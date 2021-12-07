@@ -1,13 +1,8 @@
-import React from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Link
-} from "react-router-dom";
+import React from 'react'
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 
 const ExamplePage = () => {
-  return <div>Example</div>;
+  return <div>Example</div>
 }
 
 export default function App() {
@@ -37,5 +32,5 @@ export default function App() {
         </Routes>
       </div>
     </Router>
-  );
+  )
 }
