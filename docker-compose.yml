@@ -6,6 +6,9 @@ services:
       dockerfile: Dockerfile.local
       args:
         NODE_ENV: development
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
     container_name: uniq-blockexplorer-client
     ports:
       - 3000:3000
