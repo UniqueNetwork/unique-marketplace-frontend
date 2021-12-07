@@ -13,6 +13,6 @@ services:
     ports:
       - 3000:3000
     volumes:
-      - ./src:/client/src
+      - ./src:/src
       - ./node_modules:/node_modules
     command: yarn start
