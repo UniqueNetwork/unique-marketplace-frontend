@@ -6,6 +6,10 @@ import {
   Link
 } from "react-router-dom";
 
+const ExamplePage = () => {
+  return <div>Example</div>;
+}
+
 export default function App() {
   return (
     <Router>
@@ -27,15 +31,11 @@ export default function App() {
         {/* A <Switch> looks through its children <Route>s and
             renders the first one that matches the current URL. */}
         <Routes>
-          <Route path="/" element={exmaplePage} />
-          <Route path="/2" element={exmaplePage} />
-          <Route path="/3" element={exmaplePage} />
+          <Route path="/" element={<ExamplePage />} />
+          <Route path="/2" element={<ExamplePage />} />
+          <Route path="/3" element={<ExamplePage />} />
         </Routes>
       </div>
     </Router>
   );
-}
-
-const exmaplePage = () => {
-  return <div>Example</div>;
 }
