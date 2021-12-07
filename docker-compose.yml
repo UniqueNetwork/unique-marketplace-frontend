@@ -1,0 +1,15 @@
+version: '2'
+services:
+  client:
+    build:
+      context: ./
+      dockerfile: Dockerfile.local
+      args:
+        NODE_ENV: development
+    container_name: uniq-blockexplorer-client
+    ports:
+      - 3000:3000
+    volumes:
+      - ./src:/client/src
+      - ./node_modules:/node_modules
+    command: yarn start
