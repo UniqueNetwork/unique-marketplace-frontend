@@ -1,5 +1,24 @@
-import React from 'react';
+import React from 'react'
+import { useQuery } from '@apollo/client'
+import { exampleBlocks, Data as BlocksData } from '../../api/graphQL/exampleQuery'
 
-const ExampleComponent = () => <div>Example</div>;
+const MainPage = () => {
+  const {
+    loading: isBlocksFetching,
+    error: fetchBlocksError,
+    data: blocks,
+  } = useQuery<BlocksData>(exampleBlocks)
 
-export default ExampleComponent;
+  return (
+    <div>
+      <span>Is fetching: {!!isBlocksFetching ? 'yes' : 'finished'}</span>
+      <br />
+      {!!fetchBlocksError && <span>Get blocks error: {fetchBlocksError}</span>}
+      {blocks?.block?.map((block: any) => (
+        <span key={block.block_hash}>{JSON.stringify(block)}</span>
+      ))}
+    </div>
+  )
+}
+
+export default MainPage
