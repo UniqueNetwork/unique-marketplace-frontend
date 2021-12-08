@@ -1,25 +1,21 @@
 import { gql } from '@apollo/client';
 const exampleBlocks = gql`
 query ExampleGetBlocks {
-  block(limit: 50) {
-    block_author
-    block_author_name
-    is_epoch
-    state_root
-    block_hash
+  block(limit: 10) {
+    timestamp
     block_number
-    num_transfers
+    block_hash
+    extrinsics_root
+    total_events
   }
 }
 `
 interface Block {
-  block_author: string,
-  block_author_name: string,
-  is_epoch: boolean,
-  state_root: string,
+  timestamp: number,
+  extrinsics_root: number,
   block_hash: string,
   block_number: number,
-  num_trasfers: number
+  total_events: number
 }
 interface Data {
   block: Block[]
