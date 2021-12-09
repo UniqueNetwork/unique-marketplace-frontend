@@ -39,7 +39,7 @@ const MainPage = () => {
     error: fetchBlocksError,
     data: blocks,
   } = useQuery<BlocksData, BlocksVariables>(getLatestBlocksQuery, {
-    variables: { limit: pageSize, offset: 0, order_by: 'block_number', order: 'desc' },
+    variables: { limit: pageSize, offset: 0, order_by: { block_number: 'desc' } },
   })
 
   const onPageChange = useCallback(

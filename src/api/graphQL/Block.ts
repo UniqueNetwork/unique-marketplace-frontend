@@ -1,7 +1,10 @@
 import { gql } from '@apollo/client';
+type OrderBy = {
+  [name: string]: 'asc' | 'desc'
+}
 const getLatestBlocksQuery = gql`
-query GetLatestBlocks($limit: Int, $offset: Int) {
-  view_last_block(limit: $limit, offset: $offset, order_by: { block_number: desc }) {
+query GetLatestBlocks($limit: Int, $offset: Int, $order_by: [view_last_block_order_by!]) {
+  view_last_block(limit: $limit, offset: $offset, order_by: $order_by) {
     block_number
     event_count
     extrinsic_count
@@ -18,8 +21,7 @@ query GetLatestBlocks($limit: Int, $offset: Int) {
 interface Variables {
   limit: number;
   offset: number;
-  order_by: string;
-  order: 'asc' | 'desc';
+  order_by: OrderBy
 }
 interface Block {
   timestamp: number;
