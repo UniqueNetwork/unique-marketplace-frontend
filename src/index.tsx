@@ -3,12 +3,8 @@ import ReactDOM from 'react-dom'
 import App from './App'
 import { store } from './store'
 import { Provider } from 'react-redux'
-import { ApolloClient, InMemoryCache, ApolloProvider, useQuery, gql } from '@apollo/client'
-
-const client = new ApolloClient({
-  uri: 'https://dev-api-explorer.unique.network/v1/graphql',
-  cache: new InMemoryCache(),
-})
+import { ApolloProvider } from '@apollo/client'
+import client from './api/graphQL/client'
 
 ReactDOM.render(
   <React.StrictMode>
