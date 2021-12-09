@@ -4,23 +4,24 @@ import Table from 'rc-table'
 import PaginationComponent from '../../components/Pagination'
 import { timeDifference } from '../../utils/timestampUtils'
 import {
-  exampleBlocksQuery,
+  getLatestBlocksQuery,
   Data as BlocksData,
   Variables as BlocksVariables,
   Block,
-} from '../../api/graphQL/exampleQuery'
+} from '../../api/graphQL/Block'
 
 const columns = [
   {
-    title: 'Block hash',
-    dataIndex: 'block_hash',
-    key: 'block_hash',
+    title: 'Block',
+    dataIndex: 'block_number',
+    key: 'block_number',
     width: 400,
   },
-  { title: 'Block number', dataIndex: 'block_number', key: 'block_number', width: 10 },
-  { title: 'Timestamp', dataIndex: 'time_difference', key: 'time_difference', width: 10 },
-  { title: 'Extrinsic', dataIndex: 'extrinsics_root', key: 'extrinsics_root', width: 400 },
-  { title: 'Event', dataIndex: 'total_events', key: 'total_events', width: 10 },
+  { title: 'Block number', dataIndex: 'block_number', key: 'block_number', width: 100 },
+  // Age is calculated from timestamp aftter query execution
+  { title: 'Age', dataIndex: 'time_difference', key: 'time_difference', width: 200 },
+  { title: 'Extrinsic', dataIndex: 'extrinsic_count', key: 'extrinsic_count', width: 100 },
+  { title: 'Event', dataIndex: 'event_count', key: 'event_count', width: 50 },
 ]
 
 const blocksWithTimeDifference = (blocks: Block[] | undefined): Block[] => {
@@ -37,8 +38,8 @@ const MainPage = () => {
     loading: isBlocksFetching,
     error: fetchBlocksError,
     data: blocks,
-  } = useQuery<BlocksData, BlocksVariables>(exampleBlocksQuery, {
-    variables: { limit: pageSize, offset: 0 },
+  } = useQuery<BlocksData, BlocksVariables>(getLatestBlocksQuery, {
+    variables: { limit: pageSize, offset: 0, order_by: 'block_number', order: 'desc' },
   })
 
   const onPageChange = useCallback(
@@ -49,16 +50,16 @@ const MainPage = () => {
   return (
     <div>
       <span>Is fetching: {!!isBlocksFetching ? 'yes' : 'finished'}</span>
-      <span>Total number of blocks: {blocks?.block_aggregate.aggregate.count}</span>
+      <span>Total number of blocks: {blocks?.view_last_block_aggregate.aggregate.count}</span>
       <br />
       <Table
         columns={columns}
-        data={blocksWithTimeDifference(blocks?.block)}
-        rowKey={'block_hash'}
+        data={blocksWithTimeDifference(blocks?.view_last_block)}
+        rowKey={'block_number'}
       />
       <PaginationComponent
         pageSize={pageSize}
-        count={blocks?.block_aggregate?.aggregate?.count || 0}
+        count={blocks?.view_last_block_aggregate?.aggregate?.count || 0}
         onPageChange={onPageChange}
       />
     </div>
