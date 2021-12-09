@@ -77,6 +77,8 @@ const getTotalPages = (totalCount: number, pageSize: number, siblingCount: numbe
     let middleRange = range(leftSiblingIndex, rightSiblingIndex);
     return [firstPageIndex, DOTS, ...middleRange, DOTS, lastPageIndex];
   }
+
+  return [1];
 }
 
 const usePagination = ({

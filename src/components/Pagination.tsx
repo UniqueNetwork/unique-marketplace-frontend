@@ -10,7 +10,7 @@ interface PaginationProps {
 }
 
 // TODO: can be string (when DOTS)
-const PageComponent = (props: {
+const PageNumberComponent = (props: {
   pageNumber: number | string
   currentPage: number
   onPageChanged: (newPage: number) => void
@@ -50,7 +50,7 @@ const PaginationComponent = ({
   let lastPage =
     (paginationRange?.length > 1 && paginationRange[paginationRange.length - 1]) || null
   const onPageChanged = (newPage: number) => {
-    const offset = (currentPage - 1) * pageSize
+    const offset = (newPage - 1) * pageSize
     setCurrentPage(newPage)
     onPageChange(pageSize, offset)
   }
@@ -60,7 +60,7 @@ const PaginationComponent = ({
   }
 
   const onPrevious = () => {
-    if (currentPage === 0) return
+    if (currentPage < 2) return
     onPageChanged(currentPage - 1)
   }
 
@@ -69,9 +69,9 @@ const PaginationComponent = ({
       <li key={'prev'} onClick={onPrevious}>
         {'<'}
       </li>
-      {paginationRange.map((pageNumber) => (
-        <PageComponent
-          key={pageNumber}
+      {paginationRange.map((pageNumber, index) => (
+        <PageNumberComponent
+          key={pageNumber === DOTS ? `${DOTS}_${index}` : pageNumber}
           pageNumber={pageNumber}
           currentPage={currentPage}
           onPageChanged={onPageChanged}
