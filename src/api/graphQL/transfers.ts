@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client';
 
-const lastTransfersQuery = gql`
-query getLastTransfers($limit: Int, $offset: Int) {
-  view_last_transfers(limit: $limit, offset: $offset, order_by: {block_index: desc}) {
+const getLastTransfersQuery = gql`
+query getLastTransfers($limit: Int, $offset: Int, $where: view_last_transfers_bool_exp) {
+  view_last_transfers(limit: $limit, offset: $offset, order_by: {block_index: desc}, where: $where) {
     block_index
     from_owner
     to_owner
@@ -19,6 +19,8 @@ query getLastTransfers($limit: Int, $offset: Int) {
 interface Variables {
   limit: number;
   offset: number;
+  order_by?: { [name: string]: 'asc' | 'desc' }
+  where?: { [key: string]: any }
 }
 
 interface Transfer {
@@ -42,5 +44,5 @@ export type {
   Data,
 }
 export {
-  lastTransfersQuery,
+  getLastTransfersQuery,
 }
