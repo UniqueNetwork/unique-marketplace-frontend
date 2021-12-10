@@ -24,20 +24,20 @@ interface Variables {
 }
 
 interface Collection {
-  "collection_id": number;
-  "description": string;
-  "name": string;
-  "owner": string;
-  "token_prefix": string;
-  "tokens_aggregate": {
-    "aggregate": {
-      "count": number
+  collection_id: number;
+  description: string;
+  name: string;
+  owner: string;
+  token_prefix: string;
+  tokens_aggregate: {
+    aggregate: {
+      count: number
     }
   }
 }
 
 interface Data {
-  "collections": Collection[];
+  collections: Collection[];
 }
 
 export type {

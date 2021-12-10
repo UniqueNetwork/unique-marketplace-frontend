@@ -1,14 +1,17 @@
 import React from 'react';
 import AccountDetail from './components/AccountDetail'
 import LastTransfers from './components/LastTransfers'
+import { useParams } from 'react-router-dom'
 
 const AccountPage = () => {
- const mokAccountId = '5Fuv2d5vedMcFU2ppZkx3MHjMWdPP8rVECf67K63sTcufCN1';
+ const { accountId } = useParams();
 
-  return <div>
-   <AccountDetail accountId={mokAccountId} />
-   <LastTransfers accountId={mokAccountId} />
-  </div>;
+ if (!accountId) return null;
+
+ return <div>
+   <AccountDetail accountId={accountId} />
+   <LastTransfers />
+ </div>;
 }
 
 export default AccountPage;

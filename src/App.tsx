@@ -17,7 +17,7 @@ export default function App() {
                 <Link to="/">1</Link>
               </li>
               <li>
-                <Link to="/account">account</Link>
+                <Link to="/account/5Fuv2d5vedMcFU2ppZkx3MHjMWdPP8rVECf67K63sTcufCN1">account</Link>
               </li>
               <li>
                 <Link to="/extrinsic">extrinsic</Link>
@@ -29,7 +29,7 @@ export default function App() {
             renders the first one that matches the current URL. */}
           <Routes>
             <Route path="/" element={<Main />} />
-            <Route path="/account" element={<Account />} />
+            <Route path="/account/:accountId" element={<Account />} />
             <Route path="/extrinsic" element={<Extrinsic />} />
           </Routes>
         </div>

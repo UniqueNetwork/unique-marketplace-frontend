@@ -20,18 +20,18 @@ interface Variables {
   accountId: string;
 }
 interface Data {
-  "account_by_pk": {
-    "account_id": string,
-    "available_balance": string,
-    "balances": string,
-    "block_height": number,
-    "free_balance": string,
-    "identity": string,
-    "identity_display": string,
-    "identity_display_parent": string,
-    "locked_balance": string,
-    "timestamp": number,
-    "nonce": string
+  account_by_pk: {
+    account_id: string,
+    available_balance: string,
+    balances: string,
+    block_height: number,
+    free_balance: string,
+    identity: string,
+    identity_display: string,
+    identity_display_parent: string,
+    locked_balance: string,
+    timestamp: number,
+    nonce: string
   }
 }
 

@@ -3,21 +3,18 @@ import { useQuery } from '@apollo/client'
 import { collectionsQuery, Data as collectionsData, Variables as CollectionsVariables } from '../../../api/graphQL/collections'
 import Table from 'rc-table'
 
-interface CollectionsProps {
-  accountId: string
-}
+const columns = [
+  {
+    title: 'Title',
+    dataIndex: 'title',
+    key: 'title',
+    width: 400,
+  },
+];
 
-const Collections: FC<CollectionsProps> = (props) => {
-  const { accountId } = props;
-
-  const columns = useRef([
-    {}
-  ]).current;
-
+const Collections: FC = () => {
 
   const {
-    loading: isAccountFetching,
-    error: fetchAccountError,
     data: collections,
   } = useQuery<collectionsData, CollectionsVariables>(collectionsQuery, {
     variables: { limit: 6, offset: 0 },
