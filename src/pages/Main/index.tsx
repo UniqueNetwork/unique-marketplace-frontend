@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react'
-import { useQuery } from '@apollo/client'
+import { ApolloQueryResult, useQuery } from '@apollo/client'
 import Table from 'rc-table'
 import PaginationComponent from '../../components/Pagination'
 import { timeDifference } from '../../utils/timestampUtils'
@@ -50,8 +50,48 @@ const blocksWithTimeDifference = (blocks: Block[] | undefined): Block[] => {
   )
 }
 
-const LastTransfersComponent = () => {}
-const LastBlocksComponent = () => {}
+type BlockComponentProps<T> = {
+  data?: T
+  pageSize: number
+  onPageChange: (limit: number, offset: number) => Promise<ApolloQueryResult<T>>
+}
+
+const NothingFoundComponent = () => <span>Nothing found by you search request.</span>
+
+const LastTransfersComponent = ({
+  data,
+  pageSize,
+  onPageChange,
+}: BlockComponentProps<TransfersData>) => {
+  if (!data?.view_last_transfers.length) return null
+  return (
+    <div>
+      <Table columns={transferColumns} data={data?.view_last_transfers} rowKey={'block_index'} />
+      <PaginationComponent
+        pageSize={pageSize}
+        count={data?.view_last_transfers_aggregate.aggregate?.count || 0}
+        onPageChange={onPageChange}
+      />
+    </div>
+  )
+}
+const LastBlocksComponent = ({ data, pageSize, onPageChange }: BlockComponentProps<BlocksData>) => {
+  if (!data?.view_last_block.length) return null
+  return (
+    <div>
+      <Table
+        columns={blockColumns}
+        data={blocksWithTimeDifference(data?.view_last_block)}
+        rowKey={'block_number'}
+      />
+      <PaginationComponent
+        pageSize={pageSize}
+        count={data?.view_last_block_aggregate?.aggregate?.count || 0}
+        onPageChange={onPageChange}
+      />
+    </div>
+  )
+}
 
 const MainPage = () => {
   const pageSize = 10 // default
@@ -96,10 +136,12 @@ const MainPage = () => {
   )
 
   const onSearchClick = () => {
+    const prettifiedBlockSearchString = searchString.match(/[^$,.\d]/) ? -1 : searchString
     fetchMoreBlocks({
       variables: {
         where:
-          (searchString && searchString.length > 0 && { block_number: { _eq: searchString } }) ||
+          (searchString &&
+            searchString.length > 0 && { block_number: { _eq: prettifiedBlockSearchString } }) ||
           undefined,
       },
     })
@@ -108,11 +150,15 @@ const MainPage = () => {
         where:
           (searchString &&
             searchString.length > 0 && {
-              block_index: { _eq: searchString },
-              _or: {
-                from_owner: { _eq: searchString },
-                _or: { to_owner: { _eq: searchString } },
-              },
+              _or: [
+                {
+                  block_index: { _eq: searchString },
+                },
+                {
+                  from_owner: { _eq: searchString },
+                },
+                { to_owner: { _eq: searchString } },
+              ],
             }) ||
           undefined,
       },
@@ -129,29 +175,31 @@ const MainPage = () => {
       </button>
       {/* TODO: keep in mind - QTZ should be changed to different name based on config */}
       <br />
-      <span>Last QTZ transfers</span>
-      <Table
-        columns={transferColumns}
-        data={transfers?.view_last_transfers}
-        rowKey={'block_index'}
-      />
-      <PaginationComponent
-        pageSize={pageSize}
-        count={transfers?.view_last_transfers_aggregate.aggregate?.count || 0}
-        onPageChange={onTransfersPageChange}
-      />
+      {!isBlocksFetching &&
+        !isTransfersFetching &&
+        !transfers?.view_last_transfers.length &&
+        !blocks?.view_last_block.length && <NothingFoundComponent />}
+      {!!transfers?.view_last_transfers.length && (
+        <>
+          <span>Last QTZ transfers</span>
+          <LastTransfersComponent
+            data={transfers}
+            onPageChange={onTransfersPageChange}
+            pageSize={pageSize}
+          />
+        </>
+      )}
       <br />
-      <span>Last blocks</span>
-      <Table
-        columns={blockColumns}
-        data={blocksWithTimeDifference(blocks?.view_last_block)}
-        rowKey={'block_number'}
-      />
-      <PaginationComponent
-        pageSize={pageSize}
-        count={blocks?.view_last_block_aggregate?.aggregate?.count || 0}
-        onPageChange={onBlocksPageChange}
-      />
+      {!!blocks?.view_last_block.length && (
+        <>
+          <span>Last blocks</span>
+          <LastBlocksComponent
+            data={blocks}
+            onPageChange={onBlocksPageChange}
+            pageSize={pageSize}
+          />
+        </>
+      )}
     </div>
   )
 }
