@@ -7,6 +7,12 @@ query getLastTransfers($limit: Int, $offset: Int) {
     from_owner
     to_owner
   }
+  
+  view_last_transfers_aggregate {
+    aggregate {
+      count
+    }
+  }
 }
 `;
 
