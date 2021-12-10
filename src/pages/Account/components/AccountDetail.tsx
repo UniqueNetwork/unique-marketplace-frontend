@@ -1,6 +1,5 @@
 import React, { FC } from 'react'
 import { useQuery } from '@apollo/client'
-import { Data as BlocksData, exampleBlocksQuery, Variables as BlocksVariables } from '../../../api/graphQL/exampleQuery'
 import { Data as AccountData, Variables as AccountVariables, accountQuery } from '../../../api/graphQL/account'
 
 interface AccountProps {
