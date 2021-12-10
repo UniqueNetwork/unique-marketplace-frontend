@@ -8,6 +8,7 @@ import {
   Variables as LastTransfersVariables,
 } from '../../../api/graphQL/transfers'
 import PaginationComponent from '../../../components/Pagination'
+import { Link } from 'react-router-dom'
 
 const columns = [
   {
@@ -15,6 +16,7 @@ const columns = [
     dataIndex: 'block_index',
     key: 'block_index',
     width: 400,
+    render: (value: string) => <Link to={`/extrinsic/${value}`}>{value}</Link>
   },
   { title: 'Age', dataIndex: 'age', key: 'age', width: 10 },
   { title: 'From', dataIndex: 'from_owner', key: 'from_owner', width: 10 },
