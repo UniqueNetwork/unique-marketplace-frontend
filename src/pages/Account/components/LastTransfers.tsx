@@ -1,11 +1,6 @@
 import React, { FC, useCallback, useRef } from 'react'
 import Table from 'rc-table'
 import { useQuery } from '@apollo/client'
-import {
-  collectionsQuery,
-  Data as collectionsData,
-  Variables as CollectionsVariables,
-} from '../../../api/graphQL/collections'
 import { lastTransfersQuery, Data as LastTransfersData, Transfer, Variables as LastTransfersVariables } from '../../../api/graphQL/transfers'
 import PaginationComponent from '../../../components/Pagination'
 
@@ -40,17 +35,22 @@ const LastTransfers: FC<LastTransfersProps> = (props) => {
     variables: { limit: pageSize, offset: 0 },
   });
 
-  const onPageChange = useCallback((limit: number, offset: number) => {
-    fetchMore({variables: {limit, offset}});
-  }, []);
+  const onPageChange = useCallback(
+    (limit: number, offset: number) => fetchMore({variables: {limit, offset}}).then(console.log),
+    [fetchMore]
+  );
+
+  console.log(lastTransfers);
 
   return (
     <>
       <h1>Last  QTZ transfers</h1>
+      <div>Is fetching: {!!isTransfersFetching ? 'yes' : 'finished'}</div>
+      <div>Total number of transfers: {lastTransfers?.view_last_transfers_aggregate.aggregate.count}</div>
       <Table
         columns={columns}
         data={lastTransfers?.view_last_transfers}
-        rowKey={'block_hash'}
+        rowKey={(record: Transfer, index?: number) => `transfer_row_${index}_${record.block_index}`}
       />
       <PaginationComponent
         pageSize={pageSize}
@@ -61,4 +61,4 @@ const LastTransfers: FC<LastTransfersProps> = (props) => {
   )
 }
 
-export default React.memo(LastTransfers);
+export default LastTransfers;
