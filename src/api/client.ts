@@ -1,7 +1,8 @@
 import { ApolloClient, InMemoryCache, } from '@apollo/client'
+import config from '../config';
 
 const client = new ApolloClient({
-  uri: 'https://dev-api-explorer.unique.network/v1/graphql',
+  uri: config.API_URL,
   cache: new InMemoryCache({
     typePolicies: {
       Query: {
