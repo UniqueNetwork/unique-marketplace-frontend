@@ -6,7 +6,7 @@ const client = new ApolloClient({
     typePolicies: {
       Query: {
         fields: {
-          block: {
+          view_last_block: {
             // Don't cache separate results based on
             // any of this field's arguments.
             keyArgs: false,

@@ -1,66 +1,134 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useState } from 'react'
 import { useQuery } from '@apollo/client'
-import Table from 'rc-table'
-import PaginationComponent from '../../components/Pagination'
-import { timeDifference } from '../../utils/timestampUtils'
 import {
-  exampleBlocksQuery,
+  getLatestBlocksQuery,
   Data as BlocksData,
   Variables as BlocksVariables,
-  Block,
-} from '../../api/graphQL/exampleQuery'
+} from '../../api/graphQL/block'
+import {
+  getLastTransfersQuery,
+  Data as TransfersData,
+  Variables as TransferVariables,
+} from '../../api/graphQL/transfers'
+import LastTransfersComponent from './components/LastTransfersComponent'
+import LastBlocksComponent from './components/LastBlocksComponents'
 
-const columns = [
-  {
-    title: 'Block hash',
-    dataIndex: 'block_hash',
-    key: 'block_hash',
-    width: 400,
-  },
-  { title: 'Block number', dataIndex: 'block_number', key: 'block_number', width: 10 },
-  { title: 'Timestamp', dataIndex: 'time_difference', key: 'time_difference', width: 10 },
-  { title: 'Extrinsic', dataIndex: 'extrinsics_root', key: 'extrinsics_root', width: 400 },
-  { title: 'Event', dataIndex: 'total_events', key: 'total_events', width: 10 },
-]
-
-const blocksWithTimeDifference = (blocks: Block[] | undefined): Block[] => {
-  if (!blocks) return []
-  return blocks.map(
-    (block: Block) => ({ ...block, time_difference: timeDifference(block.timestamp) } as Block)
-  )
-}
+const NothingFoundComponent = () => <span>Nothing found by you search request.</span>
 
 const MainPage = () => {
   const pageSize = 10 // default
+  const [searchString, setSearchString] = useState('')
   const {
-    fetchMore,
+    fetchMore: fetchMoreBlocks,
     loading: isBlocksFetching,
     error: fetchBlocksError,
     data: blocks,
-  } = useQuery<BlocksData, BlocksVariables>(exampleBlocksQuery, {
-    variables: { limit: pageSize, offset: 0 },
+  } = useQuery<BlocksData, BlocksVariables>(getLatestBlocksQuery, {
+    variables: { limit: pageSize, offset: 0, order_by: { block_number: 'desc' } },
   })
 
-  const onPageChange = useCallback(
-    (limit: number, offset: number) => fetchMore({ variables: { limit, offset } }),
-    [fetchMore]
+  const {
+    fetchMore: fetchMoreTransfers,
+    loading: isTransfersFetching,
+    error: fetchTransfersError,
+    data: transfers,
+  } = useQuery<TransfersData, TransferVariables>(getLastTransfersQuery, {
+    variables: { limit: pageSize, offset: 0, order_by: { block_index: 'desc' } },
+  })
+
+  const onBlocksPageChange = useCallback(
+    (limit: number, offset: number) =>
+      fetchMoreBlocks({
+        variables: {
+          limit,
+          offset,
+        },
+      }),
+    [fetchMoreBlocks, searchString]
+  )
+  const onTransfersPageChange = useCallback(
+    (limit: number, offset: number) =>
+      fetchMoreTransfers({
+        variables: {
+          limit,
+          offset,
+        },
+      }),
+    [fetchMoreTransfers, searchString]
   )
 
+  const onSearchClick = useCallback(() => {
+    const prettifiedBlockSearchString = searchString.match(/[^$,.\d]/) ? -1 : searchString
+    fetchMoreBlocks({
+      variables: {
+        where:
+          (searchString &&
+            searchString.length > 0 && { block_number: { _eq: prettifiedBlockSearchString } }) ||
+          undefined,
+      },
+    })
+    fetchMoreTransfers({
+      variables: {
+        where:
+          (searchString &&
+            searchString.length > 0 && {
+              _or: [
+                {
+                  block_index: { _eq: searchString },
+                },
+                {
+                  from_owner: { _eq: searchString },
+                },
+                { to_owner: { _eq: searchString } },
+              ],
+            }) ||
+          undefined,
+      },
+    })
+  }, [fetchMoreTransfers, fetchMoreBlocks, searchString])
+  const onSearchKeyDown = useCallback(
+    ({ key }) => {
+      console.log('hello', key)
+      if (key === 'Enter') onSearchClick()
+    },
+    [onSearchClick]
+  )
   return (
     <div>
       <span>Is fetching: {!!isBlocksFetching ? 'yes' : 'finished'}</span>
-      <span>Total number of blocks: {blocks?.block_aggregate.aggregate.count}</span>
+      <span>Total number of blocks: {blocks?.view_last_block_aggregate.aggregate.count}</span>
       <br />
-      <Table
-        columns={columns}
-        data={blocksWithTimeDifference(blocks?.block)}
-        rowKey={'block_hash'}
-      />
-      <PaginationComponent
-        pageSize={pageSize}
-        count={blocks?.block_aggregate?.aggregate?.count || 0}
-        onPageChange={onPageChange}
-      />
+      <input onChange={({ target }) => setSearchString(target.value)} onKeyDown={onSearchKeyDown} />
+      <button type="button" onClick={onSearchClick}>
+        SEARCH
+      </button>
+      {/* TODO: keep in mind - QTZ should be changed to different name based on config */}
+      <br />
+      {!isBlocksFetching &&
+        !isTransfersFetching &&
+        !transfers?.view_last_transfers.length &&
+        !blocks?.view_last_block.length && <NothingFoundComponent />}
+      {!!transfers?.view_last_transfers.length && (
+        <>
+          <span>Last QTZ transfers</span>
+          <LastTransfersComponent
+            data={transfers}
+            onPageChange={onTransfersPageChange}
+            pageSize={pageSize}
+          />
+        </>
+      )}
+      <br />
+      {!!blocks?.view_last_block.length && (
+        <>
+          <span>Last blocks</span>
+          <LastBlocksComponent
+            data={blocks}
+            onPageChange={onBlocksPageChange}
+            pageSize={pageSize}
+          />
+        </>
+      )}
     </div>
   )
 }

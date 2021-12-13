@@ -1,7 +1,12 @@
 import React, { FC, useCallback, useRef } from 'react'
 import Table from 'rc-table'
 import { useQuery } from '@apollo/client'
-import { lastTransfersQuery, Data as LastTransfersData, Transfer, Variables as LastTransfersVariables } from '../../../api/graphQL/transfers'
+import {
+  getLastTransfersQuery,
+  Data as LastTransfersData,
+  Transfer,
+  Variables as LastTransfersVariables,
+} from '../../../api/graphQL/transfers'
 import PaginationComponent from '../../../components/Pagination'
 
 const columns = [
@@ -15,30 +20,31 @@ const columns = [
   { title: 'From', dataIndex: 'from_owner', key: 'from_owner', width: 10 },
   { title: 'To', dataIndex: 'to_owner', key: 'to_owner', width: 400 },
   { title: 'Amount', dataIndex: 'amount', key: 'amount', width: 10 },
-];
+]
 
-const pageSize = 20;
+const pageSize = 20
 
 const LastTransfers: FC = () => {
-
   const {
     fetchMore,
     loading: isTransfersFetching,
     data: lastTransfers,
-  } = useQuery<LastTransfersData, LastTransfersVariables>(lastTransfersQuery, {
+  } = useQuery<LastTransfersData, LastTransfersVariables>(getLastTransfersQuery, {
     variables: { limit: pageSize, offset: 0 },
-  });
+  })
 
   const onPageChange = useCallback(
-    (limit: number, offset: number) => fetchMore({variables: {limit, offset}}),
+    (limit: number, offset: number) => fetchMore({ variables: { limit, offset } }),
     [fetchMore]
-  );
+  )
 
   return (
     <>
-      <h1>Last  QTZ transfers</h1>
+      <h1>Last QTZ transfers</h1>
       <div>Is fetching: {!!isTransfersFetching ? 'yes' : 'finished'}</div>
-      <div>Total number of transfers: {lastTransfers?.view_last_transfers_aggregate.aggregate.count}</div>
+      <div>
+        Total number of transfers: {lastTransfers?.view_last_transfers_aggregate.aggregate.count}
+      </div>
       <Table
         columns={columns}
         data={lastTransfers?.view_last_transfers}
@@ -53,4 +59,4 @@ const LastTransfers: FC = () => {
   )
 }
 
-export default LastTransfers;
+export default LastTransfers
