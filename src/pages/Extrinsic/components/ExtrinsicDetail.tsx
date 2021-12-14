@@ -9,61 +9,58 @@ import {
 
 const ExtrinsicDetail: FC = () => {
 
-  const {extrinsicId} = useParams();
-
-  const variables = useMemo<ExtrinsicVariables | undefined>(() => {
-    const parted =  extrinsicId?.split('-');
-    if (!parted || !parted[0] || !parted[1]) return undefined;
-    return { block_number: parted[0], extrinsic_index: parseInt(parted[1], 10) };
-  } , [extrinsicId])
+  const { blockIndex } = useParams();
 
   const {
     data: extrinsic,
-  } = useQuery<extrinsicData, ExtrinsicVariables>(extrinsicQuery, {
-    variables,
-  });
+  } = useQuery<extrinsicData, ExtrinsicVariables>(
+    extrinsicQuery,
+    { variables: { block_index: blockIndex || '' }},
+  );
+
+  if (!blockIndex) return null;
 
   return (
     <>
-      <h1>Extrinsic {extrinsicId}</h1>
+      <h1>Extrinsic {blockIndex}</h1>
       <div>
         <div>
           <span>Block </span>
-          <span>{extrinsic?.extrinsic_by_pk.block_number}</span>
+          <span>{extrinsic?.view_extrinsic[0]?.block_number}</span>
         </div>
         <div>
           <span>Timestamp </span>
-          <span></span>
+          <span>{extrinsic?.view_extrinsic[0]?.timestamp && new Date(extrinsic?.view_extrinsic[0]?.timestamp).toLocaleString()}</span>
         </div>
       </div>
       <div>
         <div>
           <span>Sender </span>
-          <span></span>
+          <span>{extrinsic?.view_extrinsic[0]?.from_owner}</span>
         </div>
         <div>
           <span>Destination </span>
-          <span></span>
+          <span>{extrinsic?.view_extrinsic[0]?.to_owner}</span>
         </div>
       </div>
       <div>
         <div>
           <span>Amount </span>
-          <span></span>
+          <span>{extrinsic?.view_extrinsic[0]?.amount}</span>
         </div>
         <div>
           <span>Fee </span>
-          <span></span>
+          <span>{extrinsic?.view_extrinsic[0]?.fee}</span>
         </div>
       </div>
       <div>
         <div>
           <span>Hash </span>
-          <span>{extrinsic?.extrinsic_by_pk.hash}</span>
+          <span>{extrinsic?.view_extrinsic[0]?.hash}</span>
         </div>
         <div>
           <span>Extrinsic </span>
-          <span>{extrinsicId}</span>
+          <span>{blockIndex}</span>
         </div>
       </div>
 
