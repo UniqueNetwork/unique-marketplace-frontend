@@ -2,16 +2,33 @@ import Table from 'rc-table'
 import { Data as TransfersData } from '../../../api/graphQL/transfers'
 import PaginationComponent from '../../../components/Pagination'
 import { BlockComponentProps } from '../types'
+import { Link } from 'react-router-dom'
+import React from 'react'
+import AccountLinkComponent from '../../Account/components/AccountLinkComponent'
 const transferColumns = [
   {
     title: 'Extrinsic',
     dataIndex: 'block_index',
     key: 'block_index',
-    width: 400,
+    width: 100,
+
+    render: (value: string) => <Link to={`/extrinsic/${value}`}>{value}</Link>
   },
-  { title: 'Age', dataIndex: 'age', key: 'age', width: 10 },
-  { title: 'From', dataIndex: 'from_owner', key: 'from_owner', width: 10 },
-  { title: 'To', dataIndex: 'to_owner', key: 'to_owner', width: 400 },
+  { title: 'Age', dataIndex: 'age', key: 'age', width: 50 },
+  {
+    title: 'From',
+    dataIndex: 'from_owner',
+    key: 'from_owner',
+    width: 200,
+    render: (value: string) => <AccountLinkComponent value={value} />
+  },
+  {
+    title: 'To',
+    dataIndex: 'to_owner',
+    key: 'to_owner',
+    width: 200,
+    render: (value: string) => <AccountLinkComponent value={value} />
+  },
   { title: 'Amount', dataIndex: 'amount', key: 'amount', width: 10 },
 ]
 

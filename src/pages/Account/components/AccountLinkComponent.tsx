@@ -5,7 +5,7 @@ interface AccountLinkProps {
   value: string;
 }
 
-const AccountLink: FC<AccountLinkProps> = ({value}) => {
+const AccountLinkComponent: FC<AccountLinkProps> = ({value}) => {
 
   const { accountId } = useParams();
 
@@ -22,4 +22,4 @@ const AccountLink: FC<AccountLinkProps> = ({value}) => {
   )
 }
 
-export default AccountLink;
+export default AccountLinkComponent;

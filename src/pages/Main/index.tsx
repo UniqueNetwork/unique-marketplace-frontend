@@ -11,7 +11,7 @@ import {
   Variables as TransferVariables,
 } from '../../api/graphQL/transfers'
 import LastTransfersComponent from './components/LastTransfersComponent'
-import LastBlocksComponent from './components/LastBlocksComponents'
+import LastBlocksComponent from './components/LastBlocksComponent'
 
 const NothingFoundComponent = () => <span>Nothing found by you search request.</span>
 
@@ -88,7 +88,6 @@ const MainPage = () => {
   }, [fetchMoreTransfers, fetchMoreBlocks, searchString])
   const onSearchKeyDown = useCallback(
     ({ key }) => {
-      console.log('hello', key)
       if (key === 'Enter') onSearchClick()
     },
     [onSearchClick]

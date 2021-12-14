@@ -6,7 +6,7 @@ interface AccountProps {
   accountId: string;
 }
 
-const AccountDetail: FC<AccountProps> = (props) => {
+const AccountDetailComponent: FC<AccountProps> = (props) => {
   const { accountId } = props;
 
   const {
@@ -34,4 +34,4 @@ const AccountDetail: FC<AccountProps> = (props) => {
   )
 }
 
-export default AccountDetail
+export default AccountDetailComponent
