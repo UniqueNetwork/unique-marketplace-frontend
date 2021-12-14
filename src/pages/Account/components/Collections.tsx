@@ -1,4 +1,4 @@
-import React, { FC, useRef } from 'react'
+import React, { FC } from 'react'
 import { useQuery } from '@apollo/client'
 import { collectionsQuery, Data as collectionsData, Variables as CollectionsVariables } from '../../../api/graphQL/collections'
 import Table from 'rc-table'
