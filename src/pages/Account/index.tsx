@@ -1,8 +1,9 @@
 import React, { useCallback } from 'react'
-import AccountDetailComponent from './components/AccountDetailComponent'
 import { useParams } from 'react-router-dom'
-import LastTransfersComponent from '../Main/components/LastTransfersComponent';
 import { useQuery } from '@apollo/client'
+import AccountDetailComponent from './components/AccountDetailComponent'
+import LastTransfersComponent from '../Main/components/LastTransfersComponent';
+
 import {
   Data as TransfersData,
   getLastTransfersQuery,

@@ -1,7 +1,8 @@
 import React, { FC } from 'react'
+import Table from 'rc-table'
 import { useQuery } from '@apollo/client'
 import { collectionsQuery, Data as collectionsData, Variables as CollectionsVariables } from '../../../api/graphQL/collections'
-import Table from 'rc-table'
+
 
 const columns = [
   {
