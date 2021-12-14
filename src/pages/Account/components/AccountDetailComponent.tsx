@@ -26,9 +26,9 @@ const AccountDetailComponent: FC<AccountProps> = (props) => {
       <div>Created on {new Date(account.account_by_pk?.timestamp).toLocaleString()}</div>
       <div>
         <span>Balance </span>
-        <span>{account.account_by_pk?.free_balance || 0} (total) </span>
-        <span>{account.account_by_pk?.locked_balance || 0} (locked) </span>
-        <span>{account.account_by_pk?.available_balance || 0} (transferable) </span>
+        <span>{account.account_by_pk?.free_balance || "unavailable"} (total) </span>
+        <span>{account.account_by_pk?.locked_balance || "unavailable"} (locked) </span>
+        <span>{account.account_by_pk?.available_balance || "unavailable"} (transferable) </span>
       </div>
     </>
   )

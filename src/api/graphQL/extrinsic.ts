@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client';
 
 const extrinsicQuery = gql`
-query getLastTransfers($block_index: String) {
+query getExtrinsic($block_index: String!) {
   view_extrinsic(where: {block_index: {_eq: $block_index}}) {
     amount
     args
