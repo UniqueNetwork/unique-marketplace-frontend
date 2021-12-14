@@ -1,6 +1,9 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 import { Account, Collections, Extrinsic, Main, Tokens, Transfers } from './pages'
+import Header from './components/Header'
+import Footer from './components/Footer'
+import './app.scss';
 
 const ExamplePage = () => {
   return <div>Example</div>
@@ -8,9 +11,10 @@ const ExamplePage = () => {
 
 export default function App() {
   return (
-    <>
+    <div className={'app-wrapper'}>
       <Router>
-        <div>
+        <Header />
+        <div className={'app-container'}>
           <nav>
             <ul>
               <li>
@@ -33,7 +37,8 @@ export default function App() {
             <Route path="/extrinsic" element={<Extrinsic />} />
           </Routes>
         </div>
+        <Footer />
       </Router>
-    </>
+    </div>
   )
 }
