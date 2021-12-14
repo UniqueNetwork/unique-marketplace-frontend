@@ -8,6 +8,7 @@
   --bg-page: #f9faff;
   --card-background: #fff;
   --header-background: #fff;
+  --border-color: #D2D3D6;
 
   --gap: 16px;
   --bradius: 4px;
@@ -30,6 +31,7 @@ body {
   background: var(--header-background);
   margin-bottom: 0;
   padding: calc(var(--gap) / 2) 0;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .app-container {
@@ -55,6 +57,7 @@ body {
 .app-footer {
   background: var(--header-background);
   padding: calc(var(--gap) / 2) 0;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.06);
 
   &__info {
     color: var(--blue-gray);
@@ -74,6 +77,9 @@ body {
 
   .app-container {
     padding: 0 calc(var(--gap) * 1.5);
+  }
+  .app-footer {
+    border-top: 1px solid #D2D3D6;
   }
 }
 
