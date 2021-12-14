@@ -14,7 +14,7 @@ export default function App() {
     <div className={'app-wrapper'}>
       <Router>
         <Header />
-        <div className={'app-container'}>
+        <div className={'app-container app-container--card'}>
           <nav>
             <ul>
               <li>

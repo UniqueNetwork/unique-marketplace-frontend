@@ -46,6 +46,13 @@ body {
     max-width: var(--max-header-width);
   }
 
+  &--card {
+    background-color: var(--card-background);
+    margin: calc(var(--gap) * 2.5) calc(var(--gap) * 3);
+    padding: calc(var(--gap) * 2);
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
   &--footer {
     display: flex;
     justify-content: space-between;
@@ -77,6 +84,12 @@ body {
 
   .app-container {
     padding: 0 calc(var(--gap) * 1.5);
+
+    &--card {
+      margin: calc(var(--gap) * 1.5) 0;
+      padding: 0 calc(var(--gap) * 1.5);
+      box-shadow: none;
+    }
   }
   .app-footer {
     border-top: 1px solid #D2D3D6;
@@ -86,6 +99,12 @@ body {
 @media (max-width: 767px) {
   .app-container{
     padding: 0 var(--gap);
+
+    &--card {
+      margin: var(--gap) 0;
+      padding: 0 var(--gap);
+      box-shadow: none;
+    }
   }
 
   .app-footer {
