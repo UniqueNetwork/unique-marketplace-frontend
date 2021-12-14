@@ -1,9 +1,10 @@
-import React, { FC, useCallback, useRef } from 'react'
+import React, { FC, useCallback } from 'react'
 import Table from 'rc-table'
 import { useQuery } from '@apollo/client'
 import { lastTransfersQuery, Data as LastTransfersData, Transfer, Variables as LastTransfersVariables } from '../../../api/graphQL/transfers'
 import PaginationComponent from '../../../components/Pagination'
 import { Link } from 'react-router-dom'
+import AccountLink from './AccountLink'
 
 const columns = [
   {
@@ -14,8 +15,20 @@ const columns = [
     render: (value: string) => <Link to={`/extrinsic/${value}`}>{value}</Link>
   },
   { title: 'Age', dataIndex: 'age', key: 'age', width: 10 },
-  { title: 'From', dataIndex: 'from_owner', key: 'from_owner', width: 10 },
-  { title: 'To', dataIndex: 'to_owner', key: 'to_owner', width: 400 },
+  {
+    title: 'From',
+    dataIndex: 'from_owner',
+    key: 'from_owner',
+    width: 400,
+    render: (value: string) => <AccountLink value={value} />
+  },
+  {
+    title: 'To',
+    dataIndex: 'to_owner',
+    key: 'to_owner',
+    width: 400,
+    render: (value: string) => <AccountLink value={value} />
+  },
   { title: 'Amount', dataIndex: 'amount', key: 'amount', width: 10 },
 ];
 
