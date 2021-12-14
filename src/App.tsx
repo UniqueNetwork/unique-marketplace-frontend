@@ -14,7 +14,7 @@ export default function App() {
     <div className={'app-wrapper'}>
       <Router>
         <Header />
-        <div className={'app-container'}>
+        <div className={'app-container app-container--card'}>
           <nav>
             <ul>
               <li>
@@ -34,7 +34,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Main />} />
             <Route path="/account/:accountId" element={<Account />} />
-            <Route path="/extrinsic" element={<Extrinsic />} />
+            <Route path="/extrinsic/:blockIndex" element={<Extrinsic />} />
           </Routes>
         </div>
         <Footer />
