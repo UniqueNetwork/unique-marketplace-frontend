@@ -1,40 +1,45 @@
 import { gql } from '@apollo/client';
 
 const extrinsicQuery = gql`
-query getLastTransfers($block_number: String, $extrinsic_index: Int) {
-  extrinsic_by_pk(block_number: $block_number, extrinsic_index: $extrinsic_index) {
+query getLastTransfers($block_index: String) {
+  view_extrinsic(where: {block_index: {_eq: $block_index}}) {
+    amount
     args
+    block_index
     block_number
-    doc
-    extrinsic_index
+    fee
     hash
-    is_signed
     method
     section
     signer
     success
+    timestamp
   }
 }
 `;
 
 interface Variables {
-  block_number: string;
-  extrinsic_index: number;
+  block_index: string;
+}
+
+interface Extrinsic {
+  amount: number;
+  args: string;
+  block_index: string;
+  block_number: number;
+  fee: number;
+  hash: string;
+  method: string;
+  section: string;
+  signer: string;
+  success: boolean;
+  timestamp: number;
+  from_owner: string;
+  to_owner: string;
 }
 
 interface Data {
-  extrinsic_by_pk: {
-    args: string;
-    block_number: number;
-    doc: string;
-    extrinsic_index: number;
-    hash: string;
-    is_signed: boolean;
-    method: string;
-    section: string;
-    signer: string;
-    success: true;
-  }
+  view_extrinsic: Extrinsic[];
 }
 
 export type {

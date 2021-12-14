@@ -30,7 +30,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Main />} />
             <Route path="/account/:accountId" element={<Account />} />
-            <Route path="/extrinsic/:extrinsicId" element={<Extrinsic />} />
+            <Route path="/extrinsic/:blockIndex" element={<Extrinsic />} />
           </Routes>
         </div>
       </Router>
