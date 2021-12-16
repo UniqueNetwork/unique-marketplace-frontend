@@ -20,6 +20,18 @@ const client = new ApolloClient({
             merge(existing = [], incoming) {
               return [...incoming]
             },
+          },
+          collections: {
+            keyArgs: false,
+            merge(existing = [], incoming) {
+              return [...incoming]
+            },
+          },
+          view_extrinsic: {
+            keyArgs: false,
+            merge(existing = [], incoming) {
+              return [...incoming]
+            },
           }
         },
       },

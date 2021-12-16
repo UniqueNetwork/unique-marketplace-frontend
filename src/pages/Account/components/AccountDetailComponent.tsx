@@ -30,10 +30,10 @@ const AccountDetailComponent: FC<AccountProps> = (props) => {
           <div>Account name</div>
           <h2>{account.account_by_pk?.account_id}</h2>
         </div>
-        <div className={'grid-item_col1 text_grey'}>Created on</div>
-        <div className={'grid-item_col11'}>{new Date(account.account_by_pk?.timestamp).toLocaleString()}</div>
-        <div className={'grid-item_col1 text_grey'}>Balance</div>
-        <div className={'grid-item_col11 flexbox-container'}>
+        <div className={'grid-item_col1 text_grey margin-top'}>Created on</div>
+        <div className={'grid-item_col11 margin-top '}>{new Date(account.account_by_pk?.timestamp).toLocaleString()}</div>
+        <div className={'grid-item_col1 text_grey margin-top'}>Balance</div>
+        <div className={'grid-item_col11 flexbox-container margin-top'}>
           <span>{account.account_by_pk?.free_balance || "unavailable"} (total) </span>
           <span className={'text_grey'}>{account.account_by_pk?.locked_balance || 'unavailable'} (locked) </span>
           <span className={'text_grey'}>{account.account_by_pk?.available_balance || 'unavailable'} (transferable) </span>
