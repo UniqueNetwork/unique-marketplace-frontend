@@ -46,18 +46,18 @@ const AccountPage = () => {
 
  return <div>
    <AccountDetailComponent accountId={accountId} />
-   <h2 className={'margin-top'}>Assets</h2>
-   <Tabs
-     activeIndex={activeAssetsTabIndex}
-     labels={assetsTabs}
-     onClick={setActiveAssetsTabIndex}
-   />
-   <Tabs
-     activeIndex={activeAssetsTabIndex}
-     contents={[
-       <CollectionsComponent accountId={accountId} />,
-       <TokensComponent accountId={accountId} />]}
-   />
+   {/*<h2 className={'margin-top'}>Assets</h2>*/}
+   {/*<Tabs*/}
+   {/*  activeIndex={activeAssetsTabIndex}*/}
+   {/*  labels={assetsTabs}*/}
+   {/*  onClick={setActiveAssetsTabIndex}*/}
+   {/*/>*/}
+   {/*<Tabs*/}
+   {/*  activeIndex={activeAssetsTabIndex}*/}
+   {/*  contents={[*/}
+   {/*    <CollectionsComponent accountId={accountId} />,*/}
+   {/*    <TokensComponent accountId={accountId} />]}*/}
+   {/*/>*/}
    <h2 className={'margin-top margin-bottom'}>Last  QTZ transfers</h2>
    <LastTransfersComponent
      data={transfers}

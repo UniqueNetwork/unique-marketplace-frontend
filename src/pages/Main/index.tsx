@@ -12,6 +12,8 @@ import {
 } from '../../api/graphQL/transfers'
 import LastTransfersComponent from './components/LastTransfersComponent'
 import LastBlocksComponent from './components/LastBlocksComponent'
+import Button from '../../components/Button'
+import { InputText } from '@unique-nft/ui-kit'
 
 const NothingFoundComponent = () => <span>Nothing found by you search request.</span>
 
@@ -96,22 +98,18 @@ const MainPage = () => {
 
   return (
     <div>
-      <span>Is fetching: {!!isBlocksFetching ? 'yes' : 'finished'}</span>
-      <span>Total number of blocks: {blocks?.view_last_block_aggregate.aggregate.count}</span>
-      <br />
-      <input onChange={({ target }) => setSearchString(target.value)} onKeyDown={onSearchKeyDown} />
-      <button type="button" onClick={onSearchClick}>
-        SEARCH
-      </button>
+      <div className={'flexbox-container'}>
+        <InputText placeholder={'Extrinsic / account'} onChange={(value) => setSearchString(value?.toString() || '')} />
+        <Button onClick={onSearchClick} text="Search"/>
+      </div>
       {/* TODO: keep in mind - QTZ should be changed to different name based on config */}
-      <br />
       {!isBlocksFetching &&
         !isTransfersFetching &&
         !transfers?.view_extrinsic.length &&
         !blocks?.view_last_block.length && <NothingFoundComponent />}
       {!!transfers?.view_extrinsic.length && (
         <>
-          <span>Last QTZ transfers</span>
+          <h2>Last QTZ transfers</h2>
           <LastTransfersComponent
             data={transfers}
             onPageChange={onTransfersPageChange}
@@ -122,7 +120,7 @@ const MainPage = () => {
       <br />
       {!!blocks?.view_last_block.length && (
         <>
-          <span>Last blocks</span>
+          <h2>Last blocks</h2>
           <LastBlocksComponent
             data={blocks}
             onPageChange={onBlocksPageChange}
