@@ -25,7 +25,7 @@ const PageNumberComponent = (props: {
     // highlight if selected
     <li
       key={pageNumber}
-      style={{ color: pageNumber === currentPage ? 'red' : 'blue' }}
+      className={pageNumber === currentPage ? 'active' : ''}
       onClick={() => onPageChanged(pageNumber as number)}
     >
       {pageNumber}
@@ -65,23 +65,26 @@ const PaginationComponent = ({
   }
 
   return (
-    <ul>
-      <li key={'prev'} onClick={onPrevious}>
-        {'<'}
-      </li>
-      {paginationRange.map((pageNumber, index) => (
-        <PageNumberComponent
-          key={pageNumber === DOTS ? `${DOTS}_${index}` : pageNumber}
-          pageNumber={pageNumber}
-          currentPage={currentPage}
-          onPageChanged={onPageChanged}
-        />
-      ))}
-      {/* TODO: disabled={currentPage === lastPage} */}
-      <li key={'next'} onClick={onNext}>
-        {'>'}
-      </li>
-    </ul>
+    <div className={'flexbox-container flexbox-container_space-between'}>
+      <div>{count} items</div>
+      <ul className={'pagination-container'}>
+        <li key={'prev'} onClick={onPrevious}>
+          {'<'}
+        </li>
+        {paginationRange.map((pageNumber, index) => (
+          <PageNumberComponent
+            key={pageNumber === DOTS ? `${DOTS}_${index}` : pageNumber}
+            pageNumber={pageNumber}
+            currentPage={currentPage}
+            onPageChanged={onPageChanged}
+          />
+        ))}
+        {/* TODO: disabled={currentPage === lastPage} */}
+        <li key={'next'} onClick={onNext}>
+          {'>'}
+        </li>
+      </ul>
+    </div>
   )
 }
 
