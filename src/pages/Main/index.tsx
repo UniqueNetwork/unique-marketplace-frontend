@@ -1,5 +1,7 @@
 import React, { useCallback, useState } from 'react'
 import { useQuery } from '@apollo/client'
+import { InputText } from '@unique-nft/ui-kit'
+import Button from '../../components/Button'
 import {
   getLatestBlocksQuery,
   Data as BlocksData,
@@ -12,8 +14,6 @@ import {
 } from '../../api/graphQL/transfers'
 import LastTransfersComponent from './components/LastTransfersComponent'
 import LastBlocksComponent from './components/LastBlocksComponent'
-import Button from '../../components/Button'
-import { InputText } from '@unique-nft/ui-kit'
 
 const NothingFoundComponent = () => <span>Nothing found by you search request.</span>
 
@@ -108,14 +108,14 @@ const MainPage = () => {
         !transfers?.view_extrinsic.length &&
         !blocks?.view_last_block.length && <NothingFoundComponent />}
       {!!transfers?.view_extrinsic.length && (
-        <>
+        <div className={'margin-top'}>
           <h2>Last QTZ transfers</h2>
           <LastTransfersComponent
             data={transfers}
             onPageChange={onTransfersPageChange}
             pageSize={pageSize}
           />
-        </>
+        </div>
       )}
       <br />
       {!!blocks?.view_last_block.length && (

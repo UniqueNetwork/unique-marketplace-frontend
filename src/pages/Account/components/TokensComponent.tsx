@@ -1,6 +1,6 @@
 import React, { FC, Reducer, useCallback, useEffect, useReducer, useState } from 'react'
-import { Checkbox, Icon, InputText } from '@unique-nft/ui-kit'
 import { useQuery } from '@apollo/client'
+import { Checkbox, Icon, InputText } from '@unique-nft/ui-kit'
 import {
   Token,
   tokensQuery,

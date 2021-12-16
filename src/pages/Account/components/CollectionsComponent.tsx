@@ -1,14 +1,14 @@
 import React, { FC, Reducer, useCallback, useEffect, useReducer, useState } from 'react'
+import { useQuery } from '@apollo/client'
 import { InputText, Checkbox, Icon } from '@unique-nft/ui-kit';
 import Button from '../../../components/Button'
-import { useQuery } from '@apollo/client'
+import Avatar from '../../../components/Avatar'
 import {
   Collection,
   collectionsQuery,
   Data as collectionsData,
   Variables as CollectionsVariables,
 } from '../../../api/graphQL/collections'
-import Avatar from '../../../components/Avatar'
 import AccountLinkComponent from './AccountLinkComponent'
 
 interface CollectionsComponentProps {

@@ -1,9 +1,9 @@
+import './app.scss';
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
-import { Account, Collections, Extrinsic, Main, Tokens, Transfers } from './pages'
+import { Account, Extrinsic, Main } from './pages'
 import Header from './components/Header'
 import Footer from './components/Footer'
-import './app.scss';
 
 export default function App() {
   return (
