@@ -7,12 +7,10 @@ query getAccount($accountId: String!) {
     balances
     block_height
     free_balance
-    identity
-    identity_display
-    identity_display_parent
+    is_staking
     locked_balance
-    timestamp
     nonce
+    timestamp
   }
 }`;
 
@@ -26,9 +24,6 @@ interface Data {
     balances: string,
     block_height: number,
     free_balance: string,
-    identity: string,
-    identity_display: string,
-    identity_display_parent: string,
     locked_balance: string,
     timestamp: number,
     nonce: string

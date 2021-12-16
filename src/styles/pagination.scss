@@ -1,0 +1,20 @@
+@import 'global';
+
+.pagination-container {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  li {
+    padding: 4px 6px;
+    min-width: 18px;
+    text-align: center;
+    cursor: pointer;
+    &.active {
+      border: 1px solid var(--primary-color);
+      color: var(--white-color);
+      background-color: var(--primary-color);
+      border-radius: 4px;
+      cursor: default;
+    }
+  }
+}

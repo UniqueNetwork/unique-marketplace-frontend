@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client';
 
 const collectionsQuery = gql`
-query getCollections($owner: String, $limit: Int, $offset: Int) {
-  collections(where: {owner: {_eq: $owner}}, limit: $limit, offset: $offset) {
+query getCollections($limit: Int, $offset: Int, $where: collections_bool_exp = {}) {
+  collections(where: $where, limit: $limit, offset: $offset) {
     collection_id
     description
     name    
@@ -14,13 +14,18 @@ query getCollections($owner: String, $limit: Int, $offset: Int) {
       }
     }
   }
+  collections_aggregate {
+    aggregate {
+      count
+    }
+  }
 }
 `;
 
 interface Variables {
-  owner?: string | undefined | null;
   limit: number;
   offset: number;
+  where?: Record<string, any>;
 }
 
 interface Collection {
@@ -31,13 +36,18 @@ interface Collection {
   token_prefix: string;
   tokens_aggregate: {
     aggregate: {
-      count: number
+      count: number;
     }
   }
 }
 
 interface Data {
   collections: Collection[];
+  collections_aggregate: {
+    aggregate: {
+      count: number;
+    }
+  }
 }
 
 export type {

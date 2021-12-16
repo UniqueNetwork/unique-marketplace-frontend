@@ -1,10 +1,12 @@
-import Table from 'rc-table'
-import { Data as TransfersData } from '../../../api/graphQL/transfers'
-import PaginationComponent from '../../../components/Pagination'
-import { BlockComponentProps } from '../types'
-import { Link } from 'react-router-dom'
 import React from 'react'
+import Table from 'rc-table'
+import { Link } from 'react-router-dom'
+import PaginationComponent from '../../../components/Pagination'
 import AccountLinkComponent from '../../Account/components/AccountLinkComponent'
+import { Data as TransfersData, Transfer } from '../../../api/graphQL/transfers'
+import { BlockComponentProps } from '../types'
+import { timeDifference } from '../../../utils/timestampUtils'
+
 const transferColumns = [
   {
     title: 'Extrinsic',
@@ -14,7 +16,7 @@ const transferColumns = [
 
     render: (value: string) => <Link to={`/extrinsic/${value}`}>{value}</Link>
   },
-  { title: 'Age', dataIndex: 'age', key: 'age', width: 50 },
+  { title: 'Age', dataIndex: 'time_difference', key: 'age', width: 50 },
   {
     title: 'From',
     dataIndex: 'from_owner',
@@ -32,18 +34,26 @@ const transferColumns = [
   { title: 'Amount', dataIndex: 'amount', key: 'amount', width: 10 },
 ]
 
+const transfersWithTimeDifference = (transfers: Transfer[] | undefined): Transfer[] => {
+  if (!transfers) return []
+  return transfers.map(
+    (transfer: Transfer) => ({ ...transfer, time_difference: transfer.timestamp ? timeDifference(transfer.timestamp) : '' } as Transfer)
+  )
+}
+
+
 const LastTransfersComponent = ({
   data,
   pageSize,
   onPageChange,
 }: BlockComponentProps<TransfersData>) => {
-  if (!data?.view_last_transfers.length) return null
+  if (!data?.view_extrinsic.length) return null
   return (
     <div>
-      <Table columns={transferColumns} data={data?.view_last_transfers} rowKey={'block_index'} />
+      <Table columns={transferColumns} data={transfersWithTimeDifference(data?.view_extrinsic)} rowKey={'block_index'} />
       <PaginationComponent
         pageSize={pageSize}
-        count={data?.view_last_transfers_aggregate.aggregate?.count || 0}
+        count={data?.view_extrinsic_aggregate.aggregate?.count || 0}
         onPageChange={onPageChange}
       />
     </div>

@@ -4,16 +4,14 @@ const extrinsicQuery = gql`
 query getExtrinsic($block_index: String!) {
   view_extrinsic(where: {block_index: {_eq: $block_index}}) {
     amount
-    args
     block_index
     block_number
     fee
     hash
-    method
-    section
-    signer
     success
     timestamp
+    from_owner
+    to_owner
   }
 }
 `;
