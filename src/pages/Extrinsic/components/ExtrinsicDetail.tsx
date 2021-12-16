@@ -6,6 +6,7 @@ import {
   Data as extrinsicData,
   Variables as ExtrinsicVariables,
 } from '../../../api/graphQL/extrinsic'
+import AccountLinkComponent from '../../Account/components/AccountLinkComponent'
 
 const ExtrinsicDetail: FC = () => {
 
@@ -23,45 +24,29 @@ const ExtrinsicDetail: FC = () => {
   return (
     <>
       <h1>Extrinsic {blockIndex}</h1>
-      <div>
-        <div>
-          <span>Block </span>
-          <span>{extrinsic?.view_extrinsic[0]?.block_number}</span>
-        </div>
-        <div>
-          <span>Timestamp </span>
-          <span>{extrinsic?.view_extrinsic[0]?.timestamp && new Date(extrinsic?.view_extrinsic[0]?.timestamp).toLocaleString()}</span>
-        </div>
+      <div className={'grid-container container-with-border'}>
+        <div className={'grid-item_col1 text_grey'}>Block </div>
+        <div className={'grid-item_col11'}>{extrinsic?.view_extrinsic[0]?.block_number}</div>
+        <div className={'grid-item_col1 text_grey'}>Timestamp </div>
+        <div className={'grid-item_col11'}>{extrinsic?.view_extrinsic[0]?.timestamp && new Date(extrinsic?.view_extrinsic[0]?.timestamp).toLocaleString()}</div>
       </div>
-      <div>
-        <div>
-          <span>Sender </span>
-          <span>{extrinsic?.view_extrinsic[0]?.from_owner}</span>
-        </div>
-        <div>
-          <span>Destination </span>
-          <span>{extrinsic?.view_extrinsic[0]?.to_owner}</span>
-        </div>
+      <div className={'grid-container container-with-border margin-top'}>
+        <div className={'grid-item_col1 text_grey'}>Sender </div>
+        <div className={'grid-item_col11'}>{extrinsic?.view_extrinsic[0]?.from_owner && <AccountLinkComponent value={extrinsic?.view_extrinsic[0]?.from_owner} />}</div>
+        <div className={'grid-item_col1 text_grey'}>Destination </div>
+        <div className={'grid-item_col11'}>{extrinsic?.view_extrinsic[0]?.to_owner && <AccountLinkComponent value={extrinsic?.view_extrinsic[0]?.to_owner} />}</div>
       </div>
-      <div>
-        <div>
-          <span>Amount </span>
-          <span>{extrinsic?.view_extrinsic[0]?.amount}</span>
-        </div>
-        <div>
-          <span>Fee </span>
-          <span>{extrinsic?.view_extrinsic[0]?.fee}</span>
-        </div>
+      <div className={'grid-container container-with-border margin-top'}>
+        <div className={'grid-item_col1 text_grey'}>Amount </div>
+        <div className={'grid-item_col11'}>{extrinsic?.view_extrinsic[0]?.amount}</div>
+        <div className={'grid-item_col1 text_grey'}>Fee </div>
+        <div className={'grid-item_col11'}>{extrinsic?.view_extrinsic[0]?.fee}</div>
       </div>
-      <div>
-        <div>
-          <span>Hash </span>
-          <span>{extrinsic?.view_extrinsic[0]?.hash}</span>
-        </div>
-        <div>
-          <span>Extrinsic </span>
-          <span>{blockIndex}</span>
-        </div>
+      <div className={'grid-container margin-top'}>
+        <div className={'grid-item_col1 text_grey'}>Hash </div>
+        <div className={'grid-item_col11'}>{extrinsic?.view_extrinsic[0]?.hash}</div>
+        <div className={'grid-item_col1 text_grey'}>Extrinsic </div>
+        <div className={'grid-item_col11'}>{blockIndex}</div>
       </div>
 
     </>

@@ -86,12 +86,14 @@ const MainPage = () => {
       },
     })
   }, [fetchMoreTransfers, fetchMoreBlocks, searchString])
+
   const onSearchKeyDown = useCallback(
     ({ key }) => {
       if (key === 'Enter') onSearchClick()
     },
     [onSearchClick]
   )
+
   return (
     <div>
       <span>Is fetching: {!!isBlocksFetching ? 'yes' : 'finished'}</span>
@@ -105,9 +107,9 @@ const MainPage = () => {
       <br />
       {!isBlocksFetching &&
         !isTransfersFetching &&
-        !transfers?.view_last_transfers.length &&
+        !transfers?.view_extrinsic.length &&
         !blocks?.view_last_block.length && <NothingFoundComponent />}
-      {!!transfers?.view_last_transfers.length && (
+      {!!transfers?.view_extrinsic.length && (
         <>
           <span>Last QTZ transfers</span>
           <LastTransfersComponent
