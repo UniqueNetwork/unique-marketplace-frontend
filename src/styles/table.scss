@@ -1,0 +1,25 @@
+@import "global";
+
+.rc-table {
+  table {
+    width: 100%;
+  }
+  &-thead {
+    tr {
+      background-color: var(--blue-gray);
+    }
+    th {
+      padding: calc(var(--gap) / 2) var(--gap);
+      text-align: left;
+      color: var(--grey);
+      font-size: 16px;
+    }
+  }
+  &-tbody {
+    td {
+      padding: calc(var(--gap) / 2) var(--gap);
+      text-align: left;
+      border-bottom: 1px dashed #D2D3D6;
+    }
+  }
+}
