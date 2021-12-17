@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import React, { FC, useEffect, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
 import {
@@ -13,13 +13,18 @@ const ExtrinsicDetail: FC = () => {
   const { blockIndex } = useParams();
 
   const {
-    data: extrinsic,
+    fetchMore: fetchMoreExtrinsic,
+    data: extrinsics,
   } = useQuery<extrinsicData, ExtrinsicVariables>(
     extrinsicQuery,
     { variables: { block_index: blockIndex || '' }},
   );
 
-  if (!blockIndex) return null;
+  const extrinsic = useMemo(() => {
+    return extrinsics?.view_extrinsic?.find((item) => item.block_index === blockIndex);
+  }, [extrinsics])
+
+  if (!blockIndex || !extrinsic) return null;
 
   return (
     <>
@@ -27,42 +32,41 @@ const ExtrinsicDetail: FC = () => {
       <div className={'grid-container container-with-border'}>
         <div className={'grid-item_col1 text_grey'}>Block </div>
         <div className={'grid-item_col11'}>
-          {extrinsic?.view_extrinsic[0]?.block_number}
+          {extrinsic?.block_number}
         </div>
         <div className={'grid-item_col1 text_grey margin-top '}>Timestamp </div>
         <div className={'grid-item_col11 margin-top '}>
-          {extrinsic?.view_extrinsic[0]?.timestamp && new Date(extrinsic?.view_extrinsic[0]?.timestamp).toLocaleString()}
+          {extrinsic?.timestamp && new Date(extrinsic?.timestamp).toLocaleString()}
         </div>
       </div>
       <div className={'grid-container container-with-border margin-top'}>
         <div className={'grid-item_col1 text_grey'}>Sender </div>
         <div className={'grid-item_col11'}>
-          {extrinsic?.view_extrinsic[0]?.from_owner && <AccountLinkComponent value={extrinsic?.view_extrinsic[0]?.from_owner} />}
+          {extrinsic?.from_owner && <AccountLinkComponent value={extrinsic?.from_owner} />}
         </div>
         <div className={'grid-item_col1 text_grey margin-top '}>Destination </div>
         <div className={'grid-item_col11 margin-top '}>
-          {extrinsic?.view_extrinsic[0]?.to_owner && <AccountLinkComponent value={extrinsic?.view_extrinsic[0]?.to_owner} />}
+          {extrinsic?.to_owner && <AccountLinkComponent value={extrinsic?.to_owner} />}
         </div>
       </div>
       <div className={'grid-container container-with-border margin-top'}>
         <div className={'grid-item_col1 text_grey'}>Amount </div>
         <div className={'grid-item_col11'}>
-          {extrinsic?.view_extrinsic[0]?.amount}
+          {extrinsic?.amount}
         </div>
         <div className={'grid-item_col1 text_grey margin-top '}>Fee </div>
         <div className={'grid-item_col11 margin-top '}>
-          {extrinsic?.view_extrinsic[0]?.fee}
+          {extrinsic?.fee}
         </div>
       </div>
       <div className={'grid-container margin-top'}>
         <div className={'grid-item_col1 text_grey'}>Hash </div>
         <div className={'grid-item_col11'}>
-          {extrinsic?.view_extrinsic[0]?.hash}
+          {extrinsic?.hash}
         </div>
         <div className={'grid-item_col1 text_grey margin-top '}>Extrinsic </div>
         <div className={'grid-item_col11 margin-top '}>{blockIndex}</div>
       </div>
-
     </>
   )
 }
