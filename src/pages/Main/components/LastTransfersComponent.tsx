@@ -47,7 +47,9 @@ const LastTransfersComponent = ({
   pageSize,
   onPageChange,
 }: BlockComponentProps<TransfersData>) => {
+
   if (!data?.view_extrinsic.length) return null
+
   return (
     <div>
       <Table columns={transferColumns} data={transfersWithTimeDifference(data?.view_extrinsic)} rowKey={'block_index'} />

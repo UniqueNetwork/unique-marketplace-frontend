@@ -27,6 +27,8 @@ const MainPage = () => {
     data: blocks,
   } = useQuery<BlocksData, BlocksVariables>(getLatestBlocksQuery, {
     variables: { limit: pageSize, offset: 0, order_by: { block_number: 'desc' } },
+    fetchPolicy: 'network-only', // Used for first execution
+    nextFetchPolicy: 'cache-first'
   })
 
   const {
@@ -36,7 +38,8 @@ const MainPage = () => {
     data: transfers,
   } = useQuery<TransfersData, TransferVariables>(getLastTransfersQuery, {
     variables: { limit: pageSize, offset: 0, order_by: { block_index: 'desc' } },
-    fetchPolicy: 'network-only',
+    fetchPolicy: 'network-only', // Used for first execution
+    nextFetchPolicy: 'cache-first'
   })
 
   const onBlocksPageChange = useCallback(

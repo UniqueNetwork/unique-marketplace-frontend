@@ -32,10 +32,16 @@ const client = new ApolloClient({
             merge(existing = [], incoming) {
               return [...incoming]
             },
+          },
+          view_extrinsic_aggregate: {
+            keyArgs: false,
+            merge(existing = [], incoming) {
+              return incoming
+            },
           }
         },
       },
-    },
+   },
   }),
 })
 

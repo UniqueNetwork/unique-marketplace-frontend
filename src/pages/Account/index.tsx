@@ -29,7 +29,7 @@ const AccountPage = () => {
     data: transfers,
   } = useQuery<TransfersData, TransferVariables>(getLastTransfersQuery, {
     variables: { limit: pageSize, offset: 0, order_by: { block_index: 'desc' } },
-    fetchPolicy: 'network-only',
+    fetchPolicy: "no-cache",
   })
 
   const onTransfersPageChange = useCallback(
