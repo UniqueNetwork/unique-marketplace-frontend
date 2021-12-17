@@ -1,7 +1,7 @@
 // Calculate how much time passed (ex. 10seconds, 5 hours, 3 days, 25weeks)
-const timeDifference = (target: number, now = new Date().getTime()) => {
-  // https://stackoverflow.com/questions/9873197/how-to-convert-date-to-timestamp
-  let difference = target - now
+const timeDifference = (target: number, now = new Date().getTime() / 1000) => {
+  // https://stackoverflow.com/questions/16767301/calculate-difference-between-2-timestamps-using-javascript
+  let difference = now - target
 
   const daysDifference = Math.floor(difference / 1000 / 60 / 60 / 24)
   difference -= daysDifference * 1000 * 60 * 60 * 24
@@ -13,28 +13,29 @@ const timeDifference = (target: number, now = new Date().getTime()) => {
   difference -= minutesDifference * 1000 * 60
 
   const secondsDifference = Math.floor(difference / 1000)
-
   // just an example, later on oculd be extended to calculate time difference (trying to avoid any external libs for this matter)
   let amount = secondsDifference
   let timeType = 'second'
-  if (minutesDifference > 0) {
+  if (minutesDifference >= 1) {
     timeType = 'minute'
     amount = minutesDifference
   }
-  if (hoursDifference > 0) {
+  if (hoursDifference >= 1) {
     timeType = 'hour'
     amount = hoursDifference
   }
-  if (daysDifference > 0) {
+  if (daysDifference >= 1) {
     timeType = 'day'
     amount = daysDifference
   }
-  if (daysDifference > 7) {
+  if (daysDifference >= 7) {
     timeType = 'week'
     amount = Math.round(daysDifference / 7)
   }
 
-  return `${amount} ${timeType}${amount > 1 ? 's' : ''} ago`
+  if (amount < 1 && timeType === 'second') return 'Less than a second ago';
+
+  return `${amount} ${timeType}${amount >= 2 ? 's' : ''} ago`
 }
 
 export {
