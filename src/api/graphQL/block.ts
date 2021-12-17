@@ -8,7 +8,7 @@ query GetLatestBlocks($limit: Int, $offset: Int, $order_by: [view_last_block_ord
     extrinsic_count
     timestamp
   }
-  view_last_block_aggregate {
+  view_last_block_aggregate(where: $where) {
     aggregate {
       count
     }

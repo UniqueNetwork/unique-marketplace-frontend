@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import Table from 'rc-table'
 import { Link } from 'react-router-dom'
 import PaginationComponent from '../../../components/Pagination'
@@ -47,7 +47,17 @@ const LastTransfersComponent = ({
   pageSize,
   onPageChange,
 }: BlockComponentProps<TransfersData>) => {
+
+
+  useEffect(() => {
+    console.log(data?.view_extrinsic_aggregate.aggregate);
+  }, [data?.view_extrinsic_aggregate.aggregate?.count])
+
   if (!data?.view_extrinsic.length) return null
+
+
+
+
   return (
     <div>
       <Table columns={transferColumns} data={transfersWithTimeDifference(data?.view_extrinsic)} rowKey={'block_index'} />

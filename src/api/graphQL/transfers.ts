@@ -13,7 +13,7 @@ query getLastTransfers($limit: Int, $offset: Int, $where: view_extrinsic_bool_ex
     timestamp
     to_owner
   }
-  view_extrinsic_aggregate {
+  view_extrinsic_aggregate(where: $where) {
     aggregate {
       count
     }

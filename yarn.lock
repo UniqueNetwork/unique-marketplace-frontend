@@ -2117,10 +2117,10 @@
     "@typescript-eslint/types" "4.33.0"
     eslint-visitor-keys "^2.0.0"
 
-"@unique-nft/ui-kit@^0.0.1-rc2":
-  version "0.0.1-rc2"
-  resolved "https://registry.yarnpkg.com/@unique-nft/ui-kit/-/ui-kit-0.0.1-rc2.tgz#4314dedcbb7038150bf10ec080d56de1d10f337d"
-  integrity sha512-U6M/i+Qjl3L9mVtdSreHM2cP2nrExZfDA7gwlDBVu7RvFwi5bT8iBmZwbDD5K/WkdU4hch2nslBIUthPCPYrGg==
+"@unique-nft/ui-kit@^0.0.1-rc5":
+  version "0.0.1-rc5"
+  resolved "https://registry.yarnpkg.com/@unique-nft/ui-kit/-/ui-kit-0.0.1-rc5.tgz#25cefeef130fe25a25b9e3adac30d7ed5e74e816"
+  integrity sha512-iFpaIJ8/GDtpbL9mEgTA3Tf/eiBRNiIgxWgrjo4lUzj20blT603H/XSzquFKsgCCVXMdiokMRTQ29L0Ci/SBnA==
 
 "@webassemblyjs/ast@1.9.0":
   version "1.9.0"
