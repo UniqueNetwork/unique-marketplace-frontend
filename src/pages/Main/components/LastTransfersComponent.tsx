@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import Table from 'rc-table'
 import { Link } from 'react-router-dom'
 import PaginationComponent from '../../../components/Pagination'
@@ -48,15 +48,7 @@ const LastTransfersComponent = ({
   onPageChange,
 }: BlockComponentProps<TransfersData>) => {
 
-
-  useEffect(() => {
-    console.log(data?.view_extrinsic_aggregate.aggregate);
-  }, [data?.view_extrinsic_aggregate.aggregate?.count])
-
   if (!data?.view_extrinsic.length) return null
-
-
-
 
   return (
     <div>
