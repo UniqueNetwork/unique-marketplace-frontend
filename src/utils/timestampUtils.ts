@@ -1,7 +1,9 @@
 // Calculate how much time passed (ex. 10seconds, 5 hours, 3 days, 25weeks)
-const timeDifference = (target: number, now = new Date().getTime() / 1000) => {
+const timeDifference = (when: number, sinceWhen: number | null = null) => {
+  const first = sinceWhen || new Date().getTime() / 1000;
+  const second = when;
   // https://stackoverflow.com/questions/16767301/calculate-difference-between-2-timestamps-using-javascript
-  let difference = now - target
+  let difference = (first - second) * 1000
 
   const daysDifference = Math.floor(difference / 1000 / 60 / 60 / 24)
   difference -= daysDifference * 1000 * 60 * 60 * 24
@@ -32,7 +34,6 @@ const timeDifference = (target: number, now = new Date().getTime() / 1000) => {
     timeType = 'week'
     amount = Math.round(daysDifference / 7)
   }
-
   if (amount < 1 && timeType === 'second') return 'Less than a second ago';
 
   return `${amount} ${timeType}${amount >= 2 ? 's' : ''} ago`
