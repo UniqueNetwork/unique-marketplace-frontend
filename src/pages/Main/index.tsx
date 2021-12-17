@@ -36,6 +36,7 @@ const MainPage = () => {
     data: transfers,
   } = useQuery<TransfersData, TransferVariables>(getLastTransfersQuery, {
     variables: { limit: pageSize, offset: 0, order_by: { block_index: 'desc' } },
+    fetchPolicy: 'network-only',
   })
 
   const onBlocksPageChange = useCallback(
@@ -99,7 +100,9 @@ const MainPage = () => {
   return (
     <div>
       <div className={'flexbox-container'}>
-        <InputText placeholder={'Extrinsic / account'} onChange={(value) => setSearchString(value?.toString() || '')} />
+        <InputText placeholder={'Extrinsic / account'} onChange={(value) =>{
+          setSearchString(value?.toString() || '');
+        }} />
         <Button onClick={onSearchClick} text="Search"/>
       </div>
       {/* TODO: keep in mind - QTZ should be changed to different name based on config */}
