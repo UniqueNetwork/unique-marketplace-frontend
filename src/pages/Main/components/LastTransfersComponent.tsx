@@ -14,7 +14,7 @@ const transferColumns = [
     key: 'block_index',
     width: 100,
 
-    render: (value: string) => <Link to={`/extrinsic/${value}`}>{value}</Link>
+    render: (value: string) => <Link to={`/extrinsic/${value}`}>{value}</Link>,
   },
   { title: 'Age', dataIndex: 'time_difference', key: 'age', width: 50 },
   {
@@ -22,37 +22,50 @@ const transferColumns = [
     dataIndex: 'from_owner',
     key: 'from_owner',
     width: 200,
-    render: (value: string) => <AccountLinkComponent value={value} />
+    render: (value: string) => <AccountLinkComponent value={value} />,
   },
   {
     title: 'To',
     dataIndex: 'to_owner',
     key: 'to_owner',
     width: 200,
-    render: (value: string) => <AccountLinkComponent value={value} />
+    render: (value: string) => <AccountLinkComponent value={value} />,
   },
-  { title: 'Amount', dataIndex: 'amount', key: 'amount', width: 10 },
+  /* TODO: due to API issues - amount of some transactions is object which is, for now, should be translated as zero */
+  {
+    title: 'Amount',
+    dataIndex: 'amount',
+    key: 'amount',
+    width: 10,
+    render: (value: number | object) => <span>{Number(value) || 0}</span>,
+  },
 ]
 
 const transfersWithTimeDifference = (transfers: Transfer[] | undefined): Transfer[] => {
   if (!transfers) return []
   return transfers.map(
-    (transfer: Transfer) => ({ ...transfer, time_difference: transfer.timestamp ? timeDifference(transfer.timestamp) : '' } as Transfer)
+    (transfer: Transfer) =>
+      ({
+        ...transfer,
+        time_difference: transfer.timestamp ? timeDifference(transfer.timestamp) : '',
+      } as Transfer)
   )
 }
-
 
 const LastTransfersComponent = ({
   data,
   pageSize,
   onPageChange,
 }: BlockComponentProps<TransfersData>) => {
-
   if (!data?.view_extrinsic.length) return null
 
   return (
     <div>
-      <Table columns={transferColumns} data={transfersWithTimeDifference(data?.view_extrinsic)} rowKey={'block_index'} />
+      <Table
+        columns={transferColumns}
+        data={transfersWithTimeDifference(data?.view_extrinsic)}
+        rowKey={'block_index'}
+      />
       <PaginationComponent
         pageSize={pageSize}
         count={data?.view_extrinsic_aggregate.aggregate?.count || 0}
