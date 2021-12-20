@@ -116,12 +116,16 @@ const MainPage = () => {
   return (
     <div>
       <div className={'flexbox-container'}>
-        <InputText
-          placeholder={'Extrinsic / account'}
-          onChange={(value) =>setSearchString(value?.toString() || '')}
-          onKeyDown={onSearchKeyDown}
-        />
-        <Button onClick={onSearchClick} text="Search"/>
+        <div className={'search-wrap'}>
+          <InputText
+            placeholder={'Extrinsic / account'}
+            className={'input-width-612'}
+            onChange={(value) =>setSearchString(value?.toString() || '')}
+            onKeyDown={onSearchKeyDown}
+          />
+          <Button onClick={onSearchClick} text="Search"/>
+        </div>
+
       </div>
       {/* TODO: keep in mind - QTZ should be changed to different name based on config */}
       {!isBlocksFetching &&
