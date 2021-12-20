@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react'
+import { useNavigate } from "react-router-dom";
 import { useQuery } from '@apollo/client'
 import { InputText } from '@unique-nft/ui-kit'
 import Button from '../../components/Button'
@@ -42,6 +43,8 @@ const MainPage = () => {
     nextFetchPolicy: 'cache-first'
   })
 
+  const navigate = useNavigate();
+
   const onBlocksPageChange = useCallback(
     (limit: number, offset: number) =>
       fetchMoreBlocks({
@@ -64,7 +67,17 @@ const MainPage = () => {
   )
 
   const onSearchClick = useCallback(() => {
+
+    if (/^\w{48}$/.test(searchString)) {
+      navigate(`/account/${searchString}`)
+    }
+
+    if (/^\d+-\d+$/.test(searchString)) {
+      navigate(`/extrinsic/${searchString}`)
+    }
+
     const prettifiedBlockSearchString = searchString.match(/[^$,.\d]/) ? -1 : searchString
+
     fetchMoreBlocks({
       variables: {
         where:
@@ -103,9 +116,11 @@ const MainPage = () => {
   return (
     <div>
       <div className={'flexbox-container'}>
-        <InputText placeholder={'Extrinsic / account'} onChange={(value) =>{
-          setSearchString(value?.toString() || '');
-        }} />
+        <InputText
+          placeholder={'Extrinsic / account'}
+          onChange={(value) =>setSearchString(value?.toString() || '')}
+          onKeyDown={onSearchKeyDown}
+        />
         <Button onClick={onSearchClick} text="Search"/>
       </div>
       {/* TODO: keep in mind - QTZ should be changed to different name based on config */}

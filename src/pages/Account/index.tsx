@@ -28,7 +28,7 @@ const AccountPage = () => {
     error: fetchTransfersError,
     data: transfers,
   } = useQuery<TransfersData, TransferVariables>(getLastTransfersQuery, {
-    variables: { limit: pageSize, offset: 0, order_by: { block_index: 'desc' } },
+    variables: { limit: pageSize, offset: 0, order_by: { block_index: 'desc' }, where: { _or: [{ from_owner: { _eq: accountId } }, { to_owner: { _eq: accountId } }] } },
     fetchPolicy: "no-cache",
   })
 
