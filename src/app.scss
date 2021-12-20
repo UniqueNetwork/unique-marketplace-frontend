@@ -84,7 +84,7 @@ body {
 }
 
 @media (max-width: 767px) {
-  .app-container{
+  .app-container {
     padding: 0 var(--gap);
 
     &--card {
@@ -182,21 +182,26 @@ a {
   display: flex;
   column-gap: var(--gap);
   align-items: center;
+
   &_column {
     flex-direction: column;
     row-gap: var(--gap);
     align-items: flex-start;
   }
+
   &_half-gap {
     column-gap: calc(var(--gap) / 2);
   }
+
   &_without-gap {
     column-gap: 0;
     row-gap: 0;
   }
+
   &_space-between {
     justify-content: space-between;
   }
+
   &_align-start {
     align-items: flex-start;
   }
@@ -225,4 +230,14 @@ a {
 
 .margin-bottom {
   margin-bottom: var(--gap);
+}
+
+.search-wrap {
+  display: flex;
+
+  .input-width-612 {
+    box-sizing: border-box;
+    width: 612px;
+    margin-right: calc(var(--gap) / 2);
+  }
 }
