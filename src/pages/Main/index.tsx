@@ -12,13 +12,25 @@ import {
   Data as TransfersData,
   Variables as TransferVariables,
 } from '../../api/graphQL/transfers'
+import {
+  tokensQuery,
+  Data as TokensData,
+  Variables as TokensVariables,
+} from '../../api/graphQL/tokens'
 import LastTransfersComponent from './components/LastTransfersComponent'
 import LastBlocksComponent from './components/LastBlocksComponent'
+import NewTokensComponent from './components/NewTokensComponent'
+import NewCollectionsComponent from './components/NewCollectionsComponent'
+import {
+  collectionsQuery,
+  Data as collectionsData,
+  Variables as CollectionsVariables,
+} from '../../api/graphQL/collections'
 
 const NothingFoundComponent = () => <span>Nothing found by you search request.</span>
 
 const MainPage = () => {
-  const pageSize = 10 // default
+  const pageSize = 5 // default
   const [searchString, setSearchString] = useState('')
   const {
     fetchMore: fetchMoreBlocks,
@@ -38,6 +50,26 @@ const MainPage = () => {
     data: transfers,
   } = useQuery<TransfersData, TransferVariables>(getLastTransfersQuery, {
     variables: { limit: pageSize, offset: 0, order_by: { block_index: 'desc' } },
+    fetchPolicy: 'network-only', // Used for first execution
+    nextFetchPolicy: 'cache-first'
+  })
+
+  const {
+    fetchMore: fetchMoreTokens,
+    loading: isTokensFetching,
+    error: fetchTokensError,
+    data: tokens,
+  } = useQuery<TokensData, TokensVariables>(tokensQuery, {
+    variables: { limit: 9, offset: 0 },
+    fetchPolicy: 'network-only', // Used for first execution
+    nextFetchPolicy: 'cache-first'
+  })
+
+  const {
+    fetchMore,
+    data: collections,
+  } = useQuery<collectionsData, CollectionsVariables>(collectionsQuery, {
+    variables: { limit: 6, offset: 0 },
     fetchPolicy: 'network-only', // Used for first execution
     nextFetchPolicy: 'cache-first'
   })
@@ -108,14 +140,29 @@ const MainPage = () => {
         }} />
         <Button onClick={onSearchClick} text="Search"/>
       </div>
+      {!!blocks?.view_last_block.length && (
+        <div className="margin-top_double">
+          <h2>Last blocks</h2>
+          <LastBlocksComponent
+            data={blocks}
+            onPageChange={onBlocksPageChange}
+            pageSize={pageSize}
+          />
+        </div>
+      )}
+      {<div className="margin-top_double">
+        <h2>New tokens</h2>
+        <NewTokensComponent tokens={tokens?.tokens || []} />
+      </div>}
+
       {/* TODO: keep in mind - QTZ should be changed to different name based on config */}
       {!isBlocksFetching &&
         !isTransfersFetching &&
         !transfers?.view_extrinsic.length &&
         !blocks?.view_last_block.length && <NothingFoundComponent />}
       {!!transfers?.view_extrinsic.length && (
-        <div className={'margin-top'}>
-          <h2>Last QTZ transfers</h2>
+        <div className={'margin-top_double'}>
+          <h2>Last transfers</h2>
           <LastTransfersComponent
             data={transfers}
             onPageChange={onTransfersPageChange}
@@ -123,17 +170,10 @@ const MainPage = () => {
           />
         </div>
       )}
-      <br />
-      {!!blocks?.view_last_block.length && (
-        <>
-          <h2>Last blocks</h2>
-          <LastBlocksComponent
-            data={blocks}
-            onPageChange={onBlocksPageChange}
-            pageSize={pageSize}
-          />
-        </>
-      )}
+      {<div className="margin-top_double">
+        <h2>New collections</h2>
+        <NewCollectionsComponent collections={collections?.collections || []}  />
+      </div>}
     </div>
   )
 }

@@ -1,19 +1,27 @@
 import React from 'react'
 import Table from 'rc-table'
+import { Text } from '@unique-nft/ui-kit'
 import { Link } from 'react-router-dom'
 import PaginationComponent from '../../../components/Pagination'
 import AccountLinkComponent from '../../Account/components/AccountLinkComponent'
 import { Data as TransfersData, Transfer } from '../../../api/graphQL/transfers'
 import { BlockComponentProps } from '../types'
 import { timeDifference } from '../../../utils/timestampUtils'
+import Avatar from '../../../components/Avatar'
 
 const transferColumns = [
   {
-    title: 'Extrinsic',
+    title: 'Token',
     dataIndex: 'block_index',
     key: 'block_index',
     width: 100,
-
+    render: (value: string) => <div className={'flexbox-container'}><Avatar size={'small'} /><Text size={'s'} weight={'medium'}>{value}</Text></div>
+  },
+  {
+    title: 'Extrinsic-id',
+    dataIndex: 'block_index',
+    key: 'block_index',
+    width: 100,
     render: (value: string) => <Link to={`/extrinsic/${value}`}>{value}</Link>
   },
   { title: 'Age', dataIndex: 'time_difference', key: 'age', width: 50 },
@@ -40,7 +48,6 @@ const transfersWithTimeDifference = (transfers: Transfer[] | undefined): Transfe
     (transfer: Transfer) => ({ ...transfer, time_difference: transfer.timestamp ? timeDifference(transfer.timestamp) : '' } as Transfer)
   )
 }
-
 
 const LastTransfersComponent = ({
   data,

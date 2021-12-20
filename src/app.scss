@@ -200,6 +200,9 @@ a {
   &_align-start {
     align-items: flex-start;
   }
+  &_max-growth {
+    flex-grow: 1;
+  }
 }
 
 .grid-container {
@@ -214,6 +217,8 @@ a {
   }
 }
 
+
+
 .container-with-border {
   padding-bottom: calc(var(--gap) * 2);
   border-bottom: 1px dashed #D2D3D6;
@@ -221,8 +226,20 @@ a {
 
 .margin-top {
   margin-top: var(--gap);
+  &_double {
+    margin-top: calc(var(--gap) * 2);
+  }
 }
+
 
 .margin-bottom {
   margin-bottom: var(--gap);
+}
+
+
+.picture {
+  img, svg {
+    border-radius: 4px;
+    overflow: hidden;
+  }
 }
