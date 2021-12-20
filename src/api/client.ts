@@ -1,5 +1,5 @@
-import { ApolloClient, InMemoryCache, } from '@apollo/client'
-import config from '../config';
+import { ApolloClient, InMemoryCache } from '@apollo/client'
+import config from '../config'
 
 const client = new ApolloClient({
   uri: config.API_URL,
@@ -38,11 +38,11 @@ const client = new ApolloClient({
             merge(existing = [], incoming) {
               return incoming
             },
-          }
+          },
         },
       },
-   },
+    },
   }),
 })
 
-export default client;
+export default client
