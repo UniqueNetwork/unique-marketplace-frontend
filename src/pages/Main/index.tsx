@@ -78,8 +78,6 @@ const MainPage = () => {
 
     const prettifiedBlockSearchString = searchString.match(/[^$,.\d]/) ? -1 : searchString
 
-    console.log(prettifiedBlockSearchString)
-
     fetchMoreBlocks({
       variables: {
         where:
