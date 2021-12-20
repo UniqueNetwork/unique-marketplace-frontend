@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Tabs } from '@unique-nft/ui-kit'
 import { useQuery } from '@apollo/client'
@@ -28,7 +28,7 @@ const AccountPage = () => {
     error: fetchTransfersError,
     data: transfers,
   } = useQuery<TransfersData, TransferVariables>(getLastTransfersQuery, {
-    variables: { limit: pageSize, offset: 0, order_by: { block_index: 'desc' } },
+    variables: { limit: pageSize, offset: 0, order_by: { block_index: 'desc' }, where: { _or: [{ from_owner: { _eq: accountId } }, { to_owner: { _eq: accountId } }] } },
     fetchPolicy: "no-cache",
   })
 
