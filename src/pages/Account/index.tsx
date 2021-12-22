@@ -32,7 +32,8 @@ const AccountPage = () => {
       offset: 0,
       where: { _or: [{ from_owner: { _eq: accountId } }, { to_owner: { _eq: accountId } }] },
     },
-    fetchPolicy: 'no-cache',
+    fetchPolicy: 'network-only',
+    nextFetchPolicy: 'cache-first',
     notifyOnNetworkStatusChange: true,
   })
 
