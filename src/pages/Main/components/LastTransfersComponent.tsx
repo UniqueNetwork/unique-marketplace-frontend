@@ -6,6 +6,7 @@ import AccountLinkComponent from '../../Account/components/AccountLinkComponent'
 import { Data as TransfersData, Transfer } from '../../../api/graphQL/transfers'
 import { BlockComponentProps } from '../types'
 import { timeDifference } from '../../../utils/timestampUtils'
+import LoadingComponent from '../../../components/LoadingComponent'
 
 const transferColumns = [
   {
@@ -48,22 +49,22 @@ const transfersWithTimeDifference = (transfers: Transfer[] | undefined): Transfe
       ({
         ...transfer,
         time_difference: transfer.timestamp ? timeDifference(transfer.timestamp) : '',
-      } as Transfer)
+      } as Transfer),
   )
 }
 
 const LastTransfersComponent = ({
-  data,
-  pageSize,
-  onPageChange,
-}: BlockComponentProps<TransfersData>) => {
-  if (!data?.view_extrinsic.length) return null
-
+                                  data,
+                                  pageSize,
+                                  loading,
+                                  onPageChange,
+                                }: BlockComponentProps<TransfersData>) => {
   return (
     <div>
       <Table
         columns={transferColumns}
-        data={transfersWithTimeDifference(data?.view_extrinsic)}
+        data={!loading && data?.view_extrinsic.length ? transfersWithTimeDifference(data?.view_extrinsic) : []}
+        emptyText={() => !loading ? 'No data' : <LoadingComponent />}
         rowKey={'block_index'}
       />
       <PaginationComponent

@@ -2,7 +2,7 @@ import { gql } from '@apollo/client'
 
 const getLastTransfersQuery = gql`
   query getLastTransfers($limit: Int, $offset: Int, $where: view_extrinsic_bool_exp = {}) {
-    view_extrinsic(limit: $limit, offset: $offset, order_by: { block_index: desc }, where: $where) {
+    view_extrinsic(limit: $limit, offset: $offset, order_by: { timestamp: desc }, where: $where) {
       block_number
       block_index
       amount
