@@ -1,6 +1,7 @@
 import React from 'react'
 import Table from 'rc-table'
 import { Link } from 'react-router-dom'
+import { Text } from '@unique-nft/ui-kit'
 import PaginationComponent from '../../../components/Pagination'
 import AccountLinkComponent from '../../Account/components/AccountLinkComponent'
 import { Data as TransfersData, Transfer } from '../../../api/graphQL/transfers'
@@ -37,7 +38,7 @@ const transferColumns = [
     dataIndex: 'amount',
     key: 'amount',
     width: 10,
-    render: (value: number | object) => <span>{Number(value) || 0}</span>,
+    render: (value: number | object) => <Text className={'text_right'}>{`${Number(value) || 0} QTZ`}</Text>,
   },
 ]
 
@@ -48,15 +49,15 @@ const transfersWithTimeDifference = (transfers: Transfer[] | undefined): Transfe
       ({
         ...transfer,
         time_difference: transfer.timestamp ? timeDifference(transfer.timestamp) : '',
-      } as Transfer)
+      } as Transfer),
   )
 }
 
 const LastTransfersComponent = ({
-  data,
-  pageSize,
-  onPageChange,
-}: BlockComponentProps<TransfersData>) => {
+                                  data,
+                                  pageSize,
+                                  onPageChange,
+                                }: BlockComponentProps<TransfersData>) => {
   if (!data?.view_extrinsic.length) return null
 
   return (

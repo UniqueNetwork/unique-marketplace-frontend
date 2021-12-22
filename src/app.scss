@@ -241,3 +241,9 @@ a {
     margin-right: calc(var(--gap) / 2);
   }
 }
+
+.text_right {
+  display: inline-block;
+  width: 100%;
+  text-align: right;
+}
