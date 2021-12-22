@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react'
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
 import { InputText } from '@unique-nft/ui-kit'
 import Button from '../../components/Button'
@@ -16,8 +16,6 @@ import {
 import LastTransfersComponent from './components/LastTransfersComponent'
 import LastBlocksComponent from './components/LastBlocksComponent'
 
-const NothingFoundComponent = () => <span>Nothing found by you search request.</span>
-
 const MainPage = () => {
   const pageSize = 10 // default
   const [searchString, setSearchString] = useState('')
@@ -29,7 +27,8 @@ const MainPage = () => {
   } = useQuery<BlocksData, BlocksVariables>(getLatestBlocksQuery, {
     variables: { limit: pageSize, offset: 0, order_by: { block_number: 'desc' } },
     fetchPolicy: 'network-only', // Used for first execution
-    nextFetchPolicy: 'cache-first'
+    nextFetchPolicy: 'cache-first',
+    notifyOnNetworkStatusChange: true,
   })
 
   const {
@@ -38,12 +37,13 @@ const MainPage = () => {
     error: fetchTransfersError,
     data: transfers,
   } = useQuery<TransfersData, TransferVariables>(getLastTransfersQuery, {
-    variables: { limit: pageSize, offset: 0, order_by: { block_index: 'desc' } },
+    variables: { limit: pageSize, offset: 0 },
     fetchPolicy: 'network-only', // Used for first execution
-    nextFetchPolicy: 'cache-first'
+    nextFetchPolicy: 'cache-first',
+    notifyOnNetworkStatusChange: true,
   })
 
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   const onBlocksPageChange = useCallback(
     (limit: number, offset: number) =>
@@ -53,7 +53,7 @@ const MainPage = () => {
           offset,
         },
       }),
-    [fetchMoreBlocks, searchString]
+    [fetchMoreBlocks, searchString],
   )
   const onTransfersPageChange = useCallback(
     (limit: number, offset: number) =>
@@ -63,7 +63,7 @@ const MainPage = () => {
           offset,
         },
       }),
-    [fetchMoreTransfers, searchString]
+    [fetchMoreTransfers, searchString],
   )
 
   const onSearchClick = useCallback(() => {
@@ -110,7 +110,7 @@ const MainPage = () => {
     ({ key }) => {
       if (key === 'Enter') onSearchClick()
     },
-    [onSearchClick]
+    [onSearchClick],
   )
 
   return (
@@ -120,39 +120,31 @@ const MainPage = () => {
           <InputText
             placeholder={'Extrinsic / account'}
             className={'input-width-612'}
-            onChange={(value) =>setSearchString(value?.toString() || '')}
+            onChange={(value) => setSearchString(value?.toString() || '')}
             onKeyDown={onSearchKeyDown}
           />
-          <Button onClick={onSearchClick} text="Search"/>
+          <Button onClick={onSearchClick} text='Search' />
         </div>
-
       </div>
-      {/* TODO: keep in mind - QTZ should be changed to different name based on config */}
-      {!isBlocksFetching &&
-        !isTransfersFetching &&
-        !transfers?.view_extrinsic.length &&
-        !blocks?.view_last_block.length && <NothingFoundComponent />}
-      {!!transfers?.view_extrinsic.length && (
-        <div className={'margin-top'}>
-          <h2>Last QTZ transfers</h2>
-          <LastTransfersComponent
-            data={transfers}
-            onPageChange={onTransfersPageChange}
-            pageSize={pageSize}
-          />
-        </div>
-      )}
-      <br />
-      {!!blocks?.view_last_block.length && (
-        <>
-          <h2>Last blocks</h2>
-          <LastBlocksComponent
-            data={blocks}
-            onPageChange={onBlocksPageChange}
-            pageSize={pageSize}
-          />
-        </>
-      )}
+      {/* TODO: keep in mind - QTZ should be changed to different name based on data from rpc */}
+      <div className={'margin-top'}>
+        <h2>Last QTZ transfers</h2>
+        <LastTransfersComponent
+          data={transfers}
+          loading={isTransfersFetching}
+          pageSize={pageSize}
+          onPageChange={onTransfersPageChange}
+        />
+      </div>
+      <div className={'margin-top'}>
+        <h2>Last blocks</h2>
+        <LastBlocksComponent
+          data={blocks}
+          loading={isBlocksFetching}
+          onPageChange={onBlocksPageChange}
+          pageSize={pageSize}
+        />
+      </div>
     </div>
   )
 }

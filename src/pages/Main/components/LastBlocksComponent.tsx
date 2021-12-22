@@ -3,6 +3,8 @@ import { Data as BlocksData, Block } from '../../../api/graphQL/block'
 import PaginationComponent from '../../../components/Pagination'
 import { timeDifference } from '../../../utils/timestampUtils'
 import { BlockComponentProps } from '../types'
+import LoadingComponent from '../../../components/LoadingComponent'
+import React from 'react'
 
 const blockColumns = [
   {
@@ -11,7 +13,6 @@ const blockColumns = [
     key: 'block_number',
     width: 400,
   },
-  { title: 'Block number', dataIndex: 'block_number', key: 'block_number', width: 100 },
   // Age is calculated from timestamp aftter query execution
   { title: 'Age', dataIndex: 'time_difference', key: 'time_difference', width: 200 },
   { title: 'Extrinsic', dataIndex: 'extrinsic_count', key: 'extrinsic_count', width: 100 },
@@ -21,17 +22,17 @@ const blockColumns = [
 const blocksWithTimeDifference = (blocks: Block[] | undefined): Block[] => {
   if (!blocks) return []
   return blocks.map(
-    (block: Block) => ({ ...block, time_difference: timeDifference(block.timestamp) } as Block)
+    (block: Block) => ({ ...block, time_difference: timeDifference(block.timestamp) } as Block),
   )
 }
 
-const LastBlocksComponent = ({ data, pageSize, onPageChange }: BlockComponentProps<BlocksData>) => {
-  if (!data?.view_last_block.length) return null
+const LastBlocksComponent = ({ data, pageSize, loading, onPageChange }: BlockComponentProps<BlocksData>) => {
   return (
     <div>
       <Table
         columns={blockColumns}
-        data={blocksWithTimeDifference(data?.view_last_block)}
+        data={!loading && data?.view_last_block.length ? blocksWithTimeDifference(data?.view_last_block) : []}
+        emptyText={() => !loading ? 'No data' : <LoadingComponent />}
         rowKey={'block_number'}
       />
       <PaginationComponent

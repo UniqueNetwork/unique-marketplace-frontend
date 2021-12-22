@@ -22,4 +22,11 @@
       border-bottom: 1px dashed #D2D3D6;
     }
   }
+  &-placeholder {
+    td {
+      text-align: center;
+      color: var(--grey);
+      padding: var(--gap) 0 !important;
+    }
+  }
 }
