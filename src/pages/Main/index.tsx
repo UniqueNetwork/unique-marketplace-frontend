@@ -126,7 +126,7 @@ const MainPage = () => {
           <Button onClick={onSearchClick} text='Search' />
         </div>
       </div>
-      {/* TODO: keep in mind - QTZ should be changed to different name based on config */}
+      {/* TODO: keep in mind - QTZ should be changed to different name based on data from rpc */}
       <div className={'margin-top'}>
         <h2>Last QTZ transfers</h2>
         <LastTransfersComponent

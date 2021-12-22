@@ -4,7 +4,6 @@ import { Tabs } from '@unique-nft/ui-kit'
 import { useQuery } from '@apollo/client'
 import AccountDetailComponent from './components/AccountDetailComponent'
 import LastTransfersComponent from '../Main/components/LastTransfersComponent'
-
 import {
   Data as TransfersData,
   getLastTransfersQuery,
@@ -12,7 +11,6 @@ import {
 } from '../../api/graphQL/transfers'
 import CollectionsComponent from './components/CollectionsComponent'
 import TokensComponent from './components/TokensComponent'
-import { log } from 'util'
 
 const assetsTabs = ['Collections', 'Tokens']
 
