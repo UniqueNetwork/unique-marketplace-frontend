@@ -1,16 +1,14 @@
 import './app.scss';
 import React from 'react'
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom'
 import { Account, Extrinsic, Main } from './pages'
-import Header from './components/Header'
-import Footer from './components/Footer'
+import PageLayout from './components/PageLayout';
 
 export default function App() {
   return (
     <div className={'app-wrapper'}>
       <Router>
-        <Header />
-        <div className={'app-container app-container--card'}>
+        <PageLayout>
           {/* A <Switch> looks through its children <Route>s and
             renders the first one that matches the current URL. */}
           <Routes>
@@ -18,8 +16,7 @@ export default function App() {
             <Route path="/account/:accountId" element={<Account />} />
             <Route path="/extrinsic/:blockIndex" element={<Extrinsic />} />
           </Routes>
-        </div>
-        <Footer />
+        </PageLayout>
       </Router>
     </div>
   )

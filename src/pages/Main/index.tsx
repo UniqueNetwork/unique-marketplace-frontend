@@ -120,6 +120,7 @@ const MainPage = () => {
           <InputText
             placeholder={'Extrinsic / account'}
             className={'input-width-612'}
+            iconLeft={{name: 'magnify', size: 18}}
             onChange={(value) => setSearchString(value?.toString() || '')}
             onKeyDown={onSearchKeyDown}
           />
