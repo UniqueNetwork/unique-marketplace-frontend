@@ -68,12 +68,14 @@ const MainPage = () => {
 
   const onSearchClick = useCallback(() => {
 
-    if (/^\w{48}$/.test(searchString)) {
+    if (/^\w{48}\w*$/.test(searchString)) {
       navigate(`/account/${searchString}`)
+      return;
     }
 
     if (/^\d+-\d+$/.test(searchString)) {
       navigate(`/extrinsic/${searchString}`)
+      return;
     }
 
     const prettifiedBlockSearchString = searchString.match(/[^$,.\d]/) ? -1 : searchString
