@@ -1,8 +1,7 @@
 import React, { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
-import { InputText } from '@unique-nft/ui-kit'
-import Button from '../../components/Button'
+import { Button, InputText } from '@unique-nft/ui-kit'
 import {
   getLatestBlocksQuery,
   Data as BlocksData,
@@ -126,7 +125,7 @@ const MainPage = () => {
             onChange={(value) => setSearchString(value?.toString() || '')}
             onKeyDown={onSearchKeyDown}
           />
-          <Button onClick={onSearchClick} text='Search' />
+          <Button onClick={onSearchClick} title='Search' role={'primary'} />
         </div>
       </div>
       {/* TODO: keep in mind - QTZ should be changed to different name based on data from rpc */}
