@@ -31,7 +31,7 @@ const AccountDetailComponent: FC<AccountProps> = (props) => {
 
   return (
     <div className={'container-with-border'}>
-      <div className={'grid-container'}>
+      <div className={'grid-container grid-container_account_wrapper'}>
         <div className={'grid-item_col1'}>
           <Avatar size='large' />
         </div>

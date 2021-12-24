@@ -1,8 +1,7 @@
 import React, { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
-import { InputText } from '@unique-nft/ui-kit'
-import Button from '../../components/Button'
+import { Button, Heading, InputText } from '@unique-nft/ui-kit'
 import {
   getLatestBlocksQuery,
   Data as BlocksData,
@@ -117,21 +116,19 @@ const MainPage = () => {
 
   return (
     <div>
-      <div className={'flexbox-container'}>
-        <div className={'search-wrap'}>
-          <InputText
-            placeholder={'Extrinsic / account'}
-            className={'input-width-612'}
-            iconLeft={{name: 'magnify', size: 18}}
-            onChange={(value) => setSearchString(value?.toString() || '')}
-            onKeyDown={onSearchKeyDown}
-          />
-          <Button onClick={onSearchClick} text='Search' />
-        </div>
+      <div className={'search-wrap'}>
+        <InputText
+          placeholder={'Extrinsic / account'}
+          className={'input-width-612'}
+          iconLeft={{name: 'magnify', size: 18}}
+          onChange={(value) => setSearchString(value?.toString() || '')}
+          onKeyDown={onSearchKeyDown}
+        />
+        <Button onClick={onSearchClick} title='Search' role={'primary'} />
       </div>
       {/* TODO: keep in mind - QTZ should be changed to different name based on data from rpc */}
-      <div className={'margin-top'}>
-        <h2>Last QTZ transfers</h2>
+      <div className={'main-block-container'}>
+        <Heading size={'2'}>Last QTZ transfers</Heading>
         <LastTransfersComponent
           data={transfers}
           loading={isTransfersFetching}
@@ -139,8 +136,8 @@ const MainPage = () => {
           onPageChange={onTransfersPageChange}
         />
       </div>
-      <div className={'margin-top'}>
-        <h2>Last blocks</h2>
+      <div className={'main-block-container'}>
+        <Heading size={'2'}>Last blocks</Heading>
         <LastBlocksComponent
           data={blocks}
           loading={isBlocksFetching}

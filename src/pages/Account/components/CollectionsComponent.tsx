@@ -1,7 +1,6 @@
 import React, { FC, Reducer, useCallback, useEffect, useReducer, useState } from 'react'
 import { useQuery } from '@apollo/client'
-import { InputText, Checkbox, Icon } from '@unique-nft/ui-kit';
-import Button from '../../../components/Button'
+import { InputText, Checkbox, Icon, Button } from '@unique-nft/ui-kit';
 import Avatar from '../../../components/Avatar'
 import {
   Collection,
@@ -94,13 +93,12 @@ const CollectionsComponent: FC<CollectionsComponentProps> = (props) => {
     fetchMoreCollections();
   }, [fetchMoreCollections, searchString])
 
-
   return (
     <>
       <div className={'flexbox-container flexbox-container_space-between margin-top'}>
         <div className={'flexbox-container flexbox-container_half-gap'} >
           <InputText placeholder={'Collection name'}  onChange={onSearchChange} />
-          <Button text={'Search'} onClick={onSearchClick} />
+          <Button title={'Search'} role="primary" onClick={onSearchClick} />
         </div>
         <div className={'flexbox-container'}>
           <Checkbox label={'All'} size={'s'} checked={filter === undefined} onChange={onCheckBoxChange('All')}/>
@@ -114,7 +112,16 @@ const CollectionsComponent: FC<CollectionsComponentProps> = (props) => {
       <div className={'grid-container'}>
         {collections?.collections.map((collection) => <CollectionCard {...collection} />)}
       </div>
-      <Button text={'See all'} iconPosition={'right'} icon={<Icon name={'arrow-right'} size={10} color={'white'}/>} />
+      <Button
+        title={'See all'}
+        iconRight={{
+          color: '#fff',
+          name: 'arrow-right',
+          size: 12
+        }}
+        role="primary"
+        onClick={() => {}}
+      />
     </>
   )
 }

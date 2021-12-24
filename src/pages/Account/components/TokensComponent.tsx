@@ -1,13 +1,12 @@
 import React, { FC, Reducer, useCallback, useEffect, useReducer, useState } from 'react'
 import { useQuery } from '@apollo/client'
-import { Checkbox, Icon, InputText } from '@unique-nft/ui-kit'
+import { Checkbox, Icon, InputText, Button } from '@unique-nft/ui-kit'
 import {
   Token,
   tokensQuery,
   Data as tokensData,
   Variables as TokensVariables,
 } from '../../../api/graphQL/tokens'
-import Button from '../../../components/Button'
 import Avatar from '../../../components/Avatar'
 
 
@@ -91,7 +90,7 @@ const TokensComponent: FC<TokensComponentProps> = (props) => {
       <div className={'flexbox-container flexbox-container_space-between margin-top'}>
         <div className={'flexbox-container flexbox-container_half-gap'} >
           <InputText placeholder={'Collection name'}  onChange={onSearchChange} />
-          <Button text={'Search'} onClick={onSearchClick} />
+          <Button title={'Search'} role="primary" onClick={onSearchClick} />
         </div>
         <div className={'flexbox-container'}>
           <Checkbox label={'All'} size={'s'} checked={filter === undefined} onChange={onCheckBoxChange('All')}/>
@@ -103,7 +102,15 @@ const TokensComponent: FC<TokensComponentProps> = (props) => {
       <div className={'grid-container'}>
         {collections?.tokens.map((token) => <TokenCard {...token} />)}
       </div>
-      <Button text={'See all'} iconPosition={'right'} icon={<Icon name={'arrow-right'} size={10} color={'white'}/>} />
+      <Button
+        title={'See all'}
+        iconRight={{
+          color: '#fff',
+          name: 'arrow-right',
+          size: 12
+        }}
+        role="primary"
+        onClick={() => {}}/>
     </>
   )
 }

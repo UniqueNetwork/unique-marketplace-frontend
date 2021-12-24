@@ -139,34 +139,15 @@ h4 {
 
 a {
   color: var(--link-color);
+  text-decoration: none;
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .text {
   &_grey {
     color: var(--grey);
-  }
-}
-
-.button {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  height: 38px;
-  border: 1px solid var(--primary-color);
-  color: var(--white-color);
-  background-color: var(--primary-color);
-  line-height: 24px;
-  cursor: pointer;
-  border-radius: 4px;
-  padding: 0 calc(var(--gap) * 1.5);
-
-  &.icon-right {
-    flex-direction: row-reverse;
-  }
-
-  &__icon {
-    margin-left: var(--gap);
   }
 }
 
@@ -217,11 +198,24 @@ a {
       grid-column: span #{$i};
     }
   }
+  &_account_wrapper {
+    grid-template-columns: 85px repeat(11, 1fr);
+  }
 }
+
 
 .container-with-border {
   padding-bottom: calc(var(--gap) * 2);
   border-bottom: 1px dashed #D2D3D6;
+}
+
+.extrinsic-block-container {
+  padding-bottom: calc(var(--gap) * 1.5) !important;
+  margin-bottom: calc(var(--gap) * 1.5) !important;
+}
+
+.main-block-container {
+  padding-top: calc(var(--gap) * 2);
 }
 
 .margin-top {
@@ -234,7 +228,6 @@ a {
 
 .search-wrap {
   display: flex;
-
   .input-width-612 {
     box-sizing: border-box;
     width: 612px;
