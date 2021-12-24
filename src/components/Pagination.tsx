@@ -56,12 +56,12 @@ const PaginationComponent = ({
     onPageChange(pageSize, offset)
   }
   const onNext = () => {
-    if (currentPage === lastPage) return
+    if (currentPage === lastPage || count < pageSize) return
     onPageChanged(currentPage + 1)
   }
 
   const onPrevious = () => {
-    if (currentPage < 2) return
+    if (currentPage < 2 || count < pageSize) return
     onPageChanged(currentPage - 1)
   }
 
@@ -82,7 +82,7 @@ const PaginationComponent = ({
         ))}
         {/* TODO: disabled={currentPage === lastPage} */}
         <li key={'next'} onClick={onNext}>
-          <Icon name={'carret-right'} size={12} color={currentPage === lastPage ? '#ABB6C1' : '#040B1D'} />
+          <Icon name={'carret-right'} size={12} color={currentPage === lastPage || count < pageSize ? '#ABB6C1' : '#040B1D'} />
         </li>
       </ul>
     </div>
