@@ -4,6 +4,11 @@
   "private": true,
   "dependencies": {
     "@apollo/client": "^3.5.5",
+    "@polkadot/api": "^7.0.2",
+    "@polkadot/rpc-core": "^7.0.2",
+    "@polkadot/rpc-provider": "^7.0.2",
+    "@polkadot/types": "^7.0.2",
+    "@polkadot/util": "^8.2.2",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
