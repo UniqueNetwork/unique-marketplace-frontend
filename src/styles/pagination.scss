@@ -17,4 +17,10 @@
       cursor: default;
     }
   }
+  li:first-child {
+    transform: rotate(180deg);
+  }
+  li:last-child, li:first-child {
+    padding: 5px 6px;
+  }
 }
