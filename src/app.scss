@@ -198,7 +198,11 @@ a {
       grid-column: span #{$i};
     }
   }
+  &_account_wrapper {
+    grid-template-columns: 85px repeat(11, 1fr);
+  }
 }
+
 
 .container-with-border {
   padding-bottom: calc(var(--gap) * 2);
