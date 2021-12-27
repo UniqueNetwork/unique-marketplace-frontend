@@ -2,14 +2,10 @@ import React, { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
 import { Button, Heading, InputText } from '@unique-nft/ui-kit'
+import { Data as BlocksData, getLatestBlocksQuery, Variables as BlocksVariables } from '../../api/graphQL/block'
 import {
-  getLatestBlocksQuery,
-  Data as BlocksData,
-  Variables as BlocksVariables,
-} from '../../api/graphQL/block'
-import {
-  getLastTransfersQuery,
   Data as TransfersData,
+  getLastTransfersQuery,
   Variables as TransferVariables,
 } from '../../api/graphQL/transfers'
 import LastTransfersComponent from './components/LastTransfersComponent'
@@ -69,12 +65,12 @@ const MainPage = () => {
 
     if (/^\w{48}\w*$/.test(searchString)) {
       navigate(`/account/${searchString}`)
-      return;
+      return
     }
 
     if (/^\d+-\d+$/.test(searchString)) {
       navigate(`/extrinsic/${searchString}`)
-      return;
+      return
     }
 
     const prettifiedBlockSearchString = searchString.match(/[^$,.\d]/) ? -1 : searchString
@@ -120,7 +116,7 @@ const MainPage = () => {
         <InputText
           placeholder={'Extrinsic / account'}
           className={'input-width-612'}
-          iconLeft={{name: 'magnify', size: 18}}
+          iconLeft={{ name: 'magnify', size: 18 }}
           onChange={(value) => setSearchString(value?.toString() || '')}
           onKeyDown={onSearchKeyDown}
         />
