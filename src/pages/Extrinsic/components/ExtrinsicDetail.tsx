@@ -8,9 +8,13 @@ import {
 } from '../../../api/graphQL/extrinsic'
 import AccountLinkComponent from '../../Account/components/AccountLinkComponent'
 import LoadingComponent from '../../../components/LoadingComponent'
+import ChainLogo from '../../../components/ChainLogo'
+import { useApi } from '../../../hooks/useApi'
 
 const ExtrinsicDetail: FC = () => {
   const { blockIndex } = useParams()
+
+  const { chainData } = useApi();
 
   const {
     loading: isExtrinsicFetching,
@@ -64,10 +68,14 @@ const ExtrinsicDetail: FC = () => {
       <div className={'grid-item_col1 text_grey'}>Amount</div>
       {/* TODO: due to API issues - amount of some transactions is object which is, for now, should be translated as zero */}
       <div className={'grid-item_col11'}>
-        {Number(amount) || 0} QTZ
+          <ChainLogo isInline />
+          {Number(amount) || 0} {chainData?.properties.tokenSymbol}
       </div>
       <div className={'grid-item_col1 text_grey margin-top '}>Fee</div>
-      <div className={'grid-item_col11 margin-top '}>{Number(fee) || 0} QTZ</div>
+      <div className={'grid-item_col11 margin-top '}>
+        <ChainLogo isInline />
+        {Number(fee) || 0} {chainData?.properties.tokenSymbol}
+      </div>
     </div>
     <div className={'grid-container margin-top'}>
       <div className={'grid-item_col1 text_grey'}>Hash</div>

@@ -268,3 +268,17 @@ a {
   width: 100%;
   text-align: right;
 }
+
+.chain-logo {
+  background: white;
+  border-radius: 50%;
+  box-sizing: border-box;
+
+  &.isInline {
+    display: inline-block;
+    height: 24px;
+    margin-right: 0.75rem;
+    vertical-align: middle;
+    width: 24px;
+  }
+}
