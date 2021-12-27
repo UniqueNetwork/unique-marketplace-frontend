@@ -13,12 +13,12 @@ const blockColumns = [
     title: 'Block',
     dataIndex: 'block_number',
     key: 'block_number',
-    width: 400,
+    width: 100,
   },
   // Age is calculated from timestamp aftter query execution
-  { title: 'Age', dataIndex: 'time_difference', key: 'time_difference', width: 200 },
+  { title: 'Age', dataIndex: 'time_difference', key: 'time_difference', width: 100 },
   { title: 'Extrinsic', dataIndex: 'extrinsic_count', key: 'extrinsic_count', width: 100 },
-  { title: 'Event', dataIndex: 'event_count', key: 'event_count', width: 50 },
+  { title: 'Event', dataIndex: 'event_count', key: 'event_count', width: 100 },
 ]
 
 const blocksWithTimeDifference = (blocks: Block[] | undefined): (Block & { time_difference: string })[] => {

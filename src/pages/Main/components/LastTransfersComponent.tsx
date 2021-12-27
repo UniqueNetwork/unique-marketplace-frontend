@@ -19,19 +19,19 @@ const transferColumns = [
 
     render: (value: string) => <Link to={`/extrinsic/${value}`}>{value}</Link>,
   },
-  { title: 'Age', dataIndex: 'time_difference', key: 'age', width: 50 },
+  { title: 'Age', dataIndex: 'time_difference', key: 'age', width: 100 },
   {
     title: 'From',
     dataIndex: 'from_owner',
     key: 'from_owner',
-    width: 200,
+    width: 100,
     render: (value: string) => <AccountLinkComponent value={value} />,
   },
   {
     title: 'To',
     dataIndex: 'to_owner',
     key: 'to_owner',
-    width: 200,
+    width: 100,
     render: (value: string) => <AccountLinkComponent value={value} />,
   },
   /* TODO: due to API issues - amount of some transactions is object which is, for now, should be translated as zero */
@@ -39,7 +39,7 @@ const transferColumns = [
     title: 'Amount',
     dataIndex: 'amount',
     key: 'amount',
-    width: 10,
+    width: 100,
     render: (value: number | object) => <Text size={'s'}>{`${Number(value) || 0} QTZ`}</Text>,
   },
 ]
