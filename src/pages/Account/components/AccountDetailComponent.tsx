@@ -17,7 +17,6 @@ const AccountDetailComponent: FC<AccountProps> = (props) => {
 
   const {
     loading: isAccountFetching,
-    error: fetchAccountError,
     data: account,
   } = useQuery<AccountData, AccountVariables>(accountQuery, {
     variables: { accountId },

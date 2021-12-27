@@ -49,7 +49,7 @@ const ExtrinsicDetail: FC = () => {
       <Text className={'grid-item_col11'}>{blockNumber?.toString() || ''}</Text>
       <Text className={'grid-item_col1'} color={'grey-500'}>Timestamp</Text>
       <Text className={'grid-item_col11'}>
-        {timestamp && new Date(timestamp * 1000).toLocaleString() || ''}
+        {timestamp ? new Date(timestamp * 1000).toLocaleString() : ''}
       </Text>
     </div>
     <div className={'grid-container container-with-border grid-container_extrinsic-container'}>
