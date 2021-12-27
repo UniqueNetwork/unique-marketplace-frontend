@@ -20,6 +20,8 @@ body {
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  color: var(--blue-gray-500);
+  line-height: 22px;
   &__social-links {
     display: flex;
     column-gap: var(--gap);
@@ -183,7 +185,7 @@ a {
   .unique-layout footer {
     margin-top: 40px;
     padding: 16px !important;
-    height: 84px !important;
+    height: 100px !important;
     flex-direction: column !important;
     justify-content: center !important;
     align-items: flex-start !important;
