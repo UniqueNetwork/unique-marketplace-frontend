@@ -79,7 +79,7 @@ const LastTransfersComponent = ({
         {!loading && transfersWithTimeDifference(data?.view_extrinsic).map((item) => <div className={'row'}>
           <div>
             <Text className={'title'}>Extrinsic</Text>
-            <Text>{item.block_index}</Text>
+            <Link to={`/extrinsic/${item.block_index}`}><Text color={'primary-600'}>{item.block_index}</Text></Link>
           </div>
           <div>
             <Text className={'title'}>Age</Text>
