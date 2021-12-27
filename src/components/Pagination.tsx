@@ -68,7 +68,7 @@ const PaginationComponent = ({
   return (
     <div className={'flexbox-container flexbox-container_space-between '}>
       <div>{count} items</div>
-      <ul className={'pagination-container'}>
+      {count > pageSize && <ul className={'pagination-container'}>
         <li key={'prev'} onClick={onPrevious}>
           <Icon name={'carret-right'} size={12} color={currentPage === 1 ? '#ABB6C1' : '#040B1D'} />
         </li>
@@ -84,7 +84,7 @@ const PaginationComponent = ({
         <li key={'next'} onClick={onNext}>
           <Icon name={'carret-right'} size={12} color={currentPage === lastPage || count < pageSize ? '#ABB6C1' : '#040B1D'} />
         </li>
-      </ul>
+      </ul>}
     </div>
   )
 }
