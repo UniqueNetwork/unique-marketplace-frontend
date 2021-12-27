@@ -1,7 +1,7 @@
 import React, { FC } from 'react'
 import { useQuery } from '@apollo/client'
 import { Text } from '@unique-nft/ui-kit'
-import { Data as AccountData, Variables as AccountVariables, accountQuery } from '../../../api/graphQL/account'
+import { accountQuery, Data as AccountData, Variables as AccountVariables } from '../../../api/graphQL/account'
 import Avatar from '../../../components/Avatar'
 import LoadingComponent from '../../../components/LoadingComponent'
 import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize'
@@ -53,8 +53,10 @@ const AccountDetailComponent: FC<AccountProps> = (props) => {
         <Text className={'grid-item_col1'} color={'grey-500'}>Balance</Text>
         <div className={'grid-item_col11 flexbox-container flexbox-container_wrap'}>
           <Text>{`${freeBalance || 'unavailable'} ${chainData?.properties.tokenSymbol} (total) `}</Text>
-          <Text color={'grey-500'}>{`${lockedBalance || 'unavailable'} ${chainData?.properties.tokenSymbol} (locked) `}</Text>
-          <Text color={'grey-500'}>{`${availableBalance || 'unavailable'} ${chainData?.properties.tokenSymbol} (transferable)`}</Text>
+          <Text
+            color={'grey-500'}>{`${lockedBalance || 'unavailable'} ${chainData?.properties.tokenSymbol} (locked) `}</Text>
+          <Text
+            color={'grey-500'}>{`${availableBalance || 'unavailable'} ${chainData?.properties.tokenSymbol} (transferable)`}</Text>
         </div>
       </div>
     </div>

@@ -9,7 +9,7 @@ interface AccountLinkProps {
   noShort?: boolean;
 }
 
-const AccountLinkComponent: FC<AccountLinkProps> = ({ value, size = 's', noShort }) => {
+const AccountLinkComponent: FC<AccountLinkProps> = ({ value, size = 'm', noShort }) => {
 
   const { accountId } = useParams()
 
@@ -21,7 +21,7 @@ const AccountLinkComponent: FC<AccountLinkProps> = ({ value, size = 's', noShort
   if (value === accountId) return <>{shortcut}</>
 
   return (
-    <Link to={`/account/${value}`}><Text color={'primary'} size={size} >{shortcut}</Text></Link>
+    <Link to={`/account/${value}`}><Text color={'primary-600'} size={size}>{shortcut}</Text></Link>
   )
 }
 

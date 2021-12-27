@@ -9,8 +9,9 @@ import { BlockComponentProps } from '../types'
 import { timeDifference } from '../../../utils/timestampUtils'
 import LoadingComponent from '../../../components/LoadingComponent'
 import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize'
+import { useApi } from '../../../hooks/useApi'
 
-const transferColumns = [
+const getTransferColumns = (tokenSymbol: string) => ([
   {
     title: 'Extrinsic',
     dataIndex: 'block_index',
@@ -40,9 +41,9 @@ const transferColumns = [
     dataIndex: 'amount',
     key: 'amount',
     width: 100,
-    render: (value: number | object) => <Text size={'s'}>{`${Number(value) || 0} QTZ`}</Text>,
+    render: (value: number | object) => <Text>{`${Number(value) || 0} ${tokenSymbol}`}</Text>,
   },
-]
+])
 
 const transfersWithTimeDifference = (transfers: Transfer[] | undefined): (Transfer & { time_difference: string })[] => {
   if (!transfers) return []
@@ -64,10 +65,12 @@ const LastTransfersComponent = ({
 
   const deviceSize = useDeviceSize()
 
+  const { chainData } = useApi()
+
   return (
     <div>
       {deviceSize !== DeviceSize.sm && <Table
-        columns={transferColumns}
+        columns={getTransferColumns(chainData?.properties.tokenSymbol || '')}
         data={!loading && data?.view_extrinsic.length ? transfersWithTimeDifference(data?.view_extrinsic) : []}
         emptyText={() => !loading ? 'No data' : <LoadingComponent />}
         rowKey={'block_index'}
@@ -95,7 +98,7 @@ const LastTransfersComponent = ({
           </div>
           <div>
             <Text className={'title'}>Amount</Text>
-            <Text>{`${Number(item.amount) || 0} QTZ`}</Text>
+            <Text>{`${Number(item.amount) || 0} ${chainData?.properties.tokenSymbol}`}</Text>
           </div>
         </div>)}
       </div>}
@@ -107,5 +110,5 @@ const LastTransfersComponent = ({
     </div>
   )
 }
-export { transferColumns }
+
 export default LastTransfersComponent
