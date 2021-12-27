@@ -17,4 +17,13 @@
       cursor: default;
     }
   }
+  li:last-child, li:first-child {
+    padding: 0px 0px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  li:first-child {
+    transform: rotate(180deg);
+  }
 }

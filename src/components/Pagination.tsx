@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import usePagination, { UsePaginationProps, DOTS } from '../hooks/usePagination'
+import { Icon } from '@unique-nft/ui-kit'
 
 interface PaginationProps {
   count: number // total number of elements in DB
@@ -55,21 +56,21 @@ const PaginationComponent = ({
     onPageChange(pageSize, offset)
   }
   const onNext = () => {
-    if (currentPage === lastPage) return
+    if (currentPage === lastPage || count < pageSize) return
     onPageChanged(currentPage + 1)
   }
 
   const onPrevious = () => {
-    if (currentPage < 2) return
+    if (currentPage < 2 || count < pageSize) return
     onPageChanged(currentPage - 1)
   }
 
   return (
-    <div className={'flexbox-container flexbox-container_space-between'}>
+    <div className={'flexbox-container flexbox-container_space-between '}>
       <div>{count} items</div>
-      <ul className={'pagination-container'}>
+      {count > pageSize && <ul className={'pagination-container'}>
         <li key={'prev'} onClick={onPrevious}>
-          {'<'}
+          <Icon name={'carret-right'} size={12} color={currentPage === 1 ? '#ABB6C1' : '#040B1D'} />
         </li>
         {paginationRange.map((pageNumber, index) => (
           <PageNumberComponent
@@ -81,9 +82,9 @@ const PaginationComponent = ({
         ))}
         {/* TODO: disabled={currentPage === lastPage} */}
         <li key={'next'} onClick={onNext}>
-          {'>'}
+          <Icon name={'carret-right'} size={12} color={currentPage === lastPage || count < pageSize ? '#ABB6C1' : '#040B1D'} />
         </li>
-      </ul>
+      </ul>}
     </div>
   )
 }

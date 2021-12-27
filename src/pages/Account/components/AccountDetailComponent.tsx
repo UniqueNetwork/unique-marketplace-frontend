@@ -3,6 +3,8 @@ import { useQuery } from '@apollo/client'
 import { Data as AccountData, Variables as AccountVariables, accountQuery } from '../../../api/graphQL/account'
 import Avatar from '../../../components/Avatar'
 import LoadingComponent from '../../../components/LoadingComponent'
+import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize'
+import { shortcutText } from '../../../utils/textUtils'
 
 interface AccountProps {
   accountId: string;
@@ -20,6 +22,8 @@ const AccountDetailComponent: FC<AccountProps> = (props) => {
     notifyOnNetworkStatusChange: true,
   })
 
+  const deviceSize = useDeviceSize()
+
   if (isAccountFetching) return <LoadingComponent />
 
   const {
@@ -31,19 +35,19 @@ const AccountDetailComponent: FC<AccountProps> = (props) => {
 
   return (
     <div className={'container-with-border'}>
-      <div className={'grid-container'}>
+      <div className={'grid-container grid-container_account-container'}>
         <div className={'grid-item_col1'}>
           <Avatar size='large' />
         </div>
         <div className={'flexbox-container flexbox-container_column flexbox-container_without-gap grid-item_col11'}>
           <div>Account name</div>
-          <h2>{accountId}</h2>
+          <h2>{deviceSize === DeviceSize.sm || deviceSize === DeviceSize.md ? shortcutText(accountId) : accountId}</h2>
         </div>
         <div className={'grid-item_col1 text_grey margin-top'}>Created on</div>
         <div
           className={'grid-item_col11 margin-top '}>{timestamp ? new Date(timestamp).toLocaleString() : 'unavailable'}</div>
         <div className={'grid-item_col1 text_grey margin-top'}>Balance</div>
-        <div className={'grid-item_col11 flexbox-container margin-top'}>
+        <div className={'grid-item_col11 flexbox-container flexbox-container_wrap margin-top'}>
           <span>{freeBalance || 'unavailable'} QTZ (total) </span>
           <span className={'text_grey'}>{lockedBalance || 'unavailable'} QTZ (locked) </span>
           <span

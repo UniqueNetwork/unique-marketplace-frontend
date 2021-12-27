@@ -1,16 +1,11 @@
 import React, { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
-import { InputText } from '@unique-nft/ui-kit'
-import Button from '../../components/Button'
+import { Button, Heading, InputText } from '@unique-nft/ui-kit'
+import { Data as BlocksData, getLatestBlocksQuery, Variables as BlocksVariables } from '../../api/graphQL/block'
 import {
-  getLatestBlocksQuery,
-  Data as BlocksData,
-  Variables as BlocksVariables,
-} from '../../api/graphQL/block'
-import {
-  getLastTransfersQuery,
   Data as TransfersData,
+  getLastTransfersQuery,
   Variables as TransferVariables,
 } from '../../api/graphQL/transfers'
 import LastTransfersComponent from './components/LastTransfersComponent'
@@ -37,7 +32,7 @@ const MainPage = () => {
     error: fetchTransfersError,
     data: transfers,
   } = useQuery<TransfersData, TransferVariables>(getLastTransfersQuery, {
-    variables: { limit: pageSize, offset: 0 },
+    variables: { limit: pageSize, offset: 0, where: { amount: { _neq: '0' } } },
     fetchPolicy: 'network-only', // Used for first execution
     nextFetchPolicy: 'cache-first',
     notifyOnNetworkStatusChange: true,
@@ -70,12 +65,12 @@ const MainPage = () => {
 
     if (/^\w{48}\w*$/.test(searchString)) {
       navigate(`/account/${searchString}`)
-      return;
+      return
     }
 
     if (/^\d+-\d+$/.test(searchString)) {
       navigate(`/extrinsic/${searchString}`)
-      return;
+      return
     }
 
     const prettifiedBlockSearchString = searchString.match(/[^$,.\d]/) ? -1 : searchString
@@ -117,21 +112,19 @@ const MainPage = () => {
 
   return (
     <div>
-      <div className={'flexbox-container'}>
-        <div className={'search-wrap'}>
-          <InputText
-            placeholder={'Extrinsic / account'}
-            className={'input-width-612'}
-            iconLeft={{name: 'magnify', size: 18}}
-            onChange={(value) => setSearchString(value?.toString() || '')}
-            onKeyDown={onSearchKeyDown}
-          />
-          <Button onClick={onSearchClick} text='Search' />
-        </div>
+      <div className={'search-wrap'}>
+        <InputText
+          placeholder={'Extrinsic / account'}
+          className={'input-width-612'}
+          iconLeft={{ name: 'magnify', size: 18 }}
+          onChange={(value) => setSearchString(value?.toString() || '')}
+          onKeyDown={onSearchKeyDown}
+        />
+        <Button onClick={onSearchClick} title='Search' role={'primary'} />
       </div>
       {/* TODO: keep in mind - QTZ should be changed to different name based on data from rpc */}
-      <div className={'margin-top'}>
-        <h2>Last QTZ transfers</h2>
+      <div className={'main-block-container'}>
+        <Heading size={'2'}>Last QTZ transfers</Heading>
         <LastTransfersComponent
           data={transfers}
           loading={isTransfersFetching}
@@ -139,8 +132,8 @@ const MainPage = () => {
           onPageChange={onTransfersPageChange}
         />
       </div>
-      <div className={'margin-top'}>
-        <h2>Last blocks</h2>
+      <div className={'main-block-container'}>
+        <Heading size={'2'}>Last blocks</Heading>
         <LastBlocksComponent
           data={blocks}
           loading={isBlocksFetching}
