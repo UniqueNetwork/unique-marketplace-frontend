@@ -1,5 +1,5 @@
-export const shortcutAccountId = (accountId: string) => {
+export const shortcutText = (text: string) => {
   //Cut it to the first and last 5 symbols
-  const [_, start, end] = /^(.{5}).*(.{5})$/.exec(accountId) || []
-  return start && end ? `${start}...${end}` : accountId
+  const [_, start, end] = /^(.{5}).*(.{5})$/.exec(text) || []
+  return start && end ? `${start}...${end}` : text
 }

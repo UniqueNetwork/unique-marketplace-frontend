@@ -39,3 +39,25 @@
     }
   }
 }
+
+@media (max-width: 767px) {
+  .rc-table {
+    display: none;
+  }
+
+  .table-sm {
+      margin: var(--gap) 0;
+     .row {
+       border-bottom: 1px dashed #D2D3D6;
+       div {
+         margin: var(--gap) 0;
+         display: flex;
+         flex-direction: column;
+       }
+       .title {
+         color: var(--blue-gray-600);
+       }
+     }
+  }
+
+}
