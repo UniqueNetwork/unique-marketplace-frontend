@@ -1,6 +1,7 @@
 import React, { FC, useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
 import { Layout } from '@unique-nft/ui-kit'
+import Footer from './Footer'
 
 const PageLayout: FC = (props) => {
   const { children } = props
@@ -12,7 +13,7 @@ const PageLayout: FC = (props) => {
   }, [pathname])
 
   return (
-    <Layout {...layoutProps}>
+    <Layout {...layoutProps} footer={<Footer />}>
       {children}
     </Layout>
   )
