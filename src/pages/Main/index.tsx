@@ -36,7 +36,7 @@ const MainPage = () => {
     error: fetchTransfersError,
     data: transfers,
   } = useQuery<TransfersData, TransferVariables>(getLastTransfersQuery, {
-    variables: { limit: pageSize, offset: 0 },
+    variables: { limit: pageSize, offset: 0, where: { amount: { _neq: '0' } } },
     fetchPolicy: 'network-only', // Used for first execution
     nextFetchPolicy: 'cache-first',
     notifyOnNetworkStatusChange: true,
@@ -108,9 +108,8 @@ const MainPage = () => {
   }, [fetchMoreTransfers, fetchMoreBlocks, searchString])
 
   const onSearchKeyDown = useCallback(
-    (...args) => {
-      console.log(args)
-      //if (key === 'Enter') onSearchClick()
+    ({ key }) => {
+      if (key === 'Enter') onSearchClick()
     },
     [onSearchClick],
   )
