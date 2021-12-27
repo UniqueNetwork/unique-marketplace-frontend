@@ -13,7 +13,7 @@ import { useApi } from '../../../hooks/useApi'
 const ExtrinsicDetail: FC = () => {
   const { blockIndex } = useParams()
 
-  const { chainData } = useApi();
+  const { chainData } = useApi()
 
   const {
     loading: isExtrinsicFetching,
@@ -70,8 +70,8 @@ const ExtrinsicDetail: FC = () => {
       <Text className={'grid-item_col1 '} color={'grey-500'}>Amount</Text>
       {/* TODO: due to API issues - amount of some transactions is object which is, for now, should be translated as zero */}
       <div className={'grid-item_col11'}>
-          <ChainLogo isInline />
-          {Number(amount) || 0} {chainData?.properties.tokenSymbol}
+        <ChainLogo isInline />
+        {Number(amount) || 0} {chainData?.properties.tokenSymbol}
       </div>
       <Text className={'grid-item_col1'} color={'grey-500'}>Fee</Text>
       <div className={'grid-item_col11'}>

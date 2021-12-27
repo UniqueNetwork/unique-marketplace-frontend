@@ -1,10 +1,12 @@
 import React, { FC } from 'react'
 import { useQuery } from '@apollo/client'
+import { Text } from '@unique-nft/ui-kit'
 import { Data as AccountData, Variables as AccountVariables, accountQuery } from '../../../api/graphQL/account'
 import Avatar from '../../../components/Avatar'
 import LoadingComponent from '../../../components/LoadingComponent'
 import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize'
 import { shortcutText } from '../../../utils/textUtils'
+import { useApi } from '../../../hooks/useApi'
 
 interface AccountProps {
   accountId: string;
@@ -24,6 +26,8 @@ const AccountDetailComponent: FC<AccountProps> = (props) => {
 
   const deviceSize = useDeviceSize()
 
+  const { chainData } = useApi()
+
   if (isAccountFetching) return <LoadingComponent />
 
   const {
@@ -40,18 +44,17 @@ const AccountDetailComponent: FC<AccountProps> = (props) => {
           <Avatar size='large' />
         </div>
         <div className={'flexbox-container flexbox-container_column flexbox-container_without-gap grid-item_col11'}>
-          <div>Account name</div>
+          <Text size={'l'}>Account name</Text>
           <h2>{deviceSize === DeviceSize.sm || deviceSize === DeviceSize.md ? shortcutText(accountId) : accountId}</h2>
         </div>
-        <div className={'grid-item_col1 text_grey margin-top'}>Created on</div>
-        <div
-          className={'grid-item_col11 margin-top '}>{timestamp ? new Date(timestamp).toLocaleString() : 'unavailable'}</div>
-        <div className={'grid-item_col1 text_grey margin-top'}>Balance</div>
-        <div className={'grid-item_col11 flexbox-container flexbox-container_wrap margin-top'}>
-          <span>{freeBalance || 'unavailable'} QTZ (total) </span>
-          <span className={'text_grey'}>{lockedBalance || 'unavailable'} QTZ (locked) </span>
-          <span
-            className={'text_grey'}>{availableBalance || 'unavailable'} QTZ (transferable) </span>
+        <Text className={'grid-item_col1'} color={'grey-500'}>Created on</Text>
+        <Text
+          className={'grid-item_col11'}>{timestamp ? new Date(timestamp).toLocaleString() : 'unavailable'}</Text>
+        <Text className={'grid-item_col1'} color={'grey-500'}>Balance</Text>
+        <div className={'grid-item_col11 flexbox-container flexbox-container_wrap'}>
+          <Text>{`${freeBalance || 'unavailable'} ${chainData?.properties.tokenSymbol} (total) `}</Text>
+          <Text color={'grey-500'}>{`${lockedBalance || 'unavailable'} ${chainData?.properties.tokenSymbol} (locked) `}</Text>
+          <Text color={'grey-500'}>{`${availableBalance || 'unavailable'} ${chainData?.properties.tokenSymbol} (transferable)`}</Text>
         </div>
       </div>
     </div>
