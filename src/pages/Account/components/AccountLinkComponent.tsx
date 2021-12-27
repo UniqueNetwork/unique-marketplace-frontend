@@ -1,13 +1,15 @@
 import React, { FC, useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { Text } from '@unique-nft/ui-kit'
 import { shortcutText } from '../../../utils/textUtils'
 
 interface AccountLinkProps {
   value: string;
+  size?: 'xs' | 's' | 'm' | 'l'
   noShort?: boolean;
 }
 
-const AccountLinkComponent: FC<AccountLinkProps> = ({ value, noShort }) => {
+const AccountLinkComponent: FC<AccountLinkProps> = ({ value, size = 's', noShort }) => {
 
   const { accountId } = useParams()
 
@@ -19,7 +21,7 @@ const AccountLinkComponent: FC<AccountLinkProps> = ({ value, noShort }) => {
   if (value === accountId) return <>{shortcut}</>
 
   return (
-    <Link to={`/account/${value}`}>{shortcut}</Link>
+    <Link to={`/account/${value}`}><Text color={'primary'} size={size} >{shortcut}</Text></Link>
   )
 }
 
