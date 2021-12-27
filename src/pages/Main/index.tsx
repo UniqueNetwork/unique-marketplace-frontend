@@ -108,8 +108,9 @@ const MainPage = () => {
   }, [fetchMoreTransfers, fetchMoreBlocks, searchString])
 
   const onSearchKeyDown = useCallback(
-    ({ key }) => {
-      if (key === 'Enter') onSearchClick()
+    (...args) => {
+      console.log(args)
+      //if (key === 'Enter') onSearchClick()
     },
     [onSearchClick],
   )

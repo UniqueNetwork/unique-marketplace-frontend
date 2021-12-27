@@ -8,6 +8,7 @@ import { Data as TransfersData, Transfer } from '../../../api/graphQL/transfers'
 import { BlockComponentProps } from '../types'
 import { timeDifference } from '../../../utils/timestampUtils'
 import LoadingComponent from '../../../components/LoadingComponent'
+import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize'
 
 const transferColumns = [
   {
@@ -43,14 +44,14 @@ const transferColumns = [
   },
 ]
 
-const transfersWithTimeDifference = (transfers: Transfer[] | undefined): Transfer[] => {
+const transfersWithTimeDifference = (transfers: Transfer[] | undefined): (Transfer & { time_difference: string })[] => {
   if (!transfers) return []
   return transfers.map(
     (transfer: Transfer) =>
       ({
         ...transfer,
         time_difference: transfer.timestamp ? timeDifference(transfer.timestamp) : '',
-      } as Transfer),
+      }),
   )
 }
 
@@ -60,14 +61,44 @@ const LastTransfersComponent = ({
                                   loading,
                                   onPageChange,
                                 }: BlockComponentProps<TransfersData>) => {
+
+  const deviceSize = useDeviceSize()
+
   return (
     <div>
-      <Table
+      {deviceSize !== DeviceSize.sm && <Table
         columns={transferColumns}
         data={!loading && data?.view_extrinsic.length ? transfersWithTimeDifference(data?.view_extrinsic) : []}
         emptyText={() => !loading ? 'No data' : <LoadingComponent />}
         rowKey={'block_index'}
-      />
+      />}
+
+      {deviceSize === DeviceSize.sm && <div className={'table-sm'}>
+        {loading && <LoadingComponent />}
+        {!loading && data?.view_extrinsic.length === 0 && <Text color={'grey'} className={'text_grey'}>No data</Text>}
+        {!loading && transfersWithTimeDifference(data?.view_extrinsic).map((item) => <div className={'row'}>
+          <div>
+            <Text className={'title'}>Extrinsic</Text>
+            <Text>{item.block_index}</Text>
+          </div>
+          <div>
+            <Text className={'title'}>Age</Text>
+            <Text>{item.time_difference}</Text>
+          </div>
+          <div>
+            <Text className={'title'}>From</Text>
+            <AccountLinkComponent value={item.from_owner} />
+          </div>
+          <div>
+            <Text className={'title'}>To</Text>
+            <AccountLinkComponent value={item.to_owner} />
+          </div>
+          <div>
+            <Text className={'title'}>Amount</Text>
+            <Text>{`${Number(item.amount) || 0} QTZ`}</Text>
+          </div>
+        </div>)}
+      </div>}
       <PaginationComponent
         pageSize={pageSize}
         count={data?.view_extrinsic_aggregate.aggregate?.count || 0}
