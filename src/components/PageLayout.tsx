@@ -10,6 +10,8 @@ const PageLayout: FC = (props) => {
 
   const layoutProps = useMemo(() => {
     if (pathname === '/') return { heading: 'Block Explorer' }
+    if (/^\/extrinsic\//.test(pathname)) return { breadcrumbs: { options: [{ title: 'Home', link: '/'}, { title: 'Extrinsic' }] } }
+    if (/^\/account\//.test(pathname)) return { breadcrumbs: { options: [{ title: 'Home', link: '/'}, { title: 'Account' }] } }
   }, [pathname])
 
   return (
