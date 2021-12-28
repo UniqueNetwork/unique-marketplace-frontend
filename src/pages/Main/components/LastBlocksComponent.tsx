@@ -66,6 +66,7 @@ const LastBlocksComponent = ({ data, pageSize, loading, onPageChange }: BlockCom
         pageSize={pageSize}
         count={data?.view_last_block_aggregate?.aggregate?.count || 0}
         onPageChange={onPageChange}
+        siblingCount={deviceSize === DeviceSize.sm ? 1 : 2}
       />
     </div>
   )

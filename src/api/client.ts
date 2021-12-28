@@ -15,6 +15,12 @@ const client = new ApolloClient({
               return [...incoming]
             },
           },
+          view_last_block_aggregate: {
+            keyArgs: false,
+            merge(existing = [], incoming) {
+              return incoming
+            },
+          },
           view_last_transfers: {
             keyArgs: false,
             merge(existing = [], incoming) {
