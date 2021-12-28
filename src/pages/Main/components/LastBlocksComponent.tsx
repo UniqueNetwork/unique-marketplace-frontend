@@ -7,6 +7,7 @@ import { timeDifference } from '../../../utils/timestampUtils'
 import { BlockComponentProps } from '../types'
 import LoadingComponent from '../../../components/LoadingComponent'
 import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize'
+import { Link } from 'react-router-dom'
 
 const blockColumns = [
   {
@@ -14,6 +15,7 @@ const blockColumns = [
     dataIndex: 'block_number',
     key: 'block_number',
     width: 100,
+    render: (value: string) => <Link to={`/block/${value}`}>{value}</Link>,
   },
   // Age is calculated from timestamp aftter query execution
   { title: 'Age', dataIndex: 'time_difference', key: 'time_difference', width: 100 },

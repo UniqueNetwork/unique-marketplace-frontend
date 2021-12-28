@@ -1,7 +1,7 @@
 import './app.scss';
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom'
-import { Account, Extrinsic, Main } from './pages'
+import { Account, Extrinsic, Main, Block } from './pages'
 import PageLayout from './components/PageLayout';
 
 export default function App() {
@@ -15,6 +15,7 @@ export default function App() {
             <Route path="/" element={<Main />} />
             <Route path="/account/:accountId" element={<Account />} />
             <Route path="/extrinsic/:blockIndex" element={<Extrinsic />} />
+            <Route path="/block/:blockIndex" element={<Block />} />
           </Routes>
         </PageLayout>
       </Router>
