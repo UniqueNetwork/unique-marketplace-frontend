@@ -99,6 +99,8 @@ a {
   }
 
   &_extrinsic-container {
+    font-size: 16px;
+    line-height: 20px;
     padding: calc(var(--gap) * 1.5) 0 !important;
     grid-template-columns: 85px repeat(11, 1fr);
     grid-row-gap: var(--gap);

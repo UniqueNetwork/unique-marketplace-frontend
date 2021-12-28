@@ -65,11 +65,15 @@ const ExtrinsicDetail: FC = () => {
     <div className={'grid-container container-with-border grid-container_extrinsic-container'}>
       <div className={'grid-item_col1 text_grey'}>Amount</div>
       {/* TODO: due to API issues - amount of some transactions is object which is, for now, should be translated as zero */}
-      <div className={'grid-item_col11'}>
+      <div className={'grid-item_col11 flexbox-container'}>
+        <img src={'/logos/quartz.png'} height={22} width={22} />
         {Number(amount) || 0} QTZ
       </div>
       <div className={'grid-item_col1 text_grey'}>Fee</div>
-      <div className={'grid-item_col11'}>{Number(fee) || 0} QTZ</div>
+      <div className={'grid-item_col11 flexbox-container'}>
+        <img src={'/logos/quartz.png'} height={22} width={22} />
+        {Number(fee) || 0} QTZ
+      </div>
     </div>
     <div className={'grid-container grid-container_extrinsic-container'}>
       <div className={'grid-item_col1 text_grey'}>Hash</div>
