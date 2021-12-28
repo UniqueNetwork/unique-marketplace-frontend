@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
-import usePagination, { UsePaginationProps, DOTS } from '../hooks/usePagination'
 import { Icon } from '@unique-nft/ui-kit'
+import usePagination, { UsePaginationProps, DOTS } from '../hooks/usePagination'
+import useDeviceSize from '../hooks/useDeviceSize'
 
 interface PaginationProps {
   count: number // total number of elements in DB
@@ -65,8 +66,9 @@ const PaginationComponent = ({
     onPageChanged(currentPage - 1)
   }
 
+
   return (
-    <div className={'flexbox-container flexbox-container_space-between '}>
+    <div className={'flexbox-container flexbox-container_space-between pagination-wrapper'}>
       <div>{count} items</div>
       {count > pageSize && <ul className={'pagination-container'}>
         <li key={'prev'} onClick={onPrevious}>
