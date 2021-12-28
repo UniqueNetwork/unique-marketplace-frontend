@@ -14,7 +14,6 @@ const getBlockQuery = gql`
   }
 `
 
-
 interface Variables {
   block_number: string
 }
@@ -35,6 +34,3 @@ interface Data {
 
 export type { Variables, Data }
 export { getBlockQuery }
-
-
-// view_last_block: Block[]

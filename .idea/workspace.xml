@@ -5,18 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="446f1af7-cab2-49b1-805a-da86245b25f5" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/api/graphQL/blockInfo.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/pages/Block/components/BlockDetailComponent.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/pages/Block/components/EventsListComponent.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/pages/Block/components/ExtrinsicsListComponent.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/pages/Block/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/config.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/Account/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/Account/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/Main/components/LastBlocksComponent.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/Main/components/LastBlocksComponent.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/index.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/api/graphQL/extrinsicsForBlock.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/api/graphQL/blockInfo.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/graphQL/blockInfo.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/Block/components/ExtrinsicsListComponent.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/Block/components/ExtrinsicsListComponent.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/Block/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/Block/index.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -94,7 +87,7 @@
       <workItem from="1640241426827" duration="60227000" />
       <workItem from="1640696543920" duration="1323000" />
       <workItem from="1640698057132" duration="688000" />
-      <workItem from="1640699108042" duration="10303000" />
+      <workItem from="1640699108042" duration="16918000" />
     </task>
     <servers />
   </component>

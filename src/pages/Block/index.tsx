@@ -3,9 +3,10 @@ import { useParams } from 'react-router-dom';
 import { Tabs } from '@unique-nft/ui-kit';
 import { useQuery } from '@apollo/client';
 import BlockDetailComponent from './components/BlockDetailComponent';
+import ExtrinsicsListComponent from './components/ExtrinsicsListComponent';
 
 
-const assetsTabs = ['Collections', 'Tokens'];
+const assetsTabs = ['Extrinsics', 'Events'];
 
 const BlockPage = () => {
 
@@ -21,6 +22,7 @@ const BlockPage = () => {
 
       <div className={'margin-bottom'}></div>
       <div className={'margin-bottom'}></div>
+
       <Tabs
         activeIndex={activeAssetsTabIndex}
         labels={assetsTabs}
@@ -29,11 +31,10 @@ const BlockPage = () => {
       <Tabs
         activeIndex={activeAssetsTabIndex}
         contents={[
-          <div>1</div>,
+          <ExtrinsicsListComponent blockNumber={blockIndex} />,
           <div>2</div>
         ]}
       />
-      123
     </div>
   );
 };
