@@ -4,6 +4,7 @@ import { Tabs } from '@unique-nft/ui-kit';
 import { useQuery } from '@apollo/client';
 import BlockDetailComponent from './components/BlockDetailComponent';
 import ExtrinsicsListComponent from './components/ExtrinsicsListComponent';
+import EventListComponent from './components/EventsListComponent';
 
 
 const assetsTabs = ['Extrinsics', 'Events'];
@@ -32,7 +33,7 @@ const BlockPage = () => {
         activeIndex={activeAssetsTabIndex}
         contents={[
           <ExtrinsicsListComponent blockNumber={blockIndex} />,
-          <div>2</div>
+          <EventListComponent blockNumber={blockIndex} />,
         ]}
       />
     </div>

@@ -34,7 +34,7 @@ const BlockDetailComponent = (props: any) => {
       <Heading>{`Block ${block_number}`}</Heading>
       <div className={'grid-container container-with-border grid-container_extrinsic-container'}>
         <div className={'grid-item_col2 text_grey'}>Status</div>
-        <div className={'grid-item_col10'}><div className={'color-red'}>Тут надо статус</div></div>
+        <div className={'grid-item_col10'}>Unavailable</div>
         <div className={'grid-item_col2 text_grey'}>Timestamp</div>
         <div className={'grid-item_col10'}>{timestamp && new Date(timestamp * 1000).toLocaleString()}</div>
       </div>
