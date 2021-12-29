@@ -4,7 +4,7 @@ import { WsProvider } from '@polkadot/rpc-provider'
 import { ApiContextProps, ApiProvider, ChainData } from './context/ApiContext'
 import { formatBalance } from '@polkadot/util'
 import { ApolloClient, ApolloProvider } from '@apollo/client'
-import { cache } from './api/client'
+import cache from './api/cache'
 import chains, { Chain, defaultChain } from './chains'
 
 async function retrieve(api: ApiPromise): Promise<ChainData> {

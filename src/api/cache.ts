@@ -1,4 +1,4 @@
-import { ApolloClient, HttpLink, InMemoryCache } from '@apollo/client'
+import { InMemoryCache } from '@apollo/client'
 
 const cache = new InMemoryCache({
   typePolicies: {
@@ -48,12 +48,5 @@ const cache = new InMemoryCache({
 })
 
 
-const client = new ApolloClient({
-  //uri: config.API_URL,
-  //link,
-  cache
-})
+export default cache
 
-export { cache }
-
-export default client
