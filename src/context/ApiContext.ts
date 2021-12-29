@@ -1,4 +1,5 @@
 import React from 'react'
+import { Chain } from '../config'
 
 export type ChainData = {
   properties: {
@@ -13,6 +14,8 @@ export type ApiContextProps = {
   isApiConnected: boolean;
   isApiInitialized: boolean;
   chainData: ChainData | undefined
+  currentChain: Chain | undefined
+  onChangeChain: (chain: Chain) => void
 }
 
 const ApiContext: React.Context<ApiContextProps> = React.createContext({} as unknown as ApiContextProps)
