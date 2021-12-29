@@ -1,5 +1,5 @@
 import React from 'react'
-import { Chain } from '../config'
+import { Chain } from '../chains'
 
 export type ChainData = {
   properties: {

@@ -1,8 +1,7 @@
 import React, { FC } from 'react'
 import { Select } from '@unique-nft/ui-kit';
-import { chains } from '../config';
 import { useApi } from '../hooks/useApi'
-
+import chains from '../chains'
 
 const Header: FC = () => {
 
