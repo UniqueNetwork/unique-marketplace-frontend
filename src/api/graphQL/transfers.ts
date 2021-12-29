@@ -31,7 +31,7 @@ interface Variables {
 interface Transfer {
   block_number: number
   block_index: string
-  amount: number
+  amount: string
   fee: number
   from_owner: string
   hash: string

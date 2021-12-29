@@ -40,7 +40,9 @@ const transferColumns = [
     dataIndex: 'amount',
     key: 'amount',
     width: 100,
-    render: (value: number | object) => <Text size={'s'}>{`${Number(value) || 0} QTZ`}</Text>,
+    render: (value: number | object) => (
+      <Text size={'s'}>{`${(Number(value) && value) || 0} QTZ`}</Text>
+    ),
   },
 ]
 
