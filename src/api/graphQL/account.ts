@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client'
+import { gql, useQuery } from '@apollo/client'
 const accountQuery = gql`
   query getAccount($accountId: String!) {
     account_by_pk(account_id: $accountId) {
@@ -32,4 +32,14 @@ interface Data {
 }
 
 export type { Variables, Data }
+
+export const useGraphQlAccount = (accountId: string) => {
+  const { loading: isAccountFetching, data: account } = useQuery<Data, Variables>(accountQuery, {
+    variables: { accountId },
+    notifyOnNetworkStatusChange: true,
+  })
+
+  return { account: account?.account_by_pk, isAccountFetching }
+}
+
 export { accountQuery }

@@ -3,8 +3,8 @@ import { ApiPromise } from '@polkadot/api/promise'
 import { WsProvider } from '@polkadot/rpc-provider'
 import { ApiContextProps, ApiProvider, ChainData } from './context/ApiContext'
 import { formatBalance } from '@polkadot/util'
-import { ApolloClient, ApolloProvider } from '@apollo/client'
-import cache from './api/cache'
+import { ApolloProvider, HttpLink } from '@apollo/client'
+import client from './api/client'
 import chains, { Chain, defaultChain } from './chains'
 
 async function retrieve(api: ApiPromise): Promise<ChainData> {
@@ -16,7 +16,9 @@ async function retrieve(api: ApiPromise): Promise<ChainData> {
 
   return {
     properties: {
-      tokenSymbol: chainProperties.tokenSymbol.unwrapOr([formatBalance.getDefaults().unit])[0].toString(),
+      tokenSymbol: chainProperties.tokenSymbol
+        .unwrapOr([formatBalance.getDefaults().unit])[0]
+        .toString(),
     },
     systemChain: (systemChain || '<unknown>').toString(),
     systemName: systemName.toString(),
@@ -29,17 +31,24 @@ const Api: FC = ({ children }) => {
   const [apiError, setApiError] = useState<null | string>(null)
   const [api, setApi] = useState<ApiPromise>()
   const [chainData, setChainData] = useState<ChainData | undefined>()
-  const [currentChain, setCurrentChain] = useState<Chain>(chains[defaultChain]);
-  const [client, setClient] = useState<ApolloClient<any>>(new ApolloClient({ uri: chains[defaultChain].clientEndpoint, cache }))
+  const [currentChain, setCurrentChain] = useState<Chain>(chains[defaultChain])
 
   const value = useMemo<ApiContextProps>(
-    () => ({ apiError, isApiConnected, isApiInitialized, chainData, api, currentChain, onChangeChain: setCurrentChain }),
-    [apiError, isApiConnected, isApiInitialized, chainData, api, currentChain, setCurrentChain],
+    () => ({
+      apiError,
+      isApiConnected,
+      isApiInitialized,
+      chainData,
+      api,
+      currentChain,
+      onChangeChain: setCurrentChain,
+    }),
+    [apiError, isApiConnected, isApiInitialized, chainData, api, currentChain, setCurrentChain]
   )
 
   useEffect(() => {
     if (api) {
-      api.disconnect();
+      api.disconnect()
     }
 
     const provider = new WsProvider(currentChain.rpcEndpoint)
@@ -57,16 +66,16 @@ const Api: FC = ({ children }) => {
     setApi(_api)
     setIsApiInitialized(true)
 
-    client.stop()
-    setClient(new ApolloClient({ uri: currentChain.clientEndpoint, cache }))
-
+    client.stop() // terminate all active query processes
+    client.clearStore().then(() => {
+      // resets the entire store by clearing out the cache
+      client.setLink(new HttpLink({ uri: currentChain.clientEndpoint }))
+    })
   }, [currentChain])
 
   return (
     <ApiProvider value={value}>
-      <ApolloProvider client={client}>
-        {children}
-      </ApolloProvider>
+      <ApolloProvider client={client}>{children}</ApolloProvider>
     </ApiProvider>
   )
 }

@@ -4,14 +4,14 @@ import { Link } from 'react-router-dom'
 import { Text } from '@unique-nft/ui-kit'
 import PaginationComponent from '../../../components/Pagination'
 import AccountLinkComponent from '../../Account/components/AccountLinkComponent'
-import { Data as TransfersData, Transfer } from '../../../api/graphQL/transfers'
+import { Transfer } from '../../../api/graphQL/transfers'
 import { BlockComponentProps } from '../types'
 import { timeDifference } from '../../../utils/timestampUtils'
 import LoadingComponent from '../../../components/LoadingComponent'
 import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize'
 import { useApi } from '../../../hooks/useApi'
 
-const getTransferColumns = (tokenSymbol: string) => ([
+const getTransferColumns = (tokenSymbol: string) => [
   {
     title: 'Extrinsic',
     dataIndex: 'block_index',
@@ -43,68 +43,80 @@ const getTransferColumns = (tokenSymbol: string) => ([
     width: 100,
     render: (value: number | object) => <Text>{`${Number(value) || 0} ${tokenSymbol}`}</Text>,
   },
-])
+]
 
-const transfersWithTimeDifference = (transfers: Transfer[] | undefined): (Transfer & { time_difference: string })[] => {
+const transfersWithTimeDifference = (
+  transfers: Transfer[] | undefined
+): (Transfer & { time_difference: string })[] => {
   if (!transfers) return []
-  return transfers.map(
-    (transfer: Transfer) =>
-      ({
-        ...transfer,
-        time_difference: transfer.timestamp ? timeDifference(transfer.timestamp) : '',
-      }),
-  )
+  return transfers.map((transfer: Transfer) => ({
+    ...transfer,
+    time_difference: transfer.timestamp ? timeDifference(transfer.timestamp) : '',
+  }))
 }
 
 const LastTransfersComponent = ({
-                                  data,
-                                  pageSize,
-                                  loading,
-                                  onPageChange,
-                                }: BlockComponentProps<TransfersData>) => {
-
+  data,
+  count,
+  pageSize,
+  loading,
+  onPageChange,
+}: BlockComponentProps<Transfer[]>) => {
   const deviceSize = useDeviceSize()
 
   const { chainData } = useApi()
 
   return (
     <div>
-      {deviceSize !== DeviceSize.sm && <Table
-        columns={getTransferColumns(chainData?.properties.tokenSymbol || '')}
-        data={!loading && data?.view_extrinsic.length ? transfersWithTimeDifference(data?.view_extrinsic) : []}
-        emptyText={() => !loading ? 'No data' : <LoadingComponent />}
-        rowKey={'block_index'}
-      />}
+      {deviceSize !== DeviceSize.sm && (
+        <Table
+          columns={getTransferColumns(chainData?.properties.tokenSymbol || '')}
+          data={!loading && data?.length ? transfersWithTimeDifference(data) : []}
+          emptyText={!loading ? 'No data' : <LoadingComponent />}
+          rowKey={'block_index'}
+        />
+      )}
 
-      {deviceSize === DeviceSize.sm && <div className={'table-sm'}>
-        {loading && <LoadingComponent />}
-        {!loading && data?.view_extrinsic.length === 0 && <Text color={'grey'} className={'text_grey'}>No data</Text>}
-        {!loading && transfersWithTimeDifference(data?.view_extrinsic).map((item) => <div className={'row'}>
-          <div>
-            <Text className={'title'}>Extrinsic</Text>
-            <Link to={`/extrinsic/${item.block_index}`}><Text color={'primary-600'}>{item.block_index}</Text></Link>
-          </div>
-          <div>
-            <Text className={'title'}>Age</Text>
-            <Text>{item.time_difference}</Text>
-          </div>
-          <div>
-            <Text className={'title'}>From</Text>
-            <AccountLinkComponent value={item.from_owner} />
-          </div>
-          <div>
-            <Text className={'title'}>To</Text>
-            <AccountLinkComponent value={item.to_owner} />
-          </div>
-          <div>
-            <Text className={'title'}>Amount</Text>
-            <Text>{`${Number(item.amount) || 0} ${chainData?.properties.tokenSymbol}`}</Text>
-          </div>
-        </div>)}
-      </div>}
+      {deviceSize === DeviceSize.sm && (
+        <div className={'table-sm'}>
+          {loading && <LoadingComponent />}
+          {!loading && data?.length === 0 && (
+            <Text color={'grey'} className={'text_grey'}>
+              No data
+            </Text>
+          )}
+          {!loading &&
+            transfersWithTimeDifference(data).map((item) => (
+              <div key={item.block_index} className={'row'}>
+                <div>
+                  <Text className={'title'}>Extrinsic</Text>
+                  <Link to={`/extrinsic/${item.block_index}`}>
+                    <Text color={'primary-600'}>{item.block_index}</Text>
+                  </Link>
+                </div>
+                <div>
+                  <Text className={'title'}>Age</Text>
+                  <Text>{item.time_difference}</Text>
+                </div>
+                <div>
+                  <Text className={'title'}>From</Text>
+                  <AccountLinkComponent value={item.from_owner} />
+                </div>
+                <div>
+                  <Text className={'title'}>To</Text>
+                  <AccountLinkComponent value={item.to_owner} />
+                </div>
+                <div>
+                  <Text className={'title'}>Amount</Text>
+                  <Text>{`${Number(item.amount) || 0} ${chainData?.properties.tokenSymbol}`}</Text>
+                </div>
+              </div>
+            ))}
+        </div>
+      )}
       <PaginationComponent
         pageSize={pageSize}
-        count={data?.view_extrinsic_aggregate.aggregate?.count || 0}
+        count={count}
         onPageChange={onPageChange}
         siblingCount={deviceSize === DeviceSize.sm ? 1 : 2}
       />

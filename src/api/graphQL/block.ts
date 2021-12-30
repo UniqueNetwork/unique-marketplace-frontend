@@ -1,4 +1,5 @@
-import { gql } from '@apollo/client'
+import { gql, useApolloClient, useQuery } from '@apollo/client'
+import { useCallback, useEffect } from 'react'
 
 const getLatestBlocksQuery = gql`
   query GetLatestBlocks(
@@ -43,4 +44,65 @@ interface Data {
   }
 }
 export type { Variables, Data, Block }
+
+export type useGraphQlBlocksProps = {
+  pageSize: number
+}
+
+export type FetchMoreBlocksOptions = {
+  limit?: number
+  offset?: number
+  searchString?: string
+}
+
+export const useGraphQlBlocks = ({ pageSize }: useGraphQlBlocksProps) => {
+  const client = useApolloClient()
+
+  const {
+    fetchMore,
+    data,
+    loading: isBlocksFetching,
+    error: fetchBlocksError,
+  } = useQuery<Data, Variables>(getLatestBlocksQuery, {
+    variables: { limit: pageSize, offset: 0, order_by: { block_number: 'desc' } },
+    fetchPolicy: 'network-only', // Used for first execution
+    nextFetchPolicy: 'cache-first',
+    notifyOnNetworkStatusChange: true,
+  })
+
+  useEffect(() => {
+    fetchMore({})
+  }, [client.link, fetchMore])
+
+  const fetchMoreBlocks = useCallback(
+    ({ limit = pageSize, offset, searchString }: FetchMoreBlocksOptions) => {
+      return fetchMore({
+        variables: {
+          limit,
+          offset,
+          where:
+            (searchString &&
+              searchString.length > 0 && {
+                _or: [
+                  {
+                    block_number: { _eq: searchString },
+                  },
+                ],
+              }) ||
+            undefined,
+        },
+      })
+    },
+    [fetchMore, pageSize]
+  )
+
+  return {
+    fetchMoreBlocks,
+    blocks: data?.view_last_block,
+    blockCount: data?.view_last_block_aggregate.aggregate.count || 0,
+    isBlocksFetching,
+    fetchBlocksError,
+  }
+}
+
 export { getLatestBlocksQuery }

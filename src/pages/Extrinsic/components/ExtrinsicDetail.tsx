@@ -1,8 +1,7 @@
 import React, { FC } from 'react'
 import { useParams } from 'react-router-dom'
-import { useQuery } from '@apollo/client'
 import { Heading, Text } from '@unique-nft/ui-kit'
-import { Data as extrinsicData, extrinsicQuery, Variables as ExtrinsicVariables } from '../../../api/graphQL/extrinsic'
+import { useGraphQlExtrinsic } from '../../../api/graphQL/extrinsic'
 import AccountLinkComponent from '../../Account/components/AccountLinkComponent'
 import LoadingComponent from '../../../components/LoadingComponent'
 import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize'
@@ -15,15 +14,7 @@ const ExtrinsicDetail: FC = () => {
 
   const { chainData } = useApi()
 
-  const {
-    loading: isExtrinsicFetching,
-    data: extrinsics,
-  } = useQuery<extrinsicData,
-    ExtrinsicVariables>(extrinsicQuery, {
-    variables: { block_index: blockIndex || '' },
-    fetchPolicy: 'network-only',
-    notifyOnNetworkStatusChange: true,
-  })
+  const { extrinsic, isExtrinsicFetching } = useGraphQlExtrinsic(blockIndex)
 
   const deviceSize = useDeviceSize()
 
@@ -39,53 +30,80 @@ const ExtrinsicDetail: FC = () => {
     amount,
     fee,
     hash,
-  } = extrinsics?.view_extrinsic[0] || {}
+  } = extrinsic || {}
 
-
-  return (<>
-    <Heading>{`Extrinsic ${blockIndex}`}</Heading>
-    <div className={'grid-container container-with-border grid-container_extrinsic-container'}>
-      <Text className={'grid-item_col1'} color={'grey-500'}>Block</Text>
-      <Text className={'grid-item_col11'}>{blockNumber?.toString() || ''}</Text>
-      <Text className={'grid-item_col1'} color={'grey-500'}>Timestamp</Text>
-      <Text className={'grid-item_col11'}>
-        {timestamp ? new Date(timestamp * 1000).toLocaleString() : ''}
-      </Text>
-    </div>
-    <div className={'grid-container container-with-border grid-container_extrinsic-container'}>
-      <Text className={'grid-item_col1'} color={'grey-500'}>Sender</Text>
-      <div className={'grid-item_col11'}>
-        {fromOwner && (
-          <AccountLinkComponent value={fromOwner} noShort={deviceSize !== DeviceSize.sm} size={'m'} />
-        )}
+  return (
+    <>
+      <Heading>{`Extrinsic ${blockIndex}`}</Heading>
+      <div className={'grid-container container-with-border grid-container_extrinsic-container'}>
+        <Text className={'grid-item_col1'} color={'grey-500'}>
+          Block
+        </Text>
+        <Text className={'grid-item_col11'}>{blockNumber?.toString() || ''}</Text>
+        <Text className={'grid-item_col1'} color={'grey-500'}>
+          Timestamp
+        </Text>
+        <Text className={'grid-item_col11'}>
+          {timestamp ? new Date(timestamp * 1000).toLocaleString() : ''}
+        </Text>
       </div>
-      <Text className={'grid-item_col1'} color={'grey-500'}>Destination</Text>
-      <div className={'grid-item_col11'}>
-        {toOwner && (
-          <AccountLinkComponent value={toOwner} noShort={deviceSize !== DeviceSize.sm} size={'m'} />
-        )}
+      <div className={'grid-container container-with-border grid-container_extrinsic-container'}>
+        <Text className={'grid-item_col1'} color={'grey-500'}>
+          Sender
+        </Text>
+        <div className={'grid-item_col11'}>
+          {fromOwner && (
+            <AccountLinkComponent
+              value={fromOwner}
+              noShort={deviceSize !== DeviceSize.sm}
+              size={'m'}
+            />
+          )}
+        </div>
+        <Text className={'grid-item_col1'} color={'grey-500'}>
+          Destination
+        </Text>
+        <div className={'grid-item_col11'}>
+          {toOwner && (
+            <AccountLinkComponent
+              value={toOwner}
+              noShort={deviceSize !== DeviceSize.sm}
+              size={'m'}
+            />
+          )}
+        </div>
       </div>
-    </div>
-    <div className={'grid-container container-with-border grid-container_extrinsic-container'}>
-      <Text className={'grid-item_col1 '} color={'grey-500'}>Amount</Text>
-      {/* TODO: due to API issues - amount of some transactions is object which is, for now, should be translated as zero */}
-      <div className={'grid-item_col11'}>
-        <ChainLogo isInline />
-        {Number(amount) || 0} {chainData?.properties.tokenSymbol}
+      <div className={'grid-container container-with-border grid-container_extrinsic-container'}>
+        <Text className={'grid-item_col1 '} color={'grey-500'}>
+          Amount
+        </Text>
+        {/* TODO: due to API issues - amount of some transactions is object which is, for now, should be translated as zero */}
+        <div className={'grid-item_col11'}>
+          <ChainLogo isInline={true} />
+          {Number(amount) || 0} {chainData?.properties.tokenSymbol}
+        </div>
+        <Text className={'grid-item_col1'} color={'grey-500'}>
+          Fee
+        </Text>
+        <div className={'grid-item_col11'}>
+          <ChainLogo isInline={true} />
+          {Number(fee) || 0} {chainData?.properties.tokenSymbol}
+        </div>
       </div>
-      <Text className={'grid-item_col1'} color={'grey-500'}>Fee</Text>
-      <div className={'grid-item_col11'}>
-        <ChainLogo isInline />
-        {Number(fee) || 0} {chainData?.properties.tokenSymbol}
+      <div className={'grid-container grid-container_extrinsic-container'}>
+        <Text className={'grid-item_col1'} color={'grey-500'}>
+          Hash
+        </Text>
+        <Text className={'grid-item_col11'}>
+          {hash && deviceSize !== DeviceSize.sm ? hash : shortcutText(hash!)}
+        </Text>
+        <Text className={'grid-item_col1'} color={'grey-500'}>
+          Extrinsic
+        </Text>
+        <Text className={'grid-item_col11'}>{blockIndex}</Text>
       </div>
-    </div>
-    <div className={'grid-container grid-container_extrinsic-container'}>
-      <Text className={'grid-item_col1'} color={'grey-500'}>Hash</Text>
-      <Text className={'grid-item_col11'}>{hash && deviceSize !== DeviceSize.sm ? hash : shortcutText(hash!)}</Text>
-      <Text className={'grid-item_col1'} color={'grey-500'}>Extrinsic</Text>
-      <Text className={'grid-item_col11'}>{blockIndex}</Text>
-    </div>
-  </>)
+    </>
+  )
 }
 
 export default ExtrinsicDetail

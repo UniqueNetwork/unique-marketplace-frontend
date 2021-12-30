@@ -1,4 +1,6 @@
-import { gql } from '@apollo/client'
+import { gql, useApolloClient, useQuery } from '@apollo/client'
+import { useCallback, useEffect } from 'react'
+import { FetchMoreBlocksOptions } from './block'
 
 const getLastTransfersQuery = gql`
   query getLastTransfers($limit: Int, $offset: Int, $where: view_extrinsic_bool_exp = {}) {
@@ -50,4 +52,82 @@ interface Data {
 }
 
 export type { Variables, Transfer, Data }
+
+export type useGraphQlLastTransfersProps = {
+  pageSize: number
+  accountId?: string
+}
+
+export const useGraphQlLastTransfers = ({ pageSize, accountId }: useGraphQlLastTransfersProps) => {
+  const client = useApolloClient()
+
+  const {
+    fetchMore,
+    loading: isTransfersFetching,
+    error: fetchTransfersError,
+    data,
+  } = useQuery<Data, Variables>(getLastTransfersQuery, {
+    variables: {
+      limit: pageSize,
+      offset: 0,
+      where: {
+        _and: {
+          amount: { _neq: '0' },
+          ...(accountId
+            ? {
+                _or: [{ from_owner: { _eq: accountId } }, { to_owner: { _eq: accountId } }],
+              }
+            : {}),
+        },
+      },
+    },
+    fetchPolicy: 'network-only', // Used for first execution
+    nextFetchPolicy: 'cache-first',
+    notifyOnNetworkStatusChange: true,
+  })
+
+  useEffect(() => {
+    fetchMore({})
+  }, [client.link, fetchMore])
+
+  const fetchMoreTransfers = useCallback(
+    ({ limit = pageSize, offset, searchString }: FetchMoreBlocksOptions) => {
+      return fetchMore({
+        variables: {
+          limit,
+          offset,
+          where: {
+            _and: {
+              amount: { _neq: '0' },
+              ...(accountId
+                ? {
+                    _or: [{ from_owner: { _eq: accountId } }, { to_owner: { _eq: accountId } }],
+                  }
+                : {}),
+              ...(searchString
+                ? {
+                    _or: {
+                      block_index: { _eq: searchString },
+                      from_owner: { _eq: searchString },
+                      to_owner: { _eq: searchString },
+                    },
+                  }
+                : {}),
+            },
+          },
+        },
+      })
+    },
+    [fetchMore, accountId, pageSize]
+  )
+
+  return {
+    fetchMoreTransfers,
+    transfers: data?.view_extrinsic,
+    transfersCount: data?.view_extrinsic_aggregate.aggregate.count || 0,
+    isTransfersFetching,
+    fetchTransfersError,
+  }
+}
+
 export { getLastTransfersQuery }
