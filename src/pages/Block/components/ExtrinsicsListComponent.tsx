@@ -24,7 +24,7 @@ const blockColumns = [
     render: (value: number) => <div className={'block__table-box'}>
       <div className={'block__table-title'}>ID</div>
       <div className={'block__table-value'}>
-        <Link to={`/extrinsic/${value}`}>{value}</Link>,
+        <Link to={`/extrinsic/${value}`}>{value}</Link>
       </div>
     </div>,
   },
