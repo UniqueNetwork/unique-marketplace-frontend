@@ -22,22 +22,28 @@ const EventListComponent = (props: any) => {
       dataIndex: 'method',
       key: 'method',
       width: 100,
+      render: (value: string) => <div className={'block__table-box'}>
+        <div className={'block__table-title'}>Action</div>
+        <div className={'block__table-value'}>{value}</div>
+      </div>,
     },
     {
       title: 'ID', dataIndex: 'event_index', key: 'event_index', width: 100,
-      render: (value: string) => <Link to={getIdExtrinsicLink(value)}>{blockNumber}-{value}</Link>,
+      render: (value: string) => <div className={'block__table-box'}>
+        <div className={'block__table-title'}>ID</div>
+        <div className={'block__table-value'}>Unavailable</div>
+      </div>,
     },
     {
       title: 'Age', dataIndex: 'timestamp', key: 'timestamp', width: 100,
-      render: (value: number) => <div>{timeDifference(value)}</div>,
+      render: (value: number) => <div className={'block__table-box'}>
+        <div className={'block__table-title'}>Age</div>
+        <div className={'block__table-value'}>{timeDifference(value)}</div>
+      </div>,
     },
-
   ];
 
-  const getIdExtrinsicLink = (value: any) => {
-    console.log(blockNumber, value);
-    return '/extrinsic/' + blockNumber + '-' + value
-  }
+
 
 
   const {
@@ -74,7 +80,7 @@ const EventListComponent = (props: any) => {
         columns={blockColumns}
         data={eventsList?.event}
         emptyText={() => !loading ? 'No data' : <LoadingComponent/>}
-        rowKey={'block_index'}
+        rowKey={'event_index'}
       />
       <PaginationComponent
         pageSize={pageSize}

@@ -14,17 +14,38 @@ const blockColumns = [
     dataIndex: 'method',
     key: 'method',
     width: 100,
+    render: (value: number) => <div className={'block__table-box'}>
+      <div className={'block__table-title'}>Action</div>
+      <div className={'block__table-value'}>{value}</div>
+    </div>,
   },
   {
-    title: 'ID', dataIndex: 'block_index', key: 'block_index', width: 100,
-    render: (value: string) => <Link to={`/extrinsic/${value}`}>{value}</Link>,
+    title: 'ID', dataIndex: 'block_index', key: 'block_index', width: 150,
+    render: (value: number) => <div className={'block__table-box'}>
+      <div className={'block__table-title'}>ID</div>
+      <div className={'block__table-value'}>
+        <Link to={`/extrinsic/${value}`}>{value}</Link>,
+      </div>
+    </div>,
   },
   {
-    title: 'Age', dataIndex: 'timestamp', key: 'timestamp', width: 100,
-    render: (value: number) => <div>{timeDifference(value)}</div>,
+    title: 'Age', dataIndex: 'timestamp', key: 'timestamp', width: 150,
+    render: (value: number) => <div className={'block__table-box'}>
+      <div className={'block__table-title'}>Age</div>
+      <div className={'block__table-value'}>{timeDifference(value)}</div>
+    </div>,
   },
 
-  { title: 'Hash', dataIndex: 'hash', key: 'hash', width: 100 },
+  { title: 'Hash', dataIndex: 'hash', key: 'hash', width: 100,
+    render: (value: number) => <div className={'block__table-box'}>
+      <div className={'block__table-title'}>Hash</div>
+      <div className={'block__table-value'}>
+        <div className={'block__text-wrap'}>
+          {value}
+        </div>
+      </div>
+    </div>,
+  },
 ];
 
 

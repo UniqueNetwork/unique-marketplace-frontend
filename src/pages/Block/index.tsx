@@ -1,9 +1,11 @@
+import './block.scss';
 import React, { useCallback, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Tabs } from '@unique-nft/ui-kit';
 import { useQuery } from '@apollo/client';
 import BlockDetailComponent from './components/BlockDetailComponent';
 import ExtrinsicsListComponent from './components/ExtrinsicsListComponent';
+
 import EventListComponent from './components/EventsListComponent';
 
 
@@ -18,7 +20,7 @@ const BlockPage = () => {
 
 
   return (
-    <div>
+    <div className={'block'}>
       <BlockDetailComponent block_number={blockIndex} />
 
       <div className={'margin-bottom'}></div>

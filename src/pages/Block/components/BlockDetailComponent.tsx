@@ -48,16 +48,16 @@ const BlockDetailComponent = (props: any) => {
 
       <div className={'grid-container grid-container_extrinsic-container'}>
         <div className={'grid-item_col2 text_grey'}>Block hash</div>
-        <div className={'grid-item_col10'}>{block_hash}</div>
+        <div className={'grid-item_col10'}><div title={block_hash} className={'block__text-wrap'}>{block_hash}</div></div>
 
         <div className={'grid-item_col2 text_grey'}>Parent hash</div>
-        <div className={'grid-item_col10'}>{parent_hash}</div>
+        <div className={'grid-item_col10'}><div title={parent_hash} className={'block__text-wrap'}>{parent_hash}</div></div>
 
         <div className={'grid-item_col2 text_grey'}>Extrinsic root</div>
-        <div className={'grid-item_col10'}>{extrinsics_root}</div>
+        <div className={'grid-item_col10'}><div title={extrinsics_root} className={'block__text-wrap'}>{extrinsics_root}</div></div>
 
         <div className={'grid-item_col2 text_grey'}>State root</div>
-        <div className={'grid-item_col10'}>{state_root}</div>
+        <div className={'grid-item_col10'}><div title={state_root} className={'block__text-wrap'}>{state_root}</div></div>
       </div>
     </>
   );
