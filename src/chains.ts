@@ -1,23 +1,23 @@
 export type Chain = {
-  name: string;
+  name: string
   clientEndpoint: string
   rpcEndpoint: string
 }
 
 const chains: Record<string, Chain> = {
-  ['OPAL by UNIQUE']: {
+  ['OPAL']: {
     name: 'OPAL by UNIQUE',
     clientEndpoint: 'https://hasura-opal.unique.network/v1/graphql',
     rpcEndpoint: 'wss://opal.unique.network',
   },
-  ['QUARTZ by UNIQUE']: {
+  ['QUARTZ']: {
     name: 'QUARTZ by UNIQUE',
     clientEndpoint: 'https://hasura-quartz.unique.network/v1/graphql',
     rpcEndpoint: 'wss://quartz.unique.network',
   },
 }
 
-const defaultChain = 'OPAL by UNIQUE'
+const defaultChain = 'OPAL'
 
 export { defaultChain }
 
