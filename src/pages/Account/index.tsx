@@ -3,47 +3,34 @@ import { useParams } from 'react-router-dom'
 import { Tabs } from '@unique-nft/ui-kit'
 import { useQuery } from '@apollo/client'
 import AccountDetailComponent from './components/AccountDetailComponent'
-import LastTransfersComponent from '../Main/components/LastTransfersComponent';
-
-import {
-  Data as TransfersData,
-  getLastTransfersQuery,
-  Variables as TransferVariables,
-} from '../../api/graphQL/transfers'
+import LastTransfersComponent from '../Main/components/LastTransfersComponent'
+import { useGraphQlLastTransfers } from '../../api/graphQL/transfers'
 import CollectionsComponent from './components/CollectionsComponent'
 import TokensComponent from './components/TokensComponent'
 
 const assetsTabs = ['Collections', 'Tokens']
 
 const AccountPage = () => {
- const { accountId } = useParams();
+  const { accountId } = useParams()
 
- const pageSize = 10 // default
+  const pageSize = 10 // default
 
-  const [activeAssetsTabIndex, setActiveAssetsTabIndex] = useState<number>(0);
+  const [activeAssetsTabIndex, setActiveAssetsTabIndex] = useState<number>(0)
 
-  const {
-    fetchMore: fetchMoreTransfers,
-    loading: isTransfersFetching,
-    error: fetchTransfersError,
-    data: transfers,
-  } = useQuery<TransfersData, TransferVariables>(getLastTransfersQuery, {
-    variables: { limit: pageSize, offset: 0, order_by: { block_index: 'desc' } },
-    fetchPolicy: "no-cache",
-  })
+  const { fetchMoreTransfers, transfers, transfersCount, isTransfersFetching } =
+    useGraphQlLastTransfers({ pageSize, accountId })
 
   const onTransfersPageChange = useCallback(
-    (limit: number, offset: number) =>
-      fetchMoreTransfers({
-        variables: {
-          limit,
-          offset,
-        },
-      }),
+    (limit: number, offset: number) => {
+      return fetchMoreTransfers({
+        limit,
+        offset,
+      })
+    },
     [fetchMoreTransfers]
   )
 
- if (!accountId) return null;
+  if (!accountId) return null
 
  return <div>
    <AccountDetailComponent accountId={accountId} />
@@ -62,8 +49,10 @@ const AccountPage = () => {
    <h2 className={'margin-top margin-bottom'}>Last  QTZ transfers</h2>
    <LastTransfersComponent
      data={transfers}
+     count={transfersCount}
      onPageChange={onTransfersPageChange}
      pageSize={pageSize}
+     loading={isTransfersFetching}
    />
  </div>;
 }

@@ -2,8 +2,10 @@ import { ApolloQueryResult } from '@apollo/client'
 
 type BlockComponentProps<T> = {
   data?: T
+  count: number
   pageSize: number
-  onPageChange: (limit: number, offset: number) => Promise<ApolloQueryResult<T>>
+  loading: boolean
+  onPageChange: (limit: number, offset: number) => Promise<any>
 }
 
 export type { BlockComponentProps }

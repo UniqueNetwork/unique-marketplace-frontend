@@ -1,14 +1,14 @@
 import './app.scss';
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { Layout } from '@unique-nft/ui-kit'
 import { Account, Extrinsic, Main } from './pages'
+import PageLayout from './components/PageLayout';
 
 export default function App() {
   return (
     <div className={'app-wrapper'}>
       <Router>
-        <Layout>
+        <PageLayout>
           {/* A <Switch> looks through its children <Route>s and
             renders the first one that matches the current URL. */}
           <Routes>
@@ -16,7 +16,7 @@ export default function App() {
             <Route path="/account/:accountId" element={<Account />} />
             <Route path="/extrinsic/:blockIndex" element={<Extrinsic />} />
           </Routes>
-        </Layout>
+        </PageLayout>
       </Router>
     </div>
   )
