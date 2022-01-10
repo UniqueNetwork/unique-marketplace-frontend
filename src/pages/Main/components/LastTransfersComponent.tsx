@@ -41,7 +41,9 @@ const getTransferColumns = (tokenSymbol: string) => [
     dataIndex: 'amount',
     key: 'amount',
     width: 100,
-    render: (value: number | object) => <Text>{`${Number(value) || 0} ${tokenSymbol}`}</Text>,
+    render: (value: number | object) => (
+      <Text size={'s'}>{`${(Number(value) && value) || 0} ${tokenSymbol}`}</Text>
+    ),
   },
 ]
 
