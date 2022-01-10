@@ -14,7 +14,13 @@ function sanitize(value?: string): string {
   return value?.toLowerCase().replace('-', ' ') || ''
 }
 
-function ChainLogo({ className = '', isInline, logo, onClick, withoutHl }: Props): React.ReactElement<Props> {
+function ChainLogo({
+  className = '',
+  isInline,
+  logo,
+  onClick,
+  withoutHl,
+}: Props): React.ReactElement<Props> {
   const { chainData } = useApi()
   const [isEmpty, img] = useMemo((): [boolean, string] => {
     const found = logo
@@ -26,7 +32,7 @@ function ChainLogo({ className = '', isInline, logo, onClick, withoutHl }: Props
 
   return (
     <img
-      alt='chain logo'
+      alt="chain logo"
       className={`chain-logo ${className}${(isEmpty && !withoutHl) ? ' highlight--bg' : ''}${isInline ? ' isInline' : ''}`}
       onClick={onClick}
       src={img}
