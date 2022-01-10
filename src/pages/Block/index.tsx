@@ -1,23 +1,19 @@
-import './block.scss';
-import React, { useCallback, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { Tabs } from '@unique-nft/ui-kit';
-import { useQuery } from '@apollo/client';
-import BlockDetailComponent from './components/BlockDetailComponent';
-import ExtrinsicsListComponent from './components/ExtrinsicsListComponent';
+import React, { useCallback, useState } from 'react'
+import { useParams } from 'react-router-dom'
+import { Tabs } from '@unique-nft/ui-kit'
+import { useQuery } from '@apollo/client'
 
-import EventListComponent from './components/EventsListComponent';
+import BlockDetailComponent from './components/BlockDetailComponent'
+import ExtrinsicsListComponent from './components/ExtrinsicsListComponent'
+import EventListComponent from './components/EventsListComponent'
 
-
-const assetsTabs = ['Extrinsics', 'Events'];
+const assetsTabs = ['Extrinsics', 'Events']
 
 const BlockPage = () => {
+  const { blockIndex } = useParams()
+  const pageSize = 10 // default
 
-  const { blockIndex } = useParams();
-  const pageSize = 10; // default
-
-  const [activeAssetsTabIndex, setActiveAssetsTabIndex] = useState<number>(0);
-
+  const [activeAssetsTabIndex, setActiveAssetsTabIndex] = useState<number>(0)
 
   return (
     <div className={'block'}>
@@ -39,7 +35,7 @@ const BlockPage = () => {
         ]}
       />
     </div>
-  );
-};
+  )
+}
 
-export default BlockPage;
+export default BlockPage

@@ -1,12 +1,17 @@
-import { useQuery } from '@apollo/client';
-import Table from 'rc-table';
-import React, { useCallback } from 'react';
-import { Link } from 'react-router-dom';
-import LoadingComponent from '../../../components/LoadingComponent';
-import { Data as ExtrinsicsData, Variables as ExtrinsicsVariables, getExtrinsicsQuery } from '../../../api/graphQL/extrinsicsForBlock';
-import { timeDifference } from '../../../utils/timestampUtils';
-import PaginationComponent from '../../../components/Pagination';
-import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';
+import { useQuery } from '@apollo/client'
+import Table from 'rc-table'
+import React, { useCallback } from 'react'
+import { Link } from 'react-router-dom'
+
+import LoadingComponent from '../../../components/LoadingComponent'
+import {
+  Data as ExtrinsicsData,
+  Variables as ExtrinsicsVariables,
+  getExtrinsicsQuery,
+} from '../../../api/graphQL/extrinsicsForBlock'
+import { timeDifference } from '../../../utils/timestampUtils'
+import PaginationComponent from '../../../components/Pagination'
+import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize'
 
 const blockColumns = [
   {
@@ -14,46 +19,60 @@ const blockColumns = [
     dataIndex: 'method',
     key: 'method',
     width: 100,
-    render: (value: number) => <div className={'block__table-box'}>
-      <div className={'block__table-title'}>Action</div>
-      <div className={'block__table-value'}>{value}</div>
-    </div>,
-  },
-  {
-    title: 'ID', dataIndex: 'block_index', key: 'block_index', width: 150,
-    render: (value: number) => <div className={'block__table-box'}>
-      <div className={'block__table-title'}>ID</div>
-      <div className={'block__table-value'}>
-        <Link to={`/extrinsic/${value}`}>{value}</Link>
+    render: (value: number) => (
+      <div className={'block__table-box'}>
+        <div className={'block__table-title'}>Action</div>
+        <div className={'block__table-value'}>{value}</div>
       </div>
-    </div>,
+    ),
   },
   {
-    title: 'Age', dataIndex: 'timestamp', key: 'timestamp', width: 150,
-    render: (value: number) => <div className={'block__table-box'}>
-      <div className={'block__table-title'}>Age</div>
-      <div className={'block__table-value'}>{timeDifference(value)}</div>
-    </div>,
-  },
-
-  { title: 'Hash', dataIndex: 'hash', key: 'hash', width: 100,
-    render: (value: number) => <div className={'block__table-box'}>
-      <div className={'block__table-title'}>Hash</div>
-      <div className={'block__table-value'}>
-        <div className={'block__text-wrap'}>
-          {value}
+    title: 'ID',
+    dataIndex: 'block_index',
+    key: 'block_index',
+    width: 150,
+    render: (value: number) => (
+      <div className={'block__table-box'}>
+        <div className={'block__table-title'}>ID</div>
+        <div className={'block__table-value'}>
+          <Link to={`/extrinsic/${value}`}>{value}</Link>
         </div>
       </div>
-    </div>,
+    ),
   },
-];
+  {
+    title: 'Age',
+    dataIndex: 'timestamp',
+    key: 'timestamp',
+    width: 150,
+    render: (value: number) => (
+      <div className={'block__table-box'}>
+        <div className={'block__table-title'}>Age</div>
+        <div className={'block__table-value'}>{value ? timeDifference(value) : '---'}</div>
+      </div>
+    ),
+  },
 
+  {
+    title: 'Hash',
+    dataIndex: 'hash',
+    key: 'hash',
+    width: 100,
+    render: (value: number) => (
+      <div className={'block__table-box'}>
+        <div className={'block__table-title'}>Hash</div>
+        <div className={'block__table-value'}>
+          <div className={'block__text-wrap'}>{value}</div>
+        </div>
+      </div>
+    ),
+  },
+]
 
 const ExtrinsicsListComponent = (props: any) => {
-  const deviceSize = useDeviceSize();
-  const { blockNumber } = props;
-  const pageSize = 10;
-
+  const deviceSize = useDeviceSize()
+  const { blockNumber } = props
+  const pageSize = 10
 
   const {
     loading,
@@ -65,12 +84,12 @@ const ExtrinsicsListComponent = (props: any) => {
       limit: pageSize,
       offset: 0,
       order_by: { block_number: 'desc' },
-      where: { block_number: { _eq: blockNumber } }
+      where: { block_number: { _eq: blockNumber } },
     },
     fetchPolicy: 'network-only', // Used for first execution
     nextFetchPolicy: 'cache-first',
     notifyOnNetworkStatusChange: true,
-  });
+  })
 
   const onPageChange = useCallback(
     (limit: number, offset: number) =>
@@ -80,15 +99,15 @@ const ExtrinsicsListComponent = (props: any) => {
           offset,
         },
       }),
-    [fetchMoreExtrinsics],
-  );
+    [fetchMoreExtrinsics]
+  )
 
   return (
     <>
       <Table
         columns={blockColumns}
         data={eventsList?.view_extrinsic}
-        emptyText={() => !loading ? 'No data' : <LoadingComponent/>}
+        emptyText={() => (!loading ? 'No data' : <LoadingComponent />)}
         rowKey={'block_index'}
       />
       <PaginationComponent
@@ -98,7 +117,7 @@ const ExtrinsicsListComponent = (props: any) => {
         siblingCount={deviceSize === DeviceSize.sm ? 1 : 2}
       />
     </>
-  );
-};
+  )
+}
 
-export default ExtrinsicsListComponent;
+export default ExtrinsicsListComponent

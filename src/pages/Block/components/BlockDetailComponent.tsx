@@ -1,12 +1,16 @@
-import React, { FC } from 'react';
-import { useQuery } from '@apollo/client';
-import { Data as BlockData, Variables as BlockVariables, getBlockQuery } from '../../../api/graphQL/blockInfo';
-import LoadingComponent from '../../../components/LoadingComponent';
-import { Heading } from '@unique-nft/ui-kit';
+import React, { FC } from 'react'
+import { useQuery } from '@apollo/client'
+import { Heading } from '@unique-nft/ui-kit'
 
+import LoadingComponent from '../../../components/LoadingComponent'
+import {
+  Data as BlockData,
+  Variables as BlockVariables,
+  getBlockQuery,
+} from '../../../api/graphQL/blockInfo'
 
 const BlockDetailComponent = (props: any) => {
-  const { block_number } = props;
+  const { block_number } = props
   const {
     loading: isBLockFetching,
     error: fetchBlockError,
@@ -14,10 +18,9 @@ const BlockDetailComponent = (props: any) => {
   } = useQuery<BlockData, BlockVariables>(getBlockQuery, {
     variables: { block_number },
     notifyOnNetworkStatusChange: true,
-  });
+  })
 
-
-  if (isBLockFetching) return <LoadingComponent/>;
+  if (isBLockFetching) return <LoadingComponent />
 
   const {
     timestamp,
@@ -26,8 +29,8 @@ const BlockDetailComponent = (props: any) => {
     block_hash,
     parent_hash,
     extrinsics_root,
-    state_root
-  } = blockDetails?.block[0] || {};
+    state_root,
+  } = blockDetails?.block[0] || {}
 
   return (
     <>
@@ -36,7 +39,9 @@ const BlockDetailComponent = (props: any) => {
         <div className={'grid-item_col2 text_grey'}>Status</div>
         <div className={'grid-item_col10'}>Unavailable</div>
         <div className={'grid-item_col2 text_grey'}>Timestamp</div>
-        <div className={'grid-item_col10'}>{timestamp && new Date(timestamp * 1000).toLocaleString()}</div>
+        <div className={'grid-item_col10'}>
+          {timestamp && new Date(timestamp * 1000).toLocaleString()}
+        </div>
       </div>
 
       <div className={'grid-container container-with-border grid-container_extrinsic-container'}>
@@ -48,19 +53,35 @@ const BlockDetailComponent = (props: any) => {
 
       <div className={'grid-container grid-container_extrinsic-container'}>
         <div className={'grid-item_col2 text_grey'}>Block hash</div>
-        <div className={'grid-item_col10'}><div title={block_hash} className={'block__text-wrap'}>{block_hash}</div></div>
+        <div className={'grid-item_col10'}>
+          <div title={block_hash} className={'block__text-wrap'}>
+            {block_hash}
+          </div>
+        </div>
 
         <div className={'grid-item_col2 text_grey'}>Parent hash</div>
-        <div className={'grid-item_col10'}><div title={parent_hash} className={'block__text-wrap'}>{parent_hash}</div></div>
+        <div className={'grid-item_col10'}>
+          <div title={parent_hash} className={'block__text-wrap'}>
+            {parent_hash}
+          </div>
+        </div>
 
         <div className={'grid-item_col2 text_grey'}>Extrinsic root</div>
-        <div className={'grid-item_col10'}><div title={extrinsics_root} className={'block__text-wrap'}>{extrinsics_root}</div></div>
+        <div className={'grid-item_col10'}>
+          <div title={extrinsics_root} className={'block__text-wrap'}>
+            {extrinsics_root}
+          </div>
+        </div>
 
         <div className={'grid-item_col2 text_grey'}>State root</div>
-        <div className={'grid-item_col10'}><div title={state_root} className={'block__text-wrap'}>{state_root}</div></div>
+        <div className={'grid-item_col10'}>
+          <div title={state_root} className={'block__text-wrap'}>
+            {state_root}
+          </div>
+        </div>
       </div>
     </>
-  );
-};
+  )
+}
 
-export default BlockDetailComponent;
+export default BlockDetailComponent
