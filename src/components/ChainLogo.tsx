@@ -21,8 +21,7 @@ function ChainLogo({
   onClick,
   withoutHl,
 }: Props): React.ReactElement<Props> {
-  const { rpc } = useApi()
-  const { chainData } = rpc
+  const { chainData } = useApi()
 
   const [isEmpty, img] = useMemo((): [boolean, string] => {
     const found = logo

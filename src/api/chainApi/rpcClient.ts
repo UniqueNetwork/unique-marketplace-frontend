@@ -1,6 +1,7 @@
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { formatBalance } from "@polkadot/util";
 import chains, { Chain, defaultChain } from "../../chains";
+import { ChainData } from "../ApiContext";
 
 export interface IRpcClient {
   api?: ApiPromise;
@@ -51,7 +52,8 @@ export class RpcClient implements IRpcClient {
   }
 
   // TODO: options for rpc chain listeners
-  public changeRpcChain(chain: Chain) {
+  public changeRpcChain(chain: Chain, options: { onChainReady: (chainData: ChainData) => void }) {
+    this.rpcEndpoint = chain.rpcEndpoint;
     console.time('rpc');
     if (this.api) {
       this.api.disconnect()
@@ -66,7 +68,7 @@ export class RpcClient implements IRpcClient {
     _api.on('error', (error: Error) => this.setApiError(error.message))
     _api.on('ready', (): void => {
       this.setIsApiConnected(true)
-      this.getChainData() // TODO: promise is running in background without any notifications about being changed
+      this.getChainData().then(() => options.onChainReady(this.chainData)) // TODO: promise is running in background without any notifications about being changed
       console.timeEnd('rpc');
     })
 

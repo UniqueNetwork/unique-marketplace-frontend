@@ -11,8 +11,7 @@ const MainPage = () => {
   const pageSize = 10 // default
   const [searchString, setSearchString] = useState('')
 
-  const { rpc } = useApi()
-  const { chainData } = rpc
+  const { chainData } = useApi()
 
   const { fetchMoreBlocks, blocks, blockCount, isBlocksFetching } = useGraphQlBlocks({ pageSize })
 

@@ -12,8 +12,7 @@ import { useApi } from '../../../hooks/useApi'
 const ExtrinsicDetail: FC = () => {
   const { blockIndex } = useParams()
 
-  const { rpc } = useApi()
-  const { chainData } = rpc
+  const { chainData } = useApi()
 
   const { extrinsic, isExtrinsicFetching } = useGraphQlExtrinsic(blockIndex)
 

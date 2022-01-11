@@ -1,10 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { useLocation, useParams } from 'react-router-dom'
+import React, { useEffect, useMemo, useState } from 'react'
+import { useParams } from 'react-router-dom'
 import { ApolloProvider } from '@apollo/client'
 import gql, { IGqlClient } from './graphQL/gqlClient'
 import rpc, { IRpcClient } from './chainApi/rpcClient'
-import chains, { Chain, defaultChain } from '../chains'
-import { ApiContextProps, ApiProvider } from './ApiContext'
+import chains, { defaultChain } from '../chains'
+import { ApiContextProps, ApiProvider, ChainData } from './ApiContext'
 
 interface ChainProviderProps {
   children: React.ReactNode
@@ -13,6 +13,7 @@ interface ChainProviderProps {
 }
 
 const ApiWrapper = ({ gqlClient = gql, rpcClient = rpc, children }: ChainProviderProps) => {
+  const [chainData, setChainData] = useState<ChainData>()
   const { chainId } = useParams<'chainId'>()
 
   useEffect(() => {
@@ -31,17 +32,16 @@ const ApiWrapper = ({ gqlClient = gql, rpcClient = rpc, children }: ChainProvide
 
   const value = useMemo<ApiContextProps>(
     () => ({
-      gql: gqlClient,
-      gqlApi: gqlClient.api,
       rpc: rpcClient,
       rpcApi: rpcClient.api,
+      chainData,
       currentChain,
     }),
-    [gqlClient, rpcClient, currentChain]
+    [rpcClient, currentChain, chainData]
   )
 
   useEffect(() => {
-    rpc.changeRpcChain(currentChain)
+    rpc.changeRpcChain(currentChain, { onChainReady: (chainData) => setChainData(chainData) })
     gql.changeRpcChain(currentChain)
   }, [currentChain])
 

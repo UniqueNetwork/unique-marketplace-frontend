@@ -2,8 +2,6 @@ import { ApiPromise } from '@polkadot/api'
 import { Context, Consumer, Provider, createContext } from 'react'
 import { Chain } from '../chains'
 import { IRpcClient } from './chainApi/rpcClient'
-import { GqlApi } from './graphQL/gqlApi'
-import { IGqlClient } from './graphQL/gqlClient'
 
 export type ChainData = {
   properties: {
@@ -15,9 +13,8 @@ export type ChainData = {
 
 export type ApiContextProps = {
   rpc: IRpcClient
-  rpcApi?: ApiPromise
-  gql: IGqlClient
-  gqlApi: GqlApi,
+  rpcApi?: ApiPromise,
+  chainData?: ChainData,
   currentChain: Chain
 }
 
