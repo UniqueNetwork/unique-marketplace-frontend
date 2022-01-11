@@ -1,7 +1,8 @@
-import { ApolloClient, HttpLink, InMemoryCache } from '@apollo/client'
-import chains, { defaultChain } from '../../chains'
+import { ApolloClient, HttpLink, InMemoryCache, NormalizedCacheObject } from '@apollo/client'
+import chains, { Chain, defaultChain } from '../../chains'
+import gqlApi from './gqlApi';
 
-// since we are not using infinity load - we wan't to wipe all the previouse results and get only the new one
+  // since we are not using infinity load - we want to wipe all the previouse results and get only the new one
 const dontCache = () => {
   return {
     // Don't client separate results based on
@@ -16,7 +17,7 @@ const dontCache = () => {
   }
 }
 
-const client = new ApolloClient({
+const defaultClient = new ApolloClient({
   link: new HttpLink({ uri: chains[defaultChain].clientEndpoint }),
   cache: new InMemoryCache({
     typePolicies: {
@@ -44,4 +45,27 @@ const client = new ApolloClient({
   }),
 })
 
-export default client
+export class GqlClient {
+  public client: ApolloClient<NormalizedCacheObject>
+  public api = gqlApi
+
+  constructor(client: ApolloClient<NormalizedCacheObject> | undefined = undefined) {
+    if (client) {
+      this.client = client;
+      return;
+    }
+    this.client = defaultClient;
+  }
+
+  public changeRpcChain(chain: Chain) {
+    this.client.stop() // terminate all active query processes
+    this.client.clearStore().then(() => {
+      // resets the entire store by clearing out the cache
+      this.client.setLink(new HttpLink({ uri: chain.clientEndpoint }))
+    })
+  }
+}
+
+const gqlClient = new GqlClient();
+
+export default gqlClient;

@@ -3,13 +3,13 @@ import { formatBalance } from "@polkadot/util";
 import chains, { Chain, defaultChain } from "../../chains";
 
 export class RpcClient {
-  public chainApi?: ApiPromise;
+  public api?: ApiPromise;
 
   public isApiConnected: boolean = false;
   public isApiInitialized: boolean = false;
-  public apiError?: string; // todo: type?
+  public apiError?: string;
   public chainData: any = undefined;
-  public currentChain: Chain; // todo: use first key instead of defaultChain to avoid confusion with env variables
+  public currentChain: Chain;
 
   constructor(chain: Chain) {
     this.currentChain = chain;
@@ -22,17 +22,17 @@ export class RpcClient {
     this.apiError = message;
   }
   private setApi(api: ApiPromise) {
-    this.chainApi = api;
+    this.api = api;
   }
   private setIsApiInitialized(value: boolean) {
     this.isApiInitialized = value;
   }
   private async getChainData() {
-    if (!this.chainApi) throw new Error('Attempted to get chain data while api isn\' initialized');
+    if (!this.api) throw new Error('Attempted to get chain data while api isn\' initialized');
     const [chainProperties, systemChain, systemName] = await Promise.all([
-      this.chainApi.rpc.system.properties(),
-      this.chainApi.rpc.system.chain(),
-      this.chainApi.rpc.system.name(),
+      this.api.rpc.system.properties(),
+      this.api.rpc.system.chain(),
+      this.api.rpc.system.name(),
     ])
   
     this.chainData = {
@@ -48,10 +48,9 @@ export class RpcClient {
 
   // TODO: options for rpc chain listeners
   public changeRpcChain(chain: Chain) {
-    const api = this.chainApi;
     this.currentChain = chain;
-    if (api) {
-      api.disconnect()
+    if (this.api) {
+      this.api.disconnect()
     }
 
     const provider = new WsProvider(this.currentChain.rpcEndpoint)
@@ -71,6 +70,7 @@ export class RpcClient {
   }
 }
 
+// todo: use first key instead of defaultChain to avoid confusion with env variables
 const rpcClient = new RpcClient(chains[defaultChain]);
 
 export default rpcClient;

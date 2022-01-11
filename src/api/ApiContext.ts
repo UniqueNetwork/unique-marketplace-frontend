@@ -3,6 +3,7 @@ import { ApiPromise } from '@polkadot/api'
 import { Context, Consumer, Provider, createContext } from 'react'
 import { Chain } from '../chains'
 import { RpcClient } from './chainApi/rpcClient'
+import { GqlApi } from './graphQL/gqlApi'
 
 export type ChainData = {
   properties: {
@@ -16,7 +17,7 @@ export type ApiContextProps = {
   rpc: RpcClient
   rpcApi: ApiPromise | undefined
   gql: ApolloClient<NormalizedCacheObject> 
-  // gqlApi TODO: create gqlApi to contain all gql queries
+  gqlApi: GqlApi,
   currentChain: Chain | undefined
   onChangeChain: (chain: Chain) => void
 }

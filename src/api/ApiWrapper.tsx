@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { ApolloProvider, HttpLink } from '@apollo/client'
+import { ApolloProvider } from '@apollo/client'
 import gql from './graphQL/gqlClient'
 import rpc, { RpcClient } from './chainApi/rpcClient'
 import { Chain } from '../chains'
@@ -16,9 +16,10 @@ const ApiWrapper = ({ gqlClient = gql, rpcClient = rpc, children }: ChainProvide
 
   const value = useMemo<ApiContextProps>(
     () => ({
-      gql: gqlClient, // TODO: replace with api instead (gql.blocks.getAllBlocks(blablabla))
+      gql: gqlClient,
+      gqlApi: gqlClient.api,
       rpc: rpcClient,
-      rpcApi: rpcClient.chainApi,
+      rpcApi: rpcClient.api,
       currentChain,
       onChangeChain: setCurrentChain,
     }),
@@ -27,17 +28,12 @@ const ApiWrapper = ({ gqlClient = gql, rpcClient = rpc, children }: ChainProvide
 
   useEffect(() => {
     rpc.changeRpcChain(currentChain)
-    // TODO: put inside our gqlClient/gqlApi
-    gql.stop() // terminate all active query processes
-    gql.clearStore().then(() => {
-      // resets the entire store by clearing out the cache
-      gql.setLink(new HttpLink({ uri: currentChain.clientEndpoint }))
-    })
+    gql.changeRpcChain(currentChain)
   }, [currentChain])
 
   return (
     <ApiProvider value={value}>
-      <ApolloProvider client={gqlClient}>{children}</ApolloProvider>
+      <ApolloProvider client={gqlClient.client}>{children}</ApolloProvider>
     </ApiProvider>
   )
 }
