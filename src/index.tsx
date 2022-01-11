@@ -1,14 +1,14 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 // contains gql and rpc with contexts and providers
-import Api from '../src/api/chainApi/ChainApi'
+import ApiWrapper from './api/ApiWrapper'
 import App from './App'
 
 ReactDOM.render(
   <React.StrictMode>
-    <Api>
+    <ApiWrapper>
       <App />
-    </Api>
+    </ApiWrapper>
   </React.StrictMode>,
   document.getElementById('root')
 )

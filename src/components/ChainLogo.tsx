@@ -3,19 +3,26 @@ import { chainLogos, emptyLogos, namedLogos, nodeLogos } from '../logos'
 import { useApi } from '../hooks/useApi'
 
 interface Props {
-  className?: string;
-  isInline?: boolean;
-  logo?: keyof typeof namedLogos;
-  onClick?: () => any;
-  withoutHl?: boolean;
+  className?: string
+  isInline?: boolean
+  logo?: keyof typeof namedLogos
+  onClick?: () => any
+  withoutHl?: boolean
 }
 
 function sanitize(value?: string): string {
   return value?.toLowerCase().replace('-', ' ') || ''
 }
 
-function ChainLogo({ className = '', isInline, logo, onClick, withoutHl }: Props): React.ReactElement<Props> {
-  const { chainData } = useApi()
+function ChainLogo({
+  className = '',
+  isInline,
+  logo,
+  onClick,
+  withoutHl,
+}: Props): React.ReactElement<Props> {
+  const { rpc } = useApi()
+  const { chainData } = rpc
   const [isEmpty, img] = useMemo((): [boolean, string] => {
     const found = logo
       ? namedLogos[logo]
@@ -26,8 +33,10 @@ function ChainLogo({ className = '', isInline, logo, onClick, withoutHl }: Props
 
   return (
     <img
-      alt='chain logo'
-      className={`chain-logo ${className}${(isEmpty && !withoutHl) ? ' highlight--bg' : ''}${isInline ? ' isInline' : ''}`}
+      alt="chain logo"
+      className={`chain-logo ${className}${isEmpty && !withoutHl ? ' highlight--bg' : ''}${
+        isInline ? ' isInline' : ''
+      }`}
       onClick={onClick}
       src={img}
     />

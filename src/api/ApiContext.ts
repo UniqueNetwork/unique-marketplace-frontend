@@ -1,5 +1,8 @@
+import { ApolloClient, NormalizedCacheObject } from '@apollo/client'
+import { ApiPromise } from '@polkadot/api'
 import { Context, Consumer, Provider, createContext } from 'react'
-import { Chain } from '../../chains'
+import { Chain } from '../chains'
+import { RpcClient } from './chainApi/rpcClient'
 
 export type ChainData = {
   properties: {
@@ -10,10 +13,10 @@ export type ChainData = {
 }
 
 export type ApiContextProps = {
-  apiError: string | null;
-  isApiConnected: boolean;
-  isApiInitialized: boolean;
-  chainData: ChainData | undefined
+  rpc: RpcClient
+  rpcApi: ApiPromise | undefined
+  gql: ApolloClient<NormalizedCacheObject> 
+  // gqlApi TODO: create gqlApi to contain all gql queries
   currentChain: Chain | undefined
   onChangeChain: (chain: Chain) => void
 }

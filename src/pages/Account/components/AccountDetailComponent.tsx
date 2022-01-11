@@ -18,7 +18,8 @@ const AccountDetailComponent: FC<AccountProps> = (props) => {
 
   const deviceSize = useDeviceSize()
 
-  const { chainData } = useApi()
+  const { rpc } = useApi()
+  const { chainData } = rpc
 
   if (isAccountFetching) return <LoadingComponent />
 
