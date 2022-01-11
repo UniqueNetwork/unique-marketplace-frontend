@@ -15,7 +15,7 @@ export type ChainData = {
 
 export type ApiContextProps = {
   rpc: IRpcClient
-  rpcApi: ApiPromise
+  rpcApi?: ApiPromise
   gql: IGqlClient
   gqlApi: GqlApi,
   currentChain: Chain
