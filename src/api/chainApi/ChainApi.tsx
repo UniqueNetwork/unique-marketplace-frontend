@@ -1,11 +1,11 @@
 import React, { FC, useEffect, useMemo, useState } from 'react'
 import { ApiPromise } from '@polkadot/api/promise'
 import { WsProvider } from '@polkadot/rpc-provider'
-import { ApiContextProps, ApiProvider, ChainData } from './context/ApiContext'
 import { formatBalance } from '@polkadot/util'
 import { ApolloProvider, HttpLink } from '@apollo/client'
-import client from './api/client'
-import chains, { Chain, defaultChain } from './chains'
+import { ApiContextProps, ApiProvider, ChainData } from './ApiContext'
+import client from '../../api/graphQL/gqlClient'
+import chains, { Chain, defaultChain } from '../../chains'
 
 async function retrieve(api: ApiPromise): Promise<ChainData> {
   const [chainProperties, systemChain, systemName] = await Promise.all([
@@ -73,6 +73,7 @@ const Api: FC = ({ children }) => {
     })
   }, [currentChain])
 
+  console.log('hello?', value)
   return (
     <ApiProvider value={value}>
       <ApolloProvider client={client}>{children}</ApolloProvider>

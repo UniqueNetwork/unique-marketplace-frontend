@@ -1,7 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
+// contains gql and rpc with contexts and providers
+import Api from '../src/api/chainApi/ChainApi'
 import App from './App'
-import Api from './Api'
 
 ReactDOM.render(
   <React.StrictMode>

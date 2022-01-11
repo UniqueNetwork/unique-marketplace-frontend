@@ -1,5 +1,5 @@
-import React from 'react'
-import { Chain } from '../chains'
+import { Context, Consumer, Provider, createContext } from 'react'
+import { Chain } from '../../chains'
 
 export type ChainData = {
   properties: {
@@ -18,9 +18,9 @@ export type ApiContextProps = {
   onChangeChain: (chain: Chain) => void
 }
 
-const ApiContext: React.Context<ApiContextProps> = React.createContext({} as unknown as ApiContextProps)
-const ApiConsumer: React.Consumer<ApiContextProps> = ApiContext.Consumer
-const ApiProvider: React.Provider<ApiContextProps> = ApiContext.Provider
+const ApiContext: Context<ApiContextProps> = createContext({} as unknown as ApiContextProps)
+const ApiConsumer: Consumer<ApiContextProps> = ApiContext.Consumer
+const ApiProvider: Provider<ApiContextProps> = ApiContext.Provider
 
 export default ApiContext
 
