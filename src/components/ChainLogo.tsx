@@ -23,6 +23,7 @@ function ChainLogo({
 }: Props): React.ReactElement<Props> {
   const { rpc } = useApi()
   const { chainData } = rpc
+
   const [isEmpty, img] = useMemo((): [boolean, string] => {
     const found = logo
       ? namedLogos[logo]

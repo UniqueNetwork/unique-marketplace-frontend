@@ -33,7 +33,7 @@ interface Variables {
 interface Transfer {
   block_number: number
   block_index: string
-  amount: number
+  amount: string
   fee: number
   from_owner: string
   hash: string
@@ -61,6 +61,29 @@ export type useGraphQlLastTransfersProps = {
 export const useGraphQlLastTransfers = ({ pageSize, accountId }: useGraphQlLastTransfersProps) => {
   const client = useApolloClient()
 
+  const getWhere = useCallback(
+    (searchString?: string) => ({
+      _and: {
+        amount: { _neq: '0' },
+        ...(accountId
+          ? {
+              _or: [{ from_owner: { _eq: accountId } }, { to_owner: { _eq: accountId } }],
+            }
+          : {}),
+        ...(searchString
+          ? {
+              _or: {
+                block_index: { _eq: searchString },
+                from_owner: { _eq: searchString },
+                to_owner: { _eq: searchString },
+              },
+            }
+          : {}),
+      },
+    }),
+    [accountId]
+  )
+
   const {
     fetchMore,
     loading: isTransfersFetching,
@@ -70,16 +93,7 @@ export const useGraphQlLastTransfers = ({ pageSize, accountId }: useGraphQlLastT
     variables: {
       limit: pageSize,
       offset: 0,
-      where: {
-        _and: {
-          amount: { _neq: '0' },
-          ...(accountId
-            ? {
-                _or: [{ from_owner: { _eq: accountId } }, { to_owner: { _eq: accountId } }],
-              }
-            : {}),
-        },
-      },
+      where: getWhere(),
     },
     fetchPolicy: 'network-only', // Used for first execution
     nextFetchPolicy: 'cache-first',
@@ -96,25 +110,7 @@ export const useGraphQlLastTransfers = ({ pageSize, accountId }: useGraphQlLastT
         variables: {
           limit,
           offset,
-          where: {
-            _and: {
-              amount: { _neq: '0' },
-              ...(accountId
-                ? {
-                    _or: [{ from_owner: { _eq: accountId } }, { to_owner: { _eq: accountId } }],
-                  }
-                : {}),
-              ...(searchString
-                ? {
-                    _or: {
-                      block_index: { _eq: searchString },
-                      from_owner: { _eq: searchString },
-                      to_owner: { _eq: searchString },
-                    },
-                  }
-                : {}),
-            },
-          },
+          where: getWhere(searchString),
         },
       })
     },

@@ -19,7 +19,6 @@ export type ApiContextProps = {
   gql: ApolloClient<NormalizedCacheObject> 
   gqlApi: GqlApi,
   currentChain: Chain | undefined
-  onChangeChain: (chain: Chain) => void
 }
 
 const ApiContext: Context<ApiContextProps> = createContext({} as unknown as ApiContextProps)
