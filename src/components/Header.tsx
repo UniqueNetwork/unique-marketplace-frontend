@@ -19,7 +19,7 @@ const Header: FC = () => {
 
   return (
     <div className={'flexbox-container flexbox-container_space-between full-width'}>
-      <Link to={`/${currentChain ? currentChain?.id + '/' : ''}`}>
+      <Link to={`/${currentChain ? currentChain?.network + '/' : ''}`}>
         <img src="/logos/unique.svg" alt="Logo" className="header__logo" />
       </Link>
       <Select options={Object.keys(chains)} value={currentChain?.name} onChange={onSelectChange} />

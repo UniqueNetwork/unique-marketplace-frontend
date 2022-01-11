@@ -72,7 +72,10 @@ const LastTransfersComponent = ({
     <div>
       {deviceSize !== DeviceSize.sm && (
         <Table
-          columns={getTransferColumns(chainData?.properties.tokenSymbol || '', currentChain?.id)}
+          columns={getTransferColumns(
+            chainData?.properties.tokenSymbol || '',
+            currentChain?.network
+          )}
           data={!loading && data?.length ? transfersWithTimeDifference(data) : []}
           emptyText={!loading ? 'No data' : <LoadingComponent />}
           rowKey={'block_index'}
@@ -92,7 +95,7 @@ const LastTransfersComponent = ({
               <div key={item.block_index} className={'row'}>
                 <div>
                   <Text className={'title'}>Extrinsic</Text>
-                  <Link to={`/${currentChain?.id}/extrinsic/${item.block_index}`}>
+                  <Link to={`/${currentChain?.network}/extrinsic/${item.block_index}`}>
                     <Text color={'primary-600'}>{item.block_index}</Text>
                   </Link>
                 </div>
