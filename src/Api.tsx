@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useMemo, useState } from 'react'
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react'
 import { ApiPromise } from '@polkadot/api/promise'
 import { WsProvider } from '@polkadot/rpc-provider'
 import { ApiContextProps, ApiProvider, ChainData } from './context/ApiContext'
@@ -6,6 +6,7 @@ import { formatBalance } from '@polkadot/util'
 import { ApolloProvider, HttpLink } from '@apollo/client'
 import client from './api/client'
 import chains, { Chain, defaultChain } from './chains'
+import { useLocation, useParams } from 'react-router-dom'
 
 async function retrieve(api: ApiPromise): Promise<ChainData> {
   const [chainProperties, systemChain, systemName] = await Promise.all([
@@ -31,7 +32,22 @@ const Api: FC = ({ children }) => {
   const [apiError, setApiError] = useState<null | string>(null)
   const [api, setApi] = useState<ApiPromise>()
   const [chainData, setChainData] = useState<ChainData | undefined>()
-  const [currentChain, setCurrentChain] = useState<Chain>(chains[defaultChain])
+
+  const { chainId } = useParams<'chainId'>()
+
+  useEffect(() => {
+    if (chainId && chains[chainId]) {
+      localStorage.setItem('uniq-explorer_chain', chainId)
+    }
+  }, [chainId])
+
+  const currentChain = useMemo(() => {
+    return (
+      chains[chainId || ''] ||
+      chains[localStorage.getItem('uniq-explorer_chain') || ''] ||
+      chains[defaultChain]
+    )
+  }, [chainId])
 
   const value = useMemo<ApiContextProps>(
     () => ({
@@ -41,9 +57,8 @@ const Api: FC = ({ children }) => {
       chainData,
       api,
       currentChain,
-      onChangeChain: setCurrentChain,
     }),
-    [apiError, isApiConnected, isApiInitialized, chainData, api, currentChain, setCurrentChain]
+    [apiError, isApiConnected, isApiInitialized, chainData, api, currentChain]
   )
 
   useEffect(() => {

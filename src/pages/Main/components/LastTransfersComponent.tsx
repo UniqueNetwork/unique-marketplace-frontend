@@ -11,14 +11,14 @@ import LoadingComponent from '../../../components/LoadingComponent'
 import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize'
 import { useApi } from '../../../hooks/useApi'
 
-const getTransferColumns = (tokenSymbol: string) => [
+const getTransferColumns = (tokenSymbol: string, chainId?: string) => [
   {
     title: 'Extrinsic',
     dataIndex: 'block_index',
     key: 'block_index',
     width: 100,
 
-    render: (value: string) => <Link to={`/extrinsic/${value}`}>{value}</Link>,
+    render: (value: string) => <Link to={`/${chainId}/extrinsic/${value}`}>{value}</Link>,
   },
   { title: 'Age', dataIndex: 'time_difference', key: 'age', width: 100 },
   {
@@ -66,13 +66,13 @@ const LastTransfersComponent = ({
 }: BlockComponentProps<Transfer[]>) => {
   const deviceSize = useDeviceSize()
 
-  const { chainData } = useApi()
+  const { currentChain, chainData } = useApi()
 
   return (
     <div>
       {deviceSize !== DeviceSize.sm && (
         <Table
-          columns={getTransferColumns(chainData?.properties.tokenSymbol || '')}
+          columns={getTransferColumns(chainData?.properties.tokenSymbol || '', currentChain?.id)}
           data={!loading && data?.length ? transfersWithTimeDifference(data) : []}
           emptyText={!loading ? 'No data' : <LoadingComponent />}
           rowKey={'block_index'}
@@ -92,7 +92,7 @@ const LastTransfersComponent = ({
               <div key={item.block_index} className={'row'}>
                 <div>
                   <Text className={'title'}>Extrinsic</Text>
-                  <Link to={`/extrinsic/${item.block_index}`}>
+                  <Link to={`/${currentChain?.id}/extrinsic/${item.block_index}`}>
                     <Text color={'primary-600'}>{item.block_index}</Text>
                   </Link>
                 </div>
