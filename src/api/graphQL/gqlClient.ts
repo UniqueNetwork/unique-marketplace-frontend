@@ -2,6 +2,11 @@ import { ApolloClient, HttpLink, InMemoryCache, NormalizedCacheObject } from '@a
 import chains, { Chain, defaultChain } from '../../chains'
 import gqlApi from './gqlApi';
 
+export interface IGqlClient {
+  client: ApolloClient<NormalizedCacheObject>
+  api: any
+  changeRpcChain(chain: Chain): void
+}
   // since we are not using infinity load - we want to wipe all the previouse results and get only the new one
 const dontCache = () => {
   return {
@@ -45,7 +50,7 @@ const defaultClient = new ApolloClient({
   }),
 })
 
-export class GqlClient {
+export class GqlClient implements IGqlClient {
   public client: ApolloClient<NormalizedCacheObject>
   public api = gqlApi
 

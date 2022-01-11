@@ -2,17 +2,23 @@ import { ApiPromise, WsProvider } from "@polkadot/api";
 import { formatBalance } from "@polkadot/util";
 import chains, { Chain, defaultChain } from "../../chains";
 
-export class RpcClient {
-  public api?: ApiPromise;
+export interface IRpcClient {
+  api: ApiPromise;
+  chainData: any;
+}
+export class RpcClient implements IRpcClient {
+  public api: ApiPromise;
 
   public isApiConnected: boolean = false;
   public isApiInitialized: boolean = false;
   public apiError?: string;
   public chainData: any = undefined;
-  public currentChain: Chain;
+  public rpcEndpoint: string;
 
   constructor(chain: Chain) {
-    this.currentChain = chain;
+    this.rpcEndpoint = chain.rpcEndpoint;
+    const provider = new WsProvider(this.rpcEndpoint)
+    this.api = new ApiPromise({ provider })
   }
 
   private setIsApiConnected(value: boolean) {
@@ -48,12 +54,11 @@ export class RpcClient {
 
   // TODO: options for rpc chain listeners
   public changeRpcChain(chain: Chain) {
-    this.currentChain = chain;
     if (this.api) {
       this.api.disconnect()
     }
 
-    const provider = new WsProvider(this.currentChain.rpcEndpoint)
+    const provider = new WsProvider(this.rpcEndpoint)
 
     const _api = new ApiPromise({ provider })
 

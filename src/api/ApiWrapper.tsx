@@ -1,19 +1,18 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 import { ApolloProvider } from '@apollo/client'
-import gql from './graphQL/gqlClient'
-import rpc, { RpcClient } from './chainApi/rpcClient'
+import gql, { IGqlClient } from './graphQL/gqlClient'
+import rpc, { IRpcClient } from './chainApi/rpcClient'
 import chains, { Chain, defaultChain } from '../chains'
 import { ApiContextProps, ApiProvider } from './ApiContext'
 
 interface ChainProviderProps {
-  children: any
-  gqlClient?: any
-  rpcClient?: RpcClient
+  children: React.ReactNode
+  gqlClient?: IGqlClient
+  rpcClient?: IRpcClient
 }
 
 const ApiWrapper = ({ gqlClient = gql, rpcClient = rpc, children }: ChainProviderProps) => {
-  // const [currentChain, setCurrentChain] = useState<Chain>(rpc.currentChain)
   const { chainId } = useParams<'chainId'>()
 
   useEffect(() => {

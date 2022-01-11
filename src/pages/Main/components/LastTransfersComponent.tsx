@@ -66,8 +66,8 @@ const LastTransfersComponent = ({
 }: BlockComponentProps<Transfer[]>) => {
   const deviceSize = useDeviceSize()
 
-  const { rpc } = useApi()
-  const { currentChain, chainData } = rpc
+  const { rpc, currentChain } = useApi()
+  const { chainData } = rpc
 
   return (
     <div>
