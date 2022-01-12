@@ -1,14 +1,30 @@
-import React, { FC } from 'react'
+import React, { FC, useCallback } from 'react'
+import { Select } from '@unique-nft/ui-kit'
+import { Link, useNavigate } from 'react-router-dom'
+import { useApi } from '../hooks/useApi'
+import chains from '../chains'
 
 const Header: FC = () => {
+  const { currentChain } = useApi()
+
+  const navigate = useNavigate()
+  const onSelectChange = useCallback(
+    (value?: string) => {
+      if (value) {
+        navigate(`${value}/`)
+      }
+    },
+    [currentChain]
+  )
 
   return (
-    <a href="/">
-      <img
-      src="/logos/unique.svg"
-      alt="Logo" className="header__logo" />
-    </a>
-  );
+    <div className={'flexbox-container flexbox-container_space-between full-width'}>
+      <Link to={`/${currentChain ? currentChain?.id + '/' : ''}`}>
+        <img src="/logos/unique.svg" alt="Logo" className="header__logo" />
+      </Link>
+      <Select options={Object.keys(chains)} value={currentChain?.name} onChange={onSelectChange} />
+    </div>
+  )
 }
 
 export default Header

@@ -1,68 +1,44 @@
 import React, { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useQuery } from '@apollo/client'
 import { Button, Heading, InputText } from '@unique-nft/ui-kit'
-import { Data as BlocksData, getLatestBlocksQuery, Variables as BlocksVariables } from '../../api/graphQL/block'
-import {
-  Data as TransfersData,
-  getLastTransfersQuery,
-  Variables as TransferVariables,
-} from '../../api/graphQL/transfers'
+import { useGraphQlBlocks } from '../../api/graphQL/block'
+import { useGraphQlLastTransfers } from '../../api/graphQL/transfers'
+import { useApi } from '../../hooks/useApi'
 import LastTransfersComponent from './components/LastTransfersComponent'
 import LastBlocksComponent from './components/LastBlocksComponent'
 
 const MainPage = () => {
   const pageSize = 10 // default
   const [searchString, setSearchString] = useState('')
-  const {
-    fetchMore: fetchMoreBlocks,
-    loading: isBlocksFetching,
-    error: fetchBlocksError,
-    data: blocks,
-  } = useQuery<BlocksData, BlocksVariables>(getLatestBlocksQuery, {
-    variables: { limit: pageSize, offset: 0, order_by: { block_number: 'desc' } },
-    fetchPolicy: 'network-only', // Used for first execution
-    nextFetchPolicy: 'cache-first',
-    notifyOnNetworkStatusChange: true,
-  })
 
-  const {
-    fetchMore: fetchMoreTransfers,
-    loading: isTransfersFetching,
-    error: fetchTransfersError,
-    data: transfers,
-  } = useQuery<TransfersData, TransferVariables>(getLastTransfersQuery, {
-    variables: { limit: pageSize, offset: 0, where: { amount: { _neq: '0' } } },
-    fetchPolicy: 'network-only', // Used for first execution
-    nextFetchPolicy: 'cache-first',
-    notifyOnNetworkStatusChange: true,
-  })
+  const { chainData } = useApi()
+
+  const { fetchMoreBlocks, blocks, blockCount, isBlocksFetching } = useGraphQlBlocks({ pageSize })
+
+  const { fetchMoreTransfers, transfers, transfersCount, isTransfersFetching } =
+    useGraphQlLastTransfers({ pageSize })
 
   const navigate = useNavigate()
 
   const onBlocksPageChange = useCallback(
     (limit: number, offset: number) =>
       fetchMoreBlocks({
-        variables: {
-          limit,
-          offset,
-        },
+        limit,
+        offset,
       }),
-    [fetchMoreBlocks, searchString],
+    [fetchMoreBlocks]
   )
+
   const onTransfersPageChange = useCallback(
     (limit: number, offset: number) =>
       fetchMoreTransfers({
-        variables: {
-          limit,
-          offset,
-        },
+        limit,
+        offset,
       }),
-    [fetchMoreTransfers, searchString],
+    [fetchMoreTransfers]
   )
 
   const onSearchClick = useCallback(() => {
-
     if (/^\w{48}\w*$/.test(searchString)) {
       navigate(`/account/${searchString}`)
       return
@@ -73,41 +49,22 @@ const MainPage = () => {
       return
     }
 
-    const prettifiedBlockSearchString = searchString.match(/[^$,.\d]/) ? -1 : searchString
+    const prettifiedBlockSearchString = searchString.match(/[^$,.\d]/) ? '-1' : searchString
 
     fetchMoreBlocks({
-      variables: {
-        where:
-          (searchString &&
-            searchString.length > 0 && { block_number: { _eq: prettifiedBlockSearchString } }) ||
-          undefined,
-      },
+      searchString:
+        searchString && searchString.length > 0 ? prettifiedBlockSearchString : undefined,
     })
     fetchMoreTransfers({
-      variables: {
-        where:
-          (searchString &&
-            searchString.length > 0 && {
-              _or: [
-                {
-                  block_index: { _eq: searchString },
-                },
-                {
-                  from_owner: { _eq: searchString },
-                },
-                { to_owner: { _eq: searchString } },
-              ],
-            }) ||
-          undefined,
-      },
+      searchString,
     })
-  }, [fetchMoreTransfers, fetchMoreBlocks, searchString])
+  }, [fetchMoreTransfers, fetchMoreBlocks, searchString, navigate])
 
   const onSearchKeyDown = useCallback(
     ({ key }) => {
       if (key === 'Enter') onSearchClick()
     },
-    [onSearchClick],
+    [onSearchClick]
   )
 
   return (
@@ -120,22 +77,23 @@ const MainPage = () => {
           onChange={(value) => setSearchString(value?.toString() || '')}
           onKeyDown={onSearchKeyDown}
         />
-        <Button onClick={onSearchClick} title='Search' role={'primary'} />
+        <Button onClick={onSearchClick} title="Search" role={'primary'} />
       </div>
-      {/* TODO: keep in mind - QTZ should be changed to different name based on data from rpc */}
       <div className={'main-block-container'}>
-        <Heading size={'2'}>Last QTZ transfers</Heading>
+        <Heading size={'2'}>{`Last ${chainData?.properties.tokenSymbol} transfers`}</Heading>
         <LastTransfersComponent
           data={transfers}
+          count={transfersCount}
           loading={isTransfersFetching}
-          pageSize={pageSize}
           onPageChange={onTransfersPageChange}
+          pageSize={pageSize}
         />
       </div>
       <div className={'main-block-container'}>
         <Heading size={'2'}>Last blocks</Heading>
         <LastBlocksComponent
           data={blocks}
+          count={blockCount || 0}
           loading={isBlocksFetching}
           onPageChange={onBlocksPageChange}
           pageSize={pageSize}

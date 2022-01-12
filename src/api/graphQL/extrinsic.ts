@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client'
+import { gql, useQuery } from '@apollo/client'
 
 const extrinsicQuery = gql`
   query getExtrinsic($block_index: String!) {
@@ -41,4 +41,14 @@ interface Data {
 }
 
 export type { Variables, Data }
+
+export const useGraphQlExtrinsic = (blockIndex?: string) => {
+  const { loading: isExtrinsicFetching, data } = useQuery<Data, Variables>(extrinsicQuery, {
+    variables: { block_index: blockIndex || '' },
+    fetchPolicy: 'network-only',
+    notifyOnNetworkStatusChange: true,
+  })
+  return { extrinsic: data?.view_extrinsic[0], isExtrinsicFetching }
+}
+
 export { extrinsicQuery }

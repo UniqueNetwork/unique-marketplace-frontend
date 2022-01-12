@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { Icon } from '@unique-nft/ui-kit'
-import usePagination, { UsePaginationProps, DOTS } from '../hooks/usePagination'
-import useDeviceSize from '../hooks/useDeviceSize'
+import usePagination, { DOTS } from '../hooks/usePagination'
 
 interface PaginationProps {
   count: number // total number of elements in DB
@@ -49,7 +48,7 @@ const PaginationComponent = ({
     siblingCount,
     pageSize,
   })
-  let lastPage =
+  const lastPage =
     (paginationRange?.length > 1 && paginationRange[paginationRange.length - 1]) || null
   const onPageChanged = (newPage: number) => {
     const offset = (newPage - 1) * pageSize
@@ -66,27 +65,36 @@ const PaginationComponent = ({
     onPageChanged(currentPage - 1)
   }
 
-
   return (
     <div className={'flexbox-container flexbox-container_space-between pagination-wrapper'}>
       <div>{count} items</div>
-      {count > pageSize && <ul className={'pagination-container'}>
-        <li key={'prev'} onClick={onPrevious}>
-          <Icon name={'carret-right'} size={12} color={currentPage === 1 ? '#ABB6C1' : '#040B1D'} />
-        </li>
-        {paginationRange.map((pageNumber, index) => (
-          <PageNumberComponent
-            key={pageNumber === DOTS ? `${DOTS}_${index}` : pageNumber}
-            pageNumber={pageNumber}
-            currentPage={currentPage}
-            onPageChanged={onPageChanged}
-          />
-        ))}
-        {/* TODO: disabled={currentPage === lastPage} */}
-        <li key={'next'} onClick={onNext}>
-          <Icon name={'carret-right'} size={12} color={currentPage === lastPage || count < pageSize ? '#ABB6C1' : '#040B1D'} />
-        </li>
-      </ul>}
+      {count > pageSize && (
+        <ul className={'pagination-container'}>
+          <li key={'prev'} onClick={onPrevious}>
+            <Icon
+              name={'carret-right'}
+              size={12}
+              color={currentPage === 1 ? '#ABB6C1' : '#040B1D'}
+            />
+          </li>
+          {paginationRange.map((pageNumber, index) => (
+            <PageNumberComponent
+              key={pageNumber === DOTS ? `${DOTS}_${index}` : pageNumber}
+              pageNumber={pageNumber}
+              currentPage={currentPage}
+              onPageChanged={onPageChanged}
+            />
+          ))}
+          {/* TODO: disabled={currentPage === lastPage} */}
+          <li key={'next'} onClick={onNext}>
+            <Icon
+              name={'carret-right'}
+              size={12}
+              color={currentPage === lastPage || count < pageSize ? '#ABB6C1' : '#040B1D'}
+            />
+          </li>
+        </ul>
+      )}
     </div>
   )
 }

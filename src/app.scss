@@ -97,6 +97,13 @@ a {
 
   &_account-container {
     grid-template-columns: 85px repeat(11, 1fr);
+    grid-row-gap: var(--gap);
+    .grid-item_col1:nth-child(3) {
+      margin-top: calc(var(--gap) / 2);
+    }
+    .grid-item_col11:nth-child(4) {
+      margin-top: calc(var(--gap) / 2);
+    }
   }
 
   &_extrinsic-container {
@@ -125,6 +132,10 @@ a {
   padding-top: calc(var(--gap) * 2);
 }
 
+.full-width {
+  width: 100%;
+}
+
 .margin-top {
   margin-top: var(--gap);
 }
@@ -140,12 +151,6 @@ a {
     width: 612px;
     margin-right: calc(var(--gap) / 2);
   }
-}
-
-.text_right {
-  display: inline-block;
-  width: 100%;
-  text-align: right;
 }
 
 .loading {
@@ -167,6 +172,20 @@ a {
   display: inline-block;
   width: 100%;
   text-align: right;
+}
+
+.chain-logo {
+  background: white;
+  border-radius: 50%;
+  box-sizing: border-box;
+
+  &.isInline {
+    display: inline-block;
+    height: 24px;
+    margin-right: 0.75rem;
+    vertical-align: middle;
+    width: 24px;
+  }
 }
 
 @media (max-width: 1024px) {
@@ -195,7 +214,6 @@ a {
   }
 
   .search-wrap {
-
     width: 100%;
     .unique-input-text {
       width: 100%;
@@ -207,11 +225,16 @@ a {
   }
 
   .grid-container_account-container {
+    grid-row-gap: 0;
     .grid-item_col1:not(:first-child) {
       grid-column: span 11;
+      margin-top: var(--gap);
     }
-    .grid-item_col11 {
-      margin-top: calc(var(--gap) / 4);
+    .grid-item_col1:nth-child(3) {
+      margin-top: calc(var(--gap) * 1.5);
+    }
+    .grid-item_col1:not(:first-child) {
+      grid-column: span 11;
     }
     .grid-item_col11:last-child {
       flex-direction: column;
