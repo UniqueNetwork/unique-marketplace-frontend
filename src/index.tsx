@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import App from './App'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
-import { Account, Extrinsic, Main } from './pages'
+import { Account, Block, Extrinsic, Main } from './pages'
 
 ReactDOM.render(
   <React.StrictMode>
@@ -14,6 +14,7 @@ ReactDOM.render(
             <Route index={true} element={<Main />} />
             <Route path={'account/:accountId'} element={<Account />} />
             <Route path={'extrinsic/:blockIndex'} element={<Extrinsic />} />
+            <Route path={'block/:blockIndex'} element={<Block />} />
           </Route>
         </Route>
       </Routes>
