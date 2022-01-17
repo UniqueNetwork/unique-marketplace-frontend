@@ -1,17 +1,13 @@
-import React, { FC, Reducer, useCallback, useEffect, useReducer, useState } from 'react'
-import { useQuery } from '@apollo/client'
+import React, { FC, Reducer, useCallback, useReducer, useState } from 'react'
 import { Checkbox, InputText, Button } from '@unique-nft/ui-kit'
-import {
-  Token,
-  tokensQuery,
-  Data as tokensData,
-  Variables as TokensVariables,
-} from '../../../api/graphQL/tokens'
+import { Token, useGraphQlTokens } from '../../../api/graphQL/tokens'
 import Avatar from '../../../components/Avatar'
 
 interface TokensComponentProps {
   accountId: string
 }
+
+const pageSize = 18
 
 const TokenCard: FC<Token> = (props) => (
   <div className={'grid-item_col1 card margin-bottom flexbox-container_column'}>
@@ -46,32 +42,7 @@ const TokensComponent: FC<TokensComponentProps> = (props) => {
 
   const [searchString, setSearchString] = useState<string | undefined>()
 
-  const { fetchMore, data: collections } = useQuery<tokensData, TokensVariables>(tokensQuery, {
-    variables: {
-      limit: 6,
-      offset: 0,
-    },
-  })
-
-  const fetchMoreCollections = useCallback(() => {
-    const prettifiedBlockSearchString = searchString?.match(/[^$,.\d]/) ? -1 : searchString
-    fetchMore({
-      variables: {
-        where: {
-          ...(searchString && searchString.length > 0
-            ? {
-                name: { _eq: prettifiedBlockSearchString },
-              }
-            : {}),
-          ...(filter ? { _or: filter } : {}),
-        },
-      },
-    })
-  }, [filter, searchString])
-
-  useEffect(() => {
-    fetchMoreCollections()
-  }, [filter])
+  const { fetchMoreTokens, tokens, tokensCount } = useGraphQlTokens({ filter, pageSize })
 
   const onCheckBoxChange = useCallback(
     (actionType: ActionType) => (value: boolean) => dispatchFilter({ type: actionType, value }),
@@ -84,8 +55,8 @@ const TokensComponent: FC<TokensComponentProps> = (props) => {
   )
 
   const onSearchClick = useCallback(() => {
-    fetchMoreCollections()
-  }, [fetchMoreCollections, searchString])
+    fetchMoreTokens({ searchString })
+  }, [fetchMoreTokens, searchString])
 
   return (
     <>
@@ -115,13 +86,9 @@ const TokensComponent: FC<TokensComponentProps> = (props) => {
           />
         </div>
       </div>
-      <div className={'margin-top margin-bottom'}>
-        {collections?.tokens_aggregate?.aggregate?.count || 0} items
-      </div>
+      <div className={'margin-top margin-bottom'}>{tokensCount || 0} items</div>
       <div className={'grid-container'}>
-        {collections?.tokens.map((token) => (
-          <TokenCard {...token} key={`token-${token.id}`} />
-        ))}
+        {tokens?.map && tokens.map((token) => <TokenCard {...token} key={`token-${token.id}`} />)}
       </div>
       <Button
         title={'See all'}
