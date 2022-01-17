@@ -8,21 +8,12 @@ import {
   Variables as TokensVariables,
 } from '../../../api/graphQL/tokens'
 import Avatar from '../../../components/Avatar'
+import Picture from '../../../components/Picture'
+import TokenCard from '../../../components/TokenCard'
 
 interface TokensComponentProps {
   accountId: string
 }
-
-const TokenCard: FC<Token> = (props) => (
-  <div className={'grid-item_col1 card margin-bottom flexbox-container_column'}>
-    <Avatar size={'small'} />
-    <div className={'flexbox-container flexbox-container_column flexbox-container_without-gap'}>
-      <div>{props.token_id}</div>
-      <div>{props.collection.name}</div>
-      <div className={'text_grey'}>Transfers: 0</div>
-    </div>
-  </div>
-)
 
 type ActionType = 'All' | 'Minted' | 'Received'
 

@@ -32,29 +32,32 @@ const AccountPage = () => {
 
   if (!accountId) return null
 
- return <div>
-   <AccountDetailComponent accountId={accountId} />
-   <h2 className={'margin-top'}>Assets</h2>
-   <Tabs
-     activeIndex={activeAssetsTabIndex}
-     labels={assetsTabs}
-     onClick={setActiveAssetsTabIndex}
-   />
-   <Tabs
-     activeIndex={activeAssetsTabIndex}
-     contents={[
-       <CollectionsComponent accountId={accountId} />,
-       <TokensComponent accountId={accountId} />]}
-   />
-   <h2 className={'margin-top margin-bottom'}>Last  QTZ transfers</h2>
-   <LastTransfersComponent
-     data={transfers}
-     count={transfersCount}
-     onPageChange={onTransfersPageChange}
-     pageSize={pageSize}
-     loading={isTransfersFetching}
-   />
- </div>;
+  return (
+    <div>
+      <AccountDetailComponent accountId={accountId} />
+      <h2 className={'margin-top'}>Assets</h2>
+      <Tabs
+        activeIndex={activeAssetsTabIndex}
+        labels={assetsTabs}
+        onClick={setActiveAssetsTabIndex}
+      />
+      <Tabs
+        activeIndex={activeAssetsTabIndex}
+        contents={[
+          <CollectionsComponent accountId={accountId} key={'collections'} />,
+          <TokensComponent accountId={accountId} key={'tokens'} />,
+        ]}
+      />
+      <h2 className={'margin-top margin-bottom'}>Last QTZ transfers</h2>
+      <LastTransfersComponent
+        data={transfers}
+        count={transfersCount}
+        onPageChange={onTransfersPageChange}
+        pageSize={pageSize}
+        loading={isTransfersFetching}
+      />
+    </div>
+  )
 }
 
 export default AccountPage

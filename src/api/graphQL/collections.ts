@@ -8,6 +8,8 @@ const collectionsQuery = gql`
       name
       owner
       token_prefix
+      offchain_schema
+      schema_version
       tokens_aggregate {
         aggregate {
           count
@@ -34,6 +36,8 @@ interface Collection {
   name: string
   owner: string
   token_prefix: string
+  offchain_schema: string
+  schema_version: string
   tokens_aggregate: {
     aggregate: {
       count: number
