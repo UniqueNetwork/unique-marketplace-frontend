@@ -1,15 +1,18 @@
-import { Chain } from '../chains'
-import config from '../config'
+import { Chain } from '../api/chainApi/types'
 
 const configKeyRegexp = /NET_(?<network>[A-Z]+)_NAME$/gm
 
-const findNetworkParamByName = (network: string, name: string): string => {
+const findNetworkParamByName = (
+  config: Record<string, string | undefined>,
+  network: string,
+  name: string
+): string => {
   const envKey = Object.keys(config).find((key) => key.includes(`NET_${network}_${name}`))
   if (envKey) return config[envKey] || ''
   return ''
 }
 
-export const getNetworkList = (): string[] => {
+export const getNetworkList = (config: Record<string, string | undefined>): string[] => {
   return Object.keys(config).reduce<string[]>((acc, key) => {
     if (!key.includes('NET_')) return acc
 
@@ -23,19 +26,26 @@ export const getNetworkList = (): string[] => {
   }, [])
 }
 
-export const getNetworkParams = (network: string): Chain => {
+export const getDefaultChain = (config: Record<string, string | undefined>) => {
+  return getNetworkList(config)[0]
+}
+
+export const getNetworkParams = (
+  config: Record<string, string | undefined>,
+  network: string
+): Chain => {
   const chain: Chain = {
     network,
-    name: findNetworkParamByName(network, `NAME`),
-    clientEndpoint: findNetworkParamByName(network, 'API'),
-    rpcEndpoint: findNetworkParamByName(network, 'RPC'),
+    name: findNetworkParamByName(config, network, `NAME`),
+    clientEndpoint: findNetworkParamByName(config, network, 'API'),
+    rpcEndpoint: findNetworkParamByName(config, network, 'RPC'),
   }
   return chain
 }
 
-export const getChainList = (): Record<string, Chain> => {
-  return getNetworkList().reduce<Record<string, Chain>>((acc, network) => {
-    acc[network] = getNetworkParams(network)
+export const getChainList = (config: Record<string, string | undefined>): Record<string, Chain> => {
+  return getNetworkList(config).reduce<Record<string, Chain>>((acc, network) => {
+    acc[network] = getNetworkParams(config, network)
     return acc
   }, {})
 }

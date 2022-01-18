@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { ApolloProvider } from '@apollo/client'
+import { chain } from '@polkadot/types/interfaces/definitions'
 import gql, { IGqlClient } from './graphQL/gqlClient'
-import rpc, { IRpcClient } from './chainApi/rpcClient'
-import chains, { defaultChain } from '../chains'
+import rpc, { chains, defaultChainId } from './chainApi/rpcClient'
+import { IRpcClient } from './chainApi/types'
 import { ApiContextProps, ApiProvider, ChainData } from './ApiContext'
 
 interface ChainProviderProps {
@@ -23,10 +24,13 @@ const ApiWrapper = ({ gqlClient = gql, rpcClient = rpc, children }: ChainProvide
   }, [chainId])
 
   const currentChain = useMemo(() => {
+    if (Object.values(chain).length === 0) {
+      throw new Error('Networks is not configured')
+    }
     return (
       chains[chainId || ''] ||
       chains[localStorage.getItem('uniq-explorer_chain') || ''] ||
-      chains[defaultChain]
+      chains[defaultChainId]
     )
   }, [chainId])
 
@@ -34,6 +38,7 @@ const ApiWrapper = ({ gqlClient = gql, rpcClient = rpc, children }: ChainProvide
     () => ({
       rpc: rpcClient,
       rpcApi: rpcClient.api,
+      rpcAdapter: rpcClient.adapter,
       chainData,
       currentChain,
     }),

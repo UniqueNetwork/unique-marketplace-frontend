@@ -2,8 +2,8 @@ import React, { FC, useCallback, useEffect, useState } from 'react'
 import Avatar from './Avatar'
 import AccountLinkComponent from '../pages/Account/components/AccountLinkComponent'
 import { Collection } from '../api/graphQL/collections'
-import { SchemaVersionTypes, useMetadata } from '../api/chainApi/hooks/useMetadata'
-import { useCollection } from '../api/chainApi/hooks/useCollection'
+import { useApi } from '../hooks/useApi'
+import { NFTCollection } from '../api/chainApi/unique/types'
 
 // tslint:disable-next-line:no-empty-interface
 interface CollectionCardProps extends Collection {}
@@ -23,21 +23,17 @@ const CollectionCard: FC<CollectionCardProps> = (props) => {
 
   const [collectionImageUrl, setCollectionImageUrl] = useState<string>()
 
-  const { getDetailedCollectionInfo } = useCollection()
-  const { getTokenImageUrl } = useMetadata()
+  const { rpcApi, rpcAdapter } = useApi()
 
-  const defineCollectionImage = useCallback(async () => {
-    const collectionInfo = await getDetailedCollectionInfo(collectionId.toString())
-    console.log(collectionInfo)
-    if (collectionInfo) {
-      const collectionImage = await getTokenImageUrl(collectionInfo, '1')
-      console.log(collectionImage)
-      setCollectionImageUrl(collectionImage)
+  const fetchCollection = useCallback(async () => {
+    if (rpcApi?.isReady) {
+      const collectionInfo: NFTCollection = await rpcAdapter?.getCollection(collectionId.toString())
+      setCollectionImageUrl(collectionInfo?.coverImageUrl)
     }
-  }, [collectionId, getTokenImageUrl])
+  }, [collectionId, rpcApi?.isReady])
 
   useEffect(() => {
-    defineCollectionImage()
+    fetchCollection()
   }, [])
 
   return (
@@ -46,7 +42,7 @@ const CollectionCard: FC<CollectionCardProps> = (props) => {
         'grid-item_col4 flexbox-container flexbox-container_align-start card margin-bottom'
       }
     >
-      <div style={{minWidth: '40px'}}>
+      <div style={{ minWidth: '40px' }}>
         <Avatar size={'small'} src={collectionImageUrl} />
       </div>
       <div className={'flexbox-container flexbox-container_column flexbox-container_without-gap'}>

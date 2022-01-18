@@ -35,6 +35,7 @@ interface Token {
   }
   collection: {
     name: string
+    token_prefix: string
   }
   owner: string
 }

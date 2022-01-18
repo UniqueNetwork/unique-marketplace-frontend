@@ -1,13 +1,15 @@
 import { ApolloClient, HttpLink, InMemoryCache, NormalizedCacheObject } from '@apollo/client'
-import chains, { Chain, defaultChain } from '../../chains'
-import gqlApi from './gqlApi';
+import gqlApi from './gqlApi'
+import { getChainList, getDefaultChain } from '../../utils/configParser'
+import config from '../../config'
+import { Chain } from '../chainApi/types'
 
 export interface IGqlClient {
   client: ApolloClient<NormalizedCacheObject>
   api: any
   changeRpcChain(chain: Chain): void
 }
-  // since we are not using infinity load - we want to wipe all the previouse results and get only the new one
+// since we are not using infinity load - we want to wipe all the previouse results and get only the new one
 const dontCache = () => {
   return {
     // Don't client separate results based on
@@ -15,51 +17,47 @@ const dontCache = () => {
     keyArgs: false,
     merge(existing = [], incoming: any[]) {
       // aggregations bypass
-      console.log(incoming);
-      if (!incoming?.length) return incoming;
+      if (!incoming?.length) return incoming
       return [...incoming]
     },
   }
 }
 
-const defaultClient = new ApolloClient({
-  link: new HttpLink({ uri: chains[defaultChain].clientEndpoint }),
-  cache: new InMemoryCache({
-    typePolicies: {
-      Query: {
-        fields: {
-          view_last_block: dontCache,
-          view_last_block_aggregate: {
-            keyArgs: false,
-            merge(existing = [], incoming) {
-              return incoming
+const getApolloClient = (chain: Chain) =>
+  new ApolloClient({
+    link: new HttpLink({ uri: chain.clientEndpoint }),
+    cache: new InMemoryCache({
+      typePolicies: {
+        Query: {
+          fields: {
+            view_last_block: dontCache,
+            view_last_block_aggregate: {
+              keyArgs: false,
+              merge(existing = [], incoming) {
+                return incoming
+              },
             },
-          },
-          view_last_transfers: dontCache,
-          collections: dontCache,
-          view_extrinsic: dontCache,
-          view_extrinsic_aggregate: {
-            keyArgs: false,
-            merge(existing = [], incoming) {
-              return incoming
+            view_last_transfers: dontCache,
+            collections: dontCache,
+            view_extrinsic: dontCache,
+            view_extrinsic_aggregate: {
+              keyArgs: false,
+              merge(existing = [], incoming) {
+                return incoming
+              },
             },
           },
         },
       },
-    },
-  }),
-})
+    }),
+  })
 
 export class GqlClient implements IGqlClient {
   public client: ApolloClient<NormalizedCacheObject>
   public api = gqlApi
 
-  constructor(client: ApolloClient<NormalizedCacheObject> | undefined = undefined) {
-    if (client) {
-      this.client = client;
-      return;
-    }
-    this.client = defaultClient;
+  constructor(chain: Chain) {
+    this.client = getApolloClient(chain)
   }
 
   public changeRpcChain(chain: Chain) {
@@ -71,6 +69,9 @@ export class GqlClient implements IGqlClient {
   }
 }
 
-const gqlClient = new GqlClient();
+const chains = getChainList(config)
+const defaultChainId = getDefaultChain(config)
 
-export default gqlClient;
+const gqlClient = new GqlClient(chains[defaultChainId])
+
+export default gqlClient

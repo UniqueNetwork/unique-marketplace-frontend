@@ -1,4 +1,4 @@
-declare type Env = Record<string, string>
+declare type Env = Record<string, string | undefined>
 
 declare global {
   interface Window {

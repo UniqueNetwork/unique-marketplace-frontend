@@ -1,11 +1,14 @@
-import { IRpcStrategy } from '../../types'
-import { AttributesDecoded, MetadataType, NFTCollection, NFTToken } from './types'
-import { normalizeAccountId } from '../../utils/normalizeAccountId'
-import { deserializeNft, ProtobufAttributeType } from '../../utils/protobufUtils'
-import { hex2a } from '../../utils/decoder'
 import { ApiPromise } from '@polkadot/api'
+import { INFTAdapter } from '../types'
+import { AttributesDecoded, MetadataType, NFTCollection, NFTToken } from './types'
+import { normalizeAccountId } from '../utils/normalizeAccountId'
+import { deserializeNft, ProtobufAttributeType } from '../utils/protobufUtils'
+import { hex2a } from '../utils/decoder'
+import config from '../../../config'
 
-class UniqueRPC implements IRpcStrategy<NFTCollection, NFTToken> {
+const { IPFS_GATEWAY } = config
+
+class UniqueNFT implements INFTAdapter<NFTCollection, NFTToken> {
   public api: ApiPromise
 
   constructor(api: ApiPromise) {
@@ -21,6 +24,7 @@ class UniqueRPC implements IRpcStrategy<NFTCollection, NFTToken> {
           return deserializeNft(schema, Buffer.from(data.slice(2), 'hex'), 'en')
         }
       } catch (e) {
+        // tslint:disable-next-line:no-console
         console.log('decodeStruct error', e)
       }
     }
@@ -52,13 +56,17 @@ class UniqueRPC implements IRpcStrategy<NFTCollection, NFTToken> {
         return jsonData.image
       }
     } catch (e) {
+      // tslint:disable-next-line:no-console
       console.log('image metadata parse error', e)
     }
 
     return ''
   }
 
-  private getOnChainSchema(collection: NFTCollection): { attributesConst: string; attributesVar: string } {
+  private getOnChainSchema(collection: NFTCollection): {
+    attributesConst: string
+    attributesVar: string
+  } {
     if (collection) {
       return {
         attributesConst: hex2a(collection.constOnChainSchema),
@@ -77,17 +85,32 @@ class UniqueRPC implements IRpcStrategy<NFTCollection, NFTToken> {
   }
 
   public async getCollection(collectionId: string): Promise<NFTCollection | null> {
-    if (!this.client?.api) {
+    if (!this.api) {
       return null
     }
     try {
-      const collectionInfo =
+      const collection =
         // @ts-ignore
-        await this.client.api.rpc.unique.collectionById(collectionId)
+        await this.api.rpc.unique.collectionById(collectionId)
+
+      const collectionInfo = collection.toJSON() as unknown as NFTCollection
+      let coverImageUrl = ''
+
+      if (collectionInfo?.variableOnChainSchema && hex2a(collectionInfo?.variableOnChainSchema)) {
+        const collectionSchema = this.getOnChainSchema(collectionInfo)
+        const image = JSON.parse(collectionSchema?.attributesVar)?.collectionCover as string
+
+        coverImageUrl = `${IPFS_GATEWAY}/${image}`
+      } else {
+        if (collectionInfo.offchainSchema) {
+          coverImageUrl = await this.getTokenImage(collectionInfo, '1')
+        }
+      }
 
       return {
-        ...(collectionInfo.toJSON() as unknown as NFTCollection),
+        ...collectionInfo,
         id: collectionId,
+        coverImageUrl,
       }
     } catch (e) {
       console.log('getDetailedCollectionInfo error', e)
@@ -96,33 +119,39 @@ class UniqueRPC implements IRpcStrategy<NFTCollection, NFTToken> {
     return null
   }
 
-  public async getToken(collection: NFTCollection, tokenId: string): Promise<NFTToken | null> {
-    if (!this.client?.api || !collection) {
+  public async getTokenImage(collection: NFTCollection, tokenId: string): Promise<string> {
+    if (collection.schemaVersion === 'ImageURL') {
+      return this.getTokenImageUrl(hex2a(collection.offchainSchema), tokenId)
+    } else {
+      return await this.fetchTokenImage(collection, tokenId)
+    }
+  }
+
+  public async getToken(collectionId: string, tokenId: string): Promise<NFTToken | null> {
+    if (!this.api || !collectionId) {
       return null
     }
 
     try {
-      const variableData = (
-        // @ts-ignore
-        await this.client?.api.rpc.unique.variableMetadata(collection.id, tokenId)
-      ).toJSON() as string
-      const constData: string = (
-        // @ts-ignore
-        await this.client?.api.rpc.unique.constMetadata(collection.id, tokenId)
-      ).toJSON() as string
+      const collection = await this.getCollection(collectionId)
+
+      if (!collection) {
+        return null
+      }
+
+      const variableData = // @ts-ignore
+      (await this.api.rpc.unique.variableMetadata(collection.id, tokenId)).toJSON() as string
+      const constData: string = // @ts-ignore
+      (await this.api.rpc.unique.constMetadata(collection.id, tokenId)).toJSON() as string
       const crossAccount = normalizeAccountId(
         // @ts-ignore
-        (await this.client?.api.rpc.unique.tokenOwner(collection.id, tokenId)).toJSON() as string
+        (await this.api.rpc.unique.tokenOwner(collection.id, tokenId)).toJSON() as string
       ) as { Substrate: string }
 
       let imageUrl = ''
 
       if (collection.offchainSchema) {
-        if (collection.schemaVersion === 'ImageURL') {
-          imageUrl = this.getTokenImageUrl(hex2a(collection.offchainSchema), tokenId)
-        } else {
-          imageUrl = await this.fetchTokenImage(collection, tokenId)
-        }
+        imageUrl = await this.getTokenImage(collection, tokenId)
       }
 
       const onChainSchema = this.getOnChainSchema(collection)
@@ -139,6 +168,7 @@ class UniqueRPC implements IRpcStrategy<NFTCollection, NFTToken> {
         },
       }
     } catch (e) {
+      // tslint:disable-next-line:no-console
       console.log('getDetailedTokenInfo error', e)
 
       return null
@@ -146,14 +176,15 @@ class UniqueRPC implements IRpcStrategy<NFTCollection, NFTToken> {
   }
 
   public async getTokensOfCollection(collectionId: string, ownerId: string): Promise<NFTToken[]> {
-    if (!this.client?.api || !collectionId || !ownerId) {
+    if (!this.api || !collectionId || !ownerId) {
       return []
     }
 
     try {
       // @ts-ignore
-      return await this.client.api.query.unique.accountTokens(collectionId, { Substrate: ownerId })
+      return await this.api.query.unique.accountTokens(collectionId, { Substrate: ownerId })
     } catch (e) {
+      // tslint:disable-next-line:no-console
       console.log('getTokensOfCollection error', e)
     }
 
@@ -161,4 +192,4 @@ class UniqueRPC implements IRpcStrategy<NFTCollection, NFTToken> {
   }
 }
 
-export default UniqueRPC
+export default UniqueNFT
