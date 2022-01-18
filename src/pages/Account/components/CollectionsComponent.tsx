@@ -1,13 +1,7 @@
-import React, { FC, Reducer, useCallback, useEffect, useReducer, useState } from 'react'
-import { useQuery } from '@apollo/client'
+import React, { FC, Reducer, useCallback, useReducer, useState } from 'react'
 import { InputText, Checkbox, Icon, Button } from '@unique-nft/ui-kit'
 import Avatar from '../../../components/Avatar'
-import {
-  Collection,
-  collectionsQuery,
-  Data as collectionsData,
-  Variables as CollectionsVariables,
-} from '../../../api/graphQL/collections'
+import { Collection, useGraphQlCollections } from '../../../api/graphQL/collections'
 import AccountLinkComponent from './AccountLinkComponent'
 import CollectionCard from '../../../components/CollectionCard'
 
@@ -16,6 +10,8 @@ interface CollectionsComponentProps {
 }
 
 type ActionType = 'All' | 'Owner' | 'Admin' | 'Sponsor' | 'Received'
+
+const pageSize = 6
 
 const CollectionsComponent: FC<CollectionsComponentProps> = (props) => {
   const { accountId } = props
@@ -43,35 +39,9 @@ const CollectionsComponent: FC<CollectionsComponentProps> = (props) => {
 
   const [searchString, setSearchString] = useState<string | undefined>()
 
-  const { fetchMore, data: collections } = useQuery<collectionsData, CollectionsVariables>(
-    collectionsQuery,
-    {
-      variables: {
-        limit: 6,
-        offset: 0,
-      },
-    }
-  )
-
-  const fetchMoreCollections = useCallback(() => {
-    const prettifiedBlockSearchString = searchString?.match(/[^$,.\d]/) ? -1 : searchString
-    fetchMore({
-      variables: {
-        where: {
-          ...(searchString && searchString.length > 0
-            ? {
-                name: { _eq: prettifiedBlockSearchString },
-              }
-            : {}),
-          ...(filter ? { _or: filter } : {}),
-        },
-      },
-    })
-  }, [filter, searchString])
-
-  useEffect(() => {
-    fetchMoreCollections()
-  }, [filter])
+  const { fetchMoreCollections, collections, collectionsCount } = useGraphQlCollections({
+    pageSize,
+  })
 
   const onCheckBoxChange = useCallback(
     (actionType: ActionType) => (value: boolean) => dispatchFilter({ type: actionType, value }),
@@ -84,7 +54,7 @@ const CollectionsComponent: FC<CollectionsComponentProps> = (props) => {
   )
 
   const onSearchClick = useCallback(() => {
-    fetchMoreCollections()
+    fetchMoreCollections({ searchString })
   }, [fetchMoreCollections, searchString])
 
   return (
@@ -127,13 +97,12 @@ const CollectionsComponent: FC<CollectionsComponentProps> = (props) => {
           />
         </div>
       </div>
-      <div className={'margin-top margin-bottom'}>
-        {collections?.collections_aggregate?.aggregate?.count || 0} items
-      </div>
+      <div className={'margin-top margin-bottom'}>{collectionsCount || 0} items</div>
       <div className={'grid-container'}>
-        {collections?.collections.map((collection) => (
-          <CollectionCard key={`collection-${collection.collection_id}`} {...collection} />
-        ))}
+        {collections?.map &&
+          collections.map((collection) => (
+            <CollectionCard key={`collection-${collection.collection_id}`} {...collection} />
+          ))}
       </div>
       <Button
         title={'See all'}
