@@ -74,6 +74,7 @@ export class RpcClient implements IRpcClient {
       rpc: {
         unique: rpcMethods,
       },
+      // @ts-ignore
       typesBundle,
     })
 

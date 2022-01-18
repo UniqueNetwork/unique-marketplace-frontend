@@ -22,7 +22,11 @@ const Header: FC = () => {
       <Link to={`/${currentChain ? currentChain?.network + '/' : ''}`}>
         <img src="/logos/unique.svg" alt="Logo" className="header__logo" />
       </Link>
-      <Select options={Object.keys(chains)} value={currentChain?.name} onChange={onSelectChange} />
+      <Select
+        options={Object.values(chains).map(({ network, name }) => ({ id: network, title: name }))}
+        value={currentChain?.network}
+        onChange={onSelectChange}
+      />
     </div>
   )
 }
