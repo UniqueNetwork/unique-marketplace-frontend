@@ -1,10 +1,15 @@
+import { ChainData } from '../ApiContext'
 import { ApiPromise } from '@polkadot/api'
 
 export interface IRpcClient {
   isApiConnected: boolean
   controller?: INFTController<any, any>
   chainData: any
-  chains?: Record<string, Chain>
+  rawRpcApi?: ApiPromise // allow access to the raw API for exceptions in the future
+}
+
+export interface IRpcClientOptions {
+  onChainReady: (chainData: ChainData) => void
 }
 
 export interface INFTController<Collection, Token> {
@@ -16,6 +21,6 @@ export interface INFTController<Collection, Token> {
 export type Chain = {
   network: string
   name: string
-  clientEndpoint: string
+  gqlEndpoint: string
   rpcEndpoint: string
 }

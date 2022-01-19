@@ -1,24 +1,23 @@
 import { ApiPromise, WsProvider } from '@polkadot/api'
 import { formatBalance } from '@polkadot/util'
 import { OverrideBundleType } from '@polkadot/types/types'
-import { ChainData } from '../ApiContext'
-import { IRpcClient, INFTController, Chain } from './types'
+import { IRpcClient, INFTController, Chain, IRpcClientOptions } from './types'
 import bundledTypesDefinitions from './unique/bundledTypesDefinitions'
 import rpcMethods from './unique/rpcMethods'
 import UniqueNFTController from './unique/unique'
-import { chains, defaultChainId } from '../index'
+import config from '../../config'
 
 export class RpcClient implements IRpcClient {
-  private rawRpcApi?: ApiPromise
   public controller?: INFTController<any, any>
+  public rawRpcApi?: ApiPromise
   public isApiConnected: boolean = false
   public isApiInitialized: boolean = false
   public apiError?: string
   public chainData: any = undefined
   public rpcEndpoint: string
 
-  constructor(initialChain: Chain) {
-    this.rpcEndpoint = initialChain.rpcEndpoint
+  constructor(rpcEndpoint: string) {
+    this.rpcEndpoint = rpcEndpoint
   }
 
   private setIsApiConnected(value: boolean) {
@@ -27,36 +26,10 @@ export class RpcClient implements IRpcClient {
   private setApiError(message: string) {
     this.apiError = message
   }
-
-  private setApi(api: ApiPromise) {
-    this.rawRpcApi = api
-    this.controller = new UniqueNFTController(api)
-  }
-
   private setIsApiInitialized(value: boolean) {
     this.isApiInitialized = value
   }
-  private async getChainData() {
-    if (!this.rawRpcApi) throw new Error("Attempted to get chain data while api isn't initialized")
-    const [chainProperties, systemChain, systemName] = await Promise.all([
-      this.rawRpcApi.rpc.system.properties(),
-      this.rawRpcApi.rpc.system.chain(),
-      this.rawRpcApi.rpc.system.name(),
-    ])
-
-    this.chainData = {
-      properties: {
-        tokenSymbol: chainProperties.tokenSymbol
-          .unwrapOr([formatBalance.getDefaults().unit])[0]
-          .toString(),
-      },
-      systemChain: (systemChain || '<unknown>').toString(),
-      systemName: systemName.toString(),
-    }
-  }
-
-  public changeRpcChain(chain: Chain, options: { onChainReady: (chainData: ChainData) => void }) {
-    this.rpcEndpoint = chain.rpcEndpoint
+  private setApi(options: IRpcClientOptions) {
     if (this.rawRpcApi) {
       this.rawRpcApi.disconnect()
     }
@@ -85,12 +58,36 @@ export class RpcClient implements IRpcClient {
       this.setIsApiConnected(true)
       this.getChainData().then(() => options.onChainReady(this.chainData))
     })
-
-    this.setApi(_api)
+    this.rawRpcApi = _api
+    this.controller = new UniqueNFTController(_api)
     this.setIsApiInitialized(true)
+  }
+
+  private async getChainData() {
+    if (!this.rawRpcApi) throw new Error("Attempted to get chain data while api isn't initialized")
+    const [chainProperties, systemChain, systemName] = await Promise.all([
+      this.rawRpcApi.rpc.system.properties(),
+      this.rawRpcApi.rpc.system.chain(),
+      this.rawRpcApi.rpc.system.name(),
+    ])
+
+    this.chainData = {
+      properties: {
+        tokenSymbol: chainProperties.tokenSymbol
+          .unwrapOr([formatBalance.getDefaults().unit])[0]
+          .toString(),
+      },
+      systemChain: (systemChain || '<unknown>').toString(),
+      systemName: systemName.toString(),
+    }
+  }
+
+  public changeRpcChain(rpcEndpoint: string, options: IRpcClientOptions) {
+    this.rpcEndpoint = rpcEndpoint
+    this.setApi(options)
   }
 }
 
-const rpcClient = new RpcClient(chains[defaultChainId])
+const rpcClient = new RpcClient(config.defaultChain.rpcEndpoint)
 
 export default rpcClient

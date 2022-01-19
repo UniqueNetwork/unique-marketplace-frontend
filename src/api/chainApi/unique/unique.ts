@@ -6,7 +6,7 @@ import { deserializeNft, ProtobufAttributeType } from '../utils/protobufUtils'
 import { hex2a } from '../utils/decoder'
 import config from '../../../config'
 
-const { IPFS_GATEWAY } = config
+const { IPFSGateway } = config
 
 class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
   private api: ApiPromise
@@ -96,7 +96,7 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
         const collectionSchema = this.getOnChainSchema(collectionInfo)
         const image = JSON.parse(collectionSchema?.attributesVar)?.collectionCover as string
 
-        coverImageUrl = `${IPFS_GATEWAY}/${image}`
+        coverImageUrl = `${IPFSGateway}/${image}`
       } else {
         if (collectionInfo.offchainSchema) {
           coverImageUrl = await this.getTokenImage(collectionInfo, 1)

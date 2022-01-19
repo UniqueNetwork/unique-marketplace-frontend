@@ -12,6 +12,7 @@ export type ChainData = {
 
 export type ApiContextProps = {
   rpcClient: IRpcClient
+  rawRpcApi?: ApiPromise
   api?: INFTController<any, any>
   chainData?: ChainData
   currentChain: Chain

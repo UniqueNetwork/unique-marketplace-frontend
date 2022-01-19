@@ -5,13 +5,15 @@ import gql, { IGqlClient } from './graphQL/gqlClient'
 import rpc from './chainApi/rpcClient'
 import { IRpcClient } from './chainApi/types'
 import { ApiContextProps, ApiProvider, ChainData } from './ApiContext'
-import { chains, defaultChainId } from '.'
+import config from '../config'
 
 interface ChainProviderProps {
   children: React.ReactNode
   gqlClient?: IGqlClient
   rpcClient?: IRpcClient
 }
+
+const { chains, defaultChain } = config
 
 const ApiWrapper = ({ gqlClient = gql, rpcClient = rpc, children }: ChainProviderProps) => {
   const [chainData, setChainData] = useState<ChainData>()
@@ -30,13 +32,14 @@ const ApiWrapper = ({ gqlClient = gql, rpcClient = rpc, children }: ChainProvide
     return (
       chains[chainId || ''] ||
       chains[localStorage.getItem('uniq-explorer_chain') || ''] ||
-      chains[defaultChainId]
+      defaultChain
     )
   }, [chainId])
 
   const value = useMemo<ApiContextProps>(
     () => ({
       rpcClient,
+      rawRpcApi: rpcClient.rawRpcApi,
       api: rpcClient?.controller,
       chainData,
       currentChain,
@@ -45,8 +48,8 @@ const ApiWrapper = ({ gqlClient = gql, rpcClient = rpc, children }: ChainProvide
   )
 
   useEffect(() => {
-    rpc.changeRpcChain(currentChain, { onChainReady: (chainData) => setChainData(chainData) })
-    gql.changeRpcChain(currentChain)
+    rpc.changeRpcChain(currentChain.rpcEndpoint, { onChainReady: setChainData })
+    gql.changeRpcChain(currentChain.gqlEndpoint)
   }, [currentChain])
 
   return (

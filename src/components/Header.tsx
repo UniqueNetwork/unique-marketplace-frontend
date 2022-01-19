@@ -2,7 +2,7 @@ import React, { FC, useCallback } from 'react'
 import { Select } from '@unique-nft/ui-kit'
 import { Link, useNavigate } from 'react-router-dom'
 import { useApi } from '../hooks/useApi'
-import { chains } from '../api'
+import config from '../config'
 
 const Header: FC = () => {
   const { currentChain } = useApi()
@@ -23,7 +23,10 @@ const Header: FC = () => {
         <img src="/logos/unique.svg" alt="Logo" className="header__logo" />
       </Link>
       <Select
-        options={Object.values(chains).map(({ network, name }) => ({ id: network, title: name }))}
+        options={Object.values(config.chains).map(({ network, name }) => ({
+          id: network,
+          title: name,
+        }))}
         value={currentChain?.network}
         onChange={onSelectChange}
       />
