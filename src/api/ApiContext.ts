@@ -1,6 +1,6 @@
 import { ApiPromise } from '@polkadot/api'
 import { Context, Consumer, Provider, createContext } from 'react'
-import { Chain, INFTAdapter, IRpcClient } from './chainApi/types'
+import { Chain, INFTController, IRpcClient } from './chainApi/types'
 
 export type ChainData = {
   properties: {
@@ -13,7 +13,7 @@ export type ChainData = {
 export type ApiContextProps = {
   rpc: IRpcClient
   rpcApi?: ApiPromise
-  rpcAdapter?: INFTAdapter<any, any>
+  rpcAdapter?: INFTController<any, any>
   chainData?: ChainData
   currentChain: Chain
 }

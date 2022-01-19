@@ -1,5 +1,5 @@
 import { ApiPromise } from '@polkadot/api'
-import { INFTAdapter } from '../types'
+import { INFTController } from '../types'
 import { AttributesDecoded, MetadataType, NFTCollection, NFTToken } from './types'
 import { normalizeAccountId } from '../utils/normalizeAccountId'
 import { deserializeNft, ProtobufAttributeType } from '../utils/protobufUtils'
@@ -8,8 +8,8 @@ import config from '../../../config'
 
 const { IPFS_GATEWAY } = config
 
-class UniqueNFT implements INFTAdapter<NFTCollection, NFTToken> {
-  public api: ApiPromise
+class UniqueNFT implements INFTController<NFTCollection, NFTToken> {
+  private api: ApiPromise
 
   constructor(api: ApiPromise) {
     this.api = api
@@ -113,6 +113,7 @@ class UniqueNFT implements INFTAdapter<NFTCollection, NFTToken> {
         coverImageUrl,
       }
     } catch (e) {
+      // tslint:disable-next-line:no-console
       console.log('getDetailedCollectionInfo error', e)
     }
 

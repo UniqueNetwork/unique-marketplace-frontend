@@ -1,14 +1,12 @@
 import { ApiPromise } from '@polkadot/api'
 
 export interface IRpcClient {
-  api?: ApiPromise
-  adapter?: INFTAdapter<any, any>
+  controller?: INFTController<any, any>
   chainData: any
   chains?: Record<string, Chain>
 }
 
-export interface INFTAdapter<Collection, Token> {
-  api: ApiPromise
+export interface INFTController<Collection, Token> {
   setApi(api: ApiPromise): void
   getCollection(collectionId: string): Promise<Collection | null>
   getTokensOfCollection(collectionId: string, ownerId: string): Promise<Token[]>

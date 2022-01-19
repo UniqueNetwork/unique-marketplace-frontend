@@ -2,7 +2,7 @@ import { ApiPromise, WsProvider } from '@polkadot/api'
 import { formatBalance } from '@polkadot/util'
 import { OverrideBundleType } from '@polkadot/types/types'
 import { ChainData } from '../ApiContext'
-import { IRpcClient, INFTAdapter, Chain } from './types'
+import { IRpcClient, INFTController, Chain } from './types'
 import { getChainList, getDefaultChain } from '../../utils/configParser'
 import config from '../../config'
 import bundledTypesDefinitions from './unique/bundledTypesDefinitions'
@@ -10,8 +10,8 @@ import rpcMethods from './unique/rpcMethods'
 import UniqueNFT from './unique/unique'
 
 export class RpcClient implements IRpcClient {
-  public api?: ApiPromise
-  public adapter?: INFTAdapter<any, any>
+  private rawRpcApi?: ApiPromise
+  public controller?: INFTController<any, any>
   public isApiConnected: boolean = false
   public isApiInitialized: boolean = false
   public apiError?: string
@@ -29,18 +29,18 @@ export class RpcClient implements IRpcClient {
     this.apiError = message
   }
   private setApi(api: ApiPromise) {
-    this.api = api
-    this.adapter = new UniqueNFT(api)
+    this.rawRpcApi = api
+    this.controller = new UniqueNFT(api)
   }
   private setIsApiInitialized(value: boolean) {
     this.isApiInitialized = value
   }
   private async getChainData() {
-    if (!this.api) throw new Error("Attempted to get chain data while api isn' initialized")
+    if (!this.rawRpcApi) throw new Error("Attempted to get chain data while api isn' initialized")
     const [chainProperties, systemChain, systemName] = await Promise.all([
-      this.api.rpc.system.properties(),
-      this.api.rpc.system.chain(),
-      this.api.rpc.system.name(),
+      this.rawRpcApi.rpc.system.properties(),
+      this.rawRpcApi.rpc.system.chain(),
+      this.rawRpcApi.rpc.system.name(),
     ])
 
     this.chainData = {
@@ -57,8 +57,8 @@ export class RpcClient implements IRpcClient {
   // TODO: options for rpc chain listeners
   public changeRpcChain(chain: Chain, options: { onChainReady: (chainData: ChainData) => void }) {
     this.rpcEndpoint = chain.rpcEndpoint
-    if (this.api) {
-      this.api.disconnect()
+    if (this.rawRpcApi) {
+      this.rawRpcApi.disconnect()
     }
 
     const typesBundle: OverrideBundleType = {
