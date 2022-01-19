@@ -3,9 +3,10 @@ import { useParams } from 'react-router-dom'
 import { ApolloProvider } from '@apollo/client'
 import { chain } from '@polkadot/types/interfaces/definitions'
 import gql, { IGqlClient } from './graphQL/gqlClient'
-import rpc, { chains, defaultChainId } from './chainApi/rpcClient'
+import rpc from './chainApi/rpcClient'
 import { IRpcClient } from './chainApi/types'
 import { ApiContextProps, ApiProvider, ChainData } from './ApiContext'
+import { chains, defaultChainId } from '.'
 
 interface ChainProviderProps {
   children: React.ReactNode

@@ -2,7 +2,7 @@ import React, { FC, useCallback } from 'react'
 import { Select } from '@unique-nft/ui-kit'
 import { Link, useNavigate } from 'react-router-dom'
 import { useApi } from '../hooks/useApi'
-import { chains } from '../api/chainApi/rpcClient'
+import { chains } from '../api'
 
 const Header: FC = () => {
   const { currentChain } = useApi()

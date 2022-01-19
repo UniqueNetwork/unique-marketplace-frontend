@@ -1,7 +1,5 @@
-import client from "./graphQL/gqlClient";
+import { getChainList, getDefaultChain } from '../utils/configParser'
+import config from '../config'
 
-const api = {
-  client
-}
-
-export default api;
+export const chains = getChainList(config)
+export const defaultChainId = getDefaultChain(config)

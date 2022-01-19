@@ -1,8 +1,7 @@
 import { ApolloClient, HttpLink, InMemoryCache, NormalizedCacheObject } from '@apollo/client'
 import gqlApi from './gqlApi'
-import { getChainList, getDefaultChain } from '../../utils/configParser'
-import config from '../../config'
 import { Chain } from '../chainApi/types'
+import { chains, defaultChainId } from '..'
 
 export interface IGqlClient {
   client: ApolloClient<NormalizedCacheObject>
@@ -68,9 +67,6 @@ export class GqlClient implements IGqlClient {
     })
   }
 }
-
-const chains = getChainList(config)
-const defaultChainId = getDefaultChain(config)
 
 const gqlClient = new GqlClient(chains[defaultChainId])
 

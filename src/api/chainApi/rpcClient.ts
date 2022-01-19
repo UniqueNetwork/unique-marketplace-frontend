@@ -3,11 +3,10 @@ import { formatBalance } from '@polkadot/util'
 import { OverrideBundleType } from '@polkadot/types/types'
 import { ChainData } from '../ApiContext'
 import { IRpcClient, INFTController, Chain } from './types'
-import { getChainList, getDefaultChain } from '../../utils/configParser'
-import config from '../../config'
 import bundledTypesDefinitions from './unique/bundledTypesDefinitions'
 import rpcMethods from './unique/rpcMethods'
 import UniqueNFT from './unique/unique'
+import { chains, defaultChainId } from '../index'
 
 export class RpcClient implements IRpcClient {
   private rawRpcApi?: ApiPromise
@@ -91,9 +90,6 @@ export class RpcClient implements IRpcClient {
     this.setIsApiInitialized(true)
   }
 }
-
-export const chains = getChainList(config)
-export const defaultChainId = getDefaultChain(config)
 
 const rpcClient = new RpcClient(chains[defaultChainId])
 
