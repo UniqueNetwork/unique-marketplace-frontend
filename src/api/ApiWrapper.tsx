@@ -36,9 +36,8 @@ const ApiWrapper = ({ gqlClient = gql, rpcClient = rpc, children }: ChainProvide
 
   const value = useMemo<ApiContextProps>(
     () => ({
-      rpc: rpcClient,
-      rpcApi: rpcClient.api,
-      rpcAdapter: rpcClient.adapter,
+      rpcClient,
+      api: rpcClient?.controller,
       chainData,
       currentChain,
     }),

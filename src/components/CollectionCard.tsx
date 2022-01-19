@@ -23,14 +23,14 @@ const CollectionCard: FC<CollectionCardProps> = (props) => {
 
   const [collectionImageUrl, setCollectionImageUrl] = useState<string>()
 
-  const { rpcApi, rpcAdapter } = useApi()
+  const { rpcClient, api } = useApi()
 
   const fetchCollection = useCallback(async () => {
-    if (rpcApi?.isReady) {
-      const collectionInfo: NFTCollection = await rpcAdapter?.getCollection(collectionId.toString())
+    if (rpcClient?.isApiConnected) {
+      const collectionInfo: NFTCollection = await api?.getCollection(collectionId)
       setCollectionImageUrl(collectionInfo?.coverImageUrl)
     }
-  }, [collectionId, rpcApi?.isReady])
+  }, [collectionId, rpcClient?.isApiConnected])
 
   useEffect(() => {
     fetchCollection()

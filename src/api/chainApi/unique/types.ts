@@ -3,7 +3,7 @@ import BN from 'bn.js'
 export type SchemaVersionTypes = 'ImageURL' | 'Unique'
 
 export interface NFTCollection {
-  id: string
+  id: number
   access?: 'Normal' | 'WhiteList'
   decimalPoints: BN | number
   description: number[]
@@ -44,7 +44,7 @@ export type AttributesDecoded = {
 }
 
 export interface NFTToken {
-  id: string
+  id: number
   owner?: { Substrate: string }
   constData?: string
   variableData?: string

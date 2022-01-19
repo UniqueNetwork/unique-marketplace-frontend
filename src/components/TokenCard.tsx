@@ -13,17 +13,14 @@ const TokenCard: FC<TokenCardProps> = (props) => {
 
   const [tokenImageUrl, setTokenImageUrl] = useState<string>()
 
-  const { rpcApi, rpcAdapter } = useApi()
+  const { rpcClient, api } = useApi()
 
   const fetchToken = useCallback(async () => {
-    if (rpcApi?.isReady) {
-      const token: NFTToken = await rpcAdapter?.getToken(
-        collectionId.toString(),
-        tokenId.toString()
-      )
+    if (rpcClient?.isApiConnected) {
+      const token: NFTToken = await api?.getToken(collectionId, tokenId)
       setTokenImageUrl(token.imageUrl)
     }
-  }, [collectionId])
+  }, [collectionId, rpcClient?.isApiConnected])
 
   useEffect(() => {
     fetchToken()

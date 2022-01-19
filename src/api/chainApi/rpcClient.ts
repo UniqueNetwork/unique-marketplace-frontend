@@ -28,10 +28,12 @@ export class RpcClient implements IRpcClient {
   private setApiError(message: string) {
     this.apiError = message
   }
+
   private setApi(api: ApiPromise) {
     this.rawRpcApi = api
     this.controller = new UniqueNFT(api)
   }
+
   private setIsApiInitialized(value: boolean) {
     this.isApiInitialized = value
   }
@@ -54,7 +56,6 @@ export class RpcClient implements IRpcClient {
     }
   }
 
-  // TODO: options for rpc chain listeners
   public changeRpcChain(chain: Chain, options: { onChainReady: (chainData: ChainData) => void }) {
     this.rpcEndpoint = chain.rpcEndpoint
     if (this.rawRpcApi) {

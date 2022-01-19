@@ -32,9 +32,9 @@ class UniqueNFT implements INFTController<NFTCollection, NFTToken> {
     return {}
   }
 
-  private getTokenImageUrl(urlString: string, tokenId: string): string {
+  private getTokenImageUrl(urlString: string, tokenId: number): string {
     if (urlString.indexOf('{id}') !== -1) {
-      return urlString.replace('{id}', tokenId)
+      return urlString.replace('{id}', tokenId.toString())
     }
 
     return urlString
@@ -43,7 +43,7 @@ class UniqueNFT implements INFTController<NFTCollection, NFTToken> {
   // uses for token image path
   private async fetchTokenImage(
     collectionInfo: Pick<NFTCollection, 'offchainSchema'>,
-    tokenId: string
+    tokenId: number
   ): Promise<string> {
     try {
       const collectionMetadata = JSON.parse(hex2a(collectionInfo.offchainSchema)) as MetadataType
@@ -84,14 +84,14 @@ class UniqueNFT implements INFTController<NFTCollection, NFTToken> {
     this.api = api
   }
 
-  public async getCollection(collectionId: string): Promise<NFTCollection | null> {
+  public async getCollection(collectionId: number): Promise<NFTCollection | null> {
     if (!this.api) {
       return null
     }
     try {
       const collection =
         // @ts-ignore
-        await this.api.rpc.unique.collectionById(collectionId)
+        await this.api.rpc.unique.collectionById(collectionId.toString())
 
       const collectionInfo = collection.toJSON() as unknown as NFTCollection
       let coverImageUrl = ''
@@ -103,7 +103,7 @@ class UniqueNFT implements INFTController<NFTCollection, NFTToken> {
         coverImageUrl = `${IPFS_GATEWAY}/${image}`
       } else {
         if (collectionInfo.offchainSchema) {
-          coverImageUrl = await this.getTokenImage(collectionInfo, '1')
+          coverImageUrl = await this.getTokenImage(collectionInfo, 1)
         }
       }
 
@@ -120,7 +120,7 @@ class UniqueNFT implements INFTController<NFTCollection, NFTToken> {
     return null
   }
 
-  public async getTokenImage(collection: NFTCollection, tokenId: string): Promise<string> {
+  public async getTokenImage(collection: NFTCollection, tokenId: number): Promise<string> {
     if (collection.schemaVersion === 'ImageURL') {
       return this.getTokenImageUrl(hex2a(collection.offchainSchema), tokenId)
     } else {
@@ -128,7 +128,7 @@ class UniqueNFT implements INFTController<NFTCollection, NFTToken> {
     }
   }
 
-  public async getToken(collectionId: string, tokenId: string): Promise<NFTToken | null> {
+  public async getToken(collectionId: number, tokenId: number): Promise<NFTToken | null> {
     if (!this.api || !collectionId) {
       return null
     }
@@ -176,7 +176,7 @@ class UniqueNFT implements INFTController<NFTCollection, NFTToken> {
     }
   }
 
-  public async getTokensOfCollection(collectionId: string, ownerId: string): Promise<NFTToken[]> {
+  public async getTokensOfCollection(collectionId: number, ownerId: number): Promise<NFTToken[]> {
     if (!this.api || !collectionId || !ownerId) {
       return []
     }
