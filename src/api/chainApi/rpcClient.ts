@@ -36,7 +36,7 @@ export class RpcClient implements IRpcClient {
     this.isApiInitialized = value
   }
   private async getChainData() {
-    if (!this.rawRpcApi) throw new Error("Attempted to get chain data while api isn' initialized")
+    if (!this.rawRpcApi) throw new Error("Attempted to get chain data while api isn't initialized")
     const [chainProperties, systemChain, systemName] = await Promise.all([
       this.rawRpcApi.rpc.system.properties(),
       this.rawRpcApi.rpc.system.chain(),
