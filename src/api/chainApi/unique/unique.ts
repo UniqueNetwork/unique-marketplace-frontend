@@ -80,10 +80,6 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
     }
   }
 
-  public setApi(api: ApiPromise) {
-    this.api = api
-  }
-
   public async getCollection(collectionId: number): Promise<NFTCollection | null> {
     if (!this.api) {
       return null
