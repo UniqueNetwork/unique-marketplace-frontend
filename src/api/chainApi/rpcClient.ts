@@ -5,7 +5,7 @@ import { ChainData } from '../ApiContext'
 import { IRpcClient, INFTController, Chain } from './types'
 import bundledTypesDefinitions from './unique/bundledTypesDefinitions'
 import rpcMethods from './unique/rpcMethods'
-import UniqueNFT from './unique/unique'
+import UniqueNFTController from './unique/unique'
 import { chains, defaultChainId } from '../index'
 
 export class RpcClient implements IRpcClient {
@@ -30,7 +30,7 @@ export class RpcClient implements IRpcClient {
 
   private setApi(api: ApiPromise) {
     this.rawRpcApi = api
-    this.controller = new UniqueNFT(api)
+    this.controller = new UniqueNFTController(api)
   }
 
   private setIsApiInitialized(value: boolean) {

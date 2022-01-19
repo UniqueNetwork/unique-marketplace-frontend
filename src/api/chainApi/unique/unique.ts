@@ -8,7 +8,7 @@ import config from '../../../config'
 
 const { IPFS_GATEWAY } = config
 
-class UniqueNFT implements INFTController<NFTCollection, NFTToken> {
+class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
   private api: ApiPromise
 
   constructor(api: ApiPromise) {
@@ -193,4 +193,4 @@ class UniqueNFT implements INFTController<NFTCollection, NFTToken> {
   }
 }
 
-export default UniqueNFT
+export default UniqueNFTController

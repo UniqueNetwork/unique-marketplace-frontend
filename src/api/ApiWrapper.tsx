@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { ApolloProvider } from '@apollo/client'
-import { chain } from '@polkadot/types/interfaces/definitions'
 import gql, { IGqlClient } from './graphQL/gqlClient'
 import rpc from './chainApi/rpcClient'
 import { IRpcClient } from './chainApi/types'
@@ -25,7 +24,7 @@ const ApiWrapper = ({ gqlClient = gql, rpcClient = rpc, children }: ChainProvide
   }, [chainId])
 
   const currentChain = useMemo(() => {
-    if (Object.values(chain).length === 0) {
+    if (Object.values(chains).length === 0) {
       throw new Error('Networks is not configured')
     }
     return (

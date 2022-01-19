@@ -66,7 +66,6 @@ export type FetchMoreTokensOptions = {
 }
 
 export const useGraphQlTokens = ({ pageSize, filter }: useGraphQlTokensProps) => {
-  const client = useApolloClient()
 
   const getWhere = useCallback(
     (searchString?: string) => ({
