@@ -20,7 +20,7 @@ declare global {
 const chains = getChainList(window.ENV || process.env)
 
 const config: Config = {
-  IPFSGateway: window.ENV.REACT_APP_IPFS_GATEWAY || process.env.REACT_APP_IPFS_GATEWAY,
+  IPFSGateway: window.ENV?.REACT_APP_IPFS_GATEWAY || process.env.REACT_APP_IPFS_GATEWAY,
   defaultChain: chains[getDefaultChain(window.ENV || process.env)],
   chains,
 }
