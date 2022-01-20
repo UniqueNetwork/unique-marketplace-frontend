@@ -28,13 +28,13 @@ module.exports = {
             '@typescript-eslint/explicit-function-return-type': 'off',
             '@typescript-eslint/no-var-requires': 'off',
             '@typescript-eslint/no-unsafe-argument': 'off',
-            '@typescript-eslint/no-unsafe-assignment': 'off', //тоже ничего не делает?
+            '@typescript-eslint/no-unsafe-assignment': 'off',
             '@typescript-eslint/no-unsafe-call': 'off',
             '@typescript-eslint/no-unsafe-member-access': 'off',
-            '@typescript-eslint/no-unsafe-return': 'off',// ничего не делает?
+            '@typescript-eslint/no-unsafe-return': 'off',
             '@typescript-eslint/restrict-plus-operands': 'off',
             '@typescript-eslint/restrict-template-expressions': 'off',
-            "sort-keys-fix/sort-keys-fix": "warn" // сама добавила для автоматической сортировки ключей
+            "sort-keys-fix/sort-keys-fix": "warn"
         }
     }],
     parser: "@typescript-eslint/parser",
@@ -57,7 +57,7 @@ module.exports = {
         'react-hooks',
         'simple-import-sort',
         'sort-destructure-keys',
-        "sort-keys-fix",// сама добавила
+        "sort-keys-fix",
         "react",
     ],
     rules: {
@@ -67,32 +67,26 @@ module.exports = {
         '@typescript-eslint/indent': ['error', 2],
         // rules from semistandard (don't include it, has standard dep version mismatch)
         semi: [2, 'always'],
-        'camelcase':'warn',// удаление вернет error
+        'camelcase':'warn',
         'no-extra-semi': 2,
         // specific overrides
-        '@typescript-eslint/no-non-null-assertion': 'warn', //вернуть в error после правок
+        '@typescript-eslint/no-non-null-assertion': 'warn',
         '@typescript-eslint/type-annotation-spacing': 'error',
-        '@typescript-eslint/no-floating-promises': 'warn', // при удалении переключится в error
-        '@typescript-eslint/no-unsafe-return': 'warn',// при удалении переключится в error
-        '@typescript-eslint/no-unsafe-argument': 'warn', // при удалении переключится в error
-        '@typescript-eslint/no-unsafe-assignment':'warn',// при удалении переключится в error
-        '@typescript-eslint/ban-ts-comment': 'warn', // при удалении переключится в error
-        '@typescript-eslint/no-unsafe-call': 'warn', // при удалении переключится в error
-        '@typescript-eslint/no-unsafe-member-access': 'warn', // при удалении переключится в error
-        '@typescript-eslint/restrict-template-expressions':'warn', // при удалении переключится в error
+        '@typescript-eslint/no-floating-promises': 'warn',
+        '@typescript-eslint/no-unsafe-return': 'warn',
+        '@typescript-eslint/no-unsafe-argument': 'warn',
+        '@typescript-eslint/no-unsafe-assignment':'warn',
+        '@typescript-eslint/ban-ts-comment': 'warn',
+        '@typescript-eslint/no-unsafe-call': 'warn',
+        '@typescript-eslint/no-unsafe-member-access': 'warn',
+        '@typescript-eslint/restrict-template-expressions':'warn',
         'react/display-name':'warn',
         'arrow-parens': ['error', 'always'],
         'default-param-last': [0], // conflicts with TS version (this one doesn't allow TS ?)
-        
-        // если нужен header, то его можно здесь прописать
-        // 'header/header': [2, 'line', [
-        //     { pattern: ' Copyright \\d{4}(-\\d{4})? @polkadot/' },
-        //     ' SPDX-License-Identifier: Apache-2.0'
-        // ], 2],
         'import-newlines/enforce': ['error', 2048],
         'jsx-quotes': ['error', 'prefer-single'],
         'react/prop-types': [0], // this is a completely broken rule
-        'react/jsx-key':'warn', //удалив, вернется error
+        'react/jsx-key':'warn',
         'object-curly-newline': ['error', {
             ImportDeclaration: 'never',
             ObjectPattern: 'never'
@@ -113,7 +107,7 @@ module.exports = {
             { blankLine: 'any', prev: 'import', next: 'import' }
         ],
         'react-hooks/rules-of-hooks': 'error',
-        'react-hooks/exhaustive-deps': 'warn', //после исправлений вернуть в error
+        'react-hooks/exhaustive-deps': 'warn',
         'react/jsx-closing-bracket-location': [1, 'tag-aligned'],
         'react/jsx-first-prop-new-line': [1, 'multiline-multiprop'],
         'react/jsx-fragments': 'error',
@@ -121,7 +115,7 @@ module.exports = {
             maximum: 1,
             when: 'always'
         }],
-        'react/jsx-no-bind': 1, //после правок переключить в 2
+        'react/jsx-no-bind': 1,
         'react/jsx-sort-props': [1, {
             noSortAlphabetically: false
         }],
@@ -152,8 +146,8 @@ module.exports = {
         '@typescript-eslint/unbound-method': 'off',
         // suppress errors for missing 'import React' in files
         "react/react-in-jsx-scope": "off",
-        "@typescript-eslint/no-unused-vars": "warn",//вернуть в error
-        "@typescript-eslint/no-explicit-any": "warn",//вернуть в error
+        "@typescript-eslint/no-unused-vars": "warn",
+        "@typescript-eslint/no-explicit-any": "warn",
         "@typescript-eslint/no-empty-function": "off",
         '@typescript-eslint/no-var-requires': 'off'
     },
