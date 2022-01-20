@@ -1,6 +1,7 @@
 import { gql, useApolloClient, useQuery } from '@apollo/client'
 import { useCallback, useEffect } from 'react'
-import { FetchMoreBlocksOptions } from './block'
+import { TransfersData, TransfersVariables, useGraphQlLastTransfersProps } from './types'
+import { FetchMoreBlocksOptions } from '../blocks/types'
 
 const getLastTransfersQuery = gql`
   query getLastTransfers($limit: Int, $offset: Int, $where: view_extrinsic_bool_exp = {}) {
@@ -22,41 +23,6 @@ const getLastTransfersQuery = gql`
     }
   }
 `
-
-interface Variables {
-  limit: number
-  offset: number
-  order_by?: { [name: string]: 'asc' | 'desc' }
-  where?: { [key: string]: any }
-}
-
-interface Transfer {
-  block_number: number
-  block_index: string
-  amount: string
-  fee: number
-  from_owner: string
-  hash: string
-  success: boolean
-  timestamp: number | null
-  to_owner: string
-}
-
-interface Data {
-  view_extrinsic: Transfer[]
-  view_extrinsic_aggregate: {
-    aggregate: {
-      count: number
-    }
-  }
-}
-
-export type { Variables, Transfer, Data }
-
-export type useGraphQlLastTransfersProps = {
-  pageSize: number
-  accountId?: string
-}
 
 export const useGraphQlLastTransfers = ({ pageSize, accountId }: useGraphQlLastTransfersProps) => {
   const client = useApolloClient()
@@ -89,7 +55,7 @@ export const useGraphQlLastTransfers = ({ pageSize, accountId }: useGraphQlLastT
     loading: isTransfersFetching,
     error: fetchTransfersError,
     data,
-  } = useQuery<Data, Variables>(getLastTransfersQuery, {
+  } = useQuery<TransfersData, TransfersVariables>(getLastTransfersQuery, {
     variables: {
       limit: pageSize,
       offset: 0,

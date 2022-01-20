@@ -1,6 +1,6 @@
-import { gql, useApolloClient, useQuery } from '@apollo/client'
+import { gql, useQuery } from '@apollo/client'
 import { useCallback } from 'react'
-import { collectionsQuery } from './collections'
+import { FetchMoreTokensOptions, TokensData, TokensVariables, useGraphQlTokensProps } from './types'
 
 const tokensQuery = gql`
   query getTokens($limit: Int, $offset: Int, $where: tokens_bool_exp = {}) {
@@ -22,51 +22,7 @@ const tokensQuery = gql`
     }
   }
 `
-
-interface Variables {
-  limit: number
-  offset: number
-  where?: Record<string, any>
-}
-
-interface Token {
-  id: number
-  token_id: number
-  collection_id: number
-  data: {
-    hex: string
-  }
-  collection: {
-    name: string
-    token_prefix: string
-  }
-  owner: string
-}
-
-interface Data {
-  tokens: Token[]
-  tokens_aggregate: {
-    aggregate: {
-      count: number
-    }
-  }
-}
-
-export type { Variables, Token, Data }
-
-export type useGraphQlTokensProps = {
-  pageSize: number
-  filter?: Record<string, any>
-}
-
-export type FetchMoreTokensOptions = {
-  limit?: number
-  offset?: number
-  searchString?: string
-}
-
 export const useGraphQlTokens = ({ pageSize, filter }: useGraphQlTokensProps) => {
-
   const getWhere = useCallback(
     (searchString?: string) => ({
       _and: {
@@ -92,7 +48,7 @@ export const useGraphQlTokens = ({ pageSize, filter }: useGraphQlTokensProps) =>
     loading: isTokensFetching,
     error: fetchTokensError,
     data,
-  } = useQuery<Data, Variables>(collectionsQuery, {
+  } = useQuery<TokensData, TokensVariables>(tokensQuery, {
     variables: {
       limit: pageSize,
       offset: 0,

@@ -1,5 +1,11 @@
 import { gql, useApolloClient, useQuery } from '@apollo/client'
 import { useCallback, useEffect } from 'react'
+import {
+  LastBlocksData,
+  LastBlocksVariables,
+  FetchMoreBlocksOptions,
+  useGraphQlBlocksProps,
+} from './types'
 
 const getLatestBlocksQuery = gql`
   query GetLatestBlocks(
@@ -22,39 +28,6 @@ const getLatestBlocksQuery = gql`
   }
 `
 
-interface Variables {
-  limit: number
-  offset: number
-  order_by?: { [name: string]: 'asc' | 'desc' }
-  where?: { [key: string]: any }
-}
-
-interface Block {
-  timestamp: number
-  block_number: number
-  event_count: number
-  extrinsic_count: number
-}
-interface Data {
-  view_last_block: Block[]
-  view_last_block_aggregate: {
-    aggregate: {
-      count: number // total number of blocks, used for pagination
-    }
-  }
-}
-export type { Variables, Data, Block }
-
-export type useGraphQlBlocksProps = {
-  pageSize: number
-}
-
-export type FetchMoreBlocksOptions = {
-  limit?: number
-  offset?: number
-  searchString?: string
-}
-
 export const useGraphQlBlocks = ({ pageSize }: useGraphQlBlocksProps) => {
   const client = useApolloClient()
 
@@ -63,7 +36,7 @@ export const useGraphQlBlocks = ({ pageSize }: useGraphQlBlocksProps) => {
     data,
     loading: isBlocksFetching,
     error: fetchBlocksError,
-  } = useQuery<Data, Variables>(getLatestBlocksQuery, {
+  } = useQuery<LastBlocksData, LastBlocksVariables>(getLatestBlocksQuery, {
     variables: { limit: pageSize, offset: 0, order_by: { block_number: 'desc' } },
     fetchPolicy: 'network-only', // Used for first execution
     nextFetchPolicy: 'cache-first',

@@ -1,8 +1,6 @@
 import React, { FC, Reducer, useCallback, useReducer, useState } from 'react'
 import { Checkbox, InputText, Button } from '@unique-nft/ui-kit'
-import { Token, useGraphQlTokens } from '../../../api/graphQL/tokens'
-import Avatar from '../../../components/Avatar'
-import Picture from '../../../components/Picture'
+import { Token, tokens as gqlTokens } from '../../../api/graphQL'
 import TokenCard from '../../../components/TokenCard'
 
 interface TokensComponentProps {
@@ -33,7 +31,7 @@ const TokensComponent: FC<TokensComponentProps> = (props) => {
 
   const [searchString, setSearchString] = useState<string | undefined>()
 
-  const { fetchMoreTokens, tokens, tokensCount } = useGraphQlTokens({ filter, pageSize })
+  const { fetchMoreTokens, tokens, tokensCount } = gqlTokens.useGraphQlTokens({ filter, pageSize })
 
   const onCheckBoxChange = useCallback(
     (actionType: ActionType) => (value: boolean) => dispatchFilter({ type: actionType, value }),
@@ -79,7 +77,8 @@ const TokensComponent: FC<TokensComponentProps> = (props) => {
       </div>
       <div className={'margin-top margin-bottom'}>{tokensCount || 0} items</div>
       <div className={'grid-container'}>
-        {tokens?.map && tokens.map((token) => <TokenCard {...token} key={`token-${token.id}`} />)}
+        {tokens?.map &&
+          tokens.map((token: Token) => <TokenCard {...token} key={`token-${token.id}`} />)}
       </div>
       <Button
         title={'See all'}

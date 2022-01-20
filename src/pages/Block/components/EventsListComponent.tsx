@@ -1,14 +1,9 @@
 import React, { useCallback } from 'react'
 import Table from 'rc-table'
-import { Link } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
 
 import LoadingComponent from '../../../components/LoadingComponent'
-import {
-  Data as ExtrinsicsData,
-  Variables as ExtrinsicsVariables,
-  getEventsQuery,
-} from '../../../api/graphQL/eventsForBlock'
+import { EventsForBlockVariables, EventsForBlockData, eventsForBlock } from '../../../api/graphQL/'
 import { timeDifference } from '../../../utils/timestampUtils'
 import PaginationComponent from '../../../components/Pagination'
 import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize'
@@ -62,7 +57,7 @@ const EventListComponent = (props: any) => {
     error,
     fetchMore: fetchMoreExtrinsics,
     data: eventsList,
-  } = useQuery<ExtrinsicsData, ExtrinsicsVariables>(getEventsQuery, {
+  } = useQuery<EventsForBlockData, EventsForBlockVariables>(eventsForBlock.getEventsQuery, {
     variables: {
       limit: pageSize,
       offset: 0,

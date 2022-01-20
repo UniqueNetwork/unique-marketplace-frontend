@@ -1,7 +1,7 @@
 import React, { FC } from 'react'
 import { useParams } from 'react-router-dom'
 import { Heading, Text } from '@unique-nft/ui-kit'
-import { useGraphQlExtrinsic } from '../../../api/graphQL/extrinsic'
+import { extrinsic as gqlExtrinsic } from '../../../api/graphQL'
 import AccountLinkComponent from '../../Account/components/AccountLinkComponent'
 import LoadingComponent from '../../../components/LoadingComponent'
 import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize'
@@ -14,7 +14,7 @@ const ExtrinsicDetail: FC = () => {
 
   const { chainData } = useApi()
 
-  const { extrinsic, isExtrinsicFetching } = useGraphQlExtrinsic(blockIndex)
+  const { extrinsic, isExtrinsicFetching } = gqlExtrinsic.useGraphQlExtrinsic(blockIndex)
 
   const deviceSize = useDeviceSize()
 

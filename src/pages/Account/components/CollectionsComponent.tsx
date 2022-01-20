@@ -1,8 +1,6 @@
 import React, { FC, Reducer, useCallback, useReducer, useState } from 'react'
-import { InputText, Checkbox, Icon, Button } from '@unique-nft/ui-kit'
-import Avatar from '../../../components/Avatar'
-import { Collection, useGraphQlCollections } from '../../../api/graphQL/collections'
-import AccountLinkComponent from './AccountLinkComponent'
+import { InputText, Checkbox, Button } from '@unique-nft/ui-kit'
+import { Collection, collections as gqlCollection } from '../../../api/graphQL'
 import CollectionCard from '../../../components/CollectionCard'
 
 interface CollectionsComponentProps {
@@ -39,9 +37,10 @@ const CollectionsComponent: FC<CollectionsComponentProps> = (props) => {
 
   const [searchString, setSearchString] = useState<string | undefined>()
 
-  const { fetchMoreCollections, collections, collectionsCount } = useGraphQlCollections({
-    pageSize,
-  })
+  const { fetchMoreCollections, collections, collectionsCount } =
+    gqlCollection.useGraphQlCollections({
+      pageSize,
+    })
 
   const onCheckBoxChange = useCallback(
     (actionType: ActionType) => (value: boolean) => dispatchFilter({ type: actionType, value }),
@@ -100,7 +99,7 @@ const CollectionsComponent: FC<CollectionsComponentProps> = (props) => {
       <div className={'margin-top margin-bottom'}>{collectionsCount || 0} items</div>
       <div className={'grid-container'}>
         {collections?.map &&
-          collections.map((collection) => (
+          collections.map((collection: Collection) => (
             <CollectionCard key={`collection-${collection.collection_id}`} {...collection} />
           ))}
       </div>

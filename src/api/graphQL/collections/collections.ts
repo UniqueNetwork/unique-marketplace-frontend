@@ -1,5 +1,11 @@
 import { gql, useApolloClient, useQuery } from '@apollo/client'
 import { useCallback } from 'react'
+import {
+  CollectionsData,
+  CollectionsVariables,
+  FetchMoreCollectionsOptions,
+  useGraphQlCollectionsProps,
+} from './types'
 
 const collectionsQuery = gql`
   query getCollections($limit: Int, $offset: Int, $where: collections_bool_exp = {}) {
@@ -24,50 +30,6 @@ const collectionsQuery = gql`
     }
   }
 `
-
-interface Variables {
-  limit: number
-  offset: number
-  where?: Record<string, any>
-}
-
-interface Collection {
-  collection_id: number
-  description: string
-  name: string
-  owner: string
-  token_prefix: string
-  offchain_schema: string
-  schema_version: string
-  tokens_aggregate: {
-    aggregate: {
-      count: number
-    }
-  }
-}
-
-interface Data {
-  collections: Collection[]
-  collections_aggregate: {
-    aggregate: {
-      count: number
-    }
-  }
-}
-
-export type { Variables, Collection, Data }
-
-export type useGraphQlCollectionsProps = {
-  pageSize: number
-  filter?: Record<string, any>
-}
-
-export type FetchMoreCollectionsOptions = {
-  limit?: number
-  offset?: number
-  searchString?: string
-}
-
 export const useGraphQlCollections = ({ pageSize, filter }: useGraphQlCollectionsProps) => {
   const client = useApolloClient()
 
@@ -94,7 +56,7 @@ export const useGraphQlCollections = ({ pageSize, filter }: useGraphQlCollection
     loading: isCollectionsFetching,
     error: fetchCollectionsError,
     data,
-  } = useQuery<Data, Variables>(collectionsQuery, {
+  } = useQuery<CollectionsData, CollectionsVariables>(collectionsQuery, {
     variables: {
       limit: pageSize,
       offset: 0,

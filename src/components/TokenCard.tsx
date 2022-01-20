@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useEffect, useState } from 'react'
 import { Heading } from '@unique-nft/ui-kit'
-import { Token } from '../api/graphQL/tokens'
+import { Token } from '../api/graphQL'
 import Picture from './Picture'
 import { useApi } from '../hooks/useApi'
 import { NFTToken } from '../api/chainApi/unique/types'

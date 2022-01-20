@@ -1,10 +1,9 @@
 import React, { useCallback, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Tabs } from '@unique-nft/ui-kit'
-import { useQuery } from '@apollo/client'
 import AccountDetailComponent from './components/AccountDetailComponent'
 import LastTransfersComponent from '../Main/components/LastTransfersComponent'
-import { useGraphQlLastTransfers } from '../../api/graphQL/transfers'
+import { transfers as gqlTransfers } from '../../api/graphQL'
 import CollectionsComponent from './components/CollectionsComponent'
 import TokensComponent from './components/TokensComponent'
 
@@ -18,7 +17,7 @@ const AccountPage = () => {
   const [activeAssetsTabIndex, setActiveAssetsTabIndex] = useState<number>(0)
 
   const { fetchMoreTransfers, transfers, transfersCount, isTransfersFetching } =
-    useGraphQlLastTransfers({ pageSize, accountId })
+    gqlTransfers.useGraphQlLastTransfers({ pageSize, accountId })
 
   const onTransfersPageChange = useCallback(
     (limit: number, offset: number) => {

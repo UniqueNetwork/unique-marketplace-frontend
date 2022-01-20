@@ -1,10 +1,9 @@
 import { ApolloClient, HttpLink, NormalizedCacheObject } from '@apollo/client'
 import { getApolloClient } from './apolloClient'
-import config from '../../config'
 
 export interface IGqlClient {
   client: ApolloClient<NormalizedCacheObject>
-  changeRpcChain(gqlEndpoint: string): void
+  changeEndpoint(endpoint: string): void
 }
 
 export class GqlClient implements IGqlClient {
@@ -14,7 +13,7 @@ export class GqlClient implements IGqlClient {
     this.client = getApolloClient(gqlEndpoint)
   }
 
-  public changeRpcChain(gqlEndpoint: string) {
+  public changeEndpoint(gqlEndpoint: string) {
     this.client.stop() // terminate all active query processes
     this.client.clearStore().then(() => {
       // resets the entire store by clearing out the cache
@@ -22,7 +21,3 @@ export class GqlClient implements IGqlClient {
     })
   }
 }
-
-const gqlClient = new GqlClient(config.defaultChain.gqlEndpoint)
-
-export default gqlClient

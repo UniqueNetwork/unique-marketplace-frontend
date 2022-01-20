@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { ApolloProvider } from '@apollo/client'
-import gql, { IGqlClient } from './graphQL/gqlClient'
-import rpc from './chainApi/rpcClient'
+import { IGqlClient } from './graphQL/gqlClient'
 import { IRpcClient } from './chainApi/types'
 import { ApiContextProps, ApiProvider, ChainData } from './ApiContext'
 import config from '../config'
+import { defaultChainKey } from '../utils/configParser'
+import { gqlClient as gql, rpcClient as rpc } from '.'
 
 interface ChainProviderProps {
   children: React.ReactNode
@@ -15,42 +16,41 @@ interface ChainProviderProps {
 
 const { chains, defaultChain } = config
 
-const ApiWrapper = ({ gqlClient = gql, rpcClient = rpc, children }: ChainProviderProps) => {
+const ApiWrapper = ({ children, gqlClient = gql, rpcClient = rpc }: ChainProviderProps) => {
   const [chainData, setChainData] = useState<ChainData>()
   const { chainId } = useParams<'chainId'>()
 
+  // update endpoint if chainId is changed
   useEffect(() => {
-    if (chainId && chains[chainId]) {
-      localStorage.setItem('uniq-explorer_chain', chainId)
-    }
-  }, [chainId])
-
-  const currentChain = useMemo(() => {
     if (Object.values(chains).length === 0) {
       throw new Error('Networks is not configured')
     }
-    return (
-      chains[chainId || ''] ||
-      chains[localStorage.getItem('uniq-explorer_chain') || ''] ||
-      defaultChain
-    )
+    if (chainId) {
+      const currentChain = chainId ? chains[chainId] : defaultChain
+      rpcClient.changeEndpoint(currentChain.rpcEndpoint)
+      gqlClient.changeEndpoint(currentChain.gqlEndpoint)
+
+      // set current chain id into localStorage
+      localStorage.setItem(defaultChainKey, chainId)
+    }
   }, [chainId])
 
+  useEffect(() => {
+    console.log(rpcClient?.isApiConnected)
+    if (rpcClient?.chainData) setChainData(rpcClient?.chainData)
+  }, [rpcClient?.isApiConnected])
+
+  // get context value for ApiContext
   const value = useMemo<ApiContextProps>(
     () => ({
       rpcClient,
       rawRpcApi: rpcClient.rawRpcApi,
       api: rpcClient?.controller,
       chainData,
-      currentChain,
+      currentChain: chainId ? chains[chainId] : defaultChain,
     }),
-    [rpcClient, currentChain, chainData]
+    [rpcClient, chainId, chainData]
   )
-
-  useEffect(() => {
-    rpc.changeRpcChain(currentChain.rpcEndpoint, { onChainReady: setChainData })
-    gql.changeRpcChain(currentChain.gqlEndpoint)
-  }, [currentChain])
 
   return (
     <ApiProvider value={value}>

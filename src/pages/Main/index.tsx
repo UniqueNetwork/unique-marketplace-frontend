@@ -1,11 +1,10 @@
 import React, { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Heading, InputText } from '@unique-nft/ui-kit'
-import { useGraphQlBlocks } from '../../api/graphQL/block'
-import { useGraphQlLastTransfers } from '../../api/graphQL/transfers'
 import { useApi } from '../../hooks/useApi'
 import LastTransfersComponent from './components/LastTransfersComponent'
 import LastBlocksComponent from './components/LastBlocksComponent'
+import { lastBlocks, transfers as gqlTransfers } from '../../api/graphQL/'
 
 const MainPage = () => {
   const pageSize = 10 // default
@@ -13,10 +12,12 @@ const MainPage = () => {
 
   const { chainData } = useApi()
 
-  const { fetchMoreBlocks, blocks, blockCount, isBlocksFetching } = useGraphQlBlocks({ pageSize })
+  const { fetchMoreBlocks, blocks, blockCount, isBlocksFetching } = lastBlocks.useGraphQlBlocks({
+    pageSize,
+  })
 
   const { fetchMoreTransfers, transfers, transfersCount, isTransfersFetching } =
-    useGraphQlLastTransfers({ pageSize })
+    gqlTransfers.useGraphQlLastTransfers({ pageSize })
 
   const navigate = useNavigate()
 

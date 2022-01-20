@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useEffect, useState } from 'react'
 import Avatar from './Avatar'
 import AccountLinkComponent from '../pages/Account/components/AccountLinkComponent'
-import { Collection } from '../api/graphQL/collections'
+import { Collection } from '../api/graphQL'
 import { useApi } from '../hooks/useApi'
 import { NFTCollection } from '../api/chainApi/unique/types'
 
