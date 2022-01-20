@@ -4,11 +4,7 @@ import React, { useCallback } from 'react'
 import { Link } from 'react-router-dom'
 
 import LoadingComponent from '../../../components/LoadingComponent'
-import {
-  Data as ExtrinsicsData,
-  Variables as ExtrinsicsVariables,
-  getExtrinsicsQuery,
-} from '../../../api/graphQL/extrinsicsForBlock'
+import { ExtrinsicData, ExtrinsicVariables, extrinsic as gqlExtrinsic } from '../../../api/graphQL'
 import { timeDifference } from '../../../utils/timestampUtils'
 import PaginationComponent from '../../../components/Pagination'
 import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize'
@@ -79,12 +75,11 @@ const ExtrinsicsListComponent = (props: any) => {
     error,
     fetchMore: fetchMoreExtrinsics,
     data: eventsList,
-  } = useQuery<ExtrinsicsData, ExtrinsicsVariables>(getExtrinsicsQuery, {
+  } = useQuery<ExtrinsicData, ExtrinsicVariables>(gqlExtrinsic.extrinsicQuery, {
     variables: {
       limit: pageSize,
       offset: 0,
-      order_by: { block_number: 'desc' },
-      where: { block_number: { _eq: blockNumber } },
+      block_index: blockNumber,
     },
     fetchPolicy: 'network-only', // Used for first execution
     nextFetchPolicy: 'cache-first',

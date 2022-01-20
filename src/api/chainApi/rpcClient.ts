@@ -1,45 +1,83 @@
-import { ApiPromise, WsProvider } from "@polkadot/api";
-import { formatBalance } from "@polkadot/util";
-import chains, { Chain, defaultChain } from "../../chains";
-import { ChainData } from "../ApiContext";
+import { ApiPromise, WsProvider } from '@polkadot/api'
+import { formatBalance } from '@polkadot/util'
+import { OverrideBundleType } from '@polkadot/types/types'
+import { IRpcClient, INFTController, Chain, IRpcClientOptions } from './types'
+import bundledTypesDefinitions from './unique/bundledTypesDefinitions'
+import rpcMethods from './unique/rpcMethods'
+import UniqueNFTController from './unique/unique'
+import { ChainData } from '../ApiContext'
 
-export interface IRpcClient {
-  api?: ApiPromise;
-  chainData: any;
-}
 export class RpcClient implements IRpcClient {
-  public api?: ApiPromise;
+  public controller?: INFTController<any, any>
+  public rawRpcApi?: ApiPromise
+  public isApiConnected: boolean = false
+  public isApiInitialized: boolean = false
+  public apiError?: string
+  public chainData: any = undefined
+  public rpcEndpoint: string
+  private options: IRpcClientOptions
 
-  public isApiConnected: boolean = false;
-  public isApiInitialized: boolean = false;
-  public apiError?: string;
-  public chainData: any = undefined;
-  public rpcEndpoint: string;
-
-  constructor(chain: Chain) {
-    this.rpcEndpoint = chain.rpcEndpoint;
+  constructor(rpcEndpoint: string, options?: IRpcClientOptions) {
+    this.rpcEndpoint = rpcEndpoint
+    this.options = options || {}
+    this.setApi()
   }
 
   private setIsApiConnected(value: boolean) {
-    this.isApiConnected = value;
+    this.isApiConnected = value
   }
   private setApiError(message: string) {
-    this.apiError = message;
-  }
-  private setApi(api: ApiPromise) {
-    this.api = api;
+    this.apiError = message
   }
   private setIsApiInitialized(value: boolean) {
-    this.isApiInitialized = value;
+    this.isApiInitialized = value
   }
+  private setApi() {
+    if (this.rawRpcApi) {
+      this.setIsApiConnected(false)
+      this.rawRpcApi.disconnect()
+    }
+
+    const typesBundle: OverrideBundleType = {
+      spec: {
+        nft: bundledTypesDefinitions,
+      },
+    }
+
+    const provider = new WsProvider(this.rpcEndpoint)
+
+    const _api = new ApiPromise({
+      provider,
+      rpc: {
+        unique: rpcMethods,
+      },
+      // @ts-ignore
+      typesBundle,
+    })
+
+    _api.on('connected', () => this.setIsApiConnected(true))
+    _api.on('disconnected', () => this.setIsApiConnected(false))
+    _api.on('error', (error: Error) => this.setApiError(error.message))
+
+    _api.on('ready', async () => {
+      this.setIsApiConnected(true)
+      await this.getChainData()
+      if (this.options.onChainReady) this.options.onChainReady(this.chainData)
+    })
+
+    this.rawRpcApi = _api
+    this.controller = new UniqueNFTController(_api)
+    this.setIsApiInitialized(true)
+  }
+
   private async getChainData() {
-    if (!this.api) throw new Error('Attempted to get chain data while api isn\' initialized');
+    if (!this.rawRpcApi) throw new Error("Attempted to get chain data while api isn't initialized")
     const [chainProperties, systemChain, systemName] = await Promise.all([
-      this.api.rpc.system.properties(),
-      this.api.rpc.system.chain(),
-      this.api.rpc.system.name(),
+      this.rawRpcApi.rpc.system.properties(),
+      this.rawRpcApi.rpc.system.chain(),
+      this.rawRpcApi.rpc.system.name(),
     ])
-  
+
     this.chainData = {
       properties: {
         tokenSymbol: chainProperties.tokenSymbol
@@ -51,33 +89,15 @@ export class RpcClient implements IRpcClient {
     }
   }
 
-  // TODO: options for rpc chain listeners
-  public changeRpcChain(chain: Chain, options: { onChainReady: (chainData: ChainData) => void }) {
-    this.rpcEndpoint = chain.rpcEndpoint;
-    console.time('rpc');
-    if (this.api) {
-      this.api.disconnect()
-    }
+  public setOnChainReadyListener(callback: (chainData: ChainData) => void) {
+    this.options.onChainReady = callback
+  }
 
-    const provider = new WsProvider(this.rpcEndpoint)
-
-    const _api = new ApiPromise({ provider })
-
-    _api.on('connected', () => this.setIsApiConnected(true))
-    _api.on('disconnected', () => this.setIsApiConnected(false))
-    _api.on('error', (error: Error) => this.setApiError(error.message))
-    _api.on('ready', (): void => {
-      this.setIsApiConnected(true)
-      this.getChainData().then(() => options.onChainReady(this.chainData)) // TODO: promise is running in background without any notifications about being changed
-      console.timeEnd('rpc');
-    })
-
-    this.setApi(_api)
-    this.setIsApiInitialized(true)
+  public changeEndpoint(rpcEndpoint: string, options?: IRpcClientOptions) {
+    this.rpcEndpoint = rpcEndpoint
+    this.options.onChainReady = options?.onChainReady
+    this.setApi()
   }
 }
 
-// todo: use first key instead of defaultChain to avoid confusion with env variables
-const rpcClient = new RpcClient(chains[defaultChain]);
-
-export default rpcClient;
+export default RpcClient

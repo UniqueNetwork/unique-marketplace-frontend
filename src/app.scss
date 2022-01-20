@@ -51,6 +51,12 @@ a {
   padding: calc(var(--gap) * 1.5) calc(var(--gap) * 2);
 }
 
+.picture {
+  img {
+    max-width: 174px;
+  }
+}
+
 .flexbox-container {
   display: flex;
   column-gap: var(--gap);

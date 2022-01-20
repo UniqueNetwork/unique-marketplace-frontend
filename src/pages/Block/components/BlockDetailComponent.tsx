@@ -3,11 +3,7 @@ import { useQuery } from '@apollo/client'
 import { Heading } from '@unique-nft/ui-kit'
 
 import LoadingComponent from '../../../components/LoadingComponent'
-import {
-  Data as BlockData,
-  Variables as BlockVariables,
-  getBlockQuery,
-} from '../../../api/graphQL/blockInfo'
+import { BlockDetailData, BlockDetailVariables, blockDetail } from '../../../api/graphQL'
 
 const BlockDetailComponent = (props: any) => {
   const { block_number } = props
@@ -15,7 +11,7 @@ const BlockDetailComponent = (props: any) => {
     loading: isBLockFetching,
     error: fetchBlockError,
     data: blockDetails,
-  } = useQuery<BlockData, BlockVariables>(getBlockQuery, {
+  } = useQuery<BlockDetailData, BlockDetailVariables>(blockDetail.getBlockQuery, {
     variables: { block_number },
     notifyOnNetworkStatusChange: true,
   })

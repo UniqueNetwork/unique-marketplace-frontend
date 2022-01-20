@@ -1,7 +1,7 @@
 import React from 'react'
 import Table from 'rc-table'
 import { Text } from '@unique-nft/ui-kit'
-import { Block } from '../../../api/graphQL/block'
+import { LastBlock } from '../../../api/graphQL'
 import PaginationComponent from '../../../components/Pagination'
 import { timeDifference } from '../../../utils/timestampUtils'
 import { BlockComponentProps } from '../types'
@@ -24,10 +24,10 @@ const blockColumns = [
 ]
 
 const blocksWithTimeDifference = (
-  blocks: Block[] | undefined
-): (Block & { time_difference: string })[] => {
+  blocks: LastBlock[] | undefined
+): (LastBlock & { time_difference: string })[] => {
   if (!blocks) return []
-  return blocks.map((block: Block) => ({
+  return blocks.map((block: LastBlock) => ({
     ...block,
     time_difference: timeDifference(block.timestamp),
   }))
@@ -39,7 +39,7 @@ const LastBlocksComponent = ({
   pageSize,
   loading,
   onPageChange,
-}: BlockComponentProps<Block[]>) => {
+}: BlockComponentProps<LastBlock[]>) => {
   const deviceSize = useDeviceSize()
 
   return (

@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import { Text } from '@unique-nft/ui-kit'
-import { useGraphQlAccount } from '../../../api/graphQL/account'
+import { account as gqlAccount } from '../../../api/graphQL'
 import Avatar from '../../../components/Avatar'
 import LoadingComponent from '../../../components/LoadingComponent'
 import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize'
@@ -14,7 +14,7 @@ interface AccountProps {
 const AccountDetailComponent: FC<AccountProps> = (props) => {
   const { accountId } = props
 
-  const { account, isAccountFetching } = useGraphQlAccount(accountId)
+  const { account, isAccountFetching } = gqlAccount.useGraphQlAccount(accountId)
 
   const deviceSize = useDeviceSize()
 

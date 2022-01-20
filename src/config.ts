@@ -1,16 +1,28 @@
+import { Chain } from './api/chainApi/types'
+import { getChainList, getDefaultChain } from './utils/configParser'
+
 declare type Env = {
-  API_URL?: string;
-  CHAIN_API?: string;
+  REACT_APP_IPFS_GATEWAY: string | undefined,
+} & Record<string, string | undefined>
+
+declare type Config = {
+  IPFSGateway: string | undefined
+  chains: Record<string, Chain>
+  defaultChain: Chain
 }
+
 declare global {
   interface Window {
     ENV: Env
   }
 }
 
-const config: Env = {
-  API_URL: window.ENV.API_URL || process.env.REACT_APP_API_URL,
-  CHAIN_API: process.env.REACT_APP_UNIQUE_API,
+const chains = getChainList(window.ENV || process.env)
+
+const config: Config = {
+  IPFSGateway: window.ENV.REACT_APP_IPFS_GATEWAY || process.env.REACT_APP_IPFS_GATEWAY,
+  defaultChain: chains[getDefaultChain(window.ENV || process.env)],
+  chains,
 }
 
 export default config
