@@ -2,6 +2,8 @@ import { Chain } from '../api/chainApi/types'
 
 const configKeyRegexp = /NET_(?<network>[A-Z]+)_NAME$/gm
 
+export const defaultChainKey = 'block-explorer_chain'
+
 const findNetworkParamByName = (
   config: Record<string, string | undefined>,
   network: string,
@@ -27,7 +29,7 @@ export const getNetworkList = (config: Record<string, string | undefined>): stri
 }
 
 export const getDefaultChain = (config: Record<string, string | undefined>) => {
-  return getNetworkList(config)[0]
+  return localStorage.getItem(defaultChainKey) || getNetworkList(config)[0]
 }
 
 export const getNetworkParams = (

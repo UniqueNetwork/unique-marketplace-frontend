@@ -20,6 +20,10 @@ const ApiWrapper = ({ children, gqlClient = gql, rpcClient = rpc }: ChainProvide
   const [chainData, setChainData] = useState<ChainData>()
   const { chainId } = useParams<'chainId'>()
 
+  useEffect(() => {
+    rpcClient?.setOnChainReadyListener(setChainData)
+  }, [])
+
   // update endpoint if chainId is changed
   useEffect(() => {
     if (Object.values(chains).length === 0) {
@@ -34,11 +38,6 @@ const ApiWrapper = ({ children, gqlClient = gql, rpcClient = rpc }: ChainProvide
       localStorage.setItem(defaultChainKey, chainId)
     }
   }, [chainId])
-
-  useEffect(() => {
-    console.log(rpcClient?.isApiConnected)
-    if (rpcClient?.chainData) setChainData(rpcClient?.chainData)
-  }, [rpcClient?.isApiConnected])
 
   // get context value for ApiContext
   const value = useMemo<ApiContextProps>(

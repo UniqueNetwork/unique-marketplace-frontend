@@ -3,8 +3,12 @@ import { ExtrinsicData, ExtrinsicVariables } from './types'
 
 const extrinsicQuery = gql`
   query getExtrinsic($limit: Int, $offset: Int, $block_index: String!) {
-    view_extrinsic(limit: $limit, offset: $offset, where: { block_index: { _eq: $block_index } }, 
-      order_by: { block_number: 'desc' }) {
+    view_extrinsic(
+      limit: $limit
+      offset: $offset
+      where: { block_index: { _eq: $block_index } }
+      order_by: { block_number: "desc" }
+    ) {
       amount
       block_index
       block_number
