@@ -1,11 +1,6 @@
-import { gql, useApolloClient, useQuery } from '@apollo/client'
-import { useCallback } from 'react'
-import {
-  CollectionsData,
-  CollectionsVariables,
-  FetchMoreCollectionsOptions,
-  useGraphQlCollectionsProps,
-} from './types'
+import { gql, useApolloClient, useQuery } from '@apollo/client';
+import { useCallback } from 'react';
+import { CollectionsData, CollectionsVariables, FetchMoreCollectionsOptions, useGraphQlCollectionsProps } from './types';
 
 const collectionsQuery = gql`
   query getCollections($limit: Int, $offset: Int, $where: collections_bool_exp = {}) {
@@ -29,9 +24,10 @@ const collectionsQuery = gql`
       }
     }
   }
-`
-export const useGraphQlCollections = ({ pageSize, filter }: useGraphQlCollectionsProps) => {
-  const client = useApolloClient()
+`;
+
+export const useGraphQlCollections = ({ filter, pageSize }: useGraphQlCollectionsProps) => {
+  const client = useApolloClient();
 
   const getWhere = useCallback(
     (searchString?: string) => ({
@@ -40,32 +36,31 @@ export const useGraphQlCollections = ({ pageSize, filter }: useGraphQlCollection
         ...(searchString
           ? {
               _or: {
-                name: { _ilike: searchString },
                 description: { _ilike: searchString },
-                token_prefix: { _ilike: searchString },
-              },
+                name: { _ilike: searchString },
+                token_prefix: { _ilike: searchString }
+              }
             }
-          : {}),
-      },
+          : {})
+      }
     }),
     [filter]
-  )
+  );
 
-  const {
-    fetchMore,
-    loading: isCollectionsFetching,
+  const { data,
     error: fetchCollectionsError,
-    data,
-  } = useQuery<CollectionsData, CollectionsVariables>(collectionsQuery, {
+    fetchMore,
+    loading: isCollectionsFetching } = useQuery<CollectionsData, CollectionsVariables>(collectionsQuery, {
+    fetchPolicy: 'network-only',
+    // Used for first execution
+nextFetchPolicy: 'cache-first',
+    notifyOnNetworkStatusChange: true,
     variables: {
       limit: pageSize,
       offset: 0,
-      where: getWhere(),
-    },
-    fetchPolicy: 'network-only', // Used for first execution
-    nextFetchPolicy: 'cache-first',
-    notifyOnNetworkStatusChange: true,
-  })
+      where: getWhere()
+    }
+  });
 
   const fetchMoreCollections = useCallback(
     ({ limit = pageSize, offset, searchString }: FetchMoreCollectionsOptions) => {
@@ -73,20 +68,20 @@ export const useGraphQlCollections = ({ pageSize, filter }: useGraphQlCollection
         variables: {
           limit,
           offset,
-          where: getWhere(searchString),
-        },
-      })
+          where: getWhere(searchString)
+        }
+      });
     },
     [fetchMore, filter, pageSize]
-  )
+  );
 
   return {
-    fetchMoreCollections,
     collections: data?.collections || [],
     collectionsCount: data?.collections_aggregate.aggregate.count || 0,
-    isCollectionsFetching,
     fetchCollectionsError,
-  }
-}
+    fetchMoreCollections,
+    isCollectionsFetching
+  };
+};
 
-export { collectionsQuery }
+export { collectionsQuery };

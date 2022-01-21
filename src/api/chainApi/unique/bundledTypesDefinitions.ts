@@ -1,4 +1,4 @@
-import type { OverrideBundleDefinition } from '@polkadot/types/types'
+import type { OverrideBundleDefinition } from '@polkadot/types/types';
 
 // structs need to be in order
 /* eslint-disable sort-keys */
@@ -10,110 +10,110 @@ const bundledTypesDefinitions: OverrideBundleDefinition = {
       minmax: [0, undefined],
       types: {
         AccessMode: {
-          _enum: ['Normal', 'WhiteList'],
+          _enum: ['Normal', 'WhiteList']
         },
-        DecimalPoints: 'u8',
-        CollectionMode: {
-          _enum: {
-            Invalid: null,
-            NFT: null,
-            Fungible: 'DecimalPoints',
-            ReFungible: null,
-          },
-        },
-        Ownership: {
-          Owner: 'AccountId',
-          Fraction: 'u128',
-        },
-        FungibleItemType: {
-          Value: 'u128',
-        },
-        NftItemType: {
-          Owner: 'AccountId',
-          ConstData: 'Vec<u8>',
-          VariableData: 'Vec<u8>',
-        },
-        ReFungibleItemType: {
-          Owner: 'Vec<Ownership<AccountId>>',
-          ConstData: 'Vec<u8>',
-          VariableData: 'Vec<u8>',
-        },
-        SponsorshipState: {
-          _enum: {
-            Disabled: null,
-            Unconfirmed: 'AccountId',
-            Confirmed: 'AccountId',
-          },
+        AccountInfo: 'AccountInfoWithDualRefCount',
+        Address: 'AccountId',
+        ChainLimits: {
+          AccountTokenOwnershipLimit: 'u32',
+          CollectionAdminsLimit: 'u64',
+          CollectionNumbersLimit: 'u32',
+          ConstOnChainSchemaLimit: 'u32',
+          CustomDataLimit: 'u32',
+          FungibleSponsorTimeout: 'u32',
+          NftSponsorTimeout: 'u32',
+          OffchainSchemaLimit: 'u32',
+          RefungibleSponsorTimeout: 'u32',
+          VariableOnChainSchemaLimit: 'u32'
         },
         Collection: {
-          Owner: 'AccountId',
-          Mode: 'CollectionMode',
           Access: 'AccessMode',
+          ConstOnChainSchema: 'Vec<u8>',
           DecimalPoints: 'DecimalPoints',
-          Name: 'Vec<u16>',
           Description: 'Vec<u16>',
-          TokenPrefix: 'Vec<u8>',
+          Limits: 'CollectionLimits',
           MintMode: 'bool',
+          Mode: 'CollectionMode',
+          Name: 'Vec<u16>',
           OffchainSchema: 'Vec<u8>',
+          Owner: 'AccountId',
           SchemaVersion: 'SchemaVersion',
           Sponsorship: 'SponsorshipState',
-          Limits: 'CollectionLimits',
-          VariableOnChainSchema: 'Vec<u8>',
-          ConstOnChainSchema: 'Vec<u8>',
+          TokenPrefix: 'Vec<u8>',
+          VariableOnChainSchema: 'Vec<u8>'
         },
-        RawData: 'Vec<u8>',
-        Address: 'AccountId',
-        LookupSource: 'AccountId',
-        Weight: 'u64',
-        CreateNftData: {
-          const_data: 'Vec<u8>',
-          variable_data: 'Vec<u8>',
+        CollectionId: 'u32',
+        CollectionLimits: {
+          AccountTokenOwnershipLimit: 'u32',
+          OwnerCanDestroy: 'bool',
+          OwnerCanTransfer: 'bool',
+          SponsorTimeout: 'u32',
+          SponsoredDataRateLimit: 'Option<BlockNumber>',
+          SponsoredDataSize: 'u32',
+          TokenLimit: 'u32'
+        },
+        CollectionMode: {
+          _enum: {
+            Fungible: 'DecimalPoints',
+            Invalid: null,
+            NFT: null,
+            ReFungible: null
+          }
         },
         CreateFungibleData: {
-          value: 'u128',
-        },
-        CreateReFungibleData: {
-          const_data: 'Vec<u8>',
-          variable_data: 'Vec<u8>',
-          pieces: 'u128',
+          value: 'u128'
         },
         CreateItemData: {
           _enum: {
-            NFT: 'CreateNftData',
             Fungible: 'CreateFungibleData',
-            ReFungible: 'CreateReFungibleData',
-          },
+            NFT: 'CreateNftData',
+            ReFungible: 'CreateReFungibleData'
+          }
+        },
+        CreateNftData: {
+          const_data: 'Vec<u8>',
+          variable_data: 'Vec<u8>'
+        },
+        CreateReFungibleData: {
+          const_data: 'Vec<u8>',
+          pieces: 'u128',
+          variable_data: 'Vec<u8>'
+        },
+        DecimalPoints: 'u8',
+        FungibleItemType: {
+          Value: 'u128'
+        },
+        LookupSource: 'AccountId',
+        NftItemType: {
+          ConstData: 'Vec<u8>',
+          Owner: 'AccountId',
+          VariableData: 'Vec<u8>'
+        },
+        Ownership: {
+          Fraction: 'u128',
+          Owner: 'AccountId'
+        },
+        RawData: 'Vec<u8>',
+        ReFungibleItemType: {
+          ConstData: 'Vec<u8>',
+          Owner: 'Vec<Ownership<AccountId>>',
+          VariableData: 'Vec<u8>'
         },
         SchemaVersion: {
-          _enum: ['ImageURL', 'Unique'],
+          _enum: ['ImageURL', 'Unique']
         },
-        CollectionId: 'u32',
+        SponsorshipState: {
+          _enum: {
+            Confirmed: 'AccountId',
+            Disabled: null,
+            Unconfirmed: 'AccountId'
+          }
+        },
         TokenId: 'u32',
-        ChainLimits: {
-          CollectionNumbersLimit: 'u32',
-          AccountTokenOwnershipLimit: 'u32',
-          CollectionAdminsLimit: 'u64',
-          CustomDataLimit: 'u32',
-          NftSponsorTimeout: 'u32',
-          FungibleSponsorTimeout: 'u32',
-          RefungibleSponsorTimeout: 'u32',
-          OffchainSchemaLimit: 'u32',
-          VariableOnChainSchemaLimit: 'u32',
-          ConstOnChainSchemaLimit: 'u32',
-        },
-        CollectionLimits: {
-          AccountTokenOwnershipLimit: 'u32',
-          SponsoredDataSize: 'u32',
-          SponsoredDataRateLimit: 'Option<BlockNumber>',
-          TokenLimit: 'u32',
-          SponsorTimeout: 'u32',
-          OwnerCanTransfer: 'bool',
-          OwnerCanDestroy: 'bool',
-        },
-        AccountInfo: 'AccountInfoWithDualRefCount',
-      },
-    },
-  ],
-}
+        Weight: 'u64'
+      }
+    }
+  ]
+};
 
-export default bundledTypesDefinitions
+export default bundledTypesDefinitions;

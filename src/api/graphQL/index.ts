@@ -1,18 +1,18 @@
-export * as account from './account/account'
-export * from './account/types'
-export * as blockDetail from './blockDetail/blockInfo'
-export * from './blockDetail/types'
-export * as lastBlocks from './blocks/block'
-export * from './blocks/types'
-export * as collections from './collections/collections'
-export * from './collections/types'
-export * as eventsForBlock from './eventsForBlock/eventsForBlock'
-export * from './eventsForBlock/types'
-export * as extrinsic from './extrinsic/extrinsic'
-export * from './extrinsic/types'
-export * as extrinsicForBlock from './extrinsicsForBlock/extrinsicsForBlock'
-export * from './extrinsicsForBlock/types'
-export * as tokens from './tokens/tokens'
-export * from './tokens/types'
-export * as transfers from './transfers/transfers'
-export * from './transfers/types'
+export * as account from './account/account';
+export * from './account/types';
+export * as blockDetail from './blockDetail/blockInfo';
+export * from './blockDetail/types';
+export * as lastBlocks from './blocks/block';
+export * from './blocks/types';
+export * as collections from './collections/collections';
+export * from './collections/types';
+export * as eventsForBlock from './eventsForBlock/eventsForBlock';
+export * from './eventsForBlock/types';
+export * as extrinsic from './extrinsic/extrinsic';
+export * from './extrinsic/types';
+export * as extrinsicForBlock from './extrinsicsForBlock/extrinsicsForBlock';
+export * from './extrinsicsForBlock/types';
+export * as tokens from './tokens/tokens';
+export * from './tokens/types';
+export * as transfers from './transfers/transfers';
+export * from './transfers/types';
