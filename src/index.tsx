@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { Account, Block, Extrinsic, Main } from './pages';
+import { Market, MyTokens, Trades, FAQ } from './pages';
 
 ReactDOM.render(
   <React.StrictMode>
@@ -13,15 +13,27 @@ ReactDOM.render(
           path={'/'}
         >
           <Route
-            element={<Main />}
+            element={<Market />}
             index={true}
           />
-          <Route path={':chainId/'}>
+          <Route
+            element={<MyTokens />}
+            path={'myTokens'}
+          />
+          <Route
+            element={<Trades />}
+            path={'trades'}
+          />
+          <Route
+            element={<FAQ />}
+            path={'faq'}
+          />
+          {/* <Route path={':chainId/'}>
             <Route
-              element={<Main />}
+              element={<MyStuff />}
               index={true}
             />
-            <Route
+            {/* <Route
               element={<Account />}
               path={'account/:accountId'}
             />
@@ -33,7 +45,7 @@ ReactDOM.render(
               element={<Block />}
               path={'block/:blockIndex'}
             />
-          </Route>
+         </Route> */}
         </Route>
       </Routes>
     </Router>

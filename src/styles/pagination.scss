@@ -1,14 +1,16 @@
-@import 'global';
+@import "global";
 
 .pagination-container {
   list-style: none;
   padding: 0;
   display: flex;
+
   li {
     padding: 4px 6px;
     min-width: 18px;
     text-align: center;
     cursor: pointer;
+
     &.active {
       border: 1px solid var(--primary-color);
       color: var(--white-color);
@@ -17,17 +19,19 @@
       cursor: default;
     }
   }
-  li:last-child, li:first-child {
-    padding: 0px 0px;
+
+  li:last-child,
+  li:first-child {
+    padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
   }
+
   li:first-child {
     transform: rotate(180deg);
   }
 }
-
 
 @media (max-width: 767px) {
   .pagination-wrapper {

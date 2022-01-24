@@ -1,24 +1,32 @@
 import React, { FC, useMemo } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, Link } from 'react-router-dom';
 import { Layout } from '@unique-nft/ui-kit';
-import Footer from './Footer';
-import Header from './Header';
+import { Header } from './Header/Header';
 
 const PageLayout: FC = (props) => {
   const { pathname } = useLocation();
 
   const layoutProps = useMemo(() => {
-    if (pathname === '/') return { heading: 'Block Explorer' };
+    if (pathname === '/') return { heading: 'Market ' };
 
-    if (/^\/extrinsic\//.test(pathname)) { return { breadcrumbs: { options: [{ link: '/', title: 'Home' }, { title: 'Extrinsic' }] } }; }
+    if (pathname === '/myStuff') { return { heading: 'My Stuff ' }; }
 
-    if (/^\/account\//.test(pathname)) { return { breadcrumbs: { options: [{ link: '/', title: 'Home' }, { title: 'Account' }] } }; }
+    if (pathname === '/trades') { return { heading: 'Trades ' }; }
+
+    if (pathname === '/faq') { return { heading: 'FAQ ' }; }
+
+    // if (/^\/myStuff\//.test(pathname)) { return { breadcrumbs: { options: [{ link: '/', title: 'Home' }, { title: 'My Stuff' }] } }; }
+
+    // if (/^\/trades\//.test(pathname)) { return { breadcrumbs: { options: [{ link: '/', title: 'Home' }, { title: 'Trades' }] } }; }
   }, [pathname]);
+
+  console.log('layoutProps', layoutProps);
+  console.log('pathname', pathname);
 
   return (
     <Layout
 {...layoutProps}
-footer={<Footer />}
+// footer={<div>Footer</div>}
 header={<Header />}
     >
       <Outlet />
