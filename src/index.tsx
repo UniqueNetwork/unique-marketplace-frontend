@@ -28,24 +28,6 @@ ReactDOM.render(
             element={<FAQ />}
             path={'faq'}
           />
-          {/* <Route path={':chainId/'}>
-            <Route
-              element={<MyStuff />}
-              index={true}
-            />
-            {/* <Route
-              element={<Account />}
-              path={'account/:accountId'}
-            />
-            <Route
-              element={<Extrinsic />}
-              path={'extrinsic/:blockIndex'}
-            />
-            <Route
-              element={<Block />}
-              path={'block/:blockIndex'}
-            />
-         </Route> */}
         </Route>
       </Routes>
     </Router>
