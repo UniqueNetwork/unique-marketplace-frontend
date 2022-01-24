@@ -9,7 +9,7 @@ import config from '../../../config';
 const { IPFSGateway } = config;
 
 class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
-  private api: ApiPromise
+  private api: ApiPromise;
 
   constructor (api: ApiPromise) {
     this.api = api;

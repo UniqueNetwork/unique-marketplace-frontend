@@ -7,7 +7,7 @@ export interface IGqlClient {
 }
 
 export class GqlClient implements IGqlClient {
-  public client: ApolloClient<NormalizedCacheObject>
+  public client: ApolloClient<NormalizedCacheObject>;
 
   constructor (gqlEndpoint: string) {
     this.client = getApolloClient(gqlEndpoint);

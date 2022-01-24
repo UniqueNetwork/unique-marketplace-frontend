@@ -10,11 +10,11 @@ import logo from '../../logos/logo-white-label-market.svg';
 // import { useApi } from '../hooks/useApi';
 
 interface Props {
-    className?: string;
-    //   isInline?: boolean
-    //   logo?: keyof typeof namedLogos
-    //   onClick?: () => any
-    //   withoutHl?: boolean
+  className?: string;
+  //   isInline?: boolean
+  //   logo?: keyof typeof namedLogos
+  //   onClick?: () => any
+  //   withoutHl?: boolean
 }
 
 // function sanitize(value?: string): string {
@@ -22,17 +22,17 @@ interface Props {
 // }
 
 export function Header(): React.ReactElement<Props> {
-    return (
-        <HeaderStyled>
-            <img src={logo} />
-            <nav>
-                <Link to='/'>Market</Link>
-                <Link to='myTokens'>MyTokens</Link>
-                <Link to='trades'>Trades</Link>
-                <Link to='faq'>FAQ</Link>
-            </nav>
-        </HeaderStyled>
-    );
+  return (
+    <HeaderStyled>
+      <img src={logo} />
+      <nav>
+        <Link to='/'>Market</Link>
+        <Link to='myTokens'>MyTokens</Link>
+        <Link to='trades'>Trades</Link>
+        <Link to='faq'>FAQ</Link>
+      </nav>
+    </HeaderStyled>
+  );
 }
 
 const HeaderStyled = styled.div`

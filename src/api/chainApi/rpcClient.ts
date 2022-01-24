@@ -8,14 +8,14 @@ import UniqueNFTController from './unique/unique';
 import { ChainData } from '../ApiContext';
 
 export class RpcClient implements IRpcClient {
-  public controller?: INFTController<any, any>
-  public rawRpcApi?: ApiPromise
-  public isApiConnected = false
-  public isApiInitialized = false
-  public apiError?: string
-  public chainData: any = undefined
-  public rpcEndpoint: string
-  private options: IRpcClientOptions
+  public controller?: INFTController<any, any>;
+  public rawRpcApi?: ApiPromise;
+  public isApiConnected = false;
+  public isApiInitialized = false;
+  public apiError?: string;
+  public chainData: any = undefined;
+  public rpcEndpoint: string;
+  private options: IRpcClientOptions;
 
   constructor (rpcEndpoint: string, options?: IRpcClientOptions) {
     this.rpcEndpoint = rpcEndpoint;
