@@ -7,13 +7,13 @@ const PageLayout: FC = (props) => {
   const { pathname } = useLocation();
 
   const layoutProps = useMemo(() => {
-    if (pathname === '/') return { heading: 'Market ' };
+    if (pathname === '/') return { heading: 'Market' };
 
-    if (pathname === '/myStuff') { return { heading: 'My Stuff ' }; }
+    if (pathname === '/myTokens') { return { heading: 'My tokens' }; }
 
-    if (pathname === '/trades') { return { heading: 'Trades ' }; }
+    if (pathname === '/trades') { return { heading: 'Trades' }; }
 
-    if (pathname === '/faq') { return { heading: 'FAQ ' }; }
+    if (pathname === '/faq') { return { heading: 'FAQ' }; }
 
     // if (/^\/myStuff\//.test(pathname)) { return { breadcrumbs: { options: [{ link: '/', title: 'Home' }, { title: 'My Stuff' }] } }; }
 

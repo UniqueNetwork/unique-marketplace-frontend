@@ -38,4 +38,7 @@ export function Header(): React.ReactElement<Props> {
 const HeaderStyled = styled.div`
   display: flex;
   align-items: center;
+  a{
+    margin-left: 16px;
+  }
 `;
