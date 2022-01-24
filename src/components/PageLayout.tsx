@@ -1,9 +1,9 @@
-import React, { FC, useMemo } from 'react';
-import { Outlet, useLocation, Link } from 'react-router-dom';
+import { FC, useMemo } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import { Layout } from '@unique-nft/ui-kit';
 import { Header } from './Header/Header';
 
-const PageLayout: FC = (props) => {
+const PageLayout: FC = () => {
   const { pathname } = useLocation();
 
   const layoutProps = useMemo(() => {

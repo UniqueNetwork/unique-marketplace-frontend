@@ -1,27 +1,10 @@
-import React, { useMemo } from 'react';
+import { FC } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-// import { useApi } from '../../hooks/useApi';
-// import { namedLogos, chainLogos, nodeLogos, emptyLogos } from '../../logos';
-// import ChainLogo from '../ChainLogo';
+
 import logo from '../../logos/logo-white-label-market.svg';
 
-// import { chainLogos, emptyLogos, namedLogos, nodeLogos } from '../logos';
-// import { useApi } from '../hooks/useApi';
-
-interface Props {
-  className?: string;
-  //   isInline?: boolean
-  //   logo?: keyof typeof namedLogos
-  //   onClick?: () => any
-  //   withoutHl?: boolean
-}
-
-// function sanitize(value?: string): string {
-//     return value?.toLowerCase().replace('-', ' ') || '';
-// }
-
-export function Header(): React.ReactElement<Props> {
+export const Header: FC = () => {
   return (
     <HeaderStyled>
       <img src={logo} />
@@ -33,12 +16,13 @@ export function Header(): React.ReactElement<Props> {
       </nav>
     </HeaderStyled>
   );
-}
+};
 
 const HeaderStyled = styled.div`
   display: flex;
   align-items: center;
-  a{
+
+  a {
     margin-left: 16px;
   }
 `;
