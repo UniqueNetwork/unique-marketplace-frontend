@@ -30,7 +30,7 @@ const getStatusQuery = (status: TokenStatus, currentAccount: string | null = nul
     // TODO: waiting BE
     case TokenStatus.myBets:
       return {};
-      case TokenStatus.ownedByMe:
+    case TokenStatus.ownedByMe:
       return {
         owner: { _eq: currentAccount }
       };
