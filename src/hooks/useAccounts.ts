@@ -1,4 +1,4 @@
-import { web3Accounts, web3Enable, web3FromAddress, web3ListRpcProviders, web3UseRpcProvider } from '@polkadot/extension-dapp';
+import { web3Accounts, web3Enable } from '@polkadot/extension-dapp';
 import { useEffect, useState } from 'react';
 import type { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
 
