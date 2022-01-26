@@ -11,29 +11,48 @@ export interface TokensVariables {
     data: {
       hex: string
     }
-    collection: {
-      name: string
-      token_prefix: string
-    }
+    token_prefix: string
+    collection_name: string
+    image_path: string
     owner: string
   }
 
   export interface TokensData {
-    tokens: Token[]
-    tokens_aggregate: {
+    view_tokens: Token[]
+    view_tokens_aggregate: {
       aggregate: {
         count: number
       }
     }
   }
 
+  export enum TokenStatus {
+    ownedByMe = 'My tokens', // used for "My stuff" page
+    myOnSell = 'My NFTs on sell',
+    fixedPrice = 'Fixed price',
+    timedAuction = 'Timed auction',
+    myBets = 'My bets'
+  }
+
+  export interface PriceFilter {
+    min: number | undefined,
+    max: number | undefined
+  }
+  export interface TokensFilter {
+    status: TokenStatus[],
+    price: PriceFilter,
+    collections: number[] | undefined,
+    search: string | undefined,
+  }
+
   export type useGraphQlTokensProps = {
     pageSize: number
-    filter?: Record<string, unknown>
+    filter?: TokensFilter
   }
 
   export type FetchMoreTokensOptions = {
+    filter?: TokensFilter
     limit?: number
     offset?: number
-    searchString?: string
+    orderDir?: ['asc', 'dsc']
   }

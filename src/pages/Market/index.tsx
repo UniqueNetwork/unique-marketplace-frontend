@@ -24,7 +24,7 @@ const MarketPage = () => {
           tokens.map((token: Token) => (
             <TokensCard
               {...token}
-              key={`token-${token.id}`}
+              key={`token-${token.token_prefix}-${token.token_id}`}
             />
           ))}
 
