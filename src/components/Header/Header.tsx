@@ -21,7 +21,7 @@ export const Header: FC = () => {
       onClick={buttonClick}
       role='outlined'
       title='Create or connect account'
-    />;
+      />;
 
     const balance = 0;
 

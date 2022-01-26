@@ -1,9 +1,9 @@
 import { FC, useMemo } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Layout } from '@unique-nft/ui-kit';
-import { Header } from './Header/Header';
+import { Header } from '.';
 
-const PageLayout: FC = () => {
+export const PageLayout: FC = () => {
   const { pathname } = useLocation();
 
   const layoutProps = useMemo(() => {
@@ -33,5 +33,3 @@ header={<Header />}
     </Layout>
   );
 };
-
-export default PageLayout;

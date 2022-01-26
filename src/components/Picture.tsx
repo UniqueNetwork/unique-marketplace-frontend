@@ -5,7 +5,7 @@ interface PictureProps {
   alt: string
 }
 
-const Picture: FC<PictureProps> = (props) => {
+export const Picture: FC<PictureProps> = (props) => {
   const { alt, src } = props;
 
   return (<div className={'picture'}>
@@ -32,5 +32,3 @@ y={0}
     }
   </div>);
 };
-
-export default Picture;
