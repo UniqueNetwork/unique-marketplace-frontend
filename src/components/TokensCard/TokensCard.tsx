@@ -8,19 +8,19 @@ type TTokensCard = Token
 
 export const TokensCard: FC<TTokensCard> = (props) => {
     const [tokenImageUrl, setTokenImageUrl] = useState<string>();
-    const { collection, collection_id: collectionId, data, id, owner, token_id: tokenId } = props;
+    const { collection_id: collectionId, collection_name, data, id, image_path, owner, token_id: tokenId, token_prefix } = props;
 
     return (
         <TokensCardStyled>
             <Picture
                 alt={tokenId.toString()}
-                src={tokenImageUrl}
+                src={image_path}
             />
             <div className={'flexbox-container flexbox-container_column flexbox-container_without-gap'}>
-                <Heading size={'4'}>{`${collection.token_prefix || ''} #${tokenId}`}</Heading>
+                <Heading size={'4'}>{`${token_prefix || ''} #${tokenId}`}</Heading>
                 <div>
                     <a>
-                        {collection.name} [ID&nbsp;{collectionId}]
+                        {collection_name} [ID&nbsp;{collectionId}]
                     </a>
                 </div>
                 <div className={'text_grey margin-top'}>Transfers: 0</div>
