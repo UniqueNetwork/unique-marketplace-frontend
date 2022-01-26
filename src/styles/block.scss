@@ -17,7 +17,6 @@
         min-width: 100%;
         max-width: 100%;
         border-radius: 0;
-
         border: 1px solid #009cf0;
 
         &:first-child {
@@ -49,6 +48,7 @@
     .rc-table-row {
       display: flex;
       flex-direction: column;
+
       //min-width: 100vw;
       .rc-table-cell {
         border: none;
@@ -77,6 +77,7 @@
 
     &__text-wrap {
       max-width: 100%;
+
       //white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;

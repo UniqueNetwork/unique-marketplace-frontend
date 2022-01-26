@@ -1,4 +1,4 @@
-const collectionParam = { name: 'collection', type: 'UpDataStructsCollectionId' }
+const collectionParam = { name: 'collection', type: 'UpDataStructsCollectionId' };
 
 type RpcParam = {
   name: string
@@ -6,19 +6,19 @@ type RpcParam = {
   isOptional?: true
 }
 
-const atParam = { isOptional: true, name: 'at', type: 'Hash' }
+const atParam = { isOptional: true, name: 'at', type: 'Hash' };
 
 const fun = (description: string, params: RpcParam[], type: string) => ({
   description,
   params: [...params, atParam],
-  type,
-})
+  type
+});
 
-const CROSS_ACCOUNT_ID_TYPE = 'PalletCommonAccountBasicCrossAccountIdRepr'
-const TOKEN_ID_TYPE = 'UpDataStructsTokenId'
+const CROSS_ACCOUNT_ID_TYPE = 'PalletCommonAccountBasicCrossAccountIdRepr';
+const TOKEN_ID_TYPE = 'UpDataStructsTokenId';
 
-const crossAccountParam = (name = 'account') => ({ name, type: CROSS_ACCOUNT_ID_TYPE })
-const tokenParam = { name: 'tokenId', type: TOKEN_ID_TYPE }
+const crossAccountParam = (name = 'account') => ({ name, type: CROSS_ACCOUNT_ID_TYPE });
+const tokenParam = { name: 'tokenId', type: TOKEN_ID_TYPE };
 
 const rpcMethods = {
   accountBalance: fun(
@@ -71,7 +71,7 @@ const rpcMethods = {
   lastTokenId: fun('Get last token id', [collectionParam], TOKEN_ID_TYPE),
   tokenExists: fun('Check if token exists', [collectionParam, tokenParam], 'bool'),
   tokenOwner: fun('Get token owner', [collectionParam, tokenParam], CROSS_ACCOUNT_ID_TYPE),
-  variableMetadata: fun('Get token variable metadata', [collectionParam, tokenParam], 'Vec<u8>'),
-}
+  variableMetadata: fun('Get token variable metadata', [collectionParam, tokenParam], 'Vec<u8>')
+};
 
-export default rpcMethods
+export default rpcMethods;

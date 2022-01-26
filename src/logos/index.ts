@@ -1,79 +1,79 @@
 // last-resort fallback, just something empty
-import emptyLogo from './empty.svg'
+import emptyLogo from './empty.svg';
 
 // The mapping here is done on the actual chain name (system.chain RPC) or
 // the actual RPC node it is corrected to (system.name RPC)
 
 // anything for a specific chain, most would probably fit into the node category (but allow for chain-specific)
 // alphabetical
-const chainDusty = '/logos/chains/dusty.png'
-const chainHydrate = '/logos/chains/hydrate.png'
-const chainKusama = '/logos/chains/kusama-128.gif'
-const chainPolkaBTC = '/logos/chains/polkabtc.png'
-const chainQuartz = '/logos/chains/quartz.png'
-const chainRococo = '/logos/chains/rococo.svg'
-const chainRococoTick = '/logos/chains/rococo-tick.svg'
-const chainRococoTrack = '/logos/chains/rococo-track.svg'
-const chainRococoTrick = '/logos/chains/rococo-trick.svg'
-const chainSnakenet = '/logos/chains/snakenet.svg'
-const chainUnique = '/logos/chains/unique.svg'
-const extensionPolkadotJs = '/logos/extensions/polkadot-js.svg'
-const externalCommonwealth = '/logos/external/commonwealth.png'
-const externalPolkascan = '/logos/external/polkascan.png'
-const externalPolkassembly = '/logos/external/polkassembly.png'
-const externalPolkastats = '/logos/external/polkastats.png'
-const externalSubscan = '/logos/external/subscan.svg'
-const nodeAcala = '/logos/nodes/acala-circle.svg'
-const nodeAres = '/logos/nodes/ares.svg'
-const nodeBifrost = '/logos/nodes/bifrost.svg'
-const nodeBitCountry = '/logos/nodes/bitcountry.svg'
-const nodeCanvas = '/logos/nodes/canvas-2.png'
-const nodeCentrifuge = '/logos/nodes/centrifuge.png'
-const nodeChainx = '/logos/nodes/chainx.svg'
-const nodeClover = '/logos/nodes/clover.svg'
-const nodeCrab = '/logos/nodes/crab.svg'
-const nodeCrust = '/logos/nodes/crust.svg'
-const nodeDarwinia = '/logos/nodes/darwinia.png'
-const nodeDataHighway = '/logos/nodes/datahighway.png'
-const nodeDockMainnet = '/logos/nodes/dock-mainnet.png'
-const nodeDockTestnet = '/logos/nodes/dock-testnet.png'
-const nodeDotMog = '/logos/nodes/dotmog.svg'
-const nodeEdgeware = '/logos/nodes/edgeware-circle.svg'
-const nodeEncointerNotee = '/logos/nodes/encointer-notee.svg'
-const nodeEncointerTeeproxy = '/logos/nodes/encointer-teeproxy.svg'
-const nodeEquilibrium = '/logos/nodes/equilibrium.svg'
-const nodeHanonycash = '/logos/nodes/hanonycash.svg'
-const nodeIdavoll = '/logos/nodes/idavoll.png'
-const nodeIntegritee = '/logos/nodes/integritee.svg'
-const nodeJupiter = '/logos/nodes/jupiter.svg'
-const nodeKilt = '/logos/nodes/kilt.svg'
-const nodeKulupu = '/logos/nodes/kulupu.svg'
-const nodeLaminar = '/logos/nodes/laminar-circle.svg'
-const nodeLitentry = '/logos/nodes/litentry.png'
-const nodeMath = '/logos/nodes/math.svg'
-const moonbeam = '/logos/nodes/moonbeam.png'
-const nodeNodle = '/logos/nodes/nodle.svg'
-const nodePhala = '/logos/nodes/phala.svg'
-const nodePlasm = '/logos/nodes/plasm.png'
-const nodePolkaBTC = '/logos/nodes/polkabtc.png'
-const nodePolkadex = '/logos/nodes/polkadex.svg'
-const nodePolkadot = '/logos/nodes/polkadot-circle.svg'
-const nodePolkadotJs = '/logos/nodes/polkadot-js.svg'
-const nodeQuartz = '/logos/nodes/quartz.png'
-const nodeRealis = '/logos/nodes/realis.png'
-const nodeRobonomics = '/logos/nodes/robonomics.svg'
-const nodeSgc = '/logos/nodes/sgc.svg'
-const nodeSora = '/logos/nodes/sora-substrate.svg'
-const nodeStafi = '/logos/nodes/stafi.png'
-const nodeSubDAO = '/logos/nodes/subdao.png'
-const nodeSubsocial = '/logos/nodes/subsocial.svg'
-const nodeSubstrate = '/logos/nodes/substrate-hexagon.svg'
-const nodeTernoa = '/logos/nodes/ternoa.svg'
-const nodeTrustBase = '/logos/nodes/trustbase.png'
-const nodeUniarts = '/logos/nodes/uniarts.png'
-const nodeUnique = '/logos/nodes/unique.svg'
-const nodeZenlink = '/logos/nodes/zenlink.svg'
-const nodeZero = '/logos/nodes/zero.svg'
+const chainDusty = '/logos/chains/dusty.png';
+const chainHydrate = '/logos/chains/hydrate.png';
+const chainKusama = '/logos/chains/kusama-128.gif';
+const chainPolkaBTC = '/logos/chains/polkabtc.png';
+const chainQuartz = '/logos/chains/quartz.png';
+const chainRococo = '/logos/chains/rococo.svg';
+const chainRococoTick = '/logos/chains/rococo-tick.svg';
+const chainRococoTrack = '/logos/chains/rococo-track.svg';
+const chainRococoTrick = '/logos/chains/rococo-trick.svg';
+const chainSnakenet = '/logos/chains/snakenet.svg';
+const chainUnique = '/logos/chains/unique.svg';
+const extensionPolkadotJs = '/logos/extensions/polkadot-js.svg';
+const externalCommonwealth = '/logos/external/commonwealth.png';
+const externalPolkascan = '/logos/external/polkascan.png';
+const externalPolkassembly = '/logos/external/polkassembly.png';
+const externalPolkastats = '/logos/external/polkastats.png';
+const externalSubscan = '/logos/external/subscan.svg';
+const nodeAcala = '/logos/nodes/acala-circle.svg';
+const nodeAres = '/logos/nodes/ares.svg';
+const nodeBifrost = '/logos/nodes/bifrost.svg';
+const nodeBitCountry = '/logos/nodes/bitcountry.svg';
+const nodeCanvas = '/logos/nodes/canvas-2.png';
+const nodeCentrifuge = '/logos/nodes/centrifuge.png';
+const nodeChainx = '/logos/nodes/chainx.svg';
+const nodeClover = '/logos/nodes/clover.svg';
+const nodeCrab = '/logos/nodes/crab.svg';
+const nodeCrust = '/logos/nodes/crust.svg';
+const nodeDarwinia = '/logos/nodes/darwinia.png';
+const nodeDataHighway = '/logos/nodes/datahighway.png';
+const nodeDockMainnet = '/logos/nodes/dock-mainnet.png';
+const nodeDockTestnet = '/logos/nodes/dock-testnet.png';
+const nodeDotMog = '/logos/nodes/dotmog.svg';
+const nodeEdgeware = '/logos/nodes/edgeware-circle.svg';
+const nodeEncointerNotee = '/logos/nodes/encointer-notee.svg';
+const nodeEncointerTeeproxy = '/logos/nodes/encointer-teeproxy.svg';
+const nodeEquilibrium = '/logos/nodes/equilibrium.svg';
+const nodeHanonycash = '/logos/nodes/hanonycash.svg';
+const nodeIdavoll = '/logos/nodes/idavoll.png';
+const nodeIntegritee = '/logos/nodes/integritee.svg';
+const nodeJupiter = '/logos/nodes/jupiter.svg';
+const nodeKilt = '/logos/nodes/kilt.svg';
+const nodeKulupu = '/logos/nodes/kulupu.svg';
+const nodeLaminar = '/logos/nodes/laminar-circle.svg';
+const nodeLitentry = '/logos/nodes/litentry.png';
+const nodeMath = '/logos/nodes/math.svg';
+const moonbeam = '/logos/nodes/moonbeam.png';
+const nodeNodle = '/logos/nodes/nodle.svg';
+const nodePhala = '/logos/nodes/phala.svg';
+const nodePlasm = '/logos/nodes/plasm.png';
+const nodePolkaBTC = '/logos/nodes/polkabtc.png';
+const nodePolkadex = '/logos/nodes/polkadex.svg';
+const nodePolkadot = '/logos/nodes/polkadot-circle.svg';
+const nodePolkadotJs = '/logos/nodes/polkadot-js.svg';
+const nodeQuartz = '/logos/nodes/quartz.png';
+const nodeRealis = '/logos/nodes/realis.png';
+const nodeRobonomics = '/logos/nodes/robonomics.svg';
+const nodeSgc = '/logos/nodes/sgc.svg';
+const nodeSora = '/logos/nodes/sora-substrate.svg';
+const nodeStafi = '/logos/nodes/stafi.png';
+const nodeSubDAO = '/logos/nodes/subdao.png';
+const nodeSubsocial = '/logos/nodes/subsocial.svg';
+const nodeSubstrate = '/logos/nodes/substrate-hexagon.svg';
+const nodeTernoa = '/logos/nodes/ternoa.svg';
+const nodeTrustBase = '/logos/nodes/trustbase.png';
+const nodeUniarts = '/logos/nodes/uniarts.png';
+const nodeUnique = '/logos/nodes/unique.svg';
+const nodeZenlink = '/logos/nodes/zenlink.svg';
+const nodeZero = '/logos/nodes/zero.svg';
 
 // Alphabetical overrides based on the actual matched chain name
 // NOTE: This is as retrieved via system.chain RPC
@@ -115,14 +115,14 @@ export const chainLogos: Record<string, unknown> = [
   ['Trick', chainRococoTrick],
   ['TrustBase PC1', nodeTrustBase],
   ['Uniarts', nodeUniarts],
-  ['Unique', chainUnique],
+  ['Unique', chainUnique]
 ].reduce(
   (logos, [chain, logo]): Record<string, unknown> => ({
     ...logos,
-    [(chain as string).toLowerCase()]: logo,
+    [(chain).toLowerCase()]: logo
   }),
   {}
-)
+);
 
 // Alphabetical overrides based on the actual software node type
 // NOTE: This is as retrieved via system.name RPC
@@ -194,14 +194,14 @@ export const nodeLogos: Record<string, unknown> = [
   ['Zenlink Collator', nodeZenlink],
   ['SubDAO Collator', nodeSubDAO],
   ['Uniarts', nodeUniarts],
-  ['Unique Node', nodeUnique],
+  ['Unique Node', nodeUnique]
 ].reduce(
   (logos, [node, logo]): Record<string, unknown> => ({
     ...logos,
-    [(node as string).toLowerCase().replace(/-/g, ' ')]: logo,
+    [(node).toLowerCase().replace(/-/g, ' ')]: logo
   }),
   {}
-)
+);
 
 // Alphabetical overrides when we pass an explicit logo name
 // NOTE: Matches with what is defined as "info" in settings/endpoints.ts
@@ -285,13 +285,13 @@ export const namedLogos: Record<string, unknown> = {
   uniarts: nodeUniarts,
   unique: nodeUnique,
   westend: nodePolkadot,
-  zero: nodeZero,
-}
+  zero: nodeZero
+};
 
 // extension logos
 export const extensionLogos: Record<string, unknown> = {
-  'polkadot-js': extensionPolkadotJs,
-}
+  'polkadot-js': extensionPolkadotJs
+};
 
 // external logos, i.e. for explorers
 export const externalLogos: Record<string, unknown> = {
@@ -299,10 +299,10 @@ export const externalLogos: Record<string, unknown> = {
   polkascan: externalPolkascan,
   polkassembly: externalPolkassembly,
   polkastats: externalPolkastats,
-  subscan: externalSubscan,
-}
+  subscan: externalSubscan
+};
 
 // empty logos
 export const emptyLogos: Record<string, unknown> = {
-  empty: emptyLogo,
-}
+  empty: emptyLogo
+};

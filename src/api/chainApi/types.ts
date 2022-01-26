@@ -1,5 +1,5 @@
-import { ChainData } from '../ApiContext'
-import { ApiPromise } from '@polkadot/api'
+import { ChainData } from '../ApiContext';
+import { ApiPromise } from '@polkadot/api';
 
 export interface IRpcClient {
   isApiConnected: boolean

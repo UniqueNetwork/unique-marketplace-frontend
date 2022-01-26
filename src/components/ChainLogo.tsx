@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react'
-import { chainLogos, emptyLogos, namedLogos, nodeLogos } from '../logos'
-import { useApi } from '../hooks/useApi'
+import React, { useMemo } from 'react';
+import { chainLogos, emptyLogos, namedLogos, nodeLogos } from '../logos';
+import { useApi } from '../hooks/useApi';
 
 interface Props {
   className?: string
@@ -10,37 +10,35 @@ interface Props {
   withoutHl?: boolean
 }
 
-function sanitize(value?: string): string {
-  return value?.toLowerCase().replace('-', ' ') || ''
+function sanitize (value?: string): string {
+  return value?.toLowerCase().replace('-', ' ') || '';
 }
 
-function ChainLogo({
-  className = '',
+function ChainLogo ({ className = '',
   isInline,
   logo,
   onClick,
-  withoutHl,
-}: Props): React.ReactElement<Props> {
-  const { chainData } = useApi()
+  withoutHl }: Props): React.ReactElement<Props> {
+  const { chainData } = useApi();
 
   const [isEmpty, img] = useMemo((): [boolean, string] => {
     const found = logo
       ? namedLogos[logo]
-      : chainLogos[sanitize(chainData?.systemChain)] || nodeLogos[sanitize(chainData?.systemName)]
+      : chainLogos[sanitize(chainData?.systemChain)] || nodeLogos[sanitize(chainData?.systemName)];
 
-    return [!found || logo === 'empty', (found || emptyLogos.empty) as string]
-  }, [logo, chainData?.systemChain, chainData?.systemName])
+    return [!found || logo === 'empty', (found || emptyLogos.empty) as string];
+  }, [logo, chainData?.systemChain, chainData?.systemName]);
 
   return (
     <img
-      alt="chain logo"
+      alt='chain logo'
       className={`chain-logo ${className}${isEmpty && !withoutHl ? ' highlight--bg' : ''}${
         isInline ? ' isInline' : ''
       }`}
       onClick={onClick}
       src={img}
     />
-  )
+  );
 }
 
-export default React.memo(ChainLogo)
+export default React.memo(ChainLogo);

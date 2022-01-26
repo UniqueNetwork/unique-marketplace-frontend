@@ -1,5 +1,5 @@
-import { AccountId } from '@polkadot/types/interfaces'
-import { IKeyringPair } from '@polkadot/types/types'
+import { AccountId } from '@polkadot/types/interfaces';
+import { IKeyringPair } from '@polkadot/types/types';
 
 export type CrossAccountId =
   | {
@@ -9,41 +9,41 @@ export type CrossAccountId =
       Ethereum: string
     }
 
-export function normalizeAccountId(
+export function normalizeAccountId (
   input: string | AccountId | CrossAccountId | IKeyringPair
 ): CrossAccountId {
   if (typeof input === 'string') {
     if (input.length === 48 || input.length === 47) {
-      return { Substrate: input }
+      return { Substrate: input };
     } else if (input.length === 42 && input.startsWith('0x')) {
-      return { Ethereum: input.toLowerCase() }
+      return { Ethereum: input.toLowerCase() };
     } else if (input.length === 40 && !input.startsWith('0x')) {
-      return { Ethereum: '0x' + input.toLowerCase() }
+      return { Ethereum: '0x' + input.toLowerCase() };
     } else {
-      throw new Error(`Unknown address format: "${input}"`)
+      throw new Error(`Unknown address format: "${input}"`);
     }
   }
 
   if ('address' in input) {
-    return { Substrate: input.address }
+    return { Substrate: input.address };
   }
 
   if ('Ethereum' in input) {
     return {
-      Ethereum: input.Ethereum.toLowerCase(),
-    }
+      Ethereum: input.Ethereum.toLowerCase()
+    };
   } else if ('ethereum' in input) {
     return {
-      Ethereum: (input as { ethereum: string }).ethereum.toLowerCase(),
-    }
+      Ethereum: (input as { ethereum: string }).ethereum.toLowerCase()
+    };
   } else if ('Substrate' in input) {
-    return input
+    return input;
   } else if ('substrate' in input) {
     return {
-      Substrate: (input as { substrate: string }).substrate,
-    }
+      Substrate: (input as { substrate: string }).substrate
+    };
   }
 
   // AccountId
-  return { Substrate: input.toString() }
+  return { Substrate: input.toString() };
 }

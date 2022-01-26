@@ -1,5 +1,6 @@
-import { gql, useQuery } from '@apollo/client'
-import { AccountData, AccountVariables } from './types'
+import { gql, useQuery } from '@apollo/client';
+import { AccountData, AccountVariables } from './types';
+
 const accountQuery = gql`
   query getAccount($accountId: String!) {
     account_by_pk(account_id: $accountId) {
@@ -14,18 +15,18 @@ const accountQuery = gql`
       timestamp
     }
   }
-`
+`;
 
 export const useGraphQlAccount = (accountId: string) => {
-  const { loading: isAccountFetching, data: account } = useQuery<AccountData, AccountVariables>(
+  const { data: account, loading: isAccountFetching } = useQuery<AccountData, AccountVariables>(
     accountQuery,
     {
-      variables: { accountId },
       notifyOnNetworkStatusChange: true,
+      variables: { accountId }
     }
-  )
+  );
 
-  return { account: account?.account_by_pk, isAccountFetching }
-}
+  return { account: account?.account_by_pk, isAccountFetching };
+};
 
-export { accountQuery }
+export { accountQuery };
