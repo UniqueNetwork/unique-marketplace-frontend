@@ -1,10 +1,11 @@
 {
-  "name": "uniq-blockexplorer",
+  "name": "uniq-market",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
     "@apollo/client": "^3.5.5",
     "@polkadot/api": "6.10.4-4",
+    "@polkadot/extension-dapp": "^0.42.7",
     "@polkadot/keyring": "^8.1.2",
     "@polkadot/networks": "^8.1.2",
     "@polkadot/rpc-provider": "6.10.4-4",
