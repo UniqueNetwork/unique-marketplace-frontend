@@ -6,7 +6,7 @@ const dontCache = () => {
     // Don't client separate results based on
     // any of this field's arguments.
     keyArgs: false,
-    merge (existing = [], incoming: any[]) {
+    merge(existing = [], incoming: any[]) {
       // aggregations bypass
       if (!incoming?.length) return incoming;
 
@@ -22,17 +22,23 @@ export const getApolloClient = (clientEndpoint: string) =>
         Query: {
           fields: {
             collections: dontCache,
+            tokens: {
+              keyArgs: false,
+              merge(existing = [], incoming) {
+                return [...existing, ...incoming];
+              }
+            },
             view_extrinsic: dontCache,
             view_extrinsic_aggregate: {
               keyArgs: false,
-              merge (existing = [], incoming) {
+              merge(existing = [], incoming) {
                 return incoming;
               }
             },
             view_last_block: dontCache,
             view_last_block_aggregate: {
               keyArgs: false,
-              merge (existing = [], incoming) {
+              merge(existing = [], incoming) {
                 return incoming;
               }
             },

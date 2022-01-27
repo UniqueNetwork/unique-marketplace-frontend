@@ -10,7 +10,6 @@ import type { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
 // meta.source contains the name of the extension that provides this account
 
 // async function allAccounts =() => await web3Accounts();
-// console.log('allAccounts', allAccounts);
 
 export const useAccounts = () => {
     const [accounts, setAccounts] = useState<InjectedAccountWithMeta[]>([]);

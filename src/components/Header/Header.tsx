@@ -13,8 +13,6 @@ export const Header: FC = () => {
     console.log('button is clicked');
   };
 
-  console.log('allAccounts', allAccounts);
-
   const account = allAccounts.length !== 0
     ? allAccounts[0].address
     : <Button

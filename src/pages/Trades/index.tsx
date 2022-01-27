@@ -1,9 +1,7 @@
-const TradesPage = () => {
+export const TradesPage = () => {
     return (
       <div>
         TradesPage
       </div>
     );
   };
-
-  export default TradesPage;

@@ -1,38 +1,49 @@
 import styled from 'styled-components';
 import { TokensCard } from '../../components';
 import { Token, tokens as gqlTokens } from '../../api/graphQL';
-import { Button } from '@unique-nft/ui-kit';
 import { useCallback } from 'react';
+import InfiniteScroll from 'react-infinite-scroller';
 
-const MarketPage = () => {
-  const pageSize = 10;
-  const { fetchMoreTokens, tokens, tokensCount } = gqlTokens.useGraphQlTokens({
+export const MarketPage = () => {
+  const pageSize = 5;
+  const { fetchMoreTokens, isTokensFetching, tokens, tokensCount } = gqlTokens.useGraphQlTokens({
     pageSize
   });
+  const hasMore = tokens && tokens.length < tokensCount;
 
   const onClickSeeMore = useCallback(() => {
-    fetchMoreTokens({ limit: pageSize })
-      .catch((errMsg) => console.error(errMsg));
-  }, [fetchMoreTokens]);
+   if (!isTokensFetching) {
+     fetchMoreTokens({ limit: pageSize, offset: tokens?.length })
+     .catch((errMsg) => console.error(errMsg));
+  }
+ }, [fetchMoreTokens, tokens, isTokensFetching]);
 
   return (
     <MarketPageStyled>
       <div className='left-column'>Filters</div>
-      <div className='main-content'>
+      <div
+        className='main-content'
+      >
         cards
-        {tokens?.map &&
-          tokens.map((token: Token) => (
-            <TokensCard
-              {...token}
-              key={`token-${token.id}`}
-            />
-          ))}
 
-        <Button
-          onClick={onClickSeeMore}
-          role='outlined'
-          title='see more'
-        />
+        <InfiniteScroll
+          hasMore={hasMore}
+          initialLoad={false}
+          loadMore={onClickSeeMore}
+          pageStart={1}
+          threshold={200}
+          useWindow={true}
+        >
+          <div className='tokens-list'>
+            {tokens?.map &&
+              tokens.map((token: Token) => (
+                <TokensCard
+                  {...token}
+                  key={`token-${token.id}-${token.token_id}`}
+                />
+              ))}
+          </div>
+        </InfiniteScroll>
       </div>
     </MarketPageStyled>
   );
@@ -51,5 +62,3 @@ const MarketPageStyled = styled.div`
     padding: 0 24px;
   }
 `;
-
-export default MarketPage;

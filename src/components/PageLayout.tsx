@@ -20,9 +20,6 @@ export const PageLayout: FC = () => {
     // if (/^\/trades\//.test(pathname)) { return { breadcrumbs: { options: [{ link: '/', title: 'Home' }, { title: 'Trades' }] } }; }
   }, [pathname]);
 
-  console.log('layoutProps', layoutProps);
-  console.log('pathname', pathname);
-
   return (
     <Layout
 {...layoutProps}
