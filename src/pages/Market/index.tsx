@@ -9,14 +9,17 @@ export const MarketPage = () => {
   const { fetchMoreTokens, isTokensFetching, tokens, tokensCount } = gqlTokens.useGraphQlTokens({
     pageSize
   });
+
+  console.log('tokens', tokens);
   const hasMore = tokens && tokens.length < tokensCount;
 
   const onClickSeeMore = useCallback(() => {
-   if (!isTokensFetching) {
-     fetchMoreTokens({ limit: pageSize, offset: tokens?.length })
-     .catch((errMsg) => console.error(errMsg));
-  }
- }, [fetchMoreTokens, tokens, isTokensFetching]);
+    // Todo: fix twice rendering
+    if (!isTokensFetching) {
+      fetchMoreTokens({ limit: pageSize, offset: tokens?.length })
+        .catch((errMsg) => console.error(errMsg));
+    }
+  }, [fetchMoreTokens, tokens, isTokensFetching]);
 
   return (
     <MarketPageStyled>
@@ -39,7 +42,7 @@ export const MarketPage = () => {
               tokens.map((token: Token) => (
                 <TokensCard
                   {...token}
-                  key={`token-${token.id}-${token.token_id}`}
+                  key={`token-${token.token_prefix}-${token.token_id}`}
                 />
               ))}
           </div>

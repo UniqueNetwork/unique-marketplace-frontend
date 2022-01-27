@@ -22,12 +22,6 @@ export const getApolloClient = (clientEndpoint: string) =>
         Query: {
           fields: {
             collections: dontCache,
-            tokens: {
-              keyArgs: false,
-              merge(existing = [], incoming) {
-                return [...existing, ...incoming];
-              }
-            },
             view_extrinsic: dontCache,
             view_extrinsic_aggregate: {
               keyArgs: false,
@@ -42,7 +36,13 @@ export const getApolloClient = (clientEndpoint: string) =>
                 return incoming;
               }
             },
-            view_last_transfers: dontCache
+            view_last_transfers: dontCache,
+            view_tokens: {
+              keyArgs: false,
+              merge(existing = [], incoming) {
+                return [...existing, ...incoming];
+              }
+            }
           }
         }
       }
