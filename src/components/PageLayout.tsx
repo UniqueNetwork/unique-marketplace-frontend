@@ -3,6 +3,8 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { Layout } from '@unique-nft/ui-kit';
 import { Header } from '.';
 
+export type TMenuItems = 'Market' | 'My tokens' | 'Trades' | 'FAQ';
+
 export const PageLayout: FC = () => {
   const { pathname } = useLocation();
 
@@ -24,7 +26,7 @@ export const PageLayout: FC = () => {
     <Layout
 {...layoutProps}
 // footer={<div>Footer</div>}
-header={<Header />}
+header={<Header activeItem={layoutProps?.heading as TMenuItems || 'Market'} />}
     >
       <Outlet />
     </Layout>
