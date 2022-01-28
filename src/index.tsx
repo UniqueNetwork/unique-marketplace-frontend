@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom';
 import App from './App';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { Market, MyTokens, Trades, FAQ } from './pages';
+import 'normalize.css';
+import 'the-new-css-reset/css/reset.css';
 
 ReactDOM.render(
   <React.StrictMode>
