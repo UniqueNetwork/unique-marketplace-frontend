@@ -5,12 +5,10 @@ import ApiWrapper from './api/ApiWrapper';
 
 export default function App () {
   return (
-    <div className={'app-wrapper'}>
       <ApiWrapper>
         <PageLayout>
           <Outlet />
         </PageLayout>
       </ApiWrapper>
-    </div>
   );
 }

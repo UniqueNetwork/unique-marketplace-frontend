@@ -110,10 +110,10 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
       </RightSide>
       {showMobileMenu && mobileMenuIsOpen && (
         <MobileMenu>
-          <div onClick={mobileMenuToggler}>
+          <LinkWrapper onClick={mobileMenuToggler}>
             <Link to='/'>
               <TextStyled
-                $active={(activeItem === 'Market')}
+                $active={activeItem === 'Market'}
                 color='additional-dark'
                 size='m'
                 weight='medium'
@@ -121,11 +121,11 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 Market
               </TextStyled>
             </Link>
-          </div>
-          <div onClick={mobileMenuToggler}>
+          </LinkWrapper>
+          <LinkWrapper onClick={mobileMenuToggler}>
             <Link to='myTokens'>
               <TextStyled
-                $active={(activeItem === 'My tokens')}
+                $active={activeItem === 'My tokens'}
                 color='additional-dark'
                 size='m'
                 weight='medium'
@@ -133,11 +133,11 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 My tokens
               </TextStyled>
             </Link>
-          </div>
-          <div onClick={mobileMenuToggler}>
+          </LinkWrapper>
+          <LinkWrapper onClick={mobileMenuToggler}>
             <Link to='trades'>
               <TextStyled
-                $active={(activeItem === 'Trades')}
+                $active={activeItem === 'Trades'}
                 color='additional-dark'
                 size='m'
                 weight='medium'
@@ -145,11 +145,11 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 Trades
               </TextStyled>
             </Link>
-          </div>
-          <div onClick={mobileMenuToggler}>
+          </LinkWrapper>
+          <LinkWrapper onClick={mobileMenuToggler}>
             <Link to='faq'>
               <TextStyled
-                $active={(activeItem === 'FAQ')}
+                $active={activeItem === 'FAQ'}
                 color='additional-dark'
                 size='m'
                 weight='medium'
@@ -157,10 +157,9 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 FAQ
               </TextStyled>
             </Link>
-          </div>
+          </LinkWrapper>
         </MobileMenu>
-      )
-      }
+      )}
     </HeaderStyled>
   );
 };
@@ -182,13 +181,13 @@ const LeftSideColumn = styled.div`
 `;
 
 const MenuIcon = styled.img`
- width: 32px;
-      height: 32px;
-      margin-right: 8px;
+  width: 32px;
+  height: 32px;
+  margin-right: 8px;
 `;
 
 const LogoIcon = styled.img`
- margin-right: 32px;
+  margin-right: 32px;
 `;
 
 const RightSide = styled.div`
@@ -198,33 +197,42 @@ const RightSide = styled.div`
 
 const Balance = styled.div`
   margin-left: 16px;
-    margin-right: 16px;
+  margin-right: 16px;
+`;
+
+const LinkWrapper = styled.div`
+  display: contents;
+  a{
+    margin-right:0; 
+  }
 `;
 
 const MobileMenu = styled.div`
   position: absolute;
-    top: 80px;
-    left: 0;
-    right: 0;
-    height: 100vh;
-    background-color: ${AdditionalColorLight};
-    box-shadow: inset 0 2px 8px rgb(0 0 0 / 6%);
-    display: flex;
-    flex-direction: column;
-    padding: 16px;
+  top: 80px;
+  left: 0;
+  right: 0;
+  height: 100vh;
+  background-color: ${AdditionalColorLight};
+  box-shadow: inset 0 2px 8px rgb(0 0 0 / 6%);
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
 `;
 
 const TextStyled = styled(Text) <{ $active?: boolean }>`
-    && {display: flex;
-      min-width: 100%;
-      border-radius: 4px;
-      
-      padding: 8px 16px;
+  && {
+    display: flex;
+    min-width: 100%;
+    border-radius: 4px;
+    padding: 8px 16px;
+    background-color: ${(props) =>
+    props.$active ? Primary500 : 'transparent'};
+    color: ${(props) =>
+    props.$active ? AdditionalColorLight : AdditionalColorDark};
 
-      &:hover{
-        color: ${(props) => props.$active ? AdditionalColorLight : Primary500};
-      }
-      background-color: ${(props) => props.$active ? Primary500 : 'transparent'};
-      color: ${(props) => props.$active ? AdditionalColorLight : AdditionalColorDark};
+    &:hover {
+      color: ${(props) => (props.$active ? AdditionalColorLight : Primary500)};
     }
+  }
 `;
