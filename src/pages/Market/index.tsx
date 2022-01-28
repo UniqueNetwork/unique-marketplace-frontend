@@ -1,14 +1,15 @@
 import styled from 'styled-components';
-import { TokensCard } from '../../components';
+import { Filters, TokensCard } from '../../components';
 import { Token, tokens as gqlTokens } from '../../api/graphQL';
 import { useCallback } from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
+import { Select } from '@unique-nft/ui-kit';
 
 export const MarketPage = () => {
   const pageSize = 5;
   const { fetchMoreTokens, isTokensFetching, tokens, tokensCount } = gqlTokens.useGraphQlTokens({
-    pageSize
-  });
+      pageSize
+    });
 
   console.log('tokens', tokens);
   const hasMore = tokens && tokens.length < tokensCount;
@@ -23,12 +24,17 @@ export const MarketPage = () => {
 
   return (
     <MarketPageStyled>
-      <div className='left-column'>Filters</div>
-      <div
-        className='main-content'
-      >
-        cards
-
+      <div className='left-column'>
+        <Filters />
+      </div>
+      <div className='main-content'>
+        <div className='search-and-sorting'>
+          <div>Waiting for a Search Component from ui-kit</div>
+          <Select
+            onChange={() => { console.log('select changed'); }}
+            options={[{ id: 1, title: 'Listing date' }]}
+          />
+        </div>
         <InfiniteScroll
           hasMore={hasMore}
           initialLoad={false}
