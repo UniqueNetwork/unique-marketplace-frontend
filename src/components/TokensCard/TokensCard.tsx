@@ -41,7 +41,7 @@ color='primary-600'
 size='s'>
           {`${collection_name} [id ${collectionId}]`}
         </Text>
-        <Text size='s'>Transfers: 0</Text>
+        <Text size='s'>Price: 0</Text>
       </Description>
     </TokensCardStyled>
   );

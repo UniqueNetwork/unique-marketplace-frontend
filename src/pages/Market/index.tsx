@@ -23,6 +23,14 @@ export const MarketPage = () => {
     }
   }, [fetchMoreTokens, tokens, isTokensFetching]);
 
+  const sortingOptions = [
+    { iconRight: { name: 'arrow-up', size: 16 }, id: 1, title: 'Price' },
+    { iconRight: { name: 'arrow-down', size: 16 }, id: 2, title: 'Price' },
+    { iconRight: { name: 'arrow-up', size: 16 }, id: 3, title: 'Token ID' },
+    { iconRight: { name: 'arrow-down', size: 16 }, id: 4, title: 'Token ID' },
+    { iconRight: { name: 'arrow-up', size: 16 }, id: 5, title: 'Listing date' },
+    { iconRight: { name: 'arrow-down', size: 16 }, id: 6, title: 'Listing date' }];
+
   return (
     <MarketPageStyled>
       <LeftColumn>
@@ -33,9 +41,9 @@ export const MarketPage = () => {
           <div>
             <div>Waiting for a Search Component from ui-kit</div>
             <Select
-              defaultValue={1}
+              defaultValue={6}
               onChange={(val) => setSortingValue(val)}
-              options={[{ iconRight: { name: 'triangle', size: 16 }, id: 1, title: 'Listing date' }]}
+              options={sortingOptions}
               value={sortingValue}
             />
           </div>

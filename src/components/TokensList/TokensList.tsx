@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC } from 'react';
 import styled from 'styled-components/macro';
 import { TokensCard } from '..';
 import { Token } from '../../api/graphQL/tokens/types';
