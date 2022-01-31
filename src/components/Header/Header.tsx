@@ -2,7 +2,6 @@ import { Button, Text } from '@unique-nft/ui-kit';
 import { FC, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import cs from 'classnames';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useScreenWidthFromThreshold } from '../../hooks/useScreenWidthFromThreshold';
 
@@ -10,6 +9,7 @@ import logo from '../../logos/logo-white-label-market.svg';
 import menu from '../../static/icons/menu.svg';
 
 import { TMenuItems } from '../PageLayout';
+import { AdditionalColorDark, AdditionalColorLight, Primary500 } from '../../styles/colors';
 
 interface HeaderProps {
   activeItem: TMenuItems;
@@ -47,16 +47,14 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
 
   return (
     <HeaderStyled>
-      <div className='left-side'>
+      <LeftSideColumn>
         {showMobileMenu && (
-          <img
-            className='menu'
+          <MenuIcon
             onClick={mobileMenuToggler}
             src={menu}
           />
         )}
-        <img
-          className='logo'
+        <LogoIcon
           src={logo}
         />
         {!showMobileMenu && (
@@ -105,64 +103,63 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
             </Link>
           </nav>
         )}
-      </div>
-      <div className='right-side'>
-        <div className='balance'>Balance {balance}</div>
+      </LeftSideColumn>
+      <RightSide>
+        <Balance>Balance {balance}</Balance>
         {account}
-      </div>
+      </RightSide>
       {showMobileMenu && mobileMenuIsOpen && (
-        <div className='mobileMenu'>
-          <div onClick={mobileMenuToggler}>
+        <MobileMenu>
+          <LinkWrapper onClick={mobileMenuToggler}>
             <Link to='/'>
-              <Text
-                className={cs('mobile-menu-item', { active: (activeItem === 'Market') })}
+              <TextStyled
+                $active={activeItem === 'Market'}
                 color='additional-dark'
                 size='m'
                 weight='medium'
               >
                 Market
-              </Text>
+              </TextStyled>
             </Link>
-          </div>
-          <div onClick={mobileMenuToggler}>
+          </LinkWrapper>
+          <LinkWrapper onClick={mobileMenuToggler}>
             <Link to='myTokens'>
-              <Text
-                className={cs('mobile-menu-item', { active: (activeItem === 'My tokens') })}
+              <TextStyled
+                $active={activeItem === 'My tokens'}
                 color='additional-dark'
                 size='m'
                 weight='medium'
               >
                 My tokens
-              </Text>
+              </TextStyled>
             </Link>
-          </div>
-          <div onClick={mobileMenuToggler}>
+          </LinkWrapper>
+          <LinkWrapper onClick={mobileMenuToggler}>
             <Link to='trades'>
-              <Text
-                className={cs('mobile-menu-item', { active: (activeItem === 'Trades') })}
+              <TextStyled
+                $active={activeItem === 'Trades'}
                 color='additional-dark'
                 size='m'
                 weight='medium'
               >
                 Trades
-              </Text>
+              </TextStyled>
             </Link>
-          </div>
-          <div onClick={mobileMenuToggler}>
+          </LinkWrapper>
+          <LinkWrapper onClick={mobileMenuToggler}>
             <Link to='faq'>
-              <Text
-                className={cs('mobile-menu-item', { active: (activeItem === 'FAQ') })}
+              <TextStyled
+                $active={activeItem === 'FAQ'}
                 color='additional-dark'
                 size='m'
                 weight='medium'
               >
                 FAQ
-              </Text>
+              </TextStyled>
             </Link>
-          </div>
-        </div>
-      )
-      }
+          </LinkWrapper>
+        </MobileMenu>
+      )}
     </HeaderStyled>
   );
 };
@@ -173,66 +170,69 @@ const HeaderStyled = styled.div`
   justify-content: space-between;
   width: 100%;
 
-  .left-side {
-    display: flex;
-    align-items: center;
-
-    .menu {
-      width: 32px;
-      height: 32px;
-      margin-right: 8px;
-    }
-
-    .logo {
-      margin-right: 32px;
-    }
-  }
-
-  .right-side {
-    display: flex;
-    align-items: center;
-  }
-
   a {
     margin-right: 24px;
   }
+`;
 
-  .balance {
-    margin-left: 16px;
-    margin-right: 16px;
+const LeftSideColumn = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const MenuIcon = styled.img`
+  width: 32px;
+  height: 32px;
+  margin-right: 8px;
+`;
+
+const LogoIcon = styled.img`
+  margin-right: 32px;
+`;
+
+const RightSide = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const Balance = styled.div`
+  margin-left: 16px;
+  margin-right: 16px;
+`;
+
+const LinkWrapper = styled.div`
+  display: contents;
+  a{
+    margin-right:0; 
   }
+`;
 
-  .mobileMenu {
-    position: absolute;
-    top: 80px;
-    left: 0;
-    right: 0;
-    height: 100vh;
-    background-color: var(--white-color);
-    box-shadow: inset 0 2px 8px rgb(0 0 0 / 6%);
+const MobileMenu = styled.div`
+  position: absolute;
+  top: 80px;
+  left: 0;
+  right: 0;
+  height: 100vh;
+  background-color: ${AdditionalColorLight};
+  box-shadow: inset 0 2px 8px rgb(0 0 0 / 6%);
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+`;
+
+const TextStyled = styled(Text) <{ $active?: boolean }>`
+  && {
     display: flex;
-    flex-direction: column;
-    padding: 16px;
+    min-width: 100%;
+    border-radius: 4px;
+    padding: 8px 16px;
+    background-color: ${(props) =>
+    props.$active ? Primary500 : 'transparent'};
+    color: ${(props) =>
+    props.$active ? AdditionalColorLight : AdditionalColorDark};
 
-    a {
-      margin-right: 0;
-    }
-
-    .mobile-menu-item {
-      display: flex;
-      min-width: 100%;
-      border-radius: 4px;
-      
-      padding: 8px 16px;
-
-      &:hover{
-        color: var(--primary-color);
-      }
-
-      &.active{
-        background-color: var(--primary-color);
-        color: var(--white-color);
-      }
+    &:hover {
+      color: ${(props) => (props.$active ? AdditionalColorLight : Primary500)};
     }
   }
 `;
