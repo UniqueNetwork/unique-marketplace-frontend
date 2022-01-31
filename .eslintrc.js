@@ -61,7 +61,7 @@ module.exports = {
   ],
   rules: {
     // required as 'off' since typescript-eslint has own versions
-    indent: "error",
+    indent: "off",
     "no-use-before-define": "off",
     // rules from semistandard (don't include it, has standard dep version mismatch)
     semi: [2, "always"],
