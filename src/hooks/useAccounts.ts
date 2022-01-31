@@ -12,36 +12,36 @@ import type { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
 // async function allAccounts =() => await web3Accounts();
 
 export const useAccounts = () => {
-    const [accounts, setAccounts] = useState<InjectedAccountWithMeta[]>([]);
+  const [accounts, setAccounts] = useState<InjectedAccountWithMeta[]>([]);
 
-    const getAccounts = async () => {
-        // this call fires up the authorization popup
-        const extensions = await web3Enable('my cool dapp');
+  const getAccounts = async () => {
+    // this call fires up the authorization popup
+    const extensions = await web3Enable('my cool dapp');
 
-        if (extensions.length === 0) {
-            alert('no extension installed, or the user did not accept the authorization');
+    if (extensions.length === 0) {
+      alert('no extension installed, or the user did not accept the authorization');
 
-            return;
-        }
+      return;
+    }
 
-        const allAccounts = await web3Accounts();
+    const allAccounts = await web3Accounts();
 
-        return { allAccounts };
-    };
+    return { allAccounts };
+  };
 
-    useEffect(() => {
-        getAccounts().then((result) => {
-            if (result?.allAccounts?.length ? result.allAccounts.length > 0 : false) {
-                const accounts = result?.allAccounts;
+  useEffect(() => {
+    getAccounts().then((result) => {
+      if (result?.allAccounts?.length ? result.allAccounts.length > 0 : false) {
+        const accounts = result?.allAccounts;
 
-                setAccounts(accounts || []);
-            } else {
-                alert('you have got not account');
-            }
-        }, (reason) => {
-            console.log('reason', reason);
-        });
-    }, []);
+        setAccounts(accounts || []);
+      } else {
+        alert('you have got not account');
+      }
+    }, (reason) => {
+      console.log('reason', reason);
+    });
+  }, []);
 
-    return [accounts];
+  return [accounts];
 };

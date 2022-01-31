@@ -10,11 +10,11 @@ interface Props {
   withoutHl?: boolean
 }
 
-function sanitize (value?: string): string {
+function sanitize(value?: string): string {
   return value?.toLowerCase().replace('-', ' ') || '';
 }
 
-function ChainLogo ({ className = '',
+function ChainLogo({ className = '',
   isInline,
   logo,
   onClick,
@@ -32,9 +32,8 @@ function ChainLogo ({ className = '',
   return (
     <img
       alt='chain logo'
-      className={`chain-logo ${className}${isEmpty && !withoutHl ? ' highlight--bg' : ''}${
-        isInline ? ' isInline' : ''
-      }`}
+      className={`chain-logo ${className}${isEmpty && !withoutHl ? ' highlight--bg' : ''}${isInline ? ' isInline' : ''
+        }`}
       onClick={onClick}
       src={img}
     />

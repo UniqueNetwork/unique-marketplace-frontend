@@ -24,9 +24,9 @@ export const PageLayout: FC = () => {
 
   return (
     <Layout
-{...layoutProps}
-// footer={<div>Footer</div>}
-header={<Header activeItem={layoutProps?.heading as TMenuItems || 'Market'} />}
+      {...layoutProps}
+      // footer={<div>Footer</div>}
+      header={<Header activeItem={layoutProps?.heading as TMenuItems || 'Market'} />}
     >
       <Outlet />
     </Layout>

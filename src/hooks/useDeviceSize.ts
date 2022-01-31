@@ -11,7 +11,7 @@ const useDeviceSize = (): DeviceSize => {
 
   useEffect(() => {
     // Handler to call on window resize
-    function handleResize () {
+    function handleResize() {
       // Set window width to state
       setWindowWidth(window.innerWidth);
     }

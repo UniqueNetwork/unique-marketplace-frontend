@@ -17,25 +17,25 @@ export class RpcClient implements IRpcClient {
   public rpcEndpoint: string;
   private options: IRpcClientOptions;
 
-  constructor (rpcEndpoint: string, options?: IRpcClientOptions) {
+  constructor(rpcEndpoint: string, options?: IRpcClientOptions) {
     this.rpcEndpoint = rpcEndpoint;
     this.options = options || {};
     this.setApi();
   }
 
-  private setIsApiConnected (value: boolean) {
+  private setIsApiConnected(value: boolean) {
     this.isApiConnected = value;
   }
 
-  private setApiError (message: string) {
+  private setApiError(message: string) {
     this.apiError = message;
   }
 
-  private setIsApiInitialized (value: boolean) {
+  private setIsApiInitialized(value: boolean) {
     this.isApiInitialized = value;
   }
 
-  private setApi () {
+  private setApi() {
     if (this.rawRpcApi) {
       this.setIsApiConnected(false);
       this.rawRpcApi.disconnect();
@@ -73,7 +73,7 @@ export class RpcClient implements IRpcClient {
     this.setIsApiInitialized(true);
   }
 
-  private async getChainData () {
+  private async getChainData() {
     if (!this.rawRpcApi) throw new Error("Attempted to get chain data while api isn't initialized");
     const [chainProperties, systemChain, systemName] = await Promise.all([
       this.rawRpcApi.rpc.system.properties(),
@@ -92,11 +92,11 @@ export class RpcClient implements IRpcClient {
     };
   }
 
-  public setOnChainReadyListener (callback: (chainData: ChainData) => void) {
+  public setOnChainReadyListener(callback: (chainData: ChainData) => void) {
     this.options.onChainReady = callback;
   }
 
-  public changeEndpoint (rpcEndpoint: string, options?: IRpcClientOptions) {
+  public changeEndpoint(rpcEndpoint: string, options?: IRpcClientOptions) {
     this.rpcEndpoint = rpcEndpoint;
     this.options.onChainReady = options?.onChainReady;
     this.setApi();

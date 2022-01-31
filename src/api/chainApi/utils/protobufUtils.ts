@@ -43,13 +43,13 @@ export type ProtobufAttributeType = {
   }
 }
 
-function defineMessage (protobufJson: ProtobufAttributeType) {
+function defineMessage(protobufJson: ProtobufAttributeType) {
   // const protobufJson = fillProtobufJson(JSON.parse('[{"fieldType":"enum","id":1,"name":"gender","rule":"required","values":["Female","Male"]},{"fieldType":"string","id":2,"name":"imageHash","rule":"optional","values":[]},{"fieldType":"string","id":3,"name":"name","rule":"required","values":[]},{"fieldType":"enum","id":4,"name":"traits","rule":"repeated","values":["Asian Eyes","Black Lipstick","Nose Ring","Purple Lipstick","Red Lipstick","Smile","Sunglasses","Teeth Smile","Teeth Smile","Teeth Smile","Teeth Smile"]}]'));
 
   return Root.fromJSON(protobufJson);
 }
 
-export function serializeNft (
+export function serializeNft(
   onChainSchema: ProtobufAttributeType,
   payload: { [key: string]: number | number[] | string }
 ): Uint8Array {
@@ -76,7 +76,7 @@ export function serializeNft (
   return new Uint8Array();
 }
 
-export function convertEnumToString (value: string, key: string, NFTMeta: Type, locale: string) {
+export function convertEnumToString(value: string, key: string, NFTMeta: Type, locale: string) {
   let result = value;
 
   try {
@@ -94,7 +94,7 @@ export function convertEnumToString (value: string, key: string, NFTMeta: Type, 
   return result;
 }
 
-export function deserializeNft (
+export function deserializeNft(
   onChainSchema: ProtobufAttributeType,
   buffer: Uint8Array,
   locale: string
@@ -221,8 +221,8 @@ export const fillProtobufJson = (attrs: AttributeItemType[]): ProtobufAttributeT
             (protobufJson.nested.onChainMetaData.nested[attr.name] as EnumElemType).values[
               `field${index + 1}`
             ] = index
-            ;(protobufJson.nested.onChainMetaData.nested[attr.name] as EnumElemType).options[
-              `field${index + 1}`
+            ; (protobufJson.nested.onChainMetaData.nested[attr.name] as EnumElemType).options[
+                `field${index + 1}`
             ] = `{"en":"${value}"}`;
           });
         }

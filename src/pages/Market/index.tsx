@@ -1,14 +1,17 @@
-import styled from 'styled-components';
-import { TokensCard } from '../../components';
-import { Token, tokens as gqlTokens } from '../../api/graphQL';
-import { useCallback } from 'react';
+import styled from 'styled-components/macro';
+import { Filters, TokensList } from '../../components';
+import { tokens as gqlTokens } from '../../api/graphQL';
+import { useCallback, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
+import { Select, Text } from '@unique-nft/ui-kit';
 
 export const MarketPage = () => {
   const pageSize = 5;
-  const { fetchMoreTokens, isTokensFetching, tokens, tokensCount } = gqlTokens.useGraphQlTokens({
-    pageSize
-  });
+  const { fetchMoreTokens, isTokensFetching, tokens, tokensCount } =
+    gqlTokens.useGraphQlTokens({
+      pageSize
+    });
+  const [sortingValue, setSortingValue] = useState<string | number>();
 
   console.log('tokens', tokens);
   const hasMore = tokens && tokens.length < tokensCount;
@@ -16,19 +19,45 @@ export const MarketPage = () => {
   const onClickSeeMore = useCallback(() => {
     // Todo: fix twice rendering
     if (!isTokensFetching) {
-      fetchMoreTokens({ limit: pageSize, offset: tokens?.length })
-        .catch((errMsg) => console.error(errMsg));
+      fetchMoreTokens({ limit: pageSize, offset: tokens?.length }).catch(
+        (errMsg) => console.error(errMsg)
+      );
     }
   }, [fetchMoreTokens, tokens, isTokensFetching]);
 
+  const sortingOptions = [
+    { iconRight: { name: 'arrow-up', size: 16 }, id: 1, title: 'Price' },
+    { iconRight: { name: 'arrow-down', size: 16 }, id: 2, title: 'Price' },
+    { iconRight: { name: 'arrow-up', size: 16 }, id: 3, title: 'Token ID' },
+    { iconRight: { name: 'arrow-down', size: 16 }, id: 4, title: 'Token ID' },
+    { iconRight: { name: 'arrow-up', size: 16 }, id: 5, title: 'Listing date' },
+    {
+      iconRight: { name: 'arrow-down', size: 16 },
+      id: 6,
+      title: 'Listing date'
+    }
+  ];
+
   return (
     <MarketPageStyled>
-      <div className='left-column'>Filters</div>
-      <div
-        className='main-content'
-      >
-        cards
-
+      <LeftColumn>
+        <Filters />
+      </LeftColumn>
+      <MainContent>
+        <SearchAndSorting>
+          <div>
+            <div>Waiting for a Search Component from ui-kit</div>
+            <Select
+              defaultValue={6}
+              onChange={(val) => setSortingValue(val)}
+              options={sortingOptions}
+              value={sortingValue}
+            />
+          </div>
+          <div>
+            <Text size='m'>{`${tokensCount} items`}</Text>
+          </div>
+        </SearchAndSorting>
         <InfiniteScroll
           hasMore={hasMore}
           initialLoad={false}
@@ -37,31 +66,38 @@ export const MarketPage = () => {
           threshold={200}
           useWindow={true}
         >
-          <div className='tokens-list'>
-            {tokens?.map &&
-              tokens.map((token: Token) => (
-                <TokensCard
-                  {...token}
-                  key={`token-${token.token_prefix}-${token.token_id}`}
-                />
-              ))}
-          </div>
+          <TokensList tokens={tokens || []} />
         </InfiniteScroll>
-      </div>
+      </MainContent>
     </MarketPageStyled>
   );
 };
 
 const MarketPageStyled = styled.div`
   display: flex;
+`;
 
-  .left-column {
-    height: 500px;
-    padding-right: 24px;
-    border-right: 1px solid grey;
+const LeftColumn = styled.div`
+  height: 500px;
+  padding-right: 24px;
+  border-right: 1px solid grey;
+`;
+
+const MainContent = styled.div`
+  padding-left: 32px;
+  flex: 1;
+
+  > div:nth-of-type(2) {
+    margin: 32px 0;
   }
+`;
 
-  .main-content {
-    padding: 0 24px;
+const SearchAndSorting = styled.div`
+  display: flex;
+  flex-direction: column;
+
+  > div:first-of-type {
+    display: flex;
+    justify-content: space-between;
   }
 `;

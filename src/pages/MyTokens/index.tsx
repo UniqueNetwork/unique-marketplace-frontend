@@ -1,7 +1,7 @@
 export const MyTokensPage = () => {
-    return (
-      <div>
-        MyTokensPage
-      </div>
-    );
-  };
+  return (
+    <div>
+      MyTokensPage
+    </div>
+  );
+};

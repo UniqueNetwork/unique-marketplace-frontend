@@ -1,7 +1,7 @@
 export const TradesPage = () => {
-    return (
-      <div>
-        TradesPage
-      </div>
-    );
-  };
+  return (
+    <div>
+      TradesPage
+    </div>
+  );
+};

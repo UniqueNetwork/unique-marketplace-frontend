@@ -3,12 +3,12 @@ import { Outlet } from 'react-router-dom';
 import ApiWrapper from './api/ApiWrapper';
 import { PageLayout } from './components';
 
-export default function App () {
+export default function App() {
   return (
-      <ApiWrapper>
-        <PageLayout>
-          <Outlet />
-        </PageLayout>
-      </ApiWrapper>
+    <ApiWrapper>
+      <PageLayout>
+        <Outlet />
+      </PageLayout>
+    </ApiWrapper>
   );
 }
