@@ -1,6 +1,6 @@
-import Market from './Market';
-import MyTokens from './MyTokens';
-import Trades from './Trades';
-import FAQ from './FAQ';
+import { MarketPage as Market } from './Market';
+import { MyTokensPage as MyTokens } from './MyTokens';
+import { TradesPage as Trades } from './Trades';
+import { FAQPage as FAQ } from './FAQ';
 
 export { Market, MyTokens, Trades, FAQ };
