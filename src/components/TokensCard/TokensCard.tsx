@@ -25,20 +25,19 @@ export const TokensCard: FC<TTokensCard> = ({ token }) => {
     <TokensCardStyled>
       <PictureWrapper>
         <Picture
-alt={tokenId.toString()}
-src={image_path}
+          alt={tokenId.toString()}
+          src={image_path}
         />
       </PictureWrapper>
       <Description>
         <Text
-size='l'
-weight='medium'
-        >{`${
-          token_prefix || ''
-        } #${tokenId}`}</Text>
+          size='l'
+          weight='medium'
+        >{`${token_prefix || ''
+          } #${tokenId}`}</Text>
         <Text
-color='primary-600'
-size='s'>
+          color='primary-600'
+          size='s'>
           {`${collection_name} [id ${collectionId}]`}
         </Text>
         <Text size='s'>Price: 0</Text>

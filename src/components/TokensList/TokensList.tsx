@@ -4,21 +4,21 @@ import { TokensCard } from '..';
 import { Token } from '../../api/graphQL/tokens/types';
 
 type TTokensList = {
-    tokens: Token[]
+  tokens: Token[]
 }
 
 export const TokensList: FC<TTokensList> = ({ tokens }) => {
-    return (
-        <TokensListStyled>
-            {tokens?.map &&
-                tokens.map((token: Token) => (
-                    <TokensCard
-                        key={`token-${token.token_prefix}-${token.token_id}`}
-                        token={token}
-                    />
-                ))}
-        </TokensListStyled>
-    );
+  return (
+    <TokensListStyled>
+      {tokens?.map &&
+        tokens.map((token: Token) => (
+          <TokensCard
+            key={`token-${token.token_prefix}-${token.token_id}`}
+            token={token}
+          />
+        ))}
+    </TokensListStyled>
+  );
 };
 
 const TokensListStyled = styled.div`
