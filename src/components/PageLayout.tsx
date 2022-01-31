@@ -1,11 +1,11 @@
 import { FC, useMemo } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Layout } from '@unique-nft/ui-kit';
-import { Header } from './Header/Header';
+import { Header } from '.';
 
 export type TMenuItems = 'Market' | 'My tokens' | 'Trades' | 'FAQ';
 
-const PageLayout: FC = () => {
+export const PageLayout: FC = () => {
   const { pathname } = useLocation();
 
   const layoutProps = useMemo(() => {
@@ -24,13 +24,11 @@ const PageLayout: FC = () => {
 
   return (
     <Layout
-{...layoutProps}
-// footer={<div>Footer</div>}
-header={<Header activeItem={layoutProps?.heading as TMenuItems || 'Market'} />}
+      {...layoutProps}
+      // footer={<div>Footer</div>}
+      header={<Header activeItem={layoutProps?.heading as TMenuItems || 'Market'} />}
     >
       <Outlet />
     </Layout>
   );
 };
-
-export default PageLayout;

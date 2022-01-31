@@ -9,11 +9,11 @@ export interface IGqlClient {
 export class GqlClient implements IGqlClient {
   public client: ApolloClient<NormalizedCacheObject>;
 
-  constructor (gqlEndpoint: string) {
+  constructor(gqlEndpoint: string) {
     this.client = getApolloClient(gqlEndpoint);
   }
 
-  public changeEndpoint (gqlEndpoint: string) {
+  public changeEndpoint(gqlEndpoint: string) {
     this.client.stop(); // terminate all active query processes
     this.client.clearStore().then(() => {
       // resets the entire store by clearing out the cache

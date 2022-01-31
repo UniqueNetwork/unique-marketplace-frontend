@@ -1,9 +1,7 @@
-const FAQPage = () => {
-    return (
-      <div>
-        FAQPage
-      </div>
-    );
-  };
-
-  export default FAQPage;
+export const FAQPage = () => {
+  return (
+    <div>
+      FAQPage
+    </div>
+  );
+};
