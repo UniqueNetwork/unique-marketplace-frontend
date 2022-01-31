@@ -1,7 +1,7 @@
 import { Button, Text } from '@unique-nft/ui-kit';
 import { FC, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
-import styled from 'styled-components/macro';
+import styled from 'styled-components/macro'; // Todo: https://cryptousetech.atlassian.net/browse/NFTPAR-1201
 import { useAccounts } from '../../hooks/useAccounts';
 import { useScreenWidthFromThreshold } from '../../hooks/useScreenWidthFromThreshold';
 
