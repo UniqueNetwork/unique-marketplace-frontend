@@ -4,8 +4,8 @@ import { TokensCard } from '..';
 import { Token } from '../../api/graphQL/tokens/types';
 
 type TTokensList = {
-  tokens: Token[]
-}
+  tokens: Token[];
+};
 
 export const TokensList: FC<TTokensList> = ({ tokens }) => {
   return (
@@ -25,19 +25,24 @@ const TokensListStyled = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
   gap: 32px;
-  @media (max-width: 1919px){
+
+  @media (max-width: 1919px) {
     grid-template-columns: 1fr 1fr 1fr 1fr;
   }
-  @media (max-width: 1439px){
+
+  @media (max-width: 1439px) {
     grid-template-columns: 1fr 1fr 1fr;
   }
-  @media (max-width: 1023px){
+
+  @media (max-width: 1023px) {
     grid-template-columns: 1fr 1fr;
   }
-  @media (max-width: 768px){
+
+  @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
-  @media (max-width: 567px){
+
+  @media (max-width: 567px) {
     display: flex;
     flex-direction: column;
   }

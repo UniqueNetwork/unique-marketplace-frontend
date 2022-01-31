@@ -28,15 +28,15 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
   const account =
     allAccounts.length !== 0
       ? (
-        allAccounts[0].address
-      )
+          allAccounts[0].address
+        )
       : (
         <Button
           onClick={buttonClick}
           role='outlined'
           title='Create or connect account'
         />
-      );
+        );
 
   const mobileMenuToggler = useCallback(() => {
     console.log('mobileMenuToggler');
@@ -48,15 +48,11 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
   return (
     <HeaderStyled>
       <LeftSideColumn>
-        {showMobileMenu && (
-          <MenuIcon
-            onClick={mobileMenuToggler}
-            src={menu}
-          />
-        )}
-        <LogoIcon
-          src={logo}
-        />
+        {showMobileMenu && <MenuIcon
+          onClick={mobileMenuToggler}
+          src={menu}
+                           />}
+        <LogoIcon src={logo} />
         {!showMobileMenu && (
           <nav>
             <Link to='/'>
@@ -202,8 +198,9 @@ const Balance = styled.div`
 
 const LinkWrapper = styled.div`
   display: contents;
-  a{
-    margin-right:0; 
+
+  a {
+    margin-right: 0;
   }
 `;
 
@@ -227,10 +224,8 @@ const TextStyled = styled(Text) <{ $active?: boolean }>`
     min-width: 100%;
     border-radius: 4px;
     padding: 8px 16px;
-    background-color: ${(props) =>
-    props.$active ? Primary500 : 'transparent'};
-    color: ${(props) =>
-    props.$active ? AdditionalColorLight : AdditionalColorDark};
+    background-color: ${(props) => props.$active ? Primary500 : 'transparent'};
+    color: ${(props) => props.$active ? AdditionalColorLight : AdditionalColorDark};
 
     &:hover {
       color: ${(props) => (props.$active ? AdditionalColorLight : Primary500)};

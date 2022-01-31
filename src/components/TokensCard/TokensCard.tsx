@@ -37,7 +37,8 @@ export const TokensCard: FC<TTokensCard> = ({ token }) => {
           } #${tokenId}`}</Text>
         <Text
           color='primary-600'
-          size='s'>
+          size='s'
+        >
           {`${collection_name} [id ${collectionId}]`}
         </Text>
         <Text size='s'>Price: 0</Text>
@@ -62,7 +63,7 @@ const PictureWrapper = styled.div`
   overflow: hidden;
   margin-bottom: 8px;
 
-  &:before {
+  &::before {
     content: "";
     display: block;
     padding-top: 100%;

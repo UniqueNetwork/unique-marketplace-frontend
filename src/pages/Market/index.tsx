@@ -7,9 +7,10 @@ import { Select, Text } from '@unique-nft/ui-kit';
 
 export const MarketPage = () => {
   const pageSize = 5;
-  const { fetchMoreTokens, isTokensFetching, tokens, tokensCount } = gqlTokens.useGraphQlTokens({
-    pageSize
-  });
+  const { fetchMoreTokens, isTokensFetching, tokens, tokensCount } =
+    gqlTokens.useGraphQlTokens({
+      pageSize
+    });
   const [sortingValue, setSortingValue] = useState<string | number>();
 
   console.log('tokens', tokens);
@@ -18,8 +19,9 @@ export const MarketPage = () => {
   const onClickSeeMore = useCallback(() => {
     // Todo: fix twice rendering
     if (!isTokensFetching) {
-      fetchMoreTokens({ limit: pageSize, offset: tokens?.length })
-        .catch((errMsg) => console.error(errMsg));
+      fetchMoreTokens({ limit: pageSize, offset: tokens?.length }).catch(
+        (errMsg) => console.error(errMsg)
+      );
     }
   }, [fetchMoreTokens, tokens, isTokensFetching]);
 
@@ -29,7 +31,12 @@ export const MarketPage = () => {
     { iconRight: { name: 'arrow-up', size: 16 }, id: 3, title: 'Token ID' },
     { iconRight: { name: 'arrow-down', size: 16 }, id: 4, title: 'Token ID' },
     { iconRight: { name: 'arrow-up', size: 16 }, id: 5, title: 'Listing date' },
-    { iconRight: { name: 'arrow-down', size: 16 }, id: 6, title: 'Listing date' }];
+    {
+      iconRight: { name: 'arrow-down', size: 16 },
+      id: 6,
+      title: 'Listing date'
+    }
+  ];
 
   return (
     <MarketPageStyled>
@@ -47,7 +54,9 @@ export const MarketPage = () => {
               value={sortingValue}
             />
           </div>
-          <div><Text size='m'>{`${tokensCount} items`}</Text></div>
+          <div>
+            <Text size='m'>{`${tokensCount} items`}</Text>
+          </div>
         </SearchAndSorting>
         <InfiniteScroll
           hasMore={hasMore}
@@ -69,25 +78,26 @@ const MarketPageStyled = styled.div`
 `;
 
 const LeftColumn = styled.div`
-    height: 500px;
-    padding-right: 24px;
-    border-right: 1px solid grey;
+  height: 500px;
+  padding-right: 24px;
+  border-right: 1px solid grey;
 `;
 
 const MainContent = styled.div`
-     padding-left: 32px;
-     flex:1;
-     >div:nth-of-type(2){
-       margin:32px 0;
-     }
+  padding-left: 32px;
+  flex: 1;
+
+  > div:nth-of-type(2) {
+    margin: 32px 0;
+  }
 `;
 
 const SearchAndSorting = styled.div`
-     display: flex;
-     flex-direction: column;
-     
-     >div:first-of-type{
-       display: flex;
-       justify-content: space-between;
-     }
+  display: flex;
+  flex-direction: column;
+
+  > div:first-of-type {
+    display: flex;
+    justify-content: space-between;
+  }
 `;
