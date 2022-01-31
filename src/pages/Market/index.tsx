@@ -1,15 +1,16 @@
-import styled from 'styled-components';
-import { Filters, TokensCard } from '../../components';
-import { Token, tokens as gqlTokens } from '../../api/graphQL';
-import { useCallback } from 'react';
+import styled from 'styled-components/macro';
+import { Filters, TokensList } from '../../components';
+import { tokens as gqlTokens } from '../../api/graphQL';
+import { useCallback, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
-import { Select } from '@unique-nft/ui-kit';
+import { Select, Text } from '@unique-nft/ui-kit';
 
 export const MarketPage = () => {
   const pageSize = 5;
   const { fetchMoreTokens, isTokensFetching, tokens, tokensCount } = gqlTokens.useGraphQlTokens({
-      pageSize
-    });
+    pageSize
+  });
+  const [sortingValue, setSortingValue] = useState<string | number>();
 
   console.log('tokens', tokens);
   const hasMore = tokens && tokens.length < tokensCount;
@@ -24,17 +25,22 @@ export const MarketPage = () => {
 
   return (
     <MarketPageStyled>
-      <div className='left-column'>
+      <LeftColumn>
         <Filters />
-      </div>
-      <div className='main-content'>
-        <div className='search-and-sorting'>
-          <div>Waiting for a Search Component from ui-kit</div>
-          <Select
-            onChange={() => { console.log('select changed'); }}
-            options={[{ id: 1, title: 'Listing date' }]}
-          />
-        </div>
+      </LeftColumn>
+      <MainContent>
+        <SearchAndSorting>
+          <div>
+            <div>Waiting for a Search Component from ui-kit</div>
+            <Select
+              defaultValue={1}
+              onChange={(val) => setSortingValue(val)}
+              options={[{ iconRight: { name: 'triangle', size: 16 }, id: 1, title: 'Listing date' }]}
+              value={sortingValue}
+            />
+          </div>
+          <div><Text size='m'>{`${tokensCount} items`}</Text></div>
+        </SearchAndSorting>
         <InfiniteScroll
           hasMore={hasMore}
           initialLoad={false}
@@ -43,31 +49,37 @@ export const MarketPage = () => {
           threshold={200}
           useWindow={true}
         >
-          <div className='tokens-list'>
-            {tokens?.map &&
-              tokens.map((token: Token) => (
-                <TokensCard
-                  {...token}
-                  key={`token-${token.token_prefix}-${token.token_id}`}
-                />
-              ))}
-          </div>
+          <TokensList tokens={tokens || []} />
         </InfiniteScroll>
-      </div>
+      </MainContent>
     </MarketPageStyled>
   );
 };
 
 const MarketPageStyled = styled.div`
   display: flex;
+`;
 
-  .left-column {
+const LeftColumn = styled.div`
     height: 500px;
     padding-right: 24px;
     border-right: 1px solid grey;
-  }
+`;
 
-  .main-content {
-    padding: 0 24px;
-  }
+const MainContent = styled.div`
+     padding-left: 32px;
+     flex:1;
+     >div:nth-of-type(2){
+       margin:32px 0;
+     }
+`;
+
+const SearchAndSorting = styled.div`
+     display: flex;
+     flex-direction: column;
+     
+     >div:first-of-type{
+       display: flex;
+       justify-content: space-between;
+     }
 `;

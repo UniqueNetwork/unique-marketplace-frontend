@@ -1,7 +1,7 @@
 import { Button, Text } from '@unique-nft/ui-kit';
 import { FC, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
-import styled from 'styled-components';
+import styled from 'styled-components/macro';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useScreenWidthFromThreshold } from '../../hooks/useScreenWidthFromThreshold';
 
@@ -218,6 +218,7 @@ const MobileMenu = styled.div`
   display: flex;
   flex-direction: column;
   padding: 16px;
+  z-index: 9;
 `;
 
 const TextStyled = styled(Text) <{ $active?: boolean }>`
