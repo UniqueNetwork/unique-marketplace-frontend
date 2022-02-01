@@ -3,17 +3,18 @@ import { Filters, TokensList } from '../../components';
 import { tokens as gqlTokens } from '../../api/graphQL';
 import { useCallback, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
-import { Select, Text } from '@unique-nft/ui-kit';
+import { Button, InputText, Select, Text } from '@unique-nft/ui-kit';
+import { Secondary400 } from '../../styles/colors';
 
 export const MarketPage = () => {
-  const pageSize = 5;
+  const pageSize = 20;
   const { fetchMoreTokens, isTokensFetching, tokens, tokensCount } =
     gqlTokens.useGraphQlTokens({
       pageSize
     });
   const [sortingValue, setSortingValue] = useState<string | number>();
+  const [searchValue, setSearchValue] = useState<string | number>();
 
-  console.log('tokens', tokens);
   const hasMore = tokens && tokens.length < tokensCount;
 
   const onClickSeeMore = useCallback(() => {
@@ -25,15 +26,39 @@ export const MarketPage = () => {
     }
   }, [fetchMoreTokens, tokens, isTokensFetching]);
 
+  const handleSearch = () => {
+    console.log(`go search ${searchValue}`);
+  };
+
   const sortingOptions = [
-    { iconRight: { name: 'arrow-up', size: 16 }, id: 1, title: 'Price' },
-    { iconRight: { name: 'arrow-down', size: 16 }, id: 2, title: 'Price' },
-    { iconRight: { name: 'arrow-up', size: 16 }, id: 3, title: 'Token ID' },
-    { iconRight: { name: 'arrow-down', size: 16 }, id: 4, title: 'Token ID' },
-    { iconRight: { name: 'arrow-up', size: 16 }, id: 5, title: 'Listing date' },
     {
-      iconRight: { name: 'arrow-down', size: 16 },
-      id: 6,
+      iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
+      id: 'price-asc',
+      title: 'Price'
+    },
+    {
+      iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
+      id: 'price-desc',
+      title: 'Price'
+    },
+    {
+      iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
+      id: 'token-id-asc',
+      title: 'Token ID'
+    },
+    {
+      iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
+      id: 'token-id-desc',
+      title: 'Token ID'
+    },
+    {
+      iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
+      id: 'listing-date-asc',
+      title: 'Listing date'
+    },
+    {
+      iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
+      id: 'listing-date-desc',
       title: 'Listing date'
     }
   ];
@@ -45,19 +70,29 @@ export const MarketPage = () => {
       </LeftColumn>
       <MainContent>
         <SearchAndSorting>
-          <div>
-            <div>Waiting for a Search Component from ui-kit</div>
-            <Select
-              defaultValue={6}
-              onChange={(val) => setSortingValue(val)}
-              options={sortingOptions}
-              value={sortingValue}
+          <Search>
+            <InputText
+              iconLeft={{ name: 'magnify', size: 16 }}
+              onChange={(val) => setSearchValue(val)}
+              placeholder='Collection / token'
+              value={searchValue}
+            ></InputText>
+            <Button
+              onClick={() => handleSearch()}
+              role='primary'
+              title='Search'
             />
-          </div>
-          <div>
-            <Text size='m'>{`${tokensCount} items`}</Text>
-          </div>
+          </Search>
+          <Select
+            defaultValue={'listing-date-desc'}
+            onChange={(val) => setSortingValue(val)}
+            options={sortingOptions}
+            value={sortingValue}
+          />
         </SearchAndSorting>
+        <div>
+          <Text size='m'>{`${tokensCount} items`}</Text>
+        </div>
         <InfiniteScroll
           hasMore={hasMore}
           initialLoad={false}
@@ -88,16 +123,20 @@ const MainContent = styled.div`
   flex: 1;
 
   > div:nth-of-type(2) {
-    margin: 32px 0;
+    margin-top: 16px;
+    margin-bottom: 32px;
+  }
+`;
+
+const Search = styled.div`
+  display: flex;
+
+  button {
+    margin-left: 8px;
   }
 `;
 
 const SearchAndSorting = styled.div`
   display: flex;
-  flex-direction: column;
-
-  > div:first-of-type {
-    display: flex;
-    justify-content: space-between;
-  }
+  justify-content: space-between;
 `;
