@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Token } from '../../api/graphQL';
 import { useApi } from '../../hooks/useApi';
-import { PurchaseModal } from './tmp_purchase/Modals';
+import { PurchaseModal } from './Modals';
 
 // http://localhost:3000/token/124/173
 const TokenPage = (props: any) => {
