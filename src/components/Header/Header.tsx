@@ -2,7 +2,7 @@ import { Button, Text } from '@unique-nft/ui-kit';
 import { FC, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components/macro'; // Todo: https://cryptousetech.atlassian.net/browse/NFTPAR-1201
-import { useAccounts } from '../../hooks/useAccounts';
+import { useAccount } from '../../hooks/useAccount';
 import { useScreenWidthFromThreshold } from '../../hooks/useScreenWidthFromThreshold';
 
 import logo from '../../logos/logo-white-label-market.svg';
@@ -16,7 +16,7 @@ interface HeaderProps {
 }
 
 export const Header: FC<HeaderProps> = ({ activeItem }) => {
-  const [allAccounts] = useAccounts();
+  const { selectedAccount } = useAccount();
   const { lessThanThreshold: showMobileMenu } =
     useScreenWidthFromThreshold(1279);
   const [mobileMenuIsOpen, toggleMobileMenu] = useState(false);
@@ -25,10 +25,9 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
     console.log('button is clicked');
   };
 
-  const account =
-    allAccounts.length !== 0
+  const account = selectedAccount
       ? (
-          allAccounts[0].address
+        selectedAccount.address
         )
       : (
         <Button

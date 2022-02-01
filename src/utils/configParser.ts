@@ -31,7 +31,15 @@ export const getNetworkList = (config: Record<string, string | undefined>): stri
 };
 
 export const getDefaultChain = (config: Record<string, string | undefined>) => {
-  return localStorage.getItem(defaultChainKey) || getNetworkList(config)[0];
+  const storedChain = localStorage.getItem(defaultChainKey);
+  const networkList = getNetworkList(config);
+  if (!networkList?.length) throw new Error('No chains provided in env, please make sure to provide correct APP_NET_YOUR-CHAIN_* in config');
+  const defaultChain = networkList[0];
+  if (!storedChain) return defaultChain;
+  // If config was updated and we have already stored some chain that is no longer supported - skip it
+  if (networkList.includes(storedChain)) return storedChain;
+  // TODO: not enough data for localStorage.setItem?
+  return defaultChain;
 };
 
 export const getNetworkParams = (

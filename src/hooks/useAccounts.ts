@@ -1,6 +1,7 @@
 import { web3Accounts, web3Enable } from '@polkadot/extension-dapp';
 import { useEffect, useState } from 'react';
 import type { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
+import { sleep } from '../utils/helpers';
 
 // returns an array of all the injected sources
 // (this needs to be called first, before other requests)
@@ -16,12 +17,15 @@ export const useAccounts = () => {
 
   const getAccounts = async () => {
     // this call fires up the authorization popup
-    const extensions = await web3Enable('my cool dapp');
-
+    let extensions = await web3Enable('my cool dapp');
     if (extensions.length === 0) {
-      alert('no extension installed, or the user did not accept the authorization');
-
-      return;
+      console.log('Extension not found, retry in 1s');
+      await sleep(1000);
+      extensions = await web3Enable('my cool dapp');
+      if (extensions.length === 0) {
+        alert('no extension installed, or the user did not accept the authorization');
+        return;
+      }
     }
 
     const allAccounts = await web3Accounts();

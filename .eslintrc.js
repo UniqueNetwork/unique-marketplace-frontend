@@ -54,9 +54,6 @@ module.exports = {
     "import",
     "import-newlines",
     "react-hooks",
-    "simple-import-sort",
-    "sort-destructure-keys",
-    "sort-keys-fix",
     "react",
   ],
   rules: {
@@ -87,67 +84,18 @@ module.exports = {
     "react/prop-types": [0], // this is a completely broken rule
     "react/jsx-key": "warn",
     "object-curly-newline": [
-      "error",
+      "warn",
       {
-        ImportDeclaration: "never",
-        ObjectPattern: "never",
+        ImportDeclaration: {multiline: true},
+        ObjectPattern: {multiline: true},
       },
-    ],
-    "padding-line-between-statements": [
-      "error",
-      { blankLine: "always", prev: ["const", "let", "var"], next: "*" },
-      {
-        blankLine: "any",
-        prev: ["const", "let", "var"],
-        next: ["const", "let", "var"],
-      },
-      { blankLine: "always", prev: "*", next: "block-like" },
-      { blankLine: "always", prev: "block-like", next: "*" },
-      { blankLine: "always", prev: "*", next: "function" },
-      { blankLine: "always", prev: "function", next: "*" },
-      { blankLine: "always", prev: "*", next: "try" },
-      { blankLine: "always", prev: "try", next: "*" },
-      { blankLine: "always", prev: "*", next: "return" },
-      { blankLine: "always", prev: "*", next: "import" },
-      { blankLine: "always", prev: "import", next: "*" },
-      { blankLine: "any", prev: "import", next: "import" },
     ],
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
     "react/jsx-closing-bracket-location": [1, "tag-aligned"],
     "react/jsx-first-prop-new-line": [1, "multiline-multiprop"],
     "react/jsx-fragments": "error",
-    "react/jsx-max-props-per-line": [
-      1,
-      {
-        maximum: 1,
-        when: "always",
-      },
-    ],
     "react/jsx-no-bind": 1,
-    "react/jsx-sort-props": [
-      1,
-      {
-        noSortAlphabetically: false,
-      },
-    ],
-    "react/jsx-tag-spacing": [
-      2,
-      {
-        closingSlash: "never",
-        beforeSelfClosing: "always",
-        afterOpening: "never",
-        beforeClosing: "never",
-      },
-    ],
-    "sort-destructure-keys/sort-destructure-keys": [
-      2,
-      {
-        caseSensitive: true,
-      },
-    ],
-    "sort-keys-fix/sort-keys-fix": "warn",
-    "sort-keys": "error",
     "no-void": "off",
     // needs to be switched on at some point
     "@typescript-eslint/no-explicit-any": "off",
