@@ -74,21 +74,21 @@ export const SellModal: FC = () => {
   const FixedPriceTab = (
     <>
       <InputWrapper
-label='Price'
-onChange={onInputChange}
-value={inputValue}
+        label='Price'
+        onChange={onInputChange}
+        value={inputValue}
       />
       <Text
-color='additional-warning-500'
-size='s'
+        color='additional-warning-500'
+        size='s'
       >
         A fee of ~ 0.000000000000052 OPL can be applied to the transaction
       </Text>
       <ButtonWrapper>
         <Button
-onClick={onButtonClick}
-role='primary'
-title='Confirm'
+          onClick={onButtonClick}
+          role='primary'
+          title='Confirm'
         />
       </ButtonWrapper>
     </>
@@ -97,34 +97,34 @@ title='Confirm'
   const AuctionTab = (
     <>
       <InputWrapper
-label='Minimum step*'
-onChange={onAuctionInputChange}
-value={inputValueAuction}
+        label='Minimum step*'
+        onChange={onAuctionInputChange}
+        value={inputValueAuction}
       />
       <Row>
         <InputWrapper
-label='Starting Price'
-onChange={onInputStartingPriceChange}
-value={inputStartingPriceValue}
+          label='Starting Price'
+          onChange={onInputStartingPriceChange}
+          value={inputStartingPriceValue}
         />
         <SelectWrapper
-label='Duration*'
-onChange={onDurationSelectChange}
-options={durationOptions}
-value={durationSelectValue}
+          label='Duration*'
+          onChange={onDurationSelectChange}
+          options={durationOptions}
+          value={durationSelectValue}
         />
       </Row>
       <Text
-color='additional-warning-500'
-size='s'
+        color='additional-warning-500'
+        size='s'
       >
         A fee of ~ 0.000000000000052 OPL can be applied to the transaction
       </Text>
       <ButtonWrapper>
         <Button
-onClick={onButtonClick}
-role='primary'
-title='Confirm'
+          onClick={onButtonClick}
+          role='primary'
+          title='Confirm'
         />
       </ButtonWrapper>
     </>
@@ -141,10 +141,9 @@ title='Confirm'
         </Row>
       </Content>
       <Tabs
-activeIndex={activeTab}
-labels={['Fixed price', 'Auction']}
-onClick={handleClick}
-      />
+      activeIndex={activeTab}
+      labels={['Fixed price', 'Auction']}
+      onClick={handleClick} />
       <Tabs activeIndex={activeTab}>
         {FixedPriceTab}
         {AuctionTab}
