@@ -31,11 +31,6 @@ ReactDOM.render(
               element={<TokensPage />}
               path={'token-details'}
             />
-            {/* <Route
-              element={<BuyToken />}
-              path={':tokenId'}
-              />
-            </Route> */}
           </Route>
           <Route
             element={<MyTokens />}

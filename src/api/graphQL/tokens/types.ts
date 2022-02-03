@@ -1,4 +1,6 @@
-import { TAttributes } from '../../../utils/getAttributes';
+export type TAttributes = {
+  [key: string]: string | string[]
+}
 
 export interface TokensVariables {
   limit: number

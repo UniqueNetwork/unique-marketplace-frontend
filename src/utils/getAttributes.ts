@@ -1,6 +1,4 @@
-export type TAttributes = {
-    [key: string]: string | string[]
-}
+import { TAttributes } from '../api/graphQL';
 
 export const getAttributesToShow = (attributes: TAttributes): TAttributes => {
     const attributesToShow = { ...attributes };
