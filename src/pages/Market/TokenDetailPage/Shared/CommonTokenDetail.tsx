@@ -1,16 +1,16 @@
 import { Heading, Text } from '@unique-nft/ui-kit';
 import { FC, ReactChild } from 'react';
 import styled from 'styled-components/macro';
-import { Picture } from '../..';
-import { Token } from '../../../api/graphQL/tokens/types';
-import { Grey300, Grey500 } from '../../../styles/colors';
-import eye from '../../../static/icons/eye.svg';
-import share from '../../../static/icons/share.svg';
-import { Icon } from '../../Icon/Icon';
-import { CollectionsCard } from '../../CollectionsCard/CollectionsCard';
-import { Collection } from '../../../api/graphQL/collections/types';
-import { AttributesBlock } from '../Components/AttributesBlock/AttributesBlock';
-import { getAttributesToShow } from '../../../utils/getAttributes';
+import { Picture } from '../../../../components';
+import { Token } from '../../../../api/graphQL/tokens/types';
+import { Grey300, Grey500 } from '../../../../styles/colors';
+import eye from '../../../../static/icons/eye.svg';
+import share from '../../../../static/icons/share.svg';
+import { Icon } from '../../../../components/Icon/Icon';
+import { CollectionsCard } from './Components/CollectionsCard/CollectionsCard';
+import { Collection } from '../../../../api/graphQL/collections/types';
+import { AttributesBlock } from './Components/AttributesBlock/AttributesBlock';
+import { getAttributesToShow } from '../../../../utils/getAttributes';
 
 interface IProps {
   children: ReactChild[];

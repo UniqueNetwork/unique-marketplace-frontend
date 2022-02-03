@@ -4,7 +4,7 @@ import App from './App';
 import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 import { Market, MyTokens, Trades, FAQ } from './pages';
 import { MarketMainPage } from './pages/Market/MarketMain';
-import { TokensPage } from './components/TokenDetailPage';
+import { TokensPage } from './pages/Market/TokenDetailPage';
 
 ReactDOM.render(
   <React.StrictMode>

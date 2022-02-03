@@ -1,8 +1,8 @@
 import React, { FC } from 'react';
 import styled from 'styled-components/macro';
 import { Heading, Text } from '@unique-nft/ui-kit';
-import { TAttributes } from '../../../../utils/getAttributes';
-import { Trait } from '../../../Trait/Trait';
+import { Trait } from '../Trait/Trait';
+import { TAttributes } from '../../../../../../api/graphQL/tokens/types';
 
 interface IProps {
     attributes: TAttributes;

@@ -1,12 +1,12 @@
 import { Button, Heading, Text } from '@unique-nft/ui-kit';
 import { FC } from 'react';
 import styled from 'styled-components/macro';
-import { Token } from '../../../api/graphQL/tokens/types';
-import { AdditionalColorLight } from '../../../styles/colors';
-import logoKusama from '../../../static/icons/logo-kusama.svg';
-import { Icon } from '../../Icon/Icon';
-import { Collection } from '../../../api/graphQL/collections/types';
-import { CommonTokenDetail } from '../SharedComponents/CommonTokenDetail';
+import { Token } from '../../../../api/graphQL/tokens/types';
+import { AdditionalColorLight } from '../../../../styles/colors';
+import logoKusama from '../../../../static/icons/logo-kusama.svg';
+import { Icon } from '../../../../components/Icon/Icon';
+import { Collection } from '../../../../api/graphQL/collections/types';
+import { CommonTokenDetail } from '../Shared/CommonTokenDetail';
 
 interface BuyTokenProps {
   token: Token;

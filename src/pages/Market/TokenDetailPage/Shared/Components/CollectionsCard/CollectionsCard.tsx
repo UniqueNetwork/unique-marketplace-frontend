@@ -1,8 +1,8 @@
 import { FC } from 'react';
 import styled from 'styled-components/macro';
 import { Heading, Text } from '@unique-nft/ui-kit';
-import { Avatar } from '../Avatar/Avatar';
-import noCollections from '../../static/icons/no-collections.svg';
+import { Avatar } from '../../../../../../components/Avatar/Avatar';
+import noCollections from '../../../../../../static/icons/no-collections.svg';
 
 interface ICollectionsCardProps {
   title: string;

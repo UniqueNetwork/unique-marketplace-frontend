@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { tokens as gqlTokens, collections as gqlCollections } from '../../api/graphQL';
+import { tokens as gqlTokens, collections as gqlCollections } from '../../../api/graphQL';
 
 import { BuyToken } from './BuyToken/BuyToken';
 
