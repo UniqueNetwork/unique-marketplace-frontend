@@ -10,7 +10,7 @@ export const PageLayout: FC = () => {
   const { pathname } = useLocation();
 
   const layoutProps = useMemo(() => {
-    if (pathname === '/') return { heading: 'Market' };
+    if (pathname === '/market') return { heading: 'Market' };
 
     if (pathname === '/myTokens') {
       return { heading: 'My tokens' };
@@ -24,9 +24,13 @@ export const PageLayout: FC = () => {
       return { heading: 'FAQ' };
     }
 
-    // if (/^\/myStuff\//.test(pathname)) { return { breadcrumbs: { options: [{ link: '/', title: 'Home' }, { title: 'My Stuff' }] } }; }
-
-    // if (/^\/trades\//.test(pathname)) { return { breadcrumbs: { options: [{ link: '/', title: 'Home' }, { title: 'Trades' }] } }; }
+    if (pathname === '/market/token-details') {
+      return {
+        breadcrumbs: {
+          options: [{ link: '/market', title: 'Market' }, { title: 'Token' }]
+        }
+      };
+    }
   }, [pathname]);
 
   return (
@@ -50,6 +54,14 @@ const LayoutStyled = styled.div`
   main {
     > div {
       display: flex;
+    }
+/* Todo: remove after done task https://cryptousetech.atlassian.net/browse/NFTPAR-1238*/
+    .unique-breadcrumbs-wrapper {
+      align-items: center;
+
+      .breadcrumb-item {
+        line-height: 22px;
+      }
     }
   }
 `;

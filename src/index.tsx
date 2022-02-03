@@ -5,9 +5,11 @@ import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-d
 import { Market, MyTokens, Trades, FAQ } from './pages';
 import { MarketMainPage } from './pages/Market/MarketMain';
 import { TokensPage } from './pages/Market/TokenDetailPage';
+import { GlobalStyle } from './styles';
 
 ReactDOM.render(
   <React.StrictMode>
+    <GlobalStyle />
     <Router>
       <Routes>
         <Route

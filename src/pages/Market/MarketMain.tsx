@@ -78,7 +78,7 @@ const MarketPageStyled = styled.div`
 `;
 
 const LeftColumn = styled.div`
-  height: 500px;
+  height: 100%;
   padding-right: 24px;
   border-right: 1px solid grey;
 `;
