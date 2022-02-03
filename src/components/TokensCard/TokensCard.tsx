@@ -22,7 +22,7 @@ export const TokensCard: FC<TTokensCard> = ({ token }) => {
     token_id: tokenId,
     token_prefix } = token;
 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
   return (
     <TokensCardStyled onClick={() => navigate(`token-details?collectionId=${collectionId}&tokenId=${tokenId}`)}>

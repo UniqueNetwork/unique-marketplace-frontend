@@ -28,18 +28,17 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
   const account =
     allAccounts.length !== 0
       ? (
-          allAccounts[0].address
-        )
+        allAccounts[0].address
+      )
       : (
         <Button
           onClick={buttonClick}
           role='outlined'
           title='Create or connect account'
         />
-        );
+      );
 
   const mobileMenuToggler = useCallback(() => {
-    console.log('mobileMenuToggler');
     toggleMobileMenu((prevState) => !prevState);
   }, []);
 

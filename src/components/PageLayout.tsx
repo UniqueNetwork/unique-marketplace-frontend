@@ -12,11 +12,17 @@ export const PageLayout: FC = () => {
   const layoutProps = useMemo(() => {
     if (pathname === '/') return { heading: 'Market' };
 
-    if (pathname === '/myTokens') { return { heading: 'My tokens' }; }
+    if (pathname === '/myTokens') {
+      return { heading: 'My tokens' };
+    }
 
-    if (pathname === '/trades') { return { heading: 'Trades' }; }
+    if (pathname === '/trades') {
+      return { heading: 'Trades' };
+    }
 
-    if (pathname === '/faq') { return { heading: 'FAQ' }; }
+    if (pathname === '/faq') {
+      return { heading: 'FAQ' };
+    }
 
     // if (/^\/myStuff\//.test(pathname)) { return { breadcrumbs: { options: [{ link: '/', title: 'Home' }, { title: 'My Stuff' }] } }; }
 
@@ -26,9 +32,13 @@ export const PageLayout: FC = () => {
   return (
     <LayoutStyled>
       <Layout
-      {...layoutProps}
-      // footer={<div>Footer</div>}
-      header={<Header activeItem={layoutProps?.heading as TMenuItems || 'Market'} />}
+        {...layoutProps}
+        // footer={<div>Footer</div>}
+        header={
+          <Header
+            activeItem={(layoutProps?.heading as TMenuItems) || 'Market'}
+          />
+        }
       >
         <Outlet />
       </Layout>
@@ -38,6 +48,8 @@ export const PageLayout: FC = () => {
 
 const LayoutStyled = styled.div`
   main {
-    > div {display: flex;}
+    > div {
+      display: flex;
+    }
   }
 `;

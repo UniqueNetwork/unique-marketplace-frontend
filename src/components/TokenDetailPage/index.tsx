@@ -9,8 +9,8 @@ interface TokensPageProps {
 }
 
 export const TokensPage: FC<TokensPageProps> = () => {
-    const [searchParams, setSearchParams] = useSearchParams();
-    const query = new URLSearchParams(searchParams);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const query = new URLSearchParams(searchParams);
   const tokenId = query.get('tokenId') || '';
   const collectionId = query.get('collectionId') || '';
 
@@ -20,9 +20,9 @@ export const TokensPage: FC<TokensPageProps> = () => {
   return (
     <>
       {token && collections && <BuyToken
-collection={collections[0]}
-token={token}
-                />}
+        collection={collections[0]}
+        token={token}
+                               />}
     </>
   );
 };

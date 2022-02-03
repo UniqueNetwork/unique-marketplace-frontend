@@ -13,7 +13,6 @@ export const MarketMainPage = () => {
     });
   const [sortingValue, setSortingValue] = useState<string | number>();
 
-  console.log('tokens', tokens);
   const hasMore = tokens && tokens.length < tokensCount;
 
   const onClickSeeMore = useCallback(() => {

@@ -5,78 +5,76 @@ import { Avatar } from '../Avatar/Avatar';
 import noCollections from '../../static/icons/no-collections.svg';
 
 interface ICollectionsCardProps {
-    title: string;
-    id: number;
-    avatarSrc: string;
-    description?: string;
+  title: string;
+  id: number;
+  avatarSrc: string;
+  description?: string;
 }
 
 export const CollectionsCard: FC<ICollectionsCardProps> = ({ avatarSrc,
-    description,
-    id,
-    title }: ICollectionsCardProps) => {
-        const avatarImg = avatarSrc || noCollections;
+  description,
+  id,
+  title }: ICollectionsCardProps) => {
+  const avatarImg = avatarSrc || noCollections;
 
-    return (
-      <CollectionsCardStyled>
-        <AvatarStyled>
-          <Avatar
-                    size={40}
-                    src={avatarImg}
-                    type='circle'
-          />
-        </AvatarStyled>
-        <Content>
-
-          <Heading
-                            className='heading'
-                            size='4'
-          >
-            {title}
-          </Heading>
-          <Heading
-                            className='heading'
-                            size='4'
-          >
-            {`[id ${id}]`}
-          </Heading>
-          {description && (
+  return (
+    <CollectionsCardStyled>
+      <AvatarStyled>
+        <Avatar
+          size={40}
+          src={avatarImg}
+          type='circle'
+        />
+      </AvatarStyled>
+      <Content>
+        <Heading
+          className='heading'
+          size='4'
+        >
+          {title}
+        </Heading>
+        <Heading
+          className='heading'
+          size='4'
+        >
+          {`[id ${id}]`}
+        </Heading>
+        {description && (
           <Text
-                                className='description'
-                                color='grey-500'
-                                size='s'
+            className='description'
+            color='grey-500'
+            size='s'
           >
             {description}
           </Text>
-                        )}
-
-        </Content>
-      </CollectionsCardStyled>
-    );
+        )}
+      </Content>
+    </CollectionsCardStyled>
+  );
 };
 
 const CollectionsCardStyled = styled.div`
-    display: flex;
-    position: relative;
-    border-radius: 4px;
-    box-sizing: border-box;
-    max-width: 1215px;
+  display: flex;
+  position: relative;
+  border-radius: 4px;
+  box-sizing: border-box;
+  max-width: 1215px;
 
-    && h4 {
-      margin-bottom: 0;
-    }
+  && h4 {
+    margin-bottom: 0;
+  }
 
-    && h4:last-of-type{
-      margin-bottom: 8px;
-    }
+  && h4:last-of-type {
+    margin-bottom: 8px;
+  }
 `;
 
 const AvatarStyled = styled.div`
-   margin-right: 16px;              
+  margin-right: 16px;
 `;
 
 const Content = styled.div`
-display: flex;
-        flex-direction: column;
-        width: 100%;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 `;

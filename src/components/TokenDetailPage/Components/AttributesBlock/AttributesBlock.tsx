@@ -57,11 +57,11 @@ const Row = styled.div`
   align-items: center;
   flex-wrap: wrap;
 
-  >div{
-      margin-top:10px;
+  > div {
+    margin-top: 10px;
   }
 
-  &:not(:last-of-type){
-margin-bottom: 16px
+  &:not(:last-of-type) {
+    margin-bottom: 16px;
   }
 `;

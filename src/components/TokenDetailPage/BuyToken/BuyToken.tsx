@@ -25,21 +25,18 @@ export const BuyToken: FC<BuyTokenProps> = ({ collection, token }) => {
     token_id: tokenId,
     token_prefix } = token;
 
-    const currency = 'KSM';
+  const currency = 'KSM';
 
   return (
-
     <CommonTokenDetail
-collection={collection}
-token={token}
+      collection={collection}
+      token={token}
     >
       <Row>
         <LogoKusama>
           <Icon path={logoKusama} />
         </LogoKusama>
-        <Heading
-          size={'1'}
-        >{`${price + fee}`}</Heading>
+        <Heading size={'1'}>{`${price + fee}`}</Heading>
       </Row>
       <Row>
         <Text
@@ -53,7 +50,7 @@ token={token}
         <Button
           onClick={() => {
             console.log('buy click');
-          } }
+          }}
           role='primary'
           title='Buy'
           wide={true}
@@ -64,20 +61,23 @@ token={token}
 };
 
 const LogoKusama = styled.div`
-margin-right:8px;
-svg {fill: ${AdditionalColorLight}}
+  margin-right: 8px;
+
+  svg {
+    fill: ${AdditionalColorLight};
+  }
 `;
 
 const Row = styled.div`
-display: flex;
-align-items: center;
+  display: flex;
+  align-items: center;
 
- && h1{
-  margin-bottom: 0;
-}
+  && h1 {
+    margin-bottom: 0;
+  }
 `;
 
 const ButtonWrapper = styled.div`
-width: 200px;
-margin-top: 24px;
+  width: 200px;
+  margin-top: 24px;
 `;

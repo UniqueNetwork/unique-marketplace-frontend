@@ -13,12 +13,14 @@ import { AttributesBlock } from '../Components/AttributesBlock/AttributesBlock';
 import { getAttributesToShow } from '../../../utils/getAttributes';
 
 interface IProps {
-  children: ReactChild[]
+  children: ReactChild[];
   token: Token;
   collection: Collection;
 }
 
-export const CommonTokenDetail: FC<IProps> = ({ children, collection, token }) => {
+export const CommonTokenDetail: FC<IProps> = ({ children,
+  collection,
+  token }) => {
   const { collection_id: collectionId,
     count_of_views: countOfViews,
     data,
@@ -27,27 +29,24 @@ export const CommonTokenDetail: FC<IProps> = ({ children, collection, token }) =
     token_id: tokenId,
     token_prefix } = token;
 
-    const attributesToShow = getAttributesToShow(data);
+  const attributesToShow = getAttributesToShow(data);
 
   return (
     <CommonTokenDetailStyled>
       <div>
         <PictureWrapper>
           <Picture
-          alt={tokenId.toString()}
-          src={imagePath}
+alt={tokenId.toString()}
+src={imagePath}
           />
         </PictureWrapper>
       </div>
       <Description>
-        <Heading
-          size={'1'}
-        >{`${token_prefix || ''
-          } #${tokenId}`}</Heading>
+        <Heading size={'1'}>{`${token_prefix || ''} #${tokenId}`}</Heading>
         <Row>
           <Text
-          color='grey-500'
-          size='m'
+color='grey-500'
+size='m'
           >
             {(countOfViews | 123).toString()}
           </Text>
@@ -55,8 +54,8 @@ export const CommonTokenDetail: FC<IProps> = ({ children, collection, token }) =
             <Icon path={eye} />
           </IconWrapper>
           <Text
-          color='grey-500'
-          size='m'
+color='grey-500'
+size='m'
           >
             Share Link
           </Text>
@@ -66,16 +65,16 @@ export const CommonTokenDetail: FC<IProps> = ({ children, collection, token }) =
         </Row>
         <Row>
           <Text
-          color='grey-500'
-          size='m'
+color='grey-500'
+size='m'
           >
             Owned by
           </Text>
           <Account>
             IdIcon
             <Text
-          color='primary-600'
-          size='m'
+color='primary-600'
+size='m'
             >
               {owner}
             </Text>
@@ -102,9 +101,18 @@ const CommonTokenDetailStyled = styled.div`
   display: flex;
   width: 100%;
 
-  > div:first-of-type{
-    width:44%;
+  > div:first-of-type {
+    width: 44%;
     margin-right: 32px;
+  }
+`;
+
+const IconWrapper = styled.div`
+  margin-left: 4px;
+  margin-right: 16px;
+
+  svg {
+    fill: ${Grey500};
   }
 `;
 
@@ -143,35 +151,29 @@ const PictureWrapper = styled.div`
 `;
 
 const Row = styled.div`
-display: flex;
-align-items: center;
+  display: flex;
+  align-items: center;
 
- && h1{
-  margin-bottom: 0;
-}
+  && h1 {
+    margin-bottom: 0;
+  }
 `;
-
-const IconWrapper = styled.div`
-margin-left: 4px;
-margin-right: 16px;
-
- svg {fill: ${Grey500}}`;
 
 const Description = styled.div`
   display: flex;
   flex-direction: column;
-  flex:1;
+  flex: 1;
 `;
 
 const Account = styled.div`
-margin-left: 8px;
+  margin-left: 8px;
 
-span{
-  margin-left:8px;
-}
+  span {
+    margin-left: 8px;
+  }
 `;
 
 const Divider = styled.div`
-margin:24px 0;
-border-top: 1px dashed ${Grey300};
+  margin: 24px 0;
+  border-top: 1px dashed ${Grey300};
 `;

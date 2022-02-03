@@ -10,9 +10,9 @@ export const getAttributesToShow = (attributes: TAttributes): TAttributes => {
     }
 
     Object.keys(attributesToShow).map((key) => {
-    if (typeof attributesToShow[key] === 'string') {
-        attributesToShow[key] = (attributesToShow[key] as string).substring(0, 30);
-    }
+        if (typeof attributesToShow[key] === 'string') {
+            attributesToShow[key] = (attributesToShow[key] as string).substring(0, 30);
+        }
 
         return key;
     });

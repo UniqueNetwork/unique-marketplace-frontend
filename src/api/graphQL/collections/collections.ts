@@ -45,16 +45,16 @@ export const useGraphQlCollections = ({ filter, pageSize }: useGraphQlCollection
     error: fetchCollectionsError,
     fetchMore,
     loading: isCollectionsFetching } = useQuery<CollectionsData, CollectionsVariables>(collectionsQuery, {
-    fetchPolicy: 'network-only',
-    // Used for first execution
-    nextFetchPolicy: 'cache-first',
-    notifyOnNetworkStatusChange: true,
-    variables: {
-      limit: pageSize,
-      offset: 0,
-      where: getWhere()
-    }
-  });
+      fetchPolicy: 'network-only',
+      // Used for first execution
+      nextFetchPolicy: 'cache-first',
+      notifyOnNetworkStatusChange: true,
+      variables: {
+        limit: pageSize,
+        offset: 0,
+        where: getWhere()
+      }
+    });
 
   const fetchMoreCollections = useCallback(
     ({ limit = pageSize, offset, searchString }: FetchMoreCollectionsOptions) => {
@@ -82,16 +82,16 @@ export const useGraphQlCollection = (collectionId: string) => {
   const { data,
     error: fetchCollectionsError,
     loading: isCollectionFetching } = useQuery<CollectionsData, CollectionsVariables>(collectionsQuery, {
-    fetchPolicy: 'network-only',
-    // Used for first execution
-    nextFetchPolicy: 'cache-first',
-    notifyOnNetworkStatusChange: true,
-    variables: {
-      limit: 1,
-      offset: 0,
-      where: { collection_id: { _eq: collectionId } }
-    }
-  });
+      fetchPolicy: 'network-only',
+      // Used for first execution
+      nextFetchPolicy: 'cache-first',
+      notifyOnNetworkStatusChange: true,
+      variables: {
+        limit: 1,
+        offset: 0,
+        where: { collection_id: { _eq: collectionId } }
+      }
+    });
 
   return {
     collection: data?.view_collections[0] || undefined,
