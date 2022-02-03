@@ -1,6 +1,7 @@
 import { Text } from '@unique-nft/ui-kit';
 import { FC, useState } from 'react';
 import styled from 'styled-components/macro';
+import { useNavigate } from 'react-router-dom';
 import { Picture } from '..';
 import { Token } from '../../api/graphQL/tokens/types';
 import { Primary600 } from '../../styles/colors';
@@ -21,8 +22,10 @@ export const TokensCard: FC<TTokensCard> = ({ token }) => {
     token_id: tokenId,
     token_prefix } = token;
 
+    const navigate = useNavigate();
+
   return (
-    <TokensCardStyled>
+    <TokensCardStyled onClick={() => navigate(`token-details?collectionId=${collectionId}&tokenId=${tokenId}`)}>
       <PictureWrapper>
         <Picture
           alt={tokenId.toString()}
@@ -60,7 +63,6 @@ const PictureWrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
   margin-bottom: 8px;
 
   &::before {

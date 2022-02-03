@@ -110,4 +110,26 @@ export const useGraphQlTokens = ({ filter, pageSize }: useGraphQlTokensProps) =>
   };
 };
 
+export const useGraphQlToken = (collectionId: string, tokenId: string) => {
+  const { data,
+    error: fetchTokensError,
+    loading: isTokensFetching } = useQuery<TokensData, TokensVariables>(tokensQuery, {
+    fetchPolicy: 'network-only',
+    // Used for first execution
+    nextFetchPolicy: 'cache-first',
+    notifyOnNetworkStatusChange: true,
+    variables: {
+      limit: 1,
+      offset: 0,
+      where: { collection_id: { _eq: collectionId }, token_id: { _eq: tokenId } }
+    }
+  });
+
+  return {
+    fetchTokensError,
+    isTokensFetching,
+    token: data?.view_tokens[data.view_tokens.length - 1] || undefined // Todo: fix this crunch
+  };
+};
+
 export { tokensQuery };
