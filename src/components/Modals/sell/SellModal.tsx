@@ -8,12 +8,9 @@ import { Icon } from '../../Icon/Icon';
 export const SellModal: FC = () => {
   const [activeTab, setActiveTab] = useState<number>(0);
   const [inputValue, setInputValue] = useState<number>(15);
-  const [selectValue, setSelectValue] = useState<string>('QTZ');
 
   const [inputValueAuction, setInputValueAuction] = useState<number>(15);
-  const [selectValueAuction, setSelectValueAuction] = useState<string>('QTZ');
-  const [inputStartingPriceValue, setInputStartingPriceValue] =
-    useState<number>();
+  const [inputStartingPriceValue, setInputStartingPriceValue] = useState<number>();
   const [durationSelectValue, setDurationSelectValue] = useState<string>();
 
   const handleClick = useCallback(
@@ -30,13 +27,6 @@ export const SellModal: FC = () => {
     [setInputValue]
   );
 
-  const onSelectChange = useCallback(
-    (value: string) => {
-      setSelectValue(value);
-    },
-    [setSelectValue]
-  );
-
   const onButtonClick = useCallback(() => {
     console.log('click on confirm');
   }, []);
@@ -46,13 +36,6 @@ export const SellModal: FC = () => {
       setInputValueAuction(value);
     },
     [setInputValueAuction]
-  );
-
-  const onAuctionSelectChange = useCallback(
-    (value: string) => {
-      setSelectValueAuction(value);
-    },
-    [setSelectValueAuction]
   );
 
   const onInputStartingPriceChange = useCallback(
@@ -68,21 +51,6 @@ export const SellModal: FC = () => {
     },
     [setDurationSelectValue]
   );
-
-  const sortingOptions = [
-    {
-      id: 'QTZ',
-      title: 'QTZ'
-    },
-    {
-      id: 'KSM',
-      title: 'KSM'
-    },
-    {
-      id: 'UNQ',
-      title: 'UNQ'
-    }
-  ];
 
   const durationOptions = [
     {
@@ -105,31 +73,22 @@ export const SellModal: FC = () => {
 
   const FixedPriceTab = (
     <>
-      <Text
-size={'m'}
-weight={'medium'}
-      >
-        Price
-      </Text>
-      <Row>
-        <Select
-          onChange={onSelectChange}
-          options={sortingOptions}
-          value={selectValue}
-        />
-        <InputText
+      <InputWrapper
+label='Price'
 onChange={onInputChange}
 value={inputValue}
-        />
-      </Row>
-      <Text size={'s'}>
+      />
+      <Text
+color='additional-warning-500'
+size='s'
+      >
         A fee of ~ 0.000000000000052 OPL can be applied to the transaction
       </Text>
       <ButtonWrapper>
         <Button
 onClick={onButtonClick}
 role='primary'
-title={'Confirm'}
+title='Confirm'
         />
       </ButtonWrapper>
     </>
@@ -137,58 +96,35 @@ title={'Confirm'}
 
   const AuctionTab = (
     <>
-      <Text
-size={'m'}
-weight={'medium'}
-      >
-        Minimum step*
-      </Text>
-      <Row>
-        <Select
-          onChange={onAuctionSelectChange}
-          options={sortingOptions}
-          value={selectValueAuction}
-        />
-        <InputText
+      <InputWrapper
+label='Minimum step*'
 onChange={onAuctionInputChange}
 value={inputValueAuction}
-        />
-      </Row>
+      />
       <Row>
-        <Text
-size={'m'}
-weight={'medium'}
-        >
-          Starting Price
-        </Text>
-        <Text
-size={'m'}
-weight={'medium'}
-        >
-          Duration*
-        </Text>
-      </Row>
-
-      <Row>
-        <InputText
-          onChange={onInputStartingPriceChange}
-          value={inputStartingPriceValue}
+        <InputWrapper
+label='Starting Price'
+onChange={onInputStartingPriceChange}
+value={inputStartingPriceValue}
         />
-
-        <Select
-          onChange={onDurationSelectChange}
-          options={durationOptions}
-          value={durationSelectValue}
+        <SelectWrapper
+label='Duration*'
+onChange={onDurationSelectChange}
+options={durationOptions}
+value={durationSelectValue}
         />
       </Row>
-      <Text size={'s'}>
+      <Text
+color='additional-warning-500'
+size='s'
+      >
         A fee of ~ 0.000000000000052 OPL can be applied to the transaction
       </Text>
       <ButtonWrapper>
         <Button
 onClick={onButtonClick}
 role='primary'
-title={'Confirm'}
+title='Confirm'
         />
       </ButtonWrapper>
     </>
@@ -205,17 +141,25 @@ title={'Confirm'}
         </Row>
       </Content>
       <Tabs
-        activeIndex={activeTab}
-        labels={['Fixed price', 'Auction']}
-        onClick={handleClick}
-      />
-      <Tabs
 activeIndex={activeTab}
-contents={[FixedPriceTab, AuctionTab]}
+labels={['Fixed price', 'Auction']}
+onClick={handleClick}
       />
+      <Tabs activeIndex={activeTab}>
+        {FixedPriceTab}
+        {AuctionTab}
+      </Tabs>
     </SellModalStyled>
   );
 };
+
+const InputWrapper = styled(InputText)`
+  margin-bottom: 32px;
+`;
+
+const SelectWrapper = styled(Select)`
+  margin-bottom: 32px;
+`;
 
 const ButtonWrapper = styled.div`
   display: flex;
@@ -246,4 +190,25 @@ const SellModalStyled = styled.div`
   padding: 24px;
   box-sizing: border-box;
   width: 100%;
+
+  .unique-input-text {
+    width: 100%;
+  }
+
+  .unique-select {
+    margin-left: 24px;
+  }
+
+  .unique-select .select-wrapper > svg {
+    z-index: 0;
+  }
+
+  .unique-tabs-contents {
+    padding-top: 32px;
+    padding-bottom: 0;
+  }
+
+  .unique-tabs-labels {
+    margin-top: 16px;
+  }
 `;
