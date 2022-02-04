@@ -2,14 +2,14 @@ import { Button, Heading, Tabs, Text, Select, InputText } from '@unique-nft/ui-k
 import { FC, useCallback, useState } from 'react';
 import styled from 'styled-components/macro';
 import close from '../../../static/icons/close.svg';
-import { AdditionalColorDark } from '../../../styles/colors';
+import { AdditionalColorDark, AdditionalWarning100 } from '../../../styles/colors';
 import { Icon } from '../../Icon/Icon';
 
 export const SellModal: FC = () => {
   const [activeTab, setActiveTab] = useState<number>(0);
-  const [inputValue, setInputValue] = useState<number>(15);
+  const [priceInputValue, setpriceInputValue] = useState<number>(15);
 
-  const [inputValueAuction, setInputValueAuction] = useState<number>(15);
+  const [minStepInputValueAuction, setMinStepInputValueAuction] = useState<number>(15);
   const [inputStartingPriceValue, setInputStartingPriceValue] = useState<number>();
   const [durationSelectValue, setDurationSelectValue] = useState<string>();
 
@@ -20,22 +20,22 @@ export const SellModal: FC = () => {
     [setActiveTab]
   );
 
-  const onInputChange = useCallback(
+  const onPriceInputChange = useCallback(
     (value: number) => {
-      setInputValue(value);
+      setpriceInputValue(value);
     },
-    [setInputValue]
+    [setpriceInputValue]
   );
 
   const onButtonClick = useCallback(() => {
     console.log('click on confirm');
   }, []);
 
-  const onAuctionInputChange = useCallback(
+  const onMinStepInputChange = useCallback(
     (value: number) => {
-      setInputValueAuction(value);
+      setMinStepInputValueAuction(value);
     },
-    [setInputValueAuction]
+    [setMinStepInputValueAuction]
   );
 
   const onInputStartingPriceChange = useCallback(
@@ -74,21 +74,22 @@ export const SellModal: FC = () => {
   const FixedPriceTab = (
     <>
       <InputWrapper
-        label='Price'
-        onChange={onInputChange}
-        value={inputValue}
+label='Price*'
+onChange={onPriceInputChange}
+value={priceInputValue}
       />
-      <Text
-        color='additional-warning-500'
-        size='s'
+      <TextStyled
+color='additional-warning-500'
+size='s'
       >
         A fee of ~ 0.000000000000052 OPL can be applied to the transaction
-      </Text>
+      </TextStyled>
       <ButtonWrapper>
         <Button
-          onClick={onButtonClick}
-          role='primary'
-          title='Confirm'
+disabled={!priceInputValue}
+onClick={onButtonClick}
+role='primary'
+title='Confirm'
         />
       </ButtonWrapper>
     </>
@@ -97,34 +98,35 @@ export const SellModal: FC = () => {
   const AuctionTab = (
     <>
       <InputWrapper
-        label='Minimum step*'
-        onChange={onAuctionInputChange}
-        value={inputValueAuction}
+label='Minimum step*'
+onChange={onMinStepInputChange}
+value={minStepInputValueAuction}
       />
       <Row>
         <InputWrapper
-          label='Starting Price'
-          onChange={onInputStartingPriceChange}
-          value={inputStartingPriceValue}
+label='Starting Price'
+onChange={onInputStartingPriceChange}
+value={inputStartingPriceValue}
         />
         <SelectWrapper
-          label='Duration*'
-          onChange={onDurationSelectChange}
-          options={durationOptions}
-          value={durationSelectValue}
+label='Duration*'
+onChange={onDurationSelectChange}
+options={durationOptions}
+value={durationSelectValue}
         />
       </Row>
-      <Text
-        color='additional-warning-500'
-        size='s'
+      <TextStyled
+color='additional-warning-500'
+size='s'
       >
         A fee of ~ 0.000000000000052 OPL can be applied to the transaction
-      </Text>
+      </TextStyled>
       <ButtonWrapper>
         <Button
-          onClick={onButtonClick}
-          role='primary'
-          title='Confirm'
+disabled={!minStepInputValueAuction || !durationSelectValue}
+onClick={onButtonClick}
+role='primary'
+title='Confirm'
         />
       </ButtonWrapper>
     </>
@@ -141,9 +143,10 @@ export const SellModal: FC = () => {
         </Row>
       </Content>
       <Tabs
-      activeIndex={activeTab}
-      labels={['Fixed price', 'Auction']}
-      onClick={handleClick} />
+activeIndex={activeTab}
+labels={['Fixed price', 'Auction']}
+onClick={handleClick}
+      />
       <Tabs activeIndex={activeTab}>
         {FixedPriceTab}
         {AuctionTab}
@@ -151,6 +154,16 @@ export const SellModal: FC = () => {
     </SellModalStyled>
   );
 };
+
+const TextStyled = styled(Text)`
+  box-sizing: border-box;
+  display: flex;
+  padding: 8px 16px;
+  margin-bottom: 24px;
+  border-radius: 4px;
+  background-color: ${AdditionalWarning100};
+  width: 100%;
+`;
 
 const InputWrapper = styled(InputText)`
   margin-bottom: 32px;
@@ -173,7 +186,7 @@ const IconWrapper = styled.div`
 
 const Content = styled.div`
   && h2 {
-    margin-bottom: 0px;
+    margin-bottom: 0;
   }
 `;
 

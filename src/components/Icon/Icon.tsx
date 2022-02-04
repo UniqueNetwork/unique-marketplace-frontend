@@ -15,6 +15,7 @@ export const Icon: FC<IComponentProps> = ({ path }: IComponentProps) => {
 const IconStyled = styled.span`
   svg {
     fill: currentcolor;
+
     path {
       fill: inherit;
     }
