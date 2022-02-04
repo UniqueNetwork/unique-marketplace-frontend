@@ -1,19 +1,40 @@
 import styled from 'styled-components/macro';
 import { Filters, TokensList } from '../../components';
-import { tokens as gqlTokens } from '../../api/graphQL';
-import { useCallback, useState } from 'react';
+import { Token, tokens as gqlTokens } from '../../api/graphQL';
+import { useCallback, useEffect, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
 import { Button, InputText, Select, Text } from '@unique-nft/ui-kit';
 import { Secondary400 } from '../../styles/colors';
 
+type TOption = {
+  direction: 'asc' | 'desc';
+  field: keyof Token;
+  iconRight: {
+      color: string;
+      name: string;
+      size: number;
+  };
+  id: string;
+  title: string;
+}
+
 export const MarketPage = () => {
-  const pageSize = 20;
-  const { fetchMoreTokens, isTokensFetching, tokens, tokensCount } =
-    gqlTokens.useGraphQlTokens({
-      pageSize
-    });
+  const pageSize = 3;
   const [sortingValue, setSortingValue] = useState<string | number>();
   const [searchValue, setSearchValue] = useState<string | number>();
+  const [selectOption, setSelectOption] = useState<TOption>();
+  const { fetchMoreTokens, isTokensFetching, tokens, tokensCount } =
+  gqlTokens.useGraphQlTokens({
+    pageSize, sorting: selectOption ? { direction: selectOption?.direction, field: selectOption?.field } : undefined
+  });
+
+  useEffect(() => {
+    const option = sortingOptions.find((option) => { return option.id === sortingValue; });
+
+    setSelectOption(option);
+  }, [sortingValue, setSelectOption]);
+
+  console.log('selectOption', selectOption);
 
   const hasMore = tokens && tokens.length < tokensCount;
 
@@ -26,37 +47,54 @@ export const MarketPage = () => {
     }
   }, [fetchMoreTokens, tokens, isTokensFetching]);
 
+  const onSortingChange = useCallback((val) => {
+    console.log('value', val);
+    setSortingValue(val);
+  }, []);
+
   const handleSearch = () => {
     console.log(`go search ${searchValue}`);
   };
 
-  const sortingOptions = [
+  const sortingOptions: TOption[] = [
     {
+      direction: 'asc',
+      field: 'collection_id',
       iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
       id: 'price-asc',
       title: 'Price'
     },
     {
+      direction: 'desc',
+      field: 'collection_id',
       iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
       id: 'price-desc',
       title: 'Price'
     },
     {
+      direction: 'asc',
+      field: 'token_id',
       iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
       id: 'token-id-asc',
       title: 'Token ID'
     },
     {
+      direction: 'desc',
+      field: 'token_id',
       iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
       id: 'token-id-desc',
       title: 'Token ID'
     },
     {
+      direction: 'asc',
+      field: 'collection_name',
       iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
       id: 'listing-date-asc',
       title: 'Listing date'
     },
     {
+      direction: 'desc',
+      field: 'collection_name',
       iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
       id: 'listing-date-desc',
       title: 'Listing date'
@@ -85,7 +123,7 @@ export const MarketPage = () => {
           </Search>
           <Select
             defaultValue={'listing-date-desc'}
-            onChange={(val) => setSortingValue(val)}
+            onChange={onSortingChange}
             options={sortingOptions}
             value={sortingValue}
           />

@@ -13,7 +13,7 @@ export const TokensCard: FC<TTokensCard> = ({ token }) => {
   const [tokenImageUrl, setTokenImageUrl] = useState<string>();
 
   const { collection_id: collectionId,
-    collection_name,
+    collection_name: collectionName,
     data,
     id,
     image_path,
@@ -39,7 +39,7 @@ export const TokensCard: FC<TTokensCard> = ({ token }) => {
           color='primary-600'
           size='s'
         >
-          {`${collection_name} [id ${collectionId}]`}
+          {`${collectionName.substring(0, 15)} [id ${collectionId}]`}
         </Text>
         <Text size='s'>Price: 0</Text>
       </Description>

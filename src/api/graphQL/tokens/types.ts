@@ -48,6 +48,7 @@ export interface TokensFilter {
 export type useGraphQlTokensProps = {
   pageSize: number
   filter?: TokensFilter
+  sorting?: {field: keyof Token, direction: 'asc'| 'desc'}
 }
 
 export type FetchMoreTokensOptions = {

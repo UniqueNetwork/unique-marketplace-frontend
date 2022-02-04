@@ -8,6 +8,8 @@ type TTokensList = {
 };
 
 export const TokensList: FC<TTokensList> = ({ tokens }) => {
+  console.log('tokens', tokens);
+
   return (
     <TokensListStyled>
       {tokens?.map &&
