@@ -56,7 +56,6 @@ module.exports = {
     "react-hooks",
     "simple-import-sort",
     "sort-destructure-keys",
-    "sort-keys-fix",
     "react",
   ],
   rules: {
@@ -145,7 +144,6 @@ module.exports = {
         caseSensitive: true,
       },
     ],
-    "sort-keys-fix/sort-keys-fix": "warn",
     "sort-keys": "error",
     "no-void": "off",
     // needs to be switched on at some point
