@@ -74,22 +74,22 @@ export const SellModal: FC = () => {
   const FixedPriceTab = (
     <>
       <InputWrapper
-label='Price*'
-onChange={onPriceInputChange}
-value={priceInputValue}
+        label='Price*'
+        onChange={onPriceInputChange}
+        value={priceInputValue}
       />
       <TextStyled
-color='additional-warning-500'
-size='s'
+        color='additional-warning-500'
+        size='s'
       >
         A fee of ~ 0.000000000000052 OPL can be applied to the transaction
       </TextStyled>
       <ButtonWrapper>
         <Button
-disabled={!priceInputValue}
-onClick={onButtonClick}
-role='primary'
-title='Confirm'
+          disabled={!priceInputValue}
+          onClick={onButtonClick}
+          role='primary'
+          title='Confirm'
         />
       </ButtonWrapper>
     </>
@@ -98,35 +98,35 @@ title='Confirm'
   const AuctionTab = (
     <>
       <InputWrapper
-label='Minimum step*'
-onChange={onMinStepInputChange}
-value={minStepInputValueAuction}
+        label='Minimum step*'
+        onChange={onMinStepInputChange}
+        value={minStepInputValueAuction}
       />
       <Row>
         <InputWrapper
-label='Starting Price'
-onChange={onInputStartingPriceChange}
-value={inputStartingPriceValue}
+          label='Starting Price'
+          onChange={onInputStartingPriceChange}
+          value={inputStartingPriceValue}
         />
         <SelectWrapper
-label='Duration*'
-onChange={onDurationSelectChange}
-options={durationOptions}
-value={durationSelectValue}
+          label='Duration*'
+          onChange={onDurationSelectChange}
+          options={durationOptions}
+          value={durationSelectValue}
         />
       </Row>
       <TextStyled
-color='additional-warning-500'
-size='s'
+        color='additional-warning-500'
+        size='s'
       >
         A fee of ~ 0.000000000000052 OPL can be applied to the transaction
       </TextStyled>
       <ButtonWrapper>
         <Button
-disabled={!minStepInputValueAuction || !durationSelectValue}
-onClick={onButtonClick}
-role='primary'
-title='Confirm'
+          disabled={!minStepInputValueAuction || !durationSelectValue}
+          onClick={onButtonClick}
+          role='primary'
+          title='Confirm'
         />
       </ButtonWrapper>
     </>
@@ -143,9 +143,9 @@ title='Confirm'
         </Row>
       </Content>
       <Tabs
-activeIndex={activeTab}
-labels={['Fixed price', 'Auction']}
-onClick={handleClick}
+        activeIndex={activeTab}
+        labels={['Fixed price', 'Auction']}
+        onClick={handleClick}
       />
       <Tabs activeIndex={activeTab}>
         {FixedPriceTab}
