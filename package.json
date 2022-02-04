@@ -17,8 +17,7 @@
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
-    "@unique-nft/ui-kit": "^0.0.2",
-    "@xstate/react": "^2.0.0",
+    "@unique-nft/ui-kit": "^0.0.3-rc",
     "graphql": "^16.0.1",
     "protobufjs": "^6.11.2",
     "rc-table": "^7.21.0",
@@ -29,8 +28,7 @@
     "react-router-dom": "^6.0.2",
     "react-scripts": "5.0.0",
     "web-vitals": "^1.0.1",
-    "web3": "^1.7.0",
-    "xstate": "^4.29.0"
+    "web3": "^1.7.0"
   },
   "devDependencies": {
     "@polkadot/dev": "^0.65.35",
