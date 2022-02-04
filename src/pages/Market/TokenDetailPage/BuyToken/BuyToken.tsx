@@ -1,5 +1,5 @@
 import { Button, Heading, Text } from '@unique-nft/ui-kit';
-import { FC } from 'react';
+import { FC, useCallback } from 'react';
 import styled from 'styled-components/macro';
 import { Token } from '../../../../api/graphQL/tokens/types';
 import { AdditionalColorLight } from '../../../../styles/colors';
@@ -7,6 +7,7 @@ import logoKusama from '../../../../static/icons/logo-kusama.svg';
 import { Icon } from '../../../../components/Icon/Icon';
 import { Collection } from '../../../../api/graphQL/collections/types';
 import { CommonTokenDetail } from '../Shared/CommonTokenDetail';
+import { useFee } from '../../../../hooks/useFee';
 
 interface BuyTokenProps {
   token: Token;
@@ -14,10 +15,10 @@ interface BuyTokenProps {
 }
 
 export const BuyToken: FC<BuyTokenProps> = ({ collection, token }) => {
+  const { fee } = useFee();
   const { collection_id: collectionId,
     count_of_views: countOfViews,
     data,
-    fee = 0.15,
     id,
     image_path: imagePath,
     owner,
@@ -26,6 +27,10 @@ export const BuyToken: FC<BuyTokenProps> = ({ collection, token }) => {
     token_prefix } = token;
 
   const currency = 'KSM';
+
+  const onBuyButtonClick = useCallback(() => {
+    console.log('buy click');
+  }, []);
 
   return (
     <CommonTokenDetail
@@ -48,9 +53,7 @@ export const BuyToken: FC<BuyTokenProps> = ({ collection, token }) => {
       </Row>
       <ButtonWrapper>
         <Button
-          onClick={() => {
-            console.log('buy click');
-          }}
+          onClick={onBuyButtonClick}
           role='primary'
           title='Buy'
           wide={true}

@@ -14,7 +14,6 @@ export interface Token {
   collection_id: number
   collection_name: string
   data: TAttributes
-  fee: number;
   token_prefix: string
   image_path: string
   owner: string
