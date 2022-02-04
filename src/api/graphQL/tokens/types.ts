@@ -1,3 +1,7 @@
+export type TAttributes = {
+  [key: string]: string | string[]
+}
+
 export interface TokensVariables {
   limit: number
   offset: number
@@ -8,13 +12,13 @@ export interface Token {
   id: number
   token_id: number
   collection_id: number
-  data: {
-    hex: string
-  }
-  token_prefix: string
   collection_name: string
+  data: TAttributes
+  token_prefix: string
   image_path: string
   owner: string
+  price: number
+  count_of_views: number
 }
 
 export interface TokensData {

@@ -1,21 +1,39 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 import { Market, MyTokens, Trades, FAQ } from './pages';
+import { MarketMainPage } from './pages/Market/MarketMain';
+import { TokensPage } from './pages/Market/TokenDetailPage';
+import { GlobalStyle } from './styles';
 
 ReactDOM.render(
   <React.StrictMode>
+    <GlobalStyle />
     <Router>
       <Routes>
         <Route
           element={<App />}
           path={'/'}
         >
+
+          <Route
+            element={<Navigate to='market' />}
+            index
+          />
           <Route
             element={<Market />}
-            index={true}
-          />
+            path={'market'}
+          >
+            <Route
+              element={<MarketMainPage />}
+              index
+            />
+            <Route
+              element={<TokensPage />}
+              path={'token-details'}
+            />
+          </Route>
           <Route
             element={<MyTokens />}
             path={'myTokens'}
@@ -27,6 +45,10 @@ ReactDOM.render(
           <Route
             element={<FAQ />}
             path={'faq'}
+          />
+          <Route
+            element={<Navigate to='market' />}
+            path={'*'}
           />
         </Route>
       </Routes>
