@@ -95,16 +95,18 @@ export function formatStrBalance (value: BN | undefined = new BN(0), incomeDecim
   // calculate number after decimal point
   const decNum = value?.toString().length - tokenDecimals;
   let balanceStr = '';
-
   if (decNum < 0) {
+    // @ts-ignore:
     balanceStr = ['0', '.', ...Array.from('0'.repeat(Math.abs(decNum))), ...value.toString()].join('');
   }
 
   if (decNum > 0) {
+    // @ts-ignore:
     balanceStr = [...value.toString().substr(0, decNum), '.', ...value.toString().substr(decNum, tokenDecimals - decNum)].join('');
   }
 
   if (decNum === 0) {
+    // @ts-ignore:
     balanceStr = ['0', '.', ...value.toString().substr(decNum, tokenDecimals - decNum)].join('');
   }
 
