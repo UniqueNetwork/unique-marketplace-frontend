@@ -50,7 +50,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
         {showMobileMenu && <MenuIcon
           onClick={mobileMenuToggler}
           src={menu}
-                           />}
+        />}
         <LogoIcon src={logo} />
         {!showMobileMenu && (
           <nav>

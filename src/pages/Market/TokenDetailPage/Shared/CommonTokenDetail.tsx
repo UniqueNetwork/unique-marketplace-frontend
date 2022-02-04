@@ -36,8 +36,8 @@ export const CommonTokenDetail: FC<IProps> = ({ children,
       <div>
         <PictureWrapper>
           <Picture
-alt={tokenId.toString()}
-src={imagePath}
+            alt={tokenId.toString()}
+            src={imagePath}
           />
         </PictureWrapper>
       </div>
@@ -45,8 +45,8 @@ src={imagePath}
         <Heading size={'1'}>{`${token_prefix || ''} #${tokenId}`}</Heading>
         <Row>
           <Text
-color='grey-500'
-size='m'
+            color='grey-500'
+            size='m'
           >
             {(countOfViews | 123).toString()}
           </Text>
@@ -54,8 +54,8 @@ size='m'
             <Icon path={eye} />
           </IconWrapper>
           <Text
-color='grey-500'
-size='m'
+            color='grey-500'
+            size='m'
           >
             Share Link
           </Text>
@@ -65,16 +65,16 @@ size='m'
         </Row>
         <Row>
           <Text
-color='grey-500'
-size='m'
+            color='grey-500'
+            size='m'
           >
             Owned by
           </Text>
           <Account>
             IdIcon
             <Text
-color='primary-600'
-size='m'
+              color='primary-600'
+              size='m'
             >
               {owner}
             </Text>

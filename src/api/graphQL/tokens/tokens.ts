@@ -128,7 +128,7 @@ export const useGraphQlToken = (collectionId: string, tokenId: string) => {
   return {
     fetchTokensError,
     isTokensFetching,
-    token: data?.view_tokens[data.view_tokens.length - 1] || undefined // Todo: fix this crunch
+    token: data?.view_tokens[data.view_tokens.length - 1] || undefined // Todo: fix this crutch
   };
 };
 

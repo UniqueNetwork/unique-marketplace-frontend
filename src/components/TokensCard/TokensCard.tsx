@@ -1,5 +1,5 @@
 import { Text } from '@unique-nft/ui-kit';
-import { FC, useState } from 'react';
+import { FC, useCallback, useState } from 'react';
 import styled from 'styled-components/macro';
 import { useNavigate } from 'react-router-dom';
 import { Picture } from '..';
@@ -13,36 +13,34 @@ export type TTokensCard = {
 export const TokensCard: FC<TTokensCard> = ({ token }) => {
   const [tokenImageUrl, setTokenImageUrl] = useState<string>();
 
-  const { collection_id: collectionId,
-    collection_name,
+  const {
+    collection_id: collectionId,
+    collection_name: collectionName,
     data,
     id,
-    image_path,
+    image_path: imagePath,
     owner,
     token_id: tokenId,
-    token_prefix } = token;
+    token_prefix: tokenPrefix
+  } = token;
 
   const navigate = useNavigate();
 
+  const navigateToTokenPage = useCallback(() => {
+    navigate(`token-details?collectionId=${collectionId}&tokenId=${tokenId}`);
+  }, [collectionId, navigate, tokenId]);
+
   return (
-    <TokensCardStyled onClick={() => navigate(`token-details?collectionId=${collectionId}&tokenId=${tokenId}`)}>
+    <TokensCardStyled onClick={navigateToTokenPage}>
       <PictureWrapper>
-        <Picture
-          alt={tokenId.toString()}
-          src={image_path}
-        />
+        <Picture alt={tokenId.toString()} src={imagePath} />
       </PictureWrapper>
       <Description>
-        <Text
-          size='l'
-          weight='medium'
-        >{`${token_prefix || ''
-          } #${tokenId}`}</Text>
-        <Text
-          color='primary-600'
-          size='s'
-        >
-          {`${collection_name} [id ${collectionId}]`}
+        <Text size='l' weight='medium'>{`${
+          tokenPrefix || ''
+        } #${tokenId}`}</Text>
+        <Text color='primary-600' size='s'>
+          {`${collectionName} [id ${collectionId}]`}
         </Text>
         <Text size='s'>Price: 0</Text>
       </Description>
@@ -66,7 +64,7 @@ const PictureWrapper = styled.div`
   margin-bottom: 8px;
 
   &::before {
-    content: "";
+    content: '';
     display: block;
     padding-top: 100%;
   }

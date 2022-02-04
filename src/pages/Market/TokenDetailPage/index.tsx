@@ -22,7 +22,7 @@ export const TokensPage: FC<TokensPageProps> = () => {
       {token && collections && <BuyToken
         collection={collections[0]}
         token={token}
-                               />}
+      />}
     </>
   );
 };
