@@ -2,19 +2,19 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Token } from '../../api/graphQL';
 import { useApi } from '../../hooks/useApi';
-import { PurchaseModal } from './Modals';
+import { SellModal } from './Modals';
+import { ModalProps } from './Modals/types';
 
 // http://localhost:3000/token/124/173
-const TokenPage = (props: any) => {
+const TokenPage = (props: ModalProps) => {
   const { api } = useApi();
   const { id, collectionId } = useParams<{ id: string, collectionId: string}>();
-  console.log('TokenPage props', props);
   const [token, setToken] = useState<Token>();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
-  const onModalClose = () => {
+  const onModalClose = useCallback(() => {
     setIsModalOpen(false);
-  };
+  }, [setIsModalOpen]);
 
   // TODO: debug purposes, should be taken from API instead of RPC
   useEffect(() => {
@@ -35,7 +35,7 @@ const TokenPage = (props: any) => {
   return (<div>
     Token Page {token?.id}
     <button type='button' onClick={onBuyClick}>BUY</button>
-    <PurchaseModal
+    <SellModal
         token={token}
         isOpen={isModalOpen}
         onRequestClose={onModalClose}
