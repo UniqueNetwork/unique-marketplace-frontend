@@ -3,10 +3,9 @@ import { useParams } from 'react-router-dom';
 import { Token } from '../../api/graphQL';
 import { useApi } from '../../hooks/useApi';
 import { SellModal } from './Modals';
-import { ModalProps } from './Modals/types';
 
 // http://localhost:3000/token/124/173
-const TokenPage = (props: ModalProps) => {
+const TokenPage = () => {
   const { api } = useApi();
   const { id, collectionId } = useParams<{ id: string, collectionId: string}>();
   const [token, setToken] = useState<Token>();
@@ -34,13 +33,12 @@ const TokenPage = (props: ModalProps) => {
 
   return (<div>
     Token Page {token?.id}
-    <button type='button' onClick={onBuyClick}>BUY</button>
-    <SellModal
-        token={token}
-        isOpen={isModalOpen}
-        onRequestClose={onModalClose}
-        shouldCloseOnOverlayClick={true}
-      />
+    <button type='button' onClick={onBuyClick}>SELL</button>
+    {isModalOpen && <SellModal
+        tokenId={token?.id || -1}
+        onModalClose={onModalClose}
+    />
+    }
   </div>);
 };
 

@@ -1,35 +1,69 @@
-import { Button, Heading, Tabs, Text, Select, InputText } from '@unique-nft/ui-kit';
-import { FC, useCallback, useState } from 'react';
+import { Modal, Button, Heading, Tabs, Text, Select, InputText } from '@unique-nft/ui-kit';
+import { FC, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components/macro';
 import close from '../../../static/icons/close.svg';
 import { AdditionalColorDark, AdditionalWarning100 } from '../../../styles/colors';
 import { Icon } from '../../../components/Icon/Icon';
-import StagesModal from './StagesModal';
+import useMarketplaceStages, { MarketType } from '../../../hooks/useMarketplaceStages';
+import DefaultMarketStages from './StagesModal';
 
-// from api
+type TOnModalClose = () => void;
+
+type TSellModalProps = {
+  tokenId: number,
+  onModalClose: TOnModalClose
+}
+
+type TFixPriceProps = {
+  price: number // float number
+}
+
+type TAuctionProps = {
+  minimumStep: number,
+  startingPrice: number,
+  duration: number // timestamp in ms's
+}
+
+// will come from api
 const getFees = () => {
   const priceFee = 0.1;
   const stepFee = 0.1;
   return { priceFee, stepFee };
 };
 
-export const SellModal: FC = (props: any) => {
-  const [price, setPrice] = useState<number>(0);
-  const [stepPrice, setStepPrice] = useState<number>(0);
-  const [minPrice, setMinPrice] = useState<number>(0);
-  // const { stages, status } = useMarketplaceStages('none');
-  const status = 'default';
-  if (status === 'default') return <InitSellModal />;
-  return <StagesModal />;
-}
+export const SellModal: FC<TSellModalProps> = ({ tokenId, onModalClose }) => {
+  const [isOpen, setIsOpen] = useState(true);
+  const [status, setStatus] = useState(MarketType.default); // TODO: naming
+  const [auction, setAuction] = useState<TAuctionProps>();
+  const [fixPrice, setFixPrice] = useState<TFixPriceProps>();
+  const onSell = useCallback((auction: TAuctionProps, fixPrice: TFixPriceProps) => {
+    if (auction) {
+      setAuction(auction);
+      setStatus(MarketType.sellAuction);
+    }
+    if (fixPrice) {
+      setFixPrice(fixPrice);
+      setStatus(MarketType.sellFix);
+    }
+  }, [setStatus, setAuction, setFixPrice]);
+  if (status === MarketType.default) return (<Modal isVisible={isOpen} isClosable={true}><SellTypeModal onConfirm={onSell}/></Modal>);
+  switch (status) {
+    // TODO: move modal iside Sell*StagesModal instead (so we can make it "closable" on errors)
+    case MarketType.sellAuction:
+      return (<Modal isVisible={isOpen} isClosable={false}><SellAuctionStagesModal tokenId={tokenId} auction={auction as TAuctionProps} onModalClose={onModalClose} /></Modal>);
+    case MarketType.sellFix:
+      return (<Modal isVisible={isOpen} isClosable={false}><SellFixStagesModal tokenId={tokenId} fixPrice={fixPrice as TFixPriceProps} onModalClose={onModalClose} /></Modal>);
+    default: throw new Error(`Incorrect status provided for processing modal: ${status}`);
+  }
+};
 
-export const InitSellModal: FC = () => {
+export const SellTypeModal: FC<any> = ({ onConfirm }) => {
   const [activeTab, setActiveTab] = useState<number>(0);
   const [priceInputValue, setpriceInputValue] = useState<number>(15);
 
   const [minStepInputValueAuction, setMinStepInputValueAuction] = useState<number>(15);
   const [inputStartingPriceValue, setInputStartingPriceValue] = useState<number>();
-  const [durationSelectValue, setDurationSelectValue] = useState<string>();
+  const [durationSelectValue, setDurationSelectValue] = useState<number>();
 
   const { priceFee, stepFee } = getFees();
 
@@ -47,8 +81,12 @@ export const InitSellModal: FC = () => {
     [setpriceInputValue]
   );
 
-  const onButtonClick = useCallback(() => {
-    console.log('click on confirm');
+  const onConfirmAuctionClick = useCallback(() => {
+    onConfirm({ minimumStep: minStepInputValueAuction, startingPrice: priceInputValue, duration: durationSelectValue } as TAuctionProps);
+  }, []);
+
+  const onConfirmFixPriceClick = useCallback(() => {
+    onConfirm(null, { price: priceInputValue } as TFixPriceProps); // TODO: proper typing, proper calculated object
   }, []);
 
   const onMinStepInputChange = useCallback(
@@ -67,7 +105,8 @@ export const InitSellModal: FC = () => {
 
   const onDurationSelectChange = useCallback(
     (value: string) => {
-      setDurationSelectValue(value);
+      // TODO; trim/parse for string
+      setDurationSelectValue(Number(value));
     },
     [setDurationSelectValue]
   );
@@ -107,7 +146,7 @@ export const InitSellModal: FC = () => {
       <ButtonWrapper>
         <Button
           disabled={!priceInputValue}
-          onClick={onButtonClick}
+          onClick={onConfirmFixPriceClick}
           role='primary'
           title='Confirm'
         />
@@ -144,7 +183,7 @@ export const InitSellModal: FC = () => {
       <ButtonWrapper>
         <Button
           disabled={!minStepInputValueAuction || !durationSelectValue}
-          onClick={onButtonClick}
+          onClick={onConfirmAuctionClick}
           role='primary'
           title='Confirm'
         />
@@ -175,9 +214,35 @@ export const InitSellModal: FC = () => {
   );
 };
 
-export const SellStageModal = () => {
+type TSellFixStagesModal = {
+  onModalClose: TOnModalClose,
+  tokenId: number,
+  fixPrice: TFixPriceProps
+}
+
+type TSellAuctionStagesModal = {
+  onModalClose: TOnModalClose,
+  tokenId: number,
+  auction: TAuctionProps
+}
+
+export const SellFixStagesModal: FC<TSellFixStagesModal> = ({ tokenId, fixPrice, onModalClose }) => {
+  const { stages, status, initiate } = useMarketplaceStages(MarketType.sellFix, tokenId, fixPrice);
+  useEffect(() => { initiate(); }, []); // TODO: initiate could be putten inside useMarketplaceStages
   return (
-    <div>SellStageModal</div>
+    <div>
+      <DefaultMarketStages stages={stages} status={status} onModalClose={onModalClose} />
+    </div>
+  );
+};
+
+export const SellAuctionStagesModal: FC<TSellAuctionStagesModal> = ({ tokenId, auction, onModalClose }) => {
+  const { stages, status, initiate } = useMarketplaceStages(MarketType.sellAuction, tokenId, auction);
+  useEffect(() => { initiate(); }, []);
+  return (
+    <div>
+      <DefaultMarketStages stages={stages} status={status} onModalClose={onModalClose} />
+    </div>
   );
 };
 

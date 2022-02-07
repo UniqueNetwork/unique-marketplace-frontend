@@ -1,6 +1,8 @@
 import { useCallback, useState } from 'react';
+import { sleep } from '../utils/helpers';
 
 export enum MarketType {
+  default = 'Not started', // initial state
   purchase = 'Purchase', // fix price
   bid = 'Bid',
   sellFix = 'Sell for fixed price',
@@ -25,20 +27,62 @@ export interface InternalStage extends Stage {
   action: (tokenId: number) => Promise<void>;
 }
 
-export type TMarketStagesProps = {
-  type: MarketType;
-  tokenId: number;
+export type useMarketplaceStagesReturn = {
+  stages: Stage[],
+  initiate: () => void,
+  status: StageStatus, // status for all stages combined, not for current stage
+  error: Error | undefined | null
 }
 
+// todo: auction | fixPrice objects to be provided
+export type TTxParams = any;
+
+// TODO: to separate files
 const purchaseStages = [{
   title: 'Approve sponsorship',
   description: 'We need to add you to a whitelist. It\'s a one time operation.',
   status: StageStatus.default,
   action: () => { throw new Error('Not implemented'); } // api.NFT.whiteList(api.accounts.selectedAccount)
 }] as InternalStage[];
-const bidStages = [] as InternalStage[];
-const sellFixStages = [] as InternalStage[];
-const sellAuctionStages = [] as InternalStage[];
+
+const bidStages = [{
+  title: 'Approve sponsorship',
+  description: 'We need to add you to a whitelist. It\'s a one time operation.',
+  status: StageStatus.default,
+  action: () => { throw new Error('Not implemented'); } // api.NFT.whiteList(api.accounts.selectedAccount)
+}] as InternalStage[];
+
+const sellFixStages = [{
+  title: 'Example: Approve sponsorship',
+  description: 'We need to add you to a whitelist. It\'s a one time operation.',
+  status: StageStatus.default,
+  action: async () => { await sleep(5 * 1000); }
+},
+{
+  title: 'Example: Send to eth',
+  description: '',
+  status: StageStatus.default,
+  action: async () => { await sleep(4 * 1000); }
+},
+{
+  title: 'Example: Operation failure',
+  description: '',
+  status: StageStatus.default,
+  action: async () => { await sleep(3 * 1000); throw new Error('Failure example'); }
+},
+{
+  title: 'Example: Won\'t reach due to error before',
+  description: '',
+  status: StageStatus.default,
+  action: async () => { await sleep(2 * 1000); }
+}] as InternalStage[];
+
+const sellAuctionStages = [{
+  title: 'Approve sponsorship',
+  description: 'We need to add you to a whitelist. It\'s a one time operation.',
+  status: StageStatus.default,
+  action: () => { throw new Error('Not implemented'); } // api.NFT.whiteList(api.accounts.selectedAccount)
+}] as InternalStage[];
 
 const getInternalStages = (type: MarketType) => {
   switch (type) {
@@ -50,13 +94,17 @@ const getInternalStages = (type: MarketType) => {
       return sellAuctionStages;
     case MarketType.purchase:
       return purchaseStages;
+    case MarketType.default:
+    default:
+      throw new Error(`Incorrect stage type received ${type}`);
   }
 };
 
-const useMarketplaceStages = (props: TMarketStagesProps) => {
-  const { type, tokenId } = props;
+// TODO: txParams depends on stage type (it is usually a price, but for auction it could contain some extra params like minBid)
+const useMarketplaceStages = (type: MarketType, tokenId: number, txParams: TTxParams): useMarketplaceStagesReturn => {
   const [internalStages, setInternalStages] = useState<InternalStage[]>(getInternalStages(type));
   const [marketStagesStatus, setMarketStagesStatus] = useState<StageStatus>(StageStatus.default);
+  const [executionError, setExecutionError] = useState<Error | undefined | null>(null);
 
   const updateStage = useCallback((index: number, newStage: InternalStage) => {
     const copy = [...internalStages];
@@ -82,6 +130,8 @@ const useMarketplaceStages = (props: TMarketStagesProps) => {
         await executeStep(internalStage, index);
       } catch (e) {
         setMarketStagesStatus(StageStatus.error);
+        setExecutionError(new Error(`Stage "${internalStage.title}" failed`));
+        return;
       }
     }
     setMarketStagesStatus(StageStatus.success);
@@ -96,7 +146,10 @@ const useMarketplaceStages = (props: TMarketStagesProps) => {
         ...other
       };
     }),
-    marketStagesStatus,
+    error: executionError,
+    status: marketStagesStatus,
     initiate
   };
 };
+
+export default useMarketplaceStages;
