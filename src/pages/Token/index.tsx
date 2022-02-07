@@ -18,7 +18,7 @@ const TokenPage = () => {
   // TODO: debug purposes, should be taken from API instead of RPC
   useEffect(() => {
     if (!api) return;
-      api?.getToken(Number(collectionId), Number(id)).then((token, ...other) => {
+      api?.nft?.getToken(Number(collectionId), Number(id)).then((token, ...other) => {
         console.log('token', token, 'other', other);
         setToken(token);
         console.log('token set', token);
