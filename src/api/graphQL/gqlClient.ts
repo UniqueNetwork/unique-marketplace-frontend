@@ -20,4 +20,9 @@ export class GqlClient implements IGqlClient {
       this.client.setLink(new HttpLink({ uri: gqlEndpoint }));
     });
   }
+
+  public clearCache() {
+    this.client.stop(); // terminate all active query processes
+    this.client.clearStore();
+  }
 }

@@ -6,9 +6,6 @@ import InfiniteScroll from 'react-infinite-scroller';
 import { Button, InputText, Select, Text } from '@unique-nft/ui-kit';
 import { Secondary400 } from '../../styles/colors';
 import { gqlClient } from '../../api';
-import config from '../../config';
-
-const { defaultChain } = config;
 
 type TOption = {
   direction: 'asc' | 'desc';
@@ -38,8 +35,6 @@ export const MarketMainPage = () => {
     setSelectOption(option);
   }, [sortingValue, setSelectOption]);
 
-  console.log('selectOption', selectOption);
-
   const hasMore = tokens && tokens.length < tokensCount;
 
   const onClickSeeMore = useCallback(() => {
@@ -52,10 +47,9 @@ export const MarketMainPage = () => {
   }, [fetchMoreTokens, tokens, isTokensFetching]);
 
   const onSortingChange = useCallback((val) => {
-    console.log('value', val);
     setSortingValue(val);
-    gqlClient.changeEndpoint(defaultChain.gqlEndpoint);
-  }, [defaultChain]);
+    gqlClient.clearCache();
+  }, []);
 
   const handleSearch = () => {
     console.log(`go search ${searchValue}`);
