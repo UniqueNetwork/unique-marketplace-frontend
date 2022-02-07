@@ -3,7 +3,8 @@ import { ApiPromise } from '@polkadot/api';
 
 export interface IRpcClient {
   isApiConnected: boolean
-  controller?: INFTController<any, any>
+  nftController?: INFTController<any, any>
+  collectionController?: ICollectionController<any, any>
   chainData: any
   rawRpcApi?: ApiPromise // allow access to the raw API for exceptions in the future
   setOnChainReadyListener(callback: (chainData: ChainData) => void): void
@@ -15,9 +16,16 @@ export interface IRpcClientOptions {
 }
 
 export interface INFTController<Collection, Token> {
+  getToken(collectionId: number, tokenId: number): Promise<Token | null>
+}
+
+export interface ICollectionController<Collection, Token> {
   getCollection(collectionId: number): Promise<Collection | null>
   getTokensOfCollection(collectionId: number, ownerId: number): Promise<Token[]>
-  getToken(collectionId: number, tokenId: number): Promise<Token | null>
+}
+
+export interface IAccountController<Collection, Token> {
+
 }
 
 export type Chain = {
