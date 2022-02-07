@@ -122,7 +122,7 @@ export const useGraphQlToken = (collectionId: string, tokenId: string) => {
   const { data,
     error: fetchTokensError,
     loading: isTokensFetching } = useQuery<TokensData, TokensVariables>(tokensQuery, {
-      fetchPolicy: 'network-only',
+      fetchPolicy: 'no-cache',
       // Used for first execution
       nextFetchPolicy: 'cache-first',
       notifyOnNetworkStatusChange: true,
@@ -136,7 +136,7 @@ export const useGraphQlToken = (collectionId: string, tokenId: string) => {
   return {
     fetchTokensError,
     isTokensFetching,
-    token: data?.view_tokens[data.view_tokens.length - 1] || undefined // Todo: fix this crutch
+    token: data?.view_tokens[0]
   };
 };
 

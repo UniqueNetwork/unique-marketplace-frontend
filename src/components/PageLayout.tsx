@@ -55,7 +55,8 @@ const LayoutStyled = styled.div`
     > div {
       display: flex;
     }
-/* Todo: remove after done task https://cryptousetech.atlassian.net/browse/NFTPAR-1238*/
+
+    /* Todo: remove after done task https://cryptousetech.atlassian.net/browse/NFTPAR-1238 */
     .unique-breadcrumbs-wrapper {
       align-items: center;
 

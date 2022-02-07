@@ -64,7 +64,7 @@ const PictureWrapper = styled.div`
   margin-bottom: 8px;
 
   &::before {
-    content: '';
+    content: "";
     display: block;
     padding-top: 100%;
   }
