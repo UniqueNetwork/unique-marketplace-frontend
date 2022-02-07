@@ -3,7 +3,11 @@ import { useCallback } from 'react';
 import { CollectionsData, CollectionsVariables, FetchMoreCollectionsOptions, useGraphQlCollectionsProps } from './types';
 
 const collectionsQuery = gql`
-  query getCollections($limit: Int, $offset: Int, $where: view_collections_bool_exp = {}) {
+  query getCollections(
+    $limit: Int
+    $offset: Int
+    $where: view_collections_bool_exp = {}
+  ) {
     view_collections(where: $where, limit: $limit, offset: $offset) {
       collection_cover
       collection_id
@@ -22,42 +26,51 @@ const collectionsQuery = gql`
   }
 `;
 
-export const useGraphQlCollections = ({ filter, pageSize }: useGraphQlCollectionsProps) => {
+export const useGraphQlCollections = ({
+  filter,
+  pageSize
+}: useGraphQlCollectionsProps) => {
   const getWhere = useCallback(
     (searchString?: string) => ({
       _and: {
         ...(filter ? { _or: filter } : {}),
         ...(searchString
           ? {
-            _or: {
-              description: { _ilike: searchString },
-              name: { _ilike: searchString },
-              token_prefix: { _ilike: searchString }
+              _or: {
+                description: { _ilike: searchString },
+                name: { _ilike: searchString },
+                token_prefix: { _ilike: searchString }
+              }
             }
-          }
           : {})
       }
     }),
     [filter]
   );
 
-  const { data,
+  const {
+    data,
     error: fetchCollectionsError,
     fetchMore,
-    loading: isCollectionsFetching } = useQuery<CollectionsData, CollectionsVariables>(collectionsQuery, {
-      fetchPolicy: 'network-only',
-      // Used for first execution
-      nextFetchPolicy: 'cache-first',
-      notifyOnNetworkStatusChange: true,
-      variables: {
-        limit: pageSize,
-        offset: 0,
-        where: getWhere()
-      }
-    });
+    loading: isCollectionsFetching
+  } = useQuery<CollectionsData, CollectionsVariables>(collectionsQuery, {
+    fetchPolicy: 'network-only',
+    // Used for first execution
+    nextFetchPolicy: 'cache-first',
+    notifyOnNetworkStatusChange: true,
+    variables: {
+      limit: pageSize,
+      offset: 0,
+      where: getWhere()
+    }
+  });
 
   const fetchMoreCollections = useCallback(
-    ({ limit = pageSize, offset, searchString }: FetchMoreCollectionsOptions) => {
+    ({
+      limit = pageSize,
+      offset,
+      searchString
+    }: FetchMoreCollectionsOptions) => {
       return fetchMore({
         variables: {
           limit,
@@ -79,19 +92,21 @@ export const useGraphQlCollections = ({ filter, pageSize }: useGraphQlCollection
 };
 
 export const useGraphQlCollection = (collectionId: string) => {
-  const { data,
+  const {
+    data,
     error: fetchCollectionsError,
-    loading: isCollectionFetching } = useQuery<CollectionsData, CollectionsVariables>(collectionsQuery, {
-      fetchPolicy: 'network-only',
-      // Used for first execution
-      nextFetchPolicy: 'cache-first',
-      notifyOnNetworkStatusChange: true,
-      variables: {
-        limit: 1,
-        offset: 0,
-        where: { collection_id: { _eq: collectionId } }
-      }
-    });
+    loading: isCollectionFetching
+  } = useQuery<CollectionsData, CollectionsVariables>(collectionsQuery, {
+    fetchPolicy: 'network-only',
+    // Used for first execution
+    nextFetchPolicy: 'cache-first',
+    notifyOnNetworkStatusChange: true,
+    variables: {
+      limit: 1,
+      offset: 0,
+      where: { collection_id: { _eq: collectionId } }
+    }
+  });
 
   return {
     collection: data?.view_collections[0] || undefined,

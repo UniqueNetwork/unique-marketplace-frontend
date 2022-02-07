@@ -16,7 +16,8 @@ interface BuyTokenProps {
 
 export const BuyToken: FC<BuyTokenProps> = ({ collection, token }) => {
   const { fee } = useFee();
-  const { collection_id: collectionId,
+  const {
+    collection_id: collectionId,
     count_of_views: countOfViews,
     data,
     id,
@@ -24,7 +25,8 @@ export const BuyToken: FC<BuyTokenProps> = ({ collection, token }) => {
     owner,
     price = 234,
     token_id: tokenId,
-    token_prefix } = token;
+    token_prefix
+  } = token;
 
   const currency = 'KSM';
 
@@ -33,10 +35,7 @@ export const BuyToken: FC<BuyTokenProps> = ({ collection, token }) => {
   }, []);
 
   return (
-    <CommonTokenDetail
-      collection={collection}
-      token={token}
-    >
+    <CommonTokenDetail collection={collection} token={token}>
       <Row>
         <LogoKusama>
           <Icon path={logoKusama} />
@@ -44,10 +43,7 @@ export const BuyToken: FC<BuyTokenProps> = ({ collection, token }) => {
         <Heading size={'1'}>{`${price + fee}`}</Heading>
       </Row>
       <Row>
-        <Text
-          color='grey-500'
-          size='m'
-        >
+        <Text color='grey-500' size='m'>
           {`price ${price} ${currency} + fee ${fee} ${currency}`}
         </Text>
       </Row>

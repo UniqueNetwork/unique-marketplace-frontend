@@ -11,40 +11,28 @@ interface ICollectionsCardProps {
   description?: string;
 }
 
-export const CollectionsCard: FC<ICollectionsCardProps> = ({ avatarSrc,
+export const CollectionsCard: FC<ICollectionsCardProps> = ({
+  avatarSrc,
   description,
   id,
-  title }: ICollectionsCardProps) => {
+  title
+}: ICollectionsCardProps) => {
   const avatarImg = avatarSrc || noCollections;
 
   return (
     <CollectionsCardStyled>
       <AvatarStyled>
-        <Avatar
-          size={40}
-          src={avatarImg}
-          type='circle'
-        />
+        <Avatar size={40} src={avatarImg} type='circle' />
       </AvatarStyled>
       <Content>
-        <Heading
-          className='heading'
-          size='4'
-        >
+        <Heading className='heading' size='4'>
           {title}
         </Heading>
-        <Heading
-          className='heading'
-          size='4'
-        >
+        <Heading className='heading' size='4'>
           {`[id ${id}]`}
         </Heading>
         {description && (
-          <Text
-            className='description'
-            color='grey-500'
-            size='s'
-          >
+          <Text className='description' color='grey-500' size='s'>
             {description}
           </Text>
         )}

@@ -18,16 +18,20 @@ interface IProps {
   collection: Collection;
 }
 
-export const CommonTokenDetail: FC<IProps> = ({ children,
+export const CommonTokenDetail: FC<IProps> = ({
+  children,
   collection,
-  token }) => {
-  const { collection_id: collectionId,
+  token
+}) => {
+  const {
+    collection_id: collectionId,
     count_of_views: countOfViews,
     data,
     image_path: imagePath,
     owner,
     token_id: tokenId,
-    token_prefix } = token;
+    token_prefix
+  } = token;
 
   const attributesToShow = getAttributesToShow(data);
 
@@ -35,28 +39,19 @@ export const CommonTokenDetail: FC<IProps> = ({ children,
     <CommonTokenDetailStyled>
       <div>
         <PictureWrapper>
-          <Picture
-            alt={tokenId.toString()}
-            src={imagePath}
-          />
+          <Picture alt={tokenId.toString()} src={imagePath} />
         </PictureWrapper>
       </div>
       <Description>
         <Heading size={'1'}>{`${token_prefix || ''} #${tokenId}`}</Heading>
         <Row>
-          <Text
-            color='grey-500'
-            size='m'
-          >
+          <Text color='grey-500' size='m'>
             {(countOfViews | 123).toString()}
           </Text>
           <IconWrapper>
             <Icon path={eye} />
           </IconWrapper>
-          <Text
-            color='grey-500'
-            size='m'
-          >
+          <Text color='grey-500' size='m'>
             Share Link
           </Text>
           <IconWrapper>
@@ -64,18 +59,12 @@ export const CommonTokenDetail: FC<IProps> = ({ children,
           </IconWrapper>
         </Row>
         <Row>
-          <Text
-            color='grey-500'
-            size='m'
-          >
+          <Text color='grey-500' size='m'>
             Owned by
           </Text>
           <Account>
             IdIcon
-            <Text
-              color='primary-600'
-              size='m'
-            >
+            <Text color='primary-600' size='m'>
               {owner}
             </Text>
           </Account>
@@ -123,7 +112,7 @@ const PictureWrapper = styled.div`
   align-items: center;
 
   &::before {
-    content: "";
+    content: '';
     display: block;
     padding-top: 100%;
   }
