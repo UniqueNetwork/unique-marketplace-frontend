@@ -18,18 +18,17 @@ const fetchTokenImage = async (
     const collectionMetadata = JSON.parse(hex2a(collectionInfo.offchainSchema)) as MetadataType;
 
     if (collectionMetadata.metadata) {
-  const dataUrl = getTokenImageUrl(collectionMetadata.metadata, tokenId);
-  const urlResponse = await fetch(dataUrl);
-  const jsonData = (await urlResponse.json()) as { image: string };
+      const dataUrl = getTokenImageUrl(collectionMetadata.metadata, tokenId);
+      const urlResponse = await fetch(dataUrl);
+      const jsonData = (await urlResponse.json()) as { image: string };
 
-  return jsonData.image;
-}
-} catch (e) {
-  // tslint:disable-next-line:no-console
-  console.log('image metadata parse error', e);
-}
+      return jsonData.image;
+    }
+  } catch (e) {
+    console.log('image metadata parse error', e);
+  }
 
-return '';
+  return '';
 };
 
 export const getTokenImage = async (collection: NFTCollection, tokenId: number): Promise<string> => {

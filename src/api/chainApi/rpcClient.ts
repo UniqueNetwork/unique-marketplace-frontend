@@ -8,9 +8,6 @@ import rpcMethods from './unique/rpcMethods';
 import UniqueNFTController from './unique/NFTController';
 import UniqueCollectionController from './unique/collectionController';
 import { ChainData } from '../ApiContext';
-import config from '../../config';
-
-const { IPFSGateway } = config;
 
 export class RpcClient implements IRpcClient {
   public nftController?: INFTController<any, any>;
@@ -75,8 +72,8 @@ export class RpcClient implements IRpcClient {
     });
 
     this.rawRpcApi = _api;
-    this.nftController = new UniqueNFTController(_api, IPFSGateway || '');
-    this.collectionController = new UniqueCollectionController(_api, IPFSGateway || '');
+    this.nftController = new UniqueNFTController(_api);
+    this.collectionController = new UniqueCollectionController(_api);
     this.setIsApiInitialized(true);
   }
 

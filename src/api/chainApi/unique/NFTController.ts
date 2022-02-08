@@ -7,11 +7,9 @@ import { getTokenImage } from '../utils/imageUtils';
 
 class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
   private api: ApiPromise;
-  private IPFSGateway: string;
 
-  constructor(api: ApiPromise, IPFSGateway: string) {
+  constructor(api: ApiPromise) {
     this.api = api;
-    this.IPFSGateway = IPFSGateway;
   }
 
   public async getToken(collectionId: number, tokenId: number): Promise<NFTToken | null> {
@@ -30,9 +28,11 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
         return null;
       }
 
-      const variableData = // @ts-ignore
+      const variableData =
+        // @ts-ignore
         (await this.api.rpc.unique.variableMetadata(collectionId, tokenId)).toJSON() as string;
-      const constData: string = // @ts-ignore
+      const constData: string =
+        // @ts-ignore
         (await this.api.rpc.unique.constMetadata(collectionId, tokenId)).toJSON() as string;
       const crossAccount = normalizeAccountId(
         // @ts-ignore
@@ -59,7 +59,6 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
         variableData
       };
     } catch (e) {
-      // tslint:disable-next-line:no-console
       console.log('getDetailedTokenInfo error', e);
 
       return null;
