@@ -33,7 +33,6 @@ export const decodeStruct = ({ attr, data }: { attr?: any; data?: string }): Att
         return deserializeNft(schema, Buffer.from(data.slice(2), 'hex'), 'en');
       }
     } catch (e) {
-      // tslint:disable-next-line:no-console
       console.log('decodeStruct error', e);
     }
   }

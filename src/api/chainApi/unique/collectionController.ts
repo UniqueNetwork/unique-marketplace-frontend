@@ -3,14 +3,15 @@ import { ICollectionController } from '../types';
 import { NFTCollection, NFTToken } from './types';
 import { getOnChainSchema, hex2a } from '../utils/decoder';
 import { getTokenImage } from '../utils/imageUtils';
+import config from '../../../config';
+
+const { IPFSGateway } = config;
 
 class UniqueCollectionController implements ICollectionController<NFTCollection, NFTToken> {
   private api: ApiPromise;
-  private IPFSGateway: string;
 
-  constructor(api: ApiPromise, IPFSGateway: string) {
+  constructor(api: ApiPromise) {
     this.api = api;
-    this.IPFSGateway = IPFSGateway;
   }
 
   public async getCollection(collectionId: number): Promise<NFTCollection | null> {
@@ -30,7 +31,7 @@ class UniqueCollectionController implements ICollectionController<NFTCollection,
         const collectionSchema = getOnChainSchema(collectionInfo);
         const image = JSON.parse(collectionSchema?.attributesVar)?.collectionCover as string;
 
-        coverImageUrl = `${this.IPFSGateway}/${image}`;
+        coverImageUrl = `${IPFSGateway}/${image}`;
       } else {
         if (collectionInfo.offchainSchema) {
           coverImageUrl = await getTokenImage(collectionInfo, 1);
@@ -43,7 +44,6 @@ class UniqueCollectionController implements ICollectionController<NFTCollection,
         id: collectionId
       };
     } catch (e) {
-      // tslint:disable-next-line:no-console
       console.log('getDetailedCollectionInfo error', e);
     }
 
@@ -59,7 +59,6 @@ class UniqueCollectionController implements ICollectionController<NFTCollection,
       // @ts-ignore
       return await this.api.query.unique.accountTokens(collectionId, { Substrate: ownerId });
     } catch (e) {
-      // tslint:disable-next-line:no-console
       console.log('getTokensOfCollection error', e);
     }
 
