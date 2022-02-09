@@ -1,14 +1,17 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { formatBalance } from '@polkadot/util';
 import { OverrideBundleType } from '@polkadot/types/types';
-import { IRpcClient, INFTController, Chain, IRpcClientOptions } from './types';
+
+import { IRpcClient, INFTController, IRpcClientOptions, ICollectionController } from './types';
 import bundledTypesDefinitions from './unique/bundledTypesDefinitions';
 import rpcMethods from './unique/rpcMethods';
-import UniqueNFTController from './unique/unique';
+import UniqueNFTController from './unique/NFTController';
+import UniqueCollectionController from './unique/collectionController';
 import { ChainData } from '../ApiContext';
 
 export class RpcClient implements IRpcClient {
-  public controller?: INFTController<any, any>;
+  public nftController?: INFTController<any, any>;
+  public collectionController?: ICollectionController<any, any>;
   public rawRpcApi?: ApiPromise;
   public isApiConnected = false;
   public isApiInitialized = false;
@@ -69,7 +72,8 @@ export class RpcClient implements IRpcClient {
     });
 
     this.rawRpcApi = _api;
-    this.controller = new UniqueNFTController(_api);
+    this.nftController = new UniqueNFTController(_api);
+    this.collectionController = new UniqueCollectionController(_api);
     this.setIsApiInitialized(true);
   }
 

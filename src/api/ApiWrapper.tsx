@@ -44,7 +44,10 @@ const ApiWrapper = ({ children, gqlClient = gql, rpcClient = rpc }: ChainProvide
   // get context value for ApiContext
   const value = useMemo<ApiContextProps>(
     () => ({
-      api: (rpcClient && rpc.isApiConnected && rpcClient?.controller) || undefined,
+      api: (rpcClient && rpc.isApiConnected && {
+        collection: rpcClient.collectionController,
+        nft: rpcClient.nftController
+      }) || undefined,
       chainData,
       currentChain: chainId ? chains[chainId] : defaultChain,
       rawRpcApi: rpcClient.rawRpcApi,
