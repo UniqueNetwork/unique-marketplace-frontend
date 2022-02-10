@@ -1,7 +1,6 @@
 import { Token } from '../../../api/graphQL/tokens/types';
-import ReactModal from "react-modal";
 
-export interface ModalProps extends ReactModal.Props {
+export interface ModalProps {
   token?: Token,
   [key: string]: any
 }
