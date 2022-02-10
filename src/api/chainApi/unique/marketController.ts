@@ -71,17 +71,17 @@ class MarketController implements IMarketController {
     throw new Error('Something went wrong when adding to whitelist: account is whitelisted, mindeposit found but success is not returned');
   }
 
-  public async lockNftForSale(): Promise<void> {
+  public async lockNftForSale(options: TransactionOptions): Promise<void> {
     await sleep(1000);
     throw new Error('Not implemented');
   }
 
-  public async sendNftToSmartContract(): Promise<void> {
+  public async sendNftToSmartContract(options: TransactionOptions): Promise<void> {
     await sleep(1000);
     throw new Error('Not implemented');
   }
 
-  public async setForFixPriceSale(price: number): Promise<void> {
+  public async setForFixPriceSale(price: number, options: TransactionOptions): Promise<void> {
     await sleep(1000);
     throw new Error('Not implemented');
   }

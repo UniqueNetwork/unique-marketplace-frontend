@@ -29,8 +29,8 @@ export type Stage = {
 
 export type TInternalStageActionParams = {
   tokenId: number,
-  txParams?: TTxParams,
-  options?: TransactionOptions
+  txParams: TTxParams,
+  options: TransactionOptions
 }
 
 export type TInternalStageAction = (params: TInternalStageActionParams) => Promise<TTransaction | void>;
@@ -67,19 +67,19 @@ const getInternalStages = (type: MarketType, marketApi: MarketController) => {
     title: 'Locking NFT for sale',
     description: '',
     status: StageStatus.default,
-    action: marketApi.lockNftForSale
+    action: (params: TInternalStageActionParams) => marketApi.lockNftForSale(params.options)
   },
   {
     title: 'Sending NFT to Smart contract',
     description: '',
     status: StageStatus.default,
-    action: marketApi.sendNftToSmartContract
+    action: (params: TInternalStageActionParams) => marketApi.sendNftToSmartContract(params.options)
   },
   {
     title: 'Setting price',
     description: '',
     status: StageStatus.default,
-    action: marketApi.setForFixPriceSale
+    action: (params: TInternalStageActionParams) => marketApi.setForFixPriceSale(params?.txParams?.price, params.options)
   }] as InternalStage[];
   switch (type) {
     case MarketType.bid:
@@ -133,7 +133,7 @@ const useMarketplaceStages = (type: MarketType, tokenId: number, txParams: TTxPa
     try {
       // if sign is required by action -> promise wouldn't be resolved untill transaction is signed
       // transaction sign should be triggered in the component that uses current stage (you can track it by stage.status or stage.signer)
-      await stage.action({ tokenId, options: { sign: getSignFunction(index, stage) } });
+      await stage.action({ tokenId, txParams, options: { sign: getSignFunction(index, stage) } });
       updateStage(index, { ...stage, status: StageStatus.success });
     } catch (e) {
       updateStage(index, { ...stage, status: StageStatus.error });

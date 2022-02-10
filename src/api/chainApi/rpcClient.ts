@@ -58,9 +58,9 @@ export class KusamaClient implements IRpc {
 export class RpcClient implements IRpcClient {
   public nftController?: INFTController<any, any>;
   public collectionController?: ICollectionController<any, any>;
-  public marketController?: IMarketController; // TODO: requires both clients - uniq rpc and kusama rpc, reconsider moving it to different level (controllers are back to api context?)
-  public rawRpcApi?: ApiPromise; // TODO: rename to rawUniqRpcApi
-  // TODO: add rawKusamaRpcApi ?
+  public marketController?: IMarketController;
+  public rawUniqRpcApi?: ApiPromise;
+  public rawKusamaRpcApi?: ApiPromise; // new
   public isApiConnected = false;
   public isApiInitialized = false;
   public apiConnectionError?: string;
@@ -73,6 +73,10 @@ export class RpcClient implements IRpcClient {
     this.rpcEndpoint = rpcEndpoint;
     this.options = options || {};
     this.setApi();
+    // todo: save kusama client in RpcClient, reevaluate whether it is a good idea or should be placed at the same level as rpcClient
+    // this.initKusamaApi()
+    // TODO: wait for both rpc's to be initiated to switch "isApiInitialized
+    // kusamaApi should be initialized only once
   }
 
   private setIsApiConnected(value: boolean) {
@@ -88,9 +92,9 @@ export class RpcClient implements IRpcClient {
   }
 
   private setApi() {
-    if (this.rawRpcApi) {
+    if (this.rawUniqRpcApi) {
       this.setIsApiConnected(false);
-      this.rawRpcApi.disconnect(); // TODO: make async and await disconnect (same for kusama client)
+      this.rawUniqRpcApi.disconnect(); // TODO: make async and await disconnect (same for kusama client)
     }
 
     const typesBundle: OverrideBundleType = {
@@ -120,20 +124,19 @@ export class RpcClient implements IRpcClient {
       if (this.options.onChainReady) this.options.onChainReady(this.chainData);
     });
 
-    this.rawRpcApi = _api;
+    this.rawUniqRpcApi = _api;
     this.nftController = new UniqueNFTController(_api);
     this.collectionController = new UniqueCollectionController(_api);
-    const kusamaClient = new KusamaClient('TODO: KUSAMA ENDPOINT', {}); // todo: save kusama client in RpcClient, reevaluate whether it is a good idea or should be placed at the same level as rpcClient
-    this.marketController = new MarketKusamaController(_api, kusamaClient.rawRpcApi); // TODO: should be initialized 
+    this.marketController = new MarketKusamaController(_api, this.rawKusamaRpcApi);
     this.setIsApiInitialized(true);
   }
 
   private async getChainData() {
-    if (!this.rawRpcApi) throw new Error("Attempted to get chain data while api isn't initialized");
+    if (!this.rawUniqRpcApi) throw new Error("Attempted to get chain data while api isn't initialized");
     const [chainProperties, systemChain, systemName] = await Promise.all([
-      this.rawRpcApi.rpc.system.properties(),
-      this.rawRpcApi.rpc.system.chain(),
-      this.rawRpcApi.rpc.system.name()
+      this.rawUniqRpcApi.rpc.system.properties(),
+      this.rawUniqRpcApi.rpc.system.chain(),
+      this.rawUniqRpcApi.rpc.system.name()
     ]);
 
     this.chainData = {
