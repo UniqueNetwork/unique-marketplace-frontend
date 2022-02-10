@@ -5,7 +5,9 @@ export type AccountContextProps = {
   isLoading: boolean
   accounts: InjectedAccountWithMeta[]
   selectedAccount: InjectedAccountWithMeta | undefined
-  onSelectAccount(account: InjectedAccountWithMeta): void
+  fetchAccountsError: string | undefined
+  fetchAccounts(): Promise<void>
+  changeAccount(account: InjectedAccountWithMeta): void
 }
 
 const AccountContext: Context<AccountContextProps> = createContext({} as unknown as AccountContextProps);
