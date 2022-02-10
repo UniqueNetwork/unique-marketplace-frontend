@@ -2,9 +2,7 @@ import React, { FC, useState } from 'react';
 import { Pagination, Table } from '@unique-nft/ui-kit';
 import { TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
-import { useFetchEntities } from '../../hooks/useFetchEntities';
-import { GetTradesRequestPayload, Trade } from '../../api/restApi/trades/types';
-import * as api from '../../api/restApi';
+import { useTrades } from '../../api/restApi/trades/trades';
 
 const pageSize = 20;
 
@@ -42,17 +40,17 @@ const tradesColumns: TableColumnProps[] = [
 ];
 
 export const TradesPage: FC = () => {
-  const [page, setPage] = useState<number>(1);
+  const [page] = useState<number>(0);
 
-  const { items, count } = useFetchEntities<GetTradesRequestPayload, Trade>({ page: 0, pageSize }, api.trades.getTrades);
+  const { trades, tradesCount } = useTrades({ pageSize, collectionId: [1, 2, 3] });
 
   return (
     <div>
       <Table
-        data={items || []}
+        data={trades || []}
         columns={tradesColumns}
       />
-      <Pagination size={count} current={page} perPage={pageSize} />
+      <Pagination size={tradesCount} current={page} perPage={pageSize} />
     </div>
   );
 };

@@ -15,3 +15,10 @@ export type PaginatedResponse<T> = {
   itemsCount: number
   items: T[]
 }
+
+
+export type ResponseError = {
+  status: number
+  message: string
+  prettifiedMessage?: string
+}
