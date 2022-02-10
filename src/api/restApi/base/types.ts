@@ -6,7 +6,7 @@ export type Pagination = {
 }
 
 export type Sortable = {
-  sort: string[]
+  sort?: string[]
 }
 
 export type PaginatedResponse<T> = {

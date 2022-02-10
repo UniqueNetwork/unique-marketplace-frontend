@@ -9,7 +9,7 @@ const endpoint = '/OnHold';
 
 export const getOnHold = ({ owner, ...payload }: GetOnHoldRequestPayload) => get<OnHoldResponse>(`${endpoint}${owner ? '/' + owner : ''}` + serializeToQuery(payload as unknown as QueryParams));
 
-export const useOnHold = (props: UseFetchOnHoldProps) => {
+export const useOnHold = ({ page = 1, pageSize = 10, ...props }: UseFetchOnHoldProps) => {
   const [onHoldItems, setOnHoldItems] = useState<OnHold[]>([]);
   const [onHoldCount, setOnHoldCount] = useState<number>(0);
   const [isFetching, setIsFetching] = useState<boolean>(false);
@@ -32,7 +32,7 @@ export const useOnHold = (props: UseFetchOnHoldProps) => {
   }, []);
 
   useEffect(() => {
-    fetch({ ...props, page: 1 });
+    fetch({ ...props, page, pageSize });
   }, []);
 
   return {
