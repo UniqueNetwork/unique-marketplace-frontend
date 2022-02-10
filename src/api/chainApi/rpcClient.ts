@@ -2,25 +2,22 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 import { formatBalance } from '@polkadot/util';
 import { OverrideBundleType } from '@polkadot/types/types';
 
-import { IRpcClient, INFTController, IRpcClientOptions, ICollectionController } from './types';
+import { IRpcClient, INFTController, IRpcClientOptions, ICollectionController, IRpc, IMarketController } from './types';
 import bundledTypesDefinitions from './unique/bundledTypesDefinitions';
 import rpcMethods from './unique/rpcMethods';
 import UniqueNFTController from './unique/NFTController';
 import UniqueCollectionController from './unique/collectionController';
+import MarketKusamaController from './unique/marketController';
 import { ChainData } from '../ApiContext';
 
-export class RpcClient implements IRpcClient {
-  public nftController?: INFTController<any, any>;
-  public collectionController?: ICollectionController<any, any>;
+export class KusamaClient implements IRpc {
   public rawRpcApi?: ApiPromise;
   public isApiConnected = false;
-  public isApiInitialized = false;
-  public apiError?: string;
-  public chainData: any = undefined;
   public rpcEndpoint: string;
+  public isApiInitialized = false;
+  public apiConnectionError?: string;
   private options: IRpcClientOptions;
-
-  constructor(rpcEndpoint: string, options?: IRpcClientOptions) {
+  constructor(rpcEndpoint: string, options: IRpcClientOptions) {
     this.rpcEndpoint = rpcEndpoint;
     this.options = options || {};
     this.setApi();
@@ -31,7 +28,7 @@ export class RpcClient implements IRpcClient {
   }
 
   private setApiError(message: string) {
-    this.apiError = message;
+    this.apiConnectionError = message;
   }
 
   private setIsApiInitialized(value: boolean) {
@@ -42,6 +39,58 @@ export class RpcClient implements IRpcClient {
     if (this.rawRpcApi) {
       this.setIsApiConnected(false);
       this.rawRpcApi.disconnect();
+    }
+    // TODO:
+    throw new Error('Not implemented');
+  }
+
+  public setOnChainReadyListener(callback: (chainData: ChainData) => void) {
+    this.options.onChainReady = callback;
+  }
+
+  public changeEndpoint(rpcEndpoint: string, options?: IRpcClientOptions) {
+    this.rpcEndpoint = rpcEndpoint;
+    this.options.onChainReady = options?.onChainReady;
+    this.setApi();
+  }
+}
+
+export class RpcClient implements IRpcClient {
+  public nftController?: INFTController<any, any>;
+  public collectionController?: ICollectionController<any, any>;
+  public marketController?: IMarketController; // TODO: requires both clients - uniq rpc and kusama rpc, reconsider moving it to different level (controllers are back to api context?)
+  public rawRpcApi?: ApiPromise; // TODO: rename to rawUniqRpcApi
+  // TODO: add rawKusamaRpcApi ?
+  public isApiConnected = false;
+  public isApiInitialized = false;
+  public apiConnectionError?: string;
+  public chainData: any = undefined;
+  public rpcEndpoint: string;
+  private options: IRpcClientOptions;
+
+  constructor(rpcEndpoint: string, options?: IRpcClientOptions) {
+    // TODO: this.decimals = this.rawRpcApi.decimal;
+    this.rpcEndpoint = rpcEndpoint;
+    this.options = options || {};
+    this.setApi();
+  }
+
+  private setIsApiConnected(value: boolean) {
+    this.isApiConnected = value;
+  }
+
+  private setApiError(message: string) {
+    this.apiConnectionError = message;
+  }
+
+  private setIsApiInitialized(value: boolean) {
+    this.isApiInitialized = value;
+  }
+
+  private setApi() {
+    if (this.rawRpcApi) {
+      this.setIsApiConnected(false);
+      this.rawRpcApi.disconnect(); // TODO: make async and await disconnect (same for kusama client)
     }
 
     const typesBundle: OverrideBundleType = {
@@ -74,6 +123,8 @@ export class RpcClient implements IRpcClient {
     this.rawRpcApi = _api;
     this.nftController = new UniqueNFTController(_api);
     this.collectionController = new UniqueCollectionController(_api);
+    const kusamaClient = new KusamaClient('TODO: KUSAMA ENDPOINT', {}); // todo: save kusama client in RpcClient, reevaluate whether it is a good idea or should be placed at the same level as rpcClient
+    this.marketController = new MarketKusamaController(_api, kusamaClient.rawRpcApi); // TODO: should be initialized 
     this.setIsApiInitialized(true);
   }
 

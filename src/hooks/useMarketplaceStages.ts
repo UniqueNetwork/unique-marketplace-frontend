@@ -1,4 +1,6 @@
 import { useCallback, useState } from 'react';
+import { TransactionOptions, TTransaction } from '../api/chainApi/types';
+import MarketController from '../api/chainApi/unique/marketController';
 import { sleep } from '../utils/helpers';
 
 export enum MarketType {
@@ -12,6 +14,7 @@ export enum MarketType {
 export enum StageStatus {
   default = 'Default',
   inProgress = 'InProgress',
+  awaitingSign = 'Awaiting for transaction sign',
   success = 'Success',
   error = 'Error'
 }
@@ -20,11 +23,20 @@ export type Stage = {
   title: string;
   description?: string;
   status: StageStatus;
-  error?: Error
+  signer?: Signer;
+  error?: Error;
 };
 
+export type TInternalStageActionParams = {
+  tokenId: number,
+  txParams?: TTxParams,
+  options?: TransactionOptions
+}
+
+export type TInternalStageAction = (params: TInternalStageActionParams) => Promise<TTransaction | void>;
 export interface InternalStage extends Stage {
-  action: (tokenId: number) => Promise<void>;
+  // if transaction is returned we will initiate sign procedure, otherwise continue with next stage
+  action: TInternalStageAction
 }
 
 export type useMarketplaceStagesReturn = {
@@ -35,56 +47,40 @@ export type useMarketplaceStagesReturn = {
 }
 
 // todo: auction | fixPrice objects to be provided
+// all the extra stuff (min step for bids, price, etc)
 export type TTxParams = any;
 
-// TODO: to separate files
-const purchaseStages = [{
-  title: 'Approve sponsorship',
-  description: 'We need to add you to a whitelist. It\'s a one time operation.',
-  status: StageStatus.default,
-  action: () => { throw new Error('Not implemented'); } // api.NFT.whiteList(api.accounts.selectedAccount)
-}] as InternalStage[];
+export type Signer = {
+  status: 'init' | 'awaiting' | 'done' | 'error'
+  tx: TTransaction,
+  onSign: (signedTx: TTransaction) => void,
+  onError: () => void
+};
 
-const bidStages = [{
-  title: 'Approve sponsorship',
-  description: 'We need to add you to a whitelist. It\'s a one time operation.',
-  status: StageStatus.default,
-  action: () => { throw new Error('Not implemented'); } // api.NFT.whiteList(api.accounts.selectedAccount)
-}] as InternalStage[];
-
-const sellFixStages = [{
-  title: 'Example: Approve sponsorship',
-  description: 'We need to add you to a whitelist. It\'s a one time operation.',
-  status: StageStatus.default,
-  action: async () => { await sleep(5 * 1000); }
-},
-{
-  title: 'Example: Send to eth',
-  description: '',
-  status: StageStatus.default,
-  action: async () => { await sleep(4 * 1000); }
-},
-{
-  title: 'Example: Operation failure',
-  description: '',
-  status: StageStatus.default,
-  action: async () => { await sleep(3 * 1000); throw new Error('Failure example'); }
-},
-{
-  title: 'Example: Won\'t reach due to error before',
-  description: '',
-  status: StageStatus.default,
-  action: async () => { await sleep(2 * 1000); }
-}] as InternalStage[];
-
-const sellAuctionStages = [{
-  title: 'Approve sponsorship',
-  description: 'We need to add you to a whitelist. It\'s a one time operation.',
-  status: StageStatus.default,
-  action: () => { throw new Error('Not implemented'); } // api.NFT.whiteList(api.accounts.selectedAccount)
-}] as InternalStage[];
-
-const getInternalStages = (type: MarketType) => {
+// TODO: into own file
+const getInternalStages = (type: MarketType, marketApi: MarketController) => {
+  const purchaseStages = [] as InternalStage[];
+  const bidStages = [] as InternalStage[];
+  const sellAuctionStages = [] as InternalStage[];
+  // TODO: added for debug, should be taken from hook
+  const sellFixStages = [{
+    title: 'Locking NFT for sale',
+    description: '',
+    status: StageStatus.default,
+    action: marketApi.lockNftForSale
+  },
+  {
+    title: 'Sending NFT to Smart contract',
+    description: '',
+    status: StageStatus.default,
+    action: marketApi.sendNftToSmartContract
+  },
+  {
+    title: 'Setting price',
+    description: '',
+    status: StageStatus.default,
+    action: marketApi.setForFixPriceSale
+  }] as InternalStage[];
   switch (type) {
     case MarketType.bid:
       return bidStages;
@@ -102,7 +98,9 @@ const getInternalStages = (type: MarketType) => {
 
 // TODO: txParams depends on stage type (it is usually a price, but for auction it could contain some extra params like minBid)
 const useMarketplaceStages = (type: MarketType, tokenId: number, txParams: TTxParams): useMarketplaceStagesReturn => {
-  const [internalStages, setInternalStages] = useState<InternalStage[]>(getInternalStages(type));
+  // TODO: marketApi should be taken from rpcClient
+  const marketApi = new MarketController({} as any, {} as any);
+  const [internalStages, setInternalStages] = useState<InternalStage[]>(getInternalStages(type, marketApi));
   const [marketStagesStatus, setMarketStagesStatus] = useState<StageStatus>(StageStatus.default);
   const [executionError, setExecutionError] = useState<Error | undefined | null>(null);
 
@@ -111,17 +109,38 @@ const useMarketplaceStages = (type: MarketType, tokenId: number, txParams: TTxPa
     copy[index] = newStage;
     setInternalStages(copy);
   }, [internalStages, setInternalStages]);
+
+  const getSignFunction = useCallback((index: number, internalStage: InternalStage) => {
+    const sign = (tx: TTransaction): Promise<TTransaction | void> => {
+      return new Promise((resolve, reject) => {
+        const targetStage = { ...internalStage };
+        targetStage.status = StageStatus.awaitingSign;
+        targetStage.signer = {
+          tx,
+          status: 'awaiting',
+          onSign: (signedTx: TTransaction) => resolve(signedTx),
+          onError: (error: Error = new Error('Sign failed or aborted')) => reject(error)
+        };
+        // TODO: action of update happens inside "get" function, consider renaming or restructuring
+        updateStage(index, targetStage);
+      });
+    };
+    return sign;
+  }, [updateStage]);
+
   const executeStep = useCallback(async (stage: InternalStage, index: number) => {
     updateStage(index, { ...stage, status: StageStatus.inProgress });
     try {
-      await stage.action(tokenId);
+      // if sign is required by action -> promise wouldn't be resolved untill transaction is signed
+      // transaction sign should be triggered in the component that uses current stage (you can track it by stage.status or stage.signer)
+      await stage.action({ tokenId, options: { sign: getSignFunction(index, stage) } });
       updateStage(index, { ...stage, status: StageStatus.success });
     } catch (e) {
       updateStage(index, { ...stage, status: StageStatus.error });
       console.error('Execute stage failed', stage, e);
       throw new Error(`Execute stage "${stage.title}" failed`);
     }
-  }, [tokenId, updateStage]);
+  }, [tokenId, updateStage, getSignFunction]);
 
   const initiate = useCallback(async () => {
     setMarketStagesStatus(StageStatus.inProgress);
