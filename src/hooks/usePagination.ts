@@ -82,10 +82,12 @@ const getTotalPages = (
   return [1];
 };
 
-const usePagination = ({ currentPage = 1,
+const usePagination = ({
+ currentPage = 1,
   pageSize,
   siblingCount = 1,
-  total }: UsePaginationProps) => {
+  total
+}: UsePaginationProps) => {
   const paginationRange = useMemo(() => {
     return getTotalPages(total, pageSize, siblingCount, currentPage);
   }, [total, pageSize, siblingCount, currentPage]);

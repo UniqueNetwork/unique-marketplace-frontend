@@ -37,7 +37,7 @@ const TokenPage = () => {
     {isModalOpen && <SellModal
         tokenId={token?.id || -1}
         onModalClose={onModalClose}
-    />
+      />
     }
   </div>);
 };
