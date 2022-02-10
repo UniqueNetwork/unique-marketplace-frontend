@@ -1,28 +1,32 @@
+import { useCallback, useEffect, useState } from 'react';
+
 import { get } from '../base';
-import { defaultParams } from '../base/axios';
 import { serializeToQuery } from '../base/helper';
 import { GetOnHoldRequestPayload, OnHold, OnHoldResponse, UseFetchOnHoldProps } from './types';
-import { useCallback, useEffect, useState } from 'react';
-import { QueryParams } from '../base/types';
+import { QueryParams, ResponseError } from '../base/types';
 
 const endpoint = '/OnHold';
 
 export const getOnHold = ({ owner, ...payload }: GetOnHoldRequestPayload) => get<OnHoldResponse>(`${endpoint}${owner ? '/' + owner : ''}` + serializeToQuery(payload as unknown as QueryParams));
 
-export const useFetchOnHold = (props: UseFetchOnHoldProps) => {
+export const useOnHold = (props: UseFetchOnHoldProps) => {
   const [onHoldItems, setOnHoldItems] = useState<OnHold[]>([]);
   const [onHoldCount, setOnHoldCount] = useState<number>(0);
-  const [isFetching, setIsFetching] = useState<boolean>(true);
-  const [isFetchingError, setIsFetchingError] = useState<boolean>(false);
+  const [isFetching, setIsFetching] = useState<boolean>(false);
+  const [fetchingError, setFetchingError] = useState<ResponseError | undefined>();
 
   const fetch = useCallback((payload: GetOnHoldRequestPayload) => {
+    setIsFetching(true);
     getOnHold(payload).then((response) => {
       if (response.status === 200) {
         setOnHoldItems(response.data.items);
         setOnHoldCount(response.data.itemsCount);
         setIsFetching(false);
       } else {
-        setIsFetchingError(true);
+        setFetchingError({
+          status: response.status,
+          message: JSON.stringify(response.data)
+        });
       }
     });
   }, []);
@@ -35,7 +39,7 @@ export const useFetchOnHold = (props: UseFetchOnHoldProps) => {
     onHoldItems,
     onHoldCount,
     isFetching,
-    isFetchingError,
+    fetchingError,
     fetchMore: fetch
   };
 };

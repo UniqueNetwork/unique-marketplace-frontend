@@ -9,5 +9,5 @@ export const serializeToQuery = (value: QueryParams) => {
     }
     return acc;
   }, []);
-  return `?${serializedQueryParams.join('&')}`;
+  return `${serializedQueryParams.join('&')}`;
 };
