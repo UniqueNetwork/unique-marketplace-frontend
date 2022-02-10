@@ -73,10 +73,12 @@ const getGqlParamsFromFilter = (filter: TokensFilter | undefined | null): Record
 };
 
 export const useGraphQlTokens = ({ filter, pageSize }: useGraphQlTokensProps) => {
-  const { data,
+  const {
+ data,
     error: fetchTokensError,
     fetchMore,
-    loading: isTokensFetching } = useQuery<TokensData, TokensVariables>(tokensQuery, {
+    loading: isTokensFetching
+} = useQuery<TokensData, TokensVariables>(tokensQuery, {
       fetchPolicy: 'network-only',
       // Used for first execution
       nextFetchPolicy: 'cache-first',
