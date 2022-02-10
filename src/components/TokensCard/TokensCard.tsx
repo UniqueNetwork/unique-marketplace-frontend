@@ -1,7 +1,6 @@
 import { Text } from '@unique-nft/ui-kit';
-import { FC, useCallback, useState } from 'react';
+import { FC, useState } from 'react';
 import styled from 'styled-components/macro';
-import { useNavigate } from 'react-router-dom';
 import { Picture } from '..';
 import { Token } from '../../api/graphQL/tokens/types';
 import { Primary600 } from '../../styles/colors';
@@ -14,33 +13,35 @@ export const TokensCard: FC<TTokensCard> = ({ token }) => {
   const [tokenImageUrl, setTokenImageUrl] = useState<string>();
 
   const {
-    collection_id: collectionId,
-    collection_name: collectionName,
+ collection_id: collectionId,
+    collection_name,
     data,
     id,
-    image_path: imagePath,
+    image_path,
     owner,
     token_id: tokenId,
-    token_prefix: tokenPrefix
-  } = token;
-
-  const navigate = useNavigate();
-
-  const navigateToTokenPage = useCallback(() => {
-    navigate(`token-details?collectionId=${collectionId}&tokenId=${tokenId}`);
-  }, [collectionId, navigate, tokenId]);
+    token_prefix
+} = token;
 
   return (
-    <TokensCardStyled onClick={navigateToTokenPage}>
+    <TokensCardStyled>
       <PictureWrapper>
-        <Picture alt={tokenId.toString()} src={imagePath} />
+        <Picture
+          alt={tokenId.toString()}
+          src={image_path}
+        />
       </PictureWrapper>
       <Description>
-        <Text size='l' weight='medium'>{`${
-          tokenPrefix || ''
-        } #${tokenId}`}</Text>
-        <Text color='primary-600' size='s'>
-          {`${collectionName.substring(0, 15)} [id ${collectionId}]`}
+        <Text
+          size='l'
+          weight='medium'
+        >{`${token_prefix || ''
+          } #${tokenId}`}</Text>
+        <Text
+          color='primary-600'
+          size='s'
+        >
+          {`${collection_name} [id ${collectionId}]`}
         </Text>
         <Text size='s'>Price: 0</Text>
       </Description>
@@ -61,6 +62,7 @@ const PictureWrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
   margin-bottom: 8px;
 
   &::before {
