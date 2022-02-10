@@ -13,4 +13,4 @@ export type OnHold = {
 
 export type OnHoldResponse = PaginatedResponse<OnHold>
 
-export type UseFetchOnHoldProps = Omit<GetOnHoldRequestPayload, 'page'>
+export type UseFetchOnHoldProps = Partial<GetOnHoldRequestPayload>

@@ -19,4 +19,4 @@ export type Trade = {
 
 export type TradesResponse = PaginatedResponse<Trade>
 
-export type UseFetchTradesProps = Omit<GetTradesRequestPayload, 'page'>
+export type UseFetchTradesProps = Partial<GetTradesRequestPayload>

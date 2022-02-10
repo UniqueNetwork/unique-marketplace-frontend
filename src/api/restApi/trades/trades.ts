@@ -9,7 +9,7 @@ const endpoint = '/Trades';
 
 export const getTrades = ({ seller, ...payload }: GetTradesRequestPayload) => get(`${endpoint}${seller ? '/' + seller : ''}`, { ...defaultParams, params: payload });
 
-export const useTrades = (props: UseFetchTradesProps) => {
+export const useTrades = ({ page = 1, pageSize = 10, ...props }: UseFetchTradesProps) => {
   const [trades, setTrades] = useState<Trade[]>([]);
   const [tradesCount, setTradesCount] = useState<number>(0);
   const [isFetching, setIsFetching] = useState<boolean>(false);
@@ -32,7 +32,7 @@ export const useTrades = (props: UseFetchTradesProps) => {
   }, []);
 
   useEffect(() => {
-    fetch({ ...props, page: 1 });
+    fetch({ ...props, page, pageSize });
   }, []);
 
   return {

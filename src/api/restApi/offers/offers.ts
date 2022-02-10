@@ -9,7 +9,7 @@ const endpoint = '/Offers';
 
 export const getOffers = (payload: GetOffersRequestPayload) => get<OffersResponse>(endpoint, {...defaultParams, params: payload});
 
-export const useOffers = (props: UseFetchOffersProps) => {
+export const useOffers = ({ page = 1, pageSize = 10, ...props }: UseFetchOffersProps) => {
   const [offers, setOffers] = useState<Offer[]>([]);
   const [offersCount, setOffersCount] = useState<number>(0);
   const [isFetching, setIsFetching] = useState<boolean>(false);
@@ -32,7 +32,7 @@ export const useOffers = (props: UseFetchOffersProps) => {
   }, []);
 
   useEffect(() => {
-    fetch({ ...props, page: 1 });
+    fetch({ ...props, page, pageSize });
   }, []);
 
   return {

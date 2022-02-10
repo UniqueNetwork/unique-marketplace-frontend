@@ -22,4 +22,4 @@ export type Offer = {
 
 export type OffersResponse = PaginatedResponse<Offer>
 
-export type UseFetchOffersProps = Omit<GetOffersRequestPayload, 'page'>
+export type UseFetchOffersProps = Partial<GetOffersRequestPayload>
