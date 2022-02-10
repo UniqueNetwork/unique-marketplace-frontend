@@ -14,11 +14,13 @@ function sanitize(value?: string): string {
   return value?.toLowerCase().replace('-', ' ') || '';
 }
 
-function ChainLogo({ className = '',
+function ChainLogo({
+ className = '',
   isInline,
   logo,
   onClick,
-  withoutHl }: Props): React.ReactElement<Props> {
+  withoutHl
+}: Props): React.ReactElement<Props> {
   const { chainData } = useApi();
 
   const [isEmpty, img] = useMemo((): [boolean, string] => {
