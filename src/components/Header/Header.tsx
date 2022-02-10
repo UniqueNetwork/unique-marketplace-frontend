@@ -1,7 +1,8 @@
 import { Button, Text } from '@unique-nft/ui-kit';
 import { FC, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
-import styled from 'styled-components/macro'; // Todo: https://cryptousetech.atlassian.net/browse/NFTPAR-1201
+// Todo: https://cryptousetech.atlassian.net/browse/NFTPAR-1201
+import styled from 'styled-components/macro';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useScreenWidthFromThreshold } from '../../hooks/useScreenWidthFromThreshold';
 
@@ -28,18 +29,17 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
   const account =
     allAccounts.length !== 0
       ? (
-          allAccounts[0].address
-        )
+        allAccounts[0].address
+      )
       : (
         <Button
           onClick={buttonClick}
           role='outlined'
           title='Create or connect account'
         />
-        );
+      );
 
   const mobileMenuToggler = useCallback(() => {
-    console.log('mobileMenuToggler');
     toggleMobileMenu((prevState) => !prevState);
   }, []);
 
@@ -51,7 +51,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
         {showMobileMenu && <MenuIcon
           onClick={mobileMenuToggler}
           src={menu}
-                           />}
+        />}
         <LogoIcon src={logo} />
         {!showMobileMenu && (
           <nav>

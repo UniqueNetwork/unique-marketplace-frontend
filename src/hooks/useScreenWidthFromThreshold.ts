@@ -13,7 +13,7 @@ export const useScreenWidthFromThreshold = (threshold: number): { lessThanThresh
     window.addEventListener('resize', listener);
 
     return () => window.removeEventListener('resize', listener);
-  }, []);
+  }, [media.matches]);
 
   return { lessThanThreshold };
 };

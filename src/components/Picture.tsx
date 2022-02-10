@@ -11,15 +11,15 @@ export const Picture: FC<PictureProps> = (props) => {
   return (<div className={'picture'}>
     {src
       ? <img
-        alt={alt}
-        src={src}
-        />
+          alt={alt}
+          src={src}
+      />
       : <svg
-        fill={'white'}
-        height='100%'
-        viewBox='0 0 1000 1000'
-        width='100%'
-        >
+          fill={'white'}
+          height='100%'
+          viewBox='0 0 1000 1000'
+          width='100%'
+      >
         <rect
           fill={'#D2D3D6'}
           height={1000}
