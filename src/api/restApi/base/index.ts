@@ -9,5 +9,5 @@ export {
   get,
   post,
   put,
-  deleteRequest,
+  deleteRequest
 };

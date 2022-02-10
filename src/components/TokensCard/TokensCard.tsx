@@ -12,14 +12,16 @@ export type TTokensCard = {
 export const TokensCard: FC<TTokensCard> = ({ token }) => {
   const [tokenImageUrl, setTokenImageUrl] = useState<string>();
 
-  const { collection_id: collectionId,
+  const {
+ collection_id: collectionId,
     collection_name,
     data,
     id,
     image_path,
     owner,
     token_id: tokenId,
-    token_prefix } = token;
+    token_prefix
+} = token;
 
   return (
     <TokensCardStyled>
