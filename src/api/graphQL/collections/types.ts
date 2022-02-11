@@ -23,8 +23,8 @@ export interface Collection {
 }
 
 export interface CollectionsVariables {
-  limit: number;
-  offset: number;
+  limit?: number;
+  offset?: number;
   where?: Record<string, unknown>;
 }
 
@@ -38,7 +38,7 @@ export interface CollectionsData {
 }
 
 export type useGraphQlCollectionsProps = {
-  pageSize: number;
+  pageSize?: number;
   filter?: Record<string, unknown>;
 };
 

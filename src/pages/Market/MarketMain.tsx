@@ -6,6 +6,7 @@ import InfiniteScroll from 'react-infinite-scroller';
 import { Button, InputText, Select, Text } from '@unique-nft/ui-kit';
 import { Secondary400 } from '../../styles/colors';
 import { gqlClient } from '../../api';
+import { FilterState } from '../../components/Filters/types';
 
 type TOption = {
   direction: 'asc' | 'desc';
@@ -55,6 +56,10 @@ export const MarketMainPage = () => {
     console.log(`go search ${searchValue}`);
   };
 
+  const onFilterChange = useCallback((filter: FilterState) => {
+
+  }, []);
+
   const sortingOptions: TOption[] = [
     {
       direction: 'asc',
@@ -103,7 +108,7 @@ export const MarketMainPage = () => {
   return (
     <MarketMainPageStyled>
       <LeftColumn>
-        <Filters />
+        <Filters onFilterChange={onFilterChange} />
       </LeftColumn>
       <MainContent>
         <SearchAndSorting>
@@ -151,9 +156,8 @@ const MarketMainPageStyled = styled.div`
 `;
 
 const LeftColumn = styled.div`
-  height: 500px;
   padding-right: 24px;
-  border-right: 1px solid grey;
+  border-right: 1px solid var(--grey-300);
 `;
 
 const MainContent = styled.div`
