@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Token } from '../../api/graphQL';
 import { useApi } from '../../hooks/useApi';
-import { SellModal } from './Modals';
 
 // http://localhost:3000/token/124/173
 const TokenPage = () => {
@@ -34,11 +33,11 @@ const TokenPage = () => {
   return (<div>
     Token Page {token?.id}
     <button type='button' onClick={onBuyClick}>SELL</button>
-    {isModalOpen && <SellModal
-        tokenId={token?.id || -1}
-        onModalClose={onModalClose}
-      />
-    }
+    {/* {isModalOpen && <SellModal */}
+    {/*    tokenId={token?.id || -1} */}
+    {/*    onModalClose={onModalClose} */}
+    {/*  /> */}
+    {/* } */}
   </div>);
 };
 

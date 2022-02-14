@@ -1,50 +1,72 @@
 import { Text } from '@unique-nft/ui-kit';
-import { FC, useState } from 'react';
+import { FC, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components/macro';
+import { useNavigate } from 'react-router-dom';
 import { Picture } from '..';
-import { Token } from '../../api/graphQL/tokens/types';
+import { Token } from '../../api/graphQL';
 import { Primary600 } from '../../styles/colors';
+import { useApi } from '../../hooks/useApi';
+import Loading from '../Loading';
 
 export type TTokensCard = {
-  token: Token;
+  token?: Token
+  tokenId?: number
+  collectionId?: number
+  price?: string
 };
 
-export const TokensCard: FC<TTokensCard> = ({ token }) => {
+export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, price, ...props }) => {
   const [tokenImageUrl, setTokenImageUrl] = useState<string>();
+  const [token, setToken] = useState<Token | undefined>(props.token);
+  const [isFetching, setIsFetching] = useState<boolean>(false);
+
+  const { api } = useApi();
 
   const {
- collection_id: collectionId,
-    collection_name,
-    data,
-    id,
-    image_path,
-    owner,
-    token_id: tokenId,
-    token_prefix
-} = token;
+    collectionName,
+    imagePath,
+    tokenPrefix
+  } = useMemo<Record<string, any>>(() => {
+    if (token) {
+      return {
+        collectionName: token.collection_name,
+        imagePath: token.image_path,
+        tokenPrefix: token.token_prefix
+      };
+    }
+
+    if (tokenId && collectionId) {
+      setIsFetching(true);
+      void api?.nft?.getToken(collectionId, tokenId).then((token) => {
+        setIsFetching(false);
+        setToken(token);
+      });
+    }
+    return {};
+  }, [collectionId, tokenId, token, api]);
+
+  const navigate = useNavigate();
+
+  const navigateToTokenPage = useCallback(() => {
+    navigate(`token-details?collectionId=${collectionId}&tokenId=${tokenId}`);
+  }, [collectionId, navigate, tokenId]);
 
   return (
-    <TokensCardStyled>
+    <TokensCardStyled onClick={navigateToTokenPage}>
       <PictureWrapper>
-        <Picture
-          alt={tokenId.toString()}
-          src={image_path}
-        />
+        <Picture alt={tokenId?.toString() || ''} src={imagePath} />
       </PictureWrapper>
       <Description>
-        <Text
-          size='l'
-          weight='medium'
-        >{`${token_prefix || ''
-          } #${tokenId}`}</Text>
-        <Text
-          color='primary-600'
-          size='s'
-        >
-          {`${collection_name} [id ${collectionId}]`}
+        <Text size='l' weight='medium'>{`${
+          tokenPrefix || ''
+        } #${tokenId}`}</Text>
+        <Text color='primary-600' size='s'>
+          {`${collectionName?.substring(0, 15) || ''} [id ${collectionId || ''}]`}
         </Text>
-        <Text size='s'>Price: 0</Text>
+        <Text size='s'>{`Price: ${price}`}</Text>
       </Description>
+
+      {isFetching && <Loading />}
     </TokensCardStyled>
   );
 };
@@ -54,6 +76,7 @@ const TokensCardStyled = styled.div`
   align-items: flex-start;
   flex-direction: column;
   justify-content: center;
+  position: relative;
 `;
 
 const PictureWrapper = styled.div`
@@ -62,7 +85,6 @@ const PictureWrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
   margin-bottom: 8px;
 
   &::before {

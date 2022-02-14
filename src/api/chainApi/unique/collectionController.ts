@@ -1,9 +1,10 @@
 import { ApiPromise } from '@polkadot/api';
 import { ICollectionController } from '../types';
 import { NFTCollection, NFTToken } from './types';
-import { getOnChainSchema, hex2a } from '../utils/decoder';
+import { collectionName8Decoder, getOnChainSchema, hex2a } from '../utils/decoder';
 import { getTokenImage } from '../utils/imageUtils';
 import config from '../../../config';
+import { u32 } from '@polkadot/types';
 
 const { IPFSGateway } = config;
 
@@ -12,6 +13,35 @@ class UniqueCollectionController implements ICollectionController<NFTCollection,
 
   constructor(api: ApiPromise) {
     this.api = api;
+  }
+
+  public async getCollections(): Promise<NFTCollection[]> {
+    if (!this.api) {
+      return [];
+    }
+
+    try {
+      // @ts-ignore
+      const fullCount = (await this.api.rpc.unique.collectionStats()) as { created: u32, destroyed: u32 };
+      const createdCollectionCount = fullCount.created.toNumber();
+      const destroyedCollectionCount = fullCount.destroyed.toNumber();
+      const collectionsCount = createdCollectionCount - destroyedCollectionCount;
+      const collections: Array<NFTCollection> = [];
+
+      for (let i = 1; i <= collectionsCount; i++) {
+        const collectionInf = await this.getCollection(i) as unknown as NFTCollection;
+
+        if (collectionInf && collectionInf.owner && collectionInf.owner.toString() !== '5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM') {
+          collections.push({ ...collectionInf, id: i });
+        }
+      }
+
+      return collections;
+    } catch (e) {
+      console.log('preset tokens collections error', e);
+
+      return [];
+    }
   }
 
   public async getCollection(collectionId: number): Promise<NFTCollection | null> {
@@ -33,13 +63,14 @@ class UniqueCollectionController implements ICollectionController<NFTCollection,
 
         coverImageUrl = `${IPFSGateway}/${image}`;
       } else {
-        if (collectionInfo.offchainSchema) {
+        if (collectionInfo?.offchainSchema) {
           coverImageUrl = await getTokenImage(collectionInfo, 1);
         }
       }
 
       return {
         ...collectionInfo,
+        collectionName: collectionInfo?.name && collectionName8Decoder(collectionInfo?.name),
         coverImageUrl,
         id: collectionId
       };

@@ -1,15 +1,16 @@
 import React, { FC, useCallback, useState } from 'react';
 import styled from 'styled-components/macro';
-import { collections as gqlCollections } from '../../api/graphQL';
 import { Checkbox } from '@unique-nft/ui-kit';
 import Accordion from '../Accordion/Accordion';
+import { useCollections } from '../../hooks/useCollections';
+import Loading from '../Loading';
 
 interface CollectionsFilterProps {
   onChange(value: number[]): void
 }
 
 const CollectionsFilter: FC<CollectionsFilterProps> = ({ onChange }) => {
-  const { collections } = gqlCollections.useGraphQlCollections({});
+  const { collections, isFetching } = useCollections();
 
   const [selectedCollections, setSelectedCollections] = useState<number[]>([]);
 
@@ -25,17 +26,18 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ onChange }) => {
   }, [selectedCollections]);
 
   const onAttributeSelect = useCallback(() => (value: boolean) => {
-
+    // TODO: filter by attributes
   }, []);
 
   return (<>
     <CollectionFilterWrapper>
+      {isFetching && <Loading />}
       {collections.map((collection) => (
-        <Checkbox checked={selectedCollections.indexOf(collection.collection_id) !== -1}
-          label={collection.name}
+        <Checkbox checked={selectedCollections.indexOf(collection.id) !== -1}
+          label={collection.collectionName}
           size={'m'}
-          onChange={onCollectionSelect(collection.collection_id)}
-          key={`collection-${collection.collection_id}`}
+          onChange={onCollectionSelect(collection.id)}
+          key={`collection-${collection.id}`}
         />
         ))}
     </CollectionFilterWrapper>
@@ -56,12 +58,13 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ onChange }) => {
 };
 
 const CollectionFilterWrapper = styled.div`
+  position: relative;
   margin-top: var(--gap);
   padding-top: 2px;
   display: flex;
   flex-direction: column;
   row-gap: var(--gap);
-  min-height: 20px;
+  min-height: 50px;
   max-height: 400px;
   overflow-y: auto;
   .unique-checkbox-wrapper label {

@@ -15,6 +15,7 @@ const PricesFilter: FC<PricesFilterProps> = ({ onChange }) => {
     () => {
       if (minPrice && maxPrice) {
         onChange({ minPrice, maxPrice });
+        return;
       }
       onChange(undefined);
     },

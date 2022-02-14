@@ -1,55 +1,47 @@
-import React, { FC, useEffect, useReducer } from 'react';
+import React, { FC, useCallback, useContext } from 'react';
 import styled from 'styled-components/macro';
+
 import Accordion from '../Accordion/Accordion';
 import StatusFilter from './StatusFilter';
 import PricesFilter from './PricesFilter';
-import { FilterState, FilterReducer, PriceRange, Statuses } from './types';
+import { FilterState, PriceRange, Statuses } from './types';
 import CollectionsFilter from './CollectionsFilter';
+import AccountContext from '../../account/AccountContext';
 
 type FiltersProps = {
   onFilterChange(value: FilterState): void
 }
 
 export const Filters: FC<FiltersProps> = ({ onFilterChange }) => {
-  const [filter, dispatch] = useReducer<FilterReducer>((state, { action, value }) => {
-    if (action === 'status') {
-      const { myNFTs } = (value || {}) as Statuses;
-      return {
-        ...state,
-        seller: myNFTs ? 'current_account' : undefined // TODO: get current account address
-        // TODO: What filter need apply for Fixed price, timed auction, my bets
-      };
-    }
-    if (action === 'price') {
-      const { minPrice, maxPrice } = (value as PriceRange) || {};
-      return {
-        ...state,
-        minPrice,
-        maxPrice
-      };
-    }
-    if (action === 'collections') {
-      return {
-        ...state,
-        collationId: value as number[]
-      };
-    }
-    return state;
-  }, {});
+  const { selectedAccount } = useContext(AccountContext);
 
-  useEffect(() => {
-    onFilterChange(filter);
-  }, [filter]);
+    const onStatusFilterChange = useCallback((value: Statuses) => {
+    const newFilter = {
+      seller: value.myNFTs ? selectedAccount?.address : undefined
+    };
+    onFilterChange(newFilter);
+  }, [onFilterChange]);
+
+  const onPricesFilterChange = useCallback((value: PriceRange | undefined) => {
+    const { minPrice, maxPrice } = (value as PriceRange) || {};
+    const newFilter = { minPrice, maxPrice };
+    onFilterChange(newFilter);
+  }, [onFilterChange]);
+
+  const onCollectionsFilterChange = useCallback((value: number[]) => {
+    const newFilter = { collationId: value };
+    onFilterChange(newFilter);
+  }, [onFilterChange]);
 
   return <FiltersStyled>
     <Accordion title={'Status'} isOpen={true} >
-      <StatusFilter onChange={(value) => dispatch({ action: 'status', value })}/>
+      <StatusFilter onChange={onStatusFilterChange}/>
     </Accordion>
     <Accordion title={'Price'} isOpen={true} >
-      <PricesFilter onChange={(value) => dispatch({ action: 'price', value })} />
+      <PricesFilter onChange={onPricesFilterChange} />
     </Accordion>
     <Accordion title={'Collections'} isOpen={true} >
-      <CollectionsFilter onChange={(value) => dispatch({ action: 'collections', value })} />
+      <CollectionsFilter onChange={onCollectionsFilterChange} />
     </Accordion>
   </FiltersStyled>;
 };

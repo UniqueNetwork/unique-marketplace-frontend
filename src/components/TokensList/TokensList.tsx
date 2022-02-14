@@ -1,22 +1,22 @@
 import { FC } from 'react';
 import styled from 'styled-components/macro';
 import { TokensCard } from '..';
-import { Token } from '../../api/graphQL/tokens/types';
+import { Offer } from '../../api/restApi/offers/types';
 
 type TTokensList = {
-  tokens: Token[];
+  offers: Offer[];
 };
 
-export const TokensList: FC<TTokensList> = ({ tokens }) => {
-  console.log('tokens', tokens);
-
+export const TokensList: FC<TTokensList> = ({ offers }) => {
   return (
     <TokensListStyled>
-      {tokens?.map &&
-        tokens.map((token: Token) => (
+      {offers?.map &&
+        offers.map((offer: Offer) => (
           <TokensCard
-            key={`token-${token.token_prefix}-${token.token_id}`}
-            token={token}
+            key={`token-${offer.collectionId}-${offer.tokenId}`}
+            tokenId={offer.tokenId}
+            collectionId={offer.collectionId}
+            price={offer.price}
           />
         ))}
     </TokensListStyled>

@@ -8,11 +8,3 @@ export type PriceRange = {
 }
 
 export type FilterState = Record<string, number | string | undefined | number[]>;
-
-export type FilterReducer = Reducer<
-  FilterState,
-  {action: 'status', value: Statuses}
-  | {action: 'price', value: PriceRange | undefined}
-  | {action: 'collections', value: number[]}
-  | {action: 'attribute', value: string[]}
-  >;

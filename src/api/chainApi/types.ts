@@ -20,12 +20,9 @@ export interface INFTController<Collection, Token> {
 }
 
 export interface ICollectionController<Collection, Token> {
+  getCollections(): Promise<Collection[]>
   getCollection(collectionId: number): Promise<Collection | null>
   getTokensOfCollection(collectionId: number, ownerId: number): Promise<Token[]>
-}
-
-export interface IAccountController<Collection, Token> {
-
 }
 
 export type Chain = {
