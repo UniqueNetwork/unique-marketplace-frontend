@@ -79,12 +79,12 @@ const AccordionBodyWrapper = styled.div<{ isOpen?: boolean}>`
   animation: ${({ isOpen }) => isOpen ? 'show 0.3s forwards' : 'hide 0.3s forwards'};
 
   @keyframes hide {
-    from { opacity: 1}
-    to { opacity: 0; height: 0; visibility: hidden }
+    from { opacity: 1; max-height: 500px; visibility: visible }
+    to { opacity: 0; max-height: 0; visibility: hidden }
   } 
   @keyframes show {
-    from { opacity: 0; height: unset; visibility: visible }
-    top { opacity: 1}
+    from { opacity: 0; max-height: 0; visibility: hidden }
+    to { opacity: 1; max-height: 500px; visibility: visible }
   }
 `;
 
