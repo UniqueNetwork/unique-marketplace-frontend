@@ -2,6 +2,8 @@ import Web3 from 'web3';
 import { ApiPromise } from '@polkadot/api';
 import { BN } from '@polkadot/util';
 import { addressToEvm } from '@polkadot/util-crypto';
+import marketplaceAbi from './abi/marketPlaceAbi.json';
+import config from '../../../config';
 import { sleep } from '../../../utils/helpers';
 import { IMarketController, TransactionOptions } from '../types';
 
@@ -15,14 +17,55 @@ import { IMarketController, TransactionOptions } from '../types';
 1. Mixins. Inherit from tokenController, inherit from collectionController, create multiple controllers for buy/sell/etc
 2. Modules (sell module, buy module, etc.) that accepts rawApi's
  */
+export type MartketControllerConfig = {
+  contractAddress?: string,
+  uniqueSubstrateApiRpc?: string,
+  escrowAddress?: string,
+  marketplaceAbi?: any,
+  minPrice?: number,
+  kusamaDecimals?: number,
+  defaultGasAmount?: number
+}
+
+const defaultMarketPlaceControllerConfig: MartketControllerConfig = {
+  contractAddress: config.contractAddress,
+  uniqueSubstrateApiRpc: config.uniqueSubstrateApiRpc,
+  escrowAddress: config.escrowAddress,
+  marketplaceAbi: marketplaceAbi,
+  minPrice: config.minPrice,
+  defaultGasAmount: 2500000
+};
+
 class MarketController implements IMarketController {
   private uniqApi: ApiPromise;
   private kusamaApi: ApiPromise;
-  private contractAddress = ''; // TODO: from config/BE
+  private contractAddress: string;
+  private uniqueSubstrateApiRpc: string;
+  private escrowAddress: string;
+  private marketplaceAbi: any; // TODO: grab type form old market
+  private minPrice: number;
+  private kusamaDecimals: number;
+  private web3Instance: any; // TODO: can be typed
+  private defaultGasAmount: number;
 
-  constructor(uniqApi: ApiPromise, kusamaApi: ApiPromise) {
+  constructor(uniqApi: ApiPromise, kusamaApi: ApiPromise, config: MartketControllerConfig = {}) {
     this.uniqApi = uniqApi;
     this.kusamaApi = kusamaApi;
+    const options = { ...defaultMarketPlaceControllerConfig, ...config };
+    if (!options.contractAddress) throw new Error('Contract address not found');
+    this.contractAddress = options.contractAddress;
+    if (!options.uniqueSubstrateApiRpc) throw new Error('Uniq substrate rpc not provided');
+    this.uniqueSubstrateApiRpc = options.uniqueSubstrateApiRpc;
+    if (!options.escrowAddress) throw new Error('Escrow address is not provided');
+    this.marketplaceAbi = options.marketplaceAbi;
+    if (!options.minPrice) throw new Error('Min price not provided');
+    this.minPrice = options.minPrice;
+    if (!options.kusamaDecimals) throw new Error('Kusama decimals not provided');
+    this.kusamaDecimals = options.kusamaDecimals; // TODO: could and should be taken from kusamaApi
+    this.defaultGasAmount = options.defaultGasAmount || 2500000;
+    const provider = new Web3.providers.HttpProvider(this.uniqueSubstrateApiRpc);
+    const web3 = new Web3(provider);
+    this.web3Instance = web3;
   }
 
   private async repeatCheckForTransactionFinish (checkIfCompleted: () => Promise<boolean>, options: { maxAttempts: boolean, awaitBetweenAttempts: number } | null = null): Promise<void> {
@@ -181,17 +224,7 @@ class MarketController implements IMarketController {
   // checkDepositReady
   private async getUserDeposit (account: string): Promise<any /* BN */> {
     const ethAccount = this.getEthAccount(account);
-    const minPrice = 0; // TODO: config
-
-    // TODO: to constructor and root
-    const uniqueSubstrateApiRpc = 'https://rpc-opal.unique.network'; // TODO: config
-    const contractAddress = ''; // TODO: config
-    const marketplaceAbi = ''; // TODO: json
-    const provider = new Web3.providers.HttpProvider(uniqueSubstrateApiRpc);
-    // const web3 = new Web3(window.ethereum);
-    const web3 = new Web3(provider); // TODO: to root
-    // END TODO
-    const matcherContractInstance = new web3.eth.Contract(marketplaceAbi as any, contractAddress, {
+    const matcherContractInstance = this.web3Instance.eth.Contract(this.marketplaceAbi, this.contractAddress, {
       from: ethAccount
     });
     const result = await (matcherContractInstance.methods/* as MarketplaceAbiMethods*/).balanceKSM(ethAccount).call();
@@ -199,7 +232,7 @@ class MarketController implements IMarketController {
     if (result) {
       const deposit = new BN(result);
 
-      Number(this.formatKsm(deposit)) > minPrice ? localStorage.setItem('deposit', JSON.stringify(result)) : localStorage.removeItem('deposit');
+      // Number(this.formatKsm(deposit)) > minPrice ? localStorage.setItem('deposit', JSON.stringify(result)) : localStorage.removeItem('deposit'); // TODO: figure out what we have been saving in localStorage and why
 
       return deposit;
     }
@@ -209,18 +242,15 @@ class MarketController implements IMarketController {
 
   // TODO: utils
   private formatKsm (value: BN) {
-    // const { commission, decimals, minPrice } = envConfig;
-    const decimals = 12; // TODO: can be taken from api // TODO: we can put it in root and calculate once in constructor
-    const minPrice = 0; // TODO: back-end/config
     if (!value || value.toString() === '0') {
       return '0';
     }
 
     // const tokenDecimals = incomeDecimals || formatBalance.getDefaults().decimals;
-    const tokenDecimals = 0; // TODO:
+    const tokenDecimals = this.kusamaDecimals; // TODO:
 
-    if (value.lte(new BN(minPrice * Math.pow(10, tokenDecimals)))) {
-      return ` ${minPrice}`;
+    if (value.lte(new BN(this.minPrice * Math.pow(10, tokenDecimals)))) {
+      return ` ${this.minPrice}`;
     }
 
     // calculate number after decimal point
@@ -241,7 +271,7 @@ class MarketController implements IMarketController {
 
     const arr = balanceStr.toString().split('.');
 
-    return `${arr[0]}${arr[1] ? `.${arr[1].substr(0, decimals)}` : ''}`;
+    return `${arr[0]}${arr[1] ? `.${arr[1].substr(0, this.kusamaDecimals)}` : ''}`;
   }
 
   // TODO: we have 3 outcomes ('already enough funds'/'not enough funds, sign to add'/'not enough funds on account'), will collide with UI since we expect bool from here and nahve no control over stages texts
@@ -262,9 +292,8 @@ class MarketController implements IMarketController {
     if (kusamaAvailableBalance?.lt(needed)) {
       throw new Error(`Your KSM balance is too low: ${this.formatKsm(kusamaAvailableBalance)} KSM. You need at least: ${this.formatKsm(needed)} KSM`);
     }
-    const escrowAddress = ''; // TODO: from config or back-end
     // accountId: encodedKusamaAccount,
-    const tx = this.kusamaApi.tx.balances.transfer(escrowAddress, needed);
+    const tx = this.kusamaApi.tx.balances.transfer(this.escrowAddress, needed);
     const signedTx = await options.sign(tx);
     // TODO: await deposit
     // await this.repeatCheckForTransactionFinish(async () => { (await this.getUserDeposit(account)) >= tokenPrice; });
@@ -273,25 +302,18 @@ class MarketController implements IMarketController {
   // buyToken
   public async buyToken (account: string, collectionId: string, tokenId: string, options: TransactionOptions) {
     const ethAccount = this.getEthAccount(account);
-    const contractAddress = ''; // TODO: config
     const abi = (matcherContractInstance.methods).buyKSM(evmCollectionInstance.options.address, tokenId, ethAccount, ethAccount).encodeABI();
-    const marketplaceAbi = ''; // TODO: json
-    const uniqueSubstrateApiRpc = 'https://rpc-opal.unique.network'; // TODO: config
-    const provider = new Web3.providers.HttpProvider(uniqueSubstrateApiRpc);
-    // const web3 = new Web3(window.ethereum);
-    const web3 = new Web3(provider); // TODO: to root
-    // END TODO
-    const matcherContractInstance = new web3.eth.Contract(marketplaceAbi as any, contractAddress, {
+    const matcherContractInstance = this.web3Instance.eth.Contract(this.marketplaceAbi, this.contractAddress, {
       from: ethAccount
     });
 
     const tx = this.kusamaApi.tx.evm.call(
       ethAccount,
-      contractAddress,
+      this.contractAddress,
       abi,
       0,
-      { gas: 2500000 },
-      await web3.eth.getGasPrice(),
+      { gas: this.defaultGasAmount },
+      await this.web3Instance.eth.getGasPrice(),
       null
     );
 
