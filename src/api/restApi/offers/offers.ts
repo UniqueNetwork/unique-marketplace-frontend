@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { AxiosError } from 'axios';
 
 import { get } from '../base';
 import { defaultParams } from '../base/axios';
@@ -28,8 +29,17 @@ export const useOffers = ({ page = 1, pageSize = 10, ...props }: UseFetchOffersP
           message: JSON.stringify(response.data)
         });
       }
+    }).catch((err: AxiosError) => {
+      setFetchingError({
+        status: err.response?.status,
+        message: err.message
+      });
     });
   }, []);
+
+  useEffect(() => {
+    console.log(fetchingError);
+  }, [fetchingError]);
 
   useEffect(() => {
     fetch({ ...props, page, pageSize });

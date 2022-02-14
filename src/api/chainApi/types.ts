@@ -20,8 +20,9 @@ export interface INFTController<Collection, Token> {
 }
 
 export interface ICollectionController<Collection, Token> {
-  getCollections(): Promise<Collection[]>
   getCollection(collectionId: number): Promise<Collection | null>
+  getCollections(): Promise<Collection[]>
+  getFeaturedCollections(): Promise<Collection[]>
   getTokensOfCollection(collectionId: number, ownerId: number): Promise<Token[]>
 }
 

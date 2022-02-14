@@ -6,42 +6,13 @@ import { getTokenImage } from '../utils/imageUtils';
 import config from '../../../config';
 import { u32 } from '@polkadot/types';
 
-const { IPFSGateway } = config;
+const { IPFSGateway, uniqueCollectionIds } = config;
 
 class UniqueCollectionController implements ICollectionController<NFTCollection, NFTToken> {
   private api: ApiPromise;
 
   constructor(api: ApiPromise) {
     this.api = api;
-  }
-
-  public async getCollections(): Promise<NFTCollection[]> {
-    if (!this.api) {
-      return [];
-    }
-
-    try {
-      // @ts-ignore
-      const fullCount = (await this.api.rpc.unique.collectionStats()) as { created: u32, destroyed: u32 };
-      const createdCollectionCount = fullCount.created.toNumber();
-      const destroyedCollectionCount = fullCount.destroyed.toNumber();
-      const collectionsCount = createdCollectionCount - destroyedCollectionCount;
-      const collections: Array<NFTCollection> = [];
-
-      for (let i = 1; i <= collectionsCount; i++) {
-        const collectionInf = await this.getCollection(i) as unknown as NFTCollection;
-
-        if (collectionInf && collectionInf.owner && collectionInf.owner.toString() !== '5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM') {
-          collections.push({ ...collectionInf, id: i });
-        }
-      }
-
-      return collections;
-    } catch (e) {
-      console.log('preset tokens collections error', e);
-
-      return [];
-    }
   }
 
   public async getCollection(collectionId: number): Promise<NFTCollection | null> {
@@ -79,6 +50,60 @@ class UniqueCollectionController implements ICollectionController<NFTCollection,
     }
 
     return null;
+  }
+
+  public async getFeaturedCollections(): Promise<NFTCollection[]> {
+    if (!this.api) {
+      return [];
+    }
+
+    try {
+      // @ts-ignore
+      const fullCount = (await this.api.rpc.unique.collectionStats()) as { created: u32, destroyed: u32 };
+      const createdCollectionCount = fullCount.created.toNumber();
+      const destroyedCollectionCount = fullCount.destroyed.toNumber();
+      const collectionsCount = createdCollectionCount - destroyedCollectionCount;
+      const collections: Array<NFTCollection> = [];
+
+      for (let i = 1; i <= collectionsCount; i++) {
+        const collectionInf = await this.getCollection(i) as unknown as NFTCollection;
+
+        if (collectionInf && collectionInf.owner && collectionInf.owner.toString() !== '5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM') {
+          collections.push({ ...collectionInf, id: i });
+        }
+      }
+
+      return collections;
+    } catch (e) {
+      console.log('preset tokens collections error', e);
+
+      return [];
+    }
+  }
+
+  public async getCollections(): Promise<NFTCollection[]> {
+    if (!this.api) {
+      return [];
+    }
+
+    try {
+      const collections: Array<NFTCollection> = [];
+      if (uniqueCollectionIds && uniqueCollectionIds.length) {
+        for (let i = 1; i <= uniqueCollectionIds.length; i++) {
+          const collectionInf = await this.getCollection(uniqueCollectionIds[i]) as unknown as NFTCollection;
+
+          if (collectionInf && collectionInf.owner && collectionInf.owner.toString() !== '5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM' && !collections.find((collection) => collection.id === uniqueCollectionIds[i])) {
+            collections.push({ ...collectionInf, id: uniqueCollectionIds[i] });
+          }
+        }
+      }
+
+      return collections;
+    } catch (e) {
+      console.log('preset tokens collections error', e);
+
+      return [];
+    }
   }
 
   public async getTokensOfCollection(collectionId: number, ownerId: number): Promise<NFTToken[]> {

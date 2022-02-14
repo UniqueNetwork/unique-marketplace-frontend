@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { AxiosError } from 'axios';
 
 import { get } from '../base';
 import { serializeToQuery } from '../base/helper';
@@ -28,6 +29,11 @@ export const useOnHold = ({ page = 1, pageSize = 10, ...props }: UseFetchOnHoldP
           message: JSON.stringify(response.data)
         });
       }
+    }).catch((err: AxiosError) => {
+      setFetchingError({
+        status: err.response?.status,
+        message: err.message
+      });
     });
   }, []);
 
