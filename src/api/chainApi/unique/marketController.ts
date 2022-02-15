@@ -8,6 +8,54 @@ import config from '../../../config';
 import { sleep } from '../../../utils/helpers';
 import { IMarketController, TransactionOptions } from '../types';
 
+export type EvmCollectionAbiMethods = {
+  approve: (contractAddress: string, tokenId: string) => {
+    encodeABI: () => any;
+  },
+  getApproved: (tokenId: string | number) => {
+    call: () => Promise<string>;
+  }
+}
+
+export type TokenAskType = { flagActive: '0' | '1', ownerAddr: string, price: BN };
+
+export type MarketplaceAbiMethods = {
+  addAsk: (price: string, currencyCode: string, address: string, tokenId: string) => {
+    encodeABI: () => any;
+  },
+  balanceKSM: (ethAddress: string) => {
+    call: () => Promise<string>;
+  };
+  buyKSM: (collectionAddress: string, tokenId: string, buyer: string, receiver: string) => {
+    encodeABI: () => any;
+  };
+  cancelAsk: (collectionId: string, tokenId: string) => {
+    encodeABI: () => any;
+  };
+  depositKSM: (price: number) => {
+    encodeABI: () => any;
+  },
+  getOrder: (collectionId: string, tokenId: string) => {
+    call: () => Promise<TokenAskType>;
+  };
+  getOrdersLen: () => {
+    call: () => Promise<number>;
+  },
+  orders: (orderNumber: number) => {
+    call: () => Promise<TokenAskType>;
+  },
+  setEscrow: (escrow: string) => {
+    encodeABI: () => any;
+  },
+  // (amount: string, currencyCode: string, address: string) => any;
+  withdraw: (amount: string, currencyCode: string, address: string) => {
+    encodeABI: () => any;
+  };
+  withdrawAllKSM: (ethAddress: string) => {
+    encodeABI: () => any;
+  };
+}
+
 // TODO: Global todo list
 /*
 1. Split into two controllers: kusama and uniq one
@@ -34,7 +82,7 @@ const defaultMarketPlaceControllerConfig: MartketControllerConfig = {
   contractOwner: config.contractOwner,
   uniqueSubstrateApiRpc: config.uniqueSubstrateApiRpc,
   escrowAddress: config.escrowAddress,
-  marketplaceAbi: marketplaceAbi,
+  marketplaceAbi: marketplaceAbi.abi,
   minPrice: config.minPrice,
   defaultGasAmount: 2500000
 };
@@ -73,7 +121,7 @@ class MarketController implements IMarketController {
     this.web3Instance = web3;
   }
 
-  private getMatcherContractInstance (ethAccount: string) {
+  private getMatcherContractInstance (ethAccount: string): { methods: MarketplaceAbiMethods } {
     return new this.web3Instance.eth.Contract(marketplaceAbi, this.contractAddress, {
       from: ethAccount
     });
@@ -95,7 +143,7 @@ class MarketController implements IMarketController {
     return Web3.utils.toChecksumAddress('0x' + buf.toString('hex'));
   }
 
-  private getEvmCollectionInstance (collectionId: string) {
+  private getEvmCollectionInstance (collectionId: string): { methods: EvmCollectionAbiMethods } {
     return new this.web3Instance.eth.Contract(nonFungibleAbi, this.collectionIdToAddress(parseInt(collectionId, 10)), { from: this.contractOwner });
   }
 
@@ -363,6 +411,24 @@ class MarketController implements IMarketController {
   // #endregion delist
 
   // #region transfer
+  public async transferToken (from: string, to: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+    const tokenPart = 1; // TODO: ??????
+    const token = {} as any; // TODO:
+    const tokenOwner = { Substrate: '', Ethereum: '' }; // TODO:
+    const tx = this.uniqueSubstrateApiRpc.tx.unique.transfer(to, collectionId, tokenId, tokenPart);
+
+    // TODO: figure out this part, makes no sense
+    // if (!tokenOwner?.Substrate || tokenOwner?.Substrate !== from) {
+    //   const ethAccount = this.getEthAccount(from);
+
+    //   if (tokenOwner?.Ethereum === ethAccount) {
+    //     tx = this.uniqueSubstrateApiRpc.tx.unique.transferFrom(normalizeAccountId({ Ethereum: ethAccount } as CrossAccountId), normalizeAccountId(recipient as CrossAccountId), collection.id, tokenId, 1);
+    //   }
+    // }
+    const signedTx = await options.sign(tx);
+    // execute
+    // await ownership change via getToken and compare it to "to"
+  }
   // #endregion transfer
 }
 
