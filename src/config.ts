@@ -8,6 +8,7 @@ declare type Env = {
 
 declare type Config = {
   contractAddress: string | undefined,
+  contractOwner: string | undefined,
   uniqueSubstrateApiRpc: string | undefined,
   minPrice: number | undefined,
   escrowAddress: string | undefined,
@@ -27,6 +28,7 @@ const chains = getChainList(window.ENV || process.env);
 
 const config: Config = {
   contractAddress: window.ENV?.CONTRACT_ADDRESS || process.env.CONTRACT_ADDRESS,
+  contractOwner: window.ENV?.CONTRACT_OWNER || process.env.CONTRACT_OWNER,
   uniqueSubstrateApiRpc: window.ENV?.UNIQUE_SUBSTRATE_API_RPC || process.env.UNIQUE_SUBSTRATE_API_RPC,
   minPrice: +window.ENV?.MIN_PRICE || process.env.MIN_PRICE,
   escrowAddress: window.ENV?.ESCROW_ADDRESS || process.env.ESCROW_ADDRESS,

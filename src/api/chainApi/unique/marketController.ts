@@ -3,6 +3,7 @@ import { ApiPromise } from '@polkadot/api';
 import { BN } from '@polkadot/util';
 import { addressToEvm } from '@polkadot/util-crypto';
 import marketplaceAbi from './abi/marketPlaceAbi.json';
+import nonFungibleAbi from './abi/nonFungibleAbi.json';
 import config from '../../../config';
 import { sleep } from '../../../utils/helpers';
 import { IMarketController, TransactionOptions } from '../types';
@@ -19,6 +20,7 @@ import { IMarketController, TransactionOptions } from '../types';
  */
 export type MartketControllerConfig = {
   contractAddress?: string,
+  contractOwner?: string,
   uniqueSubstrateApiRpc?: string,
   escrowAddress?: string,
   marketplaceAbi?: any,
@@ -29,6 +31,7 @@ export type MartketControllerConfig = {
 
 const defaultMarketPlaceControllerConfig: MartketControllerConfig = {
   contractAddress: config.contractAddress,
+  contractOwner: config.contractOwner,
   uniqueSubstrateApiRpc: config.uniqueSubstrateApiRpc,
   escrowAddress: config.escrowAddress,
   marketplaceAbi: marketplaceAbi,
@@ -40,9 +43,9 @@ class MarketController implements IMarketController {
   private uniqApi: ApiPromise;
   private kusamaApi: ApiPromise;
   private contractAddress: string;
+  private contractOwner: string;
   private uniqueSubstrateApiRpc: string;
   private escrowAddress: string;
-  private marketplaceAbi: any; // TODO: grab type form old market
   private minPrice: number;
   private kusamaDecimals: number;
   private web3Instance: any; // TODO: can be typed
@@ -54,10 +57,12 @@ class MarketController implements IMarketController {
     const options = { ...defaultMarketPlaceControllerConfig, ...config };
     if (!options.contractAddress) throw new Error('Contract address not found');
     this.contractAddress = options.contractAddress;
+    if (!options.contractOwner) throw new Error('Contract owner not provided');
+    this.contractOwner = options.contractOwner;
     if (!options.uniqueSubstrateApiRpc) throw new Error('Uniq substrate rpc not provided');
     this.uniqueSubstrateApiRpc = options.uniqueSubstrateApiRpc;
     if (!options.escrowAddress) throw new Error('Escrow address is not provided');
-    this.marketplaceAbi = options.marketplaceAbi;
+    this.escrowAddress = options.escrowAddress;
     if (!options.minPrice) throw new Error('Min price not provided');
     this.minPrice = options.minPrice;
     if (!options.kusamaDecimals) throw new Error('Kusama decimals not provided');
@@ -66,6 +71,32 @@ class MarketController implements IMarketController {
     const provider = new Web3.providers.HttpProvider(this.uniqueSubstrateApiRpc);
     const web3 = new Web3(provider);
     this.web3Instance = web3;
+  }
+
+  private getMatcherContractInstance (ethAccount: string) {
+    return new this.web3Instance.eth.Contract(marketplaceAbi, this.contractAddress, {
+      from: ethAccount
+    });
+  }
+
+  // TODO: can be moved to utils
+  private collectionIdToAddress (address: number): string {
+    if (address >= 0xffffffff || address < 0) {
+      throw new Error('id overflow');
+    }
+
+    const buf = Buffer.from([0x17, 0xc4, 0xe6, 0x45, 0x3c, 0xc4, 0x9a, 0xaa, 0xae, 0xac, 0xa8, 0x94, 0xe6, 0xd9, 0x68, 0x3e,
+      address >> 24,
+      (address >> 16) & 0xff,
+      (address >> 8) & 0xff,
+      address & 0xff
+    ]);
+
+    return Web3.utils.toChecksumAddress('0x' + buf.toString('hex'));
+  }
+
+  private getEvmCollectionInstance (collectionId: string) {
+    return new this.web3Instance.eth.Contract(nonFungibleAbi, this.collectionIdToAddress(parseInt(collectionId, 10)), { from: this.contractOwner });
   }
 
   private async repeatCheckForTransactionFinish (checkIfCompleted: () => Promise<boolean>, options: { maxAttempts: boolean, awaitBetweenAttempts: number } | null = null): Promise<void> {
@@ -107,10 +138,6 @@ class MarketController implements IMarketController {
     }
   }
 
-  private TransferMinDeposit = (recipient: string, value: BN) => {
-      return this.kusamaApi.tx.balances.transfer(recipient, value); // TODO: transaction for sign
-  }
-
   public async addToWhiteList(account: string, options: TransactionOptions): Promise<void> {
     const ethAddress = this.getEthAccount(account);
     const isWhiteListed = await this.checkWhiteListed(ethAddress);
@@ -118,26 +145,14 @@ class MarketController implements IMarketController {
       return;
     }
     // TODO: can't find account details for min deposit transfer, assuming it is taken from transaction
-    const hasMintDeposit = this.kusamaApi?.consts.balances?.existentialDeposit;
-    if (!hasMintDeposit) {
-      // await options.sign(this.TransferMinDeposit());
-      // await whiteListing before returning "done"
-      /*
-        let attempt = 0;
-        const attemptLimit = 5;
-        while(attempt < attemptLimit) {
-          sleep((attemptLimit - attempt) * 1000) // wait 1sec less between attempts
-          if (this.checkWhiteListed(account)) return;
-          attempt++;
-        }
-        sleep(5 * 1000); // final chance 5sec await
-        if (this.checkWhiteListed(account)) return;
-        throw new Error('Transaction succesfully sent, but whitelisting wasn't finished in 20seconds');
-
+    const hasMinDeposit = this.kusamaApi?.consts.balances?.existentialDeposit;
+    if (hasMinDeposit) {
       return;
-      */
     }
-    throw new Error('Something went wrong when adding to whitelist: account is whitelisted, mindeposit found but success is not returned');
+    const tx = this.kusamaApi.tx.balances.transfer(this.escrowAddress, this.kusamaApi.consts.balances?.existentialDeposit);
+    const signedTx = await options.sign(tx);
+    // execute tx
+    await this.repeatCheckForTransactionFinish(async () => await this.checkWhiteListed(account));
   }
 
   private async checkOnEth (account: string): Promise<boolean> {
@@ -171,7 +186,7 @@ class MarketController implements IMarketController {
     }
   }
 
-  private async checkIfNftApproved (tokenOwner: string, collectionId: string, tokenId: string, options: TransactionOptions) {
+  private async checkIfNftApproved (tokenOwner: string, collectionId: string, tokenId: string) {
     const ethAccount = this.getEthAccount(tokenOwner);
     // TODO: same story - check this one carefully for account params, i assume they expect objects
     const approvedCount = (await this.uniqApi.rpc.unique.allowance(collectionId, tokenOwner, ethAccount, tokenId)).toJSON() as number;
@@ -183,8 +198,9 @@ class MarketController implements IMarketController {
   public async sendNftToSmartContract(account: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
     // TODO: same here
     const token = 'debug' as any;
+    const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
     const approved = await this.checkIfNftApproved(token.owner, collectionId, tokenId);
-    const abi = (evmCollectionInstance.methods as EvmCollectionAbiMethods).approve(contractAddress, tokenId).encodeABI();
+    const abi = (evmCollectionInstance.methods).approve(this.contractAddress, tokenId).encodeABI();
 
     if (approved) {
       return;
@@ -204,9 +220,11 @@ class MarketController implements IMarketController {
   }
 
   // checkAsk - put on sale
-  public async setForFixPriceSale(account: string, price: number, options: TransactionOptions): Promise<void> {
-    const abi = (matcherContractInstance.methods as MarketplaceAbiMethods).addAsk(price.toString(), '0x0000000000000000000000000000000000000001', evmCollectionInstance.options.address, tokenId).encodeABI();
-    const tx = kusamaApi.tx.evm.call(
+  public async setForFixPriceSale(account: string, collectionId: string, tokenId: string, price: number, options: TransactionOptions): Promise<void> {
+    const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
+    const matcherContractInstance = this.getMatcherContractInstance(account);
+    const abi = (matcherContractInstance.methods).addAsk(price.toString(), '0x0000000000000000000000000000000000000001', evmCollectionInstance.options.address, tokenId).encodeABI();
+    const tx = this.kusamaApi.tx.evm.call(
       this.getEthAccount(account),
       this.contractAddress,
       abi,
@@ -226,10 +244,10 @@ class MarketController implements IMarketController {
   // checkDepositReady
   private async getUserDeposit (account: string): Promise<any /* BN */> {
     const ethAccount = this.getEthAccount(account);
-    const matcherContractInstance = this.web3Instance.eth.Contract(this.marketplaceAbi, this.contractAddress, {
+    const matcherContractInstance = this.web3Instance.eth.Contract(marketplaceAbi, this.contractAddress, {
       from: ethAccount
     });
-    const result = await (matcherContractInstance.methods/* as MarketplaceAbiMethods*/).balanceKSM(ethAccount).call();
+    const result = await (matcherContractInstance.methods/* as MarketplaceAbiMethods */).balanceKSM(ethAccount).call();
 
     if (result) {
       const deposit = new BN(result);
@@ -304,10 +322,9 @@ class MarketController implements IMarketController {
   // buyToken
   public async buyToken (account: string, collectionId: string, tokenId: string, options: TransactionOptions) {
     const ethAccount = this.getEthAccount(account);
+    const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
+    const matcherContractInstance = this.getMatcherContractInstance(account);
     const abi = (matcherContractInstance.methods).buyKSM(evmCollectionInstance.options.address, tokenId, ethAccount, ethAccount).encodeABI();
-    const matcherContractInstance = this.web3Instance.eth.Contract(this.marketplaceAbi, this.contractAddress, {
-      from: ethAccount
-    });
 
     const tx = this.kusamaApi.tx.evm.call(
       ethAccount,
@@ -327,6 +344,22 @@ class MarketController implements IMarketController {
   // #endregion buy
 
   // #region delist
+  public async cancelSell (account: string, collectionId: string, tokenId: string, options: TransactionOptions) {
+    const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
+    const matcherContractInstance = this.getMatcherContractInstance(account);
+    const tx = this.kusamaApi.tx.evm.call(
+      this.getEthAccount(account),
+      this.contractAddress,
+      (matcherContractInstance.methods as MarketplaceAbiMethods).cancelAsk(evmCollectionInstance.options.address, tokenId).encodeABI(),
+      0,
+      { gas: this.defaultGasAmount },
+      await this.web3Instance.eth.getGasPrice(),
+      null
+    );
+    const signedTx = await options.sign(tx);
+    // execute sign
+    // await repeat
+  }
   // #endregion delist
 
   // #region transfer
