@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { TransactionOptions, TTransaction } from '../api/chainApi/types';
 import MarketController from '../api/chainApi/unique/marketController';
 import { sleep } from '../utils/helpers';
@@ -29,6 +29,7 @@ export type Stage = {
 
 export type TInternalStageActionParams = {
   tokenId: number,
+  // TODO: collectionId,
   txParams: TTxParams,
   options: TransactionOptions
 }
@@ -54,7 +55,7 @@ export type Signer = {
   status: 'init' | 'awaiting' | 'done' | 'error'
   tx: TTransaction,
   onSign: (signedTx: TTransaction) => void,
-  onError: () => void
+  onError: (error: Error) => void
 };
 
 // TODO: into own file
@@ -103,6 +104,12 @@ const useMarketplaceStages = (type: MarketType, tokenId: number, txParams: TTxPa
   const [internalStages, setInternalStages] = useState<InternalStage[]>(getInternalStages(type, marketApi));
   const [marketStagesStatus, setMarketStagesStatus] = useState<StageStatus>(StageStatus.default);
   const [executionError, setExecutionError] = useState<Error | undefined | null>(null);
+
+  useEffect(() => {
+    return () => {
+      internalStages?.forEach((internalStage) => internalStage?.signer?.onError(new Error('Componen\'t unmounted')));
+    };
+  }, [internalStages]);
 
   const updateStage = useCallback((index: number, newStage: InternalStage) => {
     const copy = [...internalStages];

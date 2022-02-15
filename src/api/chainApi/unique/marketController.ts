@@ -71,7 +71,7 @@ class MarketController implements IMarketController {
   private async repeatCheckForTransactionFinish (checkIfCompleted: () => Promise<boolean>, options: { maxAttempts: boolean, awaitBetweenAttempts: number } | null = null): Promise<void> {
     let attempt = 0;
     const maxAttempts = options?.maxAttempts || 10;
-    const awaitBetweenAttempts = options?.awaitBetweenAttempts || 5 * 1000;
+    const awaitBetweenAttempts = options?.awaitBetweenAttempts || 2 * 1000;
 
     while (attempt < maxAttempts) {
       const isCompleted = await checkIfCompleted();
@@ -100,7 +100,7 @@ class MarketController implements IMarketController {
   public async checkWhiteListed(account: string): Promise<boolean> {
     const ethAddress = this.getEthAccount(account);
     try {
-      return (await this.api.query.evmContractHelpers.allowlist(this.contractAddress, ethAddress)).toJSON() as boolean;
+      return (await this.kusamaApi.query.evmContractHelpers.allowlist(this.contractAddress, ethAddress)).toJSON() as boolean;
     } catch (e) {
       console.error('Check for whitelist failed', e);
       throw e;
@@ -184,38 +184,40 @@ class MarketController implements IMarketController {
     // TODO: same here
     const token = 'debug' as any;
     const approved = await this.checkIfNftApproved(token.owner, collectionId, tokenId);
+    const abi = (evmCollectionInstance.methods as EvmCollectionAbiMethods).approve(contractAddress, tokenId).encodeABI();
 
     if (approved) {
       return;
     }
-    throw new Error('Not implemented');
-    // TODO: figure out collectionInstace's constants stuff
-    /*
     const tx = this.uniqApi.tx.evm.call(
       this.getEthAccount(account),
       evmCollectionInstance.options.address,
-      (evmCollectionInstance.methods as EvmCollectionAbiMethods).approve(contractAddress, tokenId).encodeABI(),
+      abi,
       0,
-      GAS_ARGS.gas,
-      await web3Instance.eth.getGasPrice(),
+      { gas: this.defaultGasAmount },
+      await this.web3Instance.eth.getGasPrice(),
       null
     );
     const signedTx = await options.sign(tx);
     // execute signedTx
-    try {
-      await this.repeatCheckForTransactionFinish(async () => { return this.checkIfNftApproved(token.owner, collectionId, tokenId); });
-      return;
-    } catch (e) {
-      console.error('sendNftToSmartcontract error pushed upper');
-      throw e;
-    }
-    */
+    await this.repeatCheckForTransactionFinish(async () => { return this.checkIfNftApproved(token.owner, collectionId, tokenId); });
   }
 
   // checkAsk - put on sale
-  public async setForFixPriceSale(price: number, options: TransactionOptions): Promise<void> {
-    await sleep(1000);
-    throw new Error('Not implemented');
+  public async setForFixPriceSale(account: string, price: number, options: TransactionOptions): Promise<void> {
+    const abi = (matcherContractInstance.methods as MarketplaceAbiMethods).addAsk(price.toString(), '0x0000000000000000000000000000000000000001', evmCollectionInstance.options.address, tokenId).encodeABI();
+    const tx = kusamaApi.tx.evm.call(
+      this.getEthAccount(account),
+      this.contractAddress,
+      abi,
+      0,
+      { gas: this.defaultGasAmount },
+      await this.web3Instance.eth.getGasPrice(),
+      null
+    );
+    const signedTx = await options.sign(tx);
+    // TODO: execute tx
+    // await repeat ?
   }
 
   // #endregion sell
