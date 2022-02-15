@@ -51,9 +51,9 @@ export interface IMarketController {
   // substrate address
   addToWhiteList: (account: string, options: TransactionOptions) => Promise<void>
   checkWhiteListed: (account: string) => Promise<boolean>
-  lockNftForSale: (options: TransactionOptions) => Promise<void>
-  sendNftToSmartContract: (options: TransactionOptions) => Promise<void>
-  setForFixPriceSale: (price: number, options: TransactionOptions) => Promise<void>
+  lockNftForSale: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
+  sendNftToSmartContract: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
+  setForFixPriceSale: (account: string, collectionId: string, tokenId: string, price: number, options: TransactionOptions) => Promise<void>
 }
 
 export type Chain = {

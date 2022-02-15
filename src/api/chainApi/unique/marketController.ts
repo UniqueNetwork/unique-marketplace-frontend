@@ -143,7 +143,7 @@ class MarketController implements IMarketController {
     return Web3.utils.toChecksumAddress('0x' + buf.toString('hex'));
   }
 
-  private getEvmCollectionInstance (collectionId: string): { methods: EvmCollectionAbiMethods } {
+  private getEvmCollectionInstance (collectionId: string): { methods: EvmCollectionAbiMethods, options: any } {
     return new this.web3Instance.eth.Contract(nonFungibleAbi, this.collectionIdToAddress(parseInt(collectionId, 10)), { from: this.contractOwner });
   }
 
@@ -210,9 +210,9 @@ class MarketController implements IMarketController {
       const token = 'debug' as any;
       const ethAccount = this.getEthAccount(account);
       if (token?.owner?.Substrate === account || token?.owner?.Ethereum?.toLowerCase() === ethAccount) {
-        return true;
+        return Promise.resolve(true);
       }
-      return false;
+      return Promise.resolve(false);
   }
 
   // transfer to etherium (kusama api)
@@ -237,6 +237,7 @@ class MarketController implements IMarketController {
   private async checkIfNftApproved (tokenOwner: string, collectionId: string, tokenId: string) {
     const ethAccount = this.getEthAccount(tokenOwner);
     // TODO: same story - check this one carefully for account params, i assume they expect objects
+    // @ts-ignore
     const approvedCount = (await this.uniqApi.rpc.unique.allowance(collectionId, tokenOwner, ethAccount, tokenId)).toJSON() as number;
 
     return approvedCount === 1;
@@ -398,7 +399,7 @@ class MarketController implements IMarketController {
     const tx = this.kusamaApi.tx.evm.call(
       this.getEthAccount(account),
       this.contractAddress,
-      (matcherContractInstance.methods as MarketplaceAbiMethods).cancelAsk(evmCollectionInstance.options.address, tokenId).encodeABI(),
+      matcherContractInstance.methods.cancelAsk(evmCollectionInstance.options.address, tokenId).encodeABI(),
       0,
       { gas: this.defaultGasAmount },
       await this.web3Instance.eth.getGasPrice(),
@@ -415,7 +416,7 @@ class MarketController implements IMarketController {
     const tokenPart = 1; // TODO: ??????
     const token = {} as any; // TODO:
     const tokenOwner = { Substrate: '', Ethereum: '' }; // TODO:
-    const tx = this.uniqueSubstrateApiRpc.tx.unique.transfer(to, collectionId, tokenId, tokenPart);
+    const tx = this.kusamaApi.tx.unique.transfer(to, collectionId, tokenId, tokenPart);
 
     // TODO: figure out this part, makes no sense
     // if (!tokenOwner?.Substrate || tokenOwner?.Substrate !== from) {

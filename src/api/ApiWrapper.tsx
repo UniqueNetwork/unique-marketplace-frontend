@@ -46,7 +46,8 @@ const ApiWrapper = ({ children, gqlClient = gql, rpcClient = rpc }: ChainProvide
     () => ({
       api: (rpcClient && rpc.isApiConnected && {
         collection: rpcClient.collectionController,
-        nft: rpcClient.nftController
+        nft: rpcClient.nftController,
+        market: rpcClient.marketController
       }) || undefined,
       chainData,
       currentChain: chainId ? chains[chainId] : defaultChain,

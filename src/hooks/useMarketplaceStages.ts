@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
-import { TransactionOptions, TTransaction } from '../api/chainApi/types';
-import MarketController from '../api/chainApi/unique/marketController';
-import { sleep } from '../utils/helpers';
+import { useCallback, useContext, useEffect, useState } from 'react';
+import { IMarketController, TransactionOptions, TTransaction } from '../api/chainApi/types';
+import { useApi } from './useApi';
+import AccountContext from '../account/AccountContext';
 
 export enum MarketType {
   default = 'Not started', // initial state
@@ -28,8 +28,9 @@ export type Stage = {
 };
 
 export type TInternalStageActionParams = {
+  account: string,
   tokenId: number,
-  // TODO: collectionId,
+  collectionId: string,
   txParams: TTxParams,
   options: TransactionOptions
 }
@@ -59,7 +60,7 @@ export type Signer = {
 };
 
 // TODO: into own file
-const getInternalStages = (type: MarketType, marketApi: MarketController) => {
+const getInternalStages = (type: MarketType, marketApi?: IMarketController | undefined) => {
   const purchaseStages = [] as InternalStage[];
   const bidStages = [] as InternalStage[];
   const sellAuctionStages = [] as InternalStage[];
@@ -68,19 +69,19 @@ const getInternalStages = (type: MarketType, marketApi: MarketController) => {
     title: 'Locking NFT for sale',
     description: '',
     status: StageStatus.default,
-    action: (params: TInternalStageActionParams) => marketApi.lockNftForSale(params.options)
+    action: (params: TInternalStageActionParams) => marketApi?.lockNftForSale(params.account, params.collectionId, params.tokenId.toString(), params.options)
   },
   {
     title: 'Sending NFT to Smart contract',
     description: '',
     status: StageStatus.default,
-    action: (params: TInternalStageActionParams) => marketApi.sendNftToSmartContract(params.options)
+    action: (params: TInternalStageActionParams) => marketApi?.sendNftToSmartContract(params.account, params.collectionId, params.tokenId.toString(), params.options)
   },
   {
     title: 'Setting price',
     description: '',
     status: StageStatus.default,
-    action: (params: TInternalStageActionParams) => marketApi.setForFixPriceSale(params?.txParams?.price, params.options)
+    action: (params: TInternalStageActionParams) => marketApi?.setForFixPriceSale(params.account, params.collectionId, params.tokenId.toString(), params?.txParams?.price, params.options)
   }] as InternalStage[];
   switch (type) {
     case MarketType.bid:
@@ -98,9 +99,12 @@ const getInternalStages = (type: MarketType, marketApi: MarketController) => {
 };
 
 // TODO: txParams depends on stage type (it is usually a price, but for auction it could contain some extra params like minBid)
-const useMarketplaceStages = (type: MarketType, tokenId: number, txParams: TTxParams): useMarketplaceStagesReturn => {
+const useMarketplaceStages = (type: MarketType, collectionId: string, tokenId: number, txParams: TTxParams): useMarketplaceStagesReturn => {
   // TODO: marketApi should be taken from rpcClient
-  const marketApi = new MarketController({} as any, {} as any);
+  const { api } = useApi();
+  const { selectedAccount } = useContext(AccountContext);
+
+  const marketApi = api?.market;
   const [internalStages, setInternalStages] = useState<InternalStage[]>(getInternalStages(type, marketApi));
   const [marketStagesStatus, setMarketStagesStatus] = useState<StageStatus>(StageStatus.default);
   const [executionError, setExecutionError] = useState<Error | undefined | null>(null);
@@ -140,14 +144,14 @@ const useMarketplaceStages = (type: MarketType, tokenId: number, txParams: TTxPa
     try {
       // if sign is required by action -> promise wouldn't be resolved untill transaction is signed
       // transaction sign should be triggered in the component that uses current stage (you can track it by stage.status or stage.signer)
-      await stage.action({ tokenId, txParams, options: { sign: getSignFunction(index, stage) } });
+      await stage.action({ account: selectedAccount?.address || '', collectionId, tokenId, txParams, options: { sign: getSignFunction(index, stage) } });
       updateStage(index, { ...stage, status: StageStatus.success });
     } catch (e) {
       updateStage(index, { ...stage, status: StageStatus.error });
       console.error('Execute stage failed', stage, e);
       throw new Error(`Execute stage "${stage.title}" failed`);
     }
-  }, [tokenId, updateStage, getSignFunction]);
+  }, [selectedAccount, collectionId, tokenId, updateStage, getSignFunction]);
 
   const initiate = useCallback(async () => {
     setMarketStagesStatus(StageStatus.inProgress);
