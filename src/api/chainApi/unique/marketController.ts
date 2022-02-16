@@ -84,6 +84,7 @@ const defaultMarketPlaceControllerConfig: MartketControllerConfig = {
   escrowAddress: config.escrowAddress,
   marketplaceAbi: marketplaceAbi.abi,
   minPrice: config.minPrice,
+  kusamaDecimals: config.kusamaDecimals,
   defaultGasAmount: 2500000
 };
 

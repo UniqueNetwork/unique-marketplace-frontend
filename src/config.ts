@@ -12,6 +12,7 @@ declare type Config = {
   contractOwner: string | undefined,
   uniqueSubstrateApiRpc: string | undefined,
   minPrice: number | undefined,
+  kusamaDecimals: number | undefined,
   escrowAddress: string | undefined,
   uniqueApiUrl: string | undefined
   kusamaApiUrl: string | undefined
@@ -29,11 +30,12 @@ declare global {
 const chains = getChainList(window.ENV || process.env);
 
 const config: Config = {
-  contractAddress: window.ENV?.CONTRACT_ADDRESS || process.env.CONTRACT_ADDRESS,
-  contractOwner: window.ENV?.CONTRACT_OWNER || process.env.CONTRACT_OWNER,
-  uniqueSubstrateApiRpc: window.ENV?.UNIQUE_SUBSTRATE_API_RPC || process.env.UNIQUE_SUBSTRATE_API_RPC,
-  minPrice: +(window.ENV?.MIN_PRICE || process.env.MIN_PRICE || 0),
-  escrowAddress: window.ENV?.ESCROW_ADDRESS || process.env.ESCROW_ADDRESS,
+  contractAddress: window.ENV?.CONTRACT_ADDRESS || process.env.REACT_APP_CONTRACT_ADDRESS,
+  contractOwner: window.ENV?.CONTRACT_OWNER || process.env.REACT_APP_CONTRACT_OWNER,
+  uniqueSubstrateApiRpc: window.ENV?.UNIQUE_SUBSTRATE_API_RPC || process.env.REACT_APP_UNIQUE_SUBSTRATE_API_RPC,
+  minPrice: +(window.ENV?.MIN_PRICE || process.env.REACT_APP_MIN_PRICE || 0),
+  kusamaDecimals: +(window.ENV?.DECIMALS || process.env.REACT_APP_KUSAMA_DECIMALS || 0),
+  escrowAddress: window.ENV?.ESCROW_ADDRESS || process.env.REACT_APP_ESCROW_ADDRESS,
   uniqueApiUrl: window.ENV?.REACT_APP_UNIQUE_API_URL || process.env.REACT_APP_UNIQUE_API_URL,
   kusamaApiUrl: window.ENV?.REACT_APP_KUSAMA_API_URL || process.env.REACT_APP_KUSAMA_API_URL,
   IPFSGateway: window.ENV?.REACT_APP_IPFS_GATEWAY || process.env.REACT_APP_IPFS_GATEWAY,
