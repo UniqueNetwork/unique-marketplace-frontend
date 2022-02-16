@@ -1,16 +1,15 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { formatBalance } from '@polkadot/util';
 import { OverrideBundleType } from '@polkadot/types/types';
-// import { typesChain } from '@phala/typedefs';
+import { typesChain } from '@phala/typedefs';
 
-import { IRpcClient, INFTController, IRpcClientOptions, ICollectionController, IRpc, IMarketController } from './types';
+import { IRpcClient, INFTController, IRpcClientOptions, ICollectionController, IMarketController } from './types';
 import bundledTypesDefinitions from './unique/bundledTypesDefinitions';
 import rpcMethods from './unique/rpcMethods';
 import UniqueNFTController from './unique/NFTController';
 import UniqueCollectionController from './unique/collectionController';
 import MarketKusamaController from './unique/marketController';
 import { ChainData } from '../ApiContext';
-import { TypeRegistry } from '@polkadot/types';
 
 export class RpcClient implements IRpcClient {
   public nftController?: INFTController<any, any>;
@@ -32,7 +31,6 @@ export class RpcClient implements IRpcClient {
     this.rpcEndpoint = rpcEndpoint;
     this.options = options || {};
     this.setApi();
-    // todo: save kusama client in RpcClient, reevaluate whether it is a good idea or should be placed at the same level as rpcClient
     this.rawKusamaRpcApi = this.initKusamaApi(rpcKusamaEndpoint);
     // TODO: wait for both rpc's to be initiated to switch "isApiInitialized
   }
@@ -55,21 +53,22 @@ export class RpcClient implements IRpcClient {
         nft: bundledTypesDefinitions
       }
     };
-
-    const kusamaRegistry = new TypeRegistry();
-
     const kusamaApi = new ApiPromise({
       provider,
       // @ts-ignore
-      registry: kusamaRegistry,
       types,
       // @ts-ignore
-      typesBundle
+      typesBundle,
+      typesChain: {
+        ...typesChain
+      }
     });
 
     kusamaApi.on('connected', () => { this.isApiConnected = true; });
     kusamaApi.on('disconnected', () => { this.isApiConnected = false; });
-    kusamaApi.on('error', (error: Error) => this.setApiError(error.message));
+    kusamaApi.on('error', (error: Error) => {
+      this.setApiError(error.message);
+    });
     kusamaApi.on('ready', (): void => {
       this.setIsKusamaApiConnected(true);
     });
@@ -117,7 +116,9 @@ export class RpcClient implements IRpcClient {
 
     _api.on('connected', () => this.setIsApiConnected(true));
     _api.on('disconnected', () => this.setIsApiConnected(false));
-    _api.on('error', (error: Error) => this.setApiError(error.message));
+    _api.on('error', (error: Error) => {
+      this.setApiError(error.message);
+    });
 
     _api.on('ready', async () => {
       this.setIsApiConnected(true);
