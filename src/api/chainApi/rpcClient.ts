@@ -10,6 +10,7 @@ import UniqueNFTController from './unique/NFTController';
 import UniqueCollectionController from './unique/collectionController';
 import MarketKusamaController from './unique/marketController';
 import { ChainData } from '../ApiContext';
+import { TypeRegistry } from '@polkadot/types/create';
 
 export class RpcClient implements IRpcClient {
   public nftController?: INFTController<any, any>;
@@ -30,8 +31,8 @@ export class RpcClient implements IRpcClient {
     // TODO: this.decimals = this.rawRpcApi.decimal;
     this.rpcEndpoint = rpcEndpoint;
     this.options = options || {};
-    this.setApi();
     this.rawKusamaRpcApi = this.initKusamaApi(rpcKusamaEndpoint);
+    this.setApi();
     // TODO: wait for both rpc's to be initiated to switch "isApiInitialized
   }
 
@@ -46,6 +47,7 @@ export class RpcClient implements IRpcClient {
 
   private initKusamaApi(wsEndpoint: string) {
     const provider = new WsProvider(wsEndpoint);
+
     const types = this.getDevTypes();
 
     const typesBundle: OverrideBundleType = {
@@ -53,8 +55,11 @@ export class RpcClient implements IRpcClient {
         nft: bundledTypesDefinitions
       }
     };
+    const kusamaRegistry = new TypeRegistry();
+
     const kusamaApi = new ApiPromise({
       provider,
+      registry: kusamaRegistry,
       // @ts-ignore
       types,
       // @ts-ignore
