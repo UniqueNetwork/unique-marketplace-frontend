@@ -80,7 +80,6 @@ export type MartketControllerConfig = {
 const defaultMarketPlaceControllerConfig: MartketControllerConfig = {
   contractAddress: config.contractAddress,
   contractOwner: config.contractOwner,
-  uniqueSubstrateApiRpc: config.uniqueSubstrateApiRpc,
   escrowAddress: config.escrowAddress,
   marketplaceAbi: marketplaceAbi.abi,
   minPrice: config.minPrice,
@@ -223,7 +222,7 @@ class MarketController implements IMarketController {
     const isOnEth = await this.checkOnEth(account);
     if (isOnEth) return;
     // TODO: params for transfer form probably incorrect, test carefully
-    const tx = this.kusamaApi.tx.unique.transferFrom(ethAccount, account, collectionId, tokenId, 1);
+    const tx = this.uniqApi.tx.unique.transferFrom(ethAccount, account, collectionId, tokenId, 1);
     const signedTx = await options.sign(tx);
     // execute signedTx
     try {

@@ -11,6 +11,8 @@ import UniqueCollectionController from './unique/collectionController';
 import MarketKusamaController from './unique/marketController';
 import { ChainData } from '../ApiContext';
 import { TypeRegistry } from '@polkadot/types/create';
+import CrustMaxwell from './unique/crust-maxwell';
+import { unique } from '@unique-nft/types/definitions';
 
 export class RpcClient implements IRpcClient {
   public nftController?: INFTController<any, any>;
@@ -48,11 +50,19 @@ export class RpcClient implements IRpcClient {
   private initKusamaApi(wsEndpoint: string) {
     const provider = new WsProvider(wsEndpoint);
 
-    const types = this.getDevTypes();
+//    const types = this.getDevTypes();
+
+    console.log(unique.rpc)
 
     const typesBundle: OverrideBundleType = {
       spec: {
-        nft: bundledTypesDefinitions
+        nft: bundledTypesDefinitions,
+        opal: {
+          rpc: { unique: unique.rpc }
+        },
+        quartz: {
+          rpc: { unique: unique.rpc }
+        }
       }
     };
     const kusamaRegistry = new TypeRegistry();
@@ -60,12 +70,14 @@ export class RpcClient implements IRpcClient {
     const kusamaApi = new ApiPromise({
       provider,
       registry: kusamaRegistry,
+      //signer: {},
       // @ts-ignore
-      types,
+      //types: {},
       // @ts-ignore
       typesBundle,
       typesChain: {
-        ...typesChain
+        ...typesChain,
+        'Crust Maxwell': CrustMaxwell
       }
     });
 
@@ -76,6 +88,7 @@ export class RpcClient implements IRpcClient {
     });
     kusamaApi.on('ready', (): void => {
       this.setIsKusamaApiConnected(true);
+      console.log('Kusama is ready')
     });
     return kusamaApi;
   }
