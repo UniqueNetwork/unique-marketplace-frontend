@@ -1,10 +1,10 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
-import { IMarketController, TransactionOptions, TTransaction } from '../api/chainApi/types';
-import { useApi } from './useApi';
-import AccountContext from '../account/AccountContext';
 import jsonrpc from '@polkadot/types/interfaces/jsonrpc';
-import type { ExtrinsicStatus } from '@polkadot/types/interfaces';
 import { web3Enable, web3FromSource } from '@polkadot/extension-dapp';
+import { useApi } from './useApi';
+import { IMarketController, TransactionOptions, TTransaction } from '../api/chainApi/types';
+import AccountContext from '../account/AccountContext';
+import type { ExtrinsicStatus } from '@polkadot/types/interfaces';
 
 export enum MarketType {
   default = 'Not started', // initial state

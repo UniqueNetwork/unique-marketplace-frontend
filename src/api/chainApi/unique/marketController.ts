@@ -160,7 +160,7 @@ class MarketController implements IMarketController {
 
   private async repeatCheckForTransactionFinish (checkIfCompleted: () => Promise<boolean>, options: { maxAttempts: boolean, awaitBetweenAttempts: number } | null = null): Promise<void> {
     let attempt = 0;
-    const maxAttempts = options?.maxAttempts || 10;
+    const maxAttempts = options?.maxAttempts || 100;
     const awaitBetweenAttempts = options?.awaitBetweenAttempts || 2 * 1000;
 
     while (attempt < maxAttempts) {
@@ -307,7 +307,7 @@ class MarketController implements IMarketController {
       this.contractAddress,
       abi,
       0,
-      { gas: this.defaultGasAmount },
+      this.defaultGasAmount,
       await this.web3Instance.eth.getGasPrice(),
       null
     );
@@ -414,22 +414,24 @@ class MarketController implements IMarketController {
   public async buyToken (account: string, collectionId: string, tokenId: string, options: TransactionOptions) {
     const ethAccount = this.getEthAccount(account);
     const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
-    const matcherContractInstance = this.getMatcherContractInstance(account);
+    const matcherContractInstance = this.getMatcherContractInstance(ethAccount);
     const abi = (matcherContractInstance.methods).buyKSM(evmCollectionInstance.options.address, tokenId, ethAccount, ethAccount).encodeABI();
 
-    const tx = this.kusamaApi.tx.evm.call(
+    const tx = this.uniqApi.tx.evm.call(
       ethAccount,
       this.contractAddress,
       abi,
       0,
-      { gas: this.defaultGasAmount },
+      this.defaultGasAmount,
       await this.web3Instance.eth.getGasPrice(),
       null
     );
 
     const signedTx = await options.sign(tx);
-    // TODO: await purchase
-    // await this.repeatCheckForTransactionFinish(async () => { (await this.getToken(collectionId, tokenId)) === account; });
+    await signedTx.send();
+    await this.repeatCheckForTransactionFinish(async () => {
+      return await this.nftController?.getToken(Number(collectionId), Number(tokenId)) === account;
+    });
   }
 
   // #endregion buy
@@ -443,7 +445,7 @@ class MarketController implements IMarketController {
       this.contractAddress,
       matcherContractInstance.methods.cancelAsk(evmCollectionInstance.options.address, tokenId).encodeABI(),
       0,
-      { gas: this.defaultGasAmount },
+      this.defaultGasAmount,
       await this.web3Instance.eth.getGasPrice(),
       null
     );
