@@ -430,7 +430,7 @@ class MarketController implements IMarketController {
     const signedTx = await options.sign(tx);
     await signedTx.send();
     await this.repeatCheckForTransactionFinish(async () => {
-      return await this.nftController?.getToken(Number(collectionId), Number(tokenId)) === account;
+      return (await this.nftController?.getToken(Number(collectionId), Number(tokenId)))?.owner?.Ethereum === ethAccount;
     });
   }
 
@@ -458,22 +458,28 @@ class MarketController implements IMarketController {
 
   // #region transfer
   public async transferToken (from: string, to: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
-    const tokenPart = 1; // TODO: ??????
-    const token = {} as any; // TODO:
-    const tokenOwner = { Substrate: '', Ethereum: '' }; // TODO:
-    const tx = this.kusamaApi.tx.unique.transfer(to, collectionId, tokenId, tokenPart);
+    const tokenPart = 1;
+    const recipient = { Substrate: to, Ethereum: this.getEthAccount(to) };
+    const ethTo = this.getEthAccount(to);
+    const token = await this.nftController?.getToken(Number(collectionId), Number(tokenId));
+    if (!token) throw new Error('Token not found');
+    const tokenOwner = token.owner;
+    let tx = this.uniqApi.tx.unique.transfer(recipient, collectionId, tokenId, tokenPart);
+    if (!tokenOwner?.Substrate || tokenOwner?.Substrate !== from) {
+      const ethFrom = this.getEthAccount(from);
+      if (tokenOwner?.Ethereum === ethFrom) {
+        tx = this.uniqApi.tx.unique.transferFrom(normalizeAccountId({ Ethereum: ethFrom } as CrossAccountId), normalizeAccountId(recipient as CrossAccountId), collectionId, tokenId, 1);
+      }
+    }
 
-    // TODO: figure out this part, makes no sense
-    // if (!tokenOwner?.Substrate || tokenOwner?.Substrate !== from) {
-    //   const ethAccount = this.getEthAccount(from);
-
-    //   if (tokenOwner?.Ethereum === ethAccount) {
-    //     tx = this.uniqueSubstrateApiRpc.tx.unique.transferFrom(normalizeAccountId({ Ethereum: ethAccount } as CrossAccountId), normalizeAccountId(recipient as CrossAccountId), collection.id, tokenId, 1);
-    //   }
-    // }
     const signedTx = await options.sign(tx);
-    // execute
-    // await ownership change via getToken and compare it to "to"
+    await signedTx.send();
+    await this.repeatCheckForTransactionFinish(async () => {
+      const updatedToken = await this.nftController?.getToken(Number(collectionId), Number(tokenId));
+      const owner = updatedToken.owner;
+      if (owner.Ethereum === ethTo || owner.Substrate === to) return true;
+      return false;
+    });
   }
   // #endregion transfer
 }

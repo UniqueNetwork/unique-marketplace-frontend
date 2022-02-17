@@ -11,7 +11,8 @@ export enum MarketType {
   purchase = 'Purchase', // fix price
   bid = 'Bid',
   sellFix = 'Sell for fixed price',
-  sellAuction = 'Auction'
+  sellAuction = 'Auction',
+  transfer = 'Transfer'
 }
 
 export enum StageStatus {
@@ -101,6 +102,13 @@ const getInternalStages = (type: MarketType, marketApi?: IMarketController | und
     action: (params: TInternalStageActionParams) => marketApi?.buyToken(params.account, params.collectionId, params.tokenId.toString(), params.options)
   }];
 
+  const transferStages = [{
+    title: 'Transfer token',
+    description: '',
+    status: StageStatus.default, //                                                          TODO: refactor txParams
+    action: (params: TInternalStageActionParams) => marketApi?.transferToken(params.account, '5FjUxt5DoTj2ZqCQNmzi7GQtmS16otyQa6ZZTJ4HzibTGBAH', params.collectionId, params.tokenId.toString(), params.options)
+  }];
+
   switch (type) {
     case MarketType.bid:
       return bidStages;
@@ -110,6 +118,8 @@ const getInternalStages = (type: MarketType, marketApi?: IMarketController | und
       return sellAuctionStages;
     case MarketType.purchase:
       return purchaseStages;
+    case MarketType.transfer:
+      return transferStages;
     case MarketType.default:
     default:
       throw new Error(`Incorrect stage type received ${type}`);
