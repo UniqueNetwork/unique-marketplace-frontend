@@ -132,7 +132,7 @@ const useMarketplaceStages = (type: MarketType, collectionId: string, tokenId: n
 
   const getSignFunction = useCallback((index: number, internalStage: InternalStage) => {
     const sign = (tx: TTransaction): Promise<TTransaction | void> => {
-      return new Promise(async (resolve, reject) => {
+      return new Promise<TTransaction>(async (resolve, reject) => {
         const targetStage = { ...internalStage };
         targetStage.status = StageStatus.awaitingSign;
         targetStage.signer = {
@@ -144,8 +144,8 @@ const useMarketplaceStages = (type: MarketType, collectionId: string, tokenId: n
         if (!selectedAccount) throw new Error('Invalid account');
         try {
           const injector = await web3FromSource(selectedAccount.meta.source);
-          await tx.signAsync(selectedAccount.address, { signer: injector.signer });
-          resolve();
+          const signedTx = await tx.signAsync(selectedAccount.address, { signer: injector.signer })
+          resolve(signedTx);
         } catch (e) {
           reject(e);
         }
