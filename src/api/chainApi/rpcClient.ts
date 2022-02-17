@@ -1,7 +1,7 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { formatBalance } from '@polkadot/util';
-import { OverrideBundleType } from '@polkadot/types/types';
 import { typesChain } from '@phala/typedefs';
+import { TypeRegistry } from '@polkadot/types/create';
 
 import {
   IRpcClient,
@@ -17,7 +17,6 @@ import UniqueNFTController from './unique/NFTController';
 import UniqueCollectionController from './unique/collectionController';
 import MarketKusamaController from './unique/marketController';
 import { ChainData } from '../ApiContext';
-import { TypeRegistry } from '@polkadot/types/create';
 import CrustMaxwell from './unique/crust-maxwell';
 
 export class RpcClient implements IRpcClient {

@@ -7,6 +7,7 @@ import nonFungibleAbi from './abi/nonFungibleAbi.json';
 import { sleep } from '../../../utils/helpers';
 import { IMarketController, TransactionOptions } from '../types';
 import { normalizeAccountId } from "../utils/normalizeAccountId";
+import {ExtrinsicStatus} from "@polkadot/types/interfaces";
 
 export type EvmCollectionAbiMethods = {
   approve: (contractAddress: string, tokenId: string) => {
@@ -223,8 +224,12 @@ class MarketController implements IMarketController {
     const isOnEth = await this.checkOnEth(account);
     if (isOnEth) return;
     // TODO: params for transfer form probably incorrect, test carefully
+    console.log('lockNftForSale', collectionId, tokenId)
     const tx = this.uniqApi.tx.unique.transferFrom(normalizeAccountId(ethAccount), normalizeAccountId(account), collectionId, tokenId, 1);
     const signedTx = await options.sign(tx);
+
+    const result = await this.uniqApi.rpc.author.submitAndWatchExtrinsic(tx);
+    console.log(result)
     // execute signedTx
     try {
       await this.repeatCheckForTransactionFinish(async () => { return this.checkOnEth(account); });

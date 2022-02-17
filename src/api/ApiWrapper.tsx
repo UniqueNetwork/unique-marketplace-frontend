@@ -54,6 +54,7 @@ const ApiWrapper = ({ children, gqlClient = gql, rpcClient = rpc }: ChainProvide
   // get context value for ApiContext
   const value = useMemo<ApiContextProps>(
     () => {
+      console.log(rpcClient?.rawRpcApi);
       return {
         api: (rpcClient && rpc.isApiConnected && {
           collection: rpcClient.collectionController,

@@ -2,6 +2,9 @@ import { useCallback, useContext, useEffect, useState } from 'react';
 import { IMarketController, TransactionOptions, TTransaction } from '../api/chainApi/types';
 import { useApi } from './useApi';
 import AccountContext from '../account/AccountContext';
+import jsonrpc from '@polkadot/types/interfaces/jsonrpc';
+import type { ExtrinsicStatus } from '@polkadot/types/interfaces';
+import {web3Enable, web3FromSource} from "@polkadot/extension-dapp";
 
 export enum MarketType {
   default = 'Not started', // initial state
@@ -52,12 +55,16 @@ export type useMarketplaceStagesReturn = {
 // all the extra stuff (min step for bids, price, etc)
 export type TTxParams = any;
 
+const SUBMIT_RPC = jsonrpc.author.submitAndWatchExtrinsic;
+
 export type Signer = {
   status: 'init' | 'awaiting' | 'done' | 'error'
   tx: TTransaction,
   onSign: (signedTx: TTransaction) => void,
   onError: (error: Error) => void
 };
+
+
 
 // TODO: into own file
 const getInternalStages = (type: MarketType, marketApi?: IMarketController | undefined) => {
@@ -101,10 +108,11 @@ const getInternalStages = (type: MarketType, marketApi?: IMarketController | und
 // TODO: txParams depends on stage type (it is usually a price, but for auction it could contain some extra params like minBid)
 const useMarketplaceStages = (type: MarketType, collectionId: string, tokenId: number, txParams: TTxParams): useMarketplaceStagesReturn => {
   // TODO: marketApi should be taken from rpcClient
-  const { api } = useApi();
+  const { api, rpcClient } = useApi();
   const { selectedAccount } = useContext(AccountContext);
 
   const marketApi = api?.market;
+
   const [internalStages, setInternalStages] = useState<InternalStage[]>(getInternalStages(type, marketApi));
   const [marketStagesStatus, setMarketStagesStatus] = useState<StageStatus>(StageStatus.default);
   const [executionError, setExecutionError] = useState<Error | undefined | null>(null);
@@ -123,7 +131,7 @@ const useMarketplaceStages = (type: MarketType, collectionId: string, tokenId: n
 
   const getSignFunction = useCallback((index: number, internalStage: InternalStage) => {
     const sign = (tx: TTransaction): Promise<TTransaction | void> => {
-      return new Promise((resolve, reject) => {
+      return new Promise(async (resolve, reject) => {
         const targetStage = { ...internalStage };
         targetStage.status = StageStatus.awaitingSign;
         targetStage.signer = {
@@ -132,6 +140,14 @@ const useMarketplaceStages = (type: MarketType, collectionId: string, tokenId: n
           onSign: (signedTx: TTransaction) => resolve(signedTx),
           onError: (error: Error = new Error('Sign failed or aborted')) => reject(error)
         };
+        if (!selectedAccount) throw new Error('Invalid account');
+        try {
+          const injector = await web3FromSource(selectedAccount.meta.source);
+          await tx.signAsync(selectedAccount.address, { signer: injector.signer });
+          resolve();
+        } catch (e) {
+          reject(e);
+        }
         // TODO: action of update happens inside "get" function, consider renaming or restructuring
         updateStage(index, targetStage);
       });
@@ -142,7 +158,7 @@ const useMarketplaceStages = (type: MarketType, collectionId: string, tokenId: n
   const executeStep = useCallback(async (stage: InternalStage, index: number) => {
     updateStage(index, { ...stage, status: StageStatus.inProgress });
     try {
-      // if sign is required by action -> promise wouldn't be resolved untill transaction is signed
+      // if sign is required by action -> promise wouldn't be resolved until transaction is signed
       // transaction sign should be triggered in the component that uses current stage (you can track it by stage.status or stage.signer)
       await stage.action({ account: selectedAccount?.address || '', collectionId, tokenId, txParams, options: { sign: getSignFunction(index, stage) } });
       updateStage(index, { ...stage, status: StageStatus.success });
