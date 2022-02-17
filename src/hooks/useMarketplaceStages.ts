@@ -90,6 +90,7 @@ const getInternalStages = (type: MarketType, marketApi?: IMarketController | und
     status: StageStatus.default,
     action: (params: TInternalStageActionParams) => marketApi?.setForFixPriceSale(params.account, params.collectionId, params.tokenId.toString(), params?.txParams?.price, params.options)
   }] as InternalStage[];
+
   switch (type) {
     case MarketType.bid:
       return bidStages;
@@ -108,7 +109,7 @@ const getInternalStages = (type: MarketType, marketApi?: IMarketController | und
 // TODO: txParams depends on stage type (it is usually a price, but for auction it could contain some extra params like minBid)
 const useMarketplaceStages = (type: MarketType, collectionId: string, tokenId: number, txParams: TTxParams): useMarketplaceStagesReturn => {
   // TODO: marketApi should be taken from rpcClient
-  const { api, rpcClient } = useApi();
+  const { api } = useApi();
   const { selectedAccount } = useContext(AccountContext);
 
   const marketApi = api?.market;
@@ -153,7 +154,7 @@ const useMarketplaceStages = (type: MarketType, collectionId: string, tokenId: n
       });
     };
     return sign;
-  }, [updateStage]);
+  }, [updateStage, selectedAccount]);
 
   const executeStep = useCallback(async (stage: InternalStage, index: number) => {
     updateStage(index, { ...stage, status: StageStatus.inProgress });
