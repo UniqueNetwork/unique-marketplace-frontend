@@ -1,6 +1,7 @@
 import { ChainData } from '../ApiContext';
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
+import { Settings } from "../restApi/settings/types";
 
 export interface IRpc {
   rpcEndpoint: string
@@ -13,14 +14,18 @@ export interface IRpc {
 }
 
 export interface IRpcClient extends IRpc {
+  initialize(config: IRpcConfig, options?: IRpcClientOptions): void
   nftController?: INFTController<any, any>
   collectionController?: ICollectionController<any, any>
   marketController?: IMarketController
   chainData: any
 }
 
+export interface IRpcConfig extends Settings {};
+
 export interface IRpcClientOptions {
   onChainReady?: (chainData: ChainData) => void
+
 }
 
 export interface INFTController<Collection, Token> {
@@ -51,14 +56,13 @@ export interface IMarketController {
   // substrate address
   addToWhiteList: (account: string, options: TransactionOptions) => Promise<void>
   checkWhiteListed: (account: string) => Promise<boolean>
-  lockNftForSale: (options: TransactionOptions) => Promise<void>
-  sendNftToSmartContract: (options: TransactionOptions) => Promise<void>
-  setForFixPriceSale: (price: number, options: TransactionOptions) => Promise<void>
+  lockNftForSale: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
+  sendNftToSmartContract: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
+  setForFixPriceSale: (account: string, collectionId: string, tokenId: string, price: number, options: TransactionOptions) => Promise<void>
 }
 
 export type Chain = {
   network: string
   name: string
-  gqlEndpoint: string
-  rpcEndpoint: string
+  apiEndpoint: string
 }

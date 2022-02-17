@@ -37,7 +37,7 @@ const AccountWrapper: FC = ({ children }) => {
       if (defaultAccount) {
         changeAccount(defaultAccount);
       } else {
-        changeAccount(accounts[0]);
+        changeAccount(allAccounts[0]);
       }
     } else {
       setFetchAccountsError('No accounts in extension');

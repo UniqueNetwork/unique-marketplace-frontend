@@ -10,6 +10,7 @@ import DefaultMarketStages from './StagesModal';
 type TOnModalClose = () => void;
 
 type TSellModalProps = {
+  collectionId: string,
   tokenId: number,
   onModalClose: TOnModalClose
 }
@@ -31,7 +32,7 @@ const getFees = () => {
   return { priceFee, stepFee };
 };
 
-export const SellModal: FC<TSellModalProps> = ({ tokenId, onModalClose }) => {
+export const SellModal: FC<TSellModalProps> = ({ collectionId, tokenId, onModalClose }) => {
   const [isOpen, setIsOpen] = useState(true);
   const [status, setStatus] = useState(MarketType.default); // TODO: naming
   const [auction, setAuction] = useState<TAuctionProps>();
@@ -50,9 +51,9 @@ export const SellModal: FC<TSellModalProps> = ({ tokenId, onModalClose }) => {
   switch (status) {
     // TODO: move modal iside Sell*StagesModal instead (so we can make it "closable" on errors)
     case MarketType.sellAuction:
-      return (<Modal isVisible={isOpen} isClosable={false}><SellAuctionStagesModal tokenId={tokenId} auction={auction as TAuctionProps} onModalClose={onModalClose} /></Modal>);
+      return (<Modal isVisible={isOpen} isClosable={false}><SellAuctionStagesModal collectionId={collectionId} tokenId={tokenId} auction={auction as TAuctionProps} onModalClose={onModalClose} /></Modal>);
     case MarketType.sellFix:
-      return (<Modal isVisible={isOpen} isClosable={false}><SellFixStagesModal tokenId={tokenId} fixPrice={fixPrice as TFixPriceProps} onModalClose={onModalClose} /></Modal>);
+      return (<Modal isVisible={isOpen} isClosable={false}><SellFixStagesModal collectionId={collectionId} tokenId={tokenId} fixPrice={fixPrice as TFixPriceProps} onModalClose={onModalClose} /></Modal>);
     default: throw new Error(`Incorrect status provided for processing modal: ${status}`);
   }
 };
@@ -216,18 +217,20 @@ export const SellTypeModal: FC<any> = ({ onConfirm }) => {
 
 type TSellFixStagesModal = {
   onModalClose: TOnModalClose,
+  collectionId: string,
   tokenId: number,
   fixPrice: TFixPriceProps
 }
 
 type TSellAuctionStagesModal = {
   onModalClose: TOnModalClose,
+  collectionId: string,
   tokenId: number,
   auction: TAuctionProps
 }
 
-export const SellFixStagesModal: FC<TSellFixStagesModal> = ({ tokenId, fixPrice, onModalClose }) => {
-  const { stages, status, initiate } = useMarketplaceStages(MarketType.sellFix, tokenId, fixPrice);
+export const SellFixStagesModal: FC<TSellFixStagesModal> = ({ collectionId, tokenId, fixPrice, onModalClose }) => {
+  const { stages, status, initiate } = useMarketplaceStages(MarketType.sellFix, collectionId, tokenId, fixPrice);
   useEffect(() => { initiate(); }, []); // TODO: initiate could be putten inside useMarketplaceStages
   return (
     <div>
@@ -236,8 +239,8 @@ export const SellFixStagesModal: FC<TSellFixStagesModal> = ({ tokenId, fixPrice,
   );
 };
 
-export const SellAuctionStagesModal: FC<TSellAuctionStagesModal> = ({ tokenId, auction, onModalClose }) => {
-  const { stages, status, initiate } = useMarketplaceStages(MarketType.sellAuction, tokenId, auction);
+export const SellAuctionStagesModal: FC<TSellAuctionStagesModal> = ({ collectionId, tokenId, auction, onModalClose }) => {
+  const { stages, status, initiate } = useMarketplaceStages(MarketType.sellAuction, collectionId, tokenId, auction);
   useEffect(() => { initiate(); }, [initiate]);
   return (
     <div>

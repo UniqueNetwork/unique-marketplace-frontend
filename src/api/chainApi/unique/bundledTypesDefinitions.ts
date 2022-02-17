@@ -1,7 +1,6 @@
 import type { OverrideBundleDefinition } from '@polkadot/types/types';
-
-// structs need to be in order
-/* eslint-disable sort-keys */
+import {OverrideBundleType} from "@polkadot/types/types";
+import {unique} from "@unique-nft/types/definitions";
 
 const bundledTypesDefinitions: OverrideBundleDefinition = {
   types: [
@@ -114,6 +113,19 @@ const bundledTypesDefinitions: OverrideBundleDefinition = {
       }
     }
   ]
+};
+
+
+export const typesBundle: OverrideBundleType = {
+  spec: {
+    nft: bundledTypesDefinitions,
+    opal: {
+      rpc: { unique: unique.rpc }
+    },
+    quartz: {
+      rpc: { unique: unique.rpc }
+    }
+  }
 };
 
 export default bundledTypesDefinitions;
