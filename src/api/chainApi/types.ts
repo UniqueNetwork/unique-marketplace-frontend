@@ -1,6 +1,7 @@
 import { ChainData } from '../ApiContext';
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
+import { Settings } from "../restApi/settings/types";
 
 export interface IRpc {
   rpcEndpoint: string
@@ -13,14 +14,18 @@ export interface IRpc {
 }
 
 export interface IRpcClient extends IRpc {
+  initialize(config: IRpcConfig, options?: IRpcClientOptions): void
   nftController?: INFTController<any, any>
   collectionController?: ICollectionController<any, any>
   marketController?: IMarketController
   chainData: any
 }
 
+export interface IRpcConfig extends Settings {};
+
 export interface IRpcClientOptions {
   onChainReady?: (chainData: ChainData) => void
+
 }
 
 export interface INFTController<Collection, Token> {
@@ -59,6 +64,5 @@ export interface IMarketController {
 export type Chain = {
   network: string
   name: string
-  gqlEndpoint: string
-  rpcEndpoint: string
+  apiEndpoint: string
 }

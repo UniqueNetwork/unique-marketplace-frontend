@@ -1,8 +1,9 @@
-import config from '../config';
-import { GqlClient } from './graphQL/gqlClient';
 import RpcClient from './chainApi/rpcClient';
+import {GqlClient} from "./graphQL/gqlClient";
+import config from "../config";
 
-const { defaultChain, kusamaApiUrl } = config;
+const { defaultChain } = config;
+//TODO remove gqlClient
+export const gqlClient = new GqlClient('');
 
-export const gqlClient = new GqlClient(defaultChain.gqlEndpoint);
-export const rpcClient = new RpcClient(defaultChain.rpcEndpoint, kusamaApiUrl || '');
+export const rpcClient = new RpcClient();

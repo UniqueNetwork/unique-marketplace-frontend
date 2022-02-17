@@ -3,8 +3,15 @@ import { formatBalance } from '@polkadot/util';
 import { OverrideBundleType } from '@polkadot/types/types';
 import { typesChain } from '@phala/typedefs';
 
-import { IRpcClient, INFTController, IRpcClientOptions, ICollectionController, IMarketController } from './types';
-import bundledTypesDefinitions from './unique/bundledTypesDefinitions';
+import {
+  IRpcClient,
+  INFTController,
+  IRpcClientOptions,
+  ICollectionController,
+  IMarketController,
+  IRpcConfig
+} from './types';
+import { typesBundle } from './unique/bundledTypesDefinitions';
 import rpcMethods from './unique/rpcMethods';
 import UniqueNFTController from './unique/NFTController';
 import UniqueCollectionController from './unique/collectionController';
@@ -12,59 +19,47 @@ import MarketKusamaController from './unique/marketController';
 import { ChainData } from '../ApiContext';
 import { TypeRegistry } from '@polkadot/types/create';
 import CrustMaxwell from './unique/crust-maxwell';
-import { unique } from '@unique-nft/types/definitions';
 
 export class RpcClient implements IRpcClient {
   public nftController?: INFTController<any, any>;
   public collectionController?: ICollectionController<any, any>;
   public marketController?: IMarketController;
   public rawUniqRpcApi?: ApiPromise;
-  public rawKusamaRpcApi: ApiPromise; // new
+  public rawKusamaRpcApi?: ApiPromise;
   public isKusamaApiInitialized = false;
   public isKusamaApiConnected = false;
   public isApiConnected = false;
   public isApiInitialized = false;
   public apiConnectionError?: string;
   public chainData: any = undefined;
-  public rpcEndpoint: string;
-  private options: IRpcClientOptions;
+  public rpcEndpoint: string = '';
+  private options: IRpcClientOptions = {};
+  private config?: IRpcConfig;
 
-  constructor(rpcEndpoint: string, rpcKusamaEndpoint: string, options?: IRpcClientOptions) {
+  async initialize(config: IRpcConfig, options?: IRpcClientOptions) {
     // TODO: this.decimals = this.rawRpcApi.decimal;
-    this.rpcEndpoint = rpcEndpoint;
+    this.rpcEndpoint = config.blockchain.unique.wsEndpoint || '';
     this.options = options || {};
-    this.rawKusamaRpcApi = this.initKusamaApi(rpcKusamaEndpoint);
-    this.setApi();
+    this.config = config || {};
+    this.rawKusamaRpcApi = this.initKusamaApi(config.blockchain.kusama.wsEndpoint || '');
+    await this.setApi();
     // TODO: wait for both rpc's to be initiated to switch "isApiInitialized
   }
 
-  private getDevTypes (): Record<string, Record<string, string>> {
-    const types = {} as Record<string, Record<string, string>>;
-    const names = Object.keys(types);
-
-    names.length && console.log('Injected types:', names.join(', '));
-
-    return types;
-  }
+  // private getDevTypes (): Record<string, Record<string, string>> {
+  //   const types = {} as Record<string, Record<string, string>>;
+  //   const names = Object.keys(types);
+  //
+  //   names.length && console.log('Injected types:', names.join(', '));
+  //
+  //   return types;
+  // }
 
   private initKusamaApi(wsEndpoint: string) {
     const provider = new WsProvider(wsEndpoint);
 
 //    const types = this.getDevTypes();
 
-    console.log(unique.rpc)
-
-    const typesBundle: OverrideBundleType = {
-      spec: {
-        nft: bundledTypesDefinitions,
-        opal: {
-          rpc: { unique: unique.rpc }
-        },
-        quartz: {
-          rpc: { unique: unique.rpc }
-        }
-      }
-    };
     const kusamaRegistry = new TypeRegistry();
 
     const kusamaApi = new ApiPromise({
@@ -109,17 +104,11 @@ export class RpcClient implements IRpcClient {
     this.isApiInitialized = value;
   }
 
-  private setApi() {
+  private async setApi() {
     if (this.rawUniqRpcApi) {
       this.setIsApiConnected(false);
       this.rawUniqRpcApi.disconnect(); // TODO: make async and await disconnect (same for kusama client)
     }
-
-    const typesBundle: OverrideBundleType = {
-      spec: {
-        nft: bundledTypesDefinitions
-      }
-    };
 
     const provider = new WsProvider(this.rpcEndpoint);
 
@@ -131,24 +120,32 @@ export class RpcClient implements IRpcClient {
       // @ts-ignore
       typesBundle
     });
-
-    _api.on('connected', () => this.setIsApiConnected(true));
-    _api.on('disconnected', () => this.setIsApiConnected(false));
-    _api.on('error', (error: Error) => {
-      this.setApiError(error.message);
-    });
-
-    _api.on('ready', async () => {
-      this.setIsApiConnected(true);
-      await this.getChainData();
-      if (this.options.onChainReady) this.options.onChainReady(this.chainData);
-    });
-
     this.rawUniqRpcApi = _api;
     this.nftController = new UniqueNFTController(_api);
     this.collectionController = new UniqueCollectionController(_api);
-    this.marketController = new MarketKusamaController(_api, this.rawKusamaRpcApi);
-    this.setIsApiInitialized(true);
+    if(!this.rawKusamaRpcApi) throw new Error('Kusama API is not initialized');
+    this.marketController = new MarketKusamaController(_api, this.rawKusamaRpcApi, {
+      contractAddress: this.config?.blockchain.unique.contractAddress,
+      escrowAddress: this.config?.blockchain.escrowAddress,
+      uniqueSubstrateApiRpc: this.config?.blockchain.unique.wsEndpoint,
+    });
+
+    return new Promise<void>((resolve, reject) => {
+      _api.on('connected', () => this.setIsApiConnected(true));
+      _api.on('disconnected', () => this.setIsApiConnected(false));
+      _api.on('error', (error: Error) => {
+        this.setApiError(error.message);
+        reject();
+      });
+
+      _api.on('ready', async () => {
+        this.setIsApiConnected(true);
+        await this.getChainData();
+        if (this.options.onChainReady) this.options.onChainReady(this.chainData);
+        this.setIsApiInitialized(true);
+        resolve();
+      });
+    });
   }
 
   private async getChainData() {

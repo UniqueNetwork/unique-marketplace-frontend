@@ -6,7 +6,7 @@ const axiosInstance = axios;
 
 // we can put some default params here for future (ex. cookies/headers)
 export const defaultParams: AxiosRequestConfig = {
-  baseURL: config.uniqueApiUrl,
+  baseURL: config.defaultChain.apiEndpoint,
   paramsSerializer: serializeToQuery
   // headers: { Authorization: localStorage.getItem('token') },
 };

@@ -14,7 +14,7 @@ const DefaultMarketStages: FC<TStagesModalProps> = ({ stages, status, onModalClo
   }, [status]);
   return (
     <div>
-      {stages.map((stage) => (<div>{stage.status} - {stage.title}</div>))}
+      {stages.map((stage, index) => (<div key={`stage-${index}`}>{stage.status} - {stage.title}</div>))}
     </div>
   );
 };

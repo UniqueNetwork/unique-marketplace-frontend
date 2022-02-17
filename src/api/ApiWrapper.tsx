@@ -1,12 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { ApolloProvider } from '@apollo/client';
 import { IGqlClient } from './graphQL/gqlClient';
 import { IRpcClient } from './chainApi/types';
 import { ApiContextProps, ApiProvider, ChainData } from './ApiContext';
 import config from '../config';
 import { defaultChainKey } from '../utils/configParser';
 import { gqlClient as gql, rpcClient as rpc } from '.';
+import {getSettings, useSettings} from "./restApi/settings/settings";
+import {ApolloProvider} from "@apollo/client";
 
 interface ChainProviderProps {
   children: React.ReactNode
@@ -18,10 +19,18 @@ const { chains, defaultChain } = config;
 
 const ApiWrapper = ({ children, gqlClient = gql, rpcClient = rpc }: ChainProviderProps) => {
   const [chainData, setChainData] = useState<ChainData>();
+  const [isRpcClientInitialized, setRpcClientInitialized] = useState<boolean>(false);
   const { chainId } = useParams<'chainId'>();
 
   useEffect(() => {
-    rpcClient?.setOnChainReadyListener(setChainData);
+    (async () => {
+      const { data: settings } = await getSettings();
+
+      await rpcClient?.initialize(settings);
+
+      rpcClient?.setOnChainReadyListener(setChainData);
+      setRpcClientInitialized(true);
+    })()
   }, []);
 
   // update endpoint if chainId is changed
@@ -32,9 +41,10 @@ const ApiWrapper = ({ children, gqlClient = gql, rpcClient = rpc }: ChainProvide
 
     if (chainId) {
       const currentChain = chainId ? chains[chainId] : defaultChain;
-
-      rpcClient.changeEndpoint(currentChain.rpcEndpoint);
-      gqlClient.changeEndpoint(currentChain.gqlEndpoint);
+      //TODO: change endpoint in axios instance, then obtain settings from rest api and change endpoint in rpcClient
+      //rpcClient.changeEndpoint(currentChain.rpcEndpoint);
+      //TODO: remove it
+      //gqlClient.changeEndpoint(currentChain.gqlEndpoint);
 
       // set current chain id into localStorage
       localStorage.setItem(defaultChainKey, chainId);
@@ -43,18 +53,20 @@ const ApiWrapper = ({ children, gqlClient = gql, rpcClient = rpc }: ChainProvide
 
   // get context value for ApiContext
   const value = useMemo<ApiContextProps>(
-    () => ({
-      api: (rpcClient && rpc.isApiConnected && {
-        collection: rpcClient.collectionController,
-        nft: rpcClient.nftController,
-        market: rpcClient.marketController
-      }) || undefined,
-      chainData,
-      currentChain: chainId ? chains[chainId] : defaultChain,
-      rawRpcApi: rpcClient.rawRpcApi,
-      rpcClient
-    }),
-    [rpcClient, chainId, chainData]
+    () => {
+      return {
+        api: (rpcClient && rpc.isApiConnected && {
+          collection: rpcClient.collectionController,
+          nft: rpcClient.nftController,
+          market: rpcClient.marketController
+        }) || undefined,
+        chainData,
+        currentChain: chainId ? chains[chainId] : defaultChain,
+        rawRpcApi: rpcClient.rawRpcApi,
+        rpcClient
+      };
+    },
+    [isRpcClientInitialized, chainId, chainData]
   );
 
   return (

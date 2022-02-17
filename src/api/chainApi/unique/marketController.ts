@@ -4,9 +4,9 @@ import { BN } from '@polkadot/util';
 import { addressToEvm } from '@polkadot/util-crypto';
 import marketplaceAbi from './abi/marketPlaceAbi.json';
 import nonFungibleAbi from './abi/nonFungibleAbi.json';
-import config from '../../../config';
 import { sleep } from '../../../utils/helpers';
 import { IMarketController, TransactionOptions } from '../types';
+import { normalizeAccountId } from "../utils/normalizeAccountId";
 
 export type EvmCollectionAbiMethods = {
   approve: (contractAddress: string, tokenId: string) => {
@@ -78,12 +78,11 @@ export type MartketControllerConfig = {
 }
 
 const defaultMarketPlaceControllerConfig: MartketControllerConfig = {
-  contractAddress: config.contractAddress,
-  contractOwner: config.contractOwner,
-  escrowAddress: config.escrowAddress,
-  marketplaceAbi: marketplaceAbi.abi,
-  minPrice: config.minPrice,
-  kusamaDecimals: config.kusamaDecimals,
+  contractAddress: '',
+  contractOwner: '0x396421AEE95879e8B50B9706d5FCfdeA6162eD1b', // ???
+  escrowAddress: '',
+  minPrice: 0.000001,
+  kusamaDecimals: 12,
   defaultGasAmount: 2500000
 };
 
@@ -91,7 +90,7 @@ class MarketController implements IMarketController {
   private uniqApi: ApiPromise;
   private kusamaApi: ApiPromise;
   private contractAddress: string;
-  private contractOwner: string;
+  private contractOwner: string; // ???
   private uniqueSubstrateApiRpc: string;
   private escrowAddress: string;
   private minPrice: number;
@@ -106,7 +105,7 @@ class MarketController implements IMarketController {
     if (!options.contractAddress) throw new Error('Contract address not found');
     this.contractAddress = options.contractAddress;
     if (!options.contractOwner) throw new Error('Contract owner not provided');
-    this.contractOwner = options.contractOwner;
+    this.contractOwner = options.contractOwner; // ???
     if (!options.uniqueSubstrateApiRpc) throw new Error('Uniq substrate rpc not provided');
     this.uniqueSubstrateApiRpc = options.uniqueSubstrateApiRpc;
     if (!options.escrowAddress) throw new Error('Escrow address is not provided');
@@ -218,11 +217,13 @@ class MarketController implements IMarketController {
   // transfer to etherium (kusama api)
   public async lockNftForSale(account: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
     // check if already on eth
-    const ethAccount = this.getEthAccount(account);
+    const ethAccount = {
+      Ethereum: this.getEthAccount(account)
+    };
     const isOnEth = await this.checkOnEth(account);
     if (isOnEth) return;
     // TODO: params for transfer form probably incorrect, test carefully
-    const tx = this.uniqApi.tx.unique.transferFrom(ethAccount, account, collectionId, tokenId, 1);
+    const tx = this.uniqApi.tx.unique.transferFrom(normalizeAccountId(ethAccount), normalizeAccountId(account), collectionId, tokenId, 1);
     const signedTx = await options.sign(tx);
     // execute signedTx
     try {
