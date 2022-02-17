@@ -6,8 +6,8 @@ import marketplaceAbi from './abi/marketPlaceAbi.json';
 import nonFungibleAbi from './abi/nonFungibleAbi.json';
 import { sleep } from '../../../utils/helpers';
 import { IMarketController, INFTController, TransactionOptions } from '../types';
-import { CrossAccountId, normalizeAccountId } from "../utils/normalizeAccountId";
-import {ExtrinsicStatus} from "@polkadot/types/interfaces";
+import { CrossAccountId, normalizeAccountId } from '../utils/normalizeAccountId';
+import { ExtrinsicStatus } from '@polkadot/types/interfaces';
 
 export type EvmCollectionAbiMethods = {
   approve: (contractAddress: string, tokenId: string) => {
@@ -133,7 +133,7 @@ class MarketController implements IMarketController {
   }
 
   private getMatcherContractInstance (ethAccount: string): { methods: MarketplaceAbiMethods } {
-    return new this.web3Instance.eth.Contract(marketplaceAbi, this.contractAddress, {
+    return new this.web3Instance.eth.Contract(marketplaceAbi.abi, this.contractAddress, {
       from: ethAccount
     });
   }
@@ -235,16 +235,15 @@ class MarketController implements IMarketController {
     const isOnEth = await this.checkOnEth(account);
     if (isOnEth) return;
     // TODO: params for transfer form probably incorrect, test carefully
-    console.log('lockNftForSale', collectionId, tokenId)
+    console.log('lockNftForSale', collectionId, tokenId);
     const tx = this.uniqApi.tx.unique.transferFrom(normalizeAccountId(ethAccount), normalizeAccountId(account), collectionId, tokenId, 1);
     const signedTx = await options.sign(tx);
 
-
     // execute signedTx
     try {
-      //await this.repeatCheckForTransactionFinish(async () => { return this.checkOnEth(account); });
+      // await this.repeatCheckForTransactionFinish(async () => { return this.checkOnEth(account); });
       const result = await this.uniqApi.rpc.author.submitAndWatchExtrinsic(tx);
-      console.log(result)
+      console.log(result);
       return;
     } catch (e) {
       console.error('lockNftForSale error pushed upper');
@@ -266,7 +265,7 @@ class MarketController implements IMarketController {
   // aprove token
   public async sendNftToSmartContract(account: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
     // TODO: same here
-    if(!this.nftController) throw new Error('NFTController is not available');
+    if (!this.nftController) throw new Error('NFTController is not available');
 
     const token = await this.nftController.getToken(Number(collectionId), Number(tokenId));
     console.log('token', token, account);
@@ -293,7 +292,7 @@ class MarketController implements IMarketController {
 
     const result = await this.uniqApi.rpc.author.submitAndWatchExtrinsic(tx);
 
-    console.log(result)
+    console.log(result);
     // execute signed Tx
     await this.repeatCheckForTransactionFinish(async () => { return this.checkIfNftApproved(token.owner, collectionId, tokenId); });
   }
@@ -315,9 +314,9 @@ class MarketController implements IMarketController {
     await options.sign(tx);
 
     try {
-      //await this.repeatCheckForTransactionFinish(async () => { return this.checkOnEth(account); });
+      // await this.repeatCheckForTransactionFinish(async () => { return this.checkOnEth(account); });
       const result = await this.uniqApi.rpc.author.submitAndWatchExtrinsic(tx);
-      console.log(result)
+      console.log(result);
       return;
     } catch (e) {
       console.error('lockNftForSale error pushed upper');
@@ -329,11 +328,9 @@ class MarketController implements IMarketController {
   // #region buy
 
   // checkDepositReady
-  private async getUserDeposit (account: string): Promise<any /* BN */> {
+  private async getUserDeposit (account: string): Promise<BN> {
     const ethAccount = this.getEthAccount(account);
-    const matcherContractInstance = this.web3Instance.eth.Contract(marketplaceAbi, this.contractAddress, {
-      from: ethAccount
-    });
+    const matcherContractInstance = this.getMatcherContractInstance(ethAccount);
     const result = await (matcherContractInstance.methods/* as MarketplaceAbiMethods */).balanceKSM(ethAccount).call();
 
     if (result) {
@@ -382,19 +379,23 @@ class MarketController implements IMarketController {
   }
 
   // TODO: we have 3 outcomes ('already enough funds'/'not enough funds, sign to add'/'not enough funds on account'), will collide with UI since we expect bool from here and nahve no control over stages texts
-  public async addDeposit (account: string, tokenId: string, options: TransactionOptions): Promise<void> {
+  public async addDeposit (account: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+    const matcherContractInstance = this.getMatcherContractInstance(this.getEthAccount(account));
     const userDeposit = await this.getUserDeposit(account);
-    const token = {} as any; // TODO: get token
-    if (!token) throw new Error('Token not found');
     if (!userDeposit) throw new Error('No user deposit');
-
-    if (token.price < userDeposit) {
+    const token = await this.nftController?.getToken(Number(collectionId), Number(tokenId));
+    if (!token) throw new Error('Token not found');
+    const ask = await (matcherContractInstance.methods).getOrder(this.collectionIdToAddress(Number(collectionId)), tokenId).call();
+    if (!ask?.price) throw new Error('Token has no price');
+    const price = new BN(ask.price);
+    if (price.lte(userDeposit)) {
       // Deposit already exists
       return;
     }
     // Get required amount to deposit
-    const needed = token.price.sub(userDeposit); // TODO: keep in mind that we are working with BN.js
-    const kusamaAvailableBalance = new BN(0); // TODO: some complicated stuff to be migrated
+    const needed = price.sub(userDeposit);
+    const kusamaBalancesAll = await this.kusamaApi?.derive.balances?.all(account);
+    const kusamaAvailableBalance = new BN(kusamaBalancesAll?.availableBalance); // TODO: some complicated stuff to be migrated
 
     if (kusamaAvailableBalance?.lt(needed)) {
       throw new Error(`Your KSM balance is too low: ${this.formatKsm(kusamaAvailableBalance)} KSM. You need at least: ${this.formatKsm(needed)} KSM`);
@@ -402,8 +403,11 @@ class MarketController implements IMarketController {
     // accountId: encodedKusamaAccount,
     const tx = this.kusamaApi.tx.balances.transfer(this.escrowAddress, needed);
     const signedTx = await options.sign(tx);
-    // TODO: await deposit
-    // await this.repeatCheckForTransactionFinish(async () => { (await this.getUserDeposit(account)) >= tokenPrice; });
+    await signedTx.send();
+    await this.repeatCheckForTransactionFinish(async () => {
+        return (price.lte(await this.getUserDeposit(account)));
+      }
+    );
   }
 
   // buyToken

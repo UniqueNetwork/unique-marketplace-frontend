@@ -27,7 +27,6 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
       if (!collection) {
         return null;
       }
-
       const variableData =
         // @ts-ignore
         (await this.api.rpc.unique.variableMetadata(collectionId, tokenId)).toJSON() as string;

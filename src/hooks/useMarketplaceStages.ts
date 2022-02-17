@@ -4,7 +4,7 @@ import { useApi } from './useApi';
 import AccountContext from '../account/AccountContext';
 import jsonrpc from '@polkadot/types/interfaces/jsonrpc';
 import type { ExtrinsicStatus } from '@polkadot/types/interfaces';
-import {web3Enable, web3FromSource} from "@polkadot/extension-dapp";
+import { web3Enable, web3FromSource } from '@polkadot/extension-dapp';
 
 export enum MarketType {
   default = 'Not started', // initial state
@@ -64,11 +64,8 @@ export type Signer = {
   onError: (error: Error) => void
 };
 
-
-
 // TODO: into own file
 const getInternalStages = (type: MarketType, marketApi?: IMarketController | undefined) => {
-  const purchaseStages = [] as InternalStage[];
   const bidStages = [] as InternalStage[];
   const sellAuctionStages = [] as InternalStage[];
   // TODO: added for debug, should be taken from hook
@@ -90,6 +87,19 @@ const getInternalStages = (type: MarketType, marketApi?: IMarketController | und
     status: StageStatus.default,
     action: (params: TInternalStageActionParams) => marketApi?.setForFixPriceSale(params.account, params.collectionId, params.tokenId.toString(), params?.txParams?.price, params.options)
   }] as InternalStage[];
+
+  const purchaseStages = [{
+    title: 'Place a deposit',
+    description: '',
+    status: StageStatus.default,
+    action: (params: TInternalStageActionParams) => marketApi?.addDeposit(params.account, params.collectionId, params.tokenId.toString(), params.options)
+  },
+  {
+    title: 'Buy token',
+    description: '',
+    status: StageStatus.default,
+    action: (params: TInternalStageActionParams) => marketApi?.buyToken(params.account, params.collectionId, params.tokenId.toString(), params.options)
+  }];
 
   switch (type) {
     case MarketType.bid:
@@ -132,6 +142,7 @@ const useMarketplaceStages = (type: MarketType, collectionId: string, tokenId: n
 
   const getSignFunction = useCallback((index: number, internalStage: InternalStage) => {
     const sign = (tx: TTransaction): Promise<TTransaction | void> => {
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
       return new Promise(async (resolve, reject) => {
         const targetStage = { ...internalStage };
         targetStage.status = StageStatus.awaitingSign;
@@ -144,8 +155,8 @@ const useMarketplaceStages = (type: MarketType, collectionId: string, tokenId: n
         if (!selectedAccount) throw new Error('Invalid account');
         try {
           const injector = await web3FromSource(selectedAccount.meta.source);
-          await tx.signAsync(selectedAccount.address, { signer: injector.signer });
-          resolve();
+          const signedTx = await tx.signAsync(selectedAccount.address, { signer: injector.signer });
+          resolve(signedTx);
         } catch (e) {
           reject(e);
         }
