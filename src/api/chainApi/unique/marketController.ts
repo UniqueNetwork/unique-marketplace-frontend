@@ -7,7 +7,6 @@ import nonFungibleAbi from './abi/nonFungibleAbi.json';
 import { sleep } from '../../../utils/helpers';
 import { IMarketController, INFTController, TransactionOptions } from '../types';
 import { CrossAccountId, normalizeAccountId } from '../utils/normalizeAccountId';
-import { ExtrinsicStatus } from '@polkadot/types/interfaces';
 
 export type EvmCollectionAbiMethods = {
   approve: (contractAddress: string, tokenId: string) => {
@@ -99,7 +98,7 @@ class MarketController implements IMarketController {
   private kusamaDecimals: number;
   private web3Instance: any; // TODO: can be typed
   private defaultGasAmount: number;
-  private nftController?: INFTController<any, any>
+  private nftController?: INFTController<any, any>;
 
   constructor(uniqApi: ApiPromise, kusamaApi: ApiPromise, config: MartketControllerConfig = {}) {
     this.uniqApi = uniqApi;

@@ -44,7 +44,7 @@ export interface IAccountController<Collection, Token> {
 export type TTransaction = SubmittableExtrinsic<'promise'>
 
 export type TransactionOptions = {
-  sign: (tx: TTransaction) => Promise<TTransaction | void>
+  sign: (tx: TTransaction) => Promise<TTransaction>
 };
 // TODO: receive transaction instead of void
 // TODO: token as argument for market operations

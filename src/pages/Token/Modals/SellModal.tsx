@@ -1,11 +1,13 @@
 import { Modal, Button, Heading, Tabs, Text, Select, InputText } from '@unique-nft/ui-kit';
 import { FC, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components/macro';
-import close from '../../../static/icons/close.svg';
+import DefaultMarketStages from './StagesModal';
+import { TAuctionProps, TFixPriceProps } from './types';
+import { MarketType } from '../../../types/MarketTypes';
+import { useAuctionSellStages, useSellFixStages } from '../../../hooks/useMarketplaceStages';
 import { AdditionalColorDark, AdditionalWarning100 } from '../../../styles/colors';
 import { Icon } from '../../../components/Icon/Icon';
-import useMarketplaceStages, { MarketType } from '../../../hooks/useMarketplaceStages';
-import DefaultMarketStages from './StagesModal';
+import close from '../../../static/icons/close.svg';
 
 type TOnModalClose = () => void;
 
@@ -13,16 +15,6 @@ type TSellModalProps = {
   collectionId: string,
   tokenId: number,
   onModalClose: TOnModalClose
-}
-
-type TFixPriceProps = {
-  price: number // float number
-}
-
-type TAuctionProps = {
-  minimumStep: number,
-  startingPrice: number,
-  duration: number // timestamp in ms's
 }
 
 // will come from api
@@ -230,8 +222,8 @@ type TSellAuctionStagesModal = {
 }
 
 export const SellFixStagesModal: FC<TSellFixStagesModal> = ({ collectionId, tokenId, fixPrice, onModalClose }) => {
-  const { stages, status, initiate } = useMarketplaceStages(MarketType.sellFix, collectionId, tokenId, fixPrice);
-  useEffect(() => { initiate(); }, []); // TODO: initiate could be putten inside useMarketplaceStages
+  const { stages, status, initiate } = useSellFixStages(collectionId, tokenId.toString());
+  useEffect(() => { initiate(fixPrice); }, [initiate, fixPrice]); // TODO: initiate could be putten inside useMarketplaceStages
   return (
     <div>
       <DefaultMarketStages stages={stages} status={status} onModalClose={onModalClose} />
@@ -240,8 +232,8 @@ export const SellFixStagesModal: FC<TSellFixStagesModal> = ({ collectionId, toke
 };
 
 export const SellAuctionStagesModal: FC<TSellAuctionStagesModal> = ({ collectionId, tokenId, auction, onModalClose }) => {
-  const { stages, status, initiate } = useMarketplaceStages(MarketType.sellAuction, collectionId, tokenId, auction);
-  useEffect(() => { initiate(); }, [initiate]);
+  const { stages, status, initiate } = useAuctionSellStages(collectionId, tokenId.toString());
+  useEffect(() => { initiate(auction); }, [initiate, auction]);
   return (
     <div>
       <DefaultMarketStages stages={stages} status={status} onModalClose={onModalClose} />
