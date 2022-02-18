@@ -5,6 +5,7 @@ import { useApi } from './useApi';
 import { IMarketController, TransactionOptions, TTransaction } from '../api/chainApi/types';
 import AccountContext from '../account/AccountContext';
 import type { ExtrinsicStatus } from '@polkadot/types/interfaces';
+import { TAuctionProps, TFixPriceProps, TTransfer } from '../pages/Token/Modals/types';
 
 export enum MarketType {
   default = 'Not started', // initial state
@@ -54,7 +55,11 @@ export type useMarketplaceStagesReturn = {
 
 // todo: auction | fixPrice objects to be provided
 // all the extra stuff (min step for bids, price, etc)
-export type TTxParams = any;
+export type TTxParams = {
+  auction?: TAuctionProps,
+  sellFix?: TFixPriceProps,
+  transfer?: TTransfer
+};
 
 const SUBMIT_RPC = jsonrpc.author.submitAndWatchExtrinsic;
 
@@ -66,7 +71,7 @@ export type Signer = {
 };
 
 // TODO: into own file
-const getInternalStages = (type: MarketType, marketApi?: IMarketController | undefined) => {
+const getInternalStages = (type: MarketType, marketApi?: IMarketController | undefined): InternalStage[] => {
   const bidStages = [] as InternalStage[];
   const sellAuctionStages = [] as InternalStage[];
   // TODO: added for debug, should be taken from hook
@@ -86,7 +91,7 @@ const getInternalStages = (type: MarketType, marketApi?: IMarketController | und
     title: 'Setting price',
     description: '',
     status: StageStatus.default,
-    action: (params: TInternalStageActionParams) => marketApi?.setForFixPriceSale(params.account, params.collectionId, params.tokenId.toString(), params?.txParams?.price, params.options)
+    action: (params: TInternalStageActionParams) => marketApi?.setForFixPriceSale(params.account, params.collectionId, params.tokenId.toString(), params?.txParams?.sellFix?.price || -1, params.options)
   }] as InternalStage[];
 
   const purchaseStages = [{
@@ -100,14 +105,14 @@ const getInternalStages = (type: MarketType, marketApi?: IMarketController | und
     description: '',
     status: StageStatus.default,
     action: (params: TInternalStageActionParams) => marketApi?.buyToken(params.account, params.collectionId, params.tokenId.toString(), params.options)
-  }];
+  }] as InternalStage[];
 
   const transferStages = [{
     title: 'Transfer token',
     description: '',
-    status: StageStatus.default, //                                                          TODO: refactor txParams
-    action: (params: TInternalStageActionParams) => marketApi?.transferToken(params.account, '5FjUxt5DoTj2ZqCQNmzi7GQtmS16otyQa6ZZTJ4HzibTGBAH', params.collectionId, params.tokenId.toString(), params.options)
-  }];
+    status: StageStatus.default,
+    action: (params: TInternalStageActionParams) => marketApi?.transferToken(params.account, params.txParams?.transfer?.recipient || '', params.collectionId, params.tokenId.toString(), params.options)
+  }] as InternalStage[];
 
   switch (type) {
     case MarketType.bid:
