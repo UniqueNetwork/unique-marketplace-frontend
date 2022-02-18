@@ -3,14 +3,14 @@ import { IMarketController, TransactionOptions, TTransaction } from '../api/chai
 import { useApi } from './useApi';
 import AccountContext from '../account/AccountContext';
 import jsonrpc from '@polkadot/types/interfaces/jsonrpc';
-import type { ExtrinsicStatus } from '@polkadot/types/interfaces';
-import {web3Enable, web3FromSource} from "@polkadot/extension-dapp";
+import { web3FromSource } from "@polkadot/extension-dapp";
 
 export enum MarketType {
   default = 'Not started', // initial state
   purchase = 'Purchase', // fix price
   bid = 'Bid',
   sellFix = 'Sell for fixed price',
+  cancelSellFix = 'Cancellation sell',
   sellAuction = 'Auction'
 }
 
@@ -64,8 +64,6 @@ export type Signer = {
   onError: (error: Error) => void
 };
 
-
-
 // TODO: into own file
 const getInternalStages = (type: MarketType, marketApi?: IMarketController | undefined) => {
   const purchaseStages = [] as InternalStage[];
@@ -73,6 +71,12 @@ const getInternalStages = (type: MarketType, marketApi?: IMarketController | und
   const sellAuctionStages = [] as InternalStage[];
   // TODO: added for debug, should be taken from hook
   const sellFixStages = [{
+    title: 'Add to WhiteList',
+    description: '',
+    status: StageStatus.default,
+    action: (params: TInternalStageActionParams) => marketApi?.addToWhiteList(params.account, params.options)
+  },
+  {
     title: 'Locking NFT for sale',
     description: '',
     status: StageStatus.default,
@@ -91,11 +95,21 @@ const getInternalStages = (type: MarketType, marketApi?: IMarketController | und
     action: (params: TInternalStageActionParams) => marketApi?.setForFixPriceSale(params.account, params.collectionId, params.tokenId.toString(), params?.txParams?.price, params.options)
   }] as InternalStage[];
 
+
+  const cancelSellFixStages = [{
+    title: 'Cancel sale of NFT',
+    description: '',
+    status: StageStatus.default,
+    action: (params: TInternalStageActionParams) => marketApi?.cancelSell(params.account, params.collectionId, params.tokenId.toString(), params.options)
+  }] as InternalStage[];
+
   switch (type) {
     case MarketType.bid:
       return bidStages;
     case MarketType.sellFix:
       return sellFixStages;
+    case MarketType.cancelSellFix:
+      return cancelSellFixStages;
     case MarketType.sellAuction:
       return sellAuctionStages;
     case MarketType.purchase:

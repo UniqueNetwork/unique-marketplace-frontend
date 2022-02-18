@@ -59,6 +59,7 @@ export interface IMarketController {
   lockNftForSale: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
   sendNftToSmartContract: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
   setForFixPriceSale: (account: string, collectionId: string, tokenId: string, price: number, options: TransactionOptions) => Promise<void>
+  cancelSell: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
 }
 
 export type Chain = {
