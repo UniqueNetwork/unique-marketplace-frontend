@@ -1,15 +1,16 @@
 import styled from 'styled-components/macro';
 import { Filters, TokensList } from '../../components';
-import { Token, tokens as gqlTokens } from '../../api/graphQL';
 import { useCallback, useEffect, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
 import { Button, InputText, Select, Text } from '@unique-nft/ui-kit';
 import { Secondary400 } from '../../styles/colors';
-import { gqlClient } from '../../api';
+import { FilterState } from '../../components/Filters/types';
+import { useOffers } from '../../api/restApi/offers/offers';
+import { Offer } from '../../api/restApi/offers/types';
 
 type TOption = {
   direction: 'asc' | 'desc';
-  field: keyof Token;
+  field: keyof Offer;
   iconRight: {
       color: string;
       name: string;
@@ -19,15 +20,14 @@ type TOption = {
   title: string;
 }
 
+const pageSize = 6;
+
 export const MarketMainPage = () => {
-  const pageSize = 6;
-  const [sortingValue, setSortingValue] = useState<string | number>();
+  const [filterState, setFilterState] = useState<FilterState>({});
+  const [sortingValue, setSortingValue] = useState<string>('desc(CreationDate)');
   const [searchValue, setSearchValue] = useState<string | number>();
   const [selectOption, setSelectOption] = useState<TOption>();
-  const { fetchMoreTokens, isTokensFetching, tokens, tokensCount } =
-  gqlTokens.useGraphQlTokens({
-    pageSize, sorting: selectOption ? { direction: selectOption?.direction, field: selectOption?.field } : undefined
-  });
+  const { offers, offersCount, isFetching, fetchMore, refetch } = useOffers({ pageSize, sort: [sortingValue] });
 
   useEffect(() => {
     const option = sortingOptions.find((option) => { return option.id === sortingValue; });
@@ -35,67 +35,70 @@ export const MarketMainPage = () => {
     setSelectOption(option);
   }, [sortingValue, setSelectOption]);
 
-  const hasMore = tokens && tokens.length < tokensCount;
+  const hasMore = offers && offers.length < offersCount;
 
   const onClickSeeMore = useCallback(() => {
     // Todo: fix twice rendering
-    if (!isTokensFetching) {
-      fetchMoreTokens({ limit: pageSize, offset: tokens?.length }).catch(
-        (errMsg) => console.error(errMsg)
-      );
+    if (!isFetching) {
+      fetchMore({ page: Math.ceil(offers.length / pageSize) + 1, pageSize, sort: [sortingValue], ...filterState });
     }
-  }, [fetchMoreTokens, tokens, isTokensFetching]);
+  }, [fetchMore, offers, pageSize, isFetching]);
 
-  const onSortingChange = useCallback((val) => {
+  const onSortingChange = useCallback((val: string) => {
     setSortingValue(val);
-    gqlClient.clearCache();
-  }, []);
+    refetch({ sort: [val], pageSize, page: 1, ...filterState });
+  }, [refetch]);
 
   const handleSearch = () => {
     console.log(`go search ${searchValue}`);
   };
 
+  const onFilterChange = useCallback((filter: FilterState) => {
+    setFilterState({ ...filterState, ...filter });
+    refetch({ pageSize, page: 1, sort: [sortingValue], ...filterState, ...filter });
+  }, [filterState]);
+
   const sortingOptions: TOption[] = [
     {
       direction: 'asc',
-      field: 'collection_id',
+      field: 'price',
       iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
-      id: 'price-asc',
+      id: 'asc(Price)',
       title: 'Price'
     },
     {
       direction: 'desc',
-      field: 'collection_id',
+      field: 'price',
       iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
-      id: 'price-desc',
+      id: 'desc(Price)',
       title: 'Price'
     },
     {
       direction: 'asc',
-      field: 'token_id',
+      field: 'tokenId',
       iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
-      id: 'token-id-asc',
+      id: 'asc(TokenId)',
       title: 'Token ID'
     },
     {
       direction: 'desc',
-      field: 'token_id',
+      field: 'tokenId',
       iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
-      id: 'token-id-desc',
+      id: 'desc(TokenId)',
       title: 'Token ID'
     },
     {
       direction: 'asc',
-      field: 'collection_name',
+      field: 'creationDate',
       iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
-      id: 'listing-date-asc',
+      id: 'asc(CreationDate)',
       title: 'Listing date'
     },
     {
       direction: 'desc',
-      field: 'collection_name',
+      field: 'creationDate',
       iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
-      id: 'listing-date-desc',
+      id: 'desc(CreationDate)',
       title: 'Listing date'
     }
   ];
@@ -103,7 +106,7 @@ export const MarketMainPage = () => {
   return (
     <MarketMainPageStyled>
       <LeftColumn>
-        <Filters />
+        <Filters onFilterChange={onFilterChange} />
       </LeftColumn>
       <MainContent>
         <SearchAndSorting>
@@ -121,14 +124,13 @@ export const MarketMainPage = () => {
             />
           </Search>
           <Select
-            defaultValue={'listing-date-desc'}
             onChange={onSortingChange}
             options={sortingOptions}
             value={sortingValue}
           />
         </SearchAndSorting>
         <div>
-          <Text size='m'>{`${tokensCount} items`}</Text>
+          <Text size='m'>{`${offersCount} items`}</Text>
         </div>
         <InfiniteScroll
           hasMore={hasMore}
@@ -138,7 +140,7 @@ export const MarketMainPage = () => {
           threshold={200}
           useWindow={true}
         >
-          <TokensList tokens={tokens || []} />
+          <TokensList offers={offers || []} />
         </InfiniteScroll>
       </MainContent>
     </MarketMainPageStyled>
@@ -151,9 +153,8 @@ const MarketMainPageStyled = styled.div`
 `;
 
 const LeftColumn = styled.div`
-  height: 500px;
   padding-right: 24px;
-  border-right: 1px solid grey;
+  border-right: 1px solid var(--grey-300);
 `;
 
 const MainContent = styled.div`
