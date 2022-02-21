@@ -6,6 +6,5 @@ export const Filters: FC = () => {
 };
 
 const FiltersStyled = styled.div`
-  /* width: 235px; */
-  width: 640px;
+  width: 235px;
 `;

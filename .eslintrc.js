@@ -54,6 +54,7 @@ module.exports = {
     "import",
     "import-newlines",
     "react-hooks",
+    "simple-import-sort",
     "react",
   ],
   rules: {
@@ -62,7 +63,7 @@ module.exports = {
     "no-use-before-define": "off",
     // rules from semistandard (don't include it, has standard dep version mismatch)
     semi: [2, "always"],
-    camelcase: "warn",
+    camelcase: ["warn", {ignoreDestructuring: true}],
     "no-extra-semi": 2,
     // specific overrides
     "@typescript-eslint/no-non-null-assertion": "warn",
@@ -81,6 +82,7 @@ module.exports = {
     "import-newlines/enforce": ["error", 2048],
     "jsx-quotes": ["error", "prefer-single"],
     "react/jsx-indent": ["error", 2],
+    "react/jsx-indent-props": [2, 2],
     "react/prop-types": [0], // this is a completely broken rule
     "react/jsx-key": "warn",
     "object-curly-newline": [
@@ -92,9 +94,14 @@ module.exports = {
     ],
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
-    "react/jsx-closing-bracket-location": [1, "tag-aligned"],
-    "react/jsx-first-prop-new-line": [1, "multiline-multiprop"],
+    "react/jsx-closing-bracket-location": [1, "line-aligned"],
     "react/jsx-fragments": "error",
+    "react/jsx-max-props-per-line": [
+      2,
+      {
+        maximum: { single: 3, multi: 1 }
+      },
+    ],
     "react/jsx-no-bind": 1,
     "no-void": "off",
     // needs to be switched on at some point

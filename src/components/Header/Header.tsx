@@ -35,10 +35,9 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
           role='outlined'
           title='Create or connect account'
         />
-        );
+      );
 
   const mobileMenuToggler = useCallback(() => {
-    console.log('mobileMenuToggler');
     toggleMobileMenu((prevState) => !prevState);
   }, []);
 
@@ -50,7 +49,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
         {showMobileMenu && <MenuIcon
           onClick={mobileMenuToggler}
           src={menu}
-                           />}
+        />}
         <LogoIcon src={logo} />
         {!showMobileMenu && (
           <nav>
