@@ -146,25 +146,28 @@ const useMarketplaceStages = (type: MarketType, collectionId: string, tokenId: n
 
   const getSignFunction = useCallback((index: number, internalStage: InternalStage) => {
     const sign = (tx: TTransaction): Promise<TTransaction | void> => {
+      updateStage(index, { ...internalStage, status: StageStatus.awaitingSign });
       return new Promise<TTransaction>(async (resolve, reject) => {
-        const targetStage = { ...internalStage };
-        targetStage.status = StageStatus.awaitingSign;
-        targetStage.signer = {
-          tx,
-          status: 'awaiting',
-          onSign: (signedTx: TTransaction) => resolve(signedTx),
-          onError: (error: Error = new Error('Sign failed or aborted')) => reject(error)
-        };
+        // const targetStage = { ...internalStage };
+        // targetStage.status = StageStatus.awaitingSign;
+        // targetStage.signer = {
+        //   tx,
+        //   status: 'awaiting',
+        //   onSign: (signedTx: TTransaction) => resolve(signedTx),
+        //   onError: (error: Error = new Error('Sign failed or aborted')) => reject(error)
+        // };
+        // updateStage(index, targetStage);
+
         if (!selectedAccount) throw new Error('Invalid account');
         try {
           const injector = await web3FromSource(selectedAccount.meta.source);
           const signedTx = await tx.signAsync(selectedAccount.address, { signer: injector.signer })
+          updateStage(index, { ...internalStage, status: StageStatus.inProgress });
           resolve(signedTx);
         } catch (e) {
           reject(e);
         }
         // TODO: action of update happens inside "get" function, consider renaming or restructuring
-        updateStage(index, targetStage);
       });
     };
     return sign;

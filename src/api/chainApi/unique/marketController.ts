@@ -253,12 +253,14 @@ class MarketController implements IMarketController {
     const tx = this.uniqApi.tx.unique.transfer(normalizeAccountId(ethAccount), collectionId, tokenId, 1);
     const signedTx = await options.sign(tx);
 
-    if(!signedTx) throw new Error('Breaking transaction');
+    if(!signedTx) throw new Error('Transaction cancelled');
 
     try {
-      const result = await signedTx.send();
-      console.log(result)
-      await this.repeatCheckForTransactionFinish(async () => { return this.checkOnEth(ethAccount.Ethereum, collectionId, tokenId); });
+      //await signedTx.send();
+
+      await (() => new Promise(resolve => setTimeout(resolve, 10000)))()
+
+      //await this.repeatCheckForTransactionFinish(async () => { return this.checkOnEth(ethAccount.Ethereum, collectionId, tokenId); });
       console.log('lockNftForSale passed')
       return;
     } catch (e) {
@@ -311,11 +313,12 @@ class MarketController implements IMarketController {
 
     if(!signedTx) throw new Error('Transaction cancelled');
 
-    const result = await signedTx.send(); //await this.uniqApi.rpc.author.submitAndWatchExtrinsic(tx);
 
-    console.log(result)
+    await (() => new Promise(resolve => setTimeout(resolve, 10000)))()
 
-    await this.repeatCheckForTransactionFinish(async () => { return this.checkIfNftApproved(token.owner, collectionId, tokenId); });
+    //await signedTx.send();
+
+    //await this.repeatCheckForTransactionFinish(async () => { return this.checkIfNftApproved(token.owner, collectionId, tokenId); });
   }
 
 
@@ -363,10 +366,13 @@ class MarketController implements IMarketController {
     if(!signedTx) throw new Error('Transaction cancelled');
 
 
-    await signedTx.send();
+    //await signedTx.send();
+
+    await (() => new Promise(resolve => setTimeout(resolve, 10000)))()
+
 
     try {
-      await this.repeatCheckForTransactionFinish(async () => { return this.checkAsk(account, collectionId, tokenId); });
+      //await this.repeatCheckForTransactionFinish(async () => { return this.checkAsk(account, collectionId, tokenId); });
       return;
     } catch (e) {
       console.error('setForFixPriceSale error pushed upper');
