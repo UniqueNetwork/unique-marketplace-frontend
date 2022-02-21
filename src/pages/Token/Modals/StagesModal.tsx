@@ -1,5 +1,5 @@
 import { FC, useEffect } from 'react';
-import { Stage, StageStatus } from '../../../hooks/useMarketplaceStages';
+import { Stage, StageStatus } from '../../../types/MarketTypes';
 
 type TStagesModalProps = {
   stages: Stage[],
