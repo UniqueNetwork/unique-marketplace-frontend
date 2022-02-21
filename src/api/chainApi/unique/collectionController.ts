@@ -4,9 +4,8 @@ import { NFTCollection, NFTToken } from './types';
 import { collectionName8Decoder, getOnChainSchema, hex2a } from '../utils/decoder';
 import { getTokenImage } from '../utils/imageUtils';
 import config from '../../../config';
-import { u32 } from '@polkadot/types';
 
-const { IPFSGateway, uniqueCollectionIds } = config;
+const { IPFSGateway, feturedCollectionIds } = config;
 
 class UniqueCollectionController implements ICollectionController<NFTCollection, NFTToken> {
   private api: ApiPromise;
@@ -46,10 +45,36 @@ class UniqueCollectionController implements ICollectionController<NFTCollection,
         id: collectionId
       };
     } catch (e) {
-      console.log('getDetailedCollectionInfo error', e);
+      throw e;
     }
+  }
 
-    return null;
+  public async getCollections(): Promise<NFTCollection[]> {
+    throw new Error('There to many collections available, please use featured collections instead');
+    // if (!this.api) {
+    //   return [];
+    // }
+    //
+    // try {
+    //   // @ts-ignore
+    //   const fullCount = (await this.api.rpc.unique.collectionStats()) as { created: u32, destroyed: u32 };
+    //   const createdCollectionCount = fullCount.created.toNumber();
+    //   const destroyedCollectionCount = fullCount.destroyed.toNumber();
+    //   const collectionsCount = createdCollectionCount - destroyedCollectionCount;
+    //   const collections: Array<NFTCollection> = [];
+    //
+    //   for (let i = 1; i <= collectionsCount; i++) {
+    //     const collectionInf = await this.getCollection(i) as unknown as NFTCollection;
+    //
+    //     if (collectionInf && collectionInf.owner && collectionInf.owner.toString() !== '5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM') {
+    //       collections.push({ ...collectionInf, id: i });
+    //     }
+    //   }
+    //
+    //   return collections;
+    // } catch (e) {
+    //   throw e;
+    // }
   }
 
   public async getFeaturedCollections(): Promise<NFTCollection[]> {
@@ -58,51 +83,20 @@ class UniqueCollectionController implements ICollectionController<NFTCollection,
     }
 
     try {
-      // @ts-ignore
-      const fullCount = (await this.api.rpc.unique.collectionStats()) as { created: u32, destroyed: u32 };
-      const createdCollectionCount = fullCount.created.toNumber();
-      const destroyedCollectionCount = fullCount.destroyed.toNumber();
-      const collectionsCount = createdCollectionCount - destroyedCollectionCount;
       const collections: Array<NFTCollection> = [];
+      if (feturedCollectionIds && feturedCollectionIds.length) {
+        for (let i = 1; i <= feturedCollectionIds.length; i++) {
+          const collectionInf = await this.getCollection(feturedCollectionIds[i]) as unknown as NFTCollection;
 
-      for (let i = 1; i <= collectionsCount; i++) {
-        const collectionInf = await this.getCollection(i) as unknown as NFTCollection;
-
-        if (collectionInf && collectionInf.owner && collectionInf.owner.toString() !== '5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM') {
-          collections.push({ ...collectionInf, id: i });
-        }
-      }
-
-      return collections;
-    } catch (e) {
-      console.log('preset tokens collections error', e);
-
-      return [];
-    }
-  }
-
-  public async getCollections(): Promise<NFTCollection[]> {
-    if (!this.api) {
-      return [];
-    }
-
-    try {
-      const collections: Array<NFTCollection> = [];
-      if (uniqueCollectionIds && uniqueCollectionIds.length) {
-        for (let i = 1; i <= uniqueCollectionIds.length; i++) {
-          const collectionInf = await this.getCollection(uniqueCollectionIds[i]) as unknown as NFTCollection;
-
-          if (collectionInf && collectionInf.owner && collectionInf.owner.toString() !== '5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM' && !collections.find((collection) => collection.id === uniqueCollectionIds[i])) {
-            collections.push({ ...collectionInf, id: uniqueCollectionIds[i] });
+          if (collectionInf && collectionInf.owner && collectionInf.owner.toString() !== '5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM' && !collections.find((collection) => collection.id === feturedCollectionIds[i])) {
+            collections.push({ ...collectionInf, id: feturedCollectionIds[i] });
           }
         }
       }
 
       return collections;
     } catch (e) {
-      console.log('preset tokens collections error', e);
-
-      return [];
+      throw e;
     }
   }
 
@@ -115,10 +109,8 @@ class UniqueCollectionController implements ICollectionController<NFTCollection,
       // @ts-ignore
       return await this.api.query.unique.accountTokens(collectionId, { Substrate: ownerId });
     } catch (e) {
-      console.log('getTokensOfCollection error', e);
+      throw e;
     }
-
-    return [];
   }
 }
 
