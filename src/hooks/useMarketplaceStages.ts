@@ -14,7 +14,7 @@ const getInternalStages = <T>(type: MarketType, marketApi?: IMarketController | 
     title: 'Add to WhiteList',
     description: '',
     status: StageStatus.default,
-    action: (params: TInternalStageActionParams) => marketApi?.addToWhiteList(params.account, params.options)
+    action: (params: TInternalStageActionParams<TFixPriceProps>) => marketApi?.addToWhiteList(params.account, params.options)
   },
   {
     title: 'Locking NFT for sale',
@@ -55,28 +55,28 @@ const getInternalStages = <T>(type: MarketType, marketApi?: IMarketController | 
     action: (params: TInternalStageActionParams<TTransfer>) => marketApi?.transferToken(params.account, params.txParams?.recipient || '', params.collectionId, params.tokenId.toString(), params.options)
   }] as InternalStage<any>[];
 
-  const cancelSellFixStages = [
+  const delistStages = [
     {
       title: 'Cancel sale of NFT',
       description: '',
       status: StageStatus.default,
-      action: (params: TInternalStageActionParams) => marketApi?.cancelSell(params.account, params.collectionId, params.tokenId.toString(), params.options)
+      action: (params: TInternalStageActionParams<TTransfer>) => marketApi?.cancelSell(params.account, params.collectionId, params.tokenId.toString(), params.options)
     },
     {
       title: 'Unlocking NFT',
       description: '',
       status: StageStatus.default,
-      action: (params: TInternalStageActionParams) => marketApi?.unlockNft(params.account, params.collectionId, params.tokenId.toString(), params.options)
+      action: (params: TInternalStageActionParams<TTransfer>) => marketApi?.unlockNft(params.account, params.collectionId, params.tokenId.toString(), params.options)
     }
-  ] as InternalStage[];
+  ] as InternalStage<any>[];
 
   switch (type) {
     case MarketType.bid:
       return bidStages;
     case MarketType.sellFix:
       return sellFixStages;
-    case MarketType.cancelSellFix:
-      return cancelSellFixStages;
+    case MarketType.delist:
+      return delistStages;
     case MarketType.sellAuction:
       return sellAuctionStages;
     case MarketType.purchase:
@@ -107,11 +107,12 @@ const useMarketplaceStages = <T>(type: MarketType, collectionId: string, tokenId
   const updateStage = useCallback((index: number, newStage: InternalStage<T>) => {
     const copy = [...internalStages];
     copy[index] = newStage;
+    console.log(index, newStage);
     setInternalStages(copy);
   }, [internalStages, setInternalStages]);
 
-  const getSignFunction = useCallback((index: number, internalStage: InternalStage) => {
-    const sign = (tx: TTransaction): Promise<TTransaction | void> => {
+  const getSignFunction = useCallback((index: number, internalStage: InternalStage<T>) => {
+    const sign = (tx: TTransaction): Promise<TTransaction> => {
       updateStage(index, { ...internalStage, status: StageStatus.awaitingSign });
       return new Promise<TTransaction>(async (resolve, reject) => {
         // const targetStage = { ...internalStage };
@@ -140,12 +141,15 @@ const useMarketplaceStages = <T>(type: MarketType, collectionId: string, tokenId
   }, [updateStage, selectedAccount]);
 
   const executeStep = useCallback(async (stage: InternalStage<T>, index: number, txParams: T) => {
+    console.log(index, stage);
     updateStage(index, { ...stage, status: StageStatus.inProgress });
     try {
       // if sign is required by action -> promise wouldn't be resolved until transaction is signed
       // transaction sign should be triggered in the component that uses current stage (you can track it by stage.status or stage.signer)
       await stage.action({ account: selectedAccount?.address || '', collectionId, tokenId, txParams, options: { sign: getSignFunction(index, stage) } });
       updateStage(index, { ...stage, status: StageStatus.success });
+
+      console.log(index, stage);
     } catch (e) {
       updateStage(index, { ...stage, status: StageStatus.error });
       console.error('Execute stage failed', stage, e);
@@ -185,6 +189,18 @@ const useMarketplaceStages = <T>(type: MarketType, collectionId: string, tokenId
 export const useSellFixStages = (collectionId: string, tokenId: string) => {
   const { api } = useApi();
   const { stages, error, status, initiate } = useMarketplaceStages<TFixPriceProps>(MarketType.sellFix, collectionId, tokenId, getInternalStages<TFixPriceProps>(MarketType.sellFix, api?.market));
+
+  return {
+    stages,
+    error,
+    status,
+    initiate
+  };
+};
+
+export const useCancelSellFixStages = (collectionId: string, tokenId: string) => {
+  const { api } = useApi();
+  const { stages, error, status, initiate } = useMarketplaceStages<null>(MarketType.sellFix, collectionId, tokenId, getInternalStages<null>(MarketType.delist, api?.market));
 
   return {
     stages,
