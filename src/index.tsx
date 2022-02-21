@@ -4,7 +4,7 @@ import App from './App';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { Market, MyTokens, Trades, FAQ } from './pages';
 import TokenPage from './pages/Token';
-import {injectExtension} from "@polkadot/extension-inject";
+import { injectExtension } from '@polkadot/extension-inject';
 
 // injectExtension((origin) => {
 //   return Promise.resolve();

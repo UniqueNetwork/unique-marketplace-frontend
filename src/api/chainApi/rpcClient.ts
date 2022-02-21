@@ -3,14 +3,7 @@ import { formatBalance } from '@polkadot/util';
 import { typesChain } from '@phala/typedefs';
 import { TypeRegistry } from '@polkadot/types/create';
 
-import {
-  IRpcClient,
-  INFTController,
-  IRpcClientOptions,
-  ICollectionController,
-  IMarketController,
-  IRpcConfig
-} from './types';
+import { IRpcClient, INFTController, IRpcClientOptions, ICollectionController, IMarketController, IRpcConfig } from './types';
 import { typesBundle } from './unique/bundledTypesDefinitions';
 import rpcMethods from './unique/rpcMethods';
 import UniqueNFTController from './unique/NFTController';
@@ -31,7 +24,7 @@ export class RpcClient implements IRpcClient {
   public isApiInitialized = false;
   public apiConnectionError?: string;
   public chainData: any = undefined;
-  public rpcEndpoint: string = '';
+  public rpcEndpoint = '';
   private options: IRpcClientOptions = {};
   private config?: IRpcConfig;
 
@@ -64,9 +57,9 @@ export class RpcClient implements IRpcClient {
     const kusamaApi = new ApiPromise({
       provider,
       registry: kusamaRegistry,
-      //signer: {},
+      // signer: {},
       // @ts-ignore
-      //types: {},
+      // types: {},
       // @ts-ignore
       typesBundle,
       typesChain: {
@@ -82,7 +75,7 @@ export class RpcClient implements IRpcClient {
     });
     kusamaApi.on('ready', (): void => {
       this.setIsKusamaApiConnected(true);
-      console.log('Kusama is ready')
+      console.log('Kusama is ready');
     });
     return kusamaApi;
   }
@@ -122,12 +115,12 @@ export class RpcClient implements IRpcClient {
     this.rawUniqRpcApi = _api;
     this.nftController = new UniqueNFTController(_api);
     this.collectionController = new UniqueCollectionController(_api);
-    if(!this.rawKusamaRpcApi) throw new Error('Kusama API is not initialized');
+    if (!this.rawKusamaRpcApi) throw new Error('Kusama API is not initialized');
     this.marketController = new MarketKusamaController(_api, this.rawKusamaRpcApi, {
       contractAddress: this.config?.blockchain.unique.contractAddress,
       escrowAddress: this.config?.blockchain.escrowAddress,
       uniqueSubstrateApiRpc: this.config?.blockchain.unique.wsEndpoint,
-      nftController: this.nftController,
+      nftController: this.nftController
     });
 
     return new Promise<void>((resolve, reject) => {

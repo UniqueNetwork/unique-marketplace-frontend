@@ -1,6 +1,6 @@
 import type { OverrideBundleDefinition } from '@polkadot/types/types';
-import {OverrideBundleType} from "@polkadot/types/types";
-import {unique} from "@unique-nft/types/definitions";
+import { OverrideBundleType } from '@polkadot/types/types';
+import { unique } from '@unique-nft/types/definitions';
 
 const bundledTypesDefinitions: OverrideBundleDefinition = {
   types: [
@@ -114,7 +114,6 @@ const bundledTypesDefinitions: OverrideBundleDefinition = {
     }
   ]
 };
-
 
 export const typesBundle: OverrideBundleType = {
   spec: {

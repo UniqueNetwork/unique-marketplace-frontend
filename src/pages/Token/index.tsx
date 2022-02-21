@@ -1,11 +1,9 @@
-import React, {useCallback, useContext, useEffect, useState} from 'react';
-import {useParams} from 'react-router-dom';
-import {Token} from '../../api/graphQL';
-import {useApi} from '../../hooks/useApi';
-import {SellModal} from './Modals';
-import DefaultMarketStages from "./Modals/StagesModal";
-import useMarketplaceStages, {MarketType} from "../../hooks/useMarketplaceStages";
-import {CancelSellFixStagesModal} from "./Modals/CancelSellModal";
+import React, { useCallback, useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { Token } from '../../api/graphQL';
+import { useApi } from '../../hooks/useApi';
+import { SellModal } from './Modals';
+import { CancelSellFixStagesModal } from './Modals/CancelSellModal';
 
 // http://localhost:3000/token/124/173
 const TokenPage = () => {
@@ -46,13 +44,14 @@ const TokenPage = () => {
     {isModalOpen && <SellModal
         tokenId={token?.id || -1}
         onModalClose={onModalClose}
-       collectionId={collectionId || ''}/>
+       collectionId={collectionId || ''}
+                    />
     }
     {isCancelModalOpen && <CancelSellFixStagesModal
         tokenId={token?.id || -1}
         onModalClose={onModalClose}
         collectionId={collectionId || ''}
-        />
+                          />
     }
   </div>);
 };

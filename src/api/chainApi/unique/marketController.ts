@@ -6,9 +6,9 @@ import marketplaceAbi from './abi/marketPlaceAbi.json';
 import nonFungibleAbi from './abi/nonFungibleAbi.json';
 import { sleep } from '../../../utils/helpers';
 import { IMarketController, INFTController, TransactionOptions } from '../types';
-import { CrossAccountId, normalizeAccountId } from "../utils/normalizeAccountId";
-import { ExtrinsicStatus } from "@polkadot/types/interfaces";
-import toAddress from "../utils/toAddress";
+import { CrossAccountId, normalizeAccountId } from '../utils/normalizeAccountId';
+import { ExtrinsicStatus } from '@polkadot/types/interfaces';
+import toAddress from '../utils/toAddress';
 
 export type EvmCollectionAbiMethods = {
   approve: (contractAddress: string, tokenId: string) => {
@@ -100,7 +100,7 @@ class MarketController implements IMarketController {
   private kusamaDecimals: number;
   private web3Instance: Web3;
   private defaultGasAmount: number;
-  private nftController?: INFTController<any, any>
+  private nftController?: INFTController<any, any>;
 
   constructor(uniqApi: ApiPromise, kusamaApi: ApiPromise, config: MartketControllerConfig = {}) {
     this.uniqApi = uniqApi;
@@ -211,7 +211,7 @@ class MarketController implements IMarketController {
     const tx = this.kusamaApi.tx.balances.transfer(this.escrowAddress, minDeposit);
     const signedTx = await options.sign(tx);
 
-    if(!signedTx) throw new Error('Breaking transaction');
+    if (!signedTx) throw new Error('Breaking transaction');
 
     try {
       await signedTx.send();
@@ -225,7 +225,6 @@ class MarketController implements IMarketController {
   }
 
   private async checkOnEth (account: string, collectionId: string, tokenId: string): Promise<boolean> {
-
       const token = await this.nftController?.getToken(Number(collectionId), Number(tokenId));
 
       const ethAccount = this.getEthAccount(account);
@@ -250,7 +249,7 @@ class MarketController implements IMarketController {
     const tx = this.uniqApi.tx.unique.transfer(normalizeAccountId(ethAccount), collectionId, tokenId, 1);
     const signedTx = await options.sign(tx);
 
-    if(!signedTx) throw new Error('Transaction cancelled');
+    if (!signedTx) throw new Error('Transaction cancelled');
 
     try {
       await signedTx.send();
@@ -299,13 +298,12 @@ class MarketController implements IMarketController {
     );
     const signedTx = await options.sign(tx);
 
-    if(!signedTx) throw new Error('Transaction cancelled');
+    if (!signedTx) throw new Error('Transaction cancelled');
 
     await signedTx.send();
 
     await this.repeatCheckForTransactionFinish(async () => { return this.checkIfNftApproved(token.owner, collectionId, tokenId); });
   }
-
 
   private async checkAsk(account: string, collectionId: string, tokenId: string) {
     const ethAddress = this.getEthAccount(account);
@@ -313,12 +311,11 @@ class MarketController implements IMarketController {
 
     const { flagActive, ownerAddr, price }: TokenAskType = await matcherContractInstance.methods.getOrder(this.collectionIdToAddress(parseInt(collectionId, 10)), tokenId).call();
 
-    if(ownerAddr.toLowerCase() === ethAddress && flagActive === '1') {
+    if (ownerAddr.toLowerCase() === ethAddress && flagActive === '1') {
       return Promise.resolve(true);
     }
     return Promise.resolve(false);
   }
-
 
   // checkAsk - put on sale
   public async setForFixPriceSale(account: string, collectionId: string, tokenId: string, price: number, options: TransactionOptions): Promise<void> {
@@ -345,7 +342,7 @@ class MarketController implements IMarketController {
 
     const signedTx = await options.sign(tx);
 
-    if(!signedTx) throw new Error('Transaction cancelled');
+    if (!signedTx) throw new Error('Transaction cancelled');
 
     await signedTx.send();
 
@@ -439,7 +436,7 @@ class MarketController implements IMarketController {
     const tx = this.kusamaApi.tx.balances.transfer(this.escrowAddress, needed);
     const signedTx = await options.sign(tx);
 
-    if(!signedTx) throw new Error('Transaction cancelled');
+    if (!signedTx) throw new Error('Transaction cancelled');
 
     await signedTx.send();
     await this.repeatCheckForTransactionFinish(async () => {
@@ -467,7 +464,7 @@ class MarketController implements IMarketController {
 
     const signedTx = await options.sign(tx);
 
-    if(!signedTx) throw new Error('Transaction cancelled');
+    if (!signedTx) throw new Error('Transaction cancelled');
 
     await signedTx.send();
     await this.repeatCheckForTransactionFinish(async () => {
@@ -503,13 +500,12 @@ class MarketController implements IMarketController {
     );
     const signedTx = await options.sign(tx);
 
-    if(!signedTx) throw new Error('Transaction cancelled');
+    if (!signedTx) throw new Error('Transaction cancelled');
 
     try {
       await signedTx.send();
 
       await this.repeatCheckForTransactionFinish(async () => {
-
         const { flagActive }: TokenAskType = await matcherContractInstance.methods.getOrder(this.collectionIdToAddress(parseInt(collectionId, 10)), tokenId).call();
 
         return flagActive !== '0';
@@ -522,7 +518,6 @@ class MarketController implements IMarketController {
   }
 
   public async unlockNft(account: string, collectionId: string, tokenId: string, options: TransactionOptions) {
-
     const ethAccount = {
       Ethereum: this.getEthAccount(account)
     };
@@ -534,7 +529,7 @@ class MarketController implements IMarketController {
     const tx = this.uniqApi.tx.unique.transferFrom(normalizeAccountId(ethAccount), normalizeAccountId(account), collectionId, tokenId, 1);
     const signedTx = await options.sign(tx);
 
-    if(!signedTx) throw new Error('Transaction cancelled');
+    if (!signedTx) throw new Error('Transaction cancelled');
 
     try {
       await signedTx.send();
@@ -571,7 +566,7 @@ class MarketController implements IMarketController {
 
     const signedTx = await options.sign(tx);
 
-    if(!signedTx) throw new Error('Transaction cancelled');
+    if (!signedTx) throw new Error('Transaction cancelled');
 
     await signedTx.send();
     await this.repeatCheckForTransactionFinish(async () => {

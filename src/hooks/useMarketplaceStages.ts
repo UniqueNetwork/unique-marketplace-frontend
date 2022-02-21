@@ -1,12 +1,10 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
 import jsonrpc from '@polkadot/types/interfaces/jsonrpc';
-import { web3Enable, web3FromSource } from '@polkadot/extension-dapp';
+import { web3FromSource } from '@polkadot/extension-dapp';
 import { useApi } from './useApi';
 import { IMarketController, TransactionOptions, TTransaction } from '../api/chainApi/types';
 import AccountContext from '../account/AccountContext';
-import type { ExtrinsicStatus } from '@polkadot/types/interfaces';
 import { TAuctionProps, TFixPriceProps, TTransfer } from '../pages/Token/Modals/types';
-
 
 export enum MarketType {
   default = 'Not started', // initial state
@@ -121,7 +119,6 @@ const getInternalStages = (type: MarketType, marketApi?: IMarketController | und
     status: StageStatus.default,
     action: (params: TInternalStageActionParams) => marketApi?.transferToken(params.account, params.txParams?.transfer?.recipient || '', params.collectionId, params.tokenId.toString(), params.options)
   }] as InternalStage[];
-
 
   const cancelSellFixStages = [
     {

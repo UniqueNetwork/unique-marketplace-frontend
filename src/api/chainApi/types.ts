@@ -1,7 +1,7 @@
 import { ChainData } from '../ApiContext';
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
-import { Settings } from "../restApi/settings/types";
+import { Settings } from '../restApi/settings/types';
 
 export interface IRpc {
   rpcEndpoint: string
@@ -21,7 +21,7 @@ export interface IRpcClient extends IRpc {
   chainData: any
 }
 
-export interface IRpcConfig extends Settings {};
+export type IRpcConfig = Settings;
 
 export interface IRpcClientOptions {
   onChainReady?: (chainData: ChainData) => void

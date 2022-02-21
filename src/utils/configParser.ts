@@ -49,7 +49,7 @@ export const getNetworkParams = (
   const chain: Chain = {
     apiEndpoint: findNetworkParamByName(config, network, 'API'),
     name: findNetworkParamByName(config, network, 'NAME'),
-    network,
+    network
   };
 
   return chain;
