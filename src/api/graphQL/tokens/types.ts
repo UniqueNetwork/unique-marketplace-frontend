@@ -8,6 +8,12 @@ export interface TokensVariables {
   where?: Record<string, unknown>
 }
 
+export enum TokenType {
+  auction = 'Auction', // accepts bids
+  market = 'Market', // can be purchased directly
+  none = 'None' // not on sale
+}
+
 export interface Token {
   id: number
   token_id: number

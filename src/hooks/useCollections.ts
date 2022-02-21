@@ -9,7 +9,7 @@ export const useCollections = () => {
 
   useEffect(() => {
     setIsFetching(true);
-    void api?.collection?.getCollections().then((collections) => {
+    void api?.collection?.getFeaturedCollections().then((collections) => {
       setCollections(collections);
       setIsFetching(false);
     });

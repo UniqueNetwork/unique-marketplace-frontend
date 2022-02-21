@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
-import { Market, MyTokens, Trades, FAQ } from './pages';
+import { Market, MyTokens, Trades, FAQ, TokenPage } from './pages';
 import { MarketMainPage } from './pages/Market/MarketMain';
 import { TokensPage } from './pages/Market/TokenDetailPage';
 import { GlobalStyle } from './styles';
@@ -16,10 +16,13 @@ ReactDOM.render(
           element={<App />}
           path={'/'}
         >
-
           <Route
             element={<Navigate to='market' />}
             index
+          />
+          <Route
+            element={<TokenPage />}
+            path={'/token/:collectionId/:id'}
           />
           <Route
             element={<Market />}

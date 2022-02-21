@@ -1,29 +1,72 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { formatBalance } from '@polkadot/util';
-import { OverrideBundleType } from '@polkadot/types/types';
+import { typesChain } from '@phala/typedefs';
+import { TypeRegistry } from '@polkadot/types/create';
 
-import { IRpcClient, INFTController, IRpcClientOptions, ICollectionController } from './types';
-import bundledTypesDefinitions from './unique/bundledTypesDefinitions';
+import { IRpcClient, INFTController, IRpcClientOptions, ICollectionController, IMarketController, IRpcConfig } from './types';
+import { typesBundle } from './unique/bundledTypesDefinitions';
 import rpcMethods from './unique/rpcMethods';
 import UniqueNFTController from './unique/NFTController';
 import UniqueCollectionController from './unique/collectionController';
+import MarketKusamaController from './unique/marketController';
 import { ChainData } from '../ApiContext';
+import CrustMaxwell from './unique/crust-maxwell';
 
 export class RpcClient implements IRpcClient {
   public nftController?: INFTController<any, any>;
   public collectionController?: ICollectionController<any, any>;
-  public rawRpcApi?: ApiPromise;
+  public marketController?: IMarketController;
+  public rawUniqRpcApi?: ApiPromise;
+  public rawKusamaRpcApi?: ApiPromise;
+  public isKusamaApiInitialized = false;
+  public isKusamaApiConnected = false;
   public isApiConnected = false;
   public isApiInitialized = false;
-  public apiError?: string;
+  public apiConnectionError?: string;
   public chainData: any = undefined;
-  public rpcEndpoint: string;
-  private options: IRpcClientOptions;
+  public rpcEndpoint = '';
+  private options: IRpcClientOptions = {};
+  private config?: IRpcConfig;
 
-  constructor(rpcEndpoint: string, options?: IRpcClientOptions) {
-    this.rpcEndpoint = rpcEndpoint;
+  async initialize(config: IRpcConfig, options?: IRpcClientOptions) {
+    this.rpcEndpoint = config.blockchain.unique.wsEndpoint || '';
     this.options = options || {};
-    this.setApi();
+    this.config = config || {};
+    this.rawKusamaRpcApi = this.initKusamaApi(config.blockchain.kusama.wsEndpoint || '');
+    await this.setApi();
+  }
+
+  private initKusamaApi(wsEndpoint: string) {
+    const provider = new WsProvider(wsEndpoint);
+
+//    const types = this.getDevTypes();
+
+    const kusamaRegistry = new TypeRegistry();
+
+    const kusamaApi = new ApiPromise({
+      provider,
+      registry: kusamaRegistry,
+      typesBundle,
+      typesChain: {
+        ...typesChain,
+        'Crust Maxwell': CrustMaxwell
+      }
+    });
+
+    kusamaApi.on('connected', () => { this.isApiConnected = true; });
+    kusamaApi.on('disconnected', () => { this.isApiConnected = false; });
+    kusamaApi.on('error', (error: Error) => {
+      this.setApiError(error.message);
+    });
+    kusamaApi.on('ready', (): void => {
+      this.setIsKusamaApiConnected(true);
+      console.log('Kusama is ready');
+    });
+    return kusamaApi;
+  }
+
+  private setIsKusamaApiConnected(value: boolean) {
+    this.isKusamaApiConnected = value;
   }
 
   private setIsApiConnected(value: boolean) {
@@ -31,24 +74,18 @@ export class RpcClient implements IRpcClient {
   }
 
   private setApiError(message: string) {
-    this.apiError = message;
+    this.apiConnectionError = message;
   }
 
   private setIsApiInitialized(value: boolean) {
     this.isApiInitialized = value;
   }
 
-  private setApi() {
-    if (this.rawRpcApi) {
+  private async setApi() {
+    if (this.rawUniqRpcApi) {
       this.setIsApiConnected(false);
-      this.rawRpcApi.disconnect();
+      this.rawUniqRpcApi.disconnect(); // TODO: make async and await disconnect (same for kusama client)
     }
-
-    const typesBundle: OverrideBundleType = {
-      spec: {
-        nft: bundledTypesDefinitions
-      }
-    };
 
     const provider = new WsProvider(this.rpcEndpoint);
 
@@ -60,29 +97,41 @@ export class RpcClient implements IRpcClient {
       // @ts-ignore
       typesBundle
     });
-
-    _api.on('connected', () => this.setIsApiConnected(true));
-    _api.on('disconnected', () => this.setIsApiConnected(false));
-    _api.on('error', (error: Error) => this.setApiError(error.message));
-
-    _api.on('ready', async () => {
-      this.setIsApiConnected(true);
-      await this.getChainData();
-      if (this.options.onChainReady) this.options.onChainReady(this.chainData);
-    });
-
-    this.rawRpcApi = _api;
+    this.rawUniqRpcApi = _api;
     this.nftController = new UniqueNFTController(_api);
     this.collectionController = new UniqueCollectionController(_api);
-    this.setIsApiInitialized(true);
+    if (!this.rawKusamaRpcApi) throw new Error('Kusama API is not initialized');
+    this.marketController = new MarketKusamaController(_api, this.rawKusamaRpcApi, {
+      contractAddress: this.config?.blockchain.unique.contractAddress,
+      escrowAddress: this.config?.blockchain.escrowAddress,
+      uniqueSubstrateApiRpc: this.config?.blockchain.unique.wsEndpoint,
+      nftController: this.nftController
+    });
+
+    return new Promise<void>((resolve, reject) => {
+      _api.on('connected', () => this.setIsApiConnected(true));
+      _api.on('disconnected', () => this.setIsApiConnected(false));
+      _api.on('error', (error: Error) => {
+        this.setApiError(error.message);
+        reject(error);
+      });
+
+      _api.on('ready', async () => {
+        this.setIsApiConnected(true);
+        await this.getChainData();
+        if (this.options.onChainReady) this.options.onChainReady(this.chainData);
+        this.setIsApiInitialized(true);
+        resolve();
+      });
+    });
   }
 
   private async getChainData() {
-    if (!this.rawRpcApi) throw new Error("Attempted to get chain data while api isn't initialized");
+    if (!this.rawUniqRpcApi) throw new Error("Attempted to get chain data while api isn't initialized");
     const [chainProperties, systemChain, systemName] = await Promise.all([
-      this.rawRpcApi.rpc.system.properties(),
-      this.rawRpcApi.rpc.system.chain(),
-      this.rawRpcApi.rpc.system.name()
+      this.rawUniqRpcApi.rpc.system.properties(),
+      this.rawUniqRpcApi.rpc.system.chain(),
+      this.rawUniqRpcApi.rpc.system.name()
     ]);
 
     this.chainData = {

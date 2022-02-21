@@ -1,4 +1,5 @@
-import type { OverrideBundleDefinition } from '@polkadot/types/types';
+import type { OverrideBundleDefinition, OverrideBundleType } from '@polkadot/types/types';
+import { unique } from '@unique-nft/types/definitions';
 
 // structs need to be in order
 /* eslint-disable sort-keys */
@@ -114,6 +115,18 @@ const bundledTypesDefinitions: OverrideBundleDefinition = {
       }
     }
   ]
+};
+
+export const typesBundle: OverrideBundleType = {
+  spec: {
+    nft: bundledTypesDefinitions,
+    opal: {
+      rpc: { unique: unique.rpc }
+    },
+    quartz: {
+      rpc: { unique: unique.rpc }
+    }
+  }
 };
 
 export default bundledTypesDefinitions;
