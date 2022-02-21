@@ -53,7 +53,7 @@ export const SellModal: FC<TSellModalProps> = ({ collectionId, tokenId, onModalC
     case MarketType.sellAuction:
       return (<Modal isVisible={isOpen} isClosable={false}><SellAuctionStagesModal collectionId={collectionId} tokenId={tokenId} auction={auction as TAuctionProps} onModalClose={onModalClose} /></Modal>);
     case MarketType.sellFix:
-      return (<Modal isVisible={isOpen} isClosable={false}><SellFixStagesModal collectionId={collectionId} tokenId={tokenId} fixPrice={fixPrice as TFixPriceProps} onModalClose={onModalClose} /></Modal>);
+      return (<Modal isVisible={isOpen} isClosable={false}><SellFixStagesModal collectionId={collectionId} tokenId={tokenId} sellFix={fixPrice as TFixPriceProps} onModalClose={onModalClose} /></Modal>);
     default: throw new Error(`Incorrect status provided for processing modal: ${status}`);
   }
 };
@@ -219,7 +219,7 @@ type TSellFixStagesModal = {
   onModalClose: TOnModalClose,
   collectionId: string,
   tokenId: number,
-  fixPrice: TFixPriceProps
+  sellFix: TFixPriceProps
 }
 
 type TSellAuctionStagesModal = {
@@ -229,8 +229,8 @@ type TSellAuctionStagesModal = {
   auction: TAuctionProps
 }
 
-export const SellFixStagesModal: FC<TSellFixStagesModal> = ({ collectionId, tokenId, fixPrice, onModalClose }) => {
-  const { stages, status, initiate } = useMarketplaceStages(MarketType.sellFix, collectionId, tokenId, fixPrice);
+export const SellFixStagesModal: FC<TSellFixStagesModal> = ({ collectionId, tokenId, sellFix, onModalClose }) => {
+  const { stages, status, initiate } = useMarketplaceStages(MarketType.sellFix, collectionId, tokenId, { sellFix });
   useEffect(() => { initiate(); }, []); // TODO: initiate could be putten inside useMarketplaceStages
   return (
     <div>
@@ -240,7 +240,7 @@ export const SellFixStagesModal: FC<TSellFixStagesModal> = ({ collectionId, toke
 };
 
 export const SellAuctionStagesModal: FC<TSellAuctionStagesModal> = ({ collectionId, tokenId, auction, onModalClose }) => {
-  const { stages, status, initiate } = useMarketplaceStages(MarketType.sellAuction, collectionId, tokenId, auction);
+  const { stages, status, initiate } = useMarketplaceStages(MarketType.sellAuction, collectionId, tokenId, { auction });
   useEffect(() => { initiate(); }, [initiate]);
   return (
     <div>

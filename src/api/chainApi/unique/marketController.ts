@@ -134,6 +134,7 @@ class MarketController implements IMarketController {
   }
 
   private getMatcherContractInstance (ethAccount: string): { methods: MarketplaceAbiMethods } {
+    // @ts-ignore
     return new this.web3Instance.eth.Contract(marketplaceAbi.abi, this.contractAddress, {
       from: ethAccount
     });
@@ -385,10 +386,7 @@ class MarketController implements IMarketController {
   // checkDepositReady
   private async getUserDeposit (account: string): Promise<BN> {
     const ethAccount = this.getEthAccount(account);
-    // @ts-ignore
-    const matcherContractInstance = new this.web3Instance.eth.Contract(marketplaceAbi, this.contractAddress, {
-      from: ethAccount
-    });
+
     const matcherContractInstance = this.getMatcherContractInstance(ethAccount);
     const result = await (matcherContractInstance.methods/* as MarketplaceAbiMethods */).balanceKSM(ethAccount).call();
 
@@ -462,6 +460,9 @@ class MarketController implements IMarketController {
     // accountId: encodedKusamaAccount,
     const tx = this.kusamaApi.tx.balances.transfer(this.escrowAddress, needed);
     const signedTx = await options.sign(tx);
+
+    if(!signedTx) throw new Error('Transaction cancelled');
+
     await signedTx.send();
     await this.repeatCheckForTransactionFinish(async () => {
         return (price.lte(await this.getUserDeposit(account)));
@@ -487,6 +488,9 @@ class MarketController implements IMarketController {
     );
 
     const signedTx = await options.sign(tx);
+
+    if(!signedTx) throw new Error('Transaction cancelled');
+
     await signedTx.send();
     await this.repeatCheckForTransactionFinish(async () => {
       return (await this.nftController?.getToken(Number(collectionId), Number(tokenId)))?.owner?.Ethereum === ethAccount;
@@ -554,6 +558,9 @@ class MarketController implements IMarketController {
     }
 
     const signedTx = await options.sign(tx);
+
+    if(!signedTx) throw new Error('Transaction cancelled');
+
     await signedTx.send();
     await this.repeatCheckForTransactionFinish(async () => {
       const updatedToken = await this.nftController?.getToken(Number(collectionId), Number(tokenId));
