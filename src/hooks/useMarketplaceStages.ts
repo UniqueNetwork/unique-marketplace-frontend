@@ -123,12 +123,20 @@ const getInternalStages = (type: MarketType, marketApi?: IMarketController | und
   }] as InternalStage[];
 
 
-  const cancelSellFixStages = [{
-    title: 'Cancel sale of NFT',
-    description: '',
-    status: StageStatus.default,
-    action: (params: TInternalStageActionParams) => marketApi?.cancelSell(params.account, params.collectionId, params.tokenId.toString(), params.options)
-  }] as InternalStage[];
+  const cancelSellFixStages = [
+    {
+      title: 'Cancel sale of NFT',
+      description: '',
+      status: StageStatus.default,
+      action: (params: TInternalStageActionParams) => marketApi?.cancelSell(params.account, params.collectionId, params.tokenId.toString(), params.options)
+    },
+    {
+      title: 'Unlocking NFT',
+      description: '',
+      status: StageStatus.default,
+      action: (params: TInternalStageActionParams) => marketApi?.unlockNft(params.account, params.collectionId, params.tokenId.toString(), params.options)
+    }
+  ] as InternalStage[];
 
   switch (type) {
     case MarketType.bid:
@@ -190,7 +198,7 @@ const useMarketplaceStages = (type: MarketType, collectionId: string, tokenId: n
         if (!selectedAccount) throw new Error('Invalid account');
         try {
           const injector = await web3FromSource(selectedAccount.meta.source);
-          const signedTx = await tx.signAsync(selectedAccount.address, { signer: injector.signer })
+          const signedTx = await tx.signAsync(selectedAccount.address, { signer: injector.signer });
           updateStage(index, { ...internalStage, status: StageStatus.inProgress });
           resolve(signedTx);
         } catch (e) {
