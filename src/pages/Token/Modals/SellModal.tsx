@@ -223,7 +223,7 @@ type TSellAuctionStagesModal = {
 
 export const SellFixStagesModal: FC<TSellFixStagesModal> = ({ collectionId, tokenId, sellFix, onModalClose }) => {
   const { stages, status, initiate } = useSellFixStages(collectionId, tokenId.toString());
-  useEffect(() => { initiate(sellFix); }, [sellFix]); // TODO: initiate could be putten inside useMarketplaceStages
+  useEffect(() => { initiate(sellFix); }, [sellFix]);
   return (
     <div>
       <DefaultMarketStages stages={stages} status={status} onModalClose={onModalClose} />

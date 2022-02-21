@@ -1,14 +1,13 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { web3FromSource } from '@polkadot/extension-dapp';
 import { useApi } from './useApi';
-import { IMarketController, TTransaction } from '../api/chainApi/types';
+import { TTransaction } from '../api/chainApi/types';
 import AccountContext from '../account/AccountContext';
 import { InternalStage, MarketType, StageStatus, TInternalStageActionParams, useMarketplaceStagesReturn } from '../types/MarketTypes';
 import { TAuctionProps, TFixPriceProps, TTransfer } from '../pages/Token/Modals/types';
 
 // TODO: change collection/token id's to numbers everywhere (or support both)
 const useMarketplaceStages = <T>(type: MarketType, collectionId: string, tokenId: string, stages: InternalStage<T>[]): useMarketplaceStagesReturn<T> => {
-  const { api } = useApi();
   const { selectedAccount } = useContext(AccountContext);
 
   const [internalStages, setInternalStages] = useState<InternalStage<T>[]>(stages);
@@ -53,7 +52,7 @@ const useMarketplaceStages = <T>(type: MarketType, collectionId: string, tokenId
     updateStage(index, { ...stage, status: StageStatus.inProgress });
     try {
       // if sign is required by action -> promise wouldn't be resolved until transaction is signed
-      // transaction sign should be triggered in the component that uses current stage (you can track it by stage.status or stage.signer)
+      // transaction sign could be triggered in the component that uses current stage (you can track it by using stage.signer)
       await stage.action({ account: selectedAccount?.address || '', collectionId, tokenId, txParams, options: { sign: getSignFunction(index, stage) } });
       updateStage(index, { ...stage, status: StageStatus.success });
 

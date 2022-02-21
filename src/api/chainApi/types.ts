@@ -48,12 +48,7 @@ export type TTransaction = SubmittableExtrinsic<'promise'>
 export type TransactionOptions = {
   sign: (tx: TTransaction) => Promise<TTransaction>
 };
-// TODO: receive transaction instead of void
-// TODO: token as argument for market operations
-/*
- * Main api for marketplace operations, sell-buy-auction
- * Please notice, that most methods are not executions by themselves, but instead - return transactions for further subscribe and execute
- */
+
 export interface IMarketController {
   // substrate address
   addToWhiteList: (account: string, options: TransactionOptions) => Promise<void>

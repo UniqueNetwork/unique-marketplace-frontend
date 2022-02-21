@@ -1,5 +1,7 @@
 const webpack = require('webpack');
 
+// https://github.com/polkadot-js/ui/issues/592
+// Required to load avatar static images
 module.exports = function override(config) {
     const fallback = config.resolve.fallback || {};
     Object.assign(fallback, {

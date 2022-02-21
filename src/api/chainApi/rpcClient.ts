@@ -29,23 +29,12 @@ export class RpcClient implements IRpcClient {
   private config?: IRpcConfig;
 
   async initialize(config: IRpcConfig, options?: IRpcClientOptions) {
-    // TODO: this.decimals = this.rawRpcApi.decimal;
     this.rpcEndpoint = config.blockchain.unique.wsEndpoint || '';
     this.options = options || {};
     this.config = config || {};
     this.rawKusamaRpcApi = this.initKusamaApi(config.blockchain.kusama.wsEndpoint || '');
     await this.setApi();
-    // TODO: wait for both rpc's to be initiated to switch "isApiInitialized
   }
-
-  // private getDevTypes (): Record<string, Record<string, string>> {
-  //   const types = {} as Record<string, Record<string, string>>;
-  //   const names = Object.keys(types);
-  //
-  //   names.length && console.log('Injected types:', names.join(', '));
-  //
-  //   return types;
-  // }
 
   private initKusamaApi(wsEndpoint: string) {
     const provider = new WsProvider(wsEndpoint);
@@ -57,10 +46,6 @@ export class RpcClient implements IRpcClient {
     const kusamaApi = new ApiPromise({
       provider,
       registry: kusamaRegistry,
-      // signer: {},
-      // @ts-ignore
-      // types: {},
-      // @ts-ignore
       typesBundle,
       typesChain: {
         ...typesChain,

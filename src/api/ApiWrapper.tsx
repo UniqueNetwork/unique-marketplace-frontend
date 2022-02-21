@@ -30,7 +30,7 @@ const ApiWrapper = ({ children, gqlClient = gql, rpcClient = rpc }: ChainProvide
 
       rpcClient?.setOnChainReadyListener(setChainData);
       setRpcClientInitialized(true);
-    })().then(console.log).catch(console.log);
+    })().then(() => console.log('Rpc connectection: success')).catch((e) => console.log('Rpc connectection: failed', e));
   }, []);
 
   // update endpoint if chainId is changed
@@ -40,13 +40,6 @@ const ApiWrapper = ({ children, gqlClient = gql, rpcClient = rpc }: ChainProvide
     }
 
     if (chainId) {
-      const currentChain = chainId ? chains[chainId] : defaultChain;
-      // TODO: change endpoint in axios instance, then obtain settings from rest api and change endpoint in rpcClient
-      // rpcClient.changeEndpoint(currentChain.rpcEndpoint);
-      // TODO: remove it
-      // gqlClient.changeEndpoint(currentChain.gqlEndpoint);
-
-      // set current chain id into localStorage
       localStorage.setItem(defaultChainKey, chainId);
     }
   }, [chainId]);
