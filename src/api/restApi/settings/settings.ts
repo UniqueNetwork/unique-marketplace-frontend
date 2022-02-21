@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 
 import { get } from '../base';
 import { defaultParams } from '../base/axios';
-import {Settings} from "./types";
-import {ResponseError} from "../base/types";
+import { Settings } from './types';
+import { ResponseError } from '../base/types';
 
 const endpoint = '/settings';
 
@@ -19,19 +19,19 @@ export const useSettings = () => {
     getSettings()
       .then((response) => {
         setIsFetching(false);
-        if(response.status === 200) {
+        if (response.status === 200) {
           setIsFetching(false);
-          setSettings(response.data)
+          setSettings(response.data);
         }
       })
       .catch((error) => {
-        setFetchingError(error)
-      })
+        setFetchingError(error);
+      });
   }, []);
 
   return {
     settings,
     isFetching,
     fetchingError
-  }
+  };
 };

@@ -1,7 +1,7 @@
 import { ChainData } from '../ApiContext';
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
-import { Settings } from "../restApi/settings/types";
+import { Settings } from '../restApi/settings/types';
 
 export interface IRpc {
   rpcEndpoint: string
@@ -21,7 +21,7 @@ export interface IRpcClient extends IRpc {
   chainData: any
 }
 
-export interface IRpcConfig extends Settings {};
+export type IRpcConfig = Settings;
 
 export interface IRpcClientOptions {
   onChainReady?: (chainData: ChainData) => void
@@ -44,7 +44,7 @@ export interface IAccountController<Collection, Token> {
 export type TTransaction = SubmittableExtrinsic<'promise'>
 
 export type TransactionOptions = {
-  sign: (tx: TTransaction) => Promise<TTransaction | void>
+  sign: (tx: TTransaction) => Promise<TTransaction>
 };
 // TODO: receive transaction instead of void
 // TODO: token as argument for market operations
@@ -59,6 +59,8 @@ export interface IMarketController {
   lockNftForSale: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
   sendNftToSmartContract: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
   setForFixPriceSale: (account: string, collectionId: string, tokenId: string, price: number, options: TransactionOptions) => Promise<void>
+  cancelSell: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
+  unlockNft: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
   addDeposit: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
   buyToken: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
   transferToken: (from: string, to: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>

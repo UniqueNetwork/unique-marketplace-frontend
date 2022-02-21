@@ -16,7 +16,6 @@ export type PaginatedResponse<T> = {
   items: T[]
 }
 
-
 export type ResponseError = {
   status: number
   message: string

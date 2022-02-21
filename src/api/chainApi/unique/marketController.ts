@@ -1,13 +1,14 @@
 import Web3 from 'web3';
 import { ApiPromise } from '@polkadot/api';
 import { BN } from '@polkadot/util';
-import { addressToEvm } from '@polkadot/util-crypto';
+import { addressToEvm, decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 import marketplaceAbi from './abi/marketPlaceAbi.json';
 import nonFungibleAbi from './abi/nonFungibleAbi.json';
 import { sleep } from '../../../utils/helpers';
 import { IMarketController, INFTController, TransactionOptions } from '../types';
 import { CrossAccountId, normalizeAccountId } from '../utils/normalizeAccountId';
 import { ExtrinsicStatus } from '@polkadot/types/interfaces';
+import toAddress from '../utils/toAddress';
 
 export type EvmCollectionAbiMethods = {
   approve: (contractAddress: string, tokenId: string) => {
@@ -97,9 +98,9 @@ class MarketController implements IMarketController {
   private escrowAddress: string;
   private minPrice: number;
   private kusamaDecimals: number;
-  private web3Instance: any; // TODO: can be typed
+  private web3Instance: Web3;
   private defaultGasAmount: number;
-  private nftController?: INFTController<any, any>
+  private nftController?: INFTController<any, any>;
 
   constructor(uniqApi: ApiPromise, kusamaApi: ApiPromise, config: MartketControllerConfig = {}) {
     this.uniqApi = uniqApi;
@@ -133,6 +134,7 @@ class MarketController implements IMarketController {
   }
 
   private getMatcherContractInstance (ethAccount: string): { methods: MarketplaceAbiMethods } {
+    // @ts-ignore
     return new this.web3Instance.eth.Contract(marketplaceAbi.abi, this.contractAddress, {
       from: ethAccount
     });
@@ -155,6 +157,7 @@ class MarketController implements IMarketController {
   }
 
   private getEvmCollectionInstance (collectionId: string): { methods: EvmCollectionAbiMethods, options: any } {
+    // @ts-ignore
     return new this.web3Instance.eth.Contract(nonFungibleAbi, this.collectionIdToAddress(parseInt(collectionId, 10)), { from: this.contractOwner });
   }
 
@@ -190,7 +193,7 @@ class MarketController implements IMarketController {
   public async checkWhiteListed(account: string): Promise<boolean> {
     const ethAddress = this.getEthAccount(account);
     try {
-      return (await this.kusamaApi.query.evmContractHelpers.allowlist(this.contractAddress, ethAddress)).toJSON() as boolean;
+      return (await this.uniqApi.query.evmContractHelpers.allowlist(this.contractAddress, ethAddress)).toJSON() as boolean;
     } catch (e) {
       console.error('Check for whitelist failed', e);
       throw e;
@@ -203,47 +206,55 @@ class MarketController implements IMarketController {
     if (isWhiteListed) {
       return;
     }
-    // TODO: can't find account details for min deposit transfer, assuming it is taken from transaction
-    const hasMinDeposit = this.kusamaApi?.consts.balances?.existentialDeposit;
-    if (hasMinDeposit) {
-      return;
-    }
-    const tx = this.kusamaApi.tx.balances.transfer(this.escrowAddress, this.kusamaApi.consts.balances?.existentialDeposit);
+    const minDeposit = this.kusamaApi?.consts.balances?.existentialDeposit;
+
+    const tx = this.kusamaApi.tx.balances.transfer(this.escrowAddress, minDeposit);
     const signedTx = await options.sign(tx);
+
+    if (!signedTx) throw new Error('Breaking transaction');
+
+    try {
+      await signedTx.send();
+      await this.repeatCheckForTransactionFinish(async () => await this.checkWhiteListed(account));
+      return;
+    } catch (e) {
+      console.error('addToWhiteList error pushed upper');
+      throw e;
+    }
     // execute tx
-    await this.repeatCheckForTransactionFinish(async () => await this.checkWhiteListed(account));
   }
 
-  private async checkOnEth (account: string): Promise<boolean> {
-      // TODO: we need obtain tokenInfo here (we can't pass it down from somewhere else since we need to check for the most recent version on every repeat)
-      // !!!!TODO: somehow get access to TokenController from here (avoiding circular dependencies)!!!!
-      // const token: TokenDetailsInterface = await getTokenInfo(collectionInfo, tokenId);
-      const token = 'debug' as any;
+  private async checkOnEth (account: string, collectionId: string, tokenId: string): Promise<boolean> {
+      const token = await this.nftController?.getToken(Number(collectionId), Number(tokenId));
+
       const ethAccount = this.getEthAccount(account);
-      if (token?.owner?.Substrate === account || token?.owner?.Ethereum?.toLowerCase() === ethAccount) {
+      const normalizeSubstrate = toAddress(token?.owner?.Substrate);
+
+      if (normalizeSubstrate === account || token?.owner?.Ethereum?.toLowerCase() === ethAccount) {
         return Promise.resolve(true);
       }
       return Promise.resolve(false);
   }
 
-  // transfer to etherium (kusama api)
-  public async lockNftForSale(account: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+  // transfer to etherium
+  public async lockNftForSale(account: string, collectionId: string, tokenId: string, options: TransactionOptions) {
     // check if already on eth
     const ethAccount = {
       Ethereum: this.getEthAccount(account)
     };
-    const isOnEth = await this.checkOnEth(account);
+
+    const isOnEth = await this.checkOnEth(ethAccount.Ethereum, collectionId, tokenId);
     if (isOnEth) return;
-    // TODO: params for transfer form probably incorrect, test carefully
-    console.log('lockNftForSale', collectionId, tokenId);
-    const tx = this.uniqApi.tx.unique.transferFrom(normalizeAccountId(ethAccount), normalizeAccountId(account), collectionId, tokenId, 1);
+
+    const tx = this.uniqApi.tx.unique.transfer(normalizeAccountId(ethAccount), collectionId, tokenId, 1);
     const signedTx = await options.sign(tx);
 
-    // execute signedTx
+    if (!signedTx) throw new Error('Transaction cancelled');
+
     try {
-      // await this.repeatCheckForTransactionFinish(async () => { return this.checkOnEth(account); });
-      const result = await this.uniqApi.rpc.author.submitAndWatchExtrinsic(tx);
-      console.log(result);
+      await signedTx.send();
+
+      await this.repeatCheckForTransactionFinish(async () => { return this.checkOnEth(ethAccount.Ethereum, collectionId, tokenId); });
       return;
     } catch (e) {
       console.error('lockNftForSale error pushed upper');
@@ -251,15 +262,14 @@ class MarketController implements IMarketController {
     }
   }
 
-  private async checkIfNftApproved (tokenOwner: CrossAccountId, collectionId: string, tokenId: string) {
-    const ethAccount = this.getEthAccount((tokenOwner as {Substrate: string}).Substrate);
-    // TODO: same story - check this one carefully for account params, i assume they expect objects
+  private async checkIfNftApproved (tokenOwner: CrossAccountId, collectionId: string, tokenId: string): Promise<boolean> {
     // @ts-ignore
-    const approvedCount = (await this.uniqApi.rpc.unique.allowance(collectionId, normalizeAccountId(tokenOwner), normalizeAccountId({ Ethereum: ethAccount }), tokenId)).toJSON();
+    const approvedCount = (await this.uniqApi.rpc.unique.allowance(collectionId, normalizeAccountId(tokenOwner), normalizeAccountId({ Ethereum: this.contractAddress }), tokenId)).toJSON() as number;
 
-    console.log(approvedCount);
-
-    return approvedCount === 1;
+    if (approvedCount === 1) {
+      return Promise.resolve(true);
+    }
+    return Promise.resolve(false);
   }
 
   // aprove token
@@ -268,17 +278,15 @@ class MarketController implements IMarketController {
     if (!this.nftController) throw new Error('NFTController is not available');
 
     const token = await this.nftController.getToken(Number(collectionId), Number(tokenId));
-    console.log('token', token, account);
 
     const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
     const approved = await this.checkIfNftApproved(token.owner, collectionId, tokenId);
-    console.log('approved', approved);
 
     const abi = evmCollectionInstance.methods.approve(this.contractAddress, tokenId).encodeABI();
 
-    // if (approved) {
-    //   return;
-    // }
+    if (approved) {
+      return;
+    }
     const tx = this.uniqApi.tx.evm.call(
       this.getEthAccount(account),
       evmCollectionInstance.options.address,
@@ -288,20 +296,40 @@ class MarketController implements IMarketController {
       await this.web3Instance.eth.getGasPrice(),
       null
     );
-    await options.sign(tx);
+    const signedTx = await options.sign(tx);
 
-    const result = await this.uniqApi.rpc.author.submitAndWatchExtrinsic(tx);
+    if (!signedTx) throw new Error('Transaction cancelled');
 
-    console.log(result);
-    // execute signed Tx
+    await signedTx.send();
+
     await this.repeatCheckForTransactionFinish(async () => { return this.checkIfNftApproved(token.owner, collectionId, tokenId); });
+  }
+
+  private async checkAsk(account: string, collectionId: string, tokenId: string) {
+    const ethAddress = this.getEthAccount(account);
+    const matcherContractInstance = this.getMatcherContractInstance(ethAddress);
+
+    const { flagActive, ownerAddr, price }: TokenAskType = await matcherContractInstance.methods.getOrder(this.collectionIdToAddress(parseInt(collectionId, 10)), tokenId).call();
+
+    if (ownerAddr.toLowerCase() === ethAddress && flagActive === '1') {
+      return Promise.resolve(true);
+    }
+    return Promise.resolve(false);
   }
 
   // checkAsk - put on sale
   public async setForFixPriceSale(account: string, collectionId: string, tokenId: string, price: number, options: TransactionOptions): Promise<void> {
+    const ethAddress = this.getEthAccount(account);
     const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
-    const matcherContractInstance = this.getMatcherContractInstance(account);
-    const abi = (matcherContractInstance.methods).addAsk(price.toString(), '0x0000000000000000000000000000000000000001', evmCollectionInstance.options.address, tokenId).encodeABI();
+    const matcherContractInstance = this.getMatcherContractInstance(ethAddress);
+
+    const abi = matcherContractInstance.methods.addAsk(
+      price.toString(),
+      '0x0000000000000000000000000000000000000001',
+      evmCollectionInstance.options.address,
+      tokenId
+    ).encodeABI();
+
     const tx = this.uniqApi.tx.evm.call(
       this.getEthAccount(account),
       this.contractAddress,
@@ -311,15 +339,18 @@ class MarketController implements IMarketController {
       await this.web3Instance.eth.getGasPrice(),
       null
     );
-    await options.sign(tx);
+
+    const signedTx = await options.sign(tx);
+
+    if (!signedTx) throw new Error('Transaction cancelled');
+
+    await signedTx.send();
 
     try {
-      // await this.repeatCheckForTransactionFinish(async () => { return this.checkOnEth(account); });
-      const result = await this.uniqApi.rpc.author.submitAndWatchExtrinsic(tx);
-      console.log(result);
+      await this.repeatCheckForTransactionFinish(async () => { return this.checkAsk(account, collectionId, tokenId); });
       return;
     } catch (e) {
-      console.error('lockNftForSale error pushed upper');
+      console.error('setForFixPriceSale error pushed upper');
       throw e;
     }
   }
@@ -330,6 +361,7 @@ class MarketController implements IMarketController {
   // checkDepositReady
   private async getUserDeposit (account: string): Promise<BN> {
     const ethAccount = this.getEthAccount(account);
+
     const matcherContractInstance = this.getMatcherContractInstance(ethAccount);
     const result = await (matcherContractInstance.methods/* as MarketplaceAbiMethods */).balanceKSM(ethAccount).call();
 
@@ -403,6 +435,9 @@ class MarketController implements IMarketController {
     // accountId: encodedKusamaAccount,
     const tx = this.kusamaApi.tx.balances.transfer(this.escrowAddress, needed);
     const signedTx = await options.sign(tx);
+
+    if (!signedTx) throw new Error('Transaction cancelled');
+
     await signedTx.send();
     await this.repeatCheckForTransactionFinish(async () => {
         return (price.lte(await this.getUserDeposit(account)));
@@ -428,6 +463,9 @@ class MarketController implements IMarketController {
     );
 
     const signedTx = await options.sign(tx);
+
+    if (!signedTx) throw new Error('Transaction cancelled');
+
     await signedTx.send();
     await this.repeatCheckForTransactionFinish(async () => {
       return (await this.nftController?.getToken(Number(collectionId), Number(tokenId)))?.owner?.Ethereum === ethAccount;
@@ -437,13 +475,24 @@ class MarketController implements IMarketController {
   // #endregion buy
 
   // #region delist
-  public async cancelSell (account: string, collectionId: string, tokenId: string, options: TransactionOptions) {
+  public async cancelSell(account: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+    const ethAddress = this.getEthAccount(account);
+    const matcherContractInstance = this.getMatcherContractInstance(ethAddress);
     const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
-    const matcherContractInstance = this.getMatcherContractInstance(account);
+
+    const { flagActive }: TokenAskType = await matcherContractInstance.methods.getOrder(this.collectionIdToAddress(parseInt(collectionId, 10)), tokenId).call();
+
+    if (flagActive === '0') return;
+
+    const abi = matcherContractInstance.methods.cancelAsk(
+      evmCollectionInstance.options.address,
+      tokenId
+    ).encodeABI();
+
     const tx = this.uniqApi.tx.evm.call(
       this.getEthAccount(account),
       this.contractAddress,
-      matcherContractInstance.methods.cancelAsk(evmCollectionInstance.options.address, tokenId).encodeABI(),
+      abi,
       0,
       this.defaultGasAmount,
       await this.web3Instance.eth.getGasPrice(),
@@ -451,8 +500,51 @@ class MarketController implements IMarketController {
     );
     const signedTx = await options.sign(tx);
 
-    // execute sign
-    // await repeat
+    if (!signedTx) throw new Error('Transaction cancelled');
+
+    try {
+      await signedTx.send();
+
+      await this.repeatCheckForTransactionFinish(async () => {
+        const { flagActive }: TokenAskType = await matcherContractInstance.methods.getOrder(this.collectionIdToAddress(parseInt(collectionId, 10)), tokenId).call();
+
+        return flagActive !== '0';
+      });
+      return;
+    } catch (e) {
+      console.error('lockNftForSale error pushed upper');
+      throw e;
+    }
+  }
+
+  public async unlockNft(account: string, collectionId: string, tokenId: string, options: TransactionOptions) {
+    const ethAccount = {
+      Ethereum: this.getEthAccount(account)
+    };
+    // check if already on substrar
+    const { owner } = await this.nftController?.getToken(Number(collectionId), Number(tokenId));
+
+    if (owner.Substrate === account) return;
+
+    const tx = this.uniqApi.tx.unique.transferFrom(normalizeAccountId(ethAccount), normalizeAccountId(account), collectionId, tokenId, 1);
+    const signedTx = await options.sign(tx);
+
+    if (!signedTx) throw new Error('Transaction cancelled');
+
+    try {
+      await signedTx.send();
+
+      await this.repeatCheckForTransactionFinish(async () => {
+        const updatedToken = await this.nftController?.getToken(Number(collectionId), Number(tokenId));
+        const owner = updatedToken.owner;
+        if (owner.Substrate === account) return true;
+        return false;
+      });
+      return;
+    } catch (e) {
+      console.error('unlockNft error pushed upper');
+      throw e;
+    }
   }
   // #endregion delist
 
@@ -473,6 +565,9 @@ class MarketController implements IMarketController {
     }
 
     const signedTx = await options.sign(tx);
+
+    if (!signedTx) throw new Error('Transaction cancelled');
+
     await signedTx.send();
     await this.repeatCheckForTransactionFinish(async () => {
       const updatedToken = await this.nftController?.getToken(Number(collectionId), Number(tokenId));

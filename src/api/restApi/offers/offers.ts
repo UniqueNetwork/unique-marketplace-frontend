@@ -3,11 +3,11 @@ import { useCallback, useEffect, useState } from 'react';
 import { get } from '../base';
 import { defaultParams } from '../base/axios';
 import { GetOffersRequestPayload, Offer, OffersResponse, UseFetchOffersProps } from './types';
-import { ResponseError } from "../base/types";
+import { ResponseError } from '../base/types';
 
 const endpoint = '/Offers';
 
-export const getOffers = (payload: GetOffersRequestPayload) => get<OffersResponse>(endpoint, {...defaultParams, params: payload});
+export const getOffers = (payload: GetOffersRequestPayload) => get<OffersResponse>(endpoint, { ...defaultParams, params: payload });
 
 export const useOffers = ({ page = 1, pageSize = 10, ...props }: UseFetchOffersProps) => {
   const [offers, setOffers] = useState<Offer[]>([]);

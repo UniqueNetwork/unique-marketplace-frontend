@@ -6,8 +6,8 @@ import { ApiContextProps, ApiProvider, ChainData } from './ApiContext';
 import config from '../config';
 import { defaultChainKey } from '../utils/configParser';
 import { gqlClient as gql, rpcClient as rpc } from '.';
-import {getSettings, useSettings} from "./restApi/settings/settings";
-import {ApolloProvider} from "@apollo/client";
+import { getSettings, useSettings } from './restApi/settings/settings';
+import { ApolloProvider } from '@apollo/client';
 
 interface ChainProviderProps {
   children: React.ReactNode
@@ -30,7 +30,7 @@ const ApiWrapper = ({ children, gqlClient = gql, rpcClient = rpc }: ChainProvide
 
       rpcClient?.setOnChainReadyListener(setChainData);
       setRpcClientInitialized(true);
-    })()
+    })();
   }, []);
 
   // update endpoint if chainId is changed
@@ -41,10 +41,10 @@ const ApiWrapper = ({ children, gqlClient = gql, rpcClient = rpc }: ChainProvide
 
     if (chainId) {
       const currentChain = chainId ? chains[chainId] : defaultChain;
-      //TODO: change endpoint in axios instance, then obtain settings from rest api and change endpoint in rpcClient
-      //rpcClient.changeEndpoint(currentChain.rpcEndpoint);
-      //TODO: remove it
-      //gqlClient.changeEndpoint(currentChain.gqlEndpoint);
+      // TODO: change endpoint in axios instance, then obtain settings from rest api and change endpoint in rpcClient
+      // rpcClient.changeEndpoint(currentChain.rpcEndpoint);
+      // TODO: remove it
+      // gqlClient.changeEndpoint(currentChain.gqlEndpoint);
 
       // set current chain id into localStorage
       localStorage.setItem(defaultChainKey, chainId);
