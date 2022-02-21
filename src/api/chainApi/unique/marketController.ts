@@ -522,7 +522,9 @@ class MarketController implements IMarketController {
       Ethereum: this.getEthAccount(account)
     };
     // check if already on substrar
-    const { owner } = await this.nftController?.getToken(Number(collectionId), Number(tokenId));
+    const token = await this.nftController?.getToken(Number(collectionId), Number(tokenId));
+    if (!token) throw new Error('Token for unlock not found');
+    const { owner } = token;
 
     if (owner.Substrate === account) return;
 

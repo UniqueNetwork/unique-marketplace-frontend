@@ -14,7 +14,7 @@ export interface IRpc {
 }
 
 export interface IRpcClient extends IRpc {
-  initialize(config: IRpcConfig, options?: IRpcClientOptions): void
+  initialize(config: IRpcConfig, options?: IRpcClientOptions): Promise<void>
   nftController?: INFTController<any, any>
   collectionController?: ICollectionController<any, any>
   marketController?: IMarketController
@@ -34,6 +34,8 @@ export interface INFTController<Collection, Token> {
 
 export interface ICollectionController<Collection, Token> {
   getCollection(collectionId: number): Promise<Collection | null>
+  getCollections(): Promise<Collection[]>
+  getFeaturedCollections(): Promise<Collection[]>
   getTokensOfCollection(collectionId: number, ownerId: number): Promise<Token[]>
 }
 

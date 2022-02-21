@@ -17,6 +17,7 @@ export interface NFTCollection {
     invalid: null
   }
   name: number[]
+  collectionName: string,
   offchainSchema: string
   owner?: string
   schemaVersion: SchemaVersionTypes

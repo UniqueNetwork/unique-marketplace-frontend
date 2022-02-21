@@ -5,7 +5,7 @@ import { defaultParams } from '../base/axios';
 import { Settings } from './types';
 import { ResponseError } from '../base/types';
 
-const endpoint = '/settings';
+const endpoint = '/api/settings';
 
 export const getSettings = () => get<Settings>(`${endpoint}`, { ...defaultParams });
 

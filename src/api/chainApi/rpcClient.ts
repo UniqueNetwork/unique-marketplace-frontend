@@ -128,7 +128,7 @@ export class RpcClient implements IRpcClient {
       _api.on('disconnected', () => this.setIsApiConnected(false));
       _api.on('error', (error: Error) => {
         this.setApiError(error.message);
-        reject();
+        reject(error);
       });
 
       _api.on('ready', async () => {

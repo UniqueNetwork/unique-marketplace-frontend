@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { AxiosError } from 'axios';
 
 import { get } from '../base';
 import { defaultParams } from '../base/axios';
@@ -28,6 +29,11 @@ export const useTrades = ({ page = 1, pageSize = 10, ...props }: UseFetchTradesP
           message: JSON.stringify(response.data)
         });
       }
+    }).catch((err: AxiosError) => {
+      setFetchingError({
+        status: err.response?.status,
+        message: err.message
+      });
     });
   }, []);
 

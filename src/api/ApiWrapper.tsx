@@ -30,7 +30,7 @@ const ApiWrapper = ({ children, gqlClient = gql, rpcClient = rpc }: ChainProvide
 
       rpcClient?.setOnChainReadyListener(setChainData);
       setRpcClientInitialized(true);
-    })();
+    })().then(console.log).catch(console.log);
   }, []);
 
   // update endpoint if chainId is changed
@@ -54,7 +54,6 @@ const ApiWrapper = ({ children, gqlClient = gql, rpcClient = rpc }: ChainProvide
   // get context value for ApiContext
   const value = useMemo<ApiContextProps>(
     () => {
-      console.log(rpcClient?.rawRpcApi);
       return {
         api: (rpcClient && rpc.isApiConnected && {
           collection: rpcClient.collectionController,

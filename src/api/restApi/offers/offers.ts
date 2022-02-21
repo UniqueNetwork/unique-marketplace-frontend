@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { AxiosError } from 'axios';
 
 import { get } from '../base';
 import { defaultParams } from '../base/axios';
@@ -28,18 +29,43 @@ export const useOffers = ({ page = 1, pageSize = 10, ...props }: UseFetchOffersP
           message: JSON.stringify(response.data)
         });
       }
+    }).catch((err: AxiosError) => {
+      setFetchingError({
+        status: err.response?.status,
+        message: err.message
+      });
     });
   }, []);
 
   useEffect(() => {
+    console.log(fetchingError);
+  }, [fetchingError]);
+
+  useEffect(() => {
     fetch({ ...props, page, pageSize });
   }, []);
+
+  const fetchMore = useCallback((payload: GetOffersRequestPayload) => {
+    setIsFetching(true);
+    getOffers(payload).then((response) => {
+      if (response.status === 200) {
+        setOffers([...offers, ...response.data.items]);
+        setIsFetching(false);
+      } else {
+        setFetchingError({
+          status: response.status,
+          message: JSON.stringify(response.data)
+        });
+      }
+    });
+    }, [offers]);
 
   return {
     offers,
     offersCount,
     isFetching,
     fetchingError,
-    fetchMore: fetch
+    refetch: fetch,
+    fetchMore
   };
 };
