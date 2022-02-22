@@ -2,7 +2,7 @@ import { ApiPromise } from '@polkadot/api';
 import { INFTController } from '../types';
 import { NFTCollection, NFTToken } from './types';
 import { normalizeAccountId } from '../utils/normalizeAccountId';
-import { decodeStruct, getOnChainSchema } from '../utils/decoder';
+import { collectionName16Decoder, decodeStruct, getOnChainSchema, hex2a } from '../utils/decoder';
 import { getTokenImage } from '../utils/imageUtils';
 import {UpDataStructsTokenId} from "@unique-nft/types";
 
@@ -30,11 +30,11 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
         // @ts-ignore
         await this.api.rpc.unique.collectionById(collectionId.toString());
 
-      const collectionInfo = collection.toJSON() as unknown as NFTCollection;
-
       if (!collection) {
         return null;
       }
+
+      const collectionInfo = collection.toJSON() as unknown as NFTCollection;
 
       const variableData =
         // @ts-ignore
@@ -62,9 +62,12 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
         },
         constData,
         id: tokenId,
+        collectionId,
         imageUrl,
         owner: crossAccount,
-        variableData
+        variableData,
+        collectionName: collectionName16Decoder(collectionInfo.name),
+        prefix: hex2a(collectionInfo.tokenPrefix),
       };
     } catch (e) {
       console.log('getDetailedTokenInfo error', e);
