@@ -1,29 +1,29 @@
 import { FC } from 'react';
 import styled from 'styled-components/macro';
 import { TokensCard } from '..';
-import {NFTToken} from "../../api/chainApi/unique/types";
+import { Offer } from '../../api/restApi/offers/types';
 
 type TTokensList = {
-  tokens: NFTToken[];
+  offers: Offer[];
 };
 
-export const TokensList: FC<TTokensList> = ({ tokens }) => {
+export const OffersList: FC<TTokensList> = ({ offers }) => {
   return (
-    <TokensListStyled>
-      {tokens?.map &&
-        tokens.map((token: NFTToken) => (
+    <OffersListStyled>
+      {offers?.map &&
+        offers.map((offer: Offer) => (
           <TokensCard
-            key={`token-${token.collectionId}-${token.id}`}
-            tokenId={token?.id}
-            collectionId={token?.collectionId}
-            token={token}
+            key={`token-${offer.collectionId}-${offer.tokenId}`}
+            tokenId={offer.tokenId}
+            collectionId={offer.collectionId}
+            price={offer.price}
           />
         ))}
-    </TokensListStyled>
+    </OffersListStyled>
   );
 };
 
-const TokensListStyled = styled.div`
+const OffersListStyled = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
   gap: 32px;

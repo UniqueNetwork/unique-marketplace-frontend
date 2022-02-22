@@ -7,6 +7,7 @@ import { Secondary400 } from '../../styles/colors';
 import { FilterState } from '../../components/Filters/types';
 import { useOffers } from '../../api/restApi/offers/offers';
 import { Offer } from '../../api/restApi/offers/types';
+import {OffersList} from "../../components/OffersList/OffersList";
 
 type TOption = {
   direction: 'asc' | 'desc';
@@ -140,7 +141,7 @@ export const MarketMainPage = () => {
           threshold={200}
           useWindow={true}
         >
-          <TokensList offers={offers || []} />
+          <OffersList offers={offers || []} />
         </InfiniteScroll>
       </MainContent>
     </MarketMainPageStyled>

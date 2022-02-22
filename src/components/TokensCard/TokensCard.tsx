@@ -3,21 +3,21 @@ import { FC, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components/macro';
 import { useNavigate } from 'react-router-dom';
 import { Picture } from '..';
-import { Token } from '../../api/graphQL';
 import { Primary600 } from '../../styles/colors';
 import { useApi } from '../../hooks/useApi';
 import Loading from '../Loading';
+import { NFTToken } from "../../api/chainApi/unique/types";
 
 export type TTokensCard = {
-  token?: Token
+  token?: NFTToken
   tokenId?: number
   collectionId?: number
   price?: string
+  tokenImageUrl?: string
 };
 
-export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, price, ...props }) => {
-  const [tokenImageUrl, setTokenImageUrl] = useState<string>();
-  const [token, setToken] = useState<Token | undefined>(props.token);
+export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, price, tokenImageUrl, ...props }) => {
+  const [token, setToken] = useState<NFTToken | undefined>(props.token);
   const [isFetching, setIsFetching] = useState<boolean>(false);
 
   const { api } = useApi();
@@ -29,9 +29,9 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, price, ...p
   } = useMemo<Record<string, any>>(() => {
     if (token) {
       return {
-        collectionName: token.collection_name,
-        imagePath: token.image_path,
-        tokenPrefix: token.token_prefix
+        collectionName: token.collectionName,
+        imagePath: token.imageUrl,
+        tokenPrefix: token.prefix
       };
     }
 
