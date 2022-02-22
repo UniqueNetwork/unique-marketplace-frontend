@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AxiosError } from 'axios';
 
-import { get } from "../base";
-import { Offer } from "./types";
-import { defaultParams } from "../base/axios";
-import { ResponseError } from "../base/types";
+import { get } from '../base';
+import { Offer } from './types';
+import { defaultParams } from '../base/axios';
+import { ResponseError } from '../base/types';
 
 const endpoint = '/offer';
 
@@ -18,7 +18,6 @@ export const useOffer = (collectionId: number, tokenId: number) => {
   const fetch = useCallback((collectionId: number, tokenId: number) => {
     setIsFetching(true);
     getOffer(collectionId, tokenId).then((response) => {
-      console.log(response)
       if (response.status === 200) {
         setOffer(response.data);
         setIsFetching(false);
@@ -43,6 +42,6 @@ export const useOffer = (collectionId: number, tokenId: number) => {
   return {
     offer,
     isFetching,
-    fetchingError,
+    fetchingError
   };
 };

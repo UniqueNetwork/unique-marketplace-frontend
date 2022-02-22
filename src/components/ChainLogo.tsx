@@ -8,6 +8,7 @@ interface Props {
   logo?: keyof typeof namedLogos
   onClick?: () => any
   withoutHl?: boolean
+  size?: number
 }
 
 function sanitize(value?: string): string {
@@ -19,7 +20,8 @@ function ChainLogo({
   isInline,
   logo,
   onClick,
-  withoutHl
+  withoutHl,
+  size = 32
 }: Props): React.ReactElement<Props> {
   const { chainData } = useApi();
 
@@ -38,6 +40,7 @@ function ChainLogo({
         }`}
       onClick={onClick}
       src={img}
+      height={size}
     />
   );
 }

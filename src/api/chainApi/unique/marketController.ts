@@ -227,7 +227,7 @@ class MarketController implements IMarketController {
     const ethAccount = this.getEthAccount(account);
     const normalizeSubstrate = toAddress(tokenOwner.Substrate);
 
-    return normalizeSubstrate === account || tokenOwner.Ethereum?.toLowerCase() === ethAccount
+    return normalizeSubstrate === account || tokenOwner.Ethereum?.toLowerCase() === ethAccount;
   }
 
   public async checkOnEth (account: string, collectionId: string, tokenId: string): Promise<boolean> {

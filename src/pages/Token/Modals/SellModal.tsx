@@ -43,9 +43,17 @@ export const SellModal: FC<TSellModalProps> = ({ collectionId, tokenId, onModalC
   switch (status) {
     // TODO: move modal iside Sell*StagesModal instead (so we can make it "closable" on errors)
     case MarketType.sellAuction:
-      return (<Modal isVisible={isOpen} isClosable={false}><SellAuctionStagesModal collectionId={collectionId} tokenId={tokenId} auction={auction as TAuctionProps} onModalClose={onModalClose} /></Modal>);
+      return (<Modal isVisible={isOpen} isClosable={false}><SellAuctionStagesModal collectionId={collectionId}
+        tokenId={tokenId}
+        auction={auction as TAuctionProps}
+        onModalClose={onModalClose}
+      /></Modal>);
     case MarketType.sellFix:
-      return (<Modal isVisible={isOpen} isClosable={false}><SellFixStagesModal collectionId={collectionId} tokenId={tokenId} sellFix={fixPrice as TFixPriceProps} onModalClose={onModalClose} /></Modal>);
+      return (<Modal isVisible={isOpen} isClosable={false}><SellFixStagesModal collectionId={collectionId}
+        tokenId={tokenId}
+        sellFix={fixPrice as TFixPriceProps}
+        onModalClose={onModalClose}
+      /></Modal>);
     default: throw new Error(`Incorrect status provided for processing modal: ${status}`);
   }
 };

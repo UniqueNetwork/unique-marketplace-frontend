@@ -68,7 +68,7 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
         collectionName: collectionName16Decoder(collectionInfo.name),
         prefix: hex2a(collectionInfo.tokenPrefix),
         description: collectionName16Decoder(collectionInfo.description),
-        collectionCover: collectionInfo.coverImageUrl,
+        collectionCover: collectionInfo.coverImageUrl
       };
     } catch (e) {
       console.log('getDetailedTokenInfo error', e);

@@ -69,5 +69,3 @@ export const useOffers = ({ page = 1, pageSize = 10, ...props }: UseFetchOffersP
     fetchMore
   };
 };
-
-
