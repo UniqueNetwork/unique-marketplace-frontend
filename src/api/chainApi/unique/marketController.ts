@@ -394,15 +394,15 @@ class MarketController implements IMarketController {
     let balanceStr = '';
 
     if (decNum < 0) {
-      balanceStr = ['0', '.', ...Array.from('0'.repeat(Math.abs(decNum))), ...value.toString()].join('');
+      balanceStr = ['0', '.', ...Array.from('0'.repeat(Math.abs(decNum))), value.toString()].join('');
     }
 
     if (decNum > 0) {
-      balanceStr = [...value.toString().substr(0, decNum), '.', ...value.toString().substr(decNum, tokenDecimals - decNum)].join('');
+      balanceStr = [value.toString().substr(0, decNum), '.', value.toString().substr(decNum, tokenDecimals - decNum)].join('');
     }
 
     if (decNum === 0) {
-      balanceStr = ['0', '.', ...value.toString().substr(decNum, tokenDecimals - decNum)].join('');
+      balanceStr = ['0', '.', value.toString().substr(decNum, tokenDecimals - decNum)].join('');
     }
 
     const arr = balanceStr.toString().split('.');
