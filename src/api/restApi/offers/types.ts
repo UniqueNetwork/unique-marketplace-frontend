@@ -10,14 +10,30 @@ export type GetOffersRequestPayload = {
   searchLocale?: string
 } & Pagination & Sortable;
 
+export type Bid = {
+  amount: string
+  bidderAddress: string
+  createdAt: string
+  pendingAmount: string
+  updatedAt: string
+}
+
+export type Auction = {
+  bids: Bid[]
+  priceStep: string
+  startPrice: string
+  status: 'created' | '' // ???
+  stopAt: string
+}
+
 export type Offer = {
   collectionId: number
   tokenId: number
   price: string
   quoteId: number
   seller: string
-  metadata: null,
   creationDate: string
+  auction: Auction | null
 }
 
 export type OffersResponse = PaginatedResponse<Offer>
