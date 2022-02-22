@@ -4,7 +4,6 @@ import App from './App';
 import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 import { Market, MyTokens, Trades, FAQ, TokenPage } from './pages';
 import { MarketMainPage } from './pages/Market/MarketMain';
-import { TokensPage } from './pages/Market/TokenDetailPage';
 import { GlobalStyle } from './styles';
 
 ReactDOM.render(
@@ -31,10 +30,6 @@ ReactDOM.render(
             <Route
               element={<MarketMainPage />}
               index
-            />
-            <Route
-              element={<TokensPage />}
-              path={'token-details'}
             />
           </Route>
           <Route

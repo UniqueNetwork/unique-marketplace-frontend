@@ -51,6 +51,9 @@ export interface NFTToken {
   variableData?: string
   attributes: AttributesDecoded
   imageUrl: string
+  collectionId?: number
+  collectionName?: string
+  prefix?: string
 }
 
 export type MetadataType = {

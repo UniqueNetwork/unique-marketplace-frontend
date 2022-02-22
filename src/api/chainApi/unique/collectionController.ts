@@ -92,7 +92,7 @@ class UniqueCollectionController implements ICollectionController<NFTCollection,
     return collections;
   }
 
-  public async getTokensOfCollection(collectionId: number, ownerId: number): Promise<NFTToken[]> {
+  public async getTokensOfCollection(collectionId: number, ownerId: string): Promise<NFTToken[]> {
     if (!this.api || !collectionId || !ownerId) {
       return [];
     }

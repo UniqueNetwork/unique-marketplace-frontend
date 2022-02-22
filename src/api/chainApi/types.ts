@@ -30,13 +30,14 @@ export interface IRpcClientOptions {
 
 export interface INFTController<Collection, Token> {
   getToken(collectionId: number, tokenId: number): Promise<Token | null>
+  getAccountTokens(account: string): Promise<Token[]>
 }
 
 export interface ICollectionController<Collection, Token> {
   getCollection(collectionId: number): Promise<Collection | null>
   getCollections(): Promise<Collection[]>
   getFeaturedCollections(): Promise<Collection[]>
-  getTokensOfCollection(collectionId: number, ownerId: number): Promise<Token[]>
+  getTokensOfCollection(collectionId: number, ownerId: string): Promise<Token[]>
 }
 
 export interface IAccountController<Collection, Token> {
