@@ -7,7 +7,6 @@ import nonFungibleAbi from './abi/nonFungibleAbi.json';
 import { sleep } from '../../../utils/helpers';
 import { IMarketController, INFTController, TransactionOptions } from '../types';
 import { CrossAccountId, normalizeAccountId } from '../utils/normalizeAccountId';
-import { ExtrinsicStatus } from '@polkadot/types/interfaces';
 import toAddress from '../utils/toAddress';
 
 export type EvmCollectionAbiMethods = {
@@ -224,16 +223,17 @@ class MarketController implements IMarketController {
     // execute tx
   }
 
-  private async checkOnEth (account: string, collectionId: string, tokenId: string): Promise<boolean> {
+  public isTokenOwner (account: string, tokenOwner: { Substrate?: string, Ethereum?: string }): boolean {
+    const ethAccount = this.getEthAccount(account);
+    const normalizeSubstrate = toAddress(tokenOwner.Substrate);
+
+    return normalizeSubstrate === account || tokenOwner.Ethereum?.toLowerCase() === ethAccount
+  }
+
+  public async checkOnEth (account: string, collectionId: string, tokenId: string): Promise<boolean> {
       const token = await this.nftController?.getToken(Number(collectionId), Number(tokenId));
 
-      const ethAccount = this.getEthAccount(account);
-      const normalizeSubstrate = toAddress(token?.owner?.Substrate);
-
-      if (normalizeSubstrate === account || token?.owner?.Ethereum?.toLowerCase() === ethAccount) {
-        return Promise.resolve(true);
-      }
-      return Promise.resolve(false);
+      return this.isTokenOwner(account, token.owner);
   }
 
   // transfer to etherium

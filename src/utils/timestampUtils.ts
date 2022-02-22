@@ -3,7 +3,7 @@ const timeDifference = (when: number, sinceWhen: number | null = null) => {
   const first = sinceWhen || new Date().getTime() / 1000;
   const second = when;
   // https://stackoverflow.com/questions/16767301/calculate-difference-between-2-timestamps-using-javascript
-  let difference = (first - second) * 1000;
+  let difference = Math.abs(first - second) * 1000;
 
   const daysDifference = Math.floor(difference / 1000 / 60 / 60 / 24);
 
@@ -42,9 +42,13 @@ const timeDifference = (when: number, sinceWhen: number | null = null) => {
     amount = Math.round(daysDifference / 7);
   }
 
-  if (amount < 1 && timeType === 'second') return 'Less than a second ago';
+  if (amount < 1 && timeType === 'second') return 'Less than a second';
 
-  return `${amount} ${timeType}${amount >= 2 ? 's' : ''} ago`;
+  return `${amount} ${timeType}${amount >= 2 ? 's' : ''}`;
 };
 
-export { timeDifference };
+const timestampTableFormat = (timestamp: number) => new Date(timestamp).toLocaleString('en-GB', {
+  hour12: false
+}).replaceAll('/', '-');
+
+export { timeDifference, timestampTableFormat };

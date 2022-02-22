@@ -66,7 +66,9 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
         owner: crossAccount,
         variableData,
         collectionName: collectionName16Decoder(collectionInfo.name),
-        prefix: hex2a(collectionInfo.tokenPrefix)
+        prefix: hex2a(collectionInfo.tokenPrefix),
+        description: collectionName16Decoder(collectionInfo.description),
+        collectionCover: collectionInfo.coverImageUrl,
       };
     } catch (e) {
       console.log('getDetailedTokenInfo error', e);

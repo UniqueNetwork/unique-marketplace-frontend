@@ -52,6 +52,7 @@ export type TransactionOptions = {
 
 export interface IMarketController {
   // substrate address
+  isTokenOwner: (account: string, tokenOwner: { Substrate?: string, Ethereum?: string }) => boolean
   addToWhiteList: (account: string, options: TransactionOptions) => Promise<void>
   checkWhiteListed: (account: string) => Promise<boolean>
   lockNftForSale: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
