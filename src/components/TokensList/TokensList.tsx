@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import styled from 'styled-components/macro';
 import { TokensCard } from '..';
-import {NFTToken} from "../../api/chainApi/unique/types";
+import { NFTToken } from '../../api/chainApi/unique/types';
 
 type TTokensList = {
   tokens: NFTToken[];

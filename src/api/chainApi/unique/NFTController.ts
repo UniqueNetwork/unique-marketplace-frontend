@@ -4,8 +4,7 @@ import { NFTCollection, NFTToken } from './types';
 import { normalizeAccountId } from '../utils/normalizeAccountId';
 import { collectionName16Decoder, decodeStruct, getOnChainSchema, hex2a } from '../utils/decoder';
 import { getTokenImage } from '../utils/imageUtils';
-import {UpDataStructsTokenId} from "@unique-nft/types";
-
+import { UpDataStructsTokenId } from '@unique-nft/types';
 
 export type NFTControllerConfig = {
   collectionsIds: number[]
@@ -67,7 +66,7 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
         owner: crossAccount,
         variableData,
         collectionName: collectionName16Decoder(collectionInfo.name),
-        prefix: hex2a(collectionInfo.tokenPrefix),
+        prefix: hex2a(collectionInfo.tokenPrefix)
       };
     } catch (e) {
       console.log('getDetailedTokenInfo error', e);
@@ -76,16 +75,14 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
     }
   }
 
-
   public async getAccountTokens(account: string): Promise<NFTToken[]> {
     if (!this.api || !account) {
       return [];
     }
     try {
+      const tokens: NFTToken[] = [];
 
-      let tokens: NFTToken[] = [];
-
-      for(const collectionId of this.collectionsIds) {
+      for (const collectionId of this.collectionsIds) {
         const tokensIds: UpDataStructsTokenId[] =
           // @ts-ignore
           await this.api.rpc.unique.accountTokens(collectionId, normalizeAccountId(account));
@@ -101,8 +98,6 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
       throw e;
     }
   }
-
-
 }
 
 export default UniqueNFTController;

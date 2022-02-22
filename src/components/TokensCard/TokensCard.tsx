@@ -6,7 +6,7 @@ import { Picture } from '..';
 import { Primary600 } from '../../styles/colors';
 import { useApi } from '../../hooks/useApi';
 import Loading from '../Loading';
-import { NFTToken } from "../../api/chainApi/unique/types";
+import { NFTToken } from '../../api/chainApi/unique/types';
 
 export type TTokensCard = {
   token?: NFTToken

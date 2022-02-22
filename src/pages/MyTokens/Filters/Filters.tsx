@@ -6,7 +6,7 @@ import PricesFilter from '../../../components/Filters/PricesFilter';
 import { FilterState, PriceRange } from '../../../components/Filters/types';
 import CollectionsFilter from '../../../components/Filters/CollectionsFilter';
 import AccountContext from '../../../account/AccountContext';
-import {MyTokensStatuses} from "./types";
+import { MyTokensStatuses } from './types';
 import StatusFilter from './StatusFilter';
 
 type FiltersProps = {

@@ -99,7 +99,7 @@ export class RpcClient implements IRpcClient {
     });
     this.rawUniqRpcApi = _api;
     this.nftController = new UniqueNFTController(_api, {
-      collectionsIds: this.config?.blockchain.unique.collectionIds || [],
+      collectionsIds: this.config?.blockchain.unique.collectionIds || []
     });
     this.collectionController = new UniqueCollectionController(_api);
     if (!this.rawKusamaRpcApi) throw new Error('Kusama API is not initialized');

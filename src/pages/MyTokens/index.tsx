@@ -1,4 +1,4 @@
-import React, {useCallback, useContext, useEffect, useState} from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
 import styled from 'styled-components/macro';
 import { Button, InputText, Select, Text } from '@unique-nft/ui-kit';
@@ -6,10 +6,10 @@ import { Button, InputText, Select, Text } from '@unique-nft/ui-kit';
 import { TokensList } from '../../components';
 import { Secondary400 } from '../../styles/colors';
 import { FilterState } from '../../components/Filters/types';
-import accountContext from "../../account/AccountContext";
-import { useApi } from "../../hooks/useApi";
-import { NFTToken } from "../../api/chainApi/unique/types";
-import {Filters} from "./Filters/Filters";
+import accountContext from '../../account/AccountContext';
+import { useApi } from '../../hooks/useApi';
+import { NFTToken } from '../../api/chainApi/unique/types';
+import { Filters } from './Filters/Filters';
 
 type TOption = {
   direction: 'asc' | 'desc';
@@ -34,15 +34,12 @@ export const MyTokensPage = () => {
   const { api } = useApi();
 
   useEffect(() => {
-    if(!api || !selectedAccount?.address) return;
+    if (!api || !selectedAccount?.address) return;
     (async () => {
       const _tokens = await api.nft?.getAccountTokens(selectedAccount?.address) as NFTToken[];
       setTokens(_tokens);
     })();
-
-
-
-  }, [selectedAccount, api])
+  }, [selectedAccount, api]);
 
   useEffect(() => {
     const option = sortingOptions.find((option) => { return option.id === sortingValue; });
@@ -61,7 +58,6 @@ export const MyTokensPage = () => {
 
   const onSortingChange = useCallback((val: string) => {
     setSortingValue(val);
-
   }, []);
 
   const handleSearch = () => {
@@ -70,7 +66,6 @@ export const MyTokensPage = () => {
 
   const onFilterChange = useCallback((filter: FilterState) => {
     setFilterState({ ...filterState, ...filter });
-
   }, [filterState]);
 
   const sortingOptions: TOption[] = [
