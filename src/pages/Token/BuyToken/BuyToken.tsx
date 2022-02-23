@@ -1,22 +1,21 @@
-import React, { FC, useCallback, useMemo } from 'react';
-import { Button, Heading, Text } from '@unique-nft/ui-kit';
+import React, { FC, useCallback } from 'react';
+import { Button } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import { useFee } from '../../../hooks/useFee';
 import { NFTToken } from '../../../api/chainApi/unique/types';
-import { useOffer } from '../../../api/restApi/offers/offer';
 import { Price } from '../TokenDetail/Price';
 import Auction from '../Auction/Auction';
 import { Grey300 } from '../../../styles/colors';
+import { Offer } from '../../../api/restApi/offers/types';
 
 interface BuyTokenProps {
   token: NFTToken;
+  offer: Offer;
 }
 
-export const BuyToken: FC<BuyTokenProps> = ({ token }) => {
+export const BuyToken: FC<BuyTokenProps> = ({ offer, token }) => {
   const { fee } = useFee();
-
-  const { offer } = useOffer(token.collectionId || 0, token.id);
 
   const onBuyButtonClick = useCallback(() => {
     console.log('buy click');

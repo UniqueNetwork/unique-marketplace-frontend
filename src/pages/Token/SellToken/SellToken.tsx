@@ -1,21 +1,17 @@
 import React, { FC, useCallback } from 'react';
-import { NFTToken } from '../../../api/chainApi/unique/types';
-import { useOffer } from '../../../api/restApi/offers/offer';
 import styled from 'styled-components/macro';
-import { Button, Heading } from '@unique-nft/ui-kit';
-import { AdditionalColorLight, AdditionalWarning100, AdditionalWarning500, Grey300 } from '../../../styles/colors';
-import { Icon } from '../../../components/Icon/Icon';
-import logoKusama from '../../../static/icons/logo-kusama.svg';
+import { Button } from '@unique-nft/ui-kit';
+import { AdditionalWarning100, AdditionalWarning500, Grey300 } from '../../../styles/colors';
 import { useFee } from '../../../hooks/useFee';
 import { Price } from '../TokenDetail/Price';
+import { Offer } from '../../../api/restApi/offers/types';
 
 interface ForOwnerProps {
-  token: NFTToken
+  offer: Offer
 }
 
-export const SellToken: FC<ForOwnerProps> = ({ token }) => {
+export const SellToken: FC<ForOwnerProps> = ({ offer }) => {
   const { fee } = useFee();
-  const { offer } = useOffer(token.collectionId || 0, token.id);
 
   const onSellClick = useCallback(() => {
     // TODO: open sell modal
