@@ -23,11 +23,6 @@ export const useTrades = ({ page = 1, pageSize = 10, ...props }: UseFetchTradesP
         setTrades(response.data.items);
         setTradesCount(response.data.itemsCount);
         setIsFetching(false);
-      } else {
-        setFetchingError({
-          status: response.status,
-          message: JSON.stringify(response.data)
-        });
       }
     }).catch((err: AxiosError) => {
       setFetchingError({
