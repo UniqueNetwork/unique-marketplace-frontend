@@ -550,13 +550,21 @@ class MarketController implements IMarketController {
 
     if (!signedTx) throw new Error('Transaction cancelled');
 
-    await signedTx.send();
+    if (options.send) {
+      await options.send(signedTx);
+    } else {
+      await signedTx.send();
+    }
     await this.repeatCheckForTransactionFinish(async () => {
       const updatedToken = await this.nftController?.getToken(Number(collectionId), Number(tokenId));
       const owner = updatedToken.owner;
       if (owner.Ethereum === ethTo || owner.Substrate === to) return true;
       return false;
     });
+  }
+
+  public async transferBalance (from: string, to: string, amount: string, options: TransactionOptions): Promise<void> {
+    await sleep(1000);
   }
   // #endregion transfer
 }
