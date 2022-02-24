@@ -48,7 +48,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, price, toke
   const navigate = useNavigate();
 
   const navigateToTokenPage = useCallback(() => {
-    navigate(`token-details?collectionId=${collectionId}&tokenId=${tokenId}`);
+    navigate(`/token/${collectionId}/${tokenId}`);
   }, [collectionId, navigate, tokenId]);
 
   return (

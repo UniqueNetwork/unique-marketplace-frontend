@@ -26,10 +26,11 @@ const ApiWrapper = ({ children, gqlClient = gql, rpcClient = rpc }: ChainProvide
     (async () => {
       const { data: settings } = await getSettings();
 
+      rpcClient?.setOnChainReadyListener(setChainData);
       await rpcClient?.initialize(settings);
 
-      rpcClient?.setOnChainReadyListener(setChainData);
       setRpcClientInitialized(true);
+      setChainData(rpcClient?.chainData);
     })().then(() => console.log('Rpc connectection: success')).catch((e) => console.log('Rpc connectection: failed', e));
   }, []);
 

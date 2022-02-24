@@ -1,14 +1,14 @@
 import { FC } from 'react';
 import styled from 'styled-components/macro';
 import { Heading, Text } from '@unique-nft/ui-kit';
-import { Avatar } from '../../../../../../components/Avatar/Avatar';
-import noCollections from '../../../../../../static/icons/no-collections.svg';
+import { Avatar } from '../../../components/Avatar/Avatar';
+import noCollections from '../../../static/icons/no-collections.svg';
 
 interface ICollectionsCardProps {
-  title: string;
   id: number;
+  title: string;
   avatarSrc: string;
-  description?: string;
+  description: string;
 }
 
 export const CollectionsCard: FC<ICollectionsCardProps> = ({
@@ -18,7 +18,6 @@ export const CollectionsCard: FC<ICollectionsCardProps> = ({
   title
 }: ICollectionsCardProps) => {
   const avatarImg = avatarSrc || noCollections;
-
   return (
     <CollectionsCardStyled>
       <AvatarStyled>

@@ -54,6 +54,8 @@ export interface NFTToken {
   collectionId?: number
   collectionName?: string
   prefix?: string
+  description?: string
+  collectionCover?: string
 }
 
 export type MetadataType = {
