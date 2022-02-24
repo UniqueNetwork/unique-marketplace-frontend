@@ -28,7 +28,7 @@ const TokenPage = () => {
 
   const isOwner = useMemo(() => {
     if (!selectedAccount || !token?.owner) return false;
-    return api?.market?.isTokenOwner(selectedAccount.address, token.owner);
+    return api?.nft?.isTokenOwner(selectedAccount.address, token.owner);
   }, [selectedAccount, token]);
 
   if (!token) return null;
@@ -36,7 +36,8 @@ const TokenPage = () => {
   return (<CommonTokenDetail token={token}><>
     {isOwner
       ? <SellToken token={token} />
-      : <BuyToken token={token}/>}
+      : <BuyToken token={token} />
+    }
   </></CommonTokenDetail>);
 };
 

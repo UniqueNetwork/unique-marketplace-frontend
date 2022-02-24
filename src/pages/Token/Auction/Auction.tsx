@@ -40,7 +40,7 @@ const Auction: FC<AuctionProps> = ({ offer, token }) => {
 
   const canDelist = useMemo(() => {
     if (!selectedAccount) return false;
-    return api?.market?.isTokenOwner(selectedAccount.address, token.owner || {}) && !offer.auction?.bids.length;
+    return api?.nft?.isTokenOwner(selectedAccount.address, token.owner || {}) && !offer.auction?.bids.length;
   }, []);
 
   const canWithdraw = useMemo(() => {

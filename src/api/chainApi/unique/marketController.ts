@@ -8,6 +8,7 @@ import { sleep } from '../../../utils/helpers';
 import { IMarketController, INFTController, TransactionOptions } from '../types';
 import { CrossAccountId, normalizeAccountId } from '../utils/normalizeAccountId';
 import toAddress from '../utils/toAddress';
+import {subToEthLowercase} from "../utils/decoder";
 
 export type EvmCollectionAbiMethods = {
   approve: (contractAddress: string, tokenId: string) => {
@@ -99,7 +100,7 @@ class MarketController implements IMarketController {
   private kusamaDecimals: number;
   private web3Instance: Web3;
   private defaultGasAmount: number;
-  private nftController?: INFTController<any, any>;
+  private nftController: INFTController<any, any>;
 
   constructor(uniqApi: ApiPromise, kusamaApi: ApiPromise, config: MartketControllerConfig = {}) {
     this.uniqApi = uniqApi;
@@ -118,6 +119,8 @@ class MarketController implements IMarketController {
     if (!options.kusamaDecimals) throw new Error('Kusama decimals not provided');
     this.kusamaDecimals = options.kusamaDecimals; // TODO: could and should be taken from kusamaApi
     this.defaultGasAmount = options.defaultGasAmount || 2500000;
+    if (!options.nftController) throw new Error('NFTController not provided');
+    this.nftController = options.nftController;
     const provider = new Web3.providers.WebsocketProvider(this.uniqueSubstrateApiRpc, {
       reconnect: {
         auto: true,
@@ -129,7 +132,6 @@ class MarketController implements IMarketController {
 
     const web3 = new Web3(provider);
     this.web3Instance = web3;
-    this.nftController = options.nftController;
   }
 
   private getMatcherContractInstance (ethAccount: string): { methods: MarketplaceAbiMethods } {
@@ -175,16 +177,9 @@ class MarketController implements IMarketController {
     throw new Error('Awaiting tx execution timed out');
   }
 
-   // decimals: 15 - opal, 18 - eth
-   private subToEthLowercase (eth: string): string { // TODO: why args called eth!?
-    const bytes = addressToEvm(eth);
-
-    return '0x' + Buffer.from(bytes).toString('hex');
-  }
-
   private getEthAccount(account: string) {
     if (!account) throw new Error('Account was not provided');
-    const ethAccount = Web3.utils.toChecksumAddress(this.subToEthLowercase(account));
+    const ethAccount = Web3.utils.toChecksumAddress(subToEthLowercase(account));
     return ethAccount.toLowerCase();
   }
 
@@ -223,17 +218,9 @@ class MarketController implements IMarketController {
     // execute tx
   }
 
-  public isTokenOwner (account: string, tokenOwner: { Substrate?: string, Ethereum?: string }): boolean {
-    const ethAccount = this.getEthAccount(account);
-    const normalizeSubstrate = toAddress(tokenOwner.Substrate);
-
-    return normalizeSubstrate === account || tokenOwner.Ethereum?.toLowerCase() === ethAccount;
-  }
-
-  public async checkOnEth (account: string, collectionId: string, tokenId: string): Promise<boolean> {
-      const token = await this.nftController?.getToken(Number(collectionId), Number(tokenId));
-
-      return this.isTokenOwner(account, token.owner);
+  private async checkOnEth (account: string, collectionId: string, tokenId: string): Promise<boolean> {
+    const token = await this.nftController.getToken(Number(collectionId), Number(tokenId));
+    return this.nftController.isTokenOwner(account, token.owner);
   }
 
   // transfer to etherium

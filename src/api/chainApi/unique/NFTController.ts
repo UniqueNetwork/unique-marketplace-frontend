@@ -2,9 +2,11 @@ import { ApiPromise } from '@polkadot/api';
 import { INFTController } from '../types';
 import { NFTCollection, NFTToken } from './types';
 import { normalizeAccountId } from '../utils/normalizeAccountId';
-import { collectionName16Decoder, decodeStruct, getOnChainSchema, hex2a } from '../utils/decoder';
+import { collectionName16Decoder, decodeStruct, getOnChainSchema, hex2a, subToEthLowercase } from '../utils/decoder';
 import { getTokenImage } from '../utils/imageUtils';
 import { UpDataStructsTokenId } from '@unique-nft/types';
+import toAddress from "../utils/toAddress";
+import Web3 from "web3";
 
 export type NFTControllerConfig = {
   collectionsIds: number[]
@@ -17,6 +19,19 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
   constructor(api: ApiPromise, config?: NFTControllerConfig) {
     this.api = api;
     this.collectionsIds = config?.collectionsIds || [];
+  }
+
+  private getEthAccount(account: string) {
+    if (!account) throw new Error('Account was not provided');
+    const ethAccount = Web3.utils.toChecksumAddress(subToEthLowercase(account));
+    return ethAccount.toLowerCase();
+  }
+
+  public isTokenOwner (account: string, tokenOwner: { Substrate?: string, Ethereum?: string }): boolean {
+    const ethAccount = this.getEthAccount(account);
+    const normalizeSubstrate = toAddress(tokenOwner.Substrate);
+
+    return normalizeSubstrate === account || tokenOwner.Ethereum?.toLowerCase() === ethAccount;
   }
 
   public async getToken(collectionId: number, tokenId: number): Promise<NFTToken | null> {

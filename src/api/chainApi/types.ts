@@ -31,6 +31,7 @@ export interface IRpcClientOptions {
 export interface INFTController<Collection, Token> {
   getToken(collectionId: number, tokenId: number): Promise<Token | null>
   getAccountTokens(account: string): Promise<Token[]>
+  isTokenOwner(account: string, tokenOwner: { Substrate?: string, Ethereum?: string }): boolean
 }
 
 export interface ICollectionController<Collection, Token> {
@@ -52,7 +53,6 @@ export type TransactionOptions = {
 
 export interface IMarketController {
   // substrate address
-  isTokenOwner: (account: string, tokenOwner: { Substrate?: string, Ethereum?: string }) => boolean
   addToWhiteList: (account: string, options: TransactionOptions) => Promise<void>
   checkWhiteListed: (account: string) => Promise<boolean>
   lockNftForSale: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
