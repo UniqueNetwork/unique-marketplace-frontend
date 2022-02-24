@@ -31,7 +31,6 @@ export interface IRpcClientOptions {
 export interface INFTController<Collection, Token> {
   getToken(collectionId: number, tokenId: number): Promise<Token | null>
   getAccountTokens(account: string): Promise<Token[]>
-  isTokenOwner(account: string, tokenOwner: { Substrate?: string, Ethereum?: string }): boolean
 }
 
 export interface ICollectionController<Collection, Token> {

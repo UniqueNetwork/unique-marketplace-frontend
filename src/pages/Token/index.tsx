@@ -7,6 +7,7 @@ import { NFTToken } from '../../api/chainApi/unique/types';
 import accountContext from '../../account/AccountContext';
 import { SellToken } from './SellToken/SellToken';
 import { BuyToken } from './BuyToken/BuyToken';
+import { isTokenOwner } from '../../api/chainApi/utils/isTokenOwner';
 
 // http://localhost:3000/token/124/173
 const TokenPage = () => {
@@ -28,7 +29,7 @@ const TokenPage = () => {
 
   const isOwner = useMemo(() => {
     if (!selectedAccount || !token?.owner) return false;
-    return api?.nft?.isTokenOwner(selectedAccount.address, token.owner);
+    return isTokenOwner(selectedAccount.address, token.owner);
   }, [selectedAccount, token]);
 
   if (!token) return null;
