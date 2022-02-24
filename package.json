@@ -20,8 +20,8 @@
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
     "@unique-nft/types": "^0.2.0",
-    "axios": "^0.24.0",
     "@unique-nft/ui-kit": "^0.0.3-rc",
+    "axios": "^0.24.0",
     "graphql": "^16.0.1",
     "protobufjs": "^6.11.2",
     "rc-table": "^7.21.0",
@@ -30,6 +30,7 @@
     "react-infinite-scroller": "^1.2.4",
     "react-router-dom": "^6.0.2",
     "react-scripts": "5.0.0",
+    "socket.io-client": "^4.4.1",
     "web-vitals": "^1.0.1",
     "web3": "^1.7.0"
   },
@@ -44,14 +45,12 @@
     "@types/react-infinite-scroller": "^1.2.2",
     "@types/react-modal": "^3.13.1",
     "@types/styled-components": "^5.1.20",
-
     "assert": "^2.0.0",
     "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.0",
     "eslint-plugin-sort-keys-fix": "^1.1.2",
     "https-browserify": "^1.0.0",
     "os-browserify": "^0.3.0",
-
     "postcss": "^8.0.0",
     "process": "^0.11.10",
     "react-app-rewired": "^2.2.1",

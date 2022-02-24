@@ -8,6 +8,7 @@ import { defaultChainKey } from '../utils/configParser';
 import { gqlClient as gql, rpcClient as rpc } from '.';
 import { getSettings, useSettings } from './restApi/settings/settings';
 import { ApolloProvider } from '@apollo/client';
+import AuctionSocketProvider from './restApi/auction/AuctionProvider';
 
 interface ChainProviderProps {
   children: React.ReactNode
@@ -18,6 +19,7 @@ interface ChainProviderProps {
 const { chains, defaultChain } = config;
 
 const ApiWrapper = ({ children, gqlClient = gql, rpcClient = rpc }: ChainProviderProps) => {
+  const [auctionSocketUrl, setAuctionSocketUrl] = useState<string>();
   const [chainData, setChainData] = useState<ChainData>();
   const [isRpcClientInitialized, setRpcClientInitialized] = useState<boolean>(false);
   const { chainId } = useParams<'chainId'>();
@@ -31,6 +33,7 @@ const ApiWrapper = ({ children, gqlClient = gql, rpcClient = rpc }: ChainProvide
 
       setRpcClientInitialized(true);
       setChainData(rpcClient?.chainData);
+      setAuctionSocketUrl(settings.auction.address);
     })().then(() => console.log('Rpc connectection: success')).catch((e) => console.log('Rpc connectection: failed', e));
   }, []);
 
@@ -65,7 +68,9 @@ const ApiWrapper = ({ children, gqlClient = gql, rpcClient = rpc }: ChainProvide
 
   return (
     <ApiProvider value={value}>
-      <ApolloProvider client={gqlClient.client}>{children}</ApolloProvider>
+      <AuctionSocketProvider url={auctionSocketUrl}>
+        <ApolloProvider client={gqlClient.client}>{children}</ApolloProvider>
+      </AuctionSocketProvider>
     </ApiProvider>
   );
 };
