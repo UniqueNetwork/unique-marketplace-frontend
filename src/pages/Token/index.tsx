@@ -41,7 +41,7 @@ const TokenPage = () => {
     fetchToken();
   }, [fetchToken]);
 
-  const onFinish = useCallback(() => {https://files.slack.com/files-tmb/T0223KMC0NQ-F034N5LH543-d5d1a04250/image_720.png
+  const onFinish = useCallback(() => {
     setMarketType(MarketType.default);
     fetchToken();
     fetchOffer(Number(collectionId), Number(id));
