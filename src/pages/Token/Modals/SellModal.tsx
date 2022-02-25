@@ -1,12 +1,11 @@
 import { Button, Heading, Tabs, Text, Select, InputText } from '@unique-nft/ui-kit';
 import { FC, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components/macro';
+
 import DefaultMarketStages from './StagesModal';
 import { TAuctionProps, TFixPriceProps } from './types';
 import { useAuctionSellStages, useSellFixStages } from '../../../hooks/useMarketplaceStages';
 import { AdditionalColorDark, AdditionalWarning100 } from '../../../styles/colors';
-import { Icon } from '../../../components/Icon/Icon';
-import close from '../../../static/icons/close.svg';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 
 // TODO: take from config instead (/api/settings inside ApiContext)
@@ -16,8 +15,8 @@ const getFees = () => {
   return { priceFee, stepFee };
 };
 
-export const SellModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, setIsClosable }) => {
-  const { collectionId, tokenId } = offer;
+export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, offer, onFinish, setIsClosable }) => {
+  const { collectionId, id: tokenId } = token;
   const [status, setStatus] = useState<'ask' | 'auction-stage' | 'fix-price-stage'>('ask'); // TODO: naming
   const [auction, setAuction] = useState<TAuctionProps>();
   const [fixPrice, setFixPrice] = useState<TFixPriceProps>();
@@ -36,13 +35,13 @@ export const SellModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, setIs
   if (status === 'ask') return (<AskSellModal onSellAuction={onSellAuction} onSellFixPrice={onSellFixPrice} />);
   switch (status) {
     case 'auction-stage':
-      return (<SellAuctionStagesModal collectionId={collectionId}
+      return (<SellAuctionStagesModal collectionId={collectionId || 0}
         tokenId={tokenId}
         auction={auction as TAuctionProps}
         onFinish={onFinish}
       />);
     case 'fix-price-stage':
-      return (<SellFixStagesModal collectionId={collectionId}
+      return (<SellFixStagesModal collectionId={collectionId || 0}
         tokenId={tokenId}
         sellFix={fixPrice as TFixPriceProps}
         onFinish={onFinish}
@@ -195,12 +194,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
   return (
     <SellModalStyled>
       <Content>
-        <Row>
-          <Heading size='2'>Selling method</Heading>
-          <IconWrapper>
-            <Icon path={close} />
-          </IconWrapper>
-        </Row>
+        <Heading size='2'>Selling method</Heading>
       </Content>
       <Tabs
         activeIndex={activeTab}
@@ -291,10 +285,6 @@ const Row = styled.div`
 `;
 
 const SellModalStyled = styled.div`
-  border-radius: 8px;
-  border: 1px solid grey;
-  padding: 24px;
-  box-sizing: border-box;
   width: 100%;
 
   .unique-input-text {

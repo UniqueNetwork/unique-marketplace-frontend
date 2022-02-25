@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react';
+import React, { FC } from 'react';
 import { Button } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
@@ -11,15 +11,12 @@ import { Offer } from '../../../api/restApi/offers/types';
 
 interface BuyTokenProps {
   token: NFTToken;
-  offer: Offer;
+  offer?: Offer;
+  onBuyClick(): void
 }
 
-export const BuyToken: FC<BuyTokenProps> = ({ offer, token }) => {
+export const BuyToken: FC<BuyTokenProps> = ({ offer, token, onBuyClick }) => {
   const { fee } = useFee();
-
-  const onBuyButtonClick = useCallback(() => {
-    console.log('buy click');
-  }, []);
 
   if (!offer) return null;
 
@@ -30,7 +27,7 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, token }) => {
 : <>
   <ButtonWrapper>
     <Button
-      onClick={onBuyButtonClick}
+      onClick={onBuyClick}
       role='primary'
       title='Buy'
       wide={true}

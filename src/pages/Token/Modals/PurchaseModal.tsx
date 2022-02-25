@@ -1,15 +1,17 @@
-import { Modal } from '@unique-nft/ui-kit';
-import React from 'react';
-import { ModalProps } from './types';
+import React, { FC, useEffect } from 'react';
 
-const PurchaseModal = ({ token, ...other }: ModalProps) => {
-  const price = 0.0001; // debug
+import { usePurchaseFixStages } from '../../../hooks/useMarketplaceStages';
+import DefaultMarketStages from './StagesModal';
+import { TTokenPageModalBodyProps } from './TokenPageModal';
+
+const PurchaseModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish }) => {
+  const { stages, status, initiate } = usePurchaseFixStages(token?.collectionId || 0, token?.id);
+  useEffect(() => { initiate(null); }, []);
   return (
     <div>
-      <Modal isVisible={false} {...other}>
-        tmp
-      </Modal>
-    </div>);
+      <DefaultMarketStages stages={stages} status={status} onFinish={onFinish} />
+    </div>
+  );
 };
 
 export default PurchaseModal;
