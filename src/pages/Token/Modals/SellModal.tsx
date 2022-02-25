@@ -1,64 +1,63 @@
-import { Modal, Button, Heading, Tabs, Text, Select, InputText } from '@unique-nft/ui-kit';
+import { Button, Heading, Tabs, Text, Select, InputText } from '@unique-nft/ui-kit';
 import { FC, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components/macro';
+
 import DefaultMarketStages from './StagesModal';
 import { TAuctionProps, TFixPriceProps } from './types';
-import { MarketType } from '../../../types/MarketTypes';
 import { useAuctionSellStages, useSellFixStages } from '../../../hooks/useMarketplaceStages';
 import { AdditionalColorDark, AdditionalWarning100 } from '../../../styles/colors';
-import { Icon } from '../../../components/Icon/Icon';
-import close from '../../../static/icons/close.svg';
+import { TTokenPageModalBodyProps } from './TokenPageModal';
 
-type TOnModalClose = () => void;
-
-type TSellModalProps = {
-  collectionId: string,
-  tokenId: number,
-  onModalClose: TOnModalClose
-}
-
-// will come from api
+// TODO: take from config instead (/api/settings inside ApiContext)
 const getFees = () => {
   const priceFee = 0.1;
   const stepFee = 0.1;
   return { priceFee, stepFee };
 };
 
-export const SellModal: FC<TSellModalProps> = ({ collectionId, tokenId, onModalClose }) => {
-  const [isOpen, setIsOpen] = useState(true);
-  const [status, setStatus] = useState(MarketType.default); // TODO: naming
+export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, offer, onFinish, setIsClosable }) => {
+  const { collectionId, id: tokenId } = token;
+  const [status, setStatus] = useState<'ask' | 'auction-stage' | 'fix-price-stage'>('ask'); // TODO: naming
   const [auction, setAuction] = useState<TAuctionProps>();
   const [fixPrice, setFixPrice] = useState<TFixPriceProps>();
-  const onSell = useCallback((auction: TAuctionProps, fixPrice: TFixPriceProps) => {
-    if (auction) {
+
+  const onSellAuction = useCallback((auction: TAuctionProps) => {
       setAuction(auction);
-      setStatus(MarketType.sellAuction);
-    }
-    if (fixPrice) {
-      setFixPrice(fixPrice);
-      setStatus(MarketType.sellFix);
-    }
-  }, [setStatus, setAuction, setFixPrice]);
-  if (status === MarketType.default) return (<Modal isVisible={isOpen} isClosable={true}><SellTypeModal onConfirm={onSell}/></Modal>);
+      setStatus('auction-stage');
+      setIsClosable(false);
+  }, [setStatus, setAuction]);
+  const onSellFixPrice = useCallback((fixPrice: TFixPriceProps) => {
+    setFixPrice(fixPrice);
+    setStatus('fix-price-stage');
+    setIsClosable(false);
+  }, [setStatus, setFixPrice]);
+
+  if (status === 'ask') return (<AskSellModal onSellAuction={onSellAuction} onSellFixPrice={onSellFixPrice} />);
   switch (status) {
-    // TODO: move modal iside Sell*StagesModal instead (so we can make it "closable" on errors)
-    case MarketType.sellAuction:
-      return (<Modal isVisible={isOpen} isClosable={false}><SellAuctionStagesModal collectionId={collectionId}
+    case 'auction-stage':
+      return (<SellAuctionStagesModal collectionId={collectionId || 0}
         tokenId={tokenId}
         auction={auction as TAuctionProps}
-        onModalClose={onModalClose}
-      /></Modal>);
-    case MarketType.sellFix:
-      return (<Modal isVisible={isOpen} isClosable={false}><SellFixStagesModal collectionId={collectionId}
+        onFinish={onFinish}
+      />);
+    case 'fix-price-stage':
+      return (<SellFixStagesModal collectionId={collectionId || 0}
         tokenId={tokenId}
         sellFix={fixPrice as TFixPriceProps}
-        onModalClose={onModalClose}
-      /></Modal>);
+        onFinish={onFinish}
+      />);
     default: throw new Error(`Incorrect status provided for processing modal: ${status}`);
   }
 };
 
-export const SellTypeModal: FC<any> = ({ onConfirm }) => {
+type TOnSellAuction = (auction: TAuctionProps) => void;
+type TOnSellFix = (price: TFixPriceProps) => void;
+type TAskSellModalProps = {
+  onSellAuction: TOnSellAuction,
+  onSellFixPrice: TOnSellFix,
+}
+
+export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixPrice }) => {
   const [activeTab, setActiveTab] = useState<number>(0);
   const [priceInputValue, setpriceInputValue] = useState<number>(15);
 
@@ -83,11 +82,11 @@ export const SellTypeModal: FC<any> = ({ onConfirm }) => {
   );
 
   const onConfirmAuctionClick = useCallback(() => {
-    onConfirm({ minimumStep: minStepInputValueAuction, startingPrice: priceInputValue, duration: durationSelectValue } as TAuctionProps);
+    onSellAuction({ minimumStep: minStepInputValueAuction, startingPrice: priceInputValue, duration: durationSelectValue } as TAuctionProps);
   }, []);
 
   const onConfirmFixPriceClick = useCallback(() => {
-    onConfirm(null, { price: priceInputValue } as TFixPriceProps); // TODO: proper typing, proper calculated object
+    onSellFixPrice({ price: priceInputValue } as TFixPriceProps); // TODO: proper typing, proper calculated object
   }, []);
 
   const onMinStepInputChange = useCallback(
@@ -195,12 +194,7 @@ export const SellTypeModal: FC<any> = ({ onConfirm }) => {
   return (
     <SellModalStyled>
       <Content>
-        <Row>
-          <Heading size='2'>Selling method</Heading>
-          <IconWrapper>
-            <Icon path={close} />
-          </IconWrapper>
-        </Row>
+        <Heading size='2'>Selling method</Heading>
       </Content>
       <Tabs
         activeIndex={activeTab}
@@ -216,35 +210,35 @@ export const SellTypeModal: FC<any> = ({ onConfirm }) => {
 };
 
 type TSellFixStagesModal = {
-  onModalClose: TOnModalClose,
-  collectionId: string,
+  onFinish: () => void;
+  collectionId: number,
   tokenId: number,
   sellFix: TFixPriceProps
 }
 
 type TSellAuctionStagesModal = {
-  onModalClose: TOnModalClose,
-  collectionId: string,
+  onFinish: () => void;
+  collectionId: number,
   tokenId: number,
   auction: TAuctionProps
 }
 
-export const SellFixStagesModal: FC<TSellFixStagesModal> = ({ collectionId, tokenId, sellFix, onModalClose }) => {
-  const { stages, status, initiate } = useSellFixStages(collectionId, tokenId.toString());
+export const SellFixStagesModal: FC<TSellFixStagesModal> = ({ collectionId, tokenId, sellFix, onFinish }) => {
+  const { stages, status, initiate } = useSellFixStages(collectionId, tokenId);
   useEffect(() => { initiate(sellFix); }, [sellFix]);
   return (
     <div>
-      <DefaultMarketStages stages={stages} status={status} onModalClose={onModalClose} />
+      <DefaultMarketStages stages={stages} status={status} onFinish={onFinish} />
     </div>
   );
 };
 
-export const SellAuctionStagesModal: FC<TSellAuctionStagesModal> = ({ collectionId, tokenId, auction, onModalClose }) => {
-  const { stages, status, initiate } = useAuctionSellStages(collectionId, tokenId.toString());
+export const SellAuctionStagesModal: FC<TSellAuctionStagesModal> = ({ collectionId, tokenId, auction, onFinish }) => {
+  const { stages, status, initiate } = useAuctionSellStages(collectionId, tokenId);
   useEffect(() => { initiate(auction); }, [initiate, auction]);
   return (
     <div>
-      <DefaultMarketStages stages={stages} status={status} onModalClose={onModalClose} />
+      <DefaultMarketStages stages={stages} status={status} onFinish={onFinish} />
     </div>
   );
 };
@@ -291,10 +285,6 @@ const Row = styled.div`
 `;
 
 const SellModalStyled = styled.div`
-  border-radius: 8px;
-  border: 1px solid grey;
-  padding: 24px;
-  box-sizing: border-box;
   width: 100%;
 
   .unique-input-text {

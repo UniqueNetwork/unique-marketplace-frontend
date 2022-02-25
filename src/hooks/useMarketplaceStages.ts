@@ -4,8 +4,7 @@ import { TTransaction } from '../api/chainApi/types';
 import AccountContext from '../account/AccountContext';
 import { InternalStage, MarketType, StageStatus, useMarketplaceStagesReturn } from '../types/MarketTypes';
 
-// TODO: change collection/token id's to numbers everywhere (or support both)
-const useMarketplaceStages = <T>(type: MarketType, collectionId: string, tokenId: string, stages: InternalStage<T>[]): useMarketplaceStagesReturn<T> => {
+const useMarketplaceStages = <T>(type: MarketType, collectionId: number, tokenId: number, stages: InternalStage<T>[]): useMarketplaceStagesReturn<T> => {
   const { selectedAccount } = useContext(AccountContext);
 
   const [internalStages, setInternalStages] = useState<InternalStage<T>[]>(stages);

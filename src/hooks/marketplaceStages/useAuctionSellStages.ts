@@ -6,7 +6,7 @@ import { TAuctionProps } from '../../pages/Token/Modals/types';
 import { startAuction } from '../../api/restApi/auction/auction';
 import { TTransaction } from '../../api/chainApi/types';
 
-export const useAuctionSellStages = (collectionId: string, tokenId: string) => {
+export const useAuctionSellStages = (collectionId: number, tokenId: number) => {
   const { api } = useApi();
   const marketApi = api?.market;
   const sellAuctionStages = useMemo(() => [
@@ -17,7 +17,7 @@ export const useAuctionSellStages = (collectionId: string, tokenId: string) => {
       action: (params: TInternalStageActionParams<TAuctionProps>) =>
         marketApi?.transferToken(params.account,
           'contract_address',
-          params.collectionId,
+          params.collectionId.toString(),
           params.tokenId.toString(),
           { ...params.options, send: (signedTx: TTransaction) => startAuction({ tx: signedTx, days: params.txParams.duration, startPrice: params.txParams.startingPrice.toString(), priceStep: params.txParams.minimumStep.toString() }) })
     }

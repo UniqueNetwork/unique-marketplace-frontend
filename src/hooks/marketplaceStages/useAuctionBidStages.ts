@@ -10,7 +10,7 @@ export type TAuctionBid = {
   value: string
 }
 
-export const useAuctionBidStages = (collectionId: string, tokenId: string) => {
+export const useAuctionBidStages = (collectionId: number, tokenId: number) => {
   const { api } = useApi();
   const marketApi = api?.market;
   const bidAuctionStages = useMemo(() => [
@@ -22,7 +22,7 @@ export const useAuctionBidStages = (collectionId: string, tokenId: string) => {
         marketApi?.transferBalance(params.account,
           'contract_address',
           params.txParams.value,
-          { ...params.options, send: (signedTx: TTransaction) => placeBid({ tx: signedTx, collectionId: +params.collectionId, tokenId: +params.tokenId }) })
+          { ...params.options, send: (signedTx: TTransaction) => placeBid({ tx: signedTx, collectionId: params.collectionId, tokenId: params.tokenId }) })
     }
   ], [marketApi]) as InternalStage<TAuctionBid>[];
   const { stages, error, status, initiate } = useMarketplaceStages<TAuctionBid>(MarketType.bid, collectionId, tokenId, bidAuctionStages);
