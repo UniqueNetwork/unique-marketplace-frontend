@@ -1,6 +1,6 @@
 import React, { FC, useEffect } from 'react';
 
-import { usePurchaseFixStages } from '../../../hooks/useMarketplaceStages';
+import { usePurchaseFixStages } from '../../../hooks/marketplaceStages';
 import DefaultMarketStages from './StagesModal';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 
