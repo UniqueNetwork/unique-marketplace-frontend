@@ -42,6 +42,7 @@ export const useOffer = (collectionId: number, tokenId: number) => {
   return {
     offer,
     isFetching,
-    fetchingError
+    fetchingError,
+    fetch
   };
 };

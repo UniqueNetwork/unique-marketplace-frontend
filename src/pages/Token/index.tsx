@@ -19,13 +19,12 @@ const TokenPage = () => {
   const { id, collectionId } = useParams<{ id: string, collectionId: string}>();
   const [token, setToken] = useState<NFTToken>();
   const [loading, setLoading] = useState<boolean>(false);
-  const { offer } = useOffer(Number(collectionId), Number(id));
+  const { offer, fetch: fetchOffer } = useOffer(Number(collectionId), Number(id));
   const [marketType, setMarketType] = useState<MarketType>(MarketType.default); // TODO: when "sell"/"buy"/"bid"/etc clicked - update this status to open modal
 
   const { selectedAccount } = useContext(accountContext);
 
-  // TODO: debug purposes, should be taken from API instead of RPC
-  useEffect(() => {
+  const fetchToken = useCallback(() => {
     if (!api) return;
     setLoading(true);
     api?.nft?.getToken(Number(collectionId), Number(id)).then((token) => {
@@ -34,11 +33,18 @@ const TokenPage = () => {
     }).catch((error) => {
       console.log('Get token from RPC failed', error);
     });
-  }, [api]);
+  }, [api, collectionId, id])
 
-  const onFinish = useCallback(() => {
+  // TODO: debug purposes, should be taken from API instead of RPC
+  useEffect(() => {
+    fetchToken();
+  }, [fetchToken]);
+
+  const onFinish = useCallback(() => {https://files.slack.com/files-tmb/T0223KMC0NQ-F034N5LH543-d5d1a04250/image_720.png
     setMarketType(MarketType.default);
-  }, []);
+    fetchToken();
+    fetchOffer(Number(collectionId), Number(id));
+  }, [fetchOffer, fetchToken, collectionId, id]);
 
   const isOwner = useMemo(() => {
     if (!selectedAccount || !token?.owner) return false;
