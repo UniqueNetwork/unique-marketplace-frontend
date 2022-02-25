@@ -21,11 +21,6 @@ export const useOffer = (collectionId: number, tokenId: number) => {
       if (response.status === 200) {
         setOffer(response.data);
         setIsFetching(false);
-      } else {
-        setFetchingError({
-          status: response.status,
-          message: JSON.stringify(response.data)
-        });
       }
     }).catch((err: AxiosError) => {
       setFetchingError({

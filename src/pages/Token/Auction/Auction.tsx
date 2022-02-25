@@ -11,6 +11,7 @@ import { Icon } from '../../../components/Icon/Icon';
 import clock from '../../../static/icons/clock.svg';
 import { timeDifference } from '../../../utils/timestampUtils';
 import { Grey300 } from '../../../styles/colors';
+import { isTokenOwner } from '../../../api/chainApi/utils/isTokenOwner';
 
 interface AuctionProps {
   offer: Offer
@@ -40,7 +41,7 @@ const Auction: FC<AuctionProps> = ({ offer, token }) => {
 
   const canDelist = useMemo(() => {
     if (!selectedAccount) return false;
-    return api?.market?.isTokenOwner(selectedAccount.address, token.owner || {}) && !offer.auction?.bids.length;
+    return isTokenOwner(selectedAccount.address, token.owner || {}) && !offer.auction?.bids.length;
   }, []);
 
   const canWithdraw = useMemo(() => {

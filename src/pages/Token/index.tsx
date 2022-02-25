@@ -7,6 +7,7 @@ import { NFTToken } from '../../api/chainApi/unique/types';
 import accountContext from '../../account/AccountContext';
 import { SellToken } from './SellToken/SellToken';
 import { BuyToken } from './BuyToken/BuyToken';
+import { isTokenOwner } from '../../api/chainApi/utils/isTokenOwner';
 import TokenPageModal from './Modals/TokenPageModal';
 import { useOffer } from '../../api/restApi/offers/offer';
 import { MarketType } from '../../types/MarketTypes';
@@ -48,8 +49,8 @@ const TokenPage = () => {
 
   const isOwner = useMemo(() => {
     if (!selectedAccount || !token?.owner) return false;
-    return api?.market?.isTokenOwner(selectedAccount.address, token.owner);
-  }, [selectedAccount, token, api?.market]);
+    return isTokenOwner(selectedAccount.address, token.owner);
+  }, [selectedAccount, token]);
 
   const onSellClick = useCallback(() => {
     setMarketType(MarketType.sellFix);

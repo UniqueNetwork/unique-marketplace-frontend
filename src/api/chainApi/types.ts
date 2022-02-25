@@ -47,12 +47,14 @@ export interface IAccountController<Collection, Token> {
 export type TTransaction = SubmittableExtrinsic<'promise'>
 
 export type TransactionOptions = {
+  // this function will be called after transaction is created and awaited before proceeding
   sign: (tx: TTransaction) => Promise<TTransaction>
+  // if not provided, signed.send() will be called instead
+  send?: (signedTx: TTransaction) => Promise<any | void>
 };
 
 export interface IMarketController {
   // substrate address
-  isTokenOwner: (account: string, tokenOwner: { Substrate?: string, Ethereum?: string }) => boolean
   addToWhiteList: (account: string, options: TransactionOptions) => Promise<void>
   checkWhiteListed: (account: string) => Promise<boolean>
   lockNftForSale: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
@@ -63,6 +65,7 @@ export interface IMarketController {
   addDeposit: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
   buyToken: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
   transferToken: (from: string, to: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
+  transferBidBalance: (from: string, to: string, amount: string, options: TransactionOptions) => Promise<void>
 }
 
 export type Chain = {

@@ -1,13 +1,14 @@
 import Web3 from 'web3';
 import { ApiPromise } from '@polkadot/api';
 import { BN } from '@polkadot/util';
-import { addressToEvm, decodeAddress, encodeAddress } from '@polkadot/util-crypto';
+import { encodeAddress } from '@polkadot/util-crypto';
 import marketplaceAbi from './abi/marketPlaceAbi.json';
 import nonFungibleAbi from './abi/nonFungibleAbi.json';
 import { sleep } from '../../../utils/helpers';
 import { IMarketController, INFTController, TransactionOptions } from '../types';
 import { CrossAccountId, normalizeAccountId } from '../utils/normalizeAccountId';
-import toAddress from '../utils/toAddress';
+import { getEthAccount } from '../utils/getEthAccount';
+import { isTokenOwner } from '../utils/isTokenOwner';
 
 export type EvmCollectionAbiMethods = {
   approve: (contractAddress: string, tokenId: string) => {
@@ -75,7 +76,8 @@ export type MartketControllerConfig = {
   marketplaceAbi?: any,
   minPrice?: number,
   kusamaDecimals?: number,
-  defaultGasAmount?: number
+  defaultGasAmount?: number,
+  auctionAddress?: string,
   nftController?: INFTController<any, any>
 }
 
@@ -99,7 +101,8 @@ class MarketController implements IMarketController {
   private kusamaDecimals: number;
   private web3Instance: Web3;
   private defaultGasAmount: number;
-  private nftController?: INFTController<any, any>;
+  private auctionAddress: string;
+  private nftController: INFTController<any, any>;
 
   constructor(uniqApi: ApiPromise, kusamaApi: ApiPromise, config: MartketControllerConfig = {}) {
     this.uniqApi = uniqApi;
@@ -118,6 +121,10 @@ class MarketController implements IMarketController {
     if (!options.kusamaDecimals) throw new Error('Kusama decimals not provided');
     this.kusamaDecimals = options.kusamaDecimals; // TODO: could and should be taken from kusamaApi
     this.defaultGasAmount = options.defaultGasAmount || 2500000;
+    if (!options.nftController) throw new Error('NFTController not provided');
+    this.nftController = options.nftController;
+    if (!options.auctionAddress) throw new Error('Auction address not provided');
+    this.auctionAddress = options.auctionAddress;
     const provider = new Web3.providers.WebsocketProvider(this.uniqueSubstrateApiRpc, {
       reconnect: {
         auto: true,
@@ -129,7 +136,6 @@ class MarketController implements IMarketController {
 
     const web3 = new Web3(provider);
     this.web3Instance = web3;
-    this.nftController = options.nftController;
   }
 
   private getMatcherContractInstance (ethAccount: string): { methods: MarketplaceAbiMethods } {
@@ -175,22 +181,9 @@ class MarketController implements IMarketController {
     throw new Error('Awaiting tx execution timed out');
   }
 
-   // decimals: 15 - opal, 18 - eth
-   private subToEthLowercase (eth: string): string { // TODO: why args called eth!?
-    const bytes = addressToEvm(eth);
-
-    return '0x' + Buffer.from(bytes).toString('hex');
-  }
-
-  private getEthAccount(account: string) {
-    if (!account) throw new Error('Account was not provided');
-    const ethAccount = Web3.utils.toChecksumAddress(this.subToEthLowercase(account));
-    return ethAccount.toLowerCase();
-  }
-
   // #region sell
   public async checkWhiteListed(account: string): Promise<boolean> {
-    const ethAddress = this.getEthAccount(account);
+    const ethAddress = getEthAccount(account);
     try {
       return (await this.uniqApi.query.evmContractHelpers.allowlist(this.contractAddress, ethAddress)).toJSON() as boolean;
     } catch (e) {
@@ -200,7 +193,7 @@ class MarketController implements IMarketController {
   }
 
   public async addToWhiteList(account: string, options: TransactionOptions): Promise<void> {
-    const ethAddress = this.getEthAccount(account);
+    const ethAddress = getEthAccount(account);
     const isWhiteListed = await this.checkWhiteListed(ethAddress);
     if (isWhiteListed) {
       return;
@@ -223,24 +216,16 @@ class MarketController implements IMarketController {
     // execute tx
   }
 
-  public isTokenOwner (account: string, tokenOwner: { Substrate?: string, Ethereum?: string }): boolean {
-    const ethAccount = this.getEthAccount(account);
-    const normalizeSubstrate = toAddress(tokenOwner.Substrate);
-
-    return normalizeSubstrate === account || tokenOwner.Ethereum?.toLowerCase() === ethAccount;
-  }
-
-  public async checkOnEth (account: string, collectionId: string, tokenId: string): Promise<boolean> {
-      const token = await this.nftController?.getToken(Number(collectionId), Number(tokenId));
-
-      return this.isTokenOwner(account, token.owner);
+  private async checkOnEth (account: string, collectionId: string, tokenId: string): Promise<boolean> {
+    const token = await this.nftController.getToken(Number(collectionId), Number(tokenId));
+    return isTokenOwner(account, token.owner);
   }
 
   // transfer to etherium
   public async lockNftForSale(account: string, collectionId: string, tokenId: string, options: TransactionOptions) {
     // check if already on eth
     const ethAccount = {
-      Ethereum: this.getEthAccount(account)
+      Ethereum: getEthAccount(account)
     };
 
     const isOnEth = await this.checkOnEth(ethAccount.Ethereum, collectionId, tokenId);
@@ -288,7 +273,7 @@ class MarketController implements IMarketController {
       return;
     }
     const tx = this.uniqApi.tx.evm.call(
-      this.getEthAccount(account),
+      getEthAccount(account),
       evmCollectionInstance.options.address,
       abi,
       0,
@@ -306,7 +291,7 @@ class MarketController implements IMarketController {
   }
 
   private async checkAsk(account: string, collectionId: string, tokenId: string) {
-    const ethAddress = this.getEthAccount(account);
+    const ethAddress = getEthAccount(account);
     const matcherContractInstance = this.getMatcherContractInstance(ethAddress);
 
     const { flagActive, ownerAddr, price }: TokenAskType = await matcherContractInstance.methods.getOrder(this.collectionIdToAddress(parseInt(collectionId, 10)), tokenId).call();
@@ -319,7 +304,7 @@ class MarketController implements IMarketController {
 
   // checkAsk - put on sale
   public async setForFixPriceSale(account: string, collectionId: string, tokenId: string, price: number, options: TransactionOptions): Promise<void> {
-    const ethAddress = this.getEthAccount(account);
+    const ethAddress = getEthAccount(account);
     const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
     const matcherContractInstance = this.getMatcherContractInstance(ethAddress);
 
@@ -331,7 +316,7 @@ class MarketController implements IMarketController {
     ).encodeABI();
 
     const tx = this.uniqApi.tx.evm.call(
-      this.getEthAccount(account),
+      getEthAccount(account),
       this.contractAddress,
       abi,
       0,
@@ -360,7 +345,7 @@ class MarketController implements IMarketController {
 
   // checkDepositReady
   private async getUserDeposit (account: string): Promise<BN> {
-    const ethAccount = this.getEthAccount(account);
+    const ethAccount = getEthAccount(account);
 
     const matcherContractInstance = this.getMatcherContractInstance(ethAccount);
     const result = await (matcherContractInstance.methods/* as MarketplaceAbiMethods */).balanceKSM(ethAccount).call();
@@ -412,7 +397,7 @@ class MarketController implements IMarketController {
 
   // TODO: we have 3 outcomes ('already enough funds'/'not enough funds, sign to add'/'not enough funds on account'), will collide with UI since we expect bool from here and nahve no control over stages texts
   public async addDeposit (account: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
-    const matcherContractInstance = this.getMatcherContractInstance(this.getEthAccount(account));
+    const matcherContractInstance = this.getMatcherContractInstance(getEthAccount(account));
     const userDeposit = await this.getUserDeposit(account);
     if (!userDeposit) throw new Error('No user deposit');
     const token = await this.nftController?.getToken(Number(collectionId), Number(tokenId));
@@ -447,7 +432,7 @@ class MarketController implements IMarketController {
 
   // buyToken
   public async buyToken (account: string, collectionId: string, tokenId: string, options: TransactionOptions) {
-    const ethAccount = this.getEthAccount(account);
+    const ethAccount = getEthAccount(account);
     const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
     const matcherContractInstance = this.getMatcherContractInstance(ethAccount);
     const abi = (matcherContractInstance.methods).buyKSM(evmCollectionInstance.options.address, tokenId, ethAccount, ethAccount).encodeABI();
@@ -476,7 +461,7 @@ class MarketController implements IMarketController {
 
   // #region delist
   public async cancelSell(account: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
-    const ethAddress = this.getEthAccount(account);
+    const ethAddress = getEthAccount(account);
     const matcherContractInstance = this.getMatcherContractInstance(ethAddress);
     const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
 
@@ -490,7 +475,7 @@ class MarketController implements IMarketController {
     ).encodeABI();
 
     const tx = this.uniqApi.tx.evm.call(
-      this.getEthAccount(account),
+      getEthAccount(account),
       this.contractAddress,
       abi,
       0,
@@ -519,7 +504,7 @@ class MarketController implements IMarketController {
 
   public async unlockNft(account: string, collectionId: string, tokenId: string, options: TransactionOptions) {
     const ethAccount = {
-      Ethereum: this.getEthAccount(account)
+      Ethereum: getEthAccount(account)
     };
     // check if already on substrar
     const token = await this.nftController?.getToken(Number(collectionId), Number(tokenId));
@@ -553,14 +538,14 @@ class MarketController implements IMarketController {
   // #region transfer
   public async transferToken (from: string, to: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
     const tokenPart = 1;
-    const recipient = { Substrate: to, Ethereum: this.getEthAccount(to) };
-    const ethTo = this.getEthAccount(to);
+    const recipient = { Substrate: to, Ethereum: getEthAccount(to) };
+    const ethTo = getEthAccount(to);
     const token = await this.nftController?.getToken(Number(collectionId), Number(tokenId));
     if (!token) throw new Error('Token not found');
     const tokenOwner = token.owner;
     let tx = this.uniqApi.tx.unique.transfer(recipient, collectionId, tokenId, tokenPart);
     if (!tokenOwner?.Substrate || tokenOwner?.Substrate !== from) {
-      const ethFrom = this.getEthAccount(from);
+      const ethFrom = getEthAccount(from);
       if (tokenOwner?.Ethereum === ethFrom) {
         tx = this.uniqApi.tx.unique.transferFrom(normalizeAccountId({ Ethereum: ethFrom } as CrossAccountId), normalizeAccountId(recipient as CrossAccountId), collectionId, tokenId, 1);
       }
@@ -570,13 +555,46 @@ class MarketController implements IMarketController {
 
     if (!signedTx) throw new Error('Transaction cancelled');
 
-    await signedTx.send();
+    if (options.send) {
+      await options.send(signedTx);
+    } else {
+      await signedTx.send();
+    }
     await this.repeatCheckForTransactionFinish(async () => {
       const updatedToken = await this.nftController?.getToken(Number(collectionId), Number(tokenId));
       const owner = updatedToken.owner;
       if (owner.Ethereum === ethTo || owner.Substrate === to) return true;
       return false;
     });
+  }
+
+  private fromStringToBnString (value: string, decimals: number): string {
+    if (!value || !value.length) {
+      return '0';
+    }
+
+    const numStringValue = value.replace(',', '.');
+    const [left, right] = numStringValue.split('.');
+    const decimalsFromLessZeroString = right?.length || 0;
+    const bigValue = [...(left || []), ...(right || [])].join('').replace(/^0+/, '');
+
+    return (Number(bigValue) * Math.pow(10, decimals - decimalsFromLessZeroString)).toString();
+  }
+
+  public async transferBidBalance (from: string, to: string, amount: string, options: TransactionOptions): Promise<void> {
+    const tx = this.kusamaApi.tx.balances.transfer(
+      encodeAddress(this.auctionAddress),
+      this.fromStringToBnString(amount, this.kusamaDecimals)
+    );
+    const signedTx = await options.sign(tx);
+    if (!signedTx) throw new Error('Transaction cancelled');
+    if (options.send) {
+      await options.send(signedTx);
+    } else {
+      await signedTx.send();
+    }
+    await sleep(1000);
+    // TODO: any way to check this being executed?
   }
   // #endregion transfer
 }

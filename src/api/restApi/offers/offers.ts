@@ -23,11 +23,6 @@ export const useOffers = ({ page = 1, pageSize = 10, ...props }: UseFetchOffersP
         setOffers(response.data.items);
         setOffersCount(response.data.itemsCount);
         setIsFetching(false);
-      } else {
-        setFetchingError({
-          status: response.status,
-          message: JSON.stringify(response.data)
-        });
       }
     }).catch((err: AxiosError) => {
       setFetchingError({
