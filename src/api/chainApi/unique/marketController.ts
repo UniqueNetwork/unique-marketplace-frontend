@@ -1,6 +1,7 @@
 import Web3 from 'web3';
 import { ApiPromise } from '@polkadot/api';
 import { BN } from '@polkadot/util';
+import { encodeAddress } from '@polkadot/util-crypto';
 import marketplaceAbi from './abi/marketPlaceAbi.json';
 import nonFungibleAbi from './abi/nonFungibleAbi.json';
 import { sleep } from '../../../utils/helpers';
@@ -75,7 +76,8 @@ export type MartketControllerConfig = {
   marketplaceAbi?: any,
   minPrice?: number,
   kusamaDecimals?: number,
-  defaultGasAmount?: number
+  defaultGasAmount?: number,
+  auctionAddress?: string,
   nftController?: INFTController<any, any>
 }
 
@@ -99,6 +101,7 @@ class MarketController implements IMarketController {
   private kusamaDecimals: number;
   private web3Instance: Web3;
   private defaultGasAmount: number;
+  private auctionAddress: string;
   private nftController: INFTController<any, any>;
 
   constructor(uniqApi: ApiPromise, kusamaApi: ApiPromise, config: MartketControllerConfig = {}) {
@@ -120,6 +123,8 @@ class MarketController implements IMarketController {
     this.defaultGasAmount = options.defaultGasAmount || 2500000;
     if (!options.nftController) throw new Error('NFTController not provided');
     this.nftController = options.nftController;
+    if (!options.auctionAddress) throw new Error('Auction address not provided');
+    this.auctionAddress = options.auctionAddress;
     const provider = new Web3.providers.WebsocketProvider(this.uniqueSubstrateApiRpc, {
       reconnect: {
         auto: true,
@@ -563,8 +568,33 @@ class MarketController implements IMarketController {
     });
   }
 
-  public async transferBalance (from: string, to: string, amount: string, options: TransactionOptions): Promise<void> {
+  private fromStringToBnString (value: string, decimals: number): string {
+    if (!value || !value.length) {
+      return '0';
+    }
+
+    const numStringValue = value.replace(',', '.');
+    const [left, right] = numStringValue.split('.');
+    const decimalsFromLessZeroString = right?.length || 0;
+    const bigValue = [...(left || []), ...(right || [])].join('').replace(/^0+/, '');
+
+    return (Number(bigValue) * Math.pow(10, decimals - decimalsFromLessZeroString)).toString();
+  }
+
+  public async transferBidBalance (from: string, to: string, amount: string, options: TransactionOptions): Promise<void> {
+    const tx = this.kusamaApi.tx.balances.transfer(
+      encodeAddress(this.auctionAddress),
+      this.fromStringToBnString(amount, this.kusamaDecimals)
+    );
+    const signedTx = await options.sign(tx);
+    if (!signedTx) throw new Error('Transaction cancelled');
+    if (options.send) {
+      await options.send(signedTx);
+    } else {
+      await signedTx.send();
+    }
     await sleep(1000);
+    // TODO: any way to check this being executed?
   }
   // #endregion transfer
 }

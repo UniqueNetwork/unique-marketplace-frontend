@@ -19,7 +19,7 @@ export const useAuctionBidStages = (collectionId: number, tokenId: number) => {
       description: '',
       status: StageStatus.default,
       action: (params: TInternalStageActionParams<TAuctionBid>) =>
-        marketApi?.transferBalance(params.account,
+        marketApi?.transferBidBalance(params.account,
           'contract_address',
           params.txParams.value,
           { ...params.options, send: (signedTx: TTransaction) => placeBid({ tx: signedTx, collectionId: params.collectionId, tokenId: params.tokenId }) })
