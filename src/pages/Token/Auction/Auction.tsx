@@ -47,7 +47,7 @@ const Auction: FC<AuctionProps> = ({ offer, token }) => {
     return false; // TODO: check it
   }, []);
 
-  if (!offer || !token) return null;
+  if (!offer) return null;
 
   return (
     <AuctionWrapper>
