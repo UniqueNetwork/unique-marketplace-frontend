@@ -1,13 +1,10 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { web3FromSource } from '@polkadot/extension-dapp';
-import { useApi } from './useApi';
 import { TTransaction } from '../api/chainApi/types';
 import AccountContext from '../account/AccountContext';
-import { InternalStage, MarketType, StageStatus, TInternalStageActionParams, useMarketplaceStagesReturn } from '../types/MarketTypes';
-import { TAuctionProps, TFixPriceProps, TTransfer } from '../pages/Token/Modals/types';
+import { InternalStage, MarketType, StageStatus, useMarketplaceStagesReturn } from '../types/MarketTypes';
 
-// TODO: change collection/token id's to numbers everywhere (or support both)
-const useMarketplaceStages = <T>(type: MarketType, collectionId: string, tokenId: string, stages: InternalStage<T>[]): useMarketplaceStagesReturn<T> => {
+const useMarketplaceStages = <T>(type: MarketType, collectionId: number, tokenId: number, stages: InternalStage<T>[]): useMarketplaceStagesReturn<T> => {
   const { selectedAccount } = useContext(AccountContext);
 
   const [internalStages, setInternalStages] = useState<InternalStage<T>[]>(stages);
@@ -89,142 +86,6 @@ const useMarketplaceStages = <T>(type: MarketType, collectionId: string, tokenId
     }),
     error: executionError,
     status: marketStagesStatus,
-    initiate
-  };
-};
-
-export const useSellFixStages = (collectionId: string, tokenId: string) => {
-  const { api } = useApi();
-  const marketApi = api?.market;
-  const sellFixStages = useMemo(() => [{
-    title: 'Add to WhiteList',
-    description: '',
-    status: StageStatus.default,
-    action: (params: TInternalStageActionParams<TFixPriceProps>) => marketApi?.addToWhiteList(params.account, params.options)
-  },
-  {
-    title: 'Locking NFT for sale',
-    description: '',
-    status: StageStatus.default,
-    action: (params: TInternalStageActionParams<TFixPriceProps>) => marketApi?.lockNftForSale(params.account, params.collectionId, params.tokenId.toString(), params.options)
-  },
-  {
-    title: 'Sending NFT to Smart contract',
-    description: '',
-    status: StageStatus.default,
-    action: (params: TInternalStageActionParams<TFixPriceProps>) => marketApi?.sendNftToSmartContract(params.account, params.collectionId, params.tokenId.toString(), params.options)
-  },
-  {
-    title: 'Setting price',
-    description: '',
-    status: StageStatus.default,
-    action: (params: TInternalStageActionParams<TFixPriceProps>) => marketApi?.setForFixPriceSale(params.account, params.collectionId, params.tokenId.toString(), params?.txParams?.price || -1, params.options)
-  }], [marketApi]) as InternalStage<TFixPriceProps>[]; // TODO: solve this typization riddle
-  const { stages, error, status, initiate } = useMarketplaceStages<TFixPriceProps>(MarketType.sellFix, collectionId, tokenId, sellFixStages);
-
-  return {
-    stages,
-    error,
-    status,
-    initiate
-  };
-};
-
-export const useCancelSellFixStages = (collectionId: string, tokenId: string) => {
-  const { api } = useApi();
-  const marketApi = api?.market;
-  const delistStages = useMemo(() => [
-    {
-      title: 'Cancel sale of NFT',
-      description: '',
-      status: StageStatus.default,
-      action: (params: TInternalStageActionParams<null>) => marketApi?.cancelSell(params.account, params.collectionId, params.tokenId.toString(), params.options)
-    },
-    {
-      title: 'Unlocking NFT',
-      description: '',
-      status: StageStatus.default,
-      action: (params: TInternalStageActionParams<null>) => marketApi?.unlockNft(params.account, params.collectionId, params.tokenId.toString(), params.options)
-    }
-  ], [marketApi]) as InternalStage<null>[];
-  const { stages, error, status, initiate } = useMarketplaceStages<null>(MarketType.sellFix, collectionId, tokenId, delistStages);
-
-  return {
-    stages,
-    error,
-    status,
-    initiate
-  };
-};
-
-export const usePurchaseFixStages = (collectionId: string, tokenId: string) => {
-  const { api } = useApi();
-  const marketApi = api?.market;
-  const purchaseStages = useMemo(() => [{
-    title: 'Place a deposit',
-    description: '',
-    status: StageStatus.default,
-    action: (params: TInternalStageActionParams<null>) => marketApi?.addDeposit(params.account, params.collectionId, params.tokenId.toString(), params.options)
-  },
-  {
-    title: 'Buy token',
-    description: '',
-    status: StageStatus.default,
-    action: (params: TInternalStageActionParams<null>) => marketApi?.buyToken(params.account, params.collectionId, params.tokenId.toString(), params.options)
-  }], [marketApi]) as InternalStage<null>[];
-  const { stages, error, status, initiate } = useMarketplaceStages<null>(MarketType.purchase, collectionId, tokenId, purchaseStages);
-
-  return {
-    stages,
-    error,
-    status,
-    initiate
-  };
-};
-
-export const useAuctionSellStages = (collectionId: string, tokenId: string) => {
-  const { api } = useApi();
-  const marketApi = api?.market;
-  const sellAuctionStages = useMemo(() => [], [marketApi]) as InternalStage<TAuctionProps>[];
-  const { stages, error, status, initiate } = useMarketplaceStages<TAuctionProps>(MarketType.sellAuction, collectionId, tokenId, sellAuctionStages);
-
-  return {
-    stages,
-    error,
-    status,
-    initiate
-  };
-};
-
-export const useAuctionBidStages = (collectionId: string, tokenId: string) => {
-  const { api } = useApi();
-  const marketApi = api?.market;
-  const bidAuctionStages = useMemo(() => [], [marketApi]) as InternalStage<null>[]; // TODO: proper param (amount)
-  const { stages, error, status, initiate } = useMarketplaceStages<null>(MarketType.bid, collectionId, tokenId, bidAuctionStages);
-
-  return {
-    stages,
-    error,
-    status,
-    initiate
-  };
-};
-
-export const useTransferStages = (collectionId: string, tokenId: string) => {
-  const { api } = useApi();
-  const marketApi = api?.market;
-  const transferStages = useMemo(() => [{
-    title: 'Transfer token',
-    description: '',
-    status: StageStatus.default,
-    action: (params: TInternalStageActionParams<TTransfer>) => marketApi?.transferToken(params.account, params.txParams?.recipient || '', params.collectionId, params.tokenId.toString(), params.options)
-  }], [marketApi]) as InternalStage<TTransfer>[];
-  const { stages, error, status, initiate } = useMarketplaceStages<TTransfer>(MarketType.transfer, collectionId, tokenId, transferStages);
-
-  return {
-    stages,
-    error,
-    status,
     initiate
   };
 };

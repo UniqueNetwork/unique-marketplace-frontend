@@ -6,8 +6,9 @@ import { ApiContextProps, ApiProvider, ChainData } from './ApiContext';
 import config from '../config';
 import { defaultChainKey } from '../utils/configParser';
 import { gqlClient as gql, rpcClient as rpc } from '.';
-import { getSettings, useSettings } from './restApi/settings/settings';
+import { getSettings } from './restApi/settings/settings';
 import { ApolloProvider } from '@apollo/client';
+import AuctionSocketProvider from './restApi/auction/AuctionSocketProvider';
 
 interface ChainProviderProps {
   children: React.ReactNode
@@ -65,7 +66,9 @@ const ApiWrapper = ({ children, gqlClient = gql, rpcClient = rpc }: ChainProvide
 
   return (
     <ApiProvider value={value}>
-      <ApolloProvider client={gqlClient.client}>{children}</ApolloProvider>
+      <AuctionSocketProvider url={config.uniqueApiUrl}>
+        <ApolloProvider client={gqlClient.client}>{children}</ApolloProvider>
+      </AuctionSocketProvider>
     </ApiProvider>
   );
 };

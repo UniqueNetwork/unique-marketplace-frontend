@@ -28,8 +28,8 @@ export type Stage = {
 
 export type TInternalStageActionParams<T> = {
   account: string,
-  tokenId: string,
-  collectionId: string,
+  tokenId: number,
+  collectionId: number,
   txParams: T,
   options: TransactionOptions
 }

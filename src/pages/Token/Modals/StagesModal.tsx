@@ -4,12 +4,13 @@ import { Stage, StageStatus } from '../../../types/MarketTypes';
 type TStagesModalProps = {
   stages: Stage[],
   status: StageStatus,
-  onModalClose: () => void, // TODO: copy-pasted
+  onFinish: () => void, // TODO: copy-pasted
 }
-const DefaultMarketStages: FC<TStagesModalProps> = ({ stages, status, onModalClose }) => {
+
+const DefaultMarketStages: FC<TStagesModalProps> = ({ stages, status, onFinish }) => {
   useEffect(() => {
-    if (status === StageStatus.success) {
-      setTimeout(() => onModalClose(), 500);
+    if (status === StageStatus.success || status === StageStatus.error) {
+      setTimeout(() => onFinish(), 500);
     }
   }, [status]);
 

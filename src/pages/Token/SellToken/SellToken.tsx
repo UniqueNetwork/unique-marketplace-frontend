@@ -1,42 +1,34 @@
-import React, { FC, useCallback } from 'react';
-import { NFTToken } from '../../../api/chainApi/unique/types';
-import { useOffer } from '../../../api/restApi/offers/offer';
+import React, { FC } from 'react';
 import styled from 'styled-components/macro';
-import { Button, Heading } from '@unique-nft/ui-kit';
-import { AdditionalColorLight, AdditionalWarning100, AdditionalWarning500, Grey300 } from '../../../styles/colors';
-import { Icon } from '../../../components/Icon/Icon';
-import logoKusama from '../../../static/icons/logo-kusama.svg';
+import { Button } from '@unique-nft/ui-kit';
+
+import { AdditionalWarning100, AdditionalWarning500, Grey300 } from '../../../styles/colors';
 import { useFee } from '../../../hooks/useFee';
 import { Price } from '../TokenDetail/Price';
+import { Offer } from '../../../api/restApi/offers/types';
+import { NFTToken } from '../../../api/chainApi/unique/types';
+import Auction from '../Auction/Auction';
 
 interface ForOwnerProps {
   token: NFTToken
+  offer?: Offer
+  onSellClick(): void
+  onTransferClick(): void
+  onDelistClick(): void
 }
 
-export const SellToken: FC<ForOwnerProps> = ({ token }) => {
+export const SellToken: FC<ForOwnerProps> = ({ token, offer, onSellClick, onTransferClick, onDelistClick }) => {
   const { fee } = useFee();
-  const { offer } = useOffer(token.collectionId || 0, token.id);
-
-  const onSellClick = useCallback(() => {
-    // TODO: open sell modal
-  }, []);
-
-  const onTransferClick = useCallback(() => {
-    // TODO: open transfer modal
-  }, []);
-
-  const onDelistClick = useCallback(() => {
-    // TODO: open transfer modal
-  }, []);
 
   if (offer) {
- return (<>
-   <Price price={offer.price} fee={fee} bid={offer.auction?.priceStep} />
-   <ButtonWrapper>
-     <Button title={'Delist'} role={'danger'} onClick={onDelistClick} />
-   </ButtonWrapper>
- </>);
-}
+    return (<>
+      <Price price={offer.price} fee={fee} bid={offer.auction?.priceStep} />
+      {offer.auction && <Auction offer={offer} token={token}/>}
+      <ButtonWrapper>
+        <Button title={'Delist'} role={'danger'} onClick={onDelistClick} />
+      </ButtonWrapper>
+    </>);
+  }
 
   return (
     <>
