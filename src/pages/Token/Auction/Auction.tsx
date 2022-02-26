@@ -1,9 +1,8 @@
-import React, { FC, useCallback, useContext, useMemo } from 'react';
+import React, { FC, useContext, useMemo } from 'react';
 import { Text, Button } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import { Offer } from '../../../api/restApi/offers/types';
-import { useApi } from '../../../hooks/useApi';
 import { NFTToken } from '../../../api/chainApi/unique/types';
 import Bids from './Bids';
 import accountContext from '../../../account/AccountContext';
@@ -16,24 +15,13 @@ import { isTokenOwner } from '../../../api/chainApi/utils/isTokenOwner';
 interface AuctionProps {
   offer: Offer
   token: NFTToken
+  onPlaceABidClick(): void
+  onDelistClick(): void
+  onWithdrawClick(): void
 }
 
-const Auction: FC<AuctionProps> = ({ offer, token }) => {
+const Auction: FC<AuctionProps> = ({ offer, token, onPlaceABidClick, onDelistClick, onWithdrawClick }) => {
   const { selectedAccount } = useContext(accountContext);
-
-  const { api } = useApi();
-
-  const onPlaceABidClick = useCallback(() => {
-    // TODO: place a bid
-  }, []);
-
-  const onDelistClick = useCallback(() => {
-    // TODO: delist
-  }, []);
-
-  const onWithdrawClick = useCallback(() => {
-    // TODO: withdraw
-  }, []);
 
   const canPlaceABid = useMemo(() => {
     return true; // TODO: get a balance of selected account

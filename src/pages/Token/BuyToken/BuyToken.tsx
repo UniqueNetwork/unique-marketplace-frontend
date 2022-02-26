@@ -13,9 +13,12 @@ interface BuyTokenProps {
   token: NFTToken;
   offer?: Offer;
   onBuyClick(): void
+  onPlaceABidClick(): void
+  onDelistClick(): void
+  onWithdrawClick(): void
 }
 
-export const BuyToken: FC<BuyTokenProps> = ({ offer, token, onBuyClick }) => {
+export const BuyToken: FC<BuyTokenProps> = ({ offer, token, onBuyClick, onPlaceABidClick, onDelistClick, onWithdrawClick }) => {
   const { fee } = useFee();
 
   if (!offer) return null;
@@ -23,18 +26,25 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, token, onBuyClick }) => {
   return (<>
     <Price price={offer.price} fee={fee} bid={offer.auction?.priceStep} />
     {offer.auction
-? <Auction offer={offer} token={token} />
-: <>
-  <ButtonWrapper>
-    <Button
-      onClick={onBuyClick}
-      role='primary'
-      title='Buy'
-      wide={true}
-    />
-  </ButtonWrapper>
-  <Divider />
-</>}
+      ? <Auction
+          offer={offer}
+          token={token}
+          onWithdrawClick={onWithdrawClick}
+          onPlaceABidClick={onPlaceABidClick}
+          onDelistClick={onDelistClick}
+        />
+      : <>
+        <ButtonWrapper>
+          <Button
+            onClick={onBuyClick}
+            role='primary'
+            title='Buy'
+            wide={true}
+          />
+        </ButtonWrapper>
+        <Divider />
+      </>
+    }
   </>);
 };
 

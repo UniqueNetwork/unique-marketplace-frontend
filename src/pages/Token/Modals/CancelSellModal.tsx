@@ -1,5 +1,5 @@
 import { FC, useEffect } from 'react';
-import { useCancelSellFixStages } from '../../../hooks/useMarketplaceStages';
+import { useCancelSellFixStages } from '../../../hooks/marketplaceStages';
 import DefaultMarketStages from './StagesModal';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 

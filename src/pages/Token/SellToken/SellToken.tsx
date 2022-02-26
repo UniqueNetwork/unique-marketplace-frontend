@@ -14,16 +14,24 @@ interface ForOwnerProps {
   offer?: Offer
   onSellClick(): void
   onTransferClick(): void
+  onPlaceABidClick(): void
   onDelistClick(): void
+  onWithdrawClick(): void
 }
 
-export const SellToken: FC<ForOwnerProps> = ({ token, offer, onSellClick, onTransferClick, onDelistClick }) => {
+export const SellToken: FC<ForOwnerProps> = ({ token, offer, onSellClick, onTransferClick, onDelistClick, onWithdrawClick, onPlaceABidClick }) => {
   const { fee } = useFee();
 
   if (offer) {
     return (<>
       <Price price={offer.price} fee={fee} bid={offer.auction?.priceStep} />
-      {offer.auction && <Auction offer={offer} token={token}/>}
+      {offer.auction && <Auction
+          offer={offer}
+          token={token}
+          onWithdrawClick={onWithdrawClick}
+          onPlaceABidClick={onPlaceABidClick}
+          onDelistClick={onDelistClick}
+      />}
       <ButtonWrapper>
         <Button title={'Delist'} role={'danger'} onClick={onDelistClick} />
       </ButtonWrapper>

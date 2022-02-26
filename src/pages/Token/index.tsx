@@ -62,6 +62,14 @@ const TokenPage = () => {
     setMarketType(MarketType.purchase);
   }, []);
 
+  const onPlaceABidClick = useCallback(() => {
+    setMarketType(MarketType.bid);
+  }, []);
+
+  const onWithdrawClick = useCallback(() => {
+    // TODO: withdraw
+  }, []);
+
   if (loading) return <Loading />;
   else if (!token) return <Error404 />;
 
@@ -75,9 +83,18 @@ const TokenPage = () => {
             onSellClick={onSellClick}
             onTransferClick={onTransferClick}
             onDelistClick={onDelistClick}
-          />
+            onPlaceABidClick={onPlaceABidClick}
+            onWithdrawClick={onWithdrawClick}
+        />
         // TODO: should not depend on token (we have seller in offer)
-        : <BuyToken offer={offer} token={token} onBuyClick={onBuyClick} />}
+        : <BuyToken
+          offer={offer}
+          token={token}
+          onBuyClick={onBuyClick}
+          onDelistClick={onDelistClick}
+          onPlaceABidClick={onPlaceABidClick}
+          onWithdrawClick={onWithdrawClick}
+        />}
       <TokenPageModal
         token={token}
         offer={offer}
