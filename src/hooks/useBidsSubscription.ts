@@ -8,7 +8,7 @@ type useBidsSubscriptionProps = {
   onPlaceBid(bid: Bid): void
 };
 
-export const useBidsSubscription = ({ offer, onPlaceBid}: useBidsSubscriptionProps) => {
+export const useBidsSubscription = ({ offer, onPlaceBid }: useBidsSubscriptionProps) => {
   const { socket } = useContext(AuctionContextContext);
 
   useEffect(() => {
@@ -25,6 +25,5 @@ export const useBidsSubscription = ({ offer, onPlaceBid}: useBidsSubscriptionPro
     };
   }, [socket, offer]);
 
-
-  return {}
+  return {};
 };

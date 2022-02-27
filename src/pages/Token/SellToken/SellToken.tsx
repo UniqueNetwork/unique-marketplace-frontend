@@ -26,11 +26,11 @@ export const SellToken: FC<ForOwnerProps> = ({ token, offer, onSellClick, onTran
     return (<>
       <Price price={offer.price} fee={fee} bid={offer.auction?.priceStep} />
       {offer.auction && <Auction
-          offer={offer}
-          token={token}
-          onWithdrawClick={onWithdrawClick}
-          onPlaceABidClick={onPlaceABidClick}
-          onDelistClick={onDelistClick}
+        offer={offer}
+        token={token}
+        onWithdrawClick={onWithdrawClick}
+        onPlaceABidClick={onPlaceABidClick}
+        onDelistClick={onDelistClick}
       />}
       <ButtonWrapper>
         <Button title={'Delist'} role={'danger'} onClick={onDelistClick} />

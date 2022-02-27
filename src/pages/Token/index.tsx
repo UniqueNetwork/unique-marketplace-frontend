@@ -88,12 +88,12 @@ const TokenPage = () => {
         />
         // TODO: should not depend on token (we have seller in offer)
         : <BuyToken
-          offer={offer}
-          token={token}
-          onBuyClick={onBuyClick}
-          onDelistClick={onDelistClick}
-          onPlaceABidClick={onPlaceABidClick}
-          onWithdrawClick={onWithdrawClick}
+            offer={offer}
+            token={token}
+            onBuyClick={onBuyClick}
+            onDelistClick={onDelistClick}
+            onPlaceABidClick={onPlaceABidClick}
+            onWithdrawClick={onWithdrawClick}
         />}
       <TokenPageModal
         token={token}

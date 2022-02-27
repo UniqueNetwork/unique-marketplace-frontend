@@ -8,7 +8,7 @@ import logo from '../../logos/logo-white-label-market.svg';
 import menu from '../../static/icons/menu.svg';
 import { TMenuItems } from '../PageLayout';
 import { AdditionalColorDark, AdditionalColorLight, Primary500 } from '../../styles/colors';
-import accountContext from "../../account/AccountContext";
+import accountContext from '../../account/AccountContext';
 
 interface HeaderProps {
   activeItem: TMenuItems;
@@ -29,7 +29,6 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
     console.log(address, newAccount);
     if (newAccount) changeAccount(newAccount);
   }, [accounts]);
-
 
   const account = selectedAccount
       ? (
@@ -110,7 +109,6 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
       </LeftSideColumn>
       <RightSide>
         <Balance>Balance {balance}</Balance>
-
 
         {account}
       </RightSide>

@@ -12,7 +12,7 @@ const AuctionSocketProvider: FC<TAuctionProviderProps> = ({ url, children }) => 
   const connectSocket = useCallback((url) => {
     if (!url) return;
     const socket = io(url, {
-      path: '/socket.io'
+      path: '/api/socket.io'
     });
     setSocket(socket);
 
