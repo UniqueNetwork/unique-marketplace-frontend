@@ -4,7 +4,7 @@ import styled from 'styled-components/macro';
 
 import DefaultMarketStages from './StagesModal';
 import { TAuctionProps, TFixPriceProps } from './types';
-import { useAuctionSellStages, useSellFixStages } from '../../../hooks/useMarketplaceStages';
+import { useAuctionSellStages, useSellFixStages } from '../../../hooks/marketplaceStages';
 import { AdditionalColorDark, AdditionalWarning100 } from '../../../styles/colors';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 

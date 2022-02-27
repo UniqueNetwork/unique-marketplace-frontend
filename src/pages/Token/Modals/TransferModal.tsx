@@ -5,7 +5,7 @@ import styled from 'styled-components/macro';
 import { TTransfer } from './types';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 import { AdditionalWarning100 } from '../../../styles/colors';
-import { useTransferStages } from '../../../hooks/useMarketplaceStages';
+import { useTransferStages } from '../../../hooks/marketplaceStages';
 import DefaultMarketStages from './StagesModal';
 
 export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosable, onFinish }) => {
