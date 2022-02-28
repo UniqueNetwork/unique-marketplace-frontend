@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { post, get } from '../base';
 import { defaultParams } from '../base/axios';
 
-const endpoint = '/offer';
+const endpoint = '/auction';
 
 export enum FetchStatus {
   default = 'Default',
@@ -20,8 +20,8 @@ export type TPlaceBidParams = {
   tx: unknown, collectionId: number, tokenId: number
 }
 
-export const startAuction = (body: TStartAuctionParams) => post<TStartAuctionParams>(`${endpoint}/auction/create_auction`, body, { ...defaultParams });
-export const placeBid = (body: TPlaceBidParams) => post<TPlaceBidParams>(`${endpoint}/auction/auction/place_bid`, body, { ...defaultParams });
+export const startAuction = (body: TStartAuctionParams) => post<TStartAuctionParams>(`${endpoint}/create_auction`, body, { ...defaultParams });
+export const placeBid = (body: TPlaceBidParams) => post<TPlaceBidParams>(`${endpoint}/place_bid`, body, { ...defaultParams });
 
 export const useAuction = () => {
   const [startAuctionStatus, setStartAuctionStatus] = useState<FetchStatus>(FetchStatus.default);

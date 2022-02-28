@@ -11,7 +11,7 @@ export type TFixPriceProps = {
 export type TAuctionProps = {
   minimumStep: number,
   startingPrice: number,
-  duration: number // timestamp in ms's
+  duration: number // days number
 }
 
 export interface ModalProps {

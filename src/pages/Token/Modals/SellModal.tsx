@@ -26,6 +26,7 @@ export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, offer, onFinish
       setStatus('auction-stage');
       setIsClosable(false);
   }, [setStatus, setAuction]);
+
   const onSellFixPrice = useCallback((fixPrice: TFixPriceProps) => {
     setFixPrice(fixPrice);
     setStatus('fix-price-stage');
@@ -82,12 +83,12 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
   );
 
   const onConfirmAuctionClick = useCallback(() => {
-    onSellAuction({ minimumStep: minStepInputValueAuction, startingPrice: priceInputValue, duration: durationSelectValue } as TAuctionProps);
-  }, []);
+    onSellAuction({ minimumStep: minStepInputValueAuction, startingPrice: inputStartingPriceValue, duration: durationSelectValue } as TAuctionProps);
+  }, [minStepInputValueAuction, inputStartingPriceValue, durationSelectValue]);
 
   const onConfirmFixPriceClick = useCallback(() => {
     onSellFixPrice({ price: priceInputValue } as TFixPriceProps); // TODO: proper typing, proper calculated object
-  }, []);
+  }, [priceInputValue]);
 
   const onMinStepInputChange = useCallback(
     (value: number) => {
@@ -113,19 +114,19 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
 
   const durationOptions = [
     {
-      id: '3 days',
+      id: 3,
       title: '3 days'
     },
     {
-      id: '7 days',
+      id: 7,
       title: '7 days'
     },
     {
-      id: '14 days',
+      id: 14,
       title: '14 days'
     },
     {
-      id: '21 days',
+      id: 21,
       title: '21 days'
     }
   ];
@@ -235,7 +236,8 @@ export const SellFixStagesModal: FC<TSellFixStagesModal> = ({ collectionId, toke
 
 export const SellAuctionStagesModal: FC<TSellAuctionStagesModal> = ({ collectionId, tokenId, auction, onFinish }) => {
   const { stages, status, initiate } = useAuctionSellStages(collectionId, tokenId);
-  useEffect(() => { initiate(auction); }, [initiate, auction]);
+  console.log(auction);
+  useEffect(() => { initiate(auction); }, [auction]); //
   return (
     <div>
       <DefaultMarketStages stages={stages} status={status} onFinish={onFinish} />

@@ -576,6 +576,10 @@ class MarketController implements IMarketController {
     });
   }
 
+  public async transferToAuction(owner: string, collectionId: string, tokenId: string, options: TransactionOptions) {
+    return this.transferToken(owner, this.auctionAddress, collectionId, tokenId, options);
+  }
+
   private fromStringToBnString (value: string, decimals: number): string {
     if (!value || !value.length) {
       return '0';
