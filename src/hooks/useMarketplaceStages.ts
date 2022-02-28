@@ -18,11 +18,12 @@ const useMarketplaceStages = <T>(type: MarketType, collectionId: number, tokenId
   }, [internalStages]);
 
   const updateStage = useCallback((index: number, newStage: InternalStage<T>) => {
-    const copy = [...internalStages];
-    copy[index] = newStage;
-    console.log(index, newStage);
-    setInternalStages(copy);
-  }, [internalStages, setInternalStages]);
+    setInternalStages((stages) => {
+      const copy = [...stages];
+      copy[index] = newStage;
+      return copy;
+    });
+  }, [setInternalStages]);
 
   const getSignFunction = useCallback((index: number, internalStage: InternalStage<T>) => {
     const sign = (tx: TTransaction): Promise<TTransaction> => {
@@ -45,15 +46,12 @@ const useMarketplaceStages = <T>(type: MarketType, collectionId: number, tokenId
   }, [updateStage, selectedAccount]);
 
   const executeStep = useCallback(async (stage: InternalStage<T>, index: number, txParams: T) => {
-    console.log(index, stage);
     updateStage(index, { ...stage, status: StageStatus.inProgress });
     try {
       // if sign is required by action -> promise wouldn't be resolved until transaction is signed
       // transaction sign could be triggered in the component that uses current stage (you can track it by using stage.signer)
       await stage.action({ account: selectedAccount?.address || '', collectionId, tokenId, txParams, options: { sign: getSignFunction(index, stage) } });
       updateStage(index, { ...stage, status: StageStatus.success });
-
-      console.log(index, stage);
     } catch (e) {
       updateStage(index, { ...stage, status: StageStatus.error });
       console.error('Execute stage failed', stage, e);
