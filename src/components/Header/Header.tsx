@@ -50,7 +50,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
     toggleMobileMenu((prevState) => !prevState);
   }, []);
 
-  const balance = 0;
+  const balance = selectedAccount?.balance?.KSM?.toNumber() || 0;
 
   return (
     <HeaderStyled>

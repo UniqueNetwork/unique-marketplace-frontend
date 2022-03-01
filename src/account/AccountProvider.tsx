@@ -1,31 +1,22 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
 import { web3Accounts, web3Enable } from '@polkadot/extension-dapp';
 import { BN } from '@polkadot/util';
 import keyring from '@polkadot/ui-keyring';
+import { useApi } from '../hooks/useApi';
 import { sleep } from '../utils/helpers';
 
-import { AccountProvider } from './AccountContext';
+import { Account, AccountProvider, AccountSigner } from './AccountContext';
 
 const DefaultAccountKey = 'unique_market_account_address';
-export enum AccountSigner {
-  extension = 'Extension',
-  local = 'Local'
-}
-export interface Account extends InjectedAccountWithMeta {
-  signerType: AccountSigner,
-  balance?: {
-    KSM?: BN
-  }
-}
 
 const AccountWrapper: FC = ({ children }) => {
-  const [accounts, setAccounts] = useState<InjectedAccountWithMeta[]>([]);
+  const { rpcClient } = useApi();
+  const [accounts, setAccounts] = useState<Account[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [fetchAccountsError, setFetchAccountsError] = useState<string | undefined>();
-  const [selectedAccount, setSelectedAccount] = useState<InjectedAccountWithMeta>();
+  const [selectedAccount, setSelectedAccount] = useState<Account>();
 
-  const changeAccount = useCallback((account: InjectedAccountWithMeta) => {
+  const changeAccount = useCallback((account: Account) => {
     localStorage.setItem(DefaultAccountKey, account.address);
     setSelectedAccount(account);
   }, []);
@@ -50,14 +41,11 @@ const AccountWrapper: FC = ({ children }) => {
     return keyringAccounts.map((account) => ({ address: account.address, meta: account.meta, signerType: AccountSigner.local } as Account));
   }, []);
 
-  const getAccountBalance = useCallback((account: Account) => {
-    return {
-      ...account,
-      balance: {
-        KSM: 0 // rawKusamaRpcApi?.derive.balances?.all(account.address) as number
-      }
-    } as unknown as Account;
-  }, [/* rawKusamaRpcApi */]);
+  const getAccountBalance = useCallback(async (account: Account) => {
+    if (!rpcClient?.isApiInitialized) return 0;
+    const balances = await rpcClient?.rawKusamaRpcApi?.derive.balances?.all(account.address);
+    return balances?.availableBalance || new BN(0);
+  }, [rpcClient]);
 
   const getAccounts = useCallback(async () => {
     // this call fires up the authorization popup
@@ -78,28 +66,44 @@ const AccountWrapper: FC = ({ children }) => {
       return;
     }
     const allAccounts = await getAccounts();
-    const accountsWithBalance = allAccounts.map((account) => getAccountBalance(account));
 
     if (allAccounts?.length) {
-      setAccounts(accountsWithBalance);
+      setAccounts(allAccounts);
       setIsLoading(false);
 
       const defaultAccountAddress = localStorage.getItem(DefaultAccountKey);
-      const defaultAccount = accountsWithBalance.find((item) => item.address === defaultAccountAddress);
+      const defaultAccount = allAccounts.find((item) => item.address === defaultAccountAddress);
 
       if (defaultAccount) {
         changeAccount(defaultAccount);
       } else {
-        changeAccount(accountsWithBalance[0]);
+        changeAccount(allAccounts[0]);
       }
     } else {
       setFetchAccountsError('No accounts in extension');
     }
-  }, [changeAccount]);
+  }, [changeAccount, getAccounts]);
 
   useEffect(() => {
     void fetchAccounts();
   }, []);
+
+  useEffect(() => {
+    if (!rpcClient.isApiInitialized || !accounts?.length) return;
+    const accountsWithBalancePromise = Promise.all(accounts.map(async (account: Account) => ({
+        ...account,
+        balance: {
+          KSM: await getAccountBalance(account) // TODO: it's possible to subscribe on balances via rpc
+        }
+      } as Account)));
+      // TODO: async setState in effects is dangerouse
+      void accountsWithBalancePromise.then((accountsWithBalance: Account[]) => setAccounts(accountsWithBalance));
+  }, [rpcClient.isApiInitialized, getAccountBalance]);
+
+  useEffect(() => {
+    const updatedSelectedAccount = accounts.find((account) => account.address === selectedAccount?.address);
+    if (updatedSelectedAccount) setSelectedAccount(updatedSelectedAccount);
+  }, [accounts]);
 
   const value = useMemo(() => ({
     isLoading,
