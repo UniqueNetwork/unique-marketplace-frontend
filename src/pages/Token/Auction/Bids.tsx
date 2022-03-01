@@ -35,15 +35,8 @@ const getColumns = (tokenSymbol: string): TableColumnProps[] => ([
 ]);
 
 const Bids: FC<BidsProps> = ({ offer }) => {
-  const [bids, setBids] = useState<Bid[]>(offer.auction?.bids || []);
   const { chainData } = useApi();
   const tokenSymbol = useMemo(() => chainData?.properties.tokenSymbol || 'unavailable', [chainData]);
-
-  const onPlaceBid = useCallback((bid: Bid) => {
-    setBids([bid, ...bids]);
-  }, [bids]);
-
-  useBidsSubscription({ offer, onPlaceBid });
 
   if (!offer) return null;
 

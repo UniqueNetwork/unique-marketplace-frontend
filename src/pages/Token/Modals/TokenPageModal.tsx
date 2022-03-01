@@ -8,6 +8,7 @@ import { NFTToken } from '../../../api/chainApi/unique/types';
 import { CancelSellFixStagesModal } from './CancelSellModal';
 import PurchaseModal from './PurchaseModal';
 import { TransferModal } from './TransferModal';
+import { AuctionModal } from "./AuctionModal";
 
 export type TTokenPageModalProps = {
   onFinish: () => void
@@ -39,7 +40,7 @@ const TokenPageModal = ({ onFinish, marketType, offer, token }: TTokenPageModalP
       case MarketType.sellAuction:
         return SellModal;
       case MarketType.bid:
-        throw new Error('Not implemented');
+        return AuctionModal;
       case MarketType.delist:
         return CancelSellFixStagesModal;
       case MarketType.purchase:

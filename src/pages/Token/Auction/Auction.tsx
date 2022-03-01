@@ -1,4 +1,4 @@
-import React, { FC, useContext, useMemo } from 'react';
+import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
 import { Text, Button } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
@@ -11,6 +11,9 @@ import clock from '../../../static/icons/clock.svg';
 import { timeDifference } from '../../../utils/timestampUtils';
 import { Grey300 } from '../../../styles/colors';
 import { isTokenOwner } from '../../../api/chainApi/utils/isTokenOwner';
+import { useBidsSubscription } from '../../../hooks/useBidsSubscription';
+import { Price } from '../TokenDetail/Price';
+import { useFee } from '../../../hooks/useFee';
 
 interface AuctionProps {
   offer: Offer
@@ -20,8 +23,11 @@ interface AuctionProps {
   onWithdrawClick(): void
 }
 
-const Auction: FC<AuctionProps> = ({ offer, token, onPlaceABidClick, onDelistClick, onWithdrawClick }) => {
+const Auction: FC<AuctionProps> = ({ offer: initialOffer, token, onPlaceABidClick, onDelistClick, onWithdrawClick }) => {
   const { selectedAccount } = useContext(accountContext);
+  const { fee } = useFee();
+
+  const [offer, setOffer] = useState<Offer>(initialOffer);
 
   const canPlaceABid = useMemo(() => {
     return true; // TODO: get a balance of selected account
@@ -36,9 +42,15 @@ const Auction: FC<AuctionProps> = ({ offer, token, onPlaceABidClick, onDelistCli
     return false; // TODO: check it
   }, []);
 
-  if (!offer) return null;
+  const onPlaceBid = useCallback((_offer: Offer) => {
+    console.log(_offer);
+    setOffer(_offer);
+  }, [setOffer]);
 
-  return (
+  useBidsSubscription({ offer, onPlaceBid });
+
+  return (<>
+    <Price price={offer.price} fee={fee} bid={offer.auction?.priceStep} />
     <AuctionWrapper>
       <Row>
         {canDelist && <Button title={'Delist'}
@@ -62,7 +74,7 @@ const Auction: FC<AuctionProps> = ({ offer, token, onPlaceABidClick, onDelistCli
       <Divider />
       <Bids offer={offer} />
     </AuctionWrapper>
-  );
+  </>);
 };
 
 export default Auction;

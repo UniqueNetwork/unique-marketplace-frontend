@@ -5,19 +5,22 @@ import AuctionContextContext from '../api/restApi/auction/AuctionContext';
 
 type useBidsSubscriptionProps = {
   offer: Offer,
-  onPlaceBid(bid: Bid): void
+  onPlaceBid(offer: Offer): void
 };
 
 export const useBidsSubscription = ({ offer, onPlaceBid }: useBidsSubscriptionProps) => {
   const { socket } = useContext(AuctionContextContext);
 
   useEffect(() => {
-    if (!offer) return;
-    socket?.emit('subscribeToAuction', offer);
+    if (!offer || !socket) return;
+    socket?.emit('subscribeToAuction', {
+      collectionId: offer.collectionId,
+      tokenId: offer.tokenId
+    });
 
-    socket?.on('bidPlaced', (_data) => {
-      console.log('bidPlaced', _data);
-      // onPlaceBid
+    socket?.on('bidPlaced', (offer) => {
+      console.log('bidPlaced', offer);
+      onPlaceBid(offer);
     });
 
     return () => {

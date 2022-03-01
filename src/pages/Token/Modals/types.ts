@@ -14,6 +14,10 @@ export type TAuctionProps = {
   duration: number // days number
 }
 
+export type TPlaceABid = {
+  amount: string
+}
+
 export interface ModalProps {
   token?: Token,
   [key: string]: any

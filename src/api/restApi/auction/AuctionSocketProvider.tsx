@@ -12,12 +12,13 @@ const AuctionSocketProvider: FC<TAuctionProviderProps> = ({ url, children }) => 
   const connectSocket = useCallback((url) => {
     if (!url) return;
     const socket = io(url, {
-      path: '/api/socket.io'
+      path: '/socket.io',
+      transports: ['websocket']
     });
-    setSocket(socket);
 
-    socket.on('connection', () => {
+    socket.on('connect', () => {
       console.log('Socket connected');
+      setSocket(socket);
     });
   }, []);
 
@@ -28,7 +29,7 @@ const AuctionSocketProvider: FC<TAuctionProviderProps> = ({ url, children }) => 
 
   const value = useMemo<AuctionContextProps>(() => ({
     socket
-  }), []);
+  }), [socket]);
 
   return (<AuctionContextProvider value={value} >{children}</AuctionContextProvider>);
 };

@@ -6,32 +6,20 @@ import { AdditionalWarning100, AdditionalWarning500, Grey300 } from '../../../st
 import { useFee } from '../../../hooks/useFee';
 import { Price } from '../TokenDetail/Price';
 import { Offer } from '../../../api/restApi/offers/types';
-import { NFTToken } from '../../../api/chainApi/unique/types';
-import Auction from '../Auction/Auction';
 
-interface ForOwnerProps {
-  token: NFTToken
+interface SellTokenProps {
   offer?: Offer
   onSellClick(): void
   onTransferClick(): void
-  onPlaceABidClick(): void
   onDelistClick(): void
-  onWithdrawClick(): void
 }
 
-export const SellToken: FC<ForOwnerProps> = ({ token, offer, onSellClick, onTransferClick, onDelistClick, onWithdrawClick, onPlaceABidClick }) => {
+export const SellToken: FC<SellTokenProps> = ({ offer, onSellClick, onTransferClick, onDelistClick }) => {
   const { fee } = useFee();
 
   if (offer) {
     return (<>
       <Price price={offer.price} fee={fee} bid={offer.auction?.priceStep} />
-      {offer.auction && <Auction
-        offer={offer}
-        token={token}
-        onWithdrawClick={onWithdrawClick}
-        onPlaceABidClick={onPlaceABidClick}
-        onDelistClick={onDelistClick}
-      />}
       <ButtonWrapper>
         <Button title={'Delist'} role={'danger'} onClick={onDelistClick} />
       </ButtonWrapper>
