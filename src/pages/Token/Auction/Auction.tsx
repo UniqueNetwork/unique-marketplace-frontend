@@ -39,18 +39,21 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, token, onPlaceABidClic
   }, []);
 
   const canWithdraw = useMemo(() => {
-    return false; // TODO: check it
+    return true; // TODO: check it
   }, []);
 
   const onPlaceBid = useCallback((_offer: Offer) => {
-    console.log(_offer);
     setOffer(_offer);
   }, [setOffer]);
 
   useBidsSubscription({ offer, onPlaceBid });
 
+  const bid = useMemo(() => {
+    return offer.auction?.bids.reduce((amount, bid) => Math.max(amount, Number(bid.amount)), 0) || 0;
+  }, [offer]);
+
   return (<>
-    <Price price={offer.price} fee={fee} bid={offer.auction?.priceStep} />
+    <Price price={offer.price} fee={fee} bid={bid.toString()} />
     <AuctionWrapper>
       <Row>
         {canDelist && <Button title={'Delist'}

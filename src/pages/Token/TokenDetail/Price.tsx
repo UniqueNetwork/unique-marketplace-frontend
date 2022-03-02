@@ -1,9 +1,9 @@
-import React, { FC, useMemo } from 'react';
-import styled from 'styled-components/macro';
+import React, { FC } from 'react';
 import { Heading, Text } from '@unique-nft/ui-kit';
+import styled from 'styled-components/macro';
 
-import ChainLogo from '../../../components/ChainLogo';
-import { useApi } from '../../../hooks/useApi';
+import { Icon } from '../../../components/Icon/Icon';
+import Kusama from '../../../static/icons/logo-kusama.svg';
 
 interface PriceProps {
   price: string;
@@ -11,14 +11,13 @@ interface PriceProps {
   bid?: string;
 }
 
-export const Price: FC<PriceProps> = ({ price, fee, bid }) => {
-  const { chainData } = useApi();
-  const tokenSymbol = useMemo(() => chainData?.properties.tokenSymbol || 'unavailable', [chainData]);
+const tokenSymbol = 'KSM';
 
+export const Price: FC<PriceProps> = ({ price, fee, bid }) => {
   return (
     <PriceWrapper>
       <Row>
-        <ChainLogo />
+        <Icon path={Kusama} />
         <Heading size={'1'}>{`${Number(price) + fee}`}</Heading>
       </Row>
       <Row>

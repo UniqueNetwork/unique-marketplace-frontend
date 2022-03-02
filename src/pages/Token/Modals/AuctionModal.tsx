@@ -1,12 +1,14 @@
-import React, {FC, useCallback, useEffect, useMemo, useState} from 'react';
+import React, {FC, useCallback, useEffect, useState} from 'react';
+import { Button, Heading, InputText, Select, Text } from '@unique-nft/ui-kit';
+import styled from 'styled-components/macro';
+
 import { TPlaceABid } from './types';
-import { Button, Heading, InputText, Select, Text } from "@unique-nft/ui-kit";
-import styled from "styled-components/macro";
-import { AdditionalWarning100 } from "../../../styles/colors";
-import { TTokenPageModalBodyProps } from "./TokenPageModal";
-import { useAuctionBidStages } from "../../../hooks/marketplaceStages";
-import DefaultMarketStages from "./StagesModal";
-import {Offer} from "../../../api/restApi/offers/types";
+import { AdditionalWarning100 } from '../../../styles/colors';
+import { TTokenPageModalBodyProps } from './TokenPageModal';
+import { useAuctionBidStages } from '../../../hooks/marketplaceStages';
+import { Offer } from '../../../api/restApi/offers/types';
+import DefaultMarketStages from './StagesModal';
+import Kusama from '../../../static/icons/logo-kusama.svg';
 
 export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ token, offer, setIsClosable, onFinish }) => {
   const [status, setStatus] = useState<'ask' | 'place-bid-stage'>('ask'); // TODO: naming
@@ -30,20 +32,24 @@ export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ token, offer, setIs
   return null;
 }
 
-export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(bidAmount: string, chain: string): void}> = ({ offer, onConfirmPlaceABid }) => {
-  const [bidAmount, setBidAmount] = useState<string>('0');
+const chainOptions = [{ id: 'KSM', title: 'KSM', iconRight: { size: 18, file: Kusama } }];
+
+export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: string, chain: string): void}> = ({ offer, onConfirmPlaceABid }) => {
+  const [bidAmount, setBidAmount] = useState<number>(0);
   const [chain, setChain] = useState<string | undefined>('KSM');
 
   const onConfirmPlaceABidClick = useCallback(
     () => {
-      onConfirmPlaceABid(bidAmount, chain || '');
+      const leadingBidAmount = offer?.auction?.bids.reduce((amount, bid) => Math.max(amount, Number(bid.amount)), 0) || 0;
+
+      onConfirmPlaceABid((bidAmount - leadingBidAmount).toString(), chain || '');
     },
-    [onConfirmPlaceABid, bidAmount],
+    [onConfirmPlaceABid, bidAmount, offer],
   );
 
   const onBidAmountChange = useCallback(
-    (value: string) => {
-      setBidAmount(value);
+    (value: number) => {
+      setBidAmount(value || 0);
     },
     [setBidAmount],
   );
@@ -55,25 +61,21 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(bidAmount: stri
     [setChain],
   );
 
-  const minimumAmount = useMemo(() => {
-    return 0; // TODO: calculate a minimum bid amount
-  }, [offer])
-
   return (
     <>
       <Content>
         <Heading size='2'>Place a bid</Heading>
       </Content>
-      <InputWrapper >
-        <Select options={[{ id: 'KSM', title: 'KSM' }]} value={chain} onChange={onChainChange} />
+      <InputWrapper>
+        <SelectStyled options={chainOptions} value={chain} onChange={onChainChange} />
         <InputStyled
           label=''
           onChange={onBidAmountChange}
           value={bidAmount}
         />
       </InputWrapper>
-      <Text >
-        {`Minimum bid ${minimumAmount} ${chain}`}
+      <Text size={'s'} color={'grey-500'} >
+        {`Minimum bid ${offer?.auction?.priceStep} ${chain}`}
       </Text>
       <TextStyled
         color='additional-warning-500'
@@ -104,24 +106,36 @@ const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ token, 
   );
 };
 
-
 const InputWrapper = styled.div`
   display: flex;
-  
+  margin-top: calc(var(--gap) * 2);
+  margin-bottom: calc(var(--gap) / 2);
+`;
+
+const SelectStyled = styled(Select)`
+  width: 120px;
+  .select-value {
+    border-radius: 4px 0 0 4px !important;
+  }
+`;
+
+const InputStyled = styled(InputText)`
+  width: 100%;
+  .input-wrapper {
+    border-radius: 0 4px 4px 0;
+    border-left: 0 solid;
+    height: 38px;
+  }
 `;
 
 const TextStyled = styled(Text)`
+  margin-top: calc(var(--gap) * 2);
   box-sizing: border-box;
   display: flex;
   padding: 8px 16px;
   margin-bottom: 24px;
   border-radius: 4px;
   background-color: ${AdditionalWarning100};
-  width: 100%;
-`;
-
-const InputStyled = styled(InputText)`
-  margin-bottom: 32px;
   width: 100%;
 `;
 
