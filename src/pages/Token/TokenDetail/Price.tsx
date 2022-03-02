@@ -4,6 +4,7 @@ import styled from 'styled-components/macro';
 
 import { Icon } from '../../../components/Icon/Icon';
 import Kusama from '../../../static/icons/logo-kusama.svg';
+import {formatKusamaBalance} from "../../../utils/textUtils";
 
 interface PriceProps {
   price: string;
@@ -18,11 +19,11 @@ export const Price: FC<PriceProps> = ({ price, fee, bid }) => {
     <PriceWrapper>
       <Row>
         <Icon path={Kusama} />
-        <Heading size={'1'}>{`${Number(price) + fee}`}</Heading>
+        <Heading size={'1'}>{`${(Number(formatKusamaBalance(price)) + fee).toPrecision()}`}</Heading>
       </Row>
       <Row>
         <Text color='grey-500' size='m'>
-          {`${bid ? `Bid: ${bid}` : `Price: ${price}`} ${tokenSymbol}`}
+          {`${bid ? `Bid: ${formatKusamaBalance(bid)}` : `Price: ${formatKusamaBalance(price)}`} ${tokenSymbol}`}
         </Text>
       </Row>
       <Row>

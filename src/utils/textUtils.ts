@@ -5,7 +5,10 @@ export const shortcutText = (text: string) => {
   return start && end ? `${start}...${end}` : text;
 };
 
-
-export const formatKusamaBalance = (balance: string, decimals: number = 12) => {
-  // TODO: implement
+export const formatKusamaBalance = (balance: string | number, decimals: number = 12) => {
+  const balanceValue = Number(balance);
+  return (balanceValue / Math.pow(10, decimals)).toLocaleString('en-US', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: decimals
+  });
 };
