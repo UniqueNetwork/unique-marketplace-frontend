@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { post, get } from '../base';
+import { post, get, deleteRequest } from '../base';
 import { defaultParams } from '../base/axios';
 
 const endpoint = '/auction';
@@ -20,8 +20,17 @@ export type TPlaceBidParams = {
   tx: unknown, collectionId: number, tokenId: number
 }
 
+export type TDeleteParams = {
+  collectionId: number, tokenId: number, timestamp: number
+}
+export type TDeleteHeaders = {
+  'x-polkadot-signature': string,
+  'x-polkadot-signer': string
+}
 export const startAuction = (body: TStartAuctionParams) => post<TStartAuctionParams>(`${endpoint}/create_auction`, body, { ...defaultParams });
 export const placeBid = (body: TPlaceBidParams) => post<TPlaceBidParams>(`${endpoint}/place_bid`, body, { ...defaultParams });
+export const withdrawBid = (body: TDeleteParams, headers: TDeleteHeaders) => deleteRequest(`${endpoint}/withdraw_bid`, { headers: { ...defaultParams.headers, ...headers }, params: body, ...defaultParams });
+export const cancelAuction = (body: TDeleteParams, headers: TDeleteHeaders) => deleteRequest(`${endpoint}/cancel_auction`, { headers: { ...defaultParams.headers, ...headers }, params: body, ...defaultParams });
 
 export const useAuction = () => {
   const [startAuctionStatus, setStartAuctionStatus] = useState<FetchStatus>(FetchStatus.default);

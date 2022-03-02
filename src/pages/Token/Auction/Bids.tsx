@@ -42,7 +42,6 @@ const Bids: FC<BidsProps> = ({ offer }) => {
 
   return (
     <BidsWrapper>
-      <Heading size={'4'}>Offers</Heading>
       {!offer.auction?.bids?.length && <Text >There is no bids</Text>}
       {offer.auction?.bids?.length && <Table
         data={offer.auction?.bids}

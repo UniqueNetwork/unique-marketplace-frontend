@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
-import { Text, Button } from '@unique-nft/ui-kit';
+import { Text, Button, Heading } from '@unique-nft/ui-kit';
+import { encodeAddress } from '@polkadot/util-crypto/address/encode';
 import styled from 'styled-components/macro';
 
 import { Offer } from '../../../api/restApi/offers/types';
@@ -9,21 +10,22 @@ import accountContext from '../../../account/AccountContext';
 import { Icon } from '../../../components/Icon/Icon';
 import clock from '../../../static/icons/clock.svg';
 import { timeDifference } from '../../../utils/timestampUtils';
-import { Grey300 } from '../../../styles/colors';
+import { AdditionalPositive100, AdditionalPositive500, Coral100, Coral500, Grey300 } from '../../../styles/colors';
 import { isTokenOwner } from '../../../api/chainApi/utils/isTokenOwner';
 import { useBidsSubscription } from '../../../hooks/useBidsSubscription';
 import { Price } from '../TokenDetail/Price';
 import { useFee } from '../../../hooks/useFee';
+import { shortcutText } from '../../../utils/textUtils';
 
 interface AuctionProps {
   offer: Offer
   token: NFTToken
   onPlaceABidClick(): void
-  onDelistClick(): void
+  onDelistAuctionClick(): void
   onWithdrawClick(): void
 }
 
-const Auction: FC<AuctionProps> = ({ offer: initialOffer, token, onPlaceABidClick, onDelistClick, onWithdrawClick }) => {
+const Auction: FC<AuctionProps> = ({ offer: initialOffer, token, onPlaceABidClick, onDelistAuctionClick, onWithdrawClick }) => {
   const { selectedAccount } = useContext(accountContext);
   const { fee } = useFee();
 
@@ -38,9 +40,26 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, token, onPlaceABidClic
     return isTokenOwner(selectedAccount.address, token.owner || {}) && !offer.auction?.bids.length;
   }, []);
 
-  const canWithdraw = useMemo(() => {
-    return true; // TODO: check it
+  const isBidder = useMemo(() => {
+    if (!selectedAccount) return false;
+    return offer.auction?.bids.some((bid) => encodeAddress(bid.bidderAddress) === encodeAddress(selectedAccount.address));
   }, []);
+
+  const topBid = useMemo(() => {
+    return offer.auction?.bids.reduce((top, bid) => {
+      return top.amount > bid.amount ? top : bid;
+    }) || null;
+  }, [offer]);
+
+  const isTopBidder = useMemo(() => {
+    if (!selectedAccount || !isBidder || !topBid) return false;
+    return encodeAddress(topBid.bidderAddress) === encodeAddress(selectedAccount.address);
+  }, [isBidder, topBid]);
+
+  const canWithdraw = useMemo(() => {
+    if (!selectedAccount) return false;
+    return isBidder && !isTopBidder;
+  }, [isBidder, isTopBidder]);
 
   const onPlaceBid = useCallback((_offer: Offer) => {
     setOffer(_offer);
@@ -48,17 +67,13 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, token, onPlaceABidClic
 
   useBidsSubscription({ offer, onPlaceBid });
 
-  const bid = useMemo(() => {
-    return offer.auction?.bids.reduce((amount, bid) => Math.max(amount, Number(bid.amount)), 0) || 0;
-  }, [offer]);
-
   return (<>
-    <Price price={offer.price} fee={fee} bid={bid.toString()} />
+    <Price price={offer.price} fee={fee} bid={topBid?.amount} />
     <AuctionWrapper>
       <Row>
         {canDelist && <Button title={'Delist'}
           role={'danger'}
-          onClick={onDelistClick}
+          onClick={onDelistAuctionClick}
           disabled={!canPlaceABid}
         />}
         {!canDelist && <Button title={'Place a bid'}
@@ -75,6 +90,9 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, token, onPlaceABidClic
 
       </Row>
       <Divider />
+      <Heading size={'4'}>Offers</Heading>
+      {isTopBidder && <TopBidderTextStyled >You are Top Bidder</TopBidderTextStyled>}
+      {!isTopBidder && isBidder && <Row><BidderTextStyled >You are outbid</BidderTextStyled> <Text>{`Leading bid ${shortcutText(topBid?.bidderAddress || '')}`}</Text></Row>}
       <Bids offer={offer} />
     </AuctionWrapper>
   </>);
@@ -95,10 +113,33 @@ const Row = styled.div`
   display: flex;
   align-items: center;
   column-gap: var(--gap)
-
 `;
 
 const Divider = styled.div`
   margin: 24px 0;
   border-top: 1px dashed ${Grey300};
+`;
+
+const TopBidderTextStyled = styled(Text)`
+  margin-top: calc(var(--gap) / 2);
+  box-sizing: border-box;
+  display: flex;
+  padding: 8px 16px;
+  margin-bottom: 24px;
+  border-radius: 4px;
+  background-color: ${AdditionalPositive100};
+  color: ${AdditionalPositive500} !important;
+  width: fit-content;
+`;
+
+const BidderTextStyled = styled(Text)`  
+  margin-top: calc(var(--gap) / 2);
+  box-sizing: border-box;
+  display: flex;
+  padding: 8px 16px;
+  margin-bottom: 24px;
+  border-radius: 4px;
+  background-color: ${Coral100};
+  color: ${Coral500} !important;
+  width: fit-content;
 `;

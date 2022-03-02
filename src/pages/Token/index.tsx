@@ -53,6 +53,10 @@ const TokenPage = () => {
     setMarketType(MarketType.delist);
   }, []);
 
+  const onDelistAuctionClick = useCallback(() => {
+    setMarketType(MarketType.delistAuction);
+  }, []);
+
   const onBuyClick = useCallback(() => {
     setMarketType(MarketType.purchase);
   }, []);
@@ -62,7 +66,7 @@ const TokenPage = () => {
   }, []);
 
   const onWithdrawClick = useCallback(() => {
-    // TODO: withdraw
+    setMarketType(MarketType.withdrawBid);
   }, []);
 
   if (loading) return <Loading />;
@@ -78,6 +82,7 @@ const TokenPage = () => {
       onBuyClick={onBuyClick}
       onTransferClick={onTransferClick}
       onDelistClick={onDelistClick}
+      onDelistAuctionClick={onDelistAuctionClick}
       onPlaceABidClick={onPlaceABidClick}
       onWithdrawClick={onWithdrawClick}
     />

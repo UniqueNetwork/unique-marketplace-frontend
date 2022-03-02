@@ -589,16 +589,13 @@ class MarketController implements IMarketController {
     const [left, right] = numStringValue.split('.');
     const decimalsFromLessZeroString = right?.length || 0;
     const bigValue = [...(left || []), ...(right || [])].join('').replace(/^0+/, '');
-
     return (Number(bigValue) * Math.pow(10, decimals - decimalsFromLessZeroString)).toString();
   }
 
   public async transferBidBalance (from: string, amount: string, options: TransactionOptions): Promise<void> {
-    console.log(amount,
-      this.fromStringToBnString(amount, this.kusamaDecimals));
-    const tx = this.kusamaApi.tx.balances.transfer(
+    const tx = this.kusamaApi.tx.balances.transferKeepAlive(
       encodeAddress(this.auctionAddress),
-      amount, //this.fromStringToBnString(amount, this.kusamaDecimals)
+      this.fromStringToBnString(amount, this.kusamaDecimals)
     );
     const signedTx = await options.sign(tx);
     if (!signedTx) throw new Error('Transaction cancelled');

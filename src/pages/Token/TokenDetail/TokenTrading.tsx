@@ -16,10 +16,11 @@ interface TokenTradingProps {
   onTransferClick(): void
   onPlaceABidClick(): void
   onDelistClick(): void
+  onDelistAuctionClick(): void
   onWithdrawClick(): void
 }
 
-export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick, onTransferClick, onDelistClick, onPlaceABidClick, onWithdrawClick, onBuyClick }) => {
+export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick, onTransferClick, onDelistClick, onDelistAuctionClick, onPlaceABidClick, onWithdrawClick, onBuyClick }) => {
   const { selectedAccount } = useContext(accountContext);
 
   const isOwner = useMemo(() => {
@@ -33,7 +34,7 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
       token={token}
       onPlaceABidClick={onPlaceABidClick}
       onWithdrawClick={onWithdrawClick}
-      onDelistClick={onDelistClick}
+      onDelistAuctionClick={onDelistAuctionClick}
     />);
   }
 

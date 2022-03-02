@@ -4,3 +4,8 @@ export const shortcutText = (text: string) => {
 
   return start && end ? `${start}...${end}` : text;
 };
+
+
+export const formatKusamaBalance = (balance: string, decimals: number = 12) => {
+  // TODO: implement
+};
