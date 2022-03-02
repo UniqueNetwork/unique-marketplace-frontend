@@ -6,23 +6,32 @@ type TAuctionProviderProps = {
   url?: string,
   options?: unknown
 }
-const AuctionSocketProvider: FC<TAuctionProviderProps> = ({ url }) => {
+const AuctionSocketProvider: FC<TAuctionProviderProps> = ({ url, children }) => {
   const [socket, setSocket] = useState<Socket | undefined>();
 
   const connectSocket = useCallback((url) => {
     if (!url) return;
     const socket = io(url, {
-      path: '/socket.io'
+      path: '/socket.io',
+      transports: ['websocket']
     });
-    setSocket(socket);
+
+    socket.on('connect', () => {
+      console.log('Socket connected');
+      setSocket(socket);
+    });
   }, []);
+
   useEffect(() => {
+    console.log('try connect socket', url);
     connectSocket(url);
   }, [url, connectSocket]);
+
   const value = useMemo<AuctionContextProps>(() => ({
     socket
-  }), []);
-  return (<AuctionContextProvider value={value} />);
+  }), [socket]);
+
+  return (<AuctionContextProvider value={value} >{children}</AuctionContextProvider>);
 };
 
 export default AuctionSocketProvider;

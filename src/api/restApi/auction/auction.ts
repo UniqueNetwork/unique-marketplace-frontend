@@ -1,10 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
-import { AxiosError } from 'axios';
-
-import { post, get } from '../base';
-import { Offer } from './types';
+import { useCallback, useState } from 'react';
+import { post } from '../base';
 import { defaultParams } from '../base/axios';
-import { ResponseError } from '../base/types';
 
 const endpoint = '/offer';
 
