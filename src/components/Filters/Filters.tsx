@@ -15,7 +15,7 @@ type FiltersProps = {
 export const Filters: FC<FiltersProps> = ({ onFilterChange }) => {
   const { selectedAccount } = useContext(AccountContext);
 
-    const onStatusFilterChange = useCallback((value: Statuses) => {
+  const onStatusFilterChange = useCallback((value: Statuses) => {
     const newFilter = {
       seller: value.myNFTs ? selectedAccount?.address : undefined
     };

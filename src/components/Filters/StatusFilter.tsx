@@ -14,7 +14,6 @@ const StatusFilter: FC<StatusFilterProps> = ({ onChange }) => {
   const [myBets, setMyBets] = useState<boolean>(false);
 
   const onMyNFTsChange = useCallback((value: boolean) => {
-    console.log(myNFTs);
     onChange({ myNFTs: value, fixedPrice, timedAuction, myBets });
     setMyNFTs(value);
   }, [fixedPrice, timedAuction, myBets]);
