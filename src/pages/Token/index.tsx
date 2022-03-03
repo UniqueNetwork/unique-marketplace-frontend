@@ -1,10 +1,9 @@
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { useApi } from '../../hooks/useApi';
 import { CommonTokenDetail } from './TokenDetail/CommonTokenDetail';
 import { NFTToken } from '../../api/chainApi/unique/types';
-import accountContext from '../../account/AccountContext';
 import { SellToken } from './SellToken/SellToken';
 import { BuyToken } from './BuyToken/BuyToken';
 import { isTokenOwner } from '../../api/chainApi/utils/isTokenOwner';
@@ -13,6 +12,7 @@ import { useOffer } from '../../api/restApi/offers/offer';
 import { MarketType } from '../../types/MarketTypes';
 import Loading from '../../components/Loading';
 import { Error404 } from '../errors/404';
+import { useAccounts } from '../../hooks/useAccounts';
 
 // http://localhost:3000/token/124/173
 const TokenPage = () => {
@@ -23,7 +23,7 @@ const TokenPage = () => {
   const { offer } = useOffer(Number(collectionId), Number(id));
   const [marketType, setMarketType] = useState<MarketType>(MarketType.default); // TODO: when "sell"/"buy"/"bid"/etc clicked - update this status to open modal
 
-  const { selectedAccount } = useContext(accountContext);
+  const { selectedAccount } = useAccounts();
 
   // TODO: debug purposes, should be taken from API instead of RPC
   useEffect(() => {

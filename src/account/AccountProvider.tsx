@@ -1,16 +1,10 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { web3Accounts, web3Enable } from '@polkadot/extension-dapp';
-import { BN } from '@polkadot/util';
-import keyring from '@polkadot/ui-keyring';
-import { useApi } from '../hooks/useApi';
-import { sleep } from '../utils/helpers';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 
-import { Account, AccountProvider, AccountSigner } from './AccountContext';
+import { Account, AccountProvider } from './AccountContext';
 
-const DefaultAccountKey = 'unique_market_account_address';
+export const DefaultAccountKey = 'unique_market_account_address';
 
 const AccountWrapper: FC = ({ children }) => {
-  const { rpcClient } = useApi();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [fetchAccountsError, setFetchAccountsError] = useState<string | undefined>();
@@ -21,98 +15,17 @@ const AccountWrapper: FC = ({ children }) => {
     setSelectedAccount(account);
   }, []);
 
-  const getExtensionAccounts = useCallback(async () => {
-    // this call fires up the authorization popup
-    let extensions = await web3Enable('my cool dapp');
-    if (extensions.length === 0) {
-      console.log('Extension not found, retry in 1s');
-      await sleep(1000);
-      extensions = await web3Enable('my cool dapp');
-      if (extensions.length === 0) {
-        // alert('no extension installed, or the user did not accept the authorization');
-        return [];
-      }
-    }
-    return (await web3Accounts()).map((account) => ({ ...account, signerType: AccountSigner.extension })) as Account[];
-  }, []);
-
-  const getLocalAccounts = useCallback(() => {
-    const keyringAccounts = keyring.getAccounts();
-    return keyringAccounts.map((account) => ({ address: account.address, meta: account.meta, signerType: AccountSigner.local } as Account));
-  }, []);
-
-  const getAccountBalance = useCallback(async (account: Account) => {
-    if (!rpcClient?.isApiInitialized) return 0;
-    const balances = await rpcClient?.rawKusamaRpcApi?.derive.balances?.all(account.address);
-    return balances?.availableBalance || new BN(0);
-  }, [rpcClient]);
-
-  const getAccounts = useCallback(async () => {
-    // this call fires up the authorization popup
-    const extensionAccounts = await getExtensionAccounts();
-    const localAccounts = getLocalAccounts();
-
-    const allAccounts: Account[] = [...extensionAccounts, ...localAccounts];
-
-    return allAccounts;
-  }, [getExtensionAccounts, getLocalAccounts]);
-
-  const fetchAccounts = useCallback(async () => {
-    setIsLoading(true);
-    // this call fires up the authorization popup
-    const extensions = await web3Enable('my cool dapp');
-    if (extensions.length === 0) {
-      setFetchAccountsError('No extension installed, or the user did not accept the authorization');
-      return;
-    }
-    const allAccounts = await getAccounts();
-
-    if (allAccounts?.length) {
-      setAccounts(allAccounts);
-      setIsLoading(false);
-
-      const defaultAccountAddress = localStorage.getItem(DefaultAccountKey);
-      const defaultAccount = allAccounts.find((item) => item.address === defaultAccountAddress);
-
-      if (defaultAccount) {
-        changeAccount(defaultAccount);
-      } else {
-        changeAccount(allAccounts[0]);
-      }
-    } else {
-      setFetchAccountsError('No accounts in extension');
-    }
-  }, [changeAccount, getAccounts]);
-
-  useEffect(() => {
-    void fetchAccounts();
-  }, []);
-
-  useEffect(() => {
-    if (!rpcClient.isApiInitialized || !accounts?.length) return;
-    const accountsWithBalancePromise = Promise.all(accounts.map(async (account: Account) => ({
-        ...account,
-        balance: {
-          KSM: await getAccountBalance(account) // TODO: it's possible to subscribe on balances via rpc
-        }
-      } as Account)));
-      // TODO: async setState in effects is dangerouse
-      void accountsWithBalancePromise.then((accountsWithBalance: Account[]) => setAccounts(accountsWithBalance));
-  }, [rpcClient.isApiInitialized, getAccountBalance]);
-
-  useEffect(() => {
-    const updatedSelectedAccount = accounts.find((account) => account.address === selectedAccount?.address);
-    if (updatedSelectedAccount) setSelectedAccount(updatedSelectedAccount);
-  }, [accounts]);
-
   const value = useMemo(() => ({
     isLoading,
     accounts,
     selectedAccount,
+    fetchAccountsError,
     changeAccount,
-    fetchAccounts,
-    fetchAccountsError
-  }), [isLoading, accounts, selectedAccount, fetchAccounts, fetchAccountsError, changeAccount]);
+    setSelectedAccount,
+    setFetchAccountsError,
+    setAccounts,
+    setIsLoading
+  }), [isLoading, accounts, selectedAccount, fetchAccountsError, changeAccount]);
 
   return (
     <AccountProvider value={value}>

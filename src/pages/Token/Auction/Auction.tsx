@@ -1,16 +1,16 @@
-import React, { FC, useContext, useMemo } from 'react';
+import React, { FC, useMemo } from 'react';
 import { Text, Button } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import { Offer } from '../../../api/restApi/offers/types';
 import { NFTToken } from '../../../api/chainApi/unique/types';
 import Bids from './Bids';
-import accountContext from '../../../account/AccountContext';
 import { Icon } from '../../../components/Icon/Icon';
 import clock from '../../../static/icons/clock.svg';
 import { timeDifference } from '../../../utils/timestampUtils';
 import { Grey300 } from '../../../styles/colors';
 import { isTokenOwner } from '../../../api/chainApi/utils/isTokenOwner';
+import { useAccounts } from '../../../hooks/useAccounts';
 
 interface AuctionProps {
   offer: Offer
@@ -21,7 +21,7 @@ interface AuctionProps {
 }
 
 const Auction: FC<AuctionProps> = ({ offer, token, onPlaceABidClick, onDelistClick, onWithdrawClick }) => {
-  const { selectedAccount } = useContext(accountContext);
+  const { selectedAccount } = useAccounts();
 
   const canPlaceABid = useMemo(() => {
     return true; // TODO: get a balance of selected account

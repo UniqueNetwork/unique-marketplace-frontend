@@ -1,11 +1,11 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { web3FromSource } from '@polkadot/extension-dapp';
 import { TTransaction } from '../api/chainApi/types';
-import AccountContext from '../account/AccountContext';
 import { InternalStage, MarketType, StageStatus, useMarketplaceStagesReturn } from '../types/MarketTypes';
+import { useAccounts } from './useAccounts';
 
 const useMarketplaceStages = <T>(type: MarketType, collectionId: number, tokenId: number, stages: InternalStage<T>[]): useMarketplaceStagesReturn<T> => {
-  const { selectedAccount } = useContext(AccountContext);
+  const { selectedAccount } = useAccounts();
 
   const [internalStages, setInternalStages] = useState<InternalStage<T>[]>(stages);
   const [marketStagesStatus, setMarketStagesStatus] = useState<StageStatus>(StageStatus.default);

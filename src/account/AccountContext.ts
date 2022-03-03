@@ -18,8 +18,11 @@ export type AccountContextProps = {
   accounts: Account[]
   selectedAccount: Account | undefined
   fetchAccountsError: string | undefined
-  fetchAccounts(): Promise<void>
   changeAccount(account: Account): void
+  setSelectedAccount(account: Account): void
+  setFetchAccountsError(error: string | undefined): void
+  setAccounts(accounts: Account[]): void
+  setIsLoading(loading: boolean): void
 }
 
 const AccountContext: Context<AccountContextProps> = createContext({} as unknown as AccountContextProps);
