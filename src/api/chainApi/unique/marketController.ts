@@ -9,6 +9,7 @@ import { IMarketController, INFTController, TransactionOptions } from '../types'
 import { CrossAccountId, normalizeAccountId } from '../utils/normalizeAccountId';
 import { getEthAccount } from '../utils/getEthAccount';
 import { isTokenOwner } from '../utils/isTokenOwner';
+import { compareEncodedAddresses } from "../utils/compareEncodedAddresses";
 
 export type EvmCollectionAbiMethods = {
   approve: (contractAddress: string, tokenId: string) => {
@@ -167,10 +168,6 @@ class MarketController implements IMarketController {
     return new this.web3Instance.eth.Contract(nonFungibleAbi, this.collectionIdToAddress(parseInt(collectionId, 10)), { from: this.contractOwner });
   }
 
-  private compareEncoded (subAddress1: string, subAddress2: string): boolean {
-    if (!subAddress1 || !subAddress2) return false;
-    return encodeAddress(subAddress1) === encodeAddress(subAddress2);
-  }
   // #endregion
 
   private async repeatCheckForTransactionFinish (checkIfCompleted: () => Promise<boolean>, options: { maxAttempts: boolean, awaitBetweenAttempts: number } | null = null): Promise<void> {
@@ -518,7 +515,7 @@ class MarketController implements IMarketController {
     if (!token) throw new Error('Token for unlock not found');
     const { owner } = token;
 
-    if (this.compareEncoded(owner.Substrate, account)) return;
+    if (compareEncodedAddresses(owner.Substrate, account)) return;
 
     const tx = this.uniqApi.tx.unique.transferFrom(normalizeAccountId(ethAccount), normalizeAccountId(account), collectionId, tokenId, 1);
     const signedTx = await options.sign(tx);
@@ -531,7 +528,7 @@ class MarketController implements IMarketController {
       await this.repeatCheckForTransactionFinish(async () => {
         const updatedToken = await this.nftController?.getToken(Number(collectionId), Number(tokenId));
         const owner = updatedToken.owner;
-        if (this.compareEncoded(owner.Substrate, account)) return true;
+        if (compareEncodedAddresses(owner.Substrate, account)) return true;
         return false;
       });
       return;
@@ -551,7 +548,7 @@ class MarketController implements IMarketController {
     if (!token) throw new Error('Token not found');
     const tokenOwner = token.owner;
     let tx = this.uniqApi.tx.unique.transfer(recipient, collectionId, tokenId, tokenPart);
-    if (!this.compareEncoded(tokenOwner?.Substrate, from)) {
+    if (!compareEncodedAddresses(tokenOwner?.Substrate, from)) {
       const ethFrom = getEthAccount(from);
       if (tokenOwner?.Ethereum === ethFrom) {
         tx = this.uniqApi.tx.unique.transferFrom(normalizeAccountId({ Ethereum: ethFrom } as CrossAccountId), normalizeAccountId(recipient as CrossAccountId), collectionId, tokenId, 1);
@@ -571,7 +568,7 @@ class MarketController implements IMarketController {
       const updatedToken = await this.nftController?.getToken(Number(collectionId), Number(tokenId));
       const owner = updatedToken.owner;
       if (owner.Ethereum && owner.Ethereum === ethTo) return true;
-      if (owner.Substrate && this.compareEncoded(owner.Substrate, to)) return true;
+      if (owner.Substrate && compareEncodedAddresses(owner.Substrate, to)) return true;
       return false;
     });
   }

@@ -1,6 +1,5 @@
 import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
 import { Text, Button, Heading } from '@unique-nft/ui-kit';
-import { encodeAddress } from '@polkadot/util-crypto/address/encode';
 import styled from 'styled-components/macro';
 
 import { Offer } from '../../../api/restApi/offers/types';
@@ -16,6 +15,7 @@ import { useBidsSubscription } from '../../../hooks/useBidsSubscription';
 import { Price } from '../TokenDetail/Price';
 import { useFee } from '../../../hooks/useFee';
 import { shortcutText } from '../../../utils/textUtils';
+import { compareEncodedAddresses } from "../../../api/chainApi/utils/compareEncodedAddresses";
 
 interface AuctionProps {
   offer: Offer
@@ -42,7 +42,7 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, token, onPlaceABidClic
 
   const isBidder = useMemo(() => {
     if (!selectedAccount) return false;
-    return offer.auction?.bids.some((bid) => encodeAddress(bid.bidderAddress) === encodeAddress(selectedAccount.address));
+    return offer.auction?.bids.some((bid) => compareEncodedAddresses(bid.bidderAddress, selectedAccount.address));
   }, [offer, selectedAccount]);
 
   const topBid = useMemo(() => {
@@ -53,7 +53,7 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, token, onPlaceABidClic
 
   const isTopBidder = useMemo(() => {
     if (!selectedAccount || !isBidder || !topBid) return false;
-    return encodeAddress(topBid.bidderAddress) === encodeAddress(selectedAccount.address);
+    return compareEncodedAddresses(topBid.bidderAddress, selectedAccount.address);
   }, [isBidder, topBid, selectedAccount]);
 
   const canWithdraw = useMemo(() => {
