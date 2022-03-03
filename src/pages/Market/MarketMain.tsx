@@ -116,7 +116,7 @@ export const MarketMainPage = () => {
               iconLeft={{ name: 'magnify', size: 16 }}
               onChange={(val) => setSearchValue(val)}
               placeholder='Collection / token'
-              value={searchValue}
+              value={searchValue?.toString()}
             ></InputText>
             <Button
               onClick={() => handleSearch()}

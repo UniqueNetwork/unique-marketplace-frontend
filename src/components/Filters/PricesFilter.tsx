@@ -32,9 +32,9 @@ const PricesFilter: FC<PricesFilterProps> = ({ onChange }) => {
   return (
     <PriceFilterWrapper>
       <PricesRangeWrapper>
-        <InputText value={minPrice} onChange={onChangeMinPrice} placeholder={'Min'} />
+        <InputText value={minPrice?.toString()} onChange={onChangeMinPrice} placeholder={'Min'} />
         <Text>to</Text>
-        <InputText value={maxPrice} onChange={onChangeMaxPrice} placeholder={'Max'} />
+        <InputText value={maxPrice?.toString()} onChange={onChangeMaxPrice} placeholder={'Max'} />
       </PricesRangeWrapper>
       <Button title={'Apply'} onClick={onApply}/>
     </PriceFilterWrapper>

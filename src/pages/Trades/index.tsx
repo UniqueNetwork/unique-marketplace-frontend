@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useCallback, useState } from 'react';
 import { Pagination, Table } from '@unique-nft/ui-kit';
 import { TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
@@ -42,7 +42,12 @@ const tradesColumns: TableColumnProps[] = [
 export const TradesPage: FC = () => {
   const [page] = useState<number>(0);
 
-  const { trades, tradesCount } = useTrades({ pageSize, collectionId: [1, 2, 3] });
+  const { trades, tradesCount, fetchMore } = useTrades({ pageSize, page });
+
+  const onPageChange = useCallback((newPage: number) => {
+    console.log('ON PAGE CHANGE, NEW PAGE', newPage);
+    fetchMore({ page: newPage + 1, pageSize });
+  }, [fetchMore]);
 
   return (
     <div>
@@ -50,7 +55,13 @@ export const TradesPage: FC = () => {
         data={trades || []}
         columns={tradesColumns}
       />
-      <Pagination size={tradesCount} current={page} perPage={pageSize} />
+      {/* TODO: 100 + here to avoid disappear of pagination */}
+      <Pagination size={100 + tradesCount}
+        current={page}
+        perPage={pageSize}
+        onPageChange={onPageChange}
+        withIcons
+      />
     </div>
   );
 };

@@ -34,7 +34,7 @@ const TokenPage = () => {
     }).catch((error) => {
       console.log('Get token from RPC failed', error);
     });
-  }, [api, collectionId, id])
+  }, [api, collectionId, id]);
 
   // TODO: debug purposes, should be taken from API instead of RPC
   useEffect(() => {
@@ -81,7 +81,7 @@ const TokenPage = () => {
             onSellClick={onSellClick}
             onTransferClick={onTransferClick}
             onDelistClick={onDelistClick}
-          />
+        />
         // TODO: should not depend on token (we have seller in offer)
         : <BuyToken offer={offer} token={token} onBuyClick={onBuyClick} />}
       <TokenPageModal
