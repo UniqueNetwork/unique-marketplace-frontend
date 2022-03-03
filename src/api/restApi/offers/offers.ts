@@ -32,28 +32,24 @@ export const useOffers = ({ page = 1, pageSize = 10, ...props }: UseFetchOffersP
     });
   }, []);
 
-  useEffect(() => {
-    console.log(fetchingError);
-  }, [fetchingError]);
-
-  useEffect(() => {
-    fetch({ ...props, page, pageSize });
-  }, []);
-
   const fetchMore = useCallback((payload: GetOffersRequestPayload) => {
     setIsFetching(true);
     getOffers(payload).then((response) => {
       if (response.status === 200) {
         setOffers([...offers, ...response.data.items]);
         setIsFetching(false);
-      } else {
-        setFetchingError({
-          status: response.status,
-          message: JSON.stringify(response.data)
-        });
       }
-    });
+    }).catch((err: AxiosError) => {
+        setFetchingError({
+          status: err.response?.status,
+          message: err.message
+        });
+      });
     }, [offers]);
+
+    useEffect(() => {
+      fetch({ ...props, page, pageSize });
+    }, []);
 
   return {
     offers,

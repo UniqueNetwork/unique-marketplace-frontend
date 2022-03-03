@@ -51,7 +51,7 @@ export const MarketMainPage = () => {
   }, [refetch]);
 
   const handleSearch = () => {
-    console.log(`go search ${searchValue}`);
+    refetch({ sort: [sortingValue], pageSize, page: 1, searchText: searchValue?.toString(), ...filterState });
   };
 
   const onFilterChange = useCallback((filter: FilterState) => {

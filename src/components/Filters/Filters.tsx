@@ -29,7 +29,7 @@ export const Filters: FC<FiltersProps> = ({ onFilterChange }) => {
   }, [onFilterChange]);
 
   const onCollectionsFilterChange = useCallback((value: number[]) => {
-    const newFilter = { collationId: value };
+    const newFilter = { collectionId: value };
     onFilterChange(newFilter);
   }, [onFilterChange]);
 
