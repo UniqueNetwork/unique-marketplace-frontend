@@ -26,7 +26,6 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
 
   const onAccountChange = useCallback((address: string) => {
     const newAccount = accounts.find((item) => item.address === address);
-    console.log(address, newAccount);
     if (newAccount) changeAccount(newAccount);
   }, [accounts]);
 

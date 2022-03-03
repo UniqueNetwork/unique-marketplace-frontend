@@ -38,12 +38,12 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, token, onPlaceABidClic
   const canDelist = useMemo(() => {
     if (!selectedAccount) return false;
     return isTokenOwner(selectedAccount.address, token.owner || {}) && !offer.auction?.bids.length;
-  }, []);
+  }, [token, offer, selectedAccount]);
 
   const isBidder = useMemo(() => {
     if (!selectedAccount) return false;
     return offer.auction?.bids.some((bid) => encodeAddress(bid.bidderAddress) === encodeAddress(selectedAccount.address));
-  }, []);
+  }, [offer, selectedAccount]);
 
   const topBid = useMemo(() => {
     return offer.auction?.bids.reduce((top, bid) => {
@@ -54,12 +54,12 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, token, onPlaceABidClic
   const isTopBidder = useMemo(() => {
     if (!selectedAccount || !isBidder || !topBid) return false;
     return encodeAddress(topBid.bidderAddress) === encodeAddress(selectedAccount.address);
-  }, [isBidder, topBid]);
+  }, [isBidder, topBid, selectedAccount]);
 
   const canWithdraw = useMemo(() => {
     if (!selectedAccount) return false;
     return isBidder && !isTopBidder;
-  }, [isBidder, isTopBidder]);
+  }, [isBidder, isTopBidder, selectedAccount]);
 
   const onPlaceBid = useCallback((_offer: Offer) => {
     setOffer(_offer);

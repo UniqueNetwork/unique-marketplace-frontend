@@ -41,32 +41,8 @@ const TokenPage = () => {
     fetchOffer(Number(collectionId), Number(id));
   }, [fetchOffer, fetchToken, collectionId, id]);
 
-  const onSellClick = useCallback(() => {
-    setMarketType(MarketType.sellFix);
-  }, []);
-
-  const onTransferClick = useCallback(() => {
-    setMarketType(MarketType.transfer);
-  }, []);
-
-  const onDelistClick = useCallback(() => {
-    setMarketType(MarketType.delist);
-  }, []);
-
-  const onDelistAuctionClick = useCallback(() => {
-    setMarketType(MarketType.delistAuction);
-  }, []);
-
-  const onBuyClick = useCallback(() => {
-    setMarketType(MarketType.purchase);
-  }, []);
-
-  const onPlaceABidClick = useCallback(() => {
-    setMarketType(MarketType.bid);
-  }, []);
-
-  const onWithdrawClick = useCallback(() => {
-    setMarketType(MarketType.withdrawBid);
+  const onActionClick = useCallback((action: MarketType) => () => {
+    setMarketType(action);
   }, []);
 
   if (loading) return <Loading />;
@@ -78,13 +54,13 @@ const TokenPage = () => {
     <TokenTrading
       token={token}
       offer={offer}
-      onSellClick={onSellClick}
-      onBuyClick={onBuyClick}
-      onTransferClick={onTransferClick}
-      onDelistClick={onDelistClick}
-      onDelistAuctionClick={onDelistAuctionClick}
-      onPlaceABidClick={onPlaceABidClick}
-      onWithdrawClick={onWithdrawClick}
+      onSellClick={onActionClick(MarketType.sellFix)}
+      onBuyClick={onActionClick(MarketType.purchase)}
+      onTransferClick={onActionClick(MarketType.sellFix)}
+      onDelistClick={onActionClick(MarketType.delist)}
+      onDelistAuctionClick={onActionClick(MarketType.delistAuction)}
+      onPlaceABidClick={onActionClick(MarketType.bid)}
+      onWithdrawClick={onActionClick(MarketType.withdrawBid)}
     />
     <TokenPageModal
       token={token}

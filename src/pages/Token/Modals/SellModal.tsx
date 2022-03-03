@@ -15,6 +15,8 @@ const getFees = () => {
   return { priceFee, stepFee };
 };
 
+const tokenSymbol = 'KSM';
+
 export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, offer, onFinish, setIsClosable }) => {
   const { collectionId, id: tokenId } = token;
   const [status, setStatus] = useState<'ask' | 'auction-stage' | 'fix-price-stage'>('ask'); // TODO: naming
@@ -142,7 +144,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
         color='additional-warning-500'
         size='s'
       >
-        A fee of ~ 0.000000000000052 OPL can be applied to the transaction
+        {`A fee of ~ 0.000000000000052 ${tokenSymbol} can be applied to the transaction`}
       </TextStyled>
       <ButtonWrapper>
         <Button
@@ -179,7 +181,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
         color='additional-warning-500'
         size='s'
       >
-        A fee of ~ 0.000000000000052 OPL can be applied to the transaction
+        {`A fee of ~ 0.000000000000052 ${tokenSymbol} can be applied to the transaction`}
       </TextStyled>
       <ButtonWrapper>
         <Button
@@ -236,7 +238,7 @@ export const SellFixStagesModal: FC<TSellFixStagesModal> = ({ collectionId, toke
 
 export const SellAuctionStagesModal: FC<TSellAuctionStagesModal> = ({ collectionId, tokenId, auction, onFinish }) => {
   const { stages, status, initiate } = useAuctionSellStages(collectionId, tokenId);
-  console.log(auction);
+
   useEffect(() => { initiate(auction); }, [auction]); //
   return (
     <div>

@@ -81,7 +81,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: string, 
         color='additional-warning-500'
         size='s'
       >
-        A fee of ~ 0.000000000000052 OPL can be applied to the transaction
+        {`A fee of ~ 0.000000000000052 ${chain} can be applied to the transaction`}
       </TextStyled>
       <ButtonWrapper>
         <Button
@@ -94,7 +94,6 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: string, 
     </>
   );
 };
-
 
 const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ token, onFinish, amount }) => {
   const { stages, status, initiate } = useAuctionBidStages(token?.collectionId || 0, token?.id);

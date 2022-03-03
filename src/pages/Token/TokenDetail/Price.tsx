@@ -4,7 +4,7 @@ import styled from 'styled-components/macro';
 
 import { Icon } from '../../../components/Icon/Icon';
 import Kusama from '../../../static/icons/logo-kusama.svg';
-import {formatKusamaBalance} from "../../../utils/textUtils";
+import { formatKusamaBalance } from '../../../utils/textUtils';
 
 interface PriceProps {
   price: string;

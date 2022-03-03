@@ -1,7 +1,7 @@
-import { useContext, useEffect } from 'react';
+import {useContext, useEffect, useRef} from 'react';
 
-import { Bid, Offer } from '../api/restApi/offers/types';
-import AuctionContextContext from '../api/restApi/auction/AuctionContext';
+import { Offer } from '../api/restApi/offers/types';
+import AuctionContext from '../api/restApi/auction/AuctionContext';
 
 type useBidsSubscriptionProps = {
   offer: Offer,
@@ -9,10 +9,15 @@ type useBidsSubscriptionProps = {
 };
 
 export const useBidsSubscription = ({ offer, onPlaceBid }: useBidsSubscriptionProps) => {
-  const { socket } = useContext(AuctionContextContext);
+  const { socket } = useContext(AuctionContext);
+  const offerRef = useRef<Offer>();
 
   useEffect(() => {
     if (!offer || !socket) return;
+    if (offerRef.current !== offer) {
+      socket?.emit('unsubscribeToAuction', offerRef.current);
+      offerRef.current = offer;
+    }
     socket?.emit('subscribeToAuction', {
       collectionId: offer.collectionId,
       tokenId: offer.tokenId

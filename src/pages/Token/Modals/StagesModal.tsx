@@ -1,10 +1,10 @@
 import React, { FC, useEffect } from 'react';
-import styled from "styled-components/macro";
+import styled from 'styled-components/macro';
 import { Text } from '@unique-nft/ui-kit';
 
 import { Stage, StageStatus } from '../../../types/MarketTypes';
-import Loading from "../../../components/Loading";
-import { Icon } from "../../../components/Icon/Icon";
+import Loading from '../../../components/Loading';
+import { Icon } from '../../../components/Icon/Icon';
 import CheckCircle from '../../../static/icons/check-circle.svg';
 
 type TStagesModalProps = {
@@ -24,7 +24,7 @@ const DefaultMarketStages: FC<TStagesModalProps> = ({ stages, status, onFinish }
     <StageWrapper>
       {stages.map((stage, index) => (<React.Fragment key={`stage-${index}`}>
         <StatusWrapper>
-          {stage.status === StageStatus.inProgress || stage.status === StageStatus.awaitingSign && <Loading />}
+          {(stage.status === StageStatus.inProgress || stage.status === StageStatus.awaitingSign) && <Loading />}
           {stage.status === StageStatus.success && <Icon path={CheckCircle} />}
         </StatusWrapper>
         <TitleWrapper>
