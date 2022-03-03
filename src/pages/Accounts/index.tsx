@@ -1,118 +1,154 @@
-/* eslint-disable react/jsx-no-bind */
-import { useCallback, useState } from 'react';
-import { Button, Tabs, InputText } from '@unique-nft/ui-kit';
-import { encodeAddress, hdLedger, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
-import keyring from '@polkadot/ui-keyring';
-import { u8aToHex } from '@polkadot/util';
-import { useApi } from '../../hooks/useApi';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Button, Text, InputText, Table, Avatar } from '@unique-nft/ui-kit';
+import { TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/types';
+import styled from 'styled-components/macro';
 
-type PairType = 'ecdsa' | 'ed25519' | 'ed25519-ledger' | 'ethereum' | 'sr25519';
+import { useAccounts } from '../../hooks/useAccounts';
+import DefaultAvatar from '../../static/icons/default-avatar.svg';
+import ArrowUpRight from '../../static/icons/arrow-up-right.svg';
+import config from '../../config';
+import { Icon } from '../../components/Icon/Icon';
 
-const derivePath = '';
-const defaultPairType = 'sr25519';
+const tokenSymbol = 'KSM';
 
-const getSuri = (seed: string, derivePath: string, pairType: PairType): string => {
-  return pairType === 'ed25519-ledger'
-    ? u8aToHex(hdLedger(seed, derivePath).secretKey.slice(0, 32))
-    : pairType === 'ethereum'
-      ? `${seed}/${derivePath}`
-      : `${seed}${derivePath}`;
-};
-
-// can be used to output generated address for seed
-const addressFromSeed = (seed: string, derivePath: string, pairType: PairType): string => {
-  return keyring
-    .createFromUri(getSuri(seed, derivePath, pairType), {}, pairType === 'ed25519-ledger' ? 'ed25519' : pairType)
-    .address;
-};
-
-// TODO: used for debug with transfers, irrelevant otherwise
-const fromStringToBnString = (value: string, decimals: number): string => {
-  if (!value || !value.length) {
-    return '0';
+const AccountsColumns: TableColumnProps[] = [
+  {
+    title: 'Account',
+    width: '100%',
+    field: 'accountInfo',
+    render(accountInfo) {
+      console.log(accountInfo);
+      return <AccountCellWrapper>
+        <Avatar size={24} src={DefaultAvatar} />
+        <AccountInfoWrapper>
+          <Text>{accountInfo.name}</Text>
+          <Text size={'s'} color={'grey-500'}>{accountInfo.address}</Text>
+        </AccountInfoWrapper>
+      </AccountCellWrapper>;
+    }
+  },
+  {
+    title: 'Balance',
+    width: '100%',
+    field: 'balance',
+    render(balance) {
+      const { KSM } = balance || {};
+      return <BalancesWrapper>
+        <Text>{`${KSM?.toString() || 0} ${tokenSymbol}`}</Text>
+      </BalancesWrapper>;
+    }
+  },
+  {
+    title: 'Block explorer',
+    width: '100%',
+    field: 'address',
+    render(address) {
+      return <LinksWrapper>
+        <LinkStyled target={'_blank'} rel={'noreferrer'} href={`${config.scanUrl}${address}`}>
+          <Text color={'primary-500'}>UniqueScan</Text>
+          <Icon size={16} path={ArrowUpRight} color={'none'} />
+        </LinkStyled>
+      </LinksWrapper>;
+    }
   }
-
-  const numStringValue = value.replace(',', '.');
-  const [left, right] = numStringValue.split('.');
-  const decimalsFromLessZeroString = right?.length || 0;
-  const bigValue = [...(left || []), ...(right || [])].join('').replace(/^0+/, '');
-
-  return (Number(bigValue) * Math.pow(10, decimals - decimalsFromLessZeroString)).toString();
-};
+];
 
 export const AccountsPage = () => {
-  const { rawRpcApi, rpcClient } = useApi();
-  const [step, setStep] = useState<number>(0);
-  const [password, setPassword] = useState<string>('12345');
-  const [name, setName] = useState<string>('');
-  const [seed, setSeed] = useState<string>(mnemonicGenerate());
-  const [address, setAddress] = useState<string>();
-  const generateSeed = useCallback(() => {
-    const seed = mnemonicGenerate();
-    setSeed(seed);
-  }, [setSeed]);
+  const { accounts } = useAccounts();
+  const [searchString, setSearchString] = useState<string>('');
 
-  // save account to localStorage
-  const onFinish = useCallback(() => {
-    const options = { genesisHash: rawRpcApi?.genesisHash.toString(), isHardware: false, name: name.trim(), tags: [] };
-    const result = keyring.addUri(getSuri(seed, derivePath, defaultPairType), password, options, defaultPairType);
-    const { address } = result.pair;
-    setAddress(address);
-  }, [setAddress, name, password, rawRpcApi, seed]);
+  const onCreateAccountClick = useCallback(
+    () => {
+      // TODO: implement
+    },
+    []
+  );
 
-  const SeedComponent = (<>
-    <span>{seed}</span>
-    <Button onClick={generateSeed} title='Regenerate seed' />
-  </>);
-  const PasswordComponent = (<>
-    <span>Create a password</span>
-    <InputText value={password} onChange={(value: string) => setPassword(value)}/>
-  </>);
-  const FinalComponent = (
-    <>
-      <Button onClick={onFinish} title='Finish'/>
-      {address}
-    </>);
+  const onImportViaSeedClick = useCallback(
+    () => {
+      // TODO: implement
+    },
+    []
+  );
 
-  const [importSeed, setImportSeed] = useState<string | number>();
-  const [importPassword, setImportPassword] = useState<string | number>();
-  const [importAddress, setImportAddress] = useState<string>();
-  const onImportSeed = useCallback(() => {
-    if (!importSeed || !importPassword || !mnemonicValidate(importSeed.toString())) return;
-    const options = { genesisHash: rawRpcApi?.genesisHash.toString(), isHardware: false, name: name.trim(), tags: [] };
-    const result = keyring.addUri(getSuri(importSeed?.toString(), derivePath, defaultPairType), importPassword?.toString(), options, defaultPairType);
-    setImportAddress(result.pair.address);
-  }, [importPassword, importSeed, rawRpcApi, name]);
+  const onSearchStringChange = useCallback(
+    (value: string) => {
+      setSearchString(value);
+    },
+    []
+  );
 
-  const onTest = useCallback(async () => {
-    if (!rpcClient?.rawKusamaRpcApi) return;
-    const amount = '1'; // KSM
-    const address = '5GzuDzwLScZY15q9TQhvwYySA72RxPrsuYjcF37UyLNioJs4'; // send {amount} to self in order to test signing with keyring
-    const signAccount = keyring.getPair(address);
-    const tx = rpcClient.rawKusamaRpcApi?.tx.balances.transfer(
-      encodeAddress(address),
-      fromStringToBnString(amount, 12)
-    );
-    signAccount.unlock('12345');
-    await tx.signAndSend(signAccount);
-  }, [rpcClient]);
+  const filteredAccounts = useMemo(() => {
+    if (!searchString) {
+      return accounts.map((item) => ({ ...item, accountInfo: { address: item.address, name: item.meta.name } }));
+    }
+    return accounts.filter((account) => account.address.includes(searchString) || account.meta.name?.includes(searchString))
+      .map((item) => ({ ...item, accountInfo: { address: item.address, name: item.meta.name } }));
+  }, [accounts, searchString]);
+
   return (
-    <div>
-      <InputText onChange={setImportSeed} value={importSeed} />
-      <InputText onChange={setImportPassword} value={importPassword} />
-      <Button title='Import seed' onClick={onImportSeed} />
-      <Button title='SIGN TEST' onClick={onTest} />
-      {importAddress}
-      <Tabs
-        activeIndex={step}
-        labels={['Seed', 'Password', 'Final']}
-        onClick={(index: number) => (setStep(index))}
+    <AccountPageWrapper>
+      <Row>
+        <Button title={'Create substrate account'} onClick={onCreateAccountClick} />
+        <Button title={'Import via seed phrase'} onClick={onImportViaSeedClick} role={'primary'} />
+        <SearchInputWrapper>
+          <SearchInputStyled placeholder={'Account'} iconLeft={{ name: 'magnify', size: 18 }} onChange={onSearchStringChange}/>
+        </SearchInputWrapper>
+      </Row>
+      <Table
+        columns={AccountsColumns}
+        data={filteredAccounts}
       />
-      <Tabs activeIndex={step}>
-        {SeedComponent}
-        {PasswordComponent}
-        {FinalComponent}
-      </Tabs>
-    </div>
+    </AccountPageWrapper>
   );
 };
+
+const AccountPageWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  row-gap: calc(var(--gap) * 2);
+  width: 100%;
+  .unique-table-data-row {
+    height: fit-content;
+  } 
+`;
+
+const Row = styled.div`
+  display: flex;
+  column-gap: var(--gap);
+  width: 100%;
+`;
+
+const SearchInputWrapper = styled.div`
+  flex-grow: 1;
+  display: flex;
+  justify-content: flex-end;
+`;
+
+const SearchInputStyled = styled(InputText)`
+  flex-basis: 720px;
+`;
+
+const AccountCellWrapper = styled.div`
+  display: flex;
+  padding: 20px 0 !important;
+`;
+
+const AccountInfoWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const BalancesWrapper = styled.div`
+  padding: 0;
+`;
+
+const LinksWrapper = styled.div`
+  padding: 0 !important;
+`;
+
+const LinkStyled = styled.a`
+  display: flex;
+  align-items: center;
+  column-gap: calc(var(--gap) / 2);
+`;

@@ -26,7 +26,6 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
 
   const onAccountChange = useCallback((address: string) => {
     const newAccount = accounts.find((item) => item.address === address);
-    console.log(address, newAccount);
     if (newAccount) changeAccount(newAccount);
   }, [accounts]);
 
@@ -50,7 +49,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
     toggleMobileMenu((prevState) => !prevState);
   }, []);
 
-  const balance = selectedAccount?.balance?.KSM?.toNumber() || 0;
+  const balance = selectedAccount?.balance?.KSM?.toString() || 0;
 
   return (
     <HeaderStyled>

@@ -3,21 +3,23 @@ import styled from 'styled-components/macro';
 import { useGetIcon } from '../../hooks/useGetIcon';
 
 interface IComponentProps {
-  path: string;
+  path: string
+  color?: string
+  size?: number
 }
 
-export const Icon: FC<IComponentProps> = ({ path }: IComponentProps) => {
+export const Icon: FC<IComponentProps> = ({ path, color, size }: IComponentProps) => {
   const icon = useGetIcon(path);
 
-  return <IconStyled dangerouslySetInnerHTML={{ __html: icon }} />;
+  return <IconStyled dangerouslySetInnerHTML={{ __html: icon }} size={size} color={color || 'currentcolor'} />;
 };
 
-const IconStyled = styled.span`
+const IconStyled = styled.span<{ color: string, size?: number }>`
+  height: ${({ size }) => size ? `${size}px` : 'unset'};
+  width: ${({ size }) => size ? `${size}px` : 'unset'};
   svg {
-    fill: currentcolor;
-
     path {
-      fill: inherit;
+      fill: ${({ color }) => color};
     }
   }
 `;
