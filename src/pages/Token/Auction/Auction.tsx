@@ -15,7 +15,7 @@ import { useBidsSubscription } from '../../../hooks/useBidsSubscription';
 import { Price } from '../TokenDetail/Price';
 import { useFee } from '../../../hooks/useFee';
 import { shortcutText } from '../../../utils/textUtils';
-import { compareEncodedAddresses } from "../../../api/chainApi/utils/compareEncodedAddresses";
+import { compareEncodedAddresses } from '../../../api/chainApi/utils/compareEncodedAddresses';
 
 interface AuctionProps {
   offer: Offer

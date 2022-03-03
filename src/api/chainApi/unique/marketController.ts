@@ -9,7 +9,7 @@ import { IMarketController, INFTController, TransactionOptions } from '../types'
 import { CrossAccountId, normalizeAccountId } from '../utils/normalizeAccountId';
 import { getEthAccount } from '../utils/getEthAccount';
 import { isTokenOwner } from '../utils/isTokenOwner';
-import { compareEncodedAddresses } from "../utils/compareEncodedAddresses";
+import { compareEncodedAddresses } from '../utils/compareEncodedAddresses';
 
 export type EvmCollectionAbiMethods = {
   approve: (contractAddress: string, tokenId: string) => {

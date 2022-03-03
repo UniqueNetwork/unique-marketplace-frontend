@@ -3,7 +3,7 @@ import { useWithdrawBidStages } from '../../../hooks/marketplaceStages';
 import DefaultMarketStages from './StagesModal';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 
-export const WithdrawBidStagesModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish, setIsClosable }) => {
+export const WithdrawBidStagesModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish }) => {
   const { stages, status, initiate } = useWithdrawBidStages(token.collectionId || 0, token.id);
   useEffect(() => { initiate(null); }, []);
   return (

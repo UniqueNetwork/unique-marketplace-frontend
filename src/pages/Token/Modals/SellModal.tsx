@@ -5,7 +5,7 @@ import styled from 'styled-components/macro';
 import DefaultMarketStages from './StagesModal';
 import { TAuctionProps, TFixPriceProps } from './types';
 import { useAuctionSellStages, useSellFixStages } from '../../../hooks/marketplaceStages';
-import { AdditionalColorDark, AdditionalWarning100 } from '../../../styles/colors';
+import { AdditionalWarning100 } from '../../../styles/colors';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 
 // TODO: take from config instead (/api/settings inside ApiContext)
@@ -17,7 +17,7 @@ const getFees = () => {
 
 const tokenSymbol = 'KSM';
 
-export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, offer, onFinish, setIsClosable }) => {
+export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish, setIsClosable }) => {
   const { collectionId, id: tokenId } = token;
   const [status, setStatus] = useState<'ask' | 'auction-stage' | 'fix-price-stage'>('ask'); // TODO: naming
   const [auction, setAuction] = useState<TAuctionProps>();
@@ -67,8 +67,6 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
   const [minStepInputValueAuction, setMinStepInputValueAuction] = useState<number>(15);
   const [inputStartingPriceValue, setInputStartingPriceValue] = useState<number>();
   const [durationSelectValue, setDurationSelectValue] = useState<number>();
-
-  const { priceFee, stepFee } = getFees();
 
   const handleClick = useCallback(
     (tabIndex: number) => {
@@ -268,12 +266,6 @@ const SelectWrapper = styled(Select)`
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
-`;
-
-const IconWrapper = styled.div`
-  width: 24px;
-  height: 24px;
-  color: ${AdditionalColorDark};
 `;
 
 const Content = styled.div`

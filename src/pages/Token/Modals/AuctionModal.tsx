@@ -1,4 +1,4 @@
-import React, {FC, useCallback, useEffect, useState} from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import { Button, Heading, InputText, Select, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
@@ -14,11 +14,11 @@ export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ token, offer, setIs
   const [status, setStatus] = useState<'ask' | 'place-bid-stage'>('ask'); // TODO: naming
   const [bidAmount, setBidAmount] = useState<string>('0');
 
-  const onConfirmPlaceABid = useCallback((_bidAmount: string, chain: string) => {
+  const onConfirmPlaceABid = useCallback((_bidAmount: string) => {
     setBidAmount(_bidAmount);
     setStatus('place-bid-stage');
     setIsClosable(false);
-  }, [setStatus, setBidAmount]);
+  }, [setStatus, setBidAmount, setIsClosable]);
 
   if (status === 'ask') return (<AskBidModal offer={offer} onConfirmPlaceABid={onConfirmPlaceABid} />);
   if (status === 'place-bid-stage') {
@@ -30,7 +30,7 @@ export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ token, offer, setIs
     />);
   }
   return null;
-}
+};
 
 const chainOptions = [{ id: 'KSM', title: 'KSM', iconRight: { size: 18, file: Kusama } }];
 
@@ -44,21 +44,21 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: string, 
 
       onConfirmPlaceABid((bidAmount - leadingBidAmount).toString(), chain || '');
     },
-    [onConfirmPlaceABid, bidAmount, offer],
+    [onConfirmPlaceABid, bidAmount, offer, chain]
   );
 
   const onBidAmountChange = useCallback(
     (value: number) => {
       setBidAmount(value || 0);
     },
-    [setBidAmount],
+    [setBidAmount]
   );
 
   const onChainChange = useCallback(
     (value: string) => {
       setChain(value);
     },
-    [setChain],
+    [setChain]
   );
 
   return (
@@ -75,13 +75,13 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: string, 
         />
       </InputWrapper>
       <Text size={'s'} color={'grey-500'} >
-        {`Minimum bid ${offer?.auction?.priceStep} ${chain}`}
+        {`Minimum bid ${offer?.auction?.priceStep || 0} ${chain || ''}`}
       </Text>
       <TextStyled
         color='additional-warning-500'
         size='s'
       >
-        {`A fee of ~ 0.000000000000052 ${chain} can be applied to the transaction`}
+        {`A fee of ~ 0.000000000000052 ${chain || ''} can be applied to the transaction`}
       </TextStyled>
       <ButtonWrapper>
         <Button
