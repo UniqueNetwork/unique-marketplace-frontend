@@ -65,7 +65,8 @@ export interface IMarketController {
   addDeposit: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
   buyToken: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
   transferToken: (from: string, to: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
-  transferBidBalance: (from: string, to: string, amount: string, options: TransactionOptions) => Promise<void>
+  transferToAuction: (owner: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
+  transferBidBalance: (from: string, amount: string, options: TransactionOptions) => Promise<void>
 }
 
 export type Chain = {

@@ -1,39 +1,35 @@
-import React, { FC, useCallback, useContext, useMemo } from 'react';
-import { Text, Button } from '@unique-nft/ui-kit';
+import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
+import { Text, Button, Heading } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import { Offer } from '../../../api/restApi/offers/types';
-import { useApi } from '../../../hooks/useApi';
 import { NFTToken } from '../../../api/chainApi/unique/types';
 import Bids from './Bids';
 import accountContext from '../../../account/AccountContext';
 import { Icon } from '../../../components/Icon/Icon';
 import clock from '../../../static/icons/clock.svg';
 import { timeDifference } from '../../../utils/timestampUtils';
-import { Grey300 } from '../../../styles/colors';
+import { AdditionalPositive100, AdditionalPositive500, Coral100, Coral500, Grey300 } from '../../../styles/colors';
 import { isTokenOwner } from '../../../api/chainApi/utils/isTokenOwner';
+import { useBidsSubscription } from '../../../hooks/useBidsSubscription';
+import { Price } from '../TokenDetail/Price';
+import { useFee } from '../../../hooks/useFee';
+import { shortcutText } from '../../../utils/textUtils';
+import { compareEncodedAddresses } from '../../../api/chainApi/utils/compareEncodedAddresses';
 
 interface AuctionProps {
   offer: Offer
   token: NFTToken
+  onPlaceABidClick(): void
+  onDelistAuctionClick(): void
+  onWithdrawClick(): void
 }
 
-const Auction: FC<AuctionProps> = ({ offer, token }) => {
+const Auction: FC<AuctionProps> = ({ offer: initialOffer, token, onPlaceABidClick, onDelistAuctionClick, onWithdrawClick }) => {
   const { selectedAccount } = useContext(accountContext);
+  const { fee } = useFee();
 
-  const { api } = useApi();
-
-  const onPlaceABidClick = useCallback(() => {
-    // TODO: place a bid
-  }, []);
-
-  const onDelistClick = useCallback(() => {
-    // TODO: delist
-  }, []);
-
-  const onWithdrawClick = useCallback(() => {
-    // TODO: withdraw
-  }, []);
+  const [offer, setOffer] = useState<Offer>(initialOffer);
 
   const canPlaceABid = useMemo(() => {
     return true; // TODO: get a balance of selected account
@@ -42,20 +38,42 @@ const Auction: FC<AuctionProps> = ({ offer, token }) => {
   const canDelist = useMemo(() => {
     if (!selectedAccount) return false;
     return isTokenOwner(selectedAccount.address, token.owner || {}) && !offer.auction?.bids.length;
-  }, []);
+  }, [token, offer, selectedAccount]);
+
+  const isBidder = useMemo(() => {
+    if (!selectedAccount) return false;
+    return offer.auction?.bids.some((bid) => compareEncodedAddresses(bid.bidderAddress, selectedAccount.address));
+  }, [offer, selectedAccount]);
+
+  const topBid = useMemo(() => {
+    return offer.auction?.bids.reduce((top, bid) => {
+      return top.amount > bid.amount ? top : bid;
+    }) || null;
+  }, [offer]);
+
+  const isTopBidder = useMemo(() => {
+    if (!selectedAccount || !isBidder || !topBid) return false;
+    return compareEncodedAddresses(topBid.bidderAddress, selectedAccount.address);
+  }, [isBidder, topBid, selectedAccount]);
 
   const canWithdraw = useMemo(() => {
-    return false; // TODO: check it
-  }, []);
+    if (!selectedAccount) return false;
+    return isBidder && !isTopBidder;
+  }, [isBidder, isTopBidder, selectedAccount]);
 
-  if (!offer) return null;
+  const onPlaceBid = useCallback((_offer: Offer) => {
+    setOffer(_offer);
+  }, [setOffer]);
 
-  return (
+  useBidsSubscription({ offer, onPlaceBid });
+
+  return (<>
+    <Price price={offer.price} fee={fee} bid={topBid?.amount} />
     <AuctionWrapper>
       <Row>
         {canDelist && <Button title={'Delist'}
           role={'danger'}
-          onClick={onDelistClick}
+          onClick={onDelistAuctionClick}
           disabled={!canPlaceABid}
         />}
         {!canDelist && <Button title={'Place a bid'}
@@ -72,9 +90,12 @@ const Auction: FC<AuctionProps> = ({ offer, token }) => {
 
       </Row>
       <Divider />
+      <Heading size={'4'}>Offers</Heading>
+      {isTopBidder && <TopBidderTextStyled >You are Top Bidder</TopBidderTextStyled>}
+      {!isTopBidder && isBidder && <Row><BidderTextStyled >You are outbid</BidderTextStyled> <Text>{`Leading bid ${shortcutText(topBid?.bidderAddress || '')}`}</Text></Row>}
       <Bids offer={offer} />
     </AuctionWrapper>
-  );
+  </>);
 };
 
 export default Auction;
@@ -92,10 +113,33 @@ const Row = styled.div`
   display: flex;
   align-items: center;
   column-gap: var(--gap)
-
 `;
 
 const Divider = styled.div`
   margin: 24px 0;
   border-top: 1px dashed ${Grey300};
+`;
+
+const TopBidderTextStyled = styled(Text)`
+  margin-top: calc(var(--gap) / 2);
+  box-sizing: border-box;
+  display: flex;
+  padding: 8px 16px;
+  margin-bottom: 24px;
+  border-radius: 4px;
+  background-color: ${AdditionalPositive100};
+  color: ${AdditionalPositive500} !important;
+  width: fit-content;
+`;
+
+const BidderTextStyled = styled(Text)`  
+  margin-top: calc(var(--gap) / 2);
+  box-sizing: border-box;
+  display: flex;
+  padding: 8px 16px;
+  margin-bottom: 24px;
+  border-radius: 4px;
+  background-color: ${Coral100};
+  color: ${Coral500} !important;
+  width: fit-content;
 `;

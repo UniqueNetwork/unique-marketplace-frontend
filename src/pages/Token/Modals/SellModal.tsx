@@ -5,7 +5,7 @@ import styled from 'styled-components/macro';
 import DefaultMarketStages from './StagesModal';
 import { TAuctionProps, TFixPriceProps } from './types';
 import { useAuctionSellStages, useSellFixStages } from '../../../hooks/marketplaceStages';
-import { AdditionalColorDark, AdditionalWarning100 } from '../../../styles/colors';
+import { AdditionalWarning100 } from '../../../styles/colors';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 
 // TODO: take from config instead (/api/settings inside ApiContext)
@@ -15,7 +15,9 @@ const getFees = () => {
   return { priceFee, stepFee };
 };
 
-export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, offer, onFinish, setIsClosable }) => {
+const tokenSymbol = 'KSM';
+
+export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish, setIsClosable }) => {
   const { collectionId, id: tokenId } = token;
   const [status, setStatus] = useState<'ask' | 'auction-stage' | 'fix-price-stage'>('ask'); // TODO: naming
   const [auction, setAuction] = useState<TAuctionProps>();
@@ -26,6 +28,7 @@ export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, offer, onFinish
       setStatus('auction-stage');
       setIsClosable(false);
   }, [setStatus, setAuction]);
+
   const onSellFixPrice = useCallback((fixPrice: TFixPriceProps) => {
     setFixPrice(fixPrice);
     setStatus('fix-price-stage');
@@ -65,8 +68,6 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
   const [inputStartingPriceValue, setInputStartingPriceValue] = useState<number>();
   const [durationSelectValue, setDurationSelectValue] = useState<number>();
 
-  const { priceFee, stepFee } = getFees();
-
   const handleClick = useCallback(
     (tabIndex: number) => {
       setActiveTab(tabIndex);
@@ -82,12 +83,12 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
   );
 
   const onConfirmAuctionClick = useCallback(() => {
-    onSellAuction({ minimumStep: minStepInputValueAuction, startingPrice: priceInputValue, duration: durationSelectValue } as TAuctionProps);
-  }, []);
+    onSellAuction({ minimumStep: minStepInputValueAuction, startingPrice: inputStartingPriceValue, duration: durationSelectValue } as TAuctionProps);
+  }, [minStepInputValueAuction, inputStartingPriceValue, durationSelectValue]);
 
   const onConfirmFixPriceClick = useCallback(() => {
     onSellFixPrice({ price: priceInputValue } as TFixPriceProps); // TODO: proper typing, proper calculated object
-  }, []);
+  }, [priceInputValue]);
 
   const onMinStepInputChange = useCallback(
     (value: number) => {
@@ -113,19 +114,19 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
 
   const durationOptions = [
     {
-      id: '3 days',
+      id: 3,
       title: '3 days'
     },
     {
-      id: '7 days',
+      id: 7,
       title: '7 days'
     },
     {
-      id: '14 days',
+      id: 14,
       title: '14 days'
     },
     {
-      id: '21 days',
+      id: 21,
       title: '21 days'
     }
   ];
@@ -141,7 +142,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
         color='additional-warning-500'
         size='s'
       >
-        A fee of ~ 0.000000000000052 OPL can be applied to the transaction
+        {`A fee of ~ 0.000000000000052 ${tokenSymbol} can be applied to the transaction`}
       </TextStyled>
       <ButtonWrapper>
         <Button
@@ -178,7 +179,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
         color='additional-warning-500'
         size='s'
       >
-        A fee of ~ 0.000000000000052 OPL can be applied to the transaction
+        {`A fee of ~ 0.000000000000052 ${tokenSymbol} can be applied to the transaction`}
       </TextStyled>
       <ButtonWrapper>
         <Button
@@ -235,7 +236,8 @@ export const SellFixStagesModal: FC<TSellFixStagesModal> = ({ collectionId, toke
 
 export const SellAuctionStagesModal: FC<TSellAuctionStagesModal> = ({ collectionId, tokenId, auction, onFinish }) => {
   const { stages, status, initiate } = useAuctionSellStages(collectionId, tokenId);
-  useEffect(() => { initiate(auction); }, [initiate, auction]);
+
+  useEffect(() => { initiate(auction); }, [auction]); //
   return (
     <div>
       <DefaultMarketStages stages={stages} status={status} onFinish={onFinish} />
@@ -264,12 +266,6 @@ const SelectWrapper = styled(Select)`
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
-`;
-
-const IconWrapper = styled.div`
-  width: 24px;
-  height: 24px;
-  color: ${AdditionalColorDark};
 `;
 
 const Content = styled.div`

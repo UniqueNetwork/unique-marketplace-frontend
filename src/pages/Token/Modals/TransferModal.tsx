@@ -16,7 +16,7 @@ export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosab
     setRecipient(_recipient);
     setStatus('transfer-stage');
     setIsClosable(false);
-  }, [setStatus, setRecipient]);
+  }, [setStatus, setRecipient, setIsClosable]);
 
   if (status === 'ask') return (<AskTransferModal onTransfer={onTransfer} />);
   if (status === 'transfer-stage') {
@@ -40,7 +40,7 @@ const AskTransferModal: FC<{ onTransfer(receiver: string): void }> = ({ onTransf
     () => {
       onTransfer(address);
     },
-    [address]
+    [address, onTransfer]
   );
 
   return (

@@ -2,7 +2,7 @@ import { ApiPromise } from '@polkadot/api';
 import { INFTController } from '../types';
 import { NFTCollection, NFTToken } from './types';
 import { normalizeAccountId } from '../utils/normalizeAccountId';
-import { collectionName16Decoder, decodeStruct, getOnChainSchema, hex2a, subToEthLowercase } from '../utils/decoder';
+import { collectionName16Decoder, decodeStruct, getOnChainSchema, hex2a } from '../utils/decoder';
 import { getTokenImage } from '../utils/imageUtils';
 
 export type NFTControllerConfig = {
@@ -96,5 +96,9 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
     return tokens;
   }
 }
+
+type TokenId = {
+  toNumber(): number
+};
 
 export default UniqueNFTController;

@@ -20,3 +20,11 @@ export const formatBlockNumber = (blockNumber: number | undefined) => {
 
   return blockNumber.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 };
+
+export const formatKusamaBalance = (balance: string | number, decimals = 12) => {
+  const balanceValue = Number(balance);
+  return (balanceValue / Math.pow(10, decimals)).toLocaleString('en-US', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: decimals
+  });
+};

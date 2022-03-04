@@ -12,7 +12,7 @@ import { AttributesBlock } from './AttributesBlock';
 import { NFTToken } from '../../../api/chainApi/unique/types';
 
 interface IProps {
-  children: ReactChild;
+  children: ReactChild[];
   token: NFTToken;
 }
 
