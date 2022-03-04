@@ -23,14 +23,16 @@ export type TPlaceBidParams = {
 export type TDeleteParams = {
   collectionId: number, tokenId: number, timestamp: number
 }
-export type TDeleteHeaders = {
-  'x-polkadot-signature': string,
-  'x-polkadot-signer': string
+
+export type TSignature = {
+  signature: string,
+  signer: string
 }
+
 export const startAuction = (body: TStartAuctionParams) => post<TStartAuctionParams>(`${endpoint}/create_auction`, body, { ...defaultParams });
 export const placeBid = (body: TPlaceBidParams) => post<TPlaceBidParams>(`${endpoint}/place_bid`, body, { ...defaultParams });
-export const withdrawBid = (body: TDeleteParams, headers: TDeleteHeaders) => deleteRequest(`${endpoint}/withdraw_bid`, { headers: { ...defaultParams.headers, ...headers }, params: body, ...defaultParams });
-export const cancelAuction = (body: TDeleteParams, headers: TDeleteHeaders) => deleteRequest(`${endpoint}/cancel_auction`, { headers: { ...defaultParams.headers, ...headers }, params: body, ...defaultParams });
+export const withdrawBid = (body: TDeleteParams, { signer, signature }: TSignature) => deleteRequest(`${endpoint}/withdraw_bid`, { headers: { ...defaultParams.headers, Authorization: `${signer}:${signature}` }, params: body, ...defaultParams });
+export const cancelAuction = (body: TDeleteParams, { signer, signature }: TSignature) => deleteRequest(`${endpoint}/cancel_auction`, { headers: { ...defaultParams.headers, Authorization: `${signer}:${signature}` }, params: body, ...defaultParams });
 
 export const useAuction = () => {
   const [startAuctionStatus, setStartAuctionStatus] = useState<FetchStatus>(FetchStatus.default);

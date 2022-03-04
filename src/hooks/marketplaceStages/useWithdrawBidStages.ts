@@ -22,7 +22,7 @@ export const useWithdrawBidStages = (collectionId: number, tokenId: number) => {
         const { signature, params } = await getSignature(collectionId, tokenId, selectedAccount);
         await withdrawBid(
           params,
-          { 'x-polkadot-signature': signature, 'x-polkadot-signer': selectedAccount.address }
+          { signature, signer: selectedAccount.address }
         );
       }
     }

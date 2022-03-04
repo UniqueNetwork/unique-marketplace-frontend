@@ -22,7 +22,7 @@ export const useCancelAuctionStages = (collectionId: number, tokenId: number) =>
         const { signature, params } = await getSignature(collectionId, tokenId, selectedAccount);
         await cancelAuction(
           params,
-          { 'x-polkadot-signature': signature, 'x-polkadot-signer': selectedAccount.address }
+          { signature, signer: selectedAccount.address }
         );
       }
     }
