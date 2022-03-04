@@ -6,9 +6,11 @@ import AccountContext, { Account, AccountSigner } from '../account/AccountContex
 import keyring from '@polkadot/ui-keyring';
 import { BN } from '@polkadot/util';
 import { DefaultAccountKey } from '../account/AccountProvider';
+import { getSuri, PairType } from '../utils/seedUtils';
+import { KeypairType } from '@polkadot/util-crypto/types';
 
 export const useAccounts = () => {
-  const { rpcClient } = useApi();
+  const { rpcClient, rawRpcApi } = useApi();
   const { accounts, selectedAccount, isLoading, fetchAccountsError, changeAccount, setSelectedAccount, setAccounts, setIsLoading, setFetchAccountsError } = useContext(AccountContext);
 
   const getExtensionAccounts = useCallback(async () => {
@@ -95,11 +97,19 @@ export const useAccounts = () => {
     if (updatedSelectedAccount) setSelectedAccount(updatedSelectedAccount);
   }, [accounts]);
 
+  const addLocalAccount = useCallback((seed: string, derivePath: string, name: string, password: string, pairType: PairType) => {
+      const options = { genesisHash: rawRpcApi?.genesisHash.toString(), isHardware: false, name: name.trim(), tags: [] };
+      const result = keyring.addUri(getSuri(seed, derivePath, pairType), password, options, pairType as KeypairType);
+    },
+    []
+  );
+
   return {
     accounts,
     selectedAccount,
     isLoading,
     fetchAccountsError,
+    addLocalAccount,
     changeAccount
   };
 };

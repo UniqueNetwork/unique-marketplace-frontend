@@ -8,16 +8,16 @@ import DefaultAvatar from '../../static/icons/default-avatar.svg';
 import ArrowUpRight from '../../static/icons/arrow-up-right.svg';
 import config from '../../config';
 import { Icon } from '../../components/Icon/Icon';
+import { CreateAccountModal } from './Modals/CreateAccount';
 
 const tokenSymbol = 'KSM';
 
 const AccountsColumns: TableColumnProps[] = [
   {
     title: 'Account',
-    width: '100%',
+    width: '33%',
     field: 'accountInfo',
     render(accountInfo) {
-      console.log(accountInfo);
       return <AccountCellWrapper>
         <Avatar size={24} src={DefaultAvatar} />
         <AccountInfoWrapper>
@@ -29,7 +29,7 @@ const AccountsColumns: TableColumnProps[] = [
   },
   {
     title: 'Balance',
-    width: '100%',
+    width: '33%',
     field: 'balance',
     render(balance) {
       const { KSM } = balance || {};
@@ -40,7 +40,7 @@ const AccountsColumns: TableColumnProps[] = [
   },
   {
     title: 'Block explorer',
-    width: '100%',
+    width: '33%',
     field: 'address',
     render(address) {
       return <LinksWrapper>
@@ -56,20 +56,16 @@ const AccountsColumns: TableColumnProps[] = [
 export const AccountsPage = () => {
   const { accounts } = useAccounts();
   const [searchString, setSearchString] = useState<string>('');
+  const [isCreateAccountVisible, setIsCreateAccountVisible] = useState<boolean>(false);
+  const [isImportAccountVisible, setIsImportAccountVisible] = useState<boolean>(false);
 
-  const onCreateAccountClick = useCallback(
-    () => {
-      // TODO: implement
-    },
-    []
-  );
+  const onCreateAccountClick = useCallback(() => {
+    setIsCreateAccountVisible(true);
+  }, []);
 
-  const onImportViaSeedClick = useCallback(
-    () => {
-      // TODO: implement
-    },
-    []
-  );
+  const onImportViaSeedClick = useCallback(() => {
+    setIsImportAccountVisible(true);
+  }, []);
 
   const onSearchStringChange = useCallback(
     (value: string) => {
@@ -86,6 +82,10 @@ export const AccountsPage = () => {
       .map((item) => ({ ...item, accountInfo: { address: item.address, name: item.meta.name } }));
   }, [accounts, searchString]);
 
+  const onChangeAccountsFinish = useCallback(() => {
+    setIsCreateAccountVisible(false);
+  }, []);
+
   return (
     <AccountPageWrapper>
       <Row>
@@ -99,6 +99,7 @@ export const AccountsPage = () => {
         columns={AccountsColumns}
         data={filteredAccounts}
       />
+      <CreateAccountModal isVisible={isCreateAccountVisible} onFinish={onChangeAccountsFinish} />
     </AccountPageWrapper>
   );
 };

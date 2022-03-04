@@ -32,7 +32,7 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, token, onBuyClick, onPlaceA
           onWithdrawClick={onWithdrawClick}
           onPlaceABidClick={onPlaceABidClick}
           onDelistClick={onDelistClick}
-        />
+      />
       : <>
         <ButtonWrapper>
           <Button
