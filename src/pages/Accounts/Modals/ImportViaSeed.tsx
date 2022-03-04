@@ -4,15 +4,12 @@ import styled from 'styled-components/macro';
 
 import { TCreateAccountModalProps, CreateAccountModalStages, TAccountProperties, TCreateAccountBodyModalProps } from './types';
 import { useAccounts } from '../../../hooks/useAccounts';
-import { FinalModal } from './Final';
 import { AskCredentialsModal } from './AskCredentials';
-import { AskSeedPhraseModal } from './AskSeedPhrase';
+import { FinalModal } from './Final';
+import { defaultPairType, derivePath } from './CreateAccount';
+import { AskExistsSeedPhraseModal } from './AskExistsSeedPhrase';
 
-export const derivePath = '';
-
-export const defaultPairType = 'sr25519';
-
-export const CreateAccountModal: FC<TCreateAccountModalProps> = ({ isVisible, onFinish }) => {
+export const ImportViaSeedAccountModal: FC<TCreateAccountModalProps> = ({ isVisible, onFinish }) => {
   const [stage, setStage] = useState<CreateAccountModalStages>(CreateAccountModalStages.AskSeed);
   const [accountProperties, setAccountProperties] = useState<TAccountProperties>();
   const { addLocalAccount } = useAccounts();
@@ -20,7 +17,7 @@ export const CreateAccountModal: FC<TCreateAccountModalProps> = ({ isVisible, on
   const ModalBodyComponent = useMemo<FC<TCreateAccountBodyModalProps> | null>(() => {
     switch (stage) {
       case CreateAccountModalStages.AskSeed:
-        return AskSeedPhraseModal;
+        return AskExistsSeedPhraseModal;
       case CreateAccountModalStages.AskCredentials:
         return AskCredentialsModal;
       case CreateAccountModalStages.Final:
@@ -47,7 +44,7 @@ export const CreateAccountModal: FC<TCreateAccountModalProps> = ({ isVisible, on
 
   return (<Modal isVisible={isVisible} isClosable={true} onClose={onFinish}>
     <Content>
-      <Heading size='2'>{`Add an account via seed ${stage + 1}/3`}</Heading>
+      <Heading size='2'>{`Restore an account an account from seed ${stage + 1}/3`}</Heading>
     </Content>
     <ModalBodyComponent
       accountProperties={accountProperties}

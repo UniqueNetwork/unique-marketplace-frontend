@@ -9,6 +9,7 @@ import ArrowUpRight from '../../static/icons/arrow-up-right.svg';
 import config from '../../config';
 import { Icon } from '../../components/Icon/Icon';
 import { CreateAccountModal } from './Modals/CreateAccount';
+import { ImportViaSeedAccountModal } from './Modals/ImportViaSeed';
 
 const tokenSymbol = 'KSM';
 
@@ -84,6 +85,7 @@ export const AccountsPage = () => {
 
   const onChangeAccountsFinish = useCallback(() => {
     setIsCreateAccountVisible(false);
+    setIsImportAccountVisible(false);
   }, []);
 
   return (
@@ -100,6 +102,7 @@ export const AccountsPage = () => {
         data={filteredAccounts}
       />
       <CreateAccountModal isVisible={isCreateAccountVisible} onFinish={onChangeAccountsFinish} />
+      <ImportViaSeedAccountModal isVisible={isImportAccountVisible} onFinish={onChangeAccountsFinish} />
     </AccountPageWrapper>
   );
 };
