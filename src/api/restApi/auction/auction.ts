@@ -1,12 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
-import { AxiosError } from 'axios';
 
-import { post, get } from '../base';
-import { Offer } from './types';
+import { post, get, deleteRequest } from '../base';
 import { defaultParams } from '../base/axios';
-import { ResponseError } from '../base/types';
 
-const endpoint = '/offer';
+const endpoint = '/auction';
 
 export enum FetchStatus {
   default = 'Default',
@@ -23,8 +20,19 @@ export type TPlaceBidParams = {
   tx: unknown, collectionId: number, tokenId: number
 }
 
-export const startAuction = (body: TStartAuctionParams) => post<TStartAuctionParams>(`${endpoint}/auction/create_auction`, body, { ...defaultParams });
-export const placeBid = (body: TPlaceBidParams) => post<TPlaceBidParams>(`${endpoint}/auction/auction/place_bid`, body, { ...defaultParams });
+export type TDeleteParams = {
+  collectionId: number, tokenId: number, timestamp: number
+}
+
+export type TSignature = {
+  signature: string,
+  signer: string
+}
+
+export const startAuction = (body: TStartAuctionParams) => post<TStartAuctionParams>(`${endpoint}/create_auction`, body, { ...defaultParams });
+export const placeBid = (body: TPlaceBidParams) => post<TPlaceBidParams>(`${endpoint}/place_bid`, body, { ...defaultParams });
+export const withdrawBid = (body: TDeleteParams, { signer, signature }: TSignature) => deleteRequest(`${endpoint}/withdraw_bid`, { headers: { ...defaultParams.headers, Authorization: `${signer}:${signature}` }, params: body, ...defaultParams });
+export const cancelAuction = (body: TDeleteParams, { signer, signature }: TSignature) => deleteRequest(`${endpoint}/cancel_auction`, { headers: { ...defaultParams.headers, Authorization: `${signer}:${signature}` }, params: body, ...defaultParams });
 
 export const useAuction = () => {
   const [startAuctionStatus, setStartAuctionStatus] = useState<FetchStatus>(FetchStatus.default);

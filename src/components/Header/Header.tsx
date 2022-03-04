@@ -1,22 +1,21 @@
-import { Button, Text } from '@unique-nft/ui-kit';
-import { FC, useCallback, useState } from 'react';
+import { Button, Select, Text } from '@unique-nft/ui-kit';
+import { FC, useCallback, useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components/macro'; // Todo: https://cryptousetech.atlassian.net/browse/NFTPAR-1201
-import { useAccount } from '../../hooks/useAccount';
-import { useScreenWidthFromThreshold } from '../../hooks/useScreenWidthFromThreshold';
 
+import { useScreenWidthFromThreshold } from '../../hooks/useScreenWidthFromThreshold';
 import logo from '../../logos/logo-white-label-market.svg';
 import menu from '../../static/icons/menu.svg';
-
 import { TMenuItems } from '../PageLayout';
 import { AdditionalColorDark, AdditionalColorLight, Primary500 } from '../../styles/colors';
+import accountContext from '../../account/AccountContext';
 
 interface HeaderProps {
   activeItem: TMenuItems;
 }
 
 export const Header: FC<HeaderProps> = ({ activeItem }) => {
-  const { selectedAccount } = useAccount();
+  const { selectedAccount, changeAccount, accounts } = useContext(accountContext);
   const { lessThanThreshold: showMobileMenu } =
     useScreenWidthFromThreshold(1279);
   const [mobileMenuIsOpen, toggleMobileMenu] = useState(false);
@@ -25,9 +24,18 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
     console.log('button is clicked');
   };
 
+  const onAccountChange = useCallback((address: string) => {
+    const newAccount = accounts.find((item) => item.address === address);
+    if (newAccount) changeAccount(newAccount);
+  }, [accounts]);
+
   const account = selectedAccount
       ? (
-        selectedAccount.address
+        <SelectStyled
+          options={accounts.map((account) => ({ id: account.address, title: account.address }))}
+          value={selectedAccount.address}
+          onChange={onAccountChange}
+        />
         )
       : (
         <Button
@@ -100,6 +108,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
       </LeftSideColumn>
       <RightSide>
         <Balance>Balance {balance}</Balance>
+
         {account}
       </RightSide>
       {showMobileMenu && mobileMenuIsOpen && (
@@ -229,4 +238,8 @@ const TextStyled = styled(Text) <{ $active?: boolean }>`
       color: ${(props) => (props.$active ? AdditionalColorLight : Primary500)};
     }
   }
+`;
+
+const SelectStyled = styled(Select)`
+  width: 430px;
 `;

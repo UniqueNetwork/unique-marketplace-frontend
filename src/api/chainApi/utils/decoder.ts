@@ -1,6 +1,6 @@
 import { AttributesDecoded, NFTCollection } from '../unique/types';
 import { deserializeNft, ProtobufAttributeType } from './protobufUtils';
-import {addressToEvm} from "@polkadot/util-crypto";
+import { addressToEvm } from '@polkadot/util-crypto';
 
 export const collectionName16Decoder = (name: number[]) => {
   const collectionNameArr = name.map((item: number) => item);
@@ -63,4 +63,4 @@ export const subToEthLowercase = (eth: string): string => { // TODO: why args ca
   const bytes = addressToEvm(eth);
 
   return '0x' + Buffer.from(bytes).toString('hex');
-}
+};
