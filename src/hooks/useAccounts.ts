@@ -1,17 +1,30 @@
-import { web3Accounts, web3Enable } from '@polkadot/extension-dapp';
 import { useCallback, useContext, useEffect } from 'react';
+import { web3Accounts, web3Enable, web3FromSource } from '@polkadot/extension-dapp';
+import keyring from '@polkadot/ui-keyring';
+import { BN, stringToHex, u8aToString } from '@polkadot/util';
+import { KeypairType } from '@polkadot/util-crypto/types';
+
 import { sleep } from '../utils/helpers';
 import { useApi } from './useApi';
 import AccountContext, { Account, AccountSigner } from '../account/AccountContext';
-import keyring from '@polkadot/ui-keyring';
-import { BN } from '@polkadot/util';
 import { DefaultAccountKey } from '../account/AccountProvider';
 import { getSuri, PairType } from '../utils/seedUtils';
-import { KeypairType } from '@polkadot/util-crypto/types';
+import { TTransaction } from '../api/chainApi/types';
 
 export const useAccounts = () => {
   const { rpcClient, rawRpcApi } = useApi();
-  const { accounts, selectedAccount, isLoading, fetchAccountsError, changeAccount, setSelectedAccount, setAccounts, setIsLoading, setFetchAccountsError } = useContext(AccountContext);
+  const {
+    accounts,
+    selectedAccount,
+    isLoading,
+    fetchAccountsError,
+    changeAccount,
+    setSelectedAccount,
+    setAccounts,
+    setIsLoading,
+    setFetchAccountsError,
+    showSignDialog
+  } = useContext(AccountContext);
 
   const getExtensionAccounts = useCallback(async () => {
     // this call fires up the authorization popup
@@ -98,11 +111,71 @@ export const useAccounts = () => {
   }, [accounts]);
 
   const addLocalAccount = useCallback((seed: string, derivePath: string, name: string, password: string, pairType: PairType) => {
-      const options = { genesisHash: rawRpcApi?.genesisHash.toString(), isHardware: false, name: name.trim(), tags: [] };
-      const result = keyring.addUri(getSuri(seed, derivePath, pairType), password, options, pairType as KeypairType);
-    },
-    []
-  );
+    const options = { genesisHash: rawRpcApi?.genesisHash.toString(), isHardware: false, name: name.trim(), tags: [] };
+    keyring.addUri(getSuri(seed, derivePath, pairType), password, options, pairType as KeypairType);
+  }, []);
+
+  const unlockLocalAccount = useCallback((password: string) => {
+    if (!selectedAccount) return;
+    const signature = keyring.getPair(selectedAccount.address);
+    signature.unlock(password);
+    return signature;
+  }, [selectedAccount]);
+
+  const signTx = useCallback((tx: TTransaction): Promise<TTransaction> => {
+    if (!selectedAccount) throw new Error('Invalid account');
+
+    return new Promise<TTransaction>(async (resolve, reject) => {
+      if (selectedAccount.signerType === AccountSigner.local) {
+        showSignDialog((signature) => {
+          if (signature) {
+            const signedTx = tx.signAsync(signature);
+            resolve(signedTx);
+            return;
+          }
+          reject();
+        });
+        return;
+      }
+      try {
+        const injector = await web3FromSource(selectedAccount.meta.source);
+        const signedTx = await tx.signAsync(selectedAccount.address, { signer: injector.signer });
+        resolve(signedTx);
+      } catch (e) {
+        reject(e);
+      }
+    });
+  }, [showSignDialog, selectedAccount]);
+
+  const signMessage = useCallback((message: string): Promise<string> => {
+    if (!selectedAccount) throw new Error('Invalid account');
+
+    return new Promise<string>(async (resolve, reject) => {
+      if (selectedAccount.signerType === AccountSigner.local) {
+        showSignDialog((signature) => {
+          if (signature) {
+            const signedMessage = signature.sign(message);
+            resolve(u8aToString(signedMessage));
+            return;
+          }
+          reject();
+        });
+        return;
+      }
+      try {
+        const injector = await web3FromSource(selectedAccount.meta.source);
+        if (!injector.signer.signRaw) {
+          reject(new Error('Web3 not available'));
+          return;
+        }
+
+        const { signature } = await injector.signer.signRaw({ address: selectedAccount.address, type: 'bytes', data: stringToHex(message) });
+        resolve(signature);
+      } catch (e) {
+        reject(e);
+      }
+    });
+  }, [showSignDialog, selectedAccount]);
 
   return {
     accounts,
@@ -110,6 +183,9 @@ export const useAccounts = () => {
     isLoading,
     fetchAccountsError,
     addLocalAccount,
+    signLocalAccount: unlockLocalAccount,
+    signTx,
+    signMessage,
     changeAccount
   };
 };

@@ -19,4 +19,5 @@ export type TCreateAccountModalProps = {
 export type TCreateAccountBodyModalProps = {
   accountProperties?: TAccountProperties
   onFinish(account: TAccountProperties): void
+  onGoBack(): void
 };

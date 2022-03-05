@@ -29,7 +29,6 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, token, onPlaceABidClic
   const { fee } = useFee();
 
   const [offer, setOffer] = useState<Offer>(initialOffer);
-const Auction: FC<AuctionProps> = ({ offer, token, onPlaceABidClick, onDelistClick, onWithdrawClick }) => {
   const { selectedAccount } = useAccounts();
 
   const canPlaceABid = useMemo(() => {

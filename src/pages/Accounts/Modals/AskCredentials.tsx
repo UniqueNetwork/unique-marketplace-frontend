@@ -5,7 +5,7 @@ import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import styled from 'styled-components/macro';
 import { AdditionalWarning100, Grey500 } from '../../../styles/colors';
 
-export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties, onFinish }) => {
+export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties, onFinish, onGoBack }) => {
   const [name, setName] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
@@ -55,6 +55,10 @@ export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountP
     </TextStyled>
     <ButtonWrapper>
       <Button
+        onClick={onGoBack}
+        title='Previous'
+      />
+      <Button
         disabled={!validPassword || !password || !name}
         onClick={onNextClick}
         role='primary'
@@ -83,6 +87,7 @@ const TextStyled = styled(Text)`
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
+  column-gap: var(--gap);
 `;
 
 const CredentialsWrapper = styled.div`

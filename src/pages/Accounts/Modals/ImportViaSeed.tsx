@@ -40,6 +40,11 @@ export const ImportViaSeedAccountModal: FC<TCreateAccountModalProps> = ({ isVisi
     setStage(stage + 1);
   }, [stage]);
 
+  const onGoBack = useCallback(() => {
+    if (stage === CreateAccountModalStages.AskSeed) return;
+    setStage(stage - 1);
+  }, [stage]);
+
   if (!ModalBodyComponent) return null;
 
   return (<Modal isVisible={isVisible} isClosable={true} onClose={onFinish}>
@@ -49,6 +54,7 @@ export const ImportViaSeedAccountModal: FC<TCreateAccountModalProps> = ({ isVisi
     <ModalBodyComponent
       accountProperties={accountProperties}
       onFinish={onStageFinish}
+      onGoBack={onGoBack}
     />
   </Modal>);
 };

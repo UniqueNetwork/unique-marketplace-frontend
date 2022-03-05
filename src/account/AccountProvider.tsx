@@ -1,6 +1,8 @@
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useMemo, useRef, useState } from 'react';
 
 import { Account, AccountProvider } from './AccountContext';
+import { SignModal } from '../components/SignModal/SignModal';
+import { KeyringPair } from '@polkadot/keyring/types';
 
 export const DefaultAccountKey = 'unique_market_account_address';
 
@@ -15,6 +17,23 @@ const AccountWrapper: FC = ({ children }) => {
     setSelectedAccount(account);
   }, []);
 
+  const [isSignModalVisible, setIsSignModalVisible] = useState<boolean>(false);
+  const onSignCallback = useRef<(signature?: KeyringPair) => void | undefined>();
+  const showSignDialog = useCallback((cb: (signature?: KeyringPair) => void) => {
+    setIsSignModalVisible(true);
+    onSignCallback.current = cb;
+  }, []);
+
+  const onClose = useCallback(() => {
+    setIsSignModalVisible(false);
+    onSignCallback.current && onSignCallback.current(undefined);
+  }, []);
+
+  const onSignFinish = useCallback((signature: KeyringPair) => {
+    setIsSignModalVisible(false);
+    onSignCallback.current && onSignCallback.current(signature);
+  }, []);
+
   const value = useMemo(() => ({
     isLoading,
     accounts,
@@ -24,12 +43,14 @@ const AccountWrapper: FC = ({ children }) => {
     setSelectedAccount,
     setFetchAccountsError,
     setAccounts,
-    setIsLoading
+    setIsLoading,
+    showSignDialog
   }), [isLoading, accounts, selectedAccount, fetchAccountsError, changeAccount]);
 
   return (
     <AccountProvider value={value}>
       {children}
+      <SignModal isVisible={isSignModalVisible} onClose={onClose} onFinish={onSignFinish}/>
     </AccountProvider>
   );
 };

@@ -1,6 +1,7 @@
 import { Consumer, Context, createContext, Provider } from 'react';
 import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
 import { BN } from '@polkadot/util';
+import { KeyringPair } from '@polkadot/keyring/types';
 
 export enum AccountSigner {
   extension = 'Extension',
@@ -23,6 +24,7 @@ export type AccountContextProps = {
   setFetchAccountsError(error: string | undefined): void
   setAccounts(accounts: Account[]): void
   setIsLoading(loading: boolean): void
+  showSignDialog(cb: (signature: KeyringPair | undefined) => void): void
 }
 
 const AccountContext: Context<AccountContextProps> = createContext({} as unknown as AccountContextProps);

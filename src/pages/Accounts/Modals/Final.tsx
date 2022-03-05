@@ -5,7 +5,7 @@ import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import styled from 'styled-components/macro';
 import { defaultPairType, derivePath } from './CreateAccount';
 
-export const FinalModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties, onFinish }) => {
+export const FinalModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties, onFinish, onGoBack }) => {
   const onSaveClick = useCallback(() => {
     if (!accountProperties) return;
     onFinish(accountProperties);
@@ -25,6 +25,10 @@ export const FinalModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties
     </CredentialsWrapper>
     <ButtonWrapper>
       <Button
+        onClick={onGoBack}
+        title='Previous'
+      />
+      <Button
         onClick={onSaveClick}
         role='primary'
         title='Save'
@@ -42,6 +46,7 @@ const AddressWrapper = styled.div`
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
+  column-gap: var(--gap);
 `;
 
 const CredentialsWrapper = styled.div`
