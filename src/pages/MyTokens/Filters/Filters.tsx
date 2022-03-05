@@ -1,20 +1,20 @@
-import React, { FC, useCallback, useContext } from 'react';
+import React, { FC, useCallback } from 'react';
 import styled from 'styled-components/macro';
 
 import Accordion from '../../../components/Accordion/Accordion';
 import PricesFilter from '../../../components/Filters/PricesFilter';
 import { FilterState, PriceRange } from '../../../components/Filters/types';
 import CollectionsFilter from '../../../components/Filters/CollectionsFilter';
-import AccountContext from '../../../account/AccountContext';
 import { MyTokensStatuses } from './types';
 import StatusFilter from './StatusFilter';
+import { useAccounts } from '../../../hooks/useAccounts';
 
 type FiltersProps = {
   onFilterChange(value: FilterState): void
 }
 
 export const Filters: FC<FiltersProps> = ({ onFilterChange }) => {
-  const { selectedAccount } = useContext(AccountContext);
+  const { selectedAccount } = useAccounts();
 
     const onStatusFilterChange = useCallback((value: MyTokensStatuses) => {
     const newFilter = {

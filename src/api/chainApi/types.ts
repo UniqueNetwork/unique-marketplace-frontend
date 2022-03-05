@@ -8,7 +8,8 @@ export interface IRpc {
   isApiConnected: boolean
   isApiInitialized: boolean
   apiConnectionError?: string
-  rawRpcApi?: ApiPromise // allow access to the raw API for exceptions in the future
+  rawUniqRpcApi?: ApiPromise // allow access to the raw API for exceptions in the future
+  rawKusamaRpcApi?: ApiPromise
   setOnChainReadyListener(callback: (chainData: ChainData) => void): void
   changeEndpoint(endpoint: string, options?: IRpcClientOptions): void
 }
@@ -73,4 +74,12 @@ export type Chain = {
   network: string
   name: string
   apiEndpoint: string
+}
+
+export type CrossAccountId =
+  | {
+  Substrate: string
+}
+  | {
+  Ethereum: string
 }

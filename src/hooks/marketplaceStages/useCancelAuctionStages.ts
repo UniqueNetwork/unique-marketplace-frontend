@@ -1,16 +1,12 @@
-import { useContext, useMemo } from 'react';
+import { useMemo } from 'react';
 
-import { useApi } from '../useApi';
 import useMarketplaceStages from '../useMarketplaceStages';
 import { InternalStage, MarketType, StageStatus } from '../../types/MarketTypes';
-import AccountContext from '../../account/AccountContext';
 import { cancelAuction } from '../../api/restApi/auction/auction';
-import { getSignature } from './utils/getSignature';
+import { useAccounts } from '../useAccounts';
 
 export const useCancelAuctionStages = (collectionId: number, tokenId: number) => {
-  const { api } = useApi();
-  const { selectedAccount } = useContext(AccountContext);
-  const marketApi = api?.market;
+  const { selectedAccount, signMessage } = useAccounts();
   const bidAuctionStages = useMemo(() => [
     {
       title: 'Cancelling auction',
@@ -19,14 +15,16 @@ export const useCancelAuctionStages = (collectionId: number, tokenId: number) =>
       action: async () => {
         if (!selectedAccount) throw new Error('Account not selected');
 
-        const { signature, params } = await getSignature(collectionId, tokenId, selectedAccount);
+        const timestamp = Date.now();
+        const message = `timestamp=${timestamp}&collectionId=${collectionId}&tokenId=${tokenId}`;
+        const signature = await signMessage(message);
         await cancelAuction(
-          params,
+          { collectionId, tokenId, timestamp },
           { signature, signer: selectedAccount.address }
         );
       }
     }
-  ], [marketApi]) as InternalStage<null>[];
+  ], []) as InternalStage<null>[];
   const { stages, error, status, initiate } = useMarketplaceStages<null>(MarketType.bid, collectionId, tokenId, bidAuctionStages);
 
   return {

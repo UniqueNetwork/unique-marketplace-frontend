@@ -1,5 +1,5 @@
 import { Button, Select, Text } from '@unique-nft/ui-kit';
-import { FC, useCallback, useContext, useState } from 'react';
+import { FC, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components/macro'; // Todo: https://cryptousetech.atlassian.net/browse/NFTPAR-1201
 
@@ -8,14 +8,14 @@ import logo from '../../logos/logo-white-label-market.svg';
 import menu from '../../static/icons/menu.svg';
 import { TMenuItems } from '../PageLayout';
 import { AdditionalColorDark, AdditionalColorLight, Primary500 } from '../../styles/colors';
-import accountContext from '../../account/AccountContext';
+import { useAccounts } from '../../hooks/useAccounts';
 
 interface HeaderProps {
   activeItem: TMenuItems;
 }
 
 export const Header: FC<HeaderProps> = ({ activeItem }) => {
-  const { selectedAccount, changeAccount, accounts } = useContext(accountContext);
+  const { selectedAccount, changeAccount, accounts } = useAccounts();
   const { lessThanThreshold: showMobileMenu } =
     useScreenWidthFromThreshold(1279);
   const [mobileMenuIsOpen, toggleMobileMenu] = useState(false);
@@ -49,7 +49,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
     toggleMobileMenu((prevState) => !prevState);
   }, []);
 
-  const balance = 0;
+  const balance = selectedAccount?.balance?.KSM?.toString() || 0;
 
   return (
     <HeaderStyled>

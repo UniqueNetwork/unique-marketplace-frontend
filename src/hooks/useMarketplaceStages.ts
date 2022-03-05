@@ -1,11 +1,11 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { web3FromSource } from '@polkadot/extension-dapp';
 import { TTransaction } from '../api/chainApi/types';
-import AccountContext from '../account/AccountContext';
 import { InternalStage, MarketType, StageStatus, useMarketplaceStagesReturn } from '../types/MarketTypes';
+import { useAccounts } from './useAccounts';
 
 const useMarketplaceStages = <T>(type: MarketType, collectionId: number, tokenId: number, stages: InternalStage<T>[]): useMarketplaceStagesReturn<T> => {
-  const { selectedAccount } = useContext(AccountContext);
+  const { selectedAccount, signTx } = useAccounts();
 
   const [internalStages, setInternalStages] = useState<InternalStage<T>[]>(stages);
   const [marketStagesStatus, setMarketStagesStatus] = useState<StageStatus>(StageStatus.default);
@@ -26,21 +26,11 @@ const useMarketplaceStages = <T>(type: MarketType, collectionId: number, tokenId
   }, [setInternalStages]);
 
   const getSignFunction = useCallback((index: number, internalStage: InternalStage<T>) => {
-    const sign = (tx: TTransaction): Promise<TTransaction> => {
+    const sign = async (tx: TTransaction): Promise<TTransaction> => {
       updateStage(index, { ...internalStage, status: StageStatus.awaitingSign });
-      // eslint-disable-next-line
-      return new Promise<TTransaction>(async (resolve, reject) => {
-        if (!selectedAccount) throw new Error('Invalid account');
-        try {
-          const injector = await web3FromSource(selectedAccount.meta.source);
-          const signedTx = await tx.signAsync(selectedAccount.address, { signer: injector.signer });
-          updateStage(index, { ...internalStage, status: StageStatus.inProgress });
-          resolve(signedTx);
-        } catch (e) {
-          reject(e);
-        }
-        // TODO: action of update happens inside "get" function, consider renaming or restructuring
-      });
+      const signedTx = await signTx(tx);
+      updateStage(index, { ...internalStage, status: StageStatus.inProgress });
+      return signedTx;
     };
     return sign;
   }, [updateStage, selectedAccount]);

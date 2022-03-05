@@ -1,9 +1,9 @@
 import { ApiPromise } from '@polkadot/api';
 import { INFTController } from '../types';
 import { NFTCollection, NFTToken } from './types';
-import { normalizeAccountId } from '../utils/normalizeAccountId';
 import { collectionName16Decoder, decodeStruct, getOnChainSchema, hex2a } from '../utils/decoder';
 import { getTokenImage } from '../utils/imageUtils';
+import { normalizeAccountId } from '../utils/addressUtils';
 
 export type NFTControllerConfig = {
   collectionsIds: number[]

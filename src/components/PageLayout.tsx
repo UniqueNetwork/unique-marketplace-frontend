@@ -24,6 +24,10 @@ export const PageLayout: FC = () => {
       return { heading: 'FAQ' };
     }
 
+    if (pathname === '/accounts') {
+      return { heading: 'Manage accounts' };
+    }
+
     if (pathname === '/market/token-details') {
       return {
         breadcrumbs: {
