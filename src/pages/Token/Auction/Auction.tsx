@@ -9,13 +9,12 @@ import { Icon } from '../../../components/Icon/Icon';
 import clock from '../../../static/icons/clock.svg';
 import { timeDifference } from '../../../utils/timestampUtils';
 import { AdditionalPositive100, AdditionalPositive500, Coral100, Coral500, Grey300 } from '../../../styles/colors';
-import { isTokenOwner } from '../../../api/chainApi/utils/isTokenOwner';
 import { useBidsSubscription } from '../../../hooks/useBidsSubscription';
 import { Price } from '../TokenDetail/Price';
 import { useFee } from '../../../hooks/useFee';
 import { shortcutText } from '../../../utils/textUtils';
-import { compareEncodedAddresses } from '../../../api/chainApi/utils/compareEncodedAddresses';
 import { useAccounts } from '../../../hooks/useAccounts';
+import { compareEncodedAddresses, isTokenOwner } from '../../../api/chainApi/utils/addressUtils';
 
 interface AuctionProps {
   offer: Offer

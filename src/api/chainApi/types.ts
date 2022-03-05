@@ -75,3 +75,11 @@ export type Chain = {
   name: string
   apiEndpoint: string
 }
+
+export type CrossAccountId =
+  | {
+  Substrate: string
+}
+  | {
+  Ethereum: string
+}
