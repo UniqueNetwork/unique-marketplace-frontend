@@ -7,6 +7,7 @@ import DefaultAvatar from '../../static/icons/default-avatar.svg';
 import { AdditionalWarning100, Grey500 } from '../../styles/colors';
 import { AccountSigner } from '../../account/AccountContext';
 import { useAccounts } from '../../hooks/useAccounts';
+import { PasswordInput } from '../PasswordInput/PasswordInput';
 
 export type TSignModalProps = {
   isVisible: boolean
@@ -16,7 +17,8 @@ export type TSignModalProps = {
 
 export const SignModal: FC<TSignModalProps> = ({ isVisible, onFinish, onClose }) => {
   const [password, setPassword] = useState<string>('');
-  const { selectedAccount, signLocalAccount } = useAccounts();
+  const [passwordError, setPasswordError] = useState<string>('');
+  const { selectedAccount, unlockLocalAccount } = useAccounts();
 
   const onPasswordChange = useCallback(({ target }: ChangeEvent<HTMLInputElement>) => {
     setPassword(target.value);
@@ -24,10 +26,15 @@ export const SignModal: FC<TSignModalProps> = ({ isVisible, onFinish, onClose })
 
   const onSignClick = useCallback(() => {
     if (!selectedAccount || selectedAccount.signerType !== AccountSigner.local) return;
-    const signature = signLocalAccount(password);
-    if (signature) {
-      onFinish(signature);
+    try {
+      const signature = unlockLocalAccount(password);
+      if (signature) {
+        onFinish(signature);
+      }
+    } catch (e) {
+      setPasswordError('');
     }
+
     setPassword('');
   }, [selectedAccount, password]);
 
@@ -42,10 +49,10 @@ export const SignModal: FC<TSignModalProps> = ({ isVisible, onFinish, onClose })
       <Text>{selectedAccount.address || ''}</Text>
     </AddressWrapper>
     <CredentialsWrapper >
-      <PasswordInput placeholder={'Password'}
-        onChange={onPasswordChange}
+      <PasswordInput
+        placeholder={'Password'}
+        onChange={setPassword}
         value={password}
-        type='password'
       />
     </CredentialsWrapper>
     <ButtonWrapper>
@@ -70,16 +77,6 @@ const AddressWrapper = styled.div`
   margin: calc(var(--gap) * 2) 0;
 `;
 
-const TextStyled = styled(Text)`
-  box-sizing: border-box;
-  display: flex;
-  padding: 8px 16px;
-  margin: calc(var(--gap) * 1.5) 0;
-  border-radius: 4px;
-  background-color: ${AdditionalWarning100};
-  width: 100%;
-`;
-
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
@@ -92,14 +89,5 @@ const CredentialsWrapper = styled.div`
   margin-bottom: calc(var(--gap) * 1.5);
   .unique-input-text {
     width: 100%;
-  }
-`;
-
-const PasswordInput = styled.input`
-  border: 1px solid #d2d3d6;
-  padding: 11px 12px;
-  border-radius: 4px;
-  &::placeholder {
-    color: ${Grey500};
   }
 `;

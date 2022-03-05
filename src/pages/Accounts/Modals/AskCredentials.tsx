@@ -4,6 +4,7 @@ import { Avatar, Button, InputText, Text } from '@unique-nft/ui-kit';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import styled from 'styled-components/macro';
 import { AdditionalWarning100, Grey500 } from '../../../styles/colors';
+import { PasswordInput } from '../../../components/PasswordInput/PasswordInput';
 
 export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties, onFinish, onGoBack }) => {
   const [name, setName] = useState<string>('');
@@ -12,14 +13,6 @@ export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountP
 
   const onAccountNameChange = useCallback((value: string) => {
     setName(value);
-  }, []);
-
-  const onPasswordChange = useCallback(({ target }: ChangeEvent<HTMLInputElement>) => {
-    setPassword(target.value);
-  }, []);
-
-  const onConfirmPasswordChange = useCallback(({ target }: ChangeEvent<HTMLInputElement>) => {
-    setConfirmPassword(target.value);
   }, []);
 
   const validPassword = useMemo(() => password === confirmPassword, [password, confirmPassword]);
@@ -37,14 +30,12 @@ export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountP
     <CredentialsWrapper >
       <InputText placeholder={'New account name'} onChange={onAccountNameChange} value={name} />
       <PasswordInput placeholder={'Password'}
-        onChange={onPasswordChange}
+        onChange={setPassword}
         value={password}
-        type='password'
       />
       <PasswordInput placeholder={'Confirm password'}
-        onChange={onConfirmPasswordChange}
+        onChange={setConfirmPassword}
         value={confirmPassword}
-        type='password'
       />
     </CredentialsWrapper>
     <TextStyled
@@ -97,14 +88,5 @@ const CredentialsWrapper = styled.div`
   margin-bottom: calc(var(--gap) * 1.5);
   .unique-input-text {
     width: 100%;
-  }
-`;
-
-const PasswordInput = styled.input`
-  border: 1px solid #d2d3d6;
-  padding: 11px 12px;
-  border-radius: 4px;
-  &::placeholder {
-    color: ${Grey500};
   }
 `;

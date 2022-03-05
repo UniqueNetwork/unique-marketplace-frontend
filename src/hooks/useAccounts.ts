@@ -183,7 +183,7 @@ export const useAccounts = () => {
     isLoading,
     fetchAccountsError,
     addLocalAccount,
-    signLocalAccount: unlockLocalAccount,
+    unlockLocalAccount,
     signTx,
     signMessage,
     changeAccount
