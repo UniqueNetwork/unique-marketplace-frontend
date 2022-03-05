@@ -5,13 +5,15 @@ import { collectionName8Decoder, getOnChainSchema, hex2a } from '../utils/decode
 import { getTokenImage } from '../utils/imageUtils';
 import config from '../../../config';
 
-const { IPFSGateway, feturedCollectionIds } = config;
+const { IPFSGateway } = config;
 
 class UniqueCollectionController implements ICollectionController<NFTCollection, NFTToken> {
   private api: ApiPromise;
+  private featuredCollectionIds: number[];
 
-  constructor(api: ApiPromise) {
+  constructor(api: ApiPromise, featuredCollectionIds: number[]) {
     this.api = api;
+    this.featuredCollectionIds = featuredCollectionIds;
   }
 
   public async getCollection(collectionId: number): Promise<NFTCollection | null> {
@@ -74,18 +76,16 @@ class UniqueCollectionController implements ICollectionController<NFTCollection,
   }
 
   public async getFeaturedCollections(): Promise<NFTCollection[]> {
-  if (!this.api) {
-    return [];
-  }
+    if (!this.api || !this.featuredCollectionIds.length) {
+      return [];
+    }
 
     const collections: Array<NFTCollection> = [];
-    if (feturedCollectionIds && feturedCollectionIds.length) {
-      for (let i = 1; i <= feturedCollectionIds.length; i++) {
-        const collectionInf = await this.getCollection(feturedCollectionIds[i]) as unknown as NFTCollection;
+    for (let i = 0; i < this.featuredCollectionIds.length; i++) {
+      const collectionInf = await this.getCollection(this.featuredCollectionIds[i]) as unknown as NFTCollection;
 
-        if (collectionInf && collectionInf.owner && collectionInf.owner.toString() !== '5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM' && !collections.find((collection) => collection.id === feturedCollectionIds[i])) {
-          collections.push({ ...collectionInf, id: feturedCollectionIds[i] });
-        }
+      if (collectionInf && collectionInf.owner && collectionInf.owner.toString() !== '5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM' && !collections.find((collection) => collection.id === this.featuredCollectionIds[i])) {
+        collections.push({ ...collectionInf, id: this.featuredCollectionIds[i] });
       }
     }
 

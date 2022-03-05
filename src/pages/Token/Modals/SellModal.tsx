@@ -136,7 +136,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
       <InputWrapper
         label='Price*'
         onChange={onPriceInputChange}
-        value={priceInputValue}
+        value={priceInputValue?.toString()}
       />
       <TextStyled
         color='additional-warning-500'
@@ -160,13 +160,13 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
       <InputWrapper
         label='Minimum step*'
         onChange={onMinStepInputChange}
-        value={minStepInputValueAuction}
+        value={minStepInputValueAuction?.toString()}
       />
       <Row>
         <InputWrapper
           label='Starting Price'
           onChange={onInputStartingPriceChange}
-          value={inputStartingPriceValue}
+          value={inputStartingPriceValue?.toString()}
         />
         <SelectWrapper
           label='Duration*'

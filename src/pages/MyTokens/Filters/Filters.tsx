@@ -16,12 +16,12 @@ type FiltersProps = {
 export const Filters: FC<FiltersProps> = ({ onFilterChange }) => {
   const { selectedAccount } = useAccounts();
 
-    const onStatusFilterChange = useCallback((value: MyTokensStatuses) => {
+  const onStatusFilterChange = useCallback((value: MyTokensStatuses) => {
     const newFilter = {
       seller: value.myNFTs ? selectedAccount?.address : undefined
     };
     onFilterChange(newFilter);
-  }, [onFilterChange]);
+  }, [onFilterChange, selectedAccount]);
 
   const onPricesFilterChange = useCallback((value: PriceRange | undefined) => {
     const { minPrice, maxPrice } = (value as PriceRange) || {};
@@ -30,7 +30,7 @@ export const Filters: FC<FiltersProps> = ({ onFilterChange }) => {
   }, [onFilterChange]);
 
   const onCollectionsFilterChange = useCallback((value: number[]) => {
-    const newFilter = { collationId: value };
+    const newFilter = { collectionId: value };
     onFilterChange(newFilter);
   }, [onFilterChange]);
 

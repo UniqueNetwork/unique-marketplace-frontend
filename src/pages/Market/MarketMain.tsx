@@ -51,7 +51,7 @@ export const MarketMainPage = () => {
   }, [refetch]);
 
   const handleSearch = () => {
-    console.log(`go search ${searchValue}`);
+    refetch({ sort: [sortingValue], pageSize, page: 1, searchText: searchValue?.toString(), ...filterState });
   };
 
   const onFilterChange = useCallback((filter: FilterState) => {
@@ -116,7 +116,7 @@ export const MarketMainPage = () => {
               iconLeft={{ name: 'magnify', size: 16 }}
               onChange={(val) => setSearchValue(val)}
               placeholder='Collection / token'
-              value={searchValue}
+              value={searchValue?.toString()}
             ></InputText>
             <Button
               onClick={() => handleSearch()}

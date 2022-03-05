@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 
-import { post, get, deleteRequest } from '../base';
+import { post, deleteRequest } from '../base';
 import { defaultParams } from '../base/axios';
 
 const endpoint = '/auction';

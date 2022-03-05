@@ -125,7 +125,7 @@ export const MyTokensPage = () => {
               iconLeft={{ name: 'magnify', size: 16 }}
               onChange={(val) => setSearchValue(val)}
               placeholder='Collection / token'
-              value={searchValue}
+              value={searchValue?.toString()}
             />
             <Button
               onClick={() => handleSearch()}

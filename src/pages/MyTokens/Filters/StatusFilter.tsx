@@ -12,26 +12,25 @@ const StatusFilter: FC<StatusFilterProps> = ({ onChange }) => {
   const [fixedPrice, setFixedPrice] = useState<boolean>(false);
   const [timedAuction, setTimedAuction] = useState<boolean>(false);
   const [notOnSale, setNotOnSale] = useState<boolean>(false);
-
   const onMyNFTsChange = useCallback((value: boolean) => {
     onChange({ myNFTs: value, fixedPrice, timedAuction, notOnSale });
     setMyNFTs(value);
-  }, [fixedPrice, timedAuction, notOnSale]);
+  }, [fixedPrice, timedAuction, notOnSale, onChange]);
 
   const onFixedPriceChange = useCallback((value: boolean) => {
     onChange({ myNFTs, fixedPrice: value, timedAuction, notOnSale });
     setFixedPrice(value);
-  }, [myNFTs, timedAuction, notOnSale]);
+  }, [myNFTs, timedAuction, notOnSale, onChange]);
 
   const onTimedAuctionChange = useCallback((value: boolean) => {
     onChange({ myNFTs, fixedPrice, timedAuction: value, notOnSale });
     setTimedAuction(value);
-  }, [myNFTs, fixedPrice, notOnSale]);
+  }, [myNFTs, fixedPrice, notOnSale, onChange]);
 
   const onNotOnSaleChange = useCallback((value: boolean) => {
     onChange({ myNFTs, fixedPrice, timedAuction, notOnSale: value });
     setNotOnSale(value);
-  }, [myNFTs, fixedPrice, timedAuction]);
+  }, [myNFTs, fixedPrice, timedAuction, onChange]);
 
   return (
     <StatusFilterWrapper>

@@ -70,7 +70,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: string, 
         <InputStyled
           label=''
           onChange={onBidAmountChange}
-          value={bidAmount}
+          value={bidAmount.toString()}
         />
       </InputWrapper>
       <Text size={'s'} color={'grey-500'} >

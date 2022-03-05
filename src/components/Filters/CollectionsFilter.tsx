@@ -41,7 +41,8 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ onChange }) => {
         />
         ))}
     </CollectionFilterWrapper>
-    {selectedCollections.length === 1 && <AttributesFilterWrapper>
+    {/* TODO: unsupported on back-end */}
+    {false && selectedCollections.length === 1 && <AttributesFilterWrapper>
       {/* TODO: make mapping attributes of the selected collection */}
       <Accordion title={'Traits'} isOpen={true}>
         <CollectionFilterWrapper>
