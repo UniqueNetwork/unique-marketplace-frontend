@@ -5,17 +5,16 @@ import styled from 'styled-components/macro';
 import { Offer } from '../../../api/restApi/offers/types';
 import { NFTToken } from '../../../api/chainApi/unique/types';
 import Bids from './Bids';
-import accountContext from '../../../account/AccountContext';
 import { Icon } from '../../../components/Icon/Icon';
 import clock from '../../../static/icons/clock.svg';
 import { timeDifference } from '../../../utils/timestampUtils';
 import { AdditionalPositive100, AdditionalPositive500, Coral100, Coral500, Grey300 } from '../../../styles/colors';
-import { isTokenOwner } from '../../../api/chainApi/utils/isTokenOwner';
 import { useBidsSubscription } from '../../../hooks/useBidsSubscription';
 import { Price } from '../TokenDetail/Price';
 import { useFee } from '../../../hooks/useFee';
 import { shortcutText } from '../../../utils/textUtils';
-import { compareEncodedAddresses } from '../../../api/chainApi/utils/compareEncodedAddresses';
+import { useAccounts } from '../../../hooks/useAccounts';
+import { compareEncodedAddresses, isTokenOwner } from '../../../api/chainApi/utils/addressUtils';
 
 interface AuctionProps {
   offer: Offer
@@ -26,10 +25,10 @@ interface AuctionProps {
 }
 
 const Auction: FC<AuctionProps> = ({ offer: initialOffer, token, onPlaceABidClick, onDelistAuctionClick, onWithdrawClick }) => {
-  const { selectedAccount } = useContext(accountContext);
   const { fee } = useFee();
 
   const [offer, setOffer] = useState<Offer>(initialOffer);
+  const { selectedAccount } = useAccounts();
 
   const canPlaceABid = useMemo(() => {
     return true; // TODO: get a balance of selected account

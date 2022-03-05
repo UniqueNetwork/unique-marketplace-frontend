@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { useApi } from '../../hooks/useApi';
@@ -10,6 +10,7 @@ import { TokenTrading } from './TokenDetail/TokenTrading';
 import { Error404 } from '../errors/404';
 import Loading from '../../components/Loading';
 import TokenPageModal from './Modals/TokenPageModal';
+import { useAccounts } from '../../hooks/useAccounts';
 
 const TokenPage = () => {
   const { api } = useApi();
@@ -18,6 +19,7 @@ const TokenPage = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const { offer, fetch: fetchOffer } = useOffer(Number(collectionId), Number(id));
   const [marketType, setMarketType] = useState<MarketType>(MarketType.default); // TODO: when "sell"/"buy"/"bid"/etc clicked - update this status to open modal
+  const { selectedAccount } = useAccounts();
 
   const fetchToken = useCallback(() => {
     if (!api) return;

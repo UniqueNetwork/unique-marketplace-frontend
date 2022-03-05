@@ -5,11 +5,8 @@ import { encodeAddress } from '@polkadot/util-crypto';
 import marketplaceAbi from './abi/marketPlaceAbi.json';
 import nonFungibleAbi from './abi/nonFungibleAbi.json';
 import { sleep } from '../../../utils/helpers';
-import { IMarketController, INFTController, TransactionOptions } from '../types';
-import { CrossAccountId, normalizeAccountId } from '../utils/normalizeAccountId';
-import { getEthAccount } from '../utils/getEthAccount';
-import { isTokenOwner } from '../utils/isTokenOwner';
-import { compareEncodedAddresses } from '../utils/compareEncodedAddresses';
+import { CrossAccountId, IMarketController, INFTController, TransactionOptions } from '../types';
+import { compareEncodedAddresses, getEthAccount, isTokenOwner, normalizeAccountId } from '../utils/addressUtils';
 
 export type EvmCollectionAbiMethods = {
   approve: (contractAddress: string, tokenId: string) => {

@@ -57,7 +57,7 @@ const ApiWrapper = ({ children, gqlClient = gql, rpcClient = rpc }: ChainProvide
         }) || undefined,
         chainData,
         currentChain: chainId ? chains[chainId] : defaultChain,
-        rawRpcApi: rpcClient.rawRpcApi,
+        rawRpcApi: rpcClient.rawUniqRpcApi,
         rpcClient
       };
     },

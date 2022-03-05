@@ -2,11 +2,11 @@ import React, { FC, useContext, useMemo } from 'react';
 
 import { NFTToken } from '../../../api/chainApi/unique/types';
 import { Offer } from '../../../api/restApi/offers/types';
-import { isTokenOwner } from '../../../api/chainApi/utils/isTokenOwner';
 import accountContext from '../../../account/AccountContext';
 import { SellToken } from '../SellToken/SellToken';
 import { BuyToken } from '../BuyToken/BuyToken';
 import Auction from '../Auction/Auction';
+import { isTokenOwner } from '../../../api/chainApi/utils/addressUtils';
 
 interface TokenTradingProps {
   token: NFTToken

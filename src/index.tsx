@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
-import { Market, MyTokens, Trades, FAQ, TokenPage } from './pages';
+import { Market, MyTokens, Accounts, Trades, FAQ, TokenPage } from './pages';
 import { MarketMainPage } from './pages/Market/MarketMain';
 import { GlobalStyle } from './styles';
 
@@ -35,6 +35,10 @@ ReactDOM.render(
           <Route
             element={<MyTokens />}
             path={'myTokens'}
+          />
+          <Route
+            element={<Accounts />}
+            path={'accounts'}
           />
           <Route
             element={<Trades />}

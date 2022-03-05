@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
 import styled from 'styled-components/macro';
 import { Button, InputText, Select, Text } from '@unique-nft/ui-kit';
@@ -6,10 +6,10 @@ import { Button, InputText, Select, Text } from '@unique-nft/ui-kit';
 import { TokensList } from '../../components';
 import { Secondary400 } from '../../styles/colors';
 import { FilterState } from '../../components/Filters/types';
-import accountContext from '../../account/AccountContext';
 import { useApi } from '../../hooks/useApi';
 import { NFTToken } from '../../api/chainApi/unique/types';
 import { Filters } from './Filters/Filters';
+import { useAccounts } from '../../hooks/useAccounts';
 
 type TOption = {
   direction: 'asc' | 'desc';
@@ -28,7 +28,7 @@ export const MyTokensPage = () => {
   const [sortingValue, setSortingValue] = useState<string>('desc(CreationDate)');
   const [searchValue, setSearchValue] = useState<string | number>();
   const [selectOption, setSelectOption] = useState<TOption>();
-  const { selectedAccount } = useContext(accountContext);
+  const { selectedAccount } = useAccounts();
   const [tokens, setTokens] = useState<NFTToken[]>([]);
 
   const { api } = useApi();

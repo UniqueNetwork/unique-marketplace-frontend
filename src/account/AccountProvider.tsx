@@ -1,65 +1,61 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
-import { web3Accounts, web3Enable } from '@polkadot/extension-dapp';
+import React, { FC, useCallback, useMemo, useRef, useState } from 'react';
 
-import { AccountProvider } from './AccountContext';
+import { Account, AccountProvider } from './AccountContext';
+import { SignModal } from '../components/SignModal/SignModal';
+import { KeyringPair } from '@polkadot/keyring/types';
 
-const DefaultAccountKey = 'unique_market_account_address';
+export const DefaultAccountKey = 'unique_market_account_address';
 
 const AccountWrapper: FC = ({ children }) => {
-  const [accounts, setAccounts] = useState<InjectedAccountWithMeta[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [fetchAccountsError, setFetchAccountsError] = useState<string | undefined>();
-  const [selectedAccount, setSelectedAccount] = useState<InjectedAccountWithMeta>();
+  const [selectedAccount, setSelectedAccount] = useState<Account>();
 
-  const changeAccount = useCallback((account: InjectedAccountWithMeta) => {
+  const changeAccount = useCallback((account: Account) => {
     localStorage.setItem(DefaultAccountKey, account.address);
     setSelectedAccount(account);
   }, []);
 
-  const fetchAccounts = useCallback(async () => {
-    setIsLoading(true);
-    // this call fires up the authorization popup
-    const extensions = await web3Enable('my cool dapp');
-    if (extensions.length === 0) {
-      setFetchAccountsError('No extension installed, or the user did not accept the authorization');
-      return;
-    }
-    const allAccounts = await web3Accounts();
+  const [isSignModalVisible, setIsSignModalVisible] = useState<boolean>(false);
+  const onSignCallback = useRef<(signature?: KeyringPair) => void | undefined>();
+  const showSignDialog = useCallback(() => {
+    setIsSignModalVisible(true);
+    return new Promise<KeyringPair>((resolve, reject) => {
+      onSignCallback.current = (signature?: KeyringPair) => {
+        if (signature) resolve(signature);
+        else reject(new Error('Signing failed'));
+      };
+    });
+  }, []);
 
-    if (allAccounts?.length) {
-      setAccounts(allAccounts);
-      setIsLoading(false);
+  const onClose = useCallback(() => {
+    setIsSignModalVisible(false);
+    onSignCallback.current && onSignCallback.current(undefined);
+  }, []);
 
-      const defaultAccountAddress = localStorage.getItem(DefaultAccountKey);
-      const defaultAccount = allAccounts.find((item) => item.address === defaultAccountAddress);
-
-      if (defaultAccount) {
-        changeAccount(defaultAccount);
-      } else {
-        changeAccount(allAccounts[0]);
-      }
-    } else {
-      setFetchAccountsError('No accounts in extension');
-    }
-  }, [changeAccount]);
-
-  useEffect(() => {
-    void fetchAccounts();
+  const onSignFinish = useCallback((signature: KeyringPair) => {
+    setIsSignModalVisible(false);
+    onSignCallback.current && onSignCallback.current(signature);
   }, []);
 
   const value = useMemo(() => ({
     isLoading,
     accounts,
     selectedAccount,
+    fetchAccountsError,
     changeAccount,
-    fetchAccounts,
-    fetchAccountsError
-  }), [isLoading, accounts, selectedAccount, fetchAccounts, fetchAccountsError, changeAccount]);
+    setSelectedAccount,
+    setFetchAccountsError,
+    setAccounts,
+    setIsLoading,
+    showSignDialog
+  }), [isLoading, accounts, selectedAccount, fetchAccountsError, changeAccount]);
 
   return (
     <AccountProvider value={value}>
       {children}
+      <SignModal isVisible={isSignModalVisible} onClose={onClose} onFinish={onSignFinish}/>
     </AccountProvider>
   );
 };
