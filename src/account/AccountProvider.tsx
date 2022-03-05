@@ -19,9 +19,14 @@ const AccountWrapper: FC = ({ children }) => {
 
   const [isSignModalVisible, setIsSignModalVisible] = useState<boolean>(false);
   const onSignCallback = useRef<(signature?: KeyringPair) => void | undefined>();
-  const showSignDialog = useCallback((cb: (signature?: KeyringPair) => void) => {
+  const showSignDialog = useCallback(() => {
     setIsSignModalVisible(true);
-    onSignCallback.current = cb;
+    return new Promise<KeyringPair>((resolve, reject) => {
+      onSignCallback.current = (signature?: KeyringPair) => {
+        if (signature) resolve(signature);
+        else reject(new Error('Signing failed'));
+      };
+    });
   }, []);
 
   const onClose = useCallback(() => {

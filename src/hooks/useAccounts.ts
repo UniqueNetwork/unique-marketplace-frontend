@@ -122,59 +122,41 @@ export const useAccounts = () => {
     return signature;
   }, [selectedAccount]);
 
-  const signTx = useCallback((tx: TTransaction): Promise<TTransaction> => {
+  const signTx = useCallback(async (tx: TTransaction): Promise<TTransaction> => {
     if (!selectedAccount) throw new Error('Invalid account');
-
-    return new Promise<TTransaction>(async (resolve, reject) => {
-      if (selectedAccount.signerType === AccountSigner.local) {
-        showSignDialog((signature) => {
-          if (signature) {
-            const signedTx = tx.signAsync(signature);
-            resolve(signedTx);
-            return;
-          }
-          reject();
-        });
-        return;
+    let signedTx;
+    if (selectedAccount.signerType === AccountSigner.local) {
+      const signature = await showSignDialog();
+      if (signature) {
+        signedTx = await tx.signAsync(signature);
       }
-      try {
-        const injector = await web3FromSource(selectedAccount.meta.source);
-        const signedTx = await tx.signAsync(selectedAccount.address, { signer: injector.signer });
-        resolve(signedTx);
-      } catch (e) {
-        reject(e);
-      }
-    });
+    } else {
+      const injector = await web3FromSource(selectedAccount.meta.source);
+      signedTx = await tx.signAsync(selectedAccount.address, { signer: injector.signer });
+    }
+    if (!signedTx) throw new Error('Signing failed');
+    return signedTx;
   }, [showSignDialog, selectedAccount]);
 
-  const signMessage = useCallback((message: string): Promise<string> => {
+  const signMessage = useCallback(async (message: string): Promise<string> => {
     if (!selectedAccount) throw new Error('Invalid account');
 
-    return new Promise<string>(async (resolve, reject) => {
-      if (selectedAccount.signerType === AccountSigner.local) {
-        showSignDialog((signature) => {
-          if (signature) {
-            const signedMessage = signature.sign(message);
-            resolve(u8aToString(signedMessage));
-            return;
-          }
-          reject();
-        });
-        return;
+    if (!selectedAccount) throw new Error('Invalid account');
+    let signedMessage;
+    if (selectedAccount.signerType === AccountSigner.local) {
+      const signature = await showSignDialog();
+      if (signature) {
+        signedMessage = u8aToString(signature.sign(message));
       }
-      try {
-        const injector = await web3FromSource(selectedAccount.meta.source);
-        if (!injector.signer.signRaw) {
-          reject(new Error('Web3 not available'));
-          return;
-        }
+    } else {
+      const injector = await web3FromSource(selectedAccount.meta.source);
+      if (!injector.signer.signRaw) throw new Error('Web3 not available');
 
-        const { signature } = await injector.signer.signRaw({ address: selectedAccount.address, type: 'bytes', data: stringToHex(message) });
-        resolve(signature);
-      } catch (e) {
-        reject(e);
-      }
-    });
+      const { signature } = await injector.signer.signRaw({ address: selectedAccount.address, type: 'bytes', data: stringToHex(message) });
+      signedMessage = signature;
+    }
+    if (!signedMessage) throw new Error('Signing failed');
+    return signedMessage;
   }, [showSignDialog, selectedAccount]);
 
   return {

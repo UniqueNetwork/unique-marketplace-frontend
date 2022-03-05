@@ -4,7 +4,6 @@ import styled from 'styled-components/macro';
 import { KeyringPair } from '@polkadot/keyring/types';
 
 import DefaultAvatar from '../../static/icons/default-avatar.svg';
-import { AdditionalWarning100, Grey500 } from '../../styles/colors';
 import { AccountSigner } from '../../account/AccountContext';
 import { useAccounts } from '../../hooks/useAccounts';
 import { PasswordInput } from '../PasswordInput/PasswordInput';
@@ -17,22 +16,19 @@ export type TSignModalProps = {
 
 export const SignModal: FC<TSignModalProps> = ({ isVisible, onFinish, onClose }) => {
   const [password, setPassword] = useState<string>('');
-  const [passwordError, setPasswordError] = useState<string>('');
+  const [passwordError, setPasswordError] = useState<string | undefined>();
   const { selectedAccount, unlockLocalAccount } = useAccounts();
-
-  const onPasswordChange = useCallback(({ target }: ChangeEvent<HTMLInputElement>) => {
-    setPassword(target.value);
-  }, []);
 
   const onSignClick = useCallback(() => {
     if (!selectedAccount || selectedAccount.signerType !== AccountSigner.local) return;
     try {
+      setPasswordError(undefined);
       const signature = unlockLocalAccount(password);
       if (signature) {
         onFinish(signature);
       }
     } catch (e) {
-      setPasswordError('');
+      setPasswordError('Unable to decode using the supplied passphrase');
     }
 
     setPassword('');
@@ -54,6 +50,7 @@ export const SignModal: FC<TSignModalProps> = ({ isVisible, onFinish, onClose })
         onChange={setPassword}
         value={password}
       />
+      {passwordError && <Text color={'coral-500'} >{passwordError}</Text>}
     </CredentialsWrapper>
     <ButtonWrapper>
       <Button
