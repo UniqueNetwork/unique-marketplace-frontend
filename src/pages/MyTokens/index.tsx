@@ -1,19 +1,20 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
 import styled from 'styled-components/macro';
 import { Button, InputText, Select, Text } from '@unique-nft/ui-kit';
 
 import { TokensList } from '../../components';
 import { Secondary400 } from '../../styles/colors';
-import { FilterState } from '../../components/Filters/types';
 import { useApi } from '../../hooks/useApi';
 import { NFTToken } from '../../api/chainApi/unique/types';
-import { Filters } from './Filters/Filters';
+import { Filters, FilterState } from './Filters/Filters';
 import { useAccounts } from '../../hooks/useAccounts';
+import { useOffers } from '../../api/restApi/offers/offers';
+import { Offer } from '../../api/restApi/offers/types';
 
 type TOption = {
   direction: 'asc' | 'desc';
-  field: 'price' | 'tokenId' | 'creationDate';
+  field: keyof Pick<Offer & NFTToken, 'price' | 'id' | 'creationDate'>;
   iconRight: {
     color: string;
     name: string;
@@ -23,20 +24,25 @@ type TOption = {
   title: string;
 }
 
+const pageSize = 100;
+
 export const MyTokensPage = () => {
   const [filterState, setFilterState] = useState<FilterState>({});
   const [sortingValue, setSortingValue] = useState<string>('desc(CreationDate)');
-  const [searchValue, setSearchValue] = useState<string | number>();
+  const [searchValue, setSearchValue] = useState<string>();
+  const [searchString, setSearchString] = useState<string>();
   const [selectOption, setSelectOption] = useState<TOption>();
   const { selectedAccount } = useAccounts();
   const [tokens, setTokens] = useState<NFTToken[]>([]);
+
+  const { offers } = useOffers({ page: 1, pageSize, seller: selectedAccount?.address });
 
   const { api } = useApi();
 
   useEffect(() => {
     if (!api || !selectedAccount?.address) return;
     (async () => {
-      const _tokens = await api.nft?.getAccountTokens(selectedAccount?.address) as NFTToken[];
+      const _tokens = await api.nft?.getAccountTokens(selectedAccount.address) as NFTToken[];
       setTokens(_tokens);
     })();
   }, [selectedAccount, api]);
@@ -60,13 +66,70 @@ export const MyTokensPage = () => {
     setSortingValue(val);
   }, []);
 
-  const handleSearch = () => {
-    console.log(`go search ${searchValue}`);
-  };
+  const onChangeSearchValue = useCallback((value: string) => {
+    setSearchValue(value);
+  }, []);
+
+  const handleSearch = useCallback(() => {
+    setSearchString(searchValue);
+  }, [searchValue]);
 
   const onFilterChange = useCallback((filter: FilterState) => {
-    setFilterState({ ...filterState, ...filter });
-  }, [filterState]);
+    setFilterState((filterState) => ({ ...filterState, ...filter }));
+  }, [setFilterState]);
+
+  const filter = useCallback(
+    (token: NFTToken & Partial<Offer>) => {
+      let filterByStatus = true;
+      if (filterState.onSell) {
+        filterByStatus = !!token.seller;
+      }
+      if (filterState.fixedPrice) {
+        filterByStatus = !!token.seller && !token.auction;
+      }
+      if (filterState.timedAuction) {
+        filterByStatus = !!token.seller && !!token.auction;
+      }
+      if (filterState.notOnSale) {
+        filterByStatus = !token.seller;
+      }
+      let filteredByPrice = true;
+      if (filterState.minPrice && filterState.maxPrice) {
+        if (!token.price) {
+          filteredByPrice = false;
+        } else {
+          const tokenPrice = Number(token.price);
+          filteredByPrice = (tokenPrice >= filterState.minPrice && tokenPrice <= filterState.maxPrice);
+        }
+      }
+      let filteredByCollections = true;
+      if (filterState.collectionIds && filterState.collectionIds.length > 0) {
+        filteredByCollections = filterState.collectionIds.findIndex((collectionId: number) => token.collectionId === collectionId) > -1;
+      }
+      let filteredBySearchValue = true;
+      if (searchString) {
+        filteredBySearchValue = token.collectionName?.includes(searchString) || token.prefix?.includes(searchString) || token.tokenId === Number(searchString);
+      }
+
+      return filterByStatus && filteredByPrice && filteredByCollections && filteredBySearchValue;
+    },
+    [filterState, searchString]
+  );
+
+  const featuredTokens: (NFTToken & Partial<Offer>)[] = useMemo(() => {
+    const tokensWithOffers = tokens.map((token) => ({
+      ...(offers.find((offer) => offer.tokenId === token.id && offer.collectionId === token.collectionId) || {}),
+      ...token
+    })).filter(filter);
+
+    if (selectOption) {
+      return tokensWithOffers.sort((tokenA, tokenB) => {
+        const order = selectOption.direction === 'asc' ? 1 : -1;
+        return (tokenA[selectOption.field] || '') > (tokenB[selectOption.field] || '') ? order : -order;
+      });
+    }
+    return tokensWithOffers;
+  }, [tokens, offers, filter, selectOption]);
 
   const sortingOptions: TOption[] = [
     {
@@ -85,14 +148,14 @@ export const MyTokensPage = () => {
     },
     {
       direction: 'asc',
-      field: 'tokenId',
+      field: 'id',
       iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
       id: 'asc(TokenId)',
       title: 'Token ID'
     },
     {
       direction: 'desc',
-      field: 'tokenId',
+      field: 'id',
       iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
       id: 'desc(TokenId)',
       title: 'Token ID'
@@ -123,7 +186,7 @@ export const MyTokensPage = () => {
           <Search>
             <InputText
               iconLeft={{ name: 'magnify', size: 16 }}
-              onChange={(val) => setSearchValue(val)}
+              onChange={onChangeSearchValue}
               placeholder='Collection / token'
               value={searchValue?.toString()}
             />
@@ -140,7 +203,7 @@ export const MyTokensPage = () => {
           />
         </SearchAndSorting>
         <div>
-          <Text size='m'>{`${tokens.length} items`}</Text>
+          <Text size='m'>{`${featuredTokens.length} items`}</Text>
         </div>
         <InfiniteScroll
           hasMore={hasMore}
@@ -150,7 +213,7 @@ export const MyTokensPage = () => {
           threshold={200}
           useWindow={true}
         >
-          <TokensList tokens={tokens} />
+          <TokensList tokens={featuredTokens.filter(filter)} />
         </InfiniteScroll>
       </MainContent>
     </MarketMainPageStyled>

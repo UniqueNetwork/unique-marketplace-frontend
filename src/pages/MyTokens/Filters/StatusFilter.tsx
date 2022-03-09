@@ -8,37 +8,37 @@ interface StatusFilterProps {
 }
 
 const StatusFilter: FC<StatusFilterProps> = ({ onChange }) => {
-  const [myNFTs, setMyNFTs] = useState<boolean>(false);
+  const [onSell, setOnSell] = useState<boolean>(false);
   const [fixedPrice, setFixedPrice] = useState<boolean>(false);
   const [timedAuction, setTimedAuction] = useState<boolean>(false);
   const [notOnSale, setNotOnSale] = useState<boolean>(false);
-  const onMyNFTsChange = useCallback((value: boolean) => {
-    onChange({ myNFTs: value, fixedPrice, timedAuction, notOnSale });
-    setMyNFTs(value);
+  const onMyNFTsOnSellChange = useCallback((value: boolean) => {
+    onChange({ onSell: value, fixedPrice, timedAuction, notOnSale });
+    setOnSell(value);
   }, [fixedPrice, timedAuction, notOnSale, onChange]);
 
   const onFixedPriceChange = useCallback((value: boolean) => {
-    onChange({ myNFTs, fixedPrice: value, timedAuction, notOnSale });
+    onChange({ onSell, fixedPrice: value, timedAuction, notOnSale });
     setFixedPrice(value);
-  }, [myNFTs, timedAuction, notOnSale, onChange]);
+  }, [onSell, timedAuction, notOnSale, onChange]);
 
   const onTimedAuctionChange = useCallback((value: boolean) => {
-    onChange({ myNFTs, fixedPrice, timedAuction: value, notOnSale });
+    onChange({ onSell, fixedPrice, timedAuction: value, notOnSale });
     setTimedAuction(value);
-  }, [myNFTs, fixedPrice, notOnSale, onChange]);
+  }, [onSell, fixedPrice, notOnSale, onChange]);
 
   const onNotOnSaleChange = useCallback((value: boolean) => {
-    onChange({ myNFTs, fixedPrice, timedAuction, notOnSale: value });
+    onChange({ onSell, fixedPrice, timedAuction, notOnSale: value });
     setNotOnSale(value);
-  }, [myNFTs, fixedPrice, timedAuction, onChange]);
+  }, [onSell, fixedPrice, timedAuction, onChange]);
 
   return (
     <StatusFilterWrapper>
       <Checkbox
-        checked={myNFTs}
+        checked={onSell}
         label={'My NFTs on sell'}
         size={'m'}
-        onChange={onMyNFTsChange}
+        onChange={onMyNFTsOnSellChange}
       />
       <Checkbox
         checked={fixedPrice}

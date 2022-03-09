@@ -3,25 +3,21 @@ import styled from 'styled-components/macro';
 
 import Accordion from '../../../components/Accordion/Accordion';
 import PricesFilter from '../../../components/Filters/PricesFilter';
-import { FilterState, PriceRange } from '../../../components/Filters/types';
+import { PriceRange } from '../../../components/Filters/types';
 import CollectionsFilter from '../../../components/Filters/CollectionsFilter';
 import { MyTokensStatuses } from './types';
 import StatusFilter from './StatusFilter';
-import { useAccounts } from '../../../hooks/useAccounts';
+
+export type FilterState = Partial<MyTokensStatuses> & Partial<PriceRange> & { collectionIds?: number[] }
 
 type FiltersProps = {
   onFilterChange(value: FilterState): void
 }
 
 export const Filters: FC<FiltersProps> = ({ onFilterChange }) => {
-  const { selectedAccount } = useAccounts();
-
   const onStatusFilterChange = useCallback((value: MyTokensStatuses) => {
-    const newFilter = {
-      seller: value.myNFTs ? selectedAccount?.address : undefined
-    };
-    onFilterChange(newFilter);
-  }, [onFilterChange, selectedAccount]);
+    onFilterChange(value);
+  }, [onFilterChange]);
 
   const onPricesFilterChange = useCallback((value: PriceRange | undefined) => {
     const { minPrice, maxPrice } = (value as PriceRange) || {};
@@ -30,7 +26,7 @@ export const Filters: FC<FiltersProps> = ({ onFilterChange }) => {
   }, [onFilterChange]);
 
   const onCollectionsFilterChange = useCallback((value: number[]) => {
-    const newFilter = { collectionId: value };
+    const newFilter = { collectionIds: value };
     onFilterChange(newFilter);
   }, [onFilterChange]);
 
