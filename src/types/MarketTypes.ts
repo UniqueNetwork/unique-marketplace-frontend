@@ -44,7 +44,7 @@ export interface InternalStage<T> extends Stage {
 
 export type useMarketplaceStagesReturn<T> = {
   stages: Stage[],
-  initiate: (params: T) => void,
+  initiate: (params: T) => Promise<void>,
   status: StageStatus, // status for all stages combined, not for current stage
   error: Error | undefined | null
 }

@@ -174,7 +174,7 @@ export const MyTokensPage = () => {
   return (
     <MarketMainPageStyled>
       <LeftColumn>
-        <Filters filters={filterState} onFilterChange={setFilterState} />
+        <Filters onFilterChange={setFilterState} />
       </LeftColumn>
       <MainContent>
         <SearchAndSorting>
