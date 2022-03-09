@@ -29,7 +29,16 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ onChange }) => {
     // TODO: filter by attributes
   }, []);
 
-  return (<>
+  const onCollectionsClear = useCallback(() => () => {
+    setSelectedCollections([]);
+    onChange([]);
+  }, [onChange]);
+
+  return (<Accordion title={'Collections'}
+    isOpen={true}
+    onClear={onCollectionsClear}
+    isClearShow={selectedCollections.length > 0}
+  >
     <CollectionFilterWrapper>
       {isFetching && <Loading />}
       {collections.map((collection) => (
@@ -55,7 +64,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ onChange }) => {
         </CollectionFilterWrapper>
       </Accordion>
     </AttributesFilterWrapper>}
-  </>);
+  </Accordion>);
 };
 
 const CollectionFilterWrapper = styled.div`

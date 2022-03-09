@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useEffect } from 'react';
 import styled from 'styled-components/macro';
 
 import Accordion from '../../../components/Accordion/Accordion';
@@ -11,35 +11,32 @@ import StatusFilter from './StatusFilter';
 export type FilterState = Partial<MyTokensStatuses> & Partial<PriceRange> & { collectionIds?: number[] }
 
 type FiltersProps = {
-  onFilterChange(value: FilterState): void
+  filters: FilterState
+  onFilterChange(setState: (value: FilterState) => FilterState): void
 }
 
-export const Filters: FC<FiltersProps> = ({ onFilterChange }) => {
+export const Filters: FC<FiltersProps> = ({ filters, onFilterChange }) => {
   const onStatusFilterChange = useCallback((value: MyTokensStatuses) => {
-    onFilterChange(value);
+    onFilterChange((filters) => ({ ...filters, ...value }));
   }, [onFilterChange]);
 
   const onPricesFilterChange = useCallback((value: PriceRange | undefined) => {
     const { minPrice, maxPrice } = (value as PriceRange) || {};
-    const newFilter = { minPrice, maxPrice };
-    onFilterChange(newFilter);
+    onFilterChange((filters) => ({ ...filters, minPrice, maxPrice }));
   }, [onFilterChange]);
 
-  const onCollectionsFilterChange = useCallback((value: number[]) => {
-    const newFilter = { collectionIds: value };
-    onFilterChange(newFilter);
+  const onCollectionsFilterChange = useCallback((collectionIds: number[]) => {
+    onFilterChange((filters) => ({ ...filters, collectionIds }));
+  }, [onFilterChange]);
+
+  const onStatusFilterClear = useCallback(() => {
+    onFilterChange((filters) => ({ ...filters }));
   }, [onFilterChange]);
 
   return <FiltersStyled>
-    <Accordion title={'Status'} isOpen={true} >
-      <StatusFilter onChange={onStatusFilterChange}/>
-    </Accordion>
-    <Accordion title={'Price'} isOpen={true} >
-      <PricesFilter onChange={onPricesFilterChange} />
-    </Accordion>
-    <Accordion title={'Collections'} isOpen={true} >
-      <CollectionsFilter onChange={onCollectionsFilterChange} />
-    </Accordion>
+    <StatusFilter onChange={onStatusFilterChange}/>
+    <PricesFilter onChange={onPricesFilterChange} />
+    <CollectionsFilter onChange={onCollectionsFilterChange} />
   </FiltersStyled>;
 };
 

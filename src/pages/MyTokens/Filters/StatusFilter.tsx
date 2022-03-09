@@ -2,6 +2,7 @@ import React, { FC, useCallback, useState } from 'react';
 import { Checkbox } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 import { MyTokensStatuses } from './types';
+import Accordion from '../../../components/Accordion/Accordion';
 
 interface StatusFilterProps {
   onChange(value: MyTokensStatuses): void
@@ -32,33 +33,47 @@ const StatusFilter: FC<StatusFilterProps> = ({ onChange }) => {
     setNotOnSale(value);
   }, [onSell, fixedPrice, timedAuction, onChange]);
 
+  const onClear = useCallback(() => {
+    setOnSell(false);
+    setFixedPrice(false);
+    setTimedAuction(false);
+    setNotOnSale(false);
+    onChange({ onSell: false, fixedPrice: false, timedAuction: false, notOnSale: false });
+  }, [onChange]);
+
   return (
-    <StatusFilterWrapper>
-      <Checkbox
-        checked={onSell}
-        label={'My NFTs on sell'}
-        size={'m'}
-        onChange={onMyNFTsOnSellChange}
-      />
-      <Checkbox
-        checked={fixedPrice}
-        label={'Fixed price'}
-        size={'m'}
-        onChange={onFixedPriceChange}
-      />
-      <Checkbox
-        checked={timedAuction}
-        label={'Timed auction'}
-        size={'m'}
-        onChange={onTimedAuctionChange}
-      />
-      <Checkbox
-        checked={notOnSale}
-        label={'Not on sale'}
-        size={'m'}
-        onChange={onNotOnSaleChange}
-      />
-    </StatusFilterWrapper>
+    <Accordion title={'Status'}
+      isOpen={true}
+      onClear={onClear}
+      isClearShow={onSell || fixedPrice || timedAuction || notOnSale}
+    >
+      <StatusFilterWrapper>
+        <Checkbox
+          checked={onSell}
+          label={'My NFTs on sell'}
+          size={'m'}
+          onChange={onMyNFTsOnSellChange}
+        />
+        <Checkbox
+          checked={fixedPrice}
+          label={'Fixed price'}
+          size={'m'}
+          onChange={onFixedPriceChange}
+        />
+        <Checkbox
+          checked={timedAuction}
+          label={'Timed auction'}
+          size={'m'}
+          onChange={onTimedAuctionChange}
+        />
+        <Checkbox
+          checked={notOnSale}
+          label={'Not on sale'}
+          size={'m'}
+          onChange={onNotOnSaleChange}
+        />
+      </StatusFilterWrapper>
+    </Accordion>
   );
 };
 

@@ -70,16 +70,11 @@ export const MyTokensPage = () => {
     setSearchValue(value);
   }, []);
 
-  const handleSearch = useCallback(() => {
+  const onSearch = useCallback(() => {
     setSearchString(searchValue);
   }, [searchValue]);
 
-  const onFilterChange = useCallback((filter: FilterState) => {
-    setFilterState((filterState) => ({ ...filterState, ...filter }));
-  }, [setFilterState]);
-
-  const filter = useCallback(
-    (token: NFTToken & Partial<Offer>) => {
+  const filter = useCallback((token: NFTToken & Partial<Offer>) => {
       let filterByStatus = true;
       if (filterState.onSell) {
         filterByStatus = !!token.seller;
@@ -129,7 +124,7 @@ export const MyTokensPage = () => {
       });
     }
     return tokensWithOffers;
-  }, [tokens, offers, filter, selectOption]);
+  }, [tokens, offers, filter, selectOption, filterState]);
 
   const sortingOptions: TOption[] = [
     {
@@ -179,7 +174,7 @@ export const MyTokensPage = () => {
   return (
     <MarketMainPageStyled>
       <LeftColumn>
-        <Filters onFilterChange={onFilterChange} />
+        <Filters filters={filterState} onFilterChange={setFilterState} />
       </LeftColumn>
       <MainContent>
         <SearchAndSorting>
@@ -191,7 +186,7 @@ export const MyTokensPage = () => {
               value={searchValue?.toString()}
             />
             <Button
-              onClick={() => handleSearch()}
+              onClick={onSearch}
               role='primary'
               title='Search'
             />

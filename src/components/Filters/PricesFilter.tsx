@@ -2,6 +2,7 @@ import React, { FC, useCallback, useState } from 'react';
 import { Button, InputText, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 import { PriceRange } from './types';
+import Accordion from '../Accordion/Accordion';
 
 interface PricesFilterProps {
   onChange(value: PriceRange | undefined): void
@@ -25,19 +26,32 @@ const PricesFilter: FC<PricesFilterProps> = ({ onChange }) => {
   const onChangeMinPrice = useCallback((value: string) => {
     setMinPrice(Number(value) || undefined);
   }, []);
+
   const onChangeMaxPrice = useCallback((value: string) => {
     setMaxPrice(Number(value) || undefined);
   }, []);
 
+  const onPricesClear = useCallback(() => {
+    setMinPrice(undefined);
+    setMaxPrice(undefined);
+    onChange(undefined);
+  }, []);
+
   return (
-    <PriceFilterWrapper>
-      <PricesRangeWrapper>
-        <InputText value={minPrice?.toString()} onChange={onChangeMinPrice} placeholder={'Min'} />
-        <Text>to</Text>
-        <InputText value={maxPrice?.toString()} onChange={onChangeMaxPrice} placeholder={'Max'} />
-      </PricesRangeWrapper>
-      <Button title={'Apply'} onClick={onApply}/>
-    </PriceFilterWrapper>
+    <Accordion title={'Price'}
+      isOpen={true}
+      onClear={onPricesClear}
+      isClearShow={!!minPrice && !!maxPrice}
+    >
+      <PriceFilterWrapper>
+        <PricesRangeWrapper>
+          <InputText value={minPrice?.toString()} onChange={onChangeMinPrice} placeholder={'Min'} />
+          <Text>to</Text>
+          <InputText value={maxPrice?.toString()} onChange={onChangeMaxPrice} placeholder={'Max'} />
+        </PricesRangeWrapper>
+        <Button title={'Apply'} onClick={onApply}/>
+      </PriceFilterWrapper>
+    </Accordion>
   );
 };
 
