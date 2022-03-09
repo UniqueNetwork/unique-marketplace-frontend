@@ -1,3 +1,8 @@
+networks:
+  market:
+    external:
+      name: market
+
 version: '2'
 services:
   client:
@@ -10,24 +15,8 @@ services:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true
     container_name: uniq-market-client
-    ports:
-      - 3000:3000
+    networks:
+     - market
     volumes:
       - ./src:/src
     command: yarn start
-    networks:
-      market:
-        external:
-          name: market
-  nginx:
-    image: nginx:alpine
-    container_name: nginx
-    ports:
-      - '80:80'
-      - '443:443'
-    restart: always
-    networks:
-      - market
-      - default
-    depends_on:
-      - wallet-testnet
