@@ -1,5 +1,5 @@
 import styled from 'styled-components/macro';
-import { Filters, TokensList } from '../../components';
+import { Filters } from '../../components';
 import { useCallback, useEffect, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
 import { Button, InputText, Select, Text } from '@unique-nft/ui-kit';
