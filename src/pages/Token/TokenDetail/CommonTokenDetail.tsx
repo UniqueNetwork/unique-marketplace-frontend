@@ -41,12 +41,12 @@ export const CommonTokenDetail: FC<IProps> = ({
       <Description>
         <Heading size={'1'}>{`${prefix || ''} #${tokenId}`}</Heading>
         <Row>
-          <Text color='grey-500' size='m'>
-            {(123).toString()}
+          {/* <Text color='grey-500' size='m'>
+            0
           </Text>
           <IconWrapper>
             <Icon path={eye} />
-          </IconWrapper>
+          </IconWrapper> */}
           <Text color='grey-500' size='m'>
             Share Link
           </Text>
