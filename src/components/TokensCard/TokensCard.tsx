@@ -7,6 +7,7 @@ import { Primary600 } from '../../styles/colors';
 import { useApi } from '../../hooks/useApi';
 import Loading from '../Loading';
 import { NFTToken } from '../../api/chainApi/unique/types';
+import { formatKusamaBalance } from '../../utils/textUtils';
 
 export type TTokensCard = {
   token?: NFTToken
@@ -63,7 +64,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, price, toke
         <Text color='primary-600' size='s'>
           {`${collectionName?.substring(0, 15) || ''} [id ${collectionId || ''}]`}
         </Text>
-        <Text size='s'>{`Price: ${price}`}</Text>
+        {price && <Text size='s'>{`Price: ${formatKusamaBalance(price)}`}</Text>}
       </Description>
 
       {isFetching && <Loading />}
