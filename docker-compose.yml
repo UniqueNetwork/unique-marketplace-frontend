@@ -9,7 +9,7 @@ services:
     environment:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true
-    container_name: uniq-blockexplorer-client
+    container_name: uniq-market-client
     ports:
       - 3000:3000
     volumes:
