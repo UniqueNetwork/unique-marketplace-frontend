@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import { web3FromSource } from '@polkadot/extension-dapp';
 import { TTransaction } from '../api/chainApi/types';
 import { InternalStage, MarketType, StageStatus, useMarketplaceStagesReturn } from '../types/MarketTypes';
 import { useAccounts } from './useAccounts';

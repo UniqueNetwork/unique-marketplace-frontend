@@ -1,12 +1,12 @@
 import React, { FC, useCallback, useState } from 'react';
 import styled from 'styled-components/macro';
-import { Text } from '@unique-nft/ui-kit';
+import { Button, Text } from '@unique-nft/ui-kit';
 
 interface AccordionProps {
   title: string
-  rightSideControl?: React.ReactNode
   isOpen?: boolean
-
+  isClearShow?: boolean
+  onClear?(): void
 }
 
 const AccordionChevronIcon = () => {
@@ -25,7 +25,7 @@ const AccordionChevronIcon = () => {
   );
 };
 
-const Accordion: FC<AccordionProps> = ({ title, rightSideControl, isOpen: isOpenProps, children }) => {
+const Accordion: FC<AccordionProps> = ({ title, isOpen: isOpenProps, children, onClear, isClearShow }) => {
   const [isOpen, setIsOpen] = useState(isOpenProps);
 
   const onToggle = useCallback(() => {
@@ -34,15 +34,17 @@ const Accordion: FC<AccordionProps> = ({ title, rightSideControl, isOpen: isOpen
 
   return (
     <AccordionWrapper>
-      <AccordionTitleWrapper>
-        <AccordionTitle onClick={onToggle} isOpen={isOpen}>
+      <AccordionHeaderWrapper>
+        <AccordionTitle onClick={onToggle} isOpen={isOpen} >
           <Text>{title}</Text>
           <AccordionChevronIcon />
         </AccordionTitle>
-        <RightSideControlWrapper>
-          {rightSideControl}
-        </RightSideControlWrapper>
-      </AccordionTitleWrapper>
+        {isClearShow && <Button size={'s'}
+          title={'Clear'}
+          onClick={() => onClear && onClear()}
+          role={'danger'}
+        />}
+      </AccordionHeaderWrapper>
       <AccordionBodyWrapper isOpen={isOpen}>
         {children}
       </AccordionBodyWrapper>
@@ -54,12 +56,14 @@ const AccordionWrapper = styled.div`
   
 `;
 
-const AccordionTitleWrapper = styled.div`
+const AccordionHeaderWrapper = styled.div`
   display: flex;
   align-items: center;
+  height: 32px;
+  justify-content: space-between;
 `;
 
-const AccordionTitle = styled.span<{ isOpen?: boolean}>`
+const AccordionTitle = styled.div<{ isOpen?: boolean}>`
   display: flex;
   cursor: pointer;
   align-items: center;
@@ -69,10 +73,6 @@ const AccordionTitle = styled.span<{ isOpen?: boolean}>`
     transform: ${({ isOpen }) => isOpen ? 'rotate(0deg);' : 'rotate(-90deg);'};
     transition: all 0.3s;
   }
-`;
-
-const RightSideControlWrapper = styled.div`
-  
 `;
 
 const AccordionBodyWrapper = styled.div<{ isOpen?: boolean}>`

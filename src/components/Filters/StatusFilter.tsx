@@ -2,6 +2,7 @@ import React, { FC, useCallback, useState } from 'react';
 import { Checkbox } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 import { Statuses } from './types';
+import Accordion from '../Accordion/Accordion';
 
 interface StatusFilterProps {
   onChange(value: Statuses): void
@@ -33,33 +34,47 @@ const StatusFilter: FC<StatusFilterProps> = ({ onChange }) => {
     setMyBets(value);
   }, [myNFTs, fixedPrice, timedAuction]);
 
+  const onClear = useCallback(() => {
+    setMyNFTs(false);
+    setFixedPrice(false);
+    setTimedAuction(false);
+    setMyBets(false);
+    onChange({ myNFTs: false, fixedPrice: false, timedAuction: false, myBets: false });
+  }, [onChange]);
+
   return (
-    <StatusFilterWrapper>
-      <Checkbox
-        checked={myNFTs}
-        label={'My NFTs on sell'}
-        size={'m'}
-        onChange={onMyNFTsChange}
-      />
-      <Checkbox
-        checked={fixedPrice}
-        label={'Fixed price'}
-        size={'m'}
-        onChange={onFixedPriceChange}
-      />
-      <Checkbox
-        checked={timedAuction}
-        label={'Timed auction'}
-        size={'m'}
-        onChange={onTimedAuctionChange}
-      />
-      <Checkbox
-        checked={myBets}
-        label={'My bets'}
-        size={'m'}
-        onChange={onMyBetsChange}
-      />
-    </StatusFilterWrapper>
+    <Accordion title={'Status'}
+      isOpen={true}
+      onClear={onClear}
+      isClearShow={myNFTs || fixedPrice || timedAuction || myBets}
+    >
+      <StatusFilterWrapper>
+        <Checkbox
+          checked={myNFTs}
+          label={'My NFTs on sell'}
+          size={'m'}
+          onChange={onMyNFTsChange}
+        />
+        <Checkbox
+          checked={fixedPrice}
+          label={'Fixed price'}
+          size={'m'}
+          onChange={onFixedPriceChange}
+        />
+        <Checkbox
+          checked={timedAuction}
+          label={'Timed auction'}
+          size={'m'}
+          onChange={onTimedAuctionChange}
+        />
+        <Checkbox
+          checked={myBets}
+          label={'My bets'}
+          size={'m'}
+          onChange={onMyBetsChange}
+        />
+      </StatusFilterWrapper>
+    </Accordion>
   );
 };
 

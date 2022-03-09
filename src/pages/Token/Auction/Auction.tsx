@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 import { Text, Button, Heading } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 

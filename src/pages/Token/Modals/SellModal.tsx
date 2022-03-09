@@ -8,13 +8,6 @@ import { useAuctionSellStages, useSellFixStages } from '../../../hooks/marketpla
 import { AdditionalWarning100 } from '../../../styles/colors';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 
-// TODO: take from config instead (/api/settings inside ApiContext)
-const getFees = () => {
-  const priceFee = 0.1;
-  const stepFee = 0.1;
-  return { priceFee, stepFee };
-};
-
 const tokenSymbol = 'KSM';
 
 export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish, setIsClosable }) => {

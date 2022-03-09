@@ -1,49 +1,40 @@
 import React, { FC, useCallback } from 'react';
 import styled from 'styled-components/macro';
 
-import Accordion from '../../../components/Accordion/Accordion';
 import PricesFilter from '../../../components/Filters/PricesFilter';
-import { FilterState, PriceRange } from '../../../components/Filters/types';
+import { PriceRange } from '../../../components/Filters/types';
 import CollectionsFilter from '../../../components/Filters/CollectionsFilter';
 import { MyTokensStatuses } from './types';
 import StatusFilter from './StatusFilter';
-import { useAccounts } from '../../../hooks/useAccounts';
+
+export type FilterState = Partial<MyTokensStatuses> & Partial<PriceRange> & { collectionIds?: number[] }
 
 type FiltersProps = {
-  onFilterChange(value: FilterState): void
+  onFilterChange(setState: (value: FilterState) => FilterState): void
 }
 
 export const Filters: FC<FiltersProps> = ({ onFilterChange }) => {
-  const { selectedAccount } = useAccounts();
-
   const onStatusFilterChange = useCallback((value: MyTokensStatuses) => {
-    const newFilter = {
-      seller: value.myNFTs ? selectedAccount?.address : undefined
-    };
-    onFilterChange(newFilter);
-  }, [onFilterChange, selectedAccount]);
+    onFilterChange((filters) => ({ ...filters, ...value }));
+  }, [onFilterChange]);
 
   const onPricesFilterChange = useCallback((value: PriceRange | undefined) => {
     const { minPrice, maxPrice } = (value as PriceRange) || {};
-    const newFilter = { minPrice, maxPrice };
-    onFilterChange(newFilter);
+    onFilterChange((filters) => ({ ...filters, minPrice, maxPrice }));
   }, [onFilterChange]);
 
-  const onCollectionsFilterChange = useCallback((value: number[]) => {
-    const newFilter = { collectionId: value };
-    onFilterChange(newFilter);
+  const onCollectionsFilterChange = useCallback((collectionIds: number[]) => {
+    onFilterChange((filters) => ({ ...filters, collectionIds }));
+  }, [onFilterChange]);
+
+  const onStatusFilterClear = useCallback(() => {
+    onFilterChange((filters) => ({ ...filters }));
   }, [onFilterChange]);
 
   return <FiltersStyled>
-    <Accordion title={'Status'} isOpen={true} >
-      <StatusFilter onChange={onStatusFilterChange}/>
-    </Accordion>
-    <Accordion title={'Price'} isOpen={true} >
-      <PricesFilter onChange={onPricesFilterChange} />
-    </Accordion>
-    <Accordion title={'Collections'} isOpen={true} >
-      <CollectionsFilter onChange={onCollectionsFilterChange} />
-    </Accordion>
+    <StatusFilter onChange={onStatusFilterChange}/>
+    <PricesFilter onChange={onPricesFilterChange} />
+    <CollectionsFilter onChange={onCollectionsFilterChange} />
   </FiltersStyled>;
 };
 

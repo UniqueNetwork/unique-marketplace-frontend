@@ -2,21 +2,23 @@ import { FC } from 'react';
 import styled from 'styled-components/macro';
 import { TokensCard } from '..';
 import { NFTToken } from '../../api/chainApi/unique/types';
+import { Offer } from '../../api/restApi/offers/types';
 
 type TTokensList = {
-  tokens: NFTToken[];
+  tokens: (NFTToken & Partial<Offer>)[];
 };
 
 export const TokensList: FC<TTokensList> = ({ tokens }) => {
   return (
     <TokensListStyled>
       {tokens?.map &&
-        tokens.map((token: NFTToken) => (
+        tokens.map((token) => (
           <TokensCard
             key={`token-${token.collectionId}-${token.id}`}
             tokenId={token?.id}
             collectionId={token?.collectionId}
             token={token}
+            price={token.price}
           />
         ))}
     </TokensListStyled>

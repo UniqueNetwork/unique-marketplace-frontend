@@ -1,1 +1,1 @@
-export type MyTokensStatuses = Record<'myNFTs' | 'fixedPrice' | 'timedAuction' | 'notOnSale', boolean | undefined>
+export type MyTokensStatuses = Record<'onSell' | 'fixedPrice' | 'timedAuction' | 'notOnSale', boolean | undefined>

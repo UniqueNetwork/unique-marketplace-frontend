@@ -34,15 +34,9 @@ export const Filters: FC<FiltersProps> = ({ onFilterChange }) => {
   }, [onFilterChange]);
 
   return <FiltersStyled>
-    <Accordion title={'Status'} isOpen={true} >
-      <StatusFilter onChange={onStatusFilterChange}/>
-    </Accordion>
-    <Accordion title={'Price'} isOpen={true} >
-      <PricesFilter onChange={onPricesFilterChange} />
-    </Accordion>
-    <Accordion title={'Collections'} isOpen={true} >
-      <CollectionsFilter onChange={onCollectionsFilterChange} />
-    </Accordion>
+    <StatusFilter onChange={onStatusFilterChange}/>
+    <PricesFilter onChange={onPricesFilterChange} />
+    <CollectionsFilter onChange={onCollectionsFilterChange} />
   </FiltersStyled>;
 };
 
