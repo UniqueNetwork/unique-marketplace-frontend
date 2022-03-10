@@ -15,6 +15,8 @@ COPY ./.docker/nginx.conf /etc/nginx/nginx.conf.template
 
 COPY --from=builder /app/build /usr/share/nginx/html
 
+COPY ./.docker/env.js /usr/share/nginx/html
+
 COPY ./.docker/docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
