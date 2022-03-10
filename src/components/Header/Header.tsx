@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import styled from 'styled-components/macro'; // Todo: https://cryptousetech.atlassian.net/browse/NFTPAR-1201
 
 import { useScreenWidthFromThreshold } from '../../hooks/useScreenWidthFromThreshold';
-import logo from '../../logos/logo-white-label-market.svg';
 import menu from '../../static/icons/menu.svg';
 import { TMenuItems } from '../PageLayout';
 import { AdditionalColorDark, AdditionalColorLight, Primary500 } from '../../styles/colors';
@@ -59,7 +58,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
           src={menu}
         />}
         <Link to={'/'}>
-          <LogoIcon src={logo} />
+          <LogoIcon src={'/logos/logo-white-label-market.svg'} />
         </Link>
         {!showMobileMenu && (
           <nav>

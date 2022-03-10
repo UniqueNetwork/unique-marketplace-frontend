@@ -3,11 +3,13 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { Layout } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 import { Header } from '.';
+import { useFooter } from '../hooks/useFooter';
 
 export type TMenuItems = 'Market' | 'My tokens' | 'Trades' | 'FAQ';
 
 export const PageLayout: FC = () => {
   const { pathname } = useLocation();
+  const footer = useFooter();
 
   const layoutProps = useMemo(() => {
     if (pathname === '/market') return { heading: 'Market' };
@@ -41,7 +43,7 @@ export const PageLayout: FC = () => {
     <LayoutStyled>
       <Layout
         {...layoutProps}
-        // footer={<div>Footer</div>}
+        footer={<div dangerouslySetInnerHTML={{ __html: footer }} />}
         header={
           <Header
             activeItem={(layoutProps?.heading as TMenuItems) || 'Market'}
@@ -67,6 +69,15 @@ const LayoutStyled = styled.div`
       .breadcrumb-item {
         line-height: 22px;
       }
+    }
+  }
+  footer {
+    &>div {
+      display: flex;
+      align-items: center;
+      height: 64px;
+      justify-content: space-between;
+      width: 100%;
     }
   }
 `;
