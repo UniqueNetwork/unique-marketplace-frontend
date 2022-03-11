@@ -13,10 +13,6 @@ services:
       dockerfile: ./.docker/Dockerfile
     networks:
       - market
-    environment:
-      - PORT=3000
-    ports:
-      - 3000:3000
 
   dafc-market:
     container_name: dafc-market-client
@@ -24,10 +20,8 @@ services:
       context: ./
       dockerfile: ./.docker/Dockerfile
     volumes:
+      - ./dafc/footer.html:/usr/share/nginx/html/footer.html:ro
+      - ./dafc/logo.svg:/usr/share/nginx/html/logos/logo.svg:ro
       - ./dafc/variables.css:/usr/share/nginx/html/variables.css:ro
     networks:
       - market
-    environment:
-      - PORT=3001
-    ports:
-      - 3001:3001
