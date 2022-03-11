@@ -4,19 +4,30 @@ networks:
       name: market
 
 version: '2'
+
 services:
-  client:
+  unique-market:
+    container_name: uniq-market-client
     build:
       context: ./
-      dockerfile: Dockerfile.local
-      args:
-        NODE_ENV: development
-    environment:
-      - NODE_ENV=development
-      - CHOKIDAR_USEPOLLING=true
-    container_name: uniq-market-client
+      dockerfile: ./.docker/Dockerfile
     networks:
-     - market
+      - market
+    environment:
+      - PORT=3000
+    ports:
+      - 3000:3000
+
+  dafc-market:
+    container_name: dafc-market-client
+    build:
+      context: ./
+      dockerfile: ./.docker/Dockerfile
     volumes:
-      - ./src:/src
-    command: yarn start
+      - ./dafc/variables.css:/usr/share/nginx/html/variables.css:ro
+    networks:
+      - market
+    environment:
+      - PORT=3001
+    ports:
+      - 3001:3001
