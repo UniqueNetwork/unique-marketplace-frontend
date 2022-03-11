@@ -37,14 +37,11 @@ export const AskExistsSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onF
         value={seed}
       />
     </InputSeedWrapper>
-    <Text color='grey-500' size='m'>
-      {'The secret seed value for this account. Ensure that you keep this in a safe place, with access to the seed you can re-create the account.'}
-    </Text>
     <TextStyled
       color='additional-warning-500'
       size='s'
     >
-      Consider storing your account in a signer such as a browser extension, hardware device, QR-capable phone wallet (non-connected) or desktop application for optimal account security. Future versions of the web-only interface will drop support for non-external accounts, much like the IPFS version.
+      Ensure that you keep this seed in a safe place. Anyone with access to it can re-create the account and gain full access to it.
     </TextStyled>
     <ConfirmWrapperRow>
       <Checkbox label={'I have saved my mnemnic seed safely'}
@@ -54,6 +51,8 @@ export const AskExistsSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onF
       />
     </ConfirmWrapperRow>
     <ButtonWrapper>
+
+      <StepsTextStyled size={'m'}>Step 1/3</StepsTextStyled>
       <Button
         disabled={!address || !confirmSeedSaved}
         onClick={onNextClick}
@@ -68,6 +67,9 @@ const AddressWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 2);
   margin: calc(var(--gap) * 2) 0;
+  border: 1px solid var(--grey-300);
+  border-radius: 4px;
+  padding: 20px var(--gap);
 `;
 
 const InputSeedWrapper = styled.div`
@@ -99,8 +101,11 @@ const TextStyled = styled(Text)`
 
 const ConfirmWrapperRow = styled.div`
   display: flex;
-  justify-content: flex-end;
   margin-bottom: calc(var(--gap) * 1.5);
+`;
+
+const StepsTextStyled = styled(Text)`
+  flex-grow: 1;
 `;
 
 const ButtonWrapper = styled.div`

@@ -28,23 +28,24 @@ export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountP
       <Text>{accountProperties?.address || ''}</Text>
     </AddressWrapper>
     <CredentialsWrapper >
-      <InputText placeholder={'New account name'} onChange={onAccountNameChange} value={name} />
-      <PasswordInput placeholder={'Password'}
+      <Text size={'m'}>Name</Text>
+      <Text size={'s'} color={'grey-500'}>Give your account a name for easier identification and handling. </Text>
+      <InputText onChange={onAccountNameChange} value={name} />
+
+      <Text size={'m'}>Password</Text>
+      <Text size={'s'} color={'grey-500'}>This is necessary to authenticate all committed transactions and encrypt the key pair. Ensure you are using a strong password for proper account protection. </Text>
+      <PasswordInput
         onChange={setPassword}
         value={password}
       />
-      <PasswordInput placeholder={'Confirm password'}
+      <Text size={'m'}>Repeat password</Text>
+      <PasswordInput
         onChange={setConfirmPassword}
         value={confirmPassword}
       />
     </CredentialsWrapper>
-    <TextStyled
-      color='additional-warning-500'
-      size='s'
-    >
-      Consider storing your account in a signer such as a browser extension, hardware device, QR-capable phone wallet (non-connected) or desktop application for optimal account security. Future versions of the web-only interface will drop support for non-external accounts, much like the IPFS version.
-    </TextStyled>
     <ButtonWrapper>
+      <StepsTextStyled size={'m'}>Step 2/3</StepsTextStyled>
       <Button
         onClick={onGoBack}
         title='Previous'
@@ -62,23 +63,21 @@ export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountP
 const AddressWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 2);
-  margin: calc(var(--gap) * 2) 0;
+  margin-top: calc(var(--gap) * 2);
+  border: 1px solid var(--grey-300);
+  border-radius: 4px;
+  padding: 20px var(--gap);
 `;
 
-const TextStyled = styled(Text)`
-  box-sizing: border-box;
-  display: flex;
-  padding: 8px 16px;
-  margin: calc(var(--gap) * 1.5) 0;
-  border-radius: 4px;
-  background-color: ${AdditionalWarning100};
-  width: 100%;
+const StepsTextStyled = styled(Text)`
+  flex-grow: 1;
 `;
 
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
   column-gap: var(--gap);
+  align-items: center;
 `;
 
 const CredentialsWrapper = styled.div`
@@ -86,6 +85,9 @@ const CredentialsWrapper = styled.div`
   flex-direction: column;
   row-gap: calc(var(--gap) / 2);
   margin-bottom: calc(var(--gap) * 1.5);
+  .unique-text.size-m {
+    margin-top: calc(var(--gap) * 2);
+  }
   .unique-input-text {
     width: 100%;
   }
