@@ -8,11 +8,12 @@ import { useApi } from '../../hooks/useApi';
 import Loading from '../Loading';
 import { NFTToken } from '../../api/chainApi/unique/types';
 import { formatKusamaBalance } from '../../utils/textUtils';
-import { Offer } from "../../api/restApi/offers/types";
+import { Offer } from '../../api/restApi/offers/types';
 import { Icon } from '../Icon/Icon';
-import Kusama from "../../static/icons/logo-kusama.svg";
-import {compareEncodedAddresses} from "../../api/chainApi/utils/addressUtils";
-import {useAccounts} from "../../hooks/useAccounts";
+import Kusama from '../../static/icons/logo-kusama.svg';
+import { compareEncodedAddresses } from '../../api/chainApi/utils/addressUtils';
+import { useAccounts } from '../../hooks/useAccounts';
+import { timeDifference } from '../../utils/timestampUtils';
 
 export type TTokensCard = {
   offer?: Offer
@@ -88,6 +89,15 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
           <Text size='s'>{`Price: ${formatKusamaBalance(offer?.price || 0)}`}</Text>
           <Icon path={Kusama} size={16} />
         </PriceWrapper>
+        {!offer?.auction && <Text color={'grey-500'} >Price</Text>}
+        {offer?.auction && <AuctionInfoWrapper>
+          {isTopBidder && <Text size={'xs'} color={'positive-500'} >Leading bid</Text>}
+          {isBidder && !isTopBidder && <Text size={'xs'} color={'coral-500'} >Outbid</Text>}
+          {!isBidder && !isTopBidder && <Text size={'xs'} color={'grey-500'} >{
+            offer.auction.bids.length > 0 ? 'Last bid' : 'Minimum bid'
+          }</Text>}
+          <Text color={'dark'} size={'xs'}>{`${timeDifference(new Date(offer.auction?.stopAt || '').getTime() / 1000)} left`}</Text>
+        </AuctionInfoWrapper>}
       </Description>
 
       {isFetching && <Loading />}
@@ -155,4 +165,8 @@ const Description = styled.div`
       margin-bottom: 8px;
     }
   }
+`;
+
+const AuctionInfoWrapper = styled.div`
+  display: flex;
 `;
