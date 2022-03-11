@@ -26,10 +26,10 @@ declare global {
 const chains = getChainList(window.ENV || process.env);
 
 const config: Config = {
-  feturedCollectionIds: (window.ENV?.REACT_APP_UNIQUE_COLLECTION_IDS || process.env.REACT_APP_UNIQUE_COLLECTION_IDS)?.split(',').map(Number) || [],
-  uniqueApiUrl: window.ENV?.REACT_APP_UNIQUE_API_URL || process.env.REACT_APP_UNIQUE_API_URL,
-  IPFSGateway: window.ENV?.REACT_APP_IPFS_GATEWAY || process.env.REACT_APP_IPFS_GATEWAY,
-  scanUrl: window.ENV?.REACT_APP_SCAN_ACCOUNT_URL || process.env.REACT_APP_SCAN_ACCOUNT_URL,
+  feturedCollectionIds: (window.ENV?.UNIQUE_COLLECTION_IDS || process.env.REACT_APP_UNIQUE_COLLECTION_IDS)?.split(',').map(Number) || [],
+  uniqueApiUrl: window.ENV?.UNIQUE_API_URL || process.env.REACT_APP_UNIQUE_API_URL,
+  IPFSGateway: window.ENV?.IPFS_GATEWAY || process.env.REACT_APP_IPFS_GATEWAY,
+  scanUrl: window.ENV?.SCAN_ACCOUNT_URL || process.env.REACT_APP_SCAN_ACCOUNT_URL,
   chains,
   defaultChain: chains[getDefaultChain(window.ENV || process.env)]
 };

@@ -58,7 +58,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
           src={menu}
         />}
         <Link to={'/'}>
-          <LogoIcon src={'/logos/logo-white-label-market.svg'} />
+          <LogoIcon src={'/logos/logo.svg'} />
         </Link>
         {!showMobileMenu && (
           <nav>

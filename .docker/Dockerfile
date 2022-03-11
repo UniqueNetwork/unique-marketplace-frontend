@@ -20,6 +20,7 @@ COPY ./.docker/env.js /usr/share/nginx/html
 COPY ./.docker/docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
+
 ENV DNS_RESOLVER=127.0.0.1
 ENV PORT=80
 ENV ENV_FILE=/usr/share/nginx/html/env.js
