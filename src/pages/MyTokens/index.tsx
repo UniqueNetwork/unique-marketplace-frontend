@@ -7,10 +7,11 @@ import { TokensList } from '../../components';
 import { Secondary400 } from '../../styles/colors';
 import { useApi } from '../../hooks/useApi';
 import { NFTToken } from '../../api/chainApi/unique/types';
-import { Filters, FilterState } from './Filters/Filters';
+import { Filters, MyTokensFilterState } from './Filters/Filters';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useOffers } from '../../api/restApi/offers/offers';
 import { Offer } from '../../api/restApi/offers/types';
+import { MobileFilters } from '../../components/Filters/MobileFilter';
 
 type TOption = {
   direction: 'asc' | 'desc';
@@ -24,11 +25,58 @@ type TOption = {
   title: string;
 }
 
+const sortingOptions: TOption[] = [
+  {
+    direction: 'asc',
+    field: 'price',
+    iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
+    id: 'asc(Price)',
+    title: 'Price'
+  },
+  {
+    direction: 'desc',
+    field: 'price',
+    iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
+    id: 'desc(Price)',
+    title: 'Price'
+  },
+  {
+    direction: 'asc',
+    field: 'id',
+    iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
+    id: 'asc(TokenId)',
+    title: 'Token ID'
+  },
+  {
+    direction: 'desc',
+    field: 'id',
+    iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
+    id: 'desc(TokenId)',
+    title: 'Token ID'
+  },
+  {
+    direction: 'asc',
+    field: 'creationDate',
+    iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
+    id: 'asc(CreationDate)',
+    title: 'Listing date'
+  },
+  {
+    direction: 'desc',
+    field: 'creationDate',
+    iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
+    id: 'desc(CreationDate)',
+    title: 'Listing date'
+  }
+];
+
 const pageSize = 100;
 
+const defaultSortingValue = 'desc(CreationDate)';
+
 export const MyTokensPage = () => {
-  const [filterState, setFilterState] = useState<FilterState>({});
-  const [sortingValue, setSortingValue] = useState<string>('desc(CreationDate)');
+  const [filterState, setFilterState] = useState<MyTokensFilterState | null>(null);
+  const [sortingValue, setSortingValue] = useState<string>(defaultSortingValue);
   const [searchValue, setSearchValue] = useState<string>();
   const [searchString, setSearchString] = useState<string>();
   const [selectOption, setSelectOption] = useState<TOption>();
@@ -76,20 +124,20 @@ export const MyTokensPage = () => {
 
   const filter = useCallback((token: NFTToken & Partial<Offer>) => {
       let filterByStatus = true;
-      if (filterState.onSell) {
+      if (filterState?.onSell) {
         filterByStatus = !!token.seller;
       }
-      if (filterState.fixedPrice) {
+      if (filterState?.fixedPrice) {
         filterByStatus = !!token.seller && !token.auction;
       }
-      if (filterState.timedAuction) {
+      if (filterState?.timedAuction) {
         filterByStatus = !!token.seller && !!token.auction;
       }
-      if (filterState.notOnSale) {
+      if (filterState?.notOnSale) {
         filterByStatus = !token.seller;
       }
       let filteredByPrice = true;
-      if (filterState.minPrice && filterState.maxPrice) {
+      if (filterState?.minPrice && filterState?.maxPrice) {
         if (!token.price) {
           filteredByPrice = false;
         } else {
@@ -98,7 +146,7 @@ export const MyTokensPage = () => {
         }
       }
       let filteredByCollections = true;
-      if (filterState.collectionIds && filterState.collectionIds.length > 0) {
+      if (filterState?.collectionIds && filterState?.collectionIds.length > 0) {
         filteredByCollections = filterState.collectionIds.findIndex((collectionId: number) => token.collectionId === collectionId) > -1;
       }
       let filteredBySearchValue = true;
@@ -126,51 +174,6 @@ export const MyTokensPage = () => {
     return tokensWithOffers;
   }, [tokens, offers, filter, selectOption, filterState]);
 
-  const sortingOptions: TOption[] = [
-    {
-      direction: 'asc',
-      field: 'price',
-      iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
-      id: 'asc(Price)',
-      title: 'Price'
-    },
-    {
-      direction: 'desc',
-      field: 'price',
-      iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
-      id: 'desc(Price)',
-      title: 'Price'
-    },
-    {
-      direction: 'asc',
-      field: 'id',
-      iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
-      id: 'asc(TokenId)',
-      title: 'Token ID'
-    },
-    {
-      direction: 'desc',
-      field: 'id',
-      iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
-      id: 'desc(TokenId)',
-      title: 'Token ID'
-    },
-    {
-      direction: 'asc',
-      field: 'creationDate',
-      iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
-      id: 'asc(CreationDate)',
-      title: 'Listing date'
-    },
-    {
-      direction: 'desc',
-      field: 'creationDate',
-      iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
-      id: 'desc(CreationDate)',
-      title: 'Listing date'
-    }
-  ];
-
   return (
     <MarketMainPageStyled>
       <LeftColumn>
@@ -191,11 +194,13 @@ export const MyTokensPage = () => {
               title='Search'
             />
           </Search>
-          <Select
-            onChange={onSortingChange}
-            options={sortingOptions}
-            value={sortingValue}
-          />
+          <SortSelectWrapper>
+            <Select
+              onChange={onSortingChange}
+              options={sortingOptions}
+              value={sortingValue}
+            />
+          </SortSelectWrapper>
         </SearchAndSorting>
         <div>
           <Text size='m'>{`${featuredTokens.length} items`}</Text>
@@ -211,6 +216,14 @@ export const MyTokensPage = () => {
           <TokensList tokens={featuredTokens.filter(filter)} />
         </InfiniteScroll>
       </MainContent>
+      <MobileFilters<MyTokensFilterState>
+        defaultSortingValue={defaultSortingValue}
+        sortingValue={sortingValue}
+        sortingOptions={sortingOptions}
+        onFilterChange={setFilterState}
+        onSortingChange={onSortingChange}
+        filterComponent={({ onFilterChange }) => <Filters onFilterChange={onFilterChange} />}
+      />
     </MarketMainPageStyled>
   );
 };
@@ -223,6 +236,9 @@ const MarketMainPageStyled = styled.div`
 const LeftColumn = styled.div`
   padding-right: 24px;
   border-right: 1px solid var(--grey-300);
+  @media (max-width: 1024px) {
+    display: none;
+  }
 `;
 
 const MainContent = styled.div`
@@ -233,6 +249,10 @@ const MainContent = styled.div`
     margin-top: 16px;
     margin-bottom: 32px;
   }
+
+  @media (max-width: 1024px) {
+    padding-left: 0;
+  }
 `;
 
 const Search = styled.div`
@@ -240,6 +260,19 @@ const Search = styled.div`
 
   button {
     margin-left: 8px;
+  }
+
+  @media (max-width: 768px) {
+    width: 100%;
+    .unique-input-text {
+      flex-grow: 1;
+    }
+  }
+`;
+
+const SortSelectWrapper = styled.div`
+  @media (max-width: 1024px) {
+    display: none;
   }
 `;
 

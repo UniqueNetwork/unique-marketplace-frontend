@@ -1,7 +1,6 @@
 import React, { FC, useCallback } from 'react';
 import styled from 'styled-components/macro';
 
-import Accordion from '../Accordion/Accordion';
 import StatusFilter from './StatusFilter';
 import PricesFilter from './PricesFilter';
 import { FilterState, PriceRange, Statuses } from './types';
@@ -45,4 +44,9 @@ const FiltersStyled = styled.div`
   display: flex;
   flex-direction: column;
   row-gap: calc(var(--gap) * 2);
+
+  @media (max-width: 1024px) {
+    display: none;
+  }
+  
 `;

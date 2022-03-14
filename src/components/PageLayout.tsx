@@ -72,12 +72,20 @@ const LayoutStyled = styled.div`
     }
   }
   footer {
+    @media (max-width: 568px) {
+      height: unset;
+    }
     &>div {
       display: flex;
       align-items: center;
       height: 64px;
       justify-content: space-between;
       width: 100%;
+      @media (max-width: 568px) {
+        padding: var(--gap) 0;
+        flex-direction: column;
+        align-items: flex-start;
+      }
     }
   }
 `;

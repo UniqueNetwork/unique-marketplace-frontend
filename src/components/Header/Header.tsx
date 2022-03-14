@@ -214,7 +214,7 @@ const LinkWrapper = styled.div`
 
 const MobileMenu = styled.div`
   position: absolute;
-  top: 80px;
+  top: 65px;
   left: 0;
   right: 0;
   height: 100vh;

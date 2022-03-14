@@ -16,7 +16,7 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { timeDifference } from '../../utils/timestampUtils';
 
 export type TTokensCard = {
-  offer?: Offer
+  offer: Offer
 };
 
 const tokenSymbol = 'KSM';
@@ -63,7 +63,8 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
   }, [offer, selectedAccount]);
 
   const topBid = useMemo(() => {
-    return offer?.auction?.bids.reduce((top, bid) => {
+    if (!offer?.auction?.bids?.length) return null;
+    return offer.auction.bids.reduce((top, bid) => {
       return top.amount > bid.amount ? top : bid;
     }) || null;
   }, [offer]);
@@ -169,4 +170,5 @@ const Description = styled.div`
 
 const AuctionInfoWrapper = styled.div`
   display: flex;
+  column-gap: calc(var(--gap) / 2);
 `;

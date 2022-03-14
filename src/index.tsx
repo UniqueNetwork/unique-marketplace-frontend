@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom';
 import App from './App';
 import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 import { Market, MyTokens, Accounts, Trades, FAQ, TokenPage } from './pages';
-import { MarketMainPage } from './pages/Market/MarketMain';
 import { GlobalStyle } from './styles';
 
 ReactDOM.render(
@@ -28,7 +27,7 @@ ReactDOM.render(
             path={'market'}
           >
             <Route
-              element={<MarketMainPage />}
+              element={<Market />}
               index
             />
           </Route>
