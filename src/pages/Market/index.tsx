@@ -91,8 +91,8 @@ export const MarketPage = () => {
         <Filters onFilterChange={onFilterChange} />
       </LeftColumn>
       <MainContent>
-        <SearchAndSorting>
-          <Search>
+        <SearchAndSortingWrapper>
+          <SearchWrapper>
             <InputText
               iconLeft={{ name: 'magnify', size: 16 }}
               onChange={(val) => setSearchValue(val)}
@@ -104,7 +104,7 @@ export const MarketPage = () => {
               role='primary'
               title='Search'
             />
-          </Search>
+          </SearchWrapper>
           <SortSelectWrapper>
             <Select
               onChange={onSortingChange}
@@ -112,7 +112,7 @@ export const MarketPage = () => {
               value={sortingValue}
             />
           </SortSelectWrapper>
-        </SearchAndSorting>
+        </SearchAndSortingWrapper>
         <div>
           <Text size='m'>{`${offersCount} items`}</Text>
         </div>
@@ -165,7 +165,7 @@ const MainContent = styled.div`
   }
 `;
 
-const Search = styled.div`
+const SearchWrapper = styled.div`
   display: flex;
   button {
     margin-left: 8px;
@@ -177,6 +177,12 @@ const Search = styled.div`
       flex-grow: 1;
     }
   }
+
+  @media (max-width: 320px) {
+    .unique-button {
+      display: none;
+    }
+  }
 `;
 
 const SortSelectWrapper = styled.div`
@@ -185,7 +191,7 @@ const SortSelectWrapper = styled.div`
   }
 `;
 
-const SearchAndSorting = styled.div`
+const SearchAndSortingWrapper = styled.div`
   display: flex;
   justify-content: space-between;
 `;

@@ -1,22 +1,20 @@
 import React, { FC } from 'react';
-import { ColumnType, DefaultRecordType, GetRowKey } from 'rc-table/lib/interface';
 import styled from 'styled-components';
 import { Text } from '@unique-nft/ui-kit';
 import Loading from '../Loading';
+import {TableColumnProps, TableRow} from "@unique-nft/ui-kit/dist/cjs/types";
 
-interface MobileTableProps<RecordType = DefaultRecordType> {
+interface MobileTableProps {
   className?: string
-  columns?: ColumnType<RecordType>[]
-  data?: RecordType[]
+  columns?: TableColumnProps[]
+  data?: TableRow[]
   loading?: boolean
-  rowKey?: string | GetRowKey<RecordType>
 }
 
 const MobileTable: FC<MobileTableProps> = ({
   columns,
   data,
   loading,
-  rowKey
 }) => {
   let children = <Loading />;
 
@@ -24,13 +22,13 @@ const MobileTable: FC<MobileTableProps> = ({
   else if (!loading) {
     children = <>{data?.map((item, index) => (
       <MobileTableRow
-        key={typeof rowKey === 'function' ? rowKey(item, index) : item[rowKey as keyof DefaultRecordType]}
+        key={index}
       >
         {columns?.map((column) => (
-          <div key={`column-${column.key || ''}`}>
+          <div key={`column-${column.field || ''}`}>
             {typeof column?.title === 'object' ? <>{column.title}</> : <Text color={'grey-500'}>{`${column?.title || ''}`}</Text>}
-            {column.render && <>{column.render(item[column.dataIndex as keyof DefaultRecordType], item, index)}</>}
-            {!column.render && <Text>{item[column.dataIndex as keyof DefaultRecordType]?.toString() || ''}</Text>}
+            {column.render && <>{column.render(item[column.field as keyof TableRow])}</>}
+            {!column.render && <Text>{item[column.field as keyof TableRow]?.toString() || ''}</Text>}
           </div>
         ))}
       </MobileTableRow>
