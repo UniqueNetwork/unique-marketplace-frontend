@@ -17,7 +17,7 @@ type FiltersProps<T> = {
   }[]
   onFilterChange: FilterChangeHandler<T>
   onSortingChange(value: string): void
-  filterComponent?: (props: { onFilterChange: FilterChangeHandler<T> }) => ReactElement
+  filterComponent?: (props: { onFilterChange: FilterChangeHandler<T> }) => ReactElement | null
 }
 
 const tabs = ['Filter', 'Sort'];
@@ -58,7 +58,7 @@ export function MobileFilters<T = FilterState>({ filterComponent, defaultSorting
       <Tabs
         activeIndex={activeTabIndex}
       >
-        {filterComponent ? filterComponent({ onFilterChange }) : <></>}
+        {(filterComponent && filterComponent({ onFilterChange })) || <></>}
         <SortStyled>
           <Select
             onChange={onSortingChange}

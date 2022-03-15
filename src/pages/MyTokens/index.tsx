@@ -222,7 +222,7 @@ export const MyTokensPage = () => {
         sortingOptions={sortingOptions}
         onFilterChange={setFilterState}
         onSortingChange={onSortingChange}
-        filterComponent={({ onFilterChange }) => <Filters onFilterChange={onFilterChange} />}
+        filterComponent={Filters}
       />
     </MarketMainPageStyled>
   );

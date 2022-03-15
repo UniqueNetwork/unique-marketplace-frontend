@@ -134,6 +134,7 @@ export const MarketPage = () => {
       sortingOptions={sortingOptions}
       onFilterChange={onFilterChange}
       onSortingChange={onSortingChange}
+      filterComponent={Filters}
     />
   </>);
 };

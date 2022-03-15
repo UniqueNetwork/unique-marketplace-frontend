@@ -44,9 +44,4 @@ const FiltersStyled = styled.div`
   display: flex;
   flex-direction: column;
   row-gap: calc(var(--gap) * 2);
-
-  @media (max-width: 1024px) {
-    display: none;
-  }
-  
 `;
