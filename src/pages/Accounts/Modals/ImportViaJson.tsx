@@ -6,7 +6,7 @@ import { TCreateAccountModalProps } from './types';
 import { AdditionalWarning100 } from '../../../styles/colors';
 import { PasswordInput } from '../../../components/PasswordInput/PasswordInput';
 import { Upload } from '../../../components/Upload/Upload';
-import { convertToU8a, parseJSON } from '../../../utils/jsonUtils';
+import { convertToU8a, keyringFromFile } from '../../../utils/jsonUtils';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { useApi } from '../../../hooks/useApi';
 import keyring from '@polkadot/ui-keyring';
@@ -21,7 +21,7 @@ export const ImportViaJSONAccountModal: FC<TCreateAccountModalProps> = ({ isVisi
     reader.onload = ({ target }: ProgressEvent<FileReader>): void => {
       if (target && target.result && rawRpcApi) {
         const data = convertToU8a(target.result as ArrayBuffer);
-        setPair(parseJSON(data, rawRpcApi.genesisHash.toHex()));
+        setPair(keyringFromFile(data, rawRpcApi.genesisHash.toHex()));
       }
     };
 
