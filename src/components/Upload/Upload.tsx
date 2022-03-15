@@ -1,5 +1,7 @@
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useState } from 'react';
 import styled from 'styled-components/macro';
+import { Text } from '@unique-nft/ui-kit';
+
 import UploadIcon from '../../static/icons/upload.svg';
 import { Icon } from '../Icon/Icon';
 
@@ -8,9 +10,11 @@ interface UploadProps {
 }
 
 export const Upload: FC<UploadProps> = ({ onChange }) => {
+  const [fileName, setFileName] = useState<string>();
   const onInputChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target?.files && event.target?.files.length) {
       onChange(event.target.files[0]);
+      setFileName(event.target.files[0].name);
     }
   }, [onChange]);
 
@@ -18,6 +22,7 @@ export const Upload: FC<UploadProps> = ({ onChange }) => {
     <UploadWrapper>
       <input type={'file'} onChange={onInputChange} accept={'.json'} />
       <Icon path={UploadIcon} size={48} />
+      {fileName && <Text color={'primary-500'}>{fileName}</Text>}
     </UploadWrapper>
   );
 };
@@ -31,6 +36,8 @@ const UploadWrapper = styled.div`
   border-radius: 8px;
   display: flex;
   justify-content: center;
+  flex-direction: column;
+  align-items: center;
   input {
     opacity: 0;
     position: absolute;

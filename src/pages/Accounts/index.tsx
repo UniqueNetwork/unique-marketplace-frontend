@@ -65,7 +65,7 @@ enum AccountModal {
 }
 
 export const AccountsPage = () => {
-  const { accounts } = useAccounts();
+  const { accounts, fetchAccounts } = useAccounts();
   const [searchString, setSearchString] = useState<string>('');
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
 
@@ -102,6 +102,7 @@ export const AccountsPage = () => {
 
   const onChangeAccountsFinish = useCallback(() => {
     setCurrentModal(undefined);
+    fetchAccounts();
   }, []);
 
   return (

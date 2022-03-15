@@ -174,6 +174,7 @@ export const useAccounts = () => {
   return {
     accounts,
     selectedAccount,
+    fetchAccounts,
     isLoading,
     fetchAccountsError,
     addLocalAccount,

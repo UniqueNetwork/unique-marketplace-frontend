@@ -21,22 +21,22 @@ export const ImportViaJSONAccountModal: FC<TCreateAccountModalProps> = ({ isVisi
     reader.onload = ({ target }: ProgressEvent<FileReader>): void => {
       if (target && target.result && rawRpcApi) {
         const data = convertToU8a(target.result as ArrayBuffer);
-
         setPair(parseJSON(data, rawRpcApi.genesisHash.toHex()));
       }
     };
 
     reader.readAsArrayBuffer(file);
-  }, []);
+  }, [setPair, rawRpcApi]);
 
   const onRestoreClick = useCallback(() => {
-    if (!pair) return;
+    if (!pair || !password) return;
     try {
       keyring.addPair(pair, password);
     } catch (error) {
       console.error(error);
     }
-  }, []);
+    onFinish();
+  }, [pair, password, onFinish]);
 
   return (<Modal isVisible={isVisible} isClosable={true} onClose={onFinish}>
     <Content>
@@ -63,7 +63,7 @@ export const ImportViaJSONAccountModal: FC<TCreateAccountModalProps> = ({ isVisi
     </TextStyled>
     <ButtonWrapper>
       <Button
-        // disabled={!address || !confirmSeedSaved}
+        disabled={!password || !pair}
         onClick={onRestoreClick}
         role='primary'
         title='Restore'
