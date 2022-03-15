@@ -23,6 +23,7 @@ const SEED_PREFIX = 'secret';
 export const QRReader: FC<QRReaderProps> = ({ isEthereum, onScan }) => {
   const _onScan = useCallback((data: Result | null | undefined) => {
     if (!data) return;
+
     const text = data.getText();
     let prefix: string, content: string, genesisHash: string, name: string[];
 
