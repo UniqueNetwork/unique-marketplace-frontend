@@ -71,6 +71,15 @@ const LayoutStyled = styled.div`
       }
     }
   }
+
+  header {
+    @media (max-width: 1024px) {
+      top: 0;
+      position: sticky !important;
+      z-index: 1000;
+    }
+  }
+  
   footer {
     @media (max-width: 568px) {
       height: unset;

@@ -3,7 +3,7 @@ import styled from 'styled-components/macro';
 import { Button, Select, Tabs } from '@unique-nft/ui-kit';
 import { IconProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
-import { FilterState } from '../Filters/types';
+import { FilterState } from './types';
 
 export type FilterChangeHandler<T> = Dispatch<SetStateAction<T | null>> | ((value: T | null) => void);
 
@@ -74,7 +74,7 @@ export function MobileFilters<T = FilterState>({ filterComponent, defaultSorting
 const MobileFilterActionsWrapper = styled.div`
   display: none;
   position: fixed;
-  bottom: 0;
+  top: calc(100vh - 60px);
   width: 100%;
   left: 0;
   padding: 10px calc(var(--gap) * 1.5);
@@ -88,21 +88,22 @@ const MobileFilterActionsWrapper = styled.div`
 `;
 
 const MobileFilterModal = styled.div<{ isVisible: boolean }>`
-  display: ${({ isVisible }) => isVisible ? 'block' : 'none'};
-  position: absolute;
+  display: none;
+  position: fixed;
   background-color: var(--color-additional-light);
   padding: calc(var(--gap) * 1.5);
-  min-height: 100vh;
-  top: 65px;
+  height: calc(100vh - 124px);
+  top: 64px;
   right: 0;
   left: 0;
-`;
+  overflow-y: auto;
+  .unique-tabs-labels {
+    flex-wrap: nowrap;
+  }
 
-const FiltersStyled = styled.div`
-  width: 235px;
-  display: flex;
-  flex-direction: column;
-  row-gap: calc(var(--gap) * 2);
+  @media (max-width: 1024px) {
+    display: ${({ isVisible }) => isVisible ? 'block' : 'none'};
+  }
 `;
 
 const SortStyled = styled.div`
