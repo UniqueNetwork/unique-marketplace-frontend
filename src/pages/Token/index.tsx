@@ -15,7 +15,7 @@ const TokenPage = () => {
   const { api } = useApi();
   const { id, collectionId } = useParams<{ id: string, collectionId: string}>();
   const [token, setToken] = useState<NFTToken>();
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const { offer, fetch: fetchOffer } = useOffer(Number(collectionId), Number(id));
   const [marketType, setMarketType] = useState<MarketType>(MarketType.default); // TODO: when "sell"/"buy"/"bid"/etc clicked - update this status to open modal
 

@@ -97,4 +97,8 @@ const LayoutStyled = styled.div`
       }
     }
   }
+
+  .unique-tabs-labels {
+    flex-wrap: nowrap;
+  }
 `;

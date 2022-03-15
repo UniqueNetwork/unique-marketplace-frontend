@@ -1,9 +1,7 @@
 import { Text } from '@unique-nft/ui-kit';
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 import styled from 'styled-components/macro';
-import { useNavigate } from 'react-router-dom';
 import { Picture } from '..';
-import { Primary600 } from '../../styles/colors';
 import { useApi } from '../../hooks/useApi';
 import Loading from '../Loading';
 import { NFTToken } from '../../api/chainApi/unique/types';
@@ -14,6 +12,7 @@ import Kusama from '../../static/icons/logo-kusama.svg';
 import { compareEncodedAddresses } from '../../api/chainApi/utils/addressUtils';
 import { useAccounts } from '../../hooks/useAccounts';
 import { timeDifference } from '../../utils/timestampUtils';
+import config from '../../config';
 
 export type TTokensCard = {
   offer: Offer
@@ -51,12 +50,6 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
     return {};
   }, [offer, token, api]);
 
-  const navigate = useNavigate();
-
-  const navigateToTokenPage = useCallback(() => {
-    navigate(`/token/${offer?.collectionId}/${offer?.tokenId}`);
-  }, [offer, navigate]);
-
   const isBidder = useMemo(() => {
     if (!selectedAccount) return false;
     return offer?.auction?.bids.some((bid) => compareEncodedAddresses(bid.bidderAddress, selectedAccount.address));
@@ -75,7 +68,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
   }, [isBidder, topBid, selectedAccount]);
 
   return (
-    <TokensCardStyled onClick={navigateToTokenPage}>
+    <TokensCardStyled href={`/token/${offer?.collectionId}/${offer?.tokenId}`}>
       <PictureWrapper>
         <Picture alt={offer?.tokenId?.toString() || ''} src={imagePath} />
       </PictureWrapper>
@@ -83,9 +76,11 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
         <Text size='l' weight='medium'>{`${
           tokenPrefix || ''
         } #${offer?.tokenId}`}</Text>
-        <Text color='primary-600' size='s'>
-          {`${collectionName?.substring(0, 15) || ''} [id ${offer?.collectionId || ''}]`}
-        </Text>
+        <a href={`${config.scanUrl}collections/${offer?.collectionId}`} target={'_blank'} rel='noreferrer'>
+          <Text color='primary-600' size='s'>
+            {`${collectionName?.substring(0, 15) || ''} [id ${offer?.collectionId || ''}]`}
+          </Text>
+        </a>
         <PriceWrapper>
           <Text size='s'>{`Price: ${formatKusamaBalance(offer?.price || 0)}`}</Text>
           <Icon path={Kusama} size={16} />
@@ -106,12 +101,13 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
   );
 };
 
-const TokensCardStyled = styled.div`
+const TokensCardStyled = styled.a`
   display: flex;
   align-items: flex-start;
   flex-direction: column;
   justify-content: center;
   position: relative;
+  cursor: pointer;
 `;
 
 const PictureWrapper = styled.div`
@@ -138,6 +134,7 @@ const PictureWrapper = styled.div`
     text-align: center;
     max-height: 100%;
     border-radius: 8px;
+    transition: 50ms;
 
     img {
       max-width: 100%;
@@ -146,6 +143,11 @@ const PictureWrapper = styled.div`
 
     svg {
       border-radius: 8px;
+    }
+    
+    &:hover {
+      transform: translate(0, -5px);
+      text-decoration: none;
     }
   }
 `;
@@ -160,7 +162,7 @@ const Description = styled.div`
   flex-direction: column;
 
   span {
-    color: ${Primary600};
+    color: var(--color-primary-600);
 
     &:nth-of-type(2) {
       margin-bottom: 8px;

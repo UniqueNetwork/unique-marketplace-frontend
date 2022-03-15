@@ -2,7 +2,7 @@ import React, { FC } from 'react';
 import styled from 'styled-components';
 import { Text } from '@unique-nft/ui-kit';
 import Loading from '../Loading';
-import {TableColumnProps, TableRow} from "@unique-nft/ui-kit/dist/cjs/types";
+import { TableColumnProps, TableRow } from '@unique-nft/ui-kit/dist/cjs/types';
 
 interface MobileTableProps {
   className?: string
@@ -14,7 +14,7 @@ interface MobileTableProps {
 const MobileTable: FC<MobileTableProps> = ({
   columns,
   data,
-  loading,
+  loading
 }) => {
   let children = <Loading />;
 

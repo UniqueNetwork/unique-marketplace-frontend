@@ -97,9 +97,6 @@ const MobileFilterModal = styled.div<{ isVisible: boolean }>`
   right: 0;
   left: 0;
   overflow-y: auto;
-  .unique-tabs-labels {
-    flex-wrap: nowrap;
-  }
 
   @media (max-width: 1024px) {
     display: ${({ isVisible }) => isVisible ? 'block' : 'none'};

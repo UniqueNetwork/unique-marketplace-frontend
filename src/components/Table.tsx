@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import styled from 'styled-components';
 import { Table as UITable } from '@unique-nft/ui-kit';
-import {SortQuery, TableColumnProps} from "@unique-nft/ui-kit/dist/cjs/types";
+import { SortQuery, TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
 import useDeviceSize, { DeviceSize } from '../hooks/useDeviceSize';
 import MobileTable from './MobileTable/MobileTable';
