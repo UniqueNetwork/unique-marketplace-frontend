@@ -3,13 +3,13 @@ import { FC, ReactChild } from 'react';
 import styled from 'styled-components/macro';
 
 import { Picture } from '../../../components';
-import { Grey300, Grey500 } from '../../../styles/colors';
-import eye from '../../../static/icons/eye.svg';
 import share from '../../../static/icons/share.svg';
 import { Icon } from '../../../components/Icon/Icon';
 import { CollectionsCard } from './CollectionsCard';
 import { AttributesBlock } from './AttributesBlock';
 import { NFTToken } from '../../../api/chainApi/unique/types';
+import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';
+import { shortcutText } from '../../../utils/textUtils';
 
 interface IProps {
   children: ReactChild[];
@@ -31,22 +31,16 @@ export const CommonTokenDetail: FC<IProps> = ({
     prefix
   } = token;
 
+  const deviceSize = useDeviceSize();
+
   return (
     <CommonTokenDetailStyled>
-      <div>
-        <PictureWrapper>
-          <Picture alt={tokenId.toString()} src={imageUrl} />
-        </PictureWrapper>
-      </div>
+      <PictureWrapper>
+        <Picture alt={tokenId.toString()} src={imageUrl} />
+      </PictureWrapper>
       <Description>
         <Heading size={'1'}>{`${prefix || ''} #${tokenId}`}</Heading>
         <Row>
-          {/* <Text color='grey-500' size='m'>
-            0
-          </Text>
-          <IconWrapper>
-            <Icon path={eye} />
-          </IconWrapper> */}
           <Text color='grey-500' size='m'>
             Share Link
           </Text>
@@ -61,7 +55,7 @@ export const CommonTokenDetail: FC<IProps> = ({
           <Account>
             IdIcon
             <Text color='primary-600' size='m'>
-              {owner?.Substrate || ''}
+              {deviceSize === DeviceSize.lg ? owner?.Substrate || '' : shortcutText(owner?.Substrate || '') }
             </Text>
           </Account>
         </Row>
@@ -87,6 +81,15 @@ const CommonTokenDetailStyled = styled.div`
   > div:first-of-type {
     width: 44%;
     margin-right: 32px;
+
+    @media (max-width: 568px) {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 568px) {
+    flex-direction: column;
+    row-gap: var(--gap);
   }
 `;
 
@@ -95,7 +98,7 @@ const IconWrapper = styled.div`
   margin-right: 16px;
 
   svg {
-    fill: ${Grey500};
+    fill: var(--color-grey-500);
   }
 `;
 
@@ -130,6 +133,15 @@ const PictureWrapper = styled.div`
     svg {
       border-radius: 8px;
     }
+
+    @media (max-width: 768px) {
+      min-width: 224px;
+    }
+
+    @media (max-width: 567px) {
+      width: 100%;
+    }
+    
   }
 `;
 
@@ -158,5 +170,5 @@ const Account = styled.div`
 
 const Divider = styled.div`
   margin: 24px 0;
-  border-top: 1px dashed ${Grey300};
+  border-top: 1px dashed var(--color-grey-300);
 `;

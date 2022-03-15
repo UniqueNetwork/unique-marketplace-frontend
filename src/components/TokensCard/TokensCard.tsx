@@ -1,13 +1,13 @@
+import { FC, useMemo, useState } from 'react';
 import { Text } from '@unique-nft/ui-kit';
-import { FC, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components/macro';
-import { useNavigate } from 'react-router-dom';
+
 import { Picture } from '..';
-import { Primary600 } from '../../styles/colors';
 import { useApi } from '../../hooks/useApi';
 import Loading from '../Loading';
 import { NFTToken } from '../../api/chainApi/unique/types';
 import { formatKusamaBalance } from '../../utils/textUtils';
+import config from '../../config';
 
 export type TTokensCard = {
   token?: NFTToken
@@ -46,14 +46,8 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, price, toke
     return {};
   }, [collectionId, tokenId, token, api]);
 
-  const navigate = useNavigate();
-
-  const navigateToTokenPage = useCallback(() => {
-    navigate(`/token/${collectionId}/${tokenId}`);
-  }, [collectionId, navigate, tokenId]);
-
   return (
-    <TokensCardStyled onClick={navigateToTokenPage}>
+    <TokensCardStyled href={`/token/${collectionId}/${tokenId}`}>
       <PictureWrapper>
         <Picture alt={tokenId?.toString() || ''} src={imagePath} />
       </PictureWrapper>
@@ -61,9 +55,11 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, price, toke
         <Text size='l' weight='medium'>{`${
           tokenPrefix || ''
         } #${tokenId}`}</Text>
-        <Text color='primary-600' size='s'>
-          {`${collectionName?.substring(0, 15) || ''} [id ${collectionId || ''}]`}
-        </Text>
+        <a href={`${config.scanUrl}collections/${collectionId}`} target={'_blank'} rel='noreferrer'>
+          <Text color='primary-600' size='s'>
+            {`${collectionName?.substring(0, 15) || ''} [id ${collectionId || ''}]`}
+          </Text>
+        </a>
         {price && <Text size='s'>{`Price: ${formatKusamaBalance(price)}`}</Text>}
       </Description>
 
@@ -72,12 +68,13 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, price, toke
   );
 };
 
-const TokensCardStyled = styled.div`
+const TokensCardStyled = styled.a`
   display: flex;
   align-items: flex-start;
   flex-direction: column;
   justify-content: center;
   position: relative;
+  cursor: pointer;
 `;
 
 const PictureWrapper = styled.div`
@@ -104,6 +101,7 @@ const PictureWrapper = styled.div`
     text-align: center;
     max-height: 100%;
     border-radius: 8px;
+    transition: 50ms;
 
     img {
       max-width: 100%;
@@ -113,6 +111,11 @@ const PictureWrapper = styled.div`
     svg {
       border-radius: 8px;
     }
+    
+    &:hover {
+      transform: translate(0, -5px);
+      text-decoration: none;
+    }
   }
 `;
 
@@ -121,7 +124,7 @@ const Description = styled.div`
   flex-direction: column;
 
   span {
-    color: ${Primary600};
+    color: var(--color-primary-600);
 
     &:nth-of-type(2) {
       margin-bottom: 8px;

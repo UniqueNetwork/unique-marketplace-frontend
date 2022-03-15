@@ -52,7 +52,7 @@ export const CreateAccountModal: FC<TCreateAccountModalProps> = ({ isVisible, on
 
   return (<Modal isVisible={isVisible} isClosable={true} onClose={onFinish}>
     <Content>
-      <Heading size='2'>{`Add an account via seed ${stage + 1}/3`}</Heading>
+      <Heading size='2'>Add an account via seed phrase</Heading>
     </Content>
     <ModalBodyComponent
       accountProperties={accountProperties}

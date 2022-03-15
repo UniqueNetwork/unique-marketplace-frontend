@@ -71,13 +71,34 @@ const LayoutStyled = styled.div`
       }
     }
   }
+
+  header {
+    @media (max-width: 1024px) {
+      top: 0;
+      position: sticky !important;
+      z-index: 1000;
+    }
+  }
+  
   footer {
+    @media (max-width: 568px) {
+      height: unset;
+    }
     &>div {
       display: flex;
       align-items: center;
       height: 64px;
       justify-content: space-between;
       width: 100%;
+      @media (max-width: 568px) {
+        padding: var(--gap) 0;
+        flex-direction: column;
+        align-items: flex-start;
+      }
     }
+  }
+
+  .unique-tabs-labels {
+    flex-wrap: nowrap;
   }
 `;

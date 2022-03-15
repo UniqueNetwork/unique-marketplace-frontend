@@ -23,6 +23,7 @@ const IconStyled = styled.span<{ color?: string, size?: number }>`
   height: ${({ size }) => size ? `${size}px` : 'unset'};
   width: ${({ size }) => size ? `${size}px` : 'unset'};
   svg {
+    height: ${({ size }) => size ? `${size}px` : 'unset'};
     path {
       fill: ${({ color }) => color};
     }

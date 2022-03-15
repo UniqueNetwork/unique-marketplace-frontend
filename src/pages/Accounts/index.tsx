@@ -45,7 +45,7 @@ const AccountsColumns: TableColumnProps[] = [
     field: 'address',
     render(address) {
       return <LinksWrapper>
-        <LinkStyled target={'_blank'} rel={'noreferrer'} href={`${config.scanUrl}${address}`}>
+        <LinkStyled target={'_blank'} rel={'noreferrer'} href={`${config.scanUrl}account/${address}`}>
           <Text color={'primary-500'}>UniqueScan</Text>
           <Icon size={16} path={ArrowUpRight} color={'none'} />
         </LinkStyled>
