@@ -2,24 +2,33 @@ import React, { FC, useCallback, useState } from 'react';
 import { Button, Heading, Modal, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
-import { Scanned, TCreateAccountModalProps } from './types';
-import keyring from '@polkadot/ui-keyring';
+import { TCreateAccountModalProps } from './types';
 import { PasswordInput } from '../../../components/PasswordInput/PasswordInput';
-import { QRReader } from '../../../components/QRReader';
+import { QRReader, ScannedResult } from '../../../components/QRReader/QRReader';
+import { useAccounts } from '../../../hooks/useAccounts';
 
 export const ImportViaQRCodeAccountModal: FC<TCreateAccountModalProps> = ({ isVisible, onFinish }) => {
-  const [name, setName] = useState<string>();
-  const [address, setAddress] = useState<string>();
+  const [scanned, setScanned] = useState<ScannedResult>();
   const [password, setPassword] = useState<string>('');
+  const { addAccountViaQR } = useAccounts();
 
-  const onScan = useCallback((scanned: Scanned) => {
-    setName(scanned.name);
-    setAddress(scanned.isAddress ? scanned.content : keyring.createFromUri(scanned.content, {}, 'sr25519').address);
+  const onScan = useCallback((scanned: ScannedResult) => {
+    setScanned(scanned);
   }, []);
 
   const onSaveClick = useCallback(() => {
-    if (!address) return;
-  }, []);
+    if (!scanned) return;
+
+    const { name, isAddress, content, genesisHash } = scanned;
+
+    addAccountViaQR({
+      name: name || 'unnamed',
+      isAddress,
+      content,
+      genesisHash,
+      password
+    });
+  }, [scanned, password]);
 
   return (<Modal isVisible={isVisible} isClosable={true} onClose={onFinish}>
     <Content>

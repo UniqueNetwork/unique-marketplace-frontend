@@ -4,7 +4,7 @@ import { decodeAddress } from '@polkadot/util-crypto';
 import { QrReader } from 'react-qr-reader';
 import Result from '@zxing/library/esm/core/Result';
 
-interface ScannedResult {
+export interface ScannedResult {
   content: string
   genesisHash: string
   isAddress: boolean
@@ -62,4 +62,24 @@ export const QRReader: FC<QRReaderProps> = ({ isEthereum, onScan }) => {
 };
 
 const QRReaderWrapper = styled.div`
+  div {
+    height: 362px;
+    padding-top: 0 !important;
+    video {
+      height: unset !important;
+    }
+    &:after {
+      position: absolute;
+      content: '';
+      border: 5px solid #FB838D;
+      box-sizing: border-box;
+      width: 282px;
+      height: 282px;
+      top: 50%;
+      left: 50%;
+      margin-top: -141px;
+      margin-left: -141px;
+      outline: 200px solid rgba(174,175,178, 0.5);
+    }
+  }
 `;

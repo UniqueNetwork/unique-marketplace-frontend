@@ -115,6 +115,18 @@ export const useAccounts = () => {
     keyring.addUri(getSuri(seed, derivePath, pairType), password, options, pairType as KeypairType);
   }, []);
 
+  const addAccountViaQR = useCallback((scanned: { name: string, isAddress: boolean, content: string, password: string, genesisHash: string}) => {
+    const { name, isAddress, content, password, genesisHash } = scanned;
+
+    const meta = {
+      genesisHash: genesisHash || rawRpcApi?.genesisHash.toHex(),
+      name: name?.trim()
+    };
+    const account = isAddress
+      ? keyring.addExternal(content, meta).pair.address
+      : keyring.addUri(content, password, meta, 'sr25519').pair.address;
+  }, [rawRpcApi]);
+
   const unlockLocalAccount = useCallback((password: string) => {
     if (!selectedAccount) return;
     const signature = keyring.getPair(selectedAccount.address);
@@ -165,6 +177,7 @@ export const useAccounts = () => {
     isLoading,
     fetchAccountsError,
     addLocalAccount,
+    addAccountViaQR,
     unlockLocalAccount,
     signTx,
     signMessage,
