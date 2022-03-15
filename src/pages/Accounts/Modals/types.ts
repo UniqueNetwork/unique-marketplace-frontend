@@ -21,3 +21,10 @@ export type TCreateAccountBodyModalProps = {
   onFinish(account: TAccountProperties): void
   onGoBack(): void
 };
+
+export type Scanned = {
+  content: string;
+  isAddress: boolean;
+  genesisHash: string;
+  name?: string;
+}

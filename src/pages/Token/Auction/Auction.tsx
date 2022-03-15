@@ -45,6 +45,7 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, token, onPlaceABidClic
   }, [offer, selectedAccount]);
 
   const topBid = useMemo(() => {
+    if (offer.auction?.bids.length === 0) return null;
     return offer.auction?.bids.reduce((top, bid) => {
       return top.amount > bid.amount ? top : bid;
     }) || null;
