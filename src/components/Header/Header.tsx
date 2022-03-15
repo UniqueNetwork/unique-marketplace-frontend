@@ -109,7 +109,6 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
       </LeftSideColumn>
       <RightSide>
         <Balance>Balance {balance}</Balance>
-
         {account}
       </RightSide>
       {showMobileMenu && mobileMenuIsOpen && (
@@ -197,6 +196,9 @@ const LogoIcon = styled.img`
 const RightSide = styled.div`
   display: flex;
   align-items: center;
+  @media (max-width: 1024px) {
+    display: none;
+  }
 `;
 
 const Balance = styled.div`
@@ -214,7 +216,7 @@ const LinkWrapper = styled.div`
 
 const MobileMenu = styled.div`
   position: absolute;
-  top: 80px;
+  top: 65px;
   left: 0;
   right: 0;
   height: 100vh;

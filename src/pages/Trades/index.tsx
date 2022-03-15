@@ -1,10 +1,11 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
-import { Text, Pagination, Table } from '@unique-nft/ui-kit';
+import { Text, Pagination } from '@unique-nft/ui-kit';
 import { SortQuery, TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
 import { useTrades } from '../../api/restApi/trades/trades';
 import { shortcutText } from '../../utils/textUtils';
 import styled from 'styled-components';
+import { Table } from '../../components/Table';
 
 const pageSize = 20;
 

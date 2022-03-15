@@ -10,6 +10,9 @@ import config from '../../config';
 import { Icon } from '../../components/Icon/Icon';
 import { CreateAccountModal } from './Modals/CreateAccount';
 import { ImportViaSeedAccountModal } from './Modals/ImportViaSeed';
+import { DropdownMenu, DropdownMenuItem } from '../../components/DropdownMenu/DropdownMenu';
+import { ImportViaJSONAccountModal } from './Modals/ImportViaJson';
+import { ImportViaQRCodeAccountModal } from './Modals/ImportViaQRCode';
 
 const tokenSymbol = 'KSM';
 
@@ -45,7 +48,7 @@ const AccountsColumns: TableColumnProps[] = [
     field: 'address',
     render(address) {
       return <LinksWrapper>
-        <LinkStyled target={'_blank'} rel={'noreferrer'} href={`${config.scanUrl}${address}`}>
+        <LinkStyled target={'_blank'} rel={'noreferrer'} href={`${config.scanUrl}account/${address}`}>
           <Text color={'primary-500'}>UniqueScan</Text>
           <Icon size={16} path={ArrowUpRight} color={'none'} />
         </LinkStyled>
@@ -54,18 +57,32 @@ const AccountsColumns: TableColumnProps[] = [
   }
 ];
 
+enum AccountModal {
+  create,
+  importViaSeed,
+  importViaJSON,
+  importViaQRCode
+}
+
 export const AccountsPage = () => {
-  const { accounts } = useAccounts();
+  const { accounts, fetchAccounts } = useAccounts();
   const [searchString, setSearchString] = useState<string>('');
-  const [isCreateAccountVisible, setIsCreateAccountVisible] = useState<boolean>(false);
-  const [isImportAccountVisible, setIsImportAccountVisible] = useState<boolean>(false);
+  const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
 
   const onCreateAccountClick = useCallback(() => {
-    setIsCreateAccountVisible(true);
+    setCurrentModal(AccountModal.create);
   }, []);
 
   const onImportViaSeedClick = useCallback(() => {
-    setIsImportAccountVisible(true);
+    setCurrentModal(AccountModal.importViaSeed);
+  }, []);
+
+  const onImportViaJSONClick = useCallback(() => {
+    setCurrentModal(AccountModal.importViaJSON);
+  }, []);
+
+  const onImportViaQRClick = useCallback(() => {
+    setCurrentModal(AccountModal.importViaQRCode);
   }, []);
 
   const onSearchStringChange = useCallback(
@@ -84,15 +101,19 @@ export const AccountsPage = () => {
   }, [accounts, searchString]);
 
   const onChangeAccountsFinish = useCallback(() => {
-    setIsCreateAccountVisible(false);
-    setIsImportAccountVisible(false);
+    setCurrentModal(undefined);
+    fetchAccounts();
   }, []);
 
   return (
     <AccountPageWrapper>
       <Row>
         <Button title={'Create substrate account'} onClick={onCreateAccountClick} />
-        <Button title={'Import via seed phrase'} onClick={onImportViaSeedClick} role={'primary'} />
+        <DropdownMenu title={'Add account via'} role={'primary'}>
+          <DropdownMenuItem onClick={onImportViaSeedClick}>Seed phrase</DropdownMenuItem>
+          <DropdownMenuItem onClick={onImportViaJSONClick}>Backup JSON file</DropdownMenuItem>
+          <DropdownMenuItem onClick={onImportViaQRClick}>QR-code</DropdownMenuItem>
+        </DropdownMenu>
         <SearchInputWrapper>
           <SearchInputStyled placeholder={'Account'} iconLeft={{ name: 'magnify', size: 18 }} onChange={onSearchStringChange}/>
         </SearchInputWrapper>
@@ -101,8 +122,10 @@ export const AccountsPage = () => {
         columns={AccountsColumns}
         data={filteredAccounts}
       />
-      <CreateAccountModal isVisible={isCreateAccountVisible} onFinish={onChangeAccountsFinish} />
-      <ImportViaSeedAccountModal isVisible={isImportAccountVisible} onFinish={onChangeAccountsFinish} />
+      <CreateAccountModal isVisible={currentModal === AccountModal.create} onFinish={onChangeAccountsFinish} />
+      <ImportViaSeedAccountModal isVisible={currentModal === AccountModal.importViaSeed} onFinish={onChangeAccountsFinish} />
+      <ImportViaJSONAccountModal isVisible={currentModal === AccountModal.importViaJSON} onFinish={onChangeAccountsFinish} />
+      <ImportViaQRCodeAccountModal isVisible={currentModal === AccountModal.importViaQRCode} onFinish={onChangeAccountsFinish} />
     </AccountPageWrapper>
   );
 };
