@@ -56,7 +56,7 @@ const TokenPage = () => {
       offer={offer}
       onSellClick={onActionClick(MarketType.sellFix)}
       onBuyClick={onActionClick(MarketType.purchase)}
-      onTransferClick={onActionClick(MarketType.sellFix)}
+      onTransferClick={onActionClick(MarketType.transfer)}
       onDelistClick={onActionClick(MarketType.delist)}
       onDelistAuctionClick={onActionClick(MarketType.delistAuction)}
       onPlaceABidClick={onActionClick(MarketType.bid)}
