@@ -12,7 +12,7 @@ import { getSuri, PairType } from '../utils/seedUtils';
 import { TTransaction } from '../api/chainApi/types';
 
 export const useAccounts = () => {
-  const { rpcClient, rawRpcApi } = useApi();
+  const { rpcClient, rawRpcApi, api } = useApi();
   const {
     accounts,
     selectedAccount,
@@ -47,10 +47,10 @@ export const useAccounts = () => {
   }, []);
 
   const getAccountBalance = useCallback(async (account: Account) => {
-    if (!rpcClient?.isApiInitialized) return 0;
+    if (!rpcClient?.isApiInitialized || !api) return 0;
     const balances = await rpcClient?.rawKusamaRpcApi?.derive.balances?.all(account.address);
     return balances?.availableBalance || new BN(0);
-  }, [rpcClient]);
+  }, [rpcClient, api]);
 
   const getAccounts = useCallback(async () => {
     // this call fires up the authorization popup

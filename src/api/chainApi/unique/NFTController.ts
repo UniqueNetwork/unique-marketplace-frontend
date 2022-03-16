@@ -89,7 +89,6 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
       const tokensIdsOnEth =
         // @ts-ignore
         await this.api.rpc.unique.accountTokens(collectionId, normalizeAccountId(getEthAccount(account))) as TokenId[];
-      console.log(tokensIds, tokensIdsOnEth);
 
       const tokensOfCollection = (await Promise.all([...tokensIds, ...tokensIdsOnEth].map((item) =>
         this.getToken(collectionId, item.toNumber())))) as NFTToken[];
