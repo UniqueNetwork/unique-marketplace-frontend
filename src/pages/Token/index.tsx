@@ -10,6 +10,7 @@ import { TokenTrading } from './TokenDetail/TokenTrading';
 import { Error404 } from '../errors/404';
 import Loading from '../../components/Loading';
 import TokenPageModal from './Modals/TokenPageModal';
+import { sleep } from '../../utils/helpers';
 
 const TokenPage = () => {
   const { api } = useApi();
@@ -35,7 +36,8 @@ const TokenPage = () => {
     fetchToken();
   }, [fetchToken]);
 
-  const onFinish = useCallback(() => {
+  const onFinish = useCallback(async () => {
+    await sleep(30 * 1000);
     setMarketType(MarketType.default);
     fetchToken();
     fetchOffer(Number(collectionId), Number(id));
@@ -56,7 +58,7 @@ const TokenPage = () => {
       offer={offer}
       onSellClick={onActionClick(MarketType.sellFix)}
       onBuyClick={onActionClick(MarketType.purchase)}
-      onTransferClick={onActionClick(MarketType.sellFix)}
+      onTransferClick={onActionClick(MarketType.transfer)}
       onDelistClick={onActionClick(MarketType.delist)}
       onDelistAuctionClick={onActionClick(MarketType.delistAuction)}
       onPlaceABidClick={onActionClick(MarketType.bid)}

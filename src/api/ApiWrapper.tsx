@@ -50,7 +50,7 @@ const ApiWrapper = ({ children, gqlClient = gql, rpcClient = rpc }: ChainProvide
   const value = useMemo<ApiContextProps>(
     () => {
       return {
-        api: (rpcClient && rpc.isApiConnected && {
+        api: (rpcClient && isRpcClientInitialized && {
           collection: rpcClient.collectionController,
           nft: rpcClient.nftController,
           market: rpcClient.marketController
