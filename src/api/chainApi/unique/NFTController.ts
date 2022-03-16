@@ -3,7 +3,7 @@ import { INFTController } from '../types';
 import { NFTCollection, NFTToken } from './types';
 import { collectionName16Decoder, decodeStruct, getOnChainSchema, hex2a } from '../utils/decoder';
 import { getTokenImage } from '../utils/imageUtils';
-import { normalizeAccountId } from '../utils/addressUtils';
+import { getEthAccount, normalizeAccountId } from '../utils/addressUtils';
 
 export type NFTControllerConfig = {
   collectionsIds: number[]
@@ -86,8 +86,12 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
       const tokensIds =
         // @ts-ignore
         await this.api.rpc.unique.accountTokens(collectionId, normalizeAccountId(account)) as TokenId[];
+      const tokensIdsOnEth =
+        // @ts-ignore
+        await this.api.rpc.unique.accountTokens(collectionId, normalizeAccountId(getEthAccount(account))) as TokenId[];
+      console.log(tokensIds, tokensIdsOnEth);
 
-      const tokensOfCollection = (await Promise.all(tokensIds.map((item) =>
+      const tokensOfCollection = (await Promise.all([...tokensIds, ...tokensIdsOnEth].map((item) =>
         this.getToken(collectionId, item.toNumber())))) as NFTToken[];
 
       tokens.push(...tokensOfCollection);
