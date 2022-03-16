@@ -280,7 +280,9 @@ class MarketController implements IMarketController {
       0,
       this.defaultGasAmount,
       await this.web3Instance.eth.getGasPrice(),
-      null
+      null,
+      null,
+      []
     );
     const signedTx = await options.sign(tx);
 
@@ -323,7 +325,9 @@ class MarketController implements IMarketController {
       0,
       this.defaultGasAmount,
       await this.web3Instance.eth.getGasPrice(),
-      null
+      null,
+      null,
+      []
     );
 
     const signedTx = await options.sign(tx);
@@ -445,7 +449,9 @@ class MarketController implements IMarketController {
       0,
       this.defaultGasAmount,
       await this.web3Instance.eth.getGasPrice(),
-      null
+      null,
+      null,
+      []
     );
 
     const signedTx = await options.sign(tx);
@@ -482,7 +488,9 @@ class MarketController implements IMarketController {
       0,
       this.defaultGasAmount,
       await this.web3Instance.eth.getGasPrice(),
-      null
+      null,
+      null,
+      []
     );
     const signedTx = await options.sign(tx);
 
