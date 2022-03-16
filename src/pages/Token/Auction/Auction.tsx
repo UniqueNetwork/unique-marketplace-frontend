@@ -35,8 +35,8 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, token, onPlaceABidClic
   }, []);
 
   const canDelist = useMemo(() => {
-    if (!selectedAccount) return false;
-    return isTokenOwner(selectedAccount.address, token.owner || {}) && !offer.auction?.bids.length;
+    if (!selectedAccount || !offer?.seller) return false;
+    return isTokenOwner(selectedAccount.address, { Substrate: offer.seller }) && !offer.auction?.bids.length;
   }, [token, offer, selectedAccount]);
 
   const isBidder = useMemo(() => {
