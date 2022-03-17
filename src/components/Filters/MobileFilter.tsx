@@ -92,8 +92,8 @@ const MobileFilterModal = styled.div<{ isVisible: boolean }>`
   position: fixed;
   background-color: var(--color-additional-light);
   padding: calc(var(--gap) * 1.5);
-  height: calc(100vh - 124px);
-  top: 64px;
+  height: calc(100vh - 140px);
+  top: 80px;
   right: 0;
   left: 0;
   overflow-y: auto;

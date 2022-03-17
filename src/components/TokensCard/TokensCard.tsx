@@ -47,14 +47,16 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, price, toke
   }, [collectionId, tokenId, token, api]);
 
   return (
-    <TokensCardStyled href={`/token/${collectionId}/${tokenId}`}>
-      <PictureWrapper>
+    <TokensCardStyled>
+      <PictureWrapper href={`/token/${collectionId}/${tokenId}`}>
         <Picture alt={tokenId?.toString() || ''} src={imagePath} />
       </PictureWrapper>
       <Description>
-        <Text size='l' weight='medium'>{`${
-          tokenPrefix || ''
-        } #${tokenId}`}</Text>
+        <a href={`/token/${collectionId}/${tokenId}`} title={`${tokenPrefix || ''} #${tokenId}`}>
+          <Text size='l' weight='medium'>
+            {`${tokenPrefix || ''} #${tokenId}`}
+          </Text>
+        </a>
         <a href={`${config.scanUrl}collections/${collectionId}`} target={'_blank'} rel='noreferrer'>
           <Text color='primary-600' size='s'>
             {`${collectionName?.substring(0, 15) || ''} [id ${collectionId || ''}]`}
@@ -68,7 +70,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, price, toke
   );
 };
 
-const TokensCardStyled = styled.a`
+const TokensCardStyled = styled.div`
   display: flex;
   align-items: flex-start;
   flex-direction: column;
@@ -77,7 +79,7 @@ const TokensCardStyled = styled.a`
   cursor: pointer;
 `;
 
-const PictureWrapper = styled.div`
+const PictureWrapper = styled.a`
   position: relative;
   width: 100%;
   display: flex;
