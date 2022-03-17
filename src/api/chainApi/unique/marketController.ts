@@ -609,6 +609,22 @@ class MarketController implements IMarketController {
     await sleep(1000);
     // TODO: any way to check this being executed?
   }
+
+  public async transferBalance (from: string, to: string, amount: string, options: TransactionOptions): Promise<void> {
+    const tx = this.kusamaApi.tx.balances.transferKeepAlive(
+      encodeAddress(to),
+      this.fromStringToBnString(amount, this.kusamaDecimals)
+    );
+    const signedTx = await options.sign(tx);
+    if (!signedTx) throw new Error('Transaction cancelled');
+    if (options.send) {
+      await options.send(signedTx);
+    } else {
+      await signedTx.send();
+    }
+    await sleep(1000);
+    // TODO: any way to check this being executed?
+  }
   // #endregion transfer
 }
 
