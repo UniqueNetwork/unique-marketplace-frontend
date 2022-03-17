@@ -134,37 +134,37 @@ export const useAccounts = () => {
     return signature;
   }, [selectedAccount]);
 
-  const signTx = useCallback(async (tx: TTransaction): Promise<TTransaction> => {
-    if (!selectedAccount) throw new Error('Invalid account');
+  const signTx = useCallback(async (tx: TTransaction, account?: Account): Promise<TTransaction> => {
+    const _account = account || selectedAccount;
+    if (!_account) throw new Error('Account was not provided');
     let signedTx;
-    if (selectedAccount.signerType === AccountSigner.local) {
+    if (_account.signerType === AccountSigner.local) {
       const signature = await showSignDialog();
       if (signature) {
         signedTx = await tx.signAsync(signature);
       }
     } else {
-      const injector = await web3FromSource(selectedAccount.meta.source);
-      signedTx = await tx.signAsync(selectedAccount.address, { signer: injector.signer });
+      const injector = await web3FromSource(_account.meta.source);
+      signedTx = await tx.signAsync(_account.address, { signer: injector.signer });
     }
     if (!signedTx) throw new Error('Signing failed');
     return signedTx;
   }, [showSignDialog, selectedAccount]);
 
-  const signMessage = useCallback(async (message: string): Promise<string> => {
-    if (!selectedAccount) throw new Error('Invalid account');
-
-    if (!selectedAccount) throw new Error('Invalid account');
+  const signMessage = useCallback(async (message: string, account?: Account): Promise<string> => {
+    const _account = account || selectedAccount;
+    if (!_account) throw new Error('Account was not provided');
     let signedMessage;
-    if (selectedAccount.signerType === AccountSigner.local) {
+    if (_account.signerType === AccountSigner.local) {
       const signature = await showSignDialog();
       if (signature) {
         signedMessage = u8aToString(signature.sign(message));
       }
     } else {
-      const injector = await web3FromSource(selectedAccount.meta.source);
+      const injector = await web3FromSource(_account.meta.source);
       if (!injector.signer.signRaw) throw new Error('Web3 not available');
 
-      const { signature } = await injector.signer.signRaw({ address: selectedAccount.address, type: 'bytes', data: stringToHex(message) });
+      const { signature } = await injector.signer.signRaw({ address: _account.address, type: 'bytes', data: stringToHex(message) });
       signedMessage = signature;
     }
     if (!signedMessage) throw new Error('Signing failed');

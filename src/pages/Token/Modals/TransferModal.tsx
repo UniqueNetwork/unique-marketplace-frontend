@@ -7,8 +7,10 @@ import { TTokenPageModalBodyProps } from './TokenPageModal';
 import { AdditionalWarning100 } from '../../../styles/colors';
 import { useTransferStages } from '../../../hooks/marketplaceStages';
 import DefaultMarketStages from './StagesModal';
+import { useAccounts } from '../../../hooks/useAccounts';
 
 export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosable, onFinish }) => {
+  const { selectedAccount } = useAccounts();
   const [status, setStatus] = useState<'ask' | 'transfer-stage'>('ask'); // TODO: naming
   const [recipient, setRecipient] = useState<string>('');
 
@@ -18,6 +20,8 @@ export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosab
     setIsClosable(false);
   }, [setStatus, setRecipient, setIsClosable]);
 
+  if (!selectedAccount) return null;
+
   if (status === 'ask') return (<AskTransferModal onTransfer={onTransfer} />);
   if (status === 'transfer-stage') {
     return (<TransferStagesModal
@@ -25,6 +29,7 @@ export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosab
       onFinish={onFinish}
       token={token}
       setIsClosable={setIsClosable}
+      sender={selectedAccount.address}
     />);
   }
   return null;
@@ -74,9 +79,13 @@ const AskTransferModal: FC<{ onTransfer(receiver: string): void }> = ({ onTransf
   );
 };
 
-const TransferStagesModal: FC<TTokenPageModalBodyProps & TTransfer> = ({ token, onFinish, recipient }) => {
+const TransferStagesModal: FC<TTokenPageModalBodyProps & TTransfer> = ({ token, onFinish, sender, recipient }) => {
   const { stages, status, initiate } = useTransferStages(token?.collectionId || 0, token?.id);
-  useEffect(() => { initiate({ recipient }); }, [recipient]);
+
+  useEffect(() => {
+    initiate({ sender, recipient });
+  }, [sender, recipient]);
+
   return (
     <div>
       <DefaultMarketStages stages={stages} status={status} onFinish={onFinish} />

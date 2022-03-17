@@ -7,6 +7,7 @@ import { TAuctionProps, TFixPriceProps } from './types';
 import { useAuctionSellStages, useSellFixStages } from '../../../hooks/marketplaceStages';
 import { AdditionalWarning100 } from '../../../styles/colors';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
+import { useAccounts } from '../../../hooks/useAccounts';
 
 const tokenSymbol = 'KSM';
 
@@ -20,13 +21,13 @@ export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish, setIs
       setAuction(auction);
       setStatus('auction-stage');
       setIsClosable(false);
-  }, [setStatus, setAuction]);
+  }, [setStatus, setAuction, setIsClosable]);
 
   const onSellFixPrice = useCallback((fixPrice: TFixPriceProps) => {
     setFixPrice(fixPrice);
     setStatus('fix-price-stage');
     setIsClosable(false);
-  }, [setStatus, setFixPrice]);
+  }, [setStatus, setFixPrice, setIsClosable]);
 
   if (status === 'ask') return (<AskSellModal onSellAuction={onSellAuction} onSellFixPrice={onSellFixPrice} />);
   switch (status) {
@@ -42,7 +43,7 @@ export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish, setIs
         sellFix={fixPrice as TFixPriceProps}
         onFinish={onFinish}
       />);
-    default: throw new Error(`Incorrect status provided for processing modal: ${status}`);
+    default: throw new Error(`Incorrect status provided for processing modal: ${status as string}`);
   }
 };
 
@@ -54,6 +55,7 @@ type TAskSellModalProps = {
 }
 
 export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixPrice }) => {
+  const { selectedAccount } = useAccounts();
   const [activeTab, setActiveTab] = useState<number>(0);
   const [priceInputValue, setpriceInputValue] = useState<number>(15);
 
@@ -76,12 +78,14 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
   );
 
   const onConfirmAuctionClick = useCallback(() => {
-    onSellAuction({ minimumStep: minStepInputValueAuction, startingPrice: inputStartingPriceValue, duration: durationSelectValue } as TAuctionProps);
-  }, [minStepInputValueAuction, inputStartingPriceValue, durationSelectValue]);
+    if (!selectedAccount) return;
+    onSellAuction({ minimumStep: minStepInputValueAuction, startingPrice: inputStartingPriceValue, duration: durationSelectValue, accountAddress: selectedAccount.address } as TAuctionProps);
+  }, [minStepInputValueAuction, inputStartingPriceValue, durationSelectValue, selectedAccount, onSellAuction]);
 
   const onConfirmFixPriceClick = useCallback(() => {
-    onSellFixPrice({ price: priceInputValue } as TFixPriceProps); // TODO: proper typing, proper calculated object
-  }, [priceInputValue]);
+    if (!selectedAccount) return;
+    onSellFixPrice({ price: priceInputValue, accountAddress: selectedAccount.address } as TFixPriceProps); // TODO: proper typing, proper calculated object
+  }, [priceInputValue, selectedAccount, onSellFixPrice]);
 
   const onMinStepInputChange = useCallback(
     (value: number) => {

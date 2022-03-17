@@ -8,6 +8,7 @@ import menu from '../../static/icons/menu.svg';
 import { TMenuItems } from '../PageLayout';
 import { AdditionalColorDark, AdditionalColorLight, Primary500 } from '../../styles/colors';
 import { useAccounts } from '../../hooks/useAccounts';
+import { formatKusamaBalance } from '../../utils/textUtils';
 
 interface HeaderProps {
   activeItem: TMenuItems;
@@ -108,7 +109,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
         )}
       </LeftSideColumn>
       <RightSide>
-        <Balance>Balance {balance}</Balance>
+        <Balance>Balance {formatKusamaBalance(balance)} KSM</Balance>
         {account}
       </RightSide>
       {showMobileMenu && mobileMenuIsOpen && (

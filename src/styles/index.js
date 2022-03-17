@@ -12,4 +12,8 @@ export const GlobalStyle = createGlobalStyle`
 a{
     text-decoration: none;
 }
+
+.unique-modal {
+  overflow: visible;
+}
 `;
