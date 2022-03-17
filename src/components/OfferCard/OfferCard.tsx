@@ -1,6 +1,7 @@
-import {Link, Text} from '@unique-nft/ui-kit';
 import React, { FC, useMemo, useState } from 'react';
+import { Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
+
 import { Picture } from '..';
 import { useApi } from '../../hooks/useApi';
 import Loading from '../Loading';
@@ -18,8 +19,6 @@ export type TTokensCard = {
   offer: Offer
 };
 
-const tokenSymbol = 'KSM';
-
 export const OfferCard: FC<TTokensCard> = ({ offer }) => {
   const [token, setToken] = useState<NFTToken | undefined>();
   const [isFetching, setIsFetching] = useState<boolean>(false);
@@ -31,7 +30,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
     collectionName,
     imagePath,
     tokenPrefix
-  } = useMemo<Record<string, any>>(() => {
+  } = useMemo<Record<string, string | undefined>>(() => {
     if (token) {
       return {
         collectionName: token.collectionName,
@@ -42,7 +41,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
 
     if (offer) {
       setIsFetching(true);
-      void api?.nft?.getToken(offer.collectionId, offer.tokenId).then((token) => {
+      void api?.nft?.getToken(offer.collectionId, offer.tokenId).then((token: NFTToken) => {
         setIsFetching(false);
         setToken(token);
       });
@@ -78,7 +77,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
             {`${tokenPrefix || ''} #${offer?.tokenId}`}
           </Text>
         </a>
-        <a href={`${config.scanUrl}collections/${offer?.collectionId}`} target={'_blank'} rel='noreferrer'>
+        <a href={`${config.scanUrl || ''}collections/${offer?.collectionId}`} target={'_blank'} rel='noreferrer'>
           <Text color='primary-600' size='s'>
             {`${collectionName?.substring(0, 15) || ''} [id ${offer?.collectionId || ''}]`}
           </Text>

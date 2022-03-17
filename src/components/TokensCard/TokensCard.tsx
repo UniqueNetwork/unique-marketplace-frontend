@@ -17,7 +17,7 @@ export type TTokensCard = {
   tokenImageUrl?: string
 };
 
-export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, price, tokenImageUrl, ...props }) => {
+export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, price, ...props }) => {
   const [token, setToken] = useState<NFTToken | undefined>(props.token);
   const [isFetching, setIsFetching] = useState<boolean>(false);
 
@@ -27,7 +27,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, price, toke
     collectionName,
     imagePath,
     tokenPrefix
-  } = useMemo<Record<string, any>>(() => {
+  } = useMemo<Record<string, string | undefined>>(() => {
     if (token) {
       return {
         collectionName: token.collectionName,
@@ -38,7 +38,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, price, toke
 
     if (tokenId && collectionId) {
       setIsFetching(true);
-      void api?.nft?.getToken(collectionId, tokenId).then((token) => {
+      void api?.nft?.getToken(collectionId, tokenId).then((token: NFTToken) => {
         setIsFetching(false);
         setToken(token);
       });
@@ -48,16 +48,16 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, price, toke
 
   return (
     <TokensCardStyled>
-      <PictureWrapper href={`/token/${collectionId}/${tokenId}`}>
+      <PictureWrapper href={`/token/${collectionId || ''}/${tokenId || ''}`}>
         <Picture alt={tokenId?.toString() || ''} src={imagePath} />
       </PictureWrapper>
       <Description>
-        <a href={`/token/${collectionId}/${tokenId}`} title={`${tokenPrefix || ''} #${tokenId}`}>
+        <a href={`/token/${collectionId || ''}/${tokenId || ''}`} title={`${tokenPrefix || ''} #${tokenId || ''}`}>
           <Text size='l' weight='medium'>
-            {`${tokenPrefix || ''} #${tokenId}`}
+            {`${tokenPrefix || ''} #${tokenId || ''}`}
           </Text>
         </a>
-        <a href={`${config.scanUrl}collections/${collectionId}`} target={'_blank'} rel='noreferrer'>
+        <a href={`${config.scanUrl || ''}collections/${collectionId || ''}`} target={'_blank'} rel='noreferrer'>
           <Text color='primary-600' size='s'>
             {`${collectionName?.substring(0, 15) || ''} [id ${collectionId || ''}]`}
           </Text>
