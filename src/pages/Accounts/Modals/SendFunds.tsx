@@ -10,6 +10,7 @@ import { SelectInput } from '../../../components/SelectInput/SelectInput';
 import { Account } from '../../../account/AccountContext';
 import DefaultMarketStages from '../../Token/Modals/StagesModal';
 import { useTransferFundsStages } from '../../../hooks/accountStages/useTransferFundsStages';
+import { formatKusamaBalance } from '../../../utils/textUtils';
 
 const tokenSymbol = 'KSM';
 
@@ -64,6 +65,16 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   const [recipientAddress, setRecipientAddress] = useState<string | Account | undefined>();
   const [amount, setAmount] = useState<number>(0);
 
+  const senderBalance = useMemo(() => {
+    const account = accounts.find((account) => account.address === senderAddress);
+    return account?.balance?.KSM;
+  }, [accounts, senderAddress]);
+
+  const recipientBalance = useMemo(() => {
+    const account = accounts.find((account) => account.address === recipientAddress);
+    return account?.balance?.KSM;
+  }, [accounts, recipientAddress]);
+
   const onAmountChange = useCallback((value: string) => {
     setAmount(Number(value));
   }, [setAmount]);
@@ -84,7 +95,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
       <Text>{senderAddress || ''}</Text>
     </AddressWrapper>
     <AmountWrapper>
-      {/* <Text size={'s'}>{`${selectedAccount?.balance?.KSM} ${tokenSymbol}`}</Text> */}
+      <Text size={'s'}>{`${formatKusamaBalance(senderBalance?.toString() || 0)} ${tokenSymbol}`}</Text>
     </AmountWrapper>
 
     <Text size={'s'} color={'grey-500'}>{'To'}</Text>
@@ -100,7 +111,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
       />
     </RecipientSelectWrapper>
     <AmountWrapper>
-      {/* <Text size={'s'}>{`${selectedAccount?.balance?.KSM} ${tokenSymbol}`}</Text> */}
+      {recipientBalance && <Text size={'s'}>{`${formatKusamaBalance(recipientBalance?.toString() || 0)} ${tokenSymbol}`}</Text> }
     </AmountWrapper>
     <AmountInputWrapper>
       <InputText value={amount.toString()} onChange={onAmountChange} />
@@ -121,6 +132,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     </ButtonWrapper>
   </Modal>);
 };
+
 type TransferFundsStagesModalProps = {
   isVisible: boolean
   onFinish: () => void
@@ -145,7 +157,10 @@ const Content = styled.div`
 const AddressWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 2);
-  margin: calc(var(--gap) * 2) 0;
+  margin-top: calc(var(--gap) * 2);
+  border: 1px solid var(--grey-300);
+  border-radius: 4px;
+  padding: 20px var(--gap);
 `;
 
 const AddressOptionWrapper = styled.div`
@@ -180,7 +195,8 @@ const RecipientSelectWrapper = styled.div`
 `;
 
 const AmountWrapper = styled.div`
-  
+  display: flex;
+  justify-content: flex-end;
 `;
 
 const AmountInputWrapper = styled.div`
