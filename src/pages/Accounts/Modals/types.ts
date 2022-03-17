@@ -28,3 +28,9 @@ export type Scanned = {
   genesisHash: string;
   name?: string;
 }
+
+export type TTransferFunds = {
+  sender: string
+  recipient: string
+  amount: string
+}

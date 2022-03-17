@@ -13,10 +13,15 @@ import { ImportViaSeedAccountModal } from './Modals/ImportViaSeed';
 import { DropdownMenu, DropdownMenuItem } from '../../components/DropdownMenu/DropdownMenu';
 import { ImportViaJSONAccountModal } from './Modals/ImportViaJson';
 import { ImportViaQRCodeAccountModal } from './Modals/ImportViaQRCode';
+import { TransferFundsModal } from './Modals/SendFunds';
 
 const tokenSymbol = 'KSM';
 
-const AccountsColumns: TableColumnProps[] = [
+type AccountsColumnsProps = {
+  onShowSendFundsModal(address: string): () => void
+};
+
+const getAccountsColumns = ({ onShowSendFundsModal }: AccountsColumnsProps): TableColumnProps[] => ([
   {
     title: 'Account',
     width: '33%',
@@ -54,20 +59,32 @@ const AccountsColumns: TableColumnProps[] = [
         </LinkStyled>
       </LinksWrapper>;
     }
+  },
+  {
+    title: 'Actions',
+    width: '33%',
+    field: 'address',
+    render(address) {
+      return <ActionsWrapper>
+        <Button title={'Send'} onClick={onShowSendFundsModal(address)} />
+      </ActionsWrapper>;
+    }
   }
-];
+]);
 
 enum AccountModal {
   create,
   importViaSeed,
   importViaJSON,
-  importViaQRCode
+  importViaQRCode,
+  sendFunds
 }
 
 export const AccountsPage = () => {
   const { accounts, fetchAccounts } = useAccounts();
   const [searchString, setSearchString] = useState<string>('');
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
+  const [selectedAddress, setSelectedAddress] = useState<string>();
 
   const onCreateAccountClick = useCallback(() => {
     setCurrentModal(AccountModal.create);
@@ -83,6 +100,11 @@ export const AccountsPage = () => {
 
   const onImportViaQRClick = useCallback(() => {
     setCurrentModal(AccountModal.importViaQRCode);
+  }, []);
+
+  const onSendFundsClick = useCallback((address: string) => () => {
+    setCurrentModal(AccountModal.sendFunds);
+    setSelectedAddress(address);
   }, []);
 
   const onSearchStringChange = useCallback(
@@ -119,13 +141,14 @@ export const AccountsPage = () => {
         </SearchInputWrapper>
       </Row>
       <Table
-        columns={AccountsColumns}
+        columns={getAccountsColumns({ onShowSendFundsModal: onSendFundsClick })}
         data={filteredAccounts}
       />
       <CreateAccountModal isVisible={currentModal === AccountModal.create} onFinish={onChangeAccountsFinish} />
       <ImportViaSeedAccountModal isVisible={currentModal === AccountModal.importViaSeed} onFinish={onChangeAccountsFinish} />
       <ImportViaJSONAccountModal isVisible={currentModal === AccountModal.importViaJSON} onFinish={onChangeAccountsFinish} />
       <ImportViaQRCodeAccountModal isVisible={currentModal === AccountModal.importViaQRCode} onFinish={onChangeAccountsFinish} />
+      <TransferFundsModal isVisible={currentModal === AccountModal.sendFunds} onFinish={onChangeAccountsFinish} senderAddress={selectedAddress} />
     </AccountPageWrapper>
   );
 };
@@ -178,4 +201,10 @@ const LinkStyled = styled.a`
   display: flex;
   align-items: center;
   column-gap: calc(var(--gap) / 2);
+`;
+
+const ActionsWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  column-gap: var(--gap);
 `;
