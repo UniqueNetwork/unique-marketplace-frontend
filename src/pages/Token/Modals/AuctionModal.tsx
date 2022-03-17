@@ -9,6 +9,7 @@ import { useAuctionBidStages } from '../../../hooks/marketplaceStages';
 import { Offer } from '../../../api/restApi/offers/types';
 import DefaultMarketStages from './StagesModal';
 import Kusama from '../../../static/icons/logo-kusama.svg';
+import { useAccounts } from '../../../hooks/useAccounts';
 
 export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ token, offer, setIsClosable, onFinish }) => {
   const [status, setStatus] = useState<'ask' | 'place-bid-stage'>('ask'); // TODO: naming
@@ -95,8 +96,12 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: string, 
 };
 
 const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ token, onFinish, amount }) => {
+  const { selectedAccount } = useAccounts();
   const { stages, status, initiate } = useAuctionBidStages(token?.collectionId || 0, token?.id);
-  useEffect(() => { initiate({ value: amount }); }, [amount]);
+  useEffect(() => {
+    if (!selectedAccount) throw new Error('Account not selected');
+    initiate({ value: amount, accountAddress: selectedAccount.address });
+  }, [amount, selectedAccount]);
   return (
     <div>
       <DefaultMarketStages stages={stages} status={status} onFinish={onFinish} />
