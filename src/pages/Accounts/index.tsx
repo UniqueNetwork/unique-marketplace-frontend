@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Button, Text, InputText, Table, Avatar } from '@unique-nft/ui-kit';
+import { Button, Text, InputText, Avatar } from '@unique-nft/ui-kit';
 import { TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import styled from 'styled-components/macro';
 
@@ -14,6 +14,8 @@ import { DropdownMenu, DropdownMenuItem } from '../../components/DropdownMenu/Dr
 import { ImportViaJSONAccountModal } from './Modals/ImportViaJson';
 import { ImportViaQRCodeAccountModal } from './Modals/ImportViaQRCode';
 import { TransferFundsModal } from './Modals/SendFunds';
+import { Table } from '../../components/Table';
+import { formatKusamaBalance } from '../../utils/textUtils';
 
 const tokenSymbol = 'KSM';
 
@@ -43,7 +45,7 @@ const getAccountsColumns = ({ onShowSendFundsModal }: AccountsColumnsProps): Tab
     render(balance) {
       const { KSM } = balance || {};
       return <BalancesWrapper>
-        <Text>{`${KSM?.toString() || 0} ${tokenSymbol}`}</Text>
+        <Text>{`${formatKusamaBalance(KSM || 0)} ${tokenSymbol}`}</Text>
       </BalancesWrapper>;
     }
   },
