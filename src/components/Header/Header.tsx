@@ -16,41 +16,14 @@ interface HeaderProps {
 }
 
 export const Header: FC<HeaderProps> = ({ activeItem }) => {
-  const { selectedAccount, changeAccount, accounts } = useAccounts();
   const { lessThanThreshold: showMobileMenu } =
     useScreenWidthFromThreshold(1279);
   const [mobileMenuIsOpen, toggleMobileMenu] = useState(false);
-
-  const buttonClick = () => {
-    console.log('button is clicked');
-  };
-
-  const onAccountChange = useCallback((address: string) => {
-    const newAccount = accounts.find((item) => item.address === address);
-    if (newAccount) changeAccount(newAccount);
-  }, [accounts]);
-
-  const account = selectedAccount
-      ? (
-        <SelectStyled
-          options={accounts.map((account) => ({ id: account.address, title: account.address }))}
-          value={selectedAccount.address}
-          onChange={onAccountChange}
-        />
-        )
-      : (
-        <Button
-          onClick={buttonClick}
-          role='outlined'
-          title='Create or connect account'
-        />
-      );
 
   const mobileMenuToggler = useCallback(() => {
     toggleMobileMenu((prevState) => !prevState);
   }, []);
 
-  const balance = selectedAccount?.balance?.KSM?.toString() || 0;
 
   return (
     <HeaderStyled>
@@ -110,8 +83,6 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
         )}
       </LeftSideColumn>
       <RightSide>
-        {/*<Balance>Balance {formatKusamaBalance(balance)} KSM</Balance>*/}
-        {/*{account}*/}
         <WalletManager />
       </RightSide>
       {showMobileMenu && mobileMenuIsOpen && (
@@ -199,11 +170,6 @@ const LogoIcon = styled.img`
 const RightSide = styled.div`
   display: flex;
   align-items: center;
-`;
-
-const Balance = styled.div`
-  margin-left: 16px;
-  margin-right: 16px;
 `;
 
 const LinkWrapper = styled.div`

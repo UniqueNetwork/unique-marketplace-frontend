@@ -18,7 +18,7 @@ import useDeviceSize, {DeviceSize} from "../../../hooks/useDeviceSize";
 const tokenSymbol = 'KSM';
 
 export const WalletManager: FC = () => {
-  const { selectedAccount, accounts, isLoading, changeAccount } = useAccounts();
+  const { selectedAccount, accounts, isLoading, isLoadingBalances, changeAccount } = useAccounts();
   const { currentChain } = useApi();
   const deviceSize = useDeviceSize();
 
@@ -44,7 +44,7 @@ export const WalletManager: FC = () => {
       <AccountSelect
         renderOption={AccountOptionCard}
         onChange={changeAccount}
-        options={accounts}
+        options={accounts || []}
         value={selectedAccount}
       />
       <Divider />
@@ -54,6 +54,7 @@ export const WalletManager: FC = () => {
         options={[]}
         value={currentBalance}
       />
+      {isLoadingBalances && <Loading />}
       {deviceSize === DeviceSize.lg && <><Divider />
       <SettingsButtonWrapper>
         <Icon path={Gear} size={24} color={'var(--color-grey-500)'} />
