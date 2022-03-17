@@ -117,6 +117,7 @@ const WalletManagerWrapper = styled.div`
   box-sizing: border-box;
   border-radius: 8px;
   display: flex;
+  position: relative;
 `;
 
 const Divider = styled.div`
