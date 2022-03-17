@@ -9,6 +9,7 @@ import { TMenuItems } from '../PageLayout';
 import { AdditionalColorDark, AdditionalColorLight, Primary500 } from '../../styles/colors';
 import { useAccounts } from '../../hooks/useAccounts';
 import { formatKusamaBalance } from '../../utils/textUtils';
+import {WalletManager} from "./WalletManager/WalletManager";
 
 interface HeaderProps {
   activeItem: TMenuItems;
@@ -109,8 +110,9 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
         )}
       </LeftSideColumn>
       <RightSide>
-        <Balance>Balance {formatKusamaBalance(balance)} KSM</Balance>
-        {account}
+        {/*<Balance>Balance {formatKusamaBalance(balance)} KSM</Balance>*/}
+        {/*{account}*/}
+        <WalletManager />
       </RightSide>
       {showMobileMenu && mobileMenuIsOpen && (
         <MobileMenu>
@@ -197,9 +199,6 @@ const LogoIcon = styled.img`
 const RightSide = styled.div`
   display: flex;
   align-items: center;
-  @media (max-width: 1024px) {
-    display: none;
-  }
 `;
 
 const Balance = styled.div`
@@ -217,7 +216,7 @@ const LinkWrapper = styled.div`
 
 const MobileMenu = styled.div`
   position: absolute;
-  top: 65px;
+  top: 81px;
   left: 0;
   right: 0;
   height: 100vh;

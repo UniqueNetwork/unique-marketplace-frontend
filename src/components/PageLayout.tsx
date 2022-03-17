@@ -78,6 +78,9 @@ const LayoutStyled = styled.div`
       position: sticky !important;
       z-index: 1000;
     }
+    @media (max-width: 620px) {
+      height: 80px !important;
+    }
   }
   
   footer {
