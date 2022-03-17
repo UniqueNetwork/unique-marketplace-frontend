@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import React, { ChangeEvent, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components/macro';
 
 interface SelectInputOption {
@@ -71,9 +71,9 @@ export function SelectInput<T = SelectInputOption>({ className, placeholder, opt
   return (<SelectInputWrapper>
     <InputWrapper className={className}>
       {!selectedValue && !inputValue && placeholder && !isDropdownVisible && <Placeholder>{placeholder}</Placeholder>}
-      {selectedValue && <SelectedValueWrapper>
+      {selectedValue && <div>
         {showOption(selectedValue)}
-      </SelectedValueWrapper>
+      </div>
       }
       <input
         type={'text'}
@@ -138,10 +138,6 @@ const OptionWrapper = styled.div`
   }
 `;
 
-const SelectedValueWrapper = styled.div`
-  
-`;
-
 const Placeholder = styled.div`
-  
+  color: var(--color-grey-500);
 `;
