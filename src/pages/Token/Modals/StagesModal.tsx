@@ -2,10 +2,10 @@ import React, { FC, useEffect } from 'react';
 import styled from 'styled-components/macro';
 import { Text } from '@unique-nft/ui-kit';
 
-import { Stage, StageStatus } from '../../../types/MarketTypes';
 import Loading from '../../../components/Loading';
 import { Icon } from '../../../components/Icon/Icon';
 import CheckCircle from '../../../static/icons/check-circle.svg';
+import { Stage, StageStatus } from '../../../types/StagesTypes';
 
 type TStagesModalProps = {
   stages: Stage[],

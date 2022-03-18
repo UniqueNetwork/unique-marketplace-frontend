@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useApi } from '../useApi';
 import { TTransferFunds } from '../../pages/Accounts/Modals/types';
 import useAccountStages, { AccountStage } from '../useAccountStages';
-import { InternalStage, StageStatus, TInternalStageActionParams } from '../../types/StagesTypes';
+import { InternalStage, StageStatus } from '../../types/StagesTypes';
 
 export const useTransferFundsStages = (accountAddress: string) => {
   const { api } = useApi();

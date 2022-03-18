@@ -1,6 +1,7 @@
-import { Text } from '@unique-nft/ui-kit';
 import React, { FC, useMemo, useState } from 'react';
+import { Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
+
 import { Picture } from '..';
 import { useApi } from '../../hooks/useApi';
 import Loading from '../Loading';
@@ -18,8 +19,6 @@ export type TTokensCard = {
   offer: Offer
 };
 
-const tokenSymbol = 'KSM';
-
 export const OfferCard: FC<TTokensCard> = ({ offer }) => {
   const [token, setToken] = useState<NFTToken | undefined>();
   const [isFetching, setIsFetching] = useState<boolean>(false);
@@ -31,7 +30,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
     collectionName,
     imagePath,
     tokenPrefix
-  } = useMemo<Record<string, any>>(() => {
+  } = useMemo<Record<string, string | undefined>>(() => {
     if (token) {
       return {
         collectionName: token.collectionName,
@@ -42,7 +41,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
 
     if (offer) {
       setIsFetching(true);
-      void api?.nft?.getToken(offer.collectionId, offer.tokenId).then((token) => {
+      void api?.nft?.getToken(offer.collectionId, offer.tokenId).then((token: NFTToken) => {
         setIsFetching(false);
         setToken(token);
       });
@@ -68,15 +67,17 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
   }, [isBidder, topBid, selectedAccount]);
 
   return (
-    <TokensCardStyled href={`/token/${offer?.collectionId}/${offer?.tokenId}`}>
-      <PictureWrapper>
+    <TokensCardStyled>
+      <PictureWrapper href={`/token/${offer?.collectionId}/${offer?.tokenId}`}>
         <Picture alt={offer?.tokenId?.toString() || ''} src={imagePath} />
       </PictureWrapper>
       <Description>
-        <Text size='l' weight='medium'>{`${
-          tokenPrefix || ''
-        } #${offer?.tokenId}`}</Text>
-        <a href={`${config.scanUrl}collections/${offer?.collectionId}`} target={'_blank'} rel='noreferrer'>
+        <a href={`/token/${offer?.collectionId}/${offer?.tokenId}`} title={`${tokenPrefix || ''} #${offer?.tokenId}`}>
+          <Text size='l' weight='medium' color={'secondary-500'}>
+            {`${tokenPrefix || ''} #${offer?.tokenId}`}
+          </Text>
+        </a>
+        <a href={`${config.scanUrl || ''}collections/${offer?.collectionId}`} target={'_blank'} rel='noreferrer'>
           <Text color='primary-600' size='s'>
             {`${collectionName?.substring(0, 15) || ''} [id ${offer?.collectionId || ''}]`}
           </Text>
@@ -85,7 +86,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
           <Text size='s'>{`Price: ${formatKusamaBalance(offer?.price || 0)}`}</Text>
           <Icon path={Kusama} size={16} />
         </PriceWrapper>
-        {!offer?.auction && <Text color={'grey-500'} >Price</Text>}
+        {!offer?.auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         {offer?.auction && <AuctionInfoWrapper>
           {isTopBidder && <Text size={'xs'} color={'positive-500'} >Leading bid</Text>}
           {isBidder && !isTopBidder && <Text size={'xs'} color={'coral-500'} >Outbid</Text>}
@@ -101,7 +102,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
   );
 };
 
-const TokensCardStyled = styled.a`
+const TokensCardStyled = styled.div`
   display: flex;
   align-items: flex-start;
   flex-direction: column;
@@ -110,7 +111,7 @@ const TokensCardStyled = styled.a`
   cursor: pointer;
 `;
 
-const PictureWrapper = styled.div`
+const PictureWrapper = styled.a`
   position: relative;
   width: 100%;
   display: flex;
@@ -165,7 +166,7 @@ const Description = styled.div`
     color: var(--color-primary-600);
 
     &:nth-of-type(2) {
-      margin-bottom: 8px;
+      margin-bottom: 5px;
     }
   }
 `;

@@ -29,7 +29,7 @@ export const useSellFixStages = (collectionId: number, tokenId: number) => {
     title: 'Setting price',
     description: '',
     status: StageStatus.default,
-    action: (params) => marketApi?.setForFixPriceSale(params.txParams.accountAddress, params.collectionId.toString(), params.tokenId.toString(), params?.txParams?.price || -1, params.options)
+    action: (params) => marketApi?.setForFixPriceSale(params.txParams.accountAddress, params.collectionId.toString(), params.tokenId.toString(), params?.txParams?.price.toString() || '-1', params.options)
   }], [marketApi]);
   const { stages, error, status, initiate } = useMarketplaceStages<TFixPriceProps>(collectionId, tokenId, sellFixStages);
 

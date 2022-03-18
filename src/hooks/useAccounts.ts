@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { web3Accounts, web3Enable, web3FromSource } from '@polkadot/extension-dapp';
 import keyring from '@polkadot/ui-keyring';
 import { BN, stringToHex, u8aToString } from '@polkadot/util';
@@ -25,6 +25,8 @@ export const useAccounts = () => {
     setFetchAccountsError,
     showSignDialog
   } = useContext(AccountContext);
+
+  const [isLoadingBalances, setIsLoadingBalances] = useState(true);
 
   const getExtensionAccounts = useCallback(async () => {
     // this call fires up the authorization popup
@@ -87,7 +89,7 @@ export const useAccounts = () => {
     } else {
       setFetchAccountsError('No accounts in extension');
     }
-  }, [changeAccount, getAccounts]);
+  }, [changeAccount, getAccounts, setAccounts, setIsLoading, setFetchAccountsError]);
 
   useEffect(() => {
     void fetchAccounts();
@@ -95,6 +97,7 @@ export const useAccounts = () => {
 
   useEffect(() => {
     if (!rpcClient.isApiInitialized || !accounts?.length) return;
+    setIsLoadingBalances(true);
     const accountsWithBalancePromise = Promise.all(accounts.map(async (account: Account) => ({
       ...account,
       balance: {
@@ -102,18 +105,21 @@ export const useAccounts = () => {
       }
     } as Account)));
     // TODO: async setState in effects is dangerouse
-    void accountsWithBalancePromise.then((accountsWithBalance: Account[]) => setAccounts(accountsWithBalance));
-  }, [rpcClient.isApiInitialized, getAccountBalance]);
+    void accountsWithBalancePromise.then((accountsWithBalance: Account[]) => {
+      setAccounts(accountsWithBalance);
+      setIsLoadingBalances(false);
+    });
+  }, [rpcClient.isApiInitialized, getAccountBalance, setIsLoadingBalances, accounts, setAccounts]);
 
   useEffect(() => {
     const updatedSelectedAccount = accounts.find((account) => account.address === selectedAccount?.address);
     if (updatedSelectedAccount) setSelectedAccount(updatedSelectedAccount);
-  }, [accounts]);
+  }, [accounts, setSelectedAccount, selectedAccount]);
 
   const addLocalAccount = useCallback((seed: string, derivePath: string, name: string, password: string, pairType: PairType) => {
     const options = { genesisHash: rawRpcApi?.genesisHash.toString(), isHardware: false, name: name.trim(), tags: [] };
     keyring.addUri(getSuri(seed, derivePath, pairType), password, options, pairType as KeypairType);
-  }, []);
+  }, [rawRpcApi]);
 
   const addAccountViaQR = useCallback((scanned: { name: string, isAddress: boolean, content: string, password: string, genesisHash: string}) => {
     const { name, isAddress, content, password, genesisHash } = scanned;
@@ -122,9 +128,8 @@ export const useAccounts = () => {
       genesisHash: genesisHash || rawRpcApi?.genesisHash.toHex(),
       name: name?.trim()
     };
-    const account = isAddress
-      ? keyring.addExternal(content, meta).pair.address
-      : keyring.addUri(content, password, meta, 'sr25519').pair.address;
+    if (isAddress) keyring.addExternal(content, meta);
+    else keyring.addUri(content, password, meta, 'sr25519');
   }, [rawRpcApi]);
 
   const unlockLocalAccount = useCallback((password: string) => {
@@ -176,6 +181,7 @@ export const useAccounts = () => {
     selectedAccount,
     fetchAccounts,
     isLoading,
+    isLoadingBalances,
     fetchAccountsError,
     addLocalAccount,
     addAccountViaQR,

@@ -12,6 +12,7 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { useOffers } from '../../api/restApi/offers/offers';
 import { Offer } from '../../api/restApi/offers/types';
 import { MobileFilters } from '../../components/Filters/MobileFilter';
+import Loading from "../../components/Loading";
 
 type TOption = {
   direction: 'asc' | 'desc';
@@ -82,8 +83,9 @@ export const MyTokensPage = () => {
   const [selectOption, setSelectOption] = useState<TOption>();
   const { selectedAccount } = useAccounts();
   const [tokens, setTokens] = useState<NFTToken[]>([]);
+  const [isFetchingTokens, setIsFetchingTokens] = useState<boolean>(true)
 
-  const { offers } = useOffers({ page: 1, pageSize, seller: selectedAccount?.address });
+  const { offers, isFetching: isFetchingOffers } = useOffers({ page: 1, pageSize, seller: selectedAccount?.address });
 
   const { api } = useApi();
 
@@ -92,23 +94,15 @@ export const MyTokensPage = () => {
     (async () => {
       const _tokens = await api.nft?.getAccountTokens(selectedAccount.address) as NFTToken[];
       setTokens(_tokens);
+      setIsFetchingTokens(false);
     })();
-  }, [selectedAccount, api]);
+  }, [selectedAccount, api, setIsFetchingTokens]);
 
   useEffect(() => {
     const option = sortingOptions.find((option) => { return option.id === sortingValue; });
 
     setSelectOption(option);
   }, [sortingValue, setSelectOption]);
-
-  const hasMore = false;
-
-  const onClickSeeMore = useCallback(() => {
-    // Todo: fix twice rendering
-    // if (!isFetching) {
-    //   fetchMore({ page: Math.ceil(offers.length / pageSize) + 1, pageSize, sort: [sortingValue], ...filterState });
-    // }
-  }, []);
 
   const onSortingChange = useCallback((val: string) => {
     setSortingValue(val);
@@ -205,16 +199,10 @@ export const MyTokensPage = () => {
         <div>
           <Text size='m'>{`${featuredTokens.length} items`}</Text>
         </div>
-        <InfiniteScroll
-          hasMore={hasMore}
-          initialLoad={false}
-          loadMore={onClickSeeMore}
-          pageStart={1}
-          threshold={200}
-          useWindow={true}
-        >
+        <div>
+          {(isFetchingTokens || isFetchingOffers) && <Loading />}
           <TokensList tokens={featuredTokens.filter(filter)} />
-        </InfiniteScroll>
+        </div>
       </MainContent>
       <MobileFilters<MyTokensFilterState>
         defaultSortingValue={defaultSortingValue}

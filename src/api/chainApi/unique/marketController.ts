@@ -306,13 +306,13 @@ class MarketController implements IMarketController {
   }
 
   // checkAsk - put on sale
-  public async setForFixPriceSale(account: string, collectionId: string, tokenId: string, price: number, options: TransactionOptions): Promise<void> {
+  public async setForFixPriceSale(account: string, collectionId: string, tokenId: string, price: string, options: TransactionOptions): Promise<void> {
     const ethAddress = getEthAccount(account);
     const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
     const matcherContractInstance = this.getMatcherContractInstance(ethAddress);
 
     const abi = matcherContractInstance.methods.addAsk(
-      price.toString(),
+      this.fromStringToBnString(price, this.kusamaDecimals),
       '0x0000000000000000000000000000000000000001',
       evmCollectionInstance.options.address,
       tokenId

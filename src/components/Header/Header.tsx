@@ -9,47 +9,21 @@ import { TMenuItems } from '../PageLayout';
 import { AdditionalColorDark, AdditionalColorLight, Primary500 } from '../../styles/colors';
 import { useAccounts } from '../../hooks/useAccounts';
 import { formatKusamaBalance } from '../../utils/textUtils';
+import {WalletManager} from "./WalletManager/WalletManager";
 
 interface HeaderProps {
   activeItem: TMenuItems;
 }
 
 export const Header: FC<HeaderProps> = ({ activeItem }) => {
-  const { selectedAccount, changeAccount, accounts } = useAccounts();
   const { lessThanThreshold: showMobileMenu } =
     useScreenWidthFromThreshold(1279);
   const [mobileMenuIsOpen, toggleMobileMenu] = useState(false);
-
-  const buttonClick = () => {
-    console.log('button is clicked');
-  };
-
-  const onAccountChange = useCallback((address: string) => {
-    const newAccount = accounts.find((item) => item.address === address);
-    if (newAccount) changeAccount(newAccount);
-  }, [accounts]);
-
-  const account = selectedAccount
-      ? (
-        <SelectStyled
-          options={accounts.map((account) => ({ id: account.address, title: account.address }))}
-          value={selectedAccount.address}
-          onChange={onAccountChange}
-        />
-        )
-      : (
-        <Button
-          onClick={buttonClick}
-          role='outlined'
-          title='Create or connect account'
-        />
-      );
 
   const mobileMenuToggler = useCallback(() => {
     toggleMobileMenu((prevState) => !prevState);
   }, []);
 
-  const balance = selectedAccount?.balance?.KSM?.toString() || 0;
 
   return (
     <HeaderStyled>
@@ -109,8 +83,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
         )}
       </LeftSideColumn>
       <RightSide>
-        <Balance>Balance {formatKusamaBalance(balance)} KSM</Balance>
-        {account}
+        <WalletManager />
       </RightSide>
       {showMobileMenu && mobileMenuIsOpen && (
         <MobileMenu>
@@ -197,14 +170,6 @@ const LogoIcon = styled.img`
 const RightSide = styled.div`
   display: flex;
   align-items: center;
-  @media (max-width: 1024px) {
-    display: none;
-  }
-`;
-
-const Balance = styled.div`
-  margin-left: 16px;
-  margin-right: 16px;
 `;
 
 const LinkWrapper = styled.div`
@@ -217,7 +182,7 @@ const LinkWrapper = styled.div`
 
 const MobileMenu = styled.div`
   position: absolute;
-  top: 65px;
+  top: 81px;
   left: 0;
   right: 0;
   height: 100vh;
