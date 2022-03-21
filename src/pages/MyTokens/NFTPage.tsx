@@ -100,7 +100,7 @@ export const NFTPage = () => {
 
   useEffect(() => {
     if (!api?.nft || !selectedAccount?.address) return;
-    (async () => {
+    void (async () => {
       setIsFetchingTokens(true);
       const _tokens = await api.nft?.getAccountTokens(selectedAccount.address) as NFTToken[];
       setTokens((tokens) => [...tokens, ..._tokens]);
@@ -110,9 +110,9 @@ export const NFTPage = () => {
 
   useEffect(() => {
     if (!api?.nft) return;
-    (async () => {
+    void (async () => {
       setIsFetchingTokens(true);
-      const _tokensFromOffers = await Promise.all(offers.map(({ tokenId, collectionId }) => api.nft?.getToken(collectionId, tokenId)));
+      const _tokensFromOffers = await Promise.all(offers.map(({ tokenId, collectionId }) => api.nft?.getToken(collectionId, tokenId))) as NFTToken[];
       setTokens((tokens) => [...tokens, ..._tokensFromOffers]);
       setIsFetchingTokens(false);
     })();
@@ -233,7 +233,7 @@ export const NFTPage = () => {
         filterComponent={Filters}
       />
     </MarketMainPageStyled>
-    </PagePaper>);
+  </PagePaper>);
 };
 
 const MarketMainPageStyled = styled.div`

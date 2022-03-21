@@ -16,7 +16,7 @@ import { ImportViaQRCodeAccountModal } from './Modals/ImportViaQRCode';
 import { TransferFundsModal } from './Modals/SendFunds';
 import { Table } from '../../components/Table';
 import { formatKusamaBalance } from '../../utils/textUtils';
-import {PagePaper} from "../../components/PagePaper/PagePaper";
+import { PagePaper } from '../../components/PagePaper/PagePaper';
 
 const tokenSymbol = 'KSM';
 

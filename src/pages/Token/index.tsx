@@ -10,7 +10,6 @@ import { TokenTrading } from './TokenDetail/TokenTrading';
 import { Error404 } from '../errors/404';
 import Loading from '../../components/Loading';
 import TokenPageModal from './Modals/TokenPageModal';
-import { sleep } from '../../utils/helpers';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
 
 const TokenPage = () => {
@@ -37,7 +36,7 @@ const TokenPage = () => {
     fetchToken();
   }, [fetchToken]);
 
-  const onFinish = useCallback(async () => {
+  const onFinish = useCallback(() => {
     setMarketType(MarketType.default);
     fetchToken();
     fetchOffer(Number(collectionId), Number(id));

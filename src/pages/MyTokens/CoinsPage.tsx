@@ -1,17 +1,15 @@
-import React, {FC, useCallback, useMemo, useState} from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components/macro';
-import { Button, Text, Heading, InputText, Avatar } from '@unique-nft/ui-kit';
+import { Button, Text, Heading } from '@unique-nft/ui-kit';
 
 import { Table } from '../../components/Table';
 import { TransferFundsModal } from '../Accounts/Modals/SendFunds';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
 import { TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/types';
-import DefaultAvatar from '../../static/icons/default-avatar.svg';
 import { formatKusamaBalance } from '../../utils/textUtils';
 import { useAccounts } from '../../hooks/useAccounts';
-import {useApi} from "../../hooks/useApi";
-import config from "../../config";
-import ChainLogo from "../../components/ChainLogo";
+import config from '../../config';
+import ChainLogo from '../../components/ChainLogo';
 
 const tokenSymbol = 'KSM';
 
@@ -19,14 +17,19 @@ type AccountsColumnsProps = {
   onShowSendFundsModal(): () => void
 };
 
+type ChainInfo = {
+    key: string
+    name: string
+    address: string
+}
+
 const getAccountsColumns = ({ onShowSendFundsModal }: AccountsColumnsProps): TableColumnProps[] => ([
   {
     title: 'Network',
     width: '33%',
     field: 'chainInfo',
-    render(chainInfo) {
+    render(chainInfo: ChainInfo) {
       return <ChainCellWrapper>
-        {/*<Avatar size={24} src={DefaultAvatar} />*/}
         <ChainLogo logo={chainInfo.key} />
         <ChainInfoWrapper>
           <Text>{chainInfo.name}</Text>
@@ -39,7 +42,7 @@ const getAccountsColumns = ({ onShowSendFundsModal }: AccountsColumnsProps): Tab
     title: 'Balance',
     width: '33%',
     field: 'balance',
-    render(balance) {
+    render(balance: string) {
       return <BalancesWrapper>
         <Text>{`${formatKusamaBalance(balance || 0)} ${tokenSymbol}`}</Text>
       </BalancesWrapper>;
@@ -78,9 +81,9 @@ export const CoinsPage: FC = () => {
       chainInfo: {
         key: chainKey.toLowerCase(),
         name: chains[chainKey].name,
-        address: selectedAccount?.address,
+        address: selectedAccount?.address
       },
-      balance: selectedAccount?.balance?.['KSM']?.toString(),
+      balance: selectedAccount?.balance?.[tokenSymbol]?.toString()
     }));
   }, [selectedAccount, chains]);
 
@@ -95,7 +98,7 @@ export const CoinsPage: FC = () => {
       />
       <TransferFundsModal isVisible={isTransferFundsVisible} onFinish={onFinish} senderAddress={selectedAccount?.address} />
     </CoinsPageWrapper>
-  </PagePaper>)
+  </PagePaper>);
 };
 
 const CoinsPageWrapper = styled.div`
@@ -114,16 +117,6 @@ const Row = styled.div`
   width: 100%;
 `;
 
-const SearchInputWrapper = styled.div`
-  flex-grow: 1;
-  display: flex;
-  justify-content: flex-end;
-`;
-
-const SearchInputStyled = styled(InputText)`
-  flex-basis: 720px;
-`;
-
 const ChainCellWrapper = styled.div`
   display: flex;
   padding: 20px 0 !important;
@@ -136,16 +129,6 @@ const ChainInfoWrapper = styled.div`
 
 const BalancesWrapper = styled.div`
   padding: 0;
-`;
-
-const LinksWrapper = styled.div`
-  padding: 0 !important;
-`;
-
-const LinkStyled = styled.a`
-  display: flex;
-  align-items: center;
-  column-gap: calc(var(--gap) / 2);
 `;
 
 const ActionsWrapper = styled.div`

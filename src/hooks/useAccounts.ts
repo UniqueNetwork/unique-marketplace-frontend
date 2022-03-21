@@ -26,7 +26,7 @@ export const useAccounts = () => {
     showSignDialog
   } = useContext(AccountContext);
 
-  //TODO: move fetching accounts and balances into context
+  // TODO: move fetching accounts and balances into context
 
   const [isLoadingBalances, setIsLoadingBalances] = useState(false);
 
@@ -71,7 +71,6 @@ export const useAccounts = () => {
       KSM: await getAccountBalance(account) // TODO: it's possible to subscribe on balances via rpc
     }
   } as Account))), [getAccountBalance]);
-
 
   const fetchAccounts = useCallback(async () => {
     if (!rpcClient?.isKusamaApiConnected) return;
