@@ -60,9 +60,13 @@ export const MarketPage = () => {
   const [filterState, setFilterState] = useState<FilterState | null>();
   const [sortingValue, setSortingValue] = useState<string>(defaultSortingValue);
   const [searchValue, setSearchValue] = useState<string | number>();
-  const { offers, offersCount, isFetching, fetchMore, refetch } = useOffers({ pageSize, sort: [sortingValue] });
+  const { offers, offersCount, isFetching, fetchMore, fetch } = useOffers({ pageSize, sort: [sortingValue] });
 
   const hasMore = offers && offers.length < offersCount;
+
+  useEffect(() => {
+    fetch({ page: 1, pageSize });
+  }, [fetch]);
 
   const onClickSeeMore = useCallback(() => {
     // Todo: fix twice rendering
@@ -73,16 +77,16 @@ export const MarketPage = () => {
 
   const onSortingChange = useCallback((val: string) => {
     setSortingValue(val);
-    refetch({ sort: [val], pageSize, page: 1, ...filterState });
-  }, [refetch]);
+    fetch({ sort: [val], pageSize, page: 1, ...filterState });
+  }, [fetch]);
 
   const handleSearch = () => {
-    refetch({ sort: [sortingValue], pageSize, page: 1, searchText: searchValue?.toString(), ...filterState });
+    fetch({ sort: [sortingValue], pageSize, page: 1, searchText: searchValue?.toString(), ...filterState });
   };
 
   const onFilterChange = useCallback((filter: FilterState | null) => {
     setFilterState({ ...(filterState || {}), ...filter });
-    refetch({ pageSize, page: 1, sort: [sortingValue], ...(filterState || {}), ...filter });
+    fetch({ pageSize, page: 1, sort: [sortingValue], ...(filterState || {}), ...filter });
   }, [filterState]);
 
   return (<>

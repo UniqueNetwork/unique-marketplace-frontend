@@ -47,16 +47,12 @@ export const useOffers = ({ page = 1, pageSize = 10, ...props }: UseFetchOffersP
       });
     }, [offers]);
 
-    useEffect(() => {
-      fetch({ ...props, page, pageSize });
-    }, []);
-
   return {
     offers,
     offersCount,
     isFetching,
     fetchingError,
-    refetch: fetch,
+    fetch,
     fetchMore
   };
 };

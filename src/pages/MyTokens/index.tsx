@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import InfiniteScroll from 'react-infinite-scroller';
 import styled from 'styled-components/macro';
 import { Button, InputText, Select, Text } from '@unique-nft/ui-kit';
 
@@ -12,7 +11,7 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { useOffers } from '../../api/restApi/offers/offers';
 import { Offer } from '../../api/restApi/offers/types';
 import { MobileFilters } from '../../components/Filters/MobileFilter';
-import Loading from "../../components/Loading";
+import Loading from '../../components/Loading';
 
 type TOption = {
   direction: 'asc' | 'desc';
@@ -71,7 +70,7 @@ const sortingOptions: TOption[] = [
   }
 ];
 
-const pageSize = 100;
+const pageSize = 1000;
 
 const defaultSortingValue = 'desc(CreationDate)';
 
@@ -83,20 +82,40 @@ export const MyTokensPage = () => {
   const [selectOption, setSelectOption] = useState<TOption>();
   const { selectedAccount } = useAccounts();
   const [tokens, setTokens] = useState<NFTToken[]>([]);
-  const [isFetchingTokens, setIsFetchingTokens] = useState<boolean>(true)
+  const [isFetchingTokens, setIsFetchingTokens] = useState<boolean>(true);
 
-  const { offers, isFetching: isFetchingOffers } = useOffers({ page: 1, pageSize, seller: selectedAccount?.address });
+  const { offers, isFetching: isFetchingOffers, fetch } = useOffers({ page: 1, pageSize, seller: selectedAccount?.address });
 
   const { api } = useApi();
 
+  const fetchOffersBySeller = useCallback(() => {
+    if (!selectedAccount?.address) return;
+    fetch({ page: 1, pageSize, seller: selectedAccount?.address });
+  }, [selectedAccount?.address]);
+
   useEffect(() => {
-    if (!api || !selectedAccount?.address) return;
+    void fetchOffersBySeller();
+  }, [fetchOffersBySeller]);
+
+  useEffect(() => {
+    if (!api?.nft || !selectedAccount?.address) return;
     (async () => {
+      setIsFetchingTokens(true);
       const _tokens = await api.nft?.getAccountTokens(selectedAccount.address) as NFTToken[];
-      setTokens(_tokens);
+      setTokens((tokens) => [...tokens, ..._tokens]);
       setIsFetchingTokens(false);
     })();
-  }, [selectedAccount, api, setIsFetchingTokens]);
+  }, [selectedAccount?.address, api?.nft, setIsFetchingTokens]);
+
+  useEffect(() => {
+    if (!api?.nft) return;
+    (async () => {
+      setIsFetchingTokens(true);
+      const _tokensFromOffers = await Promise.all(offers.map(({ tokenId, collectionId }) => api.nft?.getToken(collectionId, tokenId)));
+      setTokens((tokens) => [...tokens, ..._tokensFromOffers]);
+      setIsFetchingTokens(false);
+    })();
+  }, [offers, api?.nft]);
 
   useEffect(() => {
     const option = sortingOptions.find((option) => { return option.id === sortingValue; });
