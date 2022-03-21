@@ -32,7 +32,7 @@ const StatusFilter: FC<StatusFilterProps> = ({ onChange }) => {
   const onMyBetsChange = useCallback((value: boolean) => {
     onChange({ myNFTs, fixedPrice, timedAuction, myBets: value });
     setMyBets(value);
-  }, [myNFTs, fixedPrice, timedAuction]);
+  }, [myNFTs, fixedPrice, timedAuction, onChange]);
 
   const onClear = useCallback(() => {
     setMyNFTs(false);

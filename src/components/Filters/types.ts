@@ -1,5 +1,3 @@
-import { Reducer } from 'react';
-
 export type Statuses = Record<'myNFTs' | 'fixedPrice' | 'timedAuction' | 'myBets', boolean | undefined>
 
 export type PriceRange = {

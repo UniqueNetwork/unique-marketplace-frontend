@@ -3,7 +3,6 @@ import { TCreateAccountBodyModalProps } from './types';
 import { Avatar, Button, InputText, Text } from '@unique-nft/ui-kit';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import styled from 'styled-components/macro';
-import { AdditionalWarning100, Grey500 } from '../../../styles/colors';
 import { PasswordInput } from '../../../components/PasswordInput/PasswordInput';
 
 export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties, onFinish, onGoBack }) => {

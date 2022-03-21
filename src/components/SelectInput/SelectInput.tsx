@@ -24,7 +24,7 @@ export function SelectInput<T = SelectInputOption>({ className, placeholder, opt
 
   const onInputChange = useCallback(({ target }: ChangeEvent<HTMLInputElement>) => {
     onChange(target.value);
-  }, []);
+  }, [onChange]);
 
   const onInputFocus = useCallback(() => {
     setIsDropdownVisible(true);
