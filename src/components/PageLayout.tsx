@@ -30,7 +30,7 @@ export const PageLayout: FC = () => {
       return { heading: 'Manage accounts' };
     }
 
-    if (pathname === '/market/token-details') {
+    if (pathname === '/market/token') {
       return {
         breadcrumbs: {
           options: [{ link: '/market', title: 'Market' }, { title: 'Token' }]
@@ -57,6 +57,16 @@ export const PageLayout: FC = () => {
 };
 
 const LayoutStyled = styled.div`
+  .unique-layout__content {
+    padding: 0 !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    display: flex;
+    flex-direction: column;
+    row-gap: calc(var(--gap) * 1.5);
+  }
+
+
   main {
     > div {
       display: flex;

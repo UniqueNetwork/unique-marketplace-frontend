@@ -12,6 +12,7 @@ import { useOffers } from '../../api/restApi/offers/offers';
 import { Offer } from '../../api/restApi/offers/types';
 import { MobileFilters } from '../../components/Filters/MobileFilter';
 import Loading from '../../components/Loading';
+import { PagePaper } from '../../components/PagePaper/PagePaper';
 
 type TOption = {
   direction: 'asc' | 'desc';
@@ -187,7 +188,7 @@ export const MyTokensPage = () => {
     return tokensWithOffers;
   }, [tokens, offers, filter, selectOption, filterState]);
 
-  return (
+  return (<PagePaper>
     <MarketMainPageStyled>
       <LeftColumn>
         <Filters onFilterChange={setFilterState} />
@@ -232,7 +233,7 @@ export const MyTokensPage = () => {
         filterComponent={Filters}
       />
     </MarketMainPageStyled>
-  );
+  </PagePaper>);
 };
 
 const MarketMainPageStyled = styled.div`

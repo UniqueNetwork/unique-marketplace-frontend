@@ -8,6 +8,7 @@ import { FilterState } from '../../components/Filters/types';
 import { useOffers } from '../../api/restApi/offers/offers';
 import { OffersList } from '../../components/OffersList/OffersList';
 import { MobileFilters } from '../../components/Filters/MobileFilter';
+import { PagePaper } from '../../components/PagePaper/PagePaper';
 
 type TOption = {
   iconRight: {
@@ -89,7 +90,7 @@ export const MarketPage = () => {
     fetch({ pageSize, page: 1, sort: [sortingValue], ...(filterState || {}), ...filter });
   }, [filterState]);
 
-  return (<>
+  return (<PagePaper>
     <MarketMainPageStyled>
       <LeftColumn>
         <Filters onFilterChange={onFilterChange} />
@@ -140,7 +141,7 @@ export const MarketPage = () => {
       onSortingChange={onSortingChange}
       filterComponent={Filters}
     />
-  </>);
+  </PagePaper>);
 };
 
 const MarketMainPageStyled = styled.div`
