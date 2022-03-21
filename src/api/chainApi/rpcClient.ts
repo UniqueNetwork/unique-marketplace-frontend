@@ -32,11 +32,11 @@ export class RpcClient implements IRpcClient {
     this.rpcEndpoint = config.blockchain.unique.wsEndpoint || '';
     this.options = options || {};
     this.config = config || {};
-    this.rawKusamaRpcApi = this.initKusamaApi(config.blockchain.kusama.wsEndpoint || '');
+    this.rawKusamaRpcApi = await this.initKusamaApi(config.blockchain.kusama.wsEndpoint || '');
     await this.setApi();
   }
 
-  private initKusamaApi(wsEndpoint: string) {
+  private async initKusamaApi(wsEndpoint: string) {
     const provider = new WsProvider(wsEndpoint);
 
 //    const types = this.getDevTypes();
@@ -58,11 +58,21 @@ export class RpcClient implements IRpcClient {
     kusamaApi.on('error', (error: Error) => {
       this.setApiError(error.message);
     });
-    kusamaApi.on('ready', (): void => {
-      this.setIsKusamaApiConnected(true);
-      console.log('Kusama is ready');
+
+    return new Promise<ApiPromise>((resolve, reject) => {
+      kusamaApi.on('connected', () => { this.isApiConnected = true; });
+      kusamaApi.on('disconnected', () => { this.isApiConnected = false; });
+      kusamaApi.on('error', (error: Error) => {
+        this.setApiError(error.message);
+        reject(error);
+      });
+
+      kusamaApi.on('ready', (): void => {
+        this.setIsKusamaApiConnected(true);
+        console.log('Kusama is ready');
+        resolve(kusamaApi);
+      });
     });
-    return kusamaApi;
   }
 
   private setIsKusamaApiConnected(value: boolean) {
