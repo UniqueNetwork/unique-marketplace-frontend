@@ -5,7 +5,7 @@ import { Avatar, Button, Checkbox, Text } from '@unique-nft/ui-kit';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import { defaultPairType, derivePath } from './CreateAccount';
 import styled from 'styled-components/macro';
-import { AdditionalWarning100, Grey500 } from '../../../styles/colors';
+import { AdditionalWarning100 } from '../../../styles/colors';
 
 export const AskExistsSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish }) => {
   const [seed, setSeed] = useState<string>('');

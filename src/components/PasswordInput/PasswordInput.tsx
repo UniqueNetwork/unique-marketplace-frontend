@@ -17,7 +17,7 @@ export const PasswordInput: FC<PasswordInputProps> = ({ placeholder, value, onCh
 
   const onPasswordChange = useCallback(({ target }: ChangeEvent<HTMLInputElement>) => {
     onChange(target.value);
-  }, []);
+  }, [onChange]);
 
   const onVisibleValueClick = useCallback(() => {
     setIsVisibleValue(!isVisibleValue);

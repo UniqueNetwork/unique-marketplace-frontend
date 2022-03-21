@@ -1,4 +1,4 @@
-import { Button, Select, Text } from '@unique-nft/ui-kit';
+import { Select, Text } from '@unique-nft/ui-kit';
 import { FC, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components/macro'; // Todo: https://cryptousetech.atlassian.net/browse/NFTPAR-1201
@@ -7,7 +7,7 @@ import { useScreenWidthFromThreshold } from '../../hooks/useScreenWidthFromThres
 import menu from '../../static/icons/menu.svg';
 import { TMenuItems } from '../PageLayout';
 import { AdditionalColorDark, AdditionalColorLight, Primary500 } from '../../styles/colors';
-import {WalletManager} from "./WalletManager/WalletManager";
+import { WalletManager } from './WalletManager/WalletManager';
 
 interface HeaderProps {
   activeItem: TMenuItems;
@@ -21,7 +21,6 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
   const mobileMenuToggler = useCallback(() => {
     toggleMobileMenu((prevState) => !prevState);
   }, []);
-
 
   return (
     <HeaderStyled>

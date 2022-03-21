@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useMemo } from 'react';
 import { TCreateAccountBodyModalProps } from './types';
-import { Avatar, Button, Link, Text } from '@unique-nft/ui-kit';
+import { Avatar, Button, Text } from '@unique-nft/ui-kit';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import styled from 'styled-components/macro';
 import { defaultPairType, derivePath } from './CreateAccount';
