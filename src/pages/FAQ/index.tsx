@@ -1,9 +1,10 @@
 import React from 'react';
 import styled from 'styled-components/macro';
 import { Heading } from '@unique-nft/ui-kit';
+import { PagePaper } from '../../components/PagePaper/PagePaper';
 
 const Faq = (): React.ReactElement<void> => {
-  return (
+  return (<PagePaper>
     <MainWrapper>
       <Heading size='4'>Q: How can I connect my wallet?</Heading>
       <p>A: You can use either <a href='https://polkadot.js.org/extension/'>https://polkadot.js.org/extension/</a> or the market `Accounts` page. Restore your wallet through the seed phrase, JSON file+password or QR code.</p>
@@ -53,7 +54,7 @@ const Faq = (): React.ReactElement<void> => {
       <Heading size='4'>Q: Whom can I contact if I have questions regarding the marketplace?</Heading>
       <p>Please contact <a href='mailto:unqnftsupport@unique.network'>unqnftsupport@unique.network</a> if you have any questions.</p>
     </MainWrapper>
-  );
+  </PagePaper>);
 };
 
 const MainWrapper = styled.div`

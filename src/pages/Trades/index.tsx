@@ -6,6 +6,7 @@ import { useTrades } from '../../api/restApi/trades/trades';
 import { shortcutText } from '../../utils/textUtils';
 import styled from 'styled-components';
 import { Table } from '../../components/Table';
+import { PagePaper } from '../../components/PagePaper/PagePaper';
 
 const pageSize = 20;
 
@@ -82,7 +83,7 @@ export const TradesPage: FC = () => {
     fetchMore({ page: 1, pageSize, sortString });
   }, [fetchMore, setSortString]);
 
-  return (
+  return (<PagePaper>
     <TradesPageWrapper>
       <Table
         onSort={onSortChange}
@@ -97,7 +98,7 @@ export const TradesPage: FC = () => {
         withIcons
       />
     </TradesPageWrapper>
-  );
+  </PagePaper>);
 };
 
 const TradesPageWrapper = styled.div`

@@ -8,6 +8,7 @@ import { FilterState } from '../../components/Filters/types';
 import { useOffers } from '../../api/restApi/offers/offers';
 import { OffersList } from '../../components/OffersList/OffersList';
 import { MobileFilters } from '../../components/Filters/MobileFilter';
+import { PagePaper } from '../../components/PagePaper/PagePaper';
 
 type TOption = {
   iconRight: {
@@ -60,9 +61,13 @@ export const MarketPage = () => {
   const [filterState, setFilterState] = useState<FilterState | null>();
   const [sortingValue, setSortingValue] = useState<string>(defaultSortingValue);
   const [searchValue, setSearchValue] = useState<string | number>();
-  const { offers, offersCount, isFetching, fetchMore, refetch } = useOffers({ pageSize, sort: [sortingValue] });
+  const { offers, offersCount, isFetching, fetchMore, fetch } = useOffers({ pageSize, sort: [sortingValue] });
 
   const hasMore = offers && offers.length < offersCount;
+
+  useEffect(() => {
+    fetch({ page: 1, pageSize });
+  }, [fetch]);
 
   const onClickSeeMore = useCallback(() => {
     // Todo: fix twice rendering
@@ -73,19 +78,19 @@ export const MarketPage = () => {
 
   const onSortingChange = useCallback((val: string) => {
     setSortingValue(val);
-    refetch({ sort: [val], pageSize, page: 1, ...filterState });
-  }, [refetch]);
+    fetch({ sort: [val], pageSize, page: 1, ...filterState });
+  }, [fetch]);
 
   const handleSearch = () => {
-    refetch({ sort: [sortingValue], pageSize, page: 1, searchText: searchValue?.toString(), ...filterState });
+    fetch({ sort: [sortingValue], pageSize, page: 1, searchText: searchValue?.toString(), ...filterState });
   };
 
   const onFilterChange = useCallback((filter: FilterState | null) => {
     setFilterState({ ...(filterState || {}), ...filter });
-    refetch({ pageSize, page: 1, sort: [sortingValue], ...(filterState || {}), ...filter });
+    fetch({ pageSize, page: 1, sort: [sortingValue], ...(filterState || {}), ...filter });
   }, [filterState]);
 
-  return (<>
+  return (<PagePaper>
     <MarketMainPageStyled>
       <LeftColumn>
         <Filters onFilterChange={onFilterChange} />
@@ -136,7 +141,7 @@ export const MarketPage = () => {
       onSortingChange={onSortingChange}
       filterComponent={Filters}
     />
-  </>);
+  </PagePaper>);
 };
 
 const MarketMainPageStyled = styled.div`

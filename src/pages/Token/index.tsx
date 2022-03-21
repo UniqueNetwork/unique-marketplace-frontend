@@ -10,7 +10,7 @@ import { TokenTrading } from './TokenDetail/TokenTrading';
 import { Error404 } from '../errors/404';
 import Loading from '../../components/Loading';
 import TokenPageModal from './Modals/TokenPageModal';
-import { sleep } from '../../utils/helpers';
+import { PagePaper } from '../../components/PagePaper/PagePaper';
 
 const TokenPage = () => {
   const { api } = useApi();
@@ -36,8 +36,7 @@ const TokenPage = () => {
     fetchToken();
   }, [fetchToken]);
 
-  const onFinish = useCallback(async () => {
-    await sleep(30 * 1000);
+  const onFinish = useCallback(() => {
     setMarketType(MarketType.default);
     fetchToken();
     fetchOffer(Number(collectionId), Number(id));
@@ -52,25 +51,28 @@ const TokenPage = () => {
 
   // TODO: split into more categories here instead of just "buy/sell" and putting splitting inside them
 
-  return (<CommonTokenDetail token={token}>
-    <TokenTrading
-      token={token}
-      offer={offer}
-      onSellClick={onActionClick(MarketType.sellFix)}
-      onBuyClick={onActionClick(MarketType.purchase)}
-      onTransferClick={onActionClick(MarketType.transfer)}
-      onDelistClick={onActionClick(MarketType.delist)}
-      onDelistAuctionClick={onActionClick(MarketType.delistAuction)}
-      onPlaceABidClick={onActionClick(MarketType.bid)}
-      onWithdrawClick={onActionClick(MarketType.withdrawBid)}
-    />
-    <TokenPageModal
-      token={token}
-      offer={offer}
-      marketType={marketType}
-      onFinish={onFinish}
-    />
-  </CommonTokenDetail>);
+  return (<PagePaper>
+    <CommonTokenDetail token={token}>
+      <TokenTrading
+        token={token}
+        offer={offer}
+        onSellClick={onActionClick(MarketType.sellFix)}
+        onBuyClick={onActionClick(MarketType.purchase)}
+        onTransferClick={onActionClick(MarketType.transfer)}
+        onDelistClick={onActionClick(MarketType.delist)}
+        onDelistAuctionClick={onActionClick(MarketType.delistAuction)}
+        onPlaceABidClick={onActionClick(MarketType.bid)}
+        onWithdrawClick={onActionClick(MarketType.withdrawBid)}
+      />
+      <TokenPageModal
+        token={token}
+        offer={offer}
+        marketType={marketType}
+        onFinish={onFinish}
+      />
+    </CommonTokenDetail>
+  </PagePaper>
+  );
 };
 
 export default TokenPage;

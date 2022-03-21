@@ -12,7 +12,7 @@ import { getSuri, PairType } from '../utils/seedUtils';
 import { TTransaction } from '../api/chainApi/types';
 
 export const useAccounts = () => {
-  const { rpcClient, rawRpcApi, api } = useApi();
+  const { rpcClient, rawRpcApi } = useApi();
   const {
     accounts,
     selectedAccount,
@@ -26,7 +26,9 @@ export const useAccounts = () => {
     showSignDialog
   } = useContext(AccountContext);
 
-  const [isLoadingBalances, setIsLoadingBalances] = useState(true);
+  // TODO: move fetching accounts and balances into context
+
+  const [isLoadingBalances, setIsLoadingBalances] = useState(false);
 
   const getExtensionAccounts = useCallback(async () => {
     // this call fires up the authorization popup
@@ -48,12 +50,6 @@ export const useAccounts = () => {
     return keyringAccounts.map((account) => ({ address: account.address, meta: account.meta, signerType: AccountSigner.local } as Account));
   }, []);
 
-  const getAccountBalance = useCallback(async (account: Account) => {
-    if (!rpcClient?.isApiInitialized || !api) return 0;
-    const balances = await rpcClient?.rawKusamaRpcApi?.derive.balances?.all(account.address);
-    return balances?.availableBalance || new BN(0);
-  }, [rpcClient, api]);
-
   const getAccounts = useCallback(async () => {
     // this call fires up the authorization popup
     const extensionAccounts = await getExtensionAccounts();
@@ -64,7 +60,20 @@ export const useAccounts = () => {
     return allAccounts;
   }, [getExtensionAccounts, getLocalAccounts]);
 
+  const getAccountBalance = useCallback(async (account: Account) => {
+    const balances = await rpcClient?.rawKusamaRpcApi?.derive.balances?.all(account.address);
+    return balances?.availableBalance || new BN(0);
+  }, [rpcClient]);
+
+  const getAccountsBalances = useCallback(async (accounts: Account[]) => Promise.all(accounts.map(async (account: Account) => ({
+    ...account,
+    balance: {
+      KSM: await getAccountBalance(account) // TODO: it's possible to subscribe on balances via rpc
+    }
+  } as Account))), [getAccountBalance]);
+
   const fetchAccounts = useCallback(async () => {
+    if (!rpcClient?.isKusamaApiConnected) return;
     setIsLoading(true);
     // this call fires up the authorization popup
     const extensions = await web3Enable('my cool dapp');
@@ -75,8 +84,9 @@ export const useAccounts = () => {
     const allAccounts = await getAccounts();
 
     if (allAccounts?.length) {
-      setAccounts(allAccounts);
-      setIsLoading(false);
+      const accountsWithBalance = await getAccountsBalances(allAccounts);
+
+      setAccounts(accountsWithBalance);
 
       const defaultAccountAddress = localStorage.getItem(DefaultAccountKey);
       const defaultAccount = allAccounts.find((item) => item.address === defaultAccountAddress);
@@ -89,27 +99,19 @@ export const useAccounts = () => {
     } else {
       setFetchAccountsError('No accounts in extension');
     }
-  }, [changeAccount, getAccounts, setAccounts, setIsLoading, setFetchAccountsError]);
+    setIsLoading(false);
+  }, [rpcClient?.isKusamaApiConnected]);
 
   useEffect(() => {
     void fetchAccounts();
-  }, []);
+  }, [fetchAccounts]);
 
-  useEffect(() => {
-    if (!rpcClient.isApiInitialized || !accounts?.length) return;
+  const fetchBalances = useCallback(async () => {
     setIsLoadingBalances(true);
-    const accountsWithBalancePromise = Promise.all(accounts.map(async (account: Account) => ({
-      ...account,
-      balance: {
-        KSM: await getAccountBalance(account) // TODO: it's possible to subscribe on balances via rpc
-      }
-    } as Account)));
-    // TODO: async setState in effects is dangerouse
-    void accountsWithBalancePromise.then((accountsWithBalance: Account[]) => {
-      setAccounts(accountsWithBalance);
-      setIsLoadingBalances(false);
-    });
-  }, [rpcClient.isApiInitialized, getAccountBalance, setIsLoadingBalances, accounts, setAccounts]);
+    const accountsWithBalance = await getAccountsBalances(accounts);
+    setIsLoadingBalances(false);
+    setAccounts(accountsWithBalance);
+  }, [getAccountBalance, accounts]);
 
   useEffect(() => {
     const updatedSelectedAccount = accounts.find((account) => account.address === selectedAccount?.address);
@@ -188,6 +190,7 @@ export const useAccounts = () => {
     unlockLocalAccount,
     signTx,
     signMessage,
+    fetchBalances,
     changeAccount
   };
 };

@@ -7,8 +7,6 @@ import { useScreenWidthFromThreshold } from '../../hooks/useScreenWidthFromThres
 import menu from '../../static/icons/menu.svg';
 import { TMenuItems } from '../PageLayout';
 import { AdditionalColorDark, AdditionalColorLight, Primary500 } from '../../styles/colors';
-import { useAccounts } from '../../hooks/useAccounts';
-import { formatKusamaBalance } from '../../utils/textUtils';
 import {WalletManager} from "./WalletManager/WalletManager";
 
 interface HeaderProps {

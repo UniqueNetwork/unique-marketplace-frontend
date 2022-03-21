@@ -16,6 +16,7 @@ import { ImportViaQRCodeAccountModal } from './Modals/ImportViaQRCode';
 import { TransferFundsModal } from './Modals/SendFunds';
 import { Table } from '../../components/Table';
 import { formatKusamaBalance } from '../../utils/textUtils';
+import { PagePaper } from '../../components/PagePaper/PagePaper';
 
 const tokenSymbol = 'KSM';
 
@@ -129,7 +130,7 @@ export const AccountsPage = () => {
     fetchAccounts();
   }, []);
 
-  return (
+  return (<PagePaper>
     <AccountPageWrapper>
       <Row>
         <Button title={'Create substrate account'} onClick={onCreateAccountClick} />
@@ -152,7 +153,7 @@ export const AccountsPage = () => {
       <ImportViaQRCodeAccountModal isVisible={currentModal === AccountModal.importViaQRCode} onFinish={onChangeAccountsFinish} />
       <TransferFundsModal isVisible={currentModal === AccountModal.sendFunds} onFinish={onChangeAccountsFinish} senderAddress={selectedAddress} />
     </AccountPageWrapper>
-  );
+  </PagePaper>);
 };
 
 const AccountPageWrapper = styled.div`

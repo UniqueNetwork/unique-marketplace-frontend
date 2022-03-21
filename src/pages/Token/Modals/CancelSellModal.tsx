@@ -4,12 +4,13 @@ import DefaultMarketStages from './StagesModal';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 import { useAccounts } from '../../../hooks/useAccounts';
 
-export const CancelSellFixStagesModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish }) => {
+export const CancelSellFixStagesModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish, setIsClosable }) => {
   const { selectedAccount } = useAccounts();
   const { stages, status, initiate } = useCancelSellFixStages(token.collectionId || 0, token.id);
   useEffect(() => {
     if (!selectedAccount) throw new Error('Account not selected');
-    initiate({ accountAddress: selectedAccount?.address });
+    setIsClosable(false);
+    void initiate({ accountAddress: selectedAccount?.address });
   }, [selectedAccount]);
   return (
     <div>

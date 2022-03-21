@@ -7,6 +7,7 @@ export interface IRpc {
   rpcEndpoint: string
   isApiConnected: boolean
   isApiInitialized: boolean
+  isKusamaApiConnected: boolean
   apiConnectionError?: string
   rawUniqRpcApi?: ApiPromise // allow access to the raw API for exceptions in the future
   rawKusamaRpcApi?: ApiPromise
