@@ -23,6 +23,7 @@ export const SellToken: FC<SellTokenProps> = ({ offer, onSellClick, onTransferCl
       <ButtonWrapper>
         <Button title={'Delist'} role={'danger'} onClick={onDelistClick} />
       </ButtonWrapper>
+      <Divider />
     </>);
   }
 
@@ -55,10 +56,10 @@ const WarningWrapper = styled.div`
 
 const ButtonWrapper = styled.div`
   width: 200px;
-  margin-top: 24px;
+  margin-top: calc(var(--gap) * 1.5);
 `;
 
 const Divider = styled.div`
-  margin: 24px 0;
+  margin: calc(var(--gap) * 1.5) 0;
   border-top: 1px dashed ${Grey300};
 `;

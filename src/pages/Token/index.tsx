@@ -38,7 +38,6 @@ const TokenPage = () => {
   }, [fetchToken]);
 
   const onFinish = useCallback(async () => {
-    await sleep(30 * 1000);
     setMarketType(MarketType.default);
     fetchToken();
     fetchOffer(Number(collectionId), Number(id));

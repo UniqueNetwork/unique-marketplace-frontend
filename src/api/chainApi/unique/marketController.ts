@@ -338,6 +338,9 @@ class MarketController implements IMarketController {
 
     try {
       await this.repeatCheckForTransactionFinish(async () => { return this.checkAsk(account, collectionId, tokenId); });
+
+      await sleep(30 * 1000);
+
       return;
     } catch (e) {
       console.error('setForFixPriceSale error pushed upper');
