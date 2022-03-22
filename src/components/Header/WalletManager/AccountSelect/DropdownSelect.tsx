@@ -52,7 +52,7 @@ export function DropdownSelect<T>({ className, placeholder, options, value, onCh
     <InputWrapper className={className} onClick={onClick} ref={InputRef}>
       {!value && placeholder && <Placeholder>{placeholder}</Placeholder>}
       {value && showOption(value)}
-      <Icon path={TriangleDown} size={16} />
+      {options.length > 0 && <Icon path={TriangleDown} size={16} />}
     </InputWrapper>
     <Dropdown isOpen={isDropdownVisible} ref={DropdownRef}>
       {options.map((item, index) => (
