@@ -13,6 +13,7 @@ import { Offer } from '../../api/restApi/offers/types';
 import { MobileFilters } from '../../components/Filters/MobileFilter';
 import Loading from '../../components/Loading';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
+import NoItems from '../../components/NoItems';
 
 type TOption = {
   direction: 'asc' | 'desc';
@@ -100,8 +101,9 @@ export const NFTPage = () => {
 
   useEffect(() => {
     if (!api?.nft || !selectedAccount?.address) return;
+    setIsFetchingTokens(true);
+    console.log('FetchingTokens');
     void (async () => {
-      setIsFetchingTokens(true);
       const _tokens = await api.nft?.getAccountTokens(selectedAccount.address) as NFTToken[];
       setTokens((tokens) => [...tokens, ..._tokens]);
       setIsFetchingTokens(false);
@@ -110,13 +112,13 @@ export const NFTPage = () => {
 
   useEffect(() => {
     if (!api?.nft) return;
+    setIsFetchingTokens(true);
     void (async () => {
-      setIsFetchingTokens(true);
       const _tokensFromOffers = await Promise.all(offers.map(({ tokenId, collectionId }) => api.nft?.getToken(collectionId, tokenId))) as NFTToken[];
       setTokens((tokens) => [...tokens, ..._tokensFromOffers]);
       setIsFetchingTokens(false);
     })();
-  }, [offers, api?.nft]);
+  }, [offers, api?.nft, setIsFetchingTokens]);
 
   useEffect(() => {
     const option = sortingOptions.find((option) => { return option.id === sortingValue; });
@@ -219,10 +221,11 @@ export const NFTPage = () => {
         <div>
           <Text size='m'>{`${featuredTokens.length} items`}</Text>
         </div>
-        <div>
+        <TokensListWrapper >
           {(isFetchingTokens || isFetchingOffers) && <Loading />}
-          <TokensList tokens={featuredTokens.filter(filter)} />
-        </div>
+          {!isFetchingTokens && !isFetchingOffers && featuredTokens.length === 0 && <NoItems />}
+          <TokensList tokens={featuredTokens} />
+        </TokensListWrapper>
       </MainContent>
       <MobileFilters<MyTokensFilterState>
         defaultSortingValue={defaultSortingValue}
@@ -293,4 +296,8 @@ const SortSelectWrapper = styled.div`
 const SearchAndSortingWrapper = styled.div`
   display: flex;
   justify-content: space-between;
+`;
+
+const TokensListWrapper = styled.div`
+  min-height: 640px;
 `;

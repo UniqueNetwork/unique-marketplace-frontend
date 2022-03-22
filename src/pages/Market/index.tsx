@@ -9,6 +9,8 @@ import { useOffers } from '../../api/restApi/offers/offers';
 import { OffersList } from '../../components/OffersList/OffersList';
 import { MobileFilters } from '../../components/Filters/MobileFilter';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
+import Loading from '../../components/Loading';
+import NoItems from '../../components/NoItems';
 
 type TOption = {
   iconRight: {
@@ -129,6 +131,8 @@ export const MarketPage = () => {
           threshold={200}
           useWindow={true}
         >
+          {isFetching && <Loading />}
+          {!isFetching && !offers?.length && <NoItems />}
           <OffersList offers={offers || []} />
         </InfiniteScroll>
       </MainContent>
