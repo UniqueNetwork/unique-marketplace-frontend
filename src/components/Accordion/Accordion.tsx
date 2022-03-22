@@ -32,6 +32,10 @@ const Accordion: FC<AccordionProps> = ({ title, isOpen: isOpenProps, children, o
     setIsOpen(!isOpen);
   }, [isOpen]);
 
+  const onClearClick = useCallback(() => {
+    onClear && onClear();
+  }, [onClear]);
+
   return (
     <AccordionWrapper>
       <AccordionHeaderWrapper>
@@ -41,7 +45,7 @@ const Accordion: FC<AccordionProps> = ({ title, isOpen: isOpenProps, children, o
         </AccordionTitle>
         {isClearShow && <Button size={'s'}
           title={'Clear'}
-          onClick={() => onClear && onClear()}
+          onClick={onClearClick}
           role={'danger'}
         />}
       </AccordionHeaderWrapper>

@@ -1,15 +1,17 @@
-import React, { FC, useCallback, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components/macro';
-import { Checkbox } from '@unique-nft/ui-kit';
+import { Checkbox, Text } from '@unique-nft/ui-kit';
 import Accordion from '../Accordion/Accordion';
 import { useCollections } from '../../hooks/useCollections';
 import Loading from '../Loading';
+import { Avatar } from '../Avatar/Avatar';
 
 interface CollectionsFilterProps {
+  value?: number[]
   onChange(value: number[]): void
 }
 
-const CollectionsFilter: FC<CollectionsFilterProps> = ({ onChange }) => {
+const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange }) => {
   const { collections, isFetching } = useCollections();
 
   const [selectedCollections, setSelectedCollections] = useState<number[]>([]);
@@ -29,10 +31,14 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ onChange }) => {
     // TODO: filter by attributes
   }, []);
 
-  const onCollectionsClear = useCallback(() => () => {
+  const onCollectionsClear = useCallback(() => {
     setSelectedCollections([]);
     onChange([]);
-  }, [onChange]);
+  }, [onChange, setSelectedCollections]);
+
+  useEffect(() => {
+    setSelectedCollections(value || []);
+  }, [value]);
 
   return (<Accordion title={'Collections'}
     isOpen={true}
@@ -42,12 +48,17 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ onChange }) => {
     <CollectionFilterWrapper>
       {isFetching && <Loading />}
       {collections.map((collection) => (
-        <Checkbox checked={selectedCollections.indexOf(collection.id) !== -1}
-          label={collection.collectionName}
-          size={'m'}
-          onChange={onCollectionSelect(collection.id)}
-          key={`collection-${collection.id}`}
-        />
+        <CheckboxWrapper>
+          <Checkbox
+            checked={selectedCollections.indexOf(collection.id) !== -1}
+            label={''}
+            size={'m'}
+            onChange={onCollectionSelect(collection.id)}
+            key={`collection-${collection.id}`}
+          />
+          <Avatar src={collection.coverImageUrl} size={22} type={'circle'}/>
+          <Text>{collection.collectionName}</Text>
+        </CheckboxWrapper>
         ))}
     </CollectionFilterWrapper>
     {/* TODO: unsupported on back-end */}
@@ -94,6 +105,12 @@ const AttributesFilterWrapper = styled.div`
     text-overflow: ellipsis;
     overflow: hidden;
   }
+`;
+
+const CheckboxWrapper = styled.div`
+  display: flex;
+  column-gap: calc(var(--gap) / 4);
+  align-items: center;
 `;
 
 export default CollectionsFilter;
