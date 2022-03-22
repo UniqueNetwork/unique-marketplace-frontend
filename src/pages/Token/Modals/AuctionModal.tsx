@@ -41,6 +41,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: string, 
 
   const onConfirmPlaceABidClick = useCallback(
     () => {
+      if (!bidAmount) return;
       const leadingBidAmount = offer?.auction?.bids.reduce((amount, bid) => Math.max(amount, Number(bid.amount)), 0) || 0;
       onConfirmPlaceABid((bidAmount - leadingBidAmount / Math.pow(10, 12)).toString(), chain || '');
     },

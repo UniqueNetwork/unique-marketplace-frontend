@@ -78,7 +78,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
   );
 
   const onConfirmAuctionClick = useCallback(() => {
-    if (!selectedAccount || !minStepInputValueAuction || !durationSelectValue) return;
+    if (!selectedAccount || !minStepInputValueAuction || !inputStartingPriceValue || !durationSelectValue) return;
     onSellAuction({ minimumStep: minStepInputValueAuction, startingPrice: inputStartingPriceValue, duration: durationSelectValue, accountAddress: selectedAccount.address } as TAuctionProps);
   }, [minStepInputValueAuction, inputStartingPriceValue, durationSelectValue, selectedAccount, onSellAuction]);
 
