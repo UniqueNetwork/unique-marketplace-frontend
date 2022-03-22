@@ -57,7 +57,7 @@ type TAskSellModalProps = {
 export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixPrice }) => {
   const { selectedAccount } = useAccounts();
   const [activeTab, setActiveTab] = useState<number>(0);
-  const [priceInputValue, setpriceInputValue] = useState<number>(15);
+  const [priceInputValue, setPriceInputValue] = useState<number>(15);
 
   const [minStepInputValueAuction, setMinStepInputValueAuction] = useState<number>(15);
   const [inputStartingPriceValue, setInputStartingPriceValue] = useState<number>();
@@ -72,18 +72,18 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
 
   const onPriceInputChange = useCallback(
     (value: number) => {
-      setpriceInputValue(value);
+      setPriceInputValue(value);
     },
-    [setpriceInputValue]
+    [setPriceInputValue]
   );
 
   const onConfirmAuctionClick = useCallback(() => {
-    if (!selectedAccount) return;
+    if (!selectedAccount || !minStepInputValueAuction || !durationSelectValue) return;
     onSellAuction({ minimumStep: minStepInputValueAuction, startingPrice: inputStartingPriceValue, duration: durationSelectValue, accountAddress: selectedAccount.address } as TAuctionProps);
   }, [minStepInputValueAuction, inputStartingPriceValue, durationSelectValue, selectedAccount, onSellAuction]);
 
   const onConfirmFixPriceClick = useCallback(() => {
-    if (!selectedAccount) return;
+    if (!selectedAccount || !priceInputValue) return;
     onSellFixPrice({ price: priceInputValue, accountAddress: selectedAccount.address } as TFixPriceProps); // TODO: proper typing, proper calculated object
   }, [priceInputValue, selectedAccount, onSellFixPrice]);
 
