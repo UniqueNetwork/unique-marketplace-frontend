@@ -6,7 +6,6 @@ import styled from 'styled-components/macro'; // Todo: https://cryptousetech.atl
 import { useScreenWidthFromThreshold } from '../../hooks/useScreenWidthFromThreshold';
 import menu from '../../static/icons/menu.svg';
 import { TMenuItems } from '../PageLayout';
-import { AdditionalColorDark, AdditionalColorLight, Primary500 } from '../../styles/colors';
 import { WalletManager } from './WalletManager/WalletManager';
 
 interface HeaderProps {
@@ -183,7 +182,7 @@ const MobileMenu = styled.div`
   left: 0;
   right: 0;
   height: 100vh;
-  background-color: ${AdditionalColorLight};
+  background-color: var(--color-additional-light);
   box-shadow: inset 0 2px 8px rgb(0 0 0 / 6%);
   display: flex;
   flex-direction: column;
@@ -197,15 +196,11 @@ const TextStyled = styled(Text) <{ $active?: boolean }>`
     min-width: 100%;
     border-radius: 4px;
     padding: 8px 16px;
-    background-color: ${(props) => props.$active ? Primary500 : 'transparent'};
-    color: ${(props) => props.$active ? AdditionalColorLight : AdditionalColorDark};
+    background-color: ${(props) => props.$active ? 'var(--color-primary-500)' : 'transparent'};
+    color: ${(props) => props.$active ? 'var(--color-additional-light)' : 'var(--color-additional-dark)'};
 
     &:hover {
-      color: ${(props) => (props.$active ? AdditionalColorLight : Primary500)};
+      color: ${(props) => (props.$active ? 'var(--color-additional-light)' : 'var(--color-primary-500)')};
     }
   }
-`;
-
-const SelectStyled = styled(Select)`
-  width: 430px;
 `;
