@@ -556,7 +556,7 @@ class MarketController implements IMarketController {
     if (!token) throw new Error('Token not found');
     const tokenOwner = token.owner;
     let tx = this.uniqApi.tx.unique.transfer(recipient, collectionId, tokenId, tokenPart);
-    if (!compareEncodedAddresses(tokenOwner?.Substrate, from)) {
+    if (!isTokenOwner(from, tokenOwner)) {
       const ethFrom = getEthAccount(from);
       if (tokenOwner?.Ethereum === ethFrom) {
         tx = this.uniqApi.tx.unique.transferFrom(normalizeAccountId({ Ethereum: ethFrom } as CrossAccountId), normalizeAccountId(recipient as CrossAccountId), collectionId, tokenId, 1);

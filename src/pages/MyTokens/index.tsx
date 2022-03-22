@@ -15,6 +15,7 @@ export const MyTokensPage = () => {
       activeIndex={activeTab}
       labels={['MyTokens', 'Coins']}
       onClick={handleClick}
+      disabledIndexes={[1]}
     />
     <Tabs activeIndex={activeTab}>
       <NFTPage />

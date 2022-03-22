@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FC, useCallback, useEffect, useMemo } from 'react';
 import styled from 'styled-components/macro';
 import { Button, Text } from '@unique-nft/ui-kit';
 
@@ -18,9 +18,13 @@ import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';
 const tokenSymbol = 'KSM';
 
 export const WalletManager: FC = () => {
-  const { selectedAccount, accounts, isLoading, isLoadingBalances, changeAccount } = useAccounts();
+  const { selectedAccount, accounts, isLoading, isLoadingBalances, fetchAccounts, changeAccount } = useAccounts();
   const { currentChain } = useApi();
   const deviceSize = useDeviceSize();
+
+  useEffect(() => {
+    void fetchAccounts();
+  }, [fetchAccounts]);
 
   const onOnChainChange = useCallback(() => {
     // TODO: change chain

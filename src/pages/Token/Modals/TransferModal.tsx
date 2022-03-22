@@ -43,6 +43,7 @@ const AskTransferModal: FC<{ onTransfer(receiver: string): void }> = ({ onTransf
 
   const onConfirmTransferClick = useCallback(
     () => {
+      if (!address) return;
       onTransfer(address);
     },
     [address, onTransfer]
