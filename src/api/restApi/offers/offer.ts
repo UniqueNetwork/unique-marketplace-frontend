@@ -23,6 +23,7 @@ export const useOffer = (collectionId: number, tokenId: number) => {
         setIsFetching(false);
       }
     }).catch((err: AxiosError) => {
+      setOffer(undefined);
       setFetchingError({
         status: err.response?.status,
         message: err.message

@@ -102,10 +102,6 @@ export const useAccounts = () => {
     setIsLoading(false);
   }, [rpcClient?.isKusamaApiConnected]);
 
-  useEffect(() => {
-    void fetchAccounts();
-  }, [fetchAccounts]);
-
   const fetchBalances = useCallback(async () => {
     setIsLoadingBalances(true);
     const accountsWithBalance = await getAccountsBalances(accounts);
@@ -181,7 +177,6 @@ export const useAccounts = () => {
   return {
     accounts,
     selectedAccount,
-    fetchAccounts,
     isLoading,
     isLoadingBalances,
     fetchAccountsError,
@@ -190,6 +185,7 @@ export const useAccounts = () => {
     unlockLocalAccount,
     signTx,
     signMessage,
+    fetchAccounts,
     fetchBalances,
     changeAccount
   };
