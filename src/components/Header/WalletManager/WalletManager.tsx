@@ -1,4 +1,5 @@
 import React, { FC, useCallback, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { Button, Text } from '@unique-nft/ui-kit';
 
@@ -63,7 +64,9 @@ export const WalletManager: FC = () => {
       {isLoadingBalances && <Loading />}
       {deviceSize === DeviceSize.lg && <><Divider />
         <SettingsButtonWrapper>
-          <Icon path={Gear} size={24} color={'var(--color-grey-500)'} />
+          <Link to={'/accounts'}>
+            <Icon path={Gear} size={24} color={'var(--color-grey-500)'} />
+          </Link>
         </SettingsButtonWrapper></>}
     </WalletManagerWrapper>
   );
@@ -113,9 +116,13 @@ const BalanceOptionWrapper = styled.div`
 `;
 
 const SettingsButtonWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 0 var(--gap);
+  a {
+    margin-right: 0px;
+    height: 100%;
+    padding: 0 var(--gap);
+    align-items: center;
+    display: flex;
+  }
 `;
 
 const WalletManagerWrapper = styled.div`
