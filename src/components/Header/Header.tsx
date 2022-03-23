@@ -2,13 +2,16 @@ import { Text } from '@unique-nft/ui-kit';
 import { FC, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components/macro'; // Todo: https://cryptousetech.atlassian.net/browse/NFTPAR-1201
+
 import { useScreenWidthFromThreshold } from '../../hooks/useScreenWidthFromThreshold';
 import menu from '../../static/icons/menu.svg';
 import { TMenuItems } from '../PageLayout';
 import { WalletManager } from './WalletManager/WalletManager';
+
 interface HeaderProps {
   activeItem: TMenuItems;
 }
+
 export const Header: FC<HeaderProps> = ({ activeItem }) => {
   const { lessThanThreshold: showMobileMenu } =
     useScreenWidthFromThreshold(1279);
@@ -16,6 +19,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
   const mobileMenuToggler = useCallback(() => {
     toggleMobileMenu((prevState) => !prevState);
   }, []);
+
   return (
     <HeaderStyled>
       <LeftSideColumn>
@@ -129,6 +133,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
     </HeaderStyled>
   );
 };
+
 const HeaderStyled = styled.div`
   display: flex;
   align-items: center;
@@ -139,7 +144,7 @@ const HeaderStyled = styled.div`
 const LeftSideColumn = styled.div`
   display: flex;
   align-items: center;
-  `;
+`;
 
 const MenuIcon = styled.img`
   width: 32px;

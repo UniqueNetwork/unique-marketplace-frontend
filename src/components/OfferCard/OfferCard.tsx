@@ -159,8 +159,8 @@ const PriceWrapper = styled.div`
 `;
 
 const StyledText = styled(Text)` 
-&& {
-  color: var(--color-additional-dark);
+  && {
+    color: var(--color-additional-dark);
   }
 `;
 
