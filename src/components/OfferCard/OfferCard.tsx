@@ -93,7 +93,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
           {!isBidder && !isTopBidder && <Text size={'xs'} color={'grey-500'} >{
             offer.auction.bids.length > 0 ? 'Last bid' : 'Minimum bid'
           }</Text>}
-          <Text color={'dark'} size={'xs'}>{`${timeDifference(new Date(offer.auction?.stopAt || '').getTime() / 1000)} left`}</Text>
+          <StyledText color={'dark'} size={'xs'}>{`${timeDifference(new Date(offer.auction?.stopAt || '').getTime() / 1000)} left`}</StyledText>
         </AuctionInfoWrapper>}
       </Description>
 
@@ -156,6 +156,12 @@ const PictureWrapper = styled.a`
 const PriceWrapper = styled.div` 
   display: flex;
   align-items: center;
+`;
+
+const StyledText = styled(Text)` 
+  && {
+    color: var(--color-additional-dark);
+  }
 `;
 
 const Description = styled.div`

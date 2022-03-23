@@ -1,4 +1,4 @@
-import { Select, Text } from '@unique-nft/ui-kit';
+import { Text } from '@unique-nft/ui-kit';
 import { FC, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components/macro'; // Todo: https://cryptousetech.atlassian.net/browse/NFTPAR-1201
@@ -7,7 +7,6 @@ import { useScreenWidthFromThreshold } from '../../hooks/useScreenWidthFromThres
 import menu from '../../static/icons/menu.svg';
 import { TMenuItems } from '../PageLayout';
 import { WalletManager } from './WalletManager/WalletManager';
-import { AdditionalDark, AdditionalLight, Primary500 } from '../../styles/colors';
 
 interface HeaderProps {
   activeItem: TMenuItems;
@@ -17,7 +16,6 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
   const { lessThanThreshold: showMobileMenu } =
     useScreenWidthFromThreshold(1279);
   const [mobileMenuIsOpen, toggleMobileMenu] = useState(false);
-
   const mobileMenuToggler = useCallback(() => {
     toggleMobileMenu((prevState) => !prevState);
   }, []);
@@ -35,46 +33,44 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
         {!showMobileMenu && (
           <nav>
             <Link to='/'>
-              <Text
-                color={
-                  activeItem === 'Market' ? 'additional-dark' : 'primary-500'
-                }
+              <DesktopMenuItem
+                $active={activeItem === 'Market'}
+                color='additional-dark'
                 size='m'
                 weight='medium'
               >
                 Market
-              </Text>
+              </DesktopMenuItem>
             </Link>
             <Link to='myTokens'>
-              <Text
-                color={
-                  activeItem === 'My tokens' ? 'additional-dark' : 'primary-500'
-                }
+              <DesktopMenuItem
+                $active={activeItem === 'My tokens'}
+                color='additional-dark'
                 size='m'
                 weight='medium'
               >
                 My tokens
-              </Text>
+              </DesktopMenuItem>
             </Link>
             <Link to='trades'>
-              <Text
-                color={
-                  activeItem === 'Trades' ? 'additional-dark' : 'primary-500'
-                }
+              <DesktopMenuItem
+                $active={activeItem === 'Trades'}
+                color='additional-dark'
                 size='m'
                 weight='medium'
               >
                 Trades
-              </Text>
+              </DesktopMenuItem>
             </Link>
             <Link to='faq'>
-              <Text
-                color={activeItem === 'FAQ' ? 'additional-dark' : 'primary-500'}
+              <DesktopMenuItem
+                $active={activeItem === 'FAQ'}
+                color='additional-dark'
                 size='m'
                 weight='medium'
               >
                 FAQ
-              </Text>
+              </DesktopMenuItem>
             </Link>
           </nav>
         )}
@@ -171,7 +167,6 @@ const RightSide = styled.div`
 
 const LinkWrapper = styled.div`
   display: contents;
-
   a {
     margin-right: 0;
   }
@@ -183,7 +178,7 @@ const MobileMenu = styled.div`
   left: 0;
   right: 0;
   height: 100vh;
-  background-color: ${AdditionalLight};
+  background-color: var(--color-additional-light);
   box-shadow: inset 0 2px 8px rgb(0 0 0 / 6%);
   display: flex;
   flex-direction: column;
@@ -194,14 +189,23 @@ const MobileMenu = styled.div`
 const TextStyled = styled(Text) <{ $active?: boolean }>`
   && {
     display: flex;
-    min-width: 100%;
     border-radius: 4px;
     padding: 8px 16px;
-    background-color: ${(props) => props.$active ? Primary500 : 'transparent'};
-    color: ${(props) => props.$active ? AdditionalLight : AdditionalDark};
-
+    background-color: ${(props) => props.$active ? 'var(--color-primary-500)' : 'transparent'};
+    color: ${(props) => props.$active ? 'var(--color-additional-light)' : 'var(--color-additional-dark)'};
     &:hover {
-      color: ${(props) => (props.$active ? AdditionalLight : Primary500)};
+      color: ${(props) => (props.$active ? 'var(--color-additional-light)' : 'var(--color-primary-500)')};
+    }
+  }
+`;
+
+const DesktopMenuItem = styled(Text) <{ $active?: boolean }>`
+  && {
+    margin-right: 24px;
+    color: ${(props) => props.$active ? 'var(--color-additional-dark)' : 'var(--color-primary-500)'};
+    border-bottom: ${(props) => props.$active ? '1px solid var(--color-additional-dark)' : 'none'};
+    &:hover {
+      color: ${(props) => (props.$active ? 'var(--color-additional-dark)' : 'var(--color-primary-400)')};
     }
   }
 `;

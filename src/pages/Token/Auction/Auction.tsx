@@ -106,6 +106,10 @@ const AuctionWrapper = styled.div`
 const TimeLimitWrapper = styled.div`
   display: flex;
   align-items: center;
+
+  img {
+    margin-right: 4px;
+  }
 `;
 
 const Row = styled.div`
