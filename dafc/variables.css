@@ -33,6 +33,10 @@
 
     --color-additional-light: #FFFFFF;
     --color-additional-dark: #040B1D;
+    --color-additional-positive-500: #2DBF15;
+    --color-additional-positive-100: #E9FCE6;
+    --color-additional-warning-500: #F9A400;
+    --color-additional-warning-100: #FFF4E0;
 
     --color-footer-background: #040B1D;
     --color-layout-background: linear-gradient(90deg, rgba(222, 196, 240, 0.15) -27.58%, rgba(205, 227, 251, 0.15) 121.25%);
