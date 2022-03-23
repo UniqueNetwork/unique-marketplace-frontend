@@ -57,27 +57,29 @@ export const PageLayout: FC = () => {
 };
 
 const LayoutStyled = styled.div`
+
+  /* specific for dafc */
   .unique-layout {
     background: var(--color-background-layout);
 
-  .unique-font-heading.size-1 {
-    font-family: var(--font-heading);
-  }
+    .unique-font-heading.size-1 {
+      font-family: var(--font-heading);
+    }
 
-  .unique-button {
-    border-radius: var(--button-border-radius);
-  }
+    .unique-button {
+      border-radius: var(--button-border-radius);
+    }
 
-  footer{
-    background-color: var(--color-footer-background);
+    footer {
+      background-color: var(--color-footer-background);
 
-    .footer__text__dafc{
-      color: var(--color-additional-light);
-      font-size: 16px;
-      line-height: 24px;
+      .footer__text__dafc {
+        color: var(--color-additional-light);
+        font-size: 16px;
+        line-height: 24px;
+      }
     }
   }
-}
 
 
   .unique-layout__content {

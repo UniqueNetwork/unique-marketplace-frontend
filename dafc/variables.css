@@ -2,11 +2,10 @@
     --color-primary-400: #0034C6;
     --color-primary-500: #0034C6;
     --color-primary-600: #002BA2;
-    --color-grey-500: #fff;
     --color-blue-grey-100: #647789;
     --color-blue-grey-300: #abb6c1;
     --color-blue-grey-400: #647789;
-    --color-additional-light: #fff;
+    --color-additional-light: #FFFFFF;
     --color-additional-dark: #040B1D;
     --color-background-layout: linear-gradient(90deg, rgba(222, 196, 240, 0.15) -27.58%, rgba(205, 227, 251, 0.15) 121.25%);
     --color-time-limit-wrapper-background-gradient: linear-gradient(90deg, #DEC4F0 0%, #CDE3FB 121.25%);
