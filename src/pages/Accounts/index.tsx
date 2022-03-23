@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Button, Text, InputText, Avatar } from '@unique-nft/ui-kit';
+import { Button, Text, InputText, Avatar, Icon } from '@unique-nft/ui-kit';
 import { TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import styled from 'styled-components/macro';
 
@@ -7,7 +7,6 @@ import { useAccounts } from '../../hooks/useAccounts';
 import DefaultAvatar from '../../static/icons/default-avatar.svg';
 import ArrowUpRight from '../../static/icons/arrow-up-right.svg';
 import config from '../../config';
-import { Icon } from '../../components/Icon/Icon';
 import { CreateAccountModal } from './Modals/CreateAccount';
 import { ImportViaSeedAccountModal } from './Modals/ImportViaSeed';
 import { DropdownMenu, DropdownMenuItem } from '../../components/DropdownMenu/DropdownMenu';
@@ -58,7 +57,7 @@ const getAccountsColumns = ({ onShowSendFundsModal }: AccountsColumnsProps): Tab
       return <LinksWrapper>
         <LinkStyled target={'_blank'} rel={'noreferrer'} href={`${config.scanUrl}account/${address}`}>
           <Text color={'primary-500'}>UniqueScan</Text>
-          <Icon size={16} path={ArrowUpRight} color={'none'} />
+          <Icon size={16} file={ArrowUpRight} color={'none'} />
         </LinkStyled>
       </LinksWrapper>;
     }

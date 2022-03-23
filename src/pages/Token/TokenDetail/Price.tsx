@@ -1,8 +1,7 @@
 import React, { FC } from 'react';
-import { Heading, Text } from '@unique-nft/ui-kit';
+import { Heading, Icon, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
-import { Icon } from '../../../components/Icon/Icon';
 import Kusama from '../../../static/icons/logo-kusama.svg';
 import { formatKusamaBalance } from '../../../utils/textUtils';
 
@@ -18,7 +17,7 @@ export const Price: FC<PriceProps> = ({ price, fee, bid }) => {
   return (
     <PriceWrapper>
       <Row>
-        <Icon path={Kusama} />
+        <Icon file={Kusama} size={32}/>
         <Heading size={'1'}>{`${(Number(formatKusamaBalance(price)) + fee).toPrecision()}`}</Heading>
       </Row>
       <Row>

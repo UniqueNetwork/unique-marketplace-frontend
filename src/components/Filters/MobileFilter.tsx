@@ -4,6 +4,7 @@ import { Button, Select, Tabs } from '@unique-nft/ui-kit';
 import { IconProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
 import { FilterState } from './types';
+import { AdditionalLight } from '../../styles/colors';
 
 export type FilterChangeHandler<T> = Dispatch<SetStateAction<T | null>> | ((value: T | null) => void);
 
@@ -78,7 +79,7 @@ const MobileFilterActionsWrapper = styled.div`
   width: 100%;
   left: 0;
   padding: 10px calc(var(--gap) * 1.5);
-  background-color: var(--color-additional-light);
+  background-color: ${AdditionalLight};
   box-shadow: 0px -8px 12px rgba(0, 0, 0, 0.06);
   z-index: 8;
   column-gap: calc(var(--gap) / 2);
@@ -90,7 +91,7 @@ const MobileFilterActionsWrapper = styled.div`
 const MobileFilterModal = styled.div`
   display: none;
   position: fixed;
-  background-color: var(--color-additional-light);
+  background-color: ${AdditionalLight};
   padding: calc(var(--gap) * 1.5);
   height: calc(100vh - 140px);
   top: 80px;

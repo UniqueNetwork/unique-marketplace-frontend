@@ -1,11 +1,10 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
-import { Text, Button, Heading } from '@unique-nft/ui-kit';
+import { Text, Button, Heading, Icon } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import { Offer } from '../../../api/restApi/offers/types';
 import { NFTToken } from '../../../api/chainApi/unique/types';
 import Bids from './Bids';
-import { Icon } from '../../../components/Icon/Icon';
 import clock from '../../../static/icons/clock.svg';
 import { timeDifference } from '../../../utils/timestampUtils';
 import { AdditionalPositive100, AdditionalPositive500, Coral100, Coral500, Grey300 } from '../../../styles/colors';
@@ -24,7 +23,7 @@ interface AuctionProps {
   onWithdrawClick(): void
 }
 
-const Auction: FC<AuctionProps> = ({ offer: initialOffer, token, onPlaceABidClick, onDelistAuctionClick, onWithdrawClick }) => {
+const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDelistAuctionClick, onWithdrawClick }) => {
   const { fee } = useFee();
 
   const [offer, setOffer] = useState<Offer>(initialOffer);
@@ -84,7 +83,7 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, token, onPlaceABidClic
         {canWithdraw && <Button title={'Withdraw'} onClick={onWithdrawClick} />}
 
         <TimeLimitWrapper>
-          <Icon path={clock} />
+          <Icon file={clock} size={24} />
           <Text color={'dark'}>{`${timeDifference(new Date(offer.auction?.stopAt || '').getTime() / 1000)} left`}</Text>
         </TimeLimitWrapper>
 

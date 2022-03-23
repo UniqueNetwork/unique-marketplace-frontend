@@ -1,14 +1,13 @@
 import React, { FC } from 'react';
 import styled from 'styled-components/macro';
-import { Text } from '@unique-nft/ui-kit';
+import { Icon, Text } from '@unique-nft/ui-kit';
 
-import { Icon } from './Icon/Icon';
 import NoItemsIcon from '../static/icons/no-items.svg';
 
 const NoItems: FC = () => {
   return (
     <NoItemsWrapper>
-      <Icon path={NoItemsIcon} />
+      <Icon file={NoItemsIcon} size={80} />
       <Text size={'l'} color={'grey-500'}>No items found</Text>
     </NoItemsWrapper>
   );
