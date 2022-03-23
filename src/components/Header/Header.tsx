@@ -184,7 +184,6 @@ const TextStyled = styled(Text) <{ $active?: boolean }>`
     padding: 8px 16px;
     background-color: ${(props) => props.$active ? 'var(--color-primary-500)' : 'transparent'};
     color: ${(props) => props.$active ? 'var(--color-additional-light)' : 'var(--color-additional-dark)'};
-    text-decoration: ${(props) => props.$active ? 'underline' : 'none'};
     &:hover {
       color: ${(props) => (props.$active ? 'var(--color-additional-light)' : 'var(--color-primary-500)')};
     }
@@ -195,9 +194,9 @@ const DesktopMenuItem = styled(Text) <{ $active?: boolean }>`
   && {
     margin-right: 24px;
     color: ${(props) => props.$active ? 'var(--color-additional-dark)' : 'var(--color-primary-500)'};
-    text-decoration: ${(props) => props.$active ? 'underline' : 'none'};
+    border-bottom: ${(props) => props.$active ? '1px solid var(--color-additional-dark)' : 'none'};
     &:hover {
-      color: ${(props) => (props.$active ? 'var(--color-additional-light)' : 'var(--color-primary-500)')};
+      color: ${(props) => (props.$active ? 'var(--color-additional-dark)' : 'var(--color-primary-400)')};
     }
   }
 `;

@@ -60,14 +60,10 @@ const LayoutStyled = styled.div`
 
   /* specific for dafc */
   .unique-layout {
-    background: var(--color-background-layout);
+    background: var(--color-layout-background);
 
     .unique-font-heading.size-1 {
       font-family: var(--font-heading);
-    }
-
-    .unique-button {
-      border-radius: var(--button-border-radius);
     }
 
     footer {

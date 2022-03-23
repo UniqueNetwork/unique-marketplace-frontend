@@ -106,11 +106,8 @@ const AuctionWrapper = styled.div`
 const TimeLimitWrapper = styled.div`
   display: flex;
   align-items: center;
-  padding: 7px 16px;
-  background: var(--color-time-limit-wrapper-background-gradient);
-  border-radius: var(--button-border-radius);
 
-  svg{
+  img {
     margin-right: 4px;
   }
 `;
