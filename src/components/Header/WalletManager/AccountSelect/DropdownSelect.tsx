@@ -1,8 +1,8 @@
 import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components/macro';
-import { Icon } from '../../../Icon/Icon';
 import TriangleDown from '../../../../static/icons/triangle-down.svg';
 import { AdditionalLight, Grey500, Primary100, Primary500 } from '../../../../styles/colors';
+import { Icon } from '@unique-nft/ui-kit';
 
 export interface DropdownSelectProps<T> {
   className?: string
@@ -53,7 +53,7 @@ export function DropdownSelect<T>({ className, placeholder, options, value, onCh
     <InputWrapper className={className} onClick={onClick} ref={InputRef}>
       {!value && placeholder && <Placeholder>{placeholder}</Placeholder>}
       {value && showOption(value)}
-      {options.length > 0 && <Icon path={TriangleDown} size={16} />}
+      {options.length > 0 && <Icon file={TriangleDown} size={8} />}
     </InputWrapper>
     <Dropdown isOpen={isDropdownVisible} ref={DropdownRef}>
       {options.map((item, index) => (

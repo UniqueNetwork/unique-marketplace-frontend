@@ -1,5 +1,5 @@
 import React, { FC, useMemo, useState } from 'react';
-import { Text } from '@unique-nft/ui-kit';
+import { Icon, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import { Picture } from '..';
@@ -8,7 +8,6 @@ import Loading from '../Loading';
 import { NFTToken } from '../../api/chainApi/unique/types';
 import { formatKusamaBalance } from '../../utils/textUtils';
 import { Offer } from '../../api/restApi/offers/types';
-import { Icon } from '../Icon/Icon';
 import Kusama from '../../static/icons/logo-kusama.svg';
 import { compareEncodedAddresses } from '../../api/chainApi/utils/addressUtils';
 import { useAccounts } from '../../hooks/useAccounts';
@@ -85,7 +84,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
         </a>
         <PriceWrapper>
           <Text size='s'>{`Price: ${formatKusamaBalance(offer?.price || 0)}`}</Text>
-          <Icon path={Kusama} size={16} />
+          <Icon file={Kusama} size={16} />
         </PriceWrapper>
         {!offer?.auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         {offer?.auction && <AuctionInfoWrapper>

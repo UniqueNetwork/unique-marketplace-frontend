@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components/macro';
-import { Button, Text } from '@unique-nft/ui-kit';
+import { Button, Icon, Text } from '@unique-nft/ui-kit';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { DropdownSelect, DropdownSelectProps } from './AccountSelect/DropdownSelect';
@@ -9,13 +9,12 @@ import { Account } from '../../../account/AccountContext';
 import Loading from '../../Loading';
 import { formatKusamaBalance, shortcutText } from '../../../utils/textUtils';
 import { Avatar } from '../../Avatar/Avatar';
-import { Icon } from '../../Icon/Icon';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import Gear from '../../../static/icons/gear.svg';
 import { BalanceOption } from './types';
 import { useApi } from '../../../hooks/useApi';
 import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';
-import { BlueGrey200, Grey500 } from '../../../styles/colors';
+import { BlueGrey200 } from '../../../styles/colors';
 
 const tokenSymbol = 'KSM';
 
@@ -66,7 +65,7 @@ export const WalletManager: FC = () => {
       {deviceSize === DeviceSize.lg && <><Divider />
         <SettingsButtonWrapper>
           <Link to={'/accounts'}>
-            <Icon path={Gear} size={24} color={Grey500} />
+            <Icon file={Gear} size={24} />
           </Link>
         </SettingsButtonWrapper></>}
     </WalletManagerWrapper>

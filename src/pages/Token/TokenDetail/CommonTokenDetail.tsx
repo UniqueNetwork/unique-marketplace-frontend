@@ -1,10 +1,9 @@
-import { Heading, Text } from '@unique-nft/ui-kit';
+import { Heading, Icon, Text } from '@unique-nft/ui-kit';
 import { FC, ReactChild } from 'react';
 import styled from 'styled-components/macro';
 
 import { Picture } from '../../../components';
 import share from '../../../static/icons/share.svg';
-import { Icon } from '../../../components/Icon/Icon';
 import { CollectionsCard } from './CollectionsCard';
 import { AttributesBlock } from './AttributesBlock';
 import { NFTToken } from '../../../api/chainApi/unique/types';
@@ -46,7 +45,7 @@ export const CommonTokenDetail: FC<IProps> = ({
             Share Link
           </Text>
           <IconWrapper>
-            <Icon path={share} />
+            <Icon file={share} size={24} />
           </IconWrapper>
         </Row>
         <Row>

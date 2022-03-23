@@ -2,13 +2,13 @@ import React, { ChangeEvent, FC, useCallback, useEffect, useState } from 'react'
 import { TCreateAccountBodyModalProps } from './types';
 import { addressFromSeed } from '../../../utils/seedUtils';
 import { mnemonicGenerate } from '@polkadot/util-crypto';
-import { Avatar, Button, Checkbox, Heading, Link, Select, Text } from '@unique-nft/ui-kit';
+import { Avatar, Button, Checkbox, Heading, Link, Select, Text, Icon } from '@unique-nft/ui-kit';
+import styled from 'styled-components/macro';
+
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import { defaultPairType, derivePath } from './CreateAccount';
-import styled from 'styled-components/macro';
 import { AdditionalWarning100 } from '../../../styles/colors';
 import { Tooltip } from '../../../components/Tooltip/Tooltip';
-import { Icon } from '../../../components/Icon/Icon';
 import Question from '../../../static/icons/question.svg';
 
 const seedGenerators = [
@@ -57,7 +57,7 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish 
     <SeedGeneratorSelectWrapper>
       <Select options={seedGenerators} value={seedGenerator} onChange={onSeedGeneratorChange} />
       <Tooltip title={<>Find out more on <Link href='https://' title={'Polkadot Wiki'}>Polkadot Wiki</Link></>} >
-        <Icon path={Question} />
+        <Icon file={Question} size={24} />
       </Tooltip>
     </SeedGeneratorSelectWrapper>
     <InputSeedWrapper>

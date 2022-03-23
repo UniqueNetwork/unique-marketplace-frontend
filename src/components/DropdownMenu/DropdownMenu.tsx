@@ -1,9 +1,8 @@
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { DropdownMenuItemProps, DropdownMenuProps } from './types';
 import styled from 'styled-components/macro';
-import { Button } from '@unique-nft/ui-kit';
+import { Button, Icon } from '@unique-nft/ui-kit';
 import CaretDown from '../../static/icons/caret-down.svg';
-import { Icon } from '../Icon/Icon';
 import { AdditionalLight, Primary100, Primary500 } from '../../styles/colors';
 
 export const DropdownMenu: FC<DropdownMenuProps> = ({ children, ...props }) => {
@@ -30,7 +29,7 @@ export const DropdownMenu: FC<DropdownMenuProps> = ({ children, ...props }) => {
     <DropdownMenuWrapper>
       <DropdownMenuButtonWrapper ref={DropdownMenuButtonRef}>
         <Button onClick={onDropdownClick} {...props} />
-        <Icon path={CaretDown} size={16}/>
+        <Icon file={CaretDown} size={16}/>
       </DropdownMenuButtonWrapper>
       <DropdownMenuDropdown isOpen={isOpen}>
         {children}
