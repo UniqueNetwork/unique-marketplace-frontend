@@ -143,6 +143,10 @@ const HeaderStyled = styled.div`
   align-items: center;
   justify-content: space-between;
   width: 100%;
+
+  a {
+    margin-right: 24px;
+  }
 `;
 
 const LeftSideColumn = styled.div`
