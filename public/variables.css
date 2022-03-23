@@ -1,2 +1,5 @@
 :root {
+    --button-border-radius: 4px;
+    --color-footer-background: #fff;
+    --color-background-layout: #f5f6f7;
 }

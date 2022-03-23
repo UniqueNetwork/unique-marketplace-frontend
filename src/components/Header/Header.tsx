@@ -1,4 +1,4 @@
-import { Select, Text } from '@unique-nft/ui-kit';
+import { Text } from '@unique-nft/ui-kit';
 import { FC, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components/macro'; // Todo: https://cryptousetech.atlassian.net/browse/NFTPAR-1201
@@ -32,50 +32,48 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
           <LogoIcon src={'/logos/logo.svg'} />
         </Link>
         {!showMobileMenu && (
-          <nav>
+          <Nav>
             <Link to='/'>
-              <Text
-                color={
-                  activeItem === 'Market' ? 'additional-dark' : 'primary-500'
-                }
+              <TextStyled
+                $active={activeItem === 'Market'}
+                color= 'additional-dark'
                 size='m'
                 weight='medium'
               >
                 Market
-              </Text>
+              </TextStyled>
             </Link>
             <Link to='myTokens'>
-              <Text
-                color={
-                  activeItem === 'My tokens' ? 'additional-dark' : 'primary-500'
-                }
+              <TextStyled
+                $active={activeItem === 'My tokens'}
+                color= 'additional-dark'
                 size='m'
                 weight='medium'
               >
                 My tokens
-              </Text>
+              </TextStyled>
             </Link>
             <Link to='trades'>
-              <Text
-                color={
-                  activeItem === 'Trades' ? 'additional-dark' : 'primary-500'
-                }
+              <TextStyled
+                $active={activeItem === 'Trades'}
+                color= 'additional-dark'
                 size='m'
                 weight='medium'
               >
                 Trades
-              </Text>
+              </TextStyled>
             </Link>
             <Link to='faq'>
-              <Text
-                color={activeItem === 'FAQ' ? 'additional-dark' : 'primary-500'}
+              <TextStyled
+                $active={activeItem === 'FAQ'}
+                color= 'additional-dark'
                 size='m'
                 weight='medium'
               >
                 FAQ
-              </Text>
+              </TextStyled>
             </Link>
-          </nav>
+          </Nav>
         )}
       </LeftSideColumn>
       <RightSide>
@@ -148,6 +146,16 @@ const HeaderStyled = styled.div`
   }
 `;
 
+const Nav = styled.nav`
+  && {display: flex;
+  align-items: center;
+
+  a {
+    margin-right: 8px;
+  }
+}
+`;
+
 const LeftSideColumn = styled.div`
   display: flex;
   align-items: center;
@@ -193,7 +201,6 @@ const MobileMenu = styled.div`
 const TextStyled = styled(Text) <{ $active?: boolean }>`
   && {
     display: flex;
-    min-width: 100%;
     border-radius: 4px;
     padding: 8px 16px;
     background-color: ${(props) => props.$active ? 'var(--color-primary-500)' : 'transparent'};
