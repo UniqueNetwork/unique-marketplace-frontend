@@ -117,7 +117,7 @@ const BalanceOptionWrapper = styled.div`
 
 const SettingsButtonWrapper = styled.div`
   a {
-    margin-right: 0px;
+    margin-right: 0px !important;
     height: 100%;
     padding: 0 var(--gap);
     align-items: center;
