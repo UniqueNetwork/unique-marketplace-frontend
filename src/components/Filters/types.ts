@@ -5,4 +5,4 @@ export type PriceRange = {
   maxPrice: number
 }
 
-export type FilterState = Record<string, number | string | undefined | number[] | boolean>;
+export type FilterState = Record<string, number | string[] | string | undefined | number[] | boolean>;

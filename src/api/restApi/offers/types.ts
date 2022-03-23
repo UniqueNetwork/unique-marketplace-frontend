@@ -39,3 +39,13 @@ export type Offer = {
 export type OffersResponse = PaginatedResponse<Offer>
 
 export type UseFetchOffersProps = Partial<GetOffersRequestPayload>
+
+export type Trait = {
+  trait: string; // name
+  count: number;
+};
+
+export type TraitsResponse = {
+  collectionId: number;
+  traits: Trait[];
+};
