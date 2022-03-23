@@ -7,6 +7,7 @@ import { useScreenWidthFromThreshold } from '../../hooks/useScreenWidthFromThres
 import menu from '../../static/icons/menu.svg';
 import { TMenuItems } from '../PageLayout';
 import { WalletManager } from './WalletManager/WalletManager';
+import { AdditionalDark, AdditionalLight, Primary500 } from '../../styles/colors';
 
 interface HeaderProps {
   activeItem: TMenuItems;
@@ -178,7 +179,7 @@ const MobileMenu = styled.div`
   left: 0;
   right: 0;
   height: 100vh;
-  background-color: var(--color-additional-light);
+  background-color: ${AdditionalLight};
   box-shadow: inset 0 2px 8px rgb(0 0 0 / 6%);
   display: flex;
   flex-direction: column;
@@ -192,11 +193,11 @@ const TextStyled = styled(Text) <{ $active?: boolean }>`
     min-width: 100%;
     border-radius: 4px;
     padding: 8px 16px;
-    background-color: ${(props) => props.$active ? 'var(--color-primary-500)' : 'transparent'};
-    color: ${(props) => props.$active ? 'var(--color-additional-light)' : 'var(--color-additional-dark)'};
+    background-color: ${(props) => props.$active ? Primary500 : 'transparent'};
+    color: ${(props) => props.$active ? AdditionalLight : AdditionalDark};
 
     &:hover {
-      color: ${(props) => (props.$active ? 'var(--color-additional-light)' : 'var(--color-primary-500)')};
+      color: ${(props) => (props.$active ? AdditionalLight : Primary500)};
     }
   }
 `;

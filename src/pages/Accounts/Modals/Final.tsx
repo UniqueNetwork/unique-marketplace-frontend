@@ -4,7 +4,7 @@ import { Avatar, Button, Text } from '@unique-nft/ui-kit';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import styled from 'styled-components/macro';
 import { defaultPairType, derivePath } from './CreateAccount';
-import { AdditionalWarning100 } from '../../../styles/colors';
+import { AdditionalWarning100, Grey300 } from '../../../styles/colors';
 import { Tooltip } from '../../../components/Tooltip/Tooltip';
 import { Icon } from '../../../components/Icon/Icon';
 import Question from '../../../static/icons/question.svg';
@@ -118,7 +118,7 @@ const CredentialsWrapper = styled.div`
 `;
 
 const ValueTextStyled = styled.div`
-  border: 1px solid #d2d3d6;
+  border: 1px solid ${Grey300};
   padding: 11px 12px;
   border-radius: 4px;
 `;

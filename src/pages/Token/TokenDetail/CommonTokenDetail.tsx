@@ -10,6 +10,7 @@ import { AttributesBlock } from './AttributesBlock';
 import { NFTToken } from '../../../api/chainApi/unique/types';
 import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';
 import { shortcutText } from '../../../utils/textUtils';
+import { Grey300, Grey500 } from '../../../styles/colors';
 
 interface IProps {
   children: ReactChild[];
@@ -98,7 +99,7 @@ const IconWrapper = styled.div`
   margin-right: 16px;
 
   svg {
-    fill: var(--color-grey-500);
+    fill: ${Grey500};
   }
 `;
 
@@ -170,5 +171,5 @@ const Account = styled.div`
 
 const Divider = styled.div`
   margin: 24px 0;
-  border-top: 1px dashed var(--color-grey-300);
+  border-top: 1px dashed ${Grey300};
 `;

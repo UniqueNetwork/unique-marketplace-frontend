@@ -1,5 +1,6 @@
 import React, { FC, ReactNode, useCallback, useState } from 'react';
 import styled from 'styled-components';
+import { AdditionalLight, Secondary700 } from '../../styles/colors';
 
 type TooltipPlacement = 'top' | 'bottom' | 'left' | 'right'
 
@@ -34,9 +35,9 @@ const TooltipWrapper = styled.div`
 const TooltipBubble = styled.div<{placement: TooltipPlacement, isVisible: boolean}>`
   visibility: ${({ isVisible }) => isVisible ? 'visible' : 'hidden'};
   position: absolute;
-  background-color: var(--color-secondary-700);
+  background-color: ${Secondary700};
   padding: calc(var(--gap) / 2) var(--gap);
-  color: var(--color-additional-light);
+  color: ${AdditionalLight};
   min-width: 238px;
   border-radius: 2px;
   z-index: 1000;
@@ -54,10 +55,10 @@ const TooltipBubble = styled.div<{placement: TooltipPlacement, isVisible: boolea
     border-style: solid;
     border-width: 5px;
     border-color: ${({ placement }) => ({
-      top: 'var(--color-secondary-700) transparent transparent transparent',
-      bottom: 'transparent transparent var(--color-secondary-700) transparent',
-      left: 'transparent transparent transparent var(--color-secondary-700)',
-      right: 'transparent var(--color-secondary-700) transparent transparent'
+      top: `${Secondary700} transparent transparent transparent`,
+      bottom: `transparent transparent ${Secondary700} transparent`,
+      left: `transparent transparent transparent ${Secondary700}`,
+      right: `transparent ${Secondary700} transparent transparent`
     })[placement]};
     position: absolute;
     content: '';

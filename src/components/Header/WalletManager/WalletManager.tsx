@@ -15,6 +15,7 @@ import Gear from '../../../static/icons/gear.svg';
 import { BalanceOption } from './types';
 import { useApi } from '../../../hooks/useApi';
 import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';
+import { BlueGrey200, Grey500 } from '../../../styles/colors';
 
 const tokenSymbol = 'KSM';
 
@@ -65,7 +66,7 @@ export const WalletManager: FC = () => {
       {deviceSize === DeviceSize.lg && <><Divider />
         <SettingsButtonWrapper>
           <Link to={'/accounts'}>
-            <Icon path={Gear} size={24} color={'var(--color-grey-500)'} />
+            <Icon path={Gear} size={24} color={Grey500} />
           </Link>
         </SettingsButtonWrapper></>}
     </WalletManagerWrapper>
@@ -126,7 +127,7 @@ const SettingsButtonWrapper = styled.div`
 `;
 
 const WalletManagerWrapper = styled.div`
-  border: 1px solid var(--color-blue-grey-200);
+  border: 1px solid ${BlueGrey200};
   box-sizing: border-box;
   border-radius: 8px;
   display: flex;
@@ -136,5 +137,5 @@ const WalletManagerWrapper = styled.div`
 const Divider = styled.div`
   width: 1px;
   margin: calc(var(--gap) / 2) 0;
-  border-left: 1px solid var(--color-blue-grey-200);
+  border-left: 1px solid ${BlueGrey200};
 `;

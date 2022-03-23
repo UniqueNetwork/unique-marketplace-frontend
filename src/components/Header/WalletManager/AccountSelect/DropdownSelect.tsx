@@ -2,6 +2,7 @@ import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'reac
 import styled from 'styled-components/macro';
 import { Icon } from '../../../Icon/Icon';
 import TriangleDown from '../../../../static/icons/triangle-down.svg';
+import { AdditionalLight, Grey500, Primary100, Primary500 } from '../../../../styles/colors';
 
 export interface DropdownSelectProps<T> {
   className?: string
@@ -95,7 +96,7 @@ const Dropdown = styled.div<{ isOpen: boolean }>`
   min-width: 100%;
   top: calc(100% + 4px);
   flex-direction: column;
-  background: var(--color-additional-light);
+  background: ${AdditionalLight};
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
   border-radius: 4px;
   overflow: hidden;
@@ -106,11 +107,11 @@ const OptionWrapper = styled.div`
   padding: var(--gap);
   cursor: pointer;
   &:hover {
-    background: var(--color-primary-100);
-    color: var(--color-primary-500);
+    background: ${Primary100};
+    color: ${Primary500};
   }
 `;
 
 const Placeholder = styled.div`
-  color: var(--color-grey-500);
+  color: ${Grey500};
 `;

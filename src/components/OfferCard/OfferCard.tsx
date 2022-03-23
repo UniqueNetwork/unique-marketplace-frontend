@@ -14,6 +14,7 @@ import { compareEncodedAddresses } from '../../api/chainApi/utils/addressUtils';
 import { useAccounts } from '../../hooks/useAccounts';
 import { timeDifference } from '../../utils/timestampUtils';
 import config from '../../config';
+import { Primary600 } from '../../styles/colors';
 
 export type TTokensCard = {
   offer: Offer
@@ -163,7 +164,7 @@ const Description = styled.div`
   flex-direction: column;
 
   span {
-    color: var(--color-primary-600);
+    color: ${Primary600};
 
     &:nth-of-type(2) {
       margin-bottom: 5px;
