@@ -3,6 +3,7 @@ import styled from 'styled-components/macro';
 import { decodeAddress } from '@polkadot/util-crypto';
 import { QrReader } from 'react-qr-reader';
 import Result from '@zxing/library/esm/core/Result';
+import { AdditionalCoral500 } from '../../styles/colors';
 
 export interface ScannedResult {
   content: string
@@ -72,7 +73,7 @@ const QRReaderWrapper = styled.div`
     &:after {
       position: absolute;
       content: '';
-      border: 5px solid #FB838D;
+      border: 5px solid ${AdditionalCoral500};
       box-sizing: border-box;
       width: 282px;
       height: 282px;

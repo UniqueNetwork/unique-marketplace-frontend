@@ -6,6 +6,7 @@ import { SortQuery, TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import useDeviceSize, { DeviceSize } from '../hooks/useDeviceSize';
 import MobileTable from './MobileTable/MobileTable';
 import Loading from './Loading';
+import NoItems from './NoItems';
 
 interface TableProps {
   columns: TableColumnProps[]
@@ -26,6 +27,7 @@ export const Table: FC<TableProps> = ({ columns, data, loading, onSort }) => {
           onSort={onSort}
         />
         {loading && <TableLoading />}
+        {!loading && !data?.length && <NoItems />}
       </>)}
       {deviceSize <= DeviceSize.sm && (
         <MobileTable
@@ -39,7 +41,10 @@ export const Table: FC<TableProps> = ({ columns, data, loading, onSort }) => {
 };
 
 const TableWrapper = styled.div`
- 
+ .unique-table-data-row {
+   height: unset;
+   min-height: 40px;
+ }
 `;
 
 const TableLoading = styled(Loading)`

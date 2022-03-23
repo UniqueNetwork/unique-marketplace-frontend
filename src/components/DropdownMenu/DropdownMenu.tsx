@@ -1,9 +1,9 @@
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { DropdownMenuItemProps, DropdownMenuProps } from './types';
 import styled from 'styled-components/macro';
-import { Button } from '@unique-nft/ui-kit';
+import { Button, Icon } from '@unique-nft/ui-kit';
 import CaretDown from '../../static/icons/caret-down.svg';
-import { Icon } from '../Icon/Icon';
+import { AdditionalLight, Primary100, Primary500 } from '../../styles/colors';
 
 export const DropdownMenu: FC<DropdownMenuProps> = ({ children, ...props }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -29,7 +29,7 @@ export const DropdownMenu: FC<DropdownMenuProps> = ({ children, ...props }) => {
     <DropdownMenuWrapper>
       <DropdownMenuButtonWrapper ref={DropdownMenuButtonRef}>
         <Button onClick={onDropdownClick} {...props} />
-        <Icon path={CaretDown} size={16}/>
+        <Icon file={CaretDown} size={16}/>
       </DropdownMenuButtonWrapper>
       <DropdownMenuDropdown isOpen={isOpen}>
         {children}
@@ -69,7 +69,7 @@ const DropdownMenuDropdown = styled.div<{ isOpen: boolean }>`
   width: 100%;
   top: calc(100% + 4px);
   flex-direction: column;
-  background: var(--color-additional-light);
+  background: ${AdditionalLight};
   box-shadow: 0px 2px 16px rgba(0, 0, 0, 0.08);
   border-radius: 4px;
   overflow: hidden;
@@ -79,7 +79,7 @@ const DropdownMenuItemWrapper = styled.div`
   padding: var(--gap);
   cursor: pointer;
   &:hover {
-    background: var(--color-primary-100);
-    color: var(--color-primary-500);
+    background: ${Primary100};
+    color: ${Primary500};
   }
 `;

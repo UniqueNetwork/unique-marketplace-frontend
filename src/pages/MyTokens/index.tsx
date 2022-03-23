@@ -13,7 +13,7 @@ export const MyTokensPage = () => {
   return (<>
     <Tabs
       activeIndex={activeTab}
-      labels={['MyTokens', 'Coins']}
+      labels={['NFT', 'Coins']}
       onClick={handleClick}
       disabledIndexes={[1]}
     />

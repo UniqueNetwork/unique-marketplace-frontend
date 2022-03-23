@@ -1,12 +1,12 @@
 import React, { FC, useCallback, useMemo } from 'react';
 import { TCreateAccountBodyModalProps } from './types';
-import { Avatar, Button, Text } from '@unique-nft/ui-kit';
-import DefaultAvatar from '../../../static/icons/default-avatar.svg';
+import { Avatar, Button, Icon, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
+
+import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import { defaultPairType, derivePath } from './CreateAccount';
-import { AdditionalWarning100 } from '../../../styles/colors';
+import { AdditionalWarning100, Grey300 } from '../../../styles/colors';
 import { Tooltip } from '../../../components/Tooltip/Tooltip';
-import { Icon } from '../../../components/Icon/Icon';
 import Question from '../../../static/icons/question.svg';
 
 export const FinalModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties, onFinish, onGoBack }) => {
@@ -26,21 +26,21 @@ export const FinalModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties
       <LabelTextWrapper>
         <Text size={'m'}>Partial seed</Text>
         <Tooltip title={'The seed is your key to the account. Knowing the seed allows you, or anyone else who knows the seed, to re-generate and control this account.'} placement={'right'} >
-          <Icon path={Question} />
+          <Icon file={Question} size={24} />
         </Tooltip>
       </LabelTextWrapper>
       <ValueTextStyled>{shortSeed}</ValueTextStyled>
       <LabelTextWrapper>
         <Text size={'m'}>Keypair type</Text>
         <Tooltip title={'Substrate supports a number of different crypto mechanisms. As such the keyring allows for the creation and management of different types of crypto.'} placement={'right'} >
-          <Icon path={Question} />
+          <Icon file={Question} size={24} />
         </Tooltip>
       </LabelTextWrapper>
       <ValueTextStyled>{defaultPairType}</ValueTextStyled>
       <LabelTextWrapper>
         <Text size={'m'}>Derivation path</Text>
         <Tooltip title={'If you would like to create and manage several accounts on the network using the same seed, you can use derivation paths.'} placement={'right'}>
-          <Icon path={Question} />
+          <Icon file={Question} size={24} />
         </Tooltip>
       </LabelTextWrapper>
       <ValueTextStyled>{derivePath || 'None provided'}</ValueTextStyled>
@@ -118,7 +118,7 @@ const CredentialsWrapper = styled.div`
 `;
 
 const ValueTextStyled = styled.div`
-  border: 1px solid #d2d3d6;
+  border: 1px solid ${Grey300};
   padding: 11px 12px;
   border-radius: 4px;
 `;

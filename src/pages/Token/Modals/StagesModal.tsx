@@ -1,9 +1,8 @@
 import React, { FC, useEffect } from 'react';
 import styled from 'styled-components/macro';
-import { Text } from '@unique-nft/ui-kit';
+import { Icon, Text } from '@unique-nft/ui-kit';
 
 import Loading from '../../../components/Loading';
-import { Icon } from '../../../components/Icon/Icon';
 import CheckCircle from '../../../static/icons/check-circle.svg';
 import { Stage, StageStatus } from '../../../types/StagesTypes';
 
@@ -25,7 +24,7 @@ const DefaultMarketStages: FC<TStagesModalProps> = ({ stages, status, onFinish }
       {stages.map((stage, index) => (<React.Fragment key={`stage-${index}`}>
         <StatusWrapper>
           {(stage.status === StageStatus.inProgress || stage.status === StageStatus.awaitingSign) && <Loading />}
-          {stage.status === StageStatus.success && <Icon path={CheckCircle} />}
+          {stage.status === StageStatus.success && <Icon file={CheckCircle} size={24} />}
         </StatusWrapper>
         <TitleWrapper>
           <Text size={'m'}>{stage.title}</Text>

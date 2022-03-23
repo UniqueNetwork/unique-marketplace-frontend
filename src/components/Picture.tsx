@@ -1,4 +1,5 @@
 import React, { FC } from 'react';
+import { Grey300 } from '../styles/colors';
 
 interface PictureProps {
   src?: string
@@ -21,7 +22,7 @@ export const Picture: FC<PictureProps> = (props) => {
           width='100%'
       >
         <rect
-          fill={'#D2D3D6'}
+          fill={Grey300}
           height={1000}
           width={1000}
           x={0}

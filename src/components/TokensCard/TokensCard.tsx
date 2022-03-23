@@ -8,6 +8,7 @@ import Loading from '../Loading';
 import { NFTToken } from '../../api/chainApi/unique/types';
 import { formatKusamaBalance } from '../../utils/textUtils';
 import config from '../../config';
+import { Primary600 } from '../../styles/colors';
 
 export type TTokensCard = {
   token?: NFTToken
@@ -126,7 +127,7 @@ const Description = styled.div`
   flex-direction: column;
 
   span {
-    color: var(--color-primary-600);
+    color: ${Primary600};
 
     &:nth-of-type(2) {
       margin-bottom: 8px;
