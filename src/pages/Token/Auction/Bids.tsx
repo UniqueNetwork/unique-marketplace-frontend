@@ -37,11 +37,13 @@ const tokenSymbol = 'KSM';
 const Bids: FC<BidsProps> = ({ offer }) => {
   if (!offer) return null;
 
+  const isBids = Number(offer?.auction?.bids?.length) > 0;
+
   return (
     <BidsWrapper>
-      {!offer.auction?.bids?.length && <Text >There is no bids</Text>}
-      {offer.auction?.bids?.length && <Table
-        data={offer.auction?.bids}
+      {!isBids && <Text >There is no bids</Text>}
+      {isBids && <Table
+        data={offer.auction!.bids}
         columns={getColumns(tokenSymbol)}
       />}
     </BidsWrapper>
