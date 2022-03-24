@@ -1,18 +1,17 @@
-import './app.scss'
-import React from 'react'
-import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom'
-import PageLayout from './components/PageLayout'
+import { Outlet } from 'react-router-dom';
 // contains gql and rpc with contexts and providers
-import ApiWrapper from './api/ApiWrapper'
+import ApiWrapper from './api/ApiWrapper';
+import { PageLayout } from './components';
+import AccountWrapper from './account/AccountProvider';
 
 export default function App() {
   return (
-    <div className={'app-wrapper'}>
-      <ApiWrapper>
+    <ApiWrapper>
+      <AccountWrapper>
         <PageLayout>
           <Outlet />
         </PageLayout>
-      </ApiWrapper>
-    </div>
-  )
+      </AccountWrapper>
+    </ApiWrapper>
+  );
 }

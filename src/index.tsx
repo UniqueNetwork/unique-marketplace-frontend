@@ -1,24 +1,59 @@
-import React from 'react'
-import ReactDOM from 'react-dom'
-import App from './App'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
-import { Account, Block, Extrinsic, Main } from './pages'
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
+import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
+import { Market, MyTokens, Accounts, Trades, FAQ, TokenPage } from './pages';
+import { GlobalStyle } from './styles';
 
 ReactDOM.render(
   <React.StrictMode>
+    <GlobalStyle />
     <Router>
       <Routes>
-        <Route path={'/'} element={<App />}>
-          <Route index={true} element={<Main />} />
-          <Route path={':chainId/'}>
-            <Route index={true} element={<Main />} />
-            <Route path={'account/:accountId'} element={<Account />} />
-            <Route path={'extrinsic/:blockIndex'} element={<Extrinsic />} />
-            <Route path={'block/:blockIndex'} element={<Block />} />
+        <Route
+          element={<App />}
+          path={'/'}
+        >
+          <Route
+            element={<Navigate to='market' />}
+            index
+          />
+          <Route
+            element={<TokenPage />}
+            path={'/token/:collectionId/:id'}
+          />
+          <Route
+            element={<Market />}
+            path={'market'}
+          >
+            <Route
+              element={<Market />}
+              index
+            />
           </Route>
+          <Route
+            element={<MyTokens />}
+            path={'myTokens'}
+          />
+          <Route
+            element={<Accounts />}
+            path={'accounts'}
+          />
+          <Route
+            element={<Trades />}
+            path={'trades'}
+          />
+          <Route
+            element={<FAQ />}
+            path={'faq'}
+          />
+          <Route
+            element={<Navigate to='market' />}
+            path={'*'}
+          />
         </Route>
       </Routes>
     </Router>
   </React.StrictMode>,
   document.getElementById('root')
-)
+);

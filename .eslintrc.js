@@ -55,18 +55,15 @@ module.exports = {
     "import-newlines",
     "react-hooks",
     "simple-import-sort",
-    "sort-destructure-keys",
-    "sort-keys-fix",
     "react",
   ],
   rules: {
     // required as 'off' since typescript-eslint has own versions
     indent: "off",
     "no-use-before-define": "off",
-    "@typescript-eslint/indent": ["error", 2],
     // rules from semistandard (don't include it, has standard dep version mismatch)
     semi: [2, "always"],
-    camelcase: "warn",
+    camelcase: ["warn", {ignoreDestructuring: true}],
     "no-extra-semi": 2,
     // specific overrides
     "@typescript-eslint/no-non-null-assertion": "warn",
@@ -84,70 +81,28 @@ module.exports = {
     "default-param-last": [0], // conflicts with TS version (this one doesn't allow TS ?)
     "import-newlines/enforce": ["error", 2048],
     "jsx-quotes": ["error", "prefer-single"],
+    "react/jsx-indent": ["error", 2],
+    "react/jsx-indent-props": [2, 2],
     "react/prop-types": [0], // this is a completely broken rule
     "react/jsx-key": "warn",
     "object-curly-newline": [
-      "error",
+      "warn",
       {
-        ImportDeclaration: "never",
-        ObjectPattern: "never",
+        ImportDeclaration: {multiline: true},
+        ObjectPattern: {multiline: true},
       },
-    ],
-    "padding-line-between-statements": [
-      "error",
-      { blankLine: "always", prev: ["const", "let", "var"], next: "*" },
-      {
-        blankLine: "any",
-        prev: ["const", "let", "var"],
-        next: ["const", "let", "var"],
-      },
-      { blankLine: "always", prev: "*", next: "block-like" },
-      { blankLine: "always", prev: "block-like", next: "*" },
-      { blankLine: "always", prev: "*", next: "function" },
-      { blankLine: "always", prev: "function", next: "*" },
-      { blankLine: "always", prev: "*", next: "try" },
-      { blankLine: "always", prev: "try", next: "*" },
-      { blankLine: "always", prev: "*", next: "return" },
-      { blankLine: "always", prev: "*", next: "import" },
-      { blankLine: "always", prev: "import", next: "*" },
-      { blankLine: "any", prev: "import", next: "import" },
     ],
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
-    "react/jsx-closing-bracket-location": [1, "tag-aligned"],
-    "react/jsx-first-prop-new-line": [1, "multiline-multiprop"],
+    "react/jsx-closing-bracket-location": [1, "line-aligned"],
     "react/jsx-fragments": "error",
     "react/jsx-max-props-per-line": [
-      1,
+      2,
       {
-        maximum: 1,
-        when: "always",
+        maximum: { single: 3, multi: 1 }
       },
     ],
     "react/jsx-no-bind": 1,
-    "react/jsx-sort-props": [
-      1,
-      {
-        noSortAlphabetically: false,
-      },
-    ],
-    "react/jsx-tag-spacing": [
-      2,
-      {
-        closingSlash: "never",
-        beforeSelfClosing: "always",
-        afterOpening: "never",
-        beforeClosing: "never",
-      },
-    ],
-    "sort-destructure-keys/sort-destructure-keys": [
-      2,
-      {
-        caseSensitive: true,
-      },
-    ],
-    "sort-keys-fix/sort-keys-fix": "warn",
-    "sort-keys": "error",
     "no-void": "off",
     // needs to be switched on at some point
     "@typescript-eslint/no-explicit-any": "off",
@@ -159,6 +114,11 @@ module.exports = {
     "@typescript-eslint/no-explicit-any": "warn",
     "@typescript-eslint/no-empty-function": "off",
     "@typescript-eslint/no-var-requires": "off",
+    "space-before-function-paren":["off", {
+      "anonymous": "never",
+      "named": "never",
+      "asyncArrow": "always"
+    }],
   },
   settings: {
     "import/extensions": [".js", ".ts", ".tsx"],

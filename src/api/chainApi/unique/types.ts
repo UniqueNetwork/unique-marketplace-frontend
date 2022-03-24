@@ -1,4 +1,4 @@
-import BN from 'bn.js'
+import BN from 'bn.js';
 
 export type SchemaVersionTypes = 'ImageURL' | 'Unique'
 
@@ -17,6 +17,7 @@ export interface NFTCollection {
     invalid: null
   }
   name: number[]
+  collectionName: string,
   offchainSchema: string
   owner?: string
   schemaVersion: SchemaVersionTypes
@@ -50,6 +51,11 @@ export interface NFTToken {
   variableData?: string
   attributes: AttributesDecoded
   imageUrl: string
+  collectionId?: number
+  collectionName?: string
+  prefix?: string
+  description?: string
+  collectionCover?: string
 }
 
 export type MetadataType = {

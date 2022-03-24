@@ -1,4 +1,5 @@
-import type { OverrideBundleDefinition } from '@polkadot/types/types'
+import type { OverrideBundleDefinition, OverrideBundleType } from '@polkadot/types/types';
+import { unique } from '@unique-nft/types/definitions';
 
 // structs need to be in order
 /* eslint-disable sort-keys */
@@ -10,7 +11,7 @@ const bundledTypesDefinitions: OverrideBundleDefinition = {
       minmax: [0, undefined],
       types: {
         AccessMode: {
-          _enum: ['Normal', 'WhiteList'],
+          _enum: ['Normal', 'WhiteList']
         },
         DecimalPoints: 'u8',
         CollectionMode: {
@@ -18,32 +19,32 @@ const bundledTypesDefinitions: OverrideBundleDefinition = {
             Invalid: null,
             NFT: null,
             Fungible: 'DecimalPoints',
-            ReFungible: null,
-          },
+            ReFungible: null
+          }
         },
         Ownership: {
           Owner: 'AccountId',
-          Fraction: 'u128',
+          Fraction: 'u128'
         },
         FungibleItemType: {
-          Value: 'u128',
+          Value: 'u128'
         },
         NftItemType: {
           Owner: 'AccountId',
           ConstData: 'Vec<u8>',
-          VariableData: 'Vec<u8>',
+          VariableData: 'Vec<u8>'
         },
         ReFungibleItemType: {
           Owner: 'Vec<Ownership<AccountId>>',
           ConstData: 'Vec<u8>',
-          VariableData: 'Vec<u8>',
+          VariableData: 'Vec<u8>'
         },
         SponsorshipState: {
           _enum: {
             Disabled: null,
             Unconfirmed: 'AccountId',
-            Confirmed: 'AccountId',
-          },
+            Confirmed: 'AccountId'
+          }
         },
         Collection: {
           Owner: 'AccountId',
@@ -59,7 +60,7 @@ const bundledTypesDefinitions: OverrideBundleDefinition = {
           Sponsorship: 'SponsorshipState',
           Limits: 'CollectionLimits',
           VariableOnChainSchema: 'Vec<u8>',
-          ConstOnChainSchema: 'Vec<u8>',
+          ConstOnChainSchema: 'Vec<u8>'
         },
         RawData: 'Vec<u8>',
         Address: 'AccountId',
@@ -67,25 +68,25 @@ const bundledTypesDefinitions: OverrideBundleDefinition = {
         Weight: 'u64',
         CreateNftData: {
           const_data: 'Vec<u8>',
-          variable_data: 'Vec<u8>',
+          variable_data: 'Vec<u8>'
         },
         CreateFungibleData: {
-          value: 'u128',
+          value: 'u128'
         },
         CreateReFungibleData: {
           const_data: 'Vec<u8>',
           variable_data: 'Vec<u8>',
-          pieces: 'u128',
+          pieces: 'u128'
         },
         CreateItemData: {
           _enum: {
             NFT: 'CreateNftData',
             Fungible: 'CreateFungibleData',
-            ReFungible: 'CreateReFungibleData',
-          },
+            ReFungible: 'CreateReFungibleData'
+          }
         },
         SchemaVersion: {
-          _enum: ['ImageURL', 'Unique'],
+          _enum: ['ImageURL', 'Unique']
         },
         CollectionId: 'u32',
         TokenId: 'u32',
@@ -99,7 +100,7 @@ const bundledTypesDefinitions: OverrideBundleDefinition = {
           RefungibleSponsorTimeout: 'u32',
           OffchainSchemaLimit: 'u32',
           VariableOnChainSchemaLimit: 'u32',
-          ConstOnChainSchemaLimit: 'u32',
+          ConstOnChainSchemaLimit: 'u32'
         },
         CollectionLimits: {
           AccountTokenOwnershipLimit: 'u32',
@@ -108,12 +109,24 @@ const bundledTypesDefinitions: OverrideBundleDefinition = {
           TokenLimit: 'u32',
           SponsorTimeout: 'u32',
           OwnerCanTransfer: 'bool',
-          OwnerCanDestroy: 'bool',
+          OwnerCanDestroy: 'bool'
         },
-        AccountInfo: 'AccountInfoWithDualRefCount',
-      },
-    },
-  ],
-}
+        AccountInfo: 'AccountInfoWithDualRefCount'
+      }
+    }
+  ]
+};
 
-export default bundledTypesDefinitions
+export const typesBundle: OverrideBundleType = {
+  spec: {
+    nft: bundledTypesDefinitions,
+    opal: {
+      rpc: { unique: unique.rpc }
+    },
+    quartz: {
+      rpc: { unique: unique.rpc }
+    }
+  }
+};
+
+export default bundledTypesDefinitions;

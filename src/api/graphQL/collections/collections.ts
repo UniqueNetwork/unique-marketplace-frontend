@@ -1,38 +1,35 @@
-import { gql, useApolloClient, useQuery } from '@apollo/client'
-import { useCallback } from 'react'
-import {
-  CollectionsData,
-  CollectionsVariables,
-  FetchMoreCollectionsOptions,
-  useGraphQlCollectionsProps,
-} from './types'
+import { gql, useQuery } from '@apollo/client';
+import { useCallback } from 'react';
+import { CollectionsData, CollectionsVariables, FetchMoreCollectionsOptions, useGraphQlCollectionsProps } from './types';
 
 const collectionsQuery = gql`
-  query getCollections($limit: Int, $offset: Int, $where: collections_bool_exp = {}) {
-    collections(where: $where, limit: $limit, offset: $offset) {
+  query getCollections(
+    $limit: Int
+    $offset: Int
+    $where: view_collections_bool_exp = {}
+  ) {
+    view_collections(where: $where, limit: $limit, offset: $offset) {
+      collection_cover
       collection_id
       description
       name
-      owner
-      token_prefix
       offchain_schema
-      schema_version
-      tokens_aggregate {
-        aggregate {
-          count
-        }
-      }
+      owner
+      token_limit
+      token_prefix
     }
-    collections_aggregate {
+    view_collections_aggregate {
       aggregate {
         count
       }
     }
   }
-`
-export const useGraphQlCollections = ({ pageSize, filter }: useGraphQlCollectionsProps) => {
-  const client = useApolloClient()
+`;
 
+export const useGraphQlCollections = ({
+  filter,
+  pageSize
+}: useGraphQlCollectionsProps) => {
   const getWhere = useCallback(
     (searchString?: string) => ({
       _and: {
@@ -40,53 +37,82 @@ export const useGraphQlCollections = ({ pageSize, filter }: useGraphQlCollection
         ...(searchString
           ? {
               _or: {
-                name: { _ilike: searchString },
                 description: { _ilike: searchString },
-                token_prefix: { _ilike: searchString },
-              },
+                name: { _ilike: searchString },
+                token_prefix: { _ilike: searchString }
+              }
             }
-          : {}),
-      },
+          : {})
+      }
     }),
     [filter]
-  )
+  );
 
   const {
-    fetchMore,
-    loading: isCollectionsFetching,
-    error: fetchCollectionsError,
     data,
+    error: fetchCollectionsError,
+    fetchMore,
+    loading: isCollectionsFetching
   } = useQuery<CollectionsData, CollectionsVariables>(collectionsQuery, {
+    fetchPolicy: 'network-only',
+    // Used for first execution
+    nextFetchPolicy: 'cache-first',
+    notifyOnNetworkStatusChange: true,
     variables: {
       limit: pageSize,
       offset: 0,
-      where: getWhere(),
-    },
-    fetchPolicy: 'network-only', // Used for first execution
-    nextFetchPolicy: 'cache-first',
-    notifyOnNetworkStatusChange: true,
-  })
+      where: getWhere()
+    }
+  });
 
   const fetchMoreCollections = useCallback(
-    ({ limit = pageSize, offset, searchString }: FetchMoreCollectionsOptions) => {
+    ({
+      limit = pageSize,
+      offset,
+      searchString
+    }: FetchMoreCollectionsOptions) => {
       return fetchMore({
         variables: {
           limit,
           offset,
-          where: getWhere(searchString),
-        },
-      })
+          where: getWhere(searchString)
+        }
+      });
     },
-    [fetchMore, filter, pageSize]
-  )
+    [fetchMore, getWhere, pageSize]
+  );
 
   return {
-    fetchMoreCollections,
-    collections: data?.collections || [],
-    collectionsCount: data?.collections_aggregate.aggregate.count || 0,
-    isCollectionsFetching,
+    collections: data?.view_collections || [],
+    collectionsCount: data?.view_collections_aggregate.aggregate.count || 0,
     fetchCollectionsError,
-  }
-}
+    fetchMoreCollections,
+    isCollectionsFetching
+  };
+};
 
-export { collectionsQuery }
+export const useGraphQlCollection = (collectionId: string) => {
+  const {
+    data,
+    error: fetchCollectionsError,
+    loading: isCollectionFetching
+  } = useQuery<CollectionsData, CollectionsVariables>(collectionsQuery, {
+    fetchPolicy: 'network-only',
+    // Used for first execution
+    nextFetchPolicy: 'cache-first',
+    notifyOnNetworkStatusChange: true,
+    variables: {
+      limit: 1,
+      offset: 0,
+      where: { collection_id: { _eq: collectionId } }
+    }
+  });
+
+  return {
+    collection: data?.view_collections[0] || undefined,
+    fetchCollectionsError,
+    isCollectionFetching
+  };
+};
+
+export { collectionsQuery };

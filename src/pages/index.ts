@@ -1,9 +1,8 @@
-import Main from './Main'
-import Account from './Account'
-import Collections from './Collections'
-import Extrinsic from './Extrinsic'
-import Tokens from './Tokens'
-import Transfers from './Transfers'
-import Block from './Block'
+import { MarketPage as Market } from './Market';
+import { MyTokensPage as MyTokens } from './MyTokens';
+import { TradesPage as Trades } from './Trades';
+import FAQ from './FAQ';
+import { AccountsPage as Accounts } from './Accounts';
+import TokenPage from './Token'; // temporary page for debugging
 
-export { Account, Collections, Extrinsic, Main, Tokens, Transfers, Block }
+export { Market, MyTokens, Accounts, Trades, FAQ, TokenPage };

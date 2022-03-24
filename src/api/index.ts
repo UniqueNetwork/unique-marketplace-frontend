@@ -1,8 +1,7 @@
-import config from '../config'
-import { GqlClient } from './graphQL/gqlClient'
-import RpcClient from './chainApi/rpcClient'
+import RpcClient from './chainApi/rpcClient';
+import { GqlClient } from './graphQL/gqlClient';
 
-const { defaultChain } = config
+// TODO remove gqlClient
+export const gqlClient = new GqlClient('');
 
-export const gqlClient = new GqlClient(defaultChain.gqlEndpoint)
-export const rpcClient = new RpcClient(defaultChain.rpcEndpoint)
+export const rpcClient = new RpcClient();
