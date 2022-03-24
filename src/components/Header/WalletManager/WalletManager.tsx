@@ -102,6 +102,7 @@ const AccountOptionWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 2);
   cursor: pointer;
+  align-items: center;
 `;
 
 const AccountOptionPropertyWrapper = styled.div`
