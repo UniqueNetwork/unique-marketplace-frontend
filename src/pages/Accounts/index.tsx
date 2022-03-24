@@ -6,6 +6,7 @@ import styled from 'styled-components/macro';
 import { useAccounts } from '../../hooks/useAccounts';
 import DefaultAvatar from '../../static/icons/default-avatar.svg';
 import ArrowUpRight from '../../static/icons/arrow-up-right.svg';
+import Copy from '../../static/icons/copy.svg';
 import config from '../../config';
 import { CreateAccountModal } from './Modals/CreateAccount';
 import { ImportViaSeedAccountModal } from './Modals/ImportViaSeed';
@@ -24,6 +25,10 @@ type AccountsColumnsProps = {
   onShowSendFundsModal(address: string): () => void;
 };
 
+const copyAddress = (account: string) => () => {
+  navigator.clipboard.writeText(account);
+};
+
 const getAccountsColumns = ({
   onShowSendFundsModal
 }: AccountsColumnsProps): TableColumnProps[] => [
@@ -37,9 +42,16 @@ const getAccountsColumns = ({
           <Avatar size={24} src={DefaultAvatar} />
           <AccountInfoWrapper>
             <Text>{accountInfo.name}</Text>
-            <Text size={'s'} color={'grey-500'}>
-              {accountInfo.address}
-            </Text>
+            <AddressRow>
+              <Text size={'s'} color={'grey-500'}>
+                {accountInfo.address}
+              </Text>
+              <a onClick={copyAddress(accountInfo.address)}>
+                <CopyIconWrapper>
+                  <Icon path={Copy} />
+                </CopyIconWrapper>
+              </a>
+            </AddressRow>
           </AccountInfoWrapper>
         </AccountCellWrapper>
       );
@@ -293,9 +305,33 @@ const TextStyled = styled(Text)`
 
 const IconWrapper = styled.div`
   && {
-    width:16px;
-    height:16px;
+    width: 16px;
+    height: 16px;
     color: var(--color-primary-500);
+    padding: 0;
+
+    path {
+      stroke: currentColor;
+    }
+  }
+`;
+
+const CopyIconWrapper = styled.div`
+  && {
+    width: 24px;
+    height: 24px;
+    color: var(--color-grey-400);
+    padding: 0;
+    cursor: pointer;
+    svg {
+      transform: translateY(-2px);
+    }
+  }
+`;
+
+const AddressRow = styled.div`
+  && {
+    display: flex;
     padding: 0;
   }
 `;

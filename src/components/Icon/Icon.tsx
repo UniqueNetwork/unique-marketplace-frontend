@@ -22,7 +22,6 @@ const IconStyled = styled.span`
 
     path {
       fill: inherit;
-      stroke: currentColor;
     }
   }
 `;
