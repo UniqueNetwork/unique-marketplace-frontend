@@ -5,6 +5,8 @@ export type GetOffersRequestPayload = {
   minPrice?: string
   maxPrice?: string
   seller?: string
+  isAuction?: boolean
+  bidderAddress?: string
   traitsCount?: number[]
   searchText?: string
   searchLocale?: string
