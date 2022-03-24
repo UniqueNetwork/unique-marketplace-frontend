@@ -322,7 +322,7 @@ const CopyIconWrapper = styled.div`
     height: 24px;
     color: var(--color-grey-400);
     padding: 0;
-    cursor: pointer;
+    cursor: copy;
     svg {
       transform: translateY(-2px);
     }
