@@ -201,6 +201,10 @@ const SortSelectWrapper = styled.div`
   @media (max-width: 1024px) {
     display: none;
   }
+
+  .unique-select svg {
+    z-index: 0;
+  }
 `;
 
 const SearchAndSortingWrapper = styled.div`
