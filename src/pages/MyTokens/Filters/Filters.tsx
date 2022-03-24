@@ -8,7 +8,7 @@ import { MyTokensStatuses } from './types';
 import StatusFilter from './StatusFilter';
 import { FilterChangeHandler } from '../../../components/Filters/MobileFilter';
 
-export type MyTokensFilterState = Partial<MyTokensStatuses> & Partial<PriceRange> & { collectionIds?: number[] }
+export type MyTokensFilterState = Partial<MyTokensStatuses> & Partial<PriceRange> & { collectionIds?: number[] } & Partial<{ traits: string[] }>
 
 type FiltersProps = {
   onFilterChange: FilterChangeHandler<MyTokensFilterState>
@@ -31,6 +31,11 @@ export const Filters: FC<FiltersProps> = ({ onFilterChange }) => {
   const onStatusFilterClear = useCallback(() => {
     (onFilterChange as Dispatch<SetStateAction<MyTokensFilterState | null>>)((filters) => ({ ...filters }));
   }, [onFilterChange]);
+
+  // const onCollectionTraitsFilterChange = useCallback((value: string[]) => {
+  //   const newFilter = { traits: value };
+  //   onFilterChange(newFilter);
+  // }, [onFilterChange]);
 
   return <FiltersStyled>
     <StatusFilter onChange={onStatusFilterChange}/>

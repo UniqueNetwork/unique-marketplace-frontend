@@ -81,7 +81,7 @@ export const MarketPage = () => {
   const onSortingChange = useCallback((val: string) => {
     setSortingValue(val);
     fetch({ sort: [val], pageSize, page: 1, ...filterState });
-  }, [fetch]);
+  }, [fetch, filterState]);
 
   const handleSearch = () => {
     fetch({ sort: [sortingValue], pageSize, page: 1, searchText: searchValue?.toString(), ...filterState });
@@ -90,7 +90,7 @@ export const MarketPage = () => {
   const onFilterChange = useCallback((filter: FilterState | null) => {
     setFilterState({ ...(filterState || {}), ...filter });
     fetch({ pageSize, page: 1, sort: [sortingValue], ...(filterState || {}), ...filter });
-  }, [filterState]);
+  }, [filterState, fetch, sortingValue]);
 
   return (<PagePaper>
     <MarketMainPageStyled>

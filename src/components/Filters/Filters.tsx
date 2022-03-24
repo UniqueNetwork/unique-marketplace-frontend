@@ -34,10 +34,15 @@ export const Filters: FC<FiltersProps> = ({ onFilterChange }) => {
     onFilterChange(newFilter);
   }, [onFilterChange]);
 
+  const onCollectionTraitsFilterChange = useCallback((value: string[]) => {
+    const newFilter = { traits: value };
+    onFilterChange(newFilter);
+  }, [onFilterChange]);
+
   return <FiltersStyled>
     <StatusFilter onChange={onStatusFilterChange}/>
     <PricesFilter onChange={onPricesFilterChange} />
-    <CollectionsFilter onChange={onCollectionsFilterChange} />
+    <CollectionsFilter onChange={onCollectionsFilterChange} onTraitsChange={onCollectionTraitsFilterChange} />
   </FiltersStyled>;
 };
 
