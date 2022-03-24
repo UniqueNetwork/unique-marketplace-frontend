@@ -5,6 +5,8 @@ export type GetOffersRequestPayload = {
   minPrice?: string
   maxPrice?: string
   seller?: string
+  isAuction?: boolean
+  bidderAddress?: string
   traitsCount?: number[]
   searchText?: string
   searchLocale?: string
@@ -39,3 +41,13 @@ export type Offer = {
 export type OffersResponse = PaginatedResponse<Offer>
 
 export type UseFetchOffersProps = Partial<GetOffersRequestPayload>
+
+export type Trait = {
+  trait: string; // name
+  count: number;
+};
+
+export type TraitsResponse = {
+  collectionId: number;
+  traits: Trait[];
+};

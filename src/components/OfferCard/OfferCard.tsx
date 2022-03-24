@@ -156,6 +156,7 @@ const PictureWrapper = styled.a`
 const PriceWrapper = styled.div` 
   display: flex;
   align-items: center;
+  column-gap: calc(var(--gap) / 4);
 `;
 
 const StyledText = styled(Text)` 

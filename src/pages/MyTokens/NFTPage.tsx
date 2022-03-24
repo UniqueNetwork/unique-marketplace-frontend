@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components/macro';
+import BN from 'bn.js';
 import { Button, InputText, Select, Text } from '@unique-nft/ui-kit';
 
 import { TokensList } from '../../components';
@@ -14,6 +15,7 @@ import { MobileFilters } from '../../components/Filters/MobileFilter';
 import Loading from '../../components/Loading';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
 import NoItems from '../../components/NoItems';
+import { fromStringToBnString } from '../../utils/bigNum';
 
 type TOption = {
   direction: 'asc' | 'desc';
@@ -157,8 +159,10 @@ export const NFTPage = () => {
         if (!token.price) {
           filteredByPrice = false;
         } else {
-          const tokenPrice = Number(token.price);
-          filteredByPrice = (tokenPrice >= filterState.minPrice && tokenPrice <= filterState.maxPrice);
+          const tokenPrice = new BN(token.price);
+          const minPrice = new BN(fromStringToBnString(filterState.minPrice, api?.market?.kusamaDecimals));
+          const maxPrice = new BN(fromStringToBnString(filterState.maxPrice, api?.market?.kusamaDecimals));
+          filteredByPrice = (tokenPrice.gte(minPrice) && tokenPrice.lte(maxPrice));
         }
       }
       let filteredByCollections = true;
@@ -172,7 +176,7 @@ export const NFTPage = () => {
 
       return filterByStatus && filteredByPrice && filteredByCollections && filteredBySearchValue;
     },
-    [filterState, searchString]
+    [filterState, searchString, api?.market?.kusamaDecimals]
   );
 
   const featuredTokens: (NFTToken & Partial<Offer>)[] = useMemo(() => {
@@ -188,7 +192,7 @@ export const NFTPage = () => {
       });
     }
     return tokensWithOffers;
-  }, [tokens, offers, filter, selectOption, filterState]);
+  }, [tokens, offers, filter, selectOption]);
 
   return (<PagePaper>
     <MarketMainPageStyled>

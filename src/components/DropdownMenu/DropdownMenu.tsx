@@ -55,7 +55,7 @@ const DropdownMenuButtonWrapper = styled.div`
   button.unique-button {
     padding-right: calc(var(--gap) * 3);
   }
-  span[class^=Icon] {
+  img {
     position: absolute;
     margin-top: -8px;
     top: 50%;

@@ -27,7 +27,6 @@ export type IRpcConfig = Settings;
 
 export interface IRpcClientOptions {
   onChainReady?: (chainData: ChainData) => void
-
 }
 
 export interface INFTController<Collection, Token> {
@@ -56,6 +55,7 @@ export type TransactionOptions = {
 };
 
 export interface IMarketController {
+  kusamaDecimals: number
   // substrate address
   addToWhiteList: (account: string, options: TransactionOptions) => Promise<void>
   checkWhiteListed: (account: string) => Promise<boolean>

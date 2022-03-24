@@ -171,63 +171,35 @@ export const AccountsPage = () => {
     fetchAccounts();
   }, []);
 
-  return (
-    <PagePaper>
-      <AccountPageWrapper>
-        <Row>
-          <Button
-            title={'Create substrate account'}
-            onClick={onCreateAccountClick}
+  return (<PagePaper>
+    <AccountPageWrapper>
+      <Row>
+        <Button title={'Create substrate account'} onClick={onCreateAccountClick} />
+        <DropdownMenu title={'Add account via'} role={'primary'}>
+          <DropdownMenuItem onClick={onImportViaSeedClick}>Seed phrase</DropdownMenuItem>
+          <DropdownMenuItem onClick={onImportViaJSONClick}>Backup JSON file</DropdownMenuItem>
+          <DropdownMenuItem onClick={onImportViaQRClick}>QR-code</DropdownMenuItem>
+        </DropdownMenu>
+        <SearchInputWrapper>
+          <SearchInputStyled
+            placeholder={'Account'}
+            iconLeft={{ name: 'magnify', size: 18 }}
+            value={searchString}
+            onChange={onSearchStringChange}
           />
-          <DropdownMenu title={'Add account via'} role={'primary'}>
-            <DropdownMenuItem onClick={onImportViaSeedClick}>
-              Seed phrase
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={onImportViaJSONClick}>
-              Backup JSON file
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={onImportViaQRClick}>
-              QR-code
-            </DropdownMenuItem>
-          </DropdownMenu>
-          <SearchInputWrapper>
-            <SearchInputStyled
-              placeholder={'Account'}
-              iconLeft={{ name: 'magnify', size: 18 }}
-              onChange={onSearchStringChange}
-            />
-          </SearchInputWrapper>
-        </Row>
-        <Table
-          columns={getAccountsColumns({
-            onShowSendFundsModal: onSendFundsClick
-          })}
-          data={filteredAccounts}
-        />
-        <CreateAccountModal
-          isVisible={currentModal === AccountModal.create}
-          onFinish={onChangeAccountsFinish}
-        />
-        <ImportViaSeedAccountModal
-          isVisible={currentModal === AccountModal.importViaSeed}
-          onFinish={onChangeAccountsFinish}
-        />
-        <ImportViaJSONAccountModal
-          isVisible={currentModal === AccountModal.importViaJSON}
-          onFinish={onChangeAccountsFinish}
-        />
-        <ImportViaQRCodeAccountModal
-          isVisible={currentModal === AccountModal.importViaQRCode}
-          onFinish={onChangeAccountsFinish}
-        />
-        <TransferFundsModal
-          isVisible={currentModal === AccountModal.sendFunds}
-          onFinish={onChangeAccountsFinish}
-          senderAddress={selectedAddress}
-        />
-      </AccountPageWrapper>
-    </PagePaper>
-  );
+        </SearchInputWrapper>
+      </Row>
+      <Table
+        columns={getAccountsColumns({ onShowSendFundsModal: onSendFundsClick })}
+        data={filteredAccounts}
+      />
+      <CreateAccountModal isVisible={currentModal === AccountModal.create} onFinish={onChangeAccountsFinish} />
+      <ImportViaSeedAccountModal isVisible={currentModal === AccountModal.importViaSeed} onFinish={onChangeAccountsFinish} />
+      <ImportViaJSONAccountModal isVisible={currentModal === AccountModal.importViaJSON} onFinish={onChangeAccountsFinish} />
+      <ImportViaQRCodeAccountModal isVisible={currentModal === AccountModal.importViaQRCode} onFinish={onChangeAccountsFinish} />
+      <TransferFundsModal isVisible={currentModal === AccountModal.sendFunds} onFinish={onChangeAccountsFinish} senderAddress={selectedAddress} />
+    </AccountPageWrapper>
+  </PagePaper>);
 };
 
 const AccountPageWrapper = styled.div`
