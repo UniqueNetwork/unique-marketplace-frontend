@@ -10,13 +10,13 @@ interface AmountInputProps {
   className?: string
 }
 
-export const AmountInput: FC<AmountInputProps> = ({ value, onChange, placeholder, decimals = 12, className }) => {
+export const NumberInput: FC<AmountInputProps> = ({ value, onChange, placeholder, decimals = 12, className }) => {
   const { api } = useApi();
 
   const onChangeInput = useCallback((_value: string) => {
     if (_value === '') onChange(_value);
-    // regExp to check value according to format 123.000000001
-    const regExp = new RegExp(`/^([1-9]\\d*|0)(\\.\\d{0,${api?.market?.kusamaDecimals || decimals}})?$/`);
+    // regExp to check value according to valid number format
+    const regExp = new RegExp(`^([1-9]\\d*|0)(\\.\\d{0,${api?.market?.kusamaDecimals || decimals}})?$`);
     // check value is correct
     if (regExp.test(_value.trim())) {
       onChange(_value.trim());

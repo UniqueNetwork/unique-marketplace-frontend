@@ -3,7 +3,7 @@ import { Button, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 import { PriceRange } from './types';
 import Accordion from '../Accordion/Accordion';
-import { AmountInput } from '../AmountInput/AmountInput';
+import { NumberInput } from '../NumberInput/NumberInput';
 
 interface PricesFilterProps {
   onChange(value: PriceRange | undefined): void
@@ -47,9 +47,9 @@ const PricesFilter: FC<PricesFilterProps> = ({ onChange }) => {
     >
       <PriceFilterWrapper>
         <PricesRangeWrapper>
-          <AmountInput value={minPrice?.toString()} onChange={onChangeMinPrice} placeholder={'Min'} />
+          <NumberInput value={minPrice?.toString()} onChange={onChangeMinPrice} placeholder={'Min'} />
           <Text>to</Text>
-          <AmountInput value={maxPrice?.toString()} onChange={onChangeMaxPrice} placeholder={'Max'} />
+          <NumberInput value={maxPrice?.toString()} onChange={onChangeMaxPrice} placeholder={'Max'} />
         </PricesRangeWrapper>
         <Button title={'Apply'} onClick={onApply}/>
       </PriceFilterWrapper>
