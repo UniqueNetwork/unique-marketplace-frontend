@@ -89,6 +89,7 @@ const defaultMarketPlaceControllerConfig: MartketControllerConfig = {
 };
 
 class MarketController implements IMarketController {
+  public kusamaDecimals: number;
   private uniqApi: ApiPromise;
   private kusamaApi: ApiPromise;
   private contractAddress: string;
@@ -96,7 +97,6 @@ class MarketController implements IMarketController {
   private uniqueSubstrateApiRpc: string;
   private escrowAddress: string;
   private minPrice: number;
-  private kusamaDecimals: number;
   private web3Instance: Web3;
   private defaultGasAmount: number;
   private auctionAddress: string;

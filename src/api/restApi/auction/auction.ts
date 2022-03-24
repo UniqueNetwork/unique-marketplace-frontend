@@ -21,7 +21,9 @@ export type TPlaceBidParams = {
 }
 
 export type TDeleteParams = {
-  collectionId: number, tokenId: number, timestamp: number
+  collectionId: number
+  tokenId: number
+  timestamp: number
 }
 
 export type TSignature = {

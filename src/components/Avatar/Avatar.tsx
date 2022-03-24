@@ -11,7 +11,21 @@ export const Avatar: FC<IAvatarProps> = ({
   size = 38,
   src,
   type = 'square'
-}: IAvatarProps) => <AvatarStyled $type={type} src={src} width={size} />;
+}: IAvatarProps) => <AvatarWrapper size={size}>
+  <AvatarStyled $type={type}
+    src={src}
+    height={size}
+  />
+</AvatarWrapper>;
+
+const AvatarWrapper = styled.div<{ size: number }>`
+  overflow: hidden;
+  height: ${({ size }) => `${size}px`};
+  width: ${({ size }) => `${size}px`};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
 
 const AvatarStyled = styled.img<{ $type: 'circle' | 'square' }>`
   border-radius: ${(props) => (props.$type === 'circle' ? '50%' : '4px')};

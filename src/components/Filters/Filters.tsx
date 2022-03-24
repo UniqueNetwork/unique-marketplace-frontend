@@ -16,7 +16,9 @@ export const Filters: FC<FiltersProps> = ({ onFilterChange }) => {
 
   const onStatusFilterChange = useCallback((value: Statuses) => {
     const newFilter = {
-      seller: value.myNFTs ? selectedAccount?.address : undefined
+      seller: value.myNFTs ? selectedAccount?.address : undefined,
+      bidderAddress: value.myBets ? selectedAccount?.address : undefined,
+      isAuction: (value.timedAuction && value.fixedPrice) || (!value.timedAuction && !value.fixedPrice) ? undefined : value.timedAuction && !value.fixedPrice
     };
     onFilterChange(newFilter);
   }, [onFilterChange]);

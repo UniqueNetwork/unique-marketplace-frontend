@@ -48,13 +48,14 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange }) => {
     <CollectionFilterWrapper>
       {isFetching && <Loading />}
       {collections.map((collection) => (
-        <CheckboxWrapper>
+        <CheckboxWrapper
+          key={`collection-${collection.id}`}
+        >
           <Checkbox
             checked={selectedCollections.indexOf(collection.id) !== -1}
             label={''}
             size={'m'}
             onChange={onCollectionSelect(collection.id)}
-            key={`collection-${collection.id}`}
           />
           <Avatar src={collection.coverImageUrl} size={22} type={'circle'}/>
           <Text>{collection.collectionName}</Text>
