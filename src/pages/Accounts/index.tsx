@@ -6,7 +6,7 @@ import styled from 'styled-components/macro';
 import { useAccounts } from '../../hooks/useAccounts';
 import DefaultAvatar from '../../static/icons/default-avatar.svg';
 import ArrowUpRight from '../../static/icons/arrow-up-right.svg';
-import Copy from '../../static/icons/copy.svg';
+import CopyIcon from '../../static/icons/copy.svg';
 import config from '../../config';
 import { CreateAccountModal } from './Modals/CreateAccount';
 import { ImportViaSeedAccountModal } from './Modals/ImportViaSeed';
@@ -48,7 +48,7 @@ const getAccountsColumns = ({
               </Text>
               <a onClick={copyAddress(accountInfo.address)}>
                 <CopyIconWrapper>
-                  <Icon path={Copy} />
+                  <Icon path={CopyIcon} />
                 </CopyIconWrapper>
               </a>
             </AddressRow>
