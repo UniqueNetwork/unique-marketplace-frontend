@@ -139,7 +139,12 @@ export const AccountsPage = () => {
           <DropdownMenuItem onClick={onImportViaQRClick}>QR-code</DropdownMenuItem>
         </DropdownMenu>
         <SearchInputWrapper>
-          <SearchInputStyled placeholder={'Account'} iconLeft={{ name: 'magnify', size: 18 }} onChange={onSearchStringChange}/>
+          <SearchInputStyled
+            placeholder={'Account'}
+            iconLeft={{ name: 'magnify', size: 18 }}
+            value={searchString}
+            onChange={onSearchStringChange}
+          />
         </SearchInputWrapper>
       </Row>
       <Table
