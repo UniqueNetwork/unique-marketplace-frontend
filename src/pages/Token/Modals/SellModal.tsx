@@ -101,9 +101,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
     [setInputStartingPriceValue]
   );
 
-  const onDurationSelectChange = useCallback(
-    (value: string) => {
-      // TODO; trim/parse for string
+  const onDurationSelectChange = useCallback((value: string) => {
       setDurationSelectValue(Number(value));
     },
     [setDurationSelectValue]
