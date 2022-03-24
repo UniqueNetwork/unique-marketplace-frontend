@@ -11,6 +11,6 @@ export const fromStringToBnString = (value: string, decimals = 12) => {
 
     return parts[0] + bnValue.toString();
   }
-
-  return parts[0];
+  const multiplier = new BN(10).pow(new BN(decimals));
+  return new BN(parts[0]).mul(multiplier).toString();
 };

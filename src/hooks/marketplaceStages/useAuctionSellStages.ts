@@ -5,6 +5,7 @@ import { TAuctionProps } from '../../pages/Token/Modals/types';
 import { startAuction } from '../../api/restApi/auction/auction';
 import { TTransaction } from '../../api/chainApi/types';
 import { StageStatus } from '../../types/StagesTypes';
+import { fromStringToBnString } from '../../utils/bigNum';
 
 export const useAuctionSellStages = (collectionId: number, tokenId: number) => {
   const { api } = useApi();
@@ -23,11 +24,15 @@ export const useAuctionSellStages = (collectionId: number, tokenId: number) => {
           {
             ...params.options,
             send:
-              (signedTx: TTransaction) => startAuction({ tx: signedTx, days: params.txParams.duration, startPrice: params.txParams.startingPrice.toString(), priceStep: params.txParams.minimumStep.toString() })
+              (signedTx: TTransaction) => {
+                const startPrice = fromStringToBnString(params.txParams.startingPrice.toString(), api?.market?.kusamaDecimals);
+                const priceStep = fromStringToBnString(params.txParams.minimumStep.toString(), api?.market?.kusamaDecimals);
+                return startAuction({ tx: signedTx, days: params.txParams.duration, startPrice, priceStep });
+              }
             }
           )
     }
-  ], [marketApi]);
+  ], [marketApi, api?.market?.kusamaDecimals]);
 
   const { stages, error, status, initiate } = useMarketplaceStages<TAuctionProps>(collectionId, tokenId, sellAuctionStages);
 

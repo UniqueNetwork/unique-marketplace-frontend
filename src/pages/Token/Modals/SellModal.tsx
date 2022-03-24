@@ -78,8 +78,8 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
   );
 
   const onConfirmAuctionClick = useCallback(() => {
-    if (!selectedAccount || !minStepInputValueAuction || !inputStartingPriceValue || !durationSelectValue) return;
-    onSellAuction({ minimumStep: minStepInputValueAuction, startingPrice: inputStartingPriceValue, duration: durationSelectValue, accountAddress: selectedAccount.address } as TAuctionProps);
+    if (!selectedAccount || !minStepInputValueAuction || !durationSelectValue) return;
+    onSellAuction({ minimumStep: minStepInputValueAuction, startingPrice: inputStartingPriceValue || minStepInputValueAuction, duration: durationSelectValue, accountAddress: selectedAccount.address } as TAuctionProps);
   }, [minStepInputValueAuction, inputStartingPriceValue, durationSelectValue, selectedAccount, onSellAuction]);
 
   const onConfirmFixPriceClick = useCallback(() => {
@@ -129,7 +129,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
   const FixedPriceTab = (
     <>
       <InputWrapper
-        label='Price*'
+        label={`Price (${tokenSymbol})*`}
         onChange={onPriceInputChange}
         value={priceInputValue?.toString()}
       />
@@ -153,13 +153,13 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
   const AuctionTab = (
     <>
       <InputWrapper
-        label='Minimum step*'
+        label={`Minimum step (${tokenSymbol})*`}
         onChange={onMinStepInputChange}
         value={minStepInputValueAuction?.toString()}
       />
       <Row>
         <InputWrapper
-          label='Starting Price'
+          label={`Starting Price (${tokenSymbol})`}
           onChange={onInputStartingPriceChange}
           value={inputStartingPriceValue?.toString()}
         />

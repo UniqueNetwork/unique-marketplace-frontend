@@ -7,9 +7,10 @@ interface AmountInputProps {
   onChange(value: string): void
   placeholder?: string
   decimals?: number
+  className?: string
 }
 
-export const AmountInput: FC<AmountInputProps> = ({ value, onChange, placeholder, decimals = 12 }) => {
+export const AmountInput: FC<AmountInputProps> = ({ value, onChange, placeholder, decimals = 12, className }) => {
   const { api } = useApi();
 
   const onChangeInput = useCallback((_value: string) => {
@@ -22,5 +23,10 @@ export const AmountInput: FC<AmountInputProps> = ({ value, onChange, placeholder
     }
   }, [onChange, decimals]);
 
-  return <InputText placeholder={placeholder} onChange={onChangeInput} value={value} />;
+  return <InputText
+    placeholder={placeholder}
+    onChange={onChangeInput}
+    value={value}
+    className={className}
+  />;
 };
