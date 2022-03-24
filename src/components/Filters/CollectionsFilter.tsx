@@ -32,12 +32,14 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onTrai
     setSelectedCollections(_selectedCollections);
 
     // since traits are shown only if one collection is selected -> we should always reset them
-    setSelectedTraits([]);
-    onTraitsChange?.([]);
+    if (traits.length) {
+      setSelectedTraits([]);
+      onTraitsChange?.([]);
+    }
 
     if (_selectedCollections.length === 1) fetchTraits(_selectedCollections[0]);
     else resetTraits();
-  }, [selectedCollections, fetchTraits, resetTraits, onChange]);
+  }, [selectedCollections, fetchTraits, resetTraits, onTraitsChange]);
 
   const onAttributeSelect = useCallback((trait: Trait) => (value: boolean) => {
     let _selectedTraits;
@@ -87,16 +89,15 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onTrai
         <CollectionFilterWrapper>
           {isTraitsFetching && <Loading />}
           {traits.map((trait) => (
-            <>
+            <AttributeWrapper key={`attribute-${trait.trait}`}>
               <Checkbox
                 checked={selectedTraits.indexOf(trait.trait) !== -1}
                 label={trait.trait}
                 size={'m'}
                 onChange={onAttributeSelect(trait)}
-                key={`attribute-${trait.trait}`}
               />
               <span>{trait.count}</span>
-            </>
+            </AttributeWrapper>
           ))}
         </CollectionFilterWrapper>
       </Accordion>
@@ -131,6 +132,15 @@ const AttributesFilterWrapper = styled.div`
     text-overflow: ellipsis;
     overflow: hidden;
   }
+`;
+
+const AttributeWrapper = styled.div`
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 8px;
+  box-sizing: border-box;
 `;
 
 const CheckboxWrapper = styled.div`

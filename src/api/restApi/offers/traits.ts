@@ -26,6 +26,8 @@ export const useTraits = () => {
         status: err.response?.status,
         message: err.message
       });
+      setIsFetching(false);
+      setTraits([]);
     });
   }, [setTraits, setIsFetching]);
 
