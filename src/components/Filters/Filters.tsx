@@ -21,7 +21,7 @@ export const Filters: FC<FiltersProps> = ({ onFilterChange }) => {
       isAuction: (value.timedAuction && value.fixedPrice) || (!value.timedAuction && !value.fixedPrice) ? undefined : value.timedAuction && !value.fixedPrice
     };
     onFilterChange(newFilter);
-  }, [onFilterChange]);
+  }, [onFilterChange, selectedAccount]);
 
   const onPricesFilterChange = useCallback((value: PriceRange | undefined) => {
     const { minPrice, maxPrice } = (value as PriceRange) || {};
