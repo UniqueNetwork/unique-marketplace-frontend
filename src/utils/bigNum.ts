@@ -6,10 +6,8 @@ export const fromStringToBnString = (value: string, decimals = 12) => {
   const parts = value.toString().split('.');
 
   if (parts[1]) {
-    const multiplier = new BN(10).pow(new BN(decimals - parts[1].length));
-    const bnValue = new BN(parts[1]).mul(multiplier);
-
-    return parts[0] + bnValue.toString();
+    if (parts[1].length >= decimals) return parts[0] + parts[1].slice(0, decimals);
+    return parts[0] + parts[1].padEnd(decimals, '0');
   }
   const multiplier = new BN(10).pow(new BN(decimals));
   return new BN(parts[0]).mul(multiplier).toString();

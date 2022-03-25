@@ -17,17 +17,17 @@ const StatusFilter: FC<StatusFilterProps> = ({ onChange }) => {
   const onMyNFTsChange = useCallback((value: boolean) => {
     onChange({ myNFTs: value, fixedPrice, timedAuction, myBets });
     setMyNFTs(value);
-  }, [fixedPrice, timedAuction, myBets]);
+  }, [fixedPrice, timedAuction, myBets, onChange]);
 
   const onFixedPriceChange = useCallback((value: boolean) => {
     onChange({ myNFTs, fixedPrice: value, timedAuction, myBets });
     setFixedPrice(value);
-  }, [myNFTs, timedAuction, myBets]);
+  }, [myNFTs, timedAuction, myBets, onChange]);
 
   const onTimedAuctionChange = useCallback((value: boolean) => {
     onChange({ myNFTs, fixedPrice, timedAuction: value, myBets });
     setTimedAuction(value);
-  }, [myNFTs, fixedPrice, myBets]);
+  }, [myNFTs, fixedPrice, myBets, onChange]);
 
   const onMyBetsChange = useCallback((value: boolean) => {
     onChange({ myNFTs, fixedPrice, timedAuction, myBets: value });
@@ -51,7 +51,7 @@ const StatusFilter: FC<StatusFilterProps> = ({ onChange }) => {
       <StatusFilterWrapper>
         <Checkbox
           checked={myNFTs}
-          label={'My NFTs on sell'}
+          label={'My NFTs on sale'}
           size={'m'}
           onChange={onMyNFTsChange}
         />
@@ -69,7 +69,7 @@ const StatusFilter: FC<StatusFilterProps> = ({ onChange }) => {
         />
         <Checkbox
           checked={myBets}
-          label={'My bets'}
+          label={'My bids'}
           size={'m'}
           onChange={onMyBetsChange}
         />
