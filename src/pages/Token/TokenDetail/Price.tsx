@@ -9,30 +9,16 @@ import { useApi } from '../../../hooks/useApi';
 
 interface PriceProps {
   price: string;
-  fee: string;
-  bid?: string;
 }
 
-const tokenSymbol = 'KSM';
-
-export const Price: FC<PriceProps> = ({ price, fee, bid }) => {
+export const Price: FC<PriceProps> = ({ price }) => {
   const { api } = useApi();
 
   return (
     <PriceWrapper>
       <Row>
-        <Icon file={Kusama} size={32}/>
         <Heading size={'1'}>{`${formatKusamaBalance(new BN(price).toString(), api?.market?.kusamaDecimals)}`}</Heading>
-      </Row>
-      <Row>
-        <Text color='grey-500' size='m'>
-          {`${bid ? `Bid: ${formatKusamaBalance(bid, api?.market?.kusamaDecimals)}` : `Price: ${formatKusamaBalance(price)}`} ${tokenSymbol}`}
-        </Text>
-      </Row>
-      <Row>
-        <Text color='grey-500' size='m'>
-          {`Network fee: ${formatKusamaBalance(fee)} ${tokenSymbol}`}
-        </Text>
+        <Icon file={Kusama} size={32}/>
       </Row>
     </PriceWrapper>
   );

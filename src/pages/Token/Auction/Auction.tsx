@@ -14,7 +14,7 @@ import { useFee } from '../../../hooks/useFee';
 import { shortcutText } from '../../../utils/textUtils';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { compareEncodedAddresses, isTokenOwner } from '../../../api/chainApi/utils/addressUtils';
-import { AuctionPrice } from './AuctionPrice';
+import { PriceForAuction } from '../TokenDetail/PriceForAuction';
 
 interface AuctionProps {
   offer: Offer
@@ -73,11 +73,11 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
   useBidsSubscription({ offer, onPlaceBid });
 
   return (<>
-    <Text size={'m'}>Next minimum bid</Text>
-    <AuctionPrice price={minimumBid}
-      startPrice={offer.auction?.startPrice}
-      bid={topBid?.balance !== '0' ? topBid?.balance : topBid?.amount}
-      step={offer.auction?.priceStep}
+    <Text size={'l'}>{topBid ? 'Next minimum bid' : 'Starting bid'}</Text>
+    <PriceForAuction price={offer.price}
+      fee={fee}
+      minStep={offer.auction?.priceStep}
+      topBid={topBid?.balance !== '0' ? topBid?.balance : topBid?.amount}
     />
     <AuctionWrapper>
       <Row>

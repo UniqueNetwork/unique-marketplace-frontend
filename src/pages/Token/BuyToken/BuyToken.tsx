@@ -32,7 +32,8 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy }) => {
   if (!offer) return null;
 
   return (<>
-    <Price price={offer.price} fee={fee} bid={offer.auction?.priceStep} />
+    <Text size={'l'}>Price</Text>
+    <Price price={offer.price} />
     <ButtonWrapper>
       <Button
         onClick={onBuyClick}
@@ -43,7 +44,6 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy }) => {
       />
     </ButtonWrapper>
     {!isEnoughBalance && <Text color={'coral-500'}>Your balance is too low to buy</Text>}
-
     <Divider />
   </>);
 };
