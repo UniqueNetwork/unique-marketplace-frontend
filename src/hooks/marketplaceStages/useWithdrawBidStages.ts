@@ -16,7 +16,7 @@ export const useWithdrawBidStages = (collectionId: number, tokenId: number) => {
         if (!selectedAccount) throw new Error('Account not selected');
 
         const timestamp = Date.now();
-        const message = `timestamp=${timestamp}&collectionId=${collectionId}&tokenId=${tokenId}`;
+        const message = `collectionId=${collectionId}&tokenId=${tokenId}&timestamp=${timestamp}`;
         const signature = await signMessage(message);
         await withdrawBid(
           { collectionId, tokenId, timestamp },
