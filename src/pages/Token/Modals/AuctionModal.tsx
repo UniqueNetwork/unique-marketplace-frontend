@@ -1,6 +1,7 @@
-import React, { FC, useCallback, useEffect, useState } from 'react';
-import { Button, Heading, InputText, Select, Text } from '@unique-nft/ui-kit';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { Button, Heading, Select, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
+import BN from 'bn.js';
 
 import { TPlaceABid } from './types';
 import { AdditionalWarning100 } from '../../../styles/colors';
@@ -10,6 +11,10 @@ import { Offer } from '../../../api/restApi/offers/types';
 import DefaultMarketStages from './StagesModal';
 import Kusama from '../../../static/icons/logo-kusama.svg';
 import { useAccounts } from '../../../hooks/useAccounts';
+import { formatKusamaBalance } from '../../../utils/textUtils';
+import { NumberInput } from '../../../components/NumberInput/NumberInput';
+import { useApi } from '../../../hooks/useApi';
+import { fromStringToBnString } from '../../../utils/bigNum';
 
 export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ token, offer, setIsClosable, onFinish }) => {
   const [status, setStatus] = useState<'ask' | 'place-bid-stage'>('ask'); // TODO: naming
@@ -36,24 +41,38 @@ export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ token, offer, setIs
 const chainOptions = [{ id: 'KSM', title: 'KSM', iconRight: { size: 18, file: Kusama } }];
 
 export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: string, chain: string): void}> = ({ offer, onConfirmPlaceABid }) => {
-  const [bidAmount, setBidAmount] = useState<number>(0);
+  const [bidAmount, setBidAmount] = useState<string>('0');
   const [chain, setChain] = useState<string | undefined>('KSM');
+  const { api } = useApi();
+
+  const leadingBidAmount = useMemo(() => {
+    return offer?.auction?.bids.reduce((amount, bid) => BN.max(amount, new BN(bid.amount)), new BN(0)) || new BN(0);
+  }, [offer]);
+
+  const minimalBid = useMemo(() => {
+    return leadingBidAmount.add(new BN(offer?.auction?.priceStep || 0));
+  }, [leadingBidAmount, offer?.auction?.priceStep]);
 
   const onConfirmPlaceABidClick = useCallback(
     () => {
       if (!bidAmount) return;
-      const leadingBidAmount = offer?.auction?.bids.reduce((amount, bid) => Math.max(amount, Number(bid.amount)), 0) || 0;
-      onConfirmPlaceABid((bidAmount - leadingBidAmount / Math.pow(10, 12)).toString(), chain || '');
+      const bnAmount = new BN(fromStringToBnString(bidAmount, api?.market?.kusamaDecimals));
+
+      const difference = formatKusamaBalance(bnAmount.sub(leadingBidAmount).toString());
+
+      onConfirmPlaceABid(difference, chain || '');
     },
-    [onConfirmPlaceABid, bidAmount, offer, chain]
+    [onConfirmPlaceABid, bidAmount, leadingBidAmount, chain, api?.market?.kusamaDecimals]
   );
 
-  const onBidAmountChange = useCallback(
-    (value: number) => {
-      setBidAmount(value || 0);
-    },
-    [setBidAmount]
-  );
+  const onBidAmountChange = useCallback((value: string) => {
+      setBidAmount(value);
+    }, [setBidAmount]);
+
+  const isAmountValid = useMemo(() => {
+    if (!bidAmount) return false;
+    return new BN(fromStringToBnString(bidAmount, api?.market?.kusamaDecimals)).gte(minimalBid);
+  }, [bidAmount, minimalBid, api?.market?.kusamaDecimals]);
 
   const onChainChange = useCallback(
     (value: string) => {
@@ -70,13 +89,12 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: string, 
       <InputWrapper>
         <SelectStyled options={chainOptions} value={chain} onChange={onChainChange} />
         <InputStyled
-          label=''
           onChange={onBidAmountChange}
           value={bidAmount.toString()}
         />
       </InputWrapper>
       <Text size={'s'} color={'grey-500'} >
-        {`Minimum bid ${offer?.auction?.priceStep || 0} ${chain || ''}`}
+        {`Minimum bid ${formatKusamaBalance(minimalBid.toString(), api?.market?.kusamaDecimals)} ${chain || ''}`}
       </Text>
       <TextStyled
         color='additional-warning-500'
@@ -86,7 +104,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: string, 
       </TextStyled>
       <ButtonWrapper>
         <Button
-          disabled={!bidAmount}
+          disabled={!isAmountValid}
           onClick={onConfirmPlaceABidClick}
           role='primary'
           title='Confirm'
@@ -123,7 +141,7 @@ const SelectStyled = styled(Select)`
   }
 `;
 
-const InputStyled = styled(InputText)`
+const InputStyled = styled(NumberInput)`
   width: 100%;
   .input-wrapper {
     border-radius: 0 4px 4px 0;

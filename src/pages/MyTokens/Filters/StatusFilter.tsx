@@ -50,7 +50,7 @@ const StatusFilter: FC<StatusFilterProps> = ({ onChange }) => {
       <StatusFilterWrapper>
         <Checkbox
           checked={onSell}
-          label={'My NFTs on sell'}
+          label={'My NFTs on sale'}
           size={'m'}
           onChange={onMyNFTsOnSellChange}
         />

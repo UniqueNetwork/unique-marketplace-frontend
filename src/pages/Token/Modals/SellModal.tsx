@@ -8,6 +8,7 @@ import { useAuctionSellStages, useSellFixStages } from '../../../hooks/marketpla
 import { AdditionalWarning100 } from '../../../styles/colors';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 import { useAccounts } from '../../../hooks/useAccounts';
+import { NumberInput } from '../../../components/NumberInput/NumberInput';
 
 const tokenSymbol = 'KSM';
 
@@ -57,10 +58,10 @@ type TAskSellModalProps = {
 export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixPrice }) => {
   const { selectedAccount } = useAccounts();
   const [activeTab, setActiveTab] = useState<number>(0);
-  const [priceInputValue, setPriceInputValue] = useState<number>(15);
+  const [priceInputValue, setPriceInputValue] = useState<string>('15');
 
-  const [minStepInputValueAuction, setMinStepInputValueAuction] = useState<number>(15);
-  const [inputStartingPriceValue, setInputStartingPriceValue] = useState<number>();
+  const [minStepInputValueAuction, setMinStepInputValueAuction] = useState<string>('15');
+  const [inputStartingPriceValue, setInputStartingPriceValue] = useState<string>();
   const [durationSelectValue, setDurationSelectValue] = useState<number>();
 
   const handleClick = useCallback(
@@ -71,7 +72,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
   );
 
   const onPriceInputChange = useCallback(
-    (value: number) => {
+    (value: string) => {
       setPriceInputValue(value);
     },
     [setPriceInputValue]
@@ -79,23 +80,25 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
 
   const onConfirmAuctionClick = useCallback(() => {
     if (!selectedAccount || !minStepInputValueAuction || !durationSelectValue) return;
+
     onSellAuction({ minimumStep: minStepInputValueAuction, startingPrice: inputStartingPriceValue || minStepInputValueAuction, duration: durationSelectValue, accountAddress: selectedAccount.address } as TAuctionProps);
   }, [minStepInputValueAuction, inputStartingPriceValue, durationSelectValue, selectedAccount, onSellAuction]);
 
   const onConfirmFixPriceClick = useCallback(() => {
-    if (!selectedAccount || !priceInputValue) return;
+    if (!selectedAccount || !priceInputValue || !Number(priceInputValue)) return;
+
     onSellFixPrice({ price: priceInputValue, accountAddress: selectedAccount.address } as TFixPriceProps); // TODO: proper typing, proper calculated object
   }, [priceInputValue, selectedAccount, onSellFixPrice]);
 
   const onMinStepInputChange = useCallback(
-    (value: number) => {
+    (value: string) => {
       setMinStepInputValueAuction(value);
     },
     [setMinStepInputValueAuction]
   );
 
   const onInputStartingPriceChange = useCallback(
-    (value: number) => {
+    (value: string) => {
       setInputStartingPriceValue(value);
     },
     [setInputStartingPriceValue]
@@ -141,7 +144,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
       </TextStyled>
       <ButtonWrapper>
         <Button
-          disabled={!priceInputValue}
+          disabled={!priceInputValue || !Number(priceInputValue)}
           onClick={onConfirmFixPriceClick}
           role='primary'
           title='Confirm'
@@ -178,7 +181,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
       </TextStyled>
       <ButtonWrapper>
         <Button
-          disabled={!minStepInputValueAuction || !durationSelectValue}
+          disabled={!minStepInputValueAuction || !durationSelectValue || !Number(minStepInputValueAuction)}
           onClick={onConfirmAuctionClick}
           role='primary'
           title='Confirm'
@@ -250,7 +253,7 @@ const TextStyled = styled(Text)`
   width: 100%;
 `;
 
-const InputWrapper = styled(InputText)`
+const InputWrapper = styled(NumberInput)`
   margin-bottom: 32px;
 `;
 

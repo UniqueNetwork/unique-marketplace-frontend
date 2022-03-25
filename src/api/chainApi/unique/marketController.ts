@@ -505,7 +505,7 @@ class MarketController implements IMarketController {
       await this.repeatCheckForTransactionFinish(async () => {
         const { flagActive }: TokenAskType = await matcherContractInstance.methods.getOrder(this.collectionIdToAddress(parseInt(collectionId, 10)), tokenId).call();
 
-        return flagActive !== '0';
+        return flagActive === '0';
       });
       return;
     } catch (e) {
@@ -537,7 +537,6 @@ class MarketController implements IMarketController {
         const updatedToken = await this.nftController?.getToken(Number(collectionId), Number(tokenId));
         const owner = updatedToken.owner;
         if (compareEncodedAddresses(owner.Substrate, account)) return true;
-        if (owner.Ethereum === getEthAccount(account)) return true;
         return false;
       });
       return;
