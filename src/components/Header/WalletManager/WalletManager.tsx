@@ -1,7 +1,7 @@
-import React, { FC, useCallback, useEffect, useMemo } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components/macro';
-import { Button, Icon, Text } from '@unique-nft/ui-kit';
+import { Button, Text } from '@unique-nft/ui-kit';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { DropdownSelect, DropdownSelectProps } from './AccountSelect/DropdownSelect';
@@ -10,11 +10,12 @@ import Loading from '../../Loading';
 import { formatKusamaBalance, shortcutText } from '../../../utils/textUtils';
 import { Avatar } from '../../Avatar/Avatar';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
-import Gear from '../../../static/icons/gear.svg';
+import GearIcon from '../../../static/icons/gear.svg';
 import { BalanceOption } from './types';
 import { useApi } from '../../../hooks/useApi';
 import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';
 import { BlueGrey200 } from '../../../styles/colors';
+import { Icon } from '../../Icon/Icon';
 
 const tokenSymbol = 'KSM';
 
@@ -22,6 +23,9 @@ export const WalletManager: FC = () => {
   const { selectedAccount, accounts, isLoading, isLoadingBalances, fetchAccounts, changeAccount } = useAccounts();
   const { currentChain } = useApi();
   const deviceSize = useDeviceSize();
+  const gearActive = window.location.pathname !== '/accounts';
+console.log('window.location.pathname', window.location.pathname);
+  console.log('gearActive', gearActive);
 
   useEffect(() => {
     void fetchAccounts();
@@ -63,9 +67,9 @@ export const WalletManager: FC = () => {
       />
       {isLoadingBalances && <Loading />}
       {deviceSize === DeviceSize.lg && <><Divider />
-        <SettingsButtonWrapper>
+        <SettingsButtonWrapper $gearActive={gearActive}>
           <Link to={'/accounts'}>
-            <Icon file={Gear} size={24} />
+            <Icon path={GearIcon} />
           </Link>
         </SettingsButtonWrapper></>}
     </WalletManagerWrapper>
@@ -116,13 +120,21 @@ const BalanceOptionWrapper = styled.div`
   cursor: pointer;
 `;
 
-const SettingsButtonWrapper = styled.div`
+const SettingsButtonWrapper = styled.div <{ $gearActive?: boolean }>`
   a {
     margin-right: 0px !important;
     height: 100%;
     padding: 0 var(--gap);
     align-items: center;
     display: flex;
+    pointer-events: ${(props) => (props.$gearActive ? 'default' : 'none')};
+    cursor: ${(props) => (props.$gearActive ? 'pointer' : 'default')};
+  }
+
+  span {
+    display: flex;
+    align-items: center;
+    color: ${(props) => (props.$gearActive ? 'var(--color-primary-500)' : 'var(--color-grey-500)')};
   }
 `;
 
