@@ -24,8 +24,6 @@ export const WalletManager: FC = () => {
   const { currentChain } = useApi();
   const deviceSize = useDeviceSize();
   const gearActive = window.location.pathname !== '/accounts';
-console.log('window.location.pathname', window.location.pathname);
-  console.log('gearActive', gearActive);
 
   useEffect(() => {
     void fetchAccounts();
