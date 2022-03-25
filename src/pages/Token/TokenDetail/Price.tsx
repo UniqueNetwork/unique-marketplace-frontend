@@ -9,7 +9,7 @@ import { useApi } from '../../../hooks/useApi';
 
 interface PriceProps {
   price: string;
-  fee: number;
+  fee: string;
   bid?: string;
 }
 
@@ -31,7 +31,7 @@ export const Price: FC<PriceProps> = ({ price, fee, bid }) => {
       </Row>
       <Row>
         <Text color='grey-500' size='m'>
-          {`Network fee: ${fee} ${tokenSymbol}`}
+          {`Network fee: ${formatKusamaBalance(fee)} ${tokenSymbol}`}
         </Text>
       </Row>
     </PriceWrapper>
