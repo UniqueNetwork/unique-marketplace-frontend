@@ -10,11 +10,11 @@ import clock from '../../../static/icons/clock.svg';
 import { timeDifference } from '../../../utils/timestampUtils';
 import { AdditionalPositive100, AdditionalPositive500, Coral100, Coral500, Grey300 } from '../../../styles/colors';
 import { useBidsSubscription } from '../../../hooks/useBidsSubscription';
-import { Price } from '../TokenDetail/Price';
 import { useFee } from '../../../hooks/useFee';
 import { shortcutText } from '../../../utils/textUtils';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { compareEncodedAddresses, isTokenOwner } from '../../../api/chainApi/utils/addressUtils';
+import { AuctionPrice } from './AuctionPrice';
 
 interface AuctionProps {
   offer: Offer
@@ -66,14 +66,19 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
   }, [setOffer]);
 
   const minimumBid = useMemo(() => {
-    return (new BN((topBid?.balance !== '0' ? topBid?.balance : topBid?.amount) || 0).add(new BN(offer.auction?.priceStep || 0))).toString();
+    if (topBid) return (new BN(topBid.balance !== '0' ? topBid.balance : topBid.amount)).add(new BN(offer.auction?.priceStep || 0)).toString();
+    return (new BN(offer.auction?.startPrice || 0)).add(new BN(offer.auction?.priceStep || 0)).toString();
   }, [topBid, offer.auction?.priceStep]);
 
   useBidsSubscription({ offer, onPlaceBid });
 
   return (<>
     <Text size={'m'}>Next minimum bid</Text>
-    <Price price={minimumBid} fee={fee} bid={topBid?.balance !== '0' ? topBid?.balance : topBid?.amount} />
+    <AuctionPrice price={minimumBid}
+      startPrice={offer.auction?.startPrice}
+      bid={topBid?.balance !== '0' ? topBid?.balance : topBid?.amount}
+      step={offer.auction?.priceStep}
+    />
     <AuctionWrapper>
       <Row>
         {canDelist && <Button title={'Delist'}

@@ -14,6 +14,7 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { timeDifference } from '../../utils/timestampUtils';
 import config from '../../config';
 import { Primary600 } from '../../styles/colors';
+import { Link } from 'react-router-dom';
 
 export type TTokensCard = {
   offer: Offer
@@ -68,15 +69,15 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
 
   return (
     <TokensCardStyled>
-      <PictureWrapper href={`/token/${offer?.collectionId}/${offer?.tokenId}`}>
+      <PictureWrapper to={`/token/${offer?.collectionId}/${offer?.tokenId}`}>
         <Picture alt={offer?.tokenId?.toString() || ''} src={imagePath} />
       </PictureWrapper>
       <Description>
-        <a href={`/token/${offer?.collectionId}/${offer?.tokenId}`} title={`${tokenPrefix || ''} #${offer?.tokenId}`}>
+        <Link to={`/token/${offer?.collectionId}/${offer?.tokenId}`} title={`${tokenPrefix || ''} #${offer?.tokenId}`}>
           <Text size='l' weight='medium' color={'secondary-500'}>
             {`${tokenPrefix || ''} #${offer?.tokenId}`}
           </Text>
-        </a>
+        </Link>
         <a href={`${config.scanUrl || ''}collections/${offer?.collectionId}`} target={'_blank'} rel='noreferrer'>
           <Text color='primary-600' size='s'>
             {`${collectionName?.substring(0, 15) || ''} [id ${offer?.collectionId || ''}]`}
@@ -111,7 +112,7 @@ const TokensCardStyled = styled.div`
   cursor: pointer;
 `;
 
-const PictureWrapper = styled.a`
+const PictureWrapper = styled(Link)`
   position: relative;
   width: 100%;
   display: flex;
