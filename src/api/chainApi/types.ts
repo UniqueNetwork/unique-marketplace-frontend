@@ -2,6 +2,7 @@ import { ChainData } from '../ApiContext';
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { Settings } from '../restApi/settings/types';
+import { BN } from '@polkadot/util';
 
 export interface IRpc {
   rpcEndpoint: string
@@ -64,7 +65,9 @@ export interface IMarketController {
   setForFixPriceSale: (account: string, collectionId: string, tokenId: string, price: string, options: TransactionOptions) => Promise<void>
   cancelSell: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
   unlockNft: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
+  getUserDeposit: (account: string) => Promise<BN>
   addDeposit: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
+  withdrawDeposit: (account: string, options: TransactionOptions) => Promise<void>
   buyToken: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
   transferToken: (from: string, to: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
   transferToAuction: (owner: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>

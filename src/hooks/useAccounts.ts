@@ -12,7 +12,7 @@ import { getSuri, PairType } from '../utils/seedUtils';
 import { TTransaction } from '../api/chainApi/types';
 
 export const useAccounts = () => {
-  const { rpcClient, rawRpcApi } = useApi();
+  const { rpcClient, rawRpcApi, api } = useApi();
   const {
     accounts,
     selectedAccount,
@@ -72,6 +72,15 @@ export const useAccounts = () => {
     }
   } as Account))), [getAccountBalance]);
 
+  const getAccountsDeposits = useCallback(async (accounts: Account[]) => {
+    if (!api?.market) return accounts;
+    const fetchDeposit = async (account: Account) => ({
+      ...account,
+      deposit: await api?.market?.getUserDeposit(account.address)
+    });
+    return await Promise.all(accounts.map(fetchDeposit));
+  }, [api?.market]);
+
   const fetchAccounts = useCallback(async () => {
     if (!rpcClient?.isKusamaApiConnected) return;
     setIsLoading(true);
@@ -85,8 +94,8 @@ export const useAccounts = () => {
 
     if (allAccounts?.length) {
       const accountsWithBalance = await getAccountsBalances(allAccounts);
-
-      setAccounts(accountsWithBalance);
+      const accountsWithDeposits = await getAccountsDeposits(accountsWithBalance);
+      setAccounts(accountsWithDeposits);
 
       const defaultAccountAddress = localStorage.getItem(DefaultAccountKey);
       const defaultAccount = allAccounts.find((item) => item.address === defaultAccountAddress);

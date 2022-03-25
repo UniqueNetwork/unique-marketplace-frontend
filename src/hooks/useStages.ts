@@ -8,6 +8,10 @@ const useStages = <T, P = Record<string, never>>(stages: InternalStage<T, P>[], 
   const [executionError, setExecutionError] = useState<Error | undefined | null>(null);
 
   useEffect(() => {
+    setInternalStages(stages);
+  }, [stages]);
+
+  useEffect(() => {
     return () => {
       internalStages?.forEach((internalStage) => internalStage?.signer?.onError(new Error('Componen\'t unmounted')));
     };
