@@ -75,7 +75,6 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
   return (<>
     <Text size={'l'}>{topBid ? 'Next minimum bid' : 'Starting bid'}</Text>
     <PriceForAuction price={offer.price}
-      fee={fee}
       minStep={offer.auction?.priceStep}
       topBid={topBid?.balance !== '0' ? topBid?.balance : topBid?.amount}
     />
