@@ -7,7 +7,7 @@ export type TTransfer = {
 
 export type TFixPriceProps = {
   accountAddress: string
-  price: number // float number
+  price: string // float number
 }
 
 export type TPurchaseProps = {
@@ -20,8 +20,8 @@ export type TDelistProps = {
 
 export type TAuctionProps = {
   accountAddress: string
-  minimumStep: number
-  startingPrice: number
+  minimumStep: string
+  startingPrice: string
   duration: number // days number
 }
 
