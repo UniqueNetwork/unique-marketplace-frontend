@@ -100,7 +100,7 @@ export const MarketPage = () => {
       <MainContent>
         <SearchAndSortingWrapper>
           <SearchWrapper>
-            <InputText
+            <InputTextStyled
               iconLeft={{ name: 'magnify', size: 16 }}
               onChange={(val) => setSearchValue(val)}
               placeholder='Collection / token'
@@ -177,6 +177,8 @@ const MainContent = styled.div`
 
 const SearchWrapper = styled.div`
   display: flex;
+  flex-grow: 1;
+  margin-right: 16px;
   button {
     margin-left: 8px;
   }
@@ -199,9 +201,18 @@ const SortSelectWrapper = styled.div`
   @media (max-width: 1024px) {
     display: none;
   }
+
+  .unique-select svg {
+    z-index: 0;
+  }
 `;
 
 const SearchAndSortingWrapper = styled.div`
   display: flex;
   justify-content: space-between;
+`;
+
+const InputTextStyled = styled(InputText)`
+  width: 100%;
+  max-width: 610px;
 `;

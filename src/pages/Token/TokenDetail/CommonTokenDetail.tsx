@@ -50,10 +50,9 @@ export const CommonTokenDetail: FC<IProps> = ({
         </Row>
         <Row>
           <Text color='grey-500' size='m'>
-            Owned by
+            Owned&nbsp;by
           </Text>
           <Account>
-            IdIcon
             <Text color='primary-600' size='m'>
               {deviceSize === DeviceSize.lg ? owner?.Substrate || '' : shortcutText(owner?.Substrate || '') }
             </Text>
@@ -162,6 +161,8 @@ const Description = styled.div`
 
 const Account = styled.div`
   margin-left: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   span {
     margin-left: 8px;
