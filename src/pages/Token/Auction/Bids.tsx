@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 import { Text, Table, Link } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
@@ -14,7 +14,7 @@ interface BidsProps {
 const getColumns = (tokenSymbol: string): TableColumnProps[] => ([
   {
     title: 'Bid',
-    field: 'amount',
+    field: 'bidValue',
     width: '100%',
     render: (bid: string) => <Text color={'dark'}>{`${formatKusamaBalance(bid)} ${tokenSymbol}`}</Text>
   },
@@ -35,13 +35,20 @@ const getColumns = (tokenSymbol: string): TableColumnProps[] => ([
 const tokenSymbol = 'KSM';
 
 const Bids: FC<BidsProps> = ({ offer }) => {
+  const bids = useMemo(() => {
+    return offer?.auction?.bids?.map((item) => ({
+      ...item,
+      bidValue: item.balance !== '0' ? item.balance : item.amount
+    })) || [];
+  }, [offer?.auction?.bids]);
+
   if (!offer) return null;
 
   return (
     <BidsWrapper>
       {!offer.auction?.bids?.length && <Text >There is no bids</Text>}
-      {offer.auction?.bids?.length && <Table
-        data={offer.auction?.bids}
+      {!!offer.auction?.bids?.length && <Table
+        data={bids}
         columns={getColumns(tokenSymbol)}
       />}
     </BidsWrapper>

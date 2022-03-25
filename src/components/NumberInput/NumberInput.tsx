@@ -1,23 +1,22 @@
 import React, { FC, useCallback } from 'react';
 import { InputText } from '@unique-nft/ui-kit';
-import { useApi } from '../../hooks/useApi';
 
 interface AmountInputProps {
   value: string | undefined
   onChange(value: string): void
   placeholder?: string
   decimals?: number
+  label?: string
   className?: string
 }
 
-export const NumberInput: FC<AmountInputProps> = ({ value, onChange, placeholder, decimals = 12, className }) => {
-  const { api } = useApi();
-
+export const NumberInput: FC<AmountInputProps> = ({ value, onChange, placeholder, decimals = 6, label, className }) => {
   const onChangeInput = useCallback((_value: string) => {
     if (_value === '') onChange(_value);
     // regExp to check value according to valid number format
-    const regExp = new RegExp(`^([1-9]\\d*|0)(\\.\\d{0,${api?.market?.kusamaDecimals || decimals}})?$`);
+    const regExp = new RegExp(`^([1-9]\\d{0,4}|0)(\\.\\d{0,${decimals}})?$`);
     // check value is correct
+    if (_value.length > 1 && _value.startsWith('0') && !_value.startsWith('0.')) _value = _value.replace('0', '');
     if (regExp.test(_value.trim())) {
       onChange(_value.trim());
     }
@@ -27,6 +26,7 @@ export const NumberInput: FC<AmountInputProps> = ({ value, onChange, placeholder
     placeholder={placeholder}
     onChange={onChangeInput}
     value={value}
+    label={label}
     className={className}
   />;
 };

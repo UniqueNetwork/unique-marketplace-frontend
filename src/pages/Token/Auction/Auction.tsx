@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import { Text, Button, Heading, Icon } from '@unique-nft/ui-kit';
+import BN from 'bn.js';
 import styled from 'styled-components/macro';
 
 import { Offer } from '../../../api/restApi/offers/types';
@@ -46,7 +47,7 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
   const topBid = useMemo(() => {
     if (offer.auction?.bids.length === 0) return null;
     return offer.auction?.bids.reduce((top, bid) => {
-      return top.amount > bid.amount ? top : bid;
+      return new BN(top.balance).gt(new BN(bid.balance)) ? top : bid;
     }) || null;
   }, [offer]);
 
@@ -64,10 +65,15 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
     setOffer(_offer);
   }, [setOffer]);
 
+  const minimumBid = useMemo(() => {
+    return (new BN((topBid?.balance !== '0' ? topBid?.balance : topBid?.amount) || 0).add(new BN(offer.auction?.priceStep || 0))).toString();
+  }, [topBid, offer.auction?.priceStep]);
+
   useBidsSubscription({ offer, onPlaceBid });
 
   return (<>
-    <Price price={offer.price} fee={fee} bid={topBid?.amount} />
+    <Text size={'m'}>Next minimum bid</Text>
+    <Price price={minimumBid} fee={fee} bid={topBid?.balance !== '0' ? topBid?.balance : topBid?.amount} />
     <AuctionWrapper>
       <Row>
         {canDelist && <Button title={'Delist'}
