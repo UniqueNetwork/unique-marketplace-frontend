@@ -10,11 +10,11 @@ import clock from '../../../static/icons/clock.svg';
 import { timeDifference } from '../../../utils/timestampUtils';
 import { AdditionalPositive100, AdditionalPositive500, Coral100, Coral500, Grey300 } from '../../../styles/colors';
 import { useBidsSubscription } from '../../../hooks/useBidsSubscription';
-import { Price } from '../TokenDetail/Price';
 import { useFee } from '../../../hooks/useFee';
 import { shortcutText } from '../../../utils/textUtils';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { compareEncodedAddresses, isTokenOwner } from '../../../api/chainApi/utils/addressUtils';
+import { PriceForAuction } from '../TokenDetail/PriceForAuction';
 
 interface AuctionProps {
   offer: Offer
@@ -72,8 +72,12 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
   useBidsSubscription({ offer, onPlaceBid });
 
   return (<>
-    <Text size={'m'}>Next minimum bid</Text>
-    <Price price={minimumBid} fee={fee} bid={topBid?.balance !== '0' ? topBid?.balance : topBid?.amount} />
+    <Text size={'l'}>{topBid ? 'Next minimum bid' : 'Starting bid'}</Text>
+    <PriceForAuction price={offer.price}
+      fee={fee}
+      minStep={offer.auction?.priceStep}
+      topBid={topBid?.balance !== '0' ? topBid?.balance : topBid?.amount}
+    />
     <AuctionWrapper>
       <Row>
         {canDelist && <Button title={'Delist'}
