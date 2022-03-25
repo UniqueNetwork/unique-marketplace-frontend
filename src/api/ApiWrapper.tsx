@@ -9,6 +9,7 @@ import { gqlClient as gql, rpcClient as rpc } from '.';
 import { getSettings } from './restApi/settings/settings';
 import { ApolloProvider } from '@apollo/client';
 import AuctionSocketProvider from './restApi/auction/AuctionSocketProvider';
+import { Settings } from './restApi/settings/types';
 
 interface ChainProviderProps {
   children: React.ReactNode
@@ -22,11 +23,12 @@ const ApiWrapper = ({ children, gqlClient = gql, rpcClient = rpc }: ChainProvide
   const [chainData, setChainData] = useState<ChainData>();
   const [isRpcClientInitialized, setRpcClientInitialized] = useState<boolean>(false);
   const { chainId } = useParams<'chainId'>();
+  const [settings, setSettings] = useState<Settings>();
 
   useEffect(() => {
     (async () => {
       const { data: settings } = await getSettings();
-
+      setSettings(settings);
       rpcClient?.setOnChainReadyListener(setChainData);
       await rpcClient?.initialize(settings);
       setRpcClientInitialized(true);
@@ -57,10 +59,11 @@ const ApiWrapper = ({ children, gqlClient = gql, rpcClient = rpc }: ChainProvide
         chainData,
         currentChain: chainId ? chains[chainId] : defaultChain,
         rawRpcApi: rpcClient.rawUniqRpcApi,
-        rpcClient
+        rpcClient,
+        settings
       };
     },
-    [isRpcClientInitialized, chainId, chainData]
+    [isRpcClientInitialized, chainId, chainData, settings]
   );
 
   return (

@@ -9,14 +9,13 @@ import { useApi } from '../../../hooks/useApi';
 
 interface PriceProps {
   price: string;
-  fee: number;
   minStep?: string;
   topBid?: string;
 }
 
 const tokenSymbol = 'KSM';
 
-export const PriceForAuction: FC<PriceProps> = ({ price, fee, minStep, topBid }) => {
+export const PriceForAuction: FC<PriceProps> = ({ price, minStep, topBid }) => {
   const { api } = useApi();
 
   const startPrice = price || minStep;

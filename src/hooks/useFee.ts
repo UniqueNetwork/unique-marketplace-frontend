@@ -1,5 +1,9 @@
-export const useFee = (): {fee: number} => {
-    const fee = 0.1;
+import { useApi } from './useApi';
 
-return { fee };
+export const useFee = (): {fee: string} => {
+  const { settings } = useApi();
+
+  const fee = settings?.blockchain.kusama.marketCommission || '0';
+
+  return { fee };
 };

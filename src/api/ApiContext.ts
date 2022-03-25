@@ -1,6 +1,7 @@
 import { ApiPromise } from '@polkadot/api';
 import { Context, Consumer, Provider, createContext } from 'react';
 import { Chain, ICollectionController, IMarketController, INFTController, IRpcClient } from './chainApi/types';
+import { Settings } from './restApi/settings/types';
 
 export type ChainData = {
   properties: {
@@ -22,6 +23,7 @@ export type ApiContextProps = {
   api: Api | undefined
   chainData?: ChainData
   currentChain: Chain
+  settings?: Settings
 }
 
 const ApiContext: Context<ApiContextProps> = createContext({} as unknown as ApiContextProps);

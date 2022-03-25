@@ -1,7 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Heading, Select, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
-import BN from 'bn.js';
 
 import { TPlaceABid } from './types';
 import { AdditionalWarning100 } from '../../../styles/colors';
@@ -15,6 +14,7 @@ import { formatKusamaBalance } from '../../../utils/textUtils';
 import { NumberInput } from '../../../components/NumberInput/NumberInput';
 import { useApi } from '../../../hooks/useApi';
 import { fromStringToBnString } from '../../../utils/bigNum';
+import { BN } from '@polkadot/util';
 
 export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ token, offer, setIsClosable, onFinish }) => {
   const [status, setStatus] = useState<'ask' | 'place-bid-stage'>('ask'); // TODO: naming
@@ -43,9 +43,11 @@ const chainOptions = [{ id: 'KSM', title: 'KSM', iconRight: { size: 18, file: Ku
 export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: string, chain: string): void}> = ({ offer, onConfirmPlaceABid }) => {
   const [bidAmount, setBidAmount] = useState<string>('0');
   const [chain, setChain] = useState<string | undefined>('KSM');
+  const { selectedAccount } = useAccounts();
   const { api } = useApi();
 
   const leadingBidAmount = useMemo(() => {
+    if (!offer?.auction?.bids || offer?.auction?.bids.length === 0) return new BN(offer?.auction?.startPrice || 0);
     return offer?.auction?.bids.reduce((amount, bid) => BN.max(amount, new BN(bid.amount)), new BN(0)) || new BN(0);
   }, [offer]);
 
@@ -53,26 +55,32 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: string, 
     return leadingBidAmount.add(new BN(offer?.auction?.priceStep || 0));
   }, [leadingBidAmount, offer?.auction?.priceStep]);
 
+  const isEnoughBalance = useMemo(() => {
+    if (!selectedAccount?.balance?.KSM || selectedAccount?.balance?.KSM.isZero()) return false;
+    const bnAmount = new BN(fromStringToBnString(bidAmount, api?.market?.kusamaDecimals));
+    return selectedAccount?.balance?.KSM.gte(bnAmount);
+  }, [selectedAccount?.balance?.KSM, bidAmount, api?.market?.kusamaDecimals]);
+
+  const onBidAmountChange = useCallback((value: string) => {
+    setBidAmount(value);
+  }, [setBidAmount]);
+
+  const isAmountValid = useMemo(() => {
+    if (!bidAmount || bidAmount === '0') return false;
+    return new BN(fromStringToBnString(bidAmount, api?.market?.kusamaDecimals)).gte(minimalBid);
+  }, [bidAmount, minimalBid, api?.market?.kusamaDecimals]);
+
   const onConfirmPlaceABidClick = useCallback(
     () => {
-      if (!bidAmount) return;
+      if (!isAmountValid || !isEnoughBalance) return;
       const bnAmount = new BN(fromStringToBnString(bidAmount, api?.market?.kusamaDecimals));
 
       const difference = formatKusamaBalance(bnAmount.sub(leadingBidAmount).toString());
 
       onConfirmPlaceABid(difference, chain || '');
     },
-    [onConfirmPlaceABid, bidAmount, leadingBidAmount, chain, api?.market?.kusamaDecimals]
+    [onConfirmPlaceABid, bidAmount, isEnoughBalance, isAmountValid, leadingBidAmount, chain, api?.market?.kusamaDecimals]
   );
-
-  const onBidAmountChange = useCallback((value: string) => {
-      setBidAmount(value);
-    }, [setBidAmount]);
-
-  const isAmountValid = useMemo(() => {
-    if (!bidAmount) return false;
-    return new BN(fromStringToBnString(bidAmount, api?.market?.kusamaDecimals)).gte(minimalBid);
-  }, [bidAmount, minimalBid, api?.market?.kusamaDecimals]);
 
   const onChainChange = useCallback(
     (value: string) => {
@@ -96,6 +104,9 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: string, 
       <Text size={'s'} color={'grey-500'} >
         {`Minimum bid ${formatKusamaBalance(minimalBid.toString(), api?.market?.kusamaDecimals)} ${chain || ''}`}
       </Text>
+      <CautionTextWrapper>
+        {!isEnoughBalance && <Text color={'coral-500'}>Your balance is too low to place a bid</Text>}
+      </CautionTextWrapper>
       <TextStyled
         color='additional-warning-500'
         size='s'
@@ -104,7 +115,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: string, 
       </TextStyled>
       <ButtonWrapper>
         <Button
-          disabled={!isAmountValid}
+          disabled={!isAmountValid || !isEnoughBalance}
           onClick={onConfirmPlaceABidClick}
           role='primary'
           title='Confirm'
@@ -151,7 +162,7 @@ const InputStyled = styled(NumberInput)`
 `;
 
 const TextStyled = styled(Text)`
-  margin-top: calc(var(--gap) * 2);
+  margin-top: calc(var(--gap) / 2);
   box-sizing: border-box;
   display: flex;
   padding: 8px 16px;
@@ -164,6 +175,11 @@ const TextStyled = styled(Text)`
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
+`;
+
+const CautionTextWrapper = styled.div`
+  display: flex;
+  min-height: calc(var(--gap) * 1.5);
 `;
 
 const Content = styled.div`
