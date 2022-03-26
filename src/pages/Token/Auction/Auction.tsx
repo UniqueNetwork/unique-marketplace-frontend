@@ -10,7 +10,6 @@ import clock from '../../../static/icons/clock.svg';
 import { timeDifference } from '../../../utils/timestampUtils';
 import { AdditionalPositive100, AdditionalPositive500, Coral100, Coral500, Grey300 } from '../../../styles/colors';
 import { useBidsSubscription } from '../../../hooks/useBidsSubscription';
-import { useFee } from '../../../hooks/useFee';
 import { shortcutText } from '../../../utils/textUtils';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { compareEncodedAddresses, isTokenOwner } from '../../../api/chainApi/utils/addressUtils';
@@ -25,8 +24,6 @@ interface AuctionProps {
 }
 
 const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDelistAuctionClick, onWithdrawClick }) => {
-  const { fee } = useFee();
-
   const [offer, setOffer] = useState<Offer>(initialOffer);
   const { selectedAccount } = useAccounts();
 

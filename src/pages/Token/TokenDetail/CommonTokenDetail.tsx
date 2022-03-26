@@ -1,5 +1,5 @@
 import { Heading, Icon, Text } from '@unique-nft/ui-kit';
-import { FC, ReactChild } from 'react';
+import React, { FC, ReactChild, useCallback, useMemo } from 'react';
 import styled from 'styled-components/macro';
 
 import { Picture } from '../../../components';
@@ -9,7 +9,12 @@ import { AttributesBlock } from './AttributesBlock';
 import { NFTToken } from '../../../api/chainApi/unique/types';
 import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';
 import { shortcutText } from '../../../utils/textUtils';
-import { Grey300, Grey500 } from '../../../styles/colors';
+import { Grey300, Grey500, Primary600 } from '../../../styles/colors';
+import { Avatar } from '../../../components/Avatar/Avatar';
+import DefaultAvatar from '../../../static/icons/default-avatar.svg';
+import config from '../../../config';
+import { useAccounts } from '../../../hooks/useAccounts';
+import { isTokenOwner } from '../../../api/chainApi/utils/addressUtils';
 
 interface IProps {
   children: ReactChild[];
@@ -31,7 +36,22 @@ export const CommonTokenDetail: FC<IProps> = ({
     prefix
   } = token;
 
+  const { selectedAccount } = useAccounts();
   const deviceSize = useDeviceSize();
+
+  const isOwner = useMemo(() => {
+    if (!selectedAccount || !owner) return false;
+    return isTokenOwner(selectedAccount.address, owner);
+  }, [selectedAccount, owner]);
+
+  const onShareClick = useCallback(() => {
+    if (navigator.share) {
+      void navigator.share({
+        title: `NFT: ${prefix || ''} #${tokenId}`,
+        url: window.location.href
+      });
+    }
+  }, [prefix, tokenId]);
 
   return (
     <CommonTokenDetailStyled>
@@ -40,23 +60,25 @@ export const CommonTokenDetail: FC<IProps> = ({
       </PictureWrapper>
       <Description>
         <Heading size={'1'}>{`${prefix || ''} #${tokenId}`}</Heading>
-        <Row>
+        <ShareLink onClick={onShareClick}>
           <Text color='grey-500' size='m'>
             Share Link
           </Text>
           <IconWrapper>
             <Icon file={share} size={24} />
           </IconWrapper>
-        </Row>
+        </ShareLink>
         <Row>
           <Text color='grey-500' size='m'>
             Owned&nbsp;by
           </Text>
-          <Account>
+          {isOwner && <Text color='grey-500' size='m'>You own it</Text>}
+          {!isOwner && <Account href={`${config.scanUrl}account/${owner?.Substrate || ''}`}>
+            <Avatar size={24} src={DefaultAvatar}/>
             <Text color='primary-600' size='m'>
               {deviceSize === DeviceSize.lg ? owner?.Substrate || '' : shortcutText(owner?.Substrate || '') }
             </Text>
-          </Account>
+          </Account>}
         </Row>
         <Divider />
         {children}
@@ -159,11 +181,19 @@ const Description = styled.div`
   flex: 1;
 `;
 
-const Account = styled.div`
+const ShareLink = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--gap);
+  cursor: pointer;
+`;
+
+const Account = styled.a`
   margin-left: 8px;
   overflow: hidden;
   text-overflow: ellipsis;
-
+  display: flex;
+  color: ${Primary600};
   span {
     margin-left: 8px;
   }
