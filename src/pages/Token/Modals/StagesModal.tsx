@@ -1,6 +1,6 @@
 import React, { FC, useEffect } from 'react';
 import styled from 'styled-components/macro';
-import { Icon, Text } from '@unique-nft/ui-kit';
+import { Icon, Text, Heading } from '@unique-nft/ui-kit';
 
 import Loading from '../../../components/Loading';
 import CheckCircle from '../../../static/icons/check-circle.svg';
@@ -20,20 +20,25 @@ const DefaultMarketStages: FC<TStagesModalProps> = ({ stages, status, onFinish }
   }, [status]);
 
   return (
-    <StageWrapper>
-      {stages.map((stage, index) => (<React.Fragment key={`stage-${index}`}>
-        <StatusWrapper>
-          {(stage.status === StageStatus.inProgress || stage.status === StageStatus.awaitingSign) && <Loading />}
-          {stage.status === StageStatus.success && <Icon file={CheckCircle} size={24} />}
-        </StatusWrapper>
-        <TitleWrapper>
-          <Text size={'m'}>{stage.title}</Text>
-          <Text size={'s'} color={'grey-500'}>
-            {`Step ${index + 1}`}
-          </Text>
-        </TitleWrapper>
-      </React.Fragment>))}
-    </StageWrapper>
+    <ModalWrapper>
+      <HeadingWrapper>
+        <Heading size='2'>Please wait</Heading>
+      </HeadingWrapper>
+      <StageWrapper>
+        {stages.map((stage, index) => (<React.Fragment key={`stage-${index}`}>
+          <StatusWrapper>
+            {(stage.status === StageStatus.inProgress || stage.status === StageStatus.awaitingSign) && <Loading />}
+            {stage.status === StageStatus.success && <Icon file={CheckCircle} size={24} />}
+          </StatusWrapper>
+          <TitleWrapper>
+            <Text size={'m'}>{stage.title}</Text>
+            {stages.length > 1 && <Text size={'s'} color={'grey-500'}>
+                {`Step ${index + 1}`}
+              </Text>}
+          </TitleWrapper>
+        </React.Fragment>))}
+      </StageWrapper>
+    </ModalWrapper>
   );
 };
 
@@ -44,10 +49,22 @@ const StageWrapper = styled.div`
   grid-template-columns: 24px 1fr;
   grid-column-gap: var(--gap);
   grid-row-gap: var(--gap);
+  align-items: flex-start;
 `;
 
 const StatusWrapper = styled.div`
   position: relative;
+  > div {
+    top: 12px;
+  }
+`;
+
+const ModalWrapper = styled.div`
+  
+`;
+
+const HeadingWrapper = styled.div`
+  margin-bottom: 16px;
 `;
 
 const TitleWrapper = styled.div`

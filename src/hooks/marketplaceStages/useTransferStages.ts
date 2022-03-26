@@ -8,7 +8,7 @@ export const useTransferStages = (collectionId: number, tokenId: number) => {
   const { api } = useApi();
   const marketApi = api?.market;
   const transferStages: MarketplaceStage<TTransfer>[] = useMemo(() => [{
-    title: 'Transfer token',
+    title: 'Transfer in progress',
     description: '',
     status: StageStatus.default,
     action: (params) => marketApi?.transferToken(params.txParams.sender, params.txParams?.recipient || '', params.collectionId.toString(), params.tokenId.toString(), params.options)
