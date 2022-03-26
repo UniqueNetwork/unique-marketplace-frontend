@@ -69,16 +69,18 @@ export const CommonTokenDetail: FC<IProps> = ({
           </IconWrapper>
         </ShareLink>
         <Row>
-          <Text color='grey-500' size='m'>
-            Owned&nbsp;by
-          </Text>
           {isOwner && <Text color='grey-500' size='m'>You own it</Text>}
-          {!isOwner && <Account href={`${config.scanUrl}account/${owner?.Substrate || ''}`}>
-            <Avatar size={24} src={DefaultAvatar}/>
-            <Text color='primary-600' size='m'>
-              {deviceSize === DeviceSize.lg ? owner?.Substrate || '' : shortcutText(owner?.Substrate || '') }
+          {!isOwner && <>
+            <Text color='grey-500' size='m'>
+              Owned&nbsp;by
             </Text>
-          </Account>}
+            <Account href={`${config.scanUrl}account/${owner?.Substrate || ''}`}>
+              <Avatar size={24} src={DefaultAvatar}/>
+              <Text color='primary-600' size='m'>
+                {deviceSize === DeviceSize.lg ? owner?.Substrate || '' : shortcutText(owner?.Substrate || '') }
+              </Text>
+            </Account>
+          </>}
         </Row>
         <Divider />
         {children}
