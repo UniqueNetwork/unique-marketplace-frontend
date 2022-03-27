@@ -9,13 +9,13 @@ export const useCancelSellFixStages = (collectionId: number, tokenId: number) =>
   const marketApi = api?.market;
   const delistStages: MarketplaceStage<TDelistProps>[] = useMemo(() => [
     {
-      title: 'Cancel sale of NFT',
+      title: 'Unlocking NFT',
       description: '',
       status: StageStatus.default,
       action: (params) => marketApi?.cancelSell(params.txParams.accountAddress, params.collectionId.toString(), params.tokenId.toString(), params.options)
     },
     {
-      title: 'Unlocking NFT',
+      title: 'Sending NFT to wallet',
       description: '',
       status: StageStatus.default,
       action: (params) => marketApi?.unlockNft(params.txParams.accountAddress, params.collectionId.toString(), params.tokenId.toString(), params.options)

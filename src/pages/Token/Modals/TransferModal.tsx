@@ -65,9 +65,12 @@ const AskTransferModal: FC<{ onTransfer(receiver: string): void }> = ({ onTransf
       >
         Proceed with caution, once confirmed the transaction cannot be reverted.
       </TextStyled>
-      <Text color='grey-500' size='m'>
-        {'Make sure to use a Substrate address created with a Polkadot.{js} wallet. There is no guarantee that third-party wallets, exchanges or hardware wallets can successfully sign and process your transfer which will result in a possible loss of the NFT.'}
-      </Text>
+      <TextStyled
+        color='additional-warning-500'
+        size='s'
+      >
+        Make sure to use a Substrate address created with a Polkadot.&#123;js&#125; wallet. There is no guarantee that third-party wallets, exchanges or hardware wallets can successfully sign and process your transfer which will result in a possible loss of the NFT.
+      </TextStyled>
       <ButtonWrapper>
         <Button
           disabled={!address}
@@ -98,7 +101,7 @@ const TextStyled = styled(Text)`
   box-sizing: border-box;
   display: flex;
   padding: 8px 16px;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   border-radius: 4px;
   background-color: ${AdditionalWarning100};
   width: 100%;
@@ -107,15 +110,20 @@ const TextStyled = styled(Text)`
 const InputWrapper = styled(InputText)`
   margin-bottom: 32px;
   width: 100%;
+
+  label {
+    margin-bottom: 16px;
+  }
 `;
 
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
+  margin-top: 24px;
 `;
 
 const Content = styled.div`
   && h2 {
-    margin-bottom: 0;
+    margin-bottom: 32px;
   }
 `;
