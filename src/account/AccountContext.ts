@@ -11,7 +11,8 @@ export interface Account extends InjectedAccountWithMeta {
   signerType: AccountSigner,
   balance?: {
     KSM?: BN
-  }
+  },
+  deposit?: BN
 }
 
 export type AccountContextProps = {

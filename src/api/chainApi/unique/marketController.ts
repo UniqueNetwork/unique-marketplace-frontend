@@ -352,7 +352,7 @@ class MarketController implements IMarketController {
   // #region buy
 
   // checkDepositReady
-  private async getUserDeposit (account: string): Promise<BN> {
+  public async getUserDeposit (account: string): Promise<BN> {
     const ethAccount = getEthAccount(account);
 
     const matcherContractInstance = this.getMatcherContractInstance(ethAccount);
@@ -434,6 +434,39 @@ class MarketController implements IMarketController {
     await signedTx.send();
     await this.repeatCheckForTransactionFinish(async () => {
         return (price.lte(await this.getUserDeposit(account)));
+      }
+    );
+  }
+
+  public async withdrawDeposit (account: string, options: TransactionOptions) {
+    if (!account || account === '') throw new Error('Account not provided');
+    const ethAccount = getEthAccount(account);
+    const matcherContractInstance = this.getMatcherContractInstance(ethAccount);
+    const userDeposit = await this.getUserDeposit(account);
+
+    if (!userDeposit || userDeposit.isZero()) throw new Error('No user deposit');
+
+    const abi = (matcherContractInstance.methods).withdrawAllKSM(ethAccount).encodeABI();
+
+    const tx = this.uniqApi.tx.evm.call(
+      ethAccount,
+      this.contractAddress,
+      abi,
+      0,
+      this.defaultGasAmount,
+      await this.web3Instance.eth.getGasPrice(),
+      null,
+      null,
+      []
+    );
+
+    const signedTx = await options.sign(tx);
+
+    if (!signedTx) throw new Error('Transaction cancelled');
+
+    await signedTx.send();
+    await this.repeatCheckForTransactionFinish(async () => {
+        return (await this.getUserDeposit(account)).isZero();
       }
     );
   }
