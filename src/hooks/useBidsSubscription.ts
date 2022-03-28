@@ -24,7 +24,6 @@ export const useBidsSubscription = ({ offer, onPlaceBid }: useBidsSubscriptionPr
     });
 
     socket?.on('bidPlaced', (offer) => {
-      console.log('bidPlaced', offer);
       onPlaceBid(offer);
     });
 

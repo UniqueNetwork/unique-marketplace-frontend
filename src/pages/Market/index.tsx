@@ -63,7 +63,7 @@ export const MarketPage = () => {
   const [filterState, setFilterState] = useState<FilterState | null>();
   const [sortingValue, setSortingValue] = useState<string>(defaultSortingValue);
   const [searchValue, setSearchValue] = useState<string | number>();
-  const { offers, offersCount, isFetching, fetchMore, fetch } = useOffers({ pageSize, sort: [sortingValue] });
+  const { offers, offersCount, isFetching, fetchMore, fetch } = useOffers();
 
   const hasMore = offers && offers.length < offersCount;
 
