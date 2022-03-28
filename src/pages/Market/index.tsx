@@ -55,7 +55,7 @@ const sortingOptions: TOption[] = [
   }
 ];
 
-const pageSize = 6;
+const pageSize = 20;
 
 const defaultSortingValue = 'desc(CreationDate)';
 
