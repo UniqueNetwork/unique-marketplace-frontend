@@ -84,7 +84,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
           </Text>
         </a>
         <PriceWrapper>
-          <Text size='s'>{`Price: ${formatKusamaBalance(offer?.price || 0)}`}</Text>
+          <Text size='s'>{`${formatKusamaBalance(offer?.price || 0)}`}</Text>
           <Icon file={Kusama} size={16} />
         </PriceWrapper>
         {!offer?.auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
@@ -172,10 +172,6 @@ const Description = styled.div`
 
   span {
     color: ${Primary600};
-
-    &:nth-of-type(2) {
-      margin-bottom: 5px;
-    }
   }
 `;
 

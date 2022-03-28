@@ -15,15 +15,18 @@ import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import config from '../../../config';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { isTokenOwner } from '../../../api/chainApi/utils/addressUtils';
+import { Offer } from '../../../api/restApi/offers/types';
 
 interface IProps {
   children: ReactChild[];
   token: NFTToken;
+  offer?: Offer;
 }
 
 export const CommonTokenDetail: FC<IProps> = ({
   children,
-  token
+  token,
+  offer
 }) => {
   const {
     collectionId,
@@ -74,10 +77,10 @@ export const CommonTokenDetail: FC<IProps> = ({
             <Text color='grey-500' size='m'>
               Owned&nbsp;by
             </Text>
-            <Account href={`${config.scanUrl}account/${owner?.Substrate || ''}`}>
+            <Account href={`${config.scanUrl}account/${owner?.Substrate || offer!.seller}`}>
               <Avatar size={24} src={DefaultAvatar}/>
               <Text color='primary-600' size='m'>
-                {deviceSize === DeviceSize.lg ? owner?.Substrate || '' : shortcutText(owner?.Substrate || '') }
+                {deviceSize === DeviceSize.lg ? owner?.Substrate || offer!.seller : shortcutText(owner?.Substrate || '') }
               </Text>
             </Account>
           </>}
