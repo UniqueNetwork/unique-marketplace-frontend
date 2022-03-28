@@ -88,39 +88,22 @@ export const NFTPage = () => {
   const [tokens, setTokens] = useState<NFTToken[]>([]);
   const [isFetchingTokens, setIsFetchingTokens] = useState<boolean>(true);
 
-  const { offers, isFetching: isFetchingOffers, fetch } = useOffers({ page: 1, pageSize, seller: selectedAccount?.address });
+  const { offers, isFetching: isFetchingOffers, fetch } = useOffers();
 
   const { api } = useApi();
-
-  const fetchOffersBySeller = useCallback(() => {
-    if (!selectedAccount?.address) return;
-    fetch({ page: 1, pageSize, seller: selectedAccount?.address });
-  }, [selectedAccount?.address]);
-
-  useEffect(() => {
-    void fetchOffersBySeller();
-  }, [fetchOffersBySeller]);
 
   useEffect(() => {
     if (!api?.nft || !selectedAccount?.address) return;
     setIsFetchingTokens(true);
-    console.log('FetchingTokens');
     void (async () => {
+      const _offers = await fetch({ page: 1, pageSize, seller: selectedAccount?.address }) || [];
+      const _tokensFromOffers = await Promise.all(_offers.map(({ tokenId, collectionId }) => api.nft?.getToken(collectionId, tokenId))) as NFTToken[];
       const _tokens = await api.nft?.getAccountTokens(selectedAccount.address) as NFTToken[];
-      setTokens((tokens) => [...tokens, ..._tokens]);
-      setIsFetchingTokens(false);
-    })();
-  }, [selectedAccount?.address, api?.nft, setIsFetchingTokens]);
 
-  useEffect(() => {
-    if (!api?.nft) return;
-    setIsFetchingTokens(true);
-    void (async () => {
-      const _tokensFromOffers = await Promise.all(offers.map(({ tokenId, collectionId }) => api.nft?.getToken(collectionId, tokenId))) as NFTToken[];
-      setTokens((tokens) => [...tokens, ..._tokensFromOffers]);
+      setTokens([..._tokens, ..._tokensFromOffers]);
       setIsFetchingTokens(false);
     })();
-  }, [offers, api?.nft, setIsFetchingTokens]);
+  }, [api?.nft, selectedAccount?.address, setIsFetchingTokens, fetch]);
 
   useEffect(() => {
     const option = sortingOptions.find((option) => { return option.id === sortingValue; });
