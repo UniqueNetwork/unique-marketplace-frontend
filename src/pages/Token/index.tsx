@@ -52,7 +52,7 @@ const TokenPage = () => {
   // TODO: split into more categories here instead of just "buy/sell" and putting splitting inside them
 
   return (<PagePaper>
-    <CommonTokenDetail token={token}>
+    <CommonTokenDetail token={token} offer={offer}>
       <TokenTrading
         token={token}
         offer={offer}

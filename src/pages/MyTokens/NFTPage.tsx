@@ -202,7 +202,7 @@ export const NFTPage = () => {
       <MainContent>
         <SearchAndSortingWrapper>
           <SearchWrapper>
-            <InputText
+            <InputTextStyled
               iconLeft={{ name: 'magnify', size: 16 }}
               onChange={onChangeSearchValue}
               placeholder='Collection / token'
@@ -272,6 +272,8 @@ const MainContent = styled.div`
 
 const SearchWrapper = styled.div`
   display: flex;
+  flex-grow: 1;
+  margin-right: 16px;
 
   button {
     margin-left: 8px;
@@ -304,4 +306,9 @@ const SearchAndSortingWrapper = styled.div`
 
 const TokensListWrapper = styled.div`
   min-height: 640px;
+`;
+
+const InputTextStyled = styled(InputText)`
+  width: 100%;
+  max-width: 610px;
 `;
