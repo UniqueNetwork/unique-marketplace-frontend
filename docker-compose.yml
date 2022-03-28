@@ -13,15 +13,3 @@ services:
       dockerfile: ./.docker/Dockerfile
     networks:
       - market
-
-  dafc-market:
-    container_name: dafc-market-client
-    build:
-      context: ./
-      dockerfile: ./.docker/Dockerfile
-    volumes:
-      - ./dafc/footer.html:/usr/share/nginx/html/footer.html:ro
-      - ./dafc/logo.svg:/usr/share/nginx/html/logos/logo.svg:ro
-      - ./dafc/variables.css:/usr/share/nginx/html/variables.css:ro
-    networks:
-      - market
