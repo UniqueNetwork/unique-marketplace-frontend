@@ -1,13 +1,11 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
-import { Text, Button, Heading, Icon } from '@unique-nft/ui-kit';
+import { Text, Button, Heading } from '@unique-nft/ui-kit';
 import BN from 'bn.js';
 import styled from 'styled-components/macro';
 
 import { Offer } from '../../../api/restApi/offers/types';
 import { NFTToken } from '../../../api/chainApi/unique/types';
 import Bids from './Bids';
-import clock from '../../../static/icons/clock.svg';
-import { timeDifference } from '../../../utils/timestampUtils';
 import { AdditionalPositive100, AdditionalPositive500, Coral100, Coral500, Grey300 } from '../../../styles/colors';
 import { useBidsSubscription } from '../../../hooks/useBidsSubscription';
 import { shortcutText } from '../../../utils/textUtils';
@@ -89,11 +87,6 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
           disabled={!canPlaceABid}
         />}
         {canWithdraw && <Button title={'Withdraw'} onClick={onWithdrawClick} />}
-
-        {/* <TimeLimitWrapper>
-          <Icon file={clock} size={24} />
-          <Text color={'dark'}>{`${timeDifference(new Date(offer.auction?.stopAt || '').getTime() / 1000)} left`}</Text>
-        </TimeLimitWrapper> */}
       </Row>
       {offer?.auction?.stopAt && <TimerWrapper>
         <Timer time={offer.auction.stopAt} />
@@ -111,15 +104,6 @@ export default Auction;
 
 const AuctionWrapper = styled.div`
   margin-top: 24px;
-`;
-
-const TimeLimitWrapper = styled.div`
-  display: flex;
-  align-items: center;
-
-  img {
-    margin-right: 4px;
-  }
 `;
 
 const TimerWrapper = styled.div`
