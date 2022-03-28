@@ -14,6 +14,7 @@ import { shortcutText } from '../../../utils/textUtils';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { compareEncodedAddresses, isTokenOwner } from '../../../api/chainApi/utils/addressUtils';
 import { PriceForAuction } from '../TokenDetail/PriceForAuction';
+import Timer from '../../../components/Timer';
 
 interface AuctionProps {
   offer: Offer
@@ -89,12 +90,14 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
         />}
         {canWithdraw && <Button title={'Withdraw'} onClick={onWithdrawClick} />}
 
-        <TimeLimitWrapper>
+        {/* <TimeLimitWrapper>
           <Icon file={clock} size={24} />
           <Text color={'dark'}>{`${timeDifference(new Date(offer.auction?.stopAt || '').getTime() / 1000)} left`}</Text>
-        </TimeLimitWrapper>
-
+        </TimeLimitWrapper> */}
       </Row>
+      {offer?.auction?.stopAt && <TimerWrapper>
+        <Timer time={offer.auction.stopAt} />
+      </TimerWrapper>}
       <Divider />
       <Heading size={'4'}>Offers</Heading>
       {isTopBidder && <TopBidderTextStyled >You are Top Bidder</TopBidderTextStyled>}
@@ -117,6 +120,10 @@ const TimeLimitWrapper = styled.div`
   img {
     margin-right: 4px;
   }
+`;
+
+const TimerWrapper = styled.div`
+  margin-top: 24px;
 `;
 
 const Row = styled.div`
