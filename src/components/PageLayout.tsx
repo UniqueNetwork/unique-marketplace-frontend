@@ -89,6 +89,8 @@ const LayoutStyled = styled.div`
 
 
   main {
+    padding-top: 80px;
+
     > div {
       display: flex;
     }
@@ -104,6 +106,11 @@ const LayoutStyled = styled.div`
   }
 
   header {
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    right: 0;
+    top: 0;
     @media (max-width: 1024px) {
       top: 0;
       position: sticky !important;
