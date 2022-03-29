@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Heading, Select, Text } from '@unique-nft/ui-kit';
+import { Button, Heading, Link, Select, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import { TPlaceABid } from './types';
@@ -15,6 +15,9 @@ import { NumberInput } from '../../../components/NumberInput/NumberInput';
 import { useApi } from '../../../hooks/useApi';
 import { fromStringToBnString } from '../../../utils/bigNum';
 import { BN } from '@polkadot/util';
+import { StageStatus } from '../../../types/StagesTypes';
+import { NotificationSeverity } from '../../../notification/NotificationContext';
+import { useNotification } from '../../../hooks/useNotification';
 
 export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ token, offer, setIsClosable, onFinish }) => {
   const [status, setStatus] = useState<'ask' | 'place-bid-stage'>('ask'); // TODO: naming
@@ -129,10 +132,19 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: string, 
 const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ token, onFinish, amount }) => {
   const { selectedAccount } = useAccounts();
   const { stages, status, initiate } = useAuctionBidStages(token?.collectionId || 0, token?.id);
+  const { push } = useNotification();
+
   useEffect(() => {
     if (!selectedAccount) throw new Error('Account not selected');
     initiate({ value: amount, accountAddress: selectedAccount.address });
   }, [amount, selectedAccount]);
+
+  useEffect(() => {
+    if (status === StageStatus.success) {
+      push({ severity: NotificationSeverity.success, message: <>You made a new bid on <Link title={`${token.prefix} #${token.id}`}/></> });
+    }
+  }, [status]);
+
   return (
     <div>
       <DefaultMarketStages stages={stages} status={status} onFinish={onFinish} />

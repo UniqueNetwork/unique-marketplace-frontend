@@ -3,15 +3,18 @@ import { Outlet } from 'react-router-dom';
 import ApiWrapper from './api/ApiWrapper';
 import { PageLayout } from './components';
 import AccountWrapper from './account/AccountProvider';
+import NotificationWrapper from './notification/NotificationWrapper';
 
 export default function App() {
   return (
-    <ApiWrapper>
-      <AccountWrapper>
-        <PageLayout>
-          <Outlet />
-        </PageLayout>
-      </AccountWrapper>
-    </ApiWrapper>
+    <NotificationWrapper>
+      <ApiWrapper>
+        <AccountWrapper>
+          <PageLayout>
+            <Outlet />
+          </PageLayout>
+        </AccountWrapper>
+      </ApiWrapper>
+    </NotificationWrapper>
   );
 }
