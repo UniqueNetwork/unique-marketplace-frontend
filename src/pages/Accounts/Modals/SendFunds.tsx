@@ -11,6 +11,9 @@ import { Account } from '../../../account/AccountContext';
 import DefaultMarketStages from '../../Token/Modals/StagesModal';
 import { useTransferFundsStages } from '../../../hooks/accountStages/useTransferFundsStages';
 import { formatKusamaBalance } from '../../../utils/textUtils';
+import { StageStatus } from '../../../types/StagesTypes';
+import { NotificationSeverity } from '../../../notification/NotificationContext';
+import { useNotification } from '../../../hooks/useNotification';
 
 const tokenSymbol = 'KSM';
 
@@ -140,7 +143,15 @@ type TransferFundsStagesModalProps = {
 
 const TransferFundsStagesModal: FC<TransferFundsStagesModalProps & TTransferFunds> = ({ isVisible, onFinish, sender, amount, recipient }) => {
   const { stages, status, initiate } = useTransferFundsStages(sender);
+  const { push } = useNotification();
   useEffect(() => { initiate({ sender, recipient, amount }); }, [sender, recipient, amount]);
+
+  useEffect(() => {
+    if (status === StageStatus.success) {
+      push({ severity: NotificationSeverity.success, message: 'Funds transfer completed' });
+    }
+  }, [status]);
+
   return (<Modal isVisible={isVisible} isClosable={false}>
     <div>
       <DefaultMarketStages stages={stages} status={status} onFinish={onFinish} />

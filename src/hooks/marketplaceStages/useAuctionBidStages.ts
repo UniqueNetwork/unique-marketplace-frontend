@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useApi } from '../useApi';
 import useMarketplaceStages, { MarketplaceStage } from '../useMarketplaceStages';
 import { TTransaction } from '../../api/chainApi/types';
