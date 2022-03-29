@@ -1,5 +1,6 @@
 import React, { FC, useMemo, useState } from 'react';
 import { Icon, Text } from '@unique-nft/ui-kit';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components/macro';
 
 import { Picture } from '..';
@@ -67,15 +68,15 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, ...props })
 
   return (
     <TokensCardStyled>
-      <PictureWrapper href={`/token/${collectionId || ''}/${tokenId || ''}`}>
+      <PictureWrapper to={`/token/${collectionId || ''}/${tokenId || ''}`}>
         <Picture alt={tokenId?.toString() || ''} src={imageUrl} />
       </PictureWrapper>
       <Description>
-        <a href={`/token/${collectionId || ''}/${tokenId || ''}`} title={`${prefix || ''} #${tokenId || ''}`}>
+        <Link to={`/token/${collectionId}/${tokenId}`} title={`${prefix || ''} #${tokenId}`}>
           <Text size='l' weight='medium'>
             {`${prefix || ''} #${tokenId || ''}`}
           </Text>
-        </a>
+        </Link>
         <a href={`${config.scanUrl || ''}collections/${collectionId || ''}`} target={'_blank'} rel='noreferrer'>
           <Text color='primary-600' size='s'>
             {`${collectionName?.substring(0, 15) || ''} [id ${collectionId || ''}]`}
@@ -110,7 +111,7 @@ const TokensCardStyled = styled.div`
   cursor: pointer;
 `;
 
-const PictureWrapper = styled.a`
+const PictureWrapper = styled(Link)`
   position: relative;
   width: 100%;
   display: flex;
