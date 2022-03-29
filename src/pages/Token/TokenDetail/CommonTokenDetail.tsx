@@ -104,15 +104,6 @@ const CommonTokenDetailStyled = styled.div`
   display: flex;
   width: 100%;
 
-  > div:first-of-type {
-    width: 44%;
-    margin-right: 32px;
-
-    @media (max-width: 568px) {
-      width: 100%;
-    }
-  }
-
   @media (max-width: 568px) {
     flex-direction: column;
     row-gap: var(--gap);
@@ -133,7 +124,9 @@ const PictureWrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-
+  width: 536px;
+  margin-right: calc(var(--gap) * 2);
+  
   &::before {
     content: '';
     display: block;
@@ -150,6 +143,7 @@ const PictureWrapper = styled.div`
     text-align: center;
     max-height: 100%;
     border-radius: 8px;
+    
 
     img {
       max-width: 100%;

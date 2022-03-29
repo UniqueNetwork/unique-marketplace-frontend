@@ -1,7 +1,7 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { web3Accounts, web3Enable, web3FromSource } from '@polkadot/extension-dapp';
 import keyring from '@polkadot/ui-keyring';
-import { BN, stringToHex, u8aToString } from '@polkadot/util';
+import { BN, stringToHex, u8aToHex } from '@polkadot/util';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { sleep } from '../utils/helpers';
@@ -141,9 +141,9 @@ export const useAccounts = () => {
 
   const unlockLocalAccount = useCallback((password: string) => {
     if (!selectedAccount) return;
-    const signature = keyring.getPair(selectedAccount.address);
-    signature.unlock(password);
-    return signature;
+    const pair = keyring.getPair(selectedAccount.address);
+    pair.unlock(password);
+    return pair;
   }, [selectedAccount]);
 
   const signTx = useCallback(async (tx: TTransaction, account?: Account): Promise<TTransaction> => {
@@ -168,9 +168,9 @@ export const useAccounts = () => {
     if (!_account) throw new Error('Account was not provided');
     let signedMessage;
     if (_account.signerType === AccountSigner.local) {
-      const signature = await showSignDialog();
-      if (signature) {
-        signedMessage = u8aToString(signature.sign(message));
+      const pair = await showSignDialog();
+      if (pair) {
+        signedMessage = u8aToHex(pair.sign(stringToHex(message)));
       }
     } else {
       const injector = await web3FromSource(_account.meta.source);
