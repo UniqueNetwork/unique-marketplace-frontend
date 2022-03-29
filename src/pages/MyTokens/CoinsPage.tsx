@@ -8,7 +8,6 @@ import { PagePaper } from '../../components/PagePaper/PagePaper';
 import { TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import { formatKusamaBalance } from '../../utils/textUtils';
 import { useAccounts } from '../../hooks/useAccounts';
-import config from '../../config';
 import ChainLogo from '../../components/ChainLogo';
 
 const tokenSymbol = 'KSM';
@@ -61,7 +60,7 @@ const getAccountsColumns = ({ onShowSendFundsModal }: AccountsColumnsProps): Tab
   }
 ]);
 
-const { chains } = config;
+const chains: Record<string, string> = { KSM: 'Kusama' };
 
 export const CoinsPage: FC = () => {
   const { selectedAccount, fetchBalances } = useAccounts();
@@ -73,19 +72,19 @@ export const CoinsPage: FC = () => {
 
   const onFinish = useCallback(() => {
     setIsTransferFundsVisible(false);
-    fetchBalances();
+    void fetchBalances();
   }, [fetchBalances]);
 
   const balances = useMemo(() => {
     return Object.keys(chains).map((chainKey: string) => ({
       chainInfo: {
         key: chainKey.toLowerCase(),
-        name: chains[chainKey].name,
+        name: chains[chainKey],
         address: selectedAccount?.address
       },
       balance: selectedAccount?.balance?.[tokenSymbol]?.toString()
     }));
-  }, [selectedAccount, chains]);
+  }, [selectedAccount]);
 
   return (<PagePaper>
     <CoinsPageWrapper>

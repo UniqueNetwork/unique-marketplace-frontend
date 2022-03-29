@@ -14,6 +14,7 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { timeDifference } from '../../utils/timestampUtils';
 import config from '../../config';
 import { Primary600 } from '../../styles/colors';
+import { Link } from 'react-router-dom';
 
 export type TTokensCard = {
   offer: Offer
@@ -56,39 +57,37 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
 
   const topBid = useMemo(() => {
     if (!offer?.auction?.bids?.length) return null;
-    return offer.auction.bids.reduce((top, bid) => {
-      return top.amount > bid.amount ? top : bid;
-    }) || null;
+    return offer?.auction?.bids[0].balance;
   }, [offer]);
 
   const isTopBidder = useMemo(() => {
     if (!selectedAccount || !isBidder || !topBid) return false;
-    return compareEncodedAddresses(topBid.bidderAddress, selectedAccount.address);
+    return compareEncodedAddresses(offer?.auction!.bids[0].bidderAddress, selectedAccount.address);
   }, [isBidder, topBid, selectedAccount]);
 
   return (
     <TokensCardStyled>
-      <PictureWrapper href={`/token/${offer?.collectionId}/${offer?.tokenId}`}>
+      <PictureWrapper to={`/token/${offer?.collectionId}/${offer?.tokenId}`}>
         <Picture alt={offer?.tokenId?.toString() || ''} src={imagePath} />
       </PictureWrapper>
       <Description>
-        <a href={`/token/${offer?.collectionId}/${offer?.tokenId}`} title={`${tokenPrefix || ''} #${offer?.tokenId}`}>
+        <Link to={`/token/${offer?.collectionId}/${offer?.tokenId}`} title={`${tokenPrefix || ''} #${offer?.tokenId}`}>
           <Text size='l' weight='medium' color={'secondary-500'}>
             {`${tokenPrefix || ''} #${offer?.tokenId}`}
           </Text>
-        </a>
+        </Link>
         <a href={`${config.scanUrl || ''}collections/${offer?.collectionId}`} target={'_blank'} rel='noreferrer'>
           <Text color='primary-600' size='s'>
             {`${collectionName?.substring(0, 15) || ''} [id ${offer?.collectionId || ''}]`}
           </Text>
         </a>
         <PriceWrapper>
-          <Text size='s'>{`Price: ${formatKusamaBalance(offer?.price || 0)}`}</Text>
+          <Text size='s'>{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(offer?.price)}` }</Text>
           <Icon file={Kusama} size={16} />
         </PriceWrapper>
         {!offer?.auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         {offer?.auction && <AuctionInfoWrapper>
-          {isTopBidder && <Text size={'xs'} color={'positive-500'} >Leading bid</Text>}
+          {isTopBidder && <Text size={'xs'} color={'additional-positive-500'} >Leading bid</Text>}
           {isBidder && !isTopBidder && <Text size={'xs'} color={'coral-500'} >Outbid</Text>}
           {!isBidder && !isTopBidder && <Text size={'xs'} color={'grey-500'} >{
             offer.auction.bids.length > 0 ? 'Last bid' : 'Minimum bid'
@@ -111,7 +110,7 @@ const TokensCardStyled = styled.div`
   cursor: pointer;
 `;
 
-const PictureWrapper = styled.a`
+const PictureWrapper = styled(Link)`
   position: relative;
   width: 100%;
   display: flex;
@@ -171,10 +170,6 @@ const Description = styled.div`
 
   span {
     color: ${Primary600};
-
-    &:nth-of-type(2) {
-      margin-bottom: 5px;
-    }
   }
 `;
 

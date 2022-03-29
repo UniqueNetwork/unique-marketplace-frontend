@@ -1,5 +1,5 @@
 import { Heading, Icon, Text } from '@unique-nft/ui-kit';
-import { FC, ReactChild } from 'react';
+import React, { FC, ReactChild, useCallback, useMemo } from 'react';
 import styled from 'styled-components/macro';
 
 import { Picture } from '../../../components';
@@ -9,16 +9,24 @@ import { AttributesBlock } from './AttributesBlock';
 import { NFTToken } from '../../../api/chainApi/unique/types';
 import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';
 import { shortcutText } from '../../../utils/textUtils';
-import { Grey300, Grey500 } from '../../../styles/colors';
+import { Grey300, Grey500, Primary600 } from '../../../styles/colors';
+import { Avatar } from '../../../components/Avatar/Avatar';
+import DefaultAvatar from '../../../static/icons/default-avatar.svg';
+import config from '../../../config';
+import { useAccounts } from '../../../hooks/useAccounts';
+import { isTokenOwner } from '../../../api/chainApi/utils/addressUtils';
+import { Offer } from '../../../api/restApi/offers/types';
 
 interface IProps {
   children: ReactChild[];
   token: NFTToken;
+  offer?: Offer;
 }
 
 export const CommonTokenDetail: FC<IProps> = ({
   children,
-  token
+  token,
+  offer
 }) => {
   const {
     collectionId,
@@ -31,7 +39,22 @@ export const CommonTokenDetail: FC<IProps> = ({
     prefix
   } = token;
 
+  const { selectedAccount } = useAccounts();
   const deviceSize = useDeviceSize();
+
+  const isOwner = useMemo(() => {
+    if (!selectedAccount || !owner) return false;
+    return isTokenOwner(selectedAccount.address, owner);
+  }, [selectedAccount, owner]);
+
+  const onShareClick = useCallback(() => {
+    if (navigator.share) {
+      void navigator.share({
+        title: `NFT: ${prefix || ''} #${tokenId}`,
+        url: window.location.href
+      });
+    }
+  }, [prefix, tokenId]);
 
   return (
     <CommonTokenDetailStyled>
@@ -40,24 +63,27 @@ export const CommonTokenDetail: FC<IProps> = ({
       </PictureWrapper>
       <Description>
         <Heading size={'1'}>{`${prefix || ''} #${tokenId}`}</Heading>
-        <Row>
+        <ShareLink onClick={onShareClick}>
           <Text color='grey-500' size='m'>
             Share Link
           </Text>
           <IconWrapper>
             <Icon file={share} size={24} />
           </IconWrapper>
-        </Row>
+        </ShareLink>
         <Row>
-          <Text color='grey-500' size='m'>
-            Owned by
-          </Text>
-          <Account>
-            IdIcon
-            <Text color='primary-600' size='m'>
-              {deviceSize === DeviceSize.lg ? owner?.Substrate || '' : shortcutText(owner?.Substrate || '') }
+          {isOwner && <Text color='grey-500' size='m'>You own it</Text>}
+          {!isOwner && <>
+            <Text color='grey-500' size='m'>
+              Owned&nbsp;by
             </Text>
-          </Account>
+            <Account href={`${config.scanUrl}account/${owner?.Substrate || offer?.seller || '404'}`}>
+              <Avatar size={24} src={DefaultAvatar}/>
+              <Text color='primary-600' size='m'>
+                {deviceSize === DeviceSize.lg ? (owner?.Substrate || offer?.seller || '') : shortcutText(owner?.Substrate || '') }
+              </Text>
+            </Account>
+          </>}
         </Row>
         <Divider />
         {children}
@@ -77,15 +103,6 @@ export const CommonTokenDetail: FC<IProps> = ({
 const CommonTokenDetailStyled = styled.div`
   display: flex;
   width: 100%;
-
-  > div:first-of-type {
-    width: 44%;
-    margin-right: 32px;
-
-    @media (max-width: 568px) {
-      width: 100%;
-    }
-  }
 
   @media (max-width: 568px) {
     flex-direction: column;
@@ -107,7 +124,9 @@ const PictureWrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-
+  width: 536px;
+  margin-right: calc(var(--gap) * 2);
+  
   &::before {
     content: '';
     display: block;
@@ -124,6 +143,7 @@ const PictureWrapper = styled.div`
     text-align: center;
     max-height: 100%;
     border-radius: 8px;
+    
 
     img {
       max-width: 100%;
@@ -160,9 +180,19 @@ const Description = styled.div`
   flex: 1;
 `;
 
-const Account = styled.div`
-  margin-left: 8px;
+const ShareLink = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--gap);
+  cursor: pointer;
+`;
 
+const Account = styled.a`
+  margin-left: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  color: ${Primary600};
   span {
     margin-left: 8px;
   }

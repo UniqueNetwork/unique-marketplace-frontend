@@ -14,6 +14,7 @@ export type GetOffersRequestPayload = {
 
 export type Bid = {
   amount: string
+  balance: string
   bidderAddress: string
   createdAt: string
   pendingAmount: string

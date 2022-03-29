@@ -1,11 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
 import { TTransaction } from '../api/chainApi/types';
 import { ActionFunction, InternalStage, SignFunction, StageStatus, useStagesReturn } from '../types/StagesTypes';
+import { useNotification } from './useNotification';
+import { NotificationSeverity } from '../notification/NotificationContext';
 
 const useStages = <T, P = Record<string, never>>(stages: InternalStage<T, P>[], actionFunction: ActionFunction<T, P>, signFunction: SignFunction): useStagesReturn<T> => {
   const [internalStages, setInternalStages] = useState<InternalStage<T, P>[]>(stages);
   const [stagesStatus, setStagesStatus] = useState<StageStatus>(StageStatus.default);
   const [executionError, setExecutionError] = useState<Error | undefined | null>(null);
+  const { push } = useNotification();
+
+  useEffect(() => {
+    setInternalStages(stages);
+  }, [stages]);
 
   useEffect(() => {
     return () => {
@@ -53,6 +60,7 @@ const useStages = <T, P = Record<string, never>>(stages: InternalStage<T, P>[], 
       } catch (e) {
         setStagesStatus(StageStatus.error);
         setExecutionError(new Error(`Stage "${internalStage.title}" failed`));
+        push({ severity: NotificationSeverity.error, message: `Stage "${internalStage.title}" failed` });
         return;
       }
     }

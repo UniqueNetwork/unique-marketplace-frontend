@@ -1,13 +1,10 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Text, InputText, Avatar } from '@unique-nft/ui-kit';
 import { TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import styled from 'styled-components/macro';
+import { BN } from '@polkadot/util';
 
 import { useAccounts } from '../../hooks/useAccounts';
-import DefaultAvatar from '../../static/icons/default-avatar.svg';
-import ArrowUpRight from '../../static/icons/arrow-up-right.svg';
-import CopyIcon from '../../static/icons/copy.svg';
-import config from '../../config';
 import { CreateAccountModal } from './Modals/CreateAccount';
 import { ImportViaSeedAccountModal } from './Modals/ImportViaSeed';
 import { DropdownMenu, DropdownMenuItem } from '../../components/DropdownMenu/DropdownMenu';
@@ -18,25 +15,31 @@ import { Table } from '../../components/Table';
 import { formatKusamaBalance } from '../../utils/textUtils';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
 import { Icon } from '../../components/Icon/Icon';
+import { WithdrawDepositStagesModal } from './Modals/WithdrawDeposit';
+import { Account } from '../../account/AccountContext';
+import DefaultAvatar from '../../static/icons/default-avatar.svg';
+import ArrowUpRight from '../../static/icons/arrow-up-right.svg';
+import CopyIcon from '../../static/icons/copy.svg';
+import config from '../../config';
 
 const tokenSymbol = 'KSM';
 
 type AccountsColumnsProps = {
   onShowSendFundsModal(address: string): () => void;
+  onShowWithdrawDepositModal(address: string): () => void;
 };
 
 const copyAddress = (account: string) => () => {
   navigator.clipboard.writeText(account);
 };
 
-const getAccountsColumns = ({
-  onShowSendFundsModal
-}: AccountsColumnsProps): TableColumnProps[] => [
+const getAccountsColumns = ({ onShowSendFundsModal, onShowWithdrawDepositModal }: AccountsColumnsProps): TableColumnProps[] => [
   {
     title: 'Account',
     width: '25%',
     field: 'accountInfo',
     render(accountInfo) {
+      if (accountInfo.deposit) return null;
       return (
         <AccountCellWrapper>
           <Avatar size={24} src={DefaultAvatar} />
@@ -60,12 +63,17 @@ const getAccountsColumns = ({
   {
     title: 'Balance',
     width: '25%',
-    field: 'balance',
-    render(balance) {
-      const { KSM } = balance || {};
+    field: 'accountInfo',
+    render(accountInfo) {
+      const { KSM } = accountInfo.balance || { KSM: accountInfo.deposit || 0 };
+      const isDeposit = !!accountInfo.deposit;
       return (
         <BalancesWrapper>
-          <Text>{`${formatKusamaBalance(KSM || 0)} ${tokenSymbol}`}</Text>
+          {!isDeposit && <Text>{`${formatKusamaBalance(KSM || 0)} ${tokenSymbol}`}</Text>}
+          {isDeposit && (<>
+            <Text color={'grey-500'} size={'s'}>{`${formatKusamaBalance(KSM || 0)} ${tokenSymbol}`}</Text>
+            <Text color={'grey-500'} size={'s'}>market deposit</Text>
+          </>)}
         </BalancesWrapper>
       );
     }
@@ -73,14 +81,15 @@ const getAccountsColumns = ({
   {
     title: 'Block explorer',
     width: '25%',
-    field: 'address',
-    render(address) {
+    field: 'accountInfo',
+    render(accountInfo) {
+      if (accountInfo.deposit) return null;
       return (
         <LinksWrapper>
           <LinkStyled
             target={'_blank'}
             rel={'noreferrer'}
-            href={`${config.scanUrl}account/${address}`}
+            href={`${config.scanUrl}account/${accountInfo.address}`}
           >
             <TextStyled>UniqueScan</TextStyled>
             <IconWrapper>
@@ -94,11 +103,19 @@ const getAccountsColumns = ({
   {
     title: 'Actions',
     width: '25%',
-    field: 'address',
-    render(address) {
+    field: 'accountInfo',
+    render(accountInfo) {
+      if (accountInfo.deposit) {
+        return (
+          <ActionsWrapper>
+            <Button title={'Withdraw'} onClick={onShowWithdrawDepositModal(accountInfo.address)} role={'primary'} />
+          </ActionsWrapper>
+        );
+      }
       return (
         <ActionsWrapper>
-          <Button title={'Send'} onClick={onShowSendFundsModal(address)} />
+          <Button title={'Send'} onClick={onShowSendFundsModal(accountInfo.address)} />
+          <Button title={'Get'} disabled={true} onClick={onShowSendFundsModal(accountInfo.address)} />
         </ActionsWrapper>
       );
     }
@@ -110,11 +127,21 @@ enum AccountModal {
   importViaSeed,
   importViaJSON,
   importViaQRCode,
-  sendFunds
+  sendFunds,
+  withdrawDeposit
+}
+
+type AccountInfo = {
+  address: string
+  name: string
+  balance?: {
+    KSM?: BN
+  }
+  deposit?: BN
 }
 
 export const AccountsPage = () => {
-  const { accounts, fetchAccounts } = useAccounts();
+  const { accounts, fetchAccounts, isLoading, isLoadingBalances } = useAccounts();
   const [searchString, setSearchString] = useState<string>('');
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
   const [selectedAddress, setSelectedAddress] = useState<string>();
@@ -135,40 +162,50 @@ export const AccountsPage = () => {
     setCurrentModal(AccountModal.importViaQRCode);
   }, []);
 
-  const onSendFundsClick = useCallback(
-    (address: string) => () => {
-      setCurrentModal(AccountModal.sendFunds);
-      setSelectedAddress(address);
-    },
-    []
-  );
+  const onShowSendFundsModal = useCallback((address: string) => () => {
+    setCurrentModal(AccountModal.sendFunds);
+    setSelectedAddress(address);
+  }, []);
+
+  const onShowWithdrawDepositModal = useCallback((address: string) => () => {
+    setCurrentModal(AccountModal.withdrawDeposit);
+    setSelectedAddress(address);
+  }, []);
 
   const onSearchStringChange = useCallback((value: string) => {
     setSearchString(value);
   }, []);
 
   const filteredAccounts = useMemo(() => {
+    const reduceAccounts = (acc: (Account & { accountInfo: AccountInfo })[], account: Account, index: number) => {
+      acc.push({
+        ...account,
+        accountInfo: { address: account.address, name: account.meta.name || '', balance: account.balance }
+      });
+      if (account.deposit && !account.deposit.isZero()) {
+        acc.push({
+          ...account,
+          accountInfo: { address: account.address, name: account.meta.name || '', deposit: account.deposit }
+        });
+      }
+      return acc;
+    };
+
     if (!searchString) {
-      return accounts.map((item) => ({
-        ...item,
-        accountInfo: { address: item.address, name: item.meta.name }
-      }));
+      return accounts.reduce(reduceAccounts, []);
     }
     return accounts
       .filter(
         (account) =>
-          account.address.includes(searchString) ||
-          account.meta.name?.includes(searchString)
+          account.address.toLowerCase().includes(searchString.trim().toLowerCase()) ||
+          account.meta.name?.toLowerCase().includes(searchString.trim().toLowerCase())
       )
-      .map((item) => ({
-        ...item,
-        accountInfo: { address: item.address, name: item.meta.name }
-      }));
+      .reduce(reduceAccounts, []);
   }, [accounts, searchString]);
 
-  const onChangeAccountsFinish = useCallback(() => {
+  const onChangeAccountsFinish = useCallback(async () => {
     setCurrentModal(undefined);
-    fetchAccounts();
+    await fetchAccounts();
   }, []);
 
   return (<PagePaper>
@@ -190,14 +227,16 @@ export const AccountsPage = () => {
         </SearchInputWrapper>
       </Row>
       <Table
-        columns={getAccountsColumns({ onShowSendFundsModal: onSendFundsClick })}
+        columns={getAccountsColumns({ onShowSendFundsModal, onShowWithdrawDepositModal })}
         data={filteredAccounts}
+        loading={isLoading || isLoadingBalances}
       />
       <CreateAccountModal isVisible={currentModal === AccountModal.create} onFinish={onChangeAccountsFinish} />
       <ImportViaSeedAccountModal isVisible={currentModal === AccountModal.importViaSeed} onFinish={onChangeAccountsFinish} />
       <ImportViaJSONAccountModal isVisible={currentModal === AccountModal.importViaJSON} onFinish={onChangeAccountsFinish} />
       <ImportViaQRCodeAccountModal isVisible={currentModal === AccountModal.importViaQRCode} onFinish={onChangeAccountsFinish} />
       <TransferFundsModal isVisible={currentModal === AccountModal.sendFunds} onFinish={onChangeAccountsFinish} senderAddress={selectedAddress} />
+      <WithdrawDepositStagesModal isVisible={currentModal === AccountModal.withdrawDeposit} onFinish={onChangeAccountsFinish} address={selectedAddress} />
     </AccountPageWrapper>
   </PagePaper>);
 };
@@ -246,6 +285,8 @@ const AccountInfoWrapper = styled.div`
 
 const BalancesWrapper = styled.div`
   && {
+    display: flex;
+    flex-direction: column;
     padding: 0;
   }
 `;
@@ -265,7 +306,7 @@ const ActionsWrapper = styled.div`
     display: flex;
     align-items: center;
     column-gap: var(--gap);
-    padding: 0;
+    padding: var(--gap) 0; 
   }
 `;
 

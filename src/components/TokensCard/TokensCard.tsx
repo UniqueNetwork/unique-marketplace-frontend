@@ -1,5 +1,6 @@
-import { FC, useMemo, useState } from 'react';
-import { Text } from '@unique-nft/ui-kit';
+import React, { FC, useMemo, useState } from 'react';
+import { Icon, Text } from '@unique-nft/ui-kit';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components/macro';
 
 import { Picture } from '..';
@@ -7,34 +8,37 @@ import { useApi } from '../../hooks/useApi';
 import Loading from '../Loading';
 import { NFTToken } from '../../api/chainApi/unique/types';
 import { formatKusamaBalance } from '../../utils/textUtils';
-import config from '../../config';
 import { Primary600 } from '../../styles/colors';
+import Kusama from '../../static/icons/logo-kusama.svg';
+import { timeDifference } from '../../utils/timestampUtils';
+import { Offer } from '../../api/restApi/offers/types';
+import { compareEncodedAddresses } from '../../api/chainApi/utils/addressUtils';
+import { useAccounts } from '../../hooks/useAccounts';
+import config from '../../config';
 
 export type TTokensCard = {
-  token?: NFTToken
+  token?: NFTToken & Partial<Offer>
   tokenId?: number
   collectionId?: number
-  price?: string
   tokenImageUrl?: string
 };
 
-export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, price, ...props }) => {
-  const [token, setToken] = useState<NFTToken | undefined>(props.token);
+export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, ...props }) => {
+  const [token, setToken] = useState<(NFTToken & Partial<Offer>) | undefined>(props.token);
   const [isFetching, setIsFetching] = useState<boolean>(false);
 
   const { api } = useApi();
+  const { selectedAccount } = useAccounts();
 
   const {
     collectionName,
-    imagePath,
-    tokenPrefix
-  } = useMemo<Record<string, string | undefined>>(() => {
+    imageUrl,
+    prefix,
+    price,
+    auction
+  } = useMemo<Partial<Offer & NFTToken>>(() => {
     if (token) {
-      return {
-        collectionName: token.collectionName,
-        imagePath: token.imageUrl,
-        tokenPrefix: token.prefix
-      };
+      return token;
     }
 
     if (tokenId && collectionId) {
@@ -47,23 +51,50 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, price, ...p
     return {};
   }, [collectionId, tokenId, token, api]);
 
+  const isBidder = useMemo(() => {
+    if (!selectedAccount) return false;
+    return auction?.bids.some((bid) => compareEncodedAddresses(bid.bidderAddress, selectedAccount.address));
+  }, [auction, selectedAccount]);
+
+  const topBid = useMemo(() => {
+    if (!auction?.bids?.length) return null;
+    return auction.bids[0].balance;
+  }, [auction]);
+
+  const isTopBidder = useMemo(() => {
+    if (!selectedAccount || !isBidder || !topBid || !auction?.bids?.[0]?.bidderAddress) return false;
+    return compareEncodedAddresses(auction.bids[0].bidderAddress, selectedAccount.address);
+  }, [isBidder, topBid, selectedAccount, auction]);
+
   return (
     <TokensCardStyled>
-      <PictureWrapper href={`/token/${collectionId || ''}/${tokenId || ''}`}>
-        <Picture alt={tokenId?.toString() || ''} src={imagePath} />
+      <PictureWrapper to={`/token/${collectionId || ''}/${tokenId || ''}`}>
+        <Picture alt={tokenId?.toString() || ''} src={imageUrl} />
       </PictureWrapper>
       <Description>
-        <a href={`/token/${collectionId || ''}/${tokenId || ''}`} title={`${tokenPrefix || ''} #${tokenId || ''}`}>
+        <Link to={`/token/${collectionId}/${tokenId}`} title={`${prefix || ''} #${tokenId}`}>
           <Text size='l' weight='medium'>
-            {`${tokenPrefix || ''} #${tokenId || ''}`}
+            {`${prefix || ''} #${tokenId || ''}`}
           </Text>
-        </a>
+        </Link>
         <a href={`${config.scanUrl || ''}collections/${collectionId || ''}`} target={'_blank'} rel='noreferrer'>
           <Text color='primary-600' size='s'>
             {`${collectionName?.substring(0, 15) || ''} [id ${collectionId || ''}]`}
           </Text>
         </a>
-        {price && <Text size='s'>{`Price: ${formatKusamaBalance(price)}`}</Text>}
+        {price && <PriceWrapper>
+          <Text size='s'>{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(price)}` }</Text>
+          <Icon file={Kusama} size={16} />
+        </PriceWrapper>}
+        {price && !auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
+        {auction && <AuctionInfoWrapper>
+          {isTopBidder && <Text size={'xs'} color={'additional-positive-500'} >Leading bid</Text>}
+          {isBidder && !isTopBidder && <Text size={'xs'} color={'coral-500'} >Outbid</Text>}
+          {!isBidder && !isTopBidder && <Text size={'xs'} color={'grey-500'} >{
+            auction.bids.length > 0 ? 'Last bid' : 'Minimum bid'
+          }</Text>}
+          <StyledText color={'dark'} size={'xs'}>{`${timeDifference(new Date(auction?.stopAt || '').getTime() / 1000)} left`}</StyledText>
+        </AuctionInfoWrapper>}
       </Description>
 
       {isFetching && <Loading />}
@@ -75,12 +106,12 @@ const TokensCardStyled = styled.div`
   display: flex;
   align-items: flex-start;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   position: relative;
   cursor: pointer;
 `;
 
-const PictureWrapper = styled.a`
+const PictureWrapper = styled(Link)`
   position: relative;
   width: 100%;
   display: flex;
@@ -133,4 +164,21 @@ const Description = styled.div`
       margin-bottom: 8px;
     }
   }
+`;
+
+const PriceWrapper = styled.div` 
+  display: flex;
+  align-items: center;
+  column-gap: calc(var(--gap) / 4);
+`;
+
+const StyledText = styled(Text)` 
+  && {
+    color: var(--color-additional-dark);
+  }
+`;
+
+const AuctionInfoWrapper = styled.div`
+  display: flex;
+  column-gap: calc(var(--gap) / 2);
 `;

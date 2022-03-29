@@ -1,7 +1,7 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { web3Accounts, web3Enable, web3FromSource } from '@polkadot/extension-dapp';
 import keyring from '@polkadot/ui-keyring';
-import { BN, stringToHex, u8aToString } from '@polkadot/util';
+import { BN, stringToHex, u8aToHex } from '@polkadot/util';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { sleep } from '../utils/helpers';
@@ -12,7 +12,7 @@ import { getSuri, PairType } from '../utils/seedUtils';
 import { TTransaction } from '../api/chainApi/types';
 
 export const useAccounts = () => {
-  const { rpcClient, rawRpcApi } = useApi();
+  const { rpcClient, rawRpcApi, api } = useApi();
   const {
     accounts,
     selectedAccount,
@@ -72,6 +72,15 @@ export const useAccounts = () => {
     }
   } as Account))), [getAccountBalance]);
 
+  const getAccountsDeposits = useCallback(async (accounts: Account[]) => {
+    if (!api?.market) return accounts;
+    const fetchDeposit = async (account: Account) => ({
+      ...account,
+      deposit: await api?.market?.getUserDeposit(account.address)
+    });
+    return await Promise.all(accounts.map(fetchDeposit));
+  }, [api?.market]);
+
   const fetchAccounts = useCallback(async () => {
     if (!rpcClient?.isKusamaApiConnected) return;
     setIsLoading(true);
@@ -85,8 +94,8 @@ export const useAccounts = () => {
 
     if (allAccounts?.length) {
       const accountsWithBalance = await getAccountsBalances(allAccounts);
-
-      setAccounts(accountsWithBalance);
+      const accountsWithDeposits = await getAccountsDeposits(accountsWithBalance);
+      setAccounts(accountsWithDeposits);
 
       const defaultAccountAddress = localStorage.getItem(DefaultAccountKey);
       const defaultAccount = allAccounts.find((item) => item.address === defaultAccountAddress);
@@ -132,9 +141,9 @@ export const useAccounts = () => {
 
   const unlockLocalAccount = useCallback((password: string) => {
     if (!selectedAccount) return;
-    const signature = keyring.getPair(selectedAccount.address);
-    signature.unlock(password);
-    return signature;
+    const pair = keyring.getPair(selectedAccount.address);
+    pair.unlock(password);
+    return pair;
   }, [selectedAccount]);
 
   const signTx = useCallback(async (tx: TTransaction, account?: Account): Promise<TTransaction> => {
@@ -159,9 +168,9 @@ export const useAccounts = () => {
     if (!_account) throw new Error('Account was not provided');
     let signedMessage;
     if (_account.signerType === AccountSigner.local) {
-      const signature = await showSignDialog();
-      if (signature) {
-        signedMessage = u8aToString(signature.sign(message));
+      const pair = await showSignDialog();
+      if (pair) {
+        signedMessage = u8aToHex(pair.sign(stringToHex(message)));
       }
     } else {
       const injector = await web3FromSource(_account.meta.source);

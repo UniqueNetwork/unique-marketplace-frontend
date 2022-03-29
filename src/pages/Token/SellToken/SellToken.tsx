@@ -3,9 +3,8 @@ import styled from 'styled-components/macro';
 import { Button } from '@unique-nft/ui-kit';
 
 import { AdditionalWarning100, AdditionalWarning500, Grey300 } from '../../../styles/colors';
-import { useFee } from '../../../hooks/useFee';
-import { Price } from '../TokenDetail/Price';
 import { Offer } from '../../../api/restApi/offers/types';
+import { Price } from '../TokenDetail/Price';
 
 interface SellTokenProps {
   offer?: Offer
@@ -15,11 +14,9 @@ interface SellTokenProps {
 }
 
 export const SellToken: FC<SellTokenProps> = ({ offer, onSellClick, onTransferClick, onDelistClick }) => {
-  const { fee } = useFee();
-
   if (offer) {
     return (<>
-      <Price price={offer.price} fee={fee} bid={offer.auction?.priceStep} />
+      <Price price={offer.price} />
       <ButtonWrapper>
         <Button title={'Delist'} role={'danger'} onClick={onDelistClick} />
       </ButtonWrapper>
