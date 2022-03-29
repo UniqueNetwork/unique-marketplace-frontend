@@ -79,8 +79,6 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: string, 
       if (!isAmountValid || !isEnoughBalance) return;
       const bnAmount = new BN(fromStringToBnString(bidAmount, api?.market?.kusamaDecimals));
 
-      // const difference = formatKusamaBalance(bnAmount.sub(leadingBidAmount).toString());
-
       onConfirmPlaceABid(formatKusamaBalance(bnAmount.toString()), chain || '');
     },
     [onConfirmPlaceABid, bidAmount, isEnoughBalance, isAmountValid, leadingBidAmount, chain, api?.market?.kusamaDecimals]
