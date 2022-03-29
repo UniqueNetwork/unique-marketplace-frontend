@@ -61,10 +61,7 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
     setOffer(_offer);
   }, [setOffer]);
 
-  const price = useMemo(() => {
-    if (topBid) return (new BN(topBid.balance !== '0' ? topBid.balance : topBid.amount)).add(new BN(offer.auction?.priceStep || 0)).toString();
-    return (new BN(offer.auction?.startPrice || 0)).add(new BN(offer.auction?.priceStep || 0)).toString();
-  }, [topBid, offer.auction?.priceStep]);
+  const price = offer.price;
 
   useBidsSubscription({ offer, onPlaceBid });
 

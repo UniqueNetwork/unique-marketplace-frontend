@@ -57,14 +57,12 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
 
   const topBid = useMemo(() => {
     if (!offer?.auction?.bids?.length) return null;
-    return offer.auction.bids.reduce((top, bid) => {
-      return top.amount > bid.amount ? top : bid;
-    }) || null;
+    return offer?.auction?.bids[0].balance;
   }, [offer]);
 
   const isTopBidder = useMemo(() => {
     if (!selectedAccount || !isBidder || !topBid) return false;
-    return compareEncodedAddresses(topBid.bidderAddress, selectedAccount.address);
+    return compareEncodedAddresses(offer?.auction!.bids[0].bidderAddress, selectedAccount.address);
   }, [isBidder, topBid, selectedAccount]);
 
   return (
@@ -84,12 +82,12 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
           </Text>
         </a>
         <PriceWrapper>
-          <Text size='s'>{`${formatKusamaBalance(offer?.price || 0)}`}</Text>
+          <Text size='s'>{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(offer?.price)}` }</Text>
           <Icon file={Kusama} size={16} />
         </PriceWrapper>
         {!offer?.auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         {offer?.auction && <AuctionInfoWrapper>
-          {isTopBidder && <Text size={'xs'} color={'positive-500'} >Leading bid</Text>}
+          {isTopBidder && <Text size={'xs'} color={'additional-positive-500'} >Leading bid</Text>}
           {isBidder && !isTopBidder && <Text size={'xs'} color={'coral-500'} >Outbid</Text>}
           {!isBidder && !isTopBidder && <Text size={'xs'} color={'grey-500'} >{
             offer.auction.bids.length > 0 ? 'Last bid' : 'Minimum bid'

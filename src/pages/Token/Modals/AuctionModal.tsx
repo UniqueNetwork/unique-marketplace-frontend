@@ -48,12 +48,13 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: string, 
 
   const leadingBidAmount = useMemo(() => {
     if (!offer?.auction?.bids || offer?.auction?.bids.length === 0) return new BN(offer?.auction?.startPrice || 0);
-    return offer?.auction?.bids.reduce((amount, bid) => BN.max(amount, new BN(bid.amount)), new BN(0)) || new BN(0);
+    return new BN(offer?.auction?.bids[0].balance);
   }, [offer]);
 
   const minimalBid = useMemo(() => {
+    if (!offer?.auction?.bids || offer?.auction?.bids.length === 0) return leadingBidAmount;
     return leadingBidAmount.add(new BN(offer?.auction?.priceStep || 0));
-  }, [leadingBidAmount, offer?.auction?.priceStep]);
+  }, [leadingBidAmount, offer?.auction?.priceStep, offer?.auction?.bids]);
 
   const isEnoughBalance = useMemo(() => {
     if (!selectedAccount?.balance?.KSM || selectedAccount?.balance?.KSM.isZero()) return false;
@@ -75,9 +76,9 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: string, 
       if (!isAmountValid || !isEnoughBalance) return;
       const bnAmount = new BN(fromStringToBnString(bidAmount, api?.market?.kusamaDecimals));
 
-      const difference = formatKusamaBalance(bnAmount.sub(leadingBidAmount).toString());
+      // const difference = formatKusamaBalance(bnAmount.sub(leadingBidAmount).toString());
 
-      onConfirmPlaceABid(difference, chain || '');
+      onConfirmPlaceABid(formatKusamaBalance(bnAmount.toString()), chain || '');
     },
     [onConfirmPlaceABid, bidAmount, isEnoughBalance, isAmountValid, leadingBidAmount, chain, api?.market?.kusamaDecimals]
   );
