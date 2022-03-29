@@ -12,19 +12,19 @@ import { Avatar } from '../../Avatar/Avatar';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import GearIcon from '../../../static/icons/gear.svg';
 import { BalanceOption } from './types';
-import { useApi } from '../../../hooks/useApi';
 import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';
 import { BlueGrey200 } from '../../../styles/colors';
 import { Icon } from '../../Icon/Icon';
+import { useApi } from '../../../hooks/useApi';
 
 const tokenSymbol = 'KSM';
 
 export const WalletManager: FC = () => {
   const { selectedAccount, accounts, isLoading, isLoadingBalances, fetchAccounts, changeAccount } = useAccounts();
-  const { currentChain } = useApi();
   const deviceSize = useDeviceSize();
   const gearActive = window.location.pathname !== '/accounts';
   const navigate = useNavigate();
+  const { chainData } = useApi();
 
   useEffect(() => {
     void fetchAccounts();
@@ -36,11 +36,11 @@ export const WalletManager: FC = () => {
 
   const onCreateAccountClick = useCallback(() => {
     navigate('/accounts');
-  }, []);
+  }, [navigate]);
 
   const currentBalance: BalanceOption = useMemo(() => {
-    return { value: selectedAccount?.balance?.KSM?.toString() || '0', chain: currentChain };
-  }, [selectedAccount, currentChain]);
+    return { value: selectedAccount?.balance?.KSM?.toString() || '0', chain: chainData?.systemChain || '' };
+  }, [selectedAccount, chainData?.systemChain]);
 
   if (!isLoading && accounts.length === 0) {
  return (
@@ -88,7 +88,7 @@ const AccountOptionCard = (account: Account) => {
 const BalanceOptionCard = (balance: BalanceOption) => {
   return (<BalanceOptionWrapper>
     <Text size={'m'} weight={'medium'} >{`${formatKusamaBalance(balance.value)} ${tokenSymbol}`}</Text>
-    <Text size={'s'} color={'grey-500'} >{balance.chain.name}</Text>
+    <Text size={'s'} color={'grey-500'} >{balance.chain}</Text>
   </BalanceOptionWrapper>);
 };
 
