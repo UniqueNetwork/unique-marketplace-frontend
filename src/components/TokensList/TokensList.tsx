@@ -18,7 +18,6 @@ export const TokensList: FC<TTokensList> = ({ tokens }) => {
             tokenId={token?.id}
             collectionId={token?.collectionId}
             token={token}
-            price={token.price}
           />
         ))}
     </TokensListStyled>

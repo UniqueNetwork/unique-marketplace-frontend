@@ -4,7 +4,6 @@ import { IGqlClient } from './graphQL/gqlClient';
 import { IRpcClient } from './chainApi/types';
 import { ApiContextProps, ApiProvider, ChainData } from './ApiContext';
 import config from '../config';
-import { defaultChainKey } from '../utils/configParser';
 import { gqlClient as gql, rpcClient as rpc } from '.';
 import { getSettings } from './restApi/settings/settings';
 import { ApolloProvider } from '@apollo/client';
@@ -16,8 +15,6 @@ interface ChainProviderProps {
   gqlClient?: IGqlClient
   rpcClient?: IRpcClient
 }
-
-const { chains, defaultChain } = config;
 
 const ApiWrapper = ({ children, gqlClient = gql, rpcClient = rpc }: ChainProviderProps) => {
   const [chainData, setChainData] = useState<ChainData>();
@@ -36,17 +33,6 @@ const ApiWrapper = ({ children, gqlClient = gql, rpcClient = rpc }: ChainProvide
     })().then(() => console.log('Rpc connection: success')).catch((e) => console.log('Rpc connection: failed', e));
   }, []);
 
-  // update endpoint if chainId is changed
-  useEffect(() => {
-    if (Object.values(chains).length === 0) {
-      throw new Error('Networks is not configured');
-    }
-
-    if (chainId) {
-      localStorage.setItem(defaultChainKey, chainId);
-    }
-  }, [chainId]);
-
   // get context value for ApiContext
   const value = useMemo<ApiContextProps>(
     () => {
@@ -57,7 +43,6 @@ const ApiWrapper = ({ children, gqlClient = gql, rpcClient = rpc }: ChainProvide
           market: rpcClient.marketController
         }) || undefined,
         chainData,
-        currentChain: chainId ? chains[chainId] : defaultChain,
         rawRpcApi: rpcClient.rawUniqRpcApi,
         rpcClient,
         settings
