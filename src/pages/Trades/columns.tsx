@@ -6,6 +6,7 @@ import { AddressComponent } from './AddressComponent/AddressComponent';
 import { timestampTableFormat } from '../../utils/timestampUtils';
 import { TokenComponent } from './TokenComponent/TokenComponent';
 import { NFTToken } from '../../api/chainApi/unique/types';
+import { formatKusamaBalance } from '../../utils/textUtils';
 import { BlueGrey600 } from '../../styles/colors';
 import config from '../../config';
 
@@ -43,7 +44,7 @@ export const tradesColumns: TableColumnProps[] = [
     title: 'Price',
     width: '100%',
     isSortable: true,
-    render: (value: string) => <Text color={BlueGrey600}>{`${value} ${tokenSymbol}`}</Text>,
+    render: (value: string) => <Text color={BlueGrey600}>{`${formatKusamaBalance(value)} ${tokenSymbol}`}</Text>,
     field: 'price'
   },
   {
