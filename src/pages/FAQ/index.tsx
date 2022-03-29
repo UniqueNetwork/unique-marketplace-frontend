@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components/macro';
 import { Heading } from '@unique-nft/ui-kit';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
+import { Primary600 } from '../../styles/colors';
 
 const Faq = (): React.ReactElement<void> => {
   return (<PagePaper>
@@ -61,6 +62,14 @@ const MainWrapper = styled.div`
   display: block !important;
   max-width: 1168px;
 
+  h4:not(:first-child) {
+    margin-top: calc(var(--gap) * 2);
+  }
+  
+  a {
+    color: ${Primary600};
+  }
+  
   p, ol li {
     font-size: 16px;
     line-height: 24px;
