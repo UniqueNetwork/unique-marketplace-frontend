@@ -77,10 +77,10 @@ export const CommonTokenDetail: FC<IProps> = ({
             <Text color='grey-500' size='m'>
               Owned&nbsp;by
             </Text>
-            <Account href={`${config.scanUrl}account/${owner?.Substrate || offer!.seller}`}>
+            <Account href={`${config.scanUrl}account/${owner?.Substrate || offer?.seller || '404'}`}>
               <Avatar size={24} src={DefaultAvatar}/>
               <Text color='primary-600' size='m'>
-                {deviceSize === DeviceSize.lg ? owner?.Substrate || offer!.seller : shortcutText(owner?.Substrate || '') }
+                {deviceSize === DeviceSize.lg ? (owner?.Substrate || offer?.seller || '') : shortcutText(owner?.Substrate || '') }
               </Text>
             </Account>
           </>}
