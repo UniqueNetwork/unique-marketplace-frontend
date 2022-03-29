@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { Button, Text } from '@unique-nft/ui-kit';
 
@@ -24,6 +24,7 @@ export const WalletManager: FC = () => {
   const { currentChain } = useApi();
   const deviceSize = useDeviceSize();
   const gearActive = window.location.pathname !== '/accounts';
+  const navigate = useNavigate();
 
   useEffect(() => {
     void fetchAccounts();
@@ -34,7 +35,7 @@ export const WalletManager: FC = () => {
   }, []);
 
   const onCreateAccountClick = useCallback(() => {
-    // TODO: call creating account
+    navigate('/accounts');
   }, []);
 
   const currentBalance: BalanceOption = useMemo(() => {
