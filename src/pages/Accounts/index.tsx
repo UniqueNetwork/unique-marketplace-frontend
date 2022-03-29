@@ -197,8 +197,8 @@ export const AccountsPage = () => {
     return accounts
       .filter(
         (account) =>
-          account.address.includes(searchString) ||
-          account.meta.name?.includes(searchString)
+          account.address.toLowerCase().includes(searchString.trim().toLowerCase()) ||
+          account.meta.name?.toLowerCase().includes(searchString.trim().toLowerCase())
       )
       .reduce(reduceAccounts, []);
   }, [accounts, searchString]);
