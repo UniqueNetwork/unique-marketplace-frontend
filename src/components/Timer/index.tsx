@@ -43,7 +43,6 @@ function Timer({ time }: Props): React.ReactElement<Props> {
   const hoursFormat = ((hours + 11) % 12 + 1);
 
   const { secondsLeft, minutesLeft, hoursLeft, daysLeft } = useCalculateTimeLeft(time);
-  console.log('daysLeft', daysLeft);
 
   return (
     <TimerStyled>
