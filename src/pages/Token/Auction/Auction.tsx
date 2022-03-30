@@ -27,13 +27,14 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
   const { selectedAccount } = useAccounts();
 
   const canPlaceABid = useMemo(() => {
-    return true; // TODO: get a balance of selected account
-  }, []);
+    if (!selectedAccount || !offer?.seller) return false;
+    return !isTokenOwner(selectedAccount.address, { Substrate: offer.seller });
+  }, [offer, selectedAccount?.address]);
 
   const canDelist = useMemo(() => {
     if (!selectedAccount || !offer?.seller) return false;
     return isTokenOwner(selectedAccount.address, { Substrate: offer.seller }) && !offer.auction?.bids.length;
-  }, [offer, selectedAccount]);
+  }, [offer, selectedAccount?.address]);
 
   const isBidder = useMemo(() => {
     if (!selectedAccount) return false;
@@ -76,9 +77,8 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
         {canDelist && <Button title={'Delist'}
           role={'danger'}
           onClick={onDelistAuctionClick}
-          disabled={!canPlaceABid}
         />}
-        {!canDelist && <Button title={'Place a bid'}
+        {canPlaceABid && <Button title={'Place a bid'}
           role={'primary'}
           onClick={onPlaceABidClick}
           disabled={!canPlaceABid}
