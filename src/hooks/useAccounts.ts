@@ -118,6 +118,19 @@ export const useAccounts = () => {
     setAccounts(accountsWithBalance);
   }, [getAccountBalance, accounts]);
 
+  const updateAccountBalance = useCallback(async () => {
+    if (!selectedAccount) return;
+    setIsLoadingBalances(true);
+    const balanceKSM = await getAccountBalance(selectedAccount);
+    setAccounts(accounts.map((account: Account) => {
+      if (account.address === selectedAccount.address) {
+        return { ...account, balance: { KSM: balanceKSM } } as Account;
+      }
+      return account;
+    }));
+    setIsLoadingBalances(false);
+  }, [selectedAccount, accounts]);
+
   useEffect(() => {
     const updatedSelectedAccount = accounts.find((account) => account.address === selectedAccount?.address);
     if (updatedSelectedAccount) setSelectedAccount(updatedSelectedAccount);
@@ -196,6 +209,7 @@ export const useAccounts = () => {
     signMessage,
     fetchAccounts,
     fetchBalances,
+    updateAccountBalance,
     changeAccount
   };
 };

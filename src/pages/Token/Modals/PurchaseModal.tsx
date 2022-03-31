@@ -10,7 +10,7 @@ import { useNotification } from '../../../hooks/useNotification';
 import { Link } from '@unique-nft/ui-kit';
 
 const PurchaseModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish }) => {
-  const { selectedAccount } = useAccounts();
+  const { selectedAccount, updateAccountBalance } = useAccounts();
   const { stages, status, initiate } = usePurchaseFixStages(token?.collectionId || 0, token?.id);
   const { push } = useNotification();
 
@@ -22,6 +22,7 @@ const PurchaseModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish }) => {
   useEffect(() => {
     if (status === StageStatus.success) {
       push({ severity: NotificationSeverity.success, message: <>You are the new owner of <Link href={`/token/${token.collectionId}/${token.id}`} title={`${token.prefix} #${token.id}`}/></> });
+      void updateAccountBalance();
     }
   }, [status]);
 
