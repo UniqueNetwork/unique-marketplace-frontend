@@ -27,16 +27,16 @@ export type useStagesReturn<T> = {
   status: StageStatus, // status for all stages combined, not for current stage
   error: Error | undefined | null
 }
-export type TInternalStageActionParams<T, P = Record<string, never>> = {
+export type TInternalStageActionParams<T> = {
   txParams: T,
   options: TransactionOptions
-} & P;
-export type TInternalStageAction<T, P = Record<string, never>> = (params: TInternalStageActionParams<T, P>) => Promise<TTransaction | void> | undefined;
+};
+export type TInternalStageAction<T> = (params: TInternalStageActionParams<T>) => Promise<TTransaction | void> | undefined;
 
-export interface InternalStage<T, P = Record<string, never>> extends Stage {
+export interface InternalStage<T> extends Stage {
   // if transaction is returned we will initiate sign procedure, otherwise continue with next stage
-  action: TInternalStageAction<T, P>
+  action: TInternalStageAction<T>
 }
 
-export type ActionFunction<T, P = Record<string, never>> = (action: TInternalStageAction<T, P>, txParams: T, options: TransactionOptions) => Promise<TTransaction | void>;
+export type ActionFunction<T> = (action: TInternalStageAction<T>, txParams: T, options: TransactionOptions) => Promise<TTransaction | void>;
 export type SignFunction = (tx: TTransaction) => Promise<TTransaction>;

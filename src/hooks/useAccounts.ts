@@ -159,8 +159,12 @@ export const useAccounts = () => {
     return pair;
   }, [selectedAccount]);
 
-  const signTx = useCallback(async (tx: TTransaction, account?: Account): Promise<TTransaction> => {
-    const _account = account || selectedAccount;
+  const signTx = useCallback(async (tx: TTransaction, account?: Account | string): Promise<TTransaction> => {
+    let _account = account || selectedAccount;
+    if (typeof _account === 'string') {
+      _account = accounts.find((account) => account.address === _account);
+    }
+
     if (!_account) throw new Error('Account was not provided');
     let signedTx;
     if (_account.signerType === AccountSigner.local) {
@@ -174,10 +178,14 @@ export const useAccounts = () => {
     }
     if (!signedTx) throw new Error('Signing failed');
     return signedTx;
-  }, [showSignDialog, selectedAccount]);
+  }, [showSignDialog, selectedAccount, accounts]);
 
-  const signMessage = useCallback(async (message: string, account?: Account): Promise<string> => {
-    const _account = account || selectedAccount;
+  const signMessage = useCallback(async (message: string, account?: Account | string): Promise<string> => {
+    let _account = account || selectedAccount;
+    if (typeof _account === 'string') {
+      _account = accounts.find((account) => account.address === _account);
+    }
+
     if (!_account) throw new Error('Account was not provided');
     let signedMessage;
     if (_account.signerType === AccountSigner.local) {
@@ -194,7 +202,7 @@ export const useAccounts = () => {
     }
     if (!signedMessage) throw new Error('Signing failed');
     return signedMessage;
-  }, [showSignDialog, selectedAccount]);
+  }, [showSignDialog, selectedAccount, accounts]);
 
   return {
     accounts,
