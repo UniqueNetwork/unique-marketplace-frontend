@@ -20,7 +20,7 @@ type TokensTradesPage = {
 export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
   const { selectedAccount } = useAccounts();
   const [page, setPage] = useState<number>(0);
-  const [sortString, setSortString] = useState<string>('');
+  const [sortString, setSortString] = useState<string>();
   const [searchValue, setSearchValue] = useState<string | number>();
 
   const { trades, tradesCount, fetch, isFetching } = useTrades();
@@ -31,7 +31,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
     fetch({
       page: 1,
       pageSize,
-      sortString,
+      sort: sortString,
       seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
     });
   }, [selectedAccount?.address, fetch, currentTab]);
@@ -47,28 +47,35 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
     fetch({
       page: newPage + 1,
       pageSize,
-      sortString,
+      sort: sortString,
       seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
     });
   }, [selectedAccount?.address, page, fetch, sortString]);
 
   const onSortChange = useCallback((newSort: SortQuery) => {
-    let sortString = '';
+    let sortString;
     switch (newSort.mode) {
-      case 0:
+      case 2:
         sortString = 'asc';
         break;
       case 1:
         sortString = 'desc';
         break;
-      case 2:
+      case 0:
       default:
-        sortString = '';
+        sortString = undefined;
         break;
     }
-    if (sortString?.length) sortString += `(${newSort.field})`;
+    const associatedSortValues: Record<string, string> = {
+      price: 'Price',
+      token: 'TokenId',
+      collection: 'CollectionId',
+      tradeDate: 'TradeDate'
+    };
+
+    if (sortString && sortString.length) sortString += `(${associatedSortValues[newSort.field]})`;
     setSortString(sortString);
-    fetch({ page: 1, pageSize, sortString });
+    fetch({ page: 1, pageSize, sort: sortString });
   }, [fetch, setSortString]);
 
   return (<PagePaper>
