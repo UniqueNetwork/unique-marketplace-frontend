@@ -1,40 +1,16 @@
 import { useCallback, useState } from 'react';
 
-import { post, deleteRequest } from '../base';
+import { deleteRequest, post } from '../base';
 import { defaultParams } from '../base/axios';
+import { FetchStatus, TCalculateBidParams, TCalculatedBid, TDeleteParams, TPlaceBidParams, TSignature, TStartAuctionParams } from './types';
 
 const endpoint = '/auction';
-
-export enum FetchStatus {
-  default = 'Default',
-  inProgress = 'InProgress',
-  success = 'Success',
-  error = 'Error'
-}
-
-export type TStartAuctionParams = {
-  tx: unknown, days: number, startPrice: string, priceStep: string
-}
-
-export type TPlaceBidParams = {
-  tx: unknown, collectionId: number, tokenId: number
-}
-
-export type TDeleteParams = {
-  collectionId: number
-  tokenId: number
-  timestamp: number
-}
-
-export type TSignature = {
-  signature: string,
-  signer: string
-}
 
 export const startAuction = (body: TStartAuctionParams) => post<TStartAuctionParams>(`${endpoint}/create_auction`, body, { ...defaultParams });
 export const placeBid = (body: TPlaceBidParams) => post<TPlaceBidParams>(`${endpoint}/place_bid`, body, { ...defaultParams });
 export const withdrawBid = (body: TDeleteParams, { signer, signature }: TSignature) => deleteRequest(`${endpoint}/withdraw_bid`, { headers: { ...defaultParams.headers, Authorization: `${signer}:${signature}` }, params: body, ...defaultParams });
 export const cancelAuction = (body: TDeleteParams, { signer, signature }: TSignature) => deleteRequest(`${endpoint}/cancel_auction`, { headers: { ...defaultParams.headers, Authorization: `${signer}:${signature}` }, params: body, ...defaultParams });
+export const calculate = (body: TCalculateBidParams) => post<TCalculateBidParams, TCalculatedBid>(`${endpoint}/calculate`, body, { ...defaultParams });
 
 export const useAuction = () => {
   const [startAuctionStatus, setStartAuctionStatus] = useState<FetchStatus>(FetchStatus.default);
@@ -57,7 +33,19 @@ export const useAuction = () => {
       setPlaceBidStatus(FetchStatus.success);
     } catch (e) {
       setPlaceBidStatus(FetchStatus.error);
-      console.error('Failed to create auction', e);
+      console.error('Failed to place a bid', e);
+    }
+  }, []);
+
+  const getCalculatedBid = useCallback(async (params: TCalculateBidParams) => {
+    try {
+      setPlaceBidStatus(FetchStatus.inProgress);
+      const { data } = await calculate(params);
+      setPlaceBidStatus(FetchStatus.success);
+      return data;
+    } catch (e) {
+      setPlaceBidStatus(FetchStatus.error);
+      console.error('Failed to calculate bid', e);
     }
   }, []);
 
@@ -65,6 +53,7 @@ export const useAuction = () => {
     startAuction,
     placeBid,
     startAuctionStatus,
-    placeBidStatus
+    placeBidStatus,
+    getCalculatedBid
   };
 };

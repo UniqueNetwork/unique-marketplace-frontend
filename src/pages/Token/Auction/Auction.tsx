@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Text, Button, Heading } from '@unique-nft/ui-kit';
 import BN from 'bn.js';
 import styled from 'styled-components/macro';
@@ -13,6 +13,8 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import { compareEncodedAddresses, isTokenOwner } from '../../../api/chainApi/utils/addressUtils';
 import { PriceForAuction } from '../TokenDetail/PriceForAuction';
 import Timer from '../../../components/Timer';
+import { useAuction } from '../../../api/restApi/auction/auction';
+import { TCalculatedBid } from '../../../api/restApi/auction/types';
 
 interface AuctionProps {
   offer: Offer
@@ -25,6 +27,21 @@ interface AuctionProps {
 const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDelistAuctionClick, onWithdrawClick }) => {
   const [offer, setOffer] = useState<Offer>(initialOffer);
   const { selectedAccount } = useAccounts();
+  const { getCalculatedBid } = useAuction();
+
+  const [calculatedBid, setCalculatedBid] = useState<TCalculatedBid>();
+
+  useEffect(() => {
+    if (!offer || !selectedAccount) return;
+    (async () => {
+      const _calculatedBid = await getCalculatedBid({
+        collectionId: offer.collectionId || 0,
+        tokenId: offer?.tokenId || 0,
+        bidderAddress: selectedAccount?.address || ''
+      });
+      setCalculatedBid(_calculatedBid);
+    })();
+  }, [offer, selectedAccount]);
 
   const canPlaceABid = useMemo(() => {
     if (!selectedAccount || !offer?.seller) return false;
@@ -37,9 +54,12 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
   }, [offer, selectedAccount?.address]);
 
   const isBidder = useMemo(() => {
-    if (!selectedAccount) return false;
-    return offer.auction?.bids.some((bid) => compareEncodedAddresses(bid.bidderAddress, selectedAccount.address));
-  }, [offer, selectedAccount]);
+    if (!selectedAccount || !calculatedBid) return false;
+    return offer.auction?.bids.some((bid) => compareEncodedAddresses(
+      bid.bidderAddress,
+      selectedAccount.address
+    )) && calculatedBid.bidderPendingAmount !== '0';
+  }, [offer, selectedAccount, calculatedBid]);
 
   const topBid = useMemo(() => {
     if (offer.auction?.bids.length === 0) return null;
