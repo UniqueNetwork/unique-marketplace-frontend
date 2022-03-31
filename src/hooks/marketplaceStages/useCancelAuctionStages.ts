@@ -1,13 +1,13 @@
 import { useMemo } from 'react';
 
-import useMarketplaceStages, { MarketplaceStage } from '../useMarketplaceStages';
 import { cancelAuction } from '../../api/restApi/auction/auction';
 import { useAccounts } from '../useAccounts';
-import { StageStatus } from '../../types/StagesTypes';
+import { InternalStage, StageStatus } from '../../types/StagesTypes';
+import useStages from '../useStages';
 
 export const useCancelAuctionStages = (collectionId: number, tokenId: number) => {
-  const { selectedAccount, signMessage } = useAccounts();
-  const cancelAuctionStages: MarketplaceStage<null>[] = useMemo(() => [
+  const { selectedAccount, signMessage, signTx } = useAccounts();
+  const cancelAuctionStages: InternalStage<null>[] = useMemo(() => [
     {
       title: 'Cancelling auction',
       description: '',
@@ -24,8 +24,8 @@ export const useCancelAuctionStages = (collectionId: number, tokenId: number) =>
         );
       }
     }
-  ], []);
-  const { stages, error, status, initiate } = useMarketplaceStages<null>(collectionId, tokenId, cancelAuctionStages);
+  ], [collectionId, tokenId, signMessage]);
+  const { stages, error, status, initiate } = useStages<null>(cancelAuctionStages, signTx);
 
   return {
     stages,

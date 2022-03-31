@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import { Button, InputText, Pagination } from '@unique-nft/ui-kit';
+import { Button, InputText, Pagination, Text } from '@unique-nft/ui-kit';
 import { SortQuery } from '@unique-nft/ui-kit/dist/cjs/types';
 
 import { useTrades } from '../../api/restApi/trades/trades';
@@ -7,11 +7,18 @@ import styled from 'styled-components';
 import { Table } from '../../components/Table';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
 import { tradesColumns } from './columns';
+import { useAccounts } from '../../hooks/useAccounts';
 import { useGetTokensByTrades } from './hooks/useGetTokensByTrades';
+import { TradesTabs } from './types';
 
 const pageSize = 20;
 
-export const AllTokensTradesPage: FC = () => {
+type TokensTradesPage = {
+  currentTab: TradesTabs
+}
+
+export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
+  const { selectedAccount } = useAccounts();
   const [page, setPage] = useState<number>(0);
   const [sortString, setSortString] = useState<string>('');
   const [searchValue, setSearchValue] = useState<string | number>();
@@ -20,8 +27,14 @@ export const AllTokensTradesPage: FC = () => {
   const { tradesWithTokens, isFetchingTokens } = useGetTokensByTrades(trades);
 
   useEffect(() => {
-    fetch({ page: 1, pageSize, sortString });
-  }, [fetch]);
+    if (!selectedAccount?.address) return;
+    fetch({
+      page: 1,
+      pageSize,
+      sortString,
+      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
+    });
+  }, [selectedAccount?.address, fetch, currentTab]);
 
   const onSearch = useCallback(() => {
     // TODO: not implemented in api
@@ -29,10 +42,15 @@ export const AllTokensTradesPage: FC = () => {
   }, [sortString, pageSize, searchValue]);
 
   const onPageChange = useCallback((newPage: number) => {
-    if (page === newPage) return;
+    if (!selectedAccount?.address || page === newPage) return;
     setPage(newPage);
-    fetch({ page: newPage + 1, pageSize, sortString });
-  }, [fetch, page, sortString]);
+    fetch({
+      page: newPage + 1,
+      pageSize,
+      sortString,
+      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
+    });
+  }, [selectedAccount?.address, page, fetch, sortString]);
 
   const onSortChange = useCallback((newSort: SortQuery) => {
     let sortString = '';
@@ -75,6 +93,7 @@ export const AllTokensTradesPage: FC = () => {
         loading={isFetching || isFetchingTokens}
       />
       {!!tradesCount && <PaginationWrapper>
+        <Text>{`${tradesCount} items`}</Text>
         <Pagination
           size={tradesCount}
           current={page}
@@ -114,6 +133,7 @@ const SearchWrapper = styled.div`
 
 const PaginationWrapper = styled.div`
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   margin-top: calc(var(--gap) * 2);
+  align-items: center;
 `;
