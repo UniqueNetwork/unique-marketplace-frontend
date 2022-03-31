@@ -7,7 +7,7 @@ import styled from 'styled-components/macro';
 export const AddressComponent = ({ text }: { text: string }) => {
   const shortCut = useMemo(() => (shortcutText(text)), [text]);
   return <LinkWrapper><Link
-    href={`${config?.scanUrl || ''}account//${text}`}
+    href={`${config?.scanUrl || ''}account/${text}`}
     title={shortCut}
   /></LinkWrapper>;
 };

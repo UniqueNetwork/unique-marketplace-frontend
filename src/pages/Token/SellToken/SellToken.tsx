@@ -49,6 +49,7 @@ const WarningWrapper = styled.div`
   border-radius: 4px;
   padding: calc(var(--gap) / 2) var(--gap);
   margin-top: var(--gap);
+  max-width: 704px;
 `;
 
 const ButtonWrapper = styled.div`
