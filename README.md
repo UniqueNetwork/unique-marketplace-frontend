@@ -1,5 +1,5 @@
 # About
-Unique marketplace + action layour. Easy and reliable entry point to create your own marketplace in Unique ecosystem.
+Unique marketplace layout with auction. Easy and reliable entry point to create your own marketplace in Unique ecosystem.
 # Development
 ```
 npm install
