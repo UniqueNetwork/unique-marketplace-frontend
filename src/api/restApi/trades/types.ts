@@ -1,7 +1,7 @@
 import { PaginatedResponse, Pagination } from '../base/types';
 
 export type GetTradesRequestPayload = {
-  sortString?: string // ex. "asc(Price)"
+  sort?: string // ex. "asc(Price)"
   seller?: string
   collectionId?: number | number[]
 } & Pagination;
