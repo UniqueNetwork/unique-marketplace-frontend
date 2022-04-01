@@ -15,6 +15,7 @@ export const calculate = (body: TCalculateBidParams) => post<TCalculateBidParams
 export const useAuction = () => {
   const [startAuctionStatus, setStartAuctionStatus] = useState<FetchStatus>(FetchStatus.default);
   const [placeBidStatus, setPlaceBidStatus] = useState<FetchStatus>(FetchStatus.default);
+  const [calculateBidStatus, setCalculateBidStatus] = useState<FetchStatus>(FetchStatus.default);
   const startAuction = useCallback(async (params: TStartAuctionParams) => {
     try {
       setStartAuctionStatus(FetchStatus.inProgress);
@@ -39,12 +40,12 @@ export const useAuction = () => {
 
   const getCalculatedBid = useCallback(async (params: TCalculateBidParams) => {
     try {
-      setPlaceBidStatus(FetchStatus.inProgress);
+      setCalculateBidStatus(FetchStatus.inProgress);
       const { data } = await calculate(params);
-      setPlaceBidStatus(FetchStatus.success);
+      setCalculateBidStatus(FetchStatus.success);
       return data;
     } catch (e) {
-      setPlaceBidStatus(FetchStatus.error);
+      setCalculateBidStatus(FetchStatus.error);
       console.error('Failed to calculate bid', e);
     }
   }, []);
@@ -54,6 +55,7 @@ export const useAuction = () => {
     placeBid,
     startAuctionStatus,
     placeBidStatus,
-    getCalculatedBid
+    getCalculatedBid,
+    calculateBidStatus
   };
 };
