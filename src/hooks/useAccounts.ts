@@ -118,6 +118,19 @@ export const useAccounts = () => {
     setAccounts(accountsWithBalance);
   }, [getAccountBalance, accounts]);
 
+  const updateAccountBalance = useCallback(async () => {
+    if (!selectedAccount) return;
+    setIsLoadingBalances(true);
+    const balanceKSM = await getAccountBalance(selectedAccount);
+    setAccounts(accounts.map((account: Account) => {
+      if (account.address === selectedAccount.address) {
+        return { ...account, balance: { KSM: balanceKSM } } as Account;
+      }
+      return account;
+    }));
+    setIsLoadingBalances(false);
+  }, [selectedAccount, accounts]);
+
   useEffect(() => {
     const updatedSelectedAccount = accounts.find((account) => account.address === selectedAccount?.address);
     if (updatedSelectedAccount) setSelectedAccount(updatedSelectedAccount);
@@ -146,8 +159,12 @@ export const useAccounts = () => {
     return pair;
   }, [selectedAccount]);
 
-  const signTx = useCallback(async (tx: TTransaction, account?: Account): Promise<TTransaction> => {
-    const _account = account || selectedAccount;
+  const signTx = useCallback(async (tx: TTransaction, account?: Account | string): Promise<TTransaction> => {
+    let _account = account || selectedAccount;
+    if (typeof _account === 'string') {
+      _account = accounts.find((account) => account.address === _account);
+    }
+
     if (!_account) throw new Error('Account was not provided');
     let signedTx;
     if (_account.signerType === AccountSigner.local) {
@@ -161,10 +178,14 @@ export const useAccounts = () => {
     }
     if (!signedTx) throw new Error('Signing failed');
     return signedTx;
-  }, [showSignDialog, selectedAccount]);
+  }, [showSignDialog, selectedAccount, accounts]);
 
-  const signMessage = useCallback(async (message: string, account?: Account): Promise<string> => {
-    const _account = account || selectedAccount;
+  const signMessage = useCallback(async (message: string, account?: Account | string): Promise<string> => {
+    let _account = account || selectedAccount;
+    if (typeof _account === 'string') {
+      _account = accounts.find((account) => account.address === _account);
+    }
+
     if (!_account) throw new Error('Account was not provided');
     let signedMessage;
     if (_account.signerType === AccountSigner.local) {
@@ -181,7 +202,7 @@ export const useAccounts = () => {
     }
     if (!signedMessage) throw new Error('Signing failed');
     return signedMessage;
-  }, [showSignDialog, selectedAccount]);
+  }, [showSignDialog, selectedAccount, accounts]);
 
   return {
     accounts,
@@ -196,6 +217,7 @@ export const useAccounts = () => {
     signMessage,
     fetchAccounts,
     fetchBalances,
+    updateAccountBalance,
     changeAccount
   };
 };

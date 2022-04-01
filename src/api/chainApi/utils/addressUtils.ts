@@ -25,7 +25,7 @@ export const isTokenOwner = (account: string, tokenOwner: { Substrate?: string, 
   const ethAccount = getEthAccount(account);
   const normalizeSubstrate = toAddress(tokenOwner.Substrate);
 
-  return normalizeSubstrate === account || tokenOwner.Ethereum?.toLowerCase() === ethAccount;
+  return normalizeSubstrate?.toLowerCase() === account.toLowerCase() || tokenOwner.Ethereum?.toLowerCase() === ethAccount.toLowerCase();
 };
 
 export function normalizeAccountId(

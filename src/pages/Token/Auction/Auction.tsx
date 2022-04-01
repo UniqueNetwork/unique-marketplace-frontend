@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Text, Button, Heading } from '@unique-nft/ui-kit';
 import BN from 'bn.js';
 import styled from 'styled-components/macro';
@@ -14,7 +14,8 @@ import { compareEncodedAddresses, isTokenOwner } from '../../../api/chainApi/uti
 import { PriceForAuction } from '../TokenDetail/PriceForAuction';
 import Timer from '../../../components/Timer';
 import { useNavigate } from 'react-router';
-console.log('window.location', window.location);
+import { useAuction } from '../../../api/restApi/auction/auction';
+import { TCalculatedBid } from '../../../api/restApi/auction/types';
 
 interface AuctionProps {
   offer: Offer
@@ -30,20 +31,39 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
   const navigate = useNavigate();
 
   console.log('offer in Auction', offer);
+  const { getCalculatedBid } = useAuction();
+
+  const [calculatedBid, setCalculatedBid] = useState<TCalculatedBid>();
+
+  useEffect(() => {
+    if (!offer || !selectedAccount) return;
+    (async () => {
+      const _calculatedBid = await getCalculatedBid({
+        collectionId: offer.collectionId || 0,
+        tokenId: offer?.tokenId || 0,
+        bidderAddress: selectedAccount?.address || ''
+      });
+      setCalculatedBid(_calculatedBid);
+    })();
+  }, [offer, selectedAccount]);
 
   const canPlaceABid = useMemo(() => {
-    return true; // TODO: get a balance of selected account
-  }, []);
+    if (!selectedAccount || !offer?.seller) return false;
+    return !isTokenOwner(selectedAccount.address, { Substrate: offer.seller });
+  }, [offer, selectedAccount?.address]);
 
   const canDelist = useMemo(() => {
     if (!selectedAccount || !offer?.seller) return false;
     return isTokenOwner(selectedAccount.address, { Substrate: offer.seller }) && !offer.auction?.bids.length;
-  }, [offer, selectedAccount]);
+  }, [offer, selectedAccount?.address]);
 
   const isBidder = useMemo(() => {
-    if (!selectedAccount) return false;
-    return offer.auction?.bids.some((bid) => compareEncodedAddresses(bid.bidderAddress, selectedAccount.address));
-  }, [offer, selectedAccount]);
+    if (!selectedAccount || !calculatedBid) return false;
+    return offer.auction?.bids.some((bid) => compareEncodedAddresses(
+      bid.bidderAddress,
+      selectedAccount.address
+    )) && calculatedBid.bidderPendingAmount !== '0';
+  }, [offer, selectedAccount, calculatedBid]);
 
   const topBid = useMemo(() => {
     if (offer.auction?.bids.length === 0) return null;
@@ -85,9 +105,8 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
         {canDelist && <Button title={'Delist'}
           role={'danger'}
           onClick={onDelistAuctionClick}
-          disabled={!canPlaceABid}
         />}
-        {!canDelist && <Button title={'Place a bid'}
+        {canPlaceABid && <Button title={'Place a bid'}
           role={'primary'}
           onClick={onPlaceABidClick}
           disabled={!canPlaceABid}

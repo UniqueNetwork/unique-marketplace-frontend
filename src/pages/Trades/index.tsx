@@ -1,7 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { Tabs } from '@unique-nft/ui-kit';
-import { AllTokensTradesPage } from './AllTokensTrades';
-import { MyTokensTradesPage } from './MyTokensTrades';
+import { TokensTradesPage } from './TokensTrades';
 
 export const TradesPage = () => {
   const [activeTab, setActiveTab] = useState<number>(0);
@@ -16,9 +15,6 @@ export const TradesPage = () => {
       labels={['All tokens', 'My tokens']}
       onClick={handleClick}
     />
-    <Tabs activeIndex={activeTab}>
-      <AllTokensTradesPage />
-      <MyTokensTradesPage />
-    </Tabs>
+    <TokensTradesPage currentTab={activeTab} />
   </>);
 };

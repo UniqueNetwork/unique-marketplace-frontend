@@ -1,17 +1,19 @@
 import { useMemo } from 'react';
 import { useApi } from '../useApi';
-import useMarketplaceStages, { MarketplaceStage } from '../useMarketplaceStages';
 import { TAuctionProps } from '../../pages/Token/Modals/types';
 import { startAuction } from '../../api/restApi/auction/auction';
 import { TTransaction } from '../../api/chainApi/types';
-import { StageStatus } from '../../types/StagesTypes';
+import { InternalStage, StageStatus } from '../../types/StagesTypes';
 import { fromStringToBnString } from '../../utils/bigNum';
+import useStages from '../useStages';
+import { useAccounts } from '../useAccounts';
 
 export const useAuctionSellStages = (collectionId: number, tokenId: number) => {
   const { api } = useApi();
+  const { signTx } = useAccounts();
   const marketApi = api?.market;
 
-  const sellAuctionStages: MarketplaceStage<TAuctionProps>[] = useMemo(() => [
+  const sellAuctionStages: InternalStage<TAuctionProps>[] = useMemo(() => [
     {
       title: 'Starting auction',
       description: '',
@@ -19,8 +21,8 @@ export const useAuctionSellStages = (collectionId: number, tokenId: number) => {
       action: (params) =>
         marketApi?.transferToAuction(
           params.txParams.accountAddress,
-          params.collectionId.toString(),
-          params.tokenId.toString(),
+          collectionId.toString(),
+          tokenId.toString(),
           {
             ...params.options,
             send:
@@ -32,9 +34,9 @@ export const useAuctionSellStages = (collectionId: number, tokenId: number) => {
             }
           )
     }
-  ], [marketApi, api?.market?.kusamaDecimals]);
+  ], [marketApi, api?.market?.kusamaDecimals, collectionId, tokenId]);
 
-  const { stages, error, status, initiate } = useMarketplaceStages<TAuctionProps>(collectionId, tokenId, sellAuctionStages);
+  const { stages, error, status, initiate } = useStages<TAuctionProps>(sellAuctionStages, signTx);
 
   return {
     stages,

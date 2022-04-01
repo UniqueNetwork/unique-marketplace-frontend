@@ -5,14 +5,19 @@ import { useApi } from '../../../hooks/useApi';
 
 export const useGetTokensByTrades = (trades: Trade[]) => {
   const [isFetchingTokens, setIsFetchingTokens] = useState(true);
-  const [tradesWithTokens, setTradesWithTokens] = useState<(Trade & {token: NFTToken})[]>([]);
+  const [tradesWithTokens, setTradesWithTokens] = useState<(Trade & {token: NFTToken, collection: { id?: string, name?: string }})[]>([]);
   const { api } = useApi();
 
   useEffect(() => {
     const fetchToken = async (trade: Trade) => {
+      const token = await api?.nft?.getToken(trade.collectionId, trade.tokenId) as NFTToken;
       return {
         ...trade,
-        token: await api?.nft?.getToken(trade.collectionId, trade.tokenId) as NFTToken
+        token,
+        collection: {
+          id: token.collectionId?.toString(),
+          name: token.collectionName
+        }
       };
     };
 

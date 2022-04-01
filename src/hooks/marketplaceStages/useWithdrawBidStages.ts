@@ -1,13 +1,13 @@
 import { useMemo } from 'react';
 
-import useMarketplaceStages, { MarketplaceStage } from '../useMarketplaceStages';
 import { withdrawBid } from '../../api/restApi/auction/auction';
 import { useAccounts } from '../useAccounts';
-import { StageStatus } from '../../types/StagesTypes';
+import { InternalStage, StageStatus } from '../../types/StagesTypes';
+import useStages from '../useStages';
 
 export const useWithdrawBidStages = (collectionId: number, tokenId: number) => {
-  const { selectedAccount, signMessage } = useAccounts();
-  const bidAuctionStages: MarketplaceStage<null>[] = useMemo(() => [
+  const { selectedAccount, signMessage, signTx } = useAccounts();
+  const bidAuctionStages: InternalStage<null>[] = useMemo(() => [
     {
       title: 'Withdraw bid',
       description: '',
@@ -24,8 +24,8 @@ export const useWithdrawBidStages = (collectionId: number, tokenId: number) => {
         );
       }
     }
-  ], []);
-  const { stages, error, status, initiate } = useMarketplaceStages<null>(collectionId, tokenId, bidAuctionStages);
+  ], [collectionId, tokenId]);
+  const { stages, error, status, initiate } = useStages<null>(bidAuctionStages, signTx);
 
   return {
     stages,

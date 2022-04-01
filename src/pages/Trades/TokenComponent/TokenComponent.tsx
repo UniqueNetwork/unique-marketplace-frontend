@@ -10,7 +10,7 @@ export const TokenComponent = ({ token }: { token: NFTToken | undefined }) => {
   return <Link to={`/token/${token?.collectionId}/${token?.id}`}>
     <TokenComponentWrapper>
       <Avatar src={token?.imageUrl || ''} size={40} type={'square'} />
-      <Text>{`${token?.prefix} ${token?.id}`}</Text>
+      <Text>{`${token?.prefix} #${token?.id}`}</Text>
     </TokenComponentWrapper>
   </Link>;
 };
