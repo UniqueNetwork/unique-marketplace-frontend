@@ -7,12 +7,14 @@ import { Offer } from '../../../api/restApi/offers/types';
 import { NFTToken } from '../../../api/chainApi/unique/types';
 import Bids from './Bids';
 import { AdditionalPositive100, AdditionalPositive500, Coral100, Coral500, Grey300 } from '../../../styles/colors';
-import { useBidsSubscription } from '../../../hooks/useBidsSubscription';
+import { useOfferSubscription } from '../../../hooks/useOfferSubscription';
 import { shortcutText } from '../../../utils/textUtils';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { compareEncodedAddresses, isTokenOwner } from '../../../api/chainApi/utils/addressUtils';
 import { PriceForAuction } from '../TokenDetail/PriceForAuction';
 import Timer from '../../../components/Timer';
+import { useNavigate } from 'react-router';
+console.log('window.location', window.location);
 
 interface AuctionProps {
   offer: Offer
@@ -25,6 +27,9 @@ interface AuctionProps {
 const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDelistAuctionClick, onWithdrawClick }) => {
   const [offer, setOffer] = useState<Offer>(initialOffer);
   const { selectedAccount } = useAccounts();
+  const navigate = useNavigate();
+
+  console.log('offer in Auction', offer);
 
   const canPlaceABid = useMemo(() => {
     return true; // TODO: get a balance of selected account
@@ -61,9 +66,13 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
     setOffer(_offer);
   }, [setOffer]);
 
+  const onAuctionClosed = useCallback((_offer: Offer) => {
+    setOffer(_offer);
+  }, [setOffer]);
+
   const price = offer.price;
 
-  useBidsSubscription({ offer, onPlaceBid });
+  useOfferSubscription({ offer, onPlaceBid, onAuctionClosed });
 
   return (<>
     <Text size={'l'}>{topBid ? 'Next minimum bid' : 'Starting bid'}</Text>

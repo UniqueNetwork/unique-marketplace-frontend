@@ -18,6 +18,7 @@ import { BN } from '@polkadot/util';
 import { StageStatus } from '../../../types/StagesTypes';
 import { NotificationSeverity } from '../../../notification/NotificationContext';
 import { useNotification } from '../../../hooks/useNotification';
+import { TCalculatedBid, useCalculatedApi } from '../../../hooks/useCalculatedApi';
 
 export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ token, offer, setIsClosable, onFinish }) => {
   const [status, setStatus] = useState<'ask' | 'place-bid-stage'>('ask'); // TODO: naming
@@ -44,20 +45,31 @@ export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ token, offer, setIs
 const chainOptions = [{ id: 'KSM', title: 'KSM', iconRight: { size: 18, file: Kusama } }];
 
 export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: string, chain: string): void}> = ({ offer, onConfirmPlaceABid }) => {
-  const [bidAmount, setBidAmount] = useState<string>('0');
   const [chain, setChain] = useState<string | undefined>('KSM');
   const { selectedAccount } = useAccounts();
   const { api } = useApi();
+  const [calculatedBid, setCalculatedBidFromServer] = useState<TCalculatedBid>({} as TCalculatedBid);
 
-  const leadingBidAmount = useMemo(() => {
-    if (!offer?.auction?.bids || offer?.auction?.bids.length === 0) return new BN(offer?.auction?.startPrice || 0);
-    return new BN(offer?.auction?.bids[0].balance);
+  const { getCalculatedBid } = useCalculatedApi();
+
+  useEffect(() => {
+    if (offer) {
+      getCalculatedBid({ collectionId: offer.collectionId || 0, tokenId: offer?.tokenId || 0, account: selectedAccount?.address || '', setCalculatedBidFromServer });
+    }
+  }, [offer, selectedAccount, setCalculatedBidFromServer]);
+
+  const leadingBid = useMemo(() => {
+    if (!offer?.auction?.bids || offer?.auction?.bids.length === 0) return 0;
+    return offer?.auction?.bids[0].balance;
   }, [offer]);
 
+  const lastBidFromThisAccount = calculatedBid?.bidderPendingAmount;
+
   const minimalBid = useMemo(() => {
-    if (!offer?.auction?.bids || offer?.auction?.bids.length === 0) return leadingBidAmount;
-    return leadingBidAmount.add(new BN(offer?.auction?.priceStep || 0));
-  }, [leadingBidAmount, offer?.auction?.priceStep, offer?.auction?.bids]);
+    if (!leadingBid) return new BN(offer?.auction?.startPrice || offer?.auction?.priceStep || 0);
+    return new BN(Number(leadingBid) + Number(offer?.auction?.priceStep || '0'));
+  }, [offer?.auction, leadingBid]);
+  const [bidAmount, setBidAmount] = useState<string>(formatKusamaBalance(minimalBid.toString(), api?.market?.kusamaDecimals));
 
   const isEnoughBalance = useMemo(() => {
     if (!selectedAccount?.balance?.KSM || selectedAccount?.balance?.KSM.isZero()) return false;
@@ -79,9 +91,9 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: string, 
       if (!isAmountValid || !isEnoughBalance) return;
       const bnAmount = new BN(fromStringToBnString(bidAmount, api?.market?.kusamaDecimals));
 
-      onConfirmPlaceABid(formatKusamaBalance(bnAmount.toString()), chain || '');
+      onConfirmPlaceABid(formatKusamaBalance(Number(bnAmount.toString()) - Number(lastBidFromThisAccount)), chain || '');
     },
-    [onConfirmPlaceABid, bidAmount, isEnoughBalance, isAmountValid, leadingBidAmount, chain, api?.market?.kusamaDecimals]
+    [onConfirmPlaceABid, bidAmount, isEnoughBalance, isAmountValid, chain, api?.market?.kusamaDecimals, lastBidFromThisAccount]
   );
 
   const onChainChange = useCallback(
