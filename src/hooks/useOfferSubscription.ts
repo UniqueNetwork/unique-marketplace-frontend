@@ -26,12 +26,10 @@ export const useOfferSubscription = ({ offer, onPlaceBid, onAuctionClosed }: use
     });
     console.log('subscribe to bidPlaced');
     socket?.on('bidPlaced', (offer) => {
-      console.log('bidPlaced');
       onPlaceBid(offer);
     });
     console.log('subscribe to auctionClosed');
     socket?.on('auctionClosed', (offer) => {
-      console.log('auctionClosed');
       if (onAuctionClosed) {
         onAuctionClosed(offer);
       }
