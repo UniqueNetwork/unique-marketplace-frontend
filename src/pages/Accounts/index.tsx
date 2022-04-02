@@ -32,7 +32,7 @@ type AccountsColumnsProps = {
   onCopyAddress(address: string): () => void
 };
 
-const getAccountsColumns = ({ onShowSendFundsModal, onShowWithdrawDepositModal }: AccountsColumnsProps): TableColumnProps[] => [
+const getAccountsColumns = ({ onShowSendFundsModal, onShowWithdrawDepositModal, onCopyAddress }: AccountsColumnsProps): TableColumnProps[] => [
   {
     title: 'Account',
     width: '25%',
@@ -48,7 +48,7 @@ const getAccountsColumns = ({ onShowSendFundsModal, onShowWithdrawDepositModal }
               <Text size={'s'} color={'grey-500'}>
                 {accountInfo.address}
               </Text>
-              <a onClick={copyAddress(accountInfo.address)}>
+              <a onClick={onCopyAddress(accountInfo.address)}>
                 <CopyIconWrapper>
                   <Icon path={CopyIcon} />
                 </CopyIconWrapper>
@@ -177,8 +177,9 @@ export const AccountsPage = () => {
   }, []);
 
   const onCopyAddress = (account: string) => () => {
-    navigator.clipboard.writeText(account);
-    push({ severity: NotificationSeverity.success, message: 'Address copied' });
+    navigator.clipboard.writeText(account).then(() => {
+      push({ severity: NotificationSeverity.success, message: 'Address copied' });
+    });
   };
 
   const filteredAccounts = useMemo(() => {
