@@ -37,9 +37,11 @@ export const TransferFundsModal: FC<TransferFundsModalProps> = ({ isVisible, sen
 
   const onFinishStages = useCallback(() => {
     setStatus('ask');
+    onFinish();
   }, [onFinish]);
   if (status === 'ask') {
-   return (<AskTransferFundsModal isVisible={isVisible}
+   return (<AskTransferFundsModal 
+     isVisible={isVisible}
      onFinish={onTransfer}
      senderAddress={senderAddress || ''}
      onClose={onFinish}
