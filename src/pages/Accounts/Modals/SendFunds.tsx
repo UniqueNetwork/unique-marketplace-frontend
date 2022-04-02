@@ -14,6 +14,7 @@ import { formatKusamaBalance } from '../../../utils/textUtils';
 import { StageStatus } from '../../../types/StagesTypes';
 import { NotificationSeverity } from '../../../notification/NotificationContext';
 import { useNotification } from '../../../hooks/useNotification';
+import { NumberInput } from '../../../components/NumberInput/NumberInput';
 
 const tokenSymbol = 'KSM';
 
@@ -26,7 +27,7 @@ export type TransferFundsModalProps = {
 export const TransferFundsModal: FC<TransferFundsModalProps> = ({ isVisible, senderAddress, onFinish }) => {
   const [status, setStatus] = useState<'ask' | 'transfer-stage'>('ask');
   const [recipient, setRecipient] = useState<string>('');
-  const [amount, setAmount] = useState<string>('');
+  const [amount, setAmount] = useState<string>('0');
 
   const onTransfer = useCallback((_sender: string, _recipient: string, _amount: string) => {
     setRecipient(_recipient);
@@ -66,7 +67,7 @@ type AskSendFundsModalProps = {
 export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, onFinish, senderAddress, onClose }) => {
   const { accounts } = useAccounts();
   const [recipientAddress, setRecipientAddress] = useState<string | Account | undefined>();
-  const [amount, setAmount] = useState<number>(0);
+  const [amount, setAmount] = useState<string>('0');
 
   const senderBalance = useMemo(() => {
     const account = accounts.find((account) => account.address === senderAddress);
@@ -79,7 +80,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   }, [accounts, recipientAddress]);
 
   const onAmountChange = useCallback((value: string) => {
-    setAmount(Number(value));
+    setAmount(value);
   }, [setAmount]);
 
   const onSend = useCallback(() => {
@@ -117,7 +118,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
       {recipientBalance && <Text size={'s'}>{`${formatKusamaBalance(recipientBalance?.toString() || 0)} ${tokenSymbol}`}</Text> }
     </AmountWrapper>
     <AmountInputWrapper>
-      <InputText value={amount.toString()} onChange={onAmountChange} />
+      <NumberInput value={amount} onChange={onAmountChange} />
     </AmountInputWrapper>
     <TextStyled
       color='additional-warning-500'
