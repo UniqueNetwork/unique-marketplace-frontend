@@ -1,21 +1,21 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router';
 import { Text, Button, Heading } from '@unique-nft/ui-kit';
-import BN from 'bn.js';
 import styled from 'styled-components/macro';
+import BN from 'bn.js';
 
 import { Offer } from '../../../api/restApi/offers/types';
 import { NFTToken } from '../../../api/chainApi/unique/types';
-import Bids from './Bids';
 import { AdditionalPositive100, AdditionalPositive500, Coral100, Coral500, Grey300 } from '../../../styles/colors';
 import { useOfferSubscription } from '../../../hooks/useOfferSubscription';
 import { shortcutText } from '../../../utils/textUtils';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { compareEncodedAddresses, isTokenOwner } from '../../../api/chainApi/utils/addressUtils';
 import { PriceForAuction } from '../TokenDetail/PriceForAuction';
-import Timer from '../../../components/Timer';
-import { useNavigate } from 'react-router';
 import { useAuction } from '../../../api/restApi/auction/auction';
 import { TCalculatedBid } from '../../../api/restApi/auction/types';
+import Bids from './Bids';
+import Timer from '../../../components/Timer';
 
 interface AuctionProps {
   offer: Offer
