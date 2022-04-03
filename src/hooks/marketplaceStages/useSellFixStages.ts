@@ -7,14 +7,17 @@ import useStages from '../useStages';
 
 export const useSellFixStages = (collectionId: number, tokenId: number) => {
   const { api } = useApi();
-  const { signTx } = useAccounts();
+  const { signTx, selectedAccount } = useAccounts();
   const marketApi = api?.market;
-  const sellFixStages: InternalStage<TFixPriceProps>[] = useMemo(() => [{
+  const addToWhiteListStage: InternalStage<TFixPriceProps> = {
     title: 'Register sponsorship',
     description: '',
     status: StageStatus.default,
     action: (params) => marketApi?.addToWhiteList(params.txParams.accountAddress, params.options)
-  },
+  }; 
+
+  const sellFixStages: InternalStage<TFixPriceProps>[] = useMemo(() => [
+  ...(!selectedAccount?.isOnWhiteList ? [addToWhiteListStage] : []),
   {
     title: 'Prepare NFT to be sent to smart contract',
     description: '',
@@ -32,7 +35,7 @@ export const useSellFixStages = (collectionId: number, tokenId: number) => {
     description: '',
     status: StageStatus.default,
     action: (params) => marketApi?.setForFixPriceSale(params.txParams.accountAddress, collectionId.toString(), tokenId.toString(), params?.txParams?.price.toString() || '-1', params.options)
-  }], [marketApi, collectionId, tokenId]);
+  }], [marketApi, collectionId, tokenId, selectedAccount?.isOnWhiteList]);
   const { stages, error, status, initiate } = useStages<TFixPriceProps>(sellFixStages, signTx);
 
   return {

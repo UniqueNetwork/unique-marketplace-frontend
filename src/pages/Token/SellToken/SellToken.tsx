@@ -5,6 +5,7 @@ import { Button } from '@unique-nft/ui-kit';
 import { AdditionalWarning100, AdditionalWarning500, Grey300 } from '../../../styles/colors';
 import { Offer } from '../../../api/restApi/offers/types';
 import { Price } from '../TokenDetail/Price';
+import { useAccounts } from '../../../hooks/useAccounts';
 
 interface SellTokenProps {
   offer?: Offer
@@ -14,6 +15,7 @@ interface SellTokenProps {
 }
 
 export const SellToken: FC<SellTokenProps> = ({ offer, onSellClick, onTransferClick, onDelistClick }) => {
+  const { selectedAccount } = useAccounts();
   if (offer) {
     return (<>
       <Price price={offer.price} />
@@ -30,9 +32,9 @@ export const SellToken: FC<SellTokenProps> = ({ offer, onSellClick, onTransferCl
         <Button title={'Sell'} role={'primary'} onClick={onSellClick}/>
         <Button title={'Transfer'} onClick={onTransferClick} />
       </ActionsWrapper>
-      <WarningWrapper>
+      {!selectedAccount?.isOnWhiteList && <WarningWrapper>
         A fee of ~0,001 KSM may be applied to the first sale transaction. Your address will be added to the transaction sponsoring whitelist allowing you to make feeless transactions.
-      </WarningWrapper>
+      </WarningWrapper>}
       <Divider />
     </>
   );

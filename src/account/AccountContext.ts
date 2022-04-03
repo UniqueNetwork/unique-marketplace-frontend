@@ -13,6 +13,7 @@ export interface Account extends InjectedAccountWithMeta {
     KSM?: BN
   },
   deposit?: BN
+  isOnWhiteList?: boolean
 }
 
 export type AccountContextProps = {
