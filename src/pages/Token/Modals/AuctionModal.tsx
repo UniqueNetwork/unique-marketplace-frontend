@@ -23,18 +23,19 @@ import { NotificationSeverity } from '../../../notification/NotificationContext'
 
 export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ token, offer, setIsClosable, onFinish }) => {
   const [status, setStatus] = useState<'ask' | 'place-bid-stage'>('ask'); // TODO: naming
-  const [bidAmount, setBidAmount] = useState<string>('0');
+  const [bidValue, setBidValue] = useState<TPlaceABid>();
 
-  const onConfirmPlaceABid = useCallback((_bidAmount: string) => {
-    setBidAmount(_bidAmount);
+  const onConfirmPlaceABid = useCallback((_bidValue: TPlaceABid) => {
+    setBidValue(_bidValue);
     setStatus('place-bid-stage');
     setIsClosable(false);
-  }, [setStatus, setBidAmount, setIsClosable]);
+  }, [setStatus, setBidValue, setIsClosable]);
 
   if (status === 'ask') return (<AskBidModal offer={offer} onConfirmPlaceABid={onConfirmPlaceABid} />);
   if (status === 'place-bid-stage') {
     return (<AuctionStagesModal
-      amount={bidAmount}
+      accountAddress={bidValue?.accountAddress}
+      amount={bidValue?.amount}
       onFinish={onFinish}
       token={token}
       setIsClosable={setIsClosable}
@@ -45,7 +46,7 @@ export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ token, offer, setIs
 
 const chainOptions = [{ id: 'KSM', title: 'KSM', iconRight: { size: 18, file: Kusama } }];
 
-export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: string, chain: string): void}> = ({ offer, onConfirmPlaceABid }) => {
+export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceABid): void}> = ({ offer, onConfirmPlaceABid }) => {
   const [chain, setChain] = useState<string | undefined>('KSM');
   const { selectedAccount } = useAccounts();
   const { api } = useApi();
@@ -99,7 +100,10 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: string, 
       if (!isAmountValid || !isEnoughBalance) return;
       const bnAmount = new BN(fromStringToBnString(bidAmount, api?.market?.kusamaDecimals));
 
-      onConfirmPlaceABid(formatKusamaBalance(Number(bnAmount.toString()) - Number(lastBidFromThisAccount)), chain || '');
+      onConfirmPlaceABid({
+        accountAddress: selectedAccount?.address || '',
+        amount: formatKusamaBalance(Number(bnAmount.toString()) - Number(lastBidFromThisAccount))
+      });
     },
     [onConfirmPlaceABid, bidAmount, isEnoughBalance, isAmountValid, chain, api?.market?.kusamaDecimals, lastBidFromThisAccount]
   );
@@ -147,15 +151,15 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: string, 
   );
 };
 
-const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ token, onFinish, amount }) => {
-  const { selectedAccount, updateAccountBalance } = useAccounts();
+const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ token, accountAddress, onFinish, amount }) => {
+  const { updateAccountBalance } = useAccounts();
   const { stages, status, initiate } = useAuctionBidStages(token?.collectionId || 0, token?.id);
   const { push } = useNotification();
 
   useEffect(() => {
-    if (!selectedAccount) throw new Error('Account not selected');
-    initiate({ value: amount, accountAddress: selectedAccount.address });
-  }, [amount, selectedAccount]);
+    if (!amount || !accountAddress) return;
+    initiate({ value: amount, accountAddress });
+  }, [amount, accountAddress]);
 
   useEffect(() => {
     if (status === StageStatus.success) {
