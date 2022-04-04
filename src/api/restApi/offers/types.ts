@@ -25,7 +25,7 @@ export type Auction = {
   bids: Bid[]
   priceStep: string
   startPrice: string
-  status: 'created' | '' // ???
+  status: 'created' | 'active' | 'withdrawing' | 'stopped' // ???
   stopAt: string
 }
 

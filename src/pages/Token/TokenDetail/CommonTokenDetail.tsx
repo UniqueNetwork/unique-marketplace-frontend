@@ -16,6 +16,7 @@ import config from '../../../config';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { isTokenOwner } from '../../../api/chainApi/utils/addressUtils';
 import { Offer } from '../../../api/restApi/offers/types';
+import { normalizeAccountId, subToEth } from '../tmp_purchase/utils';
 
 interface IProps {
   children: ReactChild[];
@@ -34,7 +35,6 @@ export const CommonTokenDetail: FC<IProps> = ({
     description,
     attributes,
     imageUrl,
-    owner,
     id: tokenId,
     prefix
   } = token;
@@ -42,10 +42,15 @@ export const CommonTokenDetail: FC<IProps> = ({
   const { selectedAccount } = useAccounts();
   const deviceSize = useDeviceSize();
 
+  const owner = useMemo(() => {
+    if (!token?.owner) return undefined;
+    return offer?.seller ? normalizeAccountId(subToEth(offer?.seller)) : normalizeAccountId(token.owner);
+  }, [token, offer]);
+
   const isOwner = useMemo(() => {
     if (!selectedAccount || !owner) return false;
     return isTokenOwner(selectedAccount.address, owner);
-  }, [selectedAccount, owner]);
+  }, [selectedAccount, owner, offer]);
 
   const onShareClick = useCallback(() => {
     if (navigator.share) {
@@ -77,7 +82,7 @@ export const CommonTokenDetail: FC<IProps> = ({
             <Text color='grey-500' size='m'>
               Owned&nbsp;by
             </Text>
-            <Account href={`${config.scanUrl}account/${owner?.Substrate || offer?.seller || '404'}`}>
+            <Account href={`${config.scanUrl}account/${owner?.Substrate || owner?.Ethereum || '404'}`}>
               <Avatar size={24} src={DefaultAvatar}/>
               <Text color='primary-600' size='m'>
                 {deviceSize === DeviceSize.lg ? (owner?.Substrate || offer?.seller || '') : shortcutText(owner?.Substrate || '') }

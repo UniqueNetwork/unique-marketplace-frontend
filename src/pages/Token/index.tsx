@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { Link } from '@unique-nft/ui-kit';
 
 import { useApi } from '../../hooks/useApi';
 import { NFTToken } from '../../api/chainApi/unique/types';
@@ -11,14 +12,22 @@ import { Error404 } from '../errors/404';
 import Loading from '../../components/Loading';
 import TokenPageModal from './Modals/TokenPageModal';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
+import { useNotification } from '../../hooks/useNotification';
+import { NotificationSeverity } from '../../notification/NotificationContext';
+import { useAccounts } from '../../hooks/useAccounts';
+import { shortcutText } from '../../utils/textUtils';
+import { compareEncodedAddresses } from '../../api/chainApi/utils/addressUtils';
 
 const TokenPage = () => {
   const { api } = useApi();
+  const { selectedAccount } = useAccounts();
   const { id, collectionId } = useParams<{ id: string, collectionId: string}>();
   const [token, setToken] = useState<NFTToken>();
   const [loading, setLoading] = useState<boolean>(true);
   const { offer, fetch: fetchOffer } = useOffer(Number(collectionId), Number(id));
   const [marketType, setMarketType] = useState<MarketType>(MarketType.default); // TODO: when "sell"/"buy"/"bid"/etc clicked - update this status to open modal
+
+  const { push } = useNotification();
 
   const fetchToken = useCallback(() => {
     if (!api) return;
@@ -46,6 +55,16 @@ const TokenPage = () => {
     setMarketType(action);
   }, []);
 
+  const onAuctionClose = useCallback((newOwnerAddress: string) => {
+    if (!token) return;
+    push({
+      severity: NotificationSeverity.success,
+      message: <>{compareEncodedAddresses(newOwnerAddress, selectedAccount?.address || '') ? 'You are' : `${shortcutText(newOwnerAddress)} is` }  the new owner of <Link href={`/token/${token.collectionId}/${token.id}`} title={`${token.prefix} #${token.id}`}/></>
+    });
+    fetchOffer(Number(collectionId), Number(id));
+    fetchToken();
+  }, [push, fetchOffer, fetchToken, selectedAccount?.address, collectionId, id, token]);
+
   if (loading) return <Loading />;
   else if (!token) return <Error404 />;
 
@@ -63,6 +82,7 @@ const TokenPage = () => {
         onDelistAuctionClick={onActionClick(MarketType.delistAuction)}
         onPlaceABidClick={onActionClick(MarketType.bid)}
         onWithdrawClick={onActionClick(MarketType.withdrawBid)}
+        onAuctionClose={onAuctionClose}
       />
       <TokenPageModal
         token={token}
