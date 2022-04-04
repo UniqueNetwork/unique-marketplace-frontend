@@ -16,9 +16,8 @@ const decimals = 6;
 const minPrice = 0.000001;
 
 export type CrossAccountId = {
-  Substrate: string,
-} | {
-  Ethereum: string,
+  Substrate?: string
+  Ethereum?: string
 };
 
 // decimals: 15 - opal, 18 - eth
@@ -63,7 +62,7 @@ export function normalizeAccountId (input: string | AccountId | CrossAccountId |
 
   if ('Ethereum' in input) {
     return {
-      Ethereum: input.Ethereum.toLowerCase()
+      Ethereum: input.Ethereum?.toLowerCase()
     };
   } else if ('ethereum' in input) {
     return {

@@ -49,7 +49,7 @@ export function normalizeAccountId(
 
   if ('Ethereum' in input) {
     return {
-      Ethereum: input.Ethereum.toLowerCase()
+      Ethereum: input.Ethereum?.toLowerCase()
     };
   } else if ('ethereum' in input) {
     return {

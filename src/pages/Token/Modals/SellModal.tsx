@@ -36,14 +36,16 @@ export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish, setIs
   if (status === 'ask') return (<AskSellModal onSellAuction={onSellAuction} onSellFixPrice={onSellFixPrice} />);
   switch (status) {
     case 'auction-stage':
-      return (<SellAuctionStagesModal collectionId={collectionId || 0}
+      return (<SellAuctionStagesModal
+        collectionId={collectionId || 0}
         tokenId={tokenId}
         tokenPrefix={token?.prefix || ''}
         auction={auction as TAuctionProps}
         onFinish={onFinish}
       />);
     case 'fix-price-stage':
-      return (<SellFixStagesModal collectionId={collectionId || 0}
+      return (<SellFixStagesModal
+        collectionId={collectionId || 0}
         tokenId={tokenId}
         tokenPrefix={token?.prefix || ''}
         sellFix={fixPrice as TFixPriceProps}
@@ -76,8 +78,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
     [setActiveTab]
   );
 
-  const onPriceInputChange = useCallback(
-    (value: string) => {
+  const onPriceInputChange = useCallback((value: string) => {
       setPriceInputValue(value);
     },
     [setPriceInputValue]

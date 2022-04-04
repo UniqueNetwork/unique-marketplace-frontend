@@ -76,7 +76,8 @@ export const useAccounts = () => {
     if (!api?.market) return accounts;
     const fetchDeposit = async (account: Account) => ({
       ...account,
-      deposit: await api?.market?.getUserDeposit(account.address)
+      deposit: await api?.market?.getUserDeposit(account.address),
+      isOnWhiteList: await api?.market?.checkWhiteListed(account.address)
     });
     return await Promise.all(accounts.map(fetchDeposit));
   }, [api?.market]);
@@ -95,6 +96,7 @@ export const useAccounts = () => {
     if (allAccounts?.length) {
       const accountsWithBalance = await getAccountsBalances(allAccounts);
       const accountsWithDeposits = await getAccountsDeposits(accountsWithBalance);
+
       setAccounts(accountsWithDeposits);
 
       const defaultAccountAddress = localStorage.getItem(DefaultAccountKey);

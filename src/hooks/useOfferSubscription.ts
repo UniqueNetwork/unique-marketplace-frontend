@@ -3,12 +3,14 @@ import { useContext, useEffect, useRef } from 'react';
 import { Offer } from '../api/restApi/offers/types';
 import AuctionContext from '../api/restApi/auction/AuctionContext';
 
-type useBidsSubscriptionProps = {
+type useOfferSubscriptionProps = {
   offer: Offer,
-  onPlaceBid(offer: Offer): void
+  onPlaceBid(offer: Offer): void,
+  onAuctionStopped?(offer: Offer): void
+  onAuctionClosed?(offer: Offer): void
 };
 
-export const useBidsSubscription = ({ offer, onPlaceBid }: useBidsSubscriptionProps) => {
+export const useOfferSubscription = ({ offer, onPlaceBid, onAuctionStopped, onAuctionClosed }: useOfferSubscriptionProps) => {
   const { socket } = useContext(AuctionContext);
   const offerRef = useRef<Offer>();
 
@@ -22,11 +24,22 @@ export const useBidsSubscription = ({ offer, onPlaceBid }: useBidsSubscriptionPr
       collectionId: offer.collectionId,
       tokenId: offer.tokenId
     });
-
+    console.log('subscribe to bidPlaced');
     socket?.on('bidPlaced', (offer) => {
       onPlaceBid(offer);
     });
+    console.log('subscribe to auctionClosed');
 
+    socket?.on('auctionStopped', (offer) => {
+      if (onAuctionStopped) {
+        onAuctionStopped(offer);
+      }
+    });
+    socket?.on('auctionClosed', (offer) => {
+      if (onAuctionClosed) {
+        onAuctionClosed(offer);
+      }
+    });
     return () => {
       socket?.emit('unsubscribeToAuction', offer);
     };

@@ -26,7 +26,8 @@ export type TAuctionProps = {
 }
 
 export type TPlaceABid = {
-  amount: string
+  accountAddress?: string
+  amount?: string
 }
 
 export interface ModalProps {

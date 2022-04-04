@@ -21,19 +21,18 @@ import DefaultAvatar from '../../static/icons/default-avatar.svg';
 import ArrowUpRight from '../../static/icons/arrow-up-right.svg';
 import CopyIcon from '../../static/icons/copy.svg';
 import config from '../../config';
+import { useNotification } from '../../hooks/useNotification';
+import { NotificationSeverity } from '../../notification/NotificationContext';
 
 const tokenSymbol = 'KSM';
 
 type AccountsColumnsProps = {
   onShowSendFundsModal(address: string): () => void;
   onShowWithdrawDepositModal(address: string): () => void;
+  onCopyAddress(address: string): () => void
 };
 
-const copyAddress = (account: string) => () => {
-  navigator.clipboard.writeText(account);
-};
-
-const getAccountsColumns = ({ onShowSendFundsModal, onShowWithdrawDepositModal }: AccountsColumnsProps): TableColumnProps[] => [
+const getAccountsColumns = ({ onShowSendFundsModal, onShowWithdrawDepositModal, onCopyAddress }: AccountsColumnsProps): TableColumnProps[] => [
   {
     title: 'Account',
     width: '25%',
@@ -49,7 +48,7 @@ const getAccountsColumns = ({ onShowSendFundsModal, onShowWithdrawDepositModal }
               <Text size={'s'} color={'grey-500'}>
                 {accountInfo.address}
               </Text>
-              <a onClick={copyAddress(accountInfo.address)}>
+              <a onClick={onCopyAddress(accountInfo.address)}>
                 <CopyIconWrapper>
                   <Icon path={CopyIcon} />
                 </CopyIconWrapper>
@@ -145,6 +144,7 @@ export const AccountsPage = () => {
   const [searchString, setSearchString] = useState<string>('');
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
   const [selectedAddress, setSelectedAddress] = useState<string>();
+  const { push } = useNotification();
 
   const onCreateAccountClick = useCallback(() => {
     setCurrentModal(AccountModal.create);
@@ -175,6 +175,12 @@ export const AccountsPage = () => {
   const onSearchStringChange = useCallback((value: string) => {
     setSearchString(value);
   }, []);
+
+  const onCopyAddress = (account: string) => () => {
+    navigator.clipboard.writeText(account).then(() => {
+      push({ severity: NotificationSeverity.success, message: 'Address copied' });
+    });
+  };
 
   const filteredAccounts = useMemo(() => {
     const reduceAccounts = (acc: (Account & { accountInfo: AccountInfo })[], account: Account, index: number) => {
@@ -227,7 +233,7 @@ export const AccountsPage = () => {
         </SearchInputWrapper>
       </Row>
       <Table
-        columns={getAccountsColumns({ onShowSendFundsModal, onShowWithdrawDepositModal })}
+        columns={getAccountsColumns({ onShowSendFundsModal, onShowWithdrawDepositModal, onCopyAddress })}
         data={filteredAccounts}
         loading={isLoading || isLoadingBalances}
       />

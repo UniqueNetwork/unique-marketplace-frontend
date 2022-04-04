@@ -16,23 +16,26 @@ import { useApi } from '../../../hooks/useApi';
 import { fromStringToBnString } from '../../../utils/bigNum';
 import { BN } from '@polkadot/util';
 import { StageStatus } from '../../../types/StagesTypes';
-import { NotificationSeverity } from '../../../notification/NotificationContext';
 import { useNotification } from '../../../hooks/useNotification';
+import { useAuction } from '../../../api/restApi/auction/auction';
+import { TCalculatedBid } from '../../../api/restApi/auction/types';
+import { NotificationSeverity } from '../../../notification/NotificationContext';
 
 export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ token, offer, setIsClosable, onFinish }) => {
   const [status, setStatus] = useState<'ask' | 'place-bid-stage'>('ask'); // TODO: naming
-  const [bidAmount, setBidAmount] = useState<string>('0');
+  const [bidValue, setBidValue] = useState<TPlaceABid>();
 
-  const onConfirmPlaceABid = useCallback((_bidAmount: string) => {
-    setBidAmount(_bidAmount);
+  const onConfirmPlaceABid = useCallback((_bidValue: TPlaceABid) => {
+    setBidValue(_bidValue);
     setStatus('place-bid-stage');
     setIsClosable(false);
-  }, [setStatus, setBidAmount, setIsClosable]);
+  }, [setStatus, setBidValue, setIsClosable]);
 
   if (status === 'ask') return (<AskBidModal offer={offer} onConfirmPlaceABid={onConfirmPlaceABid} />);
   if (status === 'place-bid-stage') {
     return (<AuctionStagesModal
-      amount={bidAmount}
+      accountAddress={bidValue?.accountAddress}
+      amount={bidValue?.amount}
       onFinish={onFinish}
       token={token}
       setIsClosable={setIsClosable}
@@ -43,26 +46,44 @@ export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ token, offer, setIs
 
 const chainOptions = [{ id: 'KSM', title: 'KSM', iconRight: { size: 18, file: Kusama } }];
 
-export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: string, chain: string): void}> = ({ offer, onConfirmPlaceABid }) => {
-  const [bidAmount, setBidAmount] = useState<string>('0');
+export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceABid): void}> = ({ offer, onConfirmPlaceABid }) => {
   const [chain, setChain] = useState<string | undefined>('KSM');
   const { selectedAccount } = useAccounts();
   const { api } = useApi();
+  const [calculatedBid, setCalculatedBid] = useState<TCalculatedBid>();
 
-  const leadingBidAmount = useMemo(() => {
-    if (!offer?.auction?.bids || offer?.auction?.bids.length === 0) return new BN(offer?.auction?.startPrice || 0);
-    return new BN(offer?.auction?.bids[0].balance);
+  const { getCalculatedBid } = useAuction();
+
+  useEffect(() => {
+    if (!offer || !selectedAccount) return;
+    (async () => {
+      const _calculatedBid = await getCalculatedBid({
+        collectionId: offer.collectionId || 0,
+        tokenId: offer?.tokenId || 0,
+        bidderAddress: selectedAccount?.address || ''
+      });
+      setCalculatedBid(_calculatedBid);
+    })();
+  }, [offer, selectedAccount]);
+
+  const leadingBid = useMemo(() => {
+    if (!offer?.auction?.bids || offer?.auction?.bids.length === 0) return 0;
+    return offer?.auction?.bids[0].balance;
   }, [offer]);
 
+  const lastBidFromThisAccount = calculatedBid?.bidderPendingAmount;
+
   const minimalBid = useMemo(() => {
-    if (!offer?.auction?.bids || offer?.auction?.bids.length === 0) return leadingBidAmount;
-    return leadingBidAmount.add(new BN(offer?.auction?.priceStep || 0));
-  }, [leadingBidAmount, offer?.auction?.priceStep, offer?.auction?.bids]);
+    if (!leadingBid) return new BN(offer?.auction?.startPrice || offer?.auction?.priceStep || 0);
+    return new BN(Number(leadingBid) + Number(offer?.auction?.priceStep || '0'));
+  }, [offer?.auction, leadingBid]);
+
+  const [bidAmount, setBidAmount] = useState<string>(formatKusamaBalance(minimalBid.toString(), api?.market?.kusamaDecimals));
 
   const isEnoughBalance = useMemo(() => {
     if (!selectedAccount?.balance?.KSM || selectedAccount?.balance?.KSM.isZero()) return false;
     const bnAmount = new BN(fromStringToBnString(bidAmount, api?.market?.kusamaDecimals));
-    return selectedAccount?.balance?.KSM.gte(bnAmount);
+    return selectedAccount?.balance?.KSM.gte(bnAmount.sub(new BN(lastBidFromThisAccount || 0)));
   }, [selectedAccount?.balance?.KSM, bidAmount, api?.market?.kusamaDecimals]);
 
   const onBidAmountChange = useCallback((value: string) => {
@@ -79,9 +100,12 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: string, 
       if (!isAmountValid || !isEnoughBalance) return;
       const bnAmount = new BN(fromStringToBnString(bidAmount, api?.market?.kusamaDecimals));
 
-      onConfirmPlaceABid(formatKusamaBalance(bnAmount.toString()), chain || '');
+      onConfirmPlaceABid({
+        accountAddress: selectedAccount?.address || '',
+        amount: formatKusamaBalance(Number(bnAmount.toString()) - Number(lastBidFromThisAccount))
+      });
     },
-    [onConfirmPlaceABid, bidAmount, isEnoughBalance, isAmountValid, leadingBidAmount, chain, api?.market?.kusamaDecimals]
+    [onConfirmPlaceABid, bidAmount, isEnoughBalance, isAmountValid, chain, api?.market?.kusamaDecimals, lastBidFromThisAccount]
   );
 
   const onChainChange = useCallback(
@@ -127,15 +151,15 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: string, 
   );
 };
 
-const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ token, onFinish, amount }) => {
-  const { selectedAccount, updateAccountBalance } = useAccounts();
+const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ token, accountAddress, onFinish, amount }) => {
+  const { updateAccountBalance } = useAccounts();
   const { stages, status, initiate } = useAuctionBidStages(token?.collectionId || 0, token?.id);
   const { push } = useNotification();
 
   useEffect(() => {
-    if (!selectedAccount) throw new Error('Account not selected');
-    initiate({ value: amount, accountAddress: selectedAccount.address });
-  }, [amount, selectedAccount]);
+    if (!amount || !accountAddress) return;
+    initiate({ value: amount, accountAddress });
+  }, [amount, accountAddress]);
 
   useEffect(() => {
     if (status === StageStatus.success) {
