@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Avatar, Button, Heading, InputText, Modal, Text } from '@unique-nft/ui-kit';
+import { Avatar, Button, Heading, Modal, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import { TTransferFunds } from './types';
@@ -40,7 +40,7 @@ export const TransferFundsModal: FC<TransferFundsModalProps> = ({ isVisible, sen
     onFinish();
   }, [onFinish]);
   if (status === 'ask') {
-   return (<AskTransferFundsModal 
+   return (<AskTransferFundsModal
      isVisible={isVisible}
      onFinish={onTransfer}
      senderAddress={senderAddress || ''}
@@ -88,7 +88,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   const onSend = useCallback(() => {
     const recipient = typeof recipientAddress === 'string' ? recipientAddress : recipientAddress?.address;
     onFinish(senderAddress, recipient || '', amount.toString());
-  }, [senderAddress, recipientAddress, amount]);
+  }, [senderAddress, recipientAddress, amount, onFinish]);
 
   return (<Modal isVisible={isVisible} isClosable={true} onClose={onClose}>
     <Content>
@@ -153,7 +153,7 @@ const TransferFundsStagesModal: FC<TransferFundsStagesModalProps & TTransferFund
     if (status === StageStatus.success) {
       push({ severity: NotificationSeverity.success, message: 'Funds transfer completed' });
     }
-  }, [status]);
+  }, [push, status]);
 
   return (<Modal isVisible={isVisible} isClosable={false}>
     <div>

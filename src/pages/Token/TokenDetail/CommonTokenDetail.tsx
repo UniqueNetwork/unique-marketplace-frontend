@@ -14,9 +14,8 @@ import { Avatar } from '../../../components/Avatar/Avatar';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import config from '../../../config';
 import { useAccounts } from '../../../hooks/useAccounts';
-import { isTokenOwner } from '../../../api/chainApi/utils/addressUtils';
+import { isTokenOwner, normalizeAccountId, toAddress } from '../../../api/chainApi/utils/addressUtils';
 import { Offer } from '../../../api/restApi/offers/types';
-import { normalizeAccountId, subToEth } from '../tmp_purchase/utils';
 
 interface IProps {
   children: ReactChild[];
@@ -44,7 +43,7 @@ export const CommonTokenDetail: FC<IProps> = ({
 
   const owner = useMemo(() => {
     if (!token?.owner) return undefined;
-    return offer?.seller ? normalizeAccountId(subToEth(offer?.seller)) : normalizeAccountId(token.owner);
+    return offer?.seller ? normalizeAccountId(toAddress(offer?.seller || '') || '') : normalizeAccountId(token.owner);
   }, [token, offer]);
 
   const isOwner = useMemo(() => {
@@ -82,7 +81,7 @@ export const CommonTokenDetail: FC<IProps> = ({
             <Text color='grey-500' size='m'>
               Owned&nbsp;by
             </Text>
-            <Account href={`${config.scanUrl}account/${owner?.Substrate || owner?.Ethereum || '404'}`}>
+            <Account href={`${config.scanUrl}account/${owner?.Substrate || '404'}`}>
               <Avatar size={24} src={DefaultAvatar}/>
               <Text color='primary-600' size='m'>
                 {deviceSize === DeviceSize.lg ? (owner?.Substrate || offer?.seller || '') : shortcutText(owner?.Substrate || '') }

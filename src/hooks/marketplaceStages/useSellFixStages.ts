@@ -9,12 +9,12 @@ export const useSellFixStages = (collectionId: number, tokenId: number) => {
   const { api } = useApi();
   const { signTx, selectedAccount } = useAccounts();
   const marketApi = api?.market;
-  const addToWhiteListStage: InternalStage<TFixPriceProps> = {
+  const addToWhiteListStage: InternalStage<TFixPriceProps> = useMemo(() => ({
     title: 'Register sponsorship',
     description: '',
     status: StageStatus.default,
     action: (params) => marketApi?.addToWhiteList(params.txParams.accountAddress, params.options)
-  }; 
+  }), [marketApi]);
 
   const sellFixStages: InternalStage<TFixPriceProps>[] = useMemo(() => [
   ...(!selectedAccount?.isOnWhiteList ? [addToWhiteListStage] : []),
@@ -35,7 +35,7 @@ export const useSellFixStages = (collectionId: number, tokenId: number) => {
     description: '',
     status: StageStatus.default,
     action: (params) => marketApi?.setForFixPriceSale(params.txParams.accountAddress, collectionId.toString(), tokenId.toString(), params?.txParams?.price.toString() || '-1', params.options)
-  }], [marketApi, collectionId, tokenId, selectedAccount?.isOnWhiteList]);
+  }], [selectedAccount?.isOnWhiteList, addToWhiteListStage, marketApi, collectionId, tokenId]);
   const { stages, error, status, initiate } = useStages<TFixPriceProps>(sellFixStages, signTx);
 
   return {
