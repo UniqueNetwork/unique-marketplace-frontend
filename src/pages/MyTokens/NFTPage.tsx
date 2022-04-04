@@ -277,6 +277,10 @@ const SearchWrapper = styled.div`
 `;
 
 const SortSelectWrapper = styled.div`
+  .unique-select svg {
+    z-index: 0;
+  }
+
   @media (max-width: 1024px) {
     display: none;
   }
