@@ -592,7 +592,7 @@ class MarketController implements IMarketController {
     let tx = this.uniqApi.tx.unique.transfer(recipient, collectionId, tokenId, tokenPart);
     const ethFrom = getEthAccount(from);
     if (tokenOwner?.Ethereum === ethFrom) {
-      tx = this.uniqApi.tx.unique.transferFrom(normalizeAccountId({ Ethereum: ethFrom } as CrossAccountId), normalizeAccountId(recipient as CrossAccountId), collectionId, tokenId, 1);
+      tx = this.uniqApi.tx.unique.transferFrom(normalizeAccountId({ Ethereum: ethFrom } as CrossAccountId), recipient, collectionId, tokenId, 1);
     }
 
     const signedTx = await options.sign(tx);
