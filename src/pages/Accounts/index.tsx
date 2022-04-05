@@ -23,16 +23,19 @@ import CopyIcon from '../../static/icons/copy.svg';
 import config from '../../config';
 import { useNotification } from '../../hooks/useNotification';
 import { NotificationSeverity } from '../../notification/NotificationContext';
+import { toChainFormatAddress } from '../../api/chainApi/utils/addressUtils';
+import { useApi } from '../../hooks/useApi';
 
 const tokenSymbol = 'KSM';
 
 type AccountsColumnsProps = {
+  formatAddress(address: string): string
   onShowSendFundsModal(address: string): () => void;
   onShowWithdrawDepositModal(address: string): () => void;
   onCopyAddress(address: string): () => void
 };
 
-const getAccountsColumns = ({ onShowSendFundsModal, onShowWithdrawDepositModal, onCopyAddress }: AccountsColumnsProps): TableColumnProps[] => [
+const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal, onCopyAddress }: AccountsColumnsProps): TableColumnProps[] => [
   {
     title: 'Account',
     width: '25%',
@@ -46,9 +49,9 @@ const getAccountsColumns = ({ onShowSendFundsModal, onShowWithdrawDepositModal, 
             <Text>{accountInfo.name}</Text>
             <AddressRow>
               <Text size={'s'} color={'grey-500'}>
-                {accountInfo.address}
+                {formatAddress(accountInfo.address) || ''}
               </Text>
-              <a onClick={onCopyAddress(accountInfo.address)}>
+              <a onClick={onCopyAddress(formatAddress(accountInfo.address) || '')}>
                 <CopyIconWrapper>
                   <Icon path={CopyIcon} />
                 </CopyIconWrapper>
@@ -88,7 +91,7 @@ const getAccountsColumns = ({ onShowSendFundsModal, onShowWithdrawDepositModal, 
           <LinkStyled
             target={'_blank'}
             rel={'noreferrer'}
-            href={`${config.scanUrl}account/${accountInfo.address}`}
+            href={`${config.scanUrl}account/${formatAddress(accountInfo.address)}`}
           >
             <TextStyled>UniqueScan</TextStyled>
             <IconWrapper>
@@ -145,6 +148,11 @@ export const AccountsPage = () => {
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
   const [selectedAddress, setSelectedAddress] = useState<string>();
   const { push } = useNotification();
+  const { chainData } = useApi();
+
+  const formatAddress = useCallback((address: string) => {
+    return toChainFormatAddress(address, chainData?.properties.ss58Format || 0);
+  }, [chainData?.properties.ss58Format]);
 
   const onCreateAccountClick = useCallback(() => {
     setCurrentModal(AccountModal.create);
@@ -203,11 +211,11 @@ export const AccountsPage = () => {
     return accounts
       .filter(
         (account) =>
-          account.address.toLowerCase().includes(searchString.trim().toLowerCase()) ||
+          formatAddress(account.address).toLowerCase().includes(searchString.trim().toLowerCase()) ||
           account.meta.name?.toLowerCase().includes(searchString.trim().toLowerCase())
       )
       .reduce(reduceAccounts, []);
-  }, [accounts, searchString]);
+  }, [accounts, searchString, formatAddress]);
 
   const onChangeAccountsFinish = useCallback(async () => {
     setCurrentModal(undefined);
@@ -233,7 +241,7 @@ export const AccountsPage = () => {
         </SearchInputWrapper>
       </Row>
       <Table
-        columns={getAccountsColumns({ onShowSendFundsModal, onShowWithdrawDepositModal, onCopyAddress })}
+        columns={getAccountsColumns({ formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal, onCopyAddress })}
         data={filteredAccounts}
         loading={isLoading || isLoadingBalances}
       />

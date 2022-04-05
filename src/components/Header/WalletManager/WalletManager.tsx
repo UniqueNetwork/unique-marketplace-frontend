@@ -7,15 +7,14 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import { DropdownSelect, DropdownSelectProps } from './AccountSelect/DropdownSelect';
 import { Account } from '../../../account/AccountContext';
 import Loading from '../../Loading';
-import { formatKusamaBalance, shortcutText } from '../../../utils/textUtils';
-import { Avatar } from '../../Avatar/Avatar';
-import DefaultAvatar from '../../../static/icons/default-avatar.svg';
+import { formatKusamaBalance } from '../../../utils/textUtils';
 import GearIcon from '../../../static/icons/gear.svg';
 import { BalanceOption } from './types';
 import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';
 import { BlueGrey200 } from '../../../styles/colors';
 import { Icon } from '../../Icon/Icon';
 import { useApi } from '../../../hooks/useApi';
+import AccountCard from '../../Account/Account';
 
 const tokenSymbol = 'KSM';
 
@@ -75,13 +74,13 @@ export const WalletManager: FC = () => {
   );
 };
 
-const AccountOptionCard = (account: Account) => {
+const AccountOptionCard: FC<Account> = (account) => {
   return (<AccountOptionWrapper>
-    <Avatar size={24} src={DefaultAvatar}/>
-    <AccountOptionPropertyWrapper>
-      {account.meta?.name && <Text size={'m'} weight={'medium'} >{account.meta?.name}</Text>}
-      <Text size={'s'} color={'grey-500'} >{shortcutText(account.address)}</Text>
-    </AccountOptionPropertyWrapper>
+    <AccountCard accountName={account.meta.name || ''}
+      accountAddress={account.address}
+      canCopy={false}
+      isShort
+    />
   </AccountOptionWrapper>);
 };
 
@@ -106,11 +105,6 @@ const AccountOptionWrapper = styled.div`
   column-gap: calc(var(--gap) / 2);
   cursor: pointer;
   align-items: center;
-`;
-
-const AccountOptionPropertyWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
 `;
 
 const BalanceOptionWrapper = styled.div`
