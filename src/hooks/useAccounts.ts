@@ -72,14 +72,14 @@ export const useAccounts = () => {
     }
   } as Account))), [getAccountBalance]);
 
-  const getAccountsDeposits = useCallback(async (accounts: Account[]) => {
+  const getAccountsDeposits = useCallback((accounts: Account[]) => {
     if (!api?.market) return accounts;
     const fetchDeposit = async (account: Account) => ({
       ...account,
       deposit: await api?.market?.getUserDeposit(account.address),
       isOnWhiteList: await api?.market?.checkWhiteListed(account.address)
     });
-    return await Promise.all(accounts.map(fetchDeposit));
+    return Promise.all(accounts.map(fetchDeposit));
   }, [api?.market]);
 
   const fetchAccounts = useCallback(async () => {
