@@ -46,7 +46,7 @@ export type AttributesDecoded = {
 
 export interface NFTToken {
   id: number
-  owner?: { Substrate: string }
+  owner?: { Substrate: string, Ethereum?: string }
   constData?: string
   variableData?: string
   attributes: AttributesDecoded

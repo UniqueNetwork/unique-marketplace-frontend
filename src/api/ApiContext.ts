@@ -6,6 +6,7 @@ import { Settings } from './restApi/settings/types';
 export type ChainData = {
   properties: {
     tokenSymbol: string
+    ss58Format: number
   }
   systemChain: string
   systemName: string

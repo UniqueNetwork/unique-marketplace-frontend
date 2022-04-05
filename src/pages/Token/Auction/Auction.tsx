@@ -7,7 +7,6 @@ import { Offer } from '../../../api/restApi/offers/types';
 import { NFTToken } from '../../../api/chainApi/unique/types';
 import { AdditionalPositive100, AdditionalPositive500, Coral100, Coral500, Grey300 } from '../../../styles/colors';
 import { useOfferSubscription } from '../../../hooks/useOfferSubscription';
-import { shortcutText } from '../../../utils/textUtils';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { compareEncodedAddresses, isTokenOwner } from '../../../api/chainApi/utils/addressUtils';
 import { PriceForAuction } from '../TokenDetail/PriceForAuction';
@@ -17,6 +16,7 @@ import Bids from './Bids';
 import Timer from '../../../components/Timer';
 import { useNotification } from '../../../hooks/useNotification';
 import { NotificationSeverity } from '../../../notification/NotificationContext';
+import AccountLink from '../../../components/Account/AccountLink';
 
 interface AuctionProps {
   offer: Offer
@@ -137,7 +137,7 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
       <Divider />
       <Heading size={'4'}>Offers</Heading>
       {isTopBidder && <TopBidderTextStyled >You are Top Bidder</TopBidderTextStyled>}
-      {!isTopBidder && isBidder && <Row><BidderTextStyled >You are outbid</BidderTextStyled> <Text>{`Leading bid ${shortcutText(topBid?.bidderAddress || '')}`}</Text></Row>}
+      {!isTopBidder && isBidder && <Row><BidderTextStyled >You are outbid</BidderTextStyled> <Text>{'Leading bid'}</Text><AccountLink accountAddress={topBid?.bidderAddress || ''} /></Row>}
       <Bids offer={offer} />
     </AuctionWrapper>
   </>);

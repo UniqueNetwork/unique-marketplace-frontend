@@ -5,9 +5,8 @@ import styled from 'styled-components/macro';
 import { Offer } from '../../../api/restApi/offers/types';
 import { TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import { timestampTableFormat } from '../../../utils/timestampUtils';
-import { formatKusamaBalance, shortcutText } from '../../../utils/textUtils';
-import config from '../../../config';
-import { toAddress } from '../../../api/chainApi/utils/addressUtils';
+import { formatKusamaBalance } from '../../../utils/textUtils';
+import AccountLink from '../../../components/Account/AccountLink';
 
 interface BidsProps {
   offer: Offer
@@ -30,7 +29,7 @@ const getColumns = (tokenSymbol: string): TableColumnProps[] => ([
     title: 'Bidder',
     field: 'bidderAddress',
     width: '100%',
-    render: (account: string) => <Link href={`${config.scanUrl}account/${toAddress(account || '') || ''}`} title={shortcutText(toAddress(account || '') || '')} />
+    render: (account: string) => <AccountLink accountAddress={account} />
   }
 ]);
 
