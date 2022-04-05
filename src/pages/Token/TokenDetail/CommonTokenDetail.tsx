@@ -43,7 +43,7 @@ export const CommonTokenDetail: FC<IProps> = ({
 
   const owner = useMemo(() => {
     if (!token?.owner) return undefined;
-    return offer?.seller ? normalizeAccountId(toAddress(offer?.seller || '') || '') : normalizeAccountId(token.owner);
+    return offer?.seller ? normalizeAccountId(offer?.seller || '') : normalizeAccountId(token.owner);
   }, [token, offer]);
 
   const isOwner = useMemo(() => {
@@ -81,10 +81,10 @@ export const CommonTokenDetail: FC<IProps> = ({
             <Text color='grey-500' size='m'>
               Owned&nbsp;by
             </Text>
-            <Account href={`${config.scanUrl}account/${owner?.Substrate || '404'}`}>
+            <Account href={`${config.scanUrl}account/${toAddress(owner?.Substrate) || '404'}`}>
               <Avatar size={24} src={DefaultAvatar}/>
               <Text color='primary-600' size='m'>
-                {deviceSize === DeviceSize.lg ? (owner?.Substrate || offer?.seller || '') : shortcutText(owner?.Substrate || '') }
+                {deviceSize === DeviceSize.lg ? (toAddress(owner?.Substrate) || owner?.Ethereum || '') : shortcutText(toAddress(owner?.Substrate) || owner?.Ethereum || '') }
               </Text>
             </Account>
           </>}

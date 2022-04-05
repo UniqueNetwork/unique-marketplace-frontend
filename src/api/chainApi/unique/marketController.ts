@@ -588,12 +588,11 @@ class MarketController implements IMarketController {
     const token = await this.nftController?.getToken(Number(collectionId), Number(tokenId));
     if (!token) throw new Error('Token not found');
     const tokenOwner = token.owner;
+    if (!isTokenOwner(from, tokenOwner)) throw new Error('You are not owner of this token');
     let tx = this.uniqApi.tx.unique.transfer(recipient, collectionId, tokenId, tokenPart);
-    if (!isTokenOwner(from, tokenOwner)) {
-      const ethFrom = getEthAccount(from);
-      if (tokenOwner?.Ethereum === ethFrom) {
-        tx = this.uniqApi.tx.unique.transferFrom(normalizeAccountId({ Ethereum: ethFrom } as CrossAccountId), normalizeAccountId(recipient as CrossAccountId), collectionId, tokenId, 1);
-      }
+    const ethFrom = getEthAccount(from);
+    if (tokenOwner?.Ethereum === ethFrom) {
+      tx = this.uniqApi.tx.unique.transferFrom(normalizeAccountId({ Ethereum: ethFrom } as CrossAccountId), normalizeAccountId(recipient as CrossAccountId), collectionId, tokenId, 1);
     }
 
     const signedTx = await options.sign(tx);

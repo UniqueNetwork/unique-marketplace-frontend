@@ -59,8 +59,8 @@ export const getOnChainSchema = (collection: NFTCollection): {
 };
 
 // decimals: 15 - opal, 18 - eth
-export const subToEthLowercase = (eth: string): string => { // TODO: why args called eth!?
-  const bytes = addressToEvm(eth);
+export const subToEthLowercase = (address: string): string => {
+  const bytes = addressToEvm(address);
 
   return '0x' + Buffer.from(bytes).toString('hex');
 };
