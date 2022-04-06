@@ -32,7 +32,7 @@ const fetchTokenImage = async (
 };
 
 export const getTokenImage = async (collection: NFTCollection, tokenId: number): Promise<string> => {
-  if (collection.schemaVersion === 'ImageURL') {
+  if (collection.schemaVersion === 'ImageURL' || collection.schemaVersion === 'TokenURI') {
     return getTokenImageUrl(hex2a(collection.offchainSchema), tokenId);
   } else {
     return await fetchTokenImage(collection, tokenId);
