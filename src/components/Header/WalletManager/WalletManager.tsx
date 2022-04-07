@@ -26,7 +26,9 @@ export const WalletManager: FC = () => {
   const { chainData } = useApi();
 
   useEffect(() => {
-    void fetchAccounts();
+    (async () => {
+      await fetchAccounts();
+    })();
   }, [fetchAccounts]);
 
   const onOnChainChange = useCallback(() => {

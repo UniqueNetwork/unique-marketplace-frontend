@@ -63,7 +63,7 @@ const getAccountsColumns = ({ onShowSendFundsModal }: AccountsColumnsProps): Tab
 const chains: Record<string, string> = { KSM: 'Kusama' };
 
 export const CoinsPage: FC = () => {
-  const { selectedAccount, fetchBalances } = useAccounts();
+  const { selectedAccount } = useAccounts();
   const [isTransferFundsVisible, setIsTransferFundsVisible] = useState(false);
 
   const onSendFundsClick = useCallback(() => () => {
@@ -72,8 +72,8 @@ export const CoinsPage: FC = () => {
 
   const onFinish = useCallback(() => {
     setIsTransferFundsVisible(false);
-    void fetchBalances();
-  }, [fetchBalances]);
+    // void fetchBalances();
+  }, []);
 
   const balances = useMemo(() => {
     return Object.keys(chains).map((chainKey: string) => ({

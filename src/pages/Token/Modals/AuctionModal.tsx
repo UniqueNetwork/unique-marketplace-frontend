@@ -152,7 +152,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
 };
 
 const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ token, accountAddress, onFinish, amount }) => {
-  const { updateAccountBalance } = useAccounts();
+  // const { updateAccountBalance } = useAccounts();
   const { stages, status, initiate } = useAuctionBidStages(token?.collectionId || 0, token?.id);
   const { push } = useNotification();
 
@@ -164,7 +164,7 @@ const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ token, 
   useEffect(() => {
     if (status === StageStatus.success) {
       push({ severity: NotificationSeverity.success, message: <>You made a new bid on <Link title={`${token.prefix} #${token.id}`}/></> });
-      void updateAccountBalance();
+     // void updateAccountBalance();
     }
   }, [status]);
 

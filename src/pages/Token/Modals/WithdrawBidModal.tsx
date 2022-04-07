@@ -11,12 +11,12 @@ export const WithdrawBidStagesModal: FC<TTokenPageModalBodyProps> = ({ token, on
   const { stages, status, initiate } = useWithdrawBidStages(token.collectionId || 0, token.id);
   useEffect(() => { initiate(null); }, []);
   const { push } = useNotification();
-  const { updateAccountBalance } = useAccounts();
+//  const { updateAccountBalance } = useAccounts();
 
   useEffect(() => {
     if (status === StageStatus.success) {
       push({ severity: NotificationSeverity.success, message: <>Bid withdrawn</> });
-      void updateAccountBalance();
+  //    void updateAccountBalance();
     }
   }, [status]);
 

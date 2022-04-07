@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { web3Accounts, web3Enable, web3FromSource } from '@polkadot/extension-dapp';
 import keyring from '@polkadot/ui-keyring';
 import { BN, stringToHex, u8aToHex } from '@polkadot/util';
@@ -10,9 +10,10 @@ import AccountContext, { Account, AccountSigner } from '../account/AccountContex
 import { DefaultAccountKey } from '../account/AccountProvider';
 import { getSuri, PairType } from '../utils/seedUtils';
 import { TTransaction } from '../api/chainApi/types';
+import { Codec } from '@polkadot/types/types';
 
 export const useAccounts = () => {
-  const { rpcClient, rawRpcApi, api } = useApi();
+  const { rpcClient, rawRpcApi, rawKusamaRpcApi, api } = useApi();
   const {
     accounts,
     selectedAccount,
@@ -82,8 +83,31 @@ export const useAccounts = () => {
     return Promise.all(accounts.map(fetchDeposit));
   }, [api?.market]);
 
+  const unsubscribesBalancesChanges = useRef<Record<string, Codec>>({});
+  const subscribeBalancesChanges = useCallback(async (accounts: Account[]) => {
+    if (!rawKusamaRpcApi) return;
+
+    const unsubscribes = await Promise.all(accounts.map(async (account) => {
+      console.log('subscribe on balance change', account.address);
+      const unsubscribe = await rawKusamaRpcApi.query.system.account(account.address, ({ data: { free } }: { data: { free: BN } }) => {
+//        if (!unsubscribesBalancesChanges.current?.[account.address]) return;
+        console.log('update balance', account.address, free.toString());
+        if (!account.balance?.KSM || !free.sub(account.balance.KSM).isZero()) {
+          setAccounts(accounts.map((_account: Account) => ({
+            ..._account,
+            balance: account.address === _account.address ? { KSM: free } : _account.balance
+          })));
+        }
+      });
+      return { [account.address]: unsubscribe };
+    }));
+
+    unsubscribesBalancesChanges.current = unsubscribes.reduce<Record<string, Codec>>((acc, item) => ({ ...acc, ...item }), {});
+  }, [rawKusamaRpcApi]);
+
   const fetchAccounts = useCallback(async () => {
-    if (!rpcClient?.isKusamaApiConnected) return;
+    console.log('fetch accounts');
+    if (!rpcClient?.isKusamaApiConnected || !rawRpcApi) return;
     setIsLoading(true);
     // this call fires up the authorization popup
     const extensions = await web3Enable('my cool dapp');
@@ -99,6 +123,8 @@ export const useAccounts = () => {
 
       setAccounts(accountsWithDeposits);
 
+      await subscribeBalancesChanges(accountsWithDeposits);
+
       const defaultAccountAddress = localStorage.getItem(DefaultAccountKey);
       const defaultAccount = allAccounts.find((item) => item.address === defaultAccountAddress);
 
@@ -113,30 +139,30 @@ export const useAccounts = () => {
     setIsLoading(false);
   }, [rpcClient?.isKusamaApiConnected]);
 
-  const fetchBalances = useCallback(async () => {
-    setIsLoadingBalances(true);
-    const accountsWithBalance = await getAccountsBalances(accounts);
-    setIsLoadingBalances(false);
-    setAccounts(accountsWithBalance);
-  }, [getAccountBalance, accounts]);
-
-  const updateAccountBalance = useCallback(async () => {
-    if (!selectedAccount) return;
-    setIsLoadingBalances(true);
-    const balanceKSM = await getAccountBalance(selectedAccount);
-    setAccounts(accounts.map((account: Account) => {
-      if (account.address === selectedAccount.address) {
-        return { ...account, balance: { KSM: balanceKSM } } as Account;
-      }
-      return account;
-    }));
-    setIsLoadingBalances(false);
-  }, [selectedAccount, accounts]);
+  // const fetchBalances = useCallback(async () => {
+  //   setIsLoadingBalances(true);
+  //   // const accountsWithBalance = await getAccountsBalances(accounts);
+  //   setIsLoadingBalances(false);
+  //   // setAccounts(accountsWithBalance);
+  // }, [getAccountBalance, accounts]);
+  //
+  // const updateAccountBalance = useCallback(async () => {
+  //   if (!selectedAccount) return;
+  //   setIsLoadingBalances(true);
+  //   // const balanceKSM = await getAccountBalance(selectedAccount);
+  //   // setAccounts(accounts.map((account: Account) => {
+  //   //   if (account.address === selectedAccount.address) {
+  //   //     return { ...account, balance: { KSM: balanceKSM } } as Account;
+  //   //   }
+  //   //   return account;
+  //   // }));
+  //   setIsLoadingBalances(false);
+  // }, [selectedAccount, accounts]);
 
   useEffect(() => {
     const updatedSelectedAccount = accounts.find((account) => account.address === selectedAccount?.address);
     if (updatedSelectedAccount) setSelectedAccount(updatedSelectedAccount);
-  }, [accounts, setSelectedAccount, selectedAccount]);
+  }, [accounts, setSelectedAccount, selectedAccount, rawRpcApi]);
 
   const addLocalAccount = useCallback((seed: string, derivePath: string, name: string, password: string, pairType: PairType) => {
     const options = { genesisHash: rawRpcApi?.genesisHash.toString(), isHardware: false, name: name.trim(), tags: [] };
@@ -218,8 +244,9 @@ export const useAccounts = () => {
     signTx,
     signMessage,
     fetchAccounts,
-    fetchBalances,
-    updateAccountBalance,
+    subscribeBalancesChanges,
+    // fetchBalances,
+    // updateAccountBalance,
     changeAccount
   };
 };
