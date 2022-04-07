@@ -1,6 +1,7 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Heading, Link, Select, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
+import { BN } from '@polkadot/util';
 
 import { TPlaceABid } from './types';
 import { AdditionalWarning100 } from '../../../styles/colors';
@@ -14,7 +15,6 @@ import { formatKusamaBalance } from '../../../utils/textUtils';
 import { NumberInput } from '../../../components/NumberInput/NumberInput';
 import { useApi } from '../../../hooks/useApi';
 import { fromStringToBnString } from '../../../utils/bigNum';
-import { BN } from '@polkadot/util';
 import { StageStatus } from '../../../types/StagesTypes';
 import { useNotification } from '../../../hooks/useNotification';
 import { useAuction } from '../../../api/restApi/auction/auction';
@@ -152,7 +152,6 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
 };
 
 const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ token, accountAddress, onFinish, amount }) => {
-  // const { updateAccountBalance } = useAccounts();
   const { stages, status, initiate } = useAuctionBidStages(token?.collectionId || 0, token?.id);
   const { push } = useNotification();
 
@@ -164,7 +163,6 @@ const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ token, 
   useEffect(() => {
     if (status === StageStatus.success) {
       push({ severity: NotificationSeverity.success, message: <>You made a new bid on <Link title={`${token.prefix} #${token.id}`}/></> });
-     // void updateAccountBalance();
     }
   }, [status]);
 

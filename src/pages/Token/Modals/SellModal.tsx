@@ -1,4 +1,4 @@
-import { Button, Heading, Tabs, Text, Select, InputText, Link } from '@unique-nft/ui-kit';
+import { Button, Heading, Tabs, Text, Select, Link } from '@unique-nft/ui-kit';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components/macro';
 

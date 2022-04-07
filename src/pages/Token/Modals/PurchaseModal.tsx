@@ -22,7 +22,6 @@ const PurchaseModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish }) => {
   useEffect(() => {
     if (status === StageStatus.success) {
       push({ severity: NotificationSeverity.success, message: <>You are the new owner of <Link href={`/token/${token.collectionId}/${token.id}`} title={`${token.prefix} #${token.id}`}/></> });
-//      void updateAccountBalance();
     }
   }, [status]);
 

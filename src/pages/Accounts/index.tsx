@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Button, Text, InputText, Avatar } from '@unique-nft/ui-kit';
 import { TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import styled from 'styled-components/macro';
@@ -143,7 +143,7 @@ type AccountInfo = {
 }
 
 export const AccountsPage = () => {
-  const { accounts, fetchAccounts, isLoading, isLoadingBalances } = useAccounts();
+  const { accounts, fetchAccounts, isLoading } = useAccounts();
   const [searchString, setSearchString] = useState<string>('');
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
   const [selectedAddress, setSelectedAddress] = useState<string>();
@@ -243,7 +243,7 @@ export const AccountsPage = () => {
       <Table
         columns={getAccountsColumns({ formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal, onCopyAddress })}
         data={filteredAccounts}
-        loading={isLoading || isLoadingBalances}
+        loading={isLoading}
       />
       <CreateAccountModal isVisible={currentModal === AccountModal.create} onFinish={onChangeAccountsFinish} />
       <ImportViaSeedAccountModal isVisible={currentModal === AccountModal.importViaSeed} onFinish={onChangeAccountsFinish} />

@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef } from 'react';
 import { web3Accounts, web3Enable, web3FromSource } from '@polkadot/extension-dapp';
 import keyring from '@polkadot/ui-keyring';
 import { BN, stringToHex, u8aToHex } from '@polkadot/util';
@@ -29,8 +29,6 @@ export const useAccounts = () => {
 
   // TODO: move fetching accounts and balances into context
 
-  const [isLoadingBalances, setIsLoadingBalances] = useState(false);
-
   const getExtensionAccounts = useCallback(async () => {
     // this call fires up the authorization popup
     let extensions = await web3Enable('my cool dapp');
@@ -39,7 +37,6 @@ export const useAccounts = () => {
       await sleep(1000);
       extensions = await web3Enable('my cool dapp');
       if (extensions.length === 0) {
-        // alert('no extension installed, or the user did not accept the authorization');
         return [];
       }
     }
@@ -88,10 +85,7 @@ export const useAccounts = () => {
     if (!rawKusamaRpcApi) return;
 
     const unsubscribes = await Promise.all(accounts.map(async (account) => {
-      console.log('subscribe on balance change', account.address);
       const unsubscribe = await rawKusamaRpcApi.query.system.account(account.address, ({ data: { free } }: { data: { free: BN } }) => {
-//        if (!unsubscribesBalancesChanges.current?.[account.address]) return;
-        console.log('update balance', account.address, free.toString());
         if (!account.balance?.KSM || !free.sub(account.balance.KSM).isZero()) {
           setAccounts(accounts.map((_account: Account) => ({
             ..._account,
@@ -106,7 +100,6 @@ export const useAccounts = () => {
   }, [rawKusamaRpcApi]);
 
   const fetchAccounts = useCallback(async () => {
-    console.log('fetch accounts');
     if (!rpcClient?.isKusamaApiConnected || !rawRpcApi) return;
     setIsLoading(true);
     // this call fires up the authorization popup
@@ -138,26 +131,6 @@ export const useAccounts = () => {
     }
     setIsLoading(false);
   }, [rpcClient?.isKusamaApiConnected]);
-
-  // const fetchBalances = useCallback(async () => {
-  //   setIsLoadingBalances(true);
-  //   // const accountsWithBalance = await getAccountsBalances(accounts);
-  //   setIsLoadingBalances(false);
-  //   // setAccounts(accountsWithBalance);
-  // }, [getAccountBalance, accounts]);
-  //
-  // const updateAccountBalance = useCallback(async () => {
-  //   if (!selectedAccount) return;
-  //   setIsLoadingBalances(true);
-  //   // const balanceKSM = await getAccountBalance(selectedAccount);
-  //   // setAccounts(accounts.map((account: Account) => {
-  //   //   if (account.address === selectedAccount.address) {
-  //   //     return { ...account, balance: { KSM: balanceKSM } } as Account;
-  //   //   }
-  //   //   return account;
-  //   // }));
-  //   setIsLoadingBalances(false);
-  // }, [selectedAccount, accounts]);
 
   useEffect(() => {
     const updatedSelectedAccount = accounts.find((account) => account.address === selectedAccount?.address);
@@ -236,7 +209,6 @@ export const useAccounts = () => {
     accounts,
     selectedAccount,
     isLoading,
-    isLoadingBalances,
     fetchAccountsError,
     addLocalAccount,
     addAccountViaQR,
@@ -245,8 +217,6 @@ export const useAccounts = () => {
     signMessage,
     fetchAccounts,
     subscribeBalancesChanges,
-    // fetchBalances,
-    // updateAccountBalance,
     changeAccount
   };
 };
