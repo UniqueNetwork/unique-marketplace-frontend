@@ -19,14 +19,16 @@ import AccountCard from '../../Account/Account';
 const tokenSymbol = 'KSM';
 
 export const WalletManager: FC = () => {
-  const { selectedAccount, accounts, isLoading, isLoadingBalances, fetchAccounts, changeAccount } = useAccounts();
+  const { selectedAccount, accounts, isLoading, fetchAccounts, changeAccount } = useAccounts();
   const deviceSize = useDeviceSize();
   const gearActive = window.location.pathname !== '/accounts';
   const navigate = useNavigate();
   const { chainData } = useApi();
 
   useEffect(() => {
-    void fetchAccounts();
+    (async () => {
+      await fetchAccounts();
+    })();
   }, [fetchAccounts]);
 
   const onOnChainChange = useCallback(() => {
@@ -63,7 +65,6 @@ export const WalletManager: FC = () => {
         options={[]}
         value={currentBalance}
       />
-      {isLoadingBalances && <Loading />}
       {deviceSize === DeviceSize.lg && <><Divider />
         <SettingsButtonWrapper $gearActive={gearActive}>
           <Link to={'/accounts'}>
