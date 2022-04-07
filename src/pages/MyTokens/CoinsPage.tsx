@@ -1,11 +1,11 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components/macro';
 import { Button, Text, Heading } from '@unique-nft/ui-kit';
+import { TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
 import { Table } from '../../components/Table';
 import { TransferFundsModal } from '../Accounts/Modals/SendFunds';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
-import { TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import { formatKusamaBalance } from '../../utils/textUtils';
 import { useAccounts } from '../../hooks/useAccounts';
 import ChainLogo from '../../components/ChainLogo';

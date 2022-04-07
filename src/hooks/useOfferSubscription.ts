@@ -24,11 +24,9 @@ export const useOfferSubscription = ({ offer, onPlaceBid, onAuctionStopped, onAu
       collectionId: offer.collectionId,
       tokenId: offer.tokenId
     });
-    console.log('subscribe to bidPlaced');
     socket?.on('bidPlaced', (offer) => {
       onPlaceBid(offer);
     });
-    console.log('subscribe to auctionClosed');
 
     socket?.on('auctionStopped', (offer) => {
       if (onAuctionStopped) {
