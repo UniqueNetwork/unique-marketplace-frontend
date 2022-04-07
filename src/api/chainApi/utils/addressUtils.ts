@@ -91,5 +91,6 @@ export function toAddress (value?: string | Uint8Array | null, allowIndices = fa
 }
 
 export function toChainFormatAddress (address: string, ss58Format: number) {
+  if (address.startsWith('0x')) return address;
   return keyring.encodeAddress(address, ss58Format);
 }
