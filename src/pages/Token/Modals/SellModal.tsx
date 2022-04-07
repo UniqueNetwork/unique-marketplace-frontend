@@ -65,9 +65,9 @@ type TAskSellModalProps = {
 export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixPrice }) => {
   const { selectedAccount } = useAccounts();
   const [activeTab, setActiveTab] = useState<number>(0);
-  const [priceInputValue, setPriceInputValue] = useState<string>('0');
+  const [priceInputValue, setPriceInputValue] = useState<string>();
 
-  const [minStepInputValueAuction, setMinStepInputValueAuction] = useState<string>('15');
+  const [minStepInputValueAuction, setMinStepInputValueAuction] = useState<string>();
   const [inputStartingPriceValue, setInputStartingPriceValue] = useState<string>();
   const [durationSelectValue, setDurationSelectValue] = useState<number>();
 
