@@ -31,7 +31,7 @@ export const AttributesBlock: FC<IProps> = ({ attributes }: IProps) => {
   return (
     <div>
       <HeadingStyled size={'4'}>Attributes</HeadingStyled>
-      {Object.keys(attributes).map((key) => {
+      {Object.keys(attributes).filter((key) => key !== 'ipfsJson').map((key) => {
         return AttributesRow({ attribute: key, enumeration: attributes[key] });
       })}
     </div>
