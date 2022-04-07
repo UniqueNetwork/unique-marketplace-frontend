@@ -1,5 +1,5 @@
 import { Heading, Icon, Text } from '@unique-nft/ui-kit';
-import React, { FC, ReactChild, useCallback, useMemo } from 'react';
+import React, { FC, ReactChild, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components/macro';
 
 import { Picture } from '../../../components';
@@ -29,6 +29,9 @@ export const CommonTokenDetail: FC<IProps> = ({
   token,
   offer
 }) => {
+  const [collectionCoverImage, setCollectionCoverImage] = useState<string>();
+  const { api } = useApi();
+
   const {
     collectionId,
     collectionName,
@@ -38,6 +41,13 @@ export const CommonTokenDetail: FC<IProps> = ({
     id: tokenId,
     prefix
   } = token;
+
+  useEffect(() => {
+    (async () => {
+      if (!api?.collection || !token?.collectionId) return;
+      setCollectionCoverImage((await api.collection.getCollection(token.collectionId)).coverImageUrl);
+    })();
+  }, [token.collectionId, api?.collection]);
 
   const { selectedAccount } = useAccounts();
   const deviceSize = useDeviceSize();
@@ -107,7 +117,7 @@ export const CommonTokenDetail: FC<IProps> = ({
         <AttributesBlock attributes={attributes} />
         <Divider />
         <CollectionsCard
-          avatarSrc={''}
+          avatarSrc={collectionCoverImage || ''}
           description={description || ''}
           id={collectionId || -1}
           title={collectionName || ''}
