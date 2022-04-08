@@ -2,14 +2,14 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import { Heading, Modal } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
-import { TCreateAccountModalProps, CreateAccountModalStages, TAccountProperties, TCreateAccountBodyModalProps } from './types';
+import { TAccountModalProps, CreateAccountModalStages, TAccountProperties, TCreateAccountBodyModalProps } from './types';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { AskCredentialsModal } from './AskCredentials';
 import { FinalModal } from './Final';
 import { defaultPairType, derivePath } from './CreateAccount';
 import { AskExistsSeedPhraseModal } from './AskExistsSeedPhrase';
 
-export const ImportViaSeedAccountModal: FC<TCreateAccountModalProps> = ({ isVisible, onFinish }) => {
+export const ImportViaSeedAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish, onClose }) => {
   const [stage, setStage] = useState<CreateAccountModalStages>(CreateAccountModalStages.AskSeed);
   const [accountProperties, setAccountProperties] = useState<TAccountProperties>();
   const { addLocalAccount } = useAccounts();
@@ -47,7 +47,7 @@ export const ImportViaSeedAccountModal: FC<TCreateAccountModalProps> = ({ isVisi
 
   if (!ModalBodyComponent) return null;
 
-  return (<Modal isVisible={isVisible} isClosable={true} onClose={onFinish}>
+  return (<Modal isVisible={isVisible} isClosable={true} onClose={onClose}>
     <Content>
       <Heading size='2'>{`Restore an account an account from seed ${stage + 1}/3`}</Heading>
     </Content>
