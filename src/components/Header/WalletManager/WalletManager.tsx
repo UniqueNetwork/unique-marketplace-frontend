@@ -31,10 +31,6 @@ export const WalletManager: FC = () => {
     })();
   }, [fetchAccounts]);
 
-  const onOnChainChange = useCallback(() => {
-    // TODO: change chain
-  }, []);
-
   const onCreateAccountClick = useCallback(() => {
     navigate('/accounts');
   }, [navigate]);
@@ -45,9 +41,23 @@ export const WalletManager: FC = () => {
 
   if (!isLoading && accounts.length === 0) {
  return (
-   <Button title={'Сonnect or create account'} onClick={onCreateAccountClick} />
+   <Button title={'Connect or create account'} onClick={onCreateAccountClick} />
   );
 }
+
+  if (deviceSize === DeviceSize.sm) {
+    return (
+      <WalletManagerWrapper>
+        {isLoading && <Loading />}
+        <AccountSelect
+          renderOption={AccountWithBalanceOptionCard}
+          onChange={changeAccount}
+          options={accounts || []}
+          value={selectedAccount}
+        />
+      </WalletManagerWrapper>
+    );
+  }
 
   return (
     <WalletManagerWrapper>
@@ -59,12 +69,7 @@ export const WalletManager: FC = () => {
         value={selectedAccount}
       />
       <Divider />
-      <DropdownSelect<BalanceOption>
-        renderOption={BalanceOptionCard}
-        onChange={onOnChainChange}
-        options={[]}
-        value={currentBalance}
-      />
+      <BalanceCard {...currentBalance} />
       {deviceSize === DeviceSize.lg && <><Divider />
         <SettingsButtonWrapper $gearActive={gearActive}>
           <Link to={'/accounts'}>
@@ -85,7 +90,17 @@ const AccountOptionCard: FC<Account> = (account) => {
   </AccountOptionWrapper>);
 };
 
-const BalanceOptionCard = (balance: BalanceOption) => {
+const AccountWithBalanceOptionCard: FC<Account> = (account) => {
+  return (<AccountOptionWrapper>
+    <AccountCard accountName={formatKusamaBalance(account.balance?.KSM?.toString() || '0')}
+      accountAddress={account.address}
+      canCopy={false}
+      isShort
+    />
+  </AccountOptionWrapper>);
+};
+
+const BalanceCard = (balance: BalanceOption) => {
   return (<BalanceOptionWrapper>
     <Text size={'m'} weight={'medium'} >{`${formatKusamaBalance(balance.value)} ${tokenSymbol}`}</Text>
     <Text size={'s'} color={'grey-500'} >{balance.chain}</Text>
@@ -112,11 +127,12 @@ const BalanceOptionWrapper = styled.div`
   display: flex;
   flex-direction: column;
   cursor: pointer;
+  padding: calc(var(--gap) / 2) var(--gap);
 `;
 
 const SettingsButtonWrapper = styled.div <{ $gearActive?: boolean }>`
   a {
-    margin-right: 0px !important;
+    margin-right: 0 !important;
     height: 100%;
     padding: 0 var(--gap);
     align-items: center;
