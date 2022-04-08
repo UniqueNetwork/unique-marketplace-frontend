@@ -162,6 +162,7 @@ const LeftColumn = styled.div`
 `;
 
 const MainContent = styled.div`
+  position: relative;
   padding-left: calc(var(--gap) * 2);
   flex: 1;
 
