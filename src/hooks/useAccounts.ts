@@ -100,7 +100,7 @@ export const useAccounts = () => {
   }, [rawKusamaRpcApi]);
 
   const fetchAccounts = useCallback(async () => {
-    if (!rpcClient?.isKusamaApiConnected || !rawRpcApi) return;
+    if (!rpcClient?.isKusamaApiConnected) return;
     setIsLoading(true);
     // this call fires up the authorization popup
     const extensions = await web3Enable('my cool dapp');

@@ -11,9 +11,10 @@ export type TAccountProperties = {
   password?: string
 }
 
-export type TCreateAccountModalProps = {
+export type TAccountModalProps = {
   isVisible: boolean
   onFinish(): void
+  onClose(): void
 };
 
 export type TCreateAccountBodyModalProps = {
