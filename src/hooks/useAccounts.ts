@@ -102,12 +102,7 @@ export const useAccounts = () => {
   const fetchAccounts = useCallback(async () => {
     if (!rpcClient?.isKusamaApiConnected) return;
     setIsLoading(true);
-    // this call fires up the authorization popup
-    const extensions = await web3Enable('my cool dapp');
-    if (extensions.length === 0) {
-      setFetchAccountsError('No extension installed, or the user did not accept the authorization');
-      return;
-    }
+
     const allAccounts = await getAccounts();
 
     if (allAccounts?.length) {
