@@ -6,7 +6,7 @@ import { Offer } from './types';
 import { defaultParams } from '../base/axios';
 import { ResponseError } from '../base/types';
 
-const endpoint = '/offer';
+const endpoint = '/api/offer';
 
 export const getOffer = (collectionId: number, tokenId: number) => get<Offer>(`${endpoint}/${collectionId}/${tokenId}`, { ...defaultParams });
 
