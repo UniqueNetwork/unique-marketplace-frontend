@@ -6,7 +6,7 @@ import { serializeToQuery } from '../base/helper';
 import { GetOnHoldRequestPayload, OnHold, OnHoldResponse, UseFetchOnHoldProps } from './types';
 import { QueryParams, ResponseError } from '../base/types';
 
-const endpoint = '/OnHold';
+const endpoint = '/api/OnHold';
 
 export const getOnHold = ({ owner, ...payload }: GetOnHoldRequestPayload) => get<OnHoldResponse>(`${endpoint}${owner ? '/' + owner : ''}` + serializeToQuery(payload as unknown as QueryParams));
 

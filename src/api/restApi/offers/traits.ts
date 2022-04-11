@@ -5,7 +5,7 @@ import { defaultParams } from '../base/axios';
 import { ResponseError } from '../base/types';
 import { Trait, TraitsResponse } from './types';
 
-const endpoint = '/traits';
+const endpoint = '/api/traits';
 
 export const getTraits = (collectionId: string | number) => get<TraitsResponse>(`${endpoint}/${collectionId}`, { ...defaultParams });
 

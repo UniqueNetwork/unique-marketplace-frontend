@@ -6,7 +6,7 @@ import { defaultParams } from '../base/axios';
 import { ResponseError } from '../base/types';
 import { GetTradesRequestPayload, Trade, UseFetchTradesProps } from './types';
 
-const endpoint = '/Trades';
+const endpoint = '/api/Trades';
 
 export const getTrades = ({ seller, ...payload }: GetTradesRequestPayload) => get(`${endpoint}${seller ? '/' + seller : ''}`, { ...defaultParams, params: payload });
 
