@@ -27,7 +27,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
   const { tradesWithTokens, isFetchingTokens } = useGetTokensByTrades(trades);
 
   useEffect(() => {
-    if (!selectedAccount?.address) return;
+    if (currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address) return;
     fetch({
       page: 1,
       pageSize,
@@ -36,13 +36,13 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
     });
   }, [selectedAccount?.address, fetch, currentTab]);
 
-  const onSearch = useCallback(() => {
-    // TODO: not implemented in api
-    // fetch({ sortString, pageSize, page: 1, searchText: searchValue?.toString() });
-  }, [sortString, pageSize, searchValue]);
+  // const onSearch = useCallback(() => {
+  //   // TODO: not implemented in api
+  //   // fetch({ sortString, pageSize, page: 1, searchText: searchValue?.toString() });
+  // }, [sortString, pageSize, searchValue]);
 
   const onPageChange = useCallback((newPage: number) => {
-    if (!selectedAccount?.address || page === newPage) return;
+    if ((currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address) || page === newPage) return;
     setPage(newPage);
     fetch({
       page: newPage + 1,
@@ -80,19 +80,19 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
 
   return (<PagePaper>
     <TradesPageWrapper>
-      <SearchWrapper>
-        <InputText
-          iconLeft={{ name: 'magnify', size: 16 }}
-          onChange={(val) => setSearchValue(val)}
-          placeholder='Collection / token'
-          value={searchValue?.toString()}
-        />
-        <Button
-          onClick={onSearch}
-          role='primary'
-          title='Search'
-        />
-      </SearchWrapper>
+      {/* <SearchWrapper> */}
+      {/*  <InputText */}
+      {/*    iconLeft={{ name: 'magnify', size: 16 }} */}
+      {/*    onChange={(val) => setSearchValue(val)} */}
+      {/*    placeholder='Collection / token' */}
+      {/*    value={searchValue?.toString()} */}
+      {/*  /> */}
+      {/*  <Button */}
+      {/*    onClick={onSearch} */}
+      {/*    role='primary' */}
+      {/*    title='Search' */}
+      {/*  /> */}
+      {/* </SearchWrapper> */}
       <Table
         onSort={onSortChange}
         data={tradesWithTokens || []}
