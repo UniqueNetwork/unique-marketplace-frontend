@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { Heading, Icon, Text } from '@unique-nft/ui-kit';
+import { Heading, Icon } from '@unique-nft/ui-kit';
 import BN from 'bn.js';
 import styled from 'styled-components/macro';
 

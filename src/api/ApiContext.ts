@@ -21,6 +21,7 @@ type Api = {
 export type ApiContextProps = {
   rpcClient: IRpcClient
   rawRpcApi?: ApiPromise
+  rawKusamaRpcApi?: ApiPromise
   api: Api | undefined
   chainData?: ChainData
   settings?: Settings

@@ -40,10 +40,9 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
       const constData: string =
         // @ts-ignore
         (await this.api.rpc.unique.constMetadata(collectionId, tokenId)).toJSON() as string;
-      const crossAccount = normalizeAccountId(
-        // @ts-ignore
-        (await this.api.rpc.unique.tokenOwner(collectionId, tokenId)).toJSON() as string
-      ) as { Substrate: string };
+
+      const tokenData = (await this.api.query.nonfungible.tokenData(collectionId, tokenId)).toJSON() as { owner: { Substrate?: string, Ethereum?: string } };
+      const crossAccount = normalizeAccountId(tokenData?.owner as { Substrate: string }) as { Substrate: string, Ethereum: string };
 
       let imageUrl = '';
 

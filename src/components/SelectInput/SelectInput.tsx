@@ -126,7 +126,9 @@ const Dropdown = styled.div<{ isOpen: boolean }>`
   background: ${AdditionalLight};
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
   border-radius: 4px;
-  overflow: hidden;
+  max-height: 200px;
+  overflow-x: hidden;
+  overflow-y: auto;
   z-index: 10;
 `;
 
