@@ -62,6 +62,10 @@ const LayoutStyled = styled.div`
   .unique-layout {
     background: var(--color-layout-background);
 
+    @media (max-width: 1024px) {
+      background: var(--color-additional-light);
+    }
+
     .unique-font-heading.size-1 {
       font-family: var(--font-heading);
     }

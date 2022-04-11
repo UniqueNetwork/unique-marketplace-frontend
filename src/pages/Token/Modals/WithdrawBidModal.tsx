@@ -8,8 +8,9 @@ import { useNotification } from '../../../hooks/useNotification';
 
 export const WithdrawBidStagesModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish }) => {
   const { stages, status, initiate } = useWithdrawBidStages(token.collectionId || 0, token.id);
-  useEffect(() => { initiate(null); }, []);
   const { push } = useNotification();
+
+  useEffect(() => { initiate(null); }, []);
 
   useEffect(() => {
     if (status === StageStatus.success) {

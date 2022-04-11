@@ -25,7 +25,7 @@ export const isTokenOwner = (account: string, tokenOwner: { Substrate?: string, 
   const ethAccount = getEthAccount(account);
   const normalizeSubstrate = toAddress(tokenOwner.Substrate);
 
-  return normalizeSubstrate === account || tokenOwner.Ethereum?.toLowerCase() === ethAccount;
+  return normalizeSubstrate?.toLowerCase() === account.toLowerCase() || tokenOwner.Ethereum?.toLowerCase() === ethAccount.toLowerCase();
 };
 
 export function normalizeAccountId(
@@ -49,7 +49,7 @@ export function normalizeAccountId(
 
   if ('Ethereum' in input) {
     return {
-      Ethereum: input.Ethereum.toLowerCase()
+      Ethereum: input.Ethereum?.toLowerCase()
     };
   } else if ('ethereum' in input) {
     return {
@@ -88,4 +88,9 @@ export function toAddress (value?: string | Uint8Array | null, allowIndices = fa
   }
 
   return undefined;
+}
+
+export function toChainFormatAddress (address: string, ss58Format: number) {
+  if (address.startsWith('0x')) return address;
+  return keyring.encodeAddress(address, ss58Format);
 }

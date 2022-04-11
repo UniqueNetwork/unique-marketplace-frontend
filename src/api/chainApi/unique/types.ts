@@ -1,6 +1,6 @@
 import BN from 'bn.js';
 
-export type SchemaVersionTypes = 'ImageURL' | 'Unique'
+export type SchemaVersionTypes = 'ImageURL' | 'Unique' | 'TokenURI'
 
 export interface NFTCollection {
   id: number
@@ -46,7 +46,7 @@ export type AttributesDecoded = {
 
 export interface NFTToken {
   id: number
-  owner?: { Substrate: string }
+  owner?: { Substrate: string, Ethereum?: string }
   constData?: string
   variableData?: string
   attributes: AttributesDecoded

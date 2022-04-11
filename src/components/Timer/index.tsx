@@ -4,48 +4,49 @@ import { Heading } from '@unique-nft/ui-kit';
 import { useCalculateTimeLeft } from '../../hooks/useCalculateTimeLeft';
 
 interface Props {
-    time: string;
+  time: string;
 }
 
 function Timer({ time }: Props): React.ReactElement<Props> {
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-    function checkTime(i: string) {
-        if (Number(i) < 10) {
-            i = '0' + i;
-        }
-        return i;
+  function checkTime(i: string) {
+    if (Number(i) < 10) {
+      i = '0' + i;
     }
+    return i;
+  }
 
-    const localeDate = new Date(time);
+  const localeDate = new Date(time);
 
-    const months = [
-        'January',
-        'February',
-        'March',
-        'April',
-        'May',
-        'June',
-        'July',
-        'August',
-        'September',
-        'October',
-        'November',
-        'December'];
-    const year = localeDate.getFullYear();
-    const monthNumber = localeDate.getMonth();
-    const day = localeDate.getDate();
+  const months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'];
+  const year = localeDate.getFullYear();
+  const monthNumber = localeDate.getMonth();
+  const day = localeDate.getDate();
 
-    const hours = localeDate.getHours();
-    const minutes = checkTime(localeDate.getMinutes().toString());
+  const hours = localeDate.getHours();
+  const minutes = checkTime(localeDate.getMinutes().toString());
 
-    const suffix = hours >= 12 ? 'PM' : 'AM';
-    const hoursFormat = ((hours + 11) % 12 + 1);
+  const suffix = hours >= 12 ? 'PM' : 'AM';
+  const hoursFormat = ((hours + 11) % 12 + 1);
 
-    const { secondsLeft, minutesLeft, hoursLeft, daysLeft } = useCalculateTimeLeft(time);
+  const { secondsLeft, minutesLeft, hoursLeft, daysLeft } = useCalculateTimeLeft(time);
 
-    return (
-      <TimerStyled>
+  return (
+    <TimerStyled>
+      {daysLeft >= 0 && <>
         <ShortTimer>
           {`Auction ends ${months[monthNumber]} ${day}, ${year} at  ${hoursFormat}:${minutes} ${suffix} ${timezone}`}
         </ShortTimer>
@@ -67,8 +68,13 @@ function Timer({ time }: Props): React.ReactElement<Props> {
             <Description>{secondsLeft > 1 ? 'Seconds' : 'Second'}</Description>
           </Cell>
         </DetailedTimer>
-      </TimerStyled>
-    );
+      </>}
+      {daysLeft < 0 &&
+        <ShortTimer>
+          Auction is over
+        </ShortTimer>}
+    </TimerStyled>
+  );
 }
 
 const TimerStyled = styled.div`

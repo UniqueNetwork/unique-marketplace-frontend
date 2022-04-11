@@ -1,4 +1,4 @@
-import { Button, Heading, Tabs, Text, Select, InputText, Link } from '@unique-nft/ui-kit';
+import { Button, Heading, Tabs, Text, Select, Link } from '@unique-nft/ui-kit';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components/macro';
 
@@ -36,14 +36,16 @@ export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish, setIs
   if (status === 'ask') return (<AskSellModal onSellAuction={onSellAuction} onSellFixPrice={onSellFixPrice} />);
   switch (status) {
     case 'auction-stage':
-      return (<SellAuctionStagesModal collectionId={collectionId || 0}
+      return (<SellAuctionStagesModal
+        collectionId={collectionId || 0}
         tokenId={tokenId}
         tokenPrefix={token?.prefix || ''}
         auction={auction as TAuctionProps}
         onFinish={onFinish}
       />);
     case 'fix-price-stage':
-      return (<SellFixStagesModal collectionId={collectionId || 0}
+      return (<SellFixStagesModal
+        collectionId={collectionId || 0}
         tokenId={tokenId}
         tokenPrefix={token?.prefix || ''}
         sellFix={fixPrice as TFixPriceProps}
@@ -63,9 +65,9 @@ type TAskSellModalProps = {
 export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixPrice }) => {
   const { selectedAccount } = useAccounts();
   const [activeTab, setActiveTab] = useState<number>(0);
-  const [priceInputValue, setPriceInputValue] = useState<string>('0');
+  const [priceInputValue, setPriceInputValue] = useState<string>();
 
-  const [minStepInputValueAuction, setMinStepInputValueAuction] = useState<string>('15');
+  const [minStepInputValueAuction, setMinStepInputValueAuction] = useState<string>();
   const [inputStartingPriceValue, setInputStartingPriceValue] = useState<string>();
   const [durationSelectValue, setDurationSelectValue] = useState<number>();
 
@@ -76,8 +78,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
     [setActiveTab]
   );
 
-  const onPriceInputChange = useCallback(
-    (value: string) => {
+  const onPriceInputChange = useCallback((value: string) => {
       setPriceInputValue(value);
     },
     [setPriceInputValue]

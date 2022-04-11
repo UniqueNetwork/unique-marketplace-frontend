@@ -1,3 +1,4 @@
+import React from 'react';
 import { TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import { Link, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
@@ -26,17 +27,18 @@ export const tradesColumns: TableColumnProps[] = [
     title: 'Collection',
     width: '100%',
     isSortable: true,
-    render(token: NFTToken): React.ReactNode {
+    render({ id, name }: { id: string, name: string }): React.ReactNode {
       return <LinkWrapper><Link
-        href={`${config?.scanUrl || ''}collections/${token?.collectionId || ''}`}
-        title={`${token?.collectionName || ''} [ID ${token?.collectionId || ''}]`}
+        href={`${config?.scanUrl || ''}collections/${id || ''}`}
+        title={`${name || ''} [ID ${id || ''}]`}
       /></LinkWrapper>;
     },
-    field: 'token'
+    field: 'collection'
   },
   {
     title: 'Time',
     width: '100%',
+    isSortable: true,
     render: (time: number) => <Text color={BlueGrey600}>{timestampTableFormat(new Date(time).valueOf())}</Text>,
     field: 'tradeDate'
   },

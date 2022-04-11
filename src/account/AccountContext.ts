@@ -13,6 +13,7 @@ export interface Account extends InjectedAccountWithMeta {
     KSM?: BN
   },
   deposit?: BN
+  isOnWhiteList?: boolean
 }
 
 export type AccountContextProps = {
@@ -23,7 +24,7 @@ export type AccountContextProps = {
   changeAccount(account: Account): void
   setSelectedAccount(account: Account): void
   setFetchAccountsError(error: string | undefined): void
-  setAccounts(accounts: Account[]): void
+  setAccounts(accounts: ((accounts: Account[]) => Account[]) | Account[]): void
   setIsLoading(loading: boolean): void
   showSignDialog(): Promise<KeyringPair>
 }

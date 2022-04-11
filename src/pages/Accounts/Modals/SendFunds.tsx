@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Avatar, Button, Heading, InputText, Modal, Text } from '@unique-nft/ui-kit';
+import { Avatar, Button, Heading, Modal, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import { TTransferFunds } from './types';
@@ -14,6 +14,8 @@ import { formatKusamaBalance } from '../../../utils/textUtils';
 import { StageStatus } from '../../../types/StagesTypes';
 import { NotificationSeverity } from '../../../notification/NotificationContext';
 import { useNotification } from '../../../hooks/useNotification';
+import { NumberInput } from '../../../components/NumberInput/NumberInput';
+import AccountCard from '../../../components/Account/Account';
 
 const tokenSymbol = 'KSM';
 
@@ -36,9 +38,12 @@ export const TransferFundsModal: FC<TransferFundsModalProps> = ({ isVisible, sen
 
   const onFinishStages = useCallback(() => {
     setStatus('ask');
+    onFinish();
   }, [onFinish]);
+
   if (status === 'ask') {
-   return (<AskTransferFundsModal isVisible={isVisible}
+   return (<AskTransferFundsModal
+     isVisible={isVisible}
      onFinish={onTransfer}
      senderAddress={senderAddress || ''}
      onClose={onFinish}
@@ -66,11 +71,11 @@ type AskSendFundsModalProps = {
 export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, onFinish, senderAddress, onClose }) => {
   const { accounts } = useAccounts();
   const [recipientAddress, setRecipientAddress] = useState<string | Account | undefined>();
-  const [amount, setAmount] = useState<number>(0);
+  const [amount, setAmount] = useState<string>('0');
 
-  const senderBalance = useMemo(() => {
+  const sender = useMemo(() => {
     const account = accounts.find((account) => account.address === senderAddress);
-    return account?.balance?.KSM;
+    return account;
   }, [accounts, senderAddress]);
 
   const recipientBalance = useMemo(() => {
@@ -79,13 +84,13 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   }, [accounts, recipientAddress]);
 
   const onAmountChange = useCallback((value: string) => {
-    setAmount(Number(value));
+    setAmount(value);
   }, [setAmount]);
 
   const onSend = useCallback(() => {
     const recipient = typeof recipientAddress === 'string' ? recipientAddress : recipientAddress?.address;
     onFinish(senderAddress, recipient || '', amount.toString());
-  }, [senderAddress, recipientAddress, amount]);
+  }, [senderAddress, recipientAddress, amount, onFinish]);
 
   return (<Modal isVisible={isVisible} isClosable={true} onClose={onClose}>
     <Content>
@@ -94,11 +99,10 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
 
     <Text size={'s'} color={'grey-500'}>{'From'}</Text>
     <AddressWrapper>
-      <Avatar size={24} src={DefaultAvatar} />
-      <Text>{senderAddress || ''}</Text>
+      <AccountCard accountName={sender?.meta.name || ''} accountAddress={senderAddress} canCopy={false} />
     </AddressWrapper>
     <AmountWrapper>
-      <Text size={'s'}>{`${formatKusamaBalance(senderBalance?.toString() || 0)} ${tokenSymbol}`}</Text>
+      <Text size={'s'}>{`${formatKusamaBalance(sender?.balance?.KSM?.toString() || 0)} ${tokenSymbol}`}</Text>
     </AmountWrapper>
 
     <Text size={'s'} color={'grey-500'}>{'To'}</Text>
@@ -108,8 +112,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
         value={recipientAddress}
         onChange={setRecipientAddress}
         renderOption={(option) => <AddressOptionWrapper>
-          <Avatar size={24} src={DefaultAvatar} />
-          <Text>{option?.address || ''}</Text>
+          <AccountCard accountName={option.meta.name || ''} accountAddress={option.address} canCopy={false} />
         </AddressOptionWrapper>}
       />
     </RecipientSelectWrapper>
@@ -117,7 +120,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
       {recipientBalance && <Text size={'s'}>{`${formatKusamaBalance(recipientBalance?.toString() || 0)} ${tokenSymbol}`}</Text> }
     </AmountWrapper>
     <AmountInputWrapper>
-      <InputText value={amount.toString()} onChange={onAmountChange} />
+      <NumberInput value={amount} onChange={onAmountChange} />
     </AmountInputWrapper>
     <TextStyled
       color='additional-warning-500'
@@ -150,7 +153,7 @@ const TransferFundsStagesModal: FC<TransferFundsStagesModalProps & TTransferFund
     if (status === StageStatus.success) {
       push({ severity: NotificationSeverity.success, message: 'Funds transfer completed' });
     }
-  }, [status]);
+  }, [push, status]);
 
   return (<Modal isVisible={isVisible} isClosable={false}>
     <div>
@@ -171,11 +174,13 @@ const AddressWrapper = styled.div`
   margin-top: calc(var(--gap) * 2);
   border: 1px solid var(--grey-300);
   border-radius: 4px;
-  padding: 20px var(--gap);
+  padding: calc(var(--gap) / 2) var(--gap);
+  align-items: center;
 `;
 
 const AddressOptionWrapper = styled.div`
   display: flex;
+  align-items: center;
   column-gap: calc(var(--gap) / 2);
 `;
 

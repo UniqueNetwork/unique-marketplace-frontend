@@ -86,7 +86,7 @@ export const NFTPage = () => {
   const [selectOption, setSelectOption] = useState<TOption>();
   const { selectedAccount } = useAccounts();
   const [tokens, setTokens] = useState<NFTToken[]>([]);
-  const [isFetchingTokens, setIsFetchingTokens] = useState<boolean>(true);
+  const [isFetchingTokens, setIsFetchingTokens] = useState<boolean>(false);
 
   const { offers, isFetching: isFetchingOffers, fetch } = useOffers();
 
@@ -277,6 +277,10 @@ const SearchWrapper = styled.div`
 `;
 
 const SortSelectWrapper = styled.div`
+  .unique-select svg {
+    z-index: 0;
+  }
+
   @media (max-width: 1024px) {
     display: none;
   }

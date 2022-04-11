@@ -1,18 +1,22 @@
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Text, Button, Heading } from '@unique-nft/ui-kit';
-import BN from 'bn.js';
 import styled from 'styled-components/macro';
+import BN from 'bn.js';
 
 import { Offer } from '../../../api/restApi/offers/types';
 import { NFTToken } from '../../../api/chainApi/unique/types';
-import Bids from './Bids';
 import { AdditionalPositive100, AdditionalPositive500, Coral100, Coral500, Grey300 } from '../../../styles/colors';
-import { useBidsSubscription } from '../../../hooks/useBidsSubscription';
-import { shortcutText } from '../../../utils/textUtils';
+import { useOfferSubscription } from '../../../hooks/useOfferSubscription';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { compareEncodedAddresses, isTokenOwner } from '../../../api/chainApi/utils/addressUtils';
 import { PriceForAuction } from '../TokenDetail/PriceForAuction';
+import { useAuction } from '../../../api/restApi/auction/auction';
+import { TCalculatedBid } from '../../../api/restApi/auction/types';
+import Bids from './Bids';
 import Timer from '../../../components/Timer';
+import { useNotification } from '../../../hooks/useNotification';
+import { NotificationSeverity } from '../../../notification/NotificationContext';
+import AccountLink from '../../../components/Account/AccountLink';
 
 interface AuctionProps {
   offer: Offer
@@ -20,29 +24,50 @@ interface AuctionProps {
   onPlaceABidClick(): void
   onDelistAuctionClick(): void
   onWithdrawClick(): void
+  onClose(newOwnerAddress: string): void
 }
 
-const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDelistAuctionClick, onWithdrawClick }) => {
+const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDelistAuctionClick, onWithdrawClick, onClose }) => {
   const [offer, setOffer] = useState<Offer>(initialOffer);
   const { selectedAccount } = useAccounts();
+  const { getCalculatedBid } = useAuction();
+  const { push } = useNotification();
+
+  const [calculatedBid, setCalculatedBid] = useState<TCalculatedBid>();
+
+  useEffect(() => {
+    if (!offer || offer.auction?.status !== 'active' || !selectedAccount) return;
+    (async () => {
+      const _calculatedBid = await getCalculatedBid({
+        collectionId: offer.collectionId || 0,
+        tokenId: offer?.tokenId || 0,
+        bidderAddress: selectedAccount?.address || ''
+      });
+      setCalculatedBid(_calculatedBid);
+    })();
+  }, [offer, selectedAccount]);
 
   const canPlaceABid = useMemo(() => {
-    return true; // TODO: get a balance of selected account
-  }, []);
+    if (!selectedAccount?.address || !offer?.seller) return false;
+    return !isTokenOwner(selectedAccount.address, { Substrate: offer.seller });
+  }, [offer, selectedAccount?.address]);
 
   const canDelist = useMemo(() => {
-    if (!selectedAccount || !offer?.seller) return false;
-    return isTokenOwner(selectedAccount.address, { Substrate: offer.seller }) && !offer.auction?.bids.length;
-  }, [offer, selectedAccount]);
+    if (!selectedAccount?.address || !offer?.seller) return false;
+    return isTokenOwner(selectedAccount.address, { Substrate: offer.seller }) && !offer.auction?.bids?.length;
+  }, [offer, selectedAccount?.address]);
 
   const isBidder = useMemo(() => {
-    if (!selectedAccount) return false;
-    return offer.auction?.bids.some((bid) => compareEncodedAddresses(bid.bidderAddress, selectedAccount.address));
-  }, [offer, selectedAccount]);
+    if (!selectedAccount || !calculatedBid) return false;
+    return offer.auction?.bids?.some((bid) => compareEncodedAddresses(
+      bid.bidderAddress,
+      selectedAccount.address
+    )) && calculatedBid.bidderPendingAmount !== '0';
+  }, [offer, selectedAccount, calculatedBid]);
 
   const topBid = useMemo(() => {
-    if (offer.auction?.bids.length === 0) return null;
-    return offer.auction?.bids.reduce((top, bid) => {
+    if (!offer.auction?.bids?.length) return null;
+    return offer.auction.bids.reduce((top, bid) => {
       return new BN(top.balance).gt(new BN(bid.balance)) ? top : bid;
     }) || null;
   }, [offer]);
@@ -61,9 +86,29 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
     setOffer(_offer);
   }, [setOffer]);
 
-  const price = offer.price;
+  const onAuctionStopped = useCallback((_offer: Offer) => {
+    push({
+      severity: NotificationSeverity.success,
+      message: 'Auction is stopped'
+    });
+    setOffer(_offer);
+  }, [setOffer, push]);
 
-  useBidsSubscription({ offer, onPlaceBid });
+  const onAuctionClosed = useCallback((_offer: Offer) => {
+    if (offer.auction?.bids?.length) {
+      const topBid = offer.auction.bids.reduce((top, bid) => {
+        return new BN(top.balance).gt(new BN(bid.balance)) ? top : bid;
+      });
+
+      onClose(topBid.bidderAddress);
+    } else {
+      onClose(_offer.seller);
+    }
+  }, [onClose, offer.auction?.bids]);
+
+  useOfferSubscription({ offer, onPlaceBid, onAuctionStopped, onAuctionClosed });
+
+  const price = offer.price;
 
   return (<>
     <Text size={'l'}>{topBid ? 'Next minimum bid' : 'Starting bid'}</Text>
@@ -72,26 +117,27 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
       topBid={topBid?.balance !== '0' ? topBid?.balance : topBid?.amount}
     />
     <AuctionWrapper>
-      <Row>
+      {offer.auction?.status === 'active' && <Row>
         {canDelist && <Button title={'Delist'}
           role={'danger'}
           onClick={onDelistAuctionClick}
-          disabled={!canPlaceABid}
         />}
-        {!canDelist && <Button title={'Place a bid'}
+        {canPlaceABid && <Button title={'Place a bid'}
           role={'primary'}
           onClick={onPlaceABidClick}
           disabled={!canPlaceABid}
         />}
         {canWithdraw && <Button title={'Withdraw'} onClick={onWithdrawClick} />}
-      </Row>
-      {offer?.auction?.stopAt && <TimerWrapper>
+      </Row>}
+      {offer.auction?.status === 'active' && offer?.auction?.stopAt && <TimerWrapper>
         <Timer time={offer.auction.stopAt} />
       </TimerWrapper>}
+      {(offer.auction?.status === 'stopped' || offer.auction?.status === 'withdrawing') &&
+      <Text>Auction is stopped</Text>}
       <Divider />
       <Heading size={'4'}>Offers</Heading>
       {isTopBidder && <TopBidderTextStyled >You are Top Bidder</TopBidderTextStyled>}
-      {!isTopBidder && isBidder && <Row><BidderTextStyled >You are outbid</BidderTextStyled> <Text>{`Leading bid ${shortcutText(topBid?.bidderAddress || '')}`}</Text></Row>}
+      {!isTopBidder && isBidder && <Row><BidderTextStyled >You are outbid</BidderTextStyled> <Text>{'Leading bid'}</Text><AccountLink accountAddress={topBid?.bidderAddress || ''} /></Row>}
       <Bids offer={offer} />
     </AuctionWrapper>
   </>);

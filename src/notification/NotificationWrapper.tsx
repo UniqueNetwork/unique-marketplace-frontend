@@ -43,10 +43,6 @@ const NotificationWrapper: FC = ({ children }) => {
     setAlerts([]);
   }, []);
 
-  const onRemove = useCallback((alertKey?: string) => () => {
-    setAlerts((alerts) => alerts.map((alert) => ({ ...alert, isRemoved: alertKey === alert.key })));
-  }, [setAlerts]);
-
   const value = useMemo(() => ({
     push,
     clear
@@ -55,7 +51,7 @@ const NotificationWrapper: FC = ({ children }) => {
   return (
     <NotificationProvider value={value}>
       {children}
-      <Alerts alerts={alerts} onRemove={onRemove} />
+      <Alerts alerts={alerts} />
     </NotificationProvider>
   );
 };

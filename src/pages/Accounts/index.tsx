@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Text, InputText, Avatar } from '@unique-nft/ui-kit';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Button, InputText, Text } from '@unique-nft/ui-kit';
 import { TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import styled from 'styled-components/macro';
 import { BN } from '@polkadot/util';
@@ -17,23 +17,23 @@ import { PagePaper } from '../../components/PagePaper/PagePaper';
 import { Icon } from '../../components/Icon/Icon';
 import { WithdrawDepositStagesModal } from './Modals/WithdrawDeposit';
 import { Account } from '../../account/AccountContext';
-import DefaultAvatar from '../../static/icons/default-avatar.svg';
 import ArrowUpRight from '../../static/icons/arrow-up-right.svg';
-import CopyIcon from '../../static/icons/copy.svg';
 import config from '../../config';
+import { toChainFormatAddress } from '../../api/chainApi/utils/addressUtils';
+import { useApi } from '../../hooks/useApi';
+import AccountCard from '../../components/Account/Account';
+import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
 
 const tokenSymbol = 'KSM';
 
 type AccountsColumnsProps = {
-  onShowSendFundsModal(address: string): () => void;
-  onShowWithdrawDepositModal(address: string): () => void;
+  isShortAddress: boolean
+  formatAddress(address: string): string
+  onShowSendFundsModal(address: string): () => void
+  onShowWithdrawDepositModal(address: string): () => void
 };
 
-const copyAddress = (account: string) => () => {
-  navigator.clipboard.writeText(account);
-};
-
-const getAccountsColumns = ({ onShowSendFundsModal, onShowWithdrawDepositModal }: AccountsColumnsProps): TableColumnProps[] => [
+const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal, isShortAddress }: AccountsColumnsProps): TableColumnProps[] => [
   {
     title: 'Account',
     width: '25%',
@@ -42,20 +42,11 @@ const getAccountsColumns = ({ onShowSendFundsModal, onShowWithdrawDepositModal }
       if (accountInfo.deposit) return null;
       return (
         <AccountCellWrapper>
-          <Avatar size={24} src={DefaultAvatar} />
-          <AccountInfoWrapper>
-            <Text>{accountInfo.name}</Text>
-            <AddressRow>
-              <Text size={'s'} color={'grey-500'}>
-                {accountInfo.address}
-              </Text>
-              <a onClick={copyAddress(accountInfo.address)}>
-                <CopyIconWrapper>
-                  <Icon path={CopyIcon} />
-                </CopyIconWrapper>
-              </a>
-            </AddressRow>
-          </AccountInfoWrapper>
+          <AccountCard accountName={accountInfo.name}
+            accountAddress={accountInfo.address}
+            canCopy
+            isShort={isShortAddress}
+          />
         </AccountCellWrapper>
       );
     }
@@ -89,7 +80,7 @@ const getAccountsColumns = ({ onShowSendFundsModal, onShowWithdrawDepositModal }
           <LinkStyled
             target={'_blank'}
             rel={'noreferrer'}
-            href={`${config.scanUrl}account/${accountInfo.address}`}
+            href={`${config.scanUrl}account/${formatAddress(accountInfo.address)}`}
           >
             <TextStyled>UniqueScan</TextStyled>
             <IconWrapper>
@@ -141,10 +132,16 @@ type AccountInfo = {
 }
 
 export const AccountsPage = () => {
-  const { accounts, fetchAccounts, isLoading, isLoadingBalances } = useAccounts();
+  const { accounts, fetchAccounts, isLoading } = useAccounts();
   const [searchString, setSearchString] = useState<string>('');
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
   const [selectedAddress, setSelectedAddress] = useState<string>();
+  const deviceSize = useDeviceSize();
+  const { chainData } = useApi();
+
+  const formatAddress = useCallback((address: string) => {
+    return toChainFormatAddress(address, chainData?.properties.ss58Format || 0);
+  }, [chainData?.properties.ss58Format]);
 
   const onCreateAccountClick = useCallback(() => {
     setCurrentModal(AccountModal.create);
@@ -177,7 +174,7 @@ export const AccountsPage = () => {
   }, []);
 
   const filteredAccounts = useMemo(() => {
-    const reduceAccounts = (acc: (Account & { accountInfo: AccountInfo })[], account: Account, index: number) => {
+    const reduceAccounts = (acc: (Account & { accountInfo: AccountInfo })[], account: Account) => {
       acc.push({
         ...account,
         accountInfo: { address: account.address, name: account.meta.name || '', balance: account.balance }
@@ -197,15 +194,19 @@ export const AccountsPage = () => {
     return accounts
       .filter(
         (account) =>
-          account.address.toLowerCase().includes(searchString.trim().toLowerCase()) ||
+          formatAddress(account.address).toLowerCase().includes(searchString.trim().toLowerCase()) ||
           account.meta.name?.toLowerCase().includes(searchString.trim().toLowerCase())
       )
       .reduce(reduceAccounts, []);
-  }, [accounts, searchString]);
+  }, [accounts, searchString, formatAddress]);
 
   const onChangeAccountsFinish = useCallback(async () => {
     setCurrentModal(undefined);
     await fetchAccounts();
+  }, []);
+
+  const onModalClose = useCallback(() => {
+    setCurrentModal(undefined);
   }, []);
 
   return (<PagePaper>
@@ -227,15 +228,15 @@ export const AccountsPage = () => {
         </SearchInputWrapper>
       </Row>
       <Table
-        columns={getAccountsColumns({ onShowSendFundsModal, onShowWithdrawDepositModal })}
+        columns={getAccountsColumns({ isShortAddress: deviceSize === DeviceSize.sm, formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal })}
         data={filteredAccounts}
-        loading={isLoading || isLoadingBalances}
+        loading={isLoading}
       />
-      <CreateAccountModal isVisible={currentModal === AccountModal.create} onFinish={onChangeAccountsFinish} />
-      <ImportViaSeedAccountModal isVisible={currentModal === AccountModal.importViaSeed} onFinish={onChangeAccountsFinish} />
-      <ImportViaJSONAccountModal isVisible={currentModal === AccountModal.importViaJSON} onFinish={onChangeAccountsFinish} />
-      <ImportViaQRCodeAccountModal isVisible={currentModal === AccountModal.importViaQRCode} onFinish={onChangeAccountsFinish} />
-      <TransferFundsModal isVisible={currentModal === AccountModal.sendFunds} onFinish={onChangeAccountsFinish} senderAddress={selectedAddress} />
+      <CreateAccountModal isVisible={currentModal === AccountModal.create} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
+      <ImportViaSeedAccountModal isVisible={currentModal === AccountModal.importViaSeed} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
+      <ImportViaJSONAccountModal isVisible={currentModal === AccountModal.importViaJSON} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
+      <ImportViaQRCodeAccountModal isVisible={currentModal === AccountModal.importViaQRCode} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
+      <TransferFundsModal isVisible={currentModal === AccountModal.sendFunds} onFinish={onModalClose} senderAddress={selectedAddress} />
       <WithdrawDepositStagesModal isVisible={currentModal === AccountModal.withdrawDeposit} onFinish={onChangeAccountsFinish} address={selectedAddress} />
     </AccountPageWrapper>
   </PagePaper>);
@@ -255,12 +256,33 @@ const Row = styled.div`
   display: flex;
   column-gap: var(--gap);
   width: 100%;
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    row-gap: var(--gap);
+    
+    div[class^=DropdownMenu] {
+      width: 100%;
+      button {
+        width: 100%;
+      }
+    }
+  }
+  
 `;
 
 const SearchInputWrapper = styled.div`
   flex-grow: 1;
   display: flex;
   justify-content: flex-end;
+  
+  @media (max-width: 1024px) {
+    justify-content: space-between;
+    .unique-input-text {
+      width: 100%;
+      flex-grow: 1;
+    }
+  }
 `;
 
 const SearchInputStyled = styled(InputText)`
@@ -270,17 +292,6 @@ const SearchInputStyled = styled(InputText)`
 const AccountCellWrapper = styled.div`
   display: flex;
   padding: 20px 0 !important;
-`;
-
-const AccountInfoWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-
-  span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
 `;
 
 const BalancesWrapper = styled.div`
@@ -306,7 +317,15 @@ const ActionsWrapper = styled.div`
     display: flex;
     align-items: center;
     column-gap: var(--gap);
-    padding: var(--gap) 0; 
+    padding: var(--gap) 0;
+    @media (max-width: 768px) {
+      flex-direction: column;
+      row-gap: var(--gap);
+      width: 100%;
+      button {
+        width: 100%;
+      }
+    }
   }
 `;
 
@@ -326,25 +345,5 @@ const IconWrapper = styled.div`
     path {
       stroke: currentColor;
     }
-  }
-`;
-
-const CopyIconWrapper = styled.div`
-  && {
-    width: 24px;
-    height: 24px;
-    color: var(--color-grey-400);
-    padding: 0;
-    cursor: copy;
-    svg {
-      transform: translateY(-2px);
-    }
-  }
-`;
-
-const AddressRow = styled.div`
-  && {
-    display: flex;
-    padding: 0;
   }
 `;

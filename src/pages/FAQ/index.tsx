@@ -47,7 +47,7 @@ const Faq = (): React.ReactElement<void> => {
       <p>A: You can read our Terms of Service&nbsp;
         <a
           download
-          href='/files/Terms.pdf'
+          href='/Terms.pdf'
         >here.
         </a>
       </p>

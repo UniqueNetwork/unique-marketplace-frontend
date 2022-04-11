@@ -6,6 +6,7 @@ import { Settings } from './restApi/settings/types';
 export type ChainData = {
   properties: {
     tokenSymbol: string
+    ss58Format: number
   }
   systemChain: string
   systemName: string
@@ -20,6 +21,7 @@ type Api = {
 export type ApiContextProps = {
   rpcClient: IRpcClient
   rawRpcApi?: ApiPromise
+  rawKusamaRpcApi?: ApiPromise
   api: Api | undefined
   chainData?: ChainData
   settings?: Settings

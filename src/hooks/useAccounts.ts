@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef } from 'react';
 import { web3Accounts, web3Enable, web3FromSource } from '@polkadot/extension-dapp';
 import keyring from '@polkadot/ui-keyring';
 import { BN, stringToHex, u8aToHex } from '@polkadot/util';
@@ -10,9 +10,10 @@ import AccountContext, { Account, AccountSigner } from '../account/AccountContex
 import { DefaultAccountKey } from '../account/AccountProvider';
 import { getSuri, PairType } from '../utils/seedUtils';
 import { TTransaction } from '../api/chainApi/types';
+import { Codec } from '@polkadot/types/types';
 
 export const useAccounts = () => {
-  const { rpcClient, rawRpcApi, api } = useApi();
+  const { rpcClient, rawRpcApi, rawKusamaRpcApi, api } = useApi();
   const {
     accounts,
     selectedAccount,
@@ -28,8 +29,6 @@ export const useAccounts = () => {
 
   // TODO: move fetching accounts and balances into context
 
-  const [isLoadingBalances, setIsLoadingBalances] = useState(false);
-
   const getExtensionAccounts = useCallback(async () => {
     // this call fires up the authorization popup
     let extensions = await web3Enable('my cool dapp');
@@ -38,7 +37,6 @@ export const useAccounts = () => {
       await sleep(1000);
       extensions = await web3Enable('my cool dapp');
       if (extensions.length === 0) {
-        // alert('no extension installed, or the user did not accept the authorization');
         return [];
       }
     }
@@ -72,30 +70,48 @@ export const useAccounts = () => {
     }
   } as Account))), [getAccountBalance]);
 
-  const getAccountsDeposits = useCallback(async (accounts: Account[]) => {
+  const getAccountsDeposits = useCallback((accounts: Account[]) => {
     if (!api?.market) return accounts;
     const fetchDeposit = async (account: Account) => ({
       ...account,
-      deposit: await api?.market?.getUserDeposit(account.address)
+      deposit: await api?.market?.getUserDeposit(account.address),
+      isOnWhiteList: await api?.market?.checkWhiteListed(account.address)
     });
-    return await Promise.all(accounts.map(fetchDeposit));
+    return Promise.all(accounts.map(fetchDeposit));
   }, [api?.market]);
+
+  const unsubscribesBalancesChanges = useRef<Record<string, Codec>>({});
+  const subscribeBalancesChanges = useCallback(async (accounts: Account[]) => {
+    if (!rawKusamaRpcApi) return;
+
+    const unsubscribes = await Promise.all(accounts.map(async (account) => {
+      const unsubscribe = await rawKusamaRpcApi.query.system.account(account.address, ({ data: { free } }: { data: { free: BN } }) => {
+        if (!account.balance?.KSM || !free.sub(account.balance.KSM).isZero()) {
+          setAccounts(accounts.map((_account: Account) => ({
+            ..._account,
+            balance: account.address === _account.address ? { KSM: free } : _account.balance
+          })));
+        }
+      });
+      return { [account.address]: unsubscribe };
+    }));
+
+    unsubscribesBalancesChanges.current = unsubscribes.reduce<Record<string, Codec>>((acc, item) => ({ ...acc, ...item }), {});
+  }, [rawKusamaRpcApi]);
 
   const fetchAccounts = useCallback(async () => {
     if (!rpcClient?.isKusamaApiConnected) return;
     setIsLoading(true);
-    // this call fires up the authorization popup
-    const extensions = await web3Enable('my cool dapp');
-    if (extensions.length === 0) {
-      setFetchAccountsError('No extension installed, or the user did not accept the authorization');
-      return;
-    }
+
     const allAccounts = await getAccounts();
 
     if (allAccounts?.length) {
       const accountsWithBalance = await getAccountsBalances(allAccounts);
       const accountsWithDeposits = await getAccountsDeposits(accountsWithBalance);
+
       setAccounts(accountsWithDeposits);
+
+      await subscribeBalancesChanges(accountsWithDeposits);
 
       const defaultAccountAddress = localStorage.getItem(DefaultAccountKey);
       const defaultAccount = allAccounts.find((item) => item.address === defaultAccountAddress);
@@ -111,17 +127,10 @@ export const useAccounts = () => {
     setIsLoading(false);
   }, [rpcClient?.isKusamaApiConnected]);
 
-  const fetchBalances = useCallback(async () => {
-    setIsLoadingBalances(true);
-    const accountsWithBalance = await getAccountsBalances(accounts);
-    setIsLoadingBalances(false);
-    setAccounts(accountsWithBalance);
-  }, [getAccountBalance, accounts]);
-
   useEffect(() => {
     const updatedSelectedAccount = accounts.find((account) => account.address === selectedAccount?.address);
     if (updatedSelectedAccount) setSelectedAccount(updatedSelectedAccount);
-  }, [accounts, setSelectedAccount, selectedAccount]);
+  }, [accounts, setSelectedAccount, selectedAccount, rawRpcApi]);
 
   const addLocalAccount = useCallback((seed: string, derivePath: string, name: string, password: string, pairType: PairType) => {
     const options = { genesisHash: rawRpcApi?.genesisHash.toString(), isHardware: false, name: name.trim(), tags: [] };
@@ -146,8 +155,12 @@ export const useAccounts = () => {
     return pair;
   }, [selectedAccount]);
 
-  const signTx = useCallback(async (tx: TTransaction, account?: Account): Promise<TTransaction> => {
-    const _account = account || selectedAccount;
+  const signTx = useCallback(async (tx: TTransaction, account?: Account | string): Promise<TTransaction> => {
+    let _account = account || selectedAccount;
+    if (typeof _account === 'string') {
+      _account = accounts.find((account) => account.address === _account);
+    }
+
     if (!_account) throw new Error('Account was not provided');
     let signedTx;
     if (_account.signerType === AccountSigner.local) {
@@ -161,10 +174,14 @@ export const useAccounts = () => {
     }
     if (!signedTx) throw new Error('Signing failed');
     return signedTx;
-  }, [showSignDialog, selectedAccount]);
+  }, [showSignDialog, selectedAccount, accounts]);
 
-  const signMessage = useCallback(async (message: string, account?: Account): Promise<string> => {
-    const _account = account || selectedAccount;
+  const signMessage = useCallback(async (message: string, account?: Account | string): Promise<string> => {
+    let _account = account || selectedAccount;
+    if (typeof _account === 'string') {
+      _account = accounts.find((account) => account.address === _account);
+    }
+
     if (!_account) throw new Error('Account was not provided');
     let signedMessage;
     if (_account.signerType === AccountSigner.local) {
@@ -181,13 +198,12 @@ export const useAccounts = () => {
     }
     if (!signedMessage) throw new Error('Signing failed');
     return signedMessage;
-  }, [showSignDialog, selectedAccount]);
+  }, [showSignDialog, selectedAccount, accounts]);
 
   return {
     accounts,
     selectedAccount,
     isLoading,
-    isLoadingBalances,
     fetchAccountsError,
     addLocalAccount,
     addAccountViaQR,
@@ -195,7 +211,7 @@ export const useAccounts = () => {
     signTx,
     signMessage,
     fetchAccounts,
-    fetchBalances,
+    subscribeBalancesChanges,
     changeAccount
   };
 };

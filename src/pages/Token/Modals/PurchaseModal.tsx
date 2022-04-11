@@ -1,4 +1,5 @@
 import React, { FC, useEffect } from 'react';
+import { Link } from '@unique-nft/ui-kit';
 
 import { usePurchaseFixStages } from '../../../hooks/marketplaceStages';
 import DefaultMarketStages from './StagesModal';
@@ -7,7 +8,6 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import { StageStatus } from '../../../types/StagesTypes';
 import { NotificationSeverity } from '../../../notification/NotificationContext';
 import { useNotification } from '../../../hooks/useNotification';
-import { Link } from '@unique-nft/ui-kit';
 
 const PurchaseModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish }) => {
   const { selectedAccount } = useAccounts();

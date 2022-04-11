@@ -10,17 +10,15 @@ import { NotificationState } from '../../notification/NotificationWrapper';
 
 interface AlertsProps {
   alerts: NotificationState[]
-  onRemove(alertKey: string): () => void
 }
 
-const Alerts: FC<AlertsProps> = ({ alerts, onRemove }) => {
+const Alerts: FC<AlertsProps> = ({ alerts }) => {
   return (
     <AlertsWrapper>
       {alerts.map((alert) => <Alert
         key={alert.key}
         severity={alert.severity}
         isRemoved={alert.isRemoved}
-        onClick={onRemove(alert.key)}
       >
         <Icon size={32} file={alert.severity === NotificationSeverity.success ? CheckCircle : Warning} />
         {alert.message}
