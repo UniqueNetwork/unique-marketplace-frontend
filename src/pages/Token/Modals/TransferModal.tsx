@@ -87,7 +87,7 @@ const AskTransferModal: FC<{ onTransfer(receiver: string): void }> = ({ onTransf
 };
 
 const TransferStagesModal: FC<TTokenPageModalBodyProps & TTransfer> = ({ token, onFinish, sender, recipient }) => {
-  const { stages, status, initiate } = useTransferStages(token?.collectionId || 0, token?.id);
+  const { stages, status, initiate } = useTransferStages(token?.collectionId || 0, token?.id || 0);
   const { push } = useNotification();
 
   useEffect(() => {
@@ -96,7 +96,7 @@ const TransferStagesModal: FC<TTokenPageModalBodyProps & TTransfer> = ({ token, 
 
   useEffect(() => {
     if (status === StageStatus.success) {
-      push({ severity: NotificationSeverity.success, message: <><Link href={`/token/${token.collectionId}/${token.id}`} title={`${token.prefix} #${token.id}`}/> transferred</> });
+      push({ severity: NotificationSeverity.success, message: <><Link href={`/token/${token?.collectionId}/${token?.id}`} title={`${token?.prefix} #${token?.id}`}/> transferred</> });
     }
   }, [status]);
 

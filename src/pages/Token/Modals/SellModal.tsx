@@ -16,7 +16,7 @@ import { useNotification } from '../../../hooks/useNotification';
 const tokenSymbol = 'KSM';
 
 export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish, setIsClosable }) => {
-  const { collectionId, id: tokenId } = token;
+  const { collectionId, id: tokenId } = token || {};
   const [status, setStatus] = useState<'ask' | 'auction-stage' | 'fix-price-stage'>('ask'); // TODO: naming
   const [auction, setAuction] = useState<TAuctionProps>();
   const [fixPrice, setFixPrice] = useState<TFixPriceProps>();
@@ -33,12 +33,14 @@ export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish, setIs
     setIsClosable(false);
   }, [setStatus, setFixPrice, setIsClosable]);
 
+  if (!token) return null;
+
   if (status === 'ask') return (<AskSellModal onSellAuction={onSellAuction} onSellFixPrice={onSellFixPrice} />);
   switch (status) {
     case 'auction-stage':
       return (<SellAuctionStagesModal
         collectionId={collectionId || 0}
-        tokenId={tokenId}
+        tokenId={tokenId || 0}
         tokenPrefix={token?.prefix || ''}
         auction={auction as TAuctionProps}
         onFinish={onFinish}
@@ -46,7 +48,7 @@ export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish, setIs
     case 'fix-price-stage':
       return (<SellFixStagesModal
         collectionId={collectionId || 0}
-        tokenId={tokenId}
+        tokenId={tokenId || 0}
         tokenPrefix={token?.prefix || ''}
         sellFix={fixPrice as TFixPriceProps}
         onFinish={onFinish}

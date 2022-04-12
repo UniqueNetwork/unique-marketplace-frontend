@@ -1,4 +1,4 @@
-import React, { FC, useEffect } from 'react';
+import React, { FC, useEffect, useMemo } from 'react';
 import { Link } from '@unique-nft/ui-kit';
 
 import { usePurchaseFixStages } from '../../../hooks/marketplaceStages';
@@ -9,9 +9,9 @@ import { StageStatus } from '../../../types/StagesTypes';
 import { NotificationSeverity } from '../../../notification/NotificationContext';
 import { useNotification } from '../../../hooks/useNotification';
 
-const PurchaseModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish }) => {
+const PurchaseModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
   const { selectedAccount } = useAccounts();
-  const { stages, status, initiate } = usePurchaseFixStages(token?.collectionId || 0, token?.id);
+  const { stages, status, initiate } = usePurchaseFixStages(offer?.collectionId || 0, offer?.tokenId || 0);
   const { push } = useNotification();
 
   useEffect(() => {
@@ -19,9 +19,13 @@ const PurchaseModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish }) => {
     initiate({ accountAddress: selectedAccount.address });
   }, [selectedAccount?.address]);
 
+  const prefix = useMemo(() => {
+    return offer?.tokenDescription.find(({ key }) => key === 'prefix')?.value || '';
+  }, [offer]);
+
   useEffect(() => {
     if (status === StageStatus.success) {
-      push({ severity: NotificationSeverity.success, message: <>You are the new owner of <Link href={`/token/${token.collectionId}/${token.id}`} title={`${token.prefix} #${token.id}`}/></> });
+      push({ severity: NotificationSeverity.success, message: <>You are the new owner of <Link href={`/token/${offer?.collectionId}/${offer?.tokenId}`} title={`${prefix} #${offer?.tokenId}`}/></> });
     }
   }, [status]);
 
