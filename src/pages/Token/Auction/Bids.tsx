@@ -47,7 +47,7 @@ const Bids: FC<BidsProps> = ({ offer }) => {
 
   return (
     <BidsWrapper>
-      {!offer.auction?.bids?.length && <Text >There is no bids</Text>}
+      {!offer.auction?.bids?.length && <Text >There are no bids</Text>}
       {!!offer.auction?.bids?.length && <Table
         data={bids}
         columns={getColumns(tokenSymbol)}
