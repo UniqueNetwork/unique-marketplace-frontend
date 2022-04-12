@@ -37,6 +37,14 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, ...props })
     price,
     auction
   } = useMemo<Partial<Offer & NFTToken>>(() => {
+    if (token?.tokenDescription) {
+      const description: Record<string, string> = token.tokenDescription.reduce((acc, item) => ({ ...acc, [item.key]: item.value }), {});
+      return { ...token,
+        collectionName: description.collectionName,
+        prefix: description.prefix,
+        imageUrl: description.image };
+    }
+
     if (token) {
       return token;
     }
