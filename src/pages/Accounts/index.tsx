@@ -15,7 +15,7 @@ import { Table } from '../../components/Table';
 import { formatKusamaBalance } from '../../utils/textUtils';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
 import { Icon } from '../../components/Icon/Icon';
-import { WithdrawDepositStagesModal } from './Modals/WithdrawDeposit';
+import { WithdrawDepositModal } from './Modals/WithdrawDeposit';
 import { Account } from '../../account/AccountContext';
 import DefaultAvatar from '../../static/icons/default-avatar.svg';
 import ArrowUpRight from '../../static/icons/arrow-up-right.svg';
@@ -214,6 +214,10 @@ export const AccountsPage = () => {
     await fetchAccounts();
   }, []);
 
+  const onClose = useCallback(() => {
+    setCurrentModal(undefined);
+  }, []);
+
   return (<PagePaper>
     <AccountPageWrapper>
       <Row>
@@ -242,7 +246,12 @@ export const AccountsPage = () => {
       <ImportViaJSONAccountModal isVisible={currentModal === AccountModal.importViaJSON} onFinish={onChangeAccountsFinish} />
       <ImportViaQRCodeAccountModal isVisible={currentModal === AccountModal.importViaQRCode} onFinish={onChangeAccountsFinish} />
       <TransferFundsModal isVisible={currentModal === AccountModal.sendFunds} onFinish={onChangeAccountsFinish} senderAddress={selectedAddress} />
-      <WithdrawDepositStagesModal isVisible={currentModal === AccountModal.withdrawDeposit} onFinish={onChangeAccountsFinish} address={selectedAddress} />
+      <WithdrawDepositModal
+        isVisible={currentModal === AccountModal.withdrawDeposit}
+        onFinish={onChangeAccountsFinish}
+        onClose={onClose}
+        address={selectedAddress}
+      />
     </AccountPageWrapper>
   </PagePaper>);
 };
