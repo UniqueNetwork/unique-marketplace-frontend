@@ -65,7 +65,7 @@ export const CommonTokenDetail: FC<IProps> = ({
       if (!api?.collection || !token?.collectionId) return;
       setCollectionCoverImage((await api.collection.getCollection(token.collectionId)).coverImageUrl);
     })();
-  }, [token.collectionId, api?.collection]);
+  }, [token?.collectionId, api?.collection]);
 
   const { selectedAccount } = useAccounts();
   const deviceSize = useDeviceSize();
@@ -89,7 +89,7 @@ export const CommonTokenDetail: FC<IProps> = ({
     if (offer) {
       return isTokenOwner(selectedAccount.address, { Substrate: offer.seller });
     }
-    return isTokenOwner(selectedAccount.address, normalizeAccountId(token.owner || ''));
+    return isTokenOwner(selectedAccount.address, normalizeAccountId(token?.owner || ''));
   }, [selectedAccount, token, offer]);
 
   const onShareClick = useCallback(() => {
