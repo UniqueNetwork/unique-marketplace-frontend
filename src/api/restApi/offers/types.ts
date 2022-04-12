@@ -29,6 +29,12 @@ export type Auction = {
   stopAt: string
 }
 
+export type OfferTokenDescriptionItem = {
+  key: string
+  type: string
+  value: string
+}
+
 export type Offer = {
   collectionId: number
   tokenId: number
@@ -37,6 +43,7 @@ export type Offer = {
   seller: string
   creationDate: string
   auction: Auction | null
+  tokenDescription: OfferTokenDescriptionItem[]
 }
 
 export type OffersResponse = PaginatedResponse<Offer>
