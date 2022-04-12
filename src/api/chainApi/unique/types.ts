@@ -46,7 +46,7 @@ export type AttributesDecoded = {
 
 export interface NFTToken {
   id: number
-  owner?: { Substrate: string }
+  owner?: CrossAccountId
   constData?: string
   variableData?: string
   attributes: AttributesDecoded
@@ -60,4 +60,9 @@ export interface NFTToken {
 
 export type MetadataType = {
   metadata?: string
+}
+
+export type CrossAccountId = {
+  Substrate?: string
+  Ethereum?: string
 }
