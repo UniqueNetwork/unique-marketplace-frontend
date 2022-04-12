@@ -89,3 +89,7 @@ export function toAddress (value?: string | Uint8Array | null, allowIndices = fa
 
   return undefined;
 }
+
+export function toChainFormatAddress (address: string, ss58Format: number) {
+  return keyring.encodeAddress(address, ss58Format);
+}

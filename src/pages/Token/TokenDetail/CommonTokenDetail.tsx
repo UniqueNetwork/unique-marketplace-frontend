@@ -14,8 +14,9 @@ import { Avatar } from '../../../components/Avatar/Avatar';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import config from '../../../config';
 import { useAccounts } from '../../../hooks/useAccounts';
-import { isTokenOwner, normalizeAccountId, toAddress } from '../../../api/chainApi/utils/addressUtils';
+import { isTokenOwner, normalizeAccountId, toChainFormatAddress } from '../../../api/chainApi/utils/addressUtils';
 import { Offer } from '../../../api/restApi/offers/types';
+import { useApi } from '../../../hooks/useApi';
 
 interface IProps {
   children: ReactChild[];
@@ -59,15 +60,27 @@ export const CommonTokenDetail: FC<IProps> = ({
   const { selectedAccount } = useAccounts();
   const deviceSize = useDeviceSize();
 
+  const { chainData } = useApi();
+
+  const formatAddress = useCallback((address: string) => {
+    return toChainFormatAddress(address, chainData?.properties.ss58Format || 0);
+  }, [chainData?.properties.ss58Format]);
+
   const owner = useMemo(() => {
     if (!token?.owner) return undefined;
-    return offer?.seller ? normalizeAccountId(toAddress(offer?.seller || '') || '') : normalizeAccountId(token.owner);
-  }, [token, offer]);
+    if (offer) {
+      return formatAddress(offer?.seller);
+    }
+    return token.owner.Substrate ? formatAddress(token.owner.Substrate) : token.owner.Ethereum;
+  }, [token, offer, formatAddress]);
 
   const isOwner = useMemo(() => {
-    if (!selectedAccount || !owner) return false;
-    return isTokenOwner(selectedAccount.address, owner);
-  }, [selectedAccount, owner, offer]);
+    if (!selectedAccount) return false;
+    if (offer) {
+      return isTokenOwner(selectedAccount.address, { Substrate: offer.seller });
+    }
+    return isTokenOwner(selectedAccount.address, normalizeAccountId(token.owner || ''));
+  }, [selectedAccount, token, offer]);
 
   const onShareClick = useCallback(() => {
     if (navigator.share) {
@@ -99,10 +112,10 @@ export const CommonTokenDetail: FC<IProps> = ({
             <Text color='grey-500' size='m'>
               Owned&nbsp;by
             </Text>
-            <Account href={`${config.scanUrl}account/${owner?.Substrate || '404'}`}>
+            <Account href={`${config.scanUrl}account/${owner || '404'}`}>
               <Avatar size={24} src={DefaultAvatar}/>
               <Text color='primary-600' size='m'>
-                {deviceSize === DeviceSize.lg ? (owner?.Substrate || offer?.seller || '') : shortcutText(owner?.Substrate || '') }
+                {deviceSize === DeviceSize.lg ? owner || '' : shortcutText(owner || '') }
               </Text>
             </Account>
           </>}

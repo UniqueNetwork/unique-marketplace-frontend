@@ -17,8 +17,8 @@ export const useWithdrawDepositStages = (accountAddress: string) => {
     title: 'Withdraw deposit',
     description: '',
     status: StageStatus.default,
-    action: (params) => marketApi?.withdrawDeposit(accountAddress, params.options)
-  }], [marketApi, accountAddress]);
+    action: (params) => marketApi?.withdrawDeposit(params.txParams.address, params.options)
+  }], [marketApi]);
 
   const sign = useCallback(async (tx: TTransaction) => {
     return await signTx(tx, accountAddress);
