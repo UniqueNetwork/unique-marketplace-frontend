@@ -19,7 +19,7 @@ import { Offer } from '../../../api/restApi/offers/types';
 
 interface IProps {
   children: ReactChild[];
-  token: NFTToken;
+  token?: NFTToken;
   offer?: Offer;
 }
 
@@ -34,9 +34,27 @@ export const CommonTokenDetail: FC<IProps> = ({
     description,
     attributes,
     imageUrl,
-    id: tokenId,
+    tokenId,
     prefix
-  } = token;
+  } = useMemo(() => {
+    if (offer) {
+      const { tokenId, collectionName, prefix, image, ...attributes }: Record<string, string> = offer.tokenDescription
+        .reduce((acc, item) => ({ ...acc, [item.key]: item.value }), {});
+      return {
+        ...offer,
+        tokenId,
+        collectionName,
+        prefix,
+        imageUrl: image,
+        attributes,
+        description: '' // TODO: need add this in offer instance
+      };
+    }
+    return {
+      ...token,
+      tokenId: token?.id
+    };
+  }, [token, offer]);
 
   const { selectedAccount } = useAccounts();
   const deviceSize = useDeviceSize();
@@ -63,7 +81,7 @@ export const CommonTokenDetail: FC<IProps> = ({
   return (
     <CommonTokenDetailStyled>
       <PictureWrapper>
-        <Picture alt={tokenId.toString()} src={imageUrl} />
+        <Picture alt={tokenId?.toString() || ''} src={imageUrl} />
       </PictureWrapper>
       <Description>
         <Heading size={'1'}>{`${prefix || ''} #${tokenId}`}</Heading>
@@ -91,7 +109,7 @@ export const CommonTokenDetail: FC<IProps> = ({
         </Row>
         <Divider />
         {children}
-        <AttributesBlock attributes={attributes} />
+        {attributes && <AttributesBlock attributes={attributes} />}
         <Divider />
         <CollectionsCard
           avatarSrc={''}

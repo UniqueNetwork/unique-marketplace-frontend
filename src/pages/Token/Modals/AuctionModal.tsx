@@ -151,9 +151,9 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
   );
 };
 
-const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ token, accountAddress, onFinish, amount }) => {
+const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ offer, accountAddress, onFinish, amount }) => {
   const { updateAccountBalance } = useAccounts();
-  const { stages, status, initiate } = useAuctionBidStages(token?.collectionId || 0, token?.id);
+  const { stages, status, initiate } = useAuctionBidStages(offer?.collectionId || 0, offer?.tokenId || 0);
   const { push } = useNotification();
 
   useEffect(() => {
@@ -161,9 +161,13 @@ const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ token, 
     initiate({ value: amount, accountAddress });
   }, [amount, accountAddress]);
 
+  const prefix = useMemo(() => {
+    return offer?.tokenDescription.find(({ key }) => key === 'prefix')?.value || '';
+  }, [offer]);
+
   useEffect(() => {
     if (status === StageStatus.success) {
-      push({ severity: NotificationSeverity.success, message: <>You made a new bid on <Link title={`${token.prefix} #${token.id}`}/></> });
+      push({ severity: NotificationSeverity.success, message: <>You made a new bid on <Link title={`${prefix} #${offer?.tokenId || ''}`}/></> });
       void updateAccountBalance();
     }
   }, [status]);

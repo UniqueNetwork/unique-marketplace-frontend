@@ -20,7 +20,6 @@ import { NotificationSeverity } from '../../../notification/NotificationContext'
 
 interface AuctionProps {
   offer: Offer
-  token: NFTToken
   onPlaceABidClick(): void
   onDelistAuctionClick(): void
   onWithdrawClick(): void

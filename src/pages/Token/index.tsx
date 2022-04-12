@@ -32,13 +32,17 @@ const TokenPage = () => {
   const fetchToken = useCallback(() => {
     if (!api) return;
     setLoading(true);
+    if (offer) {
+      setLoading(false);
+      return;
+    }
     api?.nft?.getToken(Number(collectionId), Number(id)).then((token: NFTToken) => {
       setToken(token);
       setLoading(false);
     }).catch((error) => {
       console.log('Get token from RPC failed', error);
     });
-  }, [api, collectionId, id]);
+  }, [api, collectionId, id, offer]);
 
   // TODO: debug purposes, should be taken from API instead of RPC
   useEffect(() => {
@@ -66,7 +70,7 @@ const TokenPage = () => {
   }, [push, fetchOffer, fetchToken, selectedAccount?.address, collectionId, id, token]);
 
   if (loading) return <Loading />;
-  else if (!token) return <Error404 />;
+  else if (!token && !offer) return <Error404 />;
 
   // TODO: split into more categories here instead of just "buy/sell" and putting splitting inside them
 

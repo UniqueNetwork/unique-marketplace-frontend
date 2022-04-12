@@ -7,8 +7,8 @@ import { NotificationSeverity } from '../../../notification/NotificationContext'
 import { useNotification } from '../../../hooks/useNotification';
 import { useAccounts } from '../../../hooks/useAccounts';
 
-export const WithdrawBidStagesModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish }) => {
-  const { stages, status, initiate } = useWithdrawBidStages(token.collectionId || 0, token.id);
+export const WithdrawBidStagesModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
+  const { stages, status, initiate } = useWithdrawBidStages(offer?.collectionId || 0, offer?.tokenId || 0);
   useEffect(() => { initiate(null); }, []);
   const { push } = useNotification();
   const { updateAccountBalance } = useAccounts();
