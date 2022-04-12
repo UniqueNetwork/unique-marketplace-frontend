@@ -21,34 +21,19 @@ export type TTokensCard = {
 };
 
 export const OfferCard: FC<TTokensCard> = ({ offer }) => {
-  const [token, setToken] = useState<NFTToken | undefined>();
-  const [isFetching, setIsFetching] = useState<boolean>(false);
-
   const { api } = useApi();
   const { selectedAccount } = useAccounts();
 
   const {
     collectionName,
-    imagePath,
-    tokenPrefix
+    image,
+    prefix
   } = useMemo<Record<string, string | undefined>>(() => {
-    if (token) {
-      return {
-        collectionName: token.collectionName,
-        imagePath: token.imageUrl,
-        tokenPrefix: token.prefix
-      };
-    }
-
     if (offer) {
-      setIsFetching(true);
-      void api?.nft?.getToken(offer.collectionId, offer.tokenId).then((token: NFTToken) => {
-        setIsFetching(false);
-        setToken(token);
-      });
+      return offer.tokenDescription.reduce((acc, item) => ({ ...acc, [item.key]: item.value }), {});
     }
     return {};
-  }, [offer, token, api]);
+  }, [offer, api]);
 
   const isBidder = useMemo(() => {
     if (!selectedAccount) return false;
@@ -68,12 +53,12 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
   return (
     <TokensCardStyled>
       <PictureWrapper to={`/token/${offer?.collectionId}/${offer?.tokenId}`}>
-        <Picture alt={offer?.tokenId?.toString() || ''} src={imagePath} />
+        <Picture alt={offer?.tokenId?.toString() || ''} src={image} />
       </PictureWrapper>
       <Description>
-        <Link to={`/token/${offer?.collectionId}/${offer?.tokenId}`} title={`${tokenPrefix || ''} #${offer?.tokenId}`}>
+        <Link to={`/token/${offer?.collectionId}/${offer?.tokenId}`} title={`${prefix || ''} #${offer?.tokenId}`}>
           <Text size='l' weight='medium' color={'secondary-500'}>
-            {`${tokenPrefix || ''} #${offer?.tokenId}`}
+            {`${prefix || ''} #${offer?.tokenId}`}
           </Text>
         </Link>
         <a href={`${config.scanUrl || ''}collections/${offer?.collectionId}`} target={'_blank'} rel='noreferrer'>
@@ -95,8 +80,6 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
           <StyledText color={'dark'} size={'xs'}>{`${timeDifference(new Date(offer.auction?.stopAt || '').getTime() / 1000)} left`}</StyledText>
         </AuctionInfoWrapper>}
       </Description>
-
-      {isFetching && <Loading />}
     </TokensCardStyled>
   );
 };
