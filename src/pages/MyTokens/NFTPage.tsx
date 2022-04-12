@@ -164,7 +164,7 @@ export const NFTPage = () => {
 
   const featuredTokens: (NFTToken & Partial<Offer>)[] = useMemo(() => {
     const tokensWithOffers = tokens.map((token) => ({
-      ...(offers.find((offer) => offer.tokenId === token.id && offer.collectionId === token.collectionId) || {}),
+      ...(offers?.find((offer) => offer.tokenId === token.id && offer.collectionId === token.collectionId) || {}),
       ...token
     })).filter(filter);
 
