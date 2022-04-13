@@ -49,7 +49,7 @@ export interface NFTToken {
   owner?: CrossAccountId
   constData?: string
   variableData?: string
-  attributes: AttributesDecoded
+  attributes?: AttributesDecoded
   imageUrl: string
   collectionId?: number
   collectionName?: string

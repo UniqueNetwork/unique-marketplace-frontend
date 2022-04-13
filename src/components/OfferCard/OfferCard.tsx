@@ -1,11 +1,8 @@
-import React, { FC, useMemo, useState } from 'react';
+import React, { FC, useMemo } from 'react';
 import { Icon, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import { Picture } from '..';
-import { useApi } from '../../hooks/useApi';
-import Loading from '../Loading';
-import { NFTToken } from '../../api/chainApi/unique/types';
 import { formatKusamaBalance } from '../../utils/textUtils';
 import { Offer } from '../../api/restApi/offers/types';
 import Kusama from '../../static/icons/logo-kusama.svg';
@@ -21,19 +18,13 @@ export type TTokensCard = {
 };
 
 export const OfferCard: FC<TTokensCard> = ({ offer }) => {
-  const { api } = useApi();
   const { selectedAccount } = useAccounts();
 
   const {
     collectionName,
     image,
     prefix
-  } = useMemo<Record<string, string | undefined>>(() => {
-    if (offer) {
-      return offer.tokenDescription.reduce((acc, item) => ({ ...acc, [item.key]: item.value }), {});
-    }
-    return {};
-  }, [offer, api]);
+  } = offer?.tokenDescription || {};
 
   const isBidder = useMemo(() => {
     if (!selectedAccount) return false;

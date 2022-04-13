@@ -24,7 +24,7 @@ const TokenPage = () => {
   const { id, collectionId } = useParams<{ id: string, collectionId: string}>();
   const [token, setToken] = useState<NFTToken>();
   const [loading, setLoading] = useState<boolean>(true);
-  const { offer, fetch: fetchOffer } = useOffer(Number(collectionId), Number(id));
+  const { offer, fetch: fetchOffer, isFetching: isFetchingOffer } = useOffer(Number(collectionId), Number(id));
   const [marketType, setMarketType] = useState<MarketType>(MarketType.default); // TODO: when "sell"/"buy"/"bid"/etc clicked - update this status to open modal
 
   const { push } = useNotification();
@@ -32,7 +32,7 @@ const TokenPage = () => {
   const fetchToken = useCallback(() => {
     if (!api) return;
     setLoading(true);
-    if (offer) {
+    if (offer || token || isFetchingOffer) {
       setLoading(false);
       return;
     }
@@ -42,7 +42,7 @@ const TokenPage = () => {
     }).catch((error) => {
       console.log('Get token from RPC failed', error);
     });
-  }, [api, collectionId, id, offer]);
+  }, [api, collectionId, id, offer, token, isFetchingOffer]);
 
   // TODO: debug purposes, should be taken from API instead of RPC
   useEffect(() => {
@@ -69,7 +69,7 @@ const TokenPage = () => {
     fetchToken();
   }, [push, fetchOffer, fetchToken, selectedAccount?.address, collectionId, id, token]);
 
-  if (loading) return <Loading />;
+  if (loading || isFetchingOffer) return <Loading />;
   else if (!token && !offer) return <Error404 />;
 
   // TODO: split into more categories here instead of just "buy/sell" and putting splitting inside them

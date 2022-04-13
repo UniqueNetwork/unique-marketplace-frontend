@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useMemo } from 'react';
+import React, { FC, useEffect } from 'react';
 import { Link } from '@unique-nft/ui-kit';
 
 import { usePurchaseFixStages } from '../../../hooks/marketplaceStages';
@@ -19,13 +19,12 @@ const PurchaseModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
     initiate({ accountAddress: selectedAccount.address });
   }, [selectedAccount?.address]);
 
-  const prefix = useMemo(() => {
-    return offer?.tokenDescription.find(({ key }) => key === 'prefix')?.value || '';
-  }, [offer]);
+  const { tokenId, collectionId } = offer || {};
+  const { prefix } = offer?.tokenDescription || {};
 
   useEffect(() => {
     if (status === StageStatus.success) {
-      push({ severity: NotificationSeverity.success, message: <>You are the new owner of <Link href={`/token/${offer?.collectionId}/${offer?.tokenId}`} title={`${prefix} #${offer?.tokenId}`}/></> });
+      push({ severity: NotificationSeverity.success, message: <>You are the new owner of <Link href={`/token/${collectionId || ''}/${tokenId || ''}`} title={`${prefix || ''} #${tokenId || ''}`}/></> });
     }
   }, [status]);
 

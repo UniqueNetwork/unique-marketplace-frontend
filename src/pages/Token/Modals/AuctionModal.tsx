@@ -160,13 +160,12 @@ const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ offer, 
     initiate({ value: amount, accountAddress });
   }, [amount, accountAddress]);
 
-  const prefix = useMemo(() => {
-    return offer?.tokenDescription.find(({ key }) => key === 'prefix')?.value || '';
-  }, [offer]);
+  const { tokenId, collectionId } = offer || {};
+  const { prefix } = offer?.tokenDescription || {};
 
   useEffect(() => {
     if (status === StageStatus.success) {
-      push({ severity: NotificationSeverity.success, message: <>You made a new bid on <Link title={`${prefix} #${offer?.tokenId || ''}`}/></> });
+      push({ severity: NotificationSeverity.success, message: <>You made a new bid on <Link href={`/token/${collectionId || ''}/${tokenId || ''}`} title={`${prefix || ''} #${tokenId || ''}`}/></> });
     }
   }, [status]);
 

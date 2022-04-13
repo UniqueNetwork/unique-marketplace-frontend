@@ -29,10 +29,10 @@ export type Auction = {
   stopAt: string
 }
 
-export type OfferTokenDescriptionItem = {
+export type OfferTokenAttribute = {
   key: string
   type: string
-  value: string
+  value: string | string[]
 }
 
 export type Offer = {
@@ -43,7 +43,12 @@ export type Offer = {
   seller: string
   creationDate: string
   auction: Auction | null
-  tokenDescription: OfferTokenDescriptionItem[]
+  tokenDescription: {
+    collectionName: string
+    image: string
+    prefix: string
+    attributes: OfferTokenAttribute[]
+  }
 }
 
 export type OffersResponse = PaginatedResponse<Offer>

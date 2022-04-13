@@ -42,11 +42,10 @@ export const CommonTokenDetail: FC<IProps> = ({
     prefix
   } = useMemo(() => {
     if (offer) {
-      const { tokenId, collectionName, prefix, image, ...attributes }: Record<string, string> = offer.tokenDescription
-        .reduce((acc, item) => ({ ...acc, [item.key]: item.value }), {});
+      const { collectionName, image, prefix } = offer.tokenDescription;
+      const attributes = offer.tokenDescription.attributes.reduce((acc, item) => ({ ...acc, [item.key]: item.value }), {});
       return {
         ...offer,
-        tokenId,
         collectionName,
         prefix,
         imageUrl: image,

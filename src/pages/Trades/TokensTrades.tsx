@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import { Button, InputText, Pagination, Text } from '@unique-nft/ui-kit';
+import { Pagination, Text } from '@unique-nft/ui-kit';
 import { SortQuery } from '@unique-nft/ui-kit/dist/cjs/types';
 
 import { useTrades } from '../../api/restApi/trades/trades';
@@ -21,7 +21,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
   const { selectedAccount } = useAccounts();
   const [page, setPage] = useState<number>(0);
   const [sortString, setSortString] = useState<string>();
-  const [searchValue, setSearchValue] = useState<string | number>();
+  // const [searchValue, setSearchValue] = useState<string | number>();
 
   const { trades, tradesCount, fetch, isFetching } = useTrades();
   const { tradesWithTokens, isFetchingTokens } = useGetTokensByTrades(trades);
@@ -117,26 +117,26 @@ const TradesPageWrapper = styled.div`
   width: 100%
 `;
 
-const SearchWrapper = styled.div`
-  display: flex;
-  margin-bottom: calc(var(--gap) * 2);
-  button {
-    margin-left: 8px;
-  }
-
-  @media (max-width: 768px) {
-    width: 100%;
-    .unique-input-text {
-      flex-grow: 1;
-    }
-  }
-
-  @media (max-width: 320px) {
-    .unique-button {
-      display: none;
-    }
-  }
-`;
+// const SearchWrapper = styled.div`
+//   display: flex;
+//   margin-bottom: calc(var(--gap) * 2);
+//   button {
+//     margin-left: 8px;
+//   }
+//
+//   @media (max-width: 768px) {
+//     width: 100%;
+//     .unique-input-text {
+//       flex-grow: 1;
+//     }
+//   }
+//
+//   @media (max-width: 320px) {
+//     .unique-button {
+//       display: none;
+//     }
+//   }
+// `;
 
 const PaginationWrapper = styled.div`
   display: flex;

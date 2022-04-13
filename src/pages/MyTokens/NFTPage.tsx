@@ -96,11 +96,10 @@ export const NFTPage = () => {
     if (!api?.nft || !selectedAccount?.address) return;
     setIsFetchingTokens(true);
     void (async () => {
-      const _offers = await fetch({ page: 1, pageSize, seller: selectedAccount?.address }) || [];
-      const _tokensFromOffers = await Promise.all(_offers.map(({ tokenId, collectionId }) => api.nft?.getToken(collectionId, tokenId))) as NFTToken[];
+      await fetch({ page: 1, pageSize, seller: selectedAccount?.address });
       const _tokens = await api.nft?.getAccountTokens(selectedAccount.address) as NFTToken[];
 
-      setTokens([..._tokens, ..._tokensFromOffers]);
+      setTokens(_tokens);
       setIsFetchingTokens(false);
     })();
   }, [api?.nft, selectedAccount?.address, setIsFetchingTokens, fetch]);
@@ -163,10 +162,16 @@ export const NFTPage = () => {
   );
 
   const featuredTokens: (NFTToken & Partial<Offer>)[] = useMemo(() => {
-    const tokensWithOffers = tokens.map((token) => ({
-      ...(offers?.find((offer) => offer.tokenId === token.id && offer.collectionId === token.collectionId) || {}),
-      ...token
-    })).filter(filter);
+    const tokensWithOffers: (NFTToken & Partial<Offer>)[] = [
+      ...(offers?.map<NFTToken & Partial<Offer>>((offer) => ({
+        id: offer.tokenId,
+        collectionName: offer.tokenDescription.collectionName,
+        prefix: offer.tokenDescription.prefix,
+        imageUrl: offer.tokenDescription.image,
+        ...offer
+      })) || []),
+      ...tokens
+    ].filter(filter);
 
     if (selectOption) {
       return tokensWithOffers.sort((tokenA, tokenB) => {
