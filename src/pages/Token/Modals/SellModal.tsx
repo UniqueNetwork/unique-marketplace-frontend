@@ -3,15 +3,16 @@ import React, { FC, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components/macro';
 
 import DefaultMarketStages from './StagesModal';
+import { TTokenPageModalBodyProps } from './TokenPageModal';
 import { TAuctionProps, TFixPriceProps } from './types';
 import { useAuctionSellStages, useSellFixStages } from '../../../hooks/marketplaceStages';
-import { AdditionalWarning100 } from '../../../styles/colors';
-import { TTokenPageModalBodyProps } from './TokenPageModal';
+import { useNotification } from '../../../hooks/useNotification';
+import { useFee } from '../../../hooks/useFee';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { NumberInput } from '../../../components/NumberInput/NumberInput';
+import { AdditionalWarning100 } from '../../../styles/colors';
 import { StageStatus } from '../../../types/StagesTypes';
 import { NotificationSeverity } from '../../../notification/NotificationContext';
-import { useNotification } from '../../../hooks/useNotification';
 
 const tokenSymbol = 'KSM';
 
@@ -64,6 +65,7 @@ type TAskSellModalProps = {
 
 export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixPrice }) => {
   const { selectedAccount } = useAccounts();
+  const { kusamaFee, fetchingKusamaFee } = useFee();
   const [activeTab, setActiveTab] = useState<number>(0);
   const [priceInputValue, setPriceInputValue] = useState<string>();
 
@@ -146,7 +148,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
         color='additional-warning-500'
         size='s'
       >
-        {`A fee of ~ 0.000000000000052 ${tokenSymbol} can be applied to the transaction`}
+        {`A fee of ~ ${kusamaFee} ${tokenSymbol} can be applied to the transaction`}
       </TextStyled>
       <ButtonWrapper>
         <Button
@@ -183,7 +185,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
         color='additional-warning-500'
         size='s'
       >
-        {`A fee of ~ 0.000000000000052 ${tokenSymbol} can be applied to the transaction`}
+        {`A fee of ~ ${kusamaFee} ${tokenSymbol} can be applied to the transaction`}
       </TextStyled>
       <ButtonWrapper>
         <Button

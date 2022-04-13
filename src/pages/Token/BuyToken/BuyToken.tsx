@@ -15,13 +15,13 @@ interface BuyTokenProps {
 }
 
 export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy }) => {
-  const { fee } = useFee();
+  const { marketCommission } = useFee();
   const { selectedAccount } = useAccounts();
 
   const isEnoughBalance = useMemo(() => {
     if (!selectedAccount?.balance?.KSM || selectedAccount.balance.KSM.isZero() || !offer?.price) return false;
-    return selectedAccount.balance.KSM.gte(new BN(offer.price).add(new BN(fee)));
-  }, [offer?.price, selectedAccount?.balance?.KSM]);
+    return selectedAccount.balance.KSM.gte(new BN(offer.price).add(new BN(marketCommission)));
+  }, [offer?.price, selectedAccount?.balance?.KSM, marketCommission]);
 
   const onBuyClick = useCallback(() => {
     if (!isEnoughBalance) return;
