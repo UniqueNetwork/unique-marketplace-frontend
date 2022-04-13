@@ -1,5 +1,6 @@
 import Web3 from 'web3';
 import { ApiPromise } from '@polkadot/api';
+import { AddressOrPair } from '@polkadot/api/types';
 import { BN } from '@polkadot/util';
 import { encodeAddress } from '@polkadot/util-crypto';
 import marketplaceAbi from './abi/marketPlaceAbi.json';
@@ -180,6 +181,11 @@ class MarketController implements IMarketController {
     }
 
     throw new Error('Awaiting tx execution timed out');
+  }
+
+  public async getKusamaFee(sender: AddressOrPair, recipient: string = this.escrowAddress, value: BN = new BN(1000)) {
+    const transferFee = (await this.kusamaApi.tx.balances.transfer(recipient, value).paymentInfo(sender));
+    return transferFee.partialFee;
   }
 
   // #region sell

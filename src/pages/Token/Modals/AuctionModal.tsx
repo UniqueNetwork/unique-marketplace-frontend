@@ -4,22 +4,23 @@ import styled from 'styled-components/macro';
 import { BN } from '@polkadot/util';
 
 import { TPlaceABid } from './types';
+import DefaultMarketStages from './StagesModal';
 import { AdditionalWarning100 } from '../../../styles/colors';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 import { useAuctionBidStages } from '../../../hooks/marketplaceStages';
-import { Offer } from '../../../api/restApi/offers/types';
-import DefaultMarketStages from './StagesModal';
-import Kusama from '../../../static/icons/logo-kusama.svg';
 import { useAccounts } from '../../../hooks/useAccounts';
-import { formatKusamaBalance } from '../../../utils/textUtils';
-import { NumberInput } from '../../../components/NumberInput/NumberInput';
-import { useApi } from '../../../hooks/useApi';
-import { fromStringToBnString } from '../../../utils/bigNum';
-import { StageStatus } from '../../../types/StagesTypes';
+import { useFee } from '../../../hooks/useFee';
 import { useNotification } from '../../../hooks/useNotification';
+import { useApi } from '../../../hooks/useApi';
+import { formatKusamaBalance } from '../../../utils/textUtils';
+import { fromStringToBnString } from '../../../utils/bigNum';
+import { NumberInput } from '../../../components/NumberInput/NumberInput';
+import { StageStatus } from '../../../types/StagesTypes';
+import { Offer } from '../../../api/restApi/offers/types';
 import { useAuction } from '../../../api/restApi/auction/auction';
 import { TCalculatedBid } from '../../../api/restApi/auction/types';
 import { NotificationSeverity } from '../../../notification/NotificationContext';
+import Kusama from '../../../static/icons/logo-kusama.svg';
 
 export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ token, offer, setIsClosable, onFinish }) => {
   const [status, setStatus] = useState<'ask' | 'place-bid-stage'>('ask'); // TODO: naming
@@ -48,6 +49,7 @@ const chainOptions = [{ id: 'KSM', title: 'KSM', iconRight: { size: 18, file: Ku
 
 export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceABid): void}> = ({ offer, onConfirmPlaceABid }) => {
   const [chain, setChain] = useState<string | undefined>('KSM');
+  const { kusamaFee, fetchingKusamaFee } = useFee();
   const { selectedAccount } = useAccounts();
   const { api } = useApi();
   const [calculatedBid, setCalculatedBid] = useState<TCalculatedBid>();
@@ -137,7 +139,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
         color='additional-warning-500'
         size='s'
       >
-        {`A fee of ~ 0.000000000000052 ${chain || ''} can be applied to the transaction`}
+        {`A fee of ~ ${kusamaFee} ${chain || ''} can be applied to the transaction`}
       </TextStyled>
       <ButtonWrapper>
         <Button
