@@ -186,9 +186,13 @@ const PictureWrapper = styled.div`
     }
 
     @media (max-width: 567px) {
-      width: 100%;
+      width: 100vw;
+      min-width: 100vw;
     }
-    
+  }
+  @media (max-width: 567px) {
+    width: 100vw;
+    margin-left: calc(0px - var(--gap));
   }
 `;
 
