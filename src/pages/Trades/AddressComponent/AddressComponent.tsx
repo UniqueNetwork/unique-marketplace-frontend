@@ -15,10 +15,12 @@ export const AddressComponent = ({ text }: { text: string }) => {
 
   const shortCut = useMemo(() => (shortcutText(formatAddress(text))), [text]);
 
-  return <LinkWrapper><Link
+  return <LinkWrapper><a
+    target={'_blank'}
+    rel={'noreferrer'}
     href={`${config?.scanUrl || ''}account/${formatAddress(text)}`}
-    title={shortCut}
-  /></LinkWrapper>;
+    className={'unique-link primary'}
+    >{shortCut}</a></LinkWrapper>;
 };
 
 const LinkWrapper = styled.span`
