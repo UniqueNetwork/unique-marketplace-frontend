@@ -93,7 +93,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
       {/*    title='Search' */}
       {/*  /> */}
       {/* </SearchWrapper> */}
-      <Table
+      <StyledTable
         onSort={onSortChange}
         data={tradesWithTokens || []}
         columns={tradesColumns}
@@ -138,9 +138,23 @@ const TradesPageWrapper = styled.div`
 //   }
 // `;
 
+const StyledTable = styled(Table)`
+  && > div > div:first-child {
+    grid-column: 1 / span 2;
+    & > .unique-text {
+      display: none;
+    }
+  }
+`;
+
 const PaginationWrapper = styled.div`
   display: flex;
   justify-content: space-between;
   margin-top: calc(var(--gap) * 2);
   align-items: center;
+  
+  @media (max-width: 568px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 `;

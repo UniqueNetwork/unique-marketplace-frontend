@@ -78,10 +78,17 @@ const LayoutStyled = styled.div`
         font-size: 16px;
         line-height: 24px;
       }
+      @media (max-width: 568px) {
+        padding-bottom: calc(var(--gap) * 5);
+      }
     }
   }
 
-
+  .unique-modal-wrapper .unique-modal {
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
   .unique-layout__content {
     padding: 0 !important;
     background-color: transparent !important;
@@ -105,12 +112,15 @@ const LayoutStyled = styled.div`
         line-height: 22px;
       }
     }
+    @media (max-width: 1024px) {
+      padding-bottom: 40px;
+    }
   }
 
   header {
     top: 0;
     position: sticky !important;
-    z-index: 1000;
+    z-index: 990;
     @media (max-width: 620px) {
       height: 80px !important;
     }

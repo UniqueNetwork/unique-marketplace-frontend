@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { KeyboardEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components/macro';
 import BN from 'bn.js';
 import { Button, InputText, Select, Text } from '@unique-nft/ui-kit';
@@ -122,6 +122,11 @@ export const NFTPage = () => {
     setSearchString(searchValue);
   }, [searchValue]);
 
+  const onSearchInputKeyDown = useCallback((event: KeyboardEvent) => {
+    if (event.key !== 'Enter') return;
+    onSearch();
+  }, [onSearch]);
+
   const filter = useCallback((token: NFTToken & Partial<Offer>) => {
       let filterByStatus = true;
       if (filterState?.onSell) {
@@ -193,6 +198,7 @@ export const NFTPage = () => {
             <InputTextStyled
               iconLeft={{ name: 'magnify', size: 16 }}
               onChange={onChangeSearchValue}
+              onKeyDown={onSearchInputKeyDown}
               placeholder='Collection / token'
               value={searchValue?.toString()}
             />
@@ -273,8 +279,9 @@ const SearchWrapper = styled.div`
       flex-grow: 1;
     }
   }
-  
+
   @media (max-width: 320px) {
+    margin-right: 0;
     .unique-button {
       display: none;
     }

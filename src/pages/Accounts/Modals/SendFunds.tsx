@@ -171,11 +171,14 @@ const Content = styled.div`
 const AddressWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 2);
-  margin-top: calc(var(--gap) * 2);
   border: 1px solid var(--grey-300);
   border-radius: 4px;
   padding: calc(var(--gap) / 2) var(--gap);
   align-items: center;
+  .unique-text {
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
 `;
 
 const AddressOptionWrapper = styled.div`

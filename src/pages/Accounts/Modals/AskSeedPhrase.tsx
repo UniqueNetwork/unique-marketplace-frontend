@@ -99,6 +99,10 @@ const AddressWrapper = styled.div`
   border: 1px solid var(--grey-300);
   border-radius: 4px;
   padding: 20px var(--gap);
+  .unique-text {
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
 `;
 
 const SeedGeneratorSelectWrapper = styled.div`
