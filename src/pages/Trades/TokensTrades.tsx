@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import { Button, InputText, Pagination, Text } from '@unique-nft/ui-kit';
+import { Pagination, Text } from '@unique-nft/ui-kit';
 import { SortQuery } from '@unique-nft/ui-kit/dist/cjs/types';
 
 import { useTrades } from '../../api/restApi/trades/trades';
@@ -21,7 +21,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
   const { selectedAccount } = useAccounts();
   const [page, setPage] = useState<number>(0);
   const [sortString, setSortString] = useState<string>();
-  const [searchValue, setSearchValue] = useState<string | number>();
+  // const [searchValue, setSearchValue] = useState<string | number>();
 
   const { trades, tradesCount, fetch, isFetching } = useTrades();
   const { tradesWithTokens, isFetchingTokens } = useGetTokensByTrades(trades);
@@ -93,7 +93,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
       {/*    title='Search' */}
       {/*  /> */}
       {/* </SearchWrapper> */}
-      <Table
+      <StyledTable
         onSort={onSortChange}
         data={tradesWithTokens || []}
         columns={tradesColumns}
@@ -138,9 +138,23 @@ const SearchWrapper = styled.div`
   }
 `;
 
+const StyledTable = styled(Table)`
+  && > div > div:first-child {
+    grid-column: 1 / span 2;
+    & > .unique-text {
+      display: none;
+    }
+  }
+`;
+
 const PaginationWrapper = styled.div`
   display: flex;
   justify-content: space-between;
   margin-top: calc(var(--gap) * 2);
   align-items: center;
+  
+  @media (max-width: 568px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 `;

@@ -15,9 +15,10 @@ interface AccountProps {
   accountAddress: string
   isShort?: boolean
   canCopy?: boolean
+  hideAddress?: boolean
 }
 
-const AccountCard: FC<AccountProps> = ({ accountName, accountAddress, isShort = false, canCopy = true }) => {
+const AccountCard: FC<AccountProps> = ({ accountName, accountAddress, isShort = false, canCopy = true, hideAddress = false }) => {
   const { chainData } = useApi();
   const { push } = useNotification();
 
@@ -36,7 +37,7 @@ const AccountCard: FC<AccountProps> = ({ accountName, accountAddress, isShort = 
       <Avatar size={24} src={DefaultAvatar} />
       <AccountInfoWrapper>
         <Text>{accountName}</Text>
-        <AddressRow>
+        {!hideAddress && <AddressRow>
           <Text size={'s'} color={'grey-500'}>
             {isShort ? shortcutText(formatAddress(accountAddress) || '') : formatAddress(accountAddress) || ''}
           </Text>
@@ -45,7 +46,7 @@ const AccountCard: FC<AccountProps> = ({ accountName, accountAddress, isShort = 
               <Icon path={CopyIcon} />
             </CopyIconWrapper>
           </a>}
-        </AddressRow>
+        </AddressRow>}
       </AccountInfoWrapper>
     </>
   );
