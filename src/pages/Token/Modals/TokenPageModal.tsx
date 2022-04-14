@@ -15,14 +15,14 @@ import { CancelAuctionStagesModal } from './CancelAuctionModal';
 export type TTokenPageModalProps = {
   onFinish: () => void
   offer?: Offer
-  token: NFTToken
+  token?: NFTToken
   // once button is clicked (sell/bid/etc) -> we will change marketType for modal and therefore this component decides what to show and how
   marketType: MarketType
 }
 
 export type TTokenPageModalBodyProps = {
   setIsClosable: (value: boolean) => void
-  token: NFTToken
+  token?: NFTToken
   offer?: Offer
   onFinish: () => void // TODO: make a type, in future we would definitly wan't to pass smth like success/error/error.message
 }

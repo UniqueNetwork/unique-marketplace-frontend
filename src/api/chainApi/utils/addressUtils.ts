@@ -6,7 +6,7 @@ import { keyring } from '@polkadot/ui-keyring';
 import Web3 from 'web3';
 
 import { subToEthLowercase } from './decoder';
-import { CrossAccountId } from '../types';
+import { CrossAccountId } from '../unique/types';
 
 keyring.loadAll({});
 

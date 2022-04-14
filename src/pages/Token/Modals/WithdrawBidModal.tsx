@@ -6,8 +6,8 @@ import { StageStatus } from '../../../types/StagesTypes';
 import { NotificationSeverity } from '../../../notification/NotificationContext';
 import { useNotification } from '../../../hooks/useNotification';
 
-export const WithdrawBidStagesModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish }) => {
-  const { stages, status, initiate } = useWithdrawBidStages(token.collectionId || 0, token.id);
+export const WithdrawBidStagesModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
+  const { stages, status, initiate } = useWithdrawBidStages(offer?.collectionId || 0, offer?.tokenId || 0);
   const { push } = useNotification();
 
   useEffect(() => { initiate(null); }, []);

@@ -20,7 +20,6 @@ import AccountLink from '../../../components/Account/AccountLink';
 
 interface AuctionProps {
   offer: Offer
-  token: NFTToken
   onPlaceABidClick(): void
   onDelistAuctionClick(): void
   onWithdrawClick(): void

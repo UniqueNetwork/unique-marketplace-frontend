@@ -20,7 +20,7 @@ import { useApi } from '../../../hooks/useApi';
 
 interface IProps {
   children: ReactChild[];
-  token: NFTToken;
+  token?: NFTToken;
   offer?: Offer;
 }
 
@@ -38,16 +38,33 @@ export const CommonTokenDetail: FC<IProps> = ({
     description,
     attributes,
     imageUrl,
-    id: tokenId,
+    tokenId,
     prefix
-  } = token;
+  } = useMemo(() => {
+    if (offer) {
+      const { collectionName, image, prefix } = offer.tokenDescription;
+      const attributes = offer.tokenDescription.attributes.reduce((acc, item) => ({ ...acc, [item.key]: item.value }), {});
+      return {
+        ...offer,
+        collectionName,
+        prefix,
+        imageUrl: image,
+        attributes,
+        description: '' // TODO: need add this in offer instance
+      };
+    }
+    return {
+      ...token,
+      tokenId: token?.id
+    };
+  }, [token, offer]);
 
   useEffect(() => {
     (async () => {
       if (!api?.collection || !token?.collectionId) return;
       setCollectionCoverImage((await api.collection.getCollection(token.collectionId)).coverImageUrl);
     })();
-  }, [token.collectionId, api?.collection]);
+  }, [token?.collectionId, api?.collection]);
 
   const { selectedAccount } = useAccounts();
   const deviceSize = useDeviceSize();
@@ -71,7 +88,7 @@ export const CommonTokenDetail: FC<IProps> = ({
     if (offer) {
       return isTokenOwner(selectedAccount.address, { Substrate: offer.seller });
     }
-    return isTokenOwner(selectedAccount.address, normalizeAccountId(token.owner || ''));
+    return isTokenOwner(selectedAccount.address, normalizeAccountId(token?.owner || ''));
   }, [selectedAccount, token, offer]);
 
   const onShareClick = useCallback(() => {
@@ -86,7 +103,7 @@ export const CommonTokenDetail: FC<IProps> = ({
   return (
     <CommonTokenDetailStyled>
       <PictureWrapper>
-        <Picture alt={tokenId.toString()} src={imageUrl} />
+        <Picture alt={tokenId?.toString() || ''} src={imageUrl} />
       </PictureWrapper>
       <Description>
         <Heading size={'1'}>{`${prefix || ''} #${tokenId}`}</Heading>
@@ -114,7 +131,7 @@ export const CommonTokenDetail: FC<IProps> = ({
         </Row>
         <Divider />
         {children}
-        <AttributesBlock attributes={attributes} />
+        {attributes && <AttributesBlock attributes={attributes} />}
         <Divider />
         <CollectionsCard
           avatarSrc={collectionCoverImage || ''}
