@@ -6,8 +6,8 @@ import { Offer } from '../../../api/restApi/offers/types';
 import { TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import { timestampTableFormat } from '../../../utils/timestampUtils';
 import { formatKusamaBalance } from '../../../utils/textUtils';
-import AccountLink from '../../../components/Account/AccountLink';
 import { Table } from '../../../components/Table';
+import Bidder from './Bidder';
 
 interface BidsProps {
   offer: Offer
@@ -30,7 +30,7 @@ const getColumns = (tokenSymbol: string): TableColumnProps[] => ([
     title: 'Bidder',
     field: 'bidderAddress',
     width: '100%',
-    render: (account: string) => <AccountLink accountAddress={account} />
+    render: (account: string) => <Bidder accountAddress={account} />
   }
 ]);
 
