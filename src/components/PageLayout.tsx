@@ -78,6 +78,9 @@ const LayoutStyled = styled.div`
         font-size: 16px;
         line-height: 24px;
       }
+      @media (max-width: 568px) {
+        padding-bottom: calc(var(--gap) * 5);
+      }
     }
   }
 
@@ -108,6 +111,9 @@ const LayoutStyled = styled.div`
       .breadcrumb-item {
         line-height: 22px;
       }
+    }
+    @media (max-width: 1024px) {
+      padding-bottom: 40px;
     }
   }
 
