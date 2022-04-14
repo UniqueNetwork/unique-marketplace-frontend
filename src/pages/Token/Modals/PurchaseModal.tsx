@@ -9,13 +9,14 @@ import { StageStatus } from '../../../types/StagesTypes';
 import { NotificationSeverity } from '../../../notification/NotificationContext';
 import { useNotification } from '../../../hooks/useNotification';
 
-const PurchaseModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
+const PurchaseModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, setIsClosable }) => {
   const { selectedAccount } = useAccounts();
   const { stages, status, initiate } = usePurchaseFixStages(offer?.collectionId || 0, offer?.tokenId || 0);
   const { push } = useNotification();
 
   useEffect(() => {
     if (!selectedAccount) throw new Error('Account not selected');
+    setIsClosable(false);
     initiate({ accountAddress: selectedAccount.address });
   }, [selectedAccount?.address]);
 
