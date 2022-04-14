@@ -81,7 +81,11 @@ const LayoutStyled = styled.div`
     }
   }
 
-
+  .unique-modal-wrapper .unique-modal {
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
   .unique-layout__content {
     padding: 0 !important;
     background-color: transparent !important;
@@ -110,7 +114,7 @@ const LayoutStyled = styled.div`
   header {
     top: 0;
     position: sticky !important;
-    z-index: 1000;
+    z-index: 990;
     @media (max-width: 620px) {
       height: 80px !important;
     }
