@@ -128,19 +128,14 @@ export const NFTPage = () => {
   }, [onSearch]);
 
   const filter = useCallback((token: NFTToken & Partial<Offer>) => {
-      let filterByStatus = true;
-      if (filterState?.onSell) {
-        filterByStatus = !!token.seller;
-      }
-      if (filterState?.fixedPrice) {
-        filterByStatus = !!token.seller && !token.auction;
-      }
-      if (filterState?.timedAuction) {
-        filterByStatus = !!token.seller && !!token.auction;
-      }
-      if (filterState?.notOnSale) {
-        filterByStatus = !token.seller;
-      }
+      const filterByStatus = (token: NFTToken & Partial<Offer>) => {
+        if (!filterState?.onSell && !filterState?.fixedPrice && !filterState?.timedAuction && !filterState?.notOnSale) return true;
+        return (filterState?.onSell && !!token.seller) ||
+          (filterState?.fixedPrice && !!token.seller && !token.auction) ||
+          (filterState?.timedAuction && !!token.seller && !!token.auction) ||
+          (filterState?.notOnSale && !token.seller);
+      };
+
       let filteredByPrice = true;
       if (filterState?.minPrice && filterState?.maxPrice) {
         if (!token.price) {
@@ -161,7 +156,7 @@ export const NFTPage = () => {
         filteredBySearchValue = token.collectionName?.includes(searchString) || token.prefix?.includes(searchString) || token.id === Number(searchString);
       }
 
-      return filterByStatus && filteredByPrice && filteredByCollections && filteredBySearchValue;
+      return filterByStatus(token) && filteredByPrice && filteredByCollections && filteredBySearchValue;
     },
     [filterState, searchString, api?.market?.kusamaDecimals]
   );
@@ -170,9 +165,9 @@ export const NFTPage = () => {
     const tokensWithOffers: (NFTToken & Partial<Offer>)[] = [
       ...(offers?.map<NFTToken & Partial<Offer>>((offer) => ({
         id: offer.tokenId,
-        collectionName: offer.tokenDescription.collectionName,
-        prefix: offer.tokenDescription.prefix,
-        imageUrl: offer.tokenDescription.image,
+        collectionName: offer.tokenDescription?.collectionName || '',
+        prefix: offer.tokenDescription?.prefix || '',
+        imageUrl: offer.tokenDescription?.image || '',
         ...offer
       })) || []),
       ...tokens
