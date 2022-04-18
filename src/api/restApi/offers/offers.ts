@@ -8,7 +8,7 @@ import { ResponseError } from '../base/types';
 import { useApi } from '../../../hooks/useApi';
 import { fromStringToBnString } from '../../../utils/bigNum';
 
-const endpoint = '/Offers';
+const endpoint = '/api/Offers';
 
 export const getOffers = (payload: GetOffersRequestPayload) => get<OffersResponse>(endpoint, { ...defaultParams, params: payload });
 

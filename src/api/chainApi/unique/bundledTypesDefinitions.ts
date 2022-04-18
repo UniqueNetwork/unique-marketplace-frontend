@@ -86,7 +86,7 @@ const bundledTypesDefinitions: OverrideBundleDefinition = {
           }
         },
         SchemaVersion: {
-          _enum: ['ImageURL', 'Unique']
+          _enum: ['ImageURL', 'Unique', 'TokenURI']
         },
         CollectionId: 'u32',
         TokenId: 'u32',

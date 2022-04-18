@@ -7,32 +7,29 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import { DropdownSelect, DropdownSelectProps } from './AccountSelect/DropdownSelect';
 import { Account } from '../../../account/AccountContext';
 import Loading from '../../Loading';
-import { formatKusamaBalance, shortcutText } from '../../../utils/textUtils';
-import { Avatar } from '../../Avatar/Avatar';
-import DefaultAvatar from '../../../static/icons/default-avatar.svg';
+import { formatKusamaBalance } from '../../../utils/textUtils';
 import GearIcon from '../../../static/icons/gear.svg';
 import { BalanceOption } from './types';
 import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';
 import { BlueGrey200 } from '../../../styles/colors';
 import { Icon } from '../../Icon/Icon';
 import { useApi } from '../../../hooks/useApi';
+import AccountCard from '../../Account/Account';
 
 const tokenSymbol = 'KSM';
 
 export const WalletManager: FC = () => {
-  const { selectedAccount, accounts, isLoading, isLoadingBalances, fetchAccounts, changeAccount } = useAccounts();
+  const { selectedAccount, accounts, isLoading, fetchAccounts, changeAccount } = useAccounts();
   const deviceSize = useDeviceSize();
   const gearActive = window.location.pathname !== '/accounts';
   const navigate = useNavigate();
   const { chainData } = useApi();
 
   useEffect(() => {
-    void fetchAccounts();
+    (async () => {
+      await fetchAccounts();
+    })();
   }, [fetchAccounts]);
-
-  const onOnChainChange = useCallback(() => {
-    // TODO: change chain
-  }, []);
 
   const onCreateAccountClick = useCallback(() => {
     navigate('/accounts');
@@ -44,9 +41,23 @@ export const WalletManager: FC = () => {
 
   if (!isLoading && accounts.length === 0) {
  return (
-   <Button title={'Сonnect or create account'} onClick={onCreateAccountClick} />
+   <Button title={'Connect or create account'} onClick={onCreateAccountClick} />
   );
 }
+
+  if (deviceSize === DeviceSize.sm) {
+    return (
+      <WalletManagerWrapper>
+        {isLoading && <Loading />}
+        <AccountSelect
+          renderOption={AccountWithBalanceOptionCard}
+          onChange={changeAccount}
+          options={accounts || []}
+          value={selectedAccount}
+        />
+      </WalletManagerWrapper>
+    );
+  }
 
   return (
     <WalletManagerWrapper>
@@ -58,13 +69,7 @@ export const WalletManager: FC = () => {
         value={selectedAccount}
       />
       <Divider />
-      <DropdownSelect<BalanceOption>
-        renderOption={BalanceOptionCard}
-        onChange={onOnChainChange}
-        options={[]}
-        value={currentBalance}
-      />
-      {isLoadingBalances && <Loading />}
+      <BalanceCard {...currentBalance} />
       {deviceSize === DeviceSize.lg && <><Divider />
         <SettingsButtonWrapper $gearActive={gearActive}>
           <Link to={'/accounts'}>
@@ -75,17 +80,27 @@ export const WalletManager: FC = () => {
   );
 };
 
-const AccountOptionCard = (account: Account) => {
+const AccountOptionCard: FC<Account> = (account) => {
   return (<AccountOptionWrapper>
-    <Avatar size={24} src={DefaultAvatar}/>
-    <AccountOptionPropertyWrapper>
-      {account.meta?.name && <Text size={'m'} weight={'medium'} >{account.meta?.name}</Text>}
-      <Text size={'s'} color={'grey-500'} >{shortcutText(account.address)}</Text>
-    </AccountOptionPropertyWrapper>
+    <AccountCard accountName={account.meta.name || ''}
+      accountAddress={account.address}
+      canCopy={false}
+      isShort
+    />
   </AccountOptionWrapper>);
 };
 
-const BalanceOptionCard = (balance: BalanceOption) => {
+const AccountWithBalanceOptionCard: FC<Account> = (account) => {
+  return (<AccountOptionWrapper>
+    <AccountCard accountName={`${formatKusamaBalance(account.balance?.KSM?.toString() || '0')} ${tokenSymbol}`}
+      accountAddress={account.address}
+      canCopy={false}
+      isShort
+    />
+  </AccountOptionWrapper>);
+};
+
+const BalanceCard = (balance: BalanceOption) => {
   return (<BalanceOptionWrapper>
     <Text size={'m'} weight={'medium'} >{`${formatKusamaBalance(balance.value)} ${tokenSymbol}`}</Text>
     <Text size={'s'} color={'grey-500'} >{balance.chain}</Text>
@@ -108,20 +123,16 @@ const AccountOptionWrapper = styled.div`
   align-items: center;
 `;
 
-const AccountOptionPropertyWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-
 const BalanceOptionWrapper = styled.div`
   display: flex;
   flex-direction: column;
   cursor: pointer;
+  padding: calc(var(--gap) / 2) var(--gap);
 `;
 
 const SettingsButtonWrapper = styled.div <{ $gearActive?: boolean }>`
   a {
-    margin-right: 0px !important;
+    margin-right: 0 !important;
     height: 100%;
     padding: 0 var(--gap);
     align-items: center;
@@ -143,6 +154,11 @@ const WalletManagerWrapper = styled.div`
   border-radius: 8px;
   display: flex;
   position: relative;
+  @media(max-width: 768px) {
+    div[class^=Account__AddressRow] {
+      display: none;
+    }
+  }
 `;
 
 const Divider = styled.div`

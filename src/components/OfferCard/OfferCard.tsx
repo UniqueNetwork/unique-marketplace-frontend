@@ -1,11 +1,8 @@
-import React, { FC, useMemo, useState } from 'react';
+import React, { FC, useMemo } from 'react';
 import { Icon, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import { Picture } from '..';
-import { useApi } from '../../hooks/useApi';
-import Loading from '../Loading';
-import { NFTToken } from '../../api/chainApi/unique/types';
 import { formatKusamaBalance } from '../../utils/textUtils';
 import { Offer } from '../../api/restApi/offers/types';
 import Kusama from '../../static/icons/logo-kusama.svg';
@@ -21,34 +18,13 @@ export type TTokensCard = {
 };
 
 export const OfferCard: FC<TTokensCard> = ({ offer }) => {
-  const [token, setToken] = useState<NFTToken | undefined>();
-  const [isFetching, setIsFetching] = useState<boolean>(false);
-
-  const { api } = useApi();
   const { selectedAccount } = useAccounts();
 
   const {
     collectionName,
-    imagePath,
-    tokenPrefix
-  } = useMemo<Record<string, string | undefined>>(() => {
-    if (token) {
-      return {
-        collectionName: token.collectionName,
-        imagePath: token.imageUrl,
-        tokenPrefix: token.prefix
-      };
-    }
-
-    if (offer) {
-      setIsFetching(true);
-      void api?.nft?.getToken(offer.collectionId, offer.tokenId).then((token: NFTToken) => {
-        setIsFetching(false);
-        setToken(token);
-      });
-    }
-    return {};
-  }, [offer, token, api]);
+    image,
+    prefix
+  } = offer?.tokenDescription || {};
 
   const isBidder = useMemo(() => {
     if (!selectedAccount) return false;
@@ -68,12 +44,12 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
   return (
     <TokensCardStyled>
       <PictureWrapper to={`/token/${offer?.collectionId}/${offer?.tokenId}`}>
-        <Picture alt={offer?.tokenId?.toString() || ''} src={imagePath} />
+        <Picture alt={offer?.tokenId?.toString() || ''} src={image} />
       </PictureWrapper>
       <Description>
-        <Link to={`/token/${offer?.collectionId}/${offer?.tokenId}`} title={`${tokenPrefix || ''} #${offer?.tokenId}`}>
+        <Link to={`/token/${offer?.collectionId}/${offer?.tokenId}`} title={`${prefix || ''} #${offer?.tokenId}`}>
           <Text size='l' weight='medium' color={'secondary-500'}>
-            {`${tokenPrefix || ''} #${offer?.tokenId}`}
+            {`${prefix || ''} #${offer?.tokenId}`}
           </Text>
         </Link>
         <a href={`${config.scanUrl || ''}collections/${offer?.collectionId}`} target={'_blank'} rel='noreferrer'>
@@ -95,8 +71,6 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
           <StyledText color={'dark'} size={'xs'}>{`${timeDifference(new Date(offer.auction?.stopAt || '').getTime() / 1000)} left`}</StyledText>
         </AuctionInfoWrapper>}
       </Description>
-
-      {isFetching && <Loading />}
     </TokensCardStyled>
   );
 };

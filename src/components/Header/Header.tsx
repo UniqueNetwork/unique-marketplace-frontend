@@ -27,9 +27,9 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
           onClick={mobileMenuToggler}
           src={menu}
         />}
-        <Link to={'/'}>
+        <LogoLink to={'/'}>
           <LogoIcon src={'/logos/logo.svg'} />
-        </Link>
+        </LogoLink>
         {!showMobileMenu && (
           <nav>
             <Link to='/'>
@@ -154,6 +154,12 @@ const MenuIcon = styled.img`
   width: 32px;
   height: 32px;
   margin-right: 8px;
+`;
+
+const LogoLink = styled(Link)`
+  @media (max-width: 567px) {
+    display: none;
+  }
 `;
 
 const LogoIcon = styled.img`

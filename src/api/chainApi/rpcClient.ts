@@ -149,6 +149,7 @@ export class RpcClient implements IRpcClient {
 
     this.chainData = {
       properties: {
+        ss58Format: chainProperties.ss58Format.toString(),
         tokenSymbol: chainProperties.tokenSymbol
           .unwrapOr([formatBalance.getDefaults().unit])[0]
           .toString()

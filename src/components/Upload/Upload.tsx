@@ -30,7 +30,7 @@ export const Upload: FC<UploadProps> = ({ onChange }) => {
 const UploadWrapper = styled.div`
   position: relative;
   background: ${AdditionalLight};
-  padding: 52px 0;
+  padding: 52px var(--gap);
   border: 1px dashed ${Primary500};
   box-sizing: border-box;
   border-radius: 8px;
@@ -47,4 +47,9 @@ const UploadWrapper = styled.div`
     width: 100%;
     cursor: pointer;
   }
+  & > .unique-text {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  } 
 `;

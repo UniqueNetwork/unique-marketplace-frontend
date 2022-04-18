@@ -4,7 +4,7 @@ import { deleteRequest, post } from '../base';
 import { defaultParams } from '../base/axios';
 import { FetchStatus, TCalculateBidParams, TCalculatedBid, TDeleteParams, TPlaceBidParams, TSignature, TStartAuctionParams } from './types';
 
-const endpoint = '/auction';
+const endpoint = '/api/auction';
 
 export const startAuction = (body: TStartAuctionParams) => post<TStartAuctionParams>(`${endpoint}/create_auction`, body, { ...defaultParams });
 export const placeBid = (body: TPlaceBidParams) => post<TPlaceBidParams>(`${endpoint}/place_bid`, body, { ...defaultParams });

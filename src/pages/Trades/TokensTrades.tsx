@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import { Button, InputText, Pagination, Text } from '@unique-nft/ui-kit';
+import { Pagination, Text } from '@unique-nft/ui-kit';
 import { SortQuery } from '@unique-nft/ui-kit/dist/cjs/types';
 
 import { useTrades } from '../../api/restApi/trades/trades';
@@ -21,13 +21,13 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
   const { selectedAccount } = useAccounts();
   const [page, setPage] = useState<number>(0);
   const [sortString, setSortString] = useState<string>();
-  const [searchValue, setSearchValue] = useState<string | number>();
+  // const [searchValue, setSearchValue] = useState<string | number>();
 
   const { trades, tradesCount, fetch, isFetching } = useTrades();
   const { tradesWithTokens, isFetchingTokens } = useGetTokensByTrades(trades);
 
   useEffect(() => {
-    if (!selectedAccount?.address) return;
+    if (currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address) return;
     fetch({
       page: 1,
       pageSize,
@@ -36,13 +36,13 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
     });
   }, [selectedAccount?.address, fetch, currentTab]);
 
-  const onSearch = useCallback(() => {
-    // TODO: not implemented in api
-    // fetch({ sortString, pageSize, page: 1, searchText: searchValue?.toString() });
-  }, [sortString, pageSize, searchValue]);
+  // const onSearch = useCallback(() => {
+  //   // TODO: not implemented in api
+  //   // fetch({ sortString, pageSize, page: 1, searchText: searchValue?.toString() });
+  // }, [sortString, pageSize, searchValue]);
 
   const onPageChange = useCallback((newPage: number) => {
-    if (!selectedAccount?.address || page === newPage) return;
+    if ((currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address) || page === newPage) return;
     setPage(newPage);
     fetch({
       page: newPage + 1,
@@ -80,20 +80,20 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
 
   return (<PagePaper>
     <TradesPageWrapper>
-      <SearchWrapper>
-        <InputText
-          iconLeft={{ name: 'magnify', size: 16 }}
-          onChange={(val) => setSearchValue(val)}
-          placeholder='Collection / token'
-          value={searchValue?.toString()}
-        />
-        <Button
-          onClick={onSearch}
-          role='primary'
-          title='Search'
-        />
-      </SearchWrapper>
-      <Table
+      {/* <SearchWrapper> */}
+      {/*  <InputText */}
+      {/*    iconLeft={{ name: 'magnify', size: 16 }} */}
+      {/*    onChange={(val) => setSearchValue(val)} */}
+      {/*    placeholder='Collection / token' */}
+      {/*    value={searchValue?.toString()} */}
+      {/*  /> */}
+      {/*  <Button */}
+      {/*    onClick={onSearch} */}
+      {/*    role='primary' */}
+      {/*    title='Search' */}
+      {/*  /> */}
+      {/* </SearchWrapper> */}
+      <StyledTable
         onSort={onSortChange}
         data={tradesWithTokens || []}
         columns={tradesColumns}
@@ -117,22 +117,31 @@ const TradesPageWrapper = styled.div`
   width: 100%
 `;
 
-const SearchWrapper = styled.div`
-  display: flex;
-  margin-bottom: calc(var(--gap) * 2);
-  button {
-    margin-left: 8px;
-  }
+// const SearchWrapper = styled.div`
+//   display: flex;
+//   margin-bottom: calc(var(--gap) * 2);
+//   button {
+//     margin-left: 8px;
+//   }
+//
+//   @media (max-width: 768px) {
+//     width: 100%;
+//     .unique-input-text {
+//       flex-grow: 1;
+//     }
+//   }
+//
+//   @media (max-width: 320px) {
+//     .unique-button {
+//       display: none;
+//     }
+//   }
+// `;
 
-  @media (max-width: 768px) {
-    width: 100%;
-    .unique-input-text {
-      flex-grow: 1;
-    }
-  }
-
-  @media (max-width: 320px) {
-    .unique-button {
+const StyledTable = styled(Table)`
+  && > div > div:first-child {
+    grid-column: 1 / span 2;
+    & > .unique-text {
       display: none;
     }
   }
@@ -143,4 +152,9 @@ const PaginationWrapper = styled.div`
   justify-content: space-between;
   margin-top: calc(var(--gap) * 2);
   align-items: center;
+  
+  @media (max-width: 568px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 `;

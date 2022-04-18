@@ -50,7 +50,7 @@ export function MobileFilters<T = FilterState>({ filterComponent, defaultSorting
       </>
       }
     </MobileFilterActionsWrapper>
-    {isVisible && <MobileFilterModal>
+    <MobileFilterModal isVisible={isVisible}>
       <Tabs
         activeIndex={activeTabIndex}
         labels={tabs}
@@ -68,27 +68,34 @@ export function MobileFilters<T = FilterState>({ filterComponent, defaultSorting
           />
         </SortStyled>
       </Tabs>
-    </MobileFilterModal>}
+    </MobileFilterModal>
   </>;
 }
 
 const MobileFilterActionsWrapper = styled.div`
   display: none;
   position: fixed;
-  top: calc(100vh - 60px);
-  width: 100%;
+  top: calc(100vh - 60px);    
+  right: 0;
   left: 0;
   padding: 10px calc(var(--gap) * 1.5);
   background-color: ${AdditionalLight};
   box-shadow: 0px -8px 12px rgba(0, 0, 0, 0.06);
   z-index: 8;
   column-gap: calc(var(--gap) / 2);
+  
   @media (max-width: 1024px) {
     display: flex;
   }
+
+  @media (max-width: 567px) {
+    button {
+      flex-grow: 1;
+    }
+  }
 `;
 
-const MobileFilterModal = styled.div`
+const MobileFilterModal = styled.div<{ isVisible: boolean }>`
   display: none;
   position: fixed;
   background-color: ${AdditionalLight};
@@ -100,7 +107,7 @@ const MobileFilterModal = styled.div`
   overflow-y: auto;
 
   @media (max-width: 1024px) {
-    display: block;
+    display: ${({ isVisible }) => isVisible ? 'block' : 'none'};
   }
 `;
 

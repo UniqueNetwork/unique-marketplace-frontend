@@ -1,8 +1,9 @@
-import styled from 'styled-components/macro';
-import { Filters } from '../../components';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, KeyboardEvent } from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
 import { Button, InputText, Select, Text } from '@unique-nft/ui-kit';
+import styled from 'styled-components/macro';
+
+import { Filters } from '../../components';
 import { Secondary400 } from '../../styles/colors';
 import { FilterState } from '../../components/Filters/types';
 import { useOffers } from '../../api/restApi/offers/offers';
@@ -78,14 +79,23 @@ export const MarketPage = () => {
     }
   }, [fetchMore, offers, pageSize, isFetching]);
 
-  const onSortingChange = useCallback((val: string) => {
-    setSortingValue(val);
-    fetch({ sort: [val], pageSize, page: 1, ...filterState });
+  const onSortingChange = useCallback((value: string) => {
+    setSortingValue(value);
+    fetch({ sort: [value], pageSize, page: 1, ...filterState });
   }, [fetch, filterState]);
 
-  const handleSearch = () => {
+  const onSearch = useCallback(() => {
     fetch({ sort: [sortingValue], pageSize, page: 1, searchText: searchValue?.toString(), ...filterState });
-  };
+  }, [fetch, sortingValue, searchValue, filterState]);
+
+  const onSearchStringChange = useCallback((value: string) => {
+    setSearchValue(value);
+  }, [setSearchValue]);
+
+  const onSearchInputKeyDown = useCallback((event: KeyboardEvent) => {
+    if (event.key !== 'Enter') return;
+    onSearch();
+  }, [onSearch]);
 
   const onFilterChange = useCallback((filter: FilterState | null) => {
     setFilterState({ ...(filterState || {}), ...filter });
@@ -102,12 +112,13 @@ export const MarketPage = () => {
           <SearchWrapper>
             <InputTextStyled
               iconLeft={{ name: 'magnify', size: 16 }}
-              onChange={(val) => setSearchValue(val)}
+              onChange={onSearchStringChange}
+              onKeyDown={onSearchInputKeyDown}
               placeholder='Collection / token'
               value={searchValue?.toString()}
             />
             <Button
-              onClick={() => handleSearch()}
+              onClick={onSearch}
               role='primary'
               title='Search'
             />
@@ -162,6 +173,7 @@ const LeftColumn = styled.div`
 `;
 
 const MainContent = styled.div`
+  position: relative;
   padding-left: calc(var(--gap) * 2);
   flex: 1;
 
@@ -191,6 +203,7 @@ const SearchWrapper = styled.div`
   }
 
   @media (max-width: 320px) {
+    margin-right: 0;
     .unique-button {
       display: none;
     }

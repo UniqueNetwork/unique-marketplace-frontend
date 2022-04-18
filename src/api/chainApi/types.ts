@@ -1,8 +1,9 @@
 import { ChainData } from '../ApiContext';
 import { ApiPromise } from '@polkadot/api';
-import { SubmittableExtrinsic } from '@polkadot/api/types';
+import { AddressOrPair, SubmittableExtrinsic } from '@polkadot/api/types';
 import { Settings } from '../restApi/settings/types';
 import { BN } from '@polkadot/util';
+import { Balance } from '@polkadot/types/interfaces';
 
 export interface IRpc {
   rpcEndpoint: string
@@ -73,15 +74,11 @@ export interface IMarketController {
   transferToAuction: (owner: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
   transferBidBalance: (from: string, amount: string, options: TransactionOptions) => Promise<void>
   transferBalance: (from: string, to: string, amount: string, options: TransactionOptions) => Promise<void>
+  getKusamaFee: (sender: AddressOrPair, recipient?: string, value?: BN) => Promise<Balance>
 }
 
 export type Chain = {
   network: string
   name: string
   apiEndpoint: string
-}
-
-export type CrossAccountId = {
-  Substrate?: string
-  Ethereum?: string
 }

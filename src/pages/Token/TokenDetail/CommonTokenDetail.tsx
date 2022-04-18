@@ -1,5 +1,5 @@
 import { Heading, Icon, Text } from '@unique-nft/ui-kit';
-import React, { FC, ReactChild, useCallback, useMemo } from 'react';
+import React, { FC, ReactChild, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components/macro';
 
 import { Picture } from '../../../components';
@@ -14,12 +14,13 @@ import { Avatar } from '../../../components/Avatar/Avatar';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import config from '../../../config';
 import { useAccounts } from '../../../hooks/useAccounts';
-import { isTokenOwner, normalizeAccountId, toAddress } from '../../../api/chainApi/utils/addressUtils';
+import { isTokenOwner, normalizeAccountId, toChainFormatAddress } from '../../../api/chainApi/utils/addressUtils';
 import { Offer } from '../../../api/restApi/offers/types';
+import { useApi } from '../../../hooks/useApi';
 
 interface IProps {
   children: ReactChild[];
-  token: NFTToken;
+  token?: NFTToken;
   offer?: Offer;
 }
 
@@ -28,28 +29,67 @@ export const CommonTokenDetail: FC<IProps> = ({
   token,
   offer
 }) => {
+  const [collectionCoverImage, setCollectionCoverImage] = useState<string>();
+  const { api } = useApi();
+
   const {
     collectionId,
     collectionName,
     description,
     attributes,
     imageUrl,
-    id: tokenId,
+    tokenId,
     prefix
-  } = token;
+  } = useMemo(() => {
+    if (offer) {
+      const { collectionName, image, prefix } = offer.tokenDescription;
+      const attributes = offer.tokenDescription.attributes.reduce((acc, item) => ({ ...acc, [item.key]: item.value }), {});
+      return {
+        ...offer,
+        collectionName,
+        prefix,
+        imageUrl: image,
+        attributes,
+        description: '' // TODO: need add this in offer instance
+      };
+    }
+    return {
+      ...token,
+      tokenId: token?.id
+    };
+  }, [token, offer]);
+
+  useEffect(() => {
+    (async () => {
+      if (!api?.collection || !token?.collectionId) return;
+      setCollectionCoverImage((await api.collection.getCollection(token.collectionId)).coverImageUrl);
+    })();
+  }, [token?.collectionId, api?.collection]);
 
   const { selectedAccount } = useAccounts();
   const deviceSize = useDeviceSize();
 
+  const { chainData } = useApi();
+
+  const formatAddress = useCallback((address: string) => {
+    return toChainFormatAddress(address, chainData?.properties.ss58Format || 0);
+  }, [chainData?.properties.ss58Format]);
+
   const owner = useMemo(() => {
     if (!token?.owner) return undefined;
-    return offer?.seller ? normalizeAccountId(toAddress(offer?.seller || '') || '') : normalizeAccountId(token.owner);
-  }, [token, offer]);
+    if (offer) {
+      return formatAddress(offer?.seller);
+    }
+    return token.owner.Substrate ? formatAddress(token.owner.Substrate) : token.owner.Ethereum;
+  }, [token, offer, formatAddress]);
 
   const isOwner = useMemo(() => {
-    if (!selectedAccount || !owner) return false;
-    return isTokenOwner(selectedAccount.address, owner);
-  }, [selectedAccount, owner, offer]);
+    if (!selectedAccount) return false;
+    if (offer) {
+      return isTokenOwner(selectedAccount.address, { Substrate: offer.seller });
+    }
+    return isTokenOwner(selectedAccount.address, normalizeAccountId(token?.owner || ''));
+  }, [selectedAccount, token, offer]);
 
   const onShareClick = useCallback(() => {
     if (navigator.share) {
@@ -63,7 +103,7 @@ export const CommonTokenDetail: FC<IProps> = ({
   return (
     <CommonTokenDetailStyled>
       <PictureWrapper>
-        <Picture alt={tokenId.toString()} src={imageUrl} />
+        <Picture alt={tokenId?.toString() || ''} src={imageUrl} />
       </PictureWrapper>
       <Description>
         <Heading size={'1'}>{`${prefix || ''} #${tokenId}`}</Heading>
@@ -81,20 +121,20 @@ export const CommonTokenDetail: FC<IProps> = ({
             <Text color='grey-500' size='m'>
               Owned&nbsp;by
             </Text>
-            <Account href={`${config.scanUrl}account/${owner?.Substrate || '404'}`}>
+            <Account href={`${config.scanUrl}account/${owner || '404'}`}>
               <Avatar size={24} src={DefaultAvatar}/>
               <Text color='primary-600' size='m'>
-                {deviceSize === DeviceSize.lg ? (owner?.Substrate || offer?.seller || '') : shortcutText(owner?.Substrate || '') }
+                {deviceSize === DeviceSize.lg ? owner || '' : shortcutText(owner || '') }
               </Text>
             </Account>
           </>}
         </Row>
         <Divider />
         {children}
-        <AttributesBlock attributes={attributes} />
+        {attributes && <AttributesBlock attributes={attributes} />}
         <Divider />
         <CollectionsCard
-          avatarSrc={''}
+          avatarSrc={collectionCoverImage || ''}
           description={description || ''}
           id={collectionId || -1}
           title={collectionName || ''}
@@ -163,9 +203,13 @@ const PictureWrapper = styled.div`
     }
 
     @media (max-width: 567px) {
-      width: 100%;
+      width: 100vw;
+      min-width: 100vw;
     }
-    
+  }
+  @media (max-width: 567px) {
+    width: 100vw;
+    margin-left: calc(0px - var(--gap));
   }
 `;
 

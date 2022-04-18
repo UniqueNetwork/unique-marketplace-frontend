@@ -17,13 +17,11 @@ const AuctionSocketProvider: FC<TAuctionProviderProps> = ({ url, children }) => 
     });
 
     socket.on('connect', () => {
-      console.log('Socket connected');
       setSocket(socket);
     });
   }, []);
 
   useEffect(() => {
-    console.log('try connect socket', url);
     connectSocket(url);
   }, [url, connectSocket]);
 

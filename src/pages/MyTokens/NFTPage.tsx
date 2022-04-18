@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { KeyboardEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components/macro';
 import BN from 'bn.js';
 import { Button, InputText, Select, Text } from '@unique-nft/ui-kit';
@@ -86,7 +86,7 @@ export const NFTPage = () => {
   const [selectOption, setSelectOption] = useState<TOption>();
   const { selectedAccount } = useAccounts();
   const [tokens, setTokens] = useState<NFTToken[]>([]);
-  const [isFetchingTokens, setIsFetchingTokens] = useState<boolean>(true);
+  const [isFetchingTokens, setIsFetchingTokens] = useState<boolean>(false);
 
   const { offers, isFetching: isFetchingOffers, fetch } = useOffers();
 
@@ -96,11 +96,10 @@ export const NFTPage = () => {
     if (!api?.nft || !selectedAccount?.address) return;
     setIsFetchingTokens(true);
     void (async () => {
-      const _offers = await fetch({ page: 1, pageSize, seller: selectedAccount?.address }) || [];
-      const _tokensFromOffers = await Promise.all(_offers.map(({ tokenId, collectionId }) => api.nft?.getToken(collectionId, tokenId))) as NFTToken[];
+      await fetch({ page: 1, pageSize, seller: selectedAccount?.address });
       const _tokens = await api.nft?.getAccountTokens(selectedAccount.address) as NFTToken[];
 
-      setTokens([..._tokens, ..._tokensFromOffers]);
+      setTokens(_tokens);
       setIsFetchingTokens(false);
     })();
   }, [api?.nft, selectedAccount?.address, setIsFetchingTokens, fetch]);
@@ -122,6 +121,11 @@ export const NFTPage = () => {
   const onSearch = useCallback(() => {
     setSearchString(searchValue);
   }, [searchValue]);
+
+  const onSearchInputKeyDown = useCallback((event: KeyboardEvent) => {
+    if (event.key !== 'Enter') return;
+    onSearch();
+  }, [onSearch]);
 
   const filter = useCallback((token: NFTToken & Partial<Offer>) => {
       let filterByStatus = true;
@@ -163,10 +167,16 @@ export const NFTPage = () => {
   );
 
   const featuredTokens: (NFTToken & Partial<Offer>)[] = useMemo(() => {
-    const tokensWithOffers = tokens.map((token) => ({
-      ...(offers.find((offer) => offer.tokenId === token.id && offer.collectionId === token.collectionId) || {}),
-      ...token
-    })).filter(filter);
+    const tokensWithOffers: (NFTToken & Partial<Offer>)[] = [
+      ...(offers?.map<NFTToken & Partial<Offer>>((offer) => ({
+        id: offer.tokenId,
+        collectionName: offer.tokenDescription.collectionName,
+        prefix: offer.tokenDescription.prefix,
+        imageUrl: offer.tokenDescription.image,
+        ...offer
+      })) || []),
+      ...tokens
+    ].filter(filter);
 
     if (selectOption) {
       return tokensWithOffers.sort((tokenA, tokenB) => {
@@ -188,6 +198,7 @@ export const NFTPage = () => {
             <InputTextStyled
               iconLeft={{ name: 'magnify', size: 16 }}
               onChange={onChangeSearchValue}
+              onKeyDown={onSearchInputKeyDown}
               placeholder='Collection / token'
               value={searchValue?.toString()}
             />
@@ -268,8 +279,9 @@ const SearchWrapper = styled.div`
       flex-grow: 1;
     }
   }
-  
+
   @media (max-width: 320px) {
+    margin-right: 0;
     .unique-button {
       display: none;
     }

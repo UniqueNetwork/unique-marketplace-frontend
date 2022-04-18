@@ -1,8 +1,9 @@
 import React, { FC } from 'react';
-import styled from 'styled-components';
-import { Text } from '@unique-nft/ui-kit';
-import Loading from '../Loading';
 import { TableColumnProps, TableRow } from '@unique-nft/ui-kit/dist/cjs/types';
+import { Text } from '@unique-nft/ui-kit';
+import styled from 'styled-components';
+
+import Loading from '../Loading';
 
 interface MobileTableProps {
   className?: string
@@ -14,7 +15,8 @@ interface MobileTableProps {
 const MobileTable: FC<MobileTableProps> = ({
   columns,
   data,
-  loading
+  loading,
+  className
 }) => {
   let children = <Loading />;
 
@@ -36,27 +38,30 @@ const MobileTable: FC<MobileTableProps> = ({
   }
 
   return (
-    <MobileTableWrapper>{children}</MobileTableWrapper>
+    <MobileTableWrapper className={className}>{children}</MobileTableWrapper>
   );
 };
 
 const MobileTableWrapper = styled.div`
-  margin: var(--gap) 0;
+  && {
+    margin: var(--gap) 0;  
+  }
 `;
 
 const MobileTableRow = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
-  border-bottom: 1px dashed var(--border-color);
+  border-bottom: 1px dashed var(--color-grey-300);
   grid-row-gap: var(--gap);
   padding: var(--gap) 0;
-  div {
+
+  & > div {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
   }
-  
-  @media(max-width: 320px) {
+
+  @media (max-width: 320px) {
     grid-template-columns: 1fr;
   }
 `;

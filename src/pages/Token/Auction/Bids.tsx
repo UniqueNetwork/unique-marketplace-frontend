@@ -1,13 +1,13 @@
 import React, { FC, useMemo } from 'react';
-import { Text, Table, Link } from '@unique-nft/ui-kit';
+import { Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import { Offer } from '../../../api/restApi/offers/types';
 import { TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import { timestampTableFormat } from '../../../utils/timestampUtils';
-import { formatKusamaBalance, shortcutText } from '../../../utils/textUtils';
-import config from '../../../config';
-import { toAddress } from '../../../api/chainApi/utils/addressUtils';
+import { formatKusamaBalance } from '../../../utils/textUtils';
+import AccountLink from '../../../components/Account/AccountLink';
+import { Table } from '../../../components/Table';
 
 interface BidsProps {
   offer: Offer
@@ -30,7 +30,7 @@ const getColumns = (tokenSymbol: string): TableColumnProps[] => ([
     title: 'Bidder',
     field: 'bidderAddress',
     width: '100%',
-    render: (account: string) => <Link href={`${config.scanUrl}account/${toAddress(account || '') || ''}`} title={shortcutText(toAddress(account || '') || '')} />
+    render: (account: string) => <AccountLink accountAddress={account} />
   }
 ]);
 
@@ -48,7 +48,7 @@ const Bids: FC<BidsProps> = ({ offer }) => {
 
   return (
     <BidsWrapper>
-      {!offer.auction?.bids?.length && <Text >There is no bids</Text>}
+      {!offer.auction?.bids?.length && <Text >There are no bids</Text>}
       {!!offer.auction?.bids?.length && <Table
         data={bids}
         columns={getColumns(tokenSymbol)}

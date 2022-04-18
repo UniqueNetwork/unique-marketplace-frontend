@@ -14,7 +14,7 @@ const fun = (description: string, params: RpcParam[], type: string) => ({
   type
 });
 
-const CROSS_ACCOUNT_ID_TYPE = 'PalletCommonAccountBasicCrossAccountIdRepr';
+const CROSS_ACCOUNT_ID_TYPE = 'PalletEvmAccountBasicCrossAccountIdRepr';
 const TOKEN_ID_TYPE = 'UpDataStructsTokenId';
 
 const crossAccountParam = (name = 'account') => ({ name, type: CROSS_ACCOUNT_ID_TYPE });
@@ -29,8 +29,7 @@ const rpcMethods = {
   accountTokens: fun(
     'Get tokens owned by account',
     [collectionParam, crossAccountParam()],
-    'Vec<UpDataStructsTokenId>'
-  ),
+    'Vec<u32>'),
   adminlist: fun(
     'Get admin list',
     [collectionParam],

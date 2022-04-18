@@ -6,9 +6,12 @@ import { StageStatus } from '../../../types/StagesTypes';
 import { NotificationSeverity } from '../../../notification/NotificationContext';
 import { useNotification } from '../../../hooks/useNotification';
 
-export const CancelAuctionStagesModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish }) => {
-  const { stages, status, initiate } = useCancelAuctionStages(token.collectionId || 0, token.id);
-  useEffect(() => { initiate(null); }, []);
+export const CancelAuctionStagesModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, setIsClosable }) => {
+  const { stages, status, initiate } = useCancelAuctionStages(offer?.collectionId || 0, offer?.tokenId || 0);
+  useEffect(() => {
+    setIsClosable(false);
+    initiate(null);
+  }, []);
   const { push } = useNotification();
 
   useEffect(() => {

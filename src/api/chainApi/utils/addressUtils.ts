@@ -6,7 +6,7 @@ import { keyring } from '@polkadot/ui-keyring';
 import Web3 from 'web3';
 
 import { subToEthLowercase } from './decoder';
-import { CrossAccountId } from '../types';
+import { CrossAccountId } from '../unique/types';
 
 keyring.loadAll({});
 
@@ -88,4 +88,9 @@ export function toAddress (value?: string | Uint8Array | null, allowIndices = fa
   }
 
   return undefined;
+}
+
+export function toChainFormatAddress (address: string, ss58Format: number) {
+  if (address.startsWith('0x')) return address;
+  return keyring.encodeAddress(address, ss58Format);
 }

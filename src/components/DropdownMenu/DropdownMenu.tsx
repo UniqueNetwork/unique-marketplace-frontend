@@ -75,6 +75,7 @@ const DropdownMenuDropdown = styled.div<{ isOpen: boolean }>`
   max-height: 50vh;
   overflow-x: hidden;
   overflow-y: auto;
+  z-index: 1;
 `;
 
 const DropdownMenuItemWrapper = styled.div`

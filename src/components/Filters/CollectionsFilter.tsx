@@ -61,28 +61,30 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onTrai
     setSelectedCollections(value || []);
   }, [value]);
 
-  return (<Accordion title={'Collections'}
-    isOpen={true}
-    onClear={onCollectionsClear}
-    isClearShow={selectedCollections.length > 0}
-  >
-    <CollectionFilterWrapper>
-      {isFetching && <Loading />}
-      {collections.map((collection) => (
-        <CheckboxWrapper
-          key={`collection-${collection.id}`}
-        >
-          <Checkbox
-            checked={selectedCollections.indexOf(collection.id) !== -1}
-            label={''}
-            size={'m'}
-            onChange={onCollectionSelect(collection.id)}
-          />
-          <Avatar src={collection.coverImageUrl} size={22} type={'circle'}/>
-          <Text>{collection.collectionName}</Text>
-        </CheckboxWrapper>
-        ))}
-    </CollectionFilterWrapper>
+  return (<>
+    <Accordion title={'Collections'}
+      isOpen={true}
+      onClear={onCollectionsClear}
+      isClearShow={selectedCollections.length > 0}
+    >
+      <CollectionFilterWrapper>
+        {isFetching && <Loading />}
+        {collections.map((collection) => (
+          <CheckboxWrapper
+            key={`collection-${collection.id}`}
+          >
+            <Checkbox
+              checked={selectedCollections.indexOf(collection.id) !== -1}
+              label={''}
+              size={'m'}
+              onChange={onCollectionSelect(collection.id)}
+            />
+            <Avatar src={collection.coverImageUrl} size={22} type={'circle'}/>
+            <Text>{collection.collectionName}</Text>
+          </CheckboxWrapper>
+          ))}
+      </CollectionFilterWrapper>
+    </Accordion>
     {/* TODO: unsupported on back-end */}
     {onTraitsChange && selectedCollections.length === 1 && <AttributesFilterWrapper>
       {/* TODO: make mapping attributes of the selected collection */}
@@ -103,7 +105,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onTrai
         </CollectionFilterWrapper>
       </Accordion>
     </AttributesFilterWrapper>}
-  </Accordion>);
+  </>);
 };
 
 const CollectionFilterWrapper = styled.div`
@@ -123,7 +125,6 @@ const CollectionFilterWrapper = styled.div`
   }
 `;
 const AttributesFilterWrapper = styled.div`
-  margin-top: calc(var(--gap) * 2);
   display: flex;
   flex-direction: column;
   row-gap: var(--gap);

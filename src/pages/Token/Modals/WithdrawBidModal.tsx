@@ -5,18 +5,16 @@ import { TTokenPageModalBodyProps } from './TokenPageModal';
 import { StageStatus } from '../../../types/StagesTypes';
 import { NotificationSeverity } from '../../../notification/NotificationContext';
 import { useNotification } from '../../../hooks/useNotification';
-import { useAccounts } from '../../../hooks/useAccounts';
 
-export const WithdrawBidStagesModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish }) => {
-  const { stages, status, initiate } = useWithdrawBidStages(token.collectionId || 0, token.id);
-  useEffect(() => { initiate(null); }, []);
+export const WithdrawBidStagesModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
+  const { stages, status, initiate } = useWithdrawBidStages(offer?.collectionId || 0, offer?.tokenId || 0);
   const { push } = useNotification();
-  const { updateAccountBalance } = useAccounts();
+
+  useEffect(() => { initiate(null); }, []);
 
   useEffect(() => {
     if (status === StageStatus.success) {
       push({ severity: NotificationSeverity.success, message: <>Bid withdrawn</> });
-      void updateAccountBalance();
     }
   }, [status]);
 
