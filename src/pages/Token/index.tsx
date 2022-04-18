@@ -49,6 +49,10 @@ const TokenPage = () => {
     fetchToken();
   }, [fetchToken]);
 
+  const onClose = useCallback(() => {
+    setMarketType(MarketType.default);
+  }, []);
+
   const onFinish = useCallback(() => {
     setMarketType(MarketType.default);
     fetchToken();
@@ -93,6 +97,7 @@ const TokenPage = () => {
         offer={offer}
         marketType={marketType}
         onFinish={onFinish}
+        onClose={onClose}
       />
     </CommonTokenDetail>
   </PagePaper>

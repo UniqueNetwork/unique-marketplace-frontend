@@ -25,7 +25,7 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
   const { selectedAccount } = useContext(accountContext);
 
   const isOwner = useMemo(() => {
-    const owner = { Substrate: offer?.seller } || token?.owner;
+    const owner = offer ? { Substrate: offer.seller } : token?.owner;
     if (!selectedAccount || !owner) return false;
     return isTokenOwner(selectedAccount.address, owner);
   }, [selectedAccount, token, offer]);

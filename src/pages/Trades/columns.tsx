@@ -28,10 +28,13 @@ export const tradesColumns: TableColumnProps[] = [
     width: '100%',
     isSortable: true,
     render({ id, name }: { id: string, name: string }): React.ReactNode {
-      return <LinkWrapper><Link
+      return <LinkWrapper><a
+        target={'_blank'}
+        rel={'noreferrer'}
         href={`${config?.scanUrl || ''}collections/${id || ''}`}
-        title={`${name || ''} [ID ${id || ''}]`}
-      /></LinkWrapper>;
+        className={'unique-link primary'}
+        >{`${name || ''} [ID ${id || ''}]`}</a>
+      </LinkWrapper>;
     },
     field: 'collection'
   },
