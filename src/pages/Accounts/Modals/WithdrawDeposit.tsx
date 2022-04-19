@@ -8,7 +8,13 @@ import { StageStatus } from '../../../types/StagesTypes';
 import { NotificationSeverity } from '../../../notification/NotificationContext';
 import styled from 'styled-components/macro';
 import { Avatar } from '../../../components/Avatar/Avatar';
-import { Bid } from '../../../api/restApi/offers/types';
+import { getWithdrawBids } from '../../../api/restApi/auction/auction';
+import { TWithdrawBid } from '../../../api/restApi/auction/types';
+import { NFTToken } from '../../../api/chainApi/unique/types';
+import { formatKusamaBalance } from '../../../utils/textUtils';
+import { useAccounts } from '../../../hooks/useAccounts';
+import { BN } from '@polkadot/util';
+import Loading from '../../../components/Loading';
 
 const tokenSymbol = 'KSM';
 
@@ -19,20 +25,18 @@ export type WithdrawDepositModalProps = {
   onClose(): void
 }
 
-type BidDeposit = Bid & {
-  id: number
-  isLeading?: boolean
-  token?: {
-    id: number
-    prefix: string
-    image: string
-  }
+type BidDeposit = TWithdrawBid & {
+  token?: NFTToken
 };
 
 export const WithdrawDepositModal: FC<WithdrawDepositModalProps> = ({ isVisible, address, onFinish, onClose }) => {
   const [status, setStatus] = useState<'ask' | 'stage'>('ask');
+  const [withdrawSponsorshipFee, setWithdrawSponsorshipFee] = useState<BN>();
+  const [withdrawBids, setWithdrawBids] = useState<BidDeposit[]>([]);
 
-  const onWithdraw = useCallback(() => {
+  const onWithdraw = useCallback((withdrawBids: BidDeposit[], withdrawSponsorshipFee?: BN) => {
+    setWithdrawSponsorshipFee(withdrawSponsorshipFee);
+    setWithdrawBids(withdrawBids);
     setStatus('stage');
   }, [setStatus]);
 
@@ -43,6 +47,7 @@ export const WithdrawDepositModal: FC<WithdrawDepositModalProps> = ({ isVisible,
 
   if (status === 'ask') {
     return (<WithdrawDepositAskModal
+      address={address}
       isVisible={isVisible}
       onFinish={onWithdraw}
       onClose={onClose}
@@ -52,6 +57,8 @@ export const WithdrawDepositModal: FC<WithdrawDepositModalProps> = ({ isVisible,
     return (<WithdrawDepositStagesModal
       isVisible={isVisible}
       address={address}
+      bids={withdrawBids}
+      withdrawSponsorshipFee={withdrawSponsorshipFee}
       onFinish={onFinishStages}
       onClose={onClose}
     />);
@@ -59,91 +66,124 @@ export const WithdrawDepositModal: FC<WithdrawDepositModalProps> = ({ isVisible,
   return null;
 };
 
-export const WithdrawDepositAskModal: FC<WithdrawDepositModalProps> = ({ isVisible, address, onClose, onFinish }) => {
-  const [amountToWithdraw, setAmountToWithdraw] = useState(0);
+export type WithdrawDepositAskModalProps = {
+  isVisible: boolean
+  address?: string
+  onFinish(withdrawBids: BidDeposit[], amountToWithdraw?: BN): void
+  onClose(): void
+}
+
+export const WithdrawDepositAskModal: FC<WithdrawDepositAskModalProps> = ({ isVisible, address, onClose, onFinish }) => {
+  const { api } = useApi();
+  const { accounts } = useAccounts();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSelectedAll, setIsSelectedAll] = useState<boolean>(true);
+  const [bids, setBids] = useState<BidDeposit[]>([]);
   const [selectedBids, setSelectedBids] = useState<BidDeposit[]>([]);
   const [isSelectedSponsorshipFee, setIsSelectedSponsorshipFee] = useState<boolean>(false);
 
+  const sponsorshipFee = useMemo(() =>
+    accounts.find((item) => item.address === address)?.deposit || new BN(0), [accounts, address]);
+
+  useEffect(() => {
+    if (!address || !api || !isVisible) return;
+    setBids([]);
+    (async () => {
+      setIsLoading(true);
+      const bids = (await getWithdrawBids({ owner: address }))?.data;
+      if (!bids || bids.length === 0) {
+        setIsSelectedSponsorshipFee(true);
+      }
+      setBids(await Promise.all(bids.map(async (bid) => {
+        return { ...bid, token: await api.nft?.getToken(Number(bid.collectionId), Number(bid.tokenId)) };
+      })));
+      setIsLoading(false);
+    })();
+  }, [address, api, isVisible]);
+
   const totalAmount = useMemo(() => {
-    return 0; // TODO: calc total amount of all deposits
-  }, []);
-
-  const bids: BidDeposit[] = useMemo(() => {
-    return []; // TODO: get deposits of bids and
-  }, []);
-
-  const sponsorshipFee = useMemo(() => {
-    return 0;
-  }, []);
-
-  const calculateAmountToWithdraw = useCallback(() => {
-    const amountToWithdraw: number = isSelectedSponsorshipFee ? sponsorshipFee : 0;
-    setAmountToWithdraw(amountToWithdraw + selectedBids.reduce<number>((acc, bid) =>
-      acc + Number(bid.amount), 0));
-  }, [isSelectedSponsorshipFee, sponsorshipFee, selectedBids]);
+    return sponsorshipFee.add(bids.reduce<BN>((acc, bid) =>
+      acc.add(new BN(bid.amount)), new BN(0)));
+  }, [sponsorshipFee, bids]);
 
   const onSelectAll = useCallback((value: boolean) => {
     setIsSelectedAll(value);
-    if (!value) {
-      setAmountToWithdraw(0);
-    } else {
+    if (value) {
       setSelectedBids([]);
       setIsSelectedSponsorshipFee(false);
-      setAmountToWithdraw(totalAmount);
     }
   }, [totalAmount]);
 
   const onSelectSponsorshipFee = useCallback((value: boolean) => {
     setIsSelectedAll(false);
     setIsSelectedSponsorshipFee(value);
-    calculateAmountToWithdraw();
-  }, [calculateAmountToWithdraw]);
+  }, []);
 
   const onSelectBid = useCallback((bid: BidDeposit) => (value: boolean) => {
     if (value) {
+      setIsSelectedAll(false);
       setSelectedBids([...selectedBids, bid]);
     } else {
-      setSelectedBids(selectedBids.filter((item) => item.id !== bid.id));
+      setSelectedBids(selectedBids.filter((item) => item.auctionId !== bid.auctionId));
     }
-    calculateAmountToWithdraw();
   }, [selectedBids]);
 
+  const amountToWithdraw = useMemo(() => {
+    if (isSelectedAll) return totalAmount;
+    const amountToWithdraw: BN = isSelectedSponsorshipFee ? sponsorshipFee : new BN(0);
+    return amountToWithdraw.add(selectedBids.reduce<BN>((acc, bid) =>
+      acc.add(new BN(bid.amount)), new BN(0)));
+  }, [isSelectedAll, totalAmount, isSelectedSponsorshipFee, sponsorshipFee, selectedBids]);
+
+  useEffect(() => {
+    if (!isVisible) {
+      setSelectedBids([]);
+      setIsSelectedAll(true);
+      setIsSelectedSponsorshipFee(false);
+    }
+  }, [isVisible]);
+
   const onSubmit = useCallback(() => {
-    onFinish();
-  }, [onFinish]);
+    if (amountToWithdraw.eq(new BN(0))) return;
+
+    if (isSelectedAll) {
+      onFinish(bids, sponsorshipFee);
+      return;
+    }
+    onFinish(selectedBids, isSelectedSponsorshipFee ? sponsorshipFee : undefined);
+  }, [onFinish, totalAmount, isSelectedSponsorshipFee, selectedBids, sponsorshipFee, amountToWithdraw]);
 
   return (<Modal isVisible={isVisible} isClosable={true} onClose={onClose}>
     <Content>
-      <Heading size='2'>Transfer NFT token</Heading>
+      <Heading size='2'>Withdraw deposit</Heading>
     </Content>
-    <Content>
+    {(bids.length > 0 || isLoading) && <Content>
       <Text size={'m'} color={'grey-500'}>All deposit</Text>
-      <Checkbox checked={isSelectedAll} label={`${totalAmount} ${tokenSymbol}`} onChange={onSelectAll} />
-    </Content>
+      <Checkbox checked={isSelectedAll} label={`${formatKusamaBalance(totalAmount.toString())} ${tokenSymbol}`} onChange={onSelectAll} />
+    </Content>}
+    {isLoading && <Content><Loading /></Content>}
     {bids.length > 0 && <Content>
       <Text size={'m'} color={'grey-500'}>Bids</Text>
       {bids.map((bid) => (<Row>
-        <Checkbox checked={true} label={''} onChange={onSelectBid(bid)}/>
-        <Avatar src={''} size={64} type={'square'} />
+        <Checkbox checked={selectedBids.some((item) => item.auctionId === bid.auctionId)} label={''} onChange={onSelectBid(bid)}/>
+        <Avatar src={bid.token?.imageUrl || ''} size={64} type={'square'} />
         <BidInfoWrapper>
           <Text size={'s'} color={'grey-500'}>{`${bid.token?.prefix} #${bid.token?.id}`}</Text>
-          <Text size={'m'} >{`${bid.amount} ${tokenSymbol}`}</Text>
-          <Text size={'m'} >{`${bid.amount} ${tokenSymbol}`}</Text>
+          <Text size={'m'} >{`${formatKusamaBalance(bid.amount)} ${tokenSymbol}`}</Text>
         </BidInfoWrapper>
       </Row>))}
     </Content>}
     <Content>
       <Text size={'m'} color={'grey-500'}>Sponsorship fee</Text>
-      <Checkbox checked={isSelectedSponsorshipFee} label={`${sponsorshipFee} ${tokenSymbol}`} onChange={onSelectSponsorshipFee} />
+      <Checkbox checked={isSelectedSponsorshipFee} label={`${formatKusamaBalance(sponsorshipFee.toString())} ${tokenSymbol}`} onChange={onSelectSponsorshipFee} />
     </Content>
     <Row>
-      <Text color='grey-500'>Amount to withdraw:</Text>
-      <Text>{`${amountToWithdraw} ${tokenSymbol}`}</Text>
+      <Text color='grey-500'>Amount to withdraw:&nbsp;</Text>
+      <Text>{`${formatKusamaBalance(amountToWithdraw.toString())} ${tokenSymbol}`}</Text>
     </Row>
     <ButtonWrapper>
       <Button
-        // disabled={!validPassword || !password || !name}
+        disabled={amountToWithdraw.eq(new BN(0))}
         onClick={onSubmit}
         role='primary'
         title='Confirm'
@@ -181,8 +221,17 @@ const ButtonWrapper = styled.div`
   column-gap: var(--gap);
 `;
 
-export const WithdrawDepositStagesModal: FC<WithdrawDepositModalProps> = ({ isVisible, address, onFinish }) => {
-  const { stages, status, initiate } = useWithdrawDepositStages(address || '');
+export type WithdrawDepositStagesModalProps = {
+  isVisible: boolean
+  address?: string
+  bids: BidDeposit[]
+  withdrawSponsorshipFee?: BN
+  onFinish(): void
+  onClose(): void
+}
+
+export const WithdrawDepositStagesModal: FC<WithdrawDepositStagesModalProps> = ({ bids, withdrawSponsorshipFee, isVisible, address, onFinish }) => {
+  const { stages, status, initiate } = useWithdrawDepositStages(address || '', bids, withdrawSponsorshipFee);
   const { api } = useApi();
   const { push } = useNotification();
 
