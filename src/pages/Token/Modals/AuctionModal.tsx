@@ -22,7 +22,7 @@ import { TCalculatedBid } from '../../../api/restApi/auction/types';
 import { NotificationSeverity } from '../../../notification/NotificationContext';
 import Kusama from '../../../static/icons/logo-kusama.svg';
 
-export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ token, offer, setIsClosable, onFinish }) => {
+export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosable, onFinish }) => {
   const [status, setStatus] = useState<'ask' | 'place-bid-stage'>('ask'); // TODO: naming
   const [bidValue, setBidValue] = useState<TPlaceABid>();
 
@@ -38,7 +38,7 @@ export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ token, offer, setIs
       accountAddress={bidValue?.accountAddress}
       amount={bidValue?.amount}
       onFinish={onFinish}
-      token={token}
+      offer={offer}
       setIsClosable={setIsClosable}
     />);
   }
@@ -49,7 +49,7 @@ const chainOptions = [{ id: 'KSM', title: 'KSM', iconRight: { size: 18, file: Ku
 
 export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceABid): void}> = ({ offer, onConfirmPlaceABid }) => {
   const [chain, setChain] = useState<string | undefined>('KSM');
-  const { kusamaFee, fetchingKusamaFee } = useFee();
+  const { kusamaFee } = useFee();
   const { selectedAccount } = useAccounts();
   const { api } = useApi();
   const [calculatedBid, setCalculatedBid] = useState<TCalculatedBid>();
