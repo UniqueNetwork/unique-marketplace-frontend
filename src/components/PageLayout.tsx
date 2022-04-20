@@ -14,6 +14,10 @@ export const PageLayout: FC = () => {
   const layoutProps = useMemo(() => {
     if (pathname === '/market') return { heading: 'Market' };
 
+    if (pathname === '/admin') {
+      return { heading: 'Collections' };
+    }
+
     if (pathname === '/myTokens') {
       return { heading: 'My tokens' };
     }
