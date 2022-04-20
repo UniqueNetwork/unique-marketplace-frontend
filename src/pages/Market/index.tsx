@@ -12,6 +12,7 @@ import { MobileFilters } from '../../components/Filters/MobileFilter';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
 import Loading from '../../components/Loading';
 import NoItems from '../../components/NoItems';
+import { useAccounts } from '../../hooks/useAccounts';
 
 type TOption = {
   iconRight: {
@@ -65,12 +66,13 @@ export const MarketPage = () => {
   const [sortingValue, setSortingValue] = useState<string>(defaultSortingValue);
   const [searchValue, setSearchValue] = useState<string | number>();
   const { offers, offersCount, isFetching, fetchMore, fetch } = useOffers();
+  const { selectedAccount } = useAccounts();
 
   const hasMore = offers && offers.length < offersCount;
 
   useEffect(() => {
     fetch({ page: 1, pageSize });
-  }, [fetch]);
+  }, []);
 
   const onClickSeeMore = useCallback(() => {
     // Todo: fix twice rendering
@@ -101,6 +103,14 @@ export const MarketPage = () => {
     setFilterState({ ...(filterState || {}), ...filter });
     fetch({ pageSize, page: 1, sort: [sortingValue], ...(filterState || {}), ...filter });
   }, [filterState, fetch, sortingValue]);
+
+  useEffect(() => {
+    if ((!filterState?.seller || filterState?.seller === selectedAccount?.address) && (!filterState?.bidderAddress || filterState?.bidderAddress === selectedAccount?.address)) return;
+    onFilterChange({
+      seller: filterState?.seller ? selectedAccount?.address : undefined,
+      bidderAddress: filterState?.bidderAddress ? selectedAccount?.address : undefined
+    });
+  }, [filterState?.seller, filterState?.bidderAddress, selectedAccount?.address]);
 
   return (<PagePaper>
     <MarketMainPageStyled>

@@ -13,21 +13,22 @@ import { WithdrawBidStagesModal } from './WithdrawBidModal';
 import { CancelAuctionStagesModal } from './CancelAuctionModal';
 
 export type TTokenPageModalProps = {
-  onFinish: () => void
   offer?: Offer
   token?: NFTToken
   // once button is clicked (sell/bid/etc) -> we will change marketType for modal and therefore this component decides what to show and how
   marketType: MarketType
+  onClose(): void
+  onFinish(): void
 }
 
 export type TTokenPageModalBodyProps = {
-  setIsClosable: (value: boolean) => void
   token?: NFTToken
   offer?: Offer
-  onFinish: () => void // TODO: make a type, in future we would definitly wan't to pass smth like success/error/error.message
+  onFinish(): void // TODO: make a type, in future we would definitly wan't to pass smth like success/error/error.message
+  setIsClosable(value: boolean): void
 }
 
-const TokenPageModal = ({ onFinish, marketType, offer, token }: TTokenPageModalProps) => {
+const TokenPageModal = ({ onClose, onFinish, marketType, offer, token }: TTokenPageModalProps) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const [isClosable, setIsClosable] = useState<boolean>(true);
 
@@ -62,7 +63,7 @@ const TokenPageModal = ({ onFinish, marketType, offer, token }: TTokenPageModalP
   if (!ModalBodyComponent) return null;
 
   return (
-    <Modal isVisible={isVisible} isClosable={isClosable} onClose={onFinish}>
+    <Modal isVisible={isVisible} isClosable={isClosable} onClose={onClose}>
       <ModalBodyComponent
         setIsClosable={setIsClosable}
         token={token}

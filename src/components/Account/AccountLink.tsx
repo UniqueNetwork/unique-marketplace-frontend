@@ -1,5 +1,4 @@
 import React, { FC, useCallback } from 'react';
-import { Link } from '@unique-nft/ui-kit';
 
 import { useApi } from '../../hooks/useApi';
 import { toChainFormatAddress } from '../../api/chainApi/utils/addressUtils';
@@ -17,9 +16,12 @@ const AccountLink: FC<AccountLinkProps> = ({ accountAddress }) => {
     return toChainFormatAddress(address, chainData?.properties.ss58Format || 0);
   }, [chainData?.properties.ss58Format]);
   return (
-    <>
-      <Link href={`${config.scanUrl}account/${formatAddress(accountAddress) || '404'}`} title={shortcutText(formatAddress(accountAddress) || '')} />
-    </>
+    <a
+      target={'_blank'}
+      rel={'noreferrer'}
+      href={`${config.scanUrl}account/${formatAddress(accountAddress) || '404'}`}
+      className={'unique-link primary'}
+    >{shortcutText(formatAddress(accountAddress) || '')}</a>
   );
 };
 
