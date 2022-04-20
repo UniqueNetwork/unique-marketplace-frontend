@@ -45,6 +45,8 @@ export type Offer = {
   auction: Auction | null
   tokenDescription: {
     collectionName: string
+    collectionCover: string | null
+    description: string
     image: string
     prefix: string
     attributes: OfferTokenAttribute[]

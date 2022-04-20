@@ -29,7 +29,7 @@ export const useAuctionSellStages = (collectionId: number, tokenId: number) => {
               (signedTx: TTransaction) => {
                 const startPrice = fromStringToBnString(params.txParams.startingPrice.toString(), api?.market?.kusamaDecimals);
                 const priceStep = fromStringToBnString(params.txParams.minimumStep.toString(), api?.market?.kusamaDecimals);
-                return startAuction({ tx: signedTx, days: params.txParams.duration, startPrice, priceStep });
+                return startAuction({ tx: signedTx, days: params.txParams.duration, startPrice, priceStep, tokenOwner: params.txParams.accountAddress });
               }
             }
           )

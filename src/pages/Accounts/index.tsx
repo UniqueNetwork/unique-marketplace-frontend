@@ -15,7 +15,7 @@ import { Table } from '../../components/Table';
 import { formatKusamaBalance } from '../../utils/textUtils';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
 import { Icon } from '../../components/Icon/Icon';
-import { WithdrawDepositStagesModal } from './Modals/WithdrawDeposit';
+import { WithdrawDepositModal } from './Modals/WithdrawDeposit';
 import { Account } from '../../account/AccountContext';
 import ArrowUpRight from '../../static/icons/arrow-up-right.svg';
 import config from '../../config';
@@ -237,7 +237,12 @@ export const AccountsPage = () => {
       <ImportViaJSONAccountModal isVisible={currentModal === AccountModal.importViaJSON} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
       <ImportViaQRCodeAccountModal isVisible={currentModal === AccountModal.importViaQRCode} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
       <TransferFundsModal isVisible={currentModal === AccountModal.sendFunds} onFinish={onModalClose} senderAddress={selectedAddress} />
-      <WithdrawDepositStagesModal isVisible={currentModal === AccountModal.withdrawDeposit} onFinish={onChangeAccountsFinish} address={selectedAddress} />
+      <WithdrawDepositModal
+        isVisible={currentModal === AccountModal.withdrawDeposit}
+        onFinish={onChangeAccountsFinish}
+        onClose={onModalClose}
+        address={selectedAddress}
+      />
     </AccountPageWrapper>
   </PagePaper>);
 };

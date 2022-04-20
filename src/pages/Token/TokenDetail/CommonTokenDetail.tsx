@@ -1,5 +1,5 @@
 import { Heading, Icon, Text } from '@unique-nft/ui-kit';
-import React, { FC, ReactChild, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, ReactChild, useCallback, useMemo } from 'react';
 import styled from 'styled-components/macro';
 
 import { Picture } from '../../../components';
@@ -29,12 +29,10 @@ export const CommonTokenDetail: FC<IProps> = ({
   token,
   offer
 }) => {
-  const [collectionCoverImage, setCollectionCoverImage] = useState<string>();
-  const { api } = useApi();
-
   const {
     collectionId,
     collectionName,
+    collectionCover,
     description,
     attributes,
     imageUrl,
@@ -42,7 +40,7 @@ export const CommonTokenDetail: FC<IProps> = ({
     prefix
   } = useMemo(() => {
     if (offer) {
-      const { collectionName, image, prefix } = offer.tokenDescription;
+      const { collectionName, image, prefix, collectionCover, description } = offer.tokenDescription;
       const attributes = offer.tokenDescription.attributes.reduce((acc, item) => ({ ...acc, [item.key]: item.value }), {});
       return {
         ...offer,
@@ -50,21 +48,16 @@ export const CommonTokenDetail: FC<IProps> = ({
         prefix,
         imageUrl: image,
         attributes,
-        description: '' // TODO: need add this in offer instance
+        description,
+        collectionCover
       };
     }
+
     return {
       ...token,
       tokenId: token?.id
     };
   }, [token, offer]);
-
-  useEffect(() => {
-    (async () => {
-      if (!api?.collection || !token?.collectionId) return;
-      setCollectionCoverImage((await api.collection.getCollection(token.collectionId)).coverImageUrl);
-    })();
-  }, [token?.collectionId, api?.collection]);
 
   const { selectedAccount } = useAccounts();
   const deviceSize = useDeviceSize();
@@ -134,7 +127,7 @@ export const CommonTokenDetail: FC<IProps> = ({
         {attributes && <AttributesBlock attributes={attributes} />}
         <Divider />
         <CollectionsCard
-          avatarSrc={collectionCoverImage || ''}
+          avatarSrc={collectionCover || ''}
           description={description || ''}
           id={collectionId || -1}
           title={collectionName || ''}
