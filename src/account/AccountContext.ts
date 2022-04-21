@@ -26,7 +26,7 @@ export type AccountContextProps = {
   setFetchAccountsError(error: string | undefined): void
   setAccounts(accounts: ((accounts: Account[]) => Account[]) | Account[]): void
   setIsLoading(loading: boolean): void
-  showSignDialog(): Promise<KeyringPair>
+  showSignDialog(account: Account): Promise<KeyringPair>
 }
 
 const AccountContext: Context<AccountContextProps> = createContext({} as unknown as AccountContextProps);

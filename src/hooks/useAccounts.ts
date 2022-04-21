@@ -148,9 +148,10 @@ export const useAccounts = () => {
     else keyring.addUri(content, password, meta, 'sr25519');
   }, [rawRpcApi]);
 
-  const unlockLocalAccount = useCallback((password: string) => {
-    if (!selectedAccount) return;
-    const pair = keyring.getPair(selectedAccount.address);
+  const unlockLocalAccount = useCallback((password: string, account?: Account) => {
+    const _account = account || selectedAccount;
+    if (!_account) throw new Error('Account was not provided');
+    const pair = keyring.getPair(_account.address);
     pair.unlock(password);
     return pair;
   }, [selectedAccount]);
@@ -164,7 +165,7 @@ export const useAccounts = () => {
     if (!_account) throw new Error('Account was not provided');
     let signedTx;
     if (_account.signerType === AccountSigner.local) {
-      const signature = await showSignDialog();
+      const signature = await showSignDialog(_account);
       if (signature) {
         signedTx = await tx.signAsync(signature);
       }
@@ -185,7 +186,7 @@ export const useAccounts = () => {
     if (!_account) throw new Error('Account was not provided');
     let signedMessage;
     if (_account.signerType === AccountSigner.local) {
-      const pair = await showSignDialog();
+      const pair = await showSignDialog(_account);
       if (pair) {
         signedMessage = u8aToHex(pair.sign(stringToHex(message)));
       }
