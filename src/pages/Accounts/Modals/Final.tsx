@@ -1,10 +1,10 @@
 import React, { FC, useCallback, useMemo } from 'react';
-import { TCreateAccountBodyModalProps } from './types';
 import { Avatar, Button, Icon, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import { defaultPairType, derivePath } from './CreateAccount';
+import { TCreateAccountBodyModalProps } from './types';
 import { AdditionalWarning100, Grey300 } from '../../../styles/colors';
 import { Tooltip } from '../../../components/Tooltip/Tooltip';
 import Question from '../../../static/icons/question.svg';

@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 import { TCreateAccountBodyModalProps } from './types';
 import { Avatar, Button, InputText, Text } from '@unique-nft/ui-kit';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';

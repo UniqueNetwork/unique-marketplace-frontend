@@ -7,7 +7,6 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import { FinalModal } from './Final';
 import { AskCredentialsModal } from './AskCredentials';
 import { AskSeedPhraseModal } from './AskSeedPhrase';
-import { sleep } from '../../../utils/helpers';
 
 export const derivePath = '';
 
