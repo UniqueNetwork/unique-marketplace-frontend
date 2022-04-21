@@ -1,19 +1,20 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Checkbox, Heading, Modal, Text } from '@unique-nft/ui-kit';
+import { BN } from '@polkadot/util';
+import styled from 'styled-components/macro';
+
 import DefaultMarketStages from '../../Token/Modals/StagesModal';
 import { useWithdrawDepositStages } from '../../../hooks/accountStages/useWithdrawDepositStages';
 import { useApi } from '../../../hooks/useApi';
 import { useNotification } from '../../../hooks/useNotification';
 import { StageStatus } from '../../../types/StagesTypes';
 import { NotificationSeverity } from '../../../notification/NotificationContext';
-import styled from 'styled-components/macro';
 import { Avatar } from '../../../components/Avatar/Avatar';
 import { getWithdrawBids } from '../../../api/restApi/auction/auction';
 import { TWithdrawBid } from '../../../api/restApi/auction/types';
 import { NFTToken } from '../../../api/chainApi/unique/types';
 import { formatKusamaBalance } from '../../../utils/textUtils';
 import { useAccounts } from '../../../hooks/useAccounts';
-import { BN } from '@polkadot/util';
 import Loading from '../../../components/Loading';
 
 const tokenSymbol = 'KSM';

@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useState } from 'react';
 import { Button, Heading, Modal, Text } from '@unique-nft/ui-kit';
+import { KeyringPair } from '@polkadot/keyring/types';
 import styled from 'styled-components/macro';
 
 import { TAccountModalProps } from './types';
@@ -7,7 +8,6 @@ import { AdditionalWarning100 } from '../../../styles/colors';
 import { PasswordInput } from '../../../components/PasswordInput/PasswordInput';
 import { Upload } from '../../../components/Upload/Upload';
 import { convertToU8a, keyringFromFile } from '../../../utils/jsonUtils';
-import { KeyringPair } from '@polkadot/keyring/types';
 import { useApi } from '../../../hooks/useApi';
 import keyring from '@polkadot/ui-keyring';
 

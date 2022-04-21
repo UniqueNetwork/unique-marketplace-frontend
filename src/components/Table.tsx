@@ -46,6 +46,12 @@ const TableWrapper = styled.div`
  .unique-table-data-row {
    height: unset;
    min-height: 40px;
+   div {
+     padding: 0;
+   }
+   & > div {
+     padding: 0 var(--gap);
+   } 
  }
 `;
 

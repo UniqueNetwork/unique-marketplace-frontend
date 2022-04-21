@@ -18,11 +18,11 @@ import { Icon } from '../../components/Icon/Icon';
 import { WithdrawDepositModal } from './Modals/WithdrawDeposit';
 import { Account } from '../../account/AccountContext';
 import ArrowUpRight from '../../static/icons/arrow-up-right.svg';
-import config from '../../config';
 import { toChainFormatAddress } from '../../api/chainApi/utils/addressUtils';
 import { useApi } from '../../hooks/useApi';
 import AccountCard from '../../components/Account/Account';
 import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
+import config from '../../config';
 
 const tokenSymbol = 'KSM';
 
@@ -297,6 +297,8 @@ const SearchInputStyled = styled(InputText)`
 const AccountCellWrapper = styled.div`
   display: flex;
   padding: 20px 0 !important;
+  column-gap: calc(var(--gap) / 2); 
+  align-items: center;
 `;
 
 const BalancesWrapper = styled.div`

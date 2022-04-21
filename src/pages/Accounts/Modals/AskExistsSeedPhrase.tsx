@@ -1,10 +1,11 @@
 import React, { ChangeEvent, FC, useCallback, useState } from 'react';
+import { Avatar, Button, Checkbox, Text } from '@unique-nft/ui-kit';
+import styled from 'styled-components/macro';
+
 import { TCreateAccountBodyModalProps } from './types';
 import { addressFromSeed } from '../../../utils/seedUtils';
-import { Avatar, Button, Checkbox, Text } from '@unique-nft/ui-kit';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import { defaultPairType, derivePath } from './CreateAccount';
-import styled from 'styled-components/macro';
 import { AdditionalWarning100, Grey300 } from '../../../styles/colors';
 
 export const AskExistsSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish }) => {

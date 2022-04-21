@@ -1,9 +1,10 @@
 import React, { ChangeEvent, FC, useCallback, useEffect, useState } from 'react';
-import { TCreateAccountBodyModalProps } from './types';
-import { addressFromSeed } from '../../../utils/seedUtils';
 import { mnemonicGenerate } from '@polkadot/util-crypto';
 import { Avatar, Button, Checkbox, Heading, Link, Select, Text, Icon } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
+
+import { TCreateAccountBodyModalProps } from './types';
+import { addressFromSeed } from '../../../utils/seedUtils';
 
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import { defaultPairType, derivePath } from './CreateAccount';

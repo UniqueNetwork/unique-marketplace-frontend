@@ -10,7 +10,6 @@ export type TStartAuctionParams = {
   days: number
   startPrice: string
   priceStep: string
-  tokenOwner: string
 }
 export type TPlaceBidParams = {
   tx: unknown, collectionId: number, tokenId: number

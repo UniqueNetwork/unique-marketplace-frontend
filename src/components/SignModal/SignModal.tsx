@@ -1,29 +1,33 @@
-import React, { ChangeEvent, FC, useCallback, useState } from 'react';
+import React, { FC, useCallback, useState } from 'react';
 import { Avatar, Button, Heading, Modal, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 import { KeyringPair } from '@polkadot/keyring/types';
 
 import DefaultAvatar from '../../static/icons/default-avatar.svg';
-import { AccountSigner } from '../../account/AccountContext';
+import { Account, AccountSigner } from '../../account/AccountContext';
 import { useAccounts } from '../../hooks/useAccounts';
 import { PasswordInput } from '../PasswordInput/PasswordInput';
+import AccountCard from '../Account/Account';
+import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
 
 export type TSignModalProps = {
   isVisible: boolean
+  account?: Account
   onFinish(signature?: KeyringPair): void
   onClose(): void
 }
 
-export const SignModal: FC<TSignModalProps> = ({ isVisible, onFinish, onClose }) => {
+export const SignModal: FC<TSignModalProps> = ({ account, isVisible, onFinish, onClose }) => {
   const [password, setPassword] = useState<string>('');
   const [passwordError, setPasswordError] = useState<string | undefined>();
-  const { selectedAccount, unlockLocalAccount } = useAccounts();
+  const { unlockLocalAccount } = useAccounts();
+  const deviceSize = useDeviceSize();
 
   const onSignClick = useCallback(() => {
-    if (!selectedAccount || selectedAccount.signerType !== AccountSigner.local) return;
+    if (!account || account.signerType !== AccountSigner.local) return;
     try {
       setPasswordError(undefined);
-      const signature = unlockLocalAccount(password);
+      const signature = unlockLocalAccount(password, account);
       if (signature) {
         onFinish(signature);
       }
@@ -32,17 +36,21 @@ export const SignModal: FC<TSignModalProps> = ({ isVisible, onFinish, onClose })
     }
 
     setPassword('');
-  }, [selectedAccount, password]);
+  }, [account, password]);
 
-  if (!selectedAccount) return null;
+  if (!account) return null;
 
   return (<Modal isVisible={isVisible} isClosable={true} onClose={onClose}>
     <Content>
       <Heading size='2'>{'Authorize transaction'}</Heading>
     </Content>
     <AddressWrapper>
-      <Avatar size={24} src={DefaultAvatar} />
-      <Text>{selectedAccount.address || ''}</Text>
+      <AccountCard
+        accountName={account.meta.name || ''}
+        accountAddress={account.address}
+        isShort={deviceSize === DeviceSize.sm}
+        canCopy={false}
+      />
     </AddressWrapper>
     <CredentialsWrapper >
       <PasswordInput
@@ -71,10 +79,11 @@ const Content = styled.div`
 const AddressWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 2);
+  align-items: center;
   margin: calc(var(--gap) * 2) 0;
   border: 1px solid var(--grey-300);
   border-radius: 4px;
-  padding: 20px var(--gap);
+  padding: calc(var(--gap) / 2) var(--gap);
 `;
 
 const ButtonWrapper = styled.div`
