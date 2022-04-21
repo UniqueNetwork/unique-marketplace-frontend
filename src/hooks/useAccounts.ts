@@ -125,7 +125,7 @@ export const useAccounts = () => {
       setFetchAccountsError('No accounts in extension');
     }
     setIsLoading(false);
-  }, [rpcClient?.isKusamaApiConnected]);
+  }, [rpcClient?.isKusamaApiConnected, getAccountsDeposits, getAccountsBalances]);
 
   useEffect(() => {
     const updatedSelectedAccount = accounts.find((account) => account.address === selectedAccount?.address);
