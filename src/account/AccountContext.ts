@@ -2,6 +2,7 @@ import { Consumer, Context, createContext, Provider } from 'react';
 import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
 import { BN } from '@polkadot/util';
 import { KeyringPair } from '@polkadot/keyring/types';
+import { TWithdrawBid } from '../api/restApi/auction/types';
 
 export enum AccountSigner {
   extension = 'Extension',
@@ -12,7 +13,10 @@ export interface Account extends InjectedAccountWithMeta {
   balance?: {
     KSM?: BN
   },
-  deposit?: BN
+  deposits?: {
+    bids: TWithdrawBid[]
+    sponsorshipFee?: BN
+  }
   isOnWhiteList?: boolean
 }
 

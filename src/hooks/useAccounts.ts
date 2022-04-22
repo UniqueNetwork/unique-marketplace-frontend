@@ -11,6 +11,7 @@ import { DefaultAccountKey } from '../account/AccountProvider';
 import { getSuri, PairType } from '../utils/seedUtils';
 import { TTransaction } from '../api/chainApi/types';
 import { Codec } from '@polkadot/types/types';
+import { getWithdrawBids } from '../api/restApi/auction/auction';
 
 export const useAccounts = () => {
   const { rpcClient, rawRpcApi, rawKusamaRpcApi, api } = useApi();
@@ -70,14 +71,12 @@ export const useAccounts = () => {
     }
   } as Account))), [getAccountBalance]);
 
-  const getAccountsDeposits = useCallback((accounts: Account[]) => {
+  const getAccountsWhiteListStatus = useCallback((accounts: Account[]) => {
     if (!api?.market) return accounts;
-    const fetchDeposit = async (account: Account) => ({
+    return Promise.all(accounts.map(async (account: Account) => ({
       ...account,
-      deposit: await api?.market?.getUserDeposit(account.address),
       isOnWhiteList: await api?.market?.checkWhiteListed(account.address)
-    });
-    return Promise.all(accounts.map(fetchDeposit));
+    })));
   }, [api?.market]);
 
   const unsubscribesBalancesChanges = useRef<Record<string, Codec>>({});
@@ -107,11 +106,11 @@ export const useAccounts = () => {
 
     if (allAccounts?.length) {
       const accountsWithBalance = await getAccountsBalances(allAccounts);
-      const accountsWithDeposits = await getAccountsDeposits(accountsWithBalance);
+      const accountsWithWhiteListStatus = await getAccountsWhiteListStatus(accountsWithBalance);
 
-      setAccounts(accountsWithDeposits);
+      setAccounts(accountsWithWhiteListStatus);
 
-      await subscribeBalancesChanges(accountsWithDeposits);
+      await subscribeBalancesChanges(accountsWithWhiteListStatus);
 
       const defaultAccountAddress = localStorage.getItem(DefaultAccountKey);
       const defaultAccount = allAccounts.find((item) => item.address === defaultAccountAddress);
@@ -125,7 +124,7 @@ export const useAccounts = () => {
       setFetchAccountsError('No accounts in extension');
     }
     setIsLoading(false);
-  }, [rpcClient?.isKusamaApiConnected, getAccountsDeposits, getAccountsBalances]);
+  }, [rpcClient?.isKusamaApiConnected, getAccountsBalances, getAccountsWhiteListStatus]);
 
   useEffect(() => {
     const updatedSelectedAccount = accounts.find((account) => account.address === selectedAccount?.address);
@@ -201,6 +200,18 @@ export const useAccounts = () => {
     return signedMessage;
   }, [showSignDialog, selectedAccount, accounts]);
 
+  const fetchAccountsWithDeposits = useCallback(async () => {
+    const _accounts = await Promise.all(accounts.map(async (account) => ({
+      ...account,
+      deposits: {
+        bids: (await getWithdrawBids({ owner: account.address })).data || [],
+        sponsorshipFee: await api?.market?.getUserDeposit(account.address)
+      }
+    })));
+    setAccounts(_accounts);
+    return _accounts;
+  }, [accounts]);
+
   return {
     accounts,
     selectedAccount,
@@ -213,6 +224,7 @@ export const useAccounts = () => {
     signMessage,
     fetchAccounts,
     subscribeBalancesChanges,
+    fetchAccountsWithDeposits,
     changeAccount
   };
 };

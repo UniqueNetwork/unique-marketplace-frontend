@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, InputText, Text } from '@unique-nft/ui-kit';
 import { TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import styled from 'styled-components/macro';
@@ -132,12 +132,17 @@ type AccountInfo = {
 }
 
 export const AccountsPage = () => {
-  const { accounts, fetchAccounts, isLoading } = useAccounts();
+  const { accounts, fetchAccounts, isLoading, fetchAccountsWithDeposits } = useAccounts();
   const [searchString, setSearchString] = useState<string>('');
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
   const [selectedAddress, setSelectedAddress] = useState<string>();
   const deviceSize = useDeviceSize();
   const { chainData } = useApi();
+
+  useEffect(() => {
+    if (isLoading) return;
+    void fetchAccountsWithDeposits();
+  }, [isLoading]);
 
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainData?.properties.ss58Format || 0);
@@ -179,10 +184,15 @@ export const AccountsPage = () => {
         ...account,
         accountInfo: { address: account.address, name: account.meta.name || '', balance: account.balance }
       });
-      if (account.deposit && !account.deposit.isZero()) {
+      if (account.deposits && (!account.deposits.sponsorshipFee?.isZero() || account.deposits.bids.length !== 0)) {
         acc.push({
           ...account,
-          accountInfo: { address: account.address, name: account.meta.name || '', deposit: account.deposit }
+          accountInfo: {
+            address: account.address,
+            name: account.meta.name || '',
+            deposit: account.deposits.sponsorshipFee?.add(account.deposits.bids.reduce((acc, bid) =>
+              acc.add(new BN(bid.amount)), new BN(0)))
+          }
         });
       }
       return acc;
@@ -203,6 +213,7 @@ export const AccountsPage = () => {
   const onChangeAccountsFinish = useCallback(async () => {
     setCurrentModal(undefined);
     await fetchAccounts();
+    await fetchAccountsWithDeposits();
   }, []);
 
   const onModalClose = useCallback(() => {
@@ -305,7 +316,7 @@ const BalancesWrapper = styled.div`
   && {
     display: flex;
     flex-direction: column;
-    padding: 0;
+    padding: 20px 0 !important;
   }
 `;
 
