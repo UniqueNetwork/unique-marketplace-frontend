@@ -165,10 +165,10 @@ export const WithdrawDepositAskModal: FC<WithdrawDepositAskModalProps> = ({ isVi
         </InlineTokenCard>
       </Row>))}
     </Content>}
-    <Content>
+    {sponsorshipFee && !sponsorshipFee?.isZero() && <Content>
       <Text size={'m'} color={'grey-500'}>Sponsorship fee</Text>
       <Checkbox checked={isSelectedSponsorshipFee} label={`${formatKusamaBalance(sponsorshipFee?.toString() || '0')} ${tokenSymbol}`} onChange={onSelectSponsorshipFee} />
-    </Content>
+    </Content>}
     <Row>
       <Text color='grey-500'>Amount to withdraw:&nbsp;</Text>
       <Text>{`${formatKusamaBalance(amountToWithdraw.toString())} ${tokenSymbol}`}</Text>

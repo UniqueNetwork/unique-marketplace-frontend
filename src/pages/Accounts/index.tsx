@@ -23,6 +23,7 @@ import { useApi } from '../../hooks/useApi';
 import AccountCard from '../../components/Account/Account';
 import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
 import config from '../../config';
+import { TWithdrawBid } from '../../api/restApi/auction/types';
 
 const tokenSymbol = 'KSM';
 
@@ -184,14 +185,22 @@ export const AccountsPage = () => {
         ...account,
         accountInfo: { address: account.address, name: account.meta.name || '', balance: account.balance }
       });
-      if (account.deposits && (!account.deposits.sponsorshipFee?.isZero() || account.deposits.bids.withdraw.length !== 0)) {
+      if (!account.deposits) return acc;
+
+      const { sponsorshipFee, bids } = account.deposits;
+      const { leader, withdraw } = bids || { leader: [], withdraw: [] };
+
+      if ((!sponsorshipFee?.isZero() || leader.length !== 0 || withdraw.length !== 0)) {
+        const getTotalAmount = (acc: BN, bid: TWithdrawBid) => acc.add(new BN(bid.amount));
+
         acc.push({
           ...account,
           accountInfo: {
             address: account.address,
             name: account.meta.name || '',
-            deposit: account.deposits.sponsorshipFee?.add(account.deposits.bids.withdraw.reduce((acc, bid) =>
-              acc.add(new BN(bid.amount)), new BN(0)))
+            deposit: (sponsorshipFee || new BN(0))
+              .add(withdraw.reduce(getTotalAmount, new BN(0)))
+              .add(leader.reduce(getTotalAmount, new BN(0)))
           }
         });
       }
