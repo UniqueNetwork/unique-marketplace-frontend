@@ -132,7 +132,7 @@ type AccountInfo = {
 }
 
 export const AccountsPage = () => {
-  const { accounts, fetchAccounts, isLoading, fetchAccountsWithDeposits } = useAccounts();
+  const { accounts, fetchAccounts, isLoading, isLoadingDeposits, fetchAccountsWithDeposits } = useAccounts();
   const [searchString, setSearchString] = useState<string>('');
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
   const [selectedAddress, setSelectedAddress] = useState<string>();
@@ -184,13 +184,13 @@ export const AccountsPage = () => {
         ...account,
         accountInfo: { address: account.address, name: account.meta.name || '', balance: account.balance }
       });
-      if (account.deposits && (!account.deposits.sponsorshipFee?.isZero() || account.deposits.bids.length !== 0)) {
+      if (account.deposits && (!account.deposits.sponsorshipFee?.isZero() || account.deposits.bids.withdraw.length !== 0)) {
         acc.push({
           ...account,
           accountInfo: {
             address: account.address,
             name: account.meta.name || '',
-            deposit: account.deposits.sponsorshipFee?.add(account.deposits.bids.reduce((acc, bid) =>
+            deposit: account.deposits.sponsorshipFee?.add(account.deposits.bids.withdraw.reduce((acc, bid) =>
               acc.add(new BN(bid.amount)), new BN(0)))
           }
         });
@@ -241,7 +241,7 @@ export const AccountsPage = () => {
       <Table
         columns={getAccountsColumns({ isShortAddress: deviceSize === DeviceSize.sm, formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal })}
         data={filteredAccounts}
-        loading={isLoading}
+        loading={isLoading || isLoadingDeposits}
       />
       <CreateAccountModal isVisible={currentModal === AccountModal.create} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
       <ImportViaSeedAccountModal isVisible={currentModal === AccountModal.importViaSeed} onFinish={onChangeAccountsFinish} onClose={onModalClose} />

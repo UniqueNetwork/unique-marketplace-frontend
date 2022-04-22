@@ -10,10 +10,9 @@ import Loading from '../Loading';
 interface InlineTokenCardProps {
   tokenId: number
   collectionId: number
-  text?: string
 }
 
-export const InlineTokenCard: FC<InlineTokenCardProps> = ({ tokenId, collectionId, text }) => {
+export const InlineTokenCard: FC<InlineTokenCardProps> = ({ tokenId, collectionId, children }) => {
   const { api } = useApi();
   const [token, setToken] = useState<NFTToken>();
   const [isLoading, setIsLoading] = useState(false);
@@ -32,7 +31,7 @@ export const InlineTokenCard: FC<InlineTokenCardProps> = ({ tokenId, collectionI
       <Avatar src={token?.imageUrl || ''} size={64} type={'square'} />
       {token && <TokenInfoWrapper>
         <Text size={'s'} color={'grey-500'}>{`${token?.prefix} #${token?.id}`}</Text>
-        {text && <Text size={'m'} >{text}</Text>}
+        {children}
       </TokenInfoWrapper>}
       {isLoading && <Loading />}
     </InlineTokenCardWrapper>

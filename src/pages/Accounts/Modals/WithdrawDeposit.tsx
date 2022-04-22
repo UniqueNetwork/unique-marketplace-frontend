@@ -84,12 +84,13 @@ export const WithdrawDepositAskModal: FC<WithdrawDepositAskModalProps> = ({ isVi
   const account = useMemo(() =>
     accounts.find((item) => item.address === address), [accounts, address]);
 
-  const { bids, sponsorshipFee } = account?.deposits || { bids: [], sponsorshipFee: new BN(0) };
+  const { bids, sponsorshipFee } = account?.deposits || { sponsorshipFee: new BN(0) };
+  const { withdraw, leader } = bids || { withdraw: [], leader: [] };
 
   const totalAmount = useMemo(() => {
-    return (account?.deposits?.sponsorshipFee || new BN(0)).add(bids.reduce<BN>((acc, bid) =>
+    return (account?.deposits?.sponsorshipFee || new BN(0)).add(withdraw.reduce<BN>((acc, bid) =>
       acc.add(new BN(bid.amount)), new BN(0)));
-  }, [account, bids]);
+  }, [account]);
 
   const onSelectAll = useCallback((value: boolean) => {
     setIsSelectedAll(value);
@@ -121,18 +122,18 @@ export const WithdrawDepositAskModal: FC<WithdrawDepositAskModalProps> = ({ isVi
   }, [isSelectedAll, totalAmount, isSelectedSponsorshipFee, sponsorshipFee, selectedBids]);
 
   useEffect(() => {
-    if (!isVisible) {
+    if (isVisible) {
       setSelectedBids([]);
-      setIsSelectedAll(true);
-      setIsSelectedSponsorshipFee(false);
+      setIsSelectedAll(withdraw.length > 0); // if there are some bids to withdraw
+      setIsSelectedSponsorshipFee(withdraw.length === 0); // else
     }
-  }, [isVisible]);
+  }, [isVisible, account?.deposits?.bids]);
 
   const onSubmit = useCallback(() => {
     if (amountToWithdraw.eq(new BN(0))) return;
 
     if (isSelectedAll) {
-      onFinish(bids, sponsorshipFee);
+      onFinish(withdraw, sponsorshipFee);
       return;
     }
     onFinish(selectedBids, isSelectedSponsorshipFee ? sponsorshipFee : undefined);
@@ -142,19 +143,26 @@ export const WithdrawDepositAskModal: FC<WithdrawDepositAskModalProps> = ({ isVi
     <Content>
       <Heading size='2'>Withdraw deposit</Heading>
     </Content>
-    {(bids.length > 0) && <Content>
+    {(withdraw.length > 0) && <Content>
       <Text size={'m'} color={'grey-500'}>All deposit</Text>
       <Checkbox checked={isSelectedAll} label={`${formatKusamaBalance(totalAmount.toString())} ${tokenSymbol}`} onChange={onSelectAll} />
     </Content>}
-    {bids.length > 0 && <Content>
+    {(leader.length > 0 || withdraw.length > 0) && <Content>
       <Text size={'m'} color={'grey-500'}>Bids</Text>
-      {bids.map((bid) => (<Row>
-        <Checkbox checked={selectedBids.some((item) => item.auctionId === bid.auctionId)} label={''} onChange={onSelectBid(bid)}/>
+      {[...leader, ...withdraw].map((bid, index) => (<Row>
+        <Checkbox
+          disabled={index < leader.length}
+          label={''}
+          checked={selectedBids.some((item) => item.auctionId === bid.auctionId)}
+          onChange={onSelectBid(bid)}
+        />
         <InlineTokenCard
           tokenId={Number(bid.tokenId)}
           collectionId={Number(bid.collectionId)}
-          text={`${formatKusamaBalance(bid.amount)} ${tokenSymbol}`}
-        />
+        >
+          <Text size={'m'} >{`${formatKusamaBalance(bid.amount)} ${tokenSymbol}`}</Text>
+          {index < leader.length && <Text size={'s'} color={'additional-positive-500'}>Leading bid</Text>}
+        </InlineTokenCard>
       </Row>))}
     </Content>}
     <Content>

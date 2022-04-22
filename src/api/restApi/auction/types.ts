@@ -52,6 +52,11 @@ export type TWithdrawBid = {
   tokenId: string
 };
 
+export type TWithdrawBidsResponse = {
+  leader: TWithdrawBid[]
+  withdraw: TWithdrawBid[]
+}
+
 export type TWithdrawChooseBidsParams = {
   timestamp: number
   auctionIds: string

@@ -14,7 +14,10 @@ export interface Account extends InjectedAccountWithMeta {
     KSM?: BN
   },
   deposits?: {
-    bids: TWithdrawBid[]
+    bids: {
+      leader: TWithdrawBid[]
+      withdraw: TWithdrawBid[]
+    }
     sponsorshipFee?: BN
   }
   isOnWhiteList?: boolean

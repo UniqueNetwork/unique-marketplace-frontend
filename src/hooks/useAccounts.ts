@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useRef } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { web3Accounts, web3Enable, web3FromSource } from '@polkadot/extension-dapp';
 import keyring from '@polkadot/ui-keyring';
 import { BN, stringToHex, u8aToHex } from '@polkadot/util';
@@ -200,15 +200,18 @@ export const useAccounts = () => {
     return signedMessage;
   }, [showSignDialog, selectedAccount, accounts]);
 
+  const [isLoadingDeposits, setIsLoadingDeposits] = useState<boolean>(false);
   const fetchAccountsWithDeposits = useCallback(async () => {
+    setIsLoadingDeposits(true);
     const _accounts = await Promise.all(accounts.map(async (account) => ({
       ...account,
       deposits: {
-        bids: (await getWithdrawBids({ owner: account.address })).data || [],
+        bids: (await getWithdrawBids({ owner: account.address })).data || { withdraw: [], leader: [] },
         sponsorshipFee: await api?.market?.getUserDeposit(account.address)
       }
     })));
     setAccounts(_accounts);
+    setIsLoadingDeposits(false);
     return _accounts;
   }, [accounts]);
 
@@ -216,6 +219,7 @@ export const useAccounts = () => {
     accounts,
     selectedAccount,
     isLoading,
+    isLoadingDeposits,
     fetchAccountsError,
     addLocalAccount,
     addAccountViaQR,
