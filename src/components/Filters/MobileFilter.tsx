@@ -106,6 +106,18 @@ const MobileFilterModal = styled.div<{ isVisible: boolean }>`
   left: 0;
   overflow-y: auto;
 
+  & div[class^=Filters] {
+    width: 100%;
+    padding-bottom: 60px;
+  }
+  
+  & div[class^=CollectionsFilter__CollectionFilterWrapper] {
+    max-height: unset;
+    div[class^=CollectionsFilter__AttributeWrapper]:last-child {
+      padding-bottom: 90px;
+    }
+  }
+  
   @media (max-width: 1024px) {
     display: ${({ isVisible }) => isVisible ? 'block' : 'none'};
   }
