@@ -25,7 +25,7 @@ export const useWithdrawDepositStages = (accountAddress: string, bids: TWithdraw
   const bidsAmount = useMemo(() => bids.reduce<BN>((acc, bid) =>
     acc.add(new BN(bid.amount)), new BN(0)), [bids]);
 
-  const withdrawSponsorshipFeeStage: InternalStage<TWithdrawDeposit>[] = useMemo(() => withdrawSponsorshipFee
+  const withdrawSponsorshipFeeStage: InternalStage<TWithdrawDeposit>[] = useMemo(() => withdrawSponsorshipFee && !withdrawSponsorshipFee.isZero()
     ? [{
       title: `Withdraw sponsorship fee: ${formatKusamaBalance(withdrawSponsorshipFee?.toString())} ${tokenSymbol}`,
       description: '',
