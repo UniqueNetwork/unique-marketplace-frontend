@@ -40,10 +40,10 @@ export const WalletManager: FC = () => {
   }, [selectedAccount, chainData?.systemChain]);
 
   if (!isLoading && accounts.length === 0) {
- return (
-   <Button title={'Connect or create account'} onClick={onCreateAccountClick} />
-  );
-}
+   return (
+     <Button title={'Connect or create account'} onClick={onCreateAccountClick} />
+    );
+  }
 
   if (deviceSize === DeviceSize.sm) {
     return (
