@@ -103,6 +103,10 @@ const Dropdown = styled.div<{ isOpen: boolean }>`
   overflow-x: hidden;
   overflow-y: auto;
   z-index: 10;
+  @media (max-width: 768px) {
+    right: 0;
+    max-width: calc(100vw - var(--gap) * 2);
+  }
 `;
 
 const OptionWrapper = styled.div`
