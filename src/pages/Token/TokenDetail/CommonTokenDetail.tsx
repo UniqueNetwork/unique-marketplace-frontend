@@ -115,7 +115,7 @@ export const CommonTokenDetail: FC<IProps> = ({
               Owned&nbsp;by
             </Text>
             <Account href={`${config.scanUrl}account/${owner || '404'}`}>
-              <Avatar size={24} src={DefaultAvatar}/>
+              <Avatar size={24} src={DefaultAvatar} address={owner}/>
               <Text color='primary-600' size='m'>
                 {deviceSize === DeviceSize.lg ? owner || '' : shortcutText(owner || '') }
               </Text>

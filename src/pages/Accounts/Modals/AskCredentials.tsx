@@ -1,9 +1,10 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import { TCreateAccountBodyModalProps } from './types';
-import { Avatar, Button, InputText, Text } from '@unique-nft/ui-kit';
+import { Button, InputText, Text } from '@unique-nft/ui-kit';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import styled from 'styled-components/macro';
 import { PasswordInput } from '../../../components/PasswordInput/PasswordInput';
+import { Avatar } from '../../../components/Avatar/Avatar';
 
 export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties, onFinish, onGoBack }) => {
   const [name, setName] = useState<string>('');
@@ -23,7 +24,7 @@ export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountP
 
   return (<>
     <AddressWrapper>
-      <Avatar size={24} src={DefaultAvatar} />
+      <Avatar size={24} src={DefaultAvatar} address={accountProperties?.address} />
       <Text>{accountProperties?.address || ''}</Text>
     </AddressWrapper>
     <CredentialsWrapper >

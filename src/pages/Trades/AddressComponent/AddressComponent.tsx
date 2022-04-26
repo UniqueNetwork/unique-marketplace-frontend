@@ -18,7 +18,7 @@ export const AddressComponent = ({ text }: { text: string }) => {
   const shortCut = useMemo(() => (shortcutText(formatAddress(text))), [text]);
 
   return <LinkWrapper>
-    <Avatar size={24} src={DefaultAvatar} />
+    <Avatar size={24} src={DefaultAvatar} address={text} />
     <a
       target={'_blank'}
       rel={'noreferrer'}
