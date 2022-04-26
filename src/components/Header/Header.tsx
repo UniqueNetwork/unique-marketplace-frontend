@@ -7,6 +7,7 @@ import { useScreenWidthFromThreshold } from '../../hooks/useScreenWidthFromThres
 import menu from '../../static/icons/menu.svg';
 import { TMenuItems } from '../PageLayout';
 import { WalletManager } from './WalletManager/WalletManager';
+import { useAccounts } from '../../hooks/useAccounts';
 
 interface HeaderProps {
   activeItem: TMenuItems;
@@ -19,6 +20,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
   const mobileMenuToggler = useCallback(() => {
     toggleMobileMenu((prevState) => !prevState);
   }, []);
+  const { hasAdminPermission } = useAccounts();
 
   return (
     <HeaderStyled>
@@ -72,6 +74,16 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 FAQ
               </DesktopMenuItem>
             </Link>
+            {hasAdminPermission && <Link to='admin'>
+              <DesktopMenuItem
+                $active={activeItem === 'Admin panel'}
+                color='additional-dark'
+                size='m'
+                weight='medium'
+              >
+                Admin panel
+              </DesktopMenuItem>
+            </Link>}
           </nav>
         )}
       </LeftSideColumn>
@@ -128,6 +140,18 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
               </TextStyled>
             </Link>
           </LinkWrapper>
+          {hasAdminPermission && <LinkWrapper onClick={mobileMenuToggler}>
+            <Link to='admin'>
+              <TextStyled
+                $active={activeItem === 'Admin panel'}
+                color='additional-dark'
+                size='m'
+                weight='medium'
+              >
+                Admin panel
+              </TextStyled>
+            </Link>
+          </LinkWrapper>}
         </MobileMenu>
       )}
     </HeaderStyled>
