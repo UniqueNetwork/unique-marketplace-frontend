@@ -1,4 +1,4 @@
-import React, { FC, KeyboardEvent, useCallback, useState } from 'react';
+import React, {FC, KeyboardEvent, useCallback, useEffect, useState} from 'react';
 import { Button, InputText, Select } from '@unique-nft/ui-kit';
 import InfiniteScroll from 'react-infinite-scroller';
 import styled from 'styled-components/macro';
@@ -11,6 +11,8 @@ import { CollectionCard } from '../../components/CollectionCard/CollectionCard';
 import { AdminPanelModal } from './Modals/AdminPanelModal';
 import { AdminPanelModalType } from './Modals/types';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
+import {useAccounts} from "../../hooks/useAccounts";
+import {useNavigate} from "react-router-dom";
 
 type TOption = {
   iconRight: {
@@ -66,6 +68,14 @@ export const AdminPanelPage: FC = () => {
   const [searchValue, setSearchValue] = useState<string | number>();
   const [modalType, setModalType] = useState(AdminPanelModalType.default);
   const [selectedCollection, setSelectedCollection] = useState<NFTCollection>();
+  const { hasAdminPermission } = useAccounts();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!hasAdminPermission) {
+      navigate('/');
+    }
+  }, [hasAdminPermission]);
 
   const onSortingChange = useCallback((value: string) => {
     setSortingValue(value);
