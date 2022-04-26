@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useRef } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { web3Accounts, web3Enable, web3FromSource } from '@polkadot/extension-dapp';
 import keyring from '@polkadot/ui-keyring';
 import { BN, stringToHex, u8aToHex } from '@polkadot/util';
@@ -19,11 +19,13 @@ export const useAccounts = () => {
     selectedAccount,
     isLoading,
     fetchAccountsError,
+    hasAdminPermission,
     changeAccount,
     setSelectedAccount,
     setAccounts,
     setIsLoading,
     setFetchAccountsError,
+    setHasAdminPermission,
     showSignDialog
   } = useContext(AccountContext);
 
@@ -200,6 +202,30 @@ export const useAccounts = () => {
     return signedMessage;
   }, [showSignDialog, selectedAccount, accounts]);
 
+  const checkCookie = () => {
+    const cookieName = 'session';
+    const matches = document.cookie.match(new RegExp(
+      `(?:^|; )${cookieName}=([^;]*)`
+    ));
+
+    return !!matches;
+  };
+
+  useEffect(() => {
+    if (checkCookie()) {
+      setHasAdminPermission(true);
+    } else {
+      // TODO: send request to get JWT cookie
+      new Promise<void>((resolve) => {
+        // set mock cookie
+        document.cookie = 'session=alsh12d218eh17ASgjkenqeKLHA';
+        resolve();
+      }).then(() => {
+        setHasAdminPermission(checkCookie());
+      });
+    }
+  }, [selectedAccount]);
+
   return {
     accounts,
     selectedAccount,
@@ -212,6 +238,7 @@ export const useAccounts = () => {
     signMessage,
     fetchAccounts,
     subscribeBalancesChanges,
+    hasAdminPermission,
     changeAccount
   };
 };

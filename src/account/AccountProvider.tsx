@@ -11,6 +11,7 @@ const AccountWrapper: FC = ({ children }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [fetchAccountsError, setFetchAccountsError] = useState<string | undefined>();
   const [selectedAccount, setSelectedAccount] = useState<Account>();
+  const [hasAdminPermission, setHasAdminPermission] = useState<boolean>(false);
 
   const changeAccount = useCallback((account: Account) => {
     localStorage.setItem(DefaultAccountKey, account.address);
@@ -49,7 +50,9 @@ const AccountWrapper: FC = ({ children }) => {
     setFetchAccountsError,
     setAccounts,
     setIsLoading,
-    showSignDialog
+    showSignDialog,
+    hasAdminPermission,
+    setHasAdminPermission
   }), [isLoading, accounts, selectedAccount, fetchAccountsError, changeAccount]);
 
   return (

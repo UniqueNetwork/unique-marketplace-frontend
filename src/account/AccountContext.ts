@@ -27,6 +27,8 @@ export type AccountContextProps = {
   setAccounts(accounts: ((accounts: Account[]) => Account[]) | Account[]): void
   setIsLoading(loading: boolean): void
   showSignDialog(): Promise<KeyringPair>
+  hasAdminPermission: boolean,
+  setHasAdminPermission(value: boolean): void
 }
 
 const AccountContext: Context<AccountContextProps> = createContext({} as unknown as AccountContextProps);
