@@ -13,7 +13,9 @@ export const RemoveCollectionModal: FC<TAdminPanelModalBodyProps> = ({ collectio
       <Content>
         <Heading size='2'>Remove collection</Heading>
       </Content>
-      <Text size={'m'}>Are you sure you want to remove the collection “name” from the marketplace?</Text>
+      <Row>
+        <Text size={'m'}>Are you sure you want to remove the collection “name” from the marketplace?</Text>
+      </Row>
       <ButtonWrapper>
         <Button
           onClick={onConfirmClick}
@@ -29,6 +31,10 @@ const Content = styled.div`
   && h2 {
     margin-bottom: 0;
   }
+`;
+
+const Row = styled.div`
+  margin: calc(var(--gap) * 1.5) 0;
 `;
 
 const ButtonWrapper = styled.div`

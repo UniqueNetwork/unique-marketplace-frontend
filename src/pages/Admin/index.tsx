@@ -56,15 +56,14 @@ const sortingOptions: TOption[] = [
 ];
 
 const collectionsMock: Pick<NFTCollection, 'id' | 'collectionName' | 'coverImageUrl' >[] = [{
-  id: 123,
-  collectionName: 'CryptoDuckies',
-  coverImageUrl: ''
+  id: 5,
+  collectionName: 'Workaholics',
+  coverImageUrl: 'http://ipfs-gateway.usetech.com/ipfs/Qmap7uz7JKZNovCdLfdDE3p4XA6shghdADS7EsHvLjL6jT/nft_image_1.png\n'
 }];
 
 export const AdminPanelPage: FC = () => {
   const [sortingValue, setSortingValue] = useState<string>();
   const [searchValue, setSearchValue] = useState<string | number>();
-  const [isFetching, setIsFetching] = useState(false);
   const [modalType, setModalType] = useState(AdminPanelModalType.default);
   const [selectedCollection, setSelectedCollection] = useState<NFTCollection>();
 
@@ -140,16 +139,8 @@ export const AdminPanelPage: FC = () => {
           <Button role={'primary'} title={'Add to the marketplace'} onClick={onAddCollectionClick}/>
         </ButtonsWrapper>
       </ControlsWrapper>
-      <InfiniteScroll
-        hasMore={true}
-        initialLoad={false}
-        loadMore={onLoadMore}
-        pageStart={1}
-        threshold={200}
-        useWindow={true}
-      >
-        {isFetching && <Loading />}
-        {!isFetching && !collectionsMock?.length && <NoItems />}
+      <CollectionListWrapper>
+        {collectionsMock?.length === 0 && <NoItems />}
         <CollectionListStyled >
           {collectionsMock.map((collection) => <CollectionCard collection={collection}
             onManageSponsorshipClick={onManageSponsorshipClick(collection as NFTCollection)}
@@ -157,7 +148,7 @@ export const AdminPanelPage: FC = () => {
             onRemoveCollectionClick={onRemoveCollectionClick(collection as NFTCollection)}
           />)}
         </CollectionListStyled>
-      </InfiniteScroll>
+      </CollectionListWrapper>
     </MainContent>
     <AdminPanelModal collection={selectedCollection}
       modalType={modalType}
@@ -169,7 +160,6 @@ export const AdminPanelPage: FC = () => {
 
 const MainContent = styled.div`
   position: relative;
-  padding-left: calc(var(--gap) * 2);
   flex: 1;
 
   > div:nth-of-type(2) {
@@ -233,6 +223,10 @@ const SearchAndSortingWrapper = styled.div`
 const InputTextStyled = styled(InputText)`
   width: 100%;
   max-width: 610px;
+`;
+
+const CollectionListWrapper = styled.div`
+  position: relative;
 `;
 
 const CollectionListStyled = styled.div`

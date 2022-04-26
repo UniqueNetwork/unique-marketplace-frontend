@@ -20,31 +20,33 @@ class UniqueCollectionController implements ICollectionController<NFTCollection,
     if (!this.api) {
       return null;
     }
+    try {
+      const collection =
+        // @ts-ignore
+        await this.api.rpc.unique.collectionById(collectionId.toString());
 
-    const collection =
-      // @ts-ignore
-      await this.api.rpc.unique.collectionById(collectionId.toString());
+      const collectionInfo = collection.toJSON() as unknown as NFTCollection;
+      let coverImageUrl = '';
 
-    const collectionInfo = collection.toJSON() as unknown as NFTCollection;
-    let coverImageUrl = '';
+      if (collectionInfo?.variableOnChainSchema && hex2a(collectionInfo?.variableOnChainSchema)) {
+        const collectionSchema = getOnChainSchema(collectionInfo);
+        const image = JSON.parse(collectionSchema?.attributesVar)?.collectionCover as string;
 
-    if (collectionInfo?.variableOnChainSchema && hex2a(collectionInfo?.variableOnChainSchema)) {
-      const collectionSchema = getOnChainSchema(collectionInfo);
-      const image = JSON.parse(collectionSchema?.attributesVar)?.collectionCover as string;
-
-      coverImageUrl = `${IPFSGateway}/${image}`;
-    } else {
-      if (collectionInfo?.offchainSchema) {
-        coverImageUrl = await getTokenImage(collectionInfo, 1);
+        coverImageUrl = `${IPFSGateway}/${image}`;
+      } else {
+        if (collectionInfo?.offchainSchema) {
+          coverImageUrl = await getTokenImage(collectionInfo, 1);
+        }
       }
+      return {
+        ...collectionInfo,
+        collectionName: collectionInfo?.name && collectionName8Decoder(collectionInfo?.name),
+        coverImageUrl,
+        id: collectionId
+      };
+    } catch (err) {
+      return null;
     }
-
-    return {
-      ...collectionInfo,
-      collectionName: collectionInfo?.name && collectionName8Decoder(collectionInfo?.name),
-      coverImageUrl,
-      id: collectionId
-    };
   }
 
   public getCollections(): Promise<NFTCollection[]> {

@@ -26,7 +26,9 @@ export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collecti
       <Content>
         <Heading size='2'>Accept sponsorship</Heading>
       </Content>
-      <Text size={'m'}>The author of the collection “collection name” has chosen this address as a sponsor. Do you confirm the choice?</Text>
+      <Row>
+        <Text size={'m'}>The author of the collection “collection name” has chosen this address as a sponsor. Do you confirm the choice?</Text>
+      </Row>
       <AddressWrapper>
         <AccountCard accountName={selectedAccount?.meta.name || ''} accountAddress={selectedAccount?.address || ''} canCopy={true} />
       </AddressWrapper>
@@ -57,12 +59,17 @@ const Content = styled.div`
   }
 `;
 
+const Row = styled.div`
+  margin: calc(var(--gap) * 1.5) 0;
+`;
+
 const AddressWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 2);
   border: 1px solid var(--grey-300);
   border-radius: 4px;
   padding: calc(var(--gap) / 2) var(--gap);
+  margin: calc(var(--gap) * 1.5) 0;
   align-items: center;
   .unique-text {
     text-overflow: ellipsis;

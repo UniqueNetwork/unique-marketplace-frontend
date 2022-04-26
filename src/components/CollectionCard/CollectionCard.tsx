@@ -98,11 +98,6 @@ const PictureWrapper = styled.div`
     svg {
       border-radius: 8px;
     }
-    
-    &:hover {
-      transform: translate(0, -5px);
-      text-decoration: none;
-    }
   }
 `;
 
