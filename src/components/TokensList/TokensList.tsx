@@ -14,7 +14,7 @@ export const TokensList: FC<TTokensList> = ({ tokens }) => {
       {tokens?.map &&
         tokens.map((token) => (
           <TokensCard
-            key={`token-${token.collectionId || ''}-${token.id}`}
+            key={`token-${token?.collectionId || ''}-${token?.id}`}
             tokenId={token?.id}
             collectionId={token?.collectionId}
             token={token}
