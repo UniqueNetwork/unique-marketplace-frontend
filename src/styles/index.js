@@ -8,7 +8,12 @@ export const GlobalStyle = createGlobalStyle`
     /* colors */
     --grey-300: #D2D3D6;
   }
+  ::selection {
+    color: #fff;
+    background: #439595;
+  }
 /* reset default browser css */
+
 a{
     text-decoration: none;
 }
