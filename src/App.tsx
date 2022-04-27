@@ -6,7 +6,7 @@ import { PageLayout } from './components';
 import AccountWrapper from './account/AccountProvider';
 import NotificationWrapper from './notification/NotificationWrapper';
 
-document.title = config.documentTitle || 'Unique Market';
+document.title = config.documentTitle || 'Sadu - Marketplace';
 
 export default function App() {
   return (
