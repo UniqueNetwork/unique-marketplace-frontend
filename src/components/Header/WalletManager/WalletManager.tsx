@@ -15,6 +15,9 @@ import { BlueGrey200 } from '../../../styles/colors';
 import { Icon } from '../../Icon/Icon';
 import { useApi } from '../../../hooks/useApi';
 import AccountCard from '../../Account/Account';
+import AccountSkeleton from '../../Skeleton/AccountSkeleton';
+import DoubleLineSkeleton from '../../Skeleton/DoubleLineSkeleton';
+import Skeleton from '../../Skeleton/Skeleton';
 
 const tokenSymbol = 'KSM';
 
@@ -61,21 +64,28 @@ export const WalletManager: FC = () => {
 
   return (
     <WalletManagerWrapper>
-      {isLoading && <Loading />}
-      <AccountSelect
-        renderOption={AccountOptionCard}
-        onChange={changeAccount}
-        options={accounts || []}
-        value={selectedAccount}
-      />
-      <Divider />
-      <BalanceCard {...currentBalance} />
+      {isLoading && <>
+        <AccountSkeleton />
+        <Divider />
+        <DoubleLineSkeleton />
+      </>}
+      {!isLoading && <>
+        <AccountSelect
+          renderOption={AccountOptionCard}
+          onChange={changeAccount}
+          options={accounts || []}
+          value={selectedAccount}
+        />
+        <Divider />
+        <BalanceCard {...currentBalance} />
+      </>}
       {deviceSize === DeviceSize.lg && <><Divider />
-        <SettingsButtonWrapper $gearActive={gearActive}>
+        <SettingsButtonWrapper $gearActive={!isLoading && gearActive}>
           <Link to={'/accounts'}>
             <Icon path={GearIcon} />
           </Link>
-        </SettingsButtonWrapper></>}
+        </SettingsButtonWrapper>
+      </>}
     </WalletManagerWrapper>
   );
 };

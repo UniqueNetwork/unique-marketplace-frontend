@@ -2,12 +2,20 @@ import { FC } from 'react';
 import styled from 'styled-components/macro';
 import { Offer } from '../../api/restApi/offers/types';
 import { OfferCard } from '../OfferCard/OfferCard';
+import CardSkeleton from '../Skeleton/CardSkeleton';
 
 type TTokensList = {
   offers: Offer[];
+  isLoading?: boolean
 };
 
-export const OffersList: FC<TTokensList> = ({ offers }) => {
+export const OffersList: FC<TTokensList> = ({ offers, isLoading }) => {
+   if (isLoading) {
+     return (<OffersListStyled>
+       {[...Array(4)].map(() => <CardSkeleton />)}
+     </OffersListStyled>);
+  }
+
   return (
     <OffersListStyled>
       {offers?.map &&
@@ -17,6 +25,9 @@ export const OffersList: FC<TTokensList> = ({ offers }) => {
             offer={offer}
           />
         ))}
+      {isLoading && <>
+        {[...Array(4)].map(() => <CardSkeleton />)}
+      </>}
     </OffersListStyled>
   );
 };

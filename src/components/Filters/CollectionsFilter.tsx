@@ -7,6 +7,7 @@ import Accordion from '../Accordion/Accordion';
 import Loading from '../Loading';
 import { Avatar } from '../Avatar/Avatar';
 import { Trait } from '../../api/restApi/offers/types';
+import CheckboxSkeleton from '../Skeleton/CheckboxSkeleton';
 
 interface CollectionsFilterProps {
   value?: number[]
@@ -68,7 +69,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onTrai
       isClearShow={selectedCollections.length > 0}
     >
       <CollectionFilterWrapper>
-        {isFetching && <Loading />}
+        {isFetching && [...Array(3)].map(() => <CheckboxSkeleton />)}
         {collections.map((collection) => (
           <CheckboxWrapper
             key={`collection-${collection.id}`}
