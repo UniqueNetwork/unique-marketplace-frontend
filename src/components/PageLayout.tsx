@@ -60,18 +60,35 @@ const LayoutStyled = styled.div`
 
   /* specific for dafc */
   .unique-layout {
-    background: var(--color-layout-background);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-image: url("./logos/background.png");
+    background-position: inherit;
+    background-size: cover;
+    background-repeat: round;
+    background-attachment: fixed;
 
     @media (max-width: 1024px) {
       background: var(--color-additional-light);
     }
 
     .unique-font-heading.size-1 {
+      font-size: 40px;
+      text-align: left;
+      text-transform: uppercase;
+      font-weight: 500;
+      color: var( --color-additional-light);
       font-family: var(--font-heading);
     }
 
     footer {
-      background-color: var(--color-footer-background);
+      background: var(--card-background);
+
+      .footer__text {
+        color: var(--color-additional-light);
+      }
 
       .footer__text__dafc {
         color: var(--color-additional-light);
@@ -118,6 +135,7 @@ const LayoutStyled = styled.div`
   }
 
   header {
+    background: transparent;
     top: 0;
     position: sticky !important;
     z-index: 990;
