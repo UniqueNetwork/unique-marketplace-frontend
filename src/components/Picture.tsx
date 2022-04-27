@@ -1,16 +1,38 @@
-import React, { FC } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { Grey300 } from '../styles/colors';
+import Loading from './Loading';
 
 interface PictureProps {
   src?: string
   alt: string
 }
 
-export const Picture: FC<PictureProps> = (props) => {
-  const { alt, src } = props;
+export const Picture: FC<PictureProps> = ({ alt, src }) => {
+  const [imageSrc, setImageSrc] = useState<string | undefined>();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!src) return;
+
+    const image = new Image();
+
+    setIsLoading(true);
+
+    image.onload = () => {
+      setIsLoading(false);
+      setImageSrc(src);
+    };
+
+    image.onerror = () => {
+      setIsLoading(false);
+    };
+
+    image.src = src;
+  }, [src]);
 
   return (<div className={'picture'}>
-    {src
+    {isLoading && <Loading />}
+    {imageSrc
       ? <img
           alt={alt}
           src={src}
