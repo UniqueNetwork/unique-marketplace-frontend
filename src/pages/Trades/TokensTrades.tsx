@@ -1,9 +1,9 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import { Pagination, Text } from '@unique-nft/ui-kit';
+import { Button, InputText, Pagination, Text } from '@unique-nft/ui-kit';
 import { SortQuery } from '@unique-nft/ui-kit/dist/cjs/types';
+import styled from 'styled-components';
 
 import { useTrades } from '../../api/restApi/trades/trades';
-import styled from 'styled-components';
 import { Table } from '../../components/Table';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
 import { tradesColumns } from './columns';
@@ -21,13 +21,14 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
   const { selectedAccount } = useAccounts();
   const [page, setPage] = useState<number>(0);
   const [sortString, setSortString] = useState<string>();
-  // const [searchValue, setSearchValue] = useState<string | number>();
+  const [searchValue, setSearchValue] = useState<string | number>();
 
   const { trades, tradesCount, fetch, isFetching } = useTrades();
   const { tradesWithTokens, isFetchingTokens } = useGetTokensByTrades(trades);
 
   useEffect(() => {
     if (currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address) return;
+    setSearchValue(undefined);
     fetch({
       page: 1,
       pageSize,
@@ -36,10 +37,9 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
     });
   }, [selectedAccount?.address, fetch, currentTab]);
 
-  // const onSearch = useCallback(() => {
-  //   // TODO: not implemented in api
-  //   // fetch({ sortString, pageSize, page: 1, searchText: searchValue?.toString() });
-  // }, [sortString, pageSize, searchValue]);
+  const onSearch = useCallback(() => {
+    fetch({ sort: sortString, pageSize, page: 1, searchText: searchValue?.toString() });
+  }, [sortString, pageSize, searchValue]);
 
   const onPageChange = useCallback((newPage: number) => {
     if ((currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address) || page === newPage) return;
@@ -48,9 +48,10 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
       page: newPage + 1,
       pageSize,
       sort: sortString,
-      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
+      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined,
+      searchText: searchValue?.toString()
     });
-  }, [selectedAccount?.address, page, fetch, sortString]);
+  }, [selectedAccount?.address, page, fetch, sortString, searchValue]);
 
   const onSortChange = useCallback((newSort: SortQuery) => {
     let sortString;
@@ -75,24 +76,24 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
 
     if (sortString && sortString.length) sortString += `(${associatedSortValues[newSort.field]})`;
     setSortString(sortString);
-    fetch({ page: 1, pageSize, sort: sortString });
-  }, [fetch, setSortString]);
+    fetch({ page: 1, pageSize, sort: sortString, searchText: searchValue?.toString() });
+  }, [fetch, setSortString, searchValue]);
 
   return (<PagePaper>
     <TradesPageWrapper>
-      {/* <SearchWrapper> */}
-      {/*  <InputText */}
-      {/*    iconLeft={{ name: 'magnify', size: 16 }} */}
-      {/*    onChange={(val) => setSearchValue(val)} */}
-      {/*    placeholder='Collection / token' */}
-      {/*    value={searchValue?.toString()} */}
-      {/*  /> */}
-      {/*  <Button */}
-      {/*    onClick={onSearch} */}
-      {/*    role='primary' */}
-      {/*    title='Search' */}
-      {/*  /> */}
-      {/* </SearchWrapper> */}
+      <SearchWrapper>
+        <InputText
+          iconLeft={{ name: 'magnify', size: 16 }}
+          onChange={(val) => setSearchValue(val)}
+          placeholder='Collection / token'
+          value={searchValue?.toString()}
+        />
+        <Button
+          onClick={onSearch}
+          role='primary'
+          title='Search'
+        />
+      </SearchWrapper>
       <StyledTable
         onSort={onSortChange}
         data={tradesWithTokens || []}
@@ -117,26 +118,26 @@ const TradesPageWrapper = styled.div`
   width: 100%
 `;
 
-// const SearchWrapper = styled.div`
-//   display: flex;
-//   margin-bottom: calc(var(--gap) * 2);
-//   button {
-//     margin-left: 8px;
-//   }
-//
-//   @media (max-width: 768px) {
-//     width: 100%;
-//     .unique-input-text {
-//       flex-grow: 1;
-//     }
-//   }
-//
-//   @media (max-width: 320px) {
-//     .unique-button {
-//       display: none;
-//     }
-//   }
-// `;
+const SearchWrapper = styled.div`
+  display: flex;
+  margin-bottom: calc(var(--gap) * 2);
+  button {
+    margin-left: 8px;
+  }
+
+  @media (max-width: 768px) {
+    width: 100%;
+    .unique-input-text {
+      flex-grow: 1;
+    }
+  }
+
+  @media (max-width: 320px) {
+    .unique-button {
+      display: none;
+    }
+  }
+`;
 
 const StyledTable = styled(Table)`
   && > div > div:first-child {
