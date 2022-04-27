@@ -18,14 +18,17 @@ const tokenSymbol = 'KSM';
 export const PriceForAuction: FC<PriceProps> = ({ price, minStep, topBid }) => {
   const { api } = useApi();
 
-  const startPrice = price || minStep;
+  const priceBN = new BN(price);
+  const minStepBN = new BN(minStep || 0);
+
+  const startPrice = !priceBN.isZero() ? priceBN : minStepBN;
 
   return (
     <PriceWrapper>
       <Row>
         <Heading size={'1'}>{topBid
-          ? `${formatKusamaBalance(new BN(Number(price) + Number(minStep)).toString(), api?.market?.kusamaDecimals)}`
-          : `${formatKusamaBalance(new BN(Number(startPrice)).toString(), api?.market?.kusamaDecimals)}`
+          ? `${formatKusamaBalance(priceBN.add(minStepBN).toString(), api?.market?.kusamaDecimals)}`
+          : `${formatKusamaBalance(startPrice.toString(), api?.market?.kusamaDecimals)}`
         }</Heading>
         <Icon file={Kusama} size={32} />
       </Row>
