@@ -62,7 +62,6 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
         imageUrl = `https://ipfs.unique.network/ipfs/${ipfsJson.ipfs}`;
       }
 
-
       let collectionCover = '';
 
       if (collectionInfo?.variableOnChainSchema && hex2a(collectionInfo?.variableOnChainSchema)) {
@@ -75,7 +74,7 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
           collectionCover = await getTokenImage(collectionInfo, 1);
         }
       }
-      
+
       return {
         attributes: {
           ...decodeStruct({ attr: onChainSchema.attributesConst, data: constData }),
