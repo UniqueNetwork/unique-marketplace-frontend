@@ -16,6 +16,7 @@ import { NFTToken } from '../../../api/chainApi/unique/types';
 import { formatKusamaBalance } from '../../../utils/textUtils';
 import { useAccounts } from '../../../hooks/useAccounts';
 import Loading from '../../../components/Loading';
+import InlineTokenCard from '../../../components/TokensCard/InlineTokenCard';
 
 const tokenSymbol = 'KSM';
 
@@ -75,37 +76,21 @@ export type WithdrawDepositAskModalProps = {
 }
 
 export const WithdrawDepositAskModal: FC<WithdrawDepositAskModalProps> = ({ isVisible, address, onClose, onFinish }) => {
-  const { api } = useApi();
   const { accounts } = useAccounts();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSelectedAll, setIsSelectedAll] = useState<boolean>(true);
-  const [bids, setBids] = useState<BidDeposit[]>([]);
   const [selectedBids, setSelectedBids] = useState<BidDeposit[]>([]);
   const [isSelectedSponsorshipFee, setIsSelectedSponsorshipFee] = useState<boolean>(false);
 
-  const sponsorshipFee = useMemo(() =>
-    accounts.find((item) => item.address === address)?.deposit || new BN(0), [accounts, address]);
+  const account = useMemo(() =>
+    accounts.find((item) => item.address === address), [accounts, address]);
 
-  useEffect(() => {
-    if (!address || !api || !isVisible) return;
-    setBids([]);
-    (async () => {
-      setIsLoading(true);
-      const bids = (await getWithdrawBids({ owner: address }))?.data;
-      if (!bids || bids.length === 0) {
-        setIsSelectedSponsorshipFee(true);
-      }
-      setBids(await Promise.all(bids.map(async (bid) => {
-        return { ...bid, token: await api.nft?.getToken(Number(bid.collectionId), Number(bid.tokenId)) };
-      })));
-      setIsLoading(false);
-    })();
-  }, [address, api, isVisible]);
+  const { bids, sponsorshipFee } = account?.deposits || { sponsorshipFee: new BN(0) };
+  const { withdraw, leader } = bids || { withdraw: [], leader: [] };
 
   const totalAmount = useMemo(() => {
-    return sponsorshipFee.add(bids.reduce<BN>((acc, bid) =>
+    return (account?.deposits?.sponsorshipFee || new BN(0)).add(withdraw.reduce<BN>((acc, bid) =>
       acc.add(new BN(bid.amount)), new BN(0)));
-  }, [sponsorshipFee, bids]);
+  }, [account]);
 
   const onSelectAll = useCallback((value: boolean) => {
     setIsSelectedAll(value);
@@ -131,24 +116,24 @@ export const WithdrawDepositAskModal: FC<WithdrawDepositAskModalProps> = ({ isVi
 
   const amountToWithdraw = useMemo(() => {
     if (isSelectedAll) return totalAmount;
-    const amountToWithdraw: BN = isSelectedSponsorshipFee ? sponsorshipFee : new BN(0);
+    const amountToWithdraw: BN = isSelectedSponsorshipFee && sponsorshipFee ? sponsorshipFee : new BN(0);
     return amountToWithdraw.add(selectedBids.reduce<BN>((acc, bid) =>
       acc.add(new BN(bid.amount)), new BN(0)));
   }, [isSelectedAll, totalAmount, isSelectedSponsorshipFee, sponsorshipFee, selectedBids]);
 
   useEffect(() => {
-    if (!isVisible) {
+    if (isVisible) {
       setSelectedBids([]);
-      setIsSelectedAll(true);
-      setIsSelectedSponsorshipFee(false);
+      setIsSelectedAll(withdraw.length > 0); // if there are some bids to withdraw
+      setIsSelectedSponsorshipFee(withdraw.length === 0); // else
     }
-  }, [isVisible]);
+  }, [isVisible, account?.deposits?.bids]);
 
   const onSubmit = useCallback(() => {
     if (amountToWithdraw.eq(new BN(0))) return;
 
     if (isSelectedAll) {
-      onFinish(bids, sponsorshipFee);
+      onFinish(withdraw, sponsorshipFee);
       return;
     }
     onFinish(selectedBids, isSelectedSponsorshipFee ? sponsorshipFee : undefined);
@@ -158,26 +143,32 @@ export const WithdrawDepositAskModal: FC<WithdrawDepositAskModalProps> = ({ isVi
     <Content>
       <Heading size='2'>Withdraw deposit</Heading>
     </Content>
-    {(bids.length > 0 || isLoading) && <Content>
+    {(withdraw.length > 0) && <Content>
       <Text size={'m'} color={'grey-500'}>All deposit</Text>
       <Checkbox checked={isSelectedAll} label={`${formatKusamaBalance(totalAmount.toString())} ${tokenSymbol}`} onChange={onSelectAll} />
     </Content>}
-    {isLoading && <Content><Loading /></Content>}
-    {bids.length > 0 && <Content>
+    {(leader.length > 0 || withdraw.length > 0) && <Content>
       <Text size={'m'} color={'grey-500'}>Bids</Text>
-      {bids.map((bid) => (<Row>
-        <Checkbox checked={selectedBids.some((item) => item.auctionId === bid.auctionId)} label={''} onChange={onSelectBid(bid)}/>
-        <Avatar src={bid.token?.imageUrl || ''} size={64} type={'square'} />
-        <BidInfoWrapper>
-          <Text size={'s'} color={'grey-500'}>{`${bid.token?.prefix} #${bid.token?.id}`}</Text>
+      {[...leader, ...withdraw].map((bid, index) => (<Row>
+        <Checkbox
+          disabled={index < leader.length}
+          label={''}
+          checked={selectedBids.some((item) => item.auctionId === bid.auctionId)}
+          onChange={onSelectBid(bid)}
+        />
+        <InlineTokenCard
+          tokenId={Number(bid.tokenId)}
+          collectionId={Number(bid.collectionId)}
+        >
           <Text size={'m'} >{`${formatKusamaBalance(bid.amount)} ${tokenSymbol}`}</Text>
-        </BidInfoWrapper>
+          {index < leader.length && <Text size={'s'} color={'additional-positive-500'}>Leading bid</Text>}
+        </InlineTokenCard>
       </Row>))}
     </Content>}
-    <Content>
+    {sponsorshipFee && !sponsorshipFee?.isZero() && <Content>
       <Text size={'m'} color={'grey-500'}>Sponsorship fee</Text>
-      <Checkbox checked={isSelectedSponsorshipFee} label={`${formatKusamaBalance(sponsorshipFee.toString())} ${tokenSymbol}`} onChange={onSelectSponsorshipFee} />
-    </Content>
+      <Checkbox checked={isSelectedSponsorshipFee} label={`${formatKusamaBalance(sponsorshipFee?.toString() || '0')} ${tokenSymbol}`} onChange={onSelectSponsorshipFee} />
+    </Content>}
     <Row>
       <Text color='grey-500'>Amount to withdraw:&nbsp;</Text>
       <Text>{`${formatKusamaBalance(amountToWithdraw.toString())} ${tokenSymbol}`}</Text>
@@ -209,11 +200,6 @@ const Content = styled.div`
 
 const Row = styled.div`
   display: flex;
-`;
-
-const BidInfoWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
 `;
 
 const ButtonWrapper = styled.div`
