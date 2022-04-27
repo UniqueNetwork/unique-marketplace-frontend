@@ -53,20 +53,24 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
   const { selectedAccount } = useAccounts();
   const { api } = useApi();
   const [calculatedBid, setCalculatedBid] = useState<TCalculatedBid>();
-
+  const [isFetchingCalculatedbid, setIsFetchingCalculatedBid] = useState<boolean>(true);
   const { getCalculatedBid } = useAuction();
 
-  useEffect(() => {
+  const fetchCalculatedBid = useCallback(async () => {
     if (!offer || !selectedAccount) return;
-    (async () => {
-      const _calculatedBid = await getCalculatedBid({
-        collectionId: offer.collectionId || 0,
-        tokenId: offer?.tokenId || 0,
-        bidderAddress: selectedAccount?.address || ''
-      });
-      setCalculatedBid(_calculatedBid);
-    })();
-  }, [offer, selectedAccount]);
+    setIsFetchingCalculatedBid(true);
+    const _calculatedBid = await getCalculatedBid({
+      collectionId: offer?.collectionId || 0,
+      tokenId: offer?.tokenId || 0,
+      bidderAddress: selectedAccount?.address || ''
+    });
+    setCalculatedBid(_calculatedBid);
+    setIsFetchingCalculatedBid(false);
+  }, [offer, selectedAccount?.address]);
+
+  useEffect(() => {
+    void fetchCalculatedBid();
+  }, [fetchCalculatedBid]);
 
   const leadingBid = useMemo(() => {
     if (!offer?.auction?.bids || offer?.auction?.bids.length === 0) return 0;
@@ -143,7 +147,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
       </TextStyled>
       <ButtonWrapper>
         <Button
-          disabled={!isAmountValid || !isEnoughBalance}
+          disabled={!isAmountValid || !isEnoughBalance || isFetchingCalculatedbid}
           onClick={onConfirmPlaceABidClick}
           role='primary'
           title='Confirm'
