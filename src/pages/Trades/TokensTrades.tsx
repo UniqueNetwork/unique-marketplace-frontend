@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, KeyboardEvent, useCallback, useEffect, useState } from 'react';
 import { Button, InputText, Pagination, Text } from '@unique-nft/ui-kit';
 import { SortQuery } from '@unique-nft/ui-kit/dist/cjs/types';
 import styled from 'styled-components';
@@ -18,7 +18,7 @@ type TokensTradesPage = {
 }
 
 export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
-  const { selectedAccount } = useAccounts();
+  const { selectedAccount, isLoading: isLoadingAccounts } = useAccounts();
   const [page, setPage] = useState<number>(0);
   const [sortString, setSortString] = useState<string>();
   const [searchValue, setSearchValue] = useState<string | number>();
@@ -27,7 +27,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
   const { tradesWithTokens, isFetchingTokens } = useGetTokensByTrades(trades);
 
   useEffect(() => {
-    if (currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address) return;
+    if (isLoadingAccounts || (currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address)) return;
     setSearchValue(undefined);
     fetch({
       page: 1,
@@ -35,11 +35,20 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
       sort: sortString,
       seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
     });
-  }, [selectedAccount?.address, fetch, currentTab]);
+  }, [currentTab, selectedAccount?.address, sortString, isLoadingAccounts]);
 
   const onSearch = useCallback(() => {
     fetch({ sort: sortString, pageSize, page: 1, searchText: searchValue?.toString() });
   }, [sortString, pageSize, searchValue]);
+
+  const onSearchStringChange = useCallback((value: string) => {
+    setSearchValue(value);
+  }, [setSearchValue]);
+
+  const onSearchInputKeyDown = useCallback((event: KeyboardEvent) => {
+    if (event.key !== 'Enter') return;
+    onSearch();
+  }, [onSearch]);
 
   const onPageChange = useCallback((newPage: number) => {
     if ((currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address) || page === newPage) return;
@@ -84,7 +93,8 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
       <SearchWrapper>
         <InputText
           iconLeft={{ name: 'magnify', size: 16 }}
-          onChange={(val) => setSearchValue(val)}
+          onChange={onSearchStringChange}
+          onKeyDown={onSearchInputKeyDown}
           placeholder='Collection / token'
           value={searchValue?.toString()}
         />
@@ -98,7 +108,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
         onSort={onSortChange}
         data={tradesWithTokens || []}
         columns={tradesColumns}
-        loading={isFetching || isFetchingTokens}
+        loading={isLoadingAccounts || isFetching || isFetchingTokens}
       />
       {!!tradesCount && <PaginationWrapper>
         <Text>{`${tradesCount} items`}</Text>
