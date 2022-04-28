@@ -39,8 +39,8 @@ const Accordion: FC<AccordionProps> = ({ title, isOpen: isOpenProps, children, o
 
   return (
     <AccordionWrapper>
-      <AccordionHeaderWrapper>
-        <AccordionTitle onClick={onToggle} isOpen={isOpen} >
+      <AccordionHeaderWrapper className='accordion-item'>
+        <AccordionTitle className='accordion-title' onClick={onToggle} isOpen={isOpen} >
           <Text color={AdditionalLight}>{title}</Text>
           <AccordionChevronIcon />
         </AccordionTitle>
