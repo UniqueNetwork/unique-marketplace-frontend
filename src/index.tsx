@@ -16,7 +16,7 @@ ReactDOM.render(
           path={'/'}
         >
           <Route
-            element={<Navigate to='market' />}
+            element={<Navigate to='exhibition' />}
             index
           />
           <Route
@@ -25,7 +25,7 @@ ReactDOM.render(
           />
           <Route
             element={<Market />}
-            path={'market'}
+            path={'exhibition'}
           >
             <Route
               element={<Market />}
@@ -34,7 +34,7 @@ ReactDOM.render(
           </Route>
           <Route
             element={<MyTokens />}
-            path={'myTokens'}
+            path={'myGallery'}
           />
           <Route
             element={<Accounts />}
@@ -46,10 +46,10 @@ ReactDOM.render(
           />
           <Route
             element={<FAQ />}
-            path={'faq'}
+            path={'aboutSadu'}
           />
           <Route
-            element={<Navigate to='market' />}
+            element={<Navigate to='exhibition' />}
             path={'*'}
           />
         </Route>
