@@ -9,7 +9,6 @@ import { CommonTokenDetail } from './TokenDetail/CommonTokenDetail';
 import { useOffer } from '../../api/restApi/offers/offer';
 import { TokenTrading } from './TokenDetail/TokenTrading';
 import { Error404 } from '../errors/404';
-import Loading from '../../components/Loading';
 import TokenPageModal from './Modals/TokenPageModal';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
 import { useNotification } from '../../hooks/useNotification';
@@ -69,13 +68,12 @@ const TokenPage = () => {
     fetchToken();
   }, [push, fetchOffer, fetchToken, selectedAccount?.address, collectionId, id, token]);
 
-  if (isFetchingToken || isFetchingOffer) return <Loading />;
-  else if (!token && !offer) return <Error404 />;
+  if (!isFetchingOffer && !isFetchingToken && !token && !offer) return <Error404 />;
 
   // TODO: split into more categories here instead of just "buy/sell" and putting splitting inside them
 
   return (<PagePaper>
-    <CommonTokenDetail token={token} offer={offer}>
+    <CommonTokenDetail token={token} offer={offer} isLoading={isFetchingOffer || isFetchingToken}>
       <TokenTrading
         token={token}
         offer={offer}
