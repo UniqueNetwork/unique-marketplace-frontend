@@ -3,10 +3,11 @@ import ReactDOM from 'react-dom';
 import App from './App';
 import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 import { Market, MyTokens, Accounts, Trades, FAQ, TokenPage } from './pages';
-import { GlobalStyle } from './styles';
+import { GlobalStyle, SaduStyle } from './styles';
 
 ReactDOM.render(
   <React.StrictMode>
+    <SaduStyle />
     <GlobalStyle />
     <Router>
       <Routes>

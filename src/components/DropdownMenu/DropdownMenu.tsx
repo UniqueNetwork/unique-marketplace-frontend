@@ -83,6 +83,6 @@ const DropdownMenuItemWrapper = styled.div`
   cursor: pointer;
   &:hover {
     background: ${Primary100};
-    color: ${Primary500};
+    color: ${Primary100};
   }
 `;

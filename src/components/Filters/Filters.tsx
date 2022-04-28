@@ -40,9 +40,8 @@ export const Filters: FC<FiltersProps> = ({ onFilterChange }) => {
   }, [onFilterChange]);
 
   return <FiltersStyled>
-    <StatusFilter onChange={onStatusFilterChange}/>
-    <PricesFilter onChange={onPricesFilterChange} />
     <CollectionsFilter onChange={onCollectionsFilterChange} onTraitsChange={onCollectionTraitsFilterChange} />
+    <PricesFilter onChange={onPricesFilterChange} />
   </FiltersStyled>;
 };
 

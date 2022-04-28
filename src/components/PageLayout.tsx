@@ -12,28 +12,28 @@ export const PageLayout: FC = () => {
   const footer = useFooter();
 
   const layoutProps = useMemo(() => {
-    if (pathname === '/market') return { heading: 'Market' };
+    if (pathname === '/exhibition') return { heading: 'Exhibition' };
 
-    if (pathname === '/myTokens') {
-      return { heading: 'My tokens' };
+    if (pathname === '/myGallery') {
+      return { heading: 'My Gallery' };
     }
 
     if (pathname === '/trades') {
       return { heading: 'Trades' };
     }
 
-    if (pathname === '/faq') {
-      return { heading: 'FAQ' };
+    if (pathname === '/aboutSadu') {
+      return { heading: 'About Sadu' };
     }
 
     if (pathname === '/accounts') {
-      return { heading: 'Manage accounts' };
+      return { heading: 'My Wallets' };
     }
 
-    if (pathname === '/market/token') {
+    if (pathname === '/exhibition/token') {
       return {
         breadcrumbs: {
-          options: [{ link: '/market', title: 'Market' }, { title: 'Token' }]
+          options: [{ link: '/exhibition', title: 'Exhibition' }, { title: 'Token' }]
         }
       };
     }
@@ -139,7 +139,9 @@ const LayoutStyled = styled.div`
     top: 0;
     position: sticky !important;
     z-index: 990;
+    padding: 16px 48px;
     @media (max-width: 620px) {
+      background: var(--card-background);
       height: 80px !important;
     }
   }

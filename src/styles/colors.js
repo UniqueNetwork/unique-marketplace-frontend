@@ -1,3 +1,5 @@
+export const Primary900 = 'var(--color-primary-900)';
+export const Primary800 = 'var(--color-primary-800)';
 export const Primary700 = 'var(--color-primary-700)';
 export const Primary600 = 'var(--color-primary-600)';
 export const Primary500 = 'var(--color-primary-500)';

@@ -85,26 +85,6 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onTrai
           ))}
       </CollectionFilterWrapper>
     </Accordion>
-    {/* TODO: unsupported on back-end */}
-    {onTraitsChange && selectedCollections.length === 1 && <AttributesFilterWrapper>
-      {/* TODO: make mapping attributes of the selected collection */}
-      <Accordion title={'Traits'} isOpen={true}>
-        <CollectionFilterWrapper>
-          {isTraitsFetching && <Loading />}
-          {traits.map((trait) => (
-            <AttributeWrapper key={`attribute-${trait.trait}`}>
-              <Checkbox
-                checked={selectedTraits.indexOf(trait.trait) !== -1}
-                label={trait.trait}
-                size={'m'}
-                onChange={onAttributeSelect(trait)}
-              />
-              <Text color={'grey-400'}>{trait.count.toString()}</Text>
-            </AttributeWrapper>
-          ))}
-        </CollectionFilterWrapper>
-      </Accordion>
-    </AttributesFilterWrapper>}
   </>);
 };
 
@@ -130,6 +110,7 @@ const AttributesFilterWrapper = styled.div`
   row-gap: var(--gap);
 
   .unique-checkbox-wrapper label {
+    color: var(--color-additional-light) !important;
     max-width: 230px;
     text-overflow: ellipsis;
     overflow: hidden;
