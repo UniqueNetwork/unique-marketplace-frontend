@@ -17,7 +17,7 @@ import { useApi } from '../../../hooks/useApi';
 import AccountCard from '../../Account/Account';
 import AccountSkeleton from '../../Skeleton/AccountSkeleton';
 import DoubleLineSkeleton from '../../Skeleton/DoubleLineSkeleton';
-import Skeleton from '../../Skeleton/Skeleton';
+import BalanceSkeleton from '../../Skeleton/BalanceSkeleton';
 
 const tokenSymbol = 'KSM';
 
@@ -51,13 +51,13 @@ export const WalletManager: FC = () => {
   if (deviceSize === DeviceSize.sm) {
     return (
       <WalletManagerWrapper>
-        {isLoading && <Loading />}
-        <AccountSelect
+        {isLoading && <BalanceSkeleton />}
+        {!isLoading && <AccountSelect
           renderOption={AccountWithBalanceOptionCard}
           onChange={changeAccount}
           options={accounts || []}
           value={selectedAccount}
-        />
+        />}
       </WalletManagerWrapper>
     );
   }
