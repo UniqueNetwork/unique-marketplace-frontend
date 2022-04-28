@@ -38,7 +38,7 @@ ReactDOM.render(
           />
           <Route
             element={<Accounts />}
-            path={'accounts'}
+            path={'myWallets'}
           />
           <Route
             element={<Trades />}

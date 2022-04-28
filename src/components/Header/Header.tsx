@@ -132,14 +132,14 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
             </Link>
           </LinkWrapper>
           {deviceSize !== DeviceSize.lg && <LinkWrapper onClick={mobileMenuToggler}>
-            <Link to='accounts'>
+            <Link to='myWallets'>
               <TextStyled
-                $active={activeItem === 'Manage accounts'}
+                $active={activeItem === 'My Wallets'}
                 color='additional-dark'
                 size='m'
                 weight='medium'
               >
-                Manage accounts
+                My Wallets
               </TextStyled>
             </Link>
           </LinkWrapper>}

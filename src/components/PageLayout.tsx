@@ -5,7 +5,7 @@ import styled from 'styled-components/macro';
 import { Header } from '.';
 import { useFooter } from '../hooks/useFooter';
 
-export type TMenuItems = 'Exhibition' | 'My Gallery' | 'Trades' | 'About Sādu' | 'Manage accounts';
+export type TMenuItems = 'Exhibition' | 'My Gallery' | 'Trades' | 'About Sādu' | 'My Wallets';
 
 export const PageLayout: FC = () => {
   const { pathname } = useLocation();
@@ -26,7 +26,7 @@ export const PageLayout: FC = () => {
       return { heading: 'About Sādu' };
     }
 
-    if (pathname === '/accounts') {
+    if (pathname === '/myWallets') {
       return { heading: 'My Wallets' };
     }
 

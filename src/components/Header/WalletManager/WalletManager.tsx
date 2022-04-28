@@ -21,7 +21,7 @@ const tokenSymbol = 'KSM';
 export const WalletManager: FC = () => {
   const { selectedAccount, accounts, isLoading, fetchAccounts, changeAccount } = useAccounts();
   const deviceSize = useDeviceSize();
-  const gearActive = window.location.pathname !== '/accounts';
+  const gearActive = window.location.pathname !== '/myWallets';
   const navigate = useNavigate();
   const { chainData } = useApi();
 
@@ -32,7 +32,7 @@ export const WalletManager: FC = () => {
   }, [fetchAccounts]);
 
   const onCreateAccountClick = useCallback(() => {
-    navigate('/accounts');
+    navigate('/myWallets');
   }, [navigate]);
 
   const currentBalance: BalanceOption = useMemo(() => {
@@ -72,7 +72,7 @@ export const WalletManager: FC = () => {
       <BalanceCard {...currentBalance} />
       {deviceSize === DeviceSize.lg && <><Divider />
         <SettingsButtonWrapper $gearActive={gearActive}>
-          <Link to={'/accounts'}>
+          <Link to={'/myWallets'}>
             <Icon path={GearIcon} />
           </Link>
         </SettingsButtonWrapper></>}
