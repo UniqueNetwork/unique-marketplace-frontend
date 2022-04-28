@@ -5,17 +5,11 @@ import { OfferCard } from '../OfferCard/OfferCard';
 import CardSkeleton from '../Skeleton/CardSkeleton';
 
 type TTokensList = {
-  offers: Offer[];
+  offers: Offer[]
   isLoading?: boolean
 };
 
 export const OffersList: FC<TTokensList> = ({ offers, isLoading }) => {
-   if (isLoading) {
-     return (<OffersListStyled>
-       {[...Array(4)].map(() => <CardSkeleton />)}
-     </OffersListStyled>);
-  }
-
   return (
     <OffersListStyled>
       {offers?.map &&
@@ -26,7 +20,7 @@ export const OffersList: FC<TTokensList> = ({ offers, isLoading }) => {
           />
         ))}
       {isLoading && <>
-        {[...Array(4)].map(() => <CardSkeleton />)}
+        {Array.from({ length: 4 }).map((_, index) => <CardSkeleton key={`card-skeleton-${index}`} />)}
       </>}
     </OffersListStyled>
   );

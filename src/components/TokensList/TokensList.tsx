@@ -3,12 +3,14 @@ import styled from 'styled-components/macro';
 import { TokensCard } from '..';
 import { NFTToken } from '../../api/chainApi/unique/types';
 import { Offer } from '../../api/restApi/offers/types';
+import CardSkeleton from '../Skeleton/CardSkeleton';
 
 type TTokensList = {
-  tokens: (NFTToken & Partial<Offer>)[];
+  tokens: (NFTToken & Partial<Offer>)[]
+  isLoading?: boolean
 };
 
-export const TokensList: FC<TTokensList> = ({ tokens }) => {
+export const TokensList: FC<TTokensList> = ({ tokens, isLoading }) => {
   return (
     <TokensListStyled>
       {tokens?.map &&
@@ -20,6 +22,8 @@ export const TokensList: FC<TTokensList> = ({ tokens }) => {
             token={token}
           />
         ))}
+
+      {isLoading && Array.from({ length: 4 }).map((_, index) => <CardSkeleton key={`card-skeleton-${index}`} />)}
     </TokensListStyled>
   );
 };

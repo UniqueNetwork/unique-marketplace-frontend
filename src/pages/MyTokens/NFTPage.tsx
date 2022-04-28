@@ -86,7 +86,7 @@ export const NFTPage = () => {
   const [selectOption, setSelectOption] = useState<TOption>();
   const { selectedAccount } = useAccounts();
   const [tokens, setTokens] = useState<NFTToken[]>([]);
-  const [isFetchingTokens, setIsFetchingTokens] = useState<boolean>(false);
+  const [isFetchingTokens, setIsFetchingTokens] = useState<boolean>(true);
 
   const { offers, isFetching: isFetchingOffers, fetch } = useOffers();
 
@@ -215,9 +215,8 @@ export const NFTPage = () => {
           <Text size='m'>{`${featuredTokens.length} items`}</Text>
         </div>
         <TokensListWrapper >
-          {(isFetchingTokens || isFetchingOffers) && <Loading />}
           {!isFetchingTokens && !isFetchingOffers && featuredTokens.length === 0 && <NoItems />}
-          <TokensList tokens={featuredTokens} />
+          <TokensList tokens={featuredTokens} isLoading={isFetchingTokens || isFetchingOffers} />
         </TokensListWrapper>
       </MainContent>
       <MobileFilters<MyTokensFilterState>
