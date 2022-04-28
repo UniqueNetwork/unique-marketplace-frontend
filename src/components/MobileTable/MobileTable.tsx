@@ -3,7 +3,8 @@ import { TableColumnProps, TableRow } from '@unique-nft/ui-kit/dist/cjs/types';
 import { Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
-import Loading from '../Loading';
+import { MobileTableRow } from './MobileTableRow';
+import MobileTableSkeleton from '../Skeleton/MobileTableSkeleton';
 
 interface MobileTableProps {
   className?: string
@@ -18,7 +19,7 @@ const MobileTable: FC<MobileTableProps> = ({
   loading,
   className
 }) => {
-  let children = <Loading />;
+  let children = <MobileTableSkeleton columns={columns || []} />;
 
   if (!loading && data?.length === 0) children = <Text className={'text_grey'}>No data</Text>;
   else if (!loading) {
@@ -45,24 +46,6 @@ const MobileTable: FC<MobileTableProps> = ({
 const MobileTableWrapper = styled.div`
   && {
     margin: var(--gap) 0;  
-  }
-`;
-
-const MobileTableRow = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  border-bottom: 1px dashed var(--color-grey-300);
-  grid-row-gap: var(--gap);
-  padding: var(--gap) 0;
-
-  & > div {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  @media (max-width: 320px) {
-    grid-template-columns: 1fr;
   }
 `;
 
