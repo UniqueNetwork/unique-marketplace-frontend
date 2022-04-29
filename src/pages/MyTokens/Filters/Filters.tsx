@@ -5,7 +5,6 @@ import PricesFilter from '../../../components/Filters/PricesFilter';
 import { PriceRange } from '../../../components/Filters/types';
 import CollectionsFilter from '../../../components/Filters/CollectionsFilter';
 import { MyTokensStatuses } from './types';
-import StatusFilter from './StatusFilter';
 import { FilterChangeHandler } from '../../../components/Filters/MobileFilter';
 
 export type MyTokensFilterState = Partial<MyTokensStatuses> & Partial<PriceRange> & { collectionIds?: number[] } & Partial<{ traits: string[] }>
@@ -38,9 +37,8 @@ export const Filters: FC<FiltersProps> = ({ onFilterChange }) => {
   // }, [onFilterChange]);
 
   return <FiltersStyled>
-    <StatusFilter onChange={onStatusFilterChange}/>
-    <PricesFilter onChange={onPricesFilterChange} />
     <CollectionsFilter onChange={onCollectionsFilterChange} />
+    <PricesFilter onChange={onPricesFilterChange} />
   </FiltersStyled>;
 };
 

@@ -29,7 +29,7 @@ export const Upload: FC<UploadProps> = ({ onChange }) => {
 
 const UploadWrapper = styled.div`
   position: relative;
-  background: ${AdditionalLight};
+  background: ${Primary500};
   padding: 52px var(--gap);
   border: 1px dashed ${Primary500};
   box-sizing: border-box;

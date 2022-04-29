@@ -3,7 +3,7 @@ import { DropdownMenuItemProps, DropdownMenuProps } from './types';
 import styled from 'styled-components/macro';
 import { Button, Icon } from '@unique-nft/ui-kit';
 import CaretDown from '../../static/icons/caret-down.svg';
-import { AdditionalLight, Primary100, Primary500 } from '../../styles/colors';
+import { AdditionalLight, Primary800 } from '../../styles/colors';
 
 export const DropdownMenu: FC<DropdownMenuProps> = ({ children, ...props }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -69,7 +69,8 @@ const DropdownMenuDropdown = styled.div<{ isOpen: boolean }>`
   width: 100%;
   top: calc(100% + 4px);
   flex-direction: column;
-  background: ${AdditionalLight};
+  color: ${AdditionalLight};
+  background-color: rgba(84, 83, 83, 0.8);
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
   border-radius: 4px;
   max-height: 50vh;
@@ -82,7 +83,7 @@ const DropdownMenuItemWrapper = styled.div`
   padding: var(--gap);
   cursor: pointer;
   &:hover {
-    background: ${Primary100};
-    color: ${Primary100};
+    background: ${Primary800};
+    color: ${AdditionalLight};
   }
 `;

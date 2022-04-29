@@ -32,7 +32,7 @@ export const tradesColumns: TableColumnProps[] = [
         target={'_blank'}
         rel={'noreferrer'}
         href={`${config?.scanUrl || ''}collections/${id || ''}`}
-        className={'unique-link primary'}
+        className={'unique-link secondary'}
         >{`${name || ''} [ID ${id || ''}]`}</a>
       </LinkWrapper>;
     },

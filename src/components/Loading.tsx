@@ -13,7 +13,7 @@ const Loading: FC<{className?: string }> = ({ className }) => {
         cy='50'
         fill='none'
         r='35'
-        stroke='#0085cc'
+        stroke='#aae6b9'
         strokeDasharray='164.93361431346415 56.97787143782138'
         strokeWidth='10'
       >
@@ -36,7 +36,7 @@ const LoadingWrapper = styled.div`
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: rgba(255, 255, 255, 0.7);
+  background-color: rgba(84, 83, 83, 0.486);
   width: 100%;
   display: flex;
   align-items: center;

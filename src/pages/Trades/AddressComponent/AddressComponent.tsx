@@ -23,7 +23,7 @@ export const AddressComponent = ({ text }: { text: string }) => {
       target={'_blank'}
       rel={'noreferrer'}
       href={`${config?.scanUrl || ''}account/${formatAddress(text)}`}
-      className={'unique-link primary'}
+      className={'unique-link secondary'}
     >{shortCut}</a>
   </LinkWrapper>;
 };

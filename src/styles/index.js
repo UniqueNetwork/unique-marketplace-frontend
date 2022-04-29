@@ -46,6 +46,52 @@ export const SaduStyle = createGlobalStyle`
   .unique-text {
     color: var(--color-additional-light) !important;
   }
+  .unique-table {
+    .unique-table-data {
+      .unique-table-data-row {
+        .unique-link.secondary {
+          color: var(--color-secondary-100);
+        }
+      }
+    }
+  }
+  .unique-pagination-wrapper {
+    .pages-wrapper {
+      .page-item {
+        color: var(--color-secondary-200);
+        svg.icon {
+          fill: var(--color-secondary-200);
+        }
+      }
+    }
+  }
+  .unique-modal-wrapper {
+    .unique-modal {
+      background-color: var(--color-grey-700);
+      .close-button {
+        svg {
+          fill: var(--color-additional-light);  
+        }
+      }
+      .unique-font-heading {
+        color: var(--color-additional-light);
+      }
+    }
+  }
+  .unique-select {
+    
+    .select-wrapper {
+      color: var(--color-additional-light);
+
+      svg {
+        fill: var(--color-secondary-100);
+      }
+
+      .select-dropdown {
+        background-color: var(--card-background);
+      }
+    }
+  }
   .unique-avatar {
     display: none;
   }
@@ -53,20 +99,26 @@ export const SaduStyle = createGlobalStyle`
     .input-wrapper {
       border: none;
       border-radius: 8px;
+      &:focus-within {
+        border: none;
+      }
       input {
+        color: var(--color-additional-light);
         background: rgb(35, 31, 32);
-        &:focus {
-          border: none;
+        border-radius: 4px;
+        &:focus{
+          border: 1px solid var(--color-additional-light);
         }
       }
     }
   }
+
   .unique-checkbox-wrapper {
     .checkmark {
       background: rgb(35, 31, 32);
-      border: none;
+      border: 1px solid rgb(90, 125, 124);
       &:hover {
-        border: 1px solid rgb(90, 125, 124);
+        border: 1px solid var(--color-additional-light);
       }
       &.checked {
         border-radius: 4px;
@@ -74,6 +126,9 @@ export const SaduStyle = createGlobalStyle`
         height: 20px;
         padding: 2px;
       }
+    }
+    label {
+      color: var(--color-secondary-100);
     }
   }
   a{

@@ -51,7 +51,7 @@ const PricesFilter: FC<PricesFilterProps> = ({ onChange }) => {
           <Text>to</Text>
           <NumberInput value={maxPrice?.toString()} onChange={onChangeMaxPrice} placeholder={'Max'} />
         </PricesRangeWrapper>
-        <Button title={'Apply'} onClick={onApply}/>
+        <Button title={'Apply'} onClick={onApply} role={'primary'}/>
       </PriceFilterWrapper>
     </Accordion>
   );

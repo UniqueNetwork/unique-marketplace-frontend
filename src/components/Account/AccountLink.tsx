@@ -20,7 +20,7 @@ const AccountLink: FC<AccountLinkProps> = ({ accountAddress }) => {
       target={'_blank'}
       rel={'noreferrer'}
       href={`${config.scanUrl}account/${formatAddress(accountAddress) || '404'}`}
-      className={'unique-link primary'}
+      className={'unique-link secondary'}
     >{shortcutText(formatAddress(accountAddress) || '')}</a>
   );
 };

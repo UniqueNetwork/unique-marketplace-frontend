@@ -70,9 +70,7 @@ const LayoutStyled = styled.div`
     background-repeat: round;
     background-attachment: fixed;
 
-    @media (max-width: 1024px) {
-      background: var(--color-additional-light);
-    }
+  
 
     .unique-font-heading.size-1 {
       font-size: 40px;
@@ -140,7 +138,8 @@ const LayoutStyled = styled.div`
     position: sticky !important;
     z-index: 990;
     padding: 16px 48px;
-    @media (max-width: 620px) {
+    
+    @media (max-width: 1024px) {
       background: var(--card-background);
       height: 80px !important;
     }
