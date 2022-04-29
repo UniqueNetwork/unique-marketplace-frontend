@@ -87,10 +87,12 @@ const MainWrapper = styled.div`
   }
 
   .accordion-body {
-    border: 1px solid #fff;
     padding: 24px;
     font-size: 16px;
-    width: 99%;
+    width: 100%;
+    p {
+      padding: 16px;
+    }
     a {
       display: inline-block;
       position: relative;
