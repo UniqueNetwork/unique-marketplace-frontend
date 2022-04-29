@@ -1,6 +1,6 @@
 import React, { ChangeEvent, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components/macro';
-import { AdditionalLight, Grey300, Grey500, Primary100, Primary500 } from '../../styles/colors';
+import { AdditionalLight, Grey300, Grey500, Primary700, Primary500 } from '../../styles/colors';
 
 interface SelectInputOption {
   key: string
@@ -109,6 +109,7 @@ const InputWrapper = styled.div`
     left: 0;
     right: 0;
     bottom: 0;
+    color: ${AdditionalLight};
     border: none;
     background: transparent;
     width: 100%;
@@ -123,7 +124,7 @@ const Dropdown = styled.div<{ isOpen: boolean }>`
   width: 100%;
   top: calc(100% + 4px);
   flex-direction: column;
-  background: ${AdditionalLight};
+  background: var(--card-background);
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
   border-radius: 4px;
   max-height: 200px;
@@ -136,7 +137,7 @@ const OptionWrapper = styled.div`
   padding: var(--gap);
   cursor: pointer;
   &:hover {
-    background: ${Primary100};
+    background: ${Primary700};
     color: ${Primary500};
   }
 `;

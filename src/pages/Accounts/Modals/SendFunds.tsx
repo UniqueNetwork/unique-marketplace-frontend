@@ -4,7 +4,7 @@ import styled from 'styled-components/macro';
 
 import { TTransferFunds } from './types';
 import { useAccounts } from '../../../hooks/useAccounts';
-import { AdditionalWarning100 } from '../../../styles/colors';
+import { AdditionalWarning100, Primary700 } from '../../../styles/colors';
 import { SelectInput } from '../../../components/SelectInput/SelectInput';
 import { Account } from '../../../account/AccountContext';
 import DefaultMarketStages from '../../Token/Modals/StagesModal';
@@ -192,7 +192,7 @@ const TextStyled = styled(Text)`
   padding: 8px 16px;
   margin: calc(var(--gap) * 1.5) 0;
   border-radius: 4px;
-  background-color: ${AdditionalWarning100};
+  background-color: ${Primary700};
   width: 100%;
 `;
 

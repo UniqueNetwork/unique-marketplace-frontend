@@ -14,6 +14,17 @@ interface HeaderProps {
 }
 
 export const Header: FC<HeaderProps> = ({ activeItem }) => {
+  const className = 'inverted';
+  const scrollTrigger = 60;
+
+  window.onscroll = function() {
+    if (window.scrollY >= scrollTrigger || window.pageYOffset >= scrollTrigger) {
+      document.getElementsByTagName('header')[0].classList.add(className);
+    } else {
+      document.getElementsByTagName('header')[0].classList.remove(className);
+    }
+  };
+
   const { lessThanThreshold: showMobileMenu } =
     useScreenWidthFromThreshold(1279);
   const [mobileMenuIsOpen, toggleMobileMenu] = useState(false);

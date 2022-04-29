@@ -3,7 +3,7 @@ import styled from 'styled-components/macro';
 import { Icon } from '@unique-nft/ui-kit';
 
 import { NotificationSeverity } from '../../notification/NotificationContext';
-import { AdditionalLight, AdditionalPositive500, Coral500 } from '../../styles/colors';
+import { AdditionalCoral500, AdditionalLight, AdditionalPositive500, Coral500, Secondary400 } from '../../styles/colors';
 import CheckCircle from '../../static/icons/check-circle-light.svg';
 import Warning from '../../static/icons/warning.svg';
 import { NotificationState } from '../../notification/NotificationWrapper';
@@ -37,7 +37,7 @@ const AlertsWrapper = styled.div`
 `;
 
 const Alert = styled.div<{ severity: NotificationSeverity, isRemoved?: boolean }>`
-  background-color: ${({ severity }) => severity === NotificationSeverity.success ? AdditionalPositive500 : Coral500};
+  background-color: ${({ severity }) => severity === NotificationSeverity.success ? Secondary400 : AdditionalCoral500};
   column-gap: calc(var(--gap) / 2);
   align-items: center;
   display: flex;

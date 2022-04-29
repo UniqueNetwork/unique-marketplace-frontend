@@ -77,6 +77,7 @@ const LayoutStyled = styled.div`
       text-align: left;
       text-transform: uppercase;
       font-weight: 500;
+      margin: 32px 0;
       color: var( --color-additional-light);
       font-family: var(--font-heading);
     }
@@ -138,9 +139,13 @@ const LayoutStyled = styled.div`
     position: sticky !important;
     z-index: 990;
     padding: 16px 48px;
+    transition: background-color 0.3s ease; 
+
+    &.inverted {
+      background: rgba(0, 0, 0, 80%);
+    }
     
     @media (max-width: 1024px) {
-      background: var(--card-background);
       height: 80px !important;
     }
   }
