@@ -44,7 +44,7 @@ const Accordion: FC<AccordionProps> = ({ title, isOpen: isOpenProps, children, o
           <Text>{title}</Text>
           <AccordionChevronIcon />
         </AccordionTitle>
-        {isClearShow && <Button size={'s'}
+        {isClearShow && <Button size={'small'}
           title={'Clear'}
           onClick={onClearClick}
           role={'danger'}

@@ -13,15 +13,11 @@ import { PagePaper } from '../../components/PagePaper/PagePaper';
 import Loading from '../../components/Loading';
 import NoItems from '../../components/NoItems';
 import { useAccounts } from '../../hooks/useAccounts';
+import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
-type TOption = {
-  iconRight: {
-    color: string;
-    name: string;
-    size: number;
-  };
-  id: string;
-  title: string;
+type TOption = SelectOptionProps &{
+  id: string
+  title: string
 }
 
 const sortingOptions: TOption[] = [
@@ -59,11 +55,11 @@ const sortingOptions: TOption[] = [
 
 const pageSize = 20;
 
-const defaultSortingValue = 'desc(CreationDate)';
+const defaultSortingValue = sortingOptions[sortingOptions.length - 1];
 
 export const MarketPage = () => {
   const [filterState, setFilterState] = useState<FilterState | null>();
-  const [sortingValue, setSortingValue] = useState<string>(defaultSortingValue);
+  const [sortingValue, setSortingValue] = useState<string>(defaultSortingValue.id);
   const [searchValue, setSearchValue] = useState<string | number>();
   const { offers, offersCount, isFetching, fetchMore, fetch } = useOffers();
   const { selectedAccount } = useAccounts();
@@ -81,9 +77,9 @@ export const MarketPage = () => {
     }
   }, [fetchMore, offers, pageSize, isFetching]);
 
-  const onSortingChange = useCallback((value: string) => {
-    setSortingValue(value);
-    fetch({ sort: [value], pageSize, page: 1, ...filterState });
+  const onSortingChange = useCallback((value: TOption) => {
+    setSortingValue(value.id);
+    fetch({ sort: [value.id], pageSize, page: 1, ...filterState });
   }, [fetch, filterState]);
 
   const onSearch = useCallback(() => {

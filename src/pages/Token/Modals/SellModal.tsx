@@ -13,6 +13,7 @@ import { NumberInput } from '../../../components/NumberInput/NumberInput';
 import { AdditionalWarning100 } from '../../../styles/colors';
 import { StageStatus } from '../../../types/StagesTypes';
 import { NotificationSeverity } from '../../../notification/NotificationContext';
+import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
 const tokenSymbol = 'KSM';
 
@@ -67,7 +68,7 @@ type TAskSellModalProps = {
 
 export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixPrice }) => {
   const { selectedAccount } = useAccounts();
-  const { kusamaFee, fetchingKusamaFee } = useFee();
+  const { kusamaFee } = useFee();
   const [activeTab, setActiveTab] = useState<number>(0);
   const [priceInputValue, setPriceInputValue] = useState<string>();
 
@@ -114,27 +115,26 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
     [setInputStartingPriceValue]
   );
 
-  const onDurationSelectChange = useCallback((value: string) => {
-      setDurationSelectValue(Number(value));
-    },
-    [setDurationSelectValue]
+  const onDurationSelectChange = useCallback((value: SelectOptionProps) => {
+      setDurationSelectValue(Number(value.id));
+    }, [setDurationSelectValue]
   );
 
-  const durationOptions = [
+  const durationOptions: SelectOptionProps[] = [
     {
-      id: 3,
+      id: '3',
       title: '3 days'
     },
     {
-      id: 7,
+      id: '7',
       title: '7 days'
     },
     {
-      id: 14,
+      id: '14',
       title: '14 days'
     },
     {
-      id: 21,
+      id: '21',
       title: '21 days'
     }
   ];
@@ -180,7 +180,8 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
           label='Duration*'
           onChange={onDurationSelectChange}
           options={durationOptions}
-          value={durationSelectValue}
+          optionKey={'id'}
+          value={durationSelectValue?.toString()}
         />
       </Row>
       <TextStyled

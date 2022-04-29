@@ -21,6 +21,7 @@ import { useAuction } from '../../../api/restApi/auction/auction';
 import { TCalculatedBid } from '../../../api/restApi/auction/types';
 import { NotificationSeverity } from '../../../notification/NotificationContext';
 import Kusama from '../../../static/icons/logo-kusama.svg';
+import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
 export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosable, onFinish }) => {
   const [status, setStatus] = useState<'ask' | 'place-bid-stage'>('ask'); // TODO: naming
@@ -115,8 +116,8 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
   );
 
   const onChainChange = useCallback(
-    (value: string) => {
-      setChain(value);
+    (value: SelectOptionProps) => {
+      setChain(value.id as string);
     },
     [setChain]
   );
