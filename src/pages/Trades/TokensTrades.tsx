@@ -104,7 +104,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
         <Pagination
           size={tradesCount}
           current={page}
-          perPage={pageSize}
+          withPerPageSelector
           onPageChange={onPageChange}
           withIcons
         />

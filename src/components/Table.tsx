@@ -43,6 +43,7 @@ export const Table: FC<TableProps> = ({ columns, data, loading, onSort, classNam
 };
 
 const TableWrapper = styled.div`
+  position: relative;
  .unique-table-data-row {
    height: unset;
    min-height: 40px;
