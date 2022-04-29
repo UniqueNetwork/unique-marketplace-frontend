@@ -1,6 +1,6 @@
 import React from 'react';
 import { TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/types';
-import { Link, Text } from '@unique-nft/ui-kit';
+import { Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import { AddressComponent } from './AddressComponent/AddressComponent';
@@ -28,11 +28,12 @@ export const tradesColumns: TableColumnProps[] = [
     width: '100%',
     isSortable: true,
     render({ id, name }: { id: string, name: string }): React.ReactNode {
-      return <LinkWrapper><a
-        target={'_blank'}
-        rel={'noreferrer'}
-        href={`${config?.scanUrl || ''}collections/${id || ''}`}
-        className={'unique-link primary'}
+      return <LinkWrapper>
+        <a
+          target={'_blank'}
+          rel={'noreferrer'}
+          href={`${config?.scanUrl || ''}collections/${id || ''}`}
+          className={'unique-link primary'}
         >{`${name || ''} [ID ${id || ''}]`}</a>
       </LinkWrapper>;
     },
