@@ -11,8 +11,6 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { useGetTokensByTrades } from './hooks/useGetTokensByTrades';
 import { TradesTabs } from './types';
 
-const pageSize = 20;
-
 type TokensTradesPage = {
   currentTab: TradesTabs
 }
@@ -21,6 +19,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
   const { selectedAccount } = useAccounts();
   const [page, setPage] = useState<number>(0);
   const [sortString, setSortString] = useState<string>();
+  const [pageSize, setPageSize] = useState<number>(10);
   // const [searchValue, setSearchValue] = useState<string | number>();
 
   const { trades, tradesCount, fetch, isFetching } = useTrades();
@@ -34,7 +33,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
       sort: sortString,
       seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
     });
-  }, [selectedAccount?.address, fetch, currentTab]);
+  }, [selectedAccount?.address, fetch, currentTab, pageSize]);
 
   // const onSearch = useCallback(() => {
   //   // TODO: not implemented in api
@@ -47,6 +46,18 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
     fetch({
       page: newPage + 1,
       pageSize,
+      sort: sortString,
+      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
+    });
+  }, [selectedAccount?.address, page, fetch, sortString, pageSize]);
+
+  const onPageSizeChange = useCallback((newPageSize: number) => {
+    if (currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address) return;
+    setPageSize(newPageSize);
+    setPage(0);
+    fetch({
+      page: 1,
+      pageSize: newPageSize,
       sort: sortString,
       seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
     });
@@ -76,7 +87,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
     if (sortString && sortString.length) sortString += `(${associatedSortValues[newSort.field]})`;
     setSortString(sortString);
     fetch({ page: 1, pageSize, sort: sortString });
-  }, [fetch, setSortString]);
+  }, [fetch, setSortString, pageSize]);
 
   return (<PagePaper>
     <TradesPageWrapper>
@@ -100,12 +111,12 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
         loading={isFetching || isFetchingTokens}
       />
       {!!tradesCount && <PaginationWrapper>
-        <Text>{`${tradesCount} items`}</Text>
         <Pagination
           size={tradesCount}
           current={page}
           withPerPageSelector
           onPageChange={onPageChange}
+          onPageSizeChange={onPageSizeChange}
           withIcons
         />
       </PaginationWrapper>}
@@ -114,6 +125,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
 };
 
 const TradesPageWrapper = styled.div`
+  
   width: 100%
 `;
 
@@ -148,10 +160,11 @@ const StyledTable = styled(Table)`
 `;
 
 const PaginationWrapper = styled.div`
-  display: flex;
-  justify-content: space-between;
   margin-top: calc(var(--gap) * 2);
-  align-items: center;
+  
+  .unique-pagination-wrapper {
+    justify-content: space-between;
+  }
   
   @media (max-width: 568px) {
     flex-direction: column;
