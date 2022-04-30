@@ -16,15 +16,11 @@ import Loading from '../../components/Loading';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
 import NoItems from '../../components/NoItems';
 import { fromStringToBnString } from '../../utils/bigNum';
+import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
-type TOption = {
+type TOption = SelectOptionProps & {
   direction: 'asc' | 'desc';
   field: keyof Pick<Offer & NFTToken, 'price' | 'id' | 'creationDate'>;
-  iconRight: {
-    color: string;
-    name: string;
-    size: number;
-  };
   id: string;
   title: string;
 }
@@ -76,11 +72,11 @@ const sortingOptions: TOption[] = [
 
 const pageSize = 1000;
 
-const defaultSortingValue = 'desc(CreationDate)';
+const defaultSortingValue = sortingOptions[sortingOptions.length - 1];
 
 export const NFTPage = () => {
   const [filterState, setFilterState] = useState<MyTokensFilterState | null>(null);
-  const [sortingValue, setSortingValue] = useState<string>(defaultSortingValue);
+  const [sortingValue, setSortingValue] = useState<string>(defaultSortingValue.id);
   const [searchValue, setSearchValue] = useState<string>();
   const [searchString, setSearchString] = useState<string>();
   const [selectOption, setSelectOption] = useState<TOption>();
@@ -110,8 +106,8 @@ export const NFTPage = () => {
     setSelectOption(option);
   }, [sortingValue, setSelectOption]);
 
-  const onSortingChange = useCallback((val: string) => {
-    setSortingValue(val);
+  const onSortingChange = useCallback((val: TOption) => {
+    setSortingValue(val.id);
   }, []);
 
   const onChangeSearchValue = useCallback((value: string) => {

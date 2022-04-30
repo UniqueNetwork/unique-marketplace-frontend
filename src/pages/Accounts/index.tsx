@@ -40,7 +40,7 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
     width: '25%',
     field: 'accountInfo',
     render(accountInfo) {
-      if (accountInfo.deposit) return null;
+      if (accountInfo.deposit) return <></>;
       return (
         <AccountCellWrapper>
           <AccountCard accountName={accountInfo.name}
@@ -75,7 +75,7 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
     width: '25%',
     field: 'accountInfo',
     render(accountInfo) {
-      if (accountInfo.deposit) return null;
+      if (accountInfo.deposit) return <></>;
       return (
         <LinksWrapper>
           <LinkStyled
