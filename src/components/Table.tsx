@@ -13,9 +13,10 @@ interface TableProps {
   data?: any[]
   loading?: boolean
   onSort?(sorting: SortQuery): void
+  className?: string
 }
 
-export const Table: FC<TableProps> = ({ columns, data, loading, onSort }) => {
+export const Table: FC<TableProps> = ({ columns, data, loading, onSort, className }) => {
   const deviceSize = useDeviceSize();
 
   return (
@@ -34,6 +35,7 @@ export const Table: FC<TableProps> = ({ columns, data, loading, onSort }) => {
           columns={columns}
           data={!loading ? data : []}
           loading={loading}
+          className={className}
         />
       )}
     </TableWrapper>
@@ -41,9 +43,16 @@ export const Table: FC<TableProps> = ({ columns, data, loading, onSort }) => {
 };
 
 const TableWrapper = styled.div`
+  position: relative;
  .unique-table-data-row {
    height: unset;
    min-height: 40px;
+   div {
+     padding: 0;
+   }
+   & > div {
+     padding: 0 var(--gap);
+   } 
  }
 `;
 

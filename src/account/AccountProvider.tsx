@@ -18,8 +18,10 @@ const AccountWrapper: FC = ({ children }) => {
   }, []);
 
   const [isSignModalVisible, setIsSignModalVisible] = useState<boolean>(false);
+  const [signerAccount, setSignerAccount] = useState<Account>();
   const onSignCallback = useRef<(signature?: KeyringPair) => void | undefined>();
-  const showSignDialog = useCallback(() => {
+  const showSignDialog = useCallback((account: Account) => {
+    setSignerAccount(account);
     setIsSignModalVisible(true);
     return new Promise<KeyringPair>((resolve, reject) => {
       onSignCallback.current = (signature?: KeyringPair) => {
@@ -55,7 +57,12 @@ const AccountWrapper: FC = ({ children }) => {
   return (
     <AccountProvider value={value}>
       {children}
-      <SignModal isVisible={isSignModalVisible} onClose={onClose} onFinish={onSignFinish}/>
+      <SignModal
+        account={signerAccount}
+        isVisible={isSignModalVisible}
+        onClose={onClose}
+        onFinish={onSignFinish}
+      />
     </AccountProvider>
   );
 };

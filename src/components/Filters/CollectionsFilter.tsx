@@ -99,7 +99,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onTrai
                 size={'m'}
                 onChange={onAttributeSelect(trait)}
               />
-              <span>{trait.count}</span>
+              <Text color={'grey-400'}>{trait.count.toString()}</Text>
             </AttributeWrapper>
           ))}
         </CollectionFilterWrapper>

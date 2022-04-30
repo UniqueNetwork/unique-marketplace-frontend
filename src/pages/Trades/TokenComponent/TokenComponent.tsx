@@ -20,4 +20,10 @@ const TokenComponentWrapper = styled.div`
   column-gap: calc(var(--gap) / 2);
   align-items: center;
   padding: calc(var(--gap) / 2) 0 !important;
+  @media (max-width: 768px) {
+    width: 100%;
+    .unique-input-text {
+      flex-grow: 1;
+    }
+  }
 `;

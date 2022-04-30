@@ -4,24 +4,26 @@ import styled from 'styled-components/macro';
 import { BN } from '@polkadot/util';
 
 import { TPlaceABid } from './types';
+import DefaultMarketStages from './StagesModal';
 import { AdditionalWarning100 } from '../../../styles/colors';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 import { useAuctionBidStages } from '../../../hooks/marketplaceStages';
-import { Offer } from '../../../api/restApi/offers/types';
-import DefaultMarketStages from './StagesModal';
-import Kusama from '../../../static/icons/logo-kusama.svg';
 import { useAccounts } from '../../../hooks/useAccounts';
-import { formatKusamaBalance } from '../../../utils/textUtils';
-import { NumberInput } from '../../../components/NumberInput/NumberInput';
-import { useApi } from '../../../hooks/useApi';
-import { fromStringToBnString } from '../../../utils/bigNum';
-import { StageStatus } from '../../../types/StagesTypes';
+import { useFee } from '../../../hooks/useFee';
 import { useNotification } from '../../../hooks/useNotification';
+import { useApi } from '../../../hooks/useApi';
+import { formatKusamaBalance } from '../../../utils/textUtils';
+import { fromStringToBnString } from '../../../utils/bigNum';
+import { NumberInput } from '../../../components/NumberInput/NumberInput';
+import { StageStatus } from '../../../types/StagesTypes';
+import { Offer } from '../../../api/restApi/offers/types';
 import { useAuction } from '../../../api/restApi/auction/auction';
 import { TCalculatedBid } from '../../../api/restApi/auction/types';
 import { NotificationSeverity } from '../../../notification/NotificationContext';
+import Kusama from '../../../static/icons/logo-kusama.svg';
+import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
-export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ token, offer, setIsClosable, onFinish }) => {
+export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosable, onFinish }) => {
   const [status, setStatus] = useState<'ask' | 'place-bid-stage'>('ask'); // TODO: naming
   const [bidValue, setBidValue] = useState<TPlaceABid>();
 
@@ -37,7 +39,7 @@ export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ token, offer, setIs
       accountAddress={bidValue?.accountAddress}
       amount={bidValue?.amount}
       onFinish={onFinish}
-      token={token}
+      offer={offer}
       setIsClosable={setIsClosable}
     />);
   }
@@ -48,23 +50,28 @@ const chainOptions = [{ id: 'KSM', title: 'KSM', iconRight: { size: 18, file: Ku
 
 export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceABid): void}> = ({ offer, onConfirmPlaceABid }) => {
   const [chain, setChain] = useState<string | undefined>('KSM');
+  const { kusamaFee } = useFee();
   const { selectedAccount } = useAccounts();
   const { api } = useApi();
   const [calculatedBid, setCalculatedBid] = useState<TCalculatedBid>();
-
+  const [isFetchingCalculatedbid, setIsFetchingCalculatedBid] = useState<boolean>(true);
   const { getCalculatedBid } = useAuction();
 
-  useEffect(() => {
+  const fetchCalculatedBid = useCallback(async () => {
     if (!offer || !selectedAccount) return;
-    (async () => {
-      const _calculatedBid = await getCalculatedBid({
-        collectionId: offer.collectionId || 0,
-        tokenId: offer?.tokenId || 0,
-        bidderAddress: selectedAccount?.address || ''
-      });
-      setCalculatedBid(_calculatedBid);
-    })();
-  }, [offer, selectedAccount]);
+    setIsFetchingCalculatedBid(true);
+    const _calculatedBid = await getCalculatedBid({
+      collectionId: offer?.collectionId || 0,
+      tokenId: offer?.tokenId || 0,
+      bidderAddress: selectedAccount?.address || ''
+    });
+    setCalculatedBid(_calculatedBid);
+    setIsFetchingCalculatedBid(false);
+  }, [offer, selectedAccount?.address]);
+
+  useEffect(() => {
+    void fetchCalculatedBid();
+  }, [fetchCalculatedBid]);
 
   const leadingBid = useMemo(() => {
     if (!offer?.auction?.bids || offer?.auction?.bids.length === 0) return 0;
@@ -109,8 +116,8 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
   );
 
   const onChainChange = useCallback(
-    (value: string) => {
-      setChain(value);
+    (value: SelectOptionProps) => {
+      setChain(value.id as string);
     },
     [setChain]
   );
@@ -137,11 +144,11 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
         color='additional-warning-500'
         size='s'
       >
-        {`A fee of ~ 0.000000000000052 ${chain || ''} can be applied to the transaction`}
+        {`A fee of ~ ${kusamaFee} ${chain || ''} can be applied to the transaction`}
       </TextStyled>
       <ButtonWrapper>
         <Button
-          disabled={!isAmountValid || !isEnoughBalance}
+          disabled={!isAmountValid || !isEnoughBalance || isFetchingCalculatedbid}
           onClick={onConfirmPlaceABidClick}
           role='primary'
           title='Confirm'
@@ -151,8 +158,8 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
   );
 };
 
-const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ token, accountAddress, onFinish, amount }) => {
-  const { stages, status, initiate } = useAuctionBidStages(token?.collectionId || 0, token?.id);
+const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ offer, accountAddress, onFinish, amount }) => {
+  const { stages, status, initiate } = useAuctionBidStages(offer?.collectionId || 0, offer?.tokenId || 0);
   const { push } = useNotification();
 
   useEffect(() => {
@@ -160,9 +167,12 @@ const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ token, 
     initiate({ value: amount, accountAddress });
   }, [amount, accountAddress]);
 
+  const { tokenId, collectionId } = offer || {};
+  const { prefix } = offer?.tokenDescription || {};
+
   useEffect(() => {
     if (status === StageStatus.success) {
-      push({ severity: NotificationSeverity.success, message: <>You made a new bid on <Link title={`${token.prefix} #${token.id}`}/></> });
+      push({ severity: NotificationSeverity.success, message: <>You made a new bid on <Link href={`/token/${collectionId || ''}/${tokenId || ''}`} title={`${prefix || ''} #${tokenId || ''}`}/></> });
     }
   }, [status]);
 

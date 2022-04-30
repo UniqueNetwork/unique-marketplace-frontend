@@ -23,31 +23,35 @@ const TokenPage = () => {
   const { selectedAccount } = useAccounts();
   const { id, collectionId } = useParams<{ id: string, collectionId: string}>();
   const [token, setToken] = useState<NFTToken>();
-  const [loading, setLoading] = useState<boolean>(true);
-  const { offer, fetch: fetchOffer } = useOffer(Number(collectionId), Number(id));
-  const [marketType, setMarketType] = useState<MarketType>(MarketType.default); // TODO: when "sell"/"buy"/"bid"/etc clicked - update this status to open modal
+  const [isFetchingToken, setIsFetchingToken] = useState<boolean>(true);
+  const { offer, fetch: fetchOffer, isFetching: isFetchingOffer } = useOffer(Number(collectionId), Number(id));
+  const [marketType, setMarketType] = useState<MarketType>(MarketType.default);
 
   const { push } = useNotification();
 
-  const fetchToken = useCallback(() => {
-    if (!api) return;
-    setLoading(true);
-    api?.nft?.getToken(Number(collectionId), Number(id)).then((token: NFTToken) => {
-      setToken(token);
-      setLoading(false);
-    }).catch((error) => {
-      console.log('Get token from RPC failed', error);
-    });
-  }, [api, collectionId, id]);
+  const fetchToken = useCallback(async () => {
+    if (!api?.nft) return;
+    setIsFetchingToken(true);
+    const token = await api?.nft?.getToken(Number(collectionId), Number(id)) as NFTToken;
+    setToken(token);
+    setIsFetchingToken(false);
+  }, [api?.nft, collectionId, id]);
 
-  // TODO: debug purposes, should be taken from API instead of RPC
   useEffect(() => {
-    fetchToken();
-  }, [fetchToken]);
+    if (offer || token || isFetchingOffer) {
+      setIsFetchingToken(false);
+      return;
+    }
+    void fetchToken();
+  }, [fetchToken, isFetchingOffer, offer, token]);
+
+  const onClose = useCallback(() => {
+    setMarketType(MarketType.default);
+  }, []);
 
   const onFinish = useCallback(() => {
     setMarketType(MarketType.default);
-    fetchToken();
+    void fetchToken();
     fetchOffer(Number(collectionId), Number(id));
   }, [fetchOffer, fetchToken, collectionId, id]);
 
@@ -65,8 +69,8 @@ const TokenPage = () => {
     fetchToken();
   }, [push, fetchOffer, fetchToken, selectedAccount?.address, collectionId, id, token]);
 
-  if (loading) return <Loading />;
-  else if (!token) return <Error404 />;
+  if (isFetchingToken || isFetchingOffer) return <Loading />;
+  else if (!token && !offer) return <Error404 />;
 
   // TODO: split into more categories here instead of just "buy/sell" and putting splitting inside them
 
@@ -89,6 +93,7 @@ const TokenPage = () => {
         offer={offer}
         marketType={marketType}
         onFinish={onFinish}
+        onClose={onClose}
       />
     </CommonTokenDetail>
   </PagePaper>

@@ -4,6 +4,9 @@ import { NFTCollection, NFTToken } from './types';
 import { collectionName16Decoder, decodeStruct, getOnChainSchema, hex2a } from '../utils/decoder';
 import { getTokenImage } from '../utils/imageUtils';
 import { getEthAccount, normalizeAccountId } from '../utils/addressUtils';
+import config from '../../../config';
+
+const { IPFSGateway } = config;
 
 export type NFTControllerConfig = {
   collectionsIds: number[]
@@ -49,14 +52,20 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
       const onChainSchema = getOnChainSchema(collectionInfo);
 
       if (collectionInfo.offchainSchema) {
-        // imageUrl = await getTokenImage(collectionInfo, tokenId);
-        // TODO: Temporary solution to IPFS outage (use constant url base instead of collectionSchema)
-        const attributes = {
-          ...decodeStruct({ attr: onChainSchema.attributesConst, data: constData }),
-          ...decodeStruct({ attr: onChainSchema.attributesVar, data: variableData })
-        };
-        const ipfsJson = JSON.parse(attributes.ipfsJson as string) as { ipfs: string };
-        imageUrl = `https://ipfs.unique.network/ipfs/${ipfsJson.ipfs}`;
+        imageUrl = await getTokenImage(collectionInfo, tokenId);
+      }
+
+      let collectionCover = '';
+
+      if (collectionInfo?.variableOnChainSchema && hex2a(collectionInfo?.variableOnChainSchema)) {
+        const collectionSchema = getOnChainSchema(collectionInfo);
+        const image = JSON.parse(collectionSchema?.attributesVar)?.collectionCover as string;
+
+        collectionCover = `${IPFSGateway}/${image}`;
+      } else {
+        if (collectionInfo?.offchainSchema) {
+          collectionCover = await getTokenImage(collectionInfo, 1);
+        }
       }
 
       return {
@@ -73,7 +82,7 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
         collectionName: collectionName16Decoder(collectionInfo.name),
         prefix: hex2a(collectionInfo.tokenPrefix),
         description: collectionName16Decoder(collectionInfo.description),
-        collectionCover: collectionInfo.coverImageUrl
+        collectionCover
       };
     } catch (e) {
       console.log('getDetailedTokenInfo error', e);

@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import { Button, InputText, Pagination, Text } from '@unique-nft/ui-kit';
+import { Pagination, Text } from '@unique-nft/ui-kit';
 import { SortQuery } from '@unique-nft/ui-kit/dist/cjs/types';
 
 import { useTrades } from '../../api/restApi/trades/trades';
@@ -11,8 +11,6 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { useGetTokensByTrades } from './hooks/useGetTokensByTrades';
 import { TradesTabs } from './types';
 
-const pageSize = 20;
-
 type TokensTradesPage = {
   currentTab: TradesTabs
 }
@@ -21,7 +19,8 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
   const { selectedAccount } = useAccounts();
   const [page, setPage] = useState<number>(0);
   const [sortString, setSortString] = useState<string>();
-  const [searchValue, setSearchValue] = useState<string | number>();
+  const [pageSize, setPageSize] = useState<number>(10);
+  // const [searchValue, setSearchValue] = useState<string | number>();
 
   const { trades, tradesCount, fetch, isFetching } = useTrades();
   const { tradesWithTokens, isFetchingTokens } = useGetTokensByTrades(trades);
@@ -34,7 +33,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
       sort: sortString,
       seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
     });
-  }, [selectedAccount?.address, fetch, currentTab]);
+  }, [selectedAccount?.address, fetch, currentTab, pageSize]);
 
   // const onSearch = useCallback(() => {
   //   // TODO: not implemented in api
@@ -47,6 +46,18 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
     fetch({
       page: newPage + 1,
       pageSize,
+      sort: sortString,
+      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
+    });
+  }, [selectedAccount?.address, page, fetch, sortString, pageSize]);
+
+  const onPageSizeChange = useCallback((newPageSize: number) => {
+    if (currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address) return;
+    setPageSize(newPageSize);
+    setPage(0);
+    fetch({
+      page: 1,
+      pageSize: newPageSize,
       sort: sortString,
       seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
     });
@@ -76,7 +87,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
     if (sortString && sortString.length) sortString += `(${associatedSortValues[newSort.field]})`;
     setSortString(sortString);
     fetch({ page: 1, pageSize, sort: sortString });
-  }, [fetch, setSortString]);
+  }, [fetch, setSortString, pageSize]);
 
   return (<PagePaper>
     <TradesPageWrapper>
@@ -93,19 +104,19 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
       {/*    title='Search' */}
       {/*  /> */}
       {/* </SearchWrapper> */}
-      <Table
+      <StyledTable
         onSort={onSortChange}
         data={tradesWithTokens || []}
         columns={tradesColumns}
         loading={isFetching || isFetchingTokens}
       />
       {!!tradesCount && <PaginationWrapper>
-        <Text>{`${tradesCount} items`}</Text>
         <Pagination
           size={tradesCount}
           current={page}
-          perPage={pageSize}
+          withPerPageSelector
           onPageChange={onPageChange}
+          onPageSizeChange={onPageSizeChange}
           withIcons
         />
       </PaginationWrapper>}
@@ -114,33 +125,49 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
 };
 
 const TradesPageWrapper = styled.div`
+  
   width: 100%
 `;
 
-const SearchWrapper = styled.div`
-  display: flex;
-  margin-bottom: calc(var(--gap) * 2);
-  button {
-    margin-left: 8px;
-  }
+// const SearchWrapper = styled.div`
+//   display: flex;
+//   margin-bottom: calc(var(--gap) * 2);
+//   button {
+//     margin-left: 8px;
+//   }
+//
+//   @media (max-width: 768px) {
+//     width: 100%;
+//     .unique-input-text {
+//       flex-grow: 1;
+//     }
+//   }
+//
+//   @media (max-width: 320px) {
+//     .unique-button {
+//       display: none;
+//     }
+//   }
+// `;
 
-  @media (max-width: 768px) {
-    width: 100%;
-    .unique-input-text {
-      flex-grow: 1;
-    }
-  }
-
-  @media (max-width: 320px) {
-    .unique-button {
+const StyledTable = styled(Table)`
+  && > div > div:first-child {
+    grid-column: 1 / span 2;
+    & > .unique-text {
       display: none;
     }
   }
 `;
 
 const PaginationWrapper = styled.div`
-  display: flex;
-  justify-content: space-between;
   margin-top: calc(var(--gap) * 2);
-  align-items: center;
+  
+  .unique-pagination-wrapper {
+    justify-content: space-between;
+  }
+  
+  @media (max-width: 568px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 `;

@@ -6,7 +6,10 @@ export enum FetchStatus {
 }
 
 export type TStartAuctionParams = {
-  tx: unknown, days: number, startPrice: string, priceStep: string
+  tx: unknown
+  days: number
+  startPrice: string
+  priceStep: string
 }
 export type TPlaceBidParams = {
   tx: unknown, collectionId: number, tokenId: number
@@ -35,4 +38,26 @@ export type TCalculatedBid = {
   contractPendingPrice: string,
   // step for this auction
   priceStep: string
+}
+
+export type TWithdrawBidsParams = {
+  owner: string
+}
+
+export type TWithdrawBid = {
+  amount: string
+  auctionId: string
+  collectionId: string
+  contractAskId: string
+  tokenId: string
+};
+
+export type TWithdrawBidsResponse = {
+  leader: TWithdrawBid[]
+  withdraw: TWithdrawBid[]
+}
+
+export type TWithdrawChooseBidsParams = {
+  timestamp: number
+  auctionIds: string
 }

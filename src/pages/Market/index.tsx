@@ -1,8 +1,9 @@
-import styled from 'styled-components/macro';
-import { Filters } from '../../components';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, KeyboardEvent } from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
 import { Button, InputText, Select, Text } from '@unique-nft/ui-kit';
+import styled from 'styled-components/macro';
+
+import { Filters } from '../../components';
 import { Secondary400 } from '../../styles/colors';
 import { FilterState } from '../../components/Filters/types';
 import { useOffers } from '../../api/restApi/offers/offers';
@@ -11,15 +12,12 @@ import { MobileFilters } from '../../components/Filters/MobileFilter';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
 import Loading from '../../components/Loading';
 import NoItems from '../../components/NoItems';
+import { useAccounts } from '../../hooks/useAccounts';
+import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
-type TOption = {
-  iconRight: {
-    color: string;
-    name: string;
-    size: number;
-  };
-  id: string;
-  title: string;
+type TOption = SelectOptionProps &{
+  id: string
+  title: string
 }
 
 const sortingOptions: TOption[] = [
@@ -57,19 +55,20 @@ const sortingOptions: TOption[] = [
 
 const pageSize = 20;
 
-const defaultSortingValue = 'desc(CreationDate)';
+const defaultSortingValue = sortingOptions[sortingOptions.length - 1];
 
 export const MarketPage = () => {
   const [filterState, setFilterState] = useState<FilterState | null>();
-  const [sortingValue, setSortingValue] = useState<string>(defaultSortingValue);
+  const [sortingValue, setSortingValue] = useState<string>(defaultSortingValue.id);
   const [searchValue, setSearchValue] = useState<string | number>();
   const { offers, offersCount, isFetching, fetchMore, fetch } = useOffers();
+  const { selectedAccount } = useAccounts();
 
   const hasMore = offers && offers.length < offersCount;
 
   useEffect(() => {
     fetch({ page: 1, pageSize });
-  }, [fetch]);
+  }, []);
 
   const onClickSeeMore = useCallback(() => {
     // Todo: fix twice rendering
@@ -78,19 +77,36 @@ export const MarketPage = () => {
     }
   }, [fetchMore, offers, pageSize, isFetching]);
 
-  const onSortingChange = useCallback((val: string) => {
-    setSortingValue(val);
-    fetch({ sort: [val], pageSize, page: 1, ...filterState });
+  const onSortingChange = useCallback((value: TOption) => {
+    setSortingValue(value.id);
+    fetch({ sort: [value.id], pageSize, page: 1, ...filterState });
   }, [fetch, filterState]);
 
-  const handleSearch = () => {
+  const onSearch = useCallback(() => {
     fetch({ sort: [sortingValue], pageSize, page: 1, searchText: searchValue?.toString(), ...filterState });
-  };
+  }, [fetch, sortingValue, searchValue, filterState]);
+
+  const onSearchStringChange = useCallback((value: string) => {
+    setSearchValue(value);
+  }, [setSearchValue]);
+
+  const onSearchInputKeyDown = useCallback((event: KeyboardEvent) => {
+    if (event.key !== 'Enter') return;
+    onSearch();
+  }, [onSearch]);
 
   const onFilterChange = useCallback((filter: FilterState | null) => {
     setFilterState({ ...(filterState || {}), ...filter });
     fetch({ pageSize, page: 1, sort: [sortingValue], ...(filterState || {}), ...filter });
   }, [filterState, fetch, sortingValue]);
+
+  useEffect(() => {
+    if ((!filterState?.seller || filterState?.seller === selectedAccount?.address) && (!filterState?.bidderAddress || filterState?.bidderAddress === selectedAccount?.address)) return;
+    onFilterChange({
+      seller: filterState?.seller ? selectedAccount?.address : undefined,
+      bidderAddress: filterState?.bidderAddress ? selectedAccount?.address : undefined
+    });
+  }, [filterState?.seller, filterState?.bidderAddress, selectedAccount?.address]);
 
   return (<PagePaper>
     <MarketMainPageStyled>
@@ -102,12 +118,13 @@ export const MarketPage = () => {
           <SearchWrapper>
             <InputTextStyled
               iconLeft={{ name: 'magnify', size: 16 }}
-              onChange={(val) => setSearchValue(val)}
+              onChange={onSearchStringChange}
+              onKeyDown={onSearchInputKeyDown}
               placeholder='Collection / token'
               value={searchValue?.toString()}
             />
             <Button
-              onClick={() => handleSearch()}
+              onClick={onSearch}
               role='primary'
               title='Search'
             />
@@ -192,6 +209,7 @@ const SearchWrapper = styled.div`
   }
 
   @media (max-width: 320px) {
+    margin-right: 0;
     .unique-button {
       display: none;
     }

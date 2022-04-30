@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 import { TCreateAccountBodyModalProps } from './types';
 import { Avatar, Button, InputText, Text } from '@unique-nft/ui-kit';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
@@ -66,6 +66,10 @@ const AddressWrapper = styled.div`
   border: 1px solid var(--grey-300);
   border-radius: 4px;
   padding: 20px var(--gap);
+  .unique-text {
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
 `;
 
 const StepsTextStyled = styled(Text)`

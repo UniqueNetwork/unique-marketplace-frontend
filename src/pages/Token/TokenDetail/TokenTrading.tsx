@@ -6,10 +6,10 @@ import accountContext from '../../../account/AccountContext';
 import { SellToken } from '../SellToken/SellToken';
 import { BuyToken } from '../BuyToken/BuyToken';
 import Auction from '../Auction/Auction';
-import { isTokenOwner } from '../../../api/chainApi/utils/addressUtils';
+import { isTokenOwner, normalizeAccountId } from '../../../api/chainApi/utils/addressUtils';
 
 interface TokenTradingProps {
-  token: NFTToken
+  token?: NFTToken
   offer?: Offer
   onSellClick(): void
   onBuyClick(): void
@@ -25,17 +25,16 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
   const { selectedAccount } = useContext(accountContext);
 
   const isOwner = useMemo(() => {
-    if (!selectedAccount || !token.owner) return false;
+    if (!selectedAccount) return false;
     if (offer) {
       return isTokenOwner(selectedAccount.address, { Substrate: offer.seller });
     }
-    return isTokenOwner(selectedAccount.address, token.owner);
+    return isTokenOwner(selectedAccount.address, normalizeAccountId(token?.owner || ''));
   }, [selectedAccount, token, offer]);
 
   if (offer?.auction) {
     return (<Auction
       offer={offer}
-      token={token}
       onPlaceABidClick={onPlaceABidClick}
       onWithdrawClick={onWithdrawClick}
       onDelistAuctionClick={onDelistAuctionClick}

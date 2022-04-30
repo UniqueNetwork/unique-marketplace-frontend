@@ -7,9 +7,9 @@ import { StageStatus } from '../../../types/StagesTypes';
 import { NotificationSeverity } from '../../../notification/NotificationContext';
 import { useNotification } from '../../../hooks/useNotification';
 
-export const CancelSellFixStagesModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish, setIsClosable }) => {
+export const CancelSellFixStagesModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, setIsClosable }) => {
   const { selectedAccount } = useAccounts();
-  const { stages, status, initiate } = useCancelSellFixStages(token.collectionId || 0, token.id);
+  const { stages, status, initiate } = useCancelSellFixStages(offer?.collectionId || 0, offer?.tokenId || 0);
   const { push } = useNotification();
 
   useEffect(() => {

@@ -1,17 +1,21 @@
 import React, { ChangeEvent, FC, useCallback, useEffect, useState } from 'react';
-import { TCreateAccountBodyModalProps } from './types';
-import { addressFromSeed } from '../../../utils/seedUtils';
 import { mnemonicGenerate } from '@polkadot/util-crypto';
 import { Avatar, Button, Checkbox, Heading, Link, Select, Text, Icon } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
+
+import { TCreateAccountBodyModalProps } from './types';
+import { addressFromSeed } from '../../../utils/seedUtils';
 
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import { defaultPairType, derivePath } from './CreateAccount';
 import { AdditionalWarning100 } from '../../../styles/colors';
 import { Tooltip } from '../../../components/Tooltip/Tooltip';
 import Question from '../../../static/icons/question.svg';
+import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
-const seedGenerators = [
+type TOption = SelectOptionProps & { id: string, title: string };
+
+const seedGenerators: TOption[] = [
   { id: 'Mnemonic', title: 'Mnemonic' }
 ];
 
@@ -32,8 +36,8 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish 
     changeSeed(seed);
   }, [setSeed]);
 
-  const onSeedGeneratorChange = useCallback((value: string) => {
-    setSeedGenerator(value);
+  const onSeedGeneratorChange = useCallback((value: TOption) => {
+    setSeedGenerator(value.id);
   }, []);
 
   const onSeedChange = useCallback(({ target }: ChangeEvent<HTMLTextAreaElement>) => {
@@ -99,6 +103,10 @@ const AddressWrapper = styled.div`
   border: 1px solid var(--grey-300);
   border-radius: 4px;
   padding: 20px var(--gap);
+  .unique-text {
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
 `;
 
 const SeedGeneratorSelectWrapper = styled.div`

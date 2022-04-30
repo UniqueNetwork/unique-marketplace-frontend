@@ -1,12 +1,14 @@
 import Web3 from 'web3';
 import { ApiPromise } from '@polkadot/api';
+import { AddressOrPair } from '@polkadot/api/types';
 import { BN } from '@polkadot/util';
 import { encodeAddress } from '@polkadot/util-crypto';
 import marketplaceAbi from './abi/marketPlaceAbi.json';
 import nonFungibleAbi from './abi/nonFungibleAbi.json';
 import { sleep } from '../../../utils/helpers';
-import { CrossAccountId, IMarketController, INFTController, TransactionOptions } from '../types';
+import { IMarketController, INFTController, TransactionOptions } from '../types';
 import { compareEncodedAddresses, getEthAccount, isTokenOwner, normalizeAccountId } from '../utils/addressUtils';
+import { CrossAccountId } from './types';
 
 export type EvmCollectionAbiMethods = {
   approve: (contractAddress: string, tokenId: string) => {
@@ -180,6 +182,11 @@ class MarketController implements IMarketController {
     }
 
     throw new Error('Awaiting tx execution timed out');
+  }
+
+  public async getKusamaFee(sender: AddressOrPair, recipient: string = this.escrowAddress, value: BN = new BN(1000)) {
+    const transferFee = (await this.kusamaApi.tx.balances.transfer(recipient, value).paymentInfo(sender));
+    return transferFee.partialFee;
   }
 
   // #region sell

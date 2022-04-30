@@ -40,10 +40,10 @@ export const WalletManager: FC = () => {
   }, [selectedAccount, chainData?.systemChain]);
 
   if (!isLoading && accounts.length === 0) {
- return (
-   <Button title={'Connect or create account'} onClick={onCreateAccountClick} />
-  );
-}
+   return (
+     <Button title={'Connect or create account'} onClick={onCreateAccountClick} />
+    );
+  }
 
   if (deviceSize === DeviceSize.sm) {
     return (
@@ -92,7 +92,7 @@ const AccountOptionCard: FC<Account> = (account) => {
 
 const AccountWithBalanceOptionCard: FC<Account> = (account) => {
   return (<AccountOptionWrapper>
-    <AccountCard accountName={formatKusamaBalance(account.balance?.KSM?.toString() || '0')}
+    <AccountCard accountName={`${formatKusamaBalance(account.balance?.KSM?.toString() || '0')} ${tokenSymbol}`}
       accountAddress={account.address}
       canCopy={false}
       isShort
@@ -154,6 +154,11 @@ const WalletManagerWrapper = styled.div`
   border-radius: 8px;
   display: flex;
   position: relative;
+  @media(max-width: 768px) {
+    div[class^=Account__AddressRow] {
+      display: none;
+    }
+  }
 `;
 
 const Divider = styled.div`

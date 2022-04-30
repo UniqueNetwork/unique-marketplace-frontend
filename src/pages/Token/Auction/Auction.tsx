@@ -20,7 +20,6 @@ import AccountLink from '../../../components/Account/AccountLink';
 
 interface AuctionProps {
   offer: Offer
-  token: NFTToken
   onPlaceABidClick(): void
   onDelistAuctionClick(): void
   onWithdrawClick(): void
@@ -35,17 +34,19 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
 
   const [calculatedBid, setCalculatedBid] = useState<TCalculatedBid>();
 
+  const fetchCalculatedBid = useCallback(async () => {
+    const _calculatedBid = await getCalculatedBid({
+      collectionId: offer?.collectionId || 0,
+      tokenId: offer?.tokenId || 0,
+      bidderAddress: selectedAccount?.address || ''
+    });
+    setCalculatedBid(_calculatedBid);
+  }, [offer?.collectionId, offer?.tokenId, selectedAccount?.address]);
+
   useEffect(() => {
     if (!offer || offer.auction?.status !== 'active' || !selectedAccount) return;
-    (async () => {
-      const _calculatedBid = await getCalculatedBid({
-        collectionId: offer.collectionId || 0,
-        tokenId: offer?.tokenId || 0,
-        bidderAddress: selectedAccount?.address || ''
-      });
-      setCalculatedBid(_calculatedBid);
-    })();
-  }, [offer, selectedAccount]);
+    void fetchCalculatedBid();
+  }, [fetchCalculatedBid]);
 
   const canPlaceABid = useMemo(() => {
     if (!selectedAccount?.address || !offer?.seller) return false;
@@ -137,7 +138,12 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
       <Divider />
       <Heading size={'4'}>Offers</Heading>
       {isTopBidder && <TopBidderTextStyled >You are Top Bidder</TopBidderTextStyled>}
-      {!isTopBidder && isBidder && <Row><BidderTextStyled >You are outbid</BidderTextStyled> <Text>{'Leading bid'}</Text><AccountLink accountAddress={topBid?.bidderAddress || ''} /></Row>}
+      {!isTopBidder && isBidder && <Row>
+        <BidderTextStyled >You are outbid</BidderTextStyled>
+        <LeadingBidWrapper>
+          <Text>{'Leading bid'}</Text><AccountLink accountAddress={topBid?.bidderAddress || ''} />
+        </LeadingBidWrapper>
+      </Row>}
       <Bids offer={offer} />
     </AuctionWrapper>
   </>);
@@ -186,4 +192,11 @@ const BidderTextStyled = styled(Text)`
   background-color: ${Coral100};
   color: ${Coral500} !important;
   width: fit-content;
+`;
+
+const LeadingBidWrapper = styled.div`
+  margin-bottom: var(--gap);
+  display: flex;
+  align-items: center;
+  column-gap: calc(var(--gap) / 2);
 `;

@@ -1,10 +1,9 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Avatar, Button, Heading, Modal, Text } from '@unique-nft/ui-kit';
+import { Button, Heading, Modal, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import { TTransferFunds } from './types';
 import { useAccounts } from '../../../hooks/useAccounts';
-import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import { AdditionalWarning100 } from '../../../styles/colors';
 import { SelectInput } from '../../../components/SelectInput/SelectInput';
 import { Account } from '../../../account/AccountContext';
@@ -171,11 +170,14 @@ const Content = styled.div`
 const AddressWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 2);
-  margin-top: calc(var(--gap) * 2);
   border: 1px solid var(--grey-300);
   border-radius: 4px;
   padding: calc(var(--gap) / 2) var(--gap);
   align-items: center;
+  .unique-text {
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
 `;
 
 const AddressOptionWrapper = styled.div`

@@ -7,6 +7,7 @@ import { useScreenWidthFromThreshold } from '../../hooks/useScreenWidthFromThres
 import menu from '../../static/icons/menu.svg';
 import { TMenuItems } from '../PageLayout';
 import { WalletManager } from './WalletManager/WalletManager';
+import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
 
 interface HeaderProps {
   activeItem: TMenuItems;
@@ -20,6 +21,8 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
     toggleMobileMenu((prevState) => !prevState);
   }, []);
 
+  const deviceSize = useDeviceSize();
+
   return (
     <HeaderStyled>
       <LeftSideColumn>
@@ -27,9 +30,9 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
           onClick={mobileMenuToggler}
           src={menu}
         />}
-        <Link to={'/'}>
+        <LogoLink to={'/'}>
           <LogoIcon src={'/logos/logo.svg'} />
-        </Link>
+        </LogoLink>
         {!showMobileMenu && (
           <nav>
             <Link to='/'>
@@ -128,6 +131,18 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
               </TextStyled>
             </Link>
           </LinkWrapper>
+          {deviceSize !== DeviceSize.lg && <LinkWrapper onClick={mobileMenuToggler}>
+            <Link to='accounts'>
+              <TextStyled
+                $active={activeItem === 'Manage accounts'}
+                color='additional-dark'
+                size='m'
+                weight='medium'
+              >
+                Manage accounts
+              </TextStyled>
+            </Link>
+          </LinkWrapper>}
         </MobileMenu>
       )}
     </HeaderStyled>
@@ -154,6 +169,12 @@ const MenuIcon = styled.img`
   width: 32px;
   height: 32px;
   margin-right: 8px;
+`;
+
+const LogoLink = styled(Link)`
+  @media (max-width: 567px) {
+    display: none;
+  }
 `;
 
 const LogoIcon = styled.img`

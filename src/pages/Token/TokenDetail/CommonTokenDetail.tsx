@@ -1,5 +1,5 @@
 import { Heading, Icon, Text } from '@unique-nft/ui-kit';
-import React, { FC, ReactChild, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, ReactChild, useCallback, useMemo } from 'react';
 import styled from 'styled-components/macro';
 
 import { Picture } from '../../../components';
@@ -20,7 +20,7 @@ import { useApi } from '../../../hooks/useApi';
 
 interface IProps {
   children: ReactChild[];
-  token: NFTToken;
+  token?: NFTToken;
   offer?: Offer;
 }
 
@@ -29,25 +29,35 @@ export const CommonTokenDetail: FC<IProps> = ({
   token,
   offer
 }) => {
-  const [collectionCoverImage, setCollectionCoverImage] = useState<string>();
-  const { api } = useApi();
-
   const {
     collectionId,
     collectionName,
+    collectionCover,
     description,
     attributes,
     imageUrl,
-    id: tokenId,
+    tokenId,
     prefix
-  } = token;
+  } = useMemo(() => {
+    if (offer) {
+      const { collectionName, image, prefix, collectionCover, description } = offer.tokenDescription || {};
+      const attributes = offer.tokenDescription?.attributes.reduce((acc, item) => ({ ...acc, [item.key]: item.value }), {}) || [];
+      return {
+        ...offer,
+        collectionName,
+        prefix,
+        imageUrl: image,
+        attributes,
+        description,
+        collectionCover
+      };
+    }
 
-  useEffect(() => {
-    (async () => {
-      if (!api?.collection || !token?.collectionId) return;
-      setCollectionCoverImage((await api.collection.getCollection(token.collectionId)).coverImageUrl);
-    })();
-  }, [token.collectionId, api?.collection]);
+    return {
+      ...token,
+      tokenId: token?.id
+    };
+  }, [token, offer]);
 
   const { selectedAccount } = useAccounts();
   const deviceSize = useDeviceSize();
@@ -59,10 +69,10 @@ export const CommonTokenDetail: FC<IProps> = ({
   }, [chainData?.properties.ss58Format]);
 
   const owner = useMemo(() => {
-    if (!token?.owner) return undefined;
     if (offer) {
       return formatAddress(offer?.seller);
     }
+    if (!token?.owner) return undefined;
     return token.owner.Substrate ? formatAddress(token.owner.Substrate) : token.owner.Ethereum;
   }, [token, offer, formatAddress]);
 
@@ -71,7 +81,7 @@ export const CommonTokenDetail: FC<IProps> = ({
     if (offer) {
       return isTokenOwner(selectedAccount.address, { Substrate: offer.seller });
     }
-    return isTokenOwner(selectedAccount.address, normalizeAccountId(token.owner || ''));
+    return isTokenOwner(selectedAccount.address, normalizeAccountId(token?.owner || ''));
   }, [selectedAccount, token, offer]);
 
   const onShareClick = useCallback(() => {
@@ -86,7 +96,7 @@ export const CommonTokenDetail: FC<IProps> = ({
   return (
     <CommonTokenDetailStyled>
       <PictureWrapper>
-        <Picture alt={tokenId.toString()} src={imageUrl} />
+        <Picture alt={tokenId?.toString() || ''} src={imageUrl} />
       </PictureWrapper>
       <Description>
         <Heading size={'1'}>{`${prefix || ''} #${tokenId}`}</Heading>
@@ -114,10 +124,10 @@ export const CommonTokenDetail: FC<IProps> = ({
         </Row>
         <Divider />
         {children}
-        <AttributesBlock attributes={attributes} />
+        {attributes && <AttributesBlock attributes={attributes} />}
         <Divider />
         <CollectionsCard
-          avatarSrc={collectionCoverImage || ''}
+          avatarSrc={collectionCover || ''}
           description={description || ''}
           id={collectionId || -1}
           title={collectionName || ''}
@@ -186,9 +196,13 @@ const PictureWrapper = styled.div`
     }
 
     @media (max-width: 567px) {
-      width: 100%;
+      width: 100vw;
+      min-width: 100vw;
     }
-    
+  }
+  @media (max-width: 567px) {
+    width: 100vw;
+    margin-left: calc(0px - var(--gap));
   }
 `;
 

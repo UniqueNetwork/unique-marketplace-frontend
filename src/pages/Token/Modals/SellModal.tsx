@@ -1,23 +1,25 @@
 import { Button, Heading, Tabs, Text, Select, Link } from '@unique-nft/ui-kit';
+import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components/macro';
 
 import DefaultMarketStages from './StagesModal';
+import { TTokenPageModalBodyProps } from './TokenPageModal';
 import { TAuctionProps, TFixPriceProps } from './types';
 import { useAuctionSellStages, useSellFixStages } from '../../../hooks/marketplaceStages';
-import { AdditionalWarning100 } from '../../../styles/colors';
-import { TTokenPageModalBodyProps } from './TokenPageModal';
+import { useNotification } from '../../../hooks/useNotification';
+import { useFee } from '../../../hooks/useFee';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { NumberInput } from '../../../components/NumberInput/NumberInput';
+import { AdditionalWarning100 } from '../../../styles/colors';
 import { StageStatus } from '../../../types/StagesTypes';
 import { NotificationSeverity } from '../../../notification/NotificationContext';
-import { useNotification } from '../../../hooks/useNotification';
 import { Tooltip } from '../../../components/Tooltip/Tooltip';
 
 const tokenSymbol = 'KSM';
 
 export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish, setIsClosable }) => {
-  const { collectionId, id: tokenId } = token;
+  const { collectionId, id: tokenId } = token || {};
   const [status, setStatus] = useState<'ask' | 'auction-stage' | 'fix-price-stage'>('ask'); // TODO: naming
   const [auction, setAuction] = useState<TAuctionProps>();
   const [fixPrice, setFixPrice] = useState<TFixPriceProps>();
@@ -34,12 +36,14 @@ export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish, setIs
     setIsClosable(false);
   }, [setStatus, setFixPrice, setIsClosable]);
 
+  if (!token) return null;
+
   if (status === 'ask') return (<AskSellModal onSellAuction={onSellAuction} onSellFixPrice={onSellFixPrice} />);
   switch (status) {
     case 'auction-stage':
       return (<SellAuctionStagesModal
         collectionId={collectionId || 0}
-        tokenId={tokenId}
+        tokenId={tokenId || 0}
         tokenPrefix={token?.prefix || ''}
         auction={auction as TAuctionProps}
         onFinish={onFinish}
@@ -47,7 +51,7 @@ export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish, setIs
     case 'fix-price-stage':
       return (<SellFixStagesModal
         collectionId={collectionId || 0}
-        tokenId={tokenId}
+        tokenId={tokenId || 0}
         tokenPrefix={token?.prefix || ''}
         sellFix={fixPrice as TFixPriceProps}
         onFinish={onFinish}
@@ -65,6 +69,7 @@ type TAskSellModalProps = {
 
 export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixPrice }) => {
   const { selectedAccount } = useAccounts();
+  const { kusamaFee } = useFee();
   const [activeTab, setActiveTab] = useState<number>(0);
   const [priceInputValue, setPriceInputValue] = useState<string>();
 
@@ -111,27 +116,26 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
     [setInputStartingPriceValue]
   );
 
-  const onDurationSelectChange = useCallback((value: string) => {
-      setDurationSelectValue(Number(value));
-    },
-    [setDurationSelectValue]
+  const onDurationSelectChange = useCallback((value: SelectOptionProps) => {
+      setDurationSelectValue(Number(value.id));
+    }, [setDurationSelectValue]
   );
 
-  const durationOptions = [
+  const durationOptions: SelectOptionProps[] = [
     {
-      id: 3,
+      id: '3',
       title: '3 days'
     },
     {
-      id: 7,
+      id: '7',
       title: '7 days'
     },
     {
-      id: 14,
+      id: '14',
       title: '14 days'
     },
     {
-      id: 21,
+      id: '21',
       title: '21 days'
     }
   ];
@@ -147,7 +151,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
         color='additional-warning-500'
         size='s'
       >
-        {`A fee of ~ 0.000000000000052 ${tokenSymbol} can be applied to the transaction`}
+        {`A fee of ~ ${kusamaFee} ${tokenSymbol} can be applied to the transaction`}
       </TextStyled>
       <ButtonWrapper>
         <Button
@@ -177,14 +181,15 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
           label='Duration*'
           onChange={onDurationSelectChange}
           options={durationOptions}
-          value={durationSelectValue}
+          optionKey={'id'}
+          value={durationSelectValue?.toString()}
         />
       </Row>
       <TextStyled
         color='additional-warning-500'
         size='s'
       >
-        {`A fee of ~ 0.000000000000052 ${tokenSymbol} can be applied to the transaction`}
+        {`A fee of ~ ${kusamaFee} ${tokenSymbol} can be applied to the transaction`}
       </TextStyled>
       <ButtonWrapper>
         <Button
