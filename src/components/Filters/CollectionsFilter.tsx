@@ -7,6 +7,7 @@ import Accordion from '../Accordion/Accordion';
 import Loading from '../Loading';
 import { Avatar } from '../Avatar/Avatar';
 import { Trait } from '../../api/restApi/offers/types';
+import CheckboxSkeleton from '../Skeleton/CheckboxSkeleton';
 
 interface CollectionsFilterProps {
   value?: number[]
@@ -68,7 +69,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onTrai
       isClearShow={selectedCollections.length > 0}
     >
       <CollectionFilterWrapper>
-        {isFetching && <Loading />}
+        {isFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
         {collections.map((collection) => (
           <CheckboxWrapper
             key={`collection-${collection.id}`}
@@ -85,12 +86,10 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onTrai
           ))}
       </CollectionFilterWrapper>
     </Accordion>
-    {/* TODO: unsupported on back-end */}
     {onTraitsChange && selectedCollections.length === 1 && <AttributesFilterWrapper>
-      {/* TODO: make mapping attributes of the selected collection */}
       <Accordion title={'Traits'} isOpen={true}>
         <CollectionFilterWrapper>
-          {isTraitsFetching && <Loading />}
+          {isTraitsFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
           {traits.map((trait) => (
             <AttributeWrapper key={`attribute-${trait.trait}`}>
               <Checkbox
@@ -99,7 +98,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onTrai
                 size={'m'}
                 onChange={onAttributeSelect(trait)}
               />
-              <span>{trait.count}</span>
+              <Text color={'grey-400'}>{trait.count.toString()}</Text>
             </AttributeWrapper>
           ))}
         </CollectionFilterWrapper>

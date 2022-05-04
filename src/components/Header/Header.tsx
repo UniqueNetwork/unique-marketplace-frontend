@@ -7,6 +7,7 @@ import { useScreenWidthFromThreshold } from '../../hooks/useScreenWidthFromThres
 import menu from '../../static/icons/menu.svg';
 import { TMenuItems } from '../PageLayout';
 import { WalletManager } from './WalletManager/WalletManager';
+import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
 
 interface HeaderProps {
   activeItem: TMenuItems;
@@ -19,6 +20,8 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
   const mobileMenuToggler = useCallback(() => {
     toggleMobileMenu((prevState) => !prevState);
   }, []);
+
+  const deviceSize = useDeviceSize();
 
   return (
     <HeaderStyled>
@@ -128,6 +131,18 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
               </TextStyled>
             </Link>
           </LinkWrapper>
+          {deviceSize !== DeviceSize.lg && <LinkWrapper onClick={mobileMenuToggler}>
+            <Link to='accounts'>
+              <TextStyled
+                $active={activeItem === 'Manage accounts'}
+                color='additional-dark'
+                size='m'
+                weight='medium'
+              >
+                Manage accounts
+              </TextStyled>
+            </Link>
+          </LinkWrapper>}
         </MobileMenu>
       )}
     </HeaderStyled>

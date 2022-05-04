@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, InputText, Text } from '@unique-nft/ui-kit';
 import { TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import styled from 'styled-components/macro';
@@ -23,6 +23,7 @@ import { useApi } from '../../hooks/useApi';
 import AccountCard from '../../components/Account/Account';
 import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
 import config from '../../config';
+import { TWithdrawBid } from '../../api/restApi/auction/types';
 
 const tokenSymbol = 'KSM';
 
@@ -39,7 +40,7 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
     width: '25%',
     field: 'accountInfo',
     render(accountInfo) {
-      if (accountInfo.deposit) return null;
+      if (accountInfo.deposit) return <></>;
       return (
         <AccountCellWrapper>
           <AccountCard accountName={accountInfo.name}
@@ -74,7 +75,7 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
     width: '25%',
     field: 'accountInfo',
     render(accountInfo) {
-      if (accountInfo.deposit) return null;
+      if (accountInfo.deposit) return <></>;
       return (
         <LinksWrapper>
           <LinkStyled
@@ -132,12 +133,17 @@ type AccountInfo = {
 }
 
 export const AccountsPage = () => {
-  const { accounts, fetchAccounts, isLoading } = useAccounts();
+  const { accounts, fetchAccounts, isLoading, isLoadingDeposits, fetchAccountsWithDeposits } = useAccounts();
   const [searchString, setSearchString] = useState<string>('');
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
   const [selectedAddress, setSelectedAddress] = useState<string>();
   const deviceSize = useDeviceSize();
   const { chainData } = useApi();
+
+  useEffect(() => {
+    if (isLoading) return;
+    void fetchAccountsWithDeposits();
+  }, [isLoading]);
 
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainData?.properties.ss58Format || 0);
@@ -179,10 +185,23 @@ export const AccountsPage = () => {
         ...account,
         accountInfo: { address: account.address, name: account.meta.name || '', balance: account.balance }
       });
-      if (account.deposit && !account.deposit.isZero()) {
+      if (!account.deposits) return acc;
+
+      const { sponsorshipFee, bids } = account.deposits;
+      const { leader, withdraw } = bids || { leader: [], withdraw: [] };
+
+      if ((!sponsorshipFee?.isZero() || leader.length !== 0 || withdraw.length !== 0)) {
+        const getTotalAmount = (acc: BN, bid: TWithdrawBid) => acc.add(new BN(bid.amount));
+
         acc.push({
           ...account,
-          accountInfo: { address: account.address, name: account.meta.name || '', deposit: account.deposit }
+          accountInfo: {
+            address: account.address,
+            name: account.meta.name || '',
+            deposit: (sponsorshipFee || new BN(0))
+              .add(withdraw.reduce(getTotalAmount, new BN(0)))
+              .add(leader.reduce(getTotalAmount, new BN(0)))
+          }
         });
       }
       return acc;
@@ -203,6 +222,7 @@ export const AccountsPage = () => {
   const onChangeAccountsFinish = useCallback(async () => {
     setCurrentModal(undefined);
     await fetchAccounts();
+    await fetchAccountsWithDeposits();
   }, []);
 
   const onModalClose = useCallback(() => {
@@ -230,7 +250,7 @@ export const AccountsPage = () => {
       <Table
         columns={getAccountsColumns({ isShortAddress: deviceSize === DeviceSize.sm, formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal })}
         data={filteredAccounts}
-        loading={isLoading}
+        loading={isLoading || isLoadingDeposits}
       />
       <CreateAccountModal isVisible={currentModal === AccountModal.create} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
       <ImportViaSeedAccountModal isVisible={currentModal === AccountModal.importViaSeed} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
@@ -305,7 +325,7 @@ const BalancesWrapper = styled.div`
   && {
     display: flex;
     flex-direction: column;
-    padding: 0;
+    padding: 20px 0 !important;
   }
 `;
 

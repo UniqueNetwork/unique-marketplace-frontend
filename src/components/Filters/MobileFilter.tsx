@@ -1,7 +1,7 @@
 import React, { Dispatch, ReactElement, SetStateAction, useCallback, useState } from 'react';
 import styled from 'styled-components/macro';
 import { Button, Select, Tabs } from '@unique-nft/ui-kit';
-import { IconProps } from '@unique-nft/ui-kit/dist/cjs/types';
+import { IconProps, SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
 import { FilterState } from './types';
 import { AdditionalLight } from '../../styles/colors';
@@ -9,7 +9,7 @@ import { AdditionalLight } from '../../styles/colors';
 export type FilterChangeHandler<T> = Dispatch<SetStateAction<T | null>> | ((value: T | null) => void);
 
 type FiltersProps<T> = {
-  defaultSortingValue: string
+  defaultSortingValue: SelectOptionProps
   sortingValue: string
   sortingOptions: {
     id: string | number
@@ -17,7 +17,7 @@ type FiltersProps<T> = {
     iconRight?: IconProps
   }[]
   onFilterChange: FilterChangeHandler<T>
-  onSortingChange(value: string): void
+  onSortingChange(value: SelectOptionProps): void
   filterComponent?: (props: { onFilterChange: FilterChangeHandler<T> }) => ReactElement | null
 }
 
@@ -106,6 +106,18 @@ const MobileFilterModal = styled.div<{ isVisible: boolean }>`
   left: 0;
   overflow-y: auto;
 
+  & div[class^=Filters] {
+    width: 100%;
+    padding-bottom: 60px;
+  }
+  
+  & div[class^=CollectionsFilter__CollectionFilterWrapper] {
+    max-height: unset;
+    div[class^=CollectionsFilter__AttributeWrapper]:last-child {
+      padding-bottom: 90px;
+    }
+  }
+  
   @media (max-width: 1024px) {
     display: ${({ isVisible }) => isVisible ? 'block' : 'none'};
   }
