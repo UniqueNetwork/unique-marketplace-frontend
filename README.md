@@ -28,8 +28,10 @@ Keep in mind that env.development variables should beging with "REACT_APP_".
 
 ## Variables explained
 
-- ```DOCUMENT_TITLE``` - application title
-- ```UNIQUE_API_URL``` - back-end url
+- ```DOCUMENT_TITLE``` - Application title
+- ```UNIQUE_API_URL``` - Back-end url
+- ```SCAN_URL``` - Scan url for some of the redirects. It is recommended to use "https://uniquescan.io/QUARTZ/" for production.
+- ```IPFS_GATEWAY``` - Used for some legacy collections. If collection uses variableOnChainSchema - then we will use this variable as url prefix: _{IPFSGateway}/${image}_
 # Customization
 ## **If you want to continue to receive updates on marketplace and only change some visuals - make sure to follow this guideline instead of changing the code.**
 
