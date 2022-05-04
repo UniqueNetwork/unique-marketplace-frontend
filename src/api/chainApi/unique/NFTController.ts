@@ -49,6 +49,8 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
 
       let imageUrl = '';
 
+      const onChainSchema = getOnChainSchema(collectionInfo);
+
       if (collectionInfo.offchainSchema) {
         imageUrl = await getTokenImage(collectionInfo, tokenId);
       }
@@ -65,8 +67,6 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
           collectionCover = await getTokenImage(collectionInfo, 1);
         }
       }
-
-      const onChainSchema = getOnChainSchema(collectionInfo);
 
       return {
         attributes: {

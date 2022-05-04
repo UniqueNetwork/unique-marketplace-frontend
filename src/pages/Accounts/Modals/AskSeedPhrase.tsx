@@ -12,8 +12,11 @@ import { AdditionalWarning100 } from '../../../styles/colors';
 import { Tooltip } from '../../../components/Tooltip/Tooltip';
 import Question from '../../../static/icons/question.svg';
 import { Avatar } from '../../../components/Avatar/Avatar';
+import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
-const seedGenerators = [
+type TOption = SelectOptionProps & { id: string, title: string };
+
+const seedGenerators: TOption[] = [
   { id: 'Mnemonic', title: 'Mnemonic' }
 ];
 
@@ -34,8 +37,8 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish 
     changeSeed(seed);
   }, [setSeed]);
 
-  const onSeedGeneratorChange = useCallback((value: string) => {
-    setSeedGenerator(value);
+  const onSeedGeneratorChange = useCallback((value: TOption) => {
+    setSeedGenerator(value.id);
   }, []);
 
   const onSeedChange = useCallback(({ target }: ChangeEvent<HTMLTextAreaElement>) => {

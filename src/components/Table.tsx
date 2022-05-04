@@ -7,6 +7,7 @@ import useDeviceSize, { DeviceSize } from '../hooks/useDeviceSize';
 import MobileTable from './MobileTable/MobileTable';
 import Loading from './Loading';
 import NoItems from './NoItems';
+import Skeleton from './Skeleton/Skeleton';
 
 interface TableProps {
   columns: TableColumnProps[]
@@ -19,15 +20,19 @@ interface TableProps {
 export const Table: FC<TableProps> = ({ columns, data, loading, onSort, className }) => {
   const deviceSize = useDeviceSize();
 
+  const getSkeletonItem = () => ({});
+  const getSkeletonRender = (column: TableColumnProps) => () => <Skeleton key={`skeleton-${column.field}`} height={24}/>;
+
   return (
     <TableWrapper>
       {deviceSize > DeviceSize.sm && (<>
         <UITable
-          columns={columns}
-          data={data || []}
+          columns={loading
+            ? columns.map((column) => ({ ...column, render: getSkeletonRender(column) }))
+            : columns}
+          data={loading ? Array.from({ length: 20 }).map(getSkeletonItem) : data || []}
           onSort={onSort}
         />
-        {loading && <TableLoading />}
         {!loading && !data?.length && <NoItems />}
       </>)}
       {deviceSize <= DeviceSize.sm && (
@@ -43,6 +48,7 @@ export const Table: FC<TableProps> = ({ columns, data, loading, onSort, classNam
 };
 
 const TableWrapper = styled.div`
+  position: relative;
  .unique-table-data-row {
    height: unset;
    min-height: 40px;
