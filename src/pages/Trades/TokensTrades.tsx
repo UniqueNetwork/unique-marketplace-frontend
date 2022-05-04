@@ -1,9 +1,9 @@
-import React, { FC, useCallback, useEffect, useState } from 'react';
-import { Pagination, Text } from '@unique-nft/ui-kit';
+import React, { FC, KeyboardEvent, useCallback, useEffect, useState } from 'react';
+import { Button, InputText, Pagination } from '@unique-nft/ui-kit';
 import { SortQuery } from '@unique-nft/ui-kit/dist/cjs/types';
+import styled from 'styled-components';
 
 import { useTrades } from '../../api/restApi/trades/trades';
-import styled from 'styled-components';
 import { Table } from '../../components/Table';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
 import { tradesColumns } from './columns';
@@ -16,29 +16,38 @@ type TokensTradesPage = {
 }
 
 export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
-  const { selectedAccount } = useAccounts();
+  const { selectedAccount, isLoading: isLoadingAccounts } = useAccounts();
   const [page, setPage] = useState<number>(0);
   const [sortString, setSortString] = useState<string>();
   const [pageSize, setPageSize] = useState<number>(10);
-  // const [searchValue, setSearchValue] = useState<string | number>();
+  const [searchValue, setSearchValue] = useState<string | number>();
 
   const { trades, tradesCount, fetch, isFetching } = useTrades();
   const { tradesWithTokens, isFetchingTokens } = useGetTokensByTrades(trades);
 
   useEffect(() => {
-    if (currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address) return;
+    if (isLoadingAccounts || (currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address)) return;
+    setSearchValue(undefined);
     fetch({
       page: 1,
       pageSize,
       sort: sortString,
       seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
     });
-  }, [selectedAccount?.address, fetch, currentTab, pageSize]);
+  }, [currentTab, selectedAccount?.address, sortString, isLoadingAccounts]);
 
-  // const onSearch = useCallback(() => {
-  //   // TODO: not implemented in api
-  //   // fetch({ sortString, pageSize, page: 1, searchText: searchValue?.toString() });
-  // }, [sortString, pageSize, searchValue]);
+  const onSearch = useCallback(() => {
+    fetch({ sort: sortString, pageSize, page: 1, searchText: searchValue?.toString() });
+  }, [sortString, pageSize, searchValue]);
+
+  const onSearchStringChange = useCallback((value: string) => {
+    setSearchValue(value);
+  }, [setSearchValue]);
+
+  const onSearchInputKeyDown = useCallback((event: KeyboardEvent) => {
+    if (event.key !== 'Enter') return;
+    onSearch();
+  }, [onSearch]);
 
   const onPageChange = useCallback((newPage: number) => {
     if ((currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address) || page === newPage) return;
@@ -47,9 +56,10 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
       page: newPage + 1,
       pageSize,
       sort: sortString,
-      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
+      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined,
+      searchText: searchValue?.toString()
     });
-  }, [selectedAccount?.address, page, fetch, sortString, pageSize]);
+  }, [selectedAccount?.address, page, fetch, sortString, searchValue]);
 
   const onPageSizeChange = useCallback((newPageSize: number) => {
     if (currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address) return;
@@ -86,29 +96,30 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
 
     if (sortString && sortString.length) sortString += `(${associatedSortValues[newSort.field]})`;
     setSortString(sortString);
-    fetch({ page: 1, pageSize, sort: sortString });
-  }, [fetch, setSortString, pageSize]);
+    fetch({ page: 1, pageSize, sort: sortString, searchText: searchValue?.toString() });
+  }, [fetch, setSortString, pageSize, searchValue]);
 
   return (<PagePaper>
     <TradesPageWrapper>
-      {/* <SearchWrapper> */}
-      {/*  <InputText */}
-      {/*    iconLeft={{ name: 'magnify', size: 16 }} */}
-      {/*    onChange={(val) => setSearchValue(val)} */}
-      {/*    placeholder='Collection / token' */}
-      {/*    value={searchValue?.toString()} */}
-      {/*  /> */}
-      {/*  <Button */}
-      {/*    onClick={onSearch} */}
-      {/*    role='primary' */}
-      {/*    title='Search' */}
-      {/*  /> */}
-      {/* </SearchWrapper> */}
+      <SearchWrapper>
+        <InputText
+          iconLeft={{ name: 'magnify', size: 16 }}
+          onChange={onSearchStringChange}
+          onKeyDown={onSearchInputKeyDown}
+          placeholder='Collection / token'
+          value={searchValue?.toString()}
+        />
+        <Button
+          onClick={onSearch}
+          role='primary'
+          title='Search'
+        />
+      </SearchWrapper>
       <StyledTable
         onSort={onSortChange}
         data={tradesWithTokens || []}
         columns={tradesColumns}
-        loading={isFetching || isFetchingTokens}
+        loading={isLoadingAccounts || isFetching || isFetchingTokens}
       />
       {!!tradesCount && <PaginationWrapper>
         <Pagination
@@ -125,30 +136,29 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
 };
 
 const TradesPageWrapper = styled.div`
-  
   width: 100%
 `;
 
-// const SearchWrapper = styled.div`
-//   display: flex;
-//   margin-bottom: calc(var(--gap) * 2);
-//   button {
-//     margin-left: 8px;
-//   }
-//
-//   @media (max-width: 768px) {
-//     width: 100%;
-//     .unique-input-text {
-//       flex-grow: 1;
-//     }
-//   }
-//
-//   @media (max-width: 320px) {
-//     .unique-button {
-//       display: none;
-//     }
-//   }
-// `;
+const SearchWrapper = styled.div`
+  display: flex;
+  margin-bottom: calc(var(--gap) * 2);
+  button {
+    margin-left: 8px;
+  }
+
+  @media (max-width: 768px) {
+    width: 100%;
+    .unique-input-text {
+      flex-grow: 1;
+    }
+  }
+
+  @media (max-width: 320px) {
+    .unique-button {
+      display: none;
+    }
+  }
+`;
 
 const StyledTable = styled(Table)`
   && > div > div:first-child {
