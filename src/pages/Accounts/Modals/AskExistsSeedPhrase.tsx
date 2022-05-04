@@ -1,5 +1,5 @@
 import React, { ChangeEvent, FC, useCallback, useState } from 'react';
-import { Avatar, Button, Checkbox, Text } from '@unique-nft/ui-kit';
+import { Button, Checkbox, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import { TCreateAccountBodyModalProps } from './types';
@@ -7,6 +7,7 @@ import { addressFromSeed } from '../../../utils/seedUtils';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import { defaultPairType, derivePath } from './CreateAccount';
 import { AdditionalWarning100, Grey300 } from '../../../styles/colors';
+import { Avatar } from '../../../components/Avatar/Avatar';
 
 export const AskExistsSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish }) => {
   const [seed, setSeed] = useState<string>('');
@@ -29,7 +30,7 @@ export const AskExistsSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onF
 
   return (<>
     <AddressWrapper>
-      <Avatar size={24} src={DefaultAvatar} />
+      <Avatar size={24} src={DefaultAvatar} address={address} />
       <Text>{address}</Text>
     </AddressWrapper>
     <InputSeedWrapper>

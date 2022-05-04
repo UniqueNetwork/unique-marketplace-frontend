@@ -1,6 +1,6 @@
 import React, { ChangeEvent, FC, useCallback, useEffect, useState } from 'react';
 import { mnemonicGenerate } from '@polkadot/util-crypto';
-import { Avatar, Button, Checkbox, Heading, Link, Select, Text, Icon } from '@unique-nft/ui-kit';
+import { Button, Checkbox, Heading, Link, Select, Text, Icon } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import { TCreateAccountBodyModalProps } from './types';
@@ -11,6 +11,7 @@ import { defaultPairType, derivePath } from './CreateAccount';
 import { AdditionalWarning100 } from '../../../styles/colors';
 import { Tooltip } from '../../../components/Tooltip/Tooltip';
 import Question from '../../../static/icons/question.svg';
+import { Avatar } from '../../../components/Avatar/Avatar';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
 type TOption = SelectOptionProps & { id: string, title: string };
@@ -54,7 +55,7 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish 
 
   return (<>
     <AddressWrapper>
-      <Avatar size={24} src={DefaultAvatar} />
+      <Avatar size={24} src={DefaultAvatar} address={address} />
       <Text>{address}</Text>
     </AddressWrapper>
     <Heading size={'4'} >The secret seed value for this account</Heading>

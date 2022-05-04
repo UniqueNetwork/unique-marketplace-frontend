@@ -14,7 +14,12 @@ module.exports = function override(config) {
         "url": require.resolve("url"),
     })
     config.resolve.fallback = fallback;
-    config.resolve.alias = {...config.resolve.alias, process: 'process/'};
+    config.resolve.alias = {
+        ...config.resolve.alias,
+        process: 'process/',
+        "react/jsx-dev-runtime": "react/jsx-dev-runtime.js",
+        "react/jsx-runtime": "react/jsx-runtime.js"
+    };
     config.ignoreWarnings = [/Failed to parse source map/];
     config.plugins = (config.plugins || []).concat([
         new webpack.ProvidePlugin({

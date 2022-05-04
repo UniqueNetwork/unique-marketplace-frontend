@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useMemo } from 'react';
-import { Avatar, Button, Icon, Text } from '@unique-nft/ui-kit';
+import { Button, Icon, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
@@ -8,6 +8,7 @@ import { TCreateAccountBodyModalProps } from './types';
 import { AdditionalWarning100, Grey300 } from '../../../styles/colors';
 import { Tooltip } from '../../../components/Tooltip/Tooltip';
 import Question from '../../../static/icons/question.svg';
+import { Avatar } from '../../../components/Avatar/Avatar';
 
 export const FinalModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties, onFinish, onGoBack }) => {
   const onSaveClick = useCallback(() => {
@@ -19,7 +20,7 @@ export const FinalModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties
 
   return (<>
     <AddressWrapper>
-      <Avatar size={24} src={DefaultAvatar} />
+      <Avatar size={24} src={DefaultAvatar} address={accountProperties?.address} />
       <Text>{accountProperties?.address || ''}</Text>
     </AddressWrapper>
     <CredentialsWrapper >
