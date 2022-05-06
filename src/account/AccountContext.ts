@@ -25,15 +25,15 @@ export interface Account extends InjectedAccountWithMeta {
 
 export type AccountContextProps = {
   isLoading: boolean
+  isLoadingDeposits: boolean
   accounts: Account[]
   selectedAccount: Account | undefined
   fetchAccountsError: string | undefined
   changeAccount(account: Account): void
   setSelectedAccount(account: Account): void
-  setFetchAccountsError(error: string | undefined): void
-  setAccounts(accounts: ((accounts: Account[]) => Account[]) | Account[]): void
-  setIsLoading(loading: boolean): void
   showSignDialog(account: Account): Promise<KeyringPair>
+  fetchAccounts(): Promise<void>
+  fetchAccountsWithDeposits(): Promise<Account[]>
 }
 
 const AccountContext: Context<AccountContextProps> = createContext({} as unknown as AccountContextProps);
