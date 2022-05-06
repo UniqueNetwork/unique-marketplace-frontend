@@ -7,56 +7,9 @@ import marketplaceAbi from './abi/marketPlaceAbi.json';
 import nonFungibleAbi from './abi/nonFungibleAbi.json';
 import { sleep } from '../../../utils/helpers';
 import { IMarketController, INFTController, TransactionOptions } from '../types';
-import { compareEncodedAddresses, getEthAccount, isTokenOwner, normalizeAccountId } from '../utils/addressUtils';
-import { CrossAccountId } from './types';
-
-export type EvmCollectionAbiMethods = {
-  approve: (contractAddress: string, tokenId: string) => {
-    encodeABI: () => any;
-  },
-  getApproved: (tokenId: string | number) => {
-    call: () => Promise<string>;
-  }
-}
-
-export type TokenAskType = { flagActive: '0' | '1', ownerAddr: string, price: BN };
-
-export type MarketplaceAbiMethods = {
-  addAsk: (price: string, currencyCode: string, address: string, tokenId: string) => {
-    encodeABI: () => any;
-  },
-  balanceKSM: (ethAddress: string) => {
-    call: () => Promise<string>;
-  };
-  buyKSM: (collectionAddress: string, tokenId: string, buyer: string, receiver: string) => {
-    encodeABI: () => any;
-  };
-  cancelAsk: (collectionId: string, tokenId: string) => {
-    encodeABI: () => any;
-  };
-  depositKSM: (price: number) => {
-    encodeABI: () => any;
-  },
-  getOrder: (collectionId: string, tokenId: string) => {
-    call: () => Promise<TokenAskType>;
-  };
-  getOrdersLen: () => {
-    call: () => Promise<number>;
-  },
-  orders: (orderNumber: number) => {
-    call: () => Promise<TokenAskType>;
-  },
-  setEscrow: (escrow: string) => {
-    encodeABI: () => any;
-  },
-  // (amount: string, currencyCode: string, address: string) => any;
-  withdraw: (amount: string, currencyCode: string, address: string) => {
-    encodeABI: () => any;
-  };
-  withdrawAllKSM: (ethAddress: string) => {
-    encodeABI: () => any;
-  };
-}
+import { collectionIdToAddress, compareEncodedAddresses, getEthAccount, isTokenOwner, normalizeAccountId } from '../utils/addressUtils';
+import { CrossAccountId, EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType } from './types';
+import { formatKsm } from '../utils/textFormat';
 
 // TODO: Global todo list
 /*
@@ -144,22 +97,6 @@ class MarketController implements IMarketController {
     return new this.web3Instance.eth.Contract(marketplaceAbi.abi, this.contractAddress, {
       from: ethAccount
     });
-  }
-
-  // TODO: can be moved to utils
-  private collectionIdToAddress (address: number): string {
-    if (address >= 0xffffffff || address < 0) {
-      throw new Error('id overflow');
-    }
-
-    const buf = Buffer.from([0x17, 0xc4, 0xe6, 0x45, 0x3c, 0xc4, 0x9a, 0xaa, 0xae, 0xac, 0xa8, 0x94, 0xe6, 0xd9, 0x68, 0x3e,
-      address >> 24,
-      (address >> 16) & 0xff,
-      (address >> 8) & 0xff,
-      address & 0xff
-    ]);
-
-    return Web3.utils.toChecksumAddress('0x' + buf.toString('hex'));
   }
 
   private getEvmCollectionInstance (collectionId: string): { methods: EvmCollectionAbiMethods, options: any } {
@@ -265,7 +202,7 @@ class MarketController implements IMarketController {
     return Promise.resolve(false);
   }
 
-  // aprove token
+  // approve token
   public async sendNftToSmartContract(account: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
     // TODO: same here
     if (!this.nftController) throw new Error('NFTController is not available');
@@ -304,7 +241,7 @@ class MarketController implements IMarketController {
     const ethAddress = getEthAccount(account);
     const matcherContractInstance = this.getMatcherContractInstance(ethAddress);
 
-    const { flagActive, ownerAddr, price }: TokenAskType = await matcherContractInstance.methods.getOrder(this.collectionIdToAddress(parseInt(collectionId, 10)), tokenId).call();
+    const { flagActive, ownerAddr }: TokenAskType = await matcherContractInstance.methods.getOrder(collectionIdToAddress(parseInt(collectionId, 10)), tokenId).call();
 
     if (ownerAddr.toLowerCase() === ethAddress.toLowerCase() && flagActive === '1') {
       return Promise.resolve(true);
@@ -376,40 +313,6 @@ class MarketController implements IMarketController {
     throw new Error('Failed to get user deposit');
   }
 
-  // TODO: utils
-  private formatKsm (value: BN) {
-    if (!value || value.toString() === '0') {
-      return '0';
-    }
-
-    // const tokenDecimals = incomeDecimals || formatBalance.getDefaults().decimals;
-    const tokenDecimals = this.kusamaDecimals; // TODO:
-
-    if (value.lte(new BN(this.minPrice * Math.pow(10, tokenDecimals)))) {
-      return ` ${this.minPrice}`;
-    }
-
-    // calculate number after decimal point
-    const decNum = value?.toString().length - tokenDecimals;
-    let balanceStr = '';
-
-    if (decNum < 0) {
-      balanceStr = ['0', '.', ...Array.from('0'.repeat(Math.abs(decNum))), value.toString()].join('');
-    }
-
-    if (decNum > 0) {
-      balanceStr = [value.toString().substr(0, decNum), '.', value.toString().substr(decNum, tokenDecimals - decNum)].join('');
-    }
-
-    if (decNum === 0) {
-      balanceStr = ['0', '.', value.toString().substr(decNum, tokenDecimals - decNum)].join('');
-    }
-
-    const arr = balanceStr.toString().split('.');
-
-    return `${arr[0]}${arr[1] ? `.${arr[1].substr(0, this.kusamaDecimals)}` : ''}`;
-  }
-
   // TODO: we have 3 outcomes ('already enough funds'/'not enough funds, sign to add'/'not enough funds on account'), will collide with UI since we expect bool from here and nahve no control over stages texts
   public async addDeposit (account: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
     const matcherContractInstance = this.getMatcherContractInstance(getEthAccount(account));
@@ -417,9 +320,9 @@ class MarketController implements IMarketController {
     if (!userDeposit) throw new Error('No user deposit');
     const token = await this.nftController?.getToken(Number(collectionId), Number(tokenId));
     if (!token) throw new Error('Token not found');
-    const ask = await (matcherContractInstance.methods).getOrder(this.collectionIdToAddress(Number(collectionId)), tokenId).call();
+    const ask = await (matcherContractInstance.methods).getOrder(collectionIdToAddress(Number(collectionId)), tokenId).call();
     if (!ask?.price) throw new Error('Token has no price');
-    const price = new BN(ask.price);
+    const { price } = ask;
     if (price.lte(userDeposit)) {
       // Deposit already exists
       return;
@@ -430,7 +333,7 @@ class MarketController implements IMarketController {
     const kusamaAvailableBalance = new BN(kusamaBalancesAll?.availableBalance); // TODO: some complicated stuff to be migrated
 
     if (kusamaAvailableBalance?.lt(needed)) {
-      throw new Error(`Your KSM balance is too low: ${this.formatKsm(kusamaAvailableBalance)} KSM. You need at least: ${this.formatKsm(needed)} KSM`);
+      throw new Error(`Your KSM balance is too low: ${formatKsm(kusamaAvailableBalance, this.kusamaDecimals, this.minPrice)} KSM. You need at least: ${formatKsm(needed, this.kusamaDecimals, this.minPrice)} KSM`);
     }
     // accountId: encodedKusamaAccount,
     const tx = this.kusamaApi.tx.balances.transfer(this.escrowAddress, needed);
@@ -515,7 +418,7 @@ class MarketController implements IMarketController {
     const matcherContractInstance = this.getMatcherContractInstance(ethAddress);
     const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
 
-    const { flagActive }: TokenAskType = await matcherContractInstance.methods.getOrder(this.collectionIdToAddress(parseInt(collectionId, 10)), tokenId).call();
+    const { flagActive }: TokenAskType = await matcherContractInstance.methods.getOrder(collectionIdToAddress(parseInt(collectionId, 10)), tokenId).call();
 
     if (flagActive === '0') return;
 
@@ -543,7 +446,7 @@ class MarketController implements IMarketController {
       await signedTx.send();
 
       await this.repeatCheckForTransactionFinish(async () => {
-        const { flagActive }: TokenAskType = await matcherContractInstance.methods.getOrder(this.collectionIdToAddress(parseInt(collectionId, 10)), tokenId).call();
+        const { flagActive }: TokenAskType = await matcherContractInstance.methods.getOrder(collectionIdToAddress(parseInt(collectionId, 10)), tokenId).call();
 
         return flagActive === '0';
       });
