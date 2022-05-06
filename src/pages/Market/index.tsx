@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, KeyboardEvent } from 'react';
+import { useCallback, useEffect, useState, KeyboardEvent, useMemo } from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
 import { Button, InputText, Select, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
@@ -58,7 +58,7 @@ const pageSize = 20;
 const defaultSortingValue = sortingOptions[sortingOptions.length - 1];
 
 export const MarketPage = () => {
-  const [filterState, setFilterState] = useState<FilterState | null>();
+  const [filterState, setFilterState] = useState<FilterState | null>(null);
   const [sortingValue, setSortingValue] = useState<string>(defaultSortingValue.id);
   const [searchValue, setSearchValue] = useState<string | number>();
   const { offers, offersCount, isFetching, fetchMore, fetch } = useOffers();
@@ -95,23 +95,43 @@ export const MarketPage = () => {
     onSearch();
   }, [onSearch]);
 
-  const onFilterChange = useCallback((filter: FilterState | null) => {
-    setFilterState({ ...(filterState || {}), ...filter });
-    fetch({ pageSize, page: 1, sort: [sortingValue], ...(filterState || {}), ...filter });
-  }, [filterState, fetch, sortingValue]);
+  const getFilterByState = useCallback((filterState: FilterState | null) => {
+    if (!filterState) return {};
+    const { statuses, prices, ...otherFilter } = filterState;
+    const { myNFTs, myBets, timedAuction, fixedPrice } = statuses || {};
+
+    return {
+      seller: myNFTs ? selectedAccount?.address : undefined,
+      bidderAddress: myBets ? selectedAccount?.address : undefined,
+      isAuction: (timedAuction && fixedPrice) || (!timedAuction && !fixedPrice) ? undefined : timedAuction && !fixedPrice,
+      ...prices,
+      ...otherFilter
+    };
+  }, [selectedAccount?.address]);
+
+  const onFilterChange = useCallback((filterState: FilterState | null) => {
+    setFilterState(filterState);
+    fetch({ pageSize, page: 1, sort: [sortingValue], ...(getFilterByState(filterState)) });
+  }, [fetch, sortingValue, getFilterByState]);
 
   useEffect(() => {
-    if ((!filterState?.seller || filterState?.seller === selectedAccount?.address) && (!filterState?.bidderAddress || filterState?.bidderAddress === selectedAccount?.address)) return;
-    onFilterChange({
-      seller: filterState?.seller ? selectedAccount?.address : undefined,
-      bidderAddress: filterState?.bidderAddress ? selectedAccount?.address : undefined
-    });
-  }, [filterState?.seller, filterState?.bidderAddress, selectedAccount?.address]);
+    if ((!filterState?.statuses?.myNFTs && !filterState?.statuses?.myBets) || isFetching) return;
+    onFilterChange(filterState);
+  }, [filterState, selectedAccount?.address]);
+
+  const filterCount = useMemo(() => {
+    const { statuses, prices, collections = [], traits = [] } = filterState || {};
+    const statusesCount: number = Object.values(statuses || {}).filter((status) => status).length;
+    const collectionsCount: number = collections.length;
+    const traitsCount: number = traits.length;
+
+    return statusesCount + collectionsCount + traitsCount + (prices ? 1 : 0);
+  }, [filterState]);
 
   return (<PagePaper>
     <MarketMainPageStyled>
       <LeftColumn>
-        <Filters onFilterChange={onFilterChange} />
+        <Filters value={filterState} onFilterChange={onFilterChange} />
       </LeftColumn>
       <MainContent>
         <SearchAndSortingWrapper>
@@ -154,6 +174,8 @@ export const MarketPage = () => {
       </MainContent>
     </MarketMainPageStyled>
     <MobileFilters
+      value={filterState}
+      filterCount={filterCount}
       defaultSortingValue={defaultSortingValue}
       sortingValue={sortingValue}
       sortingOptions={sortingOptions}

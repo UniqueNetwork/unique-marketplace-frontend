@@ -3,46 +3,33 @@ import styled from 'styled-components/macro';
 
 import StatusFilter from './StatusFilter';
 import PricesFilter from './PricesFilter';
-import { FilterState, PriceRange, Statuses } from './types';
+import { FiltersProps, PriceRange, Statuses } from './types';
 import CollectionsFilter from './CollectionsFilter';
 import { useAccounts } from '../../hooks/useAccounts';
 
-type FiltersProps = {
-  onFilterChange(value: FilterState): void
-}
-
-export const Filters: FC<FiltersProps> = ({ onFilterChange }) => {
+export const Filters: FC<FiltersProps> = ({ value, onFilterChange }) => {
   const { selectedAccount } = useAccounts();
 
-  const onStatusFilterChange = useCallback((value: Statuses) => {
-    const newFilter = {
-      seller: value.myNFTs ? selectedAccount?.address : undefined,
-      bidderAddress: value.myBets ? selectedAccount?.address : undefined,
-      isAuction: (value.timedAuction && value.fixedPrice) || (!value.timedAuction && !value.fixedPrice) ? undefined : value.timedAuction && !value.fixedPrice
-    };
-    onFilterChange(newFilter);
-  }, [onFilterChange, selectedAccount]);
+  const onStatusFilterChange = useCallback((statuses: Statuses) => {
+    onFilterChange({ ...value, statuses });
+  }, [value, onFilterChange, selectedAccount]);
 
-  const onPricesFilterChange = useCallback((value: PriceRange | undefined) => {
-    const { minPrice, maxPrice } = (value as PriceRange) || {};
-    const newFilter = { minPrice, maxPrice };
-    onFilterChange(newFilter);
-  }, [onFilterChange]);
+  const onPricesFilterChange = useCallback((prices: PriceRange | undefined) => {
+    onFilterChange({ ...value, prices });
+  }, [value, onFilterChange]);
 
-  const onCollectionsFilterChange = useCallback((value: number[]) => {
-    const newFilter = { collectionId: value };
-    onFilterChange(newFilter);
-  }, [onFilterChange]);
+  const onCollectionsFilterChange = useCallback((collections: number[], traits?: string[]) => {
+    onFilterChange({ ...value, collections, traits });
+  }, [value, onFilterChange]);
 
-  const onCollectionTraitsFilterChange = useCallback((value: string[]) => {
-    const newFilter = { traits: value };
-    onFilterChange(newFilter);
-  }, [onFilterChange]);
+  const onCollectionTraitsFilterChange = useCallback((traits: string[]) => {
+    onFilterChange({ ...value, traits });
+  }, [value, onFilterChange]);
 
   return <FiltersStyled>
-    <StatusFilter onChange={onStatusFilterChange}/>
-    <PricesFilter onChange={onPricesFilterChange} />
-    <CollectionsFilter onChange={onCollectionsFilterChange} onTraitsChange={onCollectionTraitsFilterChange} />
+    <StatusFilter value={value?.statuses} onChange={onStatusFilterChange}/>
+    <PricesFilter value={value?.prices} onChange={onPricesFilterChange} />
+    <CollectionsFilter value={value} onChange={onCollectionsFilterChange} onTraitsChange={onCollectionTraitsFilterChange} />
   </FiltersStyled>;
 };
 
