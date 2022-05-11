@@ -2,15 +2,13 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 import { formatBalance } from '@polkadot/util';
 import { typesChain } from '@phala/typedefs';
 import { TypeRegistry } from '@polkadot/types/create';
+import { unique } from '@unique-nft/types/definitions';
 
 import { IRpcClient, INFTController, IRpcClientOptions, ICollectionController, IMarketController, IRpcConfig } from './types';
-import { typesBundle } from './unique/bundledTypesDefinitions';
-import rpcMethods from './unique/rpcMethods';
 import UniqueNFTController from './unique/NFTController';
 import UniqueCollectionController from './unique/collectionController';
 import MarketKusamaController from './unique/marketController';
 import { ChainData } from '../ApiContext';
-import CrustMaxwell from './unique/crust-maxwell';
 
 export class RpcClient implements IRpcClient {
   public nftController?: INFTController<any, any>;
@@ -39,18 +37,12 @@ export class RpcClient implements IRpcClient {
   private async initKusamaApi(wsEndpoint: string) {
     const provider = new WsProvider(wsEndpoint);
 
-//    const types = this.getDevTypes();
-
     const kusamaRegistry = new TypeRegistry();
 
     const kusamaApi = new ApiPromise({
       provider,
       registry: kusamaRegistry,
-      typesBundle,
-      typesChain: {
-        ...typesChain,
-        'Crust Maxwell': CrustMaxwell
-      }
+      typesChain
     });
 
     kusamaApi.on('connected', () => { this.isApiConnected = true; });
@@ -102,10 +94,8 @@ export class RpcClient implements IRpcClient {
     const _api = new ApiPromise({
       provider,
       rpc: {
-        unique: rpcMethods
-      },
-      // @ts-ignore
-      typesBundle
+        unique: unique.rpc
+      }
     });
     this.rawUniqRpcApi = _api;
     this.nftController = new UniqueNFTController(_api, {
