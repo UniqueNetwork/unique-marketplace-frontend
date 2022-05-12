@@ -51,8 +51,17 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
 
       const onChainSchema = getOnChainSchema(collectionInfo);
 
+      const decodedConstData = decodeStruct({ attr: onChainSchema.attributesConst, data: constData });
+      const decodedVariableData = decodeStruct({ attr: onChainSchema.attributesVar, data: variableData });
+
       if (collectionInfo.offchainSchema) {
-        imageUrl = await getTokenImage(collectionInfo, tokenId);
+        if (collectionInfo.schemaVersion === 'Unique' && decodedConstData.ipfsJson) {
+          const ipfsJson = JSON.parse(decodedConstData.ipfsJson as string);
+
+          imageUrl = `${IPFSGateway}/${ipfsJson.ipfs}`;
+        } else {
+          imageUrl = await getTokenImage(collectionInfo, tokenId);
+        }
       }
 
       let collectionCover = '';
@@ -70,8 +79,8 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
 
       return {
         attributes: {
-          ...decodeStruct({ attr: onChainSchema.attributesConst, data: constData }),
-          ...decodeStruct({ attr: onChainSchema.attributesVar, data: variableData })
+          ...decodedConstData,
+          ...decodedVariableData
         },
         constData,
         id: tokenId,
