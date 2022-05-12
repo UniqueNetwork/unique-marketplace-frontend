@@ -101,7 +101,7 @@ class MarketController implements IMarketController {
 
   private getEvmCollectionInstance (collectionId: string): { methods: EvmCollectionAbiMethods, options: any } {
     // @ts-ignore
-    return new this.web3Instance.eth.Contract(nonFungibleAbi, this.collectionIdToAddress(parseInt(collectionId, 10)), { from: this.contractOwner });
+    return new this.web3Instance.eth.Contract(nonFungibleAbi, collectionIdToAddress(parseInt(collectionId, 10)), { from: this.contractOwner });
   }
 
   // #endregion
@@ -322,7 +322,7 @@ class MarketController implements IMarketController {
     if (!token) throw new Error('Token not found');
     const ask = await (matcherContractInstance.methods).getOrder(collectionIdToAddress(Number(collectionId)), tokenId).call();
     if (!ask?.price) throw new Error('Token has no price');
-    const { price } = ask;
+    const price = new BN(ask.price);
     if (price.lte(userDeposit)) {
       // Deposit already exists
       return;
@@ -343,7 +343,7 @@ class MarketController implements IMarketController {
 
     await signedTx.send();
     await this.repeatCheckForTransactionFinish(async () => {
-        return (price.lte(await this.getUserDeposit(account)));
+        return price.lte(await this.getUserDeposit(account));
       }
     );
   }
