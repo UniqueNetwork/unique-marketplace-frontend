@@ -1,7 +1,8 @@
 import React, { KeyboardEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components/macro';
 import BN from 'bn.js';
-import { Button, InputText, Select, Text } from '@unique-nft/ui-kit';
+import { Select, Text } from '@unique-nft/ui-kit';
+import { BN_MAX_INTEGER } from '@polkadot/util';
 
 import { TokensList } from '../../components';
 import { Secondary400 } from '../../styles/colors';
@@ -137,13 +138,13 @@ export const NFTPage = () => {
       };
 
       let filteredByPrice = true;
-      if (prices?.minPrice && prices?.maxPrice) {
+      if (prices?.minPrice || prices?.maxPrice) {
         if (!token.price) {
           filteredByPrice = false;
         } else {
           const tokenPrice = new BN(token.price);
-          const minPrice = new BN(fromStringToBnString(prices.minPrice, api?.market?.kusamaDecimals));
-          const maxPrice = new BN(fromStringToBnString(prices.maxPrice, api?.market?.kusamaDecimals));
+          const minPrice = new BN(fromStringToBnString(prices.minPrice || '0', api?.market?.kusamaDecimals));
+          const maxPrice = prices.maxPrice ? new BN(fromStringToBnString(prices.maxPrice, api?.market?.kusamaDecimals)) : BN_MAX_INTEGER;
           filteredByPrice = (tokenPrice.gte(minPrice) && tokenPrice.lte(maxPrice));
         }
       }
