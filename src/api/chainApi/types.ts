@@ -4,6 +4,7 @@ import { AddressOrPair, SubmittableExtrinsic } from '@polkadot/api/types';
 import { Settings } from '../restApi/settings/types';
 import { BN } from '@polkadot/util';
 import { Balance } from '@polkadot/types/interfaces';
+import { TokenId } from './unique/types';
 
 export interface IRpc {
   rpcEndpoint: string
@@ -40,7 +41,7 @@ export interface ICollectionController<Collection, Token> {
   getCollection(collectionId: number): Promise<Collection | null>
   getCollections(): Promise<Collection[]>
   getFeaturedCollections(): Promise<Collection[]>
-  getTokensOfCollection(collectionId: number, ownerId: string): Promise<Token[]>
+  getTokensOfCollection(collectionId: number, ownerId: string): Promise<TokenId[]>
 }
 
 export interface IAccountController<Collection, Token> {

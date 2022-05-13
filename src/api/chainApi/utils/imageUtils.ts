@@ -1,7 +1,8 @@
-import { MetadataType, NFTCollection } from '../unique/types';
+import { MetadataType } from '../unique/types';
 import { hex2a } from './decoder';
+import { UpDataStructsCollection } from '@unique-nft/types/unique/types';
 
-const getTokenImageUrl = (urlString: string, tokenId: number): string => {
+export const getTokenImageUrl = (urlString: string, tokenId: number): string => {
   if (urlString.indexOf('{id}') !== -1) {
     return urlString.replace('{id}', tokenId.toString());
   }
@@ -10,13 +11,11 @@ const getTokenImageUrl = (urlString: string, tokenId: number): string => {
 };
 
 // uses for token image path
-const fetchTokenImage = async (
-  collectionInfo: Pick<NFTCollection, 'offchainSchema'>,
+export const fetchTokenImage = async (
+  collectionMetadata: MetadataType,
   tokenId: number
 ): Promise<string> => {
   try {
-    const collectionMetadata = JSON.parse(hex2a(collectionInfo.offchainSchema)) as MetadataType;
-
     if (collectionMetadata.metadata) {
       const dataUrl = getTokenImageUrl(collectionMetadata.metadata, tokenId);
       const urlResponse = await fetch(dataUrl);
@@ -31,10 +30,11 @@ const fetchTokenImage = async (
   return '';
 };
 
-export const getTokenImage = async (collection: NFTCollection, tokenId: number): Promise<string> => {
-  if (collection.schemaVersion === 'ImageURL' || collection.schemaVersion === 'TokenURI') {
-    return getTokenImageUrl(hex2a(collection.offchainSchema), tokenId);
+export const getTokenImage = async (collection: UpDataStructsCollection, tokenId: number): Promise<string> => {
+  if (collection.schemaVersion.isImageURL) {
+    return getTokenImageUrl(hex2a(collection.offchainSchema.toHex()), tokenId);
   } else {
-    return await fetchTokenImage(collection, tokenId);
+    const collectionMetadata = JSON.parse(hex2a(collection.offchainSchema.toHex())) as MetadataType;
+    return await fetchTokenImage(collectionMetadata, tokenId);
   }
 };
