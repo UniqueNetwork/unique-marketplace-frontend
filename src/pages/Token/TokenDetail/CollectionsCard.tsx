@@ -25,10 +25,7 @@ export const CollectionsCard: FC<ICollectionsCardProps> = ({
       </AvatarStyled>
       <Content>
         <Heading className='heading' size='4'>
-          {title}
-        </Heading>
-        <Heading className='heading' size='4'>
-          {`[id ${id}]`}
+          {`${title} [id ${id}]`}
         </Heading>
         {description && (
           <Text className='description' color='grey-500' size='s'>
