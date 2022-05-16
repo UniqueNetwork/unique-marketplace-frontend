@@ -31,10 +31,12 @@ export const fetchTokenImage = async (
 };
 
 export const getTokenImage = async (collection: UpDataStructsCollection, tokenId: number): Promise<string> => {
-  if (collection.schemaVersion.isImageURL) {
+  const schemaVersion = collection.schemaVersion.toJSON();
+  if (schemaVersion === 'ImageURL') {
     return getTokenImageUrl(hex2a(collection.offchainSchema.toHex()), tokenId);
-  } else {
+  } else if (schemaVersion === 'tokenURI') { // 'tokenURI'
     const collectionMetadata = JSON.parse(hex2a(collection.offchainSchema.toHex())) as MetadataType;
     return await fetchTokenImage(collectionMetadata, tokenId);
   }
+  return '';
 };
