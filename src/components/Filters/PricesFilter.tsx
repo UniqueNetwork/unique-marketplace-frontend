@@ -16,7 +16,7 @@ const PricesFilter: FC<PricesFilterProps> = ({ value, onChange }) => {
   const [maxPriceValue, setMaxPriceValue] = useState<string>();
 
   const onApply = useCallback(() => {
-    if (minPriceValue && maxPriceValue) {
+    if (minPriceValue || maxPriceValue) {
       const priceRange = {
         minPrice: minPriceValue,
         maxPrice: maxPriceValue

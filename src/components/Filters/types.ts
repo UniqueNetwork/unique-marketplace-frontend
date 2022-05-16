@@ -3,8 +3,8 @@ import { Dispatch, SetStateAction } from 'react';
 export type Statuses = Record<'myNFTs' | 'fixedPrice' | 'timedAuction' | 'myBets', boolean | undefined>
 
 export type PriceRange = {
-  minPrice: string
-  maxPrice: string
+  minPrice?: string
+  maxPrice?: string
 };
 
 export type FilterState = {

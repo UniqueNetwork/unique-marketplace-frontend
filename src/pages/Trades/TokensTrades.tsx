@@ -10,6 +10,7 @@ import { tradesColumns } from './columns';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useGetTokensByTrades } from './hooks/useGetTokensByTrades';
 import { TradesTabs } from './types';
+import SearchField from '../../components/SearchField/SearchField';
 
 type TokensTradesPage = {
   currentTab: TradesTabs
@@ -101,20 +102,13 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
 
   return (<PagePaper>
     <TradesPageWrapper>
-      <SearchWrapper>
-        <InputText
-          iconLeft={{ name: 'magnify', size: 16 }}
-          onChange={onSearchStringChange}
-          onKeyDown={onSearchInputKeyDown}
-          placeholder='Collection / token'
-          value={searchValue?.toString()}
-        />
-        <Button
-          onClick={onSearch}
-          role='primary'
-          title='Search'
-        />
-      </SearchWrapper>
+      <StyledSearchField
+        searchValue={searchValue}
+        placeholder='Collection / token'
+        onSearchStringChange={onSearchStringChange}
+        onSearchInputKeyDown={onSearchInputKeyDown}
+        onSearch={onSearch}
+      />
       <StyledTable
         onSort={onSortChange}
         data={tradesWithTokens || []}
@@ -139,25 +133,8 @@ const TradesPageWrapper = styled.div`
   width: 100%
 `;
 
-const SearchWrapper = styled.div`
-  display: flex;
+const StyledSearchField = styled(SearchField)`
   margin-bottom: calc(var(--gap) * 2);
-  button {
-    margin-left: 8px;
-  }
-
-  @media (max-width: 768px) {
-    width: 100%;
-    .unique-input-text {
-      flex-grow: 1;
-    }
-  }
-
-  @media (max-width: 320px) {
-    .unique-button {
-      display: none;
-    }
-  }
 `;
 
 const StyledTable = styled(Table)`

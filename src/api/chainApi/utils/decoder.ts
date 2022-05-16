@@ -1,6 +1,7 @@
-import { AttributesDecoded, NFTCollection } from '../unique/types';
+import { AttributesDecoded } from '../unique/types';
 import { deserializeNft, ProtobufAttributeType } from './protobufUtils';
 import { addressToEvm } from '@polkadot/util-crypto';
+import { UpDataStructsCollection } from '@unique-nft/types/unique/types';
 
 export const collectionName16Decoder = (name: number[]) => {
   const collectionNameArr = name.map((item: number) => item);
@@ -41,14 +42,14 @@ export const decodeStruct = ({ attr, data }: { attr?: any; data?: string }): Att
   return {};
 };
 
-export const getOnChainSchema = (collection: NFTCollection): {
+export const getOnChainSchema = (collection: UpDataStructsCollection): {
   attributesConst: string
   attributesVar: string
 } => {
   if (collection) {
     return {
-      attributesConst: hex2a(collection.constOnChainSchema),
-      attributesVar: hex2a(collection.variableOnChainSchema)
+      attributesConst: hex2a(collection.constOnChainSchema.toHex()),
+      attributesVar: hex2a(collection.variableOnChainSchema.toHex())
     };
   }
 

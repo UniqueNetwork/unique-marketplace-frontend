@@ -1,7 +1,8 @@
 import React, { KeyboardEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components/macro';
 import BN from 'bn.js';
-import { Button, InputText, Select, Text } from '@unique-nft/ui-kit';
+import { Select, Text } from '@unique-nft/ui-kit';
+import { BN_MAX_INTEGER } from '@polkadot/util';
 
 import { TokensList } from '../../components';
 import { Secondary400 } from '../../styles/colors';
@@ -17,6 +18,7 @@ import NoItems from '../../components/NoItems';
 import { fromStringToBnString } from '../../utils/bigNum';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import { MyTokensFilterState } from './Filters/types';
+import SearchField from '../../components/SearchField/SearchField';
 
 type TOption = SelectOptionProps & {
   direction: 'asc' | 'desc';
@@ -136,13 +138,13 @@ export const NFTPage = () => {
       };
 
       let filteredByPrice = true;
-      if (prices?.minPrice && prices?.maxPrice) {
+      if (prices?.minPrice || prices?.maxPrice) {
         if (!token.price) {
           filteredByPrice = false;
         } else {
           const tokenPrice = new BN(token.price);
-          const minPrice = new BN(fromStringToBnString(prices.minPrice, api?.market?.kusamaDecimals));
-          const maxPrice = new BN(fromStringToBnString(prices.maxPrice, api?.market?.kusamaDecimals));
+          const minPrice = new BN(fromStringToBnString(prices.minPrice || '0', api?.market?.kusamaDecimals));
+          const maxPrice = prices.maxPrice ? new BN(fromStringToBnString(prices.maxPrice, api?.market?.kusamaDecimals)) : BN_MAX_INTEGER;
           filteredByPrice = (tokenPrice.gte(minPrice) && tokenPrice.lte(maxPrice));
         }
       }
@@ -203,20 +205,13 @@ export const NFTPage = () => {
       </LeftColumn>
       <MainContent>
         <SearchAndSortingWrapper>
-          <SearchWrapper>
-            <InputTextStyled
-              iconLeft={{ name: 'magnify', size: 16 }}
-              onChange={onChangeSearchValue}
-              onKeyDown={onSearchInputKeyDown}
-              placeholder='Collection / token'
-              value={searchValue?.toString()}
-            />
-            <Button
-              onClick={onSearch}
-              role='primary'
-              title='Search'
-            />
-          </SearchWrapper>
+          <SearchField
+            searchValue={searchValue}
+            placeholder='Collection / token'
+            onSearchStringChange={onChangeSearchValue}
+            onSearchInputKeyDown={onSearchInputKeyDown}
+            onSearch={onSearch}
+          />
           <SortSelectWrapper>
             <Select
               onChange={onSortingChange}
@@ -274,30 +269,6 @@ const MainContent = styled.div`
   }
 `;
 
-const SearchWrapper = styled.div`
-  display: flex;
-  flex-grow: 1;
-  margin-right: 16px;
-
-  button {
-    margin-left: 8px;
-  }
-
-  @media (max-width: 768px) {
-    width: 100%;
-    .unique-input-text {
-      flex-grow: 1;
-    }
-  }
-
-  @media (max-width: 320px) {
-    margin-right: 0;
-    .unique-button {
-      display: none;
-    }
-  }
-`;
-
 const SortSelectWrapper = styled.div`
   .unique-select svg {
     z-index: 0;
@@ -315,9 +286,4 @@ const SearchAndSortingWrapper = styled.div`
 
 const TokensListWrapper = styled.div`
   min-height: 640px;
-`;
-
-const InputTextStyled = styled(InputText)`
-  width: 100%;
-  max-width: 610px;
 `;

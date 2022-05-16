@@ -1,5 +1,7 @@
 import React, { FC, useCallback } from 'react';
 import { InputText } from '@unique-nft/ui-kit';
+import styled from 'styled-components/macro';
+import { IconButton } from '../IconButton/IconButton';
 
 interface AmountInputProps {
   value: string | undefined
@@ -22,11 +24,36 @@ export const NumberInput: FC<AmountInputProps> = ({ value, onChange, placeholder
     }
   }, [onChange, decimals]);
 
-  return <InputText
-    placeholder={placeholder}
-    onChange={onChangeInput}
-    value={value}
-    label={label}
-    className={className}
-  />;
+  const onClear = useCallback(() => {
+    onChange('');
+  }, [onChange]);
+
+  return <InputWrapper className={className}>
+    <InputText
+      placeholder={placeholder}
+      onChange={onChangeInput}
+      value={value}
+      label={label}
+    />
+    {value && <ClearButton name={'close'} size={16} onClick={onClear} />}
+  </InputWrapper>;
 };
+
+const InputWrapper = styled.div`
+  position: relative;
+  display: inline-block;
+  .unique-input-text {
+    width: auto;
+    input {
+      padding-right: 22px;
+    }
+  }
+`;
+
+const ClearButton = styled(IconButton)`
+  position: absolute;
+  right: calc(var(--gap) / 2);
+  top: 50%;
+  margin-top: -8px;
+  width: auto !important;
+`;

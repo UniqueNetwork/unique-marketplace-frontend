@@ -10,10 +10,10 @@ import { useOffers } from '../../api/restApi/offers/offers';
 import { OffersList } from '../../components/OffersList/OffersList';
 import { MobileFilters } from '../../components/Filters/MobileFilter';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
-import Loading from '../../components/Loading';
 import NoItems from '../../components/NoItems';
 import { useAccounts } from '../../hooks/useAccounts';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
+import SearchField from '../../components/SearchField/SearchField';
 
 type TOption = SelectOptionProps &{
   id: string
@@ -135,20 +135,13 @@ export const MarketPage = () => {
       </LeftColumn>
       <MainContent>
         <SearchAndSortingWrapper>
-          <SearchWrapper>
-            <InputTextStyled
-              iconLeft={{ name: 'magnify', size: 16 }}
-              onChange={onSearchStringChange}
-              onKeyDown={onSearchInputKeyDown}
-              placeholder='Collection / token'
-              value={searchValue?.toString()}
-            />
-            <Button
-              onClick={onSearch}
-              role='primary'
-              title='Search'
-            />
-          </SearchWrapper>
+          <SearchField
+            searchValue={searchValue}
+            placeholder='Collection / token'
+            onSearchStringChange={onSearchStringChange}
+            onSearchInputKeyDown={onSearchInputKeyDown}
+            onSearch={onSearch}
+          />
           <SortSelectWrapper>
             <Select
               onChange={onSortingChange}
@@ -214,29 +207,6 @@ const MainContent = styled.div`
   }
 `;
 
-const SearchWrapper = styled.div`
-  display: flex;
-  flex-grow: 1;
-  margin-right: 16px;
-  button {
-    margin-left: 8px;
-  }
-
-  @media (max-width: 768px) {
-    width: 100%;
-    .unique-input-text {
-      flex-grow: 1;
-    }
-  }
-
-  @media (max-width: 320px) {
-    margin-right: 0;
-    .unique-button {
-      display: none;
-    }
-  }
-`;
-
 const SortSelectWrapper = styled.div`
   @media (max-width: 1024px) {
     display: none;
@@ -250,9 +220,4 @@ const SortSelectWrapper = styled.div`
 const SearchAndSortingWrapper = styled.div`
   display: flex;
   justify-content: space-between;
-`;
-
-const InputTextStyled = styled(InputText)`
-  width: 100%;
-  max-width: 610px;
 `;

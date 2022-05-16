@@ -66,7 +66,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onTrai
               onChange={onCollectionSelect(collection.id)}
             />
             <Avatar src={collection.coverImageUrl} size={22} type={'circle'}/>
-            <Text>{collection.collectionName}</Text>
+            <Text>{collection.collectionName || ''}</Text>
           </CheckboxWrapper>
           ))}
       </CollectionFilterWrapper>
