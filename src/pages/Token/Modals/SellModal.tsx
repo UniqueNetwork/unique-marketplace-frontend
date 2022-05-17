@@ -312,7 +312,7 @@ const Row = styled.div`
 const SellModalStyled = styled.div`
   width: 100%;
 
-  .unique-input-text {
+  .unique-input-text, div[class^=NumberInput] {
     width: 100%;
   }
 
