@@ -200,6 +200,10 @@ const Content = styled.div`
 
 const Row = styled.div`
   display: flex;
+  align-items: center;
+  .unique-checkbox-wrapper {
+    margin-top: -10px;
+  }
 `;
 
 const ButtonWrapper = styled.div`
