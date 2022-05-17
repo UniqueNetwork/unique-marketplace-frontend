@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, InputText, Text } from '@unique-nft/ui-kit';
+import { Button, Text } from '@unique-nft/ui-kit';
 import { TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import styled from 'styled-components/macro';
 import { BN } from '@polkadot/util';
@@ -24,6 +24,7 @@ import AccountCard from '../../components/Account/Account';
 import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
 import config from '../../config';
 import { TWithdrawBid } from '../../api/restApi/auction/types';
+import { TextInput } from '../../components/TextInput/TextInput';
 
 const tokenSymbol = 'KSM';
 
@@ -310,7 +311,7 @@ const SearchInputWrapper = styled.div`
   }
 `;
 
-const SearchInputStyled = styled(InputText)`
+const SearchInputStyled = styled(TextInput)`
   flex-basis: 720px;
 `;
 

@@ -8,8 +8,6 @@ const CardSkeleton: FC = () => {
       <Skeleton />
       <Skeleton height={26} />
       <Skeleton height={16} width={'75%'} />
-      <Skeleton height={20} width={'25%'} />
-      <Skeleton height={18} width={'50%'} />
     </CardSkeletonWrapper>
   );
 };

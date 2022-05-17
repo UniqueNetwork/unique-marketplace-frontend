@@ -70,21 +70,36 @@ export const MarketPage = () => {
     fetch({ page: 1, pageSize });
   }, []);
 
+  const getFilterByState = useCallback((filterState: FilterState | null) => {
+    if (!filterState) return {};
+    const { statuses, prices, collections, ...otherFilter } = filterState;
+    const { myNFTs, myBets, timedAuction, fixedPrice } = statuses || {};
+
+    return {
+      seller: myNFTs ? selectedAccount?.address : undefined,
+      bidderAddress: myBets ? selectedAccount?.address : undefined,
+      isAuction: (timedAuction && fixedPrice) || (!timedAuction && !fixedPrice) ? undefined : timedAuction && !fixedPrice,
+      ...prices,
+      collectionId: collections,
+      ...otherFilter
+    };
+  }, [selectedAccount?.address]);
+
   const onClickSeeMore = useCallback(() => {
     // Todo: fix twice rendering
     if (!isFetching) {
-      fetchMore({ page: Math.ceil(offers.length / pageSize) + 1, pageSize, sort: [sortingValue], ...filterState });
+      fetchMore({ page: Math.ceil(offers.length / pageSize) + 1, pageSize, sort: [sortingValue], ...(getFilterByState(filterState)) });
     }
   }, [fetchMore, offers, pageSize, isFetching]);
 
   const onSortingChange = useCallback((value: TOption) => {
     setSortingValue(value.id);
-    fetch({ sort: [value.id], pageSize, page: 1, ...filterState });
-  }, [fetch, filterState]);
+    fetch({ sort: [value.id], pageSize, page: 1, ...(getFilterByState(filterState)) });
+  }, [fetch, filterState, getFilterByState]);
 
   const onSearch = useCallback(() => {
-    fetch({ sort: [sortingValue], pageSize, page: 1, searchText: searchValue?.toString(), ...filterState });
-  }, [fetch, sortingValue, searchValue, filterState]);
+    fetch({ sort: [sortingValue], pageSize, page: 1, searchText: searchValue?.toString(), ...(getFilterByState(filterState)) });
+  }, [fetch, sortingValue, searchValue, filterState, getFilterByState]);
 
   const onSearchStringChange = useCallback((value: string) => {
     setSearchValue(value);
@@ -94,20 +109,6 @@ export const MarketPage = () => {
     if (event.key !== 'Enter') return;
     onSearch();
   }, [onSearch]);
-
-  const getFilterByState = useCallback((filterState: FilterState | null) => {
-    if (!filterState) return {};
-    const { statuses, prices, ...otherFilter } = filterState;
-    const { myNFTs, myBets, timedAuction, fixedPrice } = statuses || {};
-
-    return {
-      seller: myNFTs ? selectedAccount?.address : undefined,
-      bidderAddress: myBets ? selectedAccount?.address : undefined,
-      isAuction: (timedAuction && fixedPrice) || (!timedAuction && !fixedPrice) ? undefined : timedAuction && !fixedPrice,
-      ...prices,
-      ...otherFilter
-    };
-  }, [selectedAccount?.address]);
 
   const onFilterChange = useCallback((filterState: FilterState | null) => {
     setFilterState(filterState);
