@@ -15,6 +15,7 @@ interface SearchFieldProps {
 const SearchField: FC<SearchFieldProps> = ({ className, searchValue, placeholder, onSearchStringChange, onSearchInputKeyDown, onSearch }) => {
   const onClear = useCallback(() => {
     onSearchStringChange('');
+    onSearch();
   }, []);
 
   return (

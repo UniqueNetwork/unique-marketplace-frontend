@@ -70,31 +70,6 @@ export const MarketPage = () => {
     fetch({ page: 1, pageSize });
   }, []);
 
-  const onClickSeeMore = useCallback(() => {
-    // Todo: fix twice rendering
-    if (!isFetching) {
-      fetchMore({ page: Math.ceil(offers.length / pageSize) + 1, pageSize, sort: [sortingValue], ...filterState });
-    }
-  }, [fetchMore, offers, pageSize, isFetching]);
-
-  const onSortingChange = useCallback((value: TOption) => {
-    setSortingValue(value.id);
-    fetch({ sort: [value.id], pageSize, page: 1, ...filterState });
-  }, [fetch, filterState]);
-
-  const onSearch = useCallback(() => {
-    fetch({ sort: [sortingValue], pageSize, page: 1, searchText: searchValue?.toString(), ...filterState });
-  }, [fetch, sortingValue, searchValue, filterState]);
-
-  const onSearchStringChange = useCallback((value: string) => {
-    setSearchValue(value);
-  }, [setSearchValue]);
-
-  const onSearchInputKeyDown = useCallback((event: KeyboardEvent) => {
-    if (event.key !== 'Enter') return;
-    onSearch();
-  }, [onSearch]);
-
   const getFilterByState = useCallback((filterState: FilterState | null) => {
     if (!filterState) return {};
     const { statuses, prices, ...otherFilter } = filterState;
@@ -108,6 +83,31 @@ export const MarketPage = () => {
       ...otherFilter
     };
   }, [selectedAccount?.address]);
+
+  const onClickSeeMore = useCallback(() => {
+    // Todo: fix twice rendering
+    if (!isFetching) {
+      fetchMore({ page: Math.ceil(offers.length / pageSize) + 1, pageSize, sort: [sortingValue], ...(getFilterByState(filterState)) });
+    }
+  }, [fetchMore, offers, pageSize, isFetching]);
+
+  const onSortingChange = useCallback((value: TOption) => {
+    setSortingValue(value.id);
+    fetch({ sort: [value.id], pageSize, page: 1, ...(getFilterByState(filterState)) });
+  }, [fetch, filterState, getFilterByState]);
+
+  const onSearch = useCallback(() => {
+    fetch({ sort: [sortingValue], pageSize, page: 1, searchText: searchValue?.toString(), ...(getFilterByState(filterState)) });
+  }, [fetch, sortingValue, searchValue, filterState, getFilterByState]);
+
+  const onSearchStringChange = useCallback((value: string) => {
+    setSearchValue(value);
+  }, [setSearchValue]);
+
+  const onSearchInputKeyDown = useCallback((event: KeyboardEvent) => {
+    if (event.key !== 'Enter') return;
+    onSearch();
+  }, [onSearch]);
 
   const onFilterChange = useCallback((filterState: FilterState | null) => {
     setFilterState(filterState);
