@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import { Button, Heading, InputText, Link, Text } from '@unique-nft/ui-kit';
+import { Button, Heading, Link, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import { TTransfer } from './types';
@@ -11,6 +11,7 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import { StageStatus } from '../../../types/StagesTypes';
 import { NotificationSeverity } from '../../../notification/NotificationContext';
 import { useNotification } from '../../../hooks/useNotification';
+import { TextInput } from '../../../components/TextInput/TextInput';
 
 export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosable, onFinish }) => {
   const { selectedAccount } = useAccounts();
@@ -117,7 +118,7 @@ const TextStyled = styled(Text)`
   width: 100%;
 `;
 
-const InputWrapper = styled(InputText)`
+const InputWrapper = styled(TextInput)`
   margin-bottom: 32px;
   width: 100%;
 

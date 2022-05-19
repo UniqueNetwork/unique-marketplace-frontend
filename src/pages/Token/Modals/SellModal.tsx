@@ -14,7 +14,6 @@ import { NumberInput } from '../../../components/NumberInput/NumberInput';
 import { AdditionalWarning100 } from '../../../styles/colors';
 import { StageStatus } from '../../../types/StagesTypes';
 import { NotificationSeverity } from '../../../notification/NotificationContext';
-import { Tooltip } from '../../../components/Tooltip/Tooltip';
 
 const tokenSymbol = 'KSM';
 
