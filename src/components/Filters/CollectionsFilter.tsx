@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useEffect } from 'react';
 import styled from 'styled-components/macro';
 import { Checkbox, Text } from '@unique-nft/ui-kit';
 import { useTraits } from '../../api/restApi/offers/traits';
@@ -18,6 +18,10 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onTrai
   const { collections, isFetching } = useCollections();
   const { traits, fetch: fetchTraits, reset: resetTraits, isFetching: isTraitsFetching } = useTraits();
   const { collections: selectedCollections = [], traits: selectedTraits = [] } = value || {};
+
+  useEffect(() => {
+    if (selectedCollections.length === 1 && !isTraitsFetching) fetchTraits(selectedCollections[0]);
+  }, []);
 
   const onCollectionSelect = useCallback((collectionId: number) => (value: boolean) => {
     let _selectedCollections;
