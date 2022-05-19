@@ -5,11 +5,12 @@ import styled from 'styled-components/macro';
 
 interface IconButtonProps extends IconProps {
   onClick(): void;
+  className?: string;
 }
 
-export const IconButton: FC<IconButtonProps> = ({ onClick, ...iconProps }) => {
+export const IconButton: FC<IconButtonProps> = ({ onClick, className, ...iconProps }) => {
   return (
-    <StyledButton onClick={onClick}>
+    <StyledButton onClick={onClick} className={className}>
       <Icon {...iconProps} />
     </StyledButton>
   );

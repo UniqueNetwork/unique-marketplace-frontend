@@ -14,7 +14,6 @@ import { NumberInput } from '../../../components/NumberInput/NumberInput';
 import { AdditionalWarning100 } from '../../../styles/colors';
 import { StageStatus } from '../../../types/StagesTypes';
 import { NotificationSeverity } from '../../../notification/NotificationContext';
-import { Tooltip } from '../../../components/Tooltip/Tooltip';
 
 const tokenSymbol = 'KSM';
 
@@ -207,17 +206,11 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
       <Content>
         <Heading size='2'>Selling method</Heading>
       </Content>
-
-      <TooltipStyled >
-        <Tooltip title={'Auction sales are temporarily unavailable'} placement={'bottom'}>
-          <Tabs
-            activeIndex={activeTab}
-            labels={['Fixed price', 'Auction']}
-            onClick={handleClick}
-            disabledIndexes={[1]}
-          />
-        </Tooltip>
-      </TooltipStyled>
+      <Tabs
+        activeIndex={activeTab}
+        labels={['Fixed price', 'Auction']}
+        onClick={handleClick}
+      />
       <Tabs activeIndex={activeTab}>
         {FixedPriceTab}
         {AuctionTab}
@@ -225,17 +218,6 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
     </SellModalStyled>
   );
 };
-
-const TooltipStyled = styled.div`
-  &>div>div:last-child {
-    &::before {
-      top: -10px;
-      right: 50% !important;
-    }
-    margin-right: 50%;
-    right: -25%;
-  }
-`;
 
 type TSellFixStagesModal = {
   onFinish: () => void
@@ -329,7 +311,7 @@ const Row = styled.div`
 const SellModalStyled = styled.div`
   width: 100%;
 
-  .unique-input-text {
+  .unique-input-text, div[class^=NumberInput] {
     width: 100%;
   }
 

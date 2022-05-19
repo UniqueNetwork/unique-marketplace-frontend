@@ -1,9 +1,11 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import { TCreateAccountBodyModalProps } from './types';
-import { Avatar, Button, InputText, Text } from '@unique-nft/ui-kit';
+import { Button, Text } from '@unique-nft/ui-kit';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import styled from 'styled-components/macro';
 import { PasswordInput } from '../../../components/PasswordInput/PasswordInput';
+import { Avatar } from '../../../components/Avatar/Avatar';
+import { TextInput } from '../../../components/TextInput/TextInput';
 
 export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties, onFinish, onGoBack }) => {
   const [name, setName] = useState<string>('');
@@ -23,13 +25,13 @@ export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountP
 
   return (<>
     <AddressWrapper>
-      <Avatar size={24} src={DefaultAvatar} />
+      <Avatar size={24} src={DefaultAvatar} address={accountProperties?.address} />
       <Text>{accountProperties?.address || ''}</Text>
     </AddressWrapper>
     <CredentialsWrapper >
       <Text size={'m'}>Name</Text>
       <Text size={'s'} color={'grey-500'}>Give your account a name for easier identification and handling. </Text>
-      <InputText onChange={onAccountNameChange} value={name} />
+      <TextInput onChange={onAccountNameChange} value={name} />
 
       <Text size={'m'}>Password</Text>
       <Text size={'s'} color={'grey-500'}>This is necessary to authenticate all committed transactions and encrypt the key pair. Ensure you are using a strong password for proper account protection. </Text>

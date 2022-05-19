@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useState } from 'react';
-import { Avatar, Button, Heading, Modal, Text } from '@unique-nft/ui-kit';
+import { Button, Heading, Modal, Text } from '@unique-nft/ui-kit';
 import keyring from '@polkadot/ui-keyring';
 import styled from 'styled-components/macro';
 
@@ -8,6 +8,7 @@ import { PasswordInput } from '../../../components/PasswordInput/PasswordInput';
 import { QRReader, ScannedResult } from '../../../components/QRReader/QRReader';
 import { useAccounts } from '../../../hooks/useAccounts';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
+import { Avatar } from '../../../components/Avatar/Avatar';
 
 export const ImportViaQRCodeAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish }) => {
   const [address, setAddress] = useState<string>();
@@ -46,7 +47,7 @@ export const ImportViaQRCodeAccountModal: FC<TAccountModalProps> = ({ isVisible,
       <Text size={'m'}>Provide the account QR from the module/external application for scanning. Once detected as valid, you will be taken to the next step to add the account to your list.</Text>
       {!address && <QRReader onScan={onScan} />}
       {address && <AddressWrapper>
-        <Avatar size={24} src={DefaultAvatar} />
+        <Avatar size={24} src={DefaultAvatar} address={address} />
         <Text>{address}</Text>
       </AddressWrapper>}
     </InputWrapper>

@@ -1,22 +1,24 @@
 import React, { KeyboardEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components/macro';
 import BN from 'bn.js';
-import { Button, InputText, Select, Text } from '@unique-nft/ui-kit';
+import { Select, Text } from '@unique-nft/ui-kit';
+import { BN_MAX_INTEGER } from '@polkadot/util';
 
 import { TokensList } from '../../components';
 import { Secondary400 } from '../../styles/colors';
 import { useApi } from '../../hooks/useApi';
 import { NFTToken } from '../../api/chainApi/unique/types';
-import { Filters, MyTokensFilterState } from './Filters/Filters';
+import { Filters } from './Filters/Filters';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useOffers } from '../../api/restApi/offers/offers';
 import { Offer } from '../../api/restApi/offers/types';
 import { MobileFilters } from '../../components/Filters/MobileFilter';
-import Loading from '../../components/Loading';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
 import NoItems from '../../components/NoItems';
 import { fromStringToBnString } from '../../utils/bigNum';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
+import { MyTokensFilterState } from './Filters/types';
+import SearchField from '../../components/SearchField/SearchField';
 
 type TOption = SelectOptionProps & {
   direction: 'asc' | 'desc';
@@ -80,7 +82,7 @@ export const NFTPage = () => {
   const [searchValue, setSearchValue] = useState<string>();
   const [searchString, setSearchString] = useState<string>();
   const [selectOption, setSelectOption] = useState<TOption>();
-  const { selectedAccount } = useAccounts();
+  const { selectedAccount, isLoading } = useAccounts();
   const [tokens, setTokens] = useState<NFTToken[]>([]);
   const [isFetchingTokens, setIsFetchingTokens] = useState<boolean>(false);
 
@@ -124,35 +126,44 @@ export const NFTPage = () => {
   }, [onSearch]);
 
   const filter = useCallback((token: NFTToken & Partial<Offer>) => {
+      const { statuses, prices } = filterState || {};
+
       const filterByStatus = (token: NFTToken & Partial<Offer>) => {
-        if (!filterState?.onSell && !filterState?.fixedPrice && !filterState?.timedAuction && !filterState?.notOnSale) return true;
-        return (filterState?.onSell && !!token.seller) ||
-          (filterState?.fixedPrice && !!token.seller && !token.auction) ||
-          (filterState?.timedAuction && !!token.seller && !!token.auction) ||
-          (filterState?.notOnSale && !token.seller);
+        const { onSell, fixedPrice, timedAuction, notOnSale } = statuses || {};
+        if (!onSell && !fixedPrice && !timedAuction && !notOnSale) return true;
+        return (onSell && !!token.seller) ||
+          (fixedPrice && !!token.seller && !token.auction) ||
+          (timedAuction && !!token.seller && !!token.auction) ||
+          (notOnSale && !token.seller);
       };
 
       let filteredByPrice = true;
-      if (filterState?.minPrice && filterState?.maxPrice) {
+      if (prices?.minPrice || prices?.maxPrice) {
         if (!token.price) {
           filteredByPrice = false;
         } else {
           const tokenPrice = new BN(token.price);
-          const minPrice = new BN(fromStringToBnString(filterState.minPrice, api?.market?.kusamaDecimals));
-          const maxPrice = new BN(fromStringToBnString(filterState.maxPrice, api?.market?.kusamaDecimals));
+          const minPrice = new BN(fromStringToBnString(prices.minPrice || '0', api?.market?.kusamaDecimals));
+          const maxPrice = prices.maxPrice ? new BN(fromStringToBnString(prices.maxPrice, api?.market?.kusamaDecimals)) : BN_MAX_INTEGER;
           filteredByPrice = (tokenPrice.gte(minPrice) && tokenPrice.lte(maxPrice));
         }
       }
       let filteredByCollections = true;
-      if (filterState?.collectionIds && filterState?.collectionIds.length > 0) {
-        filteredByCollections = filterState.collectionIds.findIndex((collectionId: number) => token.collectionId === collectionId) > -1;
+      if (filterState?.collections && filterState.collections.length > 0) {
+        filteredByCollections = filterState.collections.findIndex((collectionId: number) => token.collectionId === collectionId) > -1;
+      }
+      let filteredByTraits = true;
+      if (filterState?.traits && filterState.traits.length > 0) {
+        filteredByTraits = filterState?.traits.some((trait) => {
+          return (token?.attributes?.Traits as string[])?.indexOf(trait) >= 0;
+        });
       }
       let filteredBySearchValue = true;
       if (searchString) {
         filteredBySearchValue = token.collectionName?.includes(searchString) || token.prefix?.includes(searchString) || token.id === Number(searchString);
       }
 
-      return filterByStatus(token) && filteredByPrice && filteredByCollections && filteredBySearchValue;
+      return filterByStatus(token) && filteredByPrice && filteredByCollections && filteredByTraits && filteredBySearchValue;
     },
     [filterState, searchString, api?.market?.kusamaDecimals]
   );
@@ -178,27 +189,29 @@ export const NFTPage = () => {
     return tokensWithOffers;
   }, [tokens, offers, filter, selectOption]);
 
+  const filterCount = useMemo(() => {
+    const { statuses, prices, collections = [], traits = [] } = filterState || {};
+    const statusesCount: number = Object.values(statuses || {}).filter((status) => status).length;
+    const collectionsCount: number = collections.length;
+    const traitsCount: number = traits.length;
+
+    return statusesCount + collectionsCount + traitsCount + (prices ? 1 : 0);
+  }, [filterState]);
+
   return (<PagePaper>
     <MarketMainPageStyled>
       <LeftColumn>
-        <Filters onFilterChange={setFilterState} />
+        <Filters value={filterState} onFilterChange={setFilterState} />
       </LeftColumn>
       <MainContent>
         <SearchAndSortingWrapper>
-          <SearchWrapper>
-            <InputTextStyled
-              iconLeft={{ name: 'magnify', size: 16 }}
-              onChange={onChangeSearchValue}
-              onKeyDown={onSearchInputKeyDown}
-              placeholder='Collection / token'
-              value={searchValue?.toString()}
-            />
-            <Button
-              onClick={onSearch}
-              role='primary'
-              title='Search'
-            />
-          </SearchWrapper>
+          <SearchField
+            searchValue={searchValue}
+            placeholder='Collection / token'
+            onSearchStringChange={onChangeSearchValue}
+            onSearchInputKeyDown={onSearchInputKeyDown}
+            onSearch={onSearch}
+          />
           <SortSelectWrapper>
             <Select
               onChange={onSortingChange}
@@ -211,12 +224,13 @@ export const NFTPage = () => {
           <Text size='m'>{`${featuredTokens.length} items`}</Text>
         </div>
         <TokensListWrapper >
-          {(isFetchingTokens || isFetchingOffers) && <Loading />}
-          {!isFetchingTokens && !isFetchingOffers && featuredTokens.length === 0 && <NoItems />}
-          <TokensList tokens={featuredTokens} />
+          {!isFetchingTokens && !isFetchingOffers && !isLoading && featuredTokens.length === 0 && <NoItems />}
+          <TokensList tokens={featuredTokens} isLoading={isFetchingTokens || isFetchingOffers || isLoading} />
         </TokensListWrapper>
       </MainContent>
       <MobileFilters<MyTokensFilterState>
+        value={filterState}
+        filterCount={filterCount}
         defaultSortingValue={defaultSortingValue}
         sortingValue={sortingValue}
         sortingOptions={sortingOptions}
@@ -255,30 +269,6 @@ const MainContent = styled.div`
   }
 `;
 
-const SearchWrapper = styled.div`
-  display: flex;
-  flex-grow: 1;
-  margin-right: 16px;
-
-  button {
-    margin-left: 8px;
-  }
-
-  @media (max-width: 768px) {
-    width: 100%;
-    .unique-input-text {
-      flex-grow: 1;
-    }
-  }
-
-  @media (max-width: 320px) {
-    margin-right: 0;
-    .unique-button {
-      display: none;
-    }
-  }
-`;
-
 const SortSelectWrapper = styled.div`
   .unique-select svg {
     z-index: 0;
@@ -296,9 +286,4 @@ const SearchAndSortingWrapper = styled.div`
 
 const TokensListWrapper = styled.div`
   min-height: 640px;
-`;
-
-const InputTextStyled = styled(InputText)`
-  width: 100%;
-  max-width: 610px;
 `;

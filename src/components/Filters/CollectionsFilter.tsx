@@ -1,25 +1,23 @@
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback } from 'react';
 import styled from 'styled-components/macro';
 import { Checkbox, Text } from '@unique-nft/ui-kit';
 import { useTraits } from '../../api/restApi/offers/traits';
 import { useCollections } from '../../hooks/useCollections';
 import Accordion from '../Accordion/Accordion';
-import Loading from '../Loading';
 import { Avatar } from '../Avatar/Avatar';
 import { Trait } from '../../api/restApi/offers/types';
+import CheckboxSkeleton from '../Skeleton/CheckboxSkeleton';
 
 interface CollectionsFilterProps {
-  value?: number[]
-  onChange(value: number[]): void
+  value?: { collections?: number[], traits?: string[] } | null
+  onChange(collections: number[], traits?: string[]): void
   onTraitsChange?(value: string[]): void
 }
 
 const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onTraitsChange }) => {
   const { collections, isFetching } = useCollections();
   const { traits, fetch: fetchTraits, reset: resetTraits, isFetching: isTraitsFetching } = useTraits();
-
-  const [selectedCollections, setSelectedCollections] = useState<number[]>([]);
-  const [selectedTraits, setSelectedTraits] = useState<string[]>([]);
+  const { collections: selectedCollections = [], traits: selectedTraits = [] } = value || {};
 
   const onCollectionSelect = useCallback((collectionId: number) => (value: boolean) => {
     let _selectedCollections;
@@ -28,14 +26,8 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onTrai
     } else {
       _selectedCollections = selectedCollections.filter((item) => item !== collectionId);
     }
-    onChange(_selectedCollections);
-    setSelectedCollections(_selectedCollections);
-
     // since traits are shown only if one collection is selected -> we should always reset them
-    if (traits.length) {
-      setSelectedTraits([]);
-      onTraitsChange?.([]);
-    }
+    onChange(_selectedCollections, []);
 
     if (_selectedCollections.length === 1) fetchTraits(_selectedCollections[0]);
     else resetTraits();
@@ -49,17 +41,11 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onTrai
       _selectedTraits = selectedTraits.filter((item) => item !== trait.trait);
     }
     onTraitsChange?.(_selectedTraits);
-    setSelectedTraits(_selectedTraits);
   }, [onTraitsChange, selectedTraits]);
 
   const onCollectionsClear = useCallback(() => {
-    setSelectedCollections([]);
-    onChange([]);
-  }, [onChange, setSelectedCollections]);
-
-  useEffect(() => {
-    setSelectedCollections(value || []);
-  }, [value]);
+    onChange([], []);
+  }, [onChange]);
 
   return (<>
     <Accordion title={'Collections'}
@@ -68,7 +54,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onTrai
       isClearShow={selectedCollections.length > 0}
     >
       <CollectionFilterWrapper>
-        {isFetching && <Loading />}
+        {isFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
         {collections.map((collection) => (
           <CheckboxWrapper
             key={`collection-${collection.id}`}
@@ -80,17 +66,15 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onTrai
               onChange={onCollectionSelect(collection.id)}
             />
             <Avatar src={collection.coverImageUrl} size={22} type={'circle'}/>
-            <Text>{collection.collectionName}</Text>
+            <Text>{collection.collectionName || ''}</Text>
           </CheckboxWrapper>
           ))}
       </CollectionFilterWrapper>
     </Accordion>
-    {/* TODO: unsupported on back-end */}
     {onTraitsChange && selectedCollections.length === 1 && <AttributesFilterWrapper>
-      {/* TODO: make mapping attributes of the selected collection */}
       <Accordion title={'Traits'} isOpen={true}>
         <CollectionFilterWrapper>
-          {isTraitsFetching && <Loading />}
+          {isTraitsFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
           {traits.map((trait) => (
             <AttributeWrapper key={`attribute-${trait.trait}`}>
               <Checkbox
@@ -148,7 +132,7 @@ const AttributeWrapper = styled.div`
 const CheckboxWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 4);
-  align-items: center;
+  align-items: flex-start;
 `;
 
 export default CollectionsFilter;
