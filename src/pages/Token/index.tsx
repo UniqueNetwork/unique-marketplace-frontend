@@ -37,7 +37,8 @@ const TokenPage = () => {
   }, [api?.nft, collectionId, id]);
 
   useEffect(() => {
-    if (offer || token || isFetchingOffer) {
+    if (isFetchingOffer) return;
+    if (offer || token) {
       setIsFetchingToken(false);
       return;
     }

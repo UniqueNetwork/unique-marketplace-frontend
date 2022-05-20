@@ -66,3 +66,18 @@ export type TraitsResponse = {
   collectionId: number;
   traits: Trait[];
 };
+
+export type Attribute = {
+  key: string;
+  count: number;
+};
+
+export type AttributesResponse = {
+  collectionId: number;
+  attributes: Record<string, Attribute[]>;
+};
+
+export type AttributeCount = {
+  numberOfAttributes: number
+  amount: number
+};
