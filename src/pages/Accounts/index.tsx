@@ -25,6 +25,7 @@ import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
 import config from '../../config';
 import { TWithdrawBid } from '../../api/restApi/auction/types';
 import { TextInput } from '../../components/TextInput/TextInput';
+import { Primary500, AdditionalDark, AdditionalLight } from '../../styles/colors';
 
 const tokenSymbol = 'KSM';
 
@@ -40,6 +41,11 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
     title: 'Account',
     width: '25%',
     field: 'accountInfo',
+    iconRight: {
+      name: 'question',
+      size: 20,
+      color: Primary500
+    },
     render(accountInfo) {
       if (accountInfo.deposit) return <></>;
       return (
@@ -140,6 +146,7 @@ export const AccountsPage = () => {
   const [selectedAddress, setSelectedAddress] = useState<string>();
   const deviceSize = useDeviceSize();
   const { chainData } = useApi();
+  const [accountPopupVisible, setAccountPopupVisible] = useState(false);
 
   useEffect(() => {
     if (isLoading) return;
@@ -230,6 +237,22 @@ export const AccountsPage = () => {
     setCurrentModal(undefined);
   }, []);
 
+  useEffect(() => {
+    const questionIcon = document.querySelector('[data-testid="icon-question"]');
+    const onQuestionHover = (e: MouseEvent) => {
+      if (
+        e.target === questionIcon ||
+        (e.target as HTMLElement).closest('[data-testid="icon-question"]') ||
+        (e.target as HTMLElement).closest('[id="account-popup"]')) {
+        setAccountPopupVisible(true);
+      } else setAccountPopupVisible(false);
+    };
+    document.addEventListener('mouseover', onQuestionHover);
+    return () => {
+      document.removeEventListener('mouseover', onQuestionHover);
+    };
+  }, []);
+
   return (<PagePaper>
     <AccountPageWrapper>
       <Row>
@@ -248,11 +271,19 @@ export const AccountsPage = () => {
           />
         </SearchInputWrapper>
       </Row>
-      <Table
-        columns={getAccountsColumns({ isShortAddress: deviceSize === DeviceSize.sm, formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal })}
-        data={filteredAccounts}
-        loading={isLoading || isLoadingDeposits}
-      />
+      <TableWrapper>
+        {accountPopupVisible && <TooltipStyled
+          id={'account-popup'}
+        >Substrate account addresses (Kusama, Quartz, Polkadot, Unique, etc.) may be represented by a different address
+          character sequence, but they can be converted between each other because they share the same public key. You
+          can see all transformations for any given address on <a href='https://quartz.subscan.io/' target='_blank' rel='noreferrer'>Subscan</a>.
+        </TooltipStyled>}
+        <Table
+          columns={getAccountsColumns({ isShortAddress: deviceSize === DeviceSize.sm, formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal })}
+          data={filteredAccounts}
+          loading={isLoading || isLoadingDeposits}
+        />
+      </TableWrapper>
       <CreateAccountModal isVisible={currentModal === AccountModal.create} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
       <ImportViaSeedAccountModal isVisible={currentModal === AccountModal.importViaSeed} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
       <ImportViaJSONAccountModal isVisible={currentModal === AccountModal.importViaJSON} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
@@ -374,4 +405,39 @@ const IconWrapper = styled.div`
       stroke: currentColor;
     }
   }
+`;
+
+const TooltipStyled = styled.div`
+  position: absolute;
+  background: ${AdditionalDark};
+  width: 400px;
+  color: ${AdditionalLight};
+  z-index: 1;
+  left: 95px;
+  top: 10px;
+  padding: 8px 16px;
+  line-height: 22px;
+  border-radius: 2px;
+  ::before {
+    position: absolute;
+    content: "";
+    width: 0;
+    height: 0;
+    left: -7px;
+    top: 5px;
+    border-top: 5px solid transparent;
+    border-right: 7px solid ${AdditionalDark};
+    border-bottom: 5px solid transparent;
+  }
+  a {
+    color: ${AdditionalLight};
+    text-decoration: underline;
+  }
+  a:hover {
+    text-decoration: none;
+  }
+`;
+
+const TableWrapper = styled.div`
+  position: relative;
 `;
