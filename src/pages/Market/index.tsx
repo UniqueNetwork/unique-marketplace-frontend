@@ -14,6 +14,7 @@ import NoItems from '../../components/NoItems';
 import { useAccounts } from '../../hooks/useAccounts';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import SearchField from '../../components/SearchField/SearchField';
+import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
 
 type TOption = SelectOptionProps &{
   id: string
@@ -63,6 +64,7 @@ export const MarketPage = () => {
   const [searchValue, setSearchValue] = useState<string | number>();
   const { offers, offersCount, isFetching, fetchMore, fetch } = useOffers();
   const { selectedAccount } = useAccounts();
+  const deviceSize = useDeviceSize();
 
   const hasMore = offers && offers.length < offersCount;
 
@@ -132,7 +134,7 @@ export const MarketPage = () => {
   return (<PagePaper>
     <MarketMainPageStyled>
       <LeftColumn>
-        <Filters value={filterState} onFilterChange={onFilterChange} />
+        {deviceSize !== DeviceSize.md && <Filters value={filterState} onFilterChange={onFilterChange} />}
       </LeftColumn>
       <MainContent>
         <SearchAndSortingWrapper>
@@ -167,7 +169,7 @@ export const MarketPage = () => {
         </InfiniteScroll>
       </MainContent>
     </MarketMainPageStyled>
-    <MobileFilters
+    {deviceSize <= DeviceSize.md && <MobileFilters
       value={filterState}
       filterCount={filterCount}
       defaultSortingValue={defaultSortingValue}
@@ -176,7 +178,7 @@ export const MarketPage = () => {
       onFilterChange={onFilterChange}
       onSortingChange={onSortingChange}
       filterComponent={Filters}
-    />
+    />}
   </PagePaper>);
 };
 

@@ -19,6 +19,7 @@ import { fromStringToBnString } from '../../utils/bigNum';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import { MyTokensFilterState } from './Filters/types';
 import SearchField from '../../components/SearchField/SearchField';
+import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
 
 type TOption = SelectOptionProps & {
   direction: 'asc' | 'desc';
@@ -85,6 +86,7 @@ export const NFTPage = () => {
   const { selectedAccount, isLoading } = useAccounts();
   const [tokens, setTokens] = useState<NFTToken[]>([]);
   const [isFetchingTokens, setIsFetchingTokens] = useState<boolean>(false);
+  const deviceSize = useDeviceSize();
 
   const { offers, isFetching: isFetchingOffers, fetch } = useOffers();
 
@@ -210,7 +212,7 @@ export const NFTPage = () => {
   return (<PagePaper>
     <MarketMainPageStyled>
       <LeftColumn>
-        <Filters value={filterState} onFilterChange={setFilterState} />
+        {deviceSize !== DeviceSize.md && <Filters value={filterState} onFilterChange={setFilterState} />}
       </LeftColumn>
       <MainContent>
         <SearchAndSortingWrapper>
@@ -237,7 +239,7 @@ export const NFTPage = () => {
           <TokensList tokens={featuredTokens} isLoading={isFetchingTokens || isFetchingOffers || isLoading} />
         </TokensListWrapper>
       </MainContent>
-      <MobileFilters<MyTokensFilterState>
+      {deviceSize <= DeviceSize.md && <MobileFilters<MyTokensFilterState>
         value={filterState}
         filterCount={filterCount}
         defaultSortingValue={defaultSortingValue}
@@ -246,7 +248,7 @@ export const NFTPage = () => {
         onFilterChange={setFilterState}
         onSortingChange={onSortingChange}
         filterComponent={Filters}
-      />
+      />}
     </MarketMainPageStyled>
   </PagePaper>);
 };
