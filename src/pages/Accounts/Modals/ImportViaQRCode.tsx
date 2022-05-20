@@ -52,9 +52,11 @@ export const ImportViaQRCodeAccountModal: FC<TAccountModalProps> = ({ isVisible,
       </AddressWrapper>}
     </InputWrapper>
     <InputWrapper>
-      <Text size={'m'}>Password</Text>
-      <Text size={'s'} color={'grey-500'}>The password that was previously used to encrypt this account</Text>
-      <PasswordInput placeholder={'Password'}
+      <PasswordTitle>
+        <Text size={'m'}>Password</Text>
+        <Text size={'s'} color={'grey-500'}>The password that was previously used to encrypt this account</Text>
+      </PasswordTitle>
+      <PasswordInput
         onChange={setPassword}
         value={password}
       />
@@ -88,11 +90,17 @@ const InputWrapper = styled.div`
   padding: var(--gap) 0;
   display: flex;
   flex-direction: column;
-  margin-bottom: var(--gap);
   row-gap: var(--gap);
 `;
 
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
+  margin-top: var(--gap);
+`;
+
+const PasswordTitle = styled.div`
+  display: flex;
+  flex-direction: column;
+  row-gap: calc(var(--gap) / 4);
 `;
