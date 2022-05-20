@@ -24,14 +24,16 @@ interface IProps {
   children: ReactChild[]
   token?: NFTToken
   offer?: Offer
-  isLoading?: boolean
+  isLoading?: boolean,
+  onShareLinkClick(): void
 }
 
 export const CommonTokenDetail: FC<IProps> = ({
   children,
   token,
   offer,
-  isLoading
+  isLoading,
+  onShareLinkClick
 }) => {
   const {
     collectionId,
@@ -88,15 +90,6 @@ export const CommonTokenDetail: FC<IProps> = ({
     return isTokenOwner(selectedAccount.address, normalizeAccountId(token?.owner || ''));
   }, [isLoading, selectedAccount, token, offer]);
 
-  const onShareClick = useCallback(() => {
-    if (navigator.share) {
-      void navigator.share({
-        title: `NFT: ${prefix || ''} #${tokenId}`,
-        url: window.location.href
-      });
-    }
-  }, [prefix, tokenId]);
-
   return (
     <CommonTokenDetailStyled>
       <PictureWrapper>
@@ -107,7 +100,7 @@ export const CommonTokenDetail: FC<IProps> = ({
         {isLoading && <TokenSkeleton />}
         {!isLoading && <>
           <Heading size={'1'}>{`${prefix || ''} #${tokenId}`}</Heading>
-          <ShareLink onClick={onShareClick}>
+          <ShareLink onClick={onShareLinkClick}>
             <Text color='grey-500' size='m'>
               Share Link
             </Text>
