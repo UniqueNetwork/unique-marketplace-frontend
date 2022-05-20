@@ -76,7 +76,8 @@ export const FinalModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties
 const AddressWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 2);
-  margin: calc(var(--gap) * 2) 0;
+  margin-top: calc(var(--gap) * 1.5);
+  margin-bottom: calc(var(--gap) / 2);
   border: 1px solid var(--grey-300);
   border-radius: 4px;
   padding: 20px var(--gap);
@@ -93,6 +94,7 @@ const StepsTextStyled = styled(Text)`
 const LabelTextWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 4);
+  margin-top: calc(var(--gap) * 1.5);
 `;
 
 const TextStyled = styled(Text)`
@@ -110,13 +112,14 @@ const ButtonWrapper = styled.div`
   justify-content: flex-end;
   align-items: center;
   column-gap: var(--gap);
+  margin-top: calc(var(--gap) * 2);
 `;
 
 const CredentialsWrapper = styled.div`
   display: flex;
   flex-direction: column;
   row-gap: calc(var(--gap) / 2);
-  margin-bottom: calc(var(--gap) * 1.5);
+  margin-bottom: calc(var(--gap) * 2);
   .unique-input-text {
     width: 100%;
   }
@@ -126,4 +129,5 @@ const ValueTextStyled = styled.div`
   border: 1px solid ${Grey300};
   padding: 11px 12px;
   border-radius: 4px;
+  background-color: var(--color-grey-100);
 `;
