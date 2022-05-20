@@ -43,14 +43,18 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
       <Heading size='2'>{'Add an account via backup JSON file'}</Heading>
     </Content>
     <InputWrapper>
-      <Text size={'m'}>Upload</Text>
-      <Text size={'s'} color={'grey-500'}>Click to select or drop the file here</Text>
+      <TitleWrapper>
+        <Text size={'m'}>Upload</Text>
+        <Text size={'s'} color={'grey-500'}>Click to select or drop the file here</Text>
+      </TitleWrapper>
       <Upload onChange={onUploadChange} />
     </InputWrapper>
     <InputWrapper>
-      <Text size={'m'}>Password</Text>
-      <Text size={'s'} color={'grey-500'}>The password that was previously used to encrypt this account</Text>
-      <PasswordInput placeholder={'Password'}
+      <TitleWrapper>
+        <Text size={'m'}>Password</Text>
+        <Text size={'s'} color={'grey-500'}>The password that was previously used to encrypt this account</Text>
+      </TitleWrapper>
+      <PasswordInput
         onChange={setPassword}
         value={password}
       />
@@ -83,15 +87,20 @@ const InputWrapper = styled.div`
   padding: var(--gap) 0;
   display: flex;
   flex-direction: column;
-  margin-bottom: var(--gap);
   row-gap: var(--gap);
+`;
+
+const TitleWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  row-gap: calc(var(--gap) / 4);
 `;
 
 const TextStyled = styled(Text)`
   box-sizing: border-box;
   display: flex;
   padding: 8px 16px;
-  margin: calc(var(--gap) * 1.5) 0;
+  margin: var(--gap) 0;
   border-radius: 4px;
   background-color: ${AdditionalWarning100};
   width: 100%;
@@ -100,4 +109,5 @@ const TextStyled = styled(Text)`
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
+  margin-top: calc(var(--gap) * 2);
 `;
