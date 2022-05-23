@@ -76,7 +76,7 @@ export const MarketPage = () => {
 
   const getFilterByState = useCallback((filterState: FilterState | null) => {
     if (!filterState) return {};
-    const { statuses, prices, collections, ...otherFilter } = filterState;
+    const { statuses, prices, collections, attributeCounts, ...otherFilter } = filterState;
     const { myNFTs, myBets, timedAuction, fixedPrice } = statuses || {};
 
     return {
@@ -85,6 +85,7 @@ export const MarketPage = () => {
       isAuction: (timedAuction && fixedPrice) || (!timedAuction && !fixedPrice) ? undefined : timedAuction && !fixedPrice,
       ...prices,
       collectionId: collections,
+      numberOfAttributes: attributeCounts,
       ...otherFilter
     };
   }, [selectedAccount?.address]);
