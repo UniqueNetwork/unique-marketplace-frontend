@@ -3,22 +3,22 @@ import { useCallback, useState } from 'react';
 import { get } from '../base';
 import { defaultParams } from '../base/axios';
 import { ResponseError } from '../base/types';
-import { Trait, TraitsResponse } from './types';
+import { Attribute, AttributesResponse } from './types';
 
-const endpoint = '/api/traits';
+const endpoint = '/api/attributes';
 
-export const getTraits = (collectionId: string | number) => get<TraitsResponse>(`${endpoint}/${collectionId}`, { ...defaultParams });
+export const getAttributes = (collectionId: string | number) => get<AttributesResponse>(`${endpoint}/${collectionId}`, { ...defaultParams });
 
-export const useTraits = () => {
-  const [traits, setTraits] = useState<Trait[]>([]);
+export const useAttributes = () => {
+  const [attributes, setAttributes] = useState<Record<string, Attribute[]>>({});
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [fetchingError, setFetchingError] = useState<ResponseError | undefined>();
 
   const fetch = useCallback((collectionId: string | number) => {
     setIsFetching(true);
-    getTraits(collectionId).then((response) => {
+    getAttributes(collectionId).then((response) => {
       if (response.status === 200) {
-        setTraits(response.data.traits);
+        setAttributes(response.data.attributes);
         setIsFetching(false);
       }
     }).catch((err: AxiosError) => {
@@ -27,18 +27,18 @@ export const useTraits = () => {
         message: err.message
       });
       setIsFetching(false);
-      setTraits([]);
+      setAttributes({});
     });
-  }, [setTraits, setIsFetching]);
+  }, [setAttributes, setIsFetching]);
 
   const reset = useCallback(() => {
-      setTraits([]);
-      setIsFetching(false);
-      setFetchingError(undefined);
-  }, [setTraits]);
+    setAttributes({});
+    setIsFetching(false);
+    setFetchingError(undefined);
+  }, [setAttributes]);
 
   return {
-    traits,
+    attributes,
     fetch,
     reset,
     fetchingError,

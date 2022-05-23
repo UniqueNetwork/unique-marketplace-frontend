@@ -19,6 +19,7 @@ import { fromStringToBnString } from '../../utils/bigNum';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import { MyTokensFilterState } from './Filters/types';
 import SearchField from '../../components/SearchField/SearchField';
+import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
 
 type TOption = SelectOptionProps & {
   direction: 'asc' | 'desc';
@@ -85,6 +86,7 @@ export const NFTPage = () => {
   const { selectedAccount, isLoading } = useAccounts();
   const [tokens, setTokens] = useState<NFTToken[]>([]);
   const [isFetchingTokens, setIsFetchingTokens] = useState<boolean>(false);
+  const deviceSize = useDeviceSize();
 
   const { offers, isFetching: isFetchingOffers, fetch } = useOffers();
 
@@ -152,10 +154,19 @@ export const NFTPage = () => {
       if (filterState?.collections && filterState.collections.length > 0) {
         filteredByCollections = filterState.collections.findIndex((collectionId: number) => token.collectionId === collectionId) > -1;
       }
-      let filteredByTraits = true;
-      if (filterState?.traits && filterState.traits.length > 0) {
-        filteredByTraits = filterState?.traits.some((trait) => {
-          return (token?.attributes?.Traits as string[])?.indexOf(trait) >= 0;
+      let filteredByAttributeCounts = true;
+      if (filterState?.attributeCounts && filterState.attributeCounts.length > 0) {
+        filteredByAttributeCounts = filterState?.attributeCounts.some((attributeCount) => {
+          const _count = Object.values(token.attributes || {})
+            .reduce((acc, attribute) => acc + (Array.isArray(attribute) ? attribute.length : 0), 0);
+          return _count === attributeCount;
+        });
+      }
+      let filteredByAttributes = true;
+      if (filterState?.attributes && filterState.attributes.length > 0) {
+        filteredByAttributes = filterState?.attributes.some((attribute) => {
+          return token.attributes?.[attribute.attribute] && Array.isArray(token.attributes[attribute.attribute]) && (token.attributes[attribute.attribute] as string[])
+            .some((key) => key === attribute.key);
         });
       }
       let filteredBySearchValue = true;
@@ -163,7 +174,7 @@ export const NFTPage = () => {
         filteredBySearchValue = token.collectionName?.includes(searchString) || token.prefix?.includes(searchString) || token.id === Number(searchString);
       }
 
-      return filterByStatus(token) && filteredByPrice && filteredByCollections && filteredByTraits && filteredBySearchValue;
+      return filterByStatus(token) && filteredByPrice && filteredByCollections && filteredByAttributeCounts && filteredByAttributes && filteredBySearchValue;
     },
     [filterState, searchString, api?.market?.kusamaDecimals]
   );
@@ -190,18 +201,18 @@ export const NFTPage = () => {
   }, [tokens, offers, filter, selectOption]);
 
   const filterCount = useMemo(() => {
-    const { statuses, prices, collections = [], traits = [] } = filterState || {};
+    const { statuses, prices, collections = [], attributes = [] } = filterState || {};
     const statusesCount: number = Object.values(statuses || {}).filter((status) => status).length;
     const collectionsCount: number = collections.length;
-    const traitsCount: number = traits.length;
+    const attributesCount: number = attributes.length;
 
-    return statusesCount + collectionsCount + traitsCount + (prices ? 1 : 0);
+    return statusesCount + collectionsCount + attributesCount + (prices ? 1 : 0);
   }, [filterState]);
 
   return (<PagePaper>
     <MarketMainPageStyled>
       <LeftColumn>
-        <Filters value={filterState} onFilterChange={setFilterState} />
+        {deviceSize !== DeviceSize.md && <Filters value={filterState} onFilterChange={setFilterState} />}
       </LeftColumn>
       <MainContent>
         <SearchAndSortingWrapper>
@@ -228,7 +239,7 @@ export const NFTPage = () => {
           <TokensList tokens={featuredTokens} isLoading={isFetchingTokens || isFetchingOffers || isLoading} />
         </TokensListWrapper>
       </MainContent>
-      <MobileFilters<MyTokensFilterState>
+      {deviceSize <= DeviceSize.md && <MobileFilters<MyTokensFilterState>
         value={filterState}
         filterCount={filterCount}
         defaultSortingValue={defaultSortingValue}
@@ -237,7 +248,7 @@ export const NFTPage = () => {
         onFilterChange={setFilterState}
         onSortingChange={onSortingChange}
         filterComponent={Filters}
-      />
+      />}
     </MarketMainPageStyled>
   </PagePaper>);
 };

@@ -14,6 +14,7 @@ import NoItems from '../../components/NoItems';
 import { useAccounts } from '../../hooks/useAccounts';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import SearchField from '../../components/SearchField/SearchField';
+import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
 import { setUrlParameter } from '../../utils/helpers';
 
 type TOption = SelectOptionProps &{
@@ -65,6 +66,7 @@ export const MarketPage = () => {
   const [searchValue, setSearchValue] = useState<string | number>(searchParams.get('searchValue') || '');
   const { offers, offersCount, isFetching, fetchMore, fetch } = useOffers();
   const { selectedAccount } = useAccounts();
+  const deviceSize = useDeviceSize();
 
   const hasMore = offers && offers.length < offersCount;
 
@@ -126,10 +128,10 @@ export const MarketPage = () => {
   }, [filterState, selectedAccount?.address]);
 
   const filterCount = useMemo(() => {
-    const { statuses, prices, collections = [], traits = [] } = filterState || {};
+    const { statuses, prices, collections = [], attributes = [] } = filterState || {};
     const statusesCount: number = Object.values(statuses || {}).filter((status) => status).length;
     const collectionsCount: number = collections.length;
-    const traitsCount: number = traits.length;
+    const traitsCount: number = attributes.length;
 
     return statusesCount + collectionsCount + traitsCount + (prices ? 1 : 0);
   }, [filterState]);
@@ -137,7 +139,7 @@ export const MarketPage = () => {
   return (<PagePaper>
     <MarketMainPageStyled>
       <LeftColumn>
-        <Filters value={filterState} onFilterChange={onFilterChange} />
+        {deviceSize !== DeviceSize.md && <Filters value={filterState} onFilterChange={onFilterChange} />}
       </LeftColumn>
       <MainContent>
         <SearchAndSortingWrapper>
@@ -172,7 +174,7 @@ export const MarketPage = () => {
         </InfiniteScroll>
       </MainContent>
     </MarketMainPageStyled>
-    <MobileFilters
+    {deviceSize <= DeviceSize.md && <MobileFilters
       value={filterState}
       filterCount={filterCount}
       defaultSortingValue={defaultSortingValue}
@@ -181,7 +183,7 @@ export const MarketPage = () => {
       onFilterChange={onFilterChange}
       onSortingChange={onSortingChange}
       filterComponent={Filters}
-    />
+    />}
   </PagePaper>);
 };
 
