@@ -24,6 +24,10 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onAttr
   const { attributeCounts, fetch: fetchAttributeCounts, isFetching: isAttributeCountsFetching } = useAttributeCounts();
   const { collections: selectedCollections = [], attributes: selectedAttributes = [], attributeCounts: selectedAttributeCounts = [] } = value || {};
 
+  useEffect(() => {
+    if (selectedCollections.length === 1 && !isAttributesFetching) fetchAttributes(selectedCollections[0]);
+  }, []);
+
   const onCollectionSelect = useCallback((collectionId: number) => (value: boolean) => {
     let _selectedCollections;
     if (value) {
