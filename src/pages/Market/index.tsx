@@ -15,6 +15,7 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import SearchField from '../../components/SearchField/SearchField';
 import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
+import { setUrlParameter } from '../../utils/helpers';
 
 type TOption = SelectOptionProps &{
   id: string
@@ -59,9 +60,10 @@ const pageSize = 20;
 const defaultSortingValue = sortingOptions[sortingOptions.length - 1];
 
 export const MarketPage = () => {
-  const [filterState, setFilterState] = useState<FilterState | null>(null);
-  const [sortingValue, setSortingValue] = useState<string>(defaultSortingValue.id);
-  const [searchValue, setSearchValue] = useState<string | number>();
+  const searchParams = new URLSearchParams(window.location.search);
+  const [filterState, setFilterState] = useState<FilterState | null>(searchParams.get('filterState') ? JSON.parse(searchParams.get('filterState') || '') : null);
+  const [sortingValue, setSortingValue] = useState<string>(searchParams.get('sortingValue') || defaultSortingValue.id);
+  const [searchValue, setSearchValue] = useState<string | number>(searchParams.get('searchValue') || '');
   const { offers, offersCount, isFetching, fetchMore, fetch } = useOffers();
   const { selectedAccount } = useAccounts();
   const deviceSize = useDeviceSize();
@@ -96,6 +98,7 @@ export const MarketPage = () => {
 
   const onSortingChange = useCallback((value: TOption) => {
     setSortingValue(value.id);
+    setUrlParameter('sortingValue', value.id);
     fetch({ sort: [value.id], pageSize, page: 1, ...(getFilterByState(filterState)) });
   }, [fetch, filterState, getFilterByState]);
 
@@ -105,6 +108,7 @@ export const MarketPage = () => {
 
   const onSearchStringChange = useCallback((value: string) => {
     setSearchValue(value);
+    setUrlParameter('searchValue', value);
   }, [setSearchValue]);
 
   const onSearchInputKeyDown = useCallback((event: KeyboardEvent) => {
@@ -114,6 +118,7 @@ export const MarketPage = () => {
 
   const onFilterChange = useCallback((filterState: FilterState | null) => {
     setFilterState(filterState);
+    setUrlParameter('filterState', filterState ? JSON.stringify(filterState) : '');
     fetch({ pageSize, page: 1, sort: [sortingValue], ...(getFilterByState(filterState)) });
   }, [fetch, sortingValue, getFilterByState]);
 

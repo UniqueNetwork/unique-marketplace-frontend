@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useEffect } from 'react';
 import styled from 'styled-components/macro';
 import { Checkbox, Text } from '@unique-nft/ui-kit';
 import { useCollections } from '../../hooks/useCollections';
@@ -23,6 +23,10 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onAttr
   const { attributes, fetch: fetchAttributes, reset: resetAttributes, isFetching: isAttributesFetching } = useAttributes();
   const { attributeCounts, fetch: fetchAttributeCounts, isFetching: isAttributeCountsFetching } = useAttributeCounts();
   const { collections: selectedCollections = [], attributes: selectedAttributes = [], attributeCounts: selectedAttributeCounts = [] } = value || {};
+
+  useEffect(() => {
+    if (selectedCollections.length === 1 && !isTraitsFetching) fetchTraits(selectedCollections[0]);
+  }, []);
 
   const onCollectionSelect = useCallback((collectionId: number) => (value: boolean) => {
     let _selectedCollections;
