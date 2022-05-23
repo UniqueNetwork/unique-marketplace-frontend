@@ -28,7 +28,7 @@ const AttributeCountsFilter: FC<AttributeCountsFilterProps> = ({ attributeCounts
   }, [onAttributeCountsChange]);
 
   return (<AttributesFilterWrapper>
-    <Accordion title={<>Number<br/> of attributes</>}
+    <Accordion title={<>Attributes</>}
       isOpen={true}
       onClear={onClear}
       isClearShow={selectedAttributeCounts.length > 0}
