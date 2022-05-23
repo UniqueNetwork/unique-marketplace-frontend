@@ -71,7 +71,7 @@ export const MarketPage = () => {
   const hasMore = offers && offers.length < offersCount;
 
   useEffect(() => {
-    fetch({ page: 1, pageSize, ...(getFilterByState(filterState)) });
+    fetch({ page: 1, pageSize, ...(getFilterByState(filterState)), sort: [sortingValue] });
   }, []);
 
   const getFilterByState = useCallback((filterState: FilterState | null) => {
