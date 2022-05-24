@@ -1,4 +1,4 @@
-import React, { KeyboardEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components/macro';
 import BN from 'bn.js';
 import { Select, Text } from '@unique-nft/ui-kit';
@@ -80,7 +80,6 @@ const defaultSortingValue = sortingOptions[sortingOptions.length - 1];
 export const NFTPage = () => {
   const [filterState, setFilterState] = useState<MyTokensFilterState | null>(null);
   const [sortingValue, setSortingValue] = useState<string>(defaultSortingValue.id);
-  const [searchValue, setSearchValue] = useState<string>();
   const [searchString, setSearchString] = useState<string>();
   const [selectOption, setSelectOption] = useState<TOption>();
   const { selectedAccount, isLoading } = useAccounts();
@@ -114,18 +113,9 @@ export const NFTPage = () => {
     setSortingValue(val.id);
   }, []);
 
-  const onChangeSearchValue = useCallback((value: string) => {
-    setSearchValue(value);
-  }, []);
-
-  const onSearch = useCallback(() => {
-    setSearchString(searchValue);
-  }, [searchValue]);
-
-  const onSearchInputKeyDown = useCallback((event: KeyboardEvent) => {
-    if (event.key !== 'Enter') return;
-    onSearch();
-  }, [onSearch]);
+  const onSearch = useCallback((value: string) => {
+    setSearchString(value);
+  }, [setSearchString]);
 
   const filter = useCallback((token: NFTToken & Partial<Offer>) => {
       const { statuses, prices } = filterState || {};
@@ -217,10 +207,8 @@ export const NFTPage = () => {
       <MainContent>
         <SearchAndSortingWrapper>
           <SearchField
-            searchValue={searchValue}
+            searchValue={searchString}
             placeholder='Collection / token'
-            onSearchStringChange={onChangeSearchValue}
-            onSearchInputKeyDown={onSearchInputKeyDown}
             onSearch={onSearch}
           />
           <SortSelectWrapper>
