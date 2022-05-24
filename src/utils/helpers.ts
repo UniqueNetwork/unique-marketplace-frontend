@@ -7,3 +7,11 @@ export const setUrlParameter = (parameter: string, value: string) => {
   searchParams.set(parameter, value);
   history.pushState(null, '', `${window.location.pathname}?${searchParams.toString()}`);
 };
+
+export const parseFilterState = (value: string | null) => {
+  try {
+    return value ? JSON.parse(value) : null;
+  } catch (e) {
+    return null;
+  }
+};

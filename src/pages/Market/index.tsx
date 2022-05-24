@@ -15,7 +15,7 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import SearchField from '../../components/SearchField/SearchField';
 import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
-import { setUrlParameter } from '../../utils/helpers';
+import { parseFilterState, setUrlParameter } from '../../utils/helpers';
 
 type TOption = SelectOptionProps &{
   id: string
@@ -61,7 +61,8 @@ const defaultSortingValue = sortingOptions[sortingOptions.length - 1];
 
 export const MarketPage = () => {
   const searchParams = new URLSearchParams(window.location.search);
-  const [filterState, setFilterState] = useState<FilterState | null>(searchParams.get('filterState') ? JSON.parse(searchParams.get('filterState') || '') : null);
+
+  const [filterState, setFilterState] = useState<FilterState | null>(parseFilterState(searchParams.get('filterState')));
   const [sortingValue, setSortingValue] = useState<string>(searchParams.get('sortingValue') || defaultSortingValue.id);
   const [searchValue, setSearchValue] = useState<string | undefined>(searchParams.get('searchValue') || '');
   const { offers, offersCount, isFetching, fetchMore, fetch } = useOffers();
