@@ -58,7 +58,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
       searchText: searchValue,
       seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
     });
-  }, [selectedAccount?.address, page, fetch, sortString, searchValue]);
+  }, [selectedAccount?.address, currentTab, page, sortString, searchValue, pageSize]);
 
   const onPageSizeChange = useCallback((newPageSize: number) => {
     if (currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address) return;
