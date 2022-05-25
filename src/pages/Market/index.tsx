@@ -122,9 +122,9 @@ export const MarketPage = () => {
     });
   }, [fetch, filterState, getFilterByState, searchValue]);
 
-  const onSearch = useCallback((value: string) => {
+  const onSearch = useCallback((value?: string) => {
     setSearchValue(value);
-    setUrlParameter('searchValue', value);
+    setUrlParameter('searchValue', value || '');
     void fetch({
       page: 1,
       pageSize,
