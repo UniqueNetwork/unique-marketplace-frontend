@@ -155,8 +155,8 @@ export const NFTPage = () => {
       let filteredByAttributes = true;
       if (filterState?.attributes && filterState.attributes.length > 0) {
         filteredByAttributes = filterState?.attributes.some((attribute) => {
-          return token.attributes?.[attribute.attribute] && Array.isArray(token.attributes[attribute.attribute]) && (token.attributes[attribute.attribute] as string[])
-            .some((key) => key === attribute.key);
+          return token.attributes?.[attribute.key] && Array.isArray(token.attributes[attribute.key]) && (token.attributes[attribute.key] as string[])
+            .some((_attribute) => _attribute === attribute.attribute);
         });
       }
       let filteredBySearchValue = true;
