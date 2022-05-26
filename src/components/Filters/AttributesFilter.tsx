@@ -19,7 +19,7 @@ const AttributesFilter: FC<AttributesFilterProps> = ({ selectedAttributes = [], 
     if (value) {
       _selectedAttributes = [...selectedAttributes, attributeItem];
     } else {
-      _selectedAttributes = selectedAttributes.filter((item) => item.attribute !== attributeItem.attribute && item.key !== attributeItem.key);
+      _selectedAttributes = selectedAttributes.filter((item) => !(item.attribute === attributeItem.attribute && item.key === attributeItem.key));
     }
     onAttributesChange?.(_selectedAttributes);
   }, [onAttributesChange, selectedAttributes]);
