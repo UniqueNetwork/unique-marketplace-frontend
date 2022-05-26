@@ -24,17 +24,17 @@ const AttributesFilter: FC<AttributesFilterProps> = ({ selectedAttributes = [], 
     onAttributesChange?.(_selectedAttributes);
   }, [onAttributesChange, selectedAttributes]);
 
-  const onClear = useCallback(() => {
-    onAttributesChange?.([]);
-  }, [onAttributesChange]);
+  const onClear = useCallback((attributeName: string) => () => {
+    onAttributesChange?.(selectedAttributes?.filter((attribute) => attributeName !== attribute.attribute));
+  }, [onAttributesChange, selectedAttributes]);
 
   return (<AttributesFilterWrapper>
     {isAttributesFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
     {Object.keys(attributes).map((attributeName) => (
       <Accordion title={attributeName}
         isOpen={true}
-        onClear={onClear}
-        isClearShow={selectedAttributes?.length > 0}
+        onClear={onClear(attributeName)}
+        isClearShow={selectedAttributes?.some((attribute) => attributeName === attribute.attribute)}
       >
         <CollectionFilterWrapper>
           {attributes[attributeName].map((attribute) => (

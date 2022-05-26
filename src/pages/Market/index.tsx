@@ -152,12 +152,13 @@ export const MarketPage = () => {
   }, [filterState, selectedAccount?.address]);
 
   const filterCount = useMemo(() => {
-    const { statuses, prices, collections = [], attributes = [] } = filterState || {};
+    const { statuses, prices, collections = [], attributes = [], attributeCounts = [] } = filterState || {};
     const statusesCount: number = Object.values(statuses || {}).filter((status) => status).length;
     const collectionsCount: number = collections.length;
-    const traitsCount: number = attributes.length;
+    const numberOfAttributesCount: number = attributeCounts.length;
+    const attributesCount: number = attributes.length;
 
-    return statusesCount + collectionsCount + traitsCount + (prices ? 1 : 0);
+    return statusesCount + collectionsCount + attributesCount + numberOfAttributesCount + (prices ? 1 : 0);
   }, [filterState]);
 
   return (<PagePaper>
