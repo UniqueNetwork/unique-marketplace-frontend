@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Heading } from '@unique-nft/ui-kit';
+import { Heading, Modal } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 import { Primary600 } from '../../../styles/colors';
 import { NotificationSeverity } from '../../../notification/NotificationContext';
@@ -11,8 +11,14 @@ import telegramIcon from '../../../static/icons/telegram.svg';
 import twitterIcon from '../../../static/icons/twitter.svg';
 import { TelegramShareButton, TwitterShareButton, FacebookShareButton, RedditShareButton } from '../../../components/ShareButton';
 
-export const ShareTokenModal = () => {
+interface IShareTokenModalProps {
+  isVisible: boolean;
+  onClose(): void;
+}
+
+const ShareTokenModal = ({ isVisible, onClose }: IShareTokenModalProps) => {
   const { push } = useNotification();
+
   const copyUrl = useCallback(() => {
     void navigator.clipboard.writeText(window.location.href).then(() => {
       push({ severity: NotificationSeverity.success, message: 'Link copied' });
@@ -20,7 +26,7 @@ export const ShareTokenModal = () => {
   }, [push]);
 
   return (
-    <>
+    <Modal isVisible={isVisible} onClose={onClose} isClosable >
       <HeadingWrapper>
         <Heading size='2'>Share</Heading>
       </HeadingWrapper>
@@ -63,7 +69,7 @@ export const ShareTokenModal = () => {
         />
         <span>Copy link</span>
       </CopyBtnWrapper>
-    </>
+    </Modal>
   );
 };
 
@@ -97,3 +103,5 @@ const CopyBtnWrapper = styled.div`
     color: ${Primary600};
   }
 `;
+
+export default ShareTokenModal;

@@ -77,7 +77,6 @@ const TokenPage = () => {
       token={token}
       offer={offer}
       isLoading={isFetchingOffer || isFetchingToken}
-      onShareLinkClick={onActionClick(MarketType.share)}
     >
       <TokenTrading
         token={token}
