@@ -1,17 +1,15 @@
 import { AxiosError } from 'axios';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { get } from '../base';
 import { defaultParams } from '../base/axios';
 import { ResponseError } from '../base/types';
 import { AttributeCount } from './types';
-import { useApi } from '../../../hooks/useApi';
 
 const endpoint = '/api/attribute-counts';
 
 export const getAttributeCounts = (collectionIds: number[]) => get<AttributeCount[]>(`${endpoint}/`, { ...defaultParams, params: { collectionId: collectionIds } });
 
 export const useAttributeCounts = () => {
-  const { settings } = useApi();
   const [attributeCounts, setAttributeCounts] = useState<AttributeCount[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [fetchingError, setFetchingError] = useState<ResponseError | undefined>();
@@ -38,12 +36,6 @@ export const useAttributeCounts = () => {
     setIsFetching(false);
     setFetchingError(undefined);
   }, [getAttributeCounts]);
-
-  useEffect(() => {
-    if (settings && settings.blockchain.unique.collectionIds.length > 0 && attributeCounts.length === 0) {
-      fetch(settings?.blockchain.unique.collectionIds || []);
-    }
-  }, [settings?.blockchain.unique.collectionIds]);
 
   return {
     attributeCounts,
