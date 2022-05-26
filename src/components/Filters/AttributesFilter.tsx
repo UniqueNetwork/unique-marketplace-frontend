@@ -5,6 +5,7 @@ import Accordion from '../Accordion/Accordion';
 import CheckboxSkeleton from '../Skeleton/CheckboxSkeleton';
 import { AttributeItem } from './types';
 import { Attribute } from '../../api/restApi/offers/types';
+import { capitalize } from '../../utils/textUtils';
 
 interface AttributesFilterProps {
   selectedAttributes?: AttributeItem[]
@@ -31,7 +32,7 @@ const AttributesFilter: FC<AttributesFilterProps> = ({ selectedAttributes = [], 
   return (<AttributesFilterWrapper>
     {isAttributesFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
     {Object.keys(attributes).map((attributeName) => (
-      <Accordion title={attributeName}
+      <Accordion title={capitalize(attributeName)}
         isOpen={true}
         onClear={onClear(attributeName)}
         isClearShow={selectedAttributes?.some((attribute) => attributeName === attribute.key)}
