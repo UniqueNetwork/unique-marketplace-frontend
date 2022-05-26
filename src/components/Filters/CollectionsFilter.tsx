@@ -32,7 +32,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onAttr
 
   useEffect(() => {
     if (settings && settings.blockchain.unique.collectionIds.length > 0 && attributeCounts.length === 0) {
-      fetchAttributeCounts(selectedCollections || settings?.blockchain.unique.collectionIds || []);
+      fetchAttributeCounts(selectedCollections?.length ? selectedCollections : settings?.blockchain.unique.collectionIds || []);
     }
   }, [settings?.blockchain.unique.collectionIds]);
 
