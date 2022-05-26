@@ -154,9 +154,9 @@ export const NFTPage = () => {
       }
       let filteredByAttributes = true;
       if (filterState?.attributes && filterState.attributes.length > 0) {
-        filteredByAttributes = filterState?.attributes.some((attribute) => {
-          return token.attributes?.[attribute.attribute] && Array.isArray(token.attributes[attribute.attribute]) && (token.attributes[attribute.attribute] as string[])
-            .some((key) => key === attribute.key);
+        filteredByAttributes = filterState?.attributes.some((attributeItem) => {
+          return token.attributes?.[attributeItem.key] && Array.isArray(token.attributes[attributeItem.key]) && (token.attributes[attributeItem.key] as string[])
+            .some((_attribute) => _attribute === attributeItem.attribute);
         });
       }
       let filteredBySearchValue = true;

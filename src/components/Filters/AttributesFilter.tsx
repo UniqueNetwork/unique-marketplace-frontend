@@ -25,7 +25,7 @@ const AttributesFilter: FC<AttributesFilterProps> = ({ selectedAttributes = [], 
   }, [onAttributesChange, selectedAttributes]);
 
   const onClear = useCallback((attributeName: string) => () => {
-    onAttributesChange?.(selectedAttributes?.filter((attribute) => attributeName !== attribute.attribute));
+    onAttributesChange?.(selectedAttributes?.filter((attribute) => attributeName !== attribute.key));
   }, [onAttributesChange, selectedAttributes]);
 
   return (<AttributesFilterWrapper>
@@ -34,16 +34,16 @@ const AttributesFilter: FC<AttributesFilterProps> = ({ selectedAttributes = [], 
       <Accordion title={attributeName}
         isOpen={true}
         onClear={onClear(attributeName)}
-        isClearShow={selectedAttributes?.some((attribute) => attributeName === attribute.attribute)}
+        isClearShow={selectedAttributes?.some((attribute) => attributeName === attribute.key)}
       >
         <CollectionFilterWrapper>
           {attributes[attributeName].map((attribute) => (
             <AttributeWrapper key={`attribute-${attribute.key}`}>
               <Checkbox
-                checked={selectedAttributes.findIndex((item) => item.attribute === attributeName && item.key === attribute.key) !== -1}
+                checked={selectedAttributes.findIndex((item) => item.key === attributeName && item.attribute === attribute.key) !== -1}
                 label={attribute.key}
                 size={'m'}
-                onChange={onAttributeSelect({ attribute: attributeName, key: attribute.key })}
+                onChange={onAttributeSelect({ key: attributeName, attribute: attribute.key })}
               />
               <Text color={'grey-500'}>{attribute.count.toString()}</Text>
             </AttributeWrapper>
