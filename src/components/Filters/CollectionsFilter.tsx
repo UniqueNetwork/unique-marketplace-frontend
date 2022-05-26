@@ -50,8 +50,8 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onAttr
     else resetAttributes();
 
     if (_selectedCollections.length > 0) fetchAttributeCounts(_selectedCollections);
-    else fetchAttributeCounts(collections.map((collection) => collection.id));
-  }, [selectedCollections, fetchAttributes, resetAttributes, onAttributesChange, onChange]);
+    else fetchAttributeCounts(settings?.blockchain.unique.collectionIds || []);
+  }, [selectedCollections, fetchAttributes, resetAttributes, onAttributesChange, onChange, settings?.blockchain.unique.collectionIds]);
 
   const onCollectionsClear = useCallback(() => {
     onChange([], [], []);
