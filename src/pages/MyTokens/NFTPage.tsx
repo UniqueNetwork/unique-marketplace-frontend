@@ -1,4 +1,4 @@
-import React, { KeyboardEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components/macro';
 import BN from 'bn.js';
 import { Select, Text } from '@unique-nft/ui-kit';
@@ -80,7 +80,6 @@ const defaultSortingValue = sortingOptions[sortingOptions.length - 1];
 export const NFTPage = () => {
   const [filterState, setFilterState] = useState<MyTokensFilterState | null>(null);
   const [sortingValue, setSortingValue] = useState<string>(defaultSortingValue.id);
-  const [searchValue, setSearchValue] = useState<string>();
   const [searchString, setSearchString] = useState<string>();
   const [selectOption, setSelectOption] = useState<TOption>();
   const { selectedAccount, isLoading } = useAccounts();
@@ -114,18 +113,9 @@ export const NFTPage = () => {
     setSortingValue(val.id);
   }, []);
 
-  const onChangeSearchValue = useCallback((value: string) => {
-    setSearchValue(value);
-  }, []);
-
-  const onSearch = useCallback(() => {
-    setSearchString(searchValue);
-  }, [searchValue]);
-
-  const onSearchInputKeyDown = useCallback((event: KeyboardEvent) => {
-    if (event.key !== 'Enter') return;
-    onSearch();
-  }, [onSearch]);
+  const onSearch = useCallback((value: string) => {
+    setSearchString(value);
+  }, [setSearchString]);
 
   const filter = useCallback((token: NFTToken & Partial<Offer>) => {
       const { statuses, prices } = filterState || {};
@@ -164,9 +154,9 @@ export const NFTPage = () => {
       }
       let filteredByAttributes = true;
       if (filterState?.attributes && filterState.attributes.length > 0) {
-        filteredByAttributes = filterState?.attributes.some((attribute) => {
-          return token.attributes?.[attribute.attribute] && Array.isArray(token.attributes[attribute.attribute]) && (token.attributes[attribute.attribute] as string[])
-            .some((key) => key === attribute.key);
+        filteredByAttributes = filterState?.attributes.some((attributeItem) => {
+          return token.attributes?.[attributeItem.key] && Array.isArray(token.attributes[attributeItem.key]) && (token.attributes[attributeItem.key] as string[])
+            .some((_attribute) => _attribute === attributeItem.attribute);
         });
       }
       let filteredBySearchValue = true;
@@ -201,12 +191,13 @@ export const NFTPage = () => {
   }, [tokens, offers, filter, selectOption]);
 
   const filterCount = useMemo(() => {
-    const { statuses, prices, collections = [], attributes = [] } = filterState || {};
+    const { statuses, prices, collections = [], attributes = [], attributeCounts = [] } = filterState || {};
     const statusesCount: number = Object.values(statuses || {}).filter((status) => status).length;
     const collectionsCount: number = collections.length;
+    const numberOfAttributesCount: number = attributeCounts.length;
     const attributesCount: number = attributes.length;
 
-    return statusesCount + collectionsCount + attributesCount + (prices ? 1 : 0);
+    return statusesCount + collectionsCount + attributesCount + numberOfAttributesCount + (prices ? 1 : 0);
   }, [filterState]);
 
   return (<PagePaper>
@@ -217,10 +208,8 @@ export const NFTPage = () => {
       <MainContent>
         <SearchAndSortingWrapper>
           <SearchField
-            searchValue={searchValue}
+            searchValue={searchString}
             placeholder='Collection / token'
-            onSearchStringChange={onChangeSearchValue}
-            onSearchInputKeyDown={onSearchInputKeyDown}
             onSearch={onSearch}
           />
           <SortSelectWrapper>

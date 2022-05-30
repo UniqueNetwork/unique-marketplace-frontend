@@ -5,6 +5,7 @@ import Accordion from '../Accordion/Accordion';
 import CheckboxSkeleton from '../Skeleton/CheckboxSkeleton';
 import { AttributeItem } from './types';
 import { Attribute } from '../../api/restApi/offers/types';
+import { capitalize } from '../../utils/textUtils';
 
 interface AttributesFilterProps {
   selectedAttributes?: AttributeItem[]
@@ -19,31 +20,31 @@ const AttributesFilter: FC<AttributesFilterProps> = ({ selectedAttributes = [], 
     if (value) {
       _selectedAttributes = [...selectedAttributes, attributeItem];
     } else {
-      _selectedAttributes = selectedAttributes.filter((item) => item.attribute !== attributeItem.attribute && item.key !== attributeItem.key);
+      _selectedAttributes = selectedAttributes.filter((item) => !(item.attribute === attributeItem.attribute && item.key === attributeItem.key));
     }
     onAttributesChange?.(_selectedAttributes);
   }, [onAttributesChange, selectedAttributes]);
 
-  const onClear = useCallback(() => {
-    onAttributesChange?.([]);
-  }, [onAttributesChange]);
+  const onClear = useCallback((attributeName: string) => () => {
+    onAttributesChange?.(selectedAttributes?.filter((attribute) => attributeName !== attribute.key));
+  }, [onAttributesChange, selectedAttributes]);
 
   return (<AttributesFilterWrapper>
     {isAttributesFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
     {Object.keys(attributes).map((attributeName) => (
-      <Accordion title={attributeName}
+      <Accordion title={capitalize(attributeName)}
         isOpen={true}
-        onClear={onClear}
-        isClearShow={selectedAttributes?.length > 0}
+        onClear={onClear(attributeName)}
+        isClearShow={selectedAttributes?.some((attribute) => attributeName === attribute.key)}
       >
         <CollectionFilterWrapper>
           {attributes[attributeName].map((attribute) => (
             <AttributeWrapper key={`attribute-${attribute.key}`}>
               <Checkbox
-                checked={selectedAttributes.findIndex((item) => item.attribute === attributeName && item.key === attribute.key) !== -1}
+                checked={selectedAttributes.findIndex((item) => item.key === attributeName && item.attribute === attribute.key) !== -1}
                 label={attribute.key}
                 size={'m'}
-                onChange={onAttributeSelect({ attribute: attributeName, key: attribute.key })}
+                onChange={onAttributeSelect({ key: attributeName, attribute: attribute.key })}
               />
               <Text color={'grey-500'}>{attribute.count.toString()}</Text>
             </AttributeWrapper>
