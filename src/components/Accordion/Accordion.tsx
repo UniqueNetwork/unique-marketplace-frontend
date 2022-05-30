@@ -1,10 +1,10 @@
-import React, { FC, useCallback, useState } from 'react';
+import React, { FC, ReactNode, useCallback, useState } from 'react';
 import styled from 'styled-components/macro';
 import { Button, Text } from '@unique-nft/ui-kit';
 import { Secondary400 } from '../../styles/colors';
 
 interface AccordionProps {
-  title: string
+  title: ReactNode
   isOpen?: boolean
   isClearShow?: boolean
   onClear?(): void

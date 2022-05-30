@@ -6,6 +6,8 @@ export const shortcutText = (text: string) => {
   return start && end ? `${start}...${end}` : text;
 };
 
+export const capitalize = (text: string) => `${text[0].toUpperCase()}${text.slice(1)}`;
+
 export const formatAmount = (amount: number | string) => {
   if (!amount) return '0';
   const parts = amount.toString().split('.');

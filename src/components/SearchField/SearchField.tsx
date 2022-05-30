@@ -1,4 +1,4 @@
-import React, { FC, KeyboardEvent, useCallback } from 'react';
+import React, { FC, KeyboardEvent, useCallback, useEffect, useState } from 'react';
 import { Button, InputText } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 import { IconButton } from '../IconButton/IconButton';
@@ -7,32 +7,47 @@ interface SearchFieldProps {
   className?: string
   searchValue?: string | number
   placeholder?: string
-  onSearchStringChange(value: string): void
-  onSearchInputKeyDown(event: KeyboardEvent): void
-  onSearch(): void
+  onSearch(value: string | undefined): void
 }
 
-const SearchField: FC<SearchFieldProps> = ({ className, searchValue, placeholder, onSearchStringChange, onSearchInputKeyDown, onSearch }) => {
+const SearchField: FC<SearchFieldProps> = ({ className, searchValue, placeholder, onSearch }) => {
+  const [value, setValue] = useState<string | number | undefined>(searchValue);
+
+  const onSearchInputKeyDown = useCallback((event: KeyboardEvent) => {
+    if (!value) return;
+    if (event.key !== 'Enter') return;
+    onSearch(value.toString());
+  }, [onSearch, value]);
+
+  const onSearchClick = useCallback(() => {
+    if (!value) return;
+    onSearch(value.toString());
+  }, [onSearch, value]);
+
   const onClear = useCallback(() => {
-    onSearchStringChange('');
-    onSearch();
-  }, []);
+    setValue(undefined);
+    onSearch(undefined);
+  }, [onSearch]);
+
+  useEffect(() => {
+    setValue(searchValue);
+  }, [searchValue]);
 
   return (
     <SearchWrapper className={className}>
       <InputWrapper>
         <InputTextStyled
           iconLeft={{ name: 'magnify', size: 16 }}
-          onChange={onSearchStringChange}
+          onChange={setValue}
           onKeyDown={onSearchInputKeyDown}
           placeholder={placeholder}
-          value={searchValue?.toString()}
+          value={value?.toString()}
         />
 
-        {searchValue && <ClearButton name={'close'} size={16} onClick={onClear} />}
+        {value && <ClearButton name={'close'} size={16} onClick={onClear} />}
       </InputWrapper>
       <Button
-        onClick={onSearch}
+        onClick={onSearchClick}
         role='primary'
         title='Search'
       />

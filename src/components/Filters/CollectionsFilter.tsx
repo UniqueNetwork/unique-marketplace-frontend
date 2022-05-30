@@ -1,23 +1,40 @@
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useEffect } from 'react';
 import styled from 'styled-components/macro';
 import { Checkbox, Text } from '@unique-nft/ui-kit';
-import { useTraits } from '../../api/restApi/offers/traits';
 import { useCollections } from '../../hooks/useCollections';
 import Accordion from '../Accordion/Accordion';
 import { Avatar } from '../Avatar/Avatar';
-import { Trait } from '../../api/restApi/offers/types';
 import CheckboxSkeleton from '../Skeleton/CheckboxSkeleton';
+import { useAttributes } from '../../api/restApi/offers/attributes';
+import { useAttributeCounts } from '../../api/restApi/offers/attributeCounts';
+import { AttributeItem } from './types';
+import AttributesFilter from './AttributesFilter';
+import AttributeCountsFilter from './AttributeCountsFilter';
+import { useApi } from '../../hooks/useApi';
 
 interface CollectionsFilterProps {
-  value?: { collections?: number[], traits?: string[] } | null
-  onChange(collections: number[], traits?: string[]): void
-  onTraitsChange?(value: string[]): void
+  value?: { collections?: number[], attributes?: { key: string, attribute: string }[], attributeCounts?: number[] } | null
+  onChange(collections: number[], attributes?: AttributeItem[], attributeCounts?: number[]): void
+  onAttributesChange?(value: { key: string, attribute: string }[]): void
+  onAttributeCountsChange?(value: number[]): void
 }
 
-const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onTraitsChange }) => {
+const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onAttributesChange, onAttributeCountsChange }) => {
   const { collections, isFetching } = useCollections();
-  const { traits, fetch: fetchTraits, reset: resetTraits, isFetching: isTraitsFetching } = useTraits();
-  const { collections: selectedCollections = [], traits: selectedTraits = [] } = value || {};
+  const { attributes, fetch: fetchAttributes, reset: resetAttributes, isFetching: isAttributesFetching } = useAttributes();
+  const { attributeCounts, fetch: fetchAttributeCounts, isFetching: isAttributeCountsFetching } = useAttributeCounts();
+  const { collections: selectedCollections = [], attributes: selectedAttributes = [], attributeCounts: selectedAttributeCounts = [] } = value || {};
+  const { settings } = useApi();
+
+  useEffect(() => {
+    if (selectedCollections.length === 1 && !isAttributesFetching) fetchAttributes(selectedCollections[0]);
+  }, []);
+
+  useEffect(() => {
+    if (settings && settings.blockchain.unique.collectionIds.length > 0 && attributeCounts.length === 0) {
+      fetchAttributeCounts(selectedCollections?.length ? selectedCollections : settings?.blockchain.unique.collectionIds || []);
+    }
+  }, [settings?.blockchain.unique.collectionIds]);
 
   const onCollectionSelect = useCallback((collectionId: number) => (value: boolean) => {
     let _selectedCollections;
@@ -27,25 +44,19 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onTrai
       _selectedCollections = selectedCollections.filter((item) => item !== collectionId);
     }
     // since traits are shown only if one collection is selected -> we should always reset them
-    onChange(_selectedCollections, []);
+    onChange(_selectedCollections, [], []);
 
-    if (_selectedCollections.length === 1) fetchTraits(_selectedCollections[0]);
-    else resetTraits();
-  }, [selectedCollections, fetchTraits, resetTraits, onTraitsChange]);
+    if (_selectedCollections.length === 1) fetchAttributes(_selectedCollections[0]);
+    else resetAttributes();
 
-  const onAttributeSelect = useCallback((trait: Trait) => (value: boolean) => {
-    let _selectedTraits;
-    if (value) {
-      _selectedTraits = [...selectedTraits, trait.trait];
-    } else {
-      _selectedTraits = selectedTraits.filter((item) => item !== trait.trait);
-    }
-    onTraitsChange?.(_selectedTraits);
-  }, [onTraitsChange, selectedTraits]);
+    if (_selectedCollections.length > 0) fetchAttributeCounts(_selectedCollections);
+    else fetchAttributeCounts(settings?.blockchain.unique.collectionIds || []);
+  }, [selectedCollections, fetchAttributes, resetAttributes, onAttributesChange, onChange, settings?.blockchain.unique.collectionIds]);
 
   const onCollectionsClear = useCallback(() => {
-    onChange([], []);
-  }, [onChange]);
+    onChange([], [], []);
+    fetchAttributeCounts(settings?.blockchain.unique.collectionIds || []);
+  }, [onChange, settings?.blockchain.unique.collectionIds]);
 
   return (<>
     <Accordion title={'Collections'}
@@ -71,24 +82,18 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onTrai
           ))}
       </CollectionFilterWrapper>
     </Accordion>
-    {onTraitsChange && selectedCollections.length === 1 && <AttributesFilterWrapper>
-      <Accordion title={'Traits'} isOpen={true}>
-        <CollectionFilterWrapper>
-          {isTraitsFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
-          {traits.map((trait) => (
-            <AttributeWrapper key={`attribute-${trait.trait}`}>
-              <Checkbox
-                checked={selectedTraits.indexOf(trait.trait) !== -1}
-                label={trait.trait}
-                size={'m'}
-                onChange={onAttributeSelect(trait)}
-              />
-              <Text color={'grey-400'}>{trait.count.toString()}</Text>
-            </AttributeWrapper>
-          ))}
-        </CollectionFilterWrapper>
-      </Accordion>
-    </AttributesFilterWrapper>}
+    {onAttributeCountsChange && attributeCounts.length > 0 && <AttributeCountsFilter
+      attributeCounts={attributeCounts}
+      selectedAttributeCounts={selectedAttributeCounts}
+      isAttributeCountsFetching={isAttributeCountsFetching}
+      onAttributeCountsChange={onAttributeCountsChange}
+    />}
+    {onAttributesChange && selectedCollections.length === 1 && <AttributesFilter
+      attributes={attributes}
+      selectedAttributes={selectedAttributes}
+      isAttributesFetching={isAttributesFetching}
+      onAttributesChange={onAttributesChange}
+    />}
   </>);
 };
 
@@ -107,26 +112,6 @@ const CollectionFilterWrapper = styled.div`
     text-overflow: ellipsis;
     overflow: hidden;
   }
-`;
-const AttributesFilterWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  row-gap: var(--gap);
-
-  .unique-checkbox-wrapper label {
-    max-width: 230px;
-    text-overflow: ellipsis;
-    overflow: hidden;
-  }
-`;
-
-const AttributeWrapper = styled.div`
-  display: flex;
-  width: 100%;
-  justify-content: space-between;
-  align-items: center;
-  padding-right: 8px;
-  box-sizing: border-box;
 `;
 
 const CheckboxWrapper = styled.div`

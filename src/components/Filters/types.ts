@@ -7,11 +7,14 @@ export type PriceRange = {
   maxPrice?: string
 };
 
+export type AttributeItem = { key: string, attribute: string };
+
 export type FilterState = {
   statuses?: Statuses | undefined
   prices?: PriceRange | undefined
   collections?: number[]
-  traits?: string[]
+  attributes?: AttributeItem[]
+  attributeCounts?: number[]
 };
 
 export type FilterChangeHandler<T> = Dispatch<SetStateAction<T | null>> | ((value: T | null) => void);
