@@ -1,23 +1,19 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Text } from '@unique-nft/ui-kit';
-import { TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/types';
-import styled from 'styled-components/macro';
+import { Button, Dropdown, Icon, TableColumnProps, Text } from '@unique-nft/ui-kit';
+import styled from 'styled-components';
 import { BN } from '@polkadot/util';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { CreateAccountModal } from './Modals/CreateAccount';
 import { ImportViaSeedAccountModal } from './Modals/ImportViaSeed';
-import { DropdownMenu, DropdownMenuItem } from '../../components/DropdownMenu/DropdownMenu';
 import { ImportViaJSONAccountModal } from './Modals/ImportViaJson';
 import { ImportViaQRCodeAccountModal } from './Modals/ImportViaQRCode';
 import { TransferFundsModal } from './Modals/SendFunds';
 import { Table } from '../../components/Table';
 import { formatKusamaBalance } from '../../utils/textUtils';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
-import { Icon } from '../../components/Icon/Icon';
 import { WithdrawDepositModal } from './Modals/WithdrawDeposit';
 import { Account } from '../../account/AccountContext';
-import ArrowUpRight from '../../static/icons/arrow-up-right.svg';
 import { toChainFormatAddress } from '../../api/chainApi/utils/addressUtils';
 import { useApi } from '../../hooks/useApi';
 import AccountCard from '../../components/Account/Account';
@@ -40,7 +36,7 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
     title: 'Account',
     width: '25%',
     field: 'accountInfo',
-    render(accountInfo) {
+    render(accountInfo: AccountInfo) {
       if (accountInfo.deposit) return <></>;
       return (
         <AccountCellWrapper>
@@ -57,14 +53,14 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
     title: 'Balance',
     width: '25%',
     field: 'accountInfo',
-    render(accountInfo) {
+    render(accountInfo: AccountInfo) {
       const { KSM } = accountInfo.balance || { KSM: accountInfo.deposit || 0 };
       const isDeposit = !!accountInfo.deposit;
       return (
         <BalancesWrapper>
-          {!isDeposit && <Text>{`${formatKusamaBalance(KSM || 0)} ${tokenSymbol}`}</Text>}
+          {!isDeposit && <Text>{`${formatKusamaBalance(KSM?.toString() || 0)} ${tokenSymbol}`}</Text>}
           {isDeposit && (<>
-            <Text color={'grey-500'} size={'s'}>{`${formatKusamaBalance(KSM || 0)} ${tokenSymbol}`}</Text>
+            <Text color={'grey-500'} size={'s'}>{`${formatKusamaBalance(KSM?.toString() || 0)} ${tokenSymbol}`}</Text>
             <Text color={'grey-500'} size={'s'}>market deposit</Text>
           </>)}
         </BalancesWrapper>
@@ -75,7 +71,7 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
     title: 'Block explorer',
     width: '25%',
     field: 'accountInfo',
-    render(accountInfo) {
+    render(accountInfo: AccountInfo) {
       if (accountInfo.deposit) return <></>;
       return (
         <LinksWrapper>
@@ -86,7 +82,7 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
           >
             <TextStyled>UniqueScan</TextStyled>
             <IconWrapper>
-              <Icon path={ArrowUpRight} />
+              <Icon name={'arrow-up-right'} size={16} />
             </IconWrapper>
           </LinkStyled>
         </LinksWrapper>
@@ -97,7 +93,7 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
     title: 'Actions',
     width: '25%',
     field: 'accountInfo',
-    render(accountInfo) {
+    render(accountInfo: AccountInfo) {
       if (accountInfo.deposit) {
         return (
           <ActionsWrapper>
@@ -234,11 +230,15 @@ export const AccountsPage = () => {
     <AccountPageWrapper>
       <Row>
         <Button title={'Create substrate account'} onClick={onCreateAccountClick} />
-        <DropdownMenu title={'Add account via'} role={'primary'}>
-          <DropdownMenuItem onClick={onImportViaSeedClick}>Seed phrase</DropdownMenuItem>
-          <DropdownMenuItem onClick={onImportViaJSONClick}>Backup JSON file</DropdownMenuItem>
-          <DropdownMenuItem onClick={onImportViaQRClick}>QR-code</DropdownMenuItem>
-        </DropdownMenu>
+        <Dropdown
+          dropdownRender={() => <DropdownMenu>
+            <DropdownMenuItem onClick={onImportViaSeedClick}>Seed phrase</DropdownMenuItem>
+            <DropdownMenuItem onClick={onImportViaJSONClick}>Backup JSON file</DropdownMenuItem>
+            <DropdownMenuItem onClick={onImportViaQRClick}>QR-code</DropdownMenuItem>
+          </DropdownMenu>}
+        >
+          <Button title={'Add account via'} role={'primary'} />
+        </Dropdown>
         <SearchInputWrapper>
           <SearchInputStyled
             placeholder={'Account'}
@@ -373,5 +373,20 @@ const IconWrapper = styled.div`
     path {
       stroke: currentColor;
     }
+  }
+`;
+
+const DropdownMenu = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+`;
+
+const DropdownMenuItem = styled.div`
+  padding: var(--gap);
+  cursor: pointer;
+  &:hover {
+    background: var(--color-primary-100);
+    color: var(--color-primary-500);
   }
 `;

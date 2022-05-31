@@ -1,5 +1,5 @@
 import React, { FC, useCallback } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
 import StatusFilter from './StatusFilter';
 import PricesFilter from './PricesFilter';

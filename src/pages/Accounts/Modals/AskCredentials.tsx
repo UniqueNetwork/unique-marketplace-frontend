@@ -2,7 +2,7 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import { TCreateAccountBodyModalProps } from './types';
 import { Button, Text } from '@unique-nft/ui-kit';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { PasswordInput } from '../../../components/PasswordInput/PasswordInput';
 import { Avatar } from '../../../components/Avatar/Avatar';
 import { TextInput } from '../../../components/TextInput/TextInput';
@@ -28,7 +28,7 @@ export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountP
       <Avatar size={24} src={DefaultAvatar} address={accountProperties?.address} />
       <Text>{accountProperties?.address || ''}</Text>
     </AddressWrapper>
-    <CredentialsWrapper >
+    <CredentialsWrapper>
       <Text size={'m'}>Name</Text>
       <Text size={'s'} color={'grey-500'}>Give your account a name for easier identification and handling. </Text>
       <TextInput onChange={onAccountNameChange} value={name} />

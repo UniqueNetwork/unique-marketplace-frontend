@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { Button, Text } from '@unique-nft/ui-kit';
 
 import { AdditionalWarning100, AdditionalWarning500, Grey300 } from '../../../styles/colors';

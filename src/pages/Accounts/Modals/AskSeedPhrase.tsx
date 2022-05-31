@@ -1,7 +1,7 @@
 import React, { ChangeEvent, FC, useCallback, useEffect, useState } from 'react';
 import { mnemonicGenerate } from '@polkadot/util-crypto';
-import { Button, Checkbox, Heading, Link, Select, Text, Icon } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import { Button, Checkbox, Heading, Link, Select, Text, Icon, Tooltip } from '@unique-nft/ui-kit';
+import styled from 'styled-components';
 
 import { TCreateAccountBodyModalProps } from './types';
 import { addressFromSeed } from '../../../utils/seedUtils';
@@ -9,8 +9,6 @@ import { addressFromSeed } from '../../../utils/seedUtils';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import { defaultPairType, derivePath } from './CreateAccount';
 import { AdditionalWarning100 } from '../../../styles/colors';
-import { Tooltip } from '../../../components/Tooltip/Tooltip';
-import Question from '../../../static/icons/question.svg';
 import { Avatar } from '../../../components/Avatar/Avatar';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
@@ -61,8 +59,8 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish 
     <Heading size={'4'} >The secret seed value for this account</Heading>
     <SeedGeneratorSelectWrapper>
       <Select options={seedGenerators} value={seedGenerator} onChange={onSeedGeneratorChange} />
-      <Tooltip title={<>Find out more on <Link href='https://' title={'Polkadot Wiki'}>Polkadot Wiki</Link></>} >
-        <Icon file={Question} size={24} />
+      <Tooltip content={<div><Icon name={'question'} size={24} color={'var(--color-primary-500)'} /></div>} placement={'top'} >
+        <>Find out more on <TooltipLink href='https://' title={'Polkadot Wiki'}>Polkadot Wiki</TooltipLink></>
       </Tooltip>
     </SeedGeneratorSelectWrapper>
     <InputSeedWrapper>
@@ -79,7 +77,7 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish 
       Ensure that you keep this seed in a safe place. Anyone with access to it can re-create the account and gain full access to it.
     </TextStyled>
     <ConfirmWrapperRow>
-      <Checkbox label={'I have saved my mnemnic seed safely'}
+      <Checkbox label={'I have saved my mnemonic seed safely'}
         checked={confirmSeedSaved}
         onChange={setConfirmSeedSaved}
         size={'m'}
@@ -143,7 +141,7 @@ const TextStyled = styled(Text)`
   display: flex;
   padding: 8px 16px;
   margin: calc(var(--gap) * 1.5) 0;
-  border-radius: 4px;
+  border-radius: var(--gap);
   background-color: ${AdditionalWarning100};
   width: 100%;
 `;
@@ -161,4 +159,9 @@ const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
   align-items: center;
+`;
+
+const TooltipLink = styled(Link)`
+  color: var(--color-additional-light);
+  text-decoration: underline;
 `;

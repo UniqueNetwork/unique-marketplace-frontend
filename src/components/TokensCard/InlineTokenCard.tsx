@@ -1,11 +1,10 @@
 import React, { FC, useEffect, useState } from 'react';
-import { Text } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import { Loader, Text } from '@unique-nft/ui-kit';
+import styled from 'styled-components';
 
 import { Avatar } from '../Avatar/Avatar';
 import { NFTToken } from '../../api/chainApi/unique/types';
 import { useApi } from '../../hooks/useApi';
-import Loading from '../Loading';
 
 interface InlineTokenCardProps {
   tokenId: number
@@ -33,7 +32,7 @@ export const InlineTokenCard: FC<InlineTokenCardProps> = ({ tokenId, collectionI
         <Text size={'s'} color={'grey-500'}>{`${token?.prefix} #${token?.id}`}</Text>
         {children}
       </TokenInfoWrapper>}
-      {isLoading && <Loading />}
+      {isLoading && <Loader isFullPage />}
     </InlineTokenCardWrapper>
   );
 };

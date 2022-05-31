@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { shortcutText } from '../../../utils/textUtils';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
 import config from '../../../config';
 import { useApi } from '../../../hooks/useApi';

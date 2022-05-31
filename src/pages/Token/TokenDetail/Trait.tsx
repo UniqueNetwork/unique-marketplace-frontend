@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { Text } from '@unique-nft/ui-kit';
 import { Grey100 } from '../../../styles/colors';
 
@@ -12,7 +12,7 @@ export const Trait: FC<ITraitProps> = ({ trait }: ITraitProps) => (
     <Text
       color='secondary-300'
       size='s'
-      weight='medium'
+      weight='regular'
     >
       {trait}
     </Text>

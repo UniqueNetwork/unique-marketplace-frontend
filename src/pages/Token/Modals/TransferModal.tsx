@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import { Button, Heading, Link, Text } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
 import { TTransfer } from './types';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
