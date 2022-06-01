@@ -1,5 +1,5 @@
 import { Heading, Icon, Text } from '@unique-nft/ui-kit';
-import React, { FC, ReactChild, useCallback, useMemo } from 'react';
+import React, { FC, ReactChild, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { Picture } from '../../../components';
@@ -18,6 +18,7 @@ import { Offer } from '../../../api/restApi/offers/types';
 import { useApi } from '../../../hooks/useApi';
 import Skeleton from '../../../components/Skeleton/Skeleton';
 import { TokenSkeleton } from '../../../components/Skeleton/TokenSkeleton';
+import ShareTokenModal from './ShareTokenModal';
 
 interface IProps {
   children: ReactChild[]
@@ -87,14 +88,15 @@ export const CommonTokenDetail: FC<IProps> = ({
     return isTokenOwner(selectedAccount.address, normalizeAccountId(token?.owner || ''));
   }, [isLoading, selectedAccount, token, offer]);
 
-  const onShareClick = useCallback(() => {
-    if (navigator.share) {
-      void navigator.share({
-        title: `NFT: ${prefix || ''} #${tokenId}`,
-        url: window.location.href
-      });
-    }
-  }, [prefix, tokenId]);
+  const [shareModalVisible, setShareModalVisible] = useState(false);
+
+  const openShareModal = useCallback(() => {
+    setShareModalVisible(true);
+  }, []);
+
+  const closeShareModal = useCallback(() => {
+    setShareModalVisible(false);
+  }, []);
 
   return (
     <CommonTokenDetailStyled>
@@ -106,7 +108,7 @@ export const CommonTokenDetail: FC<IProps> = ({
         {isLoading && <TokenSkeleton />}
         {!isLoading && <>
           <Heading size={'1'}>{`${prefix || ''} #${tokenId}`}</Heading>
-          <ShareLink onClick={onShareClick}>
+          <ShareLink onClick={openShareModal}>
             <Text color='grey-500' size='m'>
               Share Link
             </Text>
@@ -140,6 +142,7 @@ export const CommonTokenDetail: FC<IProps> = ({
           />
         </>}
       </Description>
+      <ShareTokenModal isVisible={shareModalVisible} onClose={closeShareModal} />
     </CommonTokenDetailStyled>
   );
 };

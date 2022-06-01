@@ -15,7 +15,7 @@ const tokenSymbol = 'KSM';
 export const tradesColumns: TableColumnProps[] = [
   {
     title: 'NFT',
-    width: '100%',
+    width: '16.66%',
     isSortable: true,
     render(token: NFTToken): React.ReactNode {
       return <TokenComponent token={token} />;
@@ -24,7 +24,7 @@ export const tradesColumns: TableColumnProps[] = [
   },
   {
     title: 'Collection',
-    width: '100%',
+    width: '16.66%',
     isSortable: true,
     render({ id, name }: { id: string, name: string }): React.ReactNode {
       return <LinkWrapper>
@@ -40,27 +40,27 @@ export const tradesColumns: TableColumnProps[] = [
   },
   {
     title: 'Time',
-    width: '100%',
+    width: '16.66%',
     isSortable: true,
     render: (time: number) => <Text color={BlueGrey600}>{timestampTableFormat(new Date(time).valueOf())}</Text>,
     field: 'tradeDate'
   },
   {
     title: 'Price',
-    width: '100%',
+    width: '16.66%',
     isSortable: true,
     render: (value: string) => <Text color={BlueGrey600}>{`${formatKusamaBalance(value)} ${tokenSymbol}`}</Text>,
     field: 'price'
   },
   {
     title: 'Buyer',
-    width: '100%',
+    width: '16.66%',
     render: (data: string) => <AddressComponent text={data} />,
     field: 'buyer'
   },
   {
     title: 'Seller',
-      width: '100%',
+      width: '16.66%',
     render: (data: string) => <AddressComponent text={data} />,
     field: 'seller'
   }

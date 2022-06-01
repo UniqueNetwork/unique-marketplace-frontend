@@ -41,5 +41,9 @@ const LinkWrapper = styled.span`
     .unique-link {
       font-size: 16px;
     }
+
+    @media (max-width: 768px) {
+      column-gap: calc(var(--gap) / 4);
+    }
   }
 `;

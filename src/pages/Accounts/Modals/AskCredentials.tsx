@@ -26,7 +26,7 @@ export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountP
   return (<>
     <AddressWrapper>
       <Avatar size={24} src={DefaultAvatar} address={accountProperties?.address} />
-      <Text>{accountProperties?.address || ''}</Text>
+      <Text color={'grey-500'}>{accountProperties?.address || ''}</Text>
     </AddressWrapper>
     <CredentialsWrapper>
       <Text size={'m'}>Name</Text>
@@ -64,7 +64,7 @@ export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountP
 const AddressWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 2);
-  margin-top: calc(var(--gap) * 2);
+  margin-top: calc(var(--gap) * 1.5);
   border: 1px solid var(--grey-300);
   border-radius: 4px;
   padding: 20px var(--gap);
@@ -89,9 +89,9 @@ const CredentialsWrapper = styled.div`
   display: flex;
   flex-direction: column;
   row-gap: calc(var(--gap) / 2);
-  margin-bottom: calc(var(--gap) * 1.5);
+  margin-bottom: calc(var(--gap) * 2);
   .unique-text.size-m {
-    margin-top: calc(var(--gap) * 2);
+    margin-top: calc(var(--gap) * 1.5);
   }
   .unique-input-text {
     width: 100%;

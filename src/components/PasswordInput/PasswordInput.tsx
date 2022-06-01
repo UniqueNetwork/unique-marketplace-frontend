@@ -28,7 +28,7 @@ export const PasswordInput: FC<PasswordInputProps> = ({ placeholder, value, onCh
         value={value}
         placeholder={placeholder}
       />
-      <IconButton name={isVisibleValue ? 'eye' : 'eye-closed'} onClick={onVisibleValueClick} size={24} />
+      {value && <IconButton name={isVisibleValue ? 'eye' : 'eye-closed'} onClick={onVisibleValueClick} size={24} />}
     </PasswordInputWrapper>
   );
 };

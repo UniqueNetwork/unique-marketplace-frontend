@@ -51,7 +51,7 @@ export const CreateAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish
 
   return (<Modal isVisible={isVisible} isClosable={true} onClose={onClose}>
     <Content>
-      <Heading size='2'>Add an account via seed phrase</Heading>
+      <Heading size='2'>Create substrate account</Heading>
     </Content>
     <ModalBodyComponent
       accountProperties={accountProperties}
