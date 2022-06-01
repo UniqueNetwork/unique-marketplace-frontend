@@ -1,12 +1,11 @@
 import React, { FC, useCallback, useState } from 'react';
-import { Button, Heading, Modal, Text } from '@unique-nft/ui-kit';
+import { Button, Heading, Modal, Text, Upload } from '@unique-nft/ui-kit';
 import { KeyringPair } from '@polkadot/keyring/types';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
 import { TAccountModalProps } from './types';
 import { AdditionalWarning100 } from '../../../styles/colors';
 import { PasswordInput } from '../../../components/PasswordInput/PasswordInput';
-import { Upload } from '../../../components/Upload/Upload';
 import { convertToU8a, keyringFromFile } from '../../../utils/jsonUtils';
 import { useApi } from '../../../hooks/useApi';
 import keyring from '@polkadot/ui-keyring';
@@ -16,16 +15,19 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
   const [pair, setPair] = useState<KeyringPair | null>(null);
   const [password, setPassword] = useState<string>('');
 
-  const onUploadChange = useCallback((file: File) => {
+  const onUploadChange = useCallback((data: { url: string; file: Blob } | null) => {
+    if (!data) return;
     const reader = new FileReader();
     reader.onload = ({ target }: ProgressEvent<FileReader>): void => {
       if (target && target.result && rawRpcApi) {
+        console.log(target.result);
         const data = convertToU8a(target.result as ArrayBuffer);
+
         setPair(keyringFromFile(data, rawRpcApi.genesisHash.toHex()));
       }
     };
 
-    reader.readAsArrayBuffer(file);
+    reader.readAsArrayBuffer(data.file);
   }, [setPair, rawRpcApi]);
 
   const onRestoreClick = useCallback(() => {
@@ -47,7 +49,7 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
         <Text size={'m'}>Upload</Text>
         <Text size={'s'} color={'grey-500'}>Click to select or drop the file here</Text>
       </TitleWrapper>
-      <Upload onChange={onUploadChange} />
+      <Upload onChange={onUploadChange} type={'square'} accept={'.json'} />
     </InputWrapper>
     <InputWrapper>
       <TitleWrapper>
@@ -88,6 +90,13 @@ const InputWrapper = styled.div`
   display: flex;
   flex-direction: column;
   row-gap: var(--gap);
+  
+  .unique-upload {
+    width: 100%;
+    .upload.square, .preview.square {
+      width: 100%;
+    }
+  }
 `;
 
 const TitleWrapper = styled.div`

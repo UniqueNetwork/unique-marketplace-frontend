@@ -1,6 +1,6 @@
 import React, { FC, useCallback } from 'react';
 import { InputText } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { IconButton } from '../IconButton/IconButton';
 
 interface AmountInputProps {

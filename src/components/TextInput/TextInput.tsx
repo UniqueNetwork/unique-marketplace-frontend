@@ -1,8 +1,7 @@
 import React, { FC, useCallback } from 'react';
-import { InputText } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import { IconProps, InputText } from '@unique-nft/ui-kit';
+import styled from 'styled-components';
 import { IconButton } from '../IconButton/IconButton';
-import { IconProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
 interface TextInputProps {
   value: string | undefined
@@ -29,8 +28,8 @@ export const TextInput: FC<TextInputProps> = ({ value, onChange, placeholder, la
       value={value}
       label={label}
       iconLeft={iconLeft}
+      iconRight={<ClearButton name={'close'} size={16} onClick={onClear} />}
     />
-    {value && <ClearButton name={'close'} size={16} onClick={onClear} />}
   </InputWrapper>;
 };
 

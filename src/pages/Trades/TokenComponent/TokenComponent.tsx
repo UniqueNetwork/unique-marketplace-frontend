@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Text } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
 import { NFTToken } from '../../../api/chainApi/unique/types';
 import { Avatar } from '../../../components/Avatar/Avatar';

@@ -1,7 +1,6 @@
 import React from 'react';
-import { TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/types';
-import { Text } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import { TableColumnProps, Text } from '@unique-nft/ui-kit';
+import styled from 'styled-components';
 
 import { AddressComponent } from './AddressComponent/AddressComponent';
 import { timestampTableFormat } from '../../utils/timestampUtils';

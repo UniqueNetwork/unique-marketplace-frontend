@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useEffect } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { Checkbox, Text } from '@unique-nft/ui-kit';
 import { useCollections } from '../../hooks/useCollections';
 import Accordion from '../Accordion/Accordion';

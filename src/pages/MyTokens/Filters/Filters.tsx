@@ -1,5 +1,5 @@
 import React, { FC, useCallback } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
 import PricesFilter from '../../../components/Filters/PricesFilter';
 import { AttributeItem, FiltersProps, PriceRange } from '../../../components/Filters/types';

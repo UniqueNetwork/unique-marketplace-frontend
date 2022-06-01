@@ -1,10 +1,9 @@
-import { Text } from '@unique-nft/ui-kit';
 import { FC, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
-import styled from 'styled-components/macro'; // Todo: https://cryptousetech.atlassian.net/browse/NFTPAR-1201
+import styled from 'styled-components';
+import { Icon, Text } from '@unique-nft/ui-kit';
 
 import { useScreenWidthFromThreshold } from '../../hooks/useScreenWidthFromThreshold';
-import menu from '../../static/icons/menu.svg';
 import { TMenuItems } from '../PageLayout';
 import { WalletManager } from './WalletManager/WalletManager';
 import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
@@ -28,8 +27,9 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
       <LeftSideColumn>
         {showMobileMenu && <MenuIcon
           onClick={mobileMenuToggler}
-          src={menu}
-        />}
+        >
+          <Icon name={'menu'} size={32} />
+        </MenuIcon>}
         <LogoLink to={'/'}>
           <LogoIcon src={'/logos/logo.svg'} />
         </LogoLink>
@@ -40,7 +40,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 $active={activeItem === 'Market'}
                 color='additional-dark'
                 size='m'
-                weight='medium'
+                weight='regular'
               >
                 Market
               </DesktopMenuItem>
@@ -50,7 +50,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 $active={activeItem === 'My tokens'}
                 color='additional-dark'
                 size='m'
-                weight='medium'
+                weight='regular'
               >
                 My tokens
               </DesktopMenuItem>
@@ -60,7 +60,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 $active={activeItem === 'Trades'}
                 color='additional-dark'
                 size='m'
-                weight='medium'
+                weight='regular'
               >
                 Trades
               </DesktopMenuItem>
@@ -70,7 +70,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 $active={activeItem === 'FAQ'}
                 color='additional-dark'
                 size='m'
-                weight='medium'
+                weight='regular'
               >
                 FAQ
               </DesktopMenuItem>
@@ -89,7 +89,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 $active={activeItem === 'Market'}
                 color='additional-dark'
                 size='m'
-                weight='medium'
+                weight='regular'
               >
                 Market
               </TextStyled>
@@ -101,7 +101,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 $active={activeItem === 'My tokens'}
                 color='additional-dark'
                 size='m'
-                weight='medium'
+                weight='regular'
               >
                 My tokens
               </TextStyled>
@@ -113,7 +113,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 $active={activeItem === 'Trades'}
                 color='additional-dark'
                 size='m'
-                weight='medium'
+                weight='regular'
               >
                 Trades
               </TextStyled>
@@ -125,7 +125,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 $active={activeItem === 'FAQ'}
                 color='additional-dark'
                 size='m'
-                weight='medium'
+                weight='regular'
               >
                 FAQ
               </TextStyled>
@@ -137,7 +137,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 $active={activeItem === 'Manage accounts'}
                 color='additional-dark'
                 size='m'
-                weight='medium'
+                weight='regular'
               >
                 Manage accounts
               </TextStyled>
@@ -161,7 +161,7 @@ const LeftSideColumn = styled.div`
   align-items: center;
 `;
 
-const MenuIcon = styled.img`
+const MenuIcon = styled.div`
   width: 32px;
   height: 32px;
   margin-right: 8px;

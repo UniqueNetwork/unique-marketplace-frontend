@@ -1,9 +1,8 @@
 import React, { FC } from 'react';
 import { Heading, Icon, Text } from '@unique-nft/ui-kit';
 import BN from 'bn.js';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
-import Kusama from '../../../static/icons/logo-kusama.svg';
 import { formatKusamaBalance } from '../../../utils/textUtils';
 import { useApi } from '../../../hooks/useApi';
 
@@ -30,7 +29,7 @@ export const PriceForAuction: FC<PriceProps> = ({ price, minStep, topBid }) => {
           ? `${formatKusamaBalance(priceBN.add(minStepBN).toString(), api?.market?.kusamaDecimals)}`
           : `${formatKusamaBalance(startPrice.toString(), api?.market?.kusamaDecimals)}`
         }</Heading>
-        <Icon file={Kusama} size={32} />
+        <Icon name={'chain-kusama'} size={32} />
       </Row>
       {topBid && <Row>
         <Text color='grey-500' size='m'>
