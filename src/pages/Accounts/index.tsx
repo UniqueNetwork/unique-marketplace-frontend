@@ -25,6 +25,8 @@ import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
 import config from '../../config';
 import { TWithdrawBid } from '../../api/restApi/auction/types';
 import { TextInput } from '../../components/TextInput/TextInput';
+import { Primary500 } from '../../styles/colors';
+import AccountTooltip from './AccountTooltip';
 
 const tokenSymbol = 'KSM';
 
@@ -40,6 +42,11 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
     title: 'Account',
     width: '25%',
     field: 'accountInfo',
+    iconRight: {
+      name: 'question',
+      size: 20,
+      color: Primary500
+    },
     render(accountInfo) {
       if (accountInfo.deposit) return <></>;
       return (
@@ -248,11 +255,14 @@ export const AccountsPage = () => {
           />
         </SearchInputWrapper>
       </Row>
-      <Table
-        columns={getAccountsColumns({ isShortAddress: deviceSize === DeviceSize.sm, formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal })}
-        data={filteredAccounts}
-        loading={isLoading || isLoadingDeposits}
-      />
+      <TableWrapper>
+        <AccountTooltip/>
+        <Table
+          columns={getAccountsColumns({ isShortAddress: deviceSize === DeviceSize.sm, formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal })}
+          data={filteredAccounts}
+          loading={isLoading || isLoadingDeposits}
+        />
+      </TableWrapper>
       <CreateAccountModal isVisible={currentModal === AccountModal.create} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
       <ImportViaSeedAccountModal isVisible={currentModal === AccountModal.importViaSeed} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
       <ImportViaJSONAccountModal isVisible={currentModal === AccountModal.importViaJSON} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
@@ -374,4 +384,8 @@ const IconWrapper = styled.div`
       stroke: currentColor;
     }
   }
+`;
+
+const TableWrapper = styled.div`
+  position: relative;
 `;
