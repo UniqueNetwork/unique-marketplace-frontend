@@ -10,9 +10,11 @@ import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import { defaultPairType, derivePath } from './CreateAccount';
 import { AdditionalWarning100 } from '../../../styles/colors';
 import { Tooltip } from '../../../components/Tooltip/Tooltip';
-import Question from '../../../static/icons/question.svg';
 import { Avatar } from '../../../components/Avatar/Avatar';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
+import { IconButton } from '../../../components/IconButton/IconButton';
+import Question from '../../../static/icons/question.svg';
+import Replace from '../../../static/icons/replace.svg';
 
 type TOption = SelectOptionProps & { id: string, title: string };
 
@@ -56,21 +58,21 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish 
   return (<>
     <AddressWrapper>
       <Avatar size={24} src={DefaultAvatar} address={address} />
-      <Text>{address}</Text>
+      <Text color={'grey-500'}>{address}</Text>
     </AddressWrapper>
     <Heading size={'4'} >The secret seed value for this account</Heading>
-    <SeedGeneratorSelectWrapper>
+    {seedGenerators.length > 1 && <SeedGeneratorSelectWrapper>
       <Select options={seedGenerators} value={seedGenerator} onChange={onSeedGeneratorChange} />
       <Tooltip title={<>Find out more on <Link href='https://' title={'Polkadot Wiki'}>Polkadot Wiki</Link></>} >
         <Icon file={Question} size={24} />
       </Tooltip>
-    </SeedGeneratorSelectWrapper>
+    </SeedGeneratorSelectWrapper>}
     <InputSeedWrapper>
       <SeedInput
         onChange={onSeedChange}
         value={seed}
       />
-      <Button onClick={generateSeed} title='Regenerate seed' />
+      <IconButton onClick={generateSeed} size={24} file={Replace}/>
     </InputSeedWrapper>
     <TextStyled
       color='additional-warning-500'
@@ -100,7 +102,8 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish 
 const AddressWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 2);
-  margin: calc(var(--gap) * 2) 0;
+  margin-top: calc(var(--gap) * 1.5);
+  margin-bottom: calc(var(--gap) * 2);
   border: 1px solid var(--grey-300);
   border-radius: 4px;
   padding: 20px var(--gap);
@@ -122,27 +125,32 @@ const SeedGeneratorSelectWrapper = styled.div`
 `;
 
 const InputSeedWrapper = styled.div`
-  border: 1px solid var(--grey-300);
-  border-radius: 4px;
-  padding: var(--gap);
   display: flex;
   margin-bottom: var(--gap);
+  column-gap: calc(var(--gap) / 2);
+  align-items: flex-start;
 `;
 
 const SeedInput = styled.textarea`
-  margin-bottom: 32px;
+  border: 1px solid var(--grey-300);
+  border-radius: 4px;
+  padding: calc(var(--gap) / 2) var(--gap);
   width: 100%;
-  border: none;
   height: auto;
   resize: none;
   outline: 0px none transparent;
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
 `;
 
 const TextStyled = styled(Text)`
   box-sizing: border-box;
   display: flex;
   padding: 8px 16px;
-  margin: calc(var(--gap) * 1.5) 0;
+  margin: var(--gap) 0;
   border-radius: 4px;
   background-color: ${AdditionalWarning100};
   width: 100%;

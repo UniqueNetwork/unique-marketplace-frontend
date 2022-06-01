@@ -10,6 +10,7 @@ import { useAttributeCounts } from '../../api/restApi/offers/attributeCounts';
 import { AttributeItem } from './types';
 import AttributesFilter from './AttributesFilter';
 import AttributeCountsFilter from './AttributeCountsFilter';
+import { useApi } from '../../hooks/useApi';
 
 interface CollectionsFilterProps {
   value?: { collections?: number[], attributes?: { key: string, attribute: string }[], attributeCounts?: number[] } | null
@@ -23,10 +24,17 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onAttr
   const { attributes, fetch: fetchAttributes, reset: resetAttributes, isFetching: isAttributesFetching } = useAttributes();
   const { attributeCounts, fetch: fetchAttributeCounts, isFetching: isAttributeCountsFetching } = useAttributeCounts();
   const { collections: selectedCollections = [], attributes: selectedAttributes = [], attributeCounts: selectedAttributeCounts = [] } = value || {};
+  const { settings } = useApi();
 
   useEffect(() => {
     if (selectedCollections.length === 1 && !isAttributesFetching) fetchAttributes(selectedCollections[0]);
   }, []);
+
+  useEffect(() => {
+    if (settings && settings.blockchain.unique.collectionIds.length > 0 && attributeCounts.length === 0) {
+      fetchAttributeCounts(selectedCollections?.length ? selectedCollections : settings?.blockchain.unique.collectionIds || []);
+    }
+  }, [settings?.blockchain.unique.collectionIds]);
 
   const onCollectionSelect = useCallback((collectionId: number) => (value: boolean) => {
     let _selectedCollections;
@@ -42,12 +50,13 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onAttr
     else resetAttributes();
 
     if (_selectedCollections.length > 0) fetchAttributeCounts(_selectedCollections);
-    else fetchAttributeCounts(collections.map((collection) => collection.id));
-  }, [selectedCollections, fetchAttributes, resetAttributes, onAttributesChange]);
+    else fetchAttributeCounts(settings?.blockchain.unique.collectionIds || []);
+  }, [selectedCollections, fetchAttributes, resetAttributes, onAttributesChange, onChange, settings?.blockchain.unique.collectionIds]);
 
   const onCollectionsClear = useCallback(() => {
     onChange([], [], []);
-  }, [onChange]);
+    fetchAttributeCounts(settings?.blockchain.unique.collectionIds || []);
+  }, [onChange, settings?.blockchain.unique.collectionIds]);
 
   return (<>
     <Accordion title={'Collections'}

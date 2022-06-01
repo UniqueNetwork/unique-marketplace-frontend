@@ -25,7 +25,7 @@ const PricesFilter: FC<PricesFilterProps> = ({ value, onChange }) => {
       return;
     }
     onChange(undefined);
-  }, [minPriceValue, maxPriceValue]);
+  }, [minPriceValue, maxPriceValue, onChange]);
 
   useEffect(() => {
     setMinPriceValue(minPrice);
@@ -44,7 +44,7 @@ const PricesFilter: FC<PricesFilterProps> = ({ value, onChange }) => {
     setMinPriceValue(undefined);
     setMaxPriceValue(undefined);
     onChange(undefined);
-  }, []);
+  }, [onChange]);
 
   return (
     <Accordion title={'Price'}
