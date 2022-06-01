@@ -66,4 +66,8 @@ const TooltipBubble = styled.div<{placement: TooltipPlacement, isVisible: boolea
     left: ${({ placement }) => ({ top: 'unset', bottom: 'unset', left: '100%', right: 'unset' })[placement]};
     right: ${({ placement }) => ({ top: '8px', bottom: '0px', left: 'unset', right: '100%' })[placement]};
   }
+  a {
+    color: ${AdditionalLight} !important;
+    text-decoration: underline;
+  }
 `;
