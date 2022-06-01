@@ -1,6 +1,6 @@
 import { ApiPromise } from '@polkadot/api';
 import { INFTController } from '../types';
-import { collectionName16Decoder, decodeStruct, getOnChainSchema, hex2a } from '../utils/decoder';
+import { collectionName16Decoder, decodeStruct, getCollectionProperties, hex2a } from '../utils/decoder';
 import { fetchTokenImage, getTokenImage, getTokenImageUrl } from '../utils/imageUtils';
 import { getEthAccount, normalizeAccountId } from '../utils/addressUtils';
 import { MetadataType, NFTCollection, NFTToken, TokenId, UniqueDecoratedRpc } from './types';
@@ -44,32 +44,32 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
 
       let imageUrl = '';
 
-      const onChainSchema = getOnChainSchema(collection);
+      const collectionProperties = getCollectionProperties(collection);
 
-      const decodedConstData = decodeStruct({ attr: onChainSchema.attributesConst, data: constData });
-      const decodedVariableData = decodeStruct({ attr: onChainSchema.attributesVar, data: variableData });
+      const decodedConstData = decodeStruct({ attr: collectionProperties.attributesConst, data: constData });
+      const decodedVariableData = decodeStruct({ attr: collectionProperties.attributesVar, data: variableData });
 
-      const schemaVersion = collection.schemaVersion.toJSON() as string;
+      const schemaVersion = collectionProperties.schemaVersion;
 
       if (schemaVersion === 'Unique' && decodedConstData.ipfsJson) {
         const ipfsJson = JSON.parse(decodedConstData.ipfsJson as string) as { ipfs: string };
         imageUrl = `${IPFSGateway}/${ipfsJson.ipfs}`;
       } else if (schemaVersion === 'ImageURL') {
-        imageUrl = getTokenImageUrl(hex2a(collection.offchainSchema.toHex()), tokenId);
+        imageUrl = getTokenImageUrl(collectionProperties.offchainSchema, tokenId);
       } else if (schemaVersion === 'tokenURI') {
-        const collectionMetadata = JSON.parse(hex2a(collection.offchainSchema.toHex())) as MetadataType;
+        const collectionMetadata = JSON.parse(collectionProperties.offchainSchema) as MetadataType;
         imageUrl = await fetchTokenImage(collectionMetadata, tokenId);
       }
 
       let collectionCover = '';
 
-      if (collection?.variableOnChainSchema && hex2a(collection?.variableOnChainSchema.toHex())) {
-        const collectionSchema = getOnChainSchema(collection);
+      if (collectionProperties.attributesVar) {
+        const collectionSchema = getCollectionProperties(collection);
         const image = JSON.parse(collectionSchema?.attributesVar)?.collectionCover as string;
 
         collectionCover = `${IPFSGateway}/${image}`;
       } else {
-        if (collection?.offchainSchema) {
+        if (collectionProperties?.offchainSchema) {
           collectionCover = await getTokenImage(collection, 1);
         }
       }

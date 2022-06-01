@@ -1,7 +1,7 @@
 import { ApiPromise } from '@polkadot/api';
 import { ICollectionController } from '../types';
 import { NFTCollection, NFTToken, TokenId, UniqueDecoratedRpc } from './types';
-import { collectionName16Decoder, getOnChainSchema, hex2a } from '../utils/decoder';
+import { collectionName16Decoder, getCollectionProperties, hex2a } from '../utils/decoder';
 import { getTokenImage } from '../utils/imageUtils';
 import config from '../../../config';
 
@@ -28,13 +28,14 @@ class UniqueCollectionController implements ICollectionController<NFTCollection,
 
     let coverImageUrl = '';
 
-    if (collection?.variableOnChainSchema && hex2a(collection.variableOnChainSchema.toHex())) {
-      const collectionSchema = getOnChainSchema(collection);
-      const image = JSON.parse(collectionSchema?.attributesVar)?.collectionCover as string;
+    const collectionProperties = getCollectionProperties(collection);
+
+    if (collectionProperties?.attributesVar) {
+      const image = JSON.parse(collectionProperties?.attributesVar)?.collectionCover as string;
 
       coverImageUrl = `${IPFSGateway}/${image}`;
     } else {
-      if (collection?.offchainSchema) {
+      if (collectionProperties.offchainSchema) {
         coverImageUrl = await getTokenImage(collection, 1);
       }
     }
