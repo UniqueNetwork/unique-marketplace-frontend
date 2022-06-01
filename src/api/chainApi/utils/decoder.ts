@@ -1,7 +1,7 @@
 import { AttributesDecoded } from '../unique/types';
 import { deserializeNft, ProtobufAttributeType } from './protobufUtils';
 import { addressToEvm } from '@polkadot/util-crypto';
-import { UpDataStructsCollection } from '@unique-nft/types/unique/types';
+import { UpDataStructsCreateCollectionData } from '@unique-nft/types/default/types';
 
 export const collectionName16Decoder = (name: number[]) => {
   const collectionNameArr = name.map((item: number) => item);
@@ -42,21 +42,26 @@ export const decodeStruct = ({ attr, data }: { attr?: any; data?: string }): Att
   return {};
 };
 
-export const getOnChainSchema = (collection: UpDataStructsCollection): {
+type CollectionProperties = {
   attributesConst: string
   attributesVar: string
-} => {
-  if (collection) {
-    return {
-      attributesConst: hex2a(collection.constOnChainSchema.toHex()),
-      attributesVar: hex2a(collection.variableOnChainSchema.toHex())
-    };
-  }
+  offchainSchema: string
+  schemaVersion: string
+}
 
-  return {
+export const getCollectionProperties = (collection: UpDataStructsCreateCollectionData): CollectionProperties => {
+  return collection?.properties.toArray().reduce<CollectionProperties>((acc, property) => {
+    if (property.key.toString() === '_old_constOnChainSchema') acc.attributesConst = property.value.toJSON();
+    if (property.key.toString() === '_old_variableOnChainSchema') acc.attributesVar = property.value.toJSON();
+    if (property.key.toString() === '_old_offchainSchema') acc.offchainSchema = property.value.toJSON();
+    if (property.key.toString() === '_old_schemaVersion') acc.schemaVersion = property.value.toJSON();
+    return acc;
+  }, {
     attributesConst: '',
-    attributesVar: ''
-  };
+    attributesVar: '',
+    offchainSchema: '',
+    schemaVersion: ''
+  });
 };
 
 // decimals: 15 - opal, 18 - eth
