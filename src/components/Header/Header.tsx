@@ -7,7 +7,7 @@ import { useScreenWidthFromThreshold } from '../../hooks/useScreenWidthFromThres
 import menu from '../../static/icons/menu.svg';
 import { TMenuItems } from '../PageLayout';
 import { WalletManager } from './WalletManager/WalletManager';
-import { useAccounts } from '../../hooks/useAccounts';
+import { useAdminLoggingIn } from '../../api/restApi/admin/login';
 
 interface HeaderProps {
   activeItem: TMenuItems;
@@ -20,7 +20,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
   const mobileMenuToggler = useCallback(() => {
     toggleMobileMenu((prevState) => !prevState);
   }, []);
-  const { hasAdminPermission } = useAccounts();
+  const { hasAdminPermission } = useAdminLoggingIn();
 
   return (
     <HeaderStyled>

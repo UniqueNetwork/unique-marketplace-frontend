@@ -19,13 +19,11 @@ export const useAccounts = () => {
     selectedAccount,
     isLoading,
     fetchAccountsError,
-    hasAdminPermission,
     changeAccount,
     setSelectedAccount,
     setAccounts,
     setIsLoading,
     setFetchAccountsError,
-    setHasAdminPermission,
     showSignDialog
   } = useContext(AccountContext);
 
@@ -211,21 +209,6 @@ export const useAccounts = () => {
     return !!matches;
   };
 
-  useEffect(() => {
-    if (checkCookie()) {
-      setHasAdminPermission(true);
-    } else {
-      // TODO: send request to get JWT cookie
-      new Promise<void>((resolve) => {
-        // set mock cookie
-        document.cookie = 'session=alsh12d218eh17ASgjkenqeKLHA';
-        resolve();
-      }).then(() => {
-        setHasAdminPermission(checkCookie());
-      });
-    }
-  }, [selectedAccount]);
-
   return {
     accounts,
     selectedAccount,
@@ -238,7 +221,6 @@ export const useAccounts = () => {
     signMessage,
     fetchAccounts,
     subscribeBalancesChanges,
-    hasAdminPermission,
     changeAccount
   };
 };
