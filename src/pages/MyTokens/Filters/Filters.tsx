@@ -2,12 +2,12 @@ import React, { FC, useCallback } from 'react';
 import styled from 'styled-components/macro';
 
 import PricesFilter from '../../../components/Filters/PricesFilter';
-import { AttributeItem, FiltersProps, PriceRange } from '../../../components/Filters/types';
-import CollectionsFilter from '../../../components/Filters/CollectionsFilter';
-import { MyTokensFilterState, MyTokensStatuses } from './types';
+import { PriceRange } from '../../../components/Filters/types';
+import CollectionsFilter from './CollectionsFilter';
+import { MyTokensFilterState, MyTokensStatuses, AttributeItem, FiltersProps } from './types';
 import StatusFilter from './StatusFilter';
 
-export const Filters: FC<FiltersProps<MyTokensFilterState>> = ({ value, onFilterChange }) => {
+export const Filters: FC<FiltersProps<MyTokensFilterState>> = ({ value, onFilterChange, tokens, collections, isFetchingTokens }) => {
   const onStatusFilterChange = useCallback((statuses: MyTokensStatuses) => {
     onFilterChange({ ...(value || {}), statuses });
   }, [value, onFilterChange]);
@@ -36,6 +36,9 @@ export const Filters: FC<FiltersProps<MyTokensFilterState>> = ({ value, onFilter
       onChange={onCollectionsFilterChange}
       onAttributesChange={onCollectionAttributesFilterChange}
       onAttributeCountsChange={onCollectionAttributeCountsFilterChange}
+      tokens={tokens}
+      collections={collections}
+      isFetchingTokens={isFetchingTokens}
     />
   </FiltersStyled>;
 };
