@@ -1,9 +1,7 @@
-import React, {FC, KeyboardEvent, useCallback, useEffect, useState} from 'react';
-import { Button, InputText, Select } from '@unique-nft/ui-kit';
-import InfiniteScroll from 'react-infinite-scroller';
+import React, { FC, KeyboardEvent, useCallback, useEffect, useState } from 'react';
+import { Button, InputText, Select, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
-import Loading from '../../components/Loading';
 import NoItems from '../../components/NoItems';
 import { Secondary400 } from '../../styles/colors';
 import { NFTCollection } from '../../api/chainApi/unique/types';
@@ -11,8 +9,11 @@ import { CollectionCard } from '../../components/CollectionCard/CollectionCard';
 import { AdminPanelModal } from './Modals/AdminPanelModal';
 import { AdminPanelModalType } from './Modals/types';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
-import {useAccounts} from "../../hooks/useAccounts";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
+import { useNotification } from '../../hooks/useNotification';
+import { NotificationSeverity } from '../../notification/NotificationContext';
+import { useAdminLoggingIn } from '../../api/restApi/admin/login';
+import { useAdminCollections } from '../../api/restApi/admin/collection';
 
 type TOption = {
   iconRight: {
@@ -57,24 +58,28 @@ const sortingOptions: TOption[] = [
   }
 ];
 
-const collectionsMock: Pick<NFTCollection, 'id' | 'collectionName' | 'coverImageUrl' >[] = [{
-  id: 5,
-  collectionName: 'Workaholics',
-  coverImageUrl: 'http://ipfs-gateway.usetech.com/ipfs/Qmap7uz7JKZNovCdLfdDE3p4XA6shghdADS7EsHvLjL6jT/nft_image_1.png\n'
-}];
-
 export const AdminPanelPage: FC = () => {
   const [sortingValue, setSortingValue] = useState<string>();
   const [searchValue, setSearchValue] = useState<string | number>();
   const [modalType, setModalType] = useState(AdminPanelModalType.default);
   const [selectedCollection, setSelectedCollection] = useState<NFTCollection>();
-  const { hasAdminPermission } = useAccounts();
+  const { hasAdminPermission, getJWToken, isLoggingIn } = useAdminLoggingIn();
+  const { collections, isFetching, fetch } = useAdminCollections();
   const navigate = useNavigate();
+  const { push } = useNotification();
 
   useEffect(() => {
     if (!hasAdminPermission) {
       navigate('/');
     }
+    void (async () => {
+      const jwtoken = await getJWToken();
+      if (!jwtoken) {
+        push({ message: 'Unable to login, please try again!', severity: NotificationSeverity.error });
+        navigate('/');
+      }
+      void await fetch();
+    })();
   }, [hasAdminPermission]);
 
   const onSortingChange = useCallback((value: string) => {
@@ -84,7 +89,7 @@ export const AdminPanelPage: FC = () => {
 
   const onSearch = useCallback(() => {
     // TODO: refetch collections
-  }, [fetch, sortingValue, searchValue]);
+  }, [sortingValue, searchValue]);
 
   const onSearchStringChange = useCallback((value: string) => {
     setSearchValue(value);
@@ -95,33 +100,41 @@ export const AdminPanelPage: FC = () => {
     onSearch();
   }, [onSearch]);
 
-  const onLoadMore = useCallback(() => {
-    // TODO: fetch more collections
-  }, []);
-
   const onModalClose = useCallback(() => {
     setModalType(AdminPanelModalType.default);
   }, []);
 
-  const onFinish = useCallback(() => {
+  const onFinish = useCallback(async () => {
     setModalType(AdminPanelModalType.default);
+    void await fetch();
   }, []);
 
   const onAddCollectionClick = useCallback(() => {
     setModalType(AdminPanelModalType.addCollection);
   }, []);
 
-  const onManageSponsorshipClick = useCallback((collcetion: NFTCollection) => () => {
+  const onManageSponsorshipClick = useCallback((collection: NFTCollection) => () => {
     setModalType(AdminPanelModalType.acceptSponsorship);
+    setSelectedCollection(collection);
   }, []);
 
-  const onRemoveSponsorshipClick = useCallback((collcetion: NFTCollection) => () => {
+  const onRemoveSponsorshipClick = useCallback((collection: NFTCollection) => () => {
     setModalType(AdminPanelModalType.rejectSponsorship);
+    setSelectedCollection(collection);
   }, []);
 
-  const onRemoveCollectionClick = useCallback((collcetion: NFTCollection) => () => {
+  const onRemoveCollectionClick = useCallback((collection: NFTCollection) => () => {
     setModalType(AdminPanelModalType.removeCollection);
+    setSelectedCollection(collection);
   }, []);
+
+  if (isLoggingIn) {
+ return (<PagePaper>
+   <AuthorizationMessageWrapper>
+     <Text>Need to authorize administrator</Text>
+   </AuthorizationMessageWrapper>
+ </PagePaper>);
+}
 
   return (<PagePaper>
     <MainContent>
@@ -150,17 +163,18 @@ export const AdminPanelPage: FC = () => {
         </ButtonsWrapper>
       </ControlsWrapper>
       <CollectionListWrapper>
-        {collectionsMock?.length === 0 && <NoItems />}
+        {collections.length === 0 && <NoItems />}
         <CollectionListStyled >
-          {collectionsMock.map((collection) => <CollectionCard collection={collection}
-            onManageSponsorshipClick={onManageSponsorshipClick(collection as NFTCollection)}
-            onRemoveSponsorshipClick={onRemoveSponsorshipClick(collection as NFTCollection)}
-            onRemoveCollectionClick={onRemoveCollectionClick(collection as NFTCollection)}
+          {collections.map((collection) => <CollectionCard collection={collection}
+            onManageSponsorshipClick={onManageSponsorshipClick(collection)}
+            onRemoveSponsorshipClick={onRemoveSponsorshipClick(collection)}
+            onRemoveCollectionClick={onRemoveCollectionClick(collection)}
           />)}
         </CollectionListStyled>
       </CollectionListWrapper>
     </MainContent>
-    <AdminPanelModal collection={selectedCollection}
+    <AdminPanelModal
+      collection={selectedCollection}
       modalType={modalType}
       onClose={onModalClose}
       onFinish={onFinish}
@@ -264,4 +278,10 @@ const CollectionListStyled = styled.div`
     display: flex;
     flex-direction: column;
   }
+`;
+
+const AuthorizationMessageWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;

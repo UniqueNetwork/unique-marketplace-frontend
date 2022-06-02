@@ -2,10 +2,15 @@ import React, { FC, useCallback } from 'react';
 import { Button, Heading, Text } from '@unique-nft/ui-kit';
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
 import styled from 'styled-components/macro';
+import { useAdminCollections } from '../../../api/restApi/admin/collection';
 
-export const RemoveCollectionModal: FC<TAdminPanelModalBodyProps> = ({ collection, onClose }) => {
-  const onConfirmClick = useCallback(() => {
-    onClose();
+export const RemoveCollectionModal: FC<TAdminPanelModalBodyProps> = ({ collection, onFinish }) => {
+  const { remove } = useAdminCollections();
+
+  const onConfirmClick = useCallback(async () => {
+    if (!collection) return;
+    void await remove(collection.id);
+    onFinish();
   }, []);
 
   return (

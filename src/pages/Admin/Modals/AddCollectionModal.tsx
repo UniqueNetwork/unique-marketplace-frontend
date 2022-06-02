@@ -10,17 +10,21 @@ import { Avatar } from '../../../components/Avatar/Avatar';
 import { useApi } from '../../../hooks/useApi';
 import { NotificationSeverity } from '../../../notification/NotificationContext';
 import { useNotification } from '../../../hooks/useNotification';
+import { useAdminCollections } from '../../../api/restApi/admin/collection';
 
-export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onClose }) => {
+export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) => {
   // const [collections, setCollections] = useState<NFTCollection[]>([]);
   const [selectedCollection, setSelectedCollection] = useState<NFTCollection>();
   const [searchString, setSearchString] = useState<string>();
   const { api } = useApi();
   const { push } = useNotification();
+  const { add } = useAdminCollections();
 
-  const onConfirmClick = useCallback(() => {
-    onClose();
-  }, []);
+  const onConfirmClick = useCallback(async () => {
+    if (!selectedCollection) return;
+    await add(selectedCollection.id);
+    onFinish();
+  }, [selectedCollection]);
 
   // const onChangeSelectedCollection = useCallback((collection: NFTCollection | string) => {
   //   if (typeof collection === 'string') return;
