@@ -110,7 +110,7 @@ export const CommonTokenDetail: FC<IProps> = ({
           <Heading size={'1'}>{`${prefix || ''} #${tokenId}`}</Heading>
           <ShareLink onClick={openShareModal}>
             <Text color='grey-500' size='m'>
-              Share Link
+              Share link
             </Text>
             <IconWrapper>
               <Icon name={'shared'} size={24} />
