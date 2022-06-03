@@ -241,6 +241,7 @@ const ShareLink = styled.div`
   align-items: center;
   margin-bottom: var(--gap);
   cursor: pointer;
+  width: 120px;
 `;
 
 const Account = styled.a`
