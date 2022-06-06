@@ -3,6 +3,11 @@ export type LoginPayload = {
 }
 
 export type LoginResponse = {
-    accessToken: string
-    refreshToken: string
-  }
+  accessToken: string
+  refreshToken: string
+}
+
+export type SetCollectionTokensPayload = {
+  collectionId: number,
+  tokens: string
+}

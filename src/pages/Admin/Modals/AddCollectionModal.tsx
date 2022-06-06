@@ -11,6 +11,7 @@ import { useApi } from '../../../hooks/useApi';
 import { NotificationSeverity } from '../../../notification/NotificationContext';
 import { useNotification } from '../../../hooks/useNotification';
 import { useAdminCollections } from '../../../api/restApi/admin/collection';
+import { SelectInput } from '../../../components/SelectInput/SelectInput';
 
 export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) => {
   // const [collections, setCollections] = useState<NFTCollection[]>([]);
@@ -18,7 +19,7 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
   const [searchString, setSearchString] = useState<string>();
   const { api } = useApi();
   const { push } = useNotification();
-  const { add } = useAdminCollections();
+  const { add, fetch, collections } = useAdminCollections();
 
   const onConfirmClick = useCallback(async () => {
     if (!selectedCollection) return;
@@ -26,10 +27,10 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
     onFinish();
   }, [selectedCollection]);
 
-  // const onChangeSelectedCollection = useCallback((collection: NFTCollection | string) => {
-  //   if (typeof collection === 'string') return;
-  //   setSelectedCollection(collection as unknown as NFTCollection);
-  // }, []);
+  const onChangeSelectedCollection = useCallback((collection: NFTCollection | string) => {
+    if (typeof collection === 'string') return;
+    setSelectedCollection(collection as unknown as NFTCollection);
+  }, []);
 
   const onSearchStringChange = useCallback((value: string) => {
     setSearchString(value);
@@ -55,16 +56,16 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
       <Content>
         <Heading size='2'>Add collection</Heading>
       </Content>
-      {/* <SelectWrapper > */}
-      {/*  <SelectInput<NFTCollection> */}
-      {/*    options={collections} */}
-      {/*    value={selectedCollection} */}
-      {/*    onChange={onChangeSelectedCollection} */}
-      {/*    renderOption={(option) => <Text> */}
-      {/*      {option.collectionName} */}
-      {/*    </Text>} */}
-      {/*  /> */}
-      {/* </SelectWrapper> */}
+      <SelectWrapper>
+        <SelectInput<NFTCollection>
+          options={collections}
+          value={selectedCollection}
+          onChange={onChangeSelectedCollection}
+          renderOption={(option) => <Text>
+            {option.collectionName}
+          </Text>}
+        />
+      </SelectWrapper>
       <CollectionSearchWrapper>
         <InputText onChange={onSearchStringChange} value={searchString} placeholder={'Collection ID'} />
         <Button title={'Search'} onClick={onSearch}/>
@@ -98,15 +99,15 @@ const Content = styled.div`
   }
 `;
 
-// const SelectWrapper = styled.div`
-//   display: flex;
-//   flex-direction: column;
-//   row-gap: calc(var(--gap) / 2);
-//   margin-bottom: calc(var(--gap) * 1.5);
-//   .unique-input-text {
-//     width: 100%;
-//   }
-// `;
+const SelectWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  row-gap: calc(var(--gap) / 2);
+  margin-bottom: calc(var(--gap) * 1.5);
+  .unique-input-text {
+    width: 100%;
+  }
+`;
 
 const CollectionSearchWrapper = styled.div`
   display: flex;

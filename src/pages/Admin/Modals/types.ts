@@ -3,5 +3,6 @@ export enum AdminPanelModalType {
   addCollection,
   removeCollection,
   acceptSponsorship,
-  rejectSponsorship
+  rejectSponsorship,
+  selectNFTs
 }
