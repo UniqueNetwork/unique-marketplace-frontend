@@ -1,48 +1,52 @@
 import React, { FC } from 'react';
-import { Text } from '@unique-nft/ui-kit';
+import { Dropdown, Icon, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import { Picture } from '..';
-import { NFTCollection } from '../../api/chainApi/unique/types';
-import { DropdownMenu, DropdownMenuItem } from '../DropdownMenu/DropdownMenu';
 import { AdditionalDark, AdditionalLight } from '../../styles/colors';
-import { Icon } from '../Icon/Icon';
-import ArrowUpRight from '../../static/icons/arrow-up-right.svg';
+import { CollectionData } from 'api/restApi/admin/types';
 
 export type TCollectionCard = {
-  collection: Pick<NFTCollection, 'id' | 'collectionName' | 'coverImageUrl' >
+  collection: CollectionData
+  onManageTokensClick(): void
   onManageSponsorshipClick(): void
   onRemoveSponsorshipClick(): void
   onRemoveCollectionClick(): void
 };
 
-export const CollectionCard: FC<TCollectionCard> = ({ collection, onManageSponsorshipClick, onRemoveCollectionClick, onRemoveSponsorshipClick }) => {
+export const CollectionCard: FC<TCollectionCard> = ({ collection, onManageTokensClick, onRemoveCollectionClick }) => {
   return (
     <CollectionCardStyled>
       <PictureWrapper>
         <Picture alt={collection?.id?.toString() || ''} src={collection.coverImageUrl} />
         <ActionsMenuWrapper>
-          <DropdownMenu title={'...'} >
-            <DropdownMenuItem onClick={onManageSponsorshipClick}>Manage sponsorship</DropdownMenuItem>
-            <DropdownMenuItem onClick={onRemoveSponsorshipClick}>Remove sponsorship</DropdownMenuItem>
-            <DropdownMenuItem onClick={onRemoveCollectionClick}>Remove collection</DropdownMenuItem>
-            <DropdownMenuItem onClick={onRemoveCollectionClick}>View on Scan
-
-              <IconWrapper>
-                <Icon path={ArrowUpRight} />
-              </IconWrapper>
-            </DropdownMenuItem>
-          </DropdownMenu>
+          <Dropdown placement={'right'}
+            dropdownRender={() => (<DropdownMenu>
+              {/* <DropdownMenuItem onClick={onManageSponsorshipClick}>Manage sponsorship</DropdownMenuItem> */}
+              {/* <DropdownMenuItem onClick={onRemoveSponsorshipClick}>Remove sponsorship</DropdownMenuItem> */}
+              <DropdownMenuItem onClick={onManageTokensClick}>Manage tokens</DropdownMenuItem>
+              <DropdownMenuItem onClick={onRemoveCollectionClick}>Remove collection</DropdownMenuItem>
+              <DropdownMenuItem onClick={onRemoveCollectionClick}>View on Scan
+                <IconWrapper>
+                  <Icon name={'arrow-up-right'} size={16} color={'var(--color-primary-500)'} />
+                </IconWrapper>
+              </DropdownMenuItem>
+            </DropdownMenu>)}
+          >
+            <DropdownWrapper>
+              <Icon name='more-horiz' size={24} color='var(--color-additional-light)' />
+            </DropdownWrapper>
+          </Dropdown>
         </ActionsMenuWrapper>
       </PictureWrapper>
       <Description>
-        <Text size='l' weight='medium' color={'secondary-500'}>
+        <Text size='l' weight='regular' color={'secondary-500'}>
           {`${collection.collectionName || ''} [id ${collection?.id}]`}
         </Text>
         <AttributesWrapper>
           <Row>
-            <Text size='s' color={'grey-500'} >Items:</Text>
-            <Text size='s' >{'0'}</Text>
+            <Text size='s' color={'grey-500'} >Allowed tokens:</Text>
+            <Text size='s' >{collection.allowedTokens || 'all'}</Text>
           </Row>
           <Row>
             <Text size='s' color={'grey-500'} >Sponsor:</Text>
@@ -161,5 +165,28 @@ const IconWrapper = styled.div`
     path {
       stroke: currentColor;
     }
+  }
+`;
+
+const DropdownWrapper = styled.div`
+  background: var(--color-additional-dark);
+  border-radius: 4px;
+  padding: calc(var(--gap) / 4) calc(var(--gap) / 4) 0 calc(var(--gap) / 4);
+`;
+
+const DropdownMenu = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+`;
+
+const DropdownMenuItem = styled.div`
+  display: flex;
+  padding: var(--gap);
+  cursor: pointer;
+  &:hover {
+    background: var(--color-primary-100);
+    color: var(--color-primary-500);
   }
 `;

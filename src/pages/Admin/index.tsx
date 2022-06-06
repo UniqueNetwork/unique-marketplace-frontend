@@ -1,5 +1,5 @@
-import React, { FC, KeyboardEvent, useCallback, useEffect, useState } from 'react';
-import { Button, InputText, Select, Text } from '@unique-nft/ui-kit';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { Button, Select, SelectOptionProps } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import NoItems from '../../components/NoItems';
@@ -14,61 +14,67 @@ import { useNotification } from '../../hooks/useNotification';
 import { NotificationSeverity } from '../../notification/NotificationContext';
 import { useAdminLoggingIn } from '../../api/restApi/admin/login';
 import { useAdminCollections } from '../../api/restApi/admin/collection';
+import CardSkeleton from '../../components/Skeleton/CardSkeleton';
+import SearchField from '../../components/SearchField/SearchField';
+import { useAccounts } from '../../hooks/useAccounts';
+import { CollectionData } from '../../api/restApi/admin/types';
 
 type TOption = {
   iconRight: {
-    color: string;
-    name: string;
-    size: number;
-  };
-  id: string;
-  title: string;
+    color: string
+    name: string
+    size: number
+  }
+  id: string
+  title: string
+  direction: string
+  field: keyof CollectionData
 }
 
 const sortingOptions: TOption[] = [
   {
     iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
-    id: 'asc(Price)',
+    id: 'asc(Date)',
+    direction: 'asc',
+    field: 'updatedAt',
     title: 'Date added'
   },
   {
     iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
     id: 'desc(Price)',
+    direction: 'desc',
+    field: 'updatedAt',
     title: 'Date added'
   },
   {
     iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
-    id: 'asc(TokenId)',
-    title: 'Token ID'
+    id: 'asc(collectionId)',
+    direction: 'asc',
+    field: 'id',
+    title: 'Collection ID'
   },
   {
     iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
-    id: 'desc(TokenId)',
-    title: 'Token ID'
-  },
-  {
-    iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
-    id: 'asc(CreationDate)',
-    title: 'Listing date'
-  },
-  {
-    iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
-    id: 'desc(CreationDate)',
-    title: 'Listing date'
+    id: 'desc(collectionId)',
+    direction: 'desc',
+    field: 'id',
+    title: 'Collection ID'
   }
 ];
 
 export const AdminPanelPage: FC = () => {
-  const [sortingValue, setSortingValue] = useState<string>();
-  const [searchValue, setSearchValue] = useState<string | number>();
+  const [sortingValue, setSortingValue] = useState<TOption>(sortingOptions[0]);
+  const [searchValue, setSearchValue] = useState<string>();
   const [modalType, setModalType] = useState(AdminPanelModalType.default);
   const [selectedCollection, setSelectedCollection] = useState<NFTCollection>();
-  const { hasAdminPermission, getJWToken, isLoggingIn } = useAdminLoggingIn();
-  const { collections, isFetching, fetch } = useAdminCollections();
+  const { hasAdminPermission, getJWToken } = useAdminLoggingIn();
+  const { collections, isFetching, fetchCollections } = useAdminCollections();
+  const { isLoading: isAccountsLoading } = useAccounts();
   const navigate = useNavigate();
   const { push } = useNotification();
 
   useEffect(() => {
+    if (isAccountsLoading) return;
     if (!hasAdminPermission) {
       navigate('/');
     }
@@ -78,27 +84,17 @@ export const AdminPanelPage: FC = () => {
         push({ message: 'Unable to login, please try again!', severity: NotificationSeverity.error });
         navigate('/');
       }
-      void await fetch();
+      void await fetchCollections();
     })();
-  }, [hasAdminPermission]);
+  }, [hasAdminPermission, isAccountsLoading]);
 
-  const onSortingChange = useCallback((value: string) => {
-    setSortingValue(value);
-    // TODO: refetch collections
+  const onSortingChange = useCallback((value: SelectOptionProps) => {
+    setSortingValue(value as TOption);
   }, []);
 
-  const onSearch = useCallback(() => {
-    // TODO: refetch collections
-  }, [sortingValue, searchValue]);
-
-  const onSearchStringChange = useCallback((value: string) => {
+  const onSearch = useCallback((value: string) => {
     setSearchValue(value);
-  }, [setSearchValue]);
-
-  const onSearchInputKeyDown = useCallback((event: KeyboardEvent) => {
-    if (event.key !== 'Enter') return;
-    onSearch();
-  }, [onSearch]);
+  }, []);
 
   const onModalClose = useCallback(() => {
     setModalType(AdminPanelModalType.default);
@@ -106,7 +102,7 @@ export const AdminPanelPage: FC = () => {
 
   const onFinish = useCallback(async () => {
     setModalType(AdminPanelModalType.default);
-    void await fetch();
+    void await fetchCollections();
   }, []);
 
   const onAddCollectionClick = useCallback(() => {
@@ -128,24 +124,41 @@ export const AdminPanelPage: FC = () => {
     setSelectedCollection(collection);
   }, []);
 
+  const onManageTokensClick = useCallback((collection: NFTCollection) => () => {
+    setModalType(AdminPanelModalType.selectNFTs);
+    setSelectedCollection(collection);
+  }, []);
+
+  const filteredCollections = useMemo(() => {
+    if (!collections) return [];
+    const sortCollection = (collectionA: CollectionData, collectionB: CollectionData) => {
+      if (!sortingValue) return 0;
+      const order = sortingValue.direction === 'asc' ? 1 : -1;
+      return (collectionA[sortingValue.field] || '') > (collectionB[sortingValue.field] || '') ? order : -order;
+    };
+
+    const filterCollection = (collection: CollectionData) => {
+      if (collection.status === 'Disabled') return false;
+      if (searchValue) {
+        return collection.collectionName?.includes(searchValue.trim() || '') || collection.tokenPrefix.includes(searchValue.trim());
+      }
+      return true;
+    };
+
+    return collections.filter(filterCollection).sort(sortCollection);
+  }, [sortingValue, searchValue, collections]);
+
   return (<PagePaper>
     <MainContent>
       <ControlsWrapper>
         <SearchAndSortingWrapper>
-          <SearchWrapper>
-            <InputTextStyled
-              iconLeft={{ name: 'magnify', size: 16 }}
-              onChange={onSearchStringChange}
-              onKeyDown={onSearchInputKeyDown}
-              placeholder='Collection / token'
-              value={searchValue?.toString()}
-            />
-          </SearchWrapper>
+          <SearchField placeholder='Search' onSearch={onSearch} />
           <SortSelectWrapper>
             <Select
               onChange={onSortingChange}
               options={sortingOptions}
-              value={sortingValue}
+              value={sortingValue?.id}
+              optionKey='id'
             />
           </SortSelectWrapper>
         </SearchAndSortingWrapper>
@@ -155,12 +168,17 @@ export const AdminPanelPage: FC = () => {
         </ButtonsWrapper>
       </ControlsWrapper>
       <CollectionListWrapper>
-        {isFetching}
-        {collections.length === 0 && <NoItems />}
+        {!(isAccountsLoading || isFetching) && filteredCollections.length === 0 && <NoItems />}
         <CollectionListStyled >
-          {collections?.map((collection) => <CollectionCard collection={collection}
+          {isAccountsLoading && isFetching && <>
+            {Array.from({ length: 4 }).map((_, index) => <CardSkeleton key={`card-skeleton-${index}`} />)}
+          </>}
+          {filteredCollections?.map((collection) => <CollectionCard
+            key={`collection-${collection.id}`}
+            collection={collection}
             onManageSponsorshipClick={onManageSponsorshipClick(collection)}
             onRemoveSponsorshipClick={onRemoveSponsorshipClick(collection)}
+            onManageTokensClick={onManageTokensClick(collection)}
             onRemoveCollectionClick={onRemoveCollectionClick(collection)}
           />)}
         </CollectionListStyled>
@@ -199,29 +217,6 @@ const ButtonsWrapper = styled.div`
   column-gap: calc(var(--gap) / 2);
 `;
 
-const SearchWrapper = styled.div`
-  display: flex;
-  flex-grow: 1;
-  margin-right: 16px;
-  button {
-    margin-left: 8px;
-  }
-
-  @media (max-width: 768px) {
-    width: 100%;
-    .unique-input-text {
-      flex-grow: 1;
-    }
-  }
-
-  @media (max-width: 320px) {
-    margin-right: 0;
-    .unique-button {
-      display: none;
-    }
-  }
-`;
-
 const SortSelectWrapper = styled.div`
   @media (max-width: 1024px) {
     display: none;
@@ -235,11 +230,6 @@ const SortSelectWrapper = styled.div`
 const SearchAndSortingWrapper = styled.div`
   display: flex;
   justify-content: space-between;
-`;
-
-const InputTextStyled = styled(InputText)`
-  width: 100%;
-  max-width: 610px;
 `;
 
 const CollectionListWrapper = styled.div`
@@ -271,10 +261,4 @@ const CollectionListStyled = styled.div`
     display: flex;
     flex-direction: column;
   }
-`;
-
-const AuthorizationMessageWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
 `;

@@ -5,11 +5,11 @@ import styled from 'styled-components/macro';
 import { useAdminCollections } from '../../../api/restApi/admin/collection';
 
 export const RemoveCollectionModal: FC<TAdminPanelModalBodyProps> = ({ collection, onFinish }) => {
-  const { remove } = useAdminCollections();
+  const { removeCollection } = useAdminCollections();
 
   const onConfirmClick = useCallback(async () => {
     if (!collection) return;
-    void await remove(collection.id);
+    void await removeCollection(collection.id);
     onFinish();
   }, []);
 

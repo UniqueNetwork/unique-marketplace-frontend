@@ -1,4 +1,3 @@
-import { NFTCollection } from '../../../api/chainApi/unique/types';
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { Modal } from '@unique-nft/ui-kit';
 import { AdminPanelModalType } from './types';
@@ -6,15 +5,17 @@ import { RejectSponsorshipModal } from './RejectSposorshipModal';
 import { RemoveCollectionModal } from './RemoveCollectionModal';
 import { AcceptSponsorshipModal } from './AcceptSponsorshipModal';
 import { AddCollectionModal } from './AddCollectionModal';
+import { SelectNFTsModal } from './SelectNFTsModal';
+import { CollectionData } from '../../../api/restApi/admin/types';
 
 export type TAdminPanelModalProps = {
-  collection?: NFTCollection
+  collection?: CollectionData
   modalType: AdminPanelModalType
   onClose(): void
   onFinish(): void
 }
 export type TAdminPanelModalBodyProps = {
-  collection?: NFTCollection
+  collection?: CollectionData
   setIsClosable(value: boolean): void
   onClose(): void
   onFinish(): void
@@ -39,6 +40,8 @@ export const AdminPanelModal = ({ onClose, onFinish, collection, modalType }: TA
         return AcceptSponsorshipModal;
       case AdminPanelModalType.rejectSponsorship:
         return RejectSponsorshipModal;
+      case AdminPanelModalType.selectNFTs:
+        return SelectNFTsModal;
       case AdminPanelModalType.default:
       default:
         return null;

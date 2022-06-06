@@ -3,8 +3,7 @@ import { useCallback, useState } from 'react';
 import { post, get, deleteRequest } from '../base';
 import { defaultParams } from '../base/axios';
 import { JWTokenLocalStorageKey } from './login';
-import { NFTCollection } from '../../chainApi/unique/types';
-import { SetCollectionTokensPayload } from './types';
+import { CollectionData, SetCollectionTokensPayload } from './types';
 
 const endpoint = '/api/admin';
 
@@ -15,25 +14,25 @@ export const setCollectionTokens = ({ collectionId, tokens }: SetCollectionToken
 
 export const useAdminCollections = () => {
   const [isFetching, setIsFetching] = useState(false);
-  const [collections, setCollections] = useState<NFTCollection[]>([]);
+  const [collections, setCollections] = useState<CollectionData[]>([]);
 
-  const fetch = useCallback(async () => {
+  const fetchCollections = useCallback(async () => {
     setIsFetching(true);
-    const response = await getCollections();
-    setIsFetching(false);
-    if (response.status === 200) {
+    const { data: response } = await getCollections();
+    if (response.statusCode === 200) {
       setCollections(response.data);
     }
+    setIsFetching(false);
   }, []);
 
-  const add = useCallback(async (id: number) => {
+  const appendCollection = useCallback(async (id: number) => {
     setIsFetching(true);
     const response = await addCollection(id);
     setIsFetching(false);
     return response.status === 201;
   }, []);
 
-  const remove = useCallback(async (id: number) => {
+  const removeCollection = useCallback(async (id: number) => {
     setIsFetching(true);
     const response = await deleteCollections(id);
     setIsFetching(false);
@@ -49,9 +48,9 @@ export const useAdminCollections = () => {
   return {
     collections,
     isFetching,
-    fetch,
-    add,
-    remove,
+    fetchCollections,
+    appendCollection,
+    removeCollection,
     setAllowedTokens
   };
 };

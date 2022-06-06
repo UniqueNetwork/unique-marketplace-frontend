@@ -1,29 +1,26 @@
-import React, { FC, useCallback, useState } from 'react';
-import { Button, Heading, InputText, Text } from '@unique-nft/ui-kit';
+import React, { FC, useCallback, useEffect, useState } from 'react';
+import { Button, Heading, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
 import { NFTCollection } from '../../../api/chainApi/unique/types';
-// import { SelectInput } from '../../../components/SelectInput/SelectInput';
 import { BlueGrey100 } from '../../../styles/colors';
 import { Avatar } from '../../../components/Avatar/Avatar';
-import { useApi } from '../../../hooks/useApi';
-import { NotificationSeverity } from '../../../notification/NotificationContext';
-import { useNotification } from '../../../hooks/useNotification';
 import { useAdminCollections } from '../../../api/restApi/admin/collection';
 import { SelectInput } from '../../../components/SelectInput/SelectInput';
+import { CollectionData } from '../../../api/restApi/admin/types';
 
 export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) => {
-  // const [collections, setCollections] = useState<NFTCollection[]>([]);
   const [selectedCollection, setSelectedCollection] = useState<NFTCollection>();
-  const [searchString, setSearchString] = useState<string>();
-  const { api } = useApi();
-  const { push } = useNotification();
-  const { add, fetch, collections } = useAdminCollections();
+  const { appendCollection, collections, fetchCollections } = useAdminCollections();
+
+  useEffect(() => {
+    void fetchCollections();
+  }, []);
 
   const onConfirmClick = useCallback(async () => {
     if (!selectedCollection) return;
-    await add(selectedCollection.id);
+    await appendCollection(selectedCollection.id);
     onFinish();
   }, [selectedCollection]);
 
@@ -32,44 +29,22 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
     setSelectedCollection(collection as unknown as NFTCollection);
   }, []);
 
-  const onSearchStringChange = useCallback((value: string) => {
-    setSearchString(value);
-  }, []);
-
-  const onSearch = useCallback(async () => {
-    if (!api?.collection) return;
-
-    const collection = await api.collection.getCollection(Number(searchString));
-
-    if (collection) {
-      setSelectedCollection(collection);
-    } else {
-      push({
-        severity: NotificationSeverity.warning,
-        message: `Collection with ID ${searchString} not found`
-      });
-    }
-  }, [searchString, api?.collection]);
-
   return (<>
     <ModalWrapper>
       <Content>
         <Heading size='2'>Add collection</Heading>
       </Content>
       <SelectWrapper>
-        <SelectInput<NFTCollection>
-          options={collections}
+        <SelectInput<CollectionData>
+          options={collections.filter(({ status }) => status === 'Disabled')}
           value={selectedCollection}
           onChange={onChangeSelectedCollection}
-          renderOption={(option) => <Text>
-            {option.collectionName}
-          </Text>}
+          renderOption={(option) => <CollectionOption>
+            <Avatar src={option.coverImageUrl} size={24} type={'circle'} />
+            <Text>{`${option?.name} [ID ${option?.id}]`}</Text>
+          </CollectionOption>}
         />
       </SelectWrapper>
-      <CollectionSearchWrapper>
-        <InputText onChange={onSearchStringChange} value={searchString} placeholder={'Collection ID'} />
-        <Button title={'Search'} onClick={onSearch}/>
-      </CollectionSearchWrapper>
       {selectedCollection && <>
         <Text size={'m'}>You have selected collection</Text>
 
@@ -103,19 +78,15 @@ const SelectWrapper = styled.div`
   display: flex;
   flex-direction: column;
   row-gap: calc(var(--gap) / 2);
-  margin-bottom: calc(var(--gap) * 1.5);
+  margin: calc(var(--gap) * 1.5) 0;
   .unique-input-text {
     width: 100%;
   }
 `;
 
-const CollectionSearchWrapper = styled.div`
+const CollectionOption = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 2);
-  margin: calc(var(--gap) * 1.5) 0;
-  & > .unique-input-text {
-    flex-grow: 1;
-  }
 `;
 
 const CollectionNameStyled = styled.div`

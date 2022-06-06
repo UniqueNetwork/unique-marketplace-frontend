@@ -3,7 +3,6 @@ import { Button, Heading, InputText, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
-import { AdditionalWarning100 } from '../../../styles/colors';
 import { useAdminCollections } from '../../../api/restApi/admin/collection';
 import { useNotification } from '../../../hooks/useNotification';
 import { NotificationSeverity } from '../../../notification/NotificationContext';
@@ -11,7 +10,7 @@ import { NotificationSeverity } from '../../../notification/NotificationContext'
 export const SelectNFTsModal: FC<TAdminPanelModalBodyProps> = ({ collection, onFinish }) => {
   const { push } = useNotification();
   const { setAllowedTokens } = useAdminCollections();
-  const [tokens, setTokens] = useState('');
+  const [tokens, setTokens] = useState(collection?.allowedTokens || '');
 
   const onAcceptClick = useCallback(async () => {
     if (!collection?.id) return;
@@ -66,17 +65,10 @@ const Row = styled.div`
 const InputWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 2);
-  border: 1px solid var(--grey-300);
-`;
-
-const TextStyled = styled(Text)`
-  box-sizing: border-box;
-  display: flex;
-  padding: 8px 16px;
-  margin-bottom: 24px;
-  border-radius: 4px;
-  background-color: ${AdditionalWarning100};
-  width: 100%;
+  margin-bottom: calc(var(--gap) * 2);
+  .unique-input-text {
+    width: 100%;
+  }
 `;
 
 const ButtonWrapper = styled.div`
