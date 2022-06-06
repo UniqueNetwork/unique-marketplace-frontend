@@ -20,11 +20,8 @@ export const useAdminLoggingIn = () => {
   const { selectedAccount, signMessage } = useAccounts();
 
   const hasAdminPermission: boolean = useMemo(() => {
-    if (!selectedAccount?.address) return false;
-    const jwtoken = localStorage.getItem(JWTokenLocalStorageKey);
-    if (jwtoken) return true;
-    // TODO: how to know who is admin and who can authorize as admin
-    return compareEncodedAddresses(selectedAccount.address, 'yGFrVcDk4QTaXKfePunK9dNQNzDqeTek3qPXTYpU5hGaXoKZT');
+    console.log(localStorage.getItem(JWTokenLocalStorageKey));
+    return !!localStorage.getItem(JWTokenLocalStorageKey);
   }, [selectedAccount?.address]);
 
   const logIn = useCallback(async () => {
@@ -42,7 +39,7 @@ export const useAdminLoggingIn = () => {
     }, signature);
 
     setIsLoggingIn(false);
-    if (response.status === 201) {
+    if (response.status === 200) {
       localStorage.setItem(JWTokenLocalStorageKey, response.data.accessToken);
       return response.data.accessToken;
     }

@@ -128,14 +128,6 @@ export const AdminPanelPage: FC = () => {
     setSelectedCollection(collection);
   }, []);
 
-  if (isLoggingIn) {
- return (<PagePaper>
-   <AuthorizationMessageWrapper>
-     <Text>Need to authorize administrator</Text>
-   </AuthorizationMessageWrapper>
- </PagePaper>);
-}
-
   return (<PagePaper>
     <MainContent>
       <ControlsWrapper>
@@ -158,14 +150,15 @@ export const AdminPanelPage: FC = () => {
           </SortSelectWrapper>
         </SearchAndSortingWrapper>
         <ButtonsWrapper>
-          <Button title={'Сreate new via wallet'} onClick={onAddCollectionClick}/>
+          <Button title={'Create new via wallet'} onClick={onAddCollectionClick}/>
           <Button role={'primary'} title={'Add to the marketplace'} onClick={onAddCollectionClick}/>
         </ButtonsWrapper>
       </ControlsWrapper>
       <CollectionListWrapper>
+        {isFetching}
         {collections.length === 0 && <NoItems />}
         <CollectionListStyled >
-          {collections.map((collection) => <CollectionCard collection={collection}
+          {collections?.map((collection) => <CollectionCard collection={collection}
             onManageSponsorshipClick={onManageSponsorshipClick(collection)}
             onRemoveSponsorshipClick={onRemoveSponsorshipClick(collection)}
             onRemoveCollectionClick={onRemoveCollectionClick(collection)}

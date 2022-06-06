@@ -74,7 +74,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 FAQ
               </DesktopMenuItem>
             </Link>
-            {hasAdminPermission && <Link to='admin'>
+            {hasAdminPermission && <Link to='administration'>
               <DesktopMenuItem
                 $active={activeItem === 'Admin panel'}
                 color='additional-dark'
@@ -141,7 +141,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
             </Link>
           </LinkWrapper>
           {hasAdminPermission && <LinkWrapper onClick={mobileMenuToggler}>
-            <Link to='admin'>
+            <Link to='administration'>
               <TextStyled
                 $active={activeItem === 'Admin panel'}
                 color='additional-dark'
