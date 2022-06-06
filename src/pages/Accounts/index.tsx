@@ -111,7 +111,7 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
       return (
         <ActionsWrapper>
           <Button title={'Send'} onClick={onShowSendFundsModal(accountInfo.address)} />
-          <Button title={'Get'} disabled={true} onClick={onShowSendFundsModal(accountInfo.address)} />
+          <Button title={'Get'} disabled={true} />
         </ActionsWrapper>
       );
     }
@@ -351,6 +351,7 @@ const LinkStyled = styled.a`
   display: flex;
   align-items: center;
   column-gap: calc(var(--gap) / 4);
+  width: fit-content;
 `;
 
 const ActionsWrapper = styled.div`
