@@ -244,7 +244,10 @@ export const AccountsPage = () => {
             <DropdownMenuItem onClick={onImportViaQRClick}>QR-code</DropdownMenuItem>
           </DropdownMenu>}
         >
-          <Button title={'Add account via'} role={'primary'} />
+          <DropdownButtonWrapper>
+            <Button title={'Add account via'} role={'primary'} />
+            <Icon name={'carret-down'} size={16} color={'var(--color-additional-light)'} />
+          </DropdownButtonWrapper>
         </Dropdown>
         <SearchInputWrapper>
           <SearchInputStyled
@@ -388,6 +391,19 @@ const IconWrapper = styled.div`
 
 const TableWrapper = styled.div`
   position: relative;
+`;
+
+const DropdownButtonWrapper = styled.div`
+  position: relative;
+  .unique-button {
+    padding-right: calc(var(--gap) * 3);
+  }
+  .icon {
+    position: absolute;
+    right: var(--gap);
+    top: 50%;
+    margin-top: -8px;
+  }
 `;
 
 const DropdownMenu = styled.div`
