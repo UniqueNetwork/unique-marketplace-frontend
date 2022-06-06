@@ -28,6 +28,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
   useEffect(() => {
     if (isLoadingAccounts || (currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address)) return;
     setSearchValue(undefined);
+    setPage(0);
     fetch({
       page: 1,
       pageSize,
@@ -107,8 +108,8 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
   return (<PagePaper>
     <TradesPageWrapper>
       <StyledSearchField
-        searchValue={searchValue}
         placeholder='Collection / token'
+        searchValue={searchValue}
         onSearch={onSearch}
       />
       <StyledTable
@@ -119,11 +120,11 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
       />
       {!!tradesCount && <PaginationWrapper>
         <Pagination
-          size={tradesCount}
           current={page}
-          withPerPageSelector
+          size={tradesCount}
           onPageChange={onPageChange}
           onPageSizeChange={onPageSizeChange}
+          withPerPageSelector
           withIcons
         />
       </PaginationWrapper>}
