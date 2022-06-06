@@ -35,7 +35,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
       sort: sortString,
       seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
     });
-  }, [currentTab, selectedAccount?.address, sortString, isLoadingAccounts]);
+  }, [currentTab, selectedAccount?.address, isLoadingAccounts]);
 
   const onSearch = useCallback((value: string) => {
     setSearchValue(value);
