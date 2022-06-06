@@ -1,10 +1,10 @@
-import React, { FC, useCallback, useState } from 'react';
-import styled from 'styled-components/macro';
+import React, { FC, ReactNode, useCallback, useState } from 'react';
+import styled from 'styled-components';
 import { Button, Text } from '@unique-nft/ui-kit';
 import { Secondary400 } from '../../styles/colors';
 
 interface AccordionProps {
-  title: string
+  title: ReactNode
   isOpen?: boolean
   isClearShow?: boolean
   onClear?(): void
@@ -44,7 +44,7 @@ const Accordion: FC<AccordionProps> = ({ title, isOpen: isOpenProps, children, o
           <Text>{title}</Text>
           <AccordionChevronIcon />
         </AccordionTitle>
-        {isClearShow && <Button size={'s'}
+        {isClearShow && <Button size={'small'}
           title={'Clear'}
           onClick={onClearClick}
           role={'danger'}

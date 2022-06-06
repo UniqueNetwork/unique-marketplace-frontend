@@ -1,46 +1,42 @@
-import React, { Dispatch, FC, SetStateAction, useCallback } from 'react';
-import styled from 'styled-components/macro';
+import React, { FC, useCallback } from 'react';
+import styled from 'styled-components';
 
 import PricesFilter from '../../../components/Filters/PricesFilter';
-import { PriceRange } from '../../../components/Filters/types';
+import { AttributeItem, FiltersProps, PriceRange } from '../../../components/Filters/types';
 import CollectionsFilter from '../../../components/Filters/CollectionsFilter';
-import { MyTokensStatuses } from './types';
+import { MyTokensFilterState, MyTokensStatuses } from './types';
 import StatusFilter from './StatusFilter';
-import { FilterChangeHandler } from '../../../components/Filters/MobileFilter';
 
-export type MyTokensFilterState = Partial<MyTokensStatuses> & Partial<PriceRange> & { collectionIds?: number[] } & Partial<{ traits: string[] }>
+export const Filters: FC<FiltersProps<MyTokensFilterState>> = ({ value, onFilterChange }) => {
+  const onStatusFilterChange = useCallback((statuses: MyTokensStatuses) => {
+    onFilterChange({ ...(value || {}), statuses });
+  }, [value, onFilterChange]);
 
-type FiltersProps = {
-  onFilterChange: FilterChangeHandler<MyTokensFilterState>
-}
+  const onPricesFilterChange = useCallback((prices: PriceRange | undefined) => {
+    onFilterChange({ ...(value || {}), prices });
+  }, [value, onFilterChange]);
 
-export const Filters: FC<FiltersProps> = ({ onFilterChange }) => {
-  const onStatusFilterChange = useCallback((value: MyTokensStatuses) => {
-    (onFilterChange as Dispatch<SetStateAction<MyTokensFilterState | null>>)((filters) => ({ ...filters, ...value }));
-  }, [onFilterChange]);
+  const onCollectionsFilterChange = useCallback((collections: number[], attributes?: AttributeItem[], attributeCounts?: number[]) => {
+    onFilterChange(({ ...(value || {}), collections, attributes, attributeCounts }));
+  }, [value, onFilterChange]);
 
-  const onPricesFilterChange = useCallback((value: PriceRange | undefined) => {
-    const { minPrice, maxPrice } = (value as PriceRange) || {};
-    (onFilterChange as Dispatch<SetStateAction<MyTokensFilterState | null>>)((filters) => ({ ...filters, minPrice, maxPrice }));
-  }, [onFilterChange]);
+  const onCollectionAttributesFilterChange = useCallback((attributes: AttributeItem[]) => {
+    onFilterChange({ ...(value || {}), attributes });
+  }, [value, onFilterChange]);
 
-  const onCollectionsFilterChange = useCallback((collectionIds: number[]) => {
-    (onFilterChange as Dispatch<SetStateAction<MyTokensFilterState | null>>)((filters) => ({ ...filters, collectionIds }));
-  }, [onFilterChange]);
-
-  const onStatusFilterClear = useCallback(() => {
-    (onFilterChange as Dispatch<SetStateAction<MyTokensFilterState | null>>)((filters) => ({ ...filters }));
-  }, [onFilterChange]);
-
-  // const onCollectionTraitsFilterChange = useCallback((value: string[]) => {
-  //   const newFilter = { traits: value };
-  //   onFilterChange(newFilter);
-  // }, [onFilterChange]);
+  const onCollectionAttributeCountsFilterChange = useCallback((attributeCounts: number[]) => {
+    onFilterChange({ ...(value || {}), attributeCounts });
+  }, [value, onFilterChange]);
 
   return <FiltersStyled>
-    <StatusFilter onChange={onStatusFilterChange}/>
-    <PricesFilter onChange={onPricesFilterChange} />
-    <CollectionsFilter onChange={onCollectionsFilterChange} />
+    <StatusFilter value={value?.statuses} onChange={onStatusFilterChange}/>
+    <PricesFilter value={value?.prices} onChange={onPricesFilterChange} />
+    <CollectionsFilter
+      value={value}
+      onChange={onCollectionsFilterChange}
+      onAttributesChange={onCollectionAttributesFilterChange}
+      onAttributeCountsChange={onCollectionAttributeCountsFilterChange}
+    />
   </FiltersStyled>;
 };
 

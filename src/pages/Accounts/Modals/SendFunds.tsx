@@ -1,10 +1,9 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Avatar, Button, Heading, Modal, Text } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import { Button, Heading, Modal, Text } from '@unique-nft/ui-kit';
+import styled from 'styled-components';
 
 import { TTransferFunds } from './types';
 import { useAccounts } from '../../../hooks/useAccounts';
-import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import { AdditionalWarning100 } from '../../../styles/colors';
 import { SelectInput } from '../../../components/SelectInput/SelectInput';
 import { Account } from '../../../account/AccountContext';
@@ -219,7 +218,7 @@ const AmountWrapper = styled.div`
 `;
 
 const AmountInputWrapper = styled.div`
-  .unique-input-text {
+  .unique-input-text, div[class^=NumberInput] {
     width: 100%;
   }
 `;

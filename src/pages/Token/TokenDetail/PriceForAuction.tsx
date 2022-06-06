@@ -1,9 +1,8 @@
 import React, { FC } from 'react';
 import { Heading, Icon, Text } from '@unique-nft/ui-kit';
 import BN from 'bn.js';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
-import Kusama from '../../../static/icons/logo-kusama.svg';
 import { formatKusamaBalance } from '../../../utils/textUtils';
 import { useApi } from '../../../hooks/useApi';
 
@@ -18,16 +17,19 @@ const tokenSymbol = 'KSM';
 export const PriceForAuction: FC<PriceProps> = ({ price, minStep, topBid }) => {
   const { api } = useApi();
 
-  const startPrice = price || minStep;
+  const priceBN = new BN(price);
+  const minStepBN = new BN(minStep || 0);
+
+  const startPrice = !priceBN.isZero() ? priceBN : minStepBN;
 
   return (
     <PriceWrapper>
       <Row>
         <Heading size={'1'}>{topBid
-          ? `${formatKusamaBalance(new BN(Number(price) + Number(minStep)).toString(), api?.market?.kusamaDecimals)}`
-          : `${formatKusamaBalance(new BN(Number(startPrice)).toString(), api?.market?.kusamaDecimals)}`
+          ? `${formatKusamaBalance(priceBN.add(minStepBN).toString(), api?.market?.kusamaDecimals)}`
+          : `${formatKusamaBalance(startPrice.toString(), api?.market?.kusamaDecimals)}`
         }</Heading>
-        <Icon file={Kusama} size={32} />
+        <Icon name={'chain-kusama'} size={32} />
       </Row>
       {topBid && <Row>
         <Text color='grey-500' size='m'>

@@ -21,7 +21,7 @@ export const useGetTokensByTrades = (trades: Trade[]) => {
       };
     };
 
-    (async () => {
+    void (async () => {
       if (!api?.nft) return;
       setIsFetchingTokens(true);
       setTradesWithTokens(await Promise.all(trades.map(fetchToken)));

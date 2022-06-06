@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { Icon } from '@unique-nft/ui-kit';
 
 import { NotificationSeverity } from '../../notification/NotificationContext';

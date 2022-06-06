@@ -1,13 +1,14 @@
 import React, { FC, useCallback, useState } from 'react';
-import { Avatar, Button, Heading, Modal, Text } from '@unique-nft/ui-kit';
+import { Button, Heading, Modal, Text } from '@unique-nft/ui-kit';
 import keyring from '@polkadot/ui-keyring';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
 import { TAccountModalProps } from './types';
 import { PasswordInput } from '../../../components/PasswordInput/PasswordInput';
 import { QRReader, ScannedResult } from '../../../components/QRReader/QRReader';
 import { useAccounts } from '../../../hooks/useAccounts';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
+import { Avatar } from '../../../components/Avatar/Avatar';
 
 export const ImportViaQRCodeAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish }) => {
   const [address, setAddress] = useState<string>();
@@ -46,14 +47,16 @@ export const ImportViaQRCodeAccountModal: FC<TAccountModalProps> = ({ isVisible,
       <Text size={'m'}>Provide the account QR from the module/external application for scanning. Once detected as valid, you will be taken to the next step to add the account to your list.</Text>
       {!address && <QRReader onScan={onScan} />}
       {address && <AddressWrapper>
-        <Avatar size={24} src={DefaultAvatar} />
+        <Avatar size={24} src={DefaultAvatar} address={address} />
         <Text>{address}</Text>
       </AddressWrapper>}
     </InputWrapper>
     <InputWrapper>
-      <Text size={'m'}>Password</Text>
-      <Text size={'s'} color={'grey-500'}>The password that was previously used to encrypt this account</Text>
-      <PasswordInput placeholder={'Password'}
+      <PasswordTitle>
+        <Text size={'m'}>Password</Text>
+        <Text size={'s'} color={'grey-500'}>The password that was previously used to encrypt this account</Text>
+      </PasswordTitle>
+      <PasswordInput
         onChange={setPassword}
         value={password}
       />
@@ -87,11 +90,17 @@ const InputWrapper = styled.div`
   padding: var(--gap) 0;
   display: flex;
   flex-direction: column;
-  margin-bottom: var(--gap);
   row-gap: var(--gap);
 `;
 
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
+  margin-top: var(--gap);
+`;
+
+const PasswordTitle = styled.div`
+  display: flex;
+  flex-direction: column;
+  row-gap: calc(var(--gap) / 4);
 `;

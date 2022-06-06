@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState, KeyboardEvent } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
-import { Button, InputText, Select, Text } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import { Select, Text } from '@unique-nft/ui-kit';
+import styled from 'styled-components';
 
 import { Filters } from '../../components';
 import { Secondary400 } from '../../styles/colors';
@@ -10,18 +10,16 @@ import { useOffers } from '../../api/restApi/offers/offers';
 import { OffersList } from '../../components/OffersList/OffersList';
 import { MobileFilters } from '../../components/Filters/MobileFilter';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
-import Loading from '../../components/Loading';
 import NoItems from '../../components/NoItems';
 import { useAccounts } from '../../hooks/useAccounts';
+import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
+import SearchField from '../../components/SearchField/SearchField';
+import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
+import { parseFilterState, setUrlParameter } from '../../utils/helpers';
 
-type TOption = {
-  iconRight: {
-    color: string;
-    name: string;
-    size: number;
-  };
-  id: string;
-  title: string;
+type TOption = SelectOptionProps &{
+  id: string
+  title: string
 }
 
 const sortingOptions: TOption[] = [
@@ -59,80 +57,122 @@ const sortingOptions: TOption[] = [
 
 const pageSize = 20;
 
-const defaultSortingValue = 'desc(CreationDate)';
+const defaultSortingValue = sortingOptions[sortingOptions.length - 1];
 
 export const MarketPage = () => {
-  const [filterState, setFilterState] = useState<FilterState | null>();
-  const [sortingValue, setSortingValue] = useState<string>(defaultSortingValue);
-  const [searchValue, setSearchValue] = useState<string | number>();
+  const searchParams = new URLSearchParams(window.location.search);
+
+  const [filterState, setFilterState] = useState<FilterState | null>(parseFilterState(searchParams.get('filterState')));
+  const [sortingValue, setSortingValue] = useState<string>(searchParams.get('sortingValue') || defaultSortingValue.id);
+  const [searchValue, setSearchValue] = useState<string | undefined>(searchParams.get('searchValue') || '');
   const { offers, offersCount, isFetching, fetchMore, fetch } = useOffers();
   const { selectedAccount } = useAccounts();
+  const deviceSize = useDeviceSize();
 
   const hasMore = offers && offers.length < offersCount;
 
   useEffect(() => {
-    fetch({ page: 1, pageSize });
+    void fetch({
+      page: 1,
+      pageSize,
+      ...(getFilterByState(filterState)),
+      searchText: searchValue,
+      sort: [sortingValue]
+    });
   }, []);
+
+  const getFilterByState = useCallback((filterState: FilterState | null) => {
+    if (!filterState) return {};
+    const { statuses, prices, collections, attributeCounts, ...otherFilter } = filterState;
+    const { myNFTs, myBets, timedAuction, fixedPrice } = statuses || {};
+
+    return {
+      seller: myNFTs ? selectedAccount?.address : undefined,
+      bidderAddress: myBets ? selectedAccount?.address : undefined,
+      isAuction: (timedAuction && fixedPrice) || (!timedAuction && !fixedPrice) ? undefined : !!timedAuction && !fixedPrice,
+      ...prices,
+      collectionId: collections,
+      numberOfAttributes: attributeCounts,
+      ...otherFilter
+    };
+  }, [selectedAccount?.address]);
 
   const onClickSeeMore = useCallback(() => {
     // Todo: fix twice rendering
     if (!isFetching) {
-      fetchMore({ page: Math.ceil(offers.length / pageSize) + 1, pageSize, sort: [sortingValue], ...filterState });
+      fetchMore({
+        page: Math.ceil(offers.length / pageSize) + 1,
+        pageSize,
+        ...(getFilterByState(filterState)),
+        searchText: searchValue,
+        sort: [sortingValue]
+      });
     }
-  }, [fetchMore, offers, pageSize, isFetching]);
+  }, [fetchMore, offers, pageSize, isFetching, searchValue]);
 
-  const onSortingChange = useCallback((value: string) => {
-    setSortingValue(value);
-    fetch({ sort: [value], pageSize, page: 1, ...filterState });
-  }, [fetch, filterState]);
+  const onSortingChange = useCallback((value: TOption) => {
+    setSortingValue(value.id);
+    setUrlParameter('sortingValue', value.id);
+    void fetch({
+      page: 1,
+      pageSize,
+      ...(getFilterByState(filterState)),
+      searchText: searchValue,
+      sort: [value.id]
+    });
+  }, [fetch, filterState, getFilterByState, searchValue]);
 
-  const onSearch = useCallback(() => {
-    fetch({ sort: [sortingValue], pageSize, page: 1, searchText: searchValue?.toString(), ...filterState });
-  }, [fetch, sortingValue, searchValue, filterState]);
-
-  const onSearchStringChange = useCallback((value: string) => {
+  const onSearch = useCallback((value?: string) => {
     setSearchValue(value);
-  }, [setSearchValue]);
+    setUrlParameter('searchValue', value || '');
+    void fetch({
+      page: 1,
+      pageSize,
+      ...(getFilterByState(filterState)),
+      searchText: value,
+      sort: [sortingValue]
+    });
+  }, [fetch, sortingValue, searchValue, filterState, getFilterByState]);
 
-  const onSearchInputKeyDown = useCallback((event: KeyboardEvent) => {
-    if (event.key !== 'Enter') return;
-    onSearch();
-  }, [onSearch]);
-
-  const onFilterChange = useCallback((filter: FilterState | null) => {
-    setFilterState({ ...(filterState || {}), ...filter });
-    fetch({ pageSize, page: 1, sort: [sortingValue], ...(filterState || {}), ...filter });
-  }, [filterState, fetch, sortingValue]);
+  const onFilterChange = useCallback((filterState: FilterState | null) => {
+    setFilterState(filterState);
+    setUrlParameter('filterState', filterState ? JSON.stringify(filterState) : '');
+    void fetch({
+      page: 1,
+      pageSize,
+      ...(getFilterByState(filterState)),
+      searchText: searchValue,
+      sort: [sortingValue]
+    });
+  }, [fetch, sortingValue, getFilterByState, searchValue]);
 
   useEffect(() => {
-    if ((!filterState?.seller || filterState?.seller === selectedAccount?.address) && (!filterState?.bidderAddress || filterState?.bidderAddress === selectedAccount?.address)) return;
-    onFilterChange({
-      seller: filterState?.seller ? selectedAccount?.address : undefined,
-      bidderAddress: filterState?.bidderAddress ? selectedAccount?.address : undefined
-    });
-  }, [filterState?.seller, filterState?.bidderAddress, selectedAccount?.address]);
+    if ((!filterState?.statuses?.myNFTs && !filterState?.statuses?.myBets) || isFetching) return;
+    onFilterChange(filterState);
+  }, [filterState, selectedAccount?.address]);
+
+  const filterCount = useMemo(() => {
+    const { statuses, prices, collections = [], attributes = [], attributeCounts = [] } = filterState || {};
+    const statusesCount: number = Object.values(statuses || {}).filter((status) => status).length;
+    const collectionsCount: number = collections.length;
+    const numberOfAttributesCount: number = attributeCounts.length;
+    const attributesCount: number = attributes.length;
+
+    return statusesCount + collectionsCount + attributesCount + numberOfAttributesCount + (prices ? 1 : 0);
+  }, [filterState]);
 
   return (<PagePaper>
     <MarketMainPageStyled>
       <LeftColumn>
-        <Filters onFilterChange={onFilterChange} />
+        {deviceSize !== DeviceSize.md && <Filters value={filterState} onFilterChange={onFilterChange} />}
       </LeftColumn>
       <MainContent>
         <SearchAndSortingWrapper>
-          <SearchWrapper>
-            <InputTextStyled
-              iconLeft={{ name: 'magnify', size: 16 }}
-              onChange={onSearchStringChange}
-              onKeyDown={onSearchInputKeyDown}
-              placeholder='Collection / token'
-              value={searchValue?.toString()}
-            />
-            <Button
-              onClick={onSearch}
-              role='primary'
-              title='Search'
-            />
-          </SearchWrapper>
+          <SearchField
+            searchValue={searchValue}
+            placeholder='Collection / token'
+            onSearch={onSearch}
+          />
           <SortSelectWrapper>
             <Select
               onChange={onSortingChange}
@@ -152,20 +192,21 @@ export const MarketPage = () => {
           threshold={200}
           useWindow={true}
         >
-          {isFetching && <Loading />}
           {!isFetching && !offers?.length && <NoItems />}
-          <OffersList offers={offers || []} />
+          <OffersList offers={offers || []} isLoading={isFetching} />
         </InfiniteScroll>
       </MainContent>
     </MarketMainPageStyled>
-    <MobileFilters
+    {deviceSize <= DeviceSize.md && <MobileFilters
+      value={filterState}
+      filterCount={filterCount}
       defaultSortingValue={defaultSortingValue}
       sortingValue={sortingValue}
       sortingOptions={sortingOptions}
       onFilterChange={onFilterChange}
       onSortingChange={onSortingChange}
       filterComponent={Filters}
-    />
+    />}
   </PagePaper>);
 };
 
@@ -197,29 +238,6 @@ const MainContent = styled.div`
   }
 `;
 
-const SearchWrapper = styled.div`
-  display: flex;
-  flex-grow: 1;
-  margin-right: 16px;
-  button {
-    margin-left: 8px;
-  }
-
-  @media (max-width: 768px) {
-    width: 100%;
-    .unique-input-text {
-      flex-grow: 1;
-    }
-  }
-
-  @media (max-width: 320px) {
-    margin-right: 0;
-    .unique-button {
-      display: none;
-    }
-  }
-`;
-
 const SortSelectWrapper = styled.div`
   @media (max-width: 1024px) {
     display: none;
@@ -233,9 +251,4 @@ const SortSelectWrapper = styled.div`
 const SearchAndSortingWrapper = styled.div`
   display: flex;
   justify-content: space-between;
-`;
-
-const InputTextStyled = styled(InputText)`
-  width: 100%;
-  max-width: 610px;
 `;

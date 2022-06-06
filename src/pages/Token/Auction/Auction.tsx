@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Text, Button, Heading } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import BN from 'bn.js';
 
 import { Offer } from '../../../api/restApi/offers/types';
@@ -34,17 +34,19 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
 
   const [calculatedBid, setCalculatedBid] = useState<TCalculatedBid>();
 
+  const fetchCalculatedBid = useCallback(async () => {
+    const _calculatedBid = await getCalculatedBid({
+      collectionId: offer?.collectionId || 0,
+      tokenId: offer?.tokenId || 0,
+      bidderAddress: selectedAccount?.address || ''
+    });
+    setCalculatedBid(_calculatedBid);
+  }, [offer?.collectionId, offer?.tokenId, selectedAccount?.address]);
+
   useEffect(() => {
     if (!offer || offer.auction?.status !== 'active' || !selectedAccount) return;
-    (async () => {
-      const _calculatedBid = await getCalculatedBid({
-        collectionId: offer.collectionId || 0,
-        tokenId: offer?.tokenId || 0,
-        bidderAddress: selectedAccount?.address || ''
-      });
-      setCalculatedBid(_calculatedBid);
-    })();
-  }, [offer, selectedAccount]);
+    void fetchCalculatedBid();
+  }, [fetchCalculatedBid]);
 
   const canPlaceABid = useMemo(() => {
     if (!selectedAccount?.address || !offer?.seller) return false;

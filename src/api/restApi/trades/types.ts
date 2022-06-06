@@ -4,6 +4,7 @@ export type GetTradesRequestPayload = {
   sort?: string // ex. "asc(Price)"
   seller?: string
   collectionId?: number | number[]
+  searchText?: string
 } & Pagination;
 
 export type Trade = {

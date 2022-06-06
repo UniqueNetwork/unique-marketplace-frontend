@@ -1,6 +1,5 @@
 import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
-import styled from 'styled-components/macro';
-import TriangleDown from '../../../../static/icons/triangle-down.svg';
+import styled from 'styled-components';
 import { AdditionalLight, Grey500, Primary100, Primary500 } from '../../../../styles/colors';
 import { Icon } from '@unique-nft/ui-kit';
 
@@ -53,7 +52,7 @@ export function DropdownSelect<T>({ className, placeholder, options, value, onCh
     <InputWrapper className={className} onClick={onClick} ref={InputRef}>
       {!value && placeholder && <Placeholder>{placeholder}</Placeholder>}
       {value && showOption(value)}
-      {options.length > 0 && <Icon file={TriangleDown} size={8} />}
+      {options.length > 0 && <Icon name={'triangle'} size={8} />}
     </InputWrapper>
     <Dropdown isOpen={isDropdownVisible} ref={DropdownRef}>
       {options.map((item, index) => (
@@ -103,6 +102,10 @@ const Dropdown = styled.div<{ isOpen: boolean }>`
   overflow-x: hidden;
   overflow-y: auto;
   z-index: 10;
+  @media (max-width: 768px) {
+    right: 0;
+    max-width: calc(100vw - var(--gap) * 2);
+  }
 `;
 
 const OptionWrapper = styled.div`

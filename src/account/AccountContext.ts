@@ -2,6 +2,7 @@ import { Consumer, Context, createContext, Provider } from 'react';
 import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
 import { BN } from '@polkadot/util';
 import { KeyringPair } from '@polkadot/keyring/types';
+import { TWithdrawBid } from '../api/restApi/auction/types';
 
 export enum AccountSigner {
   extension = 'Extension',
@@ -12,21 +13,27 @@ export interface Account extends InjectedAccountWithMeta {
   balance?: {
     KSM?: BN
   },
-  deposit?: BN
+  deposits?: {
+    bids: {
+      leader: TWithdrawBid[]
+      withdraw: TWithdrawBid[]
+    }
+    sponsorshipFee?: BN
+  }
   isOnWhiteList?: boolean
 }
 
 export type AccountContextProps = {
   isLoading: boolean
+  isLoadingDeposits: boolean
   accounts: Account[]
   selectedAccount: Account | undefined
   fetchAccountsError: string | undefined
   changeAccount(account: Account): void
   setSelectedAccount(account: Account): void
-  setFetchAccountsError(error: string | undefined): void
-  setAccounts(accounts: ((accounts: Account[]) => Account[]) | Account[]): void
-  setIsLoading(loading: boolean): void
-  showSignDialog(): Promise<KeyringPair>
+  showSignDialog(account: Account): Promise<KeyringPair>
+  fetchAccounts(): Promise<void>
+  fetchAccountsWithDeposits(): Promise<Account[]>
 }
 
 const AccountContext: Context<AccountContextProps> = createContext({} as unknown as AccountContextProps);

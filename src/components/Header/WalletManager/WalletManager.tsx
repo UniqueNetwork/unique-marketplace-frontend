@@ -1,20 +1,20 @@
 import React, { FC, useCallback, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import styled from 'styled-components/macro';
-import { Button, Text } from '@unique-nft/ui-kit';
+import styled from 'styled-components';
+import { Button, Icon, Text } from '@unique-nft/ui-kit';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { DropdownSelect, DropdownSelectProps } from './AccountSelect/DropdownSelect';
 import { Account } from '../../../account/AccountContext';
-import Loading from '../../Loading';
 import { formatKusamaBalance } from '../../../utils/textUtils';
-import GearIcon from '../../../static/icons/gear.svg';
 import { BalanceOption } from './types';
 import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';
 import { BlueGrey200 } from '../../../styles/colors';
-import { Icon } from '../../Icon/Icon';
 import { useApi } from '../../../hooks/useApi';
 import AccountCard from '../../Account/Account';
+import AccountSkeleton from '../../Skeleton/AccountSkeleton';
+import DoubleLineSkeleton from '../../Skeleton/DoubleLineSkeleton';
+import BalanceSkeleton from '../../Skeleton/BalanceSkeleton';
 
 const tokenSymbol = 'KSM';
 
@@ -40,42 +40,49 @@ export const WalletManager: FC = () => {
   }, [selectedAccount, chainData?.systemChain]);
 
   if (!isLoading && accounts.length === 0) {
- return (
-   <Button title={'Connect or create account'} onClick={onCreateAccountClick} />
-  );
-}
+   return (
+     <Button title={'Connect or create account'} onClick={onCreateAccountClick} />
+    );
+  }
 
   if (deviceSize === DeviceSize.sm) {
     return (
       <WalletManagerWrapper>
-        {isLoading && <Loading />}
-        <AccountSelect
+        {isLoading && <BalanceSkeleton />}
+        {!isLoading && <AccountSelect
           renderOption={AccountWithBalanceOptionCard}
           onChange={changeAccount}
           options={accounts || []}
           value={selectedAccount}
-        />
+        />}
       </WalletManagerWrapper>
     );
   }
 
   return (
     <WalletManagerWrapper>
-      {isLoading && <Loading />}
-      <AccountSelect
-        renderOption={AccountOptionCard}
-        onChange={changeAccount}
-        options={accounts || []}
-        value={selectedAccount}
-      />
-      <Divider />
-      <BalanceCard {...currentBalance} />
+      {isLoading && <>
+        <AccountSkeleton />
+        <Divider />
+        <DoubleLineSkeleton />
+      </>}
+      {!isLoading && <>
+        <AccountSelect
+          renderOption={AccountOptionCard}
+          onChange={changeAccount}
+          options={accounts || []}
+          value={selectedAccount}
+        />
+        <Divider />
+        <BalanceCard {...currentBalance} />
+      </>}
       {deviceSize === DeviceSize.lg && <><Divider />
-        <SettingsButtonWrapper $gearActive={gearActive}>
+        <SettingsButtonWrapper $gearActive={!isLoading && gearActive}>
           <Link to={'/accounts'}>
-            <Icon path={GearIcon} />
+            <Icon name={'gear'} size={24} />
           </Link>
-        </SettingsButtonWrapper></>}
+        </SettingsButtonWrapper>
+      </>}
     </WalletManagerWrapper>
   );
 };
@@ -102,7 +109,7 @@ const AccountWithBalanceOptionCard: FC<Account> = (account) => {
 
 const BalanceCard = (balance: BalanceOption) => {
   return (<BalanceOptionWrapper>
-    <Text size={'m'} weight={'medium'} >{`${formatKusamaBalance(balance.value)} ${tokenSymbol}`}</Text>
+    <Text size={'m'} weight={'regular'} >{`${formatKusamaBalance(balance.value)} ${tokenSymbol}`}</Text>
     <Text size={'s'} color={'grey-500'} >{balance.chain}</Text>
   </BalanceOptionWrapper>);
 };

@@ -1,5 +1,5 @@
 import React from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { Heading } from '@unique-nft/ui-kit';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
 import { Primary600 } from '../../styles/colors';
@@ -24,7 +24,7 @@ const Faq = (): React.ReactElement<void> => {
         <li>Copy your address at Kusama network;</li>
         <li>Use this Kusama address to send KSM from any wallet or exchange;</li>
       </ol>
-      <Heading size='4'>Q: I see my NTF on the My tokens page twice and one of them is `on hold`</Heading>
+      <Heading size='4'>Q: I see my NFT on the My tokens page twice and one of them is `on hold`</Heading>
       <p>A: It can happen if the previous version of the market had information about an unfinished listing. In that case:</p>
       <ol>
         <li>Go to the page of ‘on hold’ token and complete listing;</li>

@@ -1,25 +1,29 @@
 import { FC } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { TokensCard } from '..';
 import { NFTToken } from '../../api/chainApi/unique/types';
 import { Offer } from '../../api/restApi/offers/types';
+import CardSkeleton from '../Skeleton/CardSkeleton';
 
 type TTokensList = {
-  tokens: (NFTToken & Partial<Offer>)[];
+  tokens: (NFTToken & Partial<Offer>)[]
+  isLoading?: boolean
 };
 
-export const TokensList: FC<TTokensList> = ({ tokens }) => {
+export const TokensList: FC<TTokensList> = ({ tokens, isLoading }) => {
   return (
     <TokensListStyled>
       {tokens?.map &&
         tokens.map((token) => (
           <TokensCard
-            key={`token-${token.collectionId || ''}-${token.id}`}
+            key={`token-${token?.collectionId || ''}-${token?.id}`}
             tokenId={token?.id}
             collectionId={token?.collectionId}
             token={token}
           />
         ))}
+
+      {isLoading && Array.from({ length: 4 }).map((_, index) => <CardSkeleton key={`card-skeleton-${index}`} />)}
     </TokensListStyled>
   );
 };

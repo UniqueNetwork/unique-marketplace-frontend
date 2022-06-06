@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { Heading, Text } from '@unique-nft/ui-kit';
 import { Avatar } from '../../../components/Avatar/Avatar';
 import noCollections from '../../../static/icons/no-collections.svg';
@@ -25,10 +25,7 @@ export const CollectionsCard: FC<ICollectionsCardProps> = ({
       </AvatarStyled>
       <Content>
         <Heading className='heading' size='4'>
-          {title}
-        </Heading>
-        <Heading className='heading' size='4'>
-          {`[id ${id}]`}
+          {`${title} [id ${id}]`}
         </Heading>
         {description && (
           <Text className='description' color='grey-500' size='s'>

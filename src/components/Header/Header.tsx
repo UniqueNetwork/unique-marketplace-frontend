@@ -1,12 +1,12 @@
-import { Text } from '@unique-nft/ui-kit';
 import { FC, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
-import styled from 'styled-components/macro'; // Todo: https://cryptousetech.atlassian.net/browse/NFTPAR-1201
+import styled from 'styled-components';
+import { Icon, Text } from '@unique-nft/ui-kit';
 
 import { useScreenWidthFromThreshold } from '../../hooks/useScreenWidthFromThreshold';
-import menu from '../../static/icons/menu.svg';
 import { TMenuItems } from '../PageLayout';
 import { WalletManager } from './WalletManager/WalletManager';
+import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
 import { useAdminLoggingIn } from '../../api/restApi/admin/login';
 
 interface HeaderProps {
@@ -22,13 +22,16 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
   }, []);
   const { hasAdminPermission } = useAdminLoggingIn();
 
+  const deviceSize = useDeviceSize();
+
   return (
     <HeaderStyled>
       <LeftSideColumn>
         {showMobileMenu && <MenuIcon
           onClick={mobileMenuToggler}
-          src={menu}
-        />}
+        >
+          <Icon name={'menu'} size={32} />
+        </MenuIcon>}
         <LogoLink to={'/'}>
           <LogoIcon src={'/logos/logo.svg'} />
         </LogoLink>
@@ -39,7 +42,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 $active={activeItem === 'Market'}
                 color='additional-dark'
                 size='m'
-                weight='medium'
+                weight='regular'
               >
                 Market
               </DesktopMenuItem>
@@ -49,7 +52,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 $active={activeItem === 'My tokens'}
                 color='additional-dark'
                 size='m'
-                weight='medium'
+                weight='regular'
               >
                 My tokens
               </DesktopMenuItem>
@@ -59,7 +62,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 $active={activeItem === 'Trades'}
                 color='additional-dark'
                 size='m'
-                weight='medium'
+                weight='regular'
               >
                 Trades
               </DesktopMenuItem>
@@ -69,7 +72,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 $active={activeItem === 'FAQ'}
                 color='additional-dark'
                 size='m'
-                weight='medium'
+                weight='regular'
               >
                 FAQ
               </DesktopMenuItem>
@@ -79,7 +82,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 $active={activeItem === 'Admin panel'}
                 color='additional-dark'
                 size='m'
-                weight='medium'
+                weight='regular'
               >
                 Admin panel
               </DesktopMenuItem>
@@ -98,7 +101,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 $active={activeItem === 'Market'}
                 color='additional-dark'
                 size='m'
-                weight='medium'
+                weight='regular'
               >
                 Market
               </TextStyled>
@@ -110,7 +113,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 $active={activeItem === 'My tokens'}
                 color='additional-dark'
                 size='m'
-                weight='medium'
+                weight='regular'
               >
                 My tokens
               </TextStyled>
@@ -122,7 +125,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 $active={activeItem === 'Trades'}
                 color='additional-dark'
                 size='m'
-                weight='medium'
+                weight='regular'
               >
                 Trades
               </TextStyled>
@@ -134,23 +137,35 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 $active={activeItem === 'FAQ'}
                 color='additional-dark'
                 size='m'
-                weight='medium'
+                weight='regular'
               >
                 FAQ
               </TextStyled>
             </Link>
           </LinkWrapper>
-          {hasAdminPermission && <LinkWrapper onClick={mobileMenuToggler}>
-            <Link to='administration'>
+          {deviceSize !== DeviceSize.lg && <LinkWrapper onClick={mobileMenuToggler}>
+            <Link to='accounts'>
               <TextStyled
-                $active={activeItem === 'Admin panel'}
+                $active={activeItem === 'Manage accounts'}
                 color='additional-dark'
                 size='m'
-                weight='medium'
+                weight='regular'
               >
-                Admin panel
+                Manage accounts
               </TextStyled>
             </Link>
+          </LinkWrapper>}
+          {hasAdminPermission && <LinkWrapper onClick={mobileMenuToggler}>
+              <Link to='administration'>
+                  <TextStyled
+                      $active={activeItem === 'Admin panel'}
+                      color='additional-dark'
+                      size='m'
+                      weight='regular'
+                  >
+                      Admin panel
+                  </TextStyled>
+              </Link>
           </LinkWrapper>}
         </MobileMenu>
       )}
@@ -163,10 +178,6 @@ const HeaderStyled = styled.div`
   align-items: center;
   justify-content: space-between;
   width: 100%;
-
-  a {
-    margin-right: 24px;
-  }
 `;
 
 const LeftSideColumn = styled.div`
@@ -174,7 +185,7 @@ const LeftSideColumn = styled.div`
   align-items: center;
 `;
 
-const MenuIcon = styled.img`
+const MenuIcon = styled.div`
   width: 32px;
   height: 32px;
   margin-right: 8px;

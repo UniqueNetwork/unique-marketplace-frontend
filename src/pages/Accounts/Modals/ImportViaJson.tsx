@@ -1,13 +1,12 @@
 import React, { FC, useCallback, useState } from 'react';
-import { Button, Heading, Modal, Text } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import { Button, Heading, Modal, Text, Upload } from '@unique-nft/ui-kit';
+import { KeyringPair } from '@polkadot/keyring/types';
+import styled from 'styled-components';
 
 import { TAccountModalProps } from './types';
 import { AdditionalWarning100 } from '../../../styles/colors';
 import { PasswordInput } from '../../../components/PasswordInput/PasswordInput';
-import { Upload } from '../../../components/Upload/Upload';
 import { convertToU8a, keyringFromFile } from '../../../utils/jsonUtils';
-import { KeyringPair } from '@polkadot/keyring/types';
 import { useApi } from '../../../hooks/useApi';
 import keyring from '@polkadot/ui-keyring';
 
@@ -16,16 +15,19 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
   const [pair, setPair] = useState<KeyringPair | null>(null);
   const [password, setPassword] = useState<string>('');
 
-  const onUploadChange = useCallback((file: File) => {
+  const onUploadChange = useCallback((data: { url: string; file: Blob } | null) => {
+    if (!data) return;
     const reader = new FileReader();
     reader.onload = ({ target }: ProgressEvent<FileReader>): void => {
       if (target && target.result && rawRpcApi) {
+        console.log(target.result);
         const data = convertToU8a(target.result as ArrayBuffer);
+
         setPair(keyringFromFile(data, rawRpcApi.genesisHash.toHex()));
       }
     };
 
-    reader.readAsArrayBuffer(file);
+    reader.readAsArrayBuffer(data.file);
   }, [setPair, rawRpcApi]);
 
   const onRestoreClick = useCallback(() => {
@@ -43,14 +45,18 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
       <Heading size='2'>{'Add an account via backup JSON file'}</Heading>
     </Content>
     <InputWrapper>
-      <Text size={'m'}>Upload</Text>
-      <Text size={'s'} color={'grey-500'}>Click to select or drop the file here</Text>
-      <Upload onChange={onUploadChange} />
+      <TitleWrapper>
+        <Text size={'m'}>Upload</Text>
+        <Text size={'s'} color={'grey-500'}>Click to select or drop the file here</Text>
+      </TitleWrapper>
+      <Upload onChange={onUploadChange} type={'square'} accept={'.json'} />
     </InputWrapper>
     <InputWrapper>
-      <Text size={'m'}>Password</Text>
-      <Text size={'s'} color={'grey-500'}>The password that was previously used to encrypt this account</Text>
-      <PasswordInput placeholder={'Password'}
+      <TitleWrapper>
+        <Text size={'m'}>Password</Text>
+        <Text size={'s'} color={'grey-500'}>The password that was previously used to encrypt this account</Text>
+      </TitleWrapper>
+      <PasswordInput
         onChange={setPassword}
         value={password}
       />
@@ -83,15 +89,27 @@ const InputWrapper = styled.div`
   padding: var(--gap) 0;
   display: flex;
   flex-direction: column;
-  margin-bottom: var(--gap);
   row-gap: var(--gap);
+  
+  .unique-upload {
+    width: 100%;
+    .upload.square, .preview.square {
+      width: 100%;
+    }
+  }
+`;
+
+const TitleWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  row-gap: calc(var(--gap) / 4);
 `;
 
 const TextStyled = styled(Text)`
   box-sizing: border-box;
   display: flex;
   padding: 8px 16px;
-  margin: calc(var(--gap) * 1.5) 0;
+  margin: var(--gap) 0;
   border-radius: 4px;
   background-color: ${AdditionalWarning100};
   width: 100%;
@@ -100,4 +118,5 @@ const TextStyled = styled(Text)`
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
+  margin-top: calc(var(--gap) * 2);
 `;

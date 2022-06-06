@@ -1,8 +1,10 @@
 import { FC } from 'react';
-import styled from 'styled-components/macro';
+import Identicon from '@polkadot/react-identicon';
+import styled from 'styled-components';
 
 export interface IAvatarProps {
-  src: string;
+  src?: string;
+  address?: string;
   size: number;
   type?: 'circle' | 'square';
 }
@@ -10,13 +12,23 @@ export interface IAvatarProps {
 export const Avatar: FC<IAvatarProps> = ({
   size = 38,
   src,
+  address,
   type = 'square'
-}: IAvatarProps) => <AvatarWrapper size={size}>
-  <AvatarStyled $type={type}
-    src={src}
-    height={size}
-  />
-</AvatarWrapper>;
+}: IAvatarProps) => {
+  if (address) {
+    return <Identicon
+      value={address}
+      size={size}
+    />;
+  }
+
+  return <AvatarWrapper size={size}>
+    <AvatarStyled $type={type}
+      src={src}
+      height={size}
+    />
+  </AvatarWrapper>;
+};
 
 const AvatarWrapper = styled.div<{ size: number }>`
   overflow: hidden;

@@ -1,28 +1,28 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { Button, InputText, Text } from '@unique-nft/ui-kit';
-import { TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/types';
-import styled from 'styled-components/macro';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Button, Dropdown, Icon, TableColumnProps, Text } from '@unique-nft/ui-kit';
+import styled from 'styled-components';
 import { BN } from '@polkadot/util';
 
-import { useAccounts } from '../../hooks/useAccounts';
+import { useAccounts } from 'hooks/useAccounts';
 import { CreateAccountModal } from './Modals/CreateAccount';
 import { ImportViaSeedAccountModal } from './Modals/ImportViaSeed';
-import { DropdownMenu, DropdownMenuItem } from '../../components/DropdownMenu/DropdownMenu';
 import { ImportViaJSONAccountModal } from './Modals/ImportViaJson';
 import { ImportViaQRCodeAccountModal } from './Modals/ImportViaQRCode';
 import { TransferFundsModal } from './Modals/SendFunds';
 import { Table } from '../../components/Table';
 import { formatKusamaBalance } from '../../utils/textUtils';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
-import { Icon } from '../../components/Icon/Icon';
-import { WithdrawDepositStagesModal } from './Modals/WithdrawDeposit';
+import { WithdrawDepositModal } from './Modals/WithdrawDeposit';
 import { Account } from '../../account/AccountContext';
-import ArrowUpRight from '../../static/icons/arrow-up-right.svg';
-import config from '../../config';
 import { toChainFormatAddress } from '../../api/chainApi/utils/addressUtils';
 import { useApi } from '../../hooks/useApi';
 import AccountCard from '../../components/Account/Account';
 import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
+import config from '../../config';
+import { TWithdrawBid } from '../../api/restApi/auction/types';
+import { TextInput } from '../../components/TextInput/TextInput';
+import { Primary500 } from '../../styles/colors';
+import AccountTooltip from './AccountTooltip';
 
 const tokenSymbol = 'KSM';
 
@@ -38,8 +38,13 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
     title: 'Account',
     width: '25%',
     field: 'accountInfo',
-    render(accountInfo) {
-      if (accountInfo.deposit) return null;
+    iconRight: {
+      name: 'question',
+      size: 20,
+      color: Primary500
+    },
+    render(accountInfo: AccountInfo) {
+      if (accountInfo.deposit) return <></>;
       return (
         <AccountCellWrapper>
           <AccountCard accountName={accountInfo.name}
@@ -55,14 +60,14 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
     title: 'Balance',
     width: '25%',
     field: 'accountInfo',
-    render(accountInfo) {
+    render(accountInfo: AccountInfo) {
       const { KSM } = accountInfo.balance || { KSM: accountInfo.deposit || 0 };
       const isDeposit = !!accountInfo.deposit;
       return (
         <BalancesWrapper>
-          {!isDeposit && <Text>{`${formatKusamaBalance(KSM || 0)} ${tokenSymbol}`}</Text>}
+          {!isDeposit && <Text>{`${formatKusamaBalance(KSM?.toString() || 0)} ${tokenSymbol}`}</Text>}
           {isDeposit && (<>
-            <Text color={'grey-500'} size={'s'}>{`${formatKusamaBalance(KSM || 0)} ${tokenSymbol}`}</Text>
+            <Text color={'grey-500'} size={'s'}>{`${formatKusamaBalance(KSM?.toString() || 0)} ${tokenSymbol}`}</Text>
             <Text color={'grey-500'} size={'s'}>market deposit</Text>
           </>)}
         </BalancesWrapper>
@@ -73,8 +78,8 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
     title: 'Block explorer',
     width: '25%',
     field: 'accountInfo',
-    render(accountInfo) {
-      if (accountInfo.deposit) return null;
+    render(accountInfo: AccountInfo) {
+      if (accountInfo.deposit) return <></>;
       return (
         <LinksWrapper>
           <LinkStyled
@@ -84,7 +89,7 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
           >
             <TextStyled>UniqueScan</TextStyled>
             <IconWrapper>
-              <Icon path={ArrowUpRight} />
+              <Icon name={'arrow-up-right'} size={16} />
             </IconWrapper>
           </LinkStyled>
         </LinksWrapper>
@@ -95,7 +100,7 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
     title: 'Actions',
     width: '25%',
     field: 'accountInfo',
-    render(accountInfo) {
+    render(accountInfo: AccountInfo) {
       if (accountInfo.deposit) {
         return (
           <ActionsWrapper>
@@ -132,12 +137,17 @@ type AccountInfo = {
 }
 
 export const AccountsPage = () => {
-  const { accounts, fetchAccounts, isLoading } = useAccounts();
+  const { accounts, fetchAccounts, isLoading, isLoadingDeposits, fetchAccountsWithDeposits } = useAccounts();
   const [searchString, setSearchString] = useState<string>('');
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
   const [selectedAddress, setSelectedAddress] = useState<string>();
   const deviceSize = useDeviceSize();
   const { chainData } = useApi();
+
+  useEffect(() => {
+    if (isLoading) return;
+    void fetchAccountsWithDeposits();
+  }, [isLoading]);
 
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainData?.properties.ss58Format || 0);
@@ -179,10 +189,23 @@ export const AccountsPage = () => {
         ...account,
         accountInfo: { address: account.address, name: account.meta.name || '', balance: account.balance }
       });
-      if (account.deposit && !account.deposit.isZero()) {
+      if (!account.deposits) return acc;
+
+      const { sponsorshipFee, bids } = account.deposits;
+      const { leader, withdraw } = bids || { leader: [], withdraw: [] };
+
+      if ((!sponsorshipFee?.isZero() || leader.length !== 0 || withdraw.length !== 0)) {
+        const getTotalAmount = (acc: BN, bid: TWithdrawBid) => acc.add(new BN(bid.amount));
+
         acc.push({
           ...account,
-          accountInfo: { address: account.address, name: account.meta.name || '', deposit: account.deposit }
+          accountInfo: {
+            address: account.address,
+            name: account.meta.name || '',
+            deposit: (sponsorshipFee || new BN(0))
+              .add(withdraw.reduce(getTotalAmount, new BN(0)))
+              .add(leader.reduce(getTotalAmount, new BN(0)))
+          }
         });
       }
       return acc;
@@ -203,6 +226,7 @@ export const AccountsPage = () => {
   const onChangeAccountsFinish = useCallback(async () => {
     setCurrentModal(undefined);
     await fetchAccounts();
+    await fetchAccountsWithDeposits();
   }, []);
 
   const onModalClose = useCallback(() => {
@@ -213,11 +237,15 @@ export const AccountsPage = () => {
     <AccountPageWrapper>
       <Row>
         <Button title={'Create substrate account'} onClick={onCreateAccountClick} />
-        <DropdownMenu title={'Add account via'} role={'primary'}>
-          <DropdownMenuItem onClick={onImportViaSeedClick}>Seed phrase</DropdownMenuItem>
-          <DropdownMenuItem onClick={onImportViaJSONClick}>Backup JSON file</DropdownMenuItem>
-          <DropdownMenuItem onClick={onImportViaQRClick}>QR-code</DropdownMenuItem>
-        </DropdownMenu>
+        <Dropdown
+          dropdownRender={() => <DropdownMenu>
+            <DropdownMenuItem onClick={onImportViaSeedClick}>Seed phrase</DropdownMenuItem>
+            <DropdownMenuItem onClick={onImportViaJSONClick}>Backup JSON file</DropdownMenuItem>
+            <DropdownMenuItem onClick={onImportViaQRClick}>QR-code</DropdownMenuItem>
+          </DropdownMenu>}
+        >
+          <Button title={'Add account via'} role={'primary'} />
+        </Dropdown>
         <SearchInputWrapper>
           <SearchInputStyled
             placeholder={'Account'}
@@ -227,17 +255,25 @@ export const AccountsPage = () => {
           />
         </SearchInputWrapper>
       </Row>
-      <Table
-        columns={getAccountsColumns({ isShortAddress: deviceSize === DeviceSize.sm, formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal })}
-        data={filteredAccounts}
-        loading={isLoading}
-      />
+      <TableWrapper>
+        <AccountTooltip/>
+        <Table
+          columns={getAccountsColumns({ isShortAddress: deviceSize === DeviceSize.sm, formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal })}
+          data={filteredAccounts}
+          loading={isLoading || isLoadingDeposits}
+        />
+      </TableWrapper>
       <CreateAccountModal isVisible={currentModal === AccountModal.create} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
       <ImportViaSeedAccountModal isVisible={currentModal === AccountModal.importViaSeed} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
       <ImportViaJSONAccountModal isVisible={currentModal === AccountModal.importViaJSON} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
       <ImportViaQRCodeAccountModal isVisible={currentModal === AccountModal.importViaQRCode} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
       <TransferFundsModal isVisible={currentModal === AccountModal.sendFunds} onFinish={onModalClose} senderAddress={selectedAddress} />
-      <WithdrawDepositStagesModal isVisible={currentModal === AccountModal.withdrawDeposit} onFinish={onChangeAccountsFinish} address={selectedAddress} />
+      <WithdrawDepositModal
+        isVisible={currentModal === AccountModal.withdrawDeposit}
+        onFinish={onChangeAccountsFinish}
+        onClose={onModalClose}
+        address={selectedAddress}
+      />
     </AccountPageWrapper>
   </PagePaper>);
 };
@@ -285,20 +321,22 @@ const SearchInputWrapper = styled.div`
   }
 `;
 
-const SearchInputStyled = styled(InputText)`
+const SearchInputStyled = styled(TextInput)`
   flex-basis: 720px;
 `;
 
 const AccountCellWrapper = styled.div`
   display: flex;
   padding: 20px 0 !important;
+  column-gap: calc(var(--gap) / 2); 
+  align-items: center;
 `;
 
 const BalancesWrapper = styled.div`
   && {
     display: flex;
     flex-direction: column;
-    padding: 0;
+    padding: 20px 0 !important;
   }
 `;
 
@@ -345,5 +383,24 @@ const IconWrapper = styled.div`
     path {
       stroke: currentColor;
     }
+  }
+`;
+
+const TableWrapper = styled.div`
+  position: relative;
+`;
+
+const DropdownMenu = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+`;
+
+const DropdownMenuItem = styled.div`
+  padding: var(--gap);
+  cursor: pointer;
+  &:hover {
+    background: var(--color-primary-100);
+    color: var(--color-primary-500);
   }
 `;

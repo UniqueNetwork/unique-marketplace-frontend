@@ -1,9 +1,8 @@
 import { Heading, Icon, Text } from '@unique-nft/ui-kit';
-import React, { FC, ReactChild, useCallback, useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components/macro';
+import React, { FC, ReactChild, useCallback, useMemo, useState } from 'react';
+import styled from 'styled-components';
 
 import { Picture } from '../../../components';
-import share from '../../../static/icons/share.svg';
 import { CollectionsCard } from './CollectionsCard';
 import { AttributesBlock } from './AttributesBlock';
 import { NFTToken } from '../../../api/chainApi/unique/types';
@@ -17,24 +16,27 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import { isTokenOwner, normalizeAccountId, toChainFormatAddress } from '../../../api/chainApi/utils/addressUtils';
 import { Offer } from '../../../api/restApi/offers/types';
 import { useApi } from '../../../hooks/useApi';
+import Skeleton from '../../../components/Skeleton/Skeleton';
+import { TokenSkeleton } from '../../../components/Skeleton/TokenSkeleton';
+import ShareTokenModal from './ShareTokenModal';
 
 interface IProps {
-  children: ReactChild[];
-  token?: NFTToken;
-  offer?: Offer;
+  children: ReactChild[]
+  token?: NFTToken
+  offer?: Offer
+  isLoading?: boolean
 }
 
 export const CommonTokenDetail: FC<IProps> = ({
   children,
   token,
-  offer
+  offer,
+  isLoading
 }) => {
-  const [collectionCoverImage, setCollectionCoverImage] = useState<string>();
-  const { api } = useApi();
-
   const {
     collectionId,
     collectionName,
+    collectionCover,
     description,
     attributes,
     imageUrl,
@@ -42,29 +44,24 @@ export const CommonTokenDetail: FC<IProps> = ({
     prefix
   } = useMemo(() => {
     if (offer) {
-      const { collectionName, image, prefix } = offer.tokenDescription;
-      const attributes = offer.tokenDescription.attributes.reduce((acc, item) => ({ ...acc, [item.key]: item.value }), {});
+      const { collectionName, image, prefix, collectionCover, description } = offer.tokenDescription || {};
+      const attributes = offer.tokenDescription?.attributes.reduce((acc, item) => ({ ...acc, [item.key]: item.value }), {}) || [];
       return {
         ...offer,
         collectionName,
         prefix,
         imageUrl: image,
         attributes,
-        description: '' // TODO: need add this in offer instance
+        description,
+        collectionCover
       };
     }
+
     return {
       ...token,
       tokenId: token?.id
     };
   }, [token, offer]);
-
-  useEffect(() => {
-    (async () => {
-      if (!api?.collection || !token?.collectionId) return;
-      setCollectionCoverImage((await api.collection.getCollection(token.collectionId)).coverImageUrl);
-    })();
-  }, [token?.collectionId, api?.collection]);
 
   const { selectedAccount } = useAccounts();
   const deviceSize = useDeviceSize();
@@ -76,70 +73,76 @@ export const CommonTokenDetail: FC<IProps> = ({
   }, [chainData?.properties.ss58Format]);
 
   const owner = useMemo(() => {
-    if (!token?.owner) return undefined;
     if (offer) {
       return formatAddress(offer?.seller);
     }
+    if (!token?.owner) return undefined;
     return token.owner.Substrate ? formatAddress(token.owner.Substrate) : token.owner.Ethereum;
   }, [token, offer, formatAddress]);
 
   const isOwner = useMemo(() => {
-    if (!selectedAccount) return false;
+    if (!selectedAccount || isLoading) return false;
     if (offer) {
       return isTokenOwner(selectedAccount.address, { Substrate: offer.seller });
     }
     return isTokenOwner(selectedAccount.address, normalizeAccountId(token?.owner || ''));
-  }, [selectedAccount, token, offer]);
+  }, [isLoading, selectedAccount, token, offer]);
 
-  const onShareClick = useCallback(() => {
-    if (navigator.share) {
-      void navigator.share({
-        title: `NFT: ${prefix || ''} #${tokenId}`,
-        url: window.location.href
-      });
-    }
-  }, [prefix, tokenId]);
+  const [shareModalVisible, setShareModalVisible] = useState(false);
+
+  const openShareModal = useCallback(() => {
+    setShareModalVisible(true);
+  }, []);
+
+  const closeShareModal = useCallback(() => {
+    setShareModalVisible(false);
+  }, []);
 
   return (
     <CommonTokenDetailStyled>
       <PictureWrapper>
-        <Picture alt={tokenId?.toString() || ''} src={imageUrl} />
+        {isLoading && <Skeleton />}
+        {!isLoading && <Picture alt={tokenId?.toString() || ''} src={imageUrl} />}
       </PictureWrapper>
       <Description>
-        <Heading size={'1'}>{`${prefix || ''} #${tokenId}`}</Heading>
-        <ShareLink onClick={onShareClick}>
-          <Text color='grey-500' size='m'>
-            Share Link
-          </Text>
-          <IconWrapper>
-            <Icon file={share} size={24} />
-          </IconWrapper>
-        </ShareLink>
-        <Row>
-          {isOwner && <Text color='grey-500' size='m'>You own it</Text>}
-          {!isOwner && <>
+        {isLoading && <TokenSkeleton />}
+        {!isLoading && <>
+          <Heading size={'1'}>{`${prefix || ''} #${tokenId}`}</Heading>
+          <ShareLink onClick={openShareModal}>
             <Text color='grey-500' size='m'>
-              Owned&nbsp;by
+              Share Link
             </Text>
-            <Account href={`${config.scanUrl}account/${owner || '404'}`}>
-              <Avatar size={24} src={DefaultAvatar}/>
-              <Text color='primary-600' size='m'>
-                {deviceSize === DeviceSize.lg ? owner || '' : shortcutText(owner || '') }
+            <IconWrapper>
+              <Icon name={'shared'} size={24} />
+            </IconWrapper>
+          </ShareLink>
+          <Row>
+            {isOwner && <Text color='grey-500' size='m'>You own it</Text>}
+            {!isOwner && <>
+              <Text color='grey-500' size='m'>
+                Owned&nbsp;by
               </Text>
-            </Account>
-          </>}
-        </Row>
-        <Divider />
-        {children}
-        {attributes && <AttributesBlock attributes={attributes} />}
-        <Divider />
-        <CollectionsCard
-          avatarSrc={collectionCoverImage || ''}
-          description={description || ''}
-          id={collectionId || -1}
-          title={collectionName || ''}
-        />
+              <Account href={`${config.scanUrl}account/${owner || '404'}`}>
+                <Avatar size={24} src={DefaultAvatar} address={owner}/>
+                <Text color='primary-600' size='m'>
+                  {deviceSize === DeviceSize.lg ? owner || '' : shortcutText(owner || '') }
+                </Text>
+              </Account>
+            </>}
+          </Row>
+          <Divider />
+          {children}
+          {attributes && <AttributesBlock attributes={attributes} />}
+          <Divider />
+          <CollectionsCard
+            avatarSrc={collectionCover || ''}
+            description={description || ''}
+            id={collectionId || -1}
+            title={collectionName || ''}
+          />
+        </>}
       </Description>
+      <ShareTokenModal isVisible={shareModalVisible} onClose={closeShareModal} />
     </CommonTokenDetailStyled>
   );
 };
@@ -177,6 +180,10 @@ const PictureWrapper = styled.div`
     padding-top: 100%;
   }
 
+  div[class^=Skeleton] {
+    position: absolute;
+  }
+  
   .picture {
     position: absolute;
     top: 0;
@@ -196,6 +203,7 @@ const PictureWrapper = styled.div`
 
     svg {
       border-radius: 8px;
+      height: auto;
     }
 
     @media (max-width: 768px) {

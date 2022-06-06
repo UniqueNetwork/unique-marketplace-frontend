@@ -1,11 +1,11 @@
 import { FC, useMemo } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Layout } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { Header } from '.';
 import { useFooter } from '../hooks/useFooter';
 
-export type TMenuItems = 'Market' | 'My tokens' | 'Trades' | 'FAQ' | 'Admin panel';
+export type TMenuItems = 'Market' | 'My tokens' | 'Trades' | 'FAQ' | 'Manage accounts' | 'Admin panel';
 
 export const PageLayout: FC = () => {
   const { pathname } = useLocation();
@@ -14,7 +14,7 @@ export const PageLayout: FC = () => {
   const layoutProps = useMemo(() => {
     if (pathname === '/market') return { heading: 'Market' };
 
-    if (pathname === '/admin') {
+    if (pathname === '/administration') {
       return { heading: 'Collections' };
     }
 

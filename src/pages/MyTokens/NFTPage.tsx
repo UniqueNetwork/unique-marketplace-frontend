@@ -1,30 +1,29 @@
-import React, { KeyboardEvent, useCallback, useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components/macro';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import styled from 'styled-components';
 import BN from 'bn.js';
-import { Button, InputText, Select, Text } from '@unique-nft/ui-kit';
+import { Select, Text } from '@unique-nft/ui-kit';
+import { BN_MAX_INTEGER } from '@polkadot/util';
 
 import { TokensList } from '../../components';
 import { Secondary400 } from '../../styles/colors';
 import { useApi } from '../../hooks/useApi';
 import { NFTToken } from '../../api/chainApi/unique/types';
-import { Filters, MyTokensFilterState } from './Filters/Filters';
+import { Filters } from './Filters/Filters';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useOffers } from '../../api/restApi/offers/offers';
 import { Offer } from '../../api/restApi/offers/types';
 import { MobileFilters } from '../../components/Filters/MobileFilter';
-import Loading from '../../components/Loading';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
 import NoItems from '../../components/NoItems';
 import { fromStringToBnString } from '../../utils/bigNum';
+import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
+import { MyTokensFilterState } from './Filters/types';
+import SearchField from '../../components/SearchField/SearchField';
+import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
 
-type TOption = {
+type TOption = SelectOptionProps & {
   direction: 'asc' | 'desc';
   field: keyof Pick<Offer & NFTToken, 'price' | 'id' | 'creationDate'>;
-  iconRight: {
-    color: string;
-    name: string;
-    size: number;
-  };
   id: string;
   title: string;
 }
@@ -76,17 +75,17 @@ const sortingOptions: TOption[] = [
 
 const pageSize = 1000;
 
-const defaultSortingValue = 'desc(CreationDate)';
+const defaultSortingValue = sortingOptions[sortingOptions.length - 1];
 
 export const NFTPage = () => {
   const [filterState, setFilterState] = useState<MyTokensFilterState | null>(null);
-  const [sortingValue, setSortingValue] = useState<string>(defaultSortingValue);
-  const [searchValue, setSearchValue] = useState<string>();
+  const [sortingValue, setSortingValue] = useState<string>(defaultSortingValue.id);
   const [searchString, setSearchString] = useState<string>();
   const [selectOption, setSelectOption] = useState<TOption>();
-  const { selectedAccount } = useAccounts();
+  const { selectedAccount, isLoading } = useAccounts();
   const [tokens, setTokens] = useState<NFTToken[]>([]);
   const [isFetchingTokens, setIsFetchingTokens] = useState<boolean>(false);
+  const deviceSize = useDeviceSize();
 
   const { offers, isFetching: isFetchingOffers, fetch } = useOffers();
 
@@ -110,53 +109,62 @@ export const NFTPage = () => {
     setSelectOption(option);
   }, [sortingValue, setSelectOption]);
 
-  const onSortingChange = useCallback((val: string) => {
-    setSortingValue(val);
+  const onSortingChange = useCallback((val: TOption) => {
+    setSortingValue(val.id);
   }, []);
 
-  const onChangeSearchValue = useCallback((value: string) => {
-    setSearchValue(value);
-  }, []);
-
-  const onSearch = useCallback(() => {
-    setSearchString(searchValue);
-  }, [searchValue]);
-
-  const onSearchInputKeyDown = useCallback((event: KeyboardEvent) => {
-    if (event.key !== 'Enter') return;
-    onSearch();
-  }, [onSearch]);
+  const onSearch = useCallback((value: string) => {
+    setSearchString(value);
+  }, [setSearchString]);
 
   const filter = useCallback((token: NFTToken & Partial<Offer>) => {
+      const { statuses, prices } = filterState || {};
+
       const filterByStatus = (token: NFTToken & Partial<Offer>) => {
-        if (!filterState?.onSell && !filterState?.fixedPrice && !filterState?.timedAuction && !filterState?.notOnSale) return true;
-        return (filterState?.onSell && !!token.seller) ||
-          (filterState?.fixedPrice && !!token.seller && !token.auction) ||
-          (filterState?.timedAuction && !!token.seller && !!token.auction) ||
-          (filterState?.notOnSale && !token.seller);
+        const { onSell, fixedPrice, timedAuction, notOnSale } = statuses || {};
+        if (!onSell && !fixedPrice && !timedAuction && !notOnSale) return true;
+        return (onSell && !!token.seller) ||
+          (fixedPrice && !!token.seller && !token.auction) ||
+          (timedAuction && !!token.seller && !!token.auction) ||
+          (notOnSale && !token.seller);
       };
 
       let filteredByPrice = true;
-      if (filterState?.minPrice && filterState?.maxPrice) {
+      if (prices?.minPrice || prices?.maxPrice) {
         if (!token.price) {
           filteredByPrice = false;
         } else {
           const tokenPrice = new BN(token.price);
-          const minPrice = new BN(fromStringToBnString(filterState.minPrice, api?.market?.kusamaDecimals));
-          const maxPrice = new BN(fromStringToBnString(filterState.maxPrice, api?.market?.kusamaDecimals));
+          const minPrice = new BN(fromStringToBnString(prices.minPrice || '0', api?.market?.kusamaDecimals));
+          const maxPrice = prices.maxPrice ? new BN(fromStringToBnString(prices.maxPrice, api?.market?.kusamaDecimals)) : BN_MAX_INTEGER;
           filteredByPrice = (tokenPrice.gte(minPrice) && tokenPrice.lte(maxPrice));
         }
       }
       let filteredByCollections = true;
-      if (filterState?.collectionIds && filterState?.collectionIds.length > 0) {
-        filteredByCollections = filterState.collectionIds.findIndex((collectionId: number) => token.collectionId === collectionId) > -1;
+      if (filterState?.collections && filterState.collections.length > 0) {
+        filteredByCollections = filterState.collections.findIndex((collectionId: number) => token.collectionId === collectionId) > -1;
+      }
+      let filteredByAttributeCounts = true;
+      if (filterState?.attributeCounts && filterState.attributeCounts.length > 0) {
+        filteredByAttributeCounts = filterState?.attributeCounts.some((attributeCount) => {
+          const _count = Object.values(token.attributes || {})
+            .reduce((acc, attribute) => acc + (Array.isArray(attribute) ? attribute.length : 0), 0);
+          return _count === attributeCount;
+        });
+      }
+      let filteredByAttributes = true;
+      if (filterState?.attributes && filterState.attributes.length > 0) {
+        filteredByAttributes = filterState?.attributes.some((attributeItem) => {
+          return token.attributes?.[attributeItem.key] && Array.isArray(token.attributes[attributeItem.key]) && (token.attributes[attributeItem.key] as string[])
+            .some((_attribute) => _attribute === attributeItem.attribute);
+        });
       }
       let filteredBySearchValue = true;
       if (searchString) {
         filteredBySearchValue = token.collectionName?.includes(searchString) || token.prefix?.includes(searchString) || token.id === Number(searchString);
       }
 
-      return filterByStatus(token) && filteredByPrice && filteredByCollections && filteredBySearchValue;
+      return filterByStatus(token) && filteredByPrice && filteredByCollections && filteredByAttributeCounts && filteredByAttributes && filteredBySearchValue;
     },
     [filterState, searchString, api?.market?.kusamaDecimals]
   );
@@ -182,27 +190,28 @@ export const NFTPage = () => {
     return tokensWithOffers;
   }, [tokens, offers, filter, selectOption]);
 
+  const filterCount = useMemo(() => {
+    const { statuses, prices, collections = [], attributes = [], attributeCounts = [] } = filterState || {};
+    const statusesCount: number = Object.values(statuses || {}).filter((status) => status).length;
+    const collectionsCount: number = collections.length;
+    const numberOfAttributesCount: number = attributeCounts.length;
+    const attributesCount: number = attributes.length;
+
+    return statusesCount + collectionsCount + attributesCount + numberOfAttributesCount + (prices ? 1 : 0);
+  }, [filterState]);
+
   return (<PagePaper>
     <MarketMainPageStyled>
       <LeftColumn>
-        <Filters onFilterChange={setFilterState} />
+        {deviceSize !== DeviceSize.md && <Filters value={filterState} onFilterChange={setFilterState} />}
       </LeftColumn>
       <MainContent>
         <SearchAndSortingWrapper>
-          <SearchWrapper>
-            <InputTextStyled
-              iconLeft={{ name: 'magnify', size: 16 }}
-              onChange={onChangeSearchValue}
-              onKeyDown={onSearchInputKeyDown}
-              placeholder='Collection / token'
-              value={searchValue?.toString()}
-            />
-            <Button
-              onClick={onSearch}
-              role='primary'
-              title='Search'
-            />
-          </SearchWrapper>
+          <SearchField
+            searchValue={searchString}
+            placeholder='Collection / token'
+            onSearch={onSearch}
+          />
           <SortSelectWrapper>
             <Select
               onChange={onSortingChange}
@@ -215,19 +224,20 @@ export const NFTPage = () => {
           <Text size='m'>{`${featuredTokens.length} items`}</Text>
         </div>
         <TokensListWrapper >
-          {(isFetchingTokens || isFetchingOffers) && <Loading />}
-          {!isFetchingTokens && !isFetchingOffers && featuredTokens.length === 0 && <NoItems />}
-          <TokensList tokens={featuredTokens} />
+          {!isFetchingTokens && !isFetchingOffers && !isLoading && featuredTokens.length === 0 && <NoItems />}
+          <TokensList tokens={featuredTokens} isLoading={isFetchingTokens || isFetchingOffers || isLoading} />
         </TokensListWrapper>
       </MainContent>
-      <MobileFilters<MyTokensFilterState>
+      {deviceSize <= DeviceSize.md && <MobileFilters<MyTokensFilterState>
+        value={filterState}
+        filterCount={filterCount}
         defaultSortingValue={defaultSortingValue}
         sortingValue={sortingValue}
         sortingOptions={sortingOptions}
         onFilterChange={setFilterState}
         onSortingChange={onSortingChange}
         filterComponent={Filters}
-      />
+      />}
     </MarketMainPageStyled>
   </PagePaper>);
 };
@@ -259,30 +269,6 @@ const MainContent = styled.div`
   }
 `;
 
-const SearchWrapper = styled.div`
-  display: flex;
-  flex-grow: 1;
-  margin-right: 16px;
-
-  button {
-    margin-left: 8px;
-  }
-
-  @media (max-width: 768px) {
-    width: 100%;
-    .unique-input-text {
-      flex-grow: 1;
-    }
-  }
-
-  @media (max-width: 320px) {
-    margin-right: 0;
-    .unique-button {
-      display: none;
-    }
-  }
-`;
-
 const SortSelectWrapper = styled.div`
   .unique-select svg {
     z-index: 0;
@@ -300,9 +286,4 @@ const SearchAndSortingWrapper = styled.div`
 
 const TokensListWrapper = styled.div`
   min-height: 640px;
-`;
-
-const InputTextStyled = styled(InputText)`
-  width: 100%;
-  max-width: 610px;
 `;

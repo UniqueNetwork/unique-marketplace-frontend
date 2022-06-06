@@ -1,5 +1,5 @@
 import React, { ChangeEvent, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { AdditionalLight, Grey300, Grey500, Primary100, Primary500 } from '../../styles/colors';
 
 interface SelectInputOption {

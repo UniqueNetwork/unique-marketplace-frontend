@@ -9,11 +9,13 @@ export const useCollections = () => {
 
   useEffect(() => {
     setIsFetching(true);
-    void api?.collection?.getFeaturedCollections().then((collections) => {
+    if (!api) return;
+    (async () => {
+      const collections = await api?.collection?.getFeaturedCollections() as NFTCollection[];
       setCollections(collections);
       setIsFetching(false);
-    });
-  }, [api]);
+    })();
+  }, [api?.collection?.getFeaturedCollections]);
 
   return {
     collections,
