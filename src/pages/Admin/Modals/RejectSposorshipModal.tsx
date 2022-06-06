@@ -15,7 +15,7 @@ export const RejectSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collecti
         <Heading size='2'>Reject sponsorship</Heading>
       </Content>
       <Row>
-        <Text size={'m'}>Are you sure you want to reject the sponsorship request from the &quot;name&quot; collection?</Text>
+        <Text size={'m'}>{`Are you sure you want to reject the sponsorship request from the &quot;${collection?.name}&quot; collection?`}</Text>
       </Row>
       <ButtonWrapper>
         <Button
