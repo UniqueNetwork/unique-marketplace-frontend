@@ -17,11 +17,20 @@ const PricesFilter: FC<PricesFilterProps> = ({ value, onChange }) => {
 
   const onApply = useCallback(() => {
     if (minPriceValue || maxPriceValue) {
-      const priceRange = {
-        minPrice: minPriceValue,
-        maxPrice: maxPriceValue
-      };
-      onChange(priceRange);
+      let minPrice = minPriceValue;
+      let maxPrice = maxPriceValue;
+
+      if (minPriceValue && maxPriceValue && Number(maxPriceValue) < Number(minPriceValue)) {
+        setMinPriceValue('0');
+        minPrice = '0';
+      }
+
+      if (maxPriceValue && Number(maxPriceValue) === 0) {
+        setMaxPriceValue('');
+        maxPrice = undefined;
+      }
+
+      onChange({ minPrice, maxPrice });
       return;
     }
     onChange(undefined);
