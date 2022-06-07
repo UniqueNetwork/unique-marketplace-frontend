@@ -14,5 +14,8 @@ export type Settings = {
   auction: {
     commission: number,
     address: string
-  }
+  },
+  marketType: string,
+  mainSaleSeedAddress: string,
+  administrators: string[]
 }
