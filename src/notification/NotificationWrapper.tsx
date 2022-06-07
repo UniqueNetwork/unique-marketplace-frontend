@@ -29,6 +29,9 @@ const NotificationWrapper: FC = ({ children }) => {
   }, []);
 
   const push = useCallback((alert: NotificationAlert) => {
+    if (alerts.length > 5) {
+      removeOne();
+    }
     setAlerts((alerts) => [...alerts, {
       ...alert,
       key: `alert-${Date.now()}`
@@ -37,7 +40,7 @@ const NotificationWrapper: FC = ({ children }) => {
     if (timerRef.current) clearInterval(timerRef.current);
 
     timerRef.current = setInterval(removeOne, NOTIFICATION_DELAY);
-  }, []);
+  }, [alerts, removeOne]);
 
   const clear = useCallback(() => {
     setAlerts([]);
