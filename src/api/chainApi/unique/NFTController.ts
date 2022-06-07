@@ -1,6 +1,6 @@
 import { ApiPromise } from '@polkadot/api';
 import { INFTController } from '../types';
-import { collectionName16Decoder, decodeStruct, getCollectionProperties, hex2a } from '../utils/decoder';
+import { collectionName16Decoder, decodeStruct, getCollectionProperties, getNFTProperties, hex2a } from '../utils/decoder';
 import { fetchTokenImage, getTokenImage, getTokenImageUrl } from '../utils/imageUtils';
 import { getEthAccount, normalizeAccountId } from '../utils/addressUtils';
 import { MetadataType, NFTCollection, NFTToken, TokenId, UniqueDecoratedRpc } from './types';
@@ -34,38 +34,34 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
         return null;
       }
 
-      const variableData =
-        (await this.api.rpc.unique?.variableMetadata(collectionId, tokenId))?.toJSON();
-      const constData =
-        (await this.api.rpc.unique?.constMetadata(collectionId, tokenId))?.toJSON();
+      const tokenData =
+        (await this.api.rpc.unique?.tokenData(collectionId, tokenId))?.toJSON();
 
-      const tokenData = (await this.api.query.nonfungible.tokenData(collectionId, tokenId)).toJSON() as { owner: { Substrate?: string, Ethereum?: string } };
-      const owner = normalizeAccountId(tokenData?.owner as { Substrate: string }) as { Substrate: string, Ethereum: string };
-
-      let imageUrl = '';
-
+      if (!tokenData) {
+        throw new Error('');
+      }
+      const owner = normalizeAccountId(tokenData.owner) as { Substrate: string, Ethereum: string };
+      const tokenProperties = getNFTProperties(tokenData.properties);
       const collectionProperties = getCollectionProperties(collection);
 
-      const decodedConstData = decodeStruct({ attr: collectionProperties.attributesConst, data: constData });
-      const decodedVariableData = decodeStruct({ attr: collectionProperties.attributesVar, data: variableData });
+      const attributes = decodeStruct({ attr: collectionProperties.constOnChainSchema, data: tokenProperties.constData });
+      let imageUrl = '';
 
-      const schemaVersion = collectionProperties.schemaVersion;
-
-      if (schemaVersion === 'Unique' && decodedConstData.ipfsJson) {
-        const ipfsJson = JSON.parse(decodedConstData.ipfsJson as string) as { ipfs: string };
+      if (collectionProperties.schemaVersion === 'Unique' && tokenProperties.constData) {
+        const ipfsJson = JSON.parse(tokenProperties.constData) as { ipfs: string };
         imageUrl = `${IPFSGateway}/${ipfsJson.ipfs}`;
-      } else if (schemaVersion === 'ImageURL') {
+      } else if (collectionProperties.schemaVersion === 'ImageURL') {
         imageUrl = getTokenImageUrl(collectionProperties.offchainSchema, tokenId);
-      } else if (schemaVersion === 'tokenURI') {
+      } else if (collectionProperties.schemaVersion === 'tokenURI') {
         const collectionMetadata = JSON.parse(collectionProperties.offchainSchema) as MetadataType;
         imageUrl = await fetchTokenImage(collectionMetadata, tokenId);
       }
 
       let collectionCover = '';
 
-      if (collectionProperties.attributesVar) {
+      if (collectionProperties.variableOnChainSchema) {
         const collectionSchema = getCollectionProperties(collection);
-        const image = JSON.parse(collectionSchema?.attributesVar)?.collectionCover as string;
+        const image = JSON.parse(collectionSchema?.variableOnChainSchema)?.collectionCover as string;
 
         collectionCover = `${IPFSGateway}/${image}`;
       } else {
@@ -76,10 +72,7 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
 
       return {
         id: tokenId,
-        attributes: {
-          ...decodedConstData,
-          ...decodedVariableData
-        },
+        attributes,
         collectionId,
         imageUrl,
         owner,
@@ -102,6 +95,7 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
     const tokens: NFTToken[] = [];
 
     for (const collectionId of this.collectionsIds) {
+      console.log(collectionId);
       const tokensIds =
         await this.api.rpc.unique?.accountTokens(collectionId, normalizeAccountId(account)) as TokenId[];
       const tokensIdsOnEth =
@@ -113,6 +107,7 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
       tokens.push(...tokensOfCollection);
     }
 
+    console.log(tokens);
     return tokens;
   }
 }

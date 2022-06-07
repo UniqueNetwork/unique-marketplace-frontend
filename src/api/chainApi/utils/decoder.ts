@@ -1,7 +1,7 @@
 import { AttributesDecoded } from '../unique/types';
 import { deserializeNft, ProtobufAttributeType } from './protobufUtils';
 import { addressToEvm } from '@polkadot/util-crypto';
-import { UpDataStructsCreateCollectionData } from '@unique-nft/types/default/types';
+import { UpDataStructsCreateCollectionData, UpDataStructsProperty } from '@unique-nft/types/default/types';
 
 export const collectionName16Decoder = (name: number[]) => {
   const collectionNameArr = name.map((item: number) => item);
@@ -42,26 +42,27 @@ export const decodeStruct = ({ attr, data }: { attr?: any; data?: string }): Att
   return {};
 };
 
-type CollectionProperties = {
-  attributesConst: string
-  attributesVar: string
-  offchainSchema: string
-  schemaVersion: string
-}
+type CollectionProperties = Record<'constOnChainSchema' | 'variableOnChainSchema' | 'offchainSchema' | 'schemaVersion', string>;
 
 export const getCollectionProperties = (collection: UpDataStructsCreateCollectionData): CollectionProperties => {
-  return collection?.properties.toArray().reduce<CollectionProperties>((acc, property) => {
-    if (property.key.toString() === '_old_constOnChainSchema') acc.attributesConst = property.value.toJSON();
-    if (property.key.toString() === '_old_variableOnChainSchema') acc.attributesVar = property.value.toJSON();
-    if (property.key.toString() === '_old_offchainSchema') acc.offchainSchema = property.value.toJSON();
-    if (property.key.toString() === '_old_schemaVersion') acc.schemaVersion = property.value.toJSON();
-    return acc;
-  }, {
-    attributesConst: '',
-    attributesVar: '',
+  return collection?.properties.toArray().reduce<CollectionProperties>((acc, property) => ({
+    ...acc,
+    [hex2a(property.key.toString()).replace('_old_', '')]: hex2a(property.value.toString())
+  }), {
+    constOnChainSchema: '',
+    variableOnChainSchema: '',
     offchainSchema: '',
     schemaVersion: ''
   });
+};
+
+type NFTProperties = Record<'constData', string>;
+
+export const getNFTProperties = (NFTproperties: UpDataStructsProperty[]): NFTProperties => {
+  return NFTproperties.reduce<NFTProperties>((acc, property) => ({
+      ...acc,
+      [hex2a(property.key.toString()).replace('_old_', '')]: property.value.toString()
+  }), { constData: '' });
 };
 
 // decimals: 15 - opal, 18 - eth
