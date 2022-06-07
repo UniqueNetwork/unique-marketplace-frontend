@@ -30,8 +30,8 @@ class UniqueCollectionController implements ICollectionController<NFTCollection,
 
     const collectionProperties = getCollectionProperties(collection);
 
-    if (collectionProperties?.attributesVar) {
-      const image = JSON.parse(collectionProperties?.attributesVar)?.collectionCover as string;
+    if (collectionProperties?.variableOnChainSchema) {
+      const image = JSON.parse(collectionProperties?.variableOnChainSchema)?.collectionCover as string;
 
       coverImageUrl = `${IPFSGateway}/${image}`;
     } else {
@@ -44,7 +44,7 @@ class UniqueCollectionController implements ICollectionController<NFTCollection,
       id: collectionId,
       owner: collection.owner,
       tokenPrefix: collection.tokenPrefix?.toUtf8() || '',
-      collectionName: collectionName16Decoder(collection.name.toJSON() as number[]),
+      collectionName: collectionName16Decoder(collection.name?.toJSON() as number[] || []),
       description: hex2a(collection.description?.toHex() || ''),
       coverImageUrl
     };
