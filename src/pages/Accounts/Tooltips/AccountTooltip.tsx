@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components/macro';
-import { AdditionalDark, AdditionalLight } from '../../../styles/colors';
+import { AdditionalDark, AdditionalLight } from 'styles/colors';
 
 const AccountTooltip = () => {
   const [accountPopupVisible, setAccountPopupVisible] = useState(false);
@@ -52,7 +52,7 @@ const TooltipStyled = styled.div`
     left: -7px;
     top: 5px;
     border-top: 5px solid transparent;
-    border-right: 7px solid ${AdditionalDark};
+    border-right: 9px solid ${AdditionalDark};
     border-bottom: 5px solid transparent;
   }
 
