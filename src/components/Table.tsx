@@ -1,11 +1,9 @@
 import React, { FC } from 'react';
 import styled from 'styled-components';
-import { Table as UITable } from '@unique-nft/ui-kit';
-import { SortQuery, TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/types';
+import { SortQuery, Table as UITable, TableColumnProps } from '@unique-nft/ui-kit';
 
 import useDeviceSize, { DeviceSize } from '../hooks/useDeviceSize';
 import MobileTable from './MobileTable/MobileTable';
-import Loading from './Loading';
 import NoItems from './NoItems';
 import Skeleton from './Skeleton/Skeleton';
 
@@ -59,14 +57,4 @@ const TableWrapper = styled.div`
      padding: 0 var(--gap);
    } 
  }
-`;
-
-const TableLoading = styled(Loading)`
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: auto;
-  background-color: rgba(255, 255, 255, 0.7);
 `;

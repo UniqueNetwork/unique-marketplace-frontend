@@ -1,7 +1,7 @@
 import { Button, Heading, Tabs, Text, Select, Link } from '@unique-nft/ui-kit';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
 import DefaultMarketStages from './StagesModal';
 import { TTokenPageModalBodyProps } from './TokenPageModal';

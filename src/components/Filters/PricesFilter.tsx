@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import { Button, Text } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { PriceRange } from './types';
 import Accordion from '../Accordion/Accordion';
 import { NumberInput } from '../NumberInput/NumberInput';

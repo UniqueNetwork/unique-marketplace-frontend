@@ -1,15 +1,13 @@
 import React, { FC, useMemo, useState } from 'react';
-import { Icon, Text } from '@unique-nft/ui-kit';
+import { Icon, Loader, Text } from '@unique-nft/ui-kit';
 import { Link } from 'react-router-dom';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
 import { Picture } from '..';
 import { useApi } from '../../hooks/useApi';
-import Loading from '../Loading';
 import { NFTToken } from '../../api/chainApi/unique/types';
 import { formatKusamaBalance } from '../../utils/textUtils';
 import { Primary600 } from '../../styles/colors';
-import Kusama from '../../static/icons/logo-kusama.svg';
 import { timeDifference } from '../../utils/timestampUtils';
 import { Offer } from '../../api/restApi/offers/types';
 import { compareEncodedAddresses } from '../../api/chainApi/utils/addressUtils';
@@ -42,8 +40,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, ...props })
       return { ...token,
         collectionName,
         prefix,
-        imageUrl: image
-      };
+        imageUrl: image };
     }
 
     if (token) {
@@ -82,7 +79,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, ...props })
       </PictureWrapper>
       <Description>
         <Link to={`/token/${collectionId}/${tokenId}`} title={`${prefix || ''} #${tokenId}`}>
-          <Text size='l' weight='medium'>
+          <Text size='l' weight='regular'>
             {`${prefix || ''} #${tokenId || ''}`}
           </Text>
         </Link>
@@ -93,7 +90,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, ...props })
         </a>
         {price && <PriceWrapper>
           <Text size='s'>{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(price)}` }</Text>
-          <Icon file={Kusama} size={16} />
+          <Icon name={'chain-kusama'} size={16} />
         </PriceWrapper>}
         {price && !auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         {auction && <AuctionInfoWrapper>
@@ -106,7 +103,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, ...props })
         </AuctionInfoWrapper>}
       </Description>
 
-      {isFetching && <Loading />}
+      {isFetching && <Loader isFullPage />}
     </TokensCardStyled>
   );
 };

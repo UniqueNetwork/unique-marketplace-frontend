@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Text, Button, Heading } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import BN from 'bn.js';
 
 import { Offer } from '../../../api/restApi/offers/types';

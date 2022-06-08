@@ -1,9 +1,7 @@
 import React, { ChangeEvent, FC, useCallback, useState } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
 import { Grey300, Grey500 } from '../../styles/colors';
-import Eye from '../../static/icons/eye.svg';
-import EyeClosed from '../../static/icons/eye-closed.svg';
 import { IconButton } from '../IconButton/IconButton';
 
 interface PasswordInputProps {
@@ -30,7 +28,7 @@ export const PasswordInput: FC<PasswordInputProps> = ({ placeholder, value, onCh
         value={value}
         placeholder={placeholder}
       />
-      <IconButton file={isVisibleValue ? Eye : EyeClosed} onClick={onVisibleValueClick} size={24} />
+      {value && <IconButton name={isVisibleValue ? 'eye' : 'eye-closed'} onClick={onVisibleValueClick} size={24} />}
     </PasswordInputWrapper>
   );
 };

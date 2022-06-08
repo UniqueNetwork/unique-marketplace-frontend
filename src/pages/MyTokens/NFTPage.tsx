@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import BN from 'bn.js';
 import { Select, Text } from '@unique-nft/ui-kit';
 import { BN_MAX_INTEGER } from '@polkadot/util';

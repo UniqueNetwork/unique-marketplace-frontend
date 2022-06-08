@@ -1,10 +1,8 @@
 import React, { FC, useCallback } from 'react';
-import { Text } from '@unique-nft/ui-kit';
+import { Text, Icon } from '@unique-nft/ui-kit';
 
 import DefaultAvatar from '../../static/icons/default-avatar.svg';
-import { Icon } from '../Icon/Icon';
-import CopyIcon from '../../static/icons/copy.svg';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { useApi } from '../../hooks/useApi';
 import { toChainFormatAddress } from '../../api/chainApi/utils/addressUtils';
 import { shortcutText } from '../../utils/textUtils';
@@ -45,7 +43,7 @@ const AccountCard: FC<AccountProps> = ({ accountName, accountAddress, isShort = 
           </Text>
           {canCopy && <a onClick={onCopyAddress(formatAddress(accountAddress) || '')}>
             <CopyIconWrapper>
-              <Icon path={CopyIcon} />
+              <Icon name={'copy'} size={24} />
             </CopyIconWrapper>
           </a>}
         </AddressRow>}

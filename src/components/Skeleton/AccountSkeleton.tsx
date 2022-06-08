@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
 import Skeleton from './Skeleton';
 import DoubleLineSkeleton from './DoubleLineSkeleton';
