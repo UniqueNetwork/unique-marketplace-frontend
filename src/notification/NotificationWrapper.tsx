@@ -2,7 +2,7 @@ import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 're
 import { NotificationAlert, NotificationProvider } from './NotificationContext';
 import Alerts from '../components/Alerts/Alerts';
 
-const NOTIFICATION_DELAY = 5 * 1000;
+const NOTIFICATION_DELAY = 2 * 1000;
 
 export type NotificationState = NotificationAlert & {
   isRemoved?: boolean
