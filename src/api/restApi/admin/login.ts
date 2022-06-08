@@ -13,14 +13,13 @@ const endpoint = '/api/admin/login';
 
 const logInMessage = '/api/admin/login';
 
-export const adminLogIn = (body: LoginPayload, signature: string) => post<any, LoginResponse>(`${endpoint}`, null, { headers: { ...defaultParams.headers, Signature: signature }, params: body, ...defaultParams });
+export const adminLogIn = (body: LoginPayload, signature: string) => post<any, LoginResponse>(`${endpoint}`, null, { headers: { ...defaultParams.headers, Authorization: `Bearer ${signature}` }, params: body, ...defaultParams });
 
 export const useAdminLoggingIn = () => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const { selectedAccount, signMessage } = useAccounts();
 
   const hasAdminPermission: boolean = useMemo(() => {
-    console.log(localStorage.getItem(JWTokenLocalStorageKey));
     return !!localStorage.getItem(JWTokenLocalStorageKey);
   }, [selectedAccount?.address]);
 
