@@ -4,12 +4,14 @@ import { Layout } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 import { Header } from '.';
 import { useFooter } from '../hooks/useFooter';
+import useBackground from '../hooks/useBackground';
 
 export type TMenuItems = 'Market' | 'My tokens' | 'Trades' | 'FAQ' | 'Manage accounts';
 
 export const PageLayout: FC = () => {
   const { pathname } = useLocation();
   const footer = useFooter();
+  const backgroundImage = useBackground();
 
   const layoutProps = useMemo(() => {
     if (pathname === '/market') return { heading: 'Market' };
@@ -40,7 +42,7 @@ export const PageLayout: FC = () => {
   }, [pathname]);
 
   return (
-    <LayoutStyled>
+    <BgLayoutStyled backgroundImage={backgroundImage}>
       <Layout
         {...layoutProps}
         footer={<div dangerouslySetInnerHTML={{ __html: footer }} />}
@@ -52,7 +54,7 @@ export const PageLayout: FC = () => {
       >
         <Outlet />
       </Layout>
-    </LayoutStyled>
+    </BgLayoutStyled>
   );
 };
 
@@ -146,5 +148,18 @@ const LayoutStyled = styled.div`
 
   .unique-tabs-labels {
     flex-wrap: nowrap;
+  }
+`;
+
+const BgLayoutStyled = styled(LayoutStyled)<{ backgroundImage: string | null }>`
+  .unique-layout {
+    min-height: 100vh;
+    background-image: url(${(props) => props.backgroundImage});
+    background-position: inherit;
+    background-position-x: inherit;
+    background-position-y: inherit;
+    background-size: cover;
+    background-repeat: round;
+    background-attachment: fixed;
   }
 `;
