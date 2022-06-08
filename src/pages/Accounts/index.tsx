@@ -370,8 +370,14 @@ const ActionsWrapper = styled.div`
 `;
 
 const DepositActionsWrapper = styled(ActionsWrapper)`
-  @media (max-width: 768px) {
-    flex-direction: row !important;
+  && {
+    column-gap: calc(var(--gap) / 2);
+    button {
+      width: 148px;
+    }
+    @media (max-width: 768px) {
+      flex-direction: row !important;
+    }
   }
 `;
 
