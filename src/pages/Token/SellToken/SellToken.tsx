@@ -6,6 +6,7 @@ import { AdditionalWarning100, AdditionalWarning500, Grey300 } from '../../../st
 import { Offer } from '../../../api/restApi/offers/types';
 import { Price } from '../TokenDetail/Price';
 import { useAccounts } from '../../../hooks/useAccounts';
+import { useApi } from '../../../hooks/useApi';
 
 interface SellTokenProps {
   offer?: Offer
@@ -16,6 +17,7 @@ interface SellTokenProps {
 
 export const SellToken: FC<SellTokenProps> = ({ offer, onSellClick, onTransferClick, onDelistClick }) => {
   const { selectedAccount } = useAccounts();
+  const { settings } = useApi();
   if (offer) {
     return (<>
       <Text size={'l'}>{'Price'}</Text>
@@ -30,10 +32,10 @@ export const SellToken: FC<SellTokenProps> = ({ offer, onSellClick, onTransferCl
   return (
     <>
       <ActionsWrapper>
-        <Button title={'Sell'} role={'primary'} onClick={onSellClick}/>
+        {settings?.marketType !== 'primary' && <Button title={'Sell'} role={'primary'} onClick={onSellClick}/>}
         <Button title={'Transfer'} onClick={onTransferClick} />
       </ActionsWrapper>
-      {!selectedAccount?.isOnWhiteList && <WarningWrapper>
+      {(settings?.marketType !== 'primary' && !selectedAccount?.isOnWhiteList) && <WarningWrapper>
         A fee of ~0,001 KSM may be applied to the first sale transaction. Your address will be added to the transaction sponsoring whitelist allowing you to make feeless transactions.
       </WarningWrapper>}
       <Divider />
