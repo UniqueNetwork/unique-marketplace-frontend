@@ -5,20 +5,24 @@ import { fetchTokenImage, getTokenImage, getTokenImageUrl } from '../utils/image
 import { getEthAccount, normalizeAccountId } from '../utils/addressUtils';
 import { MetadataType, NFTCollection, NFTToken, TokenId, UniqueDecoratedRpc } from './types';
 import config from '../../../config';
+import { filterAllowedTokens } from '../utils/checkTokenIsAllowed';
 
 const { IPFSGateway } = config;
 
 export type NFTControllerConfig = {
   collectionsIds: number[]
+  allowedTokens: { collection: number; tokens: string }[];
 }
 
 class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
   private api: ApiPromise & { rpc: UniqueDecoratedRpc };
   private collectionsIds: number[];
+  private allowedTokens: { collection: number; tokens: string }[];
 
   constructor(api: ApiPromise, config?: NFTControllerConfig) {
     this.api = api;
     this.collectionsIds = config?.collectionsIds || [];
+    this.allowedTokens = config?.allowedTokens || [];
   }
 
   public async getToken(collectionId: number, tokenId: number): Promise<NFTToken | null> {
@@ -107,7 +111,10 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
       const tokensIdsOnEth =
         await this.api.rpc.unique?.accountTokens(collectionId, normalizeAccountId(getEthAccount(account))) as TokenId[];
 
-      const tokensOfCollection = (await Promise.all([...tokensIds, ...tokensIdsOnEth].map((item) =>
+      const currentAllowedTokens = this.allowedTokens?.find((item) => item.collection === collectionId)?.tokens;
+      const allowedIds = filterAllowedTokens([...tokensIds, ...tokensIdsOnEth], currentAllowedTokens);
+      const tokensOfCollection = (await Promise.all(allowedIds
+        .map((item) =>
         this.getToken(collectionId, item.toNumber())))) as NFTToken[];
 
       tokens.push(...tokensOfCollection);

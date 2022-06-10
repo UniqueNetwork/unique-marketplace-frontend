@@ -3,12 +3,12 @@ import { useParams } from 'react-router-dom';
 import { IGqlClient } from './graphQL/gqlClient';
 import { IRpcClient } from './chainApi/types';
 import { ApiContextProps, ApiProvider, ChainData } from './ApiContext';
-import config from '../config';
 import { gqlClient as gql, rpcClient as rpc } from '.';
 import { getSettings } from './restApi/settings/settings';
 import { ApolloProvider } from '@apollo/client';
 import AuctionSocketProvider from './restApi/auction/AuctionSocketProvider';
 import { Settings } from './restApi/settings/types';
+import config from '../config';
 
 interface ChainProviderProps {
   children: React.ReactNode
