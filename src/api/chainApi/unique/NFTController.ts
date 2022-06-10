@@ -38,7 +38,7 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
         (await this.api.rpc.unique?.tokenData(collectionId, tokenId))?.toJSON();
 
       if (!tokenData) {
-        throw new Error('');
+        throw new Error(`TokenData for token ${tokenId} not found`);
       }
       const owner = normalizeAccountId(tokenData.owner) as { Substrate: string, Ethereum: string };
       const tokenProperties = getNFTProperties(tokenData.properties);
@@ -95,7 +95,6 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
     const tokens: NFTToken[] = [];
 
     for (const collectionId of this.collectionsIds) {
-      console.log(collectionId);
       const tokensIds =
         await this.api.rpc.unique?.accountTokens(collectionId, normalizeAccountId(account)) as TokenId[];
       const tokensIdsOnEth =
