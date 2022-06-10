@@ -1,7 +1,7 @@
 import { AttributesDecoded } from '../unique/types';
 import { deserializeNft, ProtobufAttributeType } from './protobufUtils';
 import { addressToEvm } from '@polkadot/util-crypto';
-import { UpDataStructsCollection } from '@unique-nft/types/unique/types';
+import { UpDataStructsCreateCollectionData, UpDataStructsProperty } from '@unique-nft/types/default/types';
 
 export const collectionName16Decoder = (name: number[]) => {
   const collectionNameArr = name.map((item: number) => item);
@@ -42,21 +42,27 @@ export const decodeStruct = ({ attr, data }: { attr?: any; data?: string }): Att
   return {};
 };
 
-export const getOnChainSchema = (collection: UpDataStructsCollection): {
-  attributesConst: string
-  attributesVar: string
-} => {
-  if (collection) {
-    return {
-      attributesConst: hex2a(collection.constOnChainSchema.toHex()),
-      attributesVar: hex2a(collection.variableOnChainSchema.toHex())
-    };
-  }
+type CollectionProperties = Record<'constOnChainSchema' | 'variableOnChainSchema' | 'offchainSchema' | 'schemaVersion', string>;
 
-  return {
-    attributesConst: '',
-    attributesVar: ''
-  };
+export const getCollectionProperties = (collection: UpDataStructsCreateCollectionData): CollectionProperties => {
+  return collection?.properties.toArray().reduce<CollectionProperties>((acc, property) => ({
+    ...acc,
+    [hex2a(property.key.toString()).replace('_old_', '')]: hex2a(property.value.toString())
+  }), {
+    constOnChainSchema: '',
+    variableOnChainSchema: '',
+    offchainSchema: '',
+    schemaVersion: ''
+  });
+};
+
+type NFTProperties = Record<'constData', string>;
+
+export const getNFTProperties = (NFTproperties: UpDataStructsProperty[]): NFTProperties => {
+  return NFTproperties.reduce<NFTProperties>((acc, property) => ({
+      ...acc,
+      [hex2a(property.key.toString()).replace('_old_', '')]: property.value.toString()
+  }), { constData: '' });
 };
 
 // decimals: 15 - opal, 18 - eth

@@ -1,7 +1,8 @@
 import { DecoratedRpc } from '@polkadot/api/types';
 import { RpcInterface } from '@polkadot/rpc-core/types/jsonrpc';
-import { UpDataStructsCollection } from '@unique-nft/types/unique/types';
 import { GenericAccountId } from '@polkadot/types';
+import { UpDataStructsCreateCollectionData, UpDataStructsCreateNftExData } from '@unique-nft/types/default/types';
+import { UpDataStructsCollection } from '@unique-nft/types';
 import { BN } from '@polkadot/util';
 
 export type TokenId = {
@@ -10,13 +11,15 @@ export type TokenId = {
 
 export type UniqueDecoratedRpc = DecoratedRpc<'promise', RpcInterface> & {
   unique?: {
-    collectionById(collectionId: string): Promise<{ value: UpDataStructsCollection }>
+    collectionById(collectionId: string): Promise<{ value: UpDataStructsCollection & UpDataStructsCreateCollectionData }>
+    tokenData(collectionId: number, tokenId: number): Promise<{ toJSON: () => UpDataStructsCreateNftExData }>
     variableMetadata(collectionId: number, tokenId: number): Promise<{ toJSON: () => string }>
     constMetadata(collectionId: number, tokenId: number): Promise<{ toJSON: () => string }>
     tokenOwner(collectionId: number, tokenId: number): Promise<{ toJSON: () => string }>
     accountTokens(collectionId: number, accountId: CrossAccountId): Promise<TokenId[]>
   }
 }
+
 export type UniqueDecoratedQuery = DecoratedRpc<'promise', RpcInterface> & {
   unique?: {
     accountTokens(collectionId: number, accountId: CrossAccountId): Promise<TokenId[]>
