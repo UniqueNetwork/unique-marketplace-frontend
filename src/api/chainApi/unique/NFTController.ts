@@ -40,7 +40,7 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
       if (!tokenData) {
         throw new Error(`TokenData for token ${tokenId} not found`);
       }
-      const owner = normalizeAccountId(tokenData.owner) as { Substrate: string, Ethereum: string };
+      const owner = normalizeAccountId(tokenData.owner || {}) as { Substrate: string, Ethereum: string };
       const tokenProperties = getNFTProperties(tokenData.properties);
       const collectionProperties = getCollectionProperties(collection);
 
@@ -48,7 +48,7 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
       let imageUrl = '';
 
       if (collectionProperties.schemaVersion === 'Unique' && tokenProperties.constData) {
-        const ipfsJson = JSON.parse(tokenProperties.constData) as { ipfs: string };
+        const ipfsJson = JSON.parse(attributes.ipfsJson as string) as { ipfs: string };
         imageUrl = `${IPFSGateway}/${ipfsJson.ipfs}`;
       } else if (collectionProperties.schemaVersion === 'ImageURL') {
         imageUrl = getTokenImageUrl(collectionProperties.offchainSchema, tokenId);
@@ -106,7 +106,6 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
       tokens.push(...tokensOfCollection);
     }
 
-    console.log(tokens);
     return tokens;
   }
 }
