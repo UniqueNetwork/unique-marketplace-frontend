@@ -5,6 +5,7 @@ export type Settings = {
       wsEndpoint: string
       collectionIds: number[]
       contractAddress: string
+      allowedTokens: { collection: number, tokens: string }[]
     },
     kusama: {
       wsEndpoint: string
