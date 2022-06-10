@@ -5,6 +5,7 @@ import styled from 'styled-components/macro';
 import { Header } from '.';
 import { useFooter } from '../hooks/useFooter';
 import useBackground from '../hooks/useBackground';
+import { LightBackground } from '../styles/colors';
 
 export type TMenuItems = 'Market' | 'My tokens' | 'Trades' | 'FAQ' | 'Manage accounts';
 
@@ -63,6 +64,10 @@ const LayoutStyled = styled.div`
   /* specific for dafc */
   .unique-layout {
     background: var(--color-layout-background);
+    
+    header {
+      background: ${LightBackground};
+    }
 
     @media (max-width: 1024px) {
       background: var(--color-additional-light);

@@ -40,3 +40,4 @@ export const AdditionalPositive100 = 'var(--color-additional-positive-100)';
 export const AdditionalWarning500 = 'var(--color-additional-warning-500)';
 export const AdditionalWarning100 = 'var(--color-additional-warning-100)';
 export const AdditionalCoral500 = 'var(--color-additional-coral-500)';
+export const LightBackground = 'var(--color-light-background)';

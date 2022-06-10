@@ -1,7 +1,7 @@
 import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components/macro';
 import TriangleDown from '../../../../static/icons/triangle-down.svg';
-import { AdditionalLight, Grey500, Primary100, Primary500 } from '../../../../styles/colors';
+import { AdditionalLight, Grey500, LightBackground, Primary100, Primary500 } from '../../../../styles/colors';
 import { Icon } from '@unique-nft/ui-kit';
 
 export interface DropdownSelectProps<T> {
@@ -96,7 +96,7 @@ const Dropdown = styled.div<{ isOpen: boolean }>`
   min-width: 100%;
   top: calc(100% + 4px);
   flex-direction: column;
-  background: ${AdditionalLight};
+  background: ${LightBackground};
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
   border-radius: 4px;
   max-height: 50vh;

@@ -3,7 +3,7 @@ import styled from 'styled-components/macro';
 import { Text, Icon } from '@unique-nft/ui-kit';
 
 import UploadIcon from '../../static/icons/upload.svg';
-import { AdditionalLight, Primary500 } from '../../styles/colors';
+import { AdditionalLight, LightBackground, Primary500 } from '../../styles/colors';
 
 interface UploadProps {
   onChange(file: File): void;
@@ -29,7 +29,7 @@ export const Upload: FC<UploadProps> = ({ onChange }) => {
 
 const UploadWrapper = styled.div`
   position: relative;
-  background: ${AdditionalLight};
+  background: ${LightBackground};
   padding: 52px var(--gap);
   border: 1px dashed ${Primary500};
   box-sizing: border-box;

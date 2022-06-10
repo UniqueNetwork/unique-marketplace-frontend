@@ -8,8 +8,10 @@ const useBackground = () => {
       try {
         const response = await fetch('/background.jpeg');
         const imageBlob = await response.blob();
-        const imageObjectURL = URL.createObjectURL(imageBlob);
-        setImage(imageObjectURL);
+        if (imageBlob.type === 'image/jpeg') { // if loaded file is image
+          const imageObjectURL = URL.createObjectURL(imageBlob);
+          setImage(imageObjectURL);
+        }
       } catch (err) {
         console.log('Error during loading background image', err);
       }
