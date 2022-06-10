@@ -2,7 +2,7 @@ import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 're
 import { NotificationAlert, NotificationProvider } from './NotificationContext';
 import Alerts from '../components/Alerts/Alerts';
 
-const NOTIFICATION_DELAY = 5 * 1000;
+const NOTIFICATION_DELAY = 2 * 1000;
 const MAX_ALERTS = 5;
 
 export type NotificationState = NotificationAlert & {
@@ -43,7 +43,7 @@ const NotificationWrapper: FC = ({ children }) => {
     if (timerRef.current) clearInterval(timerRef.current);
 
     timerRef.current = setInterval(removeOne, NOTIFICATION_DELAY);
-  }, []);
+  }, [alerts, removeOne]);
 
   const clear = useCallback(() => {
     setAlerts([]);

@@ -80,6 +80,7 @@ const HeadingWrapper = styled.div`
 const SocialButtonsWrapper = styled.div`
   font-size: 16px;
   display: flex;
+  flex-wrap: wrap;
   gap: 24px;
   margin-bottom: 28px;
   button {

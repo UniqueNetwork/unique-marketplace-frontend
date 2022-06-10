@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { Header } from '.';
 import { useFooter } from '../hooks/useFooter';
 
-export type TMenuItems = 'Market' | 'My tokens' | 'Trades' | 'FAQ' | 'Manage accounts';
+export type TMenuItems = 'Market' | 'My tokens' | 'Trades' | 'FAQ' | 'Manage accounts' | 'Admin panel';
 
 export const PageLayout: FC = () => {
   const { pathname } = useLocation();
@@ -13,6 +13,10 @@ export const PageLayout: FC = () => {
 
   const layoutProps = useMemo(() => {
     if (pathname === '/market') return { heading: 'Market' };
+
+    if (pathname === '/administration') {
+      return { heading: 'Collections' };
+    }
 
     if (pathname === '/myTokens') {
       return { heading: 'My tokens' };

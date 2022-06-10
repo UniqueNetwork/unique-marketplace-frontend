@@ -22,7 +22,8 @@ import config from '../../config';
 import { TWithdrawBid } from '../../api/restApi/auction/types';
 import { TextInput } from '../../components/TextInput/TextInput';
 import { Primary500 } from '../../styles/colors';
-import AccountTooltip from './AccountTooltip';
+import AccountTooltip from './Tooltips/AccountTooltip';
+import IconWithHint from './Tooltips/WithdrawTooltip';
 
 const tokenSymbol = 'KSM';
 
@@ -103,9 +104,10 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
     render(accountInfo: AccountInfo) {
       if (accountInfo.deposit) {
         return (
-          <ActionsWrapper>
+          <DepositActionsWrapper>
             <Button title={'Withdraw'} onClick={onShowWithdrawDepositModal(accountInfo.address)} role={'primary'} />
-          </ActionsWrapper>
+            <IconWithHint />
+          </DepositActionsWrapper>
         );
       }
       return (
@@ -367,6 +369,18 @@ const ActionsWrapper = styled.div`
       button {
         width: 100%;
       }
+    }
+  }
+`;
+
+const DepositActionsWrapper = styled(ActionsWrapper)`
+  && {
+    column-gap: calc(var(--gap) / 2);
+    button {
+      width: 148px;
+    }
+    @media (max-width: 768px) {
+      flex-direction: row !important;
     }
   }
 `;
