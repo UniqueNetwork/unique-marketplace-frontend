@@ -381,7 +381,7 @@ const ActionsWrapper = styled.div`
     column-gap: var(--gap);
     padding: var(--gap) 0;
     @media (max-width: 768px) {
-      flex-direction: column;
+      flex-direction: row;
       row-gap: var(--gap);
       width: 100%;
       button {
