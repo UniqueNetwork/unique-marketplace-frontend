@@ -18,6 +18,7 @@ import CardSkeleton from '../../components/Skeleton/CardSkeleton';
 import SearchField from '../../components/SearchField/SearchField';
 import { useAccounts } from '../../hooks/useAccounts';
 import { CollectionData } from '../../api/restApi/admin/types';
+import config from '../../config';
 
 type TOption = {
   iconRight: {
@@ -109,6 +110,11 @@ export const AdminPanelPage: FC = () => {
     setModalType(AdminPanelModalType.addCollection);
   }, []);
 
+  const onCreateCollectionViaWalletClick = useCallback(() => {
+    if (!config.walletUrl) return;
+    navigate(config.walletUrl);
+  }, []);
+
   const onManageSponsorshipClick = useCallback((collection: NFTCollection) => () => {
     setModalType(AdminPanelModalType.acceptSponsorship);
     setSelectedCollection(collection);
@@ -164,7 +170,7 @@ export const AdminPanelPage: FC = () => {
           </SortSelectWrapper>
         </SearchAndSortingWrapper>
         <ButtonsWrapper>
-          <Button title={'Create new via wallet'} onClick={onAddCollectionClick}/>
+          <Button title={'Create new via wallet'} onClick={onCreateCollectionViaWalletClick}/>
           <Button role={'primary'} title={'Add to the marketplace'} onClick={onAddCollectionClick}/>
         </ButtonsWrapper>
       </ControlsWrapper>
