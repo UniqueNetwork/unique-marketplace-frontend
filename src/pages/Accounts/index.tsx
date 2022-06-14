@@ -28,13 +28,13 @@ import IconWithHint from './Tooltips/WithdrawTooltip';
 const tokenSymbol = 'KSM';
 
 type AccountsColumnsProps = {
-  isShortAddress: boolean
+  isSmallDevice: boolean
   formatAddress(address: string): string
   onShowSendFundsModal(address: string): () => void
   onShowWithdrawDepositModal(address: string): () => void
 };
 
-const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal, isShortAddress }: AccountsColumnsProps): TableColumnProps[] => [
+const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal, isSmallDevice }: AccountsColumnsProps): TableColumnProps[] => [
   {
     title: 'Account',
     width: '25%',
@@ -51,7 +51,7 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
           <AccountCard accountName={accountInfo.name}
             accountAddress={accountInfo.address}
             canCopy
-            isShort={isShortAddress}
+            isShort={isSmallDevice}
           />
         </AccountCellWrapper>
       );
@@ -98,7 +98,7 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
     }
   },
   {
-    title: 'Actions',
+    title: isSmallDevice ? '' : 'Actions',
     width: '25%',
     field: 'accountInfo',
     render(accountInfo: AccountInfo) {
@@ -262,7 +262,7 @@ export const AccountsPage = () => {
       <TableWrapper>
         <AccountTooltip/>
         <Table
-          columns={getAccountsColumns({ isShortAddress: deviceSize === DeviceSize.sm, formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal })}
+          columns={getAccountsColumns({ isSmallDevice: deviceSize === DeviceSize.sm, formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal })}
           data={filteredAccounts}
           loading={isLoading || isLoadingDeposits}
         />
