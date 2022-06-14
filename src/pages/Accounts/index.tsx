@@ -21,7 +21,7 @@ import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
 import config from '../../config';
 import { TWithdrawBid } from '../../api/restApi/auction/types';
 import { TextInput } from '../../components/TextInput/TextInput';
-import { Primary500 } from '../../styles/colors';
+import { AdditionalLight, Primary500 } from '../../styles/colors';
 import AccountTooltip from './Tooltips/AccountTooltip';
 import IconWithHint from './Tooltips/WithdrawTooltip';
 
@@ -119,6 +119,8 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
     }
   }
 ];
+
+const caretDown = { name: 'carret-down', size: 16, color: AdditionalLight };
 
 enum AccountModal {
   create,
@@ -238,16 +240,16 @@ export const AccountsPage = () => {
   return (<PagePaper>
     <AccountPageWrapper>
       <Row>
-        <Button title={'Create substrate account'} onClick={onCreateAccountClick} />
-        <Dropdown
+        <CreateAccountButton title={'Create substrate account'} onClick={onCreateAccountClick} />
+        <DropdownStyled
           dropdownRender={() => <DropdownMenu>
             <DropdownMenuItem onClick={onImportViaSeedClick}>Seed phrase</DropdownMenuItem>
             <DropdownMenuItem onClick={onImportViaJSONClick}>Backup JSON file</DropdownMenuItem>
             <DropdownMenuItem onClick={onImportViaQRClick}>QR-code</DropdownMenuItem>
           </DropdownMenu>}
         >
-          <Button title={'Add account via'} role={'primary'} />
-        </Dropdown>
+          <AddAccountButton title={'Add account via'} role={'primary'} iconRight={caretDown} />
+        </DropdownStyled>
         <SearchInputWrapper>
           <SearchInputStyled
             placeholder={'Account'}
@@ -325,6 +327,26 @@ const SearchInputWrapper = styled.div`
 
 const SearchInputStyled = styled(TextInput)`
   flex-basis: 720px;
+`;
+
+const CreateAccountButton = styled(Button)`
+  width: 243px;
+  @media (max-width: 1024px) {
+    width: 100%;
+  }
+`;
+
+const DropdownStyled = styled(Dropdown)`
+  @media (max-width: 1024px) {
+    width: 100%;
+  }
+`;
+
+const AddAccountButton = styled(Button)`
+  width: 196px;
+  @media (max-width: 1024px) {
+    width: 100%;
+  }
 `;
 
 const AccountCellWrapper = styled.div`
