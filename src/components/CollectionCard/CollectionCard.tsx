@@ -12,9 +12,10 @@ export type TCollectionCard = {
   onManageSponsorshipClick(): void
   onRemoveSponsorshipClick(): void
   onRemoveCollectionClick(): void
+  onViewOnScanClick(): void
 };
 
-export const CollectionCard: FC<TCollectionCard> = ({ collection, onManageTokensClick, onRemoveCollectionClick }) => {
+export const CollectionCard: FC<TCollectionCard> = ({ collection, onManageTokensClick, onRemoveCollectionClick, onViewOnScanClick }) => {
   return (
     <CollectionCardStyled>
       <PictureWrapper>
@@ -26,7 +27,7 @@ export const CollectionCard: FC<TCollectionCard> = ({ collection, onManageTokens
               {/* <DropdownMenuItem onClick={onRemoveSponsorshipClick}>Remove sponsorship</DropdownMenuItem> */}
               <DropdownMenuItem onClick={onManageTokensClick}>Manage tokens</DropdownMenuItem>
               <DropdownMenuItem onClick={onRemoveCollectionClick}>Remove collection</DropdownMenuItem>
-              <DropdownMenuItem onClick={onRemoveCollectionClick}>View on Scan
+              <DropdownMenuItem onClick={onViewOnScanClick}>View on Scan
                 <IconWrapper>
                   <Icon name={'arrow-up-right'} size={16} color={'var(--color-primary-500)'} />
                 </IconWrapper>

@@ -112,7 +112,7 @@ export const AdminPanelPage: FC = () => {
 
   const onCreateCollectionViaWalletClick = useCallback(() => {
     if (!config.walletUrl) return;
-    navigate(config.walletUrl);
+    window.open(config.walletUrl, '_blank')?.focus();
   }, []);
 
   const onManageSponsorshipClick = useCallback((collection: NFTCollection) => () => {
@@ -133,6 +133,11 @@ export const AdminPanelPage: FC = () => {
   const onManageTokensClick = useCallback((collection: NFTCollection) => () => {
     setModalType(AdminPanelModalType.selectNFTs);
     setSelectedCollection(collection);
+  }, []);
+
+  const onViewOnScanClick = useCallback((collection: NFTCollection) => () => {
+    if (!config.scanUrl) return;
+    window.open(`${config.scanUrl}collections/${collection.id}`, '_blank')?.focus();
   }, []);
 
   const filteredCollections = useMemo(() => {
@@ -188,6 +193,7 @@ export const AdminPanelPage: FC = () => {
             onRemoveSponsorshipClick={onRemoveSponsorshipClick(collection)}
             onManageTokensClick={onManageTokensClick(collection)}
             onRemoveCollectionClick={onRemoveCollectionClick(collection)}
+            onViewOnScanClick={onViewOnScanClick(collection)}
           />)}
         </CollectionListStyled>
       </CollectionListWrapper>
