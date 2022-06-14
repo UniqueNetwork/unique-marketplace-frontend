@@ -41,7 +41,7 @@ export const CollectionCard: FC<TCollectionCard> = ({ collection, onManageTokens
       </PictureWrapper>
       <Description>
         <Text size='l' weight='regular' color={'secondary-500'}>
-          {`${collection.collectionName || ''} [id ${collection?.id}]`}
+          {`${collection.name || collection.collectionName || ''} [id ${collection?.id}]`}
         </Text>
         <AttributesWrapper>
           <Row>
