@@ -147,7 +147,8 @@ export const AdminPanelPage: FC = () => {
     const filterCollection = (collection: CollectionData) => {
       if (collection.status === 'Disabled') return false;
       if (searchValue) {
-        return collection.collectionName?.includes(searchValue.trim() || '') || collection.tokenPrefix.includes(searchValue.trim());
+        const searchString = searchValue.trim().toLocaleLowerCase();
+        return Number(collection.id) === Number(searchString) || collection.name?.toLocaleLowerCase().includes(searchString) || collection.tokenPrefix?.toLocaleLowerCase().includes(searchString);
       }
       return true;
     };
