@@ -21,7 +21,7 @@ import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
 import config from '../../config';
 import { TWithdrawBid } from '../../api/restApi/auction/types';
 import { TextInput } from '../../components/TextInput/TextInput';
-import { AdditionalLight, Primary500 } from '../../styles/colors';
+import { AdditionalLight, BlueGrey300, Primary100, Primary500 } from '../../styles/colors';
 import AccountTooltip from './Tooltips/AccountTooltip';
 import IconWithHint from './Tooltips/WithdrawTooltip';
 
@@ -341,6 +341,10 @@ const CreateAccountButton = styled(Button)`
 `;
 
 const DropdownStyled = styled(Dropdown)`
+  .dropdown-options {
+    padding: 0;
+    width: 100%;
+  }
   @media (max-width: 1024px) {
     width: 100%;
   }
@@ -445,5 +449,9 @@ const DropdownMenuItem = styled.div`
   &:hover {
     background: var(--color-primary-100);
     color: var(--color-primary-500);
+  }
+  &:active {
+    background: ${BlueGrey300};
+    color: ${Primary100};
   }
 `;
