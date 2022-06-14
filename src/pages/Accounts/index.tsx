@@ -90,7 +90,7 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
           >
             <TextStyled>UniqueScan</TextStyled>
             <IconWrapper>
-              <Icon name={'arrow-up-right'} size={16} />
+              <Icon name={'arrow-up-right'} size={16} color={Primary500} />
             </IconWrapper>
           </LinkStyled>
         </LinksWrapper>
