@@ -403,6 +403,9 @@ const DepositActionsWrapper = styled(ActionsWrapper)`
     }
     @media (max-width: 768px) {
       flex-direction: row !important;
+      button {
+        width: 100%;
+      }
     }
   }
 `;
