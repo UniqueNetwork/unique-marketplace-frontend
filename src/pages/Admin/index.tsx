@@ -134,6 +134,7 @@ export const AdminPanelPage: FC = () => {
     const sortCollection = (collectionA: CollectionData, collectionB: CollectionData) => {
       if (!sortingValue) return 0;
       const order = sortingValue.direction === 'asc' ? 1 : -1;
+      if (sortingValue.field === 'id') return Number(collectionA[sortingValue.field]) > Number(collectionB[sortingValue.field]) ? order : -order;
       return (collectionA[sortingValue.field] || '') > (collectionB[sortingValue.field] || '') ? order : -order;
     };
 
