@@ -113,7 +113,11 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
       return (
         <ActionsWrapper>
           <Button title={'Send'} onClick={onShowSendFundsModal(accountInfo.address)} />
-          <Button title={'Get'} disabled={true} onClick={onShowSendFundsModal(accountInfo.address)} />
+          <Button
+            title={'Get'}
+            disabled={true}
+            // onClick={onShowSendFundsModal(accountInfo.address)}
+          />
         </ActionsWrapper>
       );
     }
