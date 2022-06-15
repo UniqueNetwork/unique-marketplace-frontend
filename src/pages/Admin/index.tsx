@@ -165,7 +165,7 @@ export const AdminPanelPage: FC = () => {
     <MainContent>
       <ControlsWrapper>
         <SearchAndSortingWrapper>
-          <SearchField placeholder='Search' onSearch={onSearch} />
+          <SearchField placeholder='Search' onSearch={onSearch} hideButton />
           <SortSelectWrapper>
             <Select
               onChange={onSortingChange}
@@ -244,6 +244,9 @@ const SortSelectWrapper = styled.div`
 const SearchAndSortingWrapper = styled.div`
   display: flex;
   justify-content: space-between;
+  .unique-input-text {
+    min-width: 436px;
+  }
 `;
 
 const CollectionListWrapper = styled.div`
