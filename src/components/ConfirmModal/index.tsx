@@ -8,7 +8,7 @@ export interface IConfirmModalProps {
   headerText?: string
   confirmText?: string
   cancelText?: string
-  onConfirm?: () => void
+  onConfirm: () => void
   onCancel: () => void
   isClosable?: boolean
 }
@@ -24,7 +24,7 @@ const ConfirmModal: FC<IConfirmModalProps> = ({
   isClosable = false
 }) => {
   const onConfirmClick = useCallback(() => {
-    if (onConfirm) onConfirm();
+    onConfirm();
     onCancel();
   }, [onConfirm, onCancel]);
 
