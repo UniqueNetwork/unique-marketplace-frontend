@@ -33,7 +33,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
           <Icon name={'menu'} size={32} />
         </MenuIcon>}
         <LogoLink to={'/'}>
-          <LogoIcon src={'/logos/logo.svg'} />
+          <LogoIcon src={activeItem === 'Collections' ? '/logos/admin.svg' : '/logos/logo.svg'} />
         </LogoLink>
         {!showMobileMenu && (
           <nav>
