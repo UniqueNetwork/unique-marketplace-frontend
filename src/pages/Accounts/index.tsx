@@ -13,7 +13,7 @@ import { Table } from '../../components/Table';
 import { formatKusamaBalance } from '../../utils/textUtils';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
 import { WithdrawDepositModal } from './Modals/WithdrawDeposit';
-import { Account } from '../../account/AccountContext';
+import { Account, AccountSigner } from '../../account/AccountContext';
 import { toChainFormatAddress } from '../../api/chainApi/utils/addressUtils';
 import { useApi } from '../../hooks/useApi';
 import AccountCard from '../../components/Account/Account';
@@ -24,6 +24,7 @@ import { TextInput } from '../../components/TextInput/TextInput';
 import { Primary500 } from '../../styles/colors';
 import AccountTooltip from './Tooltips/AccountTooltip';
 import IconWithHint from './Tooltips/WithdrawTooltip';
+import ConfirmModal from 'components/ConfirmModal';
 
 const tokenSymbol = 'KSM';
 
@@ -32,9 +33,10 @@ type AccountsColumnsProps = {
   formatAddress(address: string): string
   onShowSendFundsModal(address: string): () => void
   onShowWithdrawDepositModal(address: string): () => void
+  onShowDeleteLocalAccountModal(address: string): () => void
 };
 
-const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal, isShortAddress }: AccountsColumnsProps): TableColumnProps[] => [
+const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal, isShortAddress, onShowDeleteLocalAccountModal }: AccountsColumnsProps): TableColumnProps[] => [
   {
     title: 'Account',
     width: '25%',
@@ -114,6 +116,7 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
         <ActionsWrapper>
           <Button title={'Send'} onClick={onShowSendFundsModal(accountInfo.address)} />
           <Button title={'Get'} disabled={true} onClick={onShowSendFundsModal(accountInfo.address)} />
+          {accountInfo.signerType === 'Local' && <Button title={'Delete'} onClick={onShowDeleteLocalAccountModal(accountInfo.address)} />}
         </ActionsWrapper>
       );
     }
@@ -126,7 +129,8 @@ enum AccountModal {
   importViaJSON,
   importViaQRCode,
   sendFunds,
-  withdrawDeposit
+  withdrawDeposit,
+  deleteLocalAccount
 }
 
 type AccountInfo = {
@@ -136,10 +140,11 @@ type AccountInfo = {
     KSM?: BN
   }
   deposit?: BN
+  signerType: AccountSigner
 }
 
 export const AccountsPage = () => {
-  const { accounts, fetchAccounts, isLoading, isLoadingDeposits, fetchAccountsWithDeposits } = useAccounts();
+  const { accounts, fetchAccounts, isLoading, isLoadingDeposits, fetchAccountsWithDeposits, deleteLocalAccount } = useAccounts();
   const [searchString, setSearchString] = useState<string>('');
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
   const [selectedAddress, setSelectedAddress] = useState<string>();
@@ -181,6 +186,11 @@ export const AccountsPage = () => {
     setSelectedAddress(address);
   }, []);
 
+  const onShowDeleteLocalAccountModal = useCallback((address: string) => () => {
+    setCurrentModal(AccountModal.deleteLocalAccount);
+    setSelectedAddress(address);
+  }, []);
+
   const onSearchStringChange = useCallback((value: string) => {
     setSearchString(value);
   }, []);
@@ -189,7 +199,7 @@ export const AccountsPage = () => {
     const reduceAccounts = (acc: (Account & { accountInfo: AccountInfo })[], account: Account) => {
       acc.push({
         ...account,
-        accountInfo: { address: account.address, name: account.meta.name || '', balance: account.balance }
+        accountInfo: { address: account.address, name: account.meta.name || '', balance: account.balance, signerType: account.signerType }
       });
       if (!account.deposits) return acc;
 
@@ -206,7 +216,8 @@ export const AccountsPage = () => {
             name: account.meta.name || '',
             deposit: (sponsorshipFee || new BN(0))
               .add(withdraw.reduce(getTotalAmount, new BN(0)))
-              .add(leader.reduce(getTotalAmount, new BN(0)))
+              .add(leader.reduce(getTotalAmount, new BN(0))),
+            signerType: account.signerType
           }
         });
       }
@@ -235,6 +246,11 @@ export const AccountsPage = () => {
     setCurrentModal(undefined);
   }, []);
 
+  const deleteLocalAccountConfirmed = useCallback(() => {
+    deleteLocalAccount(selectedAddress || '');
+    onChangeAccountsFinish();
+  }, [selectedAddress, deleteLocalAccount, onChangeAccountsFinish]);
+
   return (<PagePaper>
     <AccountPageWrapper>
       <Row>
@@ -260,7 +276,7 @@ export const AccountsPage = () => {
       <TableWrapper>
         <AccountTooltip/>
         <Table
-          columns={getAccountsColumns({ isShortAddress: deviceSize === DeviceSize.sm, formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal })}
+          columns={getAccountsColumns({ isShortAddress: deviceSize === DeviceSize.sm, formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal, onShowDeleteLocalAccountModal })}
           data={filteredAccounts}
           loading={isLoading || isLoadingDeposits}
         />
@@ -276,6 +292,14 @@ export const AccountsPage = () => {
         onClose={onModalClose}
         address={selectedAddress}
       />
+      <ConfirmModal
+        isVisible={currentModal === AccountModal.deleteLocalAccount}
+        onCancel={onModalClose}
+        onConfirm={deleteLocalAccountConfirmed}
+        headerText={'Delete local account'}
+      >
+        <p>Are you sure, you want to perform this action? You won&apos;t be able to recover this account in future.</p>
+      </ConfirmModal>
     </AccountPageWrapper>
   </PagePaper>);
 };
@@ -358,6 +382,8 @@ const ActionsWrapper = styled.div`
     align-items: center;
     column-gap: var(--gap);
     padding: var(--gap) 0;
+    flex-wrap: wrap;
+    gap: 16px;
     @media (max-width: 768px) {
       flex-direction: column;
       row-gap: var(--gap);

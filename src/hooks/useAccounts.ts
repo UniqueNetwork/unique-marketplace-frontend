@@ -98,6 +98,10 @@ export const useAccounts = () => {
     return signedMessage;
   }, [showSignDialog, selectedAccount, accounts]);
 
+  const deleteLocalAccount = useCallback((address: string) => {
+      keyring.forgetAccount(address);
+    }, []);
+
   return {
     accounts,
     selectedAccount,
@@ -111,6 +115,7 @@ export const useAccounts = () => {
     signMessage,
     fetchAccounts,
     fetchAccountsWithDeposits,
-    changeAccount
+    changeAccount,
+    deleteLocalAccount
   };
 };
