@@ -380,6 +380,7 @@ const LinkStyled = styled.a`
   display: flex;
   align-items: center;
   column-gap: calc(var(--gap) / 4);
+  width: fit-content;
 `;
 
 const ActionsWrapper = styled.div`
@@ -435,6 +436,19 @@ const IconWrapper = styled.div`
 
 const TableWrapper = styled.div`
   position: relative;
+`;
+
+const DropdownButtonWrapper = styled.div`
+  position: relative;
+  .unique-button {
+    padding-right: calc(var(--gap) * 3);
+  }
+  .icon {
+    position: absolute;
+    right: var(--gap);
+    top: 50%;
+    margin-top: -8px;
+  }
 `;
 
 const DropdownMenu = styled.div`

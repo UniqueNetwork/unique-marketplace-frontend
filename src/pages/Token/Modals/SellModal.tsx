@@ -285,6 +285,7 @@ const TextStyled = styled(Text)`
 
 const InputWrapper = styled(NumberInput)`
   margin-bottom: 32px;
+  width: 100%;
 `;
 
 const SelectWrapper = styled(Select)`

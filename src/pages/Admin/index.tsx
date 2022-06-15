@@ -18,6 +18,7 @@ import CardSkeleton from '../../components/Skeleton/CardSkeleton';
 import SearchField from '../../components/SearchField/SearchField';
 import { useAccounts } from '../../hooks/useAccounts';
 import { CollectionData } from '../../api/restApi/admin/types';
+import config from '../../config';
 
 type TOption = {
   iconRight: {
@@ -109,6 +110,11 @@ export const AdminPanelPage: FC = () => {
     setModalType(AdminPanelModalType.addCollection);
   }, []);
 
+  const onCreateCollectionViaWalletClick = useCallback(() => {
+    if (!config.walletUrl) return;
+    window.open(config.walletUrl, '_blank')?.focus();
+  }, []);
+
   const onManageSponsorshipClick = useCallback((collection: NFTCollection) => () => {
     setModalType(AdminPanelModalType.acceptSponsorship);
     setSelectedCollection(collection);
@@ -129,18 +135,25 @@ export const AdminPanelPage: FC = () => {
     setSelectedCollection(collection);
   }, []);
 
+  const onViewOnScanClick = useCallback((collection: NFTCollection) => () => {
+    if (!config.scanUrl) return;
+    window.open(`${config.scanUrl}collections/${collection.id}`, '_blank')?.focus();
+  }, []);
+
   const filteredCollections = useMemo(() => {
     if (!collections) return [];
     const sortCollection = (collectionA: CollectionData, collectionB: CollectionData) => {
       if (!sortingValue) return 0;
       const order = sortingValue.direction === 'asc' ? 1 : -1;
+      if (sortingValue.field === 'id') return Number(collectionA[sortingValue.field]) > Number(collectionB[sortingValue.field]) ? order : -order;
       return (collectionA[sortingValue.field] || '') > (collectionB[sortingValue.field] || '') ? order : -order;
     };
 
     const filterCollection = (collection: CollectionData) => {
       if (collection.status === 'Disabled') return false;
       if (searchValue) {
-        return collection.collectionName?.includes(searchValue.trim() || '') || collection.tokenPrefix.includes(searchValue.trim());
+        const searchString = searchValue.trim().toLocaleLowerCase();
+        return Number(collection.id) === Number(searchString) || collection.name?.toLocaleLowerCase().includes(searchString) || collection.tokenPrefix?.toLocaleLowerCase().includes(searchString);
       }
       return true;
     };
@@ -152,7 +165,7 @@ export const AdminPanelPage: FC = () => {
     <MainContent>
       <ControlsWrapper>
         <SearchAndSortingWrapper>
-          <SearchField placeholder='Search' onSearch={onSearch} />
+          <SearchField placeholder='Search' onSearch={onSearch} hideButton />
           <SortSelectWrapper>
             <Select
               onChange={onSortingChange}
@@ -163,7 +176,7 @@ export const AdminPanelPage: FC = () => {
           </SortSelectWrapper>
         </SearchAndSortingWrapper>
         <ButtonsWrapper>
-          <Button title={'Create new via wallet'} onClick={onAddCollectionClick}/>
+          <Button title={'Create new via wallet'} onClick={onCreateCollectionViaWalletClick}/>
           <Button role={'primary'} title={'Add to the marketplace'} onClick={onAddCollectionClick}/>
         </ButtonsWrapper>
       </ControlsWrapper>
@@ -180,6 +193,7 @@ export const AdminPanelPage: FC = () => {
             onRemoveSponsorshipClick={onRemoveSponsorshipClick(collection)}
             onManageTokensClick={onManageTokensClick(collection)}
             onRemoveCollectionClick={onRemoveCollectionClick(collection)}
+            onViewOnScanClick={onViewOnScanClick(collection)}
           />)}
         </CollectionListStyled>
       </CollectionListWrapper>
@@ -230,6 +244,9 @@ const SortSelectWrapper = styled.div`
 const SearchAndSortingWrapper = styled.div`
   display: flex;
   justify-content: space-between;
+  .unique-input-text {
+    min-width: 436px;
+  }
 `;
 
 const CollectionListWrapper = styled.div`

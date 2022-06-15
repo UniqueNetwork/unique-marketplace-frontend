@@ -8,9 +8,10 @@ interface SearchFieldProps {
   searchValue?: string | number
   placeholder?: string
   onSearch(value: string | undefined): void
+  hideButton?: boolean
 }
 
-const SearchField: FC<SearchFieldProps> = ({ className, searchValue, placeholder, onSearch }) => {
+const SearchField: FC<SearchFieldProps> = ({ className, searchValue, placeholder, onSearch, hideButton }) => {
   const [value, setValue] = useState<string | number | undefined>(searchValue);
 
   const onSearchInputKeyDown = useCallback((event: KeyboardEvent) => {
@@ -46,11 +47,11 @@ const SearchField: FC<SearchFieldProps> = ({ className, searchValue, placeholder
 
         {value && <ClearButton name={'close'} size={16} onClick={onClear} />}
       </InputWrapper>
-      <Button
+      {!hideButton && <Button
         onClick={onSearchClick}
         role='primary'
         title='Search'
-      />
+      />}
     </SearchWrapper>
   );
 };
