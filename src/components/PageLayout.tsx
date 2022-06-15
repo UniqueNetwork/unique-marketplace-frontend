@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { Header } from '.';
 import { useFooter } from '../hooks/useFooter';
 
-export type TMenuItems = 'Market' | 'My tokens' | 'Trades' | 'FAQ' | 'Manage accounts' | 'Admin panel';
+export type TMenuItems = 'Market' | 'My tokens' | 'Trades' | 'FAQ' | 'Manage accounts' | 'Collections';
 
 export const PageLayout: FC = () => {
   const { pathname } = useLocation();

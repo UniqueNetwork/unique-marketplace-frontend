@@ -9,25 +9,40 @@ import { Avatar } from '../../../components/Avatar/Avatar';
 import { useAdminCollections } from '../../../api/restApi/admin/collection';
 import { SelectInput } from '../../../components/SelectInput/SelectInput';
 import { CollectionData } from '../../../api/restApi/admin/types';
+import { useApi } from '../../../hooks/useApi';
 
 export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) => {
-  const [selectedCollection, setSelectedCollection] = useState<NFTCollection>();
+  const [selectedCollection, setSelectedCollection] = useState<CollectionData | string | undefined>();
   const { appendCollection, collections, fetchCollections } = useAdminCollections();
+  const [collectionItems, setCollectionItems] = useState<CollectionData[]>([]);
+  const { api } = useApi();
 
   useEffect(() => {
     void fetchCollections();
   }, []);
 
+  useEffect(() => {
+    setCollectionItems(collections.filter(({ status }) => status === 'Disabled'));
+  }, [collections]);
+
   const onConfirmClick = useCallback(async () => {
-    if (!selectedCollection) return;
+    if (!selectedCollection || typeof selectedCollection === 'string') return;
     await appendCollection(selectedCollection.id);
     onFinish();
   }, [selectedCollection]);
 
-  const onChangeSelectedCollection = useCallback((collection: NFTCollection | string) => {
-    if (typeof collection === 'string') return;
-    setSelectedCollection(collection as unknown as NFTCollection);
-  }, []);
+  const onChangeSelectedCollection = useCallback(async (collection: NFTCollection | string) => {
+    if (typeof collection === 'string') {
+      if (!api?.collection) return;
+      const collectionData = await api.collection.getCollection(Number(collection));
+
+      if (collectionData && collectionData.tokenPrefix) {
+        setCollectionItems((items) => [collectionData, ...items.filter(({ id }) => id !== collectionData.id)]);
+        setSelectedCollection(collectionData);
+      }
+    }
+    setSelectedCollection(collection as unknown as CollectionData);
+  }, [setCollectionItems]);
 
   return (<>
     <ModalWrapper>
@@ -36,21 +51,20 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
       </Content>
       <SelectWrapper>
         <SelectInput<CollectionData>
-          options={collections.filter(({ status }) => status === 'Disabled')}
+          options={collectionItems}
           value={selectedCollection}
           onChange={onChangeSelectedCollection}
           renderOption={(option) => <CollectionOption>
             <Avatar src={option.coverImageUrl} size={24} type={'circle'} />
-            <Text>{`${option?.name} [ID ${option?.id}]`}</Text>
+            <Text>{`${option?.name || option?.collectionName} [ID ${option?.id}]`}</Text>
           </CollectionOption>}
         />
       </SelectWrapper>
-      {selectedCollection && <>
+      {selectedCollection && typeof selectedCollection !== 'string' && <>
         <Text size={'m'}>You have selected collection</Text>
-
         <CollectionNameStyled>
           <Avatar src={selectedCollection.coverImageUrl} size={24} type={'circle'} />
-          <Text>{`${selectedCollection?.collectionName} [ID ${selectedCollection?.id}]`}</Text>
+          <Text>{`${selectedCollection?.name || selectedCollection?.collectionName} [ID ${selectedCollection?.id}]`}</Text>
         </CollectionNameStyled>
       </>}
     </ModalWrapper>
