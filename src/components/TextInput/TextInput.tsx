@@ -28,7 +28,7 @@ export const TextInput: FC<TextInputProps> = ({ value, onChange, placeholder, la
       value={value}
       label={label}
       iconLeft={iconLeft}
-      iconRight={<ClearButton name={'close'} size={16} onClick={onClear} />}
+      iconRight={value ? <ClearButton name={'close'} size={16} onClick={onClear} /> : null}
     />
   </InputWrapper>;
 };

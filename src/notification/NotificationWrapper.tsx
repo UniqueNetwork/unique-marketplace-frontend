@@ -3,6 +3,7 @@ import { NotificationAlert, NotificationProvider } from './NotificationContext';
 import Alerts from '../components/Alerts/Alerts';
 
 const NOTIFICATION_DELAY = 2 * 1000;
+const MAX_ALERTS = 5;
 
 export type NotificationState = NotificationAlert & {
   isRemoved?: boolean
@@ -29,10 +30,12 @@ const NotificationWrapper: FC = ({ children }) => {
   }, []);
 
   const push = useCallback((alert: NotificationAlert) => {
-    if (alerts.length > 5) {
-      removeOne();
-    }
-    setAlerts((alerts) => [...alerts, {
+    setAlerts((alerts) => alerts.length > MAX_ALERTS
+      ? [...alerts.filter((alert) => !alert.isRemoved).map((alert, index) => ({ ...alert, isRemoved: index === 0 })), {
+        ...alert,
+        key: `alert-${Date.now()}`
+      }]
+    : [...alerts, {
       ...alert,
       key: `alert-${Date.now()}`
     }]);
