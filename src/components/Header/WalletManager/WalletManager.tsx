@@ -103,6 +103,7 @@ const AccountWithBalanceOptionCard: FC<Account> = (account) => {
       accountAddress={account.address}
       canCopy={false}
       isShort
+      hideAddress
     />
   </AccountOptionWrapper>);
 };
