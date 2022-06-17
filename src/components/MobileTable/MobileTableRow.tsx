@@ -14,7 +14,7 @@ export const MobileTableRow = styled.div`
     align-items: flex-start;
   }
 
-  @media (max-width: 320px) {
+  @media (max-width: 420px) {
     grid-template-columns: 1fr;
   }
 `;

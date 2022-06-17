@@ -79,7 +79,7 @@ export const WalletManager: FC = () => {
       {deviceSize === DeviceSize.lg && <><Divider />
         <SettingsButtonWrapper $gearActive={!isLoading && gearActive}>
           <Link to={'/accounts'}>
-            <Icon name={'gear'} size={24} />
+            <Icon name={'gear'} size={24} color={gearActive ? 'var(--color-primary-500)' : 'var(--color-grey-500)'} />
           </Link>
         </SettingsButtonWrapper>
       </>}
@@ -103,6 +103,7 @@ const AccountWithBalanceOptionCard: FC<Account> = (account) => {
       accountAddress={account.address}
       canCopy={false}
       isShort
+      hideAddress
     />
   </AccountOptionWrapper>);
 };
@@ -151,7 +152,6 @@ const SettingsButtonWrapper = styled.div <{ $gearActive?: boolean }>`
   span {
     display: flex;
     align-items: center;
-    color: ${(props) => (props.$gearActive ? 'var(--color-primary-500)' : 'var(--color-grey-500)')};
   }
 `;
 

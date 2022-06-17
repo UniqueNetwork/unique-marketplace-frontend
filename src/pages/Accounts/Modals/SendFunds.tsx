@@ -218,7 +218,7 @@ const AmountWrapper = styled.div`
 `;
 
 const AmountInputWrapper = styled.div`
-  .unique-input-text, div[class^=NumberInput] {
+  .unique-input-text, div {
     width: 100%;
   }
 `;

@@ -21,7 +21,7 @@ import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
 import config from '../../config';
 import { TWithdrawBid } from '../../api/restApi/auction/types';
 import { TextInput } from '../../components/TextInput/TextInput';
-import { Primary500 } from '../../styles/colors';
+import { AdditionalLight, BlueGrey300, Primary100, Primary500 } from '../../styles/colors';
 import AccountTooltip from './Tooltips/AccountTooltip';
 import IconWithHint from './Tooltips/WithdrawTooltip';
 import ConfirmModal from 'components/ConfirmModal';
@@ -29,14 +29,14 @@ import ConfirmModal from 'components/ConfirmModal';
 const tokenSymbol = 'KSM';
 
 type AccountsColumnsProps = {
-  isShortAddress: boolean
+  isSmallDevice: boolean
   formatAddress(address: string): string
   onShowSendFundsModal(address: string): () => void
   onShowWithdrawDepositModal(address: string): () => void
   onShowDeleteLocalAccountModal(address: string): () => void
 };
 
-const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal, isShortAddress, onShowDeleteLocalAccountModal }: AccountsColumnsProps): TableColumnProps[] => [
+const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal, isSmallDevice, onShowDeleteLocalAccountModal }: AccountsColumnsProps): TableColumnProps[] => [
   {
     title: 'Account',
     width: '25%',
@@ -53,7 +53,7 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
           <AccountCard accountName={accountInfo.name}
             accountAddress={accountInfo.address}
             canCopy
-            isShort={isShortAddress}
+            isShort={isSmallDevice}
           />
         </AccountCellWrapper>
       );
@@ -92,7 +92,7 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
           >
             <TextStyled>UniqueScan</TextStyled>
             <IconWrapper>
-              <Icon name={'arrow-up-right'} size={16} />
+              <Icon name={'arrow-up-right'} size={16} color={Primary500} />
             </IconWrapper>
           </LinkStyled>
         </LinksWrapper>
@@ -100,7 +100,7 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
     }
   },
   {
-    title: 'Actions',
+    title: isSmallDevice ? '' : 'Actions',
     width: '25%',
     field: 'accountInfo',
     render(accountInfo: AccountInfo) {
@@ -115,13 +115,19 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
       return (
         <ActionsWrapper>
           <Button title={'Send'} onClick={onShowSendFundsModal(accountInfo.address)} />
-          <Button title={'Get'} disabled={true} onClick={onShowSendFundsModal(accountInfo.address)} />
+          <Button
+            title={'Get'}
+            disabled={true}
+            // onClick={onShowSendFundsModal(accountInfo.address)}
+          />
           {accountInfo.signerType === 'Local' && <Button title={'Delete'} onClick={onShowDeleteLocalAccountModal(accountInfo.address)} />}
         </ActionsWrapper>
       );
     }
   }
 ];
+
+const caretDown = { name: 'carret-down', size: 16, color: AdditionalLight };
 
 enum AccountModal {
   create,
@@ -254,16 +260,16 @@ export const AccountsPage = () => {
   return (<PagePaper>
     <AccountPageWrapper>
       <Row>
-        <Button title={'Create substrate account'} onClick={onCreateAccountClick} />
-        <Dropdown
+        <CreateAccountButton title={'Create substrate account'} onClick={onCreateAccountClick} />
+        <DropdownStyled
           dropdownRender={() => <DropdownMenu>
             <DropdownMenuItem onClick={onImportViaSeedClick}>Seed phrase</DropdownMenuItem>
             <DropdownMenuItem onClick={onImportViaJSONClick}>Backup JSON file</DropdownMenuItem>
             <DropdownMenuItem onClick={onImportViaQRClick}>QR-code</DropdownMenuItem>
           </DropdownMenu>}
         >
-          <Button title={'Add account via'} role={'primary'} />
-        </Dropdown>
+          <AddAccountButton title={'Add account via'} role={'primary'} iconRight={caretDown} />
+        </DropdownStyled>
         <SearchInputWrapper>
           <SearchInputStyled
             placeholder={'Account'}
@@ -276,7 +282,7 @@ export const AccountsPage = () => {
       <TableWrapper>
         <AccountTooltip/>
         <Table
-          columns={getAccountsColumns({ isShortAddress: deviceSize === DeviceSize.sm, formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal, onShowDeleteLocalAccountModal })}
+          columns={getAccountsColumns({ isSmallDevice: deviceSize === DeviceSize.sm, formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal, onShowDeleteLocalAccountModal })}
           data={filteredAccounts}
           loading={isLoading || isLoadingDeposits}
         />
@@ -351,6 +357,30 @@ const SearchInputStyled = styled(TextInput)`
   flex-basis: 720px;
 `;
 
+const CreateAccountButton = styled(Button)`
+  width: 243px;
+  @media (max-width: 1024px) {
+    width: 100%;
+  }
+`;
+
+const DropdownStyled = styled(Dropdown)`
+  .dropdown-options {
+    padding: 0;
+    width: 100%;
+  }
+  @media (max-width: 1024px) {
+    width: 100%;
+  }
+`;
+
+const AddAccountButton = styled(Button)`
+  width: 196px;
+  @media (max-width: 1024px) {
+    width: 100%;
+  }
+`;
+
 const AccountCellWrapper = styled.div`
   display: flex;
   padding: 20px 0 !important;
@@ -374,6 +404,7 @@ const LinkStyled = styled.a`
   display: flex;
   align-items: center;
   column-gap: calc(var(--gap) / 4);
+  width: fit-content;
 `;
 
 const ActionsWrapper = styled.div`
@@ -385,7 +416,7 @@ const ActionsWrapper = styled.div`
     flex-wrap: wrap;
     gap: 16px;
     @media (max-width: 768px) {
-      flex-direction: column;
+      flex-direction: row;
       row-gap: var(--gap);
       width: 100%;
       button {
@@ -403,6 +434,9 @@ const DepositActionsWrapper = styled(ActionsWrapper)`
     }
     @media (max-width: 768px) {
       flex-direction: row !important;
+      button {
+        width: 100%;
+      }
     }
   }
 `;
@@ -430,6 +464,19 @@ const TableWrapper = styled.div`
   position: relative;
 `;
 
+const DropdownButtonWrapper = styled.div`
+  position: relative;
+  .unique-button {
+    padding-right: calc(var(--gap) * 3);
+  }
+  .icon {
+    position: absolute;
+    right: var(--gap);
+    top: 50%;
+    margin-top: -8px;
+  }
+`;
+
 const DropdownMenu = styled.div`
   width: 100%;
   display: flex;
@@ -442,5 +489,9 @@ const DropdownMenuItem = styled.div`
   &:hover {
     background: var(--color-primary-100);
     color: var(--color-primary-500);
+  }
+  &:active {
+    background: ${BlueGrey300};
+    color: ${Primary100};
   }
 `;

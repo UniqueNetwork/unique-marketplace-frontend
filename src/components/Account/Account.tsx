@@ -43,7 +43,7 @@ const AccountCard: FC<AccountProps> = ({ accountName, accountAddress, isShort = 
           </Text>
           {canCopy && <a onClick={onCopyAddress(formatAddress(accountAddress) || '')}>
             <CopyIconWrapper>
-              <Icon name={'copy'} size={24} />
+              <Icon name={'copy'} size={16} />
             </CopyIconWrapper>
           </a>}
         </AddressRow>}
@@ -71,7 +71,7 @@ const CopyIconWrapper = styled.div`
     padding: 0;
     cursor: copy;
     svg {
-      transform: translateY(-2px);
+      transform: translateX(4px);
     }
   }
 `;
