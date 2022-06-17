@@ -18,6 +18,8 @@ If you want to build it manually:
 - Provide all the customization in the **/public** folder;
 - Run the **npm run build** command; 
 - Use some server (ex. Nginx) to serve the **/build** folder from the installation. 
+**Warning** 
+You need to ensure you have **+x** on all of the directories in the path leading to the site's root
 
 # Environment variables
 We provide two files for configuration: ```env.development``` and ```public/env.js```.
