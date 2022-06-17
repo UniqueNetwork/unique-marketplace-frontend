@@ -178,6 +178,11 @@ const HeaderStyled = styled.div`
   align-items: center;
   justify-content: space-between;
   width: 100%;
+  @media (max-width: 567px) {
+    .unique-modal-wrapper {
+      padding: 0;
+    }
+  }
 `;
 
 const LeftSideColumn = styled.div`
