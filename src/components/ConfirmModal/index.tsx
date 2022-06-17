@@ -25,8 +25,7 @@ const ConfirmModal: FC<IConfirmModalProps> = ({
 }) => {
   const onConfirmClick = useCallback(() => {
     onConfirm();
-    onCancel();
-  }, [onConfirm, onCancel]);
+  }, [onConfirm]);
 
   return (
     <Modal isVisible={isVisible} onClose={onCancel} isClosable={isClosable}>
