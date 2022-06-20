@@ -45,7 +45,7 @@ const SearchField: FC<SearchFieldProps> = ({ className, searchValue, placeholder
           value={value?.toString()}
         />
 
-        {value && <ClearButton name={'close'} size={16} onClick={onClear} />}
+        {value && <ClearButton name={'circle-close'} size={24} onClick={onClear} />}
       </InputWrapper>
       {!hideButton && <Button
         onClick={onSearchClick}
@@ -94,8 +94,8 @@ const InputWrapper = styled.div`
   flex-basis: 610px;
   .unique-input-text {
     width: auto;
-    input {
-      padding-right: 22px;
+    div.input-wrapper.with-icon.to-left > input {
+      padding-right: 32px;
     }
   }
 `;
@@ -103,7 +103,6 @@ const InputWrapper = styled.div`
 const ClearButton = styled(IconButton)`
   position: absolute;
   right: calc(var(--gap) / 2);
-  top: 50%;
-  margin-top: -8px;
+  bottom: 6px;
   width: auto !important;
 `;

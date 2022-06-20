@@ -28,7 +28,7 @@ export const TextInput: FC<TextInputProps> = ({ value, onChange, placeholder, la
       value={value}
       label={label}
       iconLeft={iconLeft}
-      iconRight={value ? <ClearButton name={'close'} size={16} onClick={onClear} /> : null}
+      iconRight={value ? <ClearButton name={'circle-close'} size={24} onClick={onClear} /> : null}
     />
   </InputWrapper>;
 };
@@ -38,15 +38,15 @@ const InputWrapper = styled.div`
   display: inline-block;
   .unique-input-text {
     width: auto;
-    input {
-      padding-right: 22px;
+    div.input-wrapper.with-icon > input {
+      padding-right: 36px;
     }
   }
 `;
 
 const ClearButton = styled(IconButton)`
   position: absolute;
-  right: calc(var(--gap) / 2);
-  bottom: 10px;
+  right: 0;
+  bottom: 5px;
   width: auto !important;
 `;
