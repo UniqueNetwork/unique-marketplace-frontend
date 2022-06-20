@@ -10,9 +10,10 @@ interface TextInputProps {
   label?: string
   className?: string
   iconLeft?: IconProps
+  errorText?: string
 }
 
-export const TextInput: FC<TextInputProps> = ({ value, onChange, placeholder, label, className, iconLeft }) => {
+export const TextInput: FC<TextInputProps> = ({ value, onChange, placeholder, label, className, iconLeft, errorText }) => {
   const onChangeInput = useCallback((_value: string) => {
     onChange(_value.trim());
   }, [onChange]);
@@ -29,6 +30,8 @@ export const TextInput: FC<TextInputProps> = ({ value, onChange, placeholder, la
       label={label}
       iconLeft={iconLeft}
       iconRight={value ? <ClearButton name={'close'} size={16} onClick={onClear} /> : null}
+      statusText={errorText}
+      error={!!errorText}
     />
   </InputWrapper>;
 };
