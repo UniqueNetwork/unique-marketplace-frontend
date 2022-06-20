@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Icon, Link } from '@unique-nft/ui-kit';
 
 import { useApi } from '../../hooks/useApi';
@@ -27,6 +27,7 @@ const TokenPage = () => {
   const [isFetchingToken, setIsFetchingToken] = useState<boolean>(true);
   const { offer, fetch: fetchOffer, isFetching: isFetchingOffer } = useOffer(Number(collectionId), Number(id));
   const [marketType, setMarketType] = useState<MarketType>(MarketType.default);
+  const navigate = useNavigate();
 
   const { push } = useNotification();
 
@@ -71,13 +72,14 @@ const TokenPage = () => {
     fetchToken();
   }, [push, fetchOffer, fetchToken, selectedAccount?.address, collectionId, id, token]);
 
-  const backClickHandler = useCallback((event: React.MouseEvent<HTMLAnchorElement>) => {
+  const backClickHandler = useCallback(() => {
     // if user opened token page with a direct link, redirect him to /market, otherwise redirect him back
     if (history.length > 2) {
       history.back();
-      event.preventDefault();
+    } else {
+      navigate('/market');
     }
-  }, []);
+  }, [navigate]);
 
   if (!isFetchingOffer && !isFetchingToken && !token && !offer) return <Error404 />;
 
@@ -85,10 +87,10 @@ const TokenPage = () => {
 
   return (
     <>
-      <StyledLink href='/market' onClick={backClickHandler}>
+      <BackLink onClick={backClickHandler}>
         <Icon name='arrow-left' color={BlueGrey500} size={16}></Icon>
         <p>back</p>
-      </StyledLink>
+      </BackLink>
       <TokenPagePaper>
         <CommonTokenDetail
           token={token}
@@ -126,7 +128,7 @@ const TokenPagePaper = styled(PagePaper)`
   }
 `;
 
-const StyledLink = styled.a`
+const BackLink = styled.button`
   text-decoration: none;
   font-style: normal;
   font-weight: 400;
@@ -136,6 +138,9 @@ const StyledLink = styled.a`
   display: flex;
   gap: 6px;
   width: 60px;
+  border: none;
+  background: none;
+  cursor: pointer;
   p {
     transform: translateY(-3px);
   }
