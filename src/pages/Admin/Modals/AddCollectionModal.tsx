@@ -51,6 +51,7 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
       </Content>
       <SelectWrapper>
         <SelectInput<CollectionData>
+          placeholder='Search by name and id'
           options={collectionItems}
           value={selectedCollection}
           onChange={onChangeSelectedCollection}
