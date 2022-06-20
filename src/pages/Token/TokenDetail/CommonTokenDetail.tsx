@@ -8,7 +8,7 @@ import { AttributesBlock } from './AttributesBlock';
 import { NFTToken } from 'api/chainApi/unique/types';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { shortcutText } from 'utils/textUtils';
-import { BlueGrey500, Grey300, Grey500, Primary600 } from 'styles/colors';
+import { Grey300, Grey500, Primary600 } from 'styles/colors';
 import { Avatar } from 'components/Avatar/Avatar';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import config from 'config';
@@ -98,20 +98,8 @@ export const CommonTokenDetail: FC<IProps> = ({
     setShareModalVisible(false);
   }, []);
 
-  const backClickHandler = useCallback((event: React.MouseEvent<HTMLAnchorElement>) => {
-    // if user opened token page with a direct link, redirect him to /market, otherwise redirect him back
-    if (history.length > 2) {
-      history.back();
-      event.preventDefault();
-    }
-  }, []);
-
   return (
     <CommonTokenDetailStyled>
-      <StyledLink href='/market' onClick={backClickHandler}>
-        <Icon name='arrow-left' color={BlueGrey500} size={16}></Icon>
-        <p>back</p>
-      </StyledLink>
       <PictureWrapper>
         {isLoading && <Skeleton />}
         {!isLoading && <Picture alt={tokenId?.toString() || ''} src={imageUrl} />}
@@ -162,45 +150,10 @@ export const CommonTokenDetail: FC<IProps> = ({
 const CommonTokenDetailStyled = styled.div`
   display: flex;
   width: 100%;
-  margin-top: 64px;
-  
-  @media (max-width: 1024px) {
-    margin-top: 60px;
-  }
 
   @media (max-width: 568px) {
     flex-direction: column;
     row-gap: var(--gap);
-  }
-`;
-
-const StyledLink = styled.a`
-  position: absolute;
-  left: 50px;
-  top: 112px;
-  text-decoration: none;
-  font-style: normal;
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 24px;
-  color: ${BlueGrey500};
-  display: flex;
-  gap: 6px;
-  width: 60px;
-  p {
-    transform: translateY(-3px);
-  }
-
-  @media (max-width: 1439px) {
-    left: 28px;
-  }
-
-  @media (max-width: 1024px) {
-    top: 104px;
-  }
-
-  @media (max-width: 620px) {
-    left: 24px;
   }
 `;
 
