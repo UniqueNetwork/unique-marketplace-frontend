@@ -1,6 +1,6 @@
 import { MetadataType } from '../unique/types';
 import { getCollectionProperties } from './decoder';
-import { UpDataStructsCreateCollectionData } from '@unique-nft/types/default/types';
+import { UpDataStructsCreateCollectionData } from '@unique-nft/unique-mainnet-types/default/types';
 
 export const getTokenImageUrl = (urlString: string, tokenId: number): string => {
   if (urlString.indexOf('{id}') !== -1) {

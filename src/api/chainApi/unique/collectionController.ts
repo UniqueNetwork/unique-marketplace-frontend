@@ -35,7 +35,7 @@ class UniqueCollectionController implements ICollectionController<NFTCollection,
 
       coverImageUrl = `${IPFSGateway}/${image}`;
     } else {
-      if (collectionProperties.offchainSchema) {
+      if (collectionProperties?.offchainSchema) {
         coverImageUrl = await getTokenImage(collection, 1);
       }
     }

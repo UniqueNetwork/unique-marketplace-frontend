@@ -95,15 +95,18 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
     const tokens: NFTToken[] = [];
 
     for (const collectionId of this.collectionsIds) {
-      const tokensIds =
-        await this.api.rpc.unique?.accountTokens(collectionId, normalizeAccountId(account)) as TokenId[];
-      const tokensIdsOnEth =
-        await this.api.rpc.unique?.accountTokens(collectionId, normalizeAccountId(getEthAccount(account))) as TokenId[];
+      try {
+        const tokensIds =
+          await this.api.rpc.unique?.accountTokens(collectionId, normalizeAccountId(account)) as TokenId[];
+        const tokensIdsOnEth =
+          await this.api.rpc.unique?.accountTokens(collectionId, normalizeAccountId(getEthAccount(account))) as TokenId[];
 
-      const tokensOfCollection = (await Promise.all([...tokensIds, ...tokensIdsOnEth].map((item) =>
-        this.getToken(collectionId, item.toNumber())))) as NFTToken[];
-
-      tokens.push(...tokensOfCollection);
+        const tokensOfCollection = (await Promise.all([...tokensIds, ...tokensIdsOnEth].map((item) =>
+          this.getToken(collectionId, item.toNumber())))) as NFTToken[];
+        tokens.push(...tokensOfCollection);
+      } catch (e) {
+        console.error('Wrong ID of collection', e);
+      }
     }
 
     return tokens;

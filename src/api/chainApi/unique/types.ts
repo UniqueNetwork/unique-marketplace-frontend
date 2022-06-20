@@ -1,8 +1,7 @@
 import { DecoratedRpc } from '@polkadot/api/types';
 import { RpcInterface } from '@polkadot/rpc-core/types/jsonrpc';
 import { GenericAccountId } from '@polkadot/types';
-import { UpDataStructsCreateCollectionData, UpDataStructsCreateNftExData } from '@unique-nft/types/default/types';
-import { UpDataStructsCollection } from '@unique-nft/types';
+import { UpDataStructsCollection, UpDataStructsCreateCollectionData, UpDataStructsCreateNftExData } from '@unique-nft/unique-mainnet-types/default/types';
 import { BN } from '@polkadot/util';
 
 export type TokenId = {

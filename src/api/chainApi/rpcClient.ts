@@ -2,7 +2,7 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 import { formatBalance } from '@polkadot/util';
 import { typesChain } from '@phala/typedefs';
 import { TypeRegistry } from '@polkadot/types/create';
-import { unique } from '@unique-nft/types/definitions';
+import { unique } from '@unique-nft/unique-mainnet-types/definitions';
 
 import { IRpcClient, INFTController, IRpcClientOptions, ICollectionController, IMarketController, IRpcConfig } from './types';
 import UniqueNFTController from './unique/NFTController';

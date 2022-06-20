@@ -1,7 +1,7 @@
 import { AttributesDecoded } from '../unique/types';
 import { deserializeNft, ProtobufAttributeType } from './protobufUtils';
 import { addressToEvm } from '@polkadot/util-crypto';
-import { UpDataStructsCreateCollectionData, UpDataStructsProperty } from '@unique-nft/types/default/types';
+import { UpDataStructsCreateCollectionData, UpDataStructsProperty } from '@unique-nft/unique-mainnet-types/default/types';
 
 export const collectionName16Decoder = (name: number[]) => {
   const collectionNameArr = name.map((item: number) => item);
@@ -45,7 +45,7 @@ export const decodeStruct = ({ attr, data }: { attr?: any; data?: string }): Att
 type CollectionProperties = Record<'constOnChainSchema' | 'variableOnChainSchema' | 'offchainSchema' | 'schemaVersion', string>;
 
 export const getCollectionProperties = (collection: UpDataStructsCreateCollectionData): CollectionProperties => {
-  return collection?.properties.toArray().reduce<CollectionProperties>((acc, property) => ({
+  return collection?.properties?.toArray().reduce<CollectionProperties>((acc, property) => ({
     ...acc,
     [hex2a(property.key.toString()).replace('_old_', '')]: hex2a(property.value.toString())
   }), {
