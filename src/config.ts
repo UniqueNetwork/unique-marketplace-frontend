@@ -4,6 +4,7 @@ declare type Env = {
   REACT_APP_IPFS_GATEWAY: string | undefined,
   REACT_APP_UNIQUE_API_URL: string | undefined,
   REACT_APP_SCAN_URL: string | undefined,
+  REACT_APP_RAMP_API_KEY: string | undefined,
 } & Record<string, string | undefined>
 
 declare type Config = {
@@ -13,6 +14,7 @@ declare type Config = {
   scanUrl: string | undefined
   walletUrl: string | undefined
   IPFSGateway: string | undefined
+  rampApiKey: string | undefined
 }
 
 declare global {
@@ -27,7 +29,8 @@ const config: Config = {
   uniqueApiUrl: window.ENV?.UNIQUE_API_URL || process.env.REACT_APP_UNIQUE_API_URL,
   IPFSGateway: window.ENV?.IPFS_GATEWAY || process.env.REACT_APP_IPFS_GATEWAY,
   scanUrl: window.ENV?.SCAN_URL || process.env.REACT_APP_SCAN_URL,
-  walletUrl: window.ENV?.WALLET_URL || process.env.REACT_APP_WALLET_URL
+  walletUrl: window.ENV?.WALLET_URL || process.env.REACT_APP_WALLET_URL,
+  rampApiKey: window.ENV?.RAMP_API_KEY || process.env.REACT_APP_RAMP_API_KEY
 };
 
 export default config;
