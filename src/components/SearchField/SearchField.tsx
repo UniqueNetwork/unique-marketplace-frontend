@@ -21,8 +21,7 @@ const SearchField: FC<SearchFieldProps> = ({ className, searchValue, placeholder
   }, [onSearch, value]);
 
   const onSearchClick = useCallback(() => {
-    if (!value) return;
-    onSearch(value.toString());
+    onSearch(value?.toString());
   }, [onSearch, value]);
 
   const onClear = useCallback(() => {
