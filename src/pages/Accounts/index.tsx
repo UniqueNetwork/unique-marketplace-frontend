@@ -47,7 +47,7 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
       color: Primary500
     },
     render(accountInfo: AccountInfo) {
-      if (accountInfo.deposit) return <></>;
+      if (accountInfo.deposit && !isSmallDevice) return <></>;
       return (
         <AccountCellWrapper>
           <AccountCard accountName={accountInfo.name}
@@ -64,17 +64,29 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
     width: '25%',
     field: 'accountInfo',
     render(accountInfo: AccountInfo) {
-      const { KSM } = accountInfo.balance || { KSM: accountInfo.deposit || 0 };
+      const KSM = accountInfo.deposit || 0;
       const isDeposit = !!accountInfo.deposit;
-      return (
-        <BalancesWrapper>
-          {!isDeposit && <Text>{`${formatKusamaBalance(KSM?.toString() || 0)} ${tokenSymbol}`}</Text>}
-          {isDeposit && (<>
-            <Text color={'grey-500'} size={'s'}>{`${formatKusamaBalance(KSM?.toString() || 0)} ${tokenSymbol}`}</Text>
-            <Text color={'grey-500'} size={'s'}>market deposit</Text>
-          </>)}
-        </BalancesWrapper>
-      );
+      if (!isSmallDevice) {
+        return (
+          <BalancesWrapper>
+            {!isDeposit && <Text>{`${formatKusamaBalance(accountInfo.balance?.KSM?.toString() || 0)} ${tokenSymbol}`}</Text>}
+            {isDeposit && (<>
+              <Text color={'grey-500'} size={'s'}>{`${formatKusamaBalance(KSM?.toString() || 0)} ${tokenSymbol}`}</Text>
+              <Text color={'grey-500'} size={'s'}>market deposit</Text>
+            </>)}
+          </BalancesWrapper>
+        );
+      } else {
+        return (
+          <BalancesWrapper>
+            <Text>{`${formatKusamaBalance(accountInfo.balance?.KSM?.toString() || 0)} ${tokenSymbol}`}</Text>
+            {isDeposit && (<>
+              <Text color={'grey-500'} size={'s'}>{`${formatKusamaBalance(KSM?.toString() || 0)} ${tokenSymbol}`}</Text>
+              <Text color={'grey-500'} size={'s'}>market deposit</Text>
+            </>)}
+          </BalancesWrapper>
+        );
+      }
     }
   },
   {
@@ -82,7 +94,7 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
     width: '25%',
     field: 'accountInfo',
     render(accountInfo: AccountInfo) {
-      if (accountInfo.deposit) return <></>;
+      if (accountInfo.deposit && !isSmallDevice) return <></>;
       return (
         <LinksWrapper>
           <LinkStyled
@@ -104,7 +116,7 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
     width: '25%',
     field: 'accountInfo',
     render(accountInfo: AccountInfo) {
-      if (accountInfo.deposit) {
+      if (accountInfo.deposit && !isSmallDevice) {
         return (
           <DepositActionsWrapper>
             <Button title={'Withdraw'} onClick={onShowWithdrawDepositModal(accountInfo.address)} role={'primary'} />
@@ -113,15 +125,21 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
         );
       }
       return (
-        <ActionsWrapper>
-          <Button title={'Send'} onClick={onShowSendFundsModal(accountInfo.address)} />
-          <Button
-            title={'Get'}
-            disabled={true}
-            // onClick={onShowSendFundsModal(accountInfo.address)}
-          />
-          {accountInfo.signerType === 'Local' && <Button title={'Delete'} onClick={onShowDeleteLocalAccountModal(accountInfo.address)} />}
-        </ActionsWrapper>
+        <>
+          <ActionsWrapper>
+            <Button title={'Send'} onClick={onShowSendFundsModal(accountInfo.address)} />
+            <Button
+              title={'Get'}
+              disabled={true}
+              // onClick={onShowSendFundsModal(accountInfo.address)}
+            />
+            {accountInfo.signerType === 'Local' && <Button title={'Delete'} onClick={onShowDeleteLocalAccountModal(accountInfo.address)} />}
+          </ActionsWrapper>
+          {(accountInfo.deposit && isSmallDevice) && <DepositActionsWrapper>
+            <Button title={'Withdraw'} onClick={onShowWithdrawDepositModal(accountInfo.address)} role={'primary'} />
+            <IconWithHint />
+          </DepositActionsWrapper>}
+        </>
       );
     }
   }
@@ -214,18 +232,33 @@ export const AccountsPage = () => {
 
       if ((!sponsorshipFee?.isZero() || leader.length !== 0 || withdraw.length !== 0)) {
         const getTotalAmount = (acc: BN, bid: TWithdrawBid) => acc.add(new BN(bid.amount));
-
-        acc.push({
-          ...account,
-          accountInfo: {
-            address: account.address,
-            name: account.meta.name || '',
-            deposit: (sponsorshipFee || new BN(0))
+        // add row with deposit info only on big screens
+        if (deviceSize !== DeviceSize.sm) {
+          acc.push({
+            ...account,
+            accountInfo: {
+              address: account.address,
+              name: account.meta.name || '',
+              deposit: (sponsorshipFee || new BN(0))
+                .add(withdraw.reduce(getTotalAmount, new BN(0)))
+                .add(leader.reduce(getTotalAmount, new BN(0))),
+              signerType: account.signerType
+            }
+          });
+        } else {
+          acc[acc.length - 1] = {
+            ...account,
+            accountInfo: {
+              address: account.address,
+              name: account.meta.name || '',
+              balance: account.balance,
+              deposit: (sponsorshipFee || new BN(0))
               .add(withdraw.reduce(getTotalAmount, new BN(0)))
               .add(leader.reduce(getTotalAmount, new BN(0))),
-            signerType: account.signerType
-          }
-        });
+              signerType: account.signerType
+            }
+          };
+        }
       }
       return acc;
     };
@@ -240,7 +273,7 @@ export const AccountsPage = () => {
           account.meta.name?.toLowerCase().includes(searchString.trim().toLowerCase())
       )
       .reduce(reduceAccounts, []);
-  }, [accounts, searchString, formatAddress]);
+  }, [accounts, searchString, formatAddress, deviceSize]);
 
   const onChangeAccountsFinish = useCallback(async () => {
     setCurrentModal(undefined);
@@ -420,7 +453,7 @@ const ActionsWrapper = styled.div`
       row-gap: var(--gap);
       width: 100%;
       button {
-        width: 100%;
+        width: calc((100% - (var(--gap) * 3)) / 2);
       }
     }
   }
@@ -429,13 +462,14 @@ const ActionsWrapper = styled.div`
 const DepositActionsWrapper = styled(ActionsWrapper)`
   && {
     column-gap: calc(var(--gap) / 2);
+    padding: 0;
     button {
-      width: 148px;
+      width: calc(100% - 32px);
+      max-width: 148px;
     }
     @media (max-width: 768px) {
-      flex-direction: row !important;
       button {
-        width: 100%;
+        max-width: 100%;
       }
     }
   }
