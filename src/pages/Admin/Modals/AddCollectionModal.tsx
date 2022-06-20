@@ -45,30 +45,29 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
   }, [setCollectionItems]);
 
   return (<>
-    <ModalWrapper>
-      <Content>
-        <Heading size='2'>Add collection</Heading>
-      </Content>
-      <SelectWrapper>
-        <SelectInput<CollectionData>
-          placeholder='Search by name and id'
-          options={collectionItems}
-          value={selectedCollection}
-          onChange={onChangeSelectedCollection}
-          renderOption={(option) => <CollectionOption>
-            <Avatar src={option.coverImageUrl} size={24} type={'circle'} />
-            <Text>{`${option?.name || option?.collectionName} [ID ${option?.id}]`}</Text>
-          </CollectionOption>}
-        />
-      </SelectWrapper>
-      {selectedCollection && typeof selectedCollection !== 'string' && <>
-        <Text size={'m'}>You have selected collection</Text>
-        <CollectionNameStyled>
-          <Avatar src={selectedCollection.coverImageUrl} size={24} type={'circle'} />
-          <Text>{`${selectedCollection?.name || selectedCollection?.collectionName} [ID ${selectedCollection?.id}]`}</Text>
-        </CollectionNameStyled>
-      </>}
-    </ModalWrapper>
+    <Content>
+      <Heading size='2'>Add collection</Heading>
+    </Content>
+    <SelectWrapper>
+      <SelectInput<CollectionData>
+        isClearable
+        placeholder='Search by id'
+        options={collectionItems}
+        value={selectedCollection}
+        onChange={onChangeSelectedCollection}
+        renderOption={(option) => <CollectionOption>
+          <Avatar src={option.coverImageUrl} size={24} type={'circle'} />
+          <Text>{`${option?.name || option?.collectionName} [ID ${option?.id}]`}</Text>
+        </CollectionOption>}
+      />
+    </SelectWrapper>
+    {selectedCollection && typeof selectedCollection !== 'string' && <>
+      <Text size={'m'}>You have selected collection</Text>
+      <CollectionNameStyled>
+        <Avatar src={selectedCollection.coverImageUrl} size={24} type={'circle'} />
+        <Text>{`${selectedCollection?.name || selectedCollection?.collectionName} [ID ${selectedCollection?.id}]`}</Text>
+      </CollectionNameStyled>
+    </>}
     <ButtonWrapper>
       <Button
         onClick={onConfirmClick}
@@ -80,7 +79,7 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
 };
 
 const ModalWrapper = styled.div`
-  height: 250px;
+  
 `;
 
 const Content = styled.div`
