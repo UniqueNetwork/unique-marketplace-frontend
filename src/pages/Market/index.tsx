@@ -182,7 +182,7 @@ export const MarketPage = () => {
           </SortSelectWrapper>
         </SearchAndSortingWrapper>
         <div>
-          <Text size='m'>{`${offersCount} items`}</Text>
+          <Text size='m'>{isFetching ? 'Loading items' : `${offersCount} items`}</Text>
         </div>
         <InfiniteScroll
           hasMore={hasMore}
