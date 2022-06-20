@@ -24,6 +24,7 @@ import { TextInput } from '../../components/TextInput/TextInput';
 import { AdditionalLight, BlueGrey300, Primary100, Primary500 } from '../../styles/colors';
 import AccountTooltip from './Tooltips/AccountTooltip';
 import IconWithHint from './Tooltips/WithdrawTooltip';
+import NoAccountsIcon from '../../static/icons/no-accounts.svg';
 
 const tokenSymbol = 'KSM';
 
@@ -269,6 +270,7 @@ export const AccountsPage = () => {
           columns={getAccountsColumns({ isSmallDevice: deviceSize === DeviceSize.sm, formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal })}
           data={filteredAccounts}
           loading={isLoading || isLoadingDeposits}
+          emptyIconProps={searchString ? { name: 'magnifier-found' } : { file: NoAccountsIcon }}
         />
       </TableWrapper>
       <CreateAccountModal isVisible={currentModal === AccountModal.create} onFinish={onChangeAccountsFinish} onClose={onModalClose} />

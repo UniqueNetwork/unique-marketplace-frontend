@@ -192,7 +192,7 @@ export const MarketPage = () => {
           threshold={200}
           useWindow={true}
         >
-          {!isFetching && !offers?.length && <NoItems />}
+          {!isFetching && !!searchValue && !offers?.length && <NoItems isSearchResult={!!searchValue} />}
           <OffersList offers={offers || []} isLoading={isFetching} />
         </InfiniteScroll>
       </MainContent>

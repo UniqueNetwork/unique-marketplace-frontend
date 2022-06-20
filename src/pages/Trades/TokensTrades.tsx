@@ -11,6 +11,8 @@ import { useGetTokensByTrades } from './hooks/useGetTokensByTrades';
 import { TradesTabs } from './types';
 import SearchField from '../../components/SearchField/SearchField';
 
+import NoTradesIcon from '../../static/icons/no-trades.svg';
+
 type TokensTradesPage = {
   currentTab: TradesTabs
 }
@@ -117,6 +119,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
         data={tradesWithTokens || []}
         columns={tradesColumns}
         loading={isLoadingAccounts || isFetching || isFetchingTokens}
+        emptyIconProps={searchValue ? { name: 'magnifier-found' } : { file: NoTradesIcon }}
       />
       {!!tradesCount && <PaginationWrapper>
         <Pagination
