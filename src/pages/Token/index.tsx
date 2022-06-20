@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Link } from '@unique-nft/ui-kit';
+import { Icon, Link } from '@unique-nft/ui-kit';
 
 import { useApi } from '../../hooks/useApi';
 import { NFTToken } from '../../api/chainApi/unique/types';
@@ -16,6 +16,8 @@ import { NotificationSeverity } from '../../notification/NotificationContext';
 import { useAccounts } from '../../hooks/useAccounts';
 import { shortcutText } from '../../utils/textUtils';
 import { compareEncodedAddresses } from '../../api/chainApi/utils/addressUtils';
+import styled from 'styled-components';
+import { BlueGrey500 } from 'styles/colors';
 
 const TokenPage = () => {
   const { api } = useApi();
@@ -69,38 +71,77 @@ const TokenPage = () => {
     fetchToken();
   }, [push, fetchOffer, fetchToken, selectedAccount?.address, collectionId, id, token]);
 
+  const backClickHandler = useCallback((event: React.MouseEvent<HTMLAnchorElement>) => {
+    // if user opened token page with a direct link, redirect him to /market, otherwise redirect him back
+    if (history.length > 2) {
+      history.back();
+      event.preventDefault();
+    }
+  }, []);
+
   if (!isFetchingOffer && !isFetchingToken && !token && !offer) return <Error404 />;
 
   // TODO: split into more categories here instead of just "buy/sell" and putting splitting inside them
 
-  return (<PagePaper>
-    <CommonTokenDetail
-      token={token}
-      offer={offer}
-      isLoading={isFetchingOffer || isFetchingToken}
-    >
-      <TokenTrading
-        token={token}
-        offer={offer}
-        onSellClick={onActionClick(MarketType.sellFix)}
-        onBuyClick={onActionClick(MarketType.purchase)}
-        onTransferClick={onActionClick(MarketType.transfer)}
-        onDelistClick={onActionClick(MarketType.delist)}
-        onDelistAuctionClick={onActionClick(MarketType.delistAuction)}
-        onPlaceABidClick={onActionClick(MarketType.bid)}
-        onWithdrawClick={onActionClick(MarketType.withdrawBid)}
-        onAuctionClose={onAuctionClose}
-      />
-      <TokenPageModal
-        token={token}
-        offer={offer}
-        marketType={marketType}
-        onFinish={onFinish}
-        onClose={onClose}
-      />
-    </CommonTokenDetail>
-  </PagePaper>
+  return (
+    <>
+      <StyledLink href='/market' onClick={backClickHandler}>
+        <Icon name='arrow-left' color={BlueGrey500} size={16}></Icon>
+        <p>back</p>
+      </StyledLink>
+      <TokenPagePaper>
+        <CommonTokenDetail
+          token={token}
+          offer={offer}
+          isLoading={isFetchingOffer || isFetchingToken}
+        >
+          <TokenTrading
+            token={token}
+            offer={offer}
+            onSellClick={onActionClick(MarketType.sellFix)}
+            onBuyClick={onActionClick(MarketType.purchase)}
+            onTransferClick={onActionClick(MarketType.transfer)}
+            onDelistClick={onActionClick(MarketType.delist)}
+            onDelistAuctionClick={onActionClick(MarketType.delistAuction)}
+            onPlaceABidClick={onActionClick(MarketType.bid)}
+            onWithdrawClick={onActionClick(MarketType.withdrawBid)}
+            onAuctionClose={onAuctionClose}
+          />
+          <TokenPageModal
+            token={token}
+            offer={offer}
+            marketType={marketType}
+            onFinish={onFinish}
+            onClose={onClose}
+          />
+        </CommonTokenDetail>
+      </TokenPagePaper>
+    </>
   );
 };
+
+const TokenPagePaper = styled(PagePaper)`
+  && {
+    margin-top: calc(var(--gap) / 2);
+  }
+`;
+
+const StyledLink = styled.a`
+  text-decoration: none;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  color: ${BlueGrey500};
+  display: flex;
+  gap: 6px;
+  width: 60px;
+  p {
+    transform: translateY(-3px);
+  }
+  svg {
+    width: 14px;
+  }
+`;
 
 export default TokenPage;
