@@ -3,14 +3,14 @@ import { Link } from 'react-router-dom';
 import { Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
-import { NFTToken } from '../../../api/chainApi/unique/types';
 import { Avatar } from '../../../components/Avatar/Avatar';
+import { Trade } from '../../../api/restApi/trades/types';
 
-export const TokenComponent = ({ token }: { token: NFTToken | undefined }) => {
-  return <Link to={`/token/${token?.collectionId}/${token?.id}`}>
+export const TokenComponent = ({ collectionId, tokenId, tokenDescription }: Pick<Trade, 'collectionId' | 'tokenId' | 'tokenDescription'>) => {
+  return <Link to={`/token/${collectionId}/${tokenId}`}>
     <TokenComponentWrapper>
-      <Avatar src={token?.imageUrl || ''} size={40} type={'square'} />
-      <Text>{`${token?.prefix} #${token?.id}`}</Text>
+      <Avatar src={tokenDescription.image || ''} size={40} type={'square'} />
+      <Text>{`${tokenDescription.prefix} #${tokenId}`}</Text>
     </TokenComponentWrapper>
   </Link>;
 };

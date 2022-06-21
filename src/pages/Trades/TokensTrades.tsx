@@ -8,7 +8,6 @@ import { Table } from '../../components/Table';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
 import { tradesColumns } from './columns';
 import { useAccounts } from '../../hooks/useAccounts';
-import { useGetTokensByTrades } from './hooks/useGetTokensByTrades';
 import { TradesTabs } from './types';
 import SearchField from '../../components/SearchField/SearchField';
 
@@ -24,7 +23,6 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
   const [searchValue, setSearchValue] = useState<string>();
 
   const { trades, tradesCount, fetch, isFetching } = useTrades();
-  const { tradesWithTokens, isFetchingTokens } = useGetTokensByTrades(trades);
 
   useEffect(() => {
     if (isLoadingAccounts || (currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address)) return;
@@ -114,9 +112,9 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
       />
       <StyledTable
         onSort={onSortChange}
-        data={tradesWithTokens || []}
+        data={trades || []}
         columns={tradesColumns}
-        loading={isLoadingAccounts || isFetching || isFetchingTokens}
+        loading={isLoadingAccounts || isFetching}
       />
       {!!tradesCount && <PaginationWrapper>
         <Pagination
