@@ -2,9 +2,9 @@ import React, { FC } from 'react';
 import styled from 'styled-components';
 import { AdditionalLight } from '../../styles/colors';
 
-export const PagePaper: FC = ({ children }) => {
+export const PagePaper: FC<{ className?: string }> = ({ children, className = '' }) => {
   return (
-    <PagePaperWrapper>
+    <PagePaperWrapper className={className}>
       {children}
     </PagePaperWrapper>
   );
