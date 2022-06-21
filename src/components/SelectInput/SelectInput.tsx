@@ -1,6 +1,7 @@
 import React, { ChangeEvent, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { AdditionalLight, Grey300, Grey500, Primary100, Primary500 } from '../../styles/colors';
+import { IconButton } from '../IconButton/IconButton';
 
 interface SelectInputOption {
   key: string
@@ -44,6 +45,10 @@ export function SelectInput<T = SelectInputOption>({ className, placeholder, opt
     return null;
   }, [renderOption]);
 
+  const onClear = useCallback(() => {
+    onChange('');
+  }, [onChange]);
+
   useEffect(() => {
     const onClickOutside = (event: MouseEvent) => {
       if (InputRef.current &&
@@ -83,6 +88,7 @@ export function SelectInput<T = SelectInputOption>({ className, placeholder, opt
         onFocus={onInputFocus}
         ref={InputRef}
       />
+      {inputValue && <ClearButton name={'close'} size={16} onClick={onClear} />}
     </InputWrapper>
     <Dropdown isOpen={isDropdownVisible} ref={DropdownRef}>
       {options.map((item, index) => (
@@ -143,4 +149,11 @@ const OptionWrapper = styled.div`
 
 const Placeholder = styled.div`
   color: ${Grey500};
+`;
+
+const ClearButton = styled(IconButton)`
+  position: absolute;
+  right: calc(var(--gap) / 2);
+  bottom: 6px;
+  width: auto !important;
 `;
