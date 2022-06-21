@@ -25,6 +25,7 @@ import { AdditionalLight, BlueGrey300, Primary100, Primary500 } from '../../styl
 import AccountTooltip from './Tooltips/AccountTooltip';
 import IconWithHint from './Tooltips/WithdrawTooltip';
 import ConfirmModal from 'components/ConfirmModal';
+import GetKSMModal from 'components/GetKSMModal/GetKSMModal';
 
 const tokenSymbol = 'KSM';
 
@@ -34,9 +35,10 @@ type AccountsColumnsProps = {
   onShowSendFundsModal(address: string): () => void
   onShowWithdrawDepositModal(address: string): () => void
   onShowDeleteLocalAccountModal(address: string): () => void
+  onShowGetKsmModal: () => void
 };
 
-const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal, isSmallDevice, onShowDeleteLocalAccountModal }: AccountsColumnsProps): TableColumnProps[] => [
+const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal, isSmallDevice, onShowDeleteLocalAccountModal, onShowGetKsmModal }: AccountsColumnsProps): TableColumnProps[] => [
   {
     title: 'Account',
     width: '25%',
@@ -117,8 +119,7 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
           <Button title={'Send'} onClick={onShowSendFundsModal(accountInfo.address)} />
           <Button
             title={'Get'}
-            disabled={true}
-            // onClick={onShowSendFundsModal(accountInfo.address)}
+            onClick={onShowGetKsmModal}
           />
           {accountInfo.signerType === 'Local' && <Button title={'Delete'} onClick={onShowDeleteLocalAccountModal(accountInfo.address)} />}
         </ActionsWrapper>
@@ -136,7 +137,8 @@ enum AccountModal {
   importViaQRCode,
   sendFunds,
   withdrawDeposit,
-  deleteLocalAccount
+  deleteLocalAccount,
+  getKsmModal
 }
 
 type AccountInfo = {
@@ -195,6 +197,10 @@ export const AccountsPage = () => {
   const onShowDeleteLocalAccountModal = useCallback((address: string) => () => {
     setCurrentModal(AccountModal.deleteLocalAccount);
     setSelectedAddress(address);
+  }, []);
+
+  const onShowGetKsmModal = useCallback(() => {
+    setCurrentModal(AccountModal.getKsmModal);
   }, []);
 
   const onSearchStringChange = useCallback((value: string) => {
@@ -282,7 +288,7 @@ export const AccountsPage = () => {
       <TableWrapper>
         <AccountTooltip/>
         <Table
-          columns={getAccountsColumns({ isSmallDevice: deviceSize === DeviceSize.sm, formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal, onShowDeleteLocalAccountModal })}
+          columns={getAccountsColumns({ isSmallDevice: deviceSize === DeviceSize.sm, formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal, onShowDeleteLocalAccountModal, onShowGetKsmModal })}
           data={filteredAccounts}
           loading={isLoading || isLoadingDeposits}
         />
@@ -307,6 +313,7 @@ export const AccountsPage = () => {
         <p>Are you sure, you want to perform this action? You won&apos;t be able to recover this account in future.</p>
       </ConfirmModal>
     </AccountPageWrapper>
+    {currentModal === AccountModal.getKsmModal && <GetKSMModal key={'modal-accounts-getKsm'} onClose={onModalClose}/>}
   </PagePaper>);
 };
 
