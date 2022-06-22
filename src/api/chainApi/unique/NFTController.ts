@@ -1,6 +1,6 @@
 import { ApiPromise } from '@polkadot/api';
 import { INFTController } from '../types';
-import { collectionName16Decoder, decodeStruct, getOnChainSchema, hex2a } from '../utils/decoder';
+import { collectionName16Decoder, decodeStruct, getCollectionProperties, getNFTProperties, hex2a } from '../utils/decoder';
 import { fetchTokenImage, getTokenImage, getTokenImageUrl } from '../utils/imageUtils';
 import { getEthAccount, normalizeAccountId } from '../utils/addressUtils';
 import { MetadataType, NFTCollection, NFTToken, TokenId, UniqueDecoratedRpc } from './types';
@@ -38,52 +38,45 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
         return null;
       }
 
-      const variableData =
-        (await this.api.rpc.unique?.variableMetadata(collectionId, tokenId))?.toJSON();
-      const constData =
-        (await this.api.rpc.unique?.constMetadata(collectionId, tokenId))?.toJSON();
+      const tokenData =
+        (await this.api.rpc.unique?.tokenData(collectionId, tokenId))?.toJSON();
 
-      const tokenData = (await this.api.query.nonfungible.tokenData(collectionId, tokenId)).toJSON() as { owner: { Substrate?: string, Ethereum?: string } };
-      const owner = normalizeAccountId(tokenData?.owner as { Substrate: string }) as { Substrate: string, Ethereum: string };
+      if (!tokenData) {
+        throw new Error(`TokenData for token ${tokenId} not found`);
+      }
+      const owner = normalizeAccountId(tokenData.owner || {}) as { Substrate: string, Ethereum: string };
+      const tokenProperties = getNFTProperties(tokenData.properties);
+      const collectionProperties = getCollectionProperties(collection);
 
+      const attributes = decodeStruct({ attr: collectionProperties.constOnChainSchema, data: tokenProperties.constData });
       let imageUrl = '';
 
-      const onChainSchema = getOnChainSchema(collection);
-
-      const decodedConstData = decodeStruct({ attr: onChainSchema.attributesConst, data: constData });
-      const decodedVariableData = decodeStruct({ attr: onChainSchema.attributesVar, data: variableData });
-
-      const schemaVersion = collection.schemaVersion.toJSON() as string;
-
-      if (schemaVersion === 'Unique' && decodedConstData.ipfsJson) {
-        const ipfsJson = JSON.parse(decodedConstData.ipfsJson as string) as { ipfs: string };
+      if (collectionProperties.schemaVersion === 'Unique' && tokenProperties.constData) {
+        const ipfsJson = JSON.parse(attributes.ipfsJson as string) as { ipfs: string };
         imageUrl = `${IPFSGateway}/${ipfsJson.ipfs}`;
-      } else if (schemaVersion === 'ImageURL') {
-        imageUrl = getTokenImageUrl(hex2a(collection.offchainSchema.toHex()), tokenId);
-      } else if (schemaVersion === 'tokenURI') {
-        const collectionMetadata = JSON.parse(hex2a(collection.offchainSchema.toHex())) as MetadataType;
+      } else if (collectionProperties.schemaVersion === 'ImageURL') {
+        imageUrl = getTokenImageUrl(collectionProperties.offchainSchema, tokenId);
+      } else if (collectionProperties.schemaVersion === 'tokenURI') {
+        const collectionMetadata = JSON.parse(collectionProperties.offchainSchema) as MetadataType;
         imageUrl = await fetchTokenImage(collectionMetadata, tokenId);
       }
 
       let collectionCover = '';
 
-      if (collection?.variableOnChainSchema && hex2a(collection?.variableOnChainSchema.toHex())) {
-        const collectionSchema = getOnChainSchema(collection);
-        const image = JSON.parse(collectionSchema?.attributesVar)?.collectionCover as string;
+      if (collectionProperties.variableOnChainSchema) {
+        const collectionSchema = getCollectionProperties(collection);
+        const image = JSON.parse(collectionSchema?.variableOnChainSchema)?.collectionCover as string;
 
         collectionCover = `${IPFSGateway}/${image}`;
       } else {
-        if (collection?.offchainSchema) {
+        if (collectionProperties?.offchainSchema) {
           collectionCover = await getTokenImage(collection, 1);
         }
       }
 
       return {
         id: tokenId,
-        attributes: {
-          ...decodedConstData,
-          ...decodedVariableData
-        },
+        attributes,
         collectionId,
         imageUrl,
         owner,
@@ -106,18 +99,21 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
     const tokens: NFTToken[] = [];
 
     for (const collectionId of this.collectionsIds) {
-      const tokensIds =
-        await this.api.rpc.unique?.accountTokens(collectionId, normalizeAccountId(account)) as TokenId[];
-      const tokensIdsOnEth =
-        await this.api.rpc.unique?.accountTokens(collectionId, normalizeAccountId(getEthAccount(account))) as TokenId[];
+      try {
+        const tokensIds =
+          await this.api.rpc.unique?.accountTokens(collectionId, normalizeAccountId(account)) as TokenId[];
+        const tokensIdsOnEth =
+          await this.api.rpc.unique?.accountTokens(collectionId, normalizeAccountId(getEthAccount(account))) as TokenId[];
 
-      const currentAllowedTokens = this.allowedTokens?.find((item) => item.collection === collectionId)?.tokens;
-      const allowedIds = filterAllowedTokens([...tokensIds, ...tokensIdsOnEth], currentAllowedTokens);
-      const tokensOfCollection = (await Promise.all(allowedIds
-        .map((item) =>
-        this.getToken(collectionId, item.toNumber())))) as NFTToken[];
-
-      tokens.push(...tokensOfCollection);
+        const currentAllowedTokens = this.allowedTokens?.find((item) => item.collection === collectionId)?.tokens;
+        const allowedIds = filterAllowedTokens([...tokensIds, ...tokensIdsOnEth], currentAllowedTokens);
+        const tokensOfCollection = (await Promise.all(allowedIds
+          .map((item) =>
+            this.getToken(collectionId, item.toNumber())))) as NFTToken[];
+        tokens.push(...tokensOfCollection);
+      } catch (e) {
+        console.error('Wrong ID of collection', e);
+      }
     }
 
     return tokens;
