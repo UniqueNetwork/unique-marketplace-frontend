@@ -5,7 +5,7 @@
   "dependencies": {
     "@apollo/client": "^3.5.5",
     "@phala/typedefs": "^0.2.30",
-    "@polkadot/api": "^7.8.1",
+    "@polkadot/api": "^8.6.1",
     "@polkadot/extension-dapp": "^0.42.7",
     "@polkadot/keyring": "^8.4.1",
     "@polkadot/networks": "^8.4.1",
@@ -21,8 +21,8 @@
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
-    "@unique-nft/types": "^0.5.1",
     "@unique-nft/ui-kit": "^0.0.19",
+    "@unique-nft/unique-mainnet-types": "^0.6.1",
     "axios": "^0.24.0",
     "graphql": "^16.0.1",
     "protobufjs": "^6.11.2",
@@ -40,7 +40,7 @@
   "devDependencies": {
     "@polkadot/dev": "^0.65.35",
     "@polkadot/extension-inject": "^0.42.7",
-    "@polkadot/types": "^7.8.1",
+    "@polkadot/types": "^8.6.1",
     "@types/jest": "^27.0.3",
     "@types/node": "^16.11.12",
     "@types/react": "^17.0.37",
