@@ -32,7 +32,7 @@ export const fetchTokenImage = async (
 
 export const getTokenImage = async (collection: UpDataStructsCreateCollectionData, tokenId: number): Promise<string> => {
   const { schemaVersion, offchainSchema } = getCollectionProperties(collection);
-  if (schemaVersion === 'ImageURL') {
+  if (schemaVersion === 'ImageUrl') {
     return getTokenImageUrl(offchainSchema, tokenId);
   } else if (schemaVersion === 'tokenURI') { // 'tokenURI'
     const collectionMetadata = JSON.parse(offchainSchema) as MetadataType;
