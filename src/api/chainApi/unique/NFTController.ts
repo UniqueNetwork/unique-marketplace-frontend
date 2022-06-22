@@ -106,18 +106,22 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
     const tokens: NFTToken[] = [];
 
     for (const collectionId of this.collectionsIds) {
-      const tokensIds =
-        await this.api.rpc.unique?.accountTokens(collectionId, normalizeAccountId(account)) as TokenId[];
-      const tokensIdsOnEth =
-        await this.api.rpc.unique?.accountTokens(collectionId, normalizeAccountId(getEthAccount(account))) as TokenId[];
+      try {
+        const tokensIds =
+          await this.api.rpc.unique?.accountTokens(collectionId, normalizeAccountId(account)) as TokenId[];
+        const tokensIdsOnEth =
+          await this.api.rpc.unique?.accountTokens(collectionId, normalizeAccountId(getEthAccount(account))) as TokenId[];
 
-      const currentAllowedTokens = this.allowedTokens?.find((item) => item.collection === collectionId)?.tokens;
-      const allowedIds = filterAllowedTokens([...tokensIds, ...tokensIdsOnEth], currentAllowedTokens);
-      const tokensOfCollection = (await Promise.all(allowedIds
+        const currentAllowedTokens = this.allowedTokens?.find((item) => item.collection === collectionId)?.tokens;
+        const allowedIds = filterAllowedTokens([...tokensIds, ...tokensIdsOnEth], currentAllowedTokens);
+        const tokensOfCollection = (await Promise.all(allowedIds
         .map((item) =>
-        this.getToken(collectionId, item.toNumber())))) as NFTToken[];
+          this.getToken(collectionId, item.toNumber())))) as NFTToken[];
 
-      tokens.push(...tokensOfCollection);
+        tokens.push(...tokensOfCollection);
+      } catch (e) {
+        console.log(`getAccountTokens failed for collection id: ${collectionId}`, e);
+      }
     }
 
     return tokens;
