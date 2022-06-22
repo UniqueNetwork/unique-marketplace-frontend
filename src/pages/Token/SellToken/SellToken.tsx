@@ -40,7 +40,7 @@ export const SellToken: FC<SellTokenProps> = ({ offer, onSellClick, onTransferCl
         {!hideSellBtn && <Button title={'Sell'} role={'primary'} onClick={onSellClick}/>}
         <Button title={'Transfer'} onClick={onTransferClick} />
       </ActionsWrapper>
-      {!selectedAccount?.isOnWhiteList && <WarningWrapper>
+      {(settings?.marketType !== 'primary' && !selectedAccount?.isOnWhiteList) && <WarningWrapper>
         A fee of ~0,001 KSM may be applied to the first sale transaction. Your address will be added to the transaction sponsoring whitelist allowing you to make feeless transactions.
       </WarningWrapper>}
       <Divider />
