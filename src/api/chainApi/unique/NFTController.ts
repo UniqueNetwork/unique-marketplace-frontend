@@ -50,7 +50,7 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
       if (collectionProperties.schemaVersion === 'Unique' && tokenProperties.constData) {
         const ipfsJson = JSON.parse(attributes.ipfsJson as string) as { ipfs: string };
         imageUrl = `${IPFSGateway}/${ipfsJson.ipfs}`;
-      } else if (collectionProperties.schemaVersion === 'ImageURL') {
+      } else if (collectionProperties.schemaVersion === 'ImageUrl') {
         imageUrl = getTokenImageUrl(collectionProperties.offchainSchema, tokenId);
       } else if (collectionProperties.schemaVersion === 'tokenURI') {
         const collectionMetadata = JSON.parse(collectionProperties.offchainSchema) as MetadataType;
