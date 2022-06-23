@@ -88,7 +88,7 @@ export function SelectInput<T = SelectInputOption>({ className, placeholder, opt
         onFocus={onInputFocus}
         ref={InputRef}
       />
-      {isClearable && value && <ClearButton name={'close'} size={16} onClick={onClear} />}
+      {(inputValue || (isClearable && value)) && <ClearButton name={'close'} size={16} onClick={onClear} />}
     </InputWrapper>
     <Dropdown isOpen={isDropdownVisible} ref={DropdownRef}>
       {options.map((item, index) => (
