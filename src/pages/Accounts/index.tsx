@@ -13,7 +13,7 @@ import { Table } from '../../components/Table';
 import { formatKusamaBalance } from '../../utils/textUtils';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
 import { WithdrawDepositModal } from './Modals/WithdrawDeposit';
-import { Account, AccountSigner } from '../../account/AccountContext';
+import { Account } from '../../account/AccountContext';
 import { toChainFormatAddress } from '../../api/chainApi/utils/addressUtils';
 import { useApi } from '../../hooks/useApi';
 import AccountCard from '../../components/Account/Account';
@@ -25,6 +25,8 @@ import { AdditionalLight, BlueGrey300, Primary100, Primary500 } from '../../styl
 import AccountTooltip from './Tooltips/AccountTooltip';
 import IconWithHint from './Tooltips/WithdrawTooltip';
 import ConfirmModal from 'components/ConfirmModal';
+import { AccountInfo } from './types';
+import BalanceCell from './BalanceCell';
 
 const tokenSymbol = 'KSM';
 
@@ -64,29 +66,7 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
     width: '25%',
     field: 'accountInfo',
     render(accountInfo: AccountInfo) {
-      const KSM = accountInfo.deposit || 0;
-      const isDeposit = !!accountInfo.deposit;
-      if (!isSmallDevice) {
-        return (
-          <BalancesWrapper>
-            {!isDeposit && <Text>{`${formatKusamaBalance(accountInfo.balance?.KSM?.toString() || 0)} ${tokenSymbol}`}</Text>}
-            {isDeposit && (<>
-              <Text color={'grey-500'} size={'s'}>{`${formatKusamaBalance(KSM?.toString() || 0)} ${tokenSymbol}`}</Text>
-              <Text color={'grey-500'} size={'s'}>market deposit</Text>
-            </>)}
-          </BalancesWrapper>
-        );
-      } else {
-        return (
-          <BalancesWrapper>
-            <Text>{`${formatKusamaBalance(accountInfo.balance?.KSM?.toString() || 0)} ${tokenSymbol}`}</Text>
-            {isDeposit && (<>
-              <Text color={'grey-500'} size={'s'}>{`${formatKusamaBalance(KSM?.toString() || 0)} ${tokenSymbol}`}</Text>
-              <Text color={'grey-500'} size={'s'}>market deposit</Text>
-            </>)}
-          </BalancesWrapper>
-        );
-      }
+      return (<BalanceCell accountInfo={accountInfo} isSmallDevice={isSmallDevice} tokenSymbol={tokenSymbol} />);
     }
   },
   {
@@ -155,16 +135,6 @@ enum AccountModal {
   sendFunds,
   withdrawDeposit,
   deleteLocalAccount
-}
-
-type AccountInfo = {
-  address: string
-  name: string
-  balance?: {
-    KSM?: BN
-  }
-  deposit?: BN
-  signerType: AccountSigner
 }
 
 export const AccountsPage = () => {
@@ -419,14 +389,6 @@ const AccountCellWrapper = styled.div`
   padding: 20px 0 !important;
   column-gap: calc(var(--gap) / 2); 
   align-items: center;
-`;
-
-const BalancesWrapper = styled.div`
-  && {
-    display: flex;
-    flex-direction: column;
-    padding: 20px 0 !important;
-  }
 `;
 
 const LinksWrapper = styled.div`
