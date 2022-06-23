@@ -15,9 +15,10 @@ interface SelectInputProps<T = SelectInputOption> {
   value?: string | T
   onChange(value: string | T): void
   renderOption?(value: T): ReactNode | string
+  isClearable?: boolean
 }
 
-export function SelectInput<T = SelectInputOption>({ className, placeholder, options, value, onChange, renderOption }: SelectInputProps<T>) {
+export function SelectInput<T = SelectInputOption>({ className, placeholder, options, value, onChange, renderOption, isClearable }: SelectInputProps<T>) {
   const [selectedValue, setSelectedValue] = useState<T>();
   const [inputValue, setInputValue] = useState<string>('');
   const [isDropdownVisible, setIsDropdownVisible] = useState<boolean>(false);
@@ -79,8 +80,7 @@ export function SelectInput<T = SelectInputOption>({ className, placeholder, opt
       {!selectedValue && !inputValue && placeholder && !isDropdownVisible && <Placeholder>{placeholder}</Placeholder>}
       {selectedValue && <div>
         {showOption(selectedValue)}
-      </div>
-      }
+      </div>}
       <input
         type={'text'}
         value={inputValue}
@@ -88,7 +88,7 @@ export function SelectInput<T = SelectInputOption>({ className, placeholder, opt
         onFocus={onInputFocus}
         ref={InputRef}
       />
-      {inputValue && <ClearButton name={'close'} size={16} onClick={onClear} />}
+      {(inputValue || (isClearable && value)) && <ClearButton name={'close'} size={16} onClick={onClear} />}
     </InputWrapper>
     <Dropdown isOpen={isDropdownVisible} ref={DropdownRef}>
       {options.map((item, index) => (
@@ -98,7 +98,7 @@ export function SelectInput<T = SelectInputOption>({ className, placeholder, opt
   </SelectInputWrapper>);
 }
 
-const SelectInputWrapper = styled.div`
+export const SelectInputWrapper = styled.div`
   position: relative;
 `;
 
@@ -144,6 +144,9 @@ const OptionWrapper = styled.div`
   &:hover {
     background: ${Primary100};
     color: ${Primary500};
+    .unique-text {
+      color: ${Primary500};
+    }
   }
 `;
 
@@ -154,6 +157,7 @@ const Placeholder = styled.div`
 const ClearButton = styled(IconButton)`
   position: absolute;
   right: calc(var(--gap) / 2);
-  bottom: 6px;
+  top: 50%;
+  margin-top: -8px;
   width: auto !important;
 `;

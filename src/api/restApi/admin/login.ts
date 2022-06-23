@@ -6,6 +6,7 @@ import { LoginPayload, LoginResponse } from './types';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { compareEncodedAddresses } from '../../chainApi/utils/addressUtils';
 import { JWTDecode } from '../../../utils/JWTDecode';
+import { useApi } from '../../../hooks/useApi';
 
 export const JWTokenLocalStorageKey = 'unique_market_jwt';
 
@@ -18,10 +19,12 @@ export const adminLogIn = (body: LoginPayload, signature: string) => post<any, L
 export const useAdminLoggingIn = () => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const { selectedAccount, signMessage } = useAccounts();
+  const { settings } = useApi();
 
   const hasAdminPermission: boolean = useMemo(() => {
-    return !!localStorage.getItem(JWTokenLocalStorageKey);
-  }, [selectedAccount?.address]);
+    if (!selectedAccount) return false;
+    return settings?.administrators.some((address) => compareEncodedAddresses(address, selectedAccount.address)) || false;
+  }, [selectedAccount?.address, settings?.administrators]);
 
   const logIn = useCallback(async () => {
     if (!selectedAccount?.address) return null;

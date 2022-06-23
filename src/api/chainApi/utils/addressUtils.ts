@@ -7,6 +7,7 @@ import Web3 from 'web3';
 
 import { subToEthLowercase } from './decoder';
 import { CrossAccountId } from '../unique/types';
+import { PalletEvmAccountBasicCrossAccountIdRepr } from '@unique-nft/unique-mainnet-types';
 
 keyring.loadAll({});
 
@@ -29,7 +30,7 @@ export const isTokenOwner = (account: string, tokenOwner: { Substrate?: string, 
 };
 
 export function normalizeAccountId(
-  input: string | AccountId | CrossAccountId | IKeyringPair
+  input: string | AccountId | CrossAccountId | IKeyringPair | PalletEvmAccountBasicCrossAccountIdRepr
 ): CrossAccountId {
   if (typeof input === 'string') {
     if (input.length === 48 || input.length === 47) {
