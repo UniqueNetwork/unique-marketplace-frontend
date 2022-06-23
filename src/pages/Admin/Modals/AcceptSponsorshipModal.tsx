@@ -1,25 +1,45 @@
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import { Button, Heading, Text } from '@unique-nft/ui-kit';
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
 import styled from 'styled-components/macro';
-import { useAccounts } from '../../../hooks/useAccounts';
 import AccountCard from '../../../components/Account/Account';
 import { AdditionalWarning100 } from '../../../styles/colors';
 import { useFee } from '../../../hooks/useFee';
+import StagesModal from '../../Token/Modals/StagesModal';
+import { useAcceptSponsorshipStages } from '../../../hooks/adminStages/useAcceptSponsorshipStages';
+import { useApi } from '../../../hooks/useApi';
+import { NFTCollection } from '../../../api/chainApi/unique/types';
 
 const tokenSymbol = 'KSM';
 
-export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collection, onClose }) => {
-  const { selectedAccount } = useAccounts();
+export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collection, onClose, setIsClosable, onFinish }) => {
   const { kusamaFee } = useFee();
+  const [step, setStep] = useState<'ask' | 'stages'>('ask');
+  const { initiate, status, stages } = useAcceptSponsorshipStages(collection?.id || 0);
 
   const onRefuseClick = useCallback(() => {
     onClose();
   }, []);
 
-  const onAcceptClick = useCallback(() => {
-    onClose();
+  const onConfirmClick = useCallback(() => {
+    setIsClosable(false);
+    setStep('stages');
+    initiate(null);
   }, []);
+
+// TODO: remove this after the API provides complete collection details (cover, sponsorship, etc)
+  const { api } = useApi();
+  const collectionApi = api?.collection;
+  const [collectionDetails, setCollectionDetails] = useState<NFTCollection | null>();
+  useEffect(() => {
+    if (!collection) return;
+    (async () => {
+      setCollectionDetails(await collectionApi?.getCollection(collection.id));
+    })();
+  }, [collection, collectionApi]);
+  if (!collection) return null;
+
+  if (step === 'stages') return (<StagesModal stages={stages} status={status} onFinish={onFinish} />);
 
   return (
     <>
@@ -27,10 +47,10 @@ export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collecti
         <Heading size='2'>Accept sponsorship</Heading>
       </Content>
       <Row>
-        <Text size={'m'}>The author of the collection “collection name” has chosen this address as a sponsor. Do you confirm the choice?</Text>
+        <Text size={'m'}>{`The author of the collection “${collection?.name || collection?.collectionName}” ID ${collection?.id} has chosen this address as a sponsor. Do you confirm the choice?`}</Text>
       </Row>
       <AddressWrapper>
-        <AccountCard accountName={selectedAccount?.meta.name || ''} accountAddress={selectedAccount?.address || ''} canCopy={true} />
+        {collectionDetails?.sponsorship?.unconfirmed && <AccountCard accountName={''} accountAddress={collectionDetails?.sponsorship?.unconfirmed || ''} canCopy={true} />}
       </AddressWrapper>
       <TextStyled
         color='additional-warning-500'
@@ -44,7 +64,7 @@ export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collecti
           title='Refuse'
         />
         <Button
-          onClick={onAcceptClick}
+          onClick={onConfirmClick}
           role='primary'
           title='Accept'
         />
@@ -90,4 +110,5 @@ const TextStyled = styled(Text)`
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
+  column-gap: var(--gap);
 `;

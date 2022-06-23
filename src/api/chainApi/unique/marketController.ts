@@ -6,9 +6,9 @@ import { encodeAddress } from '@polkadot/util-crypto';
 import marketplaceAbi from './abi/marketPlaceAbi.json';
 import nonFungibleAbi from './abi/nonFungibleAbi.json';
 import { sleep } from '../../../utils/helpers';
-import { IMarketController, INFTController, TransactionOptions } from '../types';
+import { ICollectionController, IMarketController, INFTController, TransactionOptions } from '../types';
 import { collectionIdToAddress, compareEncodedAddresses, getEthAccount, isTokenOwner, normalizeAccountId } from '../utils/addressUtils';
-import { CrossAccountId, EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType } from './types';
+import { CrossAccountId, EvmCollectionAbiMethods, MarketplaceAbiMethods, NFTCollection, TokenAskType } from './types';
 import { formatKsm } from '../utils/textFormat';
 
 // TODO: Global todo list
@@ -32,6 +32,7 @@ export type MartketControllerConfig = {
   defaultGasAmount?: number,
   auctionAddress?: string,
   nftController?: INFTController<any, any>
+  collectionController?: ICollectionController<any, any>
 }
 
 const defaultMarketPlaceControllerConfig: MartketControllerConfig = {
@@ -56,6 +57,7 @@ class MarketController implements IMarketController {
   private defaultGasAmount: number;
   private auctionAddress: string;
   private nftController: INFTController<any, any>;
+  private collectionController: ICollectionController<any, any>;
 
   constructor(uniqApi: ApiPromise, kusamaApi: ApiPromise, config: MartketControllerConfig = {}) {
     this.uniqApi = uniqApi;
@@ -76,6 +78,8 @@ class MarketController implements IMarketController {
     this.defaultGasAmount = options.defaultGasAmount || 2500000;
     if (!options.nftController) throw new Error('NFTController not provided');
     this.nftController = options.nftController;
+    if (!options.collectionController) throw new Error('CollectionController not provided');
+    this.collectionController = options.collectionController;
     if (!options.auctionAddress) throw new Error('Auction address not provided');
     this.auctionAddress = options.auctionAddress;
     const provider = new Web3.providers.WebsocketProvider(this.uniqueSubstrateApiRpc, {
@@ -571,6 +575,64 @@ class MarketController implements IMarketController {
     // TODO: any way to check this being executed?
   }
   // #endregion transfer
+
+  public async setCollectionSponsor(collectionId: number, sponsorAddress: string, options: TransactionOptions): Promise<void> {
+    const tx = this.uniqApi.tx.unique.setCollectionSponsor(collectionId);
+    const signedTx = await options.sign(tx);
+
+    if (!signedTx) throw new Error('Transaction cancelled');
+
+    if (options.send) {
+      await options.send(signedTx);
+    } else {
+      await signedTx.send();
+    }
+
+    await this.repeatCheckForTransactionFinish(async () => {
+      const { sponsorship } = (await this.collectionController?.getCollection(Number(collectionId))) as NFTCollection;
+      if (sponsorship?.unconfirmed === sponsorAddress) return true;
+      return false;
+    });
+  }
+
+  public async confirmSponsorship(collectionId: number, options: TransactionOptions): Promise<void> {
+    const tx = this.uniqApi.tx.unique.confirmSponsorship(collectionId);
+    const signedTx = await options.sign(tx);
+
+    if (!signedTx) throw new Error('Transaction cancelled');
+
+    if (options.send) {
+      await options.send(signedTx);
+    } else {
+      await signedTx.send();
+    }
+
+    await this.repeatCheckForTransactionFinish(async () => {
+      const { sponsorship } = (await this.collectionController?.getCollection(Number(collectionId))) as NFTCollection;
+      if (sponsorship?.confirmed) return true;
+      return false;
+    });
+  }
+
+  public async removeCollectionSponsor(collectionId: number, options: TransactionOptions): Promise<void> {
+    const tx = this.uniqApi.tx.unique.removeCollectionSponsor(collectionId);
+    const signedTx = await options.sign(tx);
+
+    if (!signedTx) throw new Error('Transaction cancelled');
+
+    if (options.send) {
+      await options.send(signedTx);
+    } else {
+      await signedTx.send();
+    }
+
+    await this.repeatCheckForTransactionFinish(async () => {
+      const { sponsorship } = (await this.collectionController?.getCollection(Number(collectionId))) as NFTCollection;
+      console.log(collectionId, sponsorship);
+      if (!sponsorship?.confirmed) return true;
+      return false;
+    });
+  }
 }
 
 export default MarketController;

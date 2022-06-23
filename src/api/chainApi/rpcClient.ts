@@ -109,7 +109,8 @@ export class RpcClient implements IRpcClient {
       escrowAddress: this.config?.blockchain.escrowAddress,
       uniqueSubstrateApiRpc: this.config?.blockchain.unique.wsEndpoint,
       auctionAddress: this.config?.auction.address,
-      nftController: this.nftController
+      nftController: this.nftController,
+      collectionController: this.collectionController
     });
 
     return new Promise<void>((resolve, reject) => {

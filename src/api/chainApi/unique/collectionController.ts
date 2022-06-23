@@ -1,6 +1,6 @@
 import { ApiPromise } from '@polkadot/api';
 import { ICollectionController } from '../types';
-import { NFTCollection, NFTToken, TokenId, UniqueDecoratedRpc } from './types';
+import { NFTCollection, NFTCollectionSponsorship, NFTToken, TokenId, UniqueDecoratedRpc } from './types';
 import { collectionName16Decoder, getCollectionProperties, hex2a } from '../utils/decoder';
 import { getTokenImage } from '../utils/imageUtils';
 import config from '../../../config';
@@ -43,6 +43,7 @@ class UniqueCollectionController implements ICollectionController<NFTCollection,
     return {
       id: collectionId,
       owner: collection.owner,
+      sponsorship: collection.sponsorship?.toJSON() as NFTCollectionSponsorship,
       tokenPrefix: collection.tokenPrefix?.toUtf8() || '',
       collectionName: collection.name ? collectionName16Decoder(collection.name.toJSON() as number[]) : '',
       description: hex2a(collection.description?.toHex() || ''),

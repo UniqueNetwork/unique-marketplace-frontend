@@ -25,6 +25,11 @@ export type UniqueDecoratedQuery = DecoratedRpc<'promise', RpcInterface> & {
   }
 }
 
+export interface NFTCollectionSponsorship {
+  unconfirmed?: string
+  confirmed?: string
+}
+
 export interface NFTCollection {
   id: number
   tokenPrefix: string
@@ -32,6 +37,7 @@ export interface NFTCollection {
   collectionName?: string
   description?: string
   owner: GenericAccountId
+  sponsorship?: NFTCollectionSponsorship | null
 }
 
 export type AttributesDecoded = {

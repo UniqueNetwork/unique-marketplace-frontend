@@ -1,10 +1,13 @@
-import React, { FC } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { Dropdown, Icon, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import { Picture } from '..';
 import { AdditionalDark, AdditionalLight } from '../../styles/colors';
 import { CollectionData } from 'api/restApi/admin/types';
+import { useApi } from '../../hooks/useApi';
+import { NFTCollection } from '../../api/chainApi/unique/types';
+import { shortcutText } from '../../utils/textUtils';
 
 export type TCollectionCard = {
   collection: CollectionData
@@ -15,16 +18,33 @@ export type TCollectionCard = {
   onViewOnScanClick(): void
 };
 
-export const CollectionCard: FC<TCollectionCard> = ({ collection, onManageTokensClick, onRemoveCollectionClick, onViewOnScanClick }) => {
+export const CollectionCard: FC<TCollectionCard> = ({
+  collection,
+  onManageSponsorshipClick,
+  onRemoveSponsorshipClick,
+  onManageTokensClick,
+  onRemoveCollectionClick,
+  onViewOnScanClick
+}) => {
+  // TODO: remove this after the API provides complete collection details (cover, sponsorship, etc)
+  const { api } = useApi();
+  const collectionApi = api?.collection;
+  const [collectionDetails, setCollectionDetails] = useState<NFTCollection | null>();
+  useEffect(() => {
+    (async () => {
+      setCollectionDetails(await collectionApi?.getCollection(collection.id));
+    })();
+  }, [collection, collectionApi]);
+
   return (
     <CollectionCardStyled>
       <PictureWrapper>
-        <Picture alt={collection?.id?.toString() || ''} src={collection.coverImageUrl} />
+        <Picture alt={collection?.id?.toString() || ''} src={collection.coverImageUrl || collectionDetails?.coverImageUrl} />
         <ActionsMenuWrapper>
           <Dropdown placement={'right'}
             dropdownRender={() => (<DropdownMenu>
-              {/* <DropdownMenuItem onClick={onManageSponsorshipClick}>Manage sponsorship</DropdownMenuItem> */}
-              {/* <DropdownMenuItem onClick={onRemoveSponsorshipClick}>Remove sponsorship</DropdownMenuItem> */}
+              <DropdownMenuItem onClick={onManageSponsorshipClick}>Manage sponsorship</DropdownMenuItem>
+              <DropdownMenuItem onClick={onRemoveSponsorshipClick}>Remove sponsorship</DropdownMenuItem>
               <DropdownMenuItem onClick={onManageTokensClick}>Manage tokens</DropdownMenuItem>
               <DropdownMenuItem onClick={onRemoveCollectionClick}>Remove collection</DropdownMenuItem>
               <DropdownMenuItem onClick={onViewOnScanClick}>View on Scan
@@ -49,10 +69,13 @@ export const CollectionCard: FC<TCollectionCard> = ({ collection, onManageTokens
             <Text size='s' color={'grey-500'} >Allowed tokens:</Text>
             <Text size='s' >{collection.allowedTokens || 'all'}</Text>
           </Row>
-          <Row>
+          {collectionDetails?.sponsorship && <Row>
             <Text size='s' color={'grey-500'} >Sponsor:</Text>
-            <Text size='s' >{'not assigned'}</Text>
-          </Row>
+            <Text size='s' >{collectionDetails.sponsorship.confirmed ? shortcutText(collectionDetails.sponsorship.confirmed) : 'not assigned'}</Text>
+          </Row>}
+          {collectionDetails?.sponsorship?.unconfirmed && <Row>
+            <Text size='s' color={'coral-500'} >Waiting for sponsorship approval</Text>
+          </Row>}
         </AttributesWrapper>
 
       </Description>
@@ -64,7 +87,7 @@ const CollectionCardStyled = styled.div`
   display: flex;
   align-items: flex-start;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   position: relative;
   cursor: pointer;
 `;
