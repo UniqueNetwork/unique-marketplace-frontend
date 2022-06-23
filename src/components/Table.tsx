@@ -1,11 +1,11 @@
 import React, { FC } from 'react';
 import styled from 'styled-components';
-import { SortQuery, Table as UITable, TableColumnProps } from '@unique-nft/ui-kit';
+import { IconProps, SortQuery, Table as UITable, TableColumnProps } from '@unique-nft/ui-kit';
 
 import useDeviceSize, { DeviceSize } from '../hooks/useDeviceSize';
 import MobileTable from './MobileTable/MobileTable';
-import NoItems from './NoItems';
 import Skeleton from './Skeleton/Skeleton';
+import EmptyTable from './EmptyTable';
 
 interface TableProps {
   columns: TableColumnProps[]
@@ -13,9 +13,10 @@ interface TableProps {
   loading?: boolean
   onSort?(sorting: SortQuery): void
   className?: string
+  emptyIconProps?: Omit<IconProps, 'size'>
 }
 
-export const Table: FC<TableProps> = ({ columns, data, loading, onSort, className }) => {
+export const Table: FC<TableProps> = ({ columns, data, loading, onSort, className, emptyIconProps }) => {
   const deviceSize = useDeviceSize();
 
   const getSkeletonItem = () => ({});
@@ -31,7 +32,7 @@ export const Table: FC<TableProps> = ({ columns, data, loading, onSort, classNam
           data={loading ? Array.from({ length: 20 }).map(getSkeletonItem) : data || []}
           onSort={onSort}
         />
-        {!loading && !data?.length && <NoItems />}
+        {!loading && !data?.length && <EmptyTable iconProps={emptyIconProps} />}
       </>)}
       {deviceSize <= DeviceSize.sm && (
         <MobileTable

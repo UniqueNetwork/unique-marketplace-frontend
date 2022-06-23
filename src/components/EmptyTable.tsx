@@ -1,15 +1,15 @@
 import React, { VFC } from 'react';
 import styled from 'styled-components';
-import { Icon, Text } from '@unique-nft/ui-kit';
+import { Icon, IconProps, Text } from '@unique-nft/ui-kit';
 
-interface NoItemsProps {
-  isSearchResult?: boolean
+interface EmptyTableProps {
+  iconProps?: Omit<IconProps, 'size'>
 }
 
-const NoItems: VFC<NoItemsProps> = ({ isSearchResult }) => {
+const EmptyTable: VFC<EmptyTableProps> = ({ iconProps }) => {
   return (
     <NoItemsWrapper>
-      <Icon name={isSearchResult ? 'magnifier-found' : 'not-found'} size={80} />
+      <Icon {...iconProps} size={80} />
       <Text size={'l'} color={'blue-grey-500'}>Nothing found</Text>
     </NoItemsWrapper>
   );
@@ -25,4 +25,4 @@ const NoItemsWrapper = styled.div`
   justify-content: center;
 `;
 
-export default NoItems;
+export default EmptyTable;

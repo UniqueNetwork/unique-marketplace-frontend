@@ -70,7 +70,7 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish 
         onChange={onSeedChange}
         value={seed}
       />
-      <IconButton onClick={generateSeed} size={24} name={'replace'}/>
+      <IconButton onClick={generateSeed} size={24} name={'reload'}/>
     </InputSeedWrapper>
     <TextStyled
       color='additional-warning-500'

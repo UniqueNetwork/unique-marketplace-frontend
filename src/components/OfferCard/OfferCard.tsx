@@ -57,7 +57,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
           </Text>
         </a>
         <PriceWrapper>
-          <Text size='s'>{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(offer?.price)}` }</Text>
+          <Text size='l'>{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(offer?.price)}` }</Text>
           <Icon name={'chain-kusama'} size={16} />
         </PriceWrapper>
         {!offer?.auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
@@ -108,6 +108,7 @@ const PictureWrapper = styled(Link)`
     max-height: 100%;
     border-radius: 8px;
     transition: 50ms;
+    overflow: hidden;
 
     img {
       max-width: 100%;
@@ -129,6 +130,7 @@ const PriceWrapper = styled.div`
   display: flex;
   align-items: center;
   column-gap: calc(var(--gap) / 4);
+  margin-top: calc(var(--gap) / 2);
 `;
 
 const StyledText = styled(Text)` 

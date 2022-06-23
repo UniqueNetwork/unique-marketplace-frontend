@@ -142,6 +142,7 @@ const PictureWrapper = styled(Link)`
     max-height: 100%;
     border-radius: 8px;
     transition: 50ms;
+    overflow: hidden;
 
     img {
       max-width: 100%;

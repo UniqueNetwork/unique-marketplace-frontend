@@ -28,6 +28,7 @@ import ConfirmModal from 'components/ConfirmModal';
 import { AccountInfo } from './types';
 import BalanceCell from './BalanceCell';
 import GetKSMModal from 'components/GetKSMModal/GetKSMModal';
+import NoAccountsIcon from '../../static/icons/no-accounts.svg';
 
 const tokenSymbol = 'KSM';
 
@@ -294,6 +295,7 @@ export const AccountsPage = () => {
           columns={getAccountsColumns({ isSmallDevice: deviceSize === DeviceSize.sm, formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal, onShowDeleteLocalAccountModal, onShowGetKsmModal })}
           data={filteredAccounts}
           loading={isLoading || isLoadingDeposits}
+          emptyIconProps={searchString ? { name: 'magnifier-found' } : { file: NoAccountsIcon }}
         />
       </TableWrapper>
       <CreateAccountModal isVisible={currentModal === AccountModal.create} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
