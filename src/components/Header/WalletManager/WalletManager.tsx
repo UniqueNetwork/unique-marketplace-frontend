@@ -31,13 +31,13 @@ export const WalletManager: FC = () => {
   }, [chainData?.properties.ss58Format]);
 
   const widgetAccounts = useMemo(() => accounts.map((account) => (
-    { name: account.meta.name, ...account, address: formatAddress(account.address) })
+    { name: account.meta.name, ...account, address: formatAddress(account.address), substrateAddress: account?.address })
   ), [accounts, formatAddress]);
   const widgetSelectedAccount = useMemo(() => (
-    { name: selectedAccount?.meta.name, ...selectedAccount, address: selectedAccount?.address ? formatAddress(selectedAccount.address) : '' }
+    { name: selectedAccount?.meta.name, ...selectedAccount, address: selectedAccount?.address ? formatAddress(selectedAccount.address) : '', substrateAddress: selectedAccount?.address }
   ), [selectedAccount, formatAddress]);
   const widgetAccountChange = useCallback((account) => {
-    changeAccount(account as Account);
+    changeAccount({ ...account, address: account.substrateAddress } as Account);
   }, [changeAccount]);
 
   const onCopyAddress = useCallback((account: string) => {
@@ -69,8 +69,8 @@ export const WalletManager: FC = () => {
   }, [setIsGetKsmOpened]);
 
   if (!isLoading && accounts.length === 0) {
-   return (
-     <Button title={'Connect or create account'} onClick={onCreateAccountClick} />
+    return (
+      <Button title={'Connect or create account'} onClick={onCreateAccountClick} />
     );
   }
 

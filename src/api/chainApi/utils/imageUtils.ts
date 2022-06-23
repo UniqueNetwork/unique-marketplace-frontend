@@ -1,6 +1,6 @@
 import { MetadataType } from '../unique/types';
-import { hex2a } from './decoder';
-import { UpDataStructsCollection } from '@unique-nft/types/unique/types';
+import { getCollectionProperties } from './decoder';
+import { UpDataStructsCreateCollectionData } from '@unique-nft/unique-mainnet-types/default/types';
 
 export const getTokenImageUrl = (urlString: string, tokenId: number): string => {
   if (urlString.indexOf('{id}') !== -1) {
@@ -30,12 +30,12 @@ export const fetchTokenImage = async (
   return '';
 };
 
-export const getTokenImage = async (collection: UpDataStructsCollection, tokenId: number): Promise<string> => {
-  const schemaVersion = collection.schemaVersion.toJSON();
-  if (schemaVersion === 'ImageURL') {
-    return getTokenImageUrl(hex2a(collection.offchainSchema.toHex()), tokenId);
+export const getTokenImage = async (collection: UpDataStructsCreateCollectionData, tokenId: number): Promise<string> => {
+  const { schemaVersion, offchainSchema } = getCollectionProperties(collection);
+  if (schemaVersion === 'ImageUrl') {
+    return getTokenImageUrl(offchainSchema, tokenId);
   } else if (schemaVersion === 'tokenURI') { // 'tokenURI'
-    const collectionMetadata = JSON.parse(hex2a(collection.offchainSchema.toHex())) as MetadataType;
+    const collectionMetadata = JSON.parse(offchainSchema) as MetadataType;
     return await fetchTokenImage(collectionMetadata, tokenId);
   }
   return '';

@@ -49,8 +49,9 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish 
   }, []);
 
   const onNextClick = useCallback(() => {
+    if (!address || !confirmSeedSaved) return;
     onFinish({ seed, address });
-  }, [seed, address]);
+  }, [seed, address, confirmSeedSaved, onFinish]);
 
   return (<>
     <AddressWrapper>
