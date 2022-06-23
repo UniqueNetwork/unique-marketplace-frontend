@@ -19,7 +19,7 @@ export const RemoveCollectionModal: FC<TAdminPanelModalBodyProps> = ({ collectio
         <Heading size='2'>Remove collection</Heading>
       </Content>
       <Row>
-        <Text size={'m'}>{`Are you sure you want to remove the collection &quot;${collection?.name}&quot; from the marketplace?`}</Text>
+        <Text size={'m'}>{`Are you sure you want to remove the collection ${collection?.name} [id ${collection?.id}] from the marketplace?`}</Text>
       </Row>
       <ButtonWrapper>
         <Button
