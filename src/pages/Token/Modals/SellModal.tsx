@@ -89,8 +89,10 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
     [setPriceInputValue]
   );
 
+  const isAuctionValid = selectedAccount && minStepInputValueAuction && durationSelectValue && inputStartingPriceValue && Number(minStepInputValueAuction) && Number(inputStartingPriceValue);
+
   const onConfirmAuctionClick = useCallback(() => {
-    if (!selectedAccount || !minStepInputValueAuction || !durationSelectValue) return;
+    if (!isAuctionValid) return;
 
     onSellAuction({ minimumStep: minStepInputValueAuction, startingPrice: inputStartingPriceValue || minStepInputValueAuction, duration: durationSelectValue, accountAddress: selectedAccount.address } as TAuctionProps);
   }, [minStepInputValueAuction, inputStartingPriceValue, durationSelectValue, selectedAccount, onSellAuction]);
@@ -192,7 +194,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
       </TextStyled>
       <ButtonWrapper>
         <Button
-          disabled={!minStepInputValueAuction || !durationSelectValue || !Number(minStepInputValueAuction)}
+          disabled={!isAuctionValid}
           onClick={onConfirmAuctionClick}
           role='primary'
           title='Confirm'
