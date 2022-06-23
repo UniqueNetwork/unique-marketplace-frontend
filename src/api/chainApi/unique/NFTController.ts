@@ -108,11 +108,12 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
         const currentAllowedTokens = this.allowedTokens?.find((item) => item.collection === collectionId)?.tokens;
         const allowedIds = filterAllowedTokens([...tokensIds, ...tokensIdsOnEth], currentAllowedTokens);
         const tokensOfCollection = (await Promise.all(allowedIds
-          .map((item) =>
-            this.getToken(collectionId, item.toNumber())))) as NFTToken[];
+        .map((item) =>
+          this.getToken(collectionId, item.toNumber())))) as NFTToken[];
+
         tokens.push(...tokensOfCollection);
       } catch (e) {
-        console.error('Wrong ID of collection', e);
+        console.log(`Wrong ID of collection ${collectionId}`, e);
       }
     }
 

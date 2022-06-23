@@ -26,8 +26,9 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
   }, [collections]);
 
   const onConfirmClick = useCallback(async () => {
-    if (!selectedCollection || typeof selectedCollection === 'string') return;
-    await appendCollection(selectedCollection.id);
+    if (!selectedCollection) return;
+    if (typeof selectedCollection === 'string') await appendCollection(parseInt(selectedCollection));
+    else await appendCollection(selectedCollection.id);
     onFinish();
   }, [selectedCollection]);
 
