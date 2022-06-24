@@ -96,7 +96,7 @@ export const WalletManager: FC = () => {
         deposit={selectedAccount?.deposits?.sponsorshipFee?.toString()}
         depositDescription={
           <>
-            <Text color='grey-500' size='xs'>The total market deposit for participation in auctions and sponsorship. Use the “Manage my balance” section to withdraw.</Text>
+            <Text color='grey-500' size='xs'>The total market deposit for participation in auctions and sponsorship. <br/> Use the “Manage my balance” section to withdraw.</Text>
             <GetKsmButton
               title={'Get KSM'}
               size={'middle'}
