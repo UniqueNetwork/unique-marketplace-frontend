@@ -55,8 +55,14 @@ function GetKSMModal ({ onClose }: Props): React.ReactElement<Props> {
 const Content = styled.div`
   height: 720px;
   width: calc(640px - var(--prop-gap) * 3);
-  @media (max-width: 567px) {
-    width: 325px;
+  @media (max-width: 640px) {
+    width: calc(100vw - var(--prop-gap) * 2);
+    height: 700px;
+  }
+  @media (width: 414px) { // for some reason RAMP has issues with touch handling on certain widths
+    width: 362px;
+  }
+  @media (max-width: 420px) {
     height: 667px;
   }
 `;
