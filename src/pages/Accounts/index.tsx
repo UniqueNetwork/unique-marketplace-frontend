@@ -110,11 +110,11 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
       return (
         <>
           <ActionsWrapper>
-          <Button title={'Send'} onClick={onShowSendFundsModal(accountInfo.address)} />
-          <Button
-            title={'Get'}
-            onClick={onShowGetKsmModal}
-          />
+            <Button title={'Send'} onClick={onShowSendFundsModal(accountInfo.address)} />
+            <Button
+              title={'Get'}
+              onClick={onShowGetKsmModal}
+            />
             {accountInfo.signerType === 'Local' && <Button title={'Delete'} onClick={onShowDeleteLocalAccountModal(accountInfo.address)} />}
           </ActionsWrapper>
           {(accountInfo.deposit && isSmallDevice) && <DepositActionsWrapper>

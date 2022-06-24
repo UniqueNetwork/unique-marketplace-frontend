@@ -13,6 +13,7 @@ import { NotificationSeverity } from 'notification/NotificationContext';
 import { useNotification } from 'hooks/useNotification';
 import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import GetKSMModal from 'components/GetKSMModal/GetKSMModal';
+import { formatKusamaBalance } from 'utils/textUtils';
 
 const tokenSymbol = 'KSM';
 
@@ -91,7 +92,7 @@ export const WalletManager: FC = () => {
           id: 'quartz',
           name: 'Quartz'
         }}
-        balance={currentBalance.value}
+        balance={formatKusamaBalance(currentBalance.value)}
         deposit={selectedAccount?.deposits?.sponsorshipFee?.toString()}
         depositDescription={
           <>
