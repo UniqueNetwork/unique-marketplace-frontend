@@ -628,8 +628,7 @@ class MarketController implements IMarketController {
 
     await this.repeatCheckForTransactionFinish(async () => {
       const { sponsorship } = (await this.collectionController?.getCollection(Number(collectionId))) as NFTCollection;
-      console.log(collectionId, sponsorship);
-      if (!sponsorship?.confirmed) return true;
+      if (!sponsorship?.confirmed && !sponsorship?.unconfirmed) return true;
       return false;
     });
   }

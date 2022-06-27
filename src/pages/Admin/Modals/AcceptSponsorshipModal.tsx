@@ -9,22 +9,26 @@ import StagesModal from '../../Token/Modals/StagesModal';
 import { useAcceptSponsorshipStages } from '../../../hooks/adminStages/useAcceptSponsorshipStages';
 import { useApi } from '../../../hooks/useApi';
 import { NFTCollection } from '../../../api/chainApi/unique/types';
+import { useRejectSponsorshipStages } from 'hooks/adminStages/useRejectSponsorshipStages';
 
 const tokenSymbol = 'KSM';
 
 export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collection, onClose, setIsClosable, onFinish }) => {
   const { kusamaFee } = useFee();
-  const [step, setStep] = useState<'ask' | 'stages'>('ask');
-  const { initiate, status, stages } = useAcceptSponsorshipStages(collection?.id || 0);
+  const [step, setStep] = useState<'ask' | 'accept-stages' | 'reject-stages'>('ask');
+  const { initiate: initiateAccept, status: acceptStatus, stages: acceptStages } = useAcceptSponsorshipStages(collection?.id || 0);
+  const { initiate: initiateReject, status: rejectStatus, stages: rejectStages } = useRejectSponsorshipStages(collection?.id || 0);
 
   const onRefuseClick = useCallback(() => {
-    onClose();
+    setIsClosable(false);
+    setStep('reject-stages');
+    initiateReject(null);
   }, []);
 
   const onConfirmClick = useCallback(() => {
     setIsClosable(false);
-    setStep('stages');
-    initiate(null);
+    setStep('accept-stages');
+    initiateAccept(null);
   }, []);
 
 // TODO: remove this after the API provides complete collection details (cover, sponsorship, etc)
@@ -39,7 +43,8 @@ export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collecti
   }, [collection, collectionApi]);
   if (!collection) return null;
 
-  if (step === 'stages') return (<StagesModal stages={stages} status={status} onFinish={onFinish} />);
+  if (step === 'accept-stages') { return (<StagesModal stages={acceptStages} status={acceptStatus} onFinish={onFinish} />); }
+  if (step === 'reject-stages') { return (<StagesModal stages={rejectStages} status={rejectStatus} onFinish={onFinish} />); }
 
   return (
     <>
@@ -47,7 +52,7 @@ export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collecti
         <Heading size='2'>Accept sponsorship</Heading>
       </Content>
       <Row>
-        <Text size={'m'}>{`The author of the collection “${collection?.name || collection?.collectionName}” ID ${collection?.id} has chosen this address as a sponsor. Do you confirm the choice?`}</Text>
+        <Text size={'m'}>{`The author of the collection ${collection?.name || collection?.collectionName} [ID ${collection?.id}] has chosen this address as a sponsor. Do you confirm the choice?`}</Text>
       </Row>
       <AddressWrapper>
         {collectionDetails?.sponsorship?.unconfirmed && <AccountCard accountName={''} accountAddress={collectionDetails?.sponsorship?.unconfirmed || ''} canCopy={true} />}
