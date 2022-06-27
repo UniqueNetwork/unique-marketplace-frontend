@@ -69,8 +69,10 @@ export const WalletManager: FC = () => {
     setIsGetKsmOpened(true);
   }, [setIsGetKsmOpened]);
 
-  const renderedAccountDeposit = useMemo(() => {
-    if (!selectedAccount?.deposits?.sponsorshipFee || selectedAccount?.deposits?.sponsorshipFee?.toString() === '0') return undefined;
+  const formattedAccountDeposit = useMemo(() => {
+    if (!selectedAccount?.deposits?.sponsorshipFee || selectedAccount?.deposits?.sponsorshipFee?.toString() === '0') {
+      return undefined;
+    }
     return formatKusamaBalance(selectedAccount?.deposits?.sponsorshipFee?.toString());
       }, [selectedAccount?.deposits]);
 
@@ -98,10 +100,10 @@ export const WalletManager: FC = () => {
           name: 'Quartz'
         }}
         balance={formatKusamaBalance(currentBalance.value)}
-        deposit={renderedAccountDeposit}
+        deposit={formattedAccountDeposit}
         depositDescription={
           <>
-            {renderedAccountDeposit && <Text color='grey-500' size='xs'>The total market deposit for participation in auctions and
+            {formattedAccountDeposit && <Text color='grey-500' size='xs'>The total market deposit for participation in auctions and
               sponsorship. <br/> Use the “Manage my balance” section to withdraw.</Text>}
             <GetKsmButton
               title={'Get KSM'}
