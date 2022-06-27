@@ -17,6 +17,7 @@ import { NumberInput } from 'components/NumberInput/NumberInput';
 import AccountCard from 'components/Account/Account';
 import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import { useApi } from 'hooks/useApi';
+import { useFee } from '../../../hooks/useFee';
 
 const tokenSymbol = 'KSM';
 
@@ -74,6 +75,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   const [recipientAddress, setRecipientAddress] = useState<string | Account | undefined>();
   const [amount, setAmount] = useState<string>('');
   const { chainData } = useApi();
+  const { kusamaFee } = useFee();
 
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainData?.properties.ss58Format || 0);
@@ -172,7 +174,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
       color='additional-warning-500'
       size='s'
     >
-      A fee of ~ 0.016523326617 testUNQ can be applied to the transaction, unless the transaction is sponsored
+      A fee of ~ {kusamaFee} KSM can be applied to the transaction, unless the transaction is sponsored
     </TextStyled>
     <ButtonWrapper>
       <Button
