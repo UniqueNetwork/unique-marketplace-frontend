@@ -419,12 +419,14 @@ const ActionsWrapper = styled.div`
     padding: var(--gap) 0;
     flex-wrap: wrap;
     gap: 16px;
+    margin: var(--gap) 0;
     @media (max-width: 768px) {
       flex-direction: row;
       row-gap: var(--gap);
       width: 100%;
+      margin: 0;
       button {
-        width: calc((100% - (var(--gap) * 3)) / 2);
+        width: calc((100% - var(--gap)) / 2);
       }
     }
   }
