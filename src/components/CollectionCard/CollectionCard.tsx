@@ -43,8 +43,8 @@ export const CollectionCard: FC<TCollectionCard> = ({
         <ActionsMenuWrapper>
           <Dropdown placement={'right'}
             dropdownRender={() => (<DropdownMenu>
-              <DropdownMenuItem onClick={onManageSponsorshipClick}>Manage sponsorship</DropdownMenuItem>
-              <DropdownMenuItem onClick={onRemoveSponsorshipClick}>Remove sponsorship</DropdownMenuItem>
+              {collectionDetails?.sponsorship?.unconfirmed && <DropdownMenuItem onClick={onManageSponsorshipClick}>Manage sponsorship</DropdownMenuItem>}
+              {collectionDetails?.sponsorship?.confirmed && <DropdownMenuItem onClick={onRemoveSponsorshipClick}>Remove sponsorship</DropdownMenuItem>}
               <DropdownMenuItem onClick={onManageTokensClick}>Manage tokens</DropdownMenuItem>
               <DropdownMenuItem onClick={onRemoveCollectionClick}>Remove collection</DropdownMenuItem>
               <DropdownMenuItem onClick={onViewOnScanClick}>View on Scan
