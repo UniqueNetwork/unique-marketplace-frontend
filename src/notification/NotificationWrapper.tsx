@@ -43,7 +43,7 @@ const NotificationWrapper: FC = ({ children }) => {
     if (timerRef.current) clearInterval(timerRef.current);
 
     timerRef.current = setInterval(removeOne, NOTIFICATION_DELAY);
-  }, [alerts, removeOne]);
+  }, [removeOne]);
 
   const clear = useCallback(() => {
     setAlerts([]);
