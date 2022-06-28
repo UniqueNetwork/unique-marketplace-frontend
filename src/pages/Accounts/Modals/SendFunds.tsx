@@ -1,20 +1,23 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Heading, Modal, Text } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
 import { TTransferFunds } from './types';
-import { useAccounts } from '../../../hooks/useAccounts';
-import { AdditionalWarning100 } from '../../../styles/colors';
-import { SelectInput } from '../../../components/SelectInput/SelectInput';
-import { Account } from '../../../account/AccountContext';
+import { useAccounts } from 'hooks/useAccounts';
+import { AdditionalWarning100, Coral700 } from 'styles/colors';
+import { SelectInput } from 'components/SelectInput/SelectInput';
+import { Account } from 'account/AccountContext';
 import DefaultMarketStages from '../../Token/Modals/StagesModal';
-import { useTransferFundsStages } from '../../../hooks/accountStages/useTransferFundsStages';
-import { formatKusamaBalance } from '../../../utils/textUtils';
-import { StageStatus } from '../../../types/StagesTypes';
-import { NotificationSeverity } from '../../../notification/NotificationContext';
-import { useNotification } from '../../../hooks/useNotification';
-import { NumberInput } from '../../../components/NumberInput/NumberInput';
-import AccountCard from '../../../components/Account/Account';
+import { useTransferFundsStages } from 'hooks/accountStages/useTransferFundsStages';
+import { formatKusamaBalance } from 'utils/textUtils';
+import { StageStatus } from 'types/StagesTypes';
+import { NotificationSeverity } from 'notification/NotificationContext';
+import { useNotification } from 'hooks/useNotification';
+import { NumberInput } from 'components/NumberInput/NumberInput';
+import AccountCard from 'components/Account/Account';
+import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
+import { useApi } from 'hooks/useApi';
+import { useFee } from '../../../hooks/useFee';
 
 const tokenSymbol = 'KSM';
 
@@ -70,7 +73,23 @@ type AskSendFundsModalProps = {
 export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, onFinish, senderAddress, onClose }) => {
   const { accounts } = useAccounts();
   const [recipientAddress, setRecipientAddress] = useState<string | Account | undefined>();
-  const [amount, setAmount] = useState<string>('0');
+  const [amount, setAmount] = useState<string>('');
+  const { chainData } = useApi();
+  const { kusamaFee } = useFee();
+
+  const formatAddress = useCallback((address: string) => {
+    return toChainFormatAddress(address, chainData?.properties.ss58Format || 0);
+  }, [chainData?.properties.ss58Format]);
+
+  const accountsWithQuartzAdresses = useMemo(() => (
+    accounts.map((account) => ({ ...account, quartzAddress: formatAddress(account.address) }))
+  ), [accounts, formatAddress]);
+
+  const [filteredAccounts, setFilteredAccounts] = useState(accountsWithQuartzAdresses);
+
+  useEffect(() => {
+    setFilteredAccounts(accountsWithQuartzAdresses);
+  }, [accountsWithQuartzAdresses]);
 
   const sender = useMemo(() => {
     const account = accounts.find((account) => account.address === senderAddress);
@@ -86,12 +105,39 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     setAmount(value);
   }, [setAmount]);
 
+  const isConfirmDisabled = useMemo(() => (
+    !recipientAddress || Number(amount) <= 0 || Number(amount) > Number(formatKusamaBalance(sender?.balance?.KSM?.toString() || 0))
+  ), [amount, recipientAddress, sender]);
+
   const onSend = useCallback(() => {
+    if (isConfirmDisabled) return;
     const recipient = typeof recipientAddress === 'string' ? recipientAddress : recipientAddress?.address;
     onFinish(senderAddress, recipient || '', amount.toString());
-  }, [senderAddress, recipientAddress, amount, onFinish]);
+  }, [senderAddress, recipientAddress, amount, onFinish, isConfirmDisabled]);
 
-  return (<Modal isVisible={isVisible} isClosable={true} onClose={onClose}>
+  const onFilter = useCallback((input: string) => {
+    setFilteredAccounts(accountsWithQuartzAdresses.filter((account) => {
+      return account.quartzAddress.toLowerCase().includes(input.toLowerCase()) || account.meta.name?.toLowerCase().includes(input.toLowerCase());
+    }));
+  }, [accountsWithQuartzAdresses]);
+
+  const onChangeAddress = useCallback((input) => {
+    setRecipientAddress(input);
+    if (typeof input === 'string') {
+      onFilter(input);
+    } else {
+      setFilteredAccounts(accountsWithQuartzAdresses);
+    }
+  }, [accountsWithQuartzAdresses, onFilter]);
+
+  const onCloseModal = useCallback(() => {
+    setRecipientAddress('');
+    setAmount('');
+    setFilteredAccounts(accountsWithQuartzAdresses);
+    onClose();
+  }, [accountsWithQuartzAdresses, onClose]);
+
+  return (<Modal isVisible={isVisible} isClosable={true} onClose={onCloseModal}>
     <Content>
       <Heading size='2'>{'Send funds'}</Heading>
     </Content>
@@ -107,9 +153,9 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     <Text size={'s'} color={'grey-500'}>{'To'}</Text>
     <RecipientSelectWrapper >
       <SelectInput<Account>
-        options={accounts}
+        options={filteredAccounts}
         value={recipientAddress}
-        onChange={setRecipientAddress}
+        onChange={onChangeAddress}
         renderOption={(option) => <AddressOptionWrapper>
           <AccountCard accountName={option.meta.name || ''} accountAddress={option.address} canCopy={false} />
         </AddressOptionWrapper>}
@@ -119,17 +165,20 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
       {recipientBalance && <Text size={'s'}>{`${formatKusamaBalance(recipientBalance?.toString() || 0)} ${tokenSymbol}`}</Text> }
     </AmountWrapper>
     <AmountInputWrapper>
-      <NumberInput value={amount} onChange={onAmountChange} />
+      <NumberInput value={amount} onChange={onAmountChange} placeholder={'Amount (KSM)'} />
     </AmountInputWrapper>
+    {Number(amount) > Number(formatKusamaBalance(sender?.balance?.KSM?.toString() || 0)) && <LowBalanceWrapper>
+      <Text size={'s'}>Your balance is too low</Text>
+    </LowBalanceWrapper>}
     <TextStyled
       color='additional-warning-500'
       size='s'
     >
-      A fee of ~ 0.000000000000052 testUNQ can be applied to the transaction, unless the transaction is sponsored
+      A fee of ~ {kusamaFee} KSM can be applied to the transaction, unless the transaction is sponsored
     </TextStyled>
     <ButtonWrapper>
       <Button
-        // disabled={!validPassword || !password || !name}
+        disabled={isConfirmDisabled}
         onClick={onSend}
         role='primary'
         title='Confirm'
@@ -218,7 +267,15 @@ const AmountWrapper = styled.div`
 `;
 
 const AmountInputWrapper = styled.div`
-  .unique-input-text, div[class^=NumberInput] {
+  .unique-input-text, div {
     width: 100%;
+  }
+`;
+
+const LowBalanceWrapper = styled(AmountWrapper)`
+  position: absolute;
+  right: calc(var(--gap) * 1.5);
+  span {
+    color: ${Coral700} !important;
   }
 `;

@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Heading, Link, Select, Text } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { BN } from '@polkadot/util';
 
 import { TPlaceABid } from './types';
@@ -20,7 +20,6 @@ import { Offer } from '../../../api/restApi/offers/types';
 import { useAuction } from '../../../api/restApi/auction/auction';
 import { TCalculatedBid } from '../../../api/restApi/auction/types';
 import { NotificationSeverity } from '../../../notification/NotificationContext';
-import Kusama from '../../../static/icons/logo-kusama.svg';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
 export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosable, onFinish }) => {
@@ -46,7 +45,7 @@ export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosabl
   return null;
 };
 
-const chainOptions = [{ id: 'KSM', title: 'KSM', iconRight: { size: 18, file: Kusama } }];
+const chainOptions = [{ id: 'KSM', title: 'KSM', iconRight: { size: 18, name: 'chain-kusama' } }];
 
 export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceABid): void}> = ({ offer, onConfirmPlaceABid }) => {
   const [chain, setChain] = useState<string | undefined>('KSM');

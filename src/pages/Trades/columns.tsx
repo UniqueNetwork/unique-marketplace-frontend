@@ -1,7 +1,6 @@
 import React from 'react';
-import { TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/types';
-import { Text } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import { TableColumnProps, Text } from '@unique-nft/ui-kit';
+import styled from 'styled-components';
 
 import { AddressComponent } from './AddressComponent/AddressComponent';
 import { timestampTableFormat } from '../../utils/timestampUtils';
@@ -16,7 +15,7 @@ const tokenSymbol = 'KSM';
 export const tradesColumns: TableColumnProps[] = [
   {
     title: 'NFT',
-    width: '100%',
+    width: '16.66%',
     isSortable: true,
     render(tokenDescription: TokenDescription, { collectionId, tokenId }: Trade): React.ReactNode {
       return <TokenComponent {...{ collectionId, tokenId, tokenDescription }} />;
@@ -25,7 +24,7 @@ export const tradesColumns: TableColumnProps[] = [
   },
   {
     title: 'Collection',
-    width: '100%',
+    width: '16.66%',
     isSortable: true,
     render(tokenDescription: TokenDescription, { collectionId }: Trade): React.ReactNode {
       return <LinkWrapper>
@@ -41,27 +40,27 @@ export const tradesColumns: TableColumnProps[] = [
   },
   {
     title: 'Time',
-    width: '100%',
+    width: '16.66%',
     isSortable: true,
     render: (time: number) => <Text color={BlueGrey600}>{timestampTableFormat(new Date(time).valueOf())}</Text>,
     field: 'tradeDate'
   },
   {
     title: 'Price',
-    width: '100%',
+    width: '16.66%',
     isSortable: true,
     render: (value: string) => <Text color={BlueGrey600}>{`${formatKusamaBalance(value)} ${tokenSymbol}`}</Text>,
     field: 'price'
   },
   {
     title: 'Buyer',
-    width: '100%',
+    width: '16.66%',
     render: (data: string) => <AddressComponent text={data} />,
     field: 'buyer'
   },
   {
     title: 'Seller',
-      width: '100%',
+      width: '16.66%',
     render: (data: string) => <AddressComponent text={data} />,
     field: 'seller'
   }

@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useMemo } from 'react';
 import { Button, Text } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { BN } from '@polkadot/util';
 
 import { useFee } from '../../../hooks/useFee';

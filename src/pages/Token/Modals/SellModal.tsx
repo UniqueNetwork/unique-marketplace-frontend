@@ -1,7 +1,7 @@
 import { Button, Heading, Tabs, Text, Select, Link } from '@unique-nft/ui-kit';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
 import DefaultMarketStages from './StagesModal';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
@@ -89,8 +89,10 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
     [setPriceInputValue]
   );
 
+  const isAuctionValid = selectedAccount && minStepInputValueAuction && durationSelectValue && inputStartingPriceValue && Number(minStepInputValueAuction) && Number(inputStartingPriceValue);
+
   const onConfirmAuctionClick = useCallback(() => {
-    if (!selectedAccount || !minStepInputValueAuction || !durationSelectValue) return;
+    if (!isAuctionValid) return;
 
     onSellAuction({ minimumStep: minStepInputValueAuction, startingPrice: inputStartingPriceValue || minStepInputValueAuction, duration: durationSelectValue, accountAddress: selectedAccount.address } as TAuctionProps);
   }, [minStepInputValueAuction, inputStartingPriceValue, durationSelectValue, selectedAccount, onSellAuction]);
@@ -192,7 +194,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
       </TextStyled>
       <ButtonWrapper>
         <Button
-          disabled={!minStepInputValueAuction || !durationSelectValue || !Number(minStepInputValueAuction)}
+          disabled={!isAuctionValid}
           onClick={onConfirmAuctionClick}
           role='primary'
           title='Confirm'
@@ -285,6 +287,7 @@ const TextStyled = styled(Text)`
 
 const InputWrapper = styled(NumberInput)`
   margin-bottom: 32px;
+  width: 100%;
 `;
 
 const SelectWrapper = styled(Select)`

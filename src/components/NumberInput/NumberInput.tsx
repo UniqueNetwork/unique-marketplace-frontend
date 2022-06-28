@@ -1,6 +1,6 @@
 import React, { FC, useCallback } from 'react';
 import { InputText } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { IconButton } from '../IconButton/IconButton';
 
 interface AmountInputProps {
@@ -35,7 +35,7 @@ export const NumberInput: FC<AmountInputProps> = ({ value, onChange, placeholder
       value={value}
       label={label}
     />
-    {value && <ClearButton name={'close'} size={16} onClick={onClear} />}
+    {value && <ClearButton name={'circle-close'} size={24} onClick={onClear} />}
   </InputWrapper>;
 };
 
@@ -45,7 +45,7 @@ const InputWrapper = styled.div`
   .unique-input-text {
     width: auto;
     input {
-      padding-right: 22px;
+      padding-right: 32px;
     }
   }
 `;
@@ -53,6 +53,6 @@ const InputWrapper = styled.div`
 const ClearButton = styled(IconButton)`
   position: absolute;
   right: calc(var(--gap) / 2);
-  bottom: 10px;
+  bottom: 5px;
   width: auto !important;
 `;

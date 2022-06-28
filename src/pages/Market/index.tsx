@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
 import { Select, Text } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
 import { Filters } from '../../components';
 import { Secondary400 } from '../../styles/colors';
@@ -182,7 +182,7 @@ export const MarketPage = () => {
           </SortSelectWrapper>
         </SearchAndSortingWrapper>
         <div>
-          <Text size='m'>{`${offersCount} items`}</Text>
+          <Text size='m'>{isFetching ? 'Loading items' : `${offersCount} items`}</Text>
         </div>
         <InfiniteScroll
           hasMore={hasMore}
@@ -192,7 +192,7 @@ export const MarketPage = () => {
           threshold={200}
           useWindow={true}
         >
-          {!isFetching && !offers?.length && <NoItems />}
+          {!isFetching && !!searchValue && !offers?.length && <NoItems isSearchResult={!!searchValue} />}
           <OffersList offers={offers || []} isLoading={isFetching} />
         </InfiniteScroll>
       </MainContent>

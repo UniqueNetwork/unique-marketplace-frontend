@@ -1,6 +1,6 @@
 import React, { ChangeEvent, FC, useCallback, useState } from 'react';
 import { Button, Checkbox, Text } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
 import { TCreateAccountBodyModalProps } from './types';
 import { addressFromSeed } from '../../../utils/seedUtils';

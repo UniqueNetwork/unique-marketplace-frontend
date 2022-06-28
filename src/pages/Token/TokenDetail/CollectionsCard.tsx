@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { Heading, Text } from '@unique-nft/ui-kit';
 import { Avatar } from '../../../components/Avatar/Avatar';
 import noCollections from '../../../static/icons/no-collections.svg';

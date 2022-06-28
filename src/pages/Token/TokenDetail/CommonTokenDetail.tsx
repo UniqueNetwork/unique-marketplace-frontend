@@ -1,24 +1,24 @@
 import { Heading, Icon, Text } from '@unique-nft/ui-kit';
-import React, { FC, ReactChild, useCallback, useMemo } from 'react';
-import styled from 'styled-components/macro';
+import React, { FC, ReactChild, useCallback, useMemo, useState } from 'react';
+import styled from 'styled-components';
 
-import { Picture } from '../../../components';
-import share from '../../../static/icons/share.svg';
+import { Picture } from 'components';
 import { CollectionsCard } from './CollectionsCard';
 import { AttributesBlock } from './AttributesBlock';
-import { NFTToken } from '../../../api/chainApi/unique/types';
-import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';
-import { shortcutText } from '../../../utils/textUtils';
-import { Grey300, Grey500, Primary600 } from '../../../styles/colors';
-import { Avatar } from '../../../components/Avatar/Avatar';
-import DefaultAvatar from '../../../static/icons/default-avatar.svg';
-import config from '../../../config';
-import { useAccounts } from '../../../hooks/useAccounts';
-import { isTokenOwner, normalizeAccountId, toChainFormatAddress } from '../../../api/chainApi/utils/addressUtils';
-import { Offer } from '../../../api/restApi/offers/types';
-import { useApi } from '../../../hooks/useApi';
-import Skeleton from '../../../components/Skeleton/Skeleton';
-import { TokenSkeleton } from '../../../components/Skeleton/TokenSkeleton';
+import { NFTToken } from 'api/chainApi/unique/types';
+import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
+import { shortcutText } from 'utils/textUtils';
+import { Grey300, Grey500, Primary600 } from 'styles/colors';
+import { Avatar } from 'components/Avatar/Avatar';
+import DefaultAvatar from 'static/icons/default-avatar.svg';
+import config from 'config';
+import { useAccounts } from 'hooks/useAccounts';
+import { isTokenOwner, normalizeAccountId, toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
+import { Offer } from 'api/restApi/offers/types';
+import { useApi } from 'hooks/useApi';
+import Skeleton from 'components/Skeleton/Skeleton';
+import { TokenSkeleton } from 'components/Skeleton/TokenSkeleton';
+import ShareTokenModal from './ShareTokenModal';
 
 interface IProps {
   children: ReactChild[]
@@ -88,14 +88,15 @@ export const CommonTokenDetail: FC<IProps> = ({
     return isTokenOwner(selectedAccount.address, normalizeAccountId(token?.owner || ''));
   }, [isLoading, selectedAccount, token, offer]);
 
-  const onShareClick = useCallback(() => {
-    if (navigator.share) {
-      void navigator.share({
-        title: `NFT: ${prefix || ''} #${tokenId}`,
-        url: window.location.href
-      });
-    }
-  }, [prefix, tokenId]);
+  const [shareModalVisible, setShareModalVisible] = useState(false);
+
+  const openShareModal = useCallback(() => {
+    setShareModalVisible(true);
+  }, []);
+
+  const closeShareModal = useCallback(() => {
+    setShareModalVisible(false);
+  }, []);
 
   return (
     <CommonTokenDetailStyled>
@@ -107,12 +108,12 @@ export const CommonTokenDetail: FC<IProps> = ({
         {isLoading && <TokenSkeleton />}
         {!isLoading && <>
           <Heading size={'1'}>{`${prefix || ''} #${tokenId}`}</Heading>
-          <ShareLink onClick={onShareClick}>
+          <ShareLink onClick={openShareModal}>
             <Text color='grey-500' size='m'>
-              Share Link
+              Share link
             </Text>
             <IconWrapper>
-              <Icon file={share} size={24} />
+              <Icon name={'shared'} size={24} />
             </IconWrapper>
           </ShareLink>
           <Row>
@@ -141,6 +142,7 @@ export const CommonTokenDetail: FC<IProps> = ({
           />
         </>}
       </Description>
+      <ShareTokenModal isVisible={shareModalVisible} onClose={closeShareModal} />
     </CommonTokenDetailStyled>
   );
 };
@@ -239,6 +241,7 @@ const ShareLink = styled.div`
   align-items: center;
   margin-bottom: var(--gap);
   cursor: pointer;
+  width: 120px;
 `;
 
 const Account = styled.a`

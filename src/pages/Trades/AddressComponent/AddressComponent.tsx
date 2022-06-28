@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { shortcutText } from '../../../utils/textUtils';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
 import config from '../../../config';
 import { useApi } from '../../../hooks/useApi';
@@ -40,6 +40,10 @@ const LinkWrapper = styled.span`
   
     .unique-link {
       font-size: 16px;
+    }
+
+    @media (max-width: 768px) {
+      column-gap: calc(var(--gap) / 4);
     }
   }
 `;

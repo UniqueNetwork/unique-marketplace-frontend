@@ -1,6 +1,5 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import { Pagination } from '@unique-nft/ui-kit';
-import { SortQuery } from '@unique-nft/ui-kit/dist/cjs/types';
+import { Pagination, SortQuery } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
 import { useTrades } from '../../api/restApi/trades/trades';
@@ -10,6 +9,8 @@ import { tradesColumns } from './columns';
 import { useAccounts } from '../../hooks/useAccounts';
 import { TradesTabs } from './types';
 import SearchField from '../../components/SearchField/SearchField';
+
+import NoTradesIcon from '../../static/icons/no-trades.svg';
 
 type TokensTradesPage = {
   currentTab: TradesTabs
@@ -27,13 +28,14 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
   useEffect(() => {
     if (isLoadingAccounts || (currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address)) return;
     setSearchValue(undefined);
+    setPage(0);
     fetch({
       page: 1,
       pageSize,
       sort: sortString,
       seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
     });
-  }, [currentTab, selectedAccount?.address, sortString, isLoadingAccounts]);
+  }, [currentTab, selectedAccount?.address, isLoadingAccounts]);
 
   const onSearch = useCallback((value: string) => {
     setSearchValue(value);
@@ -106,8 +108,8 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
   return (<PagePaper>
     <TradesPageWrapper>
       <StyledSearchField
-        searchValue={searchValue}
         placeholder='Collection / token'
+        searchValue={searchValue}
         onSearch={onSearch}
       />
       <StyledTable
@@ -115,14 +117,15 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
         data={trades || []}
         columns={tradesColumns}
         loading={isLoadingAccounts || isFetching}
+        emptyIconProps={searchValue ? { name: 'magnifier-found' } : { file: NoTradesIcon }}
       />
       {!!tradesCount && <PaginationWrapper>
         <Pagination
-          size={tradesCount}
           current={page}
-          withPerPageSelector
+          size={tradesCount}
           onPageChange={onPageChange}
           onPageSizeChange={onPageSizeChange}
+          withPerPageSelector
           withIcons
         />
       </PaginationWrapper>}

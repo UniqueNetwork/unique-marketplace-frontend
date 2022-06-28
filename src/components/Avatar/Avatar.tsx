@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import Identicon from '@polkadot/react-identicon';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
 export interface IAvatarProps {
   src?: string;

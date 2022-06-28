@@ -5,6 +5,7 @@ export type Settings = {
       wsEndpoint: string
       collectionIds: number[]
       contractAddress: string
+      allowedTokens: { collection: number, tokens: string }[]
     },
     kusama: {
       wsEndpoint: string
@@ -15,5 +16,7 @@ export type Settings = {
     commission: number,
     address: string
   },
-  marketType: string
+  marketType: string,
+  mainSaleSeedAddress: string,
+  administrators: string[]
 }

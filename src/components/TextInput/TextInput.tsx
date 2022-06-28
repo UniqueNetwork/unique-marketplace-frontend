@@ -1,8 +1,7 @@
 import React, { FC, useCallback } from 'react';
-import { InputText } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import { IconProps, InputText } from '@unique-nft/ui-kit';
+import styled from 'styled-components';
 import { IconButton } from '../IconButton/IconButton';
-import { IconProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
 interface TextInputProps {
   value: string | undefined
@@ -11,9 +10,10 @@ interface TextInputProps {
   label?: string
   className?: string
   iconLeft?: IconProps
+  errorText?: string
 }
 
-export const TextInput: FC<TextInputProps> = ({ value, onChange, placeholder, label, className, iconLeft }) => {
+export const TextInput: FC<TextInputProps> = ({ value, onChange, placeholder, label, className, iconLeft, errorText }) => {
   const onChangeInput = useCallback((_value: string) => {
     onChange(_value.trim());
   }, [onChange]);
@@ -29,8 +29,10 @@ export const TextInput: FC<TextInputProps> = ({ value, onChange, placeholder, la
       value={value}
       label={label}
       iconLeft={iconLeft}
+      statusText={errorText}
+      error={!!errorText}
+      iconRight={value ? <ClearButton name={'circle-close'} size={24} onClick={onClear} /> : null}
     />
-    {value && <ClearButton name={'close'} size={16} onClick={onClear} />}
   </InputWrapper>;
 };
 
@@ -39,15 +41,15 @@ const InputWrapper = styled.div`
   display: inline-block;
   .unique-input-text {
     width: auto;
-    input {
-      padding-right: 22px;
+    div.input-wrapper.with-icon > input {
+      padding-right: 36px;
     }
   }
 `;
 
 const ClearButton = styled(IconButton)`
   position: absolute;
-  right: calc(var(--gap) / 2);
-  bottom: 10px;
+  right: 0;
+  bottom: 5px;
   width: auto !important;
 `;

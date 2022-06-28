@@ -1,32 +1,51 @@
-import React, { FC, useCallback, useEffect, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import styled from 'styled-components/macro';
-import { Button, Text } from '@unique-nft/ui-kit';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
+import { AccountsManager, Button, Text } from '@unique-nft/ui-kit';
 
-import { useAccounts } from '../../../hooks/useAccounts';
-import { DropdownSelect, DropdownSelectProps } from './AccountSelect/DropdownSelect';
-import { Account } from '../../../account/AccountContext';
-import Loading from '../../Loading';
-import { formatKusamaBalance } from '../../../utils/textUtils';
-import GearIcon from '../../../static/icons/gear.svg';
+import { useAccounts } from 'hooks/useAccounts';
+import { Account } from 'account/AccountContext';
 import { BalanceOption } from './types';
-import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';
-import { BlueGrey200 } from '../../../styles/colors';
-import { Icon } from '../../Icon/Icon';
-import { useApi } from '../../../hooks/useApi';
-import AccountCard from '../../Account/Account';
-import AccountSkeleton from '../../Skeleton/AccountSkeleton';
-import DoubleLineSkeleton from '../../Skeleton/DoubleLineSkeleton';
-import BalanceSkeleton from '../../Skeleton/BalanceSkeleton';
+import { useApi } from 'hooks/useApi';
+import DefaultAvatar from 'static/icons/default-avatar.svg';
+import { Avatar } from 'components/Avatar/Avatar';
+import { NotificationSeverity } from 'notification/NotificationContext';
+import { useNotification } from 'hooks/useNotification';
+import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
+import GetKSMModal from 'components/GetKSMModal/GetKSMModal';
+import { formatKusamaBalance } from 'utils/textUtils';
 
 const tokenSymbol = 'KSM';
 
+function widgetAvatarRender(accountAddress: string) {
+  return (<Avatar size={24} src={DefaultAvatar} address={accountAddress} />);
+}
+
 export const WalletManager: FC = () => {
   const { selectedAccount, accounts, isLoading, fetchAccounts, changeAccount } = useAccounts();
-  const deviceSize = useDeviceSize();
-  const gearActive = window.location.pathname !== '/accounts';
+  const [isGetKsmOpened, setIsGetKsmOpened] = useState(false);
   const navigate = useNavigate();
   const { chainData } = useApi();
+  const { push } = useNotification();
+  const formatAddress = useCallback((address: string) => {
+    return toChainFormatAddress(address, chainData?.properties.ss58Format || 0);
+  }, [chainData?.properties.ss58Format]);
+
+  const widgetAccounts = useMemo(() => accounts.map((account) => (
+    { name: account.meta.name, ...account, address: formatAddress(account.address), substrateAddress: account?.address })
+  ), [accounts, formatAddress]);
+  const widgetSelectedAccount = useMemo(() => (
+    { name: selectedAccount?.meta.name, ...selectedAccount, address: selectedAccount?.address ? formatAddress(selectedAccount.address) : '', substrateAddress: selectedAccount?.address }
+  ), [selectedAccount, formatAddress]);
+  const widgetAccountChange = useCallback((account) => {
+    changeAccount({ ...account, address: account.substrateAddress } as Account);
+  }, [changeAccount]);
+
+  const onCopyAddress = useCallback((account: string) => {
+    navigator.clipboard.writeText(formatAddress(account)).then(() => {
+      push({ severity: NotificationSeverity.success, message: 'Address copied' });
+    });
+  }, [formatAddress, push]);
 
   useEffect(() => {
     (async () => {
@@ -42,137 +61,66 @@ export const WalletManager: FC = () => {
     return { value: selectedAccount?.balance?.KSM?.toString() || '0', chain: chainData?.systemChain || '' };
   }, [selectedAccount, chainData?.systemChain]);
 
-  if (!isLoading && accounts.length === 0) {
-   return (
-     <Button title={'Connect or create account'} onClick={onCreateAccountClick} />
-    );
-  }
+  const closeModal = useCallback(() => {
+    setIsGetKsmOpened(false);
+  }, [setIsGetKsmOpened]);
 
-  if (deviceSize === DeviceSize.sm) {
+  const openModal = useCallback(() => {
+    setIsGetKsmOpened(true);
+  }, [setIsGetKsmOpened]);
+
+  if (!isLoading && accounts.length === 0) {
     return (
-      <WalletManagerWrapper>
-        {isLoading && <BalanceSkeleton />}
-        {!isLoading && <AccountSelect
-          renderOption={AccountWithBalanceOptionCard}
-          onChange={changeAccount}
-          options={accounts || []}
-          value={selectedAccount}
-        />}
-      </WalletManagerWrapper>
+      <Button title={'Connect or create account'} onClick={onCreateAccountClick} />
     );
   }
 
   return (
-    <WalletManagerWrapper>
-      {isLoading && <>
-        <AccountSkeleton />
-        <Divider />
-        <DoubleLineSkeleton />
-      </>}
-      {!isLoading && <>
-        <AccountSelect
-          renderOption={AccountOptionCard}
-          onChange={changeAccount}
-          options={accounts || []}
-          value={selectedAccount}
-        />
-        <Divider />
-        <BalanceCard {...currentBalance} />
-      </>}
-      {deviceSize === DeviceSize.lg && <><Divider />
-        <SettingsButtonWrapper $gearActive={!isLoading && gearActive}>
-          <Link to={'/accounts'}>
-            <Icon path={GearIcon} />
-          </Link>
-        </SettingsButtonWrapper>
-      </>}
-    </WalletManagerWrapper>
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'flex-end'
+      }}
+    >
+      <AccountsManager
+        accounts={widgetAccounts}
+        activeNetwork={{
+          icon: {
+            name: 'chain-quartz',
+            size: 40
+          },
+          id: 'quartz',
+          name: 'Quartz'
+        }}
+        balance={formatKusamaBalance(currentBalance.value)}
+        deposit={selectedAccount?.deposits?.sponsorshipFee?.toString()}
+        depositDescription={
+          <>
+            <Text color='grey-500' size='xs'>The total market deposit for participation in auctions and sponsorship. <br/> Use the “Manage my balance” section to withdraw.</Text>
+            <GetKsmButton
+              title={'Get KSM'}
+              size={'middle'}
+              role={'outlined'}
+              wide
+              onClick={openModal}
+            />
+          </>
+        }
+        manageBalanceLinkTitle='Manage my balance'
+        networks={[]}
+        onAccountChange={widgetAccountChange}
+        onCopyAddressClick={onCopyAddress}
+        onManageBalanceClick={onCreateAccountClick}
+        onNetworkChange={function noRefCheck() { }}
+        selectedAccount={widgetSelectedAccount}
+        symbol={tokenSymbol}
+        avatarRender={widgetAvatarRender}
+      />
+      {isGetKsmOpened && <GetKSMModal key={'modal-getKsm'} onClose={closeModal}/>}
+    </div>
   );
 };
 
-const AccountOptionCard: FC<Account> = (account) => {
-  return (<AccountOptionWrapper>
-    <AccountCard accountName={account.meta.name || ''}
-      accountAddress={account.address}
-      canCopy={false}
-      isShort
-    />
-  </AccountOptionWrapper>);
-};
-
-const AccountWithBalanceOptionCard: FC<Account> = (account) => {
-  return (<AccountOptionWrapper>
-    <AccountCard accountName={`${formatKusamaBalance(account.balance?.KSM?.toString() || '0')} ${tokenSymbol}`}
-      accountAddress={account.address}
-      canCopy={false}
-      isShort
-    />
-  </AccountOptionWrapper>);
-};
-
-const BalanceCard = (balance: BalanceOption) => {
-  return (<BalanceOptionWrapper>
-    <Text size={'m'} weight={'medium'} >{`${formatKusamaBalance(balance.value)} ${tokenSymbol}`}</Text>
-    <Text size={'s'} color={'grey-500'} >{balance.chain}</Text>
-  </BalanceOptionWrapper>);
-};
-
-const AccountSelect = styled((props: DropdownSelectProps<Account>) => DropdownSelect<Account>(props))`
-  height: 100%;
-  @media(max-width: 768px) {
-    div[class^=WalletManager__AccountOptionPropertyWrapper] {
-      display: none;
-    }
-  }
-`;
-
-const AccountOptionWrapper = styled.div`
-  display: flex;
-  column-gap: calc(var(--gap) / 2);
-  cursor: pointer;
-  align-items: center;
-`;
-
-const BalanceOptionWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  cursor: pointer;
-  padding: calc(var(--gap) / 2) var(--gap);
-`;
-
-const SettingsButtonWrapper = styled.div <{ $gearActive?: boolean }>`
-  a {
-    margin-right: 0 !important;
-    height: 100%;
-    padding: 0 var(--gap);
-    align-items: center;
-    display: flex;
-    pointer-events: ${(props) => (props.$gearActive ? 'default' : 'none')};
-    cursor: ${(props) => (props.$gearActive ? 'pointer' : 'default')};
-  }
-
-  span {
-    display: flex;
-    align-items: center;
-    color: ${(props) => (props.$gearActive ? 'var(--color-primary-500)' : 'var(--color-grey-500)')};
-  }
-`;
-
-const WalletManagerWrapper = styled.div`
-  border: 1px solid ${BlueGrey200};
-  box-sizing: border-box;
-  border-radius: 8px;
-  display: flex;
-  position: relative;
-  @media(max-width: 768px) {
-    div[class^=Account__AddressRow] {
-      display: none;
-    }
-  }
-`;
-
-const Divider = styled.div`
-  width: 1px;
-  margin: calc(var(--gap) / 2) 0;
-  border-left: 1px solid ${BlueGrey200};
+const GetKsmButton = styled(Button)`
+  margin: 8px 0;
 `;
