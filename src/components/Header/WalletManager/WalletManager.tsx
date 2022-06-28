@@ -69,6 +69,13 @@ export const WalletManager: FC = () => {
     setIsGetKsmOpened(true);
   }, [setIsGetKsmOpened]);
 
+  const formattedAccountDeposit = useMemo(() => {
+    if (!selectedAccount?.deposits?.sponsorshipFee || selectedAccount?.deposits?.sponsorshipFee?.toString() === '0') {
+      return undefined;
+    }
+    return formatKusamaBalance(selectedAccount?.deposits?.sponsorshipFee?.toString());
+      }, [selectedAccount?.deposits]);
+
   if (!isLoading && accounts.length === 0) {
     return (
       <Button title={'Connect or create account'} onClick={onCreateAccountClick} />
@@ -93,10 +100,11 @@ export const WalletManager: FC = () => {
           name: 'Quartz'
         }}
         balance={formatKusamaBalance(currentBalance.value)}
-        deposit={selectedAccount?.deposits?.sponsorshipFee?.toString()}
+        deposit={formattedAccountDeposit}
         depositDescription={
           <>
-            <Text color='grey-500' size='xs'>The total market deposit for participation in auctions and sponsorship. <br/> Use the “Manage my balance” section to withdraw.</Text>
+            {formattedAccountDeposit && <Text color='grey-500' size='xs'>The total market deposit for participation in auctions and
+              sponsorship. <br/> Use the “Manage my balance” section to withdraw.</Text>}
             <GetKsmButton
               title={'Get KSM'}
               size={'middle'}
