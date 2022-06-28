@@ -169,7 +169,11 @@ export const AdminPanelPage: FC = () => {
     <MainContent>
       <ControlsWrapper>
         <SearchAndSortingWrapper>
-          <SearchField placeholder='Search' onSearch={onSearch} hideButton />
+          <SearchField
+            placeholder='Search'
+            onSearchStringChange={onSearch}
+            hideButton
+          />
           <SortSelectWrapper>
             <Select
               onChange={onSortingChange}
