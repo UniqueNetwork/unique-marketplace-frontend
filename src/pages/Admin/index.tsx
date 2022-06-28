@@ -66,6 +66,7 @@ const sortingOptions: TOption[] = [
 export const AdminPanelPage: FC = () => {
   const [sortingValue, setSortingValue] = useState<TOption>(sortingOptions[0]);
   const [searchValue, setSearchValue] = useState<string>();
+  const [hasAccess, setHasAccess] = useState<boolean>(false);
   const [modalType, setModalType] = useState(AdminPanelModalType.default);
   const [selectedCollection, setSelectedCollection] = useState<NFTCollection>();
   const { hasAdminPermission, getJWToken } = useAdminLoggingIn();
@@ -84,7 +85,9 @@ export const AdminPanelPage: FC = () => {
       if (!jwtoken) {
         push({ message: 'Unable to login, please try again!', severity: NotificationSeverity.error });
         navigate('/');
+        return;
       }
+      setHasAccess(true);
       void await fetchCollections();
     })();
   }, [hasAdminPermission, isAccountsLoading]);
@@ -107,13 +110,14 @@ export const AdminPanelPage: FC = () => {
   }, []);
 
   const onAddCollectionClick = useCallback(() => {
+    if (!hasAccess) return;
     setModalType(AdminPanelModalType.addCollection);
-  }, []);
+  }, [hasAccess]);
 
   const onCreateCollectionViaWalletClick = useCallback(() => {
-    if (!config.walletUrl) return;
+    if (!config.walletUrl || !hasAccess) return;
     window.open(config.walletUrl, '_blank')?.focus();
-  }, []);
+  }, [config.walletUrl, hasAccess]);
 
   const onManageSponsorshipClick = useCallback((collection: NFTCollection) => () => {
     setModalType(AdminPanelModalType.acceptSponsorship);
@@ -141,7 +145,7 @@ export const AdminPanelPage: FC = () => {
   }, []);
 
   const filteredCollections = useMemo(() => {
-    if (!collections) return [];
+    if (!collections || !hasAccess) return [];
     const sortCollection = (collectionA: CollectionData, collectionB: CollectionData) => {
       if (!sortingValue) return 0;
       const order = sortingValue.direction === 'asc' ? 1 : -1;
@@ -176,8 +180,12 @@ export const AdminPanelPage: FC = () => {
           </SortSelectWrapper>
         </SearchAndSortingWrapper>
         <ButtonsWrapper>
-          <Button title={'Create new via wallet'} onClick={onCreateCollectionViaWalletClick}/>
-          <Button role={'primary'} title={'Add to the marketplace'} onClick={onAddCollectionClick}/>
+          <Button disabled={!hasAccess} title={'Create new via wallet'} onClick={onCreateCollectionViaWalletClick}/>
+          <Button disabled={!hasAccess}
+            role={'primary'}
+            title={'Add to the marketplace'}
+            onClick={onAddCollectionClick}
+          />
         </ButtonsWrapper>
       </ControlsWrapper>
       <CollectionListWrapper>
