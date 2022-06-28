@@ -2,6 +2,7 @@ import React, { ChangeEvent, ReactNode, useCallback, useEffect, useRef, useState
 import styled from 'styled-components';
 import { AdditionalLight, Grey300, Grey500, Primary100, Primary500 } from '../../styles/colors';
 import { IconButton } from '../IconButton/IconButton';
+import { Icon, IconProps } from '@unique-nft/ui-kit';
 
 interface SelectInputOption {
   key: string
@@ -16,9 +17,10 @@ interface SelectInputProps<T = SelectInputOption> {
   onChange(value: string | T): void
   renderOption?(value: T): ReactNode | string
   isClearable?: boolean
+  leftIcon?: IconProps
 }
 
-export function SelectInput<T = SelectInputOption>({ className, placeholder, options, value, onChange, renderOption, isClearable }: SelectInputProps<T>) {
+export function SelectInput<T = SelectInputOption>({ className, placeholder, options, value, onChange, renderOption, isClearable, leftIcon }: SelectInputProps<T>) {
   const [selectedValue, setSelectedValue] = useState<T>();
   const [inputValue, setInputValue] = useState<string>('');
   const [isDropdownVisible, setIsDropdownVisible] = useState<boolean>(false);
@@ -76,7 +78,8 @@ export function SelectInput<T = SelectInputOption>({ className, placeholder, opt
   }, [value, setSelectedValue, setInputValue]);
 
   return (<SelectInputWrapper>
-    <InputWrapper className={className}>
+    <InputWrapper className={leftIcon ? `${className} left-icon` : className}>
+      {leftIcon && <Icon {...leftIcon}/>}
       {!selectedValue && !inputValue && placeholder && !isDropdownVisible && <Placeholder>{placeholder}</Placeholder>}
       {selectedValue && <div>
         {showOption(selectedValue)}
@@ -88,7 +91,7 @@ export function SelectInput<T = SelectInputOption>({ className, placeholder, opt
         onFocus={onInputFocus}
         ref={InputRef}
       />
-      {(inputValue || (isClearable && value)) && <ClearButton name={'close'} size={16} onClick={onClear} />}
+      {(inputValue || (isClearable && value)) && <ClearButton name={'circle-close'} size={16} onClick={onClear} />}
     </InputWrapper>
     <Dropdown isOpen={isDropdownVisible} ref={DropdownRef}>
       {options.map((item, index) => (
@@ -117,9 +120,18 @@ const InputWrapper = styled.div`
     bottom: 0;
     border: none;
     background: transparent;
-    width: 100%;
     outline: none;
     padding: var(--gap);
+  }
+  &.left-icon {
+    padding-left: calc(var(--gap) * 2);
+    &>.icon {
+      position: absolute;
+      left: calc(var(--gap) / 2);
+    }
+    input {
+      left: var(--gap);
+    }
   }
 `;
 
@@ -156,7 +168,8 @@ const Placeholder = styled.div`
 
 const ClearButton = styled(IconButton)`
   position: absolute;
-  right: calc(var(--gap) / 2);
+  //right: calc(var(--gap) * 2);
+  left: calc(100% - calc(var(--gap) * 1.5));
   top: 50%;
   margin-top: -8px;
   width: auto !important;

@@ -55,6 +55,7 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
         placeholder='Search by id'
         options={collectionItems}
         value={selectedCollection}
+        leftIcon={{ name: 'magnify', size: 16 }}
         onChange={onChangeSelectedCollection}
         renderOption={(option) => <CollectionOption>
           <Avatar src={option.coverImageUrl} size={24} type={'circle'} />
