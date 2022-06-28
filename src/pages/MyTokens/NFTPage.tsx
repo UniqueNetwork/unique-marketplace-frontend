@@ -7,12 +7,12 @@ import { BN_MAX_INTEGER } from '@polkadot/util';
 import { TokensList } from '../../components';
 import { Secondary400 } from '../../styles/colors';
 import { useApi } from '../../hooks/useApi';
-import { NFTToken } from '../../api/chainApi/unique/types';
+import { AttributesDecoded, NFTToken } from '../../api/chainApi/unique/types';
 import { Filters } from './Filters/Filters';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useOffers } from '../../api/restApi/offers/offers';
-import { Offer } from '../../api/restApi/offers/types';
-import { MobileFilters } from '../../components/Filters/MobileFilter';
+import { Offer, OfferTokenAttribute } from '../../api/restApi/offers/types';
+import { MobileFilters } from './Filters/MobileFilter';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
 import NoItems from '../../components/NoItems';
 import { fromStringToBnString } from '../../utils/bigNum';
@@ -20,6 +20,7 @@ import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import { MyTokensFilterState } from './Filters/types';
 import SearchField from '../../components/SearchField/SearchField';
 import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
+import { useCollections } from '../../hooks/useCollections';
 
 type TOption = SelectOptionProps & {
   direction: 'asc' | 'desc';
@@ -27,6 +28,15 @@ type TOption = SelectOptionProps & {
   id: string;
   title: string;
 }
+
+const toTokenAttributes = (offerAttributes: OfferTokenAttribute[]) => {
+  const result: AttributesDecoded = {};
+  offerAttributes.map(({ key, value }) => {
+    result[key] = value;
+    return result;
+  });
+  return result;
+};
 
 const sortingOptions: TOption[] = [
   {
@@ -86,6 +96,7 @@ export const NFTPage = () => {
   const [tokens, setTokens] = useState<NFTToken[]>([]);
   const [isFetchingTokens, setIsFetchingTokens] = useState<boolean>(false);
   const deviceSize = useDeviceSize();
+  const { collections } = useCollections();
 
   const { offers, isFetching: isFetchingOffers, fetch } = useOffers();
 
@@ -102,6 +113,11 @@ export const NFTPage = () => {
       setIsFetchingTokens(false);
     })();
   }, [api?.nft, selectedAccount?.address, setIsFetchingTokens, fetch]);
+
+  const myCollections = useMemo(() => {
+    const myTokensCollectionIds = [...tokens, ...offers].map((token) => token.collectionId);
+    return collections.filter((collection) => myTokensCollectionIds.includes(collection.id));
+  }, [collections, tokens, offers]);
 
   useEffect(() => {
     const option = sortingOptions.find((option) => { return option.id === sortingValue; });
@@ -176,6 +192,7 @@ export const NFTPage = () => {
         collectionName: offer.tokenDescription?.collectionName || '',
         prefix: offer.tokenDescription?.prefix || '',
         imageUrl: offer.tokenDescription?.image || '',
+        attributes: toTokenAttributes(offer.tokenDescription?.attributes),
         ...offer
       })) || []),
       ...tokens
@@ -203,7 +220,15 @@ export const NFTPage = () => {
   return (<PagePaper>
     <MarketMainPageStyled>
       <LeftColumn>
-        {deviceSize !== DeviceSize.md && <Filters value={filterState} onFilterChange={setFilterState} />}
+        {deviceSize !== DeviceSize.md &&
+          <Filters
+            value={filterState}
+            onFilterChange={setFilterState}
+            tokens={featuredTokens}
+            collections={myCollections}
+            isFetchingTokens={isFetchingTokens}
+          />
+        }
       </LeftColumn>
       <MainContent>
         <SearchAndSortingWrapper>
@@ -236,6 +261,9 @@ export const NFTPage = () => {
         sortingOptions={sortingOptions}
         onFilterChange={setFilterState}
         onSortingChange={onSortingChange}
+        tokens={featuredTokens}
+        collections={myCollections}
+        isFetchingTokens={isFetchingTokens}
         filterComponent={Filters}
       />}
     </MarketMainPageStyled>
