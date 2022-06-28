@@ -37,10 +37,17 @@ const AvatarWrapper = styled.div<{ size: number }>`
   display: flex;
   align-items: center;
   justify-content: center;
+  background-image: url("/logos/nodes/unique.svg");
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
 `;
 
 const AvatarStyled = styled.img<{ $type: 'circle' | 'square' }>`
   border-radius: ${(props) => (props.$type === 'circle' ? '50%' : '4px')};
   outline: ${(props) =>
     props.$type === 'circle' ? '1px solid $color-grey-200' : 'none'};
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
 `;
