@@ -39,9 +39,18 @@ type AccountsColumnsProps = {
   onShowWithdrawDepositModal(address: string): () => void
   onShowDeleteLocalAccountModal(address: string): () => void
   onShowGetKsmModal: () => void
+  selectedAccountBalance: string
 };
 
-const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal, isSmallDevice, onShowDeleteLocalAccountModal, onShowGetKsmModal }: AccountsColumnsProps): TableColumnProps[] => [
+const getAccountsColumns = ({
+    formatAddress,
+    onShowSendFundsModal,
+    onShowWithdrawDepositModal,
+    isSmallDevice,
+    onShowDeleteLocalAccountModal,
+    onShowGetKsmModal,
+    selectedAccountBalance
+  }: AccountsColumnsProps): TableColumnProps[] => [
   {
     title: 'Account',
     width: '25%',
@@ -110,7 +119,7 @@ const getAccountsColumns = ({ formatAddress, onShowSendFundsModal, onShowWithdra
       return (
         <>
           <ActionsWrapper>
-            <Button title={'Send'} onClick={onShowSendFundsModal(accountInfo.address)} />
+            <Button title={'Send'} onClick={onShowSendFundsModal(accountInfo.address)} disabled={selectedAccountBalance === '0'} />
             <Button
               title={'Get'}
               onClick={onShowGetKsmModal}
@@ -141,7 +150,15 @@ enum AccountModal {
 }
 
 export const AccountsPage = () => {
-  const { accounts, fetchAccounts, isLoading, isLoadingDeposits, fetchAccountsWithDeposits, deleteLocalAccount } = useAccounts();
+  const {
+    accounts,
+    fetchAccounts,
+    isLoading,
+    isLoadingDeposits,
+    fetchAccountsWithDeposits,
+    deleteLocalAccount,
+    selectedAccount
+  } = useAccounts();
   const [searchString, setSearchString] = useState<string>('');
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
   const [selectedAddress, setSelectedAddress] = useState<string>();
@@ -200,7 +217,12 @@ export const AccountsPage = () => {
     const reduceAccounts = (acc: (Account & { accountInfo: AccountInfo })[], account: Account) => {
       acc.push({
         ...account,
-        accountInfo: { address: account.address, name: account.meta.name || '', balance: account.balance, signerType: account.signerType }
+        accountInfo: {
+          address: account.address,
+          name: account.meta.name || '',
+          balance: account.balance,
+          signerType: account.signerType
+        }
       });
       if (!account.deposits) return acc;
 
@@ -217,8 +239,8 @@ export const AccountsPage = () => {
               address: account.address,
               name: account.meta.name || '',
               deposit: (sponsorshipFee || new BN(0))
-                .add(withdraw.reduce(getTotalAmount, new BN(0)))
-                .add(leader.reduce(getTotalAmount, new BN(0))),
+              .add(withdraw.reduce(getTotalAmount, new BN(0)))
+              .add(leader.reduce(getTotalAmount, new BN(0))),
               signerType: account.signerType
             }
           });
@@ -244,12 +266,12 @@ export const AccountsPage = () => {
       return accounts.reduce(reduceAccounts, []);
     }
     return accounts
-      .filter(
-        (account) =>
-          formatAddress(account.address).toLowerCase().includes(searchString.trim().toLowerCase()) ||
-          account.meta.name?.toLowerCase().includes(searchString.trim().toLowerCase())
-      )
-      .reduce(reduceAccounts, []);
+    .filter(
+      (account) =>
+        formatAddress(account.address).toLowerCase().includes(searchString.trim().toLowerCase()) ||
+        account.meta.name?.toLowerCase().includes(searchString.trim().toLowerCase())
+    )
+    .reduce(reduceAccounts, []);
   }, [accounts, searchString, formatAddress, deviceSize]);
 
   const onChangeAccountsFinish = useCallback(async () => {
@@ -270,7 +292,7 @@ export const AccountsPage = () => {
   return (<PagePaper>
     <AccountPageWrapper>
       <Row>
-        <CreateAccountButton title={'Create substrate account'} onClick={onCreateAccountClick} />
+        <CreateAccountButton title={'Create substrate account'} onClick={onCreateAccountClick}/>
         <DropdownStyled
           dropdownRender={() => <DropdownMenu>
             <DropdownMenuItem onClick={onImportViaSeedClick}>Seed phrase</DropdownMenuItem>
@@ -278,7 +300,7 @@ export const AccountsPage = () => {
             <DropdownMenuItem onClick={onImportViaQRClick}>QR-code</DropdownMenuItem>
           </DropdownMenu>}
         >
-          <AddAccountButton title={'Add account via'} role={'primary'} iconRight={caretDown} />
+          <AddAccountButton title={'Add account via'} role={'primary'} iconRight={caretDown}/>
         </DropdownStyled>
         <SearchInputWrapper>
           <SearchInputStyled
@@ -292,7 +314,15 @@ export const AccountsPage = () => {
       <TableWrapper>
         <AccountTooltip/>
         <Table
-          columns={getAccountsColumns({ isSmallDevice: deviceSize === DeviceSize.sm, formatAddress, onShowSendFundsModal, onShowWithdrawDepositModal, onShowDeleteLocalAccountModal, onShowGetKsmModal })}
+          columns={getAccountsColumns({
+            isSmallDevice: deviceSize === DeviceSize.sm,
+            formatAddress,
+            onShowSendFundsModal,
+            onShowWithdrawDepositModal,
+            onShowDeleteLocalAccountModal,
+            onShowGetKsmModal,
+            selectedAccountBalance: formatKusamaBalance(selectedAccount?.balance?.KSM?.toString() || 0)
+          })}
           data={filteredAccounts}
           loading={isLoading || isLoadingDeposits}
           emptyIconProps={searchString ? { name: 'magnifier-found' } : { file: NoAccountsIcon }}
@@ -396,7 +426,7 @@ const AddAccountButton = styled(Button)`
 const AccountCellWrapper = styled.div`
   display: flex;
   padding: 20px 0 !important;
-  column-gap: calc(var(--gap) / 2); 
+  column-gap: calc(var(--gap) / 2);
   align-items: center;
 `;
 
