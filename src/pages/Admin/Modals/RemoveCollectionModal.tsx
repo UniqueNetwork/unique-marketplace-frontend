@@ -13,13 +13,15 @@ export const RemoveCollectionModal: FC<TAdminPanelModalBodyProps> = ({ collectio
     onFinish();
   }, []);
 
+  const collectionName = collection?.name || collection?.collectionName || '';
+
   return (
     <>
       <Content>
         <Heading size='2'>Remove collection</Heading>
       </Content>
       <Row>
-        <Text size={'m'}>{`Are you sure you want to remove the collection ${collection?.name} [id ${collection?.id}] from the marketplace?`}</Text>
+        <Text size={'m'}>{`Are you sure you want to remove the collection ${collectionName ? `"${collectionName}"` : ''} [id ${collection?.id}] from the marketplace?`}</Text>
       </Row>
       <ButtonWrapper>
         <Button
