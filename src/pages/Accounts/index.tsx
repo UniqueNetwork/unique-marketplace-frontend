@@ -39,7 +39,6 @@ type AccountsColumnsProps = {
   onShowWithdrawDepositModal(address: string): () => void
   onShowDeleteLocalAccountModal(address: string): () => void
   onShowGetKsmModal: () => void
-  selectedAccountBalance: string
 };
 
 const getAccountsColumns = ({
@@ -48,8 +47,7 @@ const getAccountsColumns = ({
     onShowWithdrawDepositModal,
     isSmallDevice,
     onShowDeleteLocalAccountModal,
-    onShowGetKsmModal,
-    selectedAccountBalance
+    onShowGetKsmModal
   }: AccountsColumnsProps): TableColumnProps[] => [
   {
     title: 'Account',
@@ -119,7 +117,7 @@ const getAccountsColumns = ({
       return (
         <>
           <ActionsWrapper>
-            <Button title={'Send'} onClick={onShowSendFundsModal(accountInfo.address)} disabled={selectedAccountBalance === '0'} />
+            <Button title={'Send'} onClick={onShowSendFundsModal(accountInfo.address)} disabled={formatKusamaBalance(accountInfo.balance?.KSM?.toString() || 0) === '0'} />
             <Button
               title={'Get'}
               onClick={onShowGetKsmModal}
@@ -156,8 +154,7 @@ export const AccountsPage = () => {
     isLoading,
     isLoadingDeposits,
     fetchAccountsWithDeposits,
-    deleteLocalAccount,
-    selectedAccount
+    deleteLocalAccount
   } = useAccounts();
   const [searchString, setSearchString] = useState<string>('');
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
@@ -320,8 +317,7 @@ export const AccountsPage = () => {
             onShowSendFundsModal,
             onShowWithdrawDepositModal,
             onShowDeleteLocalAccountModal,
-            onShowGetKsmModal,
-            selectedAccountBalance: formatKusamaBalance(selectedAccount?.balance?.KSM?.toString() || 0)
+            onShowGetKsmModal
           })}
           data={filteredAccounts}
           loading={isLoading || isLoadingDeposits}
