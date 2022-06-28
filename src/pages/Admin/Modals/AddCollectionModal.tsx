@@ -10,12 +10,15 @@ import { useAdminCollections } from '../../../api/restApi/admin/collection';
 import { SelectInput } from '../../../components/SelectInput/SelectInput';
 import { CollectionData } from '../../../api/restApi/admin/types';
 import { useApi } from '../../../hooks/useApi';
+import { useNotification } from '../../../hooks/useNotification';
+import { NotificationSeverity } from '../../../notification/NotificationContext';
 
 export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) => {
   const [selectedCollection, setSelectedCollection] = useState<CollectionData | string | undefined>();
   const { appendCollection, collections, fetchCollections } = useAdminCollections();
   const [collectionItems, setCollectionItems] = useState<CollectionData[]>([]);
   const { api } = useApi();
+  const { push } = useNotification();
 
   useEffect(() => {
     void fetchCollections();
@@ -27,23 +30,35 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
 
   const onConfirmClick = useCallback(async () => {
     if (!selectedCollection) return;
-    if (typeof selectedCollection === 'string') await appendCollection(parseInt(selectedCollection));
-    else await appendCollection(selectedCollection.id);
+    const collectionId = typeof selectedCollection === 'string' ? Number(selectedCollection) : selectedCollection.id;
+    if (collections.find(({ id }) => id.toString() === collectionId.toString())?.status === 'Enabled') {
+      push({ message: `Collection [ID ${collectionId}] has already enabled`, severity: NotificationSeverity.error });
+      return;
+    }
+    await appendCollection(collectionId);
+
+    push({ message: `Collection [ID ${collectionId}] successfully enabled`, severity: NotificationSeverity.success });
     onFinish();
-  }, [selectedCollection]);
+  }, [selectedCollection, collections]);
 
   const onChangeSelectedCollection = useCallback(async (collection: NFTCollection | string) => {
     if (typeof collection === 'string') {
+      if (!/^\d+$/.test(collection) && collection !== '') return;
       if (!api?.collection) return;
+
       const collectionData = await api.collection.getCollection(Number(collection));
 
+      setCollectionItems((items) => [
+        ...items.filter(({ id }) => id === collectionData.id),
+        ...collections.filter(({ id, status }) => status === 'Disabled' && id.toString().includes(collection))
+      ]);
+
       if (collectionData && collectionData.tokenPrefix) {
-        setCollectionItems((items) => [collectionData, ...items.filter(({ id }) => id !== collectionData.id)]);
         setSelectedCollection(collectionData);
       }
     }
     setSelectedCollection(collection as unknown as CollectionData);
-  }, [setCollectionItems]);
+  }, [setCollectionItems, collections]);
 
   return (<>
     <Content>
@@ -55,6 +70,7 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
         placeholder='Search by id'
         options={collectionItems}
         value={selectedCollection}
+        leftIcon={{ name: 'magnify', size: 16 }}
         onChange={onChangeSelectedCollection}
         renderOption={(option) => <CollectionOption>
           <Avatar src={option.coverImageUrl} size={24} type={'circle'} />
@@ -74,6 +90,7 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
         onClick={onConfirmClick}
         role='primary'
         title='Confirm'
+        disabled={!selectedCollection}
       />
     </ButtonWrapper>
   </>);

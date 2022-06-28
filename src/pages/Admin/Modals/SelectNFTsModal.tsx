@@ -5,11 +5,14 @@ import styled from 'styled-components/macro';
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
 import { useAdminCollections } from '../../../api/restApi/admin/collection';
 import { TextInput } from 'components/TextInput/TextInput';
+import { NotificationSeverity } from '../../../notification/NotificationContext';
+import { useNotification } from '../../../hooks/useNotification';
 
 export const SelectNFTsModal: FC<TAdminPanelModalBodyProps> = ({ collection, onFinish }) => {
   const { setAllowedTokens } = useAdminCollections();
   const [tokens, setTokens] = useState(collection?.allowedTokens || '');
   const [isInvalidTokensValue, setIsInvalidTokensValue] = useState<boolean>(false);
+  const { push } = useNotification();
 
   const onAcceptClick = useCallback(async () => {
     if (!collection?.id) return;
@@ -19,6 +22,8 @@ export const SelectNFTsModal: FC<TAdminPanelModalBodyProps> = ({ collection, onF
     }
 
     await setAllowedTokens(collection?.id, tokens);
+
+    push({ message: `Add allowed tokens: ${tokens} for collection: ${collection?.id}`, severity: NotificationSeverity.success });
     onFinish();
   }, [collection, tokens]);
 
