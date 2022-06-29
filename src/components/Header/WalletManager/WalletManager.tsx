@@ -23,6 +23,7 @@ function widgetAvatarRender(accountAddress: string) {
 
 export const WalletManager: FC = () => {
   const { selectedAccount, accounts, isLoading, fetchAccounts, changeAccount } = useAccounts();
+  const [isOpen, setIsOpen] = useState(false);
   const [isGetKsmOpened, setIsGetKsmOpened] = useState(false);
   const navigate = useNavigate();
   const { chainData } = useApi();
@@ -55,6 +56,7 @@ export const WalletManager: FC = () => {
 
   const onCreateAccountClick = useCallback(() => {
     navigate('/accounts');
+    setIsOpen(false);
   }, [navigate]);
 
   const currentBalance: BalanceOption = useMemo(() => {
@@ -67,6 +69,7 @@ export const WalletManager: FC = () => {
 
   const openModal = useCallback(() => {
     setIsGetKsmOpened(true);
+    setIsOpen(false);
   }, [setIsGetKsmOpened]);
 
   const formattedAccountDeposit = useMemo(() => {
@@ -83,13 +86,9 @@ export const WalletManager: FC = () => {
   }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'flex-end'
-      }}
-    >
+    <WalletManagerWrapper>
       <AccountsManager
+        open={isOpen}
         accounts={widgetAccounts}
         activeNetwork={{
           icon: {
@@ -123,12 +122,33 @@ export const WalletManager: FC = () => {
         selectedAccount={widgetSelectedAccount}
         symbol={tokenSymbol}
         avatarRender={widgetAvatarRender}
+        onOpenChange={setIsOpen}
       />
       {isGetKsmOpened && <GetKSMModal key={'modal-getKsm'} onClose={closeModal}/>}
-    </div>
+    </WalletManagerWrapper>
   );
 };
 
 const GetKsmButton = styled(Button)`
   margin: 8px 0;
+`;
+
+const WalletManagerWrapper = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  .unique-accounts-manager .accounts-manager-selected-account {
+    margin: unset;
+  }
+  & > .unique-dropdown .dropdown-options.right {
+    @media (max-width: 567px) {
+      position: fixed;
+      width: 100vw;
+      left: 0;
+      height: 100vh;
+      top: 86px;
+      border: none;
+      box-shadow: none;
+      padding: 0;
+    }
+  }  
 `;
