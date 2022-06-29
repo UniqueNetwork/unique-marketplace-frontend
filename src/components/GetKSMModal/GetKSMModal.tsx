@@ -41,29 +41,40 @@ function GetKSMModal ({ onClose }: Props): React.ReactElement<Props> {
   }, [handleGetKSMClickByRamp]);
 
   return (
-    <Modal
-      isVisible
-      isClosable
-      onClose={onClose}
-    >
-      <Content ref={ref}>
-      </Content>
-    </Modal>
+    <GetKSMModalWrapper>
+      <Modal
+        isVisible
+        isClosable
+        onClose={onClose}
+      >
+        <Content ref={ref} />
+      </Modal>
+    </GetKSMModalWrapper>
   );
 }
 
 const Content = styled.div`
   height: 720px;
   width: calc(640px - var(--prop-gap) * 3);
-  @media (max-width: 640px) {
-    width: calc(100vw - var(--prop-gap) * 2);
-    height: 700px;
+  @media (max-width: 567px) {
+    width: unset;
   }
-  @media (width: 414px) { // for some reason RAMP has issues with touch handling on certain widths
-    width: 362px;
-  }
-  @media (max-width: 420px) {
-    height: 667px;
+`;
+
+const GetKSMModalWrapper = styled.div`
+  @media (max-width: 567px) {
+    .unique-modal-wrapper {
+      background-color: transparent;
+    }
+    .unique-modal {
+      top: 85px;
+      padding: 0;
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100vw;
+    }
   }
 `;
 
