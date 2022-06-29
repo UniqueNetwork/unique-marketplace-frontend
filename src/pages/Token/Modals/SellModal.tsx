@@ -89,7 +89,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
     [setPriceInputValue]
   );
 
-  const isAuctionValid = selectedAccount && minStepInputValueAuction && durationSelectValue && inputStartingPriceValue && Number(minStepInputValueAuction) && Number(inputStartingPriceValue);
+  const isAuctionValid = selectedAccount && minStepInputValueAuction && durationSelectValue && Number(minStepInputValueAuction);
 
   const onConfirmAuctionClick = useCallback(() => {
     if (!isAuctionValid) return;

@@ -20,8 +20,12 @@ export const SelectNFTsModal: FC<TAdminPanelModalBodyProps> = ({ collection, onF
       setIsInvalidTokensValue(true);
       return;
     }
-
-    await setAllowedTokens(collection?.id, tokens);
+    try {
+      await setAllowedTokens(collection?.id, tokens);
+    } catch (err) {
+      setIsInvalidTokensValue(true);
+      return;
+    }
 
     push({ message: `Add allowed tokens: ${tokens} for collection: ${collection?.id}`, severity: NotificationSeverity.success });
     onFinish();
