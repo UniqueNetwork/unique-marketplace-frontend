@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Heading, Modal, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
@@ -19,6 +19,7 @@ import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import { useApi } from 'hooks/useApi';
 import { BN } from '@polkadot/util';
 import { fromStringToBnString } from 'utils/bigNum';
+import { useDebounce } from '../../../hooks/useDebounce';
 
 const tokenSymbol = 'KSM';
 
@@ -77,6 +78,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   const [amount, setAmount] = useState<string>('');
   const { chainData, api } = useApi();
   const [kusamaFee, setKusamaFee] = useState('0');
+  const debouncedAmount = useDebounce(amount, 300);
 
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainData?.properties.ss58Format || 0);
@@ -107,15 +109,17 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   }, [setAmount]);
 
   useEffect(() => {
-    if (!selectedAccount || !api?.market) return;
-    const recipient = typeof recipientAddress === 'string' ? recipientAddress : recipientAddress?.address;
-    api.market.getKusamaFee(selectedAccount.address, recipient, new BN(fromStringToBnString(amount)))
-    .then((fee) => {
-      setKusamaFee(formatKusamaBalance(fee.toString()));
-    }).catch((e) => {
-      console.log(e);
-    });
-  }, [api?.market, recipientAddress, selectedAccount, amount]);
+    if (debouncedAmount) {
+      if (!selectedAccount || !api?.market) return;
+      const recipient = typeof recipientAddress === 'string' ? recipientAddress : recipientAddress?.address;
+      api.market.getKusamaFee(selectedAccount.address, recipient, new BN(fromStringToBnString(debouncedAmount)))
+      .then((fee) => {
+        setKusamaFee(formatKusamaBalance(fee.toString()));
+      }).catch((e) => {
+        console.log(e);
+      });
+    }
+  }, [api?.market, recipientAddress, selectedAccount, debouncedAmount]);
 
   const isConfirmDisabled = useMemo(() => (
     !recipientAddress || Number(amount) <= 0 || Number(amount) > Number(formatKusamaBalance(sender?.balance?.KSM?.toString() || 0))
