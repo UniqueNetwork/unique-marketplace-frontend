@@ -23,12 +23,12 @@ import { TWithdrawBid } from '../../api/restApi/auction/types';
 import { TextInput } from '../../components/TextInput/TextInput';
 import { AdditionalLight, BlueGrey300, Primary100, Primary500 } from '../../styles/colors';
 import AccountTooltip from './Tooltips/AccountTooltip';
-import IconWithHint from './Tooltips/WithdrawTooltip';
+import IconWithHint from 'components/IconWithHint/IconWithHint';
 import ConfirmModal from 'components/ConfirmModal';
 import { AccountInfo } from './types';
 import BalanceCell from './BalanceCell';
 import GetKSMModal from 'components/GetKSMModal/GetKSMModal';
-import NoAccountsIcon from '../../static/icons/no-accounts.svg';
+import NoAccountsIcon from 'static/icons/no-accounts.svg';
 
 const tokenSymbol = 'KSM';
 
@@ -110,7 +110,7 @@ const getAccountsColumns = ({
         return (
           <DepositActionsWrapper>
             <Button title={'Withdraw'} onClick={onShowWithdrawDepositModal(accountInfo.address)} role={'primary'} />
-            <IconWithHint />
+            <IconWithHint>Learn more in <a href='/FAQ' target='_blank' rel='noreferrer'>FAQ</a></IconWithHint>
           </DepositActionsWrapper>
         );
       }

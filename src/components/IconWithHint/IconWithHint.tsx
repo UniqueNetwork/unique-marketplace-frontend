@@ -1,10 +1,15 @@
-import React, { useCallback, useState } from 'react';
+import React, { FC, useCallback, useState } from 'react';
 import questionFilledIcon from 'static/icons/question-fill.svg';
 import questionIcon from 'static/icons/question.svg';
 import styled from 'styled-components';
 import { AdditionalDark, AdditionalLight } from 'styles/colors';
 
-const IconWithHint = () => {
+interface IProps {
+  width?: number
+  position?: 'top' | 'bottom';
+}
+
+const IconWithHint: FC<IProps> = ({ width = 120, position = 'bottom', children }) => {
   const [isHovered, setIsHovered] = useState(false);
   const onHover = useCallback(
     () => {
@@ -28,8 +33,8 @@ const IconWithHint = () => {
         src={isHovered ? questionFilledIcon : questionIcon}
       />
       {isHovered &&
-        <TooltipStyled>
-          Learn more in <a href='/FAQ' target='_blank' rel='noreferrer'>FAQ</a>
+        <TooltipStyled width={width} className={position}>
+          {children}
         </TooltipStyled>}
     </Container>
   );
@@ -38,16 +43,40 @@ const IconWithHint = () => {
 const Container = styled.div`
   position: relative;
   img { cursor: pointer; }
+  
+  .top {
+    left: -210px;
+    top: -40px;
+    
+    ::before {
+      left: 217px;
+      top: 37px;
+      border-left: 5px solid transparent;
+      border-top: 9px solid var(--color-additional-dark);
+      border-right: 5px solid transparent;
+    }
+  }
+
+  .bottom {
+    left: -126px;
+    top: 25px;
+    
+    ::before {
+      left: 133px;
+      top: -7px;
+      border-left: 5px solid transparent;
+      border-bottom: 9px solid var(--color-additional-dark);
+      border-right: 5px solid transparent;
+    }
+  }
 `;
 
-const TooltipStyled = styled.div`
+const TooltipStyled = styled.div<{ width: number }>`
   position: absolute;
   background: ${AdditionalDark};
-  width: 120px;
+  width: ${(props) => (props.width)}px;
   color: ${AdditionalLight};
   z-index: 1;
-  left: -126px;
-  top: 25px;
   padding: 8px 16px !important;
   line-height: 22px;
   border-radius: 2px;
@@ -57,11 +86,6 @@ const TooltipStyled = styled.div`
     content: "";
     width: 0;
     height: 0;
-    left: 133px;
-    top: -7px;
-    border-left: 5px solid transparent;
-    border-bottom: 9px solid var(--color-additional-dark);
-    border-right: 5px solid transparent;
   }
 
   a {
