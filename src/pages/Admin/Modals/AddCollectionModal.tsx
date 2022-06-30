@@ -90,7 +90,7 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
         onClick={onConfirmClick}
         role='primary'
         title='Confirm'
-        disabled={!selectedCollection}
+        disabled={!selectedCollection || Number(selectedCollection) === 0}
       />
     </ButtonWrapper>
   </>);
