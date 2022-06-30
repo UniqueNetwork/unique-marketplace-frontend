@@ -157,7 +157,7 @@ export const AdminPanelPage: FC = () => {
       if (collection.status === 'Disabled') return false;
       if (searchValue) {
         const searchString = searchValue.trim().toLocaleLowerCase();
-        return Number(collection.id) === Number(searchString) || collection.name?.toLocaleLowerCase().includes(searchString) || collection.tokenPrefix?.toLocaleLowerCase().includes(searchString);
+        return collection.id.toString().includes(searchString) || collection.name?.toLocaleLowerCase().includes(searchString) || collection.tokenPrefix?.toLocaleLowerCase().includes(searchString);
       }
       return true;
     };
