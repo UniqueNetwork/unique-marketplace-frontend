@@ -17,7 +17,8 @@ import { NumberInput } from 'components/NumberInput/NumberInput';
 import AccountCard from 'components/Account/Account';
 import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import { useApi } from 'hooks/useApi';
-import { useFee } from '../../../hooks/useFee';
+import { BN } from '@polkadot/util';
+import { fromStringToBnString } from 'utils/bigNum';
 
 const tokenSymbol = 'KSM';
 
@@ -71,11 +72,11 @@ type AskSendFundsModalProps = {
 }
 
 export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, onFinish, senderAddress, onClose }) => {
-  const { accounts } = useAccounts();
+  const { accounts, selectedAccount } = useAccounts();
   const [recipientAddress, setRecipientAddress] = useState<string | Account | undefined>();
   const [amount, setAmount] = useState<string>('');
-  const { chainData } = useApi();
-  const { kusamaFee } = useFee();
+  const { chainData, api } = useApi();
+  const [kusamaFee, setKusamaFee] = useState('0');
 
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainData?.properties.ss58Format || 0);
@@ -104,6 +105,17 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   const onAmountChange = useCallback((value: string) => {
     setAmount(value);
   }, [setAmount]);
+
+  useEffect(() => {
+    if (!selectedAccount || !api?.market) return;
+    const recipient = typeof recipientAddress === 'string' ? recipientAddress : recipientAddress?.address;
+    api.market.getKusamaFee(selectedAccount.address, recipient, new BN(fromStringToBnString(amount)))
+    .then((fee) => {
+      setKusamaFee(formatKusamaBalance(fee.toString()));
+    }).catch((e) => {
+      console.log(e);
+    });
+  }, [api?.market, recipientAddress, selectedAccount, amount]);
 
   const isConfirmDisabled = useMemo(() => (
     !recipientAddress || Number(amount) <= 0 || Number(amount) > Number(formatKusamaBalance(sender?.balance?.KSM?.toString() || 0))
