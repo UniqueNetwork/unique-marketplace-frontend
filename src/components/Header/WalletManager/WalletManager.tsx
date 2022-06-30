@@ -14,6 +14,7 @@ import { useNotification } from 'hooks/useNotification';
 import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import GetKSMModal from 'components/GetKSMModal/GetKSMModal';
 import { formatKusamaBalance } from 'utils/textUtils';
+import BalanceSkeleton from '../../Skeleton/BalanceSkeleton';
 
 const tokenSymbol = 'KSM';
 
@@ -84,6 +85,8 @@ export const WalletManager: FC = () => {
       <Button title={'Connect or create account'} onClick={onCreateAccountClick} />
     );
   }
+
+  if (isLoading) return <BalanceSkeleton />;
 
   return (
     <WalletManagerWrapper>
