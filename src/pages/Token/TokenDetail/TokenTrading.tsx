@@ -8,7 +8,7 @@ import { BuyToken } from '../BuyToken/BuyToken';
 import Auction from '../Auction/Auction';
 import { isTokenOwner, normalizeAccountId } from '../../../api/chainApi/utils/addressUtils';
 import { useApi } from '../../../hooks/useApi';
-import { checkTokenIsAllowed } from '../../../api/chainApi/utils/checkTokenIsAllowed';
+import { checkAllowedTokenInSettings } from '../../../api/chainApi/utils/checkTokenIsAllowed';
 
 interface TokenTradingProps {
   token?: NFTToken
@@ -29,9 +29,9 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
 
   const isAllowed = useMemo(() => {
     if (offer) {
-      const allowedTokens = settings?.blockchain.unique.allowedTokens.find((item) => item.collection === offer.collectionId)?.tokens;
-      return allowedTokens ? checkTokenIsAllowed(offer.tokenId, allowedTokens.split(',')) : true;
-    } else return token?.isAllowed;
+      return checkAllowedTokenInSettings(offer.tokenId, offer.collectionId, settings);
+    }
+    return token?.isAllowed;
   }, [settings, token, offer]);
 
   const isOwner = useMemo(() => {

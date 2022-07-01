@@ -75,7 +75,6 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
       }
 
       const isAllowed = this.allowedTokens[collectionId] ? checkTokenIsAllowed(tokenId, this.allowedTokens[collectionId].split(',')) : true;
-      console.log(isAllowed);
 
       return {
         id: tokenId,
