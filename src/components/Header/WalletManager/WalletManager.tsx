@@ -142,6 +142,10 @@ const WalletManagerWrapper = styled.div`
   .unique-accounts-manager .accounts-manager-selected-account {
     margin: unset;
   }
+  .accounts-manager-accounts .dropdown-options {
+    max-height: 300px;
+    overflow: auto;
+  }
   & > .unique-dropdown .dropdown-options.right {
     @media (max-width: 567px) {
       position: fixed;
