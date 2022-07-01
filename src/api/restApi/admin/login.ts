@@ -23,7 +23,7 @@ export const useAdminLoggingIn = () => {
 
   const hasAdminPermission: boolean = useMemo(() => {
     if (!selectedAccount) return false;
-    return settings?.administrators.some((address) => compareEncodedAddresses(address, selectedAccount.address)) || false;
+    return settings?.administrators?.some((address) => compareEncodedAddresses(address, selectedAccount.address)) || false;
   }, [selectedAccount?.address, settings?.administrators]);
 
   const logIn = useCallback(async () => {

@@ -18,5 +18,5 @@ export type Settings = {
   },
   marketType: string,
   mainSaleSeedAddress: string,
-  administrators: string[]
+  administrators?: string[]
 }
