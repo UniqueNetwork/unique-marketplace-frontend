@@ -48,6 +48,7 @@ export interface NFTToken {
   prefix?: string
   description?: string
   collectionCover?: string
+  isAllowed?: boolean
 }
 
 export type MetadataType = {

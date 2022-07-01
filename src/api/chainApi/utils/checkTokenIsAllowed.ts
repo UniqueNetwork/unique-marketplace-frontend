@@ -1,6 +1,6 @@
 import { TokenId } from '../unique/types';
 
-const checkTokenIsAllowed = (tokenId: number, allowedTokens: string[]) => {
+export const checkTokenIsAllowed = (tokenId: number, allowedTokens: string[]) => {
   const checkInRange = ([start, end]: string[]) => Number(start) <= tokenId && Number(end) >= tokenId;
   return allowedTokens.some((item) => /^\d+-\d+$/.test(item) ? checkInRange(item.split('-')) : Number(item) === tokenId);
 };
