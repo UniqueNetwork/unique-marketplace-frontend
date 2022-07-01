@@ -29,7 +29,7 @@ const IconWithHint = () => {
       />
       {isHovered &&
         <TooltipStyled>
-          Learn more in <a href='/FAQ' target='_blank' rel='noreferrer'>FAQ</a>
+          Learn more in <a href='/faq' target='_blank' rel='noreferrer'>FAQ</a>
         </TooltipStyled>}
     </Container>
   );
