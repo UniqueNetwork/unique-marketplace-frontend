@@ -26,6 +26,7 @@ export const Avatar: FC<IAvatarProps> = ({
     <AvatarStyled $type={type}
       src={src}
       height={size}
+      alt={''}
     />
   </AvatarWrapper>;
 };
