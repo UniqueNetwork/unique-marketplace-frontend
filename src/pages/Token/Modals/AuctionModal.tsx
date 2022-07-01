@@ -90,7 +90,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
     if (!selectedAccount?.balance?.KSM || selectedAccount?.balance?.KSM.isZero()) return false;
     const bnAmount = new BN(fromStringToBnString(bidAmount, api?.market?.kusamaDecimals));
     return selectedAccount?.balance?.KSM.gte(bnAmount.sub(new BN(lastBidFromThisAccount || 0)));
-  }, [selectedAccount?.balance?.KSM, bidAmount, api?.market?.kusamaDecimals]);
+  }, [selectedAccount?.balance?.KSM, bidAmount, api?.market?.kusamaDecimals, lastBidFromThisAccount]);
 
   const onBidAmountChange = useCallback((value: string) => {
     setBidAmount(value);
