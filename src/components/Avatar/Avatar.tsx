@@ -1,6 +1,7 @@
-import { FC } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import Identicon from '@polkadot/react-identicon';
 import styled from 'styled-components';
+import { Icon } from '@unique-nft/ui-kit';
 
 export interface IAvatarProps {
   src?: string;
@@ -15,6 +16,20 @@ export const Avatar: FC<IAvatarProps> = ({
   address,
   type = 'square'
 }: IAvatarProps) => {
+  const [imageSrc, setImageSrc] = useState<string | undefined>();
+
+  useEffect(() => {
+    if (!src || address) return;
+
+    const image = new Image();
+
+    image.onload = () => {
+      setImageSrc(src);
+    };
+
+    image.src = src;
+  }, [src]);
+
   if (address) {
     return <Identicon
       value={address}
@@ -22,9 +37,13 @@ export const Avatar: FC<IAvatarProps> = ({
     />;
   }
 
+  if (!imageSrc) {
+    return <Icon name='empty-image' size={size} />;
+  }
+
   return <AvatarWrapper size={size}>
     <AvatarStyled $type={type}
-      src={src}
+      src={imageSrc}
       height={size}
     />
   </AvatarWrapper>;
@@ -37,10 +56,6 @@ const AvatarWrapper = styled.div<{ size: number }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  background-image: url("/logos/nodes/unique.svg");
-  background-position: center center;
-  background-size: cover;
-  background-repeat: no-repeat;
 `;
 
 const AvatarStyled = styled.img<{ $type: 'circle' | 'square' }>`
