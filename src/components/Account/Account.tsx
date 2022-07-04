@@ -16,9 +16,17 @@ interface AccountProps {
   isShort?: boolean
   canCopy?: boolean
   hideAddress?: boolean
+  hideName?: boolean
 }
 
-const AccountCard: FC<AccountProps> = ({ accountName, accountAddress, isShort = false, canCopy = true, hideAddress = false }) => {
+const AccountCard: FC<AccountProps> = ({
+  accountName,
+  accountAddress,
+  isShort = false,
+  canCopy = true,
+  hideAddress = false,
+  hideName = false
+}) => {
   const { chainData } = useApi();
   const { push } = useNotification();
 
@@ -36,11 +44,13 @@ const AccountCard: FC<AccountProps> = ({ accountName, accountAddress, isShort = 
     <>
       <Avatar size={24} src={DefaultAvatar} address={accountAddress} />
       <AccountInfoWrapper>
-        <Text>{accountName}</Text>
+        {!hideName && <Text>{accountName}</Text>}
         {!hideAddress && <AddressRow>
-          <Text size={'s'} color={'grey-500'}>
-            {isShort ? shortcutText(formatAddress(accountAddress) || '') : formatAddress(accountAddress) || ''}
-          </Text>
+          {hideName
+            ? <Text>{isShort ? shortcutText(formatAddress(accountAddress) || '') : formatAddress(accountAddress) || ''}</Text>
+            : <Text size={'s'} color={'grey-500'}>
+              {isShort ? shortcutText(formatAddress(accountAddress) || '') : formatAddress(accountAddress) || ''}
+            </Text>}
           {canCopy && <a onClick={onCopyAddress(formatAddress(accountAddress) || '')}>
             <CopyIconWrapper>
               <Icon name={'copy'} size={16} />
@@ -71,7 +81,7 @@ const CopyIconWrapper = styled.div`
     padding: 0;
     cursor: copy;
     svg {
-      transform: translateX(4px);
+      transform: translateX(3px);
     }
   }
 `;
