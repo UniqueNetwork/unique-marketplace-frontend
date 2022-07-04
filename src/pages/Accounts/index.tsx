@@ -121,6 +121,7 @@ const getAccountsColumns = ({
             <Button
               title={'Get'}
               onClick={onShowGetKsmModal}
+              disabled={!config.rampApiKey}
             />
             {accountInfo.signerType === 'Local' && <Button title={'Delete'} onClick={onShowDeleteLocalAccountModal(accountInfo.address)} />}
           </ActionsWrapper>
@@ -203,6 +204,7 @@ export const AccountsPage = () => {
   }, []);
 
   const onShowGetKsmModal = useCallback(() => {
+    if (!config.rampApiKey) return;
     setCurrentModal(AccountModal.getKsmModal);
   }, []);
 
@@ -344,7 +346,7 @@ export const AccountsPage = () => {
         <p>Are you sure, you want to perform this action? You won&apos;t be able to recover this account in future.</p>
       </ConfirmModal>
     </AccountPageWrapper>
-    {currentModal === AccountModal.getKsmModal && <GetKSMModal key={'modal-accounts-getKsm'} onClose={onModalClose}/>}
+    {config.rampApiKey && currentModal === AccountModal.getKsmModal && <GetKSMModal key={'modal-accounts-getKsm'} onClose={onModalClose}/>}
   </PagePaper>);
 };
 
