@@ -15,6 +15,7 @@ import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import GetKSMModal from 'components/GetKSMModal/GetKSMModal';
 import { formatKusamaBalance } from 'utils/textUtils';
 import BalanceSkeleton from '../../Skeleton/BalanceSkeleton';
+import config from '../../../config';
 
 const tokenSymbol = 'KSM';
 
@@ -107,13 +108,13 @@ export const WalletManager: FC = () => {
           <>
             {formattedAccountDeposit && <Text color='grey-500' size='xs'>The total market deposit for participation in auctions and
               sponsorship. <br/> Use the “Manage my balance” section to withdraw.</Text>}
-            <GetKsmButton
+            {config.rampApiKey && <GetKsmButton
               title={'Get KSM'}
               size={'middle'}
               role={'outlined'}
               wide
               onClick={openModal}
-            />
+            />}
           </>
         }
         manageBalanceLinkTitle='Manage my balance'
@@ -127,7 +128,7 @@ export const WalletManager: FC = () => {
         avatarRender={widgetAvatarRender}
         onOpenChange={setIsOpen}
       />
-      {isGetKsmOpened && <GetKSMModal key={'modal-getKsm'} onClose={closeModal}/>}
+      {isGetKsmOpened && config.rampApiKey && <GetKSMModal key={'modal-getKsm'} onClose={closeModal}/>}
     </WalletManagerWrapper>
   );
 };
@@ -141,6 +142,10 @@ const WalletManagerWrapper = styled.div`
   justify-content: flex-end;
   .unique-accounts-manager .accounts-manager-selected-account {
     margin: unset;
+  }
+  .accounts-manager-accounts .dropdown-options {
+    max-height: 300px;
+    overflow: auto;
   }
   & > .unique-dropdown .dropdown-options.right {
     @media (max-width: 567px) {

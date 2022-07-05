@@ -148,12 +148,12 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
         onChange={onPriceInputChange}
         value={priceInputValue?.toString()}
       />
-      <TextStyled
+      {!selectedAccount?.isOnWhiteList && <TextStyled
         color='additional-warning-500'
         size='s'
       >
         {`A fee of ~ ${kusamaFee} ${tokenSymbol} can be applied to the transaction`}
-      </TextStyled>
+      </TextStyled>}
       <ButtonWrapper>
         <Button
           disabled={!priceInputValue || !Number(priceInputValue)}
@@ -186,12 +186,6 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
           value={durationSelectValue?.toString()}
         />
       </Row>
-      <TextStyled
-        color='additional-warning-500'
-        size='s'
-      >
-        {`A fee of ~ ${kusamaFee} ${tokenSymbol} can be applied to the transaction`}
-      </TextStyled>
       <ButtonWrapper>
         <Button
           disabled={!isAuctionValid}
@@ -307,8 +301,9 @@ const Content = styled.div`
 
 const Row = styled.div`
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+  min-height: 180px;
 `;
 
 const SellModalStyled = styled.div`

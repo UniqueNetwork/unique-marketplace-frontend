@@ -10,12 +10,13 @@ import { useApi } from 'hooks/useApi';
 
 interface SellTokenProps {
   offer?: Offer
+  isAllowed?: boolean
   onSellClick(): void
   onTransferClick(): void
   onDelistClick(): void
 }
 
-export const SellToken: FC<SellTokenProps> = ({ offer, onSellClick, onTransferClick, onDelistClick }) => {
+export const SellToken: FC<SellTokenProps> = ({ offer, isAllowed, onSellClick, onTransferClick, onDelistClick }) => {
   const { selectedAccount } = useAccounts();
   const { settings } = useApi();
 
@@ -33,6 +34,8 @@ export const SellToken: FC<SellTokenProps> = ({ offer, onSellClick, onTransferCl
       <Divider />
     </>);
   }
+
+  if (!isAllowed) return null;
 
   return (
     <>

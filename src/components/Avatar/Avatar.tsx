@@ -26,6 +26,7 @@ export const Avatar: FC<IAvatarProps> = ({
     <AvatarStyled $type={type}
       src={src}
       height={size}
+      alt={''}
     />
   </AvatarWrapper>;
 };
@@ -37,10 +38,6 @@ const AvatarWrapper = styled.div<{ size: number }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  background-image: url("/logos/nodes/unique.svg");
-  background-position: center center;
-  background-size: cover;
-  background-repeat: no-repeat;
 `;
 
 const AvatarStyled = styled.img<{ $type: 'circle' | 'square' }>`
