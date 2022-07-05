@@ -1,4 +1,5 @@
 import { Dispatch, SetStateAction } from 'react';
+import { Attribute, AttributeCount } from '../../api/restApi/offers/types';
 
 export type Statuses = Record<'myNFTs' | 'fixedPrice' | 'timedAuction' | 'myBets', boolean | undefined>
 
@@ -21,5 +22,7 @@ export type FilterChangeHandler<T> = Dispatch<SetStateAction<T | null>> | ((valu
 
 export type FiltersProps<T = FilterState> = {
   value: T | null
+  attributes?: Record<string, Attribute[]>
+  attributeCounts?: AttributeCount[]
   onFilterChange: FilterChangeHandler<T>
 }

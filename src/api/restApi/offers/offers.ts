@@ -3,7 +3,7 @@ import { AxiosError } from 'axios';
 
 import { get } from '../base';
 import { defaultParams } from '../base/axios';
-import { GetOffersRequestPayload, Offer, OffersResponse, UseFetchOffersProps } from './types';
+import { Attribute, AttributeCount, GetOffersRequestPayload, Offer, OffersResponse } from './types';
 import { ResponseError } from '../base/types';
 import { useApi } from '../../../hooks/useApi';
 import { fromStringToBnString } from '../../../utils/bigNum';
@@ -15,49 +15,58 @@ export const getOffers = (payload: GetOffersRequestPayload) => get<OffersRespons
 export const useOffers = () => {
   const [offers, setOffers] = useState<Offer[]>([]);
   const [offersCount, setOffersCount] = useState<number>(0);
+  const [attributes, setAttributes] = useState<Record<string, Attribute[]>>({});
+  const [attributeCounts, setAttributeCounts] = useState<AttributeCount[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [fetchingError, setFetchingError] = useState<ResponseError | undefined>();
   const { api } = useApi();
 
-  const fetch = useCallback(({ minPrice, maxPrice, ...payload }: GetOffersRequestPayload) => {
+  const fetch = useCallback(async ({ minPrice, maxPrice, ...payload }: GetOffersRequestPayload) => {
     setIsFetching(true);
-    return getOffers({
-      ...payload,
-      minPrice: minPrice && fromStringToBnString(minPrice, api?.market?.kusamaDecimals),
-      maxPrice: maxPrice && fromStringToBnString(maxPrice, api?.market?.kusamaDecimals)
-    }).then((response) => {
-      if (response.status === 200) {
-        setOffers(response.data.items);
-        setOffersCount(response.data.itemsCount);
-        setIsFetching(false);
-        return response.data.items;
-      }
-    }).catch((err: AxiosError) => {
-      setFetchingError({
-        status: err.response?.status,
-        message: err.message
+    try {
+      const { status, data } = await getOffers({
+        ...payload,
+        minPrice: minPrice && fromStringToBnString(minPrice, api?.market?.kusamaDecimals),
+        maxPrice: maxPrice && fromStringToBnString(maxPrice, api?.market?.kusamaDecimals)
       });
-    });
+      if (status === 200) {
+        setOffers(data.items);
+        setOffersCount(data.itemsCount);
+        setAttributes(data.attributes);
+        setAttributeCounts(data.attributesCount);
+        setIsFetching(false);
+        return data;
+      }
+    } catch (err) {
+      const { response, message } = err as AxiosError;
+      setFetchingError({
+        status: response?.status,
+        message
+      });
+    }
+    return { items: [], attributes: {}, attributesCount: [], itemsCount: 0, page: 1, pageSize: 10 };
   }, [api?.market?.kusamaDecimals]);
 
-  const fetchMore = useCallback(({ minPrice, maxPrice, ...payload }: GetOffersRequestPayload) => {
+  const fetchMore = useCallback(async ({ minPrice, maxPrice, ...payload }: GetOffersRequestPayload) => {
     setIsFetching(true);
-    getOffers({
-      ...payload,
-      minPrice: minPrice && fromStringToBnString(minPrice, api?.market?.kusamaDecimals),
-      maxPrice: maxPrice && fromStringToBnString(maxPrice, api?.market?.kusamaDecimals)
-    }).then((response) => {
-      if (response.status === 200) {
-        setOffers([...offers, ...response.data.items]);
+    try {
+      const { status, data } = await getOffers({
+        ...payload,
+        minPrice: minPrice && fromStringToBnString(minPrice, api?.market?.kusamaDecimals),
+        maxPrice: maxPrice && fromStringToBnString(maxPrice, api?.market?.kusamaDecimals)
+      });
+      if (status === 200) {
+        setOffers([...offers, ...data.items]);
         setIsFetching(false);
       }
-    }).catch((err: AxiosError) => {
-        setFetchingError({
-          status: err.response?.status,
-          message: err.message
-        });
+    } catch (err) {
+      const { response, message } = err as AxiosError;
+      setFetchingError({
+        status: response?.status,
+        message
       });
-    }, [offers, api?.market?.kusamaDecimals]);
+    }
+  }, [offers, api?.market?.kusamaDecimals]);
 
   return {
     offers,
@@ -65,6 +74,8 @@ export const useOffers = () => {
     isFetching,
     fetchingError,
     fetch,
-    fetchMore
+    fetchMore,
+    attributes,
+    attributeCounts
   };
 };
