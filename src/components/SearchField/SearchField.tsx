@@ -1,32 +1,39 @@
 import React, { FC, KeyboardEvent, useCallback, useEffect, useState } from 'react';
 import { Button, InputText } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { IconButton } from '../IconButton/IconButton';
 
 interface SearchFieldProps {
   className?: string
   searchValue?: string | number
   placeholder?: string
-  onSearch(value: string | undefined): void
+  onSearch?(value: string | undefined): void
+  onSearchStringChange?(value: string | undefined): void
+  hideButton?: boolean
 }
 
-const SearchField: FC<SearchFieldProps> = ({ className, searchValue, placeholder, onSearch }) => {
+const SearchField: FC<SearchFieldProps> = ({ className, searchValue, placeholder, onSearch, onSearchStringChange, hideButton }) => {
   const [value, setValue] = useState<string | number | undefined>(searchValue);
+
+  const onValueChange = useCallback((value: string | undefined) => {
+    setValue(value);
+    onSearchStringChange?.(value);
+  }, [onSearchStringChange, setValue]);
 
   const onSearchInputKeyDown = useCallback((event: KeyboardEvent) => {
     if (!value) return;
     if (event.key !== 'Enter') return;
-    onSearch(value.toString());
+    onSearch?.(value.toString());
   }, [onSearch, value]);
 
   const onSearchClick = useCallback(() => {
-    if (!value) return;
-    onSearch(value.toString());
+    onSearch?.(value?.toString());
   }, [onSearch, value]);
 
   const onClear = useCallback(() => {
     setValue(undefined);
-    onSearch(undefined);
+    onSearch?.(undefined);
+    onSearchStringChange?.(undefined);
   }, [onSearch]);
 
   useEffect(() => {
@@ -38,19 +45,19 @@ const SearchField: FC<SearchFieldProps> = ({ className, searchValue, placeholder
       <InputWrapper>
         <InputTextStyled
           iconLeft={{ name: 'magnify', size: 16 }}
-          onChange={setValue}
+          onChange={onValueChange}
           onKeyDown={onSearchInputKeyDown}
           placeholder={placeholder}
           value={value?.toString()}
         />
 
-        {value && <ClearButton name={'close'} size={16} onClick={onClear} />}
+        {value && <ClearButton name={'circle-close'} size={24} onClick={onClear} />}
       </InputWrapper>
-      <Button
+      {!hideButton && <Button
         onClick={onSearchClick}
         role='primary'
         title='Search'
-      />
+      />}
     </SearchWrapper>
   );
 };
@@ -93,8 +100,8 @@ const InputWrapper = styled.div`
   flex-basis: 610px;
   .unique-input-text {
     width: auto;
-    input {
-      padding-right: 22px;
+    div.input-wrapper.with-icon.to-left > input {
+      padding-right: 32px;
     }
   }
 `;
@@ -102,7 +109,6 @@ const InputWrapper = styled.div`
 const ClearButton = styled(IconButton)`
   position: absolute;
   right: calc(var(--gap) / 2);
-  top: 50%;
-  margin-top: -8px;
+  bottom: 6px;
   width: auto !important;
 `;

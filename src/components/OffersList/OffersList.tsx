@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { Offer } from '../../api/restApi/offers/types';
 import { OfferCard } from '../OfferCard/OfferCard';
 import CardSkeleton from '../Skeleton/CardSkeleton';

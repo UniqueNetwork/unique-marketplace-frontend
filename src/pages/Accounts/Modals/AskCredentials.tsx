@@ -2,7 +2,7 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import { TCreateAccountBodyModalProps } from './types';
 import { Button, Text } from '@unique-nft/ui-kit';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { PasswordInput } from '../../../components/PasswordInput/PasswordInput';
 import { Avatar } from '../../../components/Avatar/Avatar';
 import { TextInput } from '../../../components/TextInput/TextInput';
@@ -26,9 +26,9 @@ export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountP
   return (<>
     <AddressWrapper>
       <Avatar size={24} src={DefaultAvatar} address={accountProperties?.address} />
-      <Text>{accountProperties?.address || ''}</Text>
+      <Text color={'grey-500'}>{accountProperties?.address || ''}</Text>
     </AddressWrapper>
-    <CredentialsWrapper >
+    <CredentialsWrapper>
       <Text size={'m'}>Name</Text>
       <Text size={'s'} color={'grey-500'}>Give your account a name for easier identification and handling. </Text>
       <TextInput onChange={onAccountNameChange} value={name} />
@@ -64,7 +64,7 @@ export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountP
 const AddressWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 2);
-  margin-top: calc(var(--gap) * 2);
+  margin-top: calc(var(--gap) * 1.5);
   border: 1px solid var(--grey-300);
   border-radius: 4px;
   padding: 20px var(--gap);
@@ -89,9 +89,9 @@ const CredentialsWrapper = styled.div`
   display: flex;
   flex-direction: column;
   row-gap: calc(var(--gap) / 2);
-  margin-bottom: calc(var(--gap) * 1.5);
+  margin-bottom: calc(var(--gap) * 2);
   .unique-text.size-m {
-    margin-top: calc(var(--gap) * 2);
+    margin-top: calc(var(--gap) * 1.5);
   }
   .unique-input-text {
     width: 100%;

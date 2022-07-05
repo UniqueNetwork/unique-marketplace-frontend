@@ -1,7 +1,7 @@
 import { Button, Heading, Tabs, Text, Select, Link } from '@unique-nft/ui-kit';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
 import DefaultMarketStages from './StagesModal';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
@@ -89,8 +89,10 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
     [setPriceInputValue]
   );
 
+  const isAuctionValid = selectedAccount && minStepInputValueAuction && durationSelectValue && Number(minStepInputValueAuction);
+
   const onConfirmAuctionClick = useCallback(() => {
-    if (!selectedAccount || !minStepInputValueAuction || !durationSelectValue) return;
+    if (!isAuctionValid) return;
 
     onSellAuction({ minimumStep: minStepInputValueAuction, startingPrice: inputStartingPriceValue || minStepInputValueAuction, duration: durationSelectValue, accountAddress: selectedAccount.address } as TAuctionProps);
   }, [minStepInputValueAuction, inputStartingPriceValue, durationSelectValue, selectedAccount, onSellAuction]);
@@ -146,12 +148,12 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
         onChange={onPriceInputChange}
         value={priceInputValue?.toString()}
       />
-      <TextStyled
+      {!selectedAccount?.isOnWhiteList && <TextStyled
         color='additional-warning-500'
         size='s'
       >
         {`A fee of ~ ${kusamaFee} ${tokenSymbol} can be applied to the transaction`}
-      </TextStyled>
+      </TextStyled>}
       <ButtonWrapper>
         <Button
           disabled={!priceInputValue || !Number(priceInputValue)}
@@ -184,15 +186,9 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
           value={durationSelectValue?.toString()}
         />
       </Row>
-      <TextStyled
-        color='additional-warning-500'
-        size='s'
-      >
-        {`A fee of ~ ${kusamaFee} ${tokenSymbol} can be applied to the transaction`}
-      </TextStyled>
       <ButtonWrapper>
         <Button
-          disabled={!minStepInputValueAuction || !durationSelectValue || !Number(minStepInputValueAuction)}
+          disabled={!isAuctionValid}
           onClick={onConfirmAuctionClick}
           role='primary'
           title='Confirm'
@@ -285,6 +281,7 @@ const TextStyled = styled(Text)`
 
 const InputWrapper = styled(NumberInput)`
   margin-bottom: 32px;
+  width: 100%;
 `;
 
 const SelectWrapper = styled(Select)`
@@ -304,8 +301,9 @@ const Content = styled.div`
 
 const Row = styled.div`
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+  min-height: 180px;
 `;
 
 const SellModalStyled = styled.div`

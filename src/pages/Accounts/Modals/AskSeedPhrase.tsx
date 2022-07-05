@@ -1,7 +1,7 @@
 import React, { ChangeEvent, FC, useCallback, useEffect, useState } from 'react';
 import { mnemonicGenerate } from '@polkadot/util-crypto';
-import { Button, Checkbox, Heading, Link, Select, Text, Icon } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import { Button, Checkbox, Heading, Link, Select, Text, Icon, Tooltip } from '@unique-nft/ui-kit';
+import styled from 'styled-components';
 
 import { TCreateAccountBodyModalProps } from './types';
 import { addressFromSeed } from '../../../utils/seedUtils';
@@ -9,10 +9,9 @@ import { addressFromSeed } from '../../../utils/seedUtils';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import { defaultPairType, derivePath } from './CreateAccount';
 import { AdditionalWarning100 } from '../../../styles/colors';
-import { Tooltip } from '../../../components/Tooltip/Tooltip';
-import Question from '../../../static/icons/question.svg';
-import { Avatar } from '../../../components/Avatar/Avatar';
+import { Avatar } from 'components/Avatar/Avatar';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
+import { IconButton } from 'components/IconButton/IconButton';
 
 type TOption = SelectOptionProps & { id: string, title: string };
 
@@ -50,27 +49,28 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish 
   }, []);
 
   const onNextClick = useCallback(() => {
+    if (!address || !confirmSeedSaved) return;
     onFinish({ seed, address });
-  }, [seed, address]);
+  }, [seed, address, confirmSeedSaved, onFinish]);
 
   return (<>
     <AddressWrapper>
       <Avatar size={24} src={DefaultAvatar} address={address} />
-      <Text>{address}</Text>
+      <Text color={'grey-500'}>{address}</Text>
     </AddressWrapper>
     <Heading size={'4'} >The secret seed value for this account</Heading>
-    <SeedGeneratorSelectWrapper>
+    {seedGenerators.length > 1 && <SeedGeneratorSelectWrapper>
       <Select options={seedGenerators} value={seedGenerator} onChange={onSeedGeneratorChange} />
-      <Tooltip title={<>Find out more on <Link href='https://' title={'Polkadot Wiki'}>Polkadot Wiki</Link></>} >
-        <Icon file={Question} size={24} />
+      <Tooltip content={<div><Icon name={'question'} size={24} color={'var(--color-primary-500)'} /></div>} placement={'top'} >
+        <>Find out more on <TooltipLink href='https://' title={'Polkadot Wiki'}>Polkadot Wiki</TooltipLink></>
       </Tooltip>
-    </SeedGeneratorSelectWrapper>
+    </SeedGeneratorSelectWrapper>}
     <InputSeedWrapper>
       <SeedInput
         onChange={onSeedChange}
         value={seed}
       />
-      <Button onClick={generateSeed} title='Regenerate seed' />
+      <IconButton onClick={generateSeed} size={24} name={'reload'}/>
     </InputSeedWrapper>
     <TextStyled
       color='additional-warning-500'
@@ -79,7 +79,7 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish 
       Ensure that you keep this seed in a safe place. Anyone with access to it can re-create the account and gain full access to it.
     </TextStyled>
     <ConfirmWrapperRow>
-      <Checkbox label={'I have saved my mnemnic seed safely'}
+      <Checkbox label={'I have saved my mnemonic seed safely'}
         checked={confirmSeedSaved}
         onChange={setConfirmSeedSaved}
         size={'m'}
@@ -100,7 +100,8 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish 
 const AddressWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 2);
-  margin: calc(var(--gap) * 2) 0;
+  margin-top: calc(var(--gap) * 1.5);
+  margin-bottom: calc(var(--gap) * 2);
   border: 1px solid var(--grey-300);
   border-radius: 4px;
   padding: 20px var(--gap);
@@ -122,28 +123,33 @@ const SeedGeneratorSelectWrapper = styled.div`
 `;
 
 const InputSeedWrapper = styled.div`
-  border: 1px solid var(--grey-300);
-  border-radius: 4px;
-  padding: var(--gap);
   display: flex;
   margin-bottom: var(--gap);
+  column-gap: calc(var(--gap) / 2);
+  align-items: flex-start;
 `;
 
 const SeedInput = styled.textarea`
-  margin-bottom: 32px;
+  border: 1px solid var(--grey-300);
+  border-radius: 4px;
+  padding: calc(var(--gap) / 2) var(--gap);
   width: 100%;
-  border: none;
   height: auto;
   resize: none;
   outline: 0px none transparent;
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
 `;
 
 const TextStyled = styled(Text)`
   box-sizing: border-box;
   display: flex;
   padding: 8px 16px;
-  margin: calc(var(--gap) * 1.5) 0;
-  border-radius: 4px;
+  margin: var(--gap) 0;
+  border-radius: var(--gap);
   background-color: ${AdditionalWarning100};
   width: 100%;
 `;
@@ -161,4 +167,9 @@ const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
   align-items: center;
+`;
+
+const TooltipLink = styled(Link)`
+  color: var(--color-additional-light);
+  text-decoration: underline;
 `;

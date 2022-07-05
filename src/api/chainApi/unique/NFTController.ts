@@ -5,20 +5,24 @@ import { fetchTokenImage, getTokenImage, getTokenImageUrl } from '../utils/image
 import { getEthAccount, normalizeAccountId } from '../utils/addressUtils';
 import { MetadataType, NFTCollection, NFTToken, TokenId, UniqueDecoratedRpc } from './types';
 import config from '../../../config';
+import { checkTokenIsAllowed, filterAllowedTokens } from '../utils/checkTokenIsAllowed';
 
 const { IPFSGateway } = config;
 
 export type NFTControllerConfig = {
   collectionsIds: number[]
+  allowedTokens: { collection: number; tokens: string }[];
 }
 
 class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
   private api: ApiPromise & { rpc: UniqueDecoratedRpc };
   private collectionsIds: number[];
+  private allowedTokens: Record<number, string>;
 
   constructor(api: ApiPromise, config?: NFTControllerConfig) {
     this.api = api;
     this.collectionsIds = config?.collectionsIds || [];
+    this.allowedTokens = config?.allowedTokens.reduce((acc, item) => ({ ...acc, [item.collection]: item.tokens }), {}) || {};
   }
 
   public async getToken(collectionId: number, tokenId: number): Promise<NFTToken | null> {
@@ -70,6 +74,8 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
         }
       }
 
+      const isAllowed = this.allowedTokens[collectionId] ? checkTokenIsAllowed(tokenId, this.allowedTokens[collectionId].split(',')) : true;
+
       return {
         id: tokenId,
         attributes,
@@ -79,7 +85,8 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
         collectionName: collectionName16Decoder(collection.name.toJSON() as number[]),
         prefix: hex2a(collection.tokenPrefix.toHex()),
         description: collectionName16Decoder(collection.description.toJSON() as number[]),
-        collectionCover
+        collectionCover,
+        isAllowed
       };
     } catch (e) {
       console.log('getDetailedTokenInfo error', e);
@@ -101,11 +108,15 @@ class UniqueNFTController implements INFTController<NFTCollection, NFTToken> {
         const tokensIdsOnEth =
           await this.api.rpc.unique?.accountTokens(collectionId, normalizeAccountId(getEthAccount(account))) as TokenId[];
 
-        const tokensOfCollection = (await Promise.all([...tokensIds, ...tokensIdsOnEth].map((item) =>
+        const currentAllowedTokens = this.allowedTokens[collectionId];
+        const allowedIds = filterAllowedTokens([...tokensIds, ...tokensIdsOnEth], currentAllowedTokens);
+        const tokensOfCollection = (await Promise.all(allowedIds
+        .map((item) =>
           this.getToken(collectionId, item.toNumber())))) as NFTToken[];
+
         tokens.push(...tokensOfCollection);
       } catch (e) {
-        console.error('Wrong ID of collection', e);
+        console.log(`Wrong ID of collection ${collectionId}`, e);
       }
     }
 

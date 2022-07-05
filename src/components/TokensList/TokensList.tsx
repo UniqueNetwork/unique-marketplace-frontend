@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { TokensCard } from '..';
 import { NFTToken } from '../../api/chainApi/unique/types';
 import { Offer } from '../../api/restApi/offers/types';

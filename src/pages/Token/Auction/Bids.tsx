@@ -1,9 +1,8 @@
 import React, { FC, useMemo } from 'react';
-import { Text } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import { TableColumnProps, Text } from '@unique-nft/ui-kit';
+import styled from 'styled-components';
 
 import { Offer } from '../../../api/restApi/offers/types';
-import { TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import { timestampTableFormat } from '../../../utils/timestampUtils';
 import { formatKusamaBalance } from '../../../utils/textUtils';
 import { Table } from '../../../components/Table';

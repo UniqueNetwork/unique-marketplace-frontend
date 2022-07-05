@@ -1,9 +1,7 @@
 import React, { FC, useEffect } from 'react';
-import styled from 'styled-components/macro';
-import { Icon, Text, Heading } from '@unique-nft/ui-kit';
+import styled from 'styled-components';
+import { Icon, Text, Heading, Loader } from '@unique-nft/ui-kit';
 
-import Loading from '../../../components/Loading';
-import CheckCircle from '../../../static/icons/check-circle.svg';
 import { Stage, StageStatus } from '../../../types/StagesTypes';
 
 type TStagesModalProps = {
@@ -27,8 +25,8 @@ const DefaultMarketStages: FC<TStagesModalProps> = ({ stages, status, onFinish }
       <StageWrapper>
         {stages.map((stage, index) => (<React.Fragment key={`stage-${index}`}>
           <StatusWrapper>
-            {(stage.status === StageStatus.inProgress || stage.status === StageStatus.awaitingSign) && <Loading />}
-            {stage.status === StageStatus.success && <Icon file={CheckCircle} size={24} />}
+            {(stage.status === StageStatus.inProgress || stage.status === StageStatus.awaitingSign) && <Loader isFullPage />}
+            {stage.status === StageStatus.success && <Icon name={'check-circle'} size={24} color={'var(--color-additional-dark)'} />}
           </StatusWrapper>
           <TitleWrapper>
             <Text size={'m'}>{stage.title}</Text>
@@ -54,6 +52,7 @@ const StageWrapper = styled.div`
 
 const StatusWrapper = styled.div`
   position: relative;
+  height: 100%;
   > div {
     top: 12px;
   }

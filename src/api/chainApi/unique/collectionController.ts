@@ -44,7 +44,7 @@ class UniqueCollectionController implements ICollectionController<NFTCollection,
       id: collectionId,
       owner: collection.owner,
       tokenPrefix: collection.tokenPrefix?.toUtf8() || '',
-      collectionName: collectionName16Decoder(collection.name?.toJSON() as number[] || []),
+      collectionName: collection.name ? collectionName16Decoder(collection.name.toJSON() as number[]) : '',
       description: hex2a(collection.description?.toHex() || ''),
       coverImageUrl
     };

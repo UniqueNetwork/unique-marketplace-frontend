@@ -61,6 +61,7 @@ const AccountWrapper: FC = ({ children }) => {
         return [];
       }
     }
+
     return (await web3Accounts()).map((account) => ({ ...account, signerType: AccountSigner.extension })) as Account[];
   }, []);
 

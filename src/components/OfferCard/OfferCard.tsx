@@ -1,11 +1,10 @@
 import React, { FC, useMemo } from 'react';
 import { Icon, Text } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
 import { Picture } from '..';
 import { formatKusamaBalance } from '../../utils/textUtils';
 import { Offer } from '../../api/restApi/offers/types';
-import Kusama from '../../static/icons/logo-kusama.svg';
 import { compareEncodedAddresses } from '../../api/chainApi/utils/addressUtils';
 import { useAccounts } from '../../hooks/useAccounts';
 import { timeDifference } from '../../utils/timestampUtils';
@@ -48,7 +47,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
       </PictureWrapper>
       <Description>
         <Link to={`/token/${offer?.collectionId}/${offer?.tokenId}`} title={`${prefix || ''} #${offer?.tokenId}`}>
-          <Text size='l' weight='medium' color={'secondary-500'}>
+          <Text size='l' weight='regular' color={'secondary-500'}>
             {`${prefix || ''} #${offer?.tokenId}`}
           </Text>
         </Link>
@@ -58,8 +57,8 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
           </Text>
         </a>
         <PriceWrapper>
-          <Text size='s'>{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(offer?.price)}` }</Text>
-          <Icon file={Kusama} size={16} />
+          <Text size='l'>{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(offer?.price)}` }</Text>
+          <Icon name={'chain-kusama'} size={16} />
         </PriceWrapper>
         {!offer?.auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         {offer?.auction && <AuctionInfoWrapper>
@@ -109,6 +108,7 @@ const PictureWrapper = styled(Link)`
     max-height: 100%;
     border-radius: 8px;
     transition: 50ms;
+    overflow: hidden;
 
     img {
       max-width: 100%;
@@ -130,6 +130,7 @@ const PriceWrapper = styled.div`
   display: flex;
   align-items: center;
   column-gap: calc(var(--gap) / 4);
+  margin-top: calc(var(--gap) / 2);
 `;
 
 const StyledText = styled(Text)` 

@@ -1,23 +1,29 @@
-import React, { FC } from 'react';
-import styled from 'styled-components/macro';
+import React, { FC, useMemo } from 'react';
+import styled from 'styled-components';
 import { Button, Text } from '@unique-nft/ui-kit';
 
-import { AdditionalWarning100, AdditionalWarning500, Grey300 } from '../../../styles/colors';
-import { Offer } from '../../../api/restApi/offers/types';
+import { AdditionalWarning100, AdditionalWarning500, Grey300 } from 'styles/colors';
+import { Offer } from 'api/restApi/offers/types';
 import { Price } from '../TokenDetail/Price';
-import { useAccounts } from '../../../hooks/useAccounts';
-import { useApi } from '../../../hooks/useApi';
+import { useAccounts } from 'hooks/useAccounts';
+import { useApi } from 'hooks/useApi';
 
 interface SellTokenProps {
   offer?: Offer
+  isAllowed?: boolean
   onSellClick(): void
   onTransferClick(): void
   onDelistClick(): void
 }
 
-export const SellToken: FC<SellTokenProps> = ({ offer, onSellClick, onTransferClick, onDelistClick }) => {
+export const SellToken: FC<SellTokenProps> = ({ offer, isAllowed, onSellClick, onTransferClick, onDelistClick }) => {
   const { selectedAccount } = useAccounts();
   const { settings } = useApi();
+
+  const hideSellBtn = useMemo(() => {
+    return settings?.marketType === 'primary' && !settings?.administrators.includes(selectedAccount?.address || '');
+  }, [settings, selectedAccount]);
+
   if (offer) {
     return (<>
       <Text size={'l'}>{'Price'}</Text>
@@ -29,10 +35,12 @@ export const SellToken: FC<SellTokenProps> = ({ offer, onSellClick, onTransferCl
     </>);
   }
 
+  if (!isAllowed) return null;
+
   return (
     <>
       <ActionsWrapper>
-        {settings?.marketType !== 'primary' && <Button title={'Sell'} role={'primary'} onClick={onSellClick}/>}
+        {!hideSellBtn && <Button title={'Sell'} role={'primary'} onClick={onSellClick}/>}
         <Button title={'Transfer'} onClick={onTransferClick} />
       </ActionsWrapper>
       {(settings?.marketType !== 'primary' && !selectedAccount?.isOnWhiteList) && <WarningWrapper>

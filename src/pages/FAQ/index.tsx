@@ -1,5 +1,5 @@
 import React from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { Heading } from '@unique-nft/ui-kit';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
 import { Primary600 } from '../../styles/colors';

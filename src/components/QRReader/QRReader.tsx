@@ -1,5 +1,5 @@
 import React, { FC, useCallback } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { decodeAddress } from '@polkadot/util-crypto';
 import { QrReader } from 'react-qr-reader';
 import Result from '@zxing/library/esm/core/Result';

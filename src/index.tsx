@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
-import { Market, MyTokens, Accounts, Trades, FAQ, TokenPage } from './pages';
+import { Market, MyTokens, Accounts, Trades, FAQ, TokenPage, AdminPanel, AdminLogin } from './pages';
 import { GlobalStyle } from './styles';
 
 ReactDOM.render(
@@ -47,6 +47,18 @@ ReactDOM.render(
             element={<FAQ />}
             path={'faq'}
           />
+          <Route
+            path={'administration'}
+          >
+            <Route
+              element={<AdminLogin />}
+              path={'login'}
+            />
+            <Route
+              element={<AdminPanel />}
+              index
+            />
+          </Route>
           <Route
             element={<Navigate to='market' />}
             path={'*'}

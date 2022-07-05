@@ -1,14 +1,16 @@
-import React, { FC } from 'react';
-import styled from 'styled-components/macro';
+import React, { VFC } from 'react';
+import styled from 'styled-components';
 import { Icon, Text } from '@unique-nft/ui-kit';
 
-import NoItemsIcon from '../static/icons/no-items.svg';
+interface NoItemsProps {
+  isSearchResult?: boolean
+}
 
-const NoItems: FC = () => {
+const NoItems: VFC<NoItemsProps> = ({ isSearchResult }) => {
   return (
     <NoItemsWrapper>
-      <Icon file={NoItemsIcon} size={80} />
-      <Text size={'l'} color={'grey-500'}>No items found</Text>
+      <Icon name={isSearchResult ? 'magnifier-found' : 'not-found'} size={80} />
+      <Text size={'l'} color={'blue-grey-500'}>Nothing found</Text>
     </NoItemsWrapper>
   );
 };
