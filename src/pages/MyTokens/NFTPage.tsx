@@ -229,14 +229,16 @@ export const NFTPage = () => {
         </TokensListWrapper>
       </MainContent>
       {deviceSize <= DeviceSize.md && <MobileFilters<MyTokensFilterState>
-        value={filterState}
         filterCount={filterCount}
         defaultSortingValue={defaultSortingValue}
         sortingValue={sortingValue}
         sortingOptions={sortingOptions}
         onFilterChange={setFilterState}
         onSortingChange={onSortingChange}
-        filterComponent={Filters}
+        filterComponent={<Filters
+          value={filterState}
+          onFilterChange={setFilterState}
+        />}
       />}
     </MarketMainPageStyled>
   </PagePaper>);

@@ -15,21 +15,25 @@ export const useOffer = (collectionId: number, tokenId: number) => {
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const [fetchingError, setFetchingError] = useState<ResponseError | undefined>();
 
-  const fetch = useCallback((collectionId: number, tokenId: number) => {
+  const fetch = useCallback(async (collectionId: number, tokenId: number) => {
     setIsFetching(true);
-    getOffer(collectionId, tokenId).then((response) => {
-      if (response.status === 200) {
-        setOffer(response.data);
+    try {
+      const { status, data } = await getOffer(collectionId, tokenId);
+      if (status === 200) {
+        setOffer(data);
         setIsFetching(false);
+        return data;
       }
-    }).catch((err: AxiosError) => {
+    } catch (err) {
+      const { response, message } = err as AxiosError;
       setOffer(undefined);
       setIsFetching(false);
       setFetchingError({
-        status: err.response?.status,
-        message: err.message
+        status: response?.status,
+        message
       });
-    });
+    }
+    return [];
   }, []);
 
   useEffect(() => {

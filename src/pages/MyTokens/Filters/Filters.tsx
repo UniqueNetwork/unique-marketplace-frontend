@@ -3,9 +3,9 @@ import styled from 'styled-components';
 
 import PricesFilter from '../../../components/Filters/PricesFilter';
 import { AttributeItem, FiltersProps, PriceRange } from '../../../components/Filters/types';
-import CollectionsFilter from '../../../components/Filters/CollectionsFilter';
 import { MyTokensFilterState, MyTokensStatuses } from './types';
 import StatusFilter from './StatusFilter';
+import CollectionsFilter from './CollectionsFilter';
 
 export const Filters: FC<FiltersProps<MyTokensFilterState>> = ({ value, onFilterChange }) => {
   const onStatusFilterChange = useCallback((statuses: MyTokensStatuses) => {
@@ -45,4 +45,7 @@ const FiltersStyled = styled.div`
   display: flex;
   flex-direction: column;
   row-gap: calc(var(--gap) * 2);
+  @media (max-width: 1024px) {
+    width: 100%;
+  }
 `;

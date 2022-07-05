@@ -7,7 +7,8 @@ export type GetOffersRequestPayload = {
   seller?: string
   isAuction?: boolean
   bidderAddress?: string
-  traitsCount?: number[]
+  attributes?: string[]
+  numberOfAttributes?: number[]
   searchText?: string
   searchLocale?: string
 } & Pagination & Sortable;
@@ -53,7 +54,10 @@ export type Offer = {
   }
 }
 
-export type OffersResponse = PaginatedResponse<Offer>
+export type OffersResponse = PaginatedResponse<Offer> & {
+  attributes: Record<string, Attribute[]>;
+  attributesCount: AttributeCount[]
+}
 
 export type UseFetchOffersProps = Partial<GetOffersRequestPayload>
 
