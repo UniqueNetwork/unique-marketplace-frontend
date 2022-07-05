@@ -151,7 +151,17 @@ const CommonTokenDetailStyled = styled.div`
   display: flex;
   width: 100%;
 
-  @media (max-width: 568px) {
+  @media (max-width: 767px) {
+    & .unique-modal-wrapper .unique-modal {
+      width: calc(520px - (var(--gap) * 3));
+    }
+  }
+  
+  @media (max-width: 567px) {
+    & .unique-modal-wrapper .unique-modal {
+      padding: 24px 16px;
+      width: calc(304px - (var(--gap) * 3));
+    }
     flex-direction: column;
     row-gap: var(--gap);
   }
