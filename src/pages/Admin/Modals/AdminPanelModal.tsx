@@ -69,4 +69,16 @@ const AdminModalWrapper = styled.div`
   & .unique-modal-wrapper .unique-modal {
     overflow: initial;
   }
+  @media (max-width: 767px) {
+    & .unique-modal-wrapper .unique-modal {
+      width: calc(520px - (var(--gap) * 3));
+    }
+  }
+
+  @media (max-width: 567px) {
+    & .unique-modal-wrapper .unique-modal {
+      width: calc(304px - (var(--gap) * 3));
+      padding: 24px 16px;
+    }
+  }
 `;

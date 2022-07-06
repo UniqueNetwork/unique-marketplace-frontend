@@ -96,13 +96,15 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
   </>);
 };
 
-const ModalWrapper = styled.div`
-  
-`;
-
 const Content = styled.div`
   && h2 {
     margin-bottom: 0;
+  }
+  @media (max-width: 567px) {
+    && h2 {
+      font-size: 24px;
+      line-height: 36px;
+    }
   }
 `;
 
@@ -136,4 +138,7 @@ const CollectionNameStyled = styled.div`
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
+  button {
+    width: 110px;
+  }
 `;

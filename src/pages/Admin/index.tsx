@@ -222,32 +222,47 @@ export const AdminPanelPage: FC = () => {
 const MainContent = styled.div`
   position: relative;
   flex: 1;
+  margin-top: calc(var(--gap) * 0.5);
 
   > div:nth-of-type(2) {
-    margin-top: var(--gap);
+    margin-top: calc(var(--gap) * 2);
     margin-bottom: calc(var(--gap) * 2);
-  }
-
-  @media (max-width: 1024px) {
-    padding-left: 0;
   }
 `;
 
 const ControlsWrapper = styled.div`
   display: flex;
   justify-content: space-between;
+
+  @media (max-width: 1279px) {
+    flex-direction: column;
+    gap: calc(var(--gap) * 1.5);
+  }
 `;
 
 const ButtonsWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 2);
+  
+  @media (max-width: 1279px) {
+    .unique-button.size-middle {
+      padding: 8px 29px;
+    }
+    button:last-of-type {
+      width: 228px;
+    }
+  }
+
+  @media (max-width: 567px) {
+    flex-direction: column;
+    gap: calc(var(--gap) / 2);
+    button:last-of-type {
+      width: 100%;
+    }
+  }
 `;
 
 const SortSelectWrapper = styled.div`
-  @media (max-width: 1024px) {
-    display: none;
-  }
-
   .unique-select svg {
     z-index: 0;
   }
@@ -258,6 +273,48 @@ const SearchAndSortingWrapper = styled.div`
   justify-content: space-between;
   .unique-input-text {
     min-width: 436px;
+  }
+  div {
+    flex-grow: unset;
+  }
+  
+  @media (max-width: 1279px) {
+    justify-content: flex-start;
+    .unique-input-text {
+      min-width: 448px;
+    }
+    .select-wrapper {
+      width: 268px;
+    }
+  }
+  
+  @media (max-width: 1023px) {
+    .select-wrapper {
+      width: 256px;
+    }
+    .unique-input-text {
+      width: 442px;
+    }
+  }
+
+  @media (max-width: 767px) {
+    flex-direction: column;
+    gap: var(--gap);
+    .unique-input-text {
+      width: 100%;
+    }
+    .select-wrapper {
+      width: 212px;
+    }
+  }
+
+  @media (max-width: 567px) {
+    .unique-input-text {
+      min-width: 100%;
+    }
+    .unique-select, .select-wrapper {
+      width: 100%;
+    }
   }
 `;
 
@@ -271,19 +328,19 @@ const CollectionListStyled = styled.div`
   gap: 32px;
 
   @media (max-width: 1919px) {
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
   }
 
   @media (max-width: 1439px) {
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
   }
 
   @media (max-width: 1023px) {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
   }
 
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
+  @media (max-width: 767px) {
+    grid-template-columns: 1fr 1fr;
   }
 
   @media (max-width: 567px) {
