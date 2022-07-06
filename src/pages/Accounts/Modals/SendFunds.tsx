@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Heading, Modal, Text } from '@unique-nft/ui-kit';
+import { Button, Heading, Modal, Text, Loader } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
 import { TTransferFunds } from './types';
@@ -19,6 +19,7 @@ import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import { useApi } from 'hooks/useApi';
 import { BN } from '@polkadot/util';
 import { fromStringToBnString } from 'utils/bigNum';
+import { debounce } from 'utils/helpers';
 
 const tokenSymbol = 'KSM';
 
@@ -71,43 +72,29 @@ type AskSendFundsModalProps = {
   onClose(): void
 }
 
-let inThrottle: boolean,
-  lastFn: ReturnType<typeof setTimeout>,
-  lastTime: number;
-const timeout = 500;
-
 export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, onFinish, senderAddress, onClose }) => {
   const { accounts, selectedAccount } = useAccounts();
   const [recipientAddress, setRecipientAddress] = useState<string | Account | undefined>();
   const [amount, setAmount] = useState<string>('');
   const { chainData, api } = useApi();
   const [kusamaFee, setKusamaFee] = useState('0');
-  const getKusamaFee = useCallback(() => {
-    if (!selectedAccount || !api?.market) return;
-    const recipient = typeof recipientAddress === 'string' ? recipientAddress : recipientAddress?.address;
-    api.market.getKusamaFee(selectedAccount.address, recipient, new BN(fromStringToBnString(amount)))
-    .then((fee) => {
-      setKusamaFee(formatKusamaBalance(fee.toString()));
-    }).catch((e) => {
-      console.log(e);
-    });
-  }, [api?.market, recipientAddress, selectedAccount, amount]);
+  const [isFeeLoading, setIsFeeLoading] = useState(false);
 
-  useEffect(() => {
-    if (!inThrottle) {
-      lastTime = Date.now();
-      inThrottle = true;
-      getKusamaFee();
-    } else {
-      clearTimeout(lastFn);
-      lastFn = setTimeout(() => {
-        if (Date.now() - lastTime >= timeout) {
-          lastTime = Date.now();
-          getKusamaFee();
-        }
-      }, Math.max(timeout - (Date.now() - lastTime), 0));
-    }
-  }, [getKusamaFee]);
+  const getKusamaFee = useCallback(() => {
+    setIsFeeLoading(true);
+    return debounce(() => {
+      if (!selectedAccount || !api?.market) return;
+      const recipient = typeof recipientAddress === 'string' ? recipientAddress : recipientAddress?.address;
+      api?.market?.getKusamaFee(selectedAccount.address, recipient, new BN(fromStringToBnString(amount)))
+      .then((fee) => {
+        setKusamaFee(formatKusamaBalance(fee.toString()));
+      }).catch((e) => {
+        console.log(e);
+      }).finally(() => {
+        setIsFeeLoading(false);
+      });
+    }, 300);
+  }, [api?.market, recipientAddress, selectedAccount, amount]);
 
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainData?.properties.ss58Format || 0);
@@ -135,7 +122,8 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
 
   const onAmountChange = useCallback((value: string) => {
     setAmount(value);
-  }, [setAmount]);
+    getKusamaFee()();
+  }, [setAmount, getKusamaFee]);
 
   const isConfirmDisabled = useMemo(() => (
     !recipientAddress || Number(amount) <= 0 || Number(amount) > Number(formatKusamaBalance(sender?.balance?.KSM?.toString() || 0))
@@ -155,6 +143,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
 
   const onChangeAddress = useCallback((input) => {
     setRecipientAddress(input);
+    getKusamaFee()();
     if (typeof input === 'string') {
       onFilter(input);
     } else {
@@ -166,6 +155,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     setRecipientAddress('');
     setAmount('');
     setFilteredAccounts(accountsWithQuartzAdresses);
+    setKusamaFee('0');
     onClose();
   }, [accountsWithQuartzAdresses, onClose]);
 
@@ -202,12 +192,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     {Number(amount) > Number(formatKusamaBalance(sender?.balance?.KSM?.toString() || 0)) && <LowBalanceWrapper>
       <Text size={'s'}>Your balance is too low</Text>
     </LowBalanceWrapper>}
-    <TextStyled
-      color='additional-warning-500'
-      size='s'
-    >
-      A fee of ~ {kusamaFee} KSM can be applied to the transaction, unless the transaction is sponsored
-    </TextStyled>
+    <KusamaFeeMessage isFeeLoading={isFeeLoading} kusamaFee={kusamaFee} />
     <ButtonWrapper>
       <Button
         disabled={isConfirmDisabled}
@@ -240,6 +225,21 @@ const TransferFundsStagesModal: FC<TransferFundsStagesModalProps & TTransferFund
       <DefaultMarketStages stages={stages} status={status} onFinish={onFinish} />
     </div>
   </Modal>);
+};
+
+type KusamaFeeMessageProps = {
+  isFeeLoading: boolean,
+  kusamaFee: string
+}
+
+const KusamaFeeMessage: FC<KusamaFeeMessageProps> = ({ isFeeLoading, kusamaFee }) => {
+  return (
+    <TextStyled color='additional-warning-500' size='s'>
+      {isFeeLoading
+        ? <Loader label='Loading fee...' />
+        : <>A fee of {kusamaFee === '0' ? 'some' : `~ ${kusamaFee}`} KSM can be applied to the transaction, unless the transaction is sponsored</>}
+    </TextStyled>
+  );
 };
 
 const Content = styled.div`
@@ -275,12 +275,18 @@ const TextStyled = styled(Text)`
   border-radius: 4px;
   background-color: ${AdditionalWarning100};
   width: 100%;
+  min-height: 58px;
+  
+  .unique-loader {
+    display: flex;
+  }
 `;
 
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
   column-gap: var(--gap);
+  margin-top: calc(var(--gap) * 1.5);
 `;
 
 const RecipientSelectWrapper = styled.div`
