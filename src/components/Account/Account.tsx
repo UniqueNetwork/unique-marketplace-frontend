@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 import { Text, Icon } from '@unique-nft/ui-kit';
 
 import DefaultAvatar from '../../static/icons/default-avatar.svg';
@@ -46,11 +46,12 @@ const AccountCard: FC<AccountProps> = ({
       <AccountInfoWrapper>
         {!hideName && <Text>{accountName}</Text>}
         {!hideAddress && <AddressRow>
-          {hideName
-            ? <Text>{isShort ? shortcutText(formatAddress(accountAddress) || '') : formatAddress(accountAddress) || ''}</Text>
-            : <Text size={'s'} color={'grey-500'}>
-              {isShort ? shortcutText(formatAddress(accountAddress) || '') : formatAddress(accountAddress) || ''}
-            </Text>}
+          <FormattedAddress
+            formatAddress={formatAddress}
+            accountAddress={accountAddress}
+            isShort={isShort}
+            hideName={hideName}
+          />
           {canCopy && <a onClick={onCopyAddress(formatAddress(accountAddress) || '')}>
             <CopyIconWrapper>
               <Icon name={'copy'} size={16} />
@@ -60,6 +61,26 @@ const AccountCard: FC<AccountProps> = ({
       </AccountInfoWrapper>
     </>
   );
+};
+
+interface IAddressProps {
+  isShort: boolean,
+  hideName: boolean,
+  formatAddress: (accountAddress: string) => string,
+  accountAddress: string
+}
+
+const FormattedAddress: FC<IAddressProps> = ({ isShort = false, formatAddress, accountAddress, hideName }) => {
+  const address = useMemo(() => {
+    return isShort ? shortcutText(formatAddress(accountAddress) || '') : formatAddress(accountAddress) || '';
+  }, [isShort, formatAddress, accountAddress]);
+
+  return (<>
+    {hideName
+      ? <Text>{address}</Text>
+      : <Text size={'s'} color={'grey-500'}>{address}</Text>
+    }
+  </>);
 };
 
 const AccountInfoWrapper = styled.div`
