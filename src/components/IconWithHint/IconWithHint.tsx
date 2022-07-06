@@ -2,14 +2,14 @@ import React, { FC, useCallback, useState } from 'react';
 import questionFilledIcon from 'static/icons/question-fill.svg';
 import questionIcon from 'static/icons/question.svg';
 import styled from 'styled-components';
-import { AdditionalDark, AdditionalLight } from 'styles/colors';
+import { Tooltip } from '@unique-nft/ui-kit';
 
 interface IProps {
-  width?: number
-  position?: 'top' | 'bottom';
+  offset?: number;
+  placement?: 'left' | 'right' | 'bottom' | 'top' | 'left-start' | 'left-end' | 'right-start' | 'right-end' | 'bottom-start' | 'bottom-end' | 'top-start' | 'top-end';
 }
 
-const IconWithHint: FC<IProps> = ({ width = 120, position = 'bottom', children }) => {
+const IconWithHint: FC<IProps> = ({ placement, offset = 5, children }) => {
   const [isHovered, setIsHovered] = useState(false);
   const onHover = useCallback(
     () => {
@@ -24,78 +24,32 @@ const IconWithHint: FC<IProps> = ({ width = 120, position = 'bottom', children }
     []
   );
   return (
-    <Container
-      onMouseOver={onHover}
-      onMouseLeave={onHoverEnd}
-    >
-      <img
-        alt='questionIcon'
-        src={isHovered ? questionFilledIcon : questionIcon}
-      />
-      {isHovered &&
-        <TooltipStyled width={width} className={position}>
+    <Cell>
+      Account
+      <IconContainer
+        onMouseOver={onHover}
+        onMouseOut={onHoverEnd}
+      >
+        <Tooltip
+          content={<img alt='questionIcon' src={isHovered ? questionFilledIcon : questionIcon}/>}
+          placement={placement}
+          offset={offset}
+        >
           {children}
-        </TooltipStyled>}
-    </Container>
+        </Tooltip>
+      </IconContainer>
+    </Cell>
   );
 };
 
-const Container = styled.div`
-  position: relative;
-  img { cursor: pointer; }
-  
-  .top {
-    left: -210px;
-    top: -40px;
-    
-    ::before {
-      left: 217px;
-      top: 37px;
-      border-left: 5px solid transparent;
-      border-top: 9px solid var(--color-additional-dark);
-      border-right: 5px solid transparent;
-    }
-  }
-
-  .bottom {
-    left: -126px;
-    top: 25px;
-    
-    ::before {
-      left: 133px;
-      top: -7px;
-      border-left: 5px solid transparent;
-      border-bottom: 9px solid var(--color-additional-dark);
-      border-right: 5px solid transparent;
-    }
-  }
+const Cell = styled.div`
+  display: flex;
+  align-items: center;
 `;
 
-const TooltipStyled = styled.div<{ width: number }>`
-  position: absolute;
-  background: ${AdditionalDark};
-  width: ${(props) => (props.width)}px;
-  color: ${AdditionalLight};
-  z-index: 1;
-  padding: 8px 16px !important;
-  line-height: 22px;
-  border-radius: 2px;
-
-  ::before {
-    position: absolute;
-    content: "";
-    width: 0;
-    height: 0;
-  }
-
-  a {
-    color: ${AdditionalLight};
-    text-decoration: underline;
-  }
-
-  a:hover {
-    text-decoration: none;
-  }
+const IconContainer = styled.div`
+  position: relative;
+  img { cursor: pointer; }
 `;
 
 export default IconWithHint;

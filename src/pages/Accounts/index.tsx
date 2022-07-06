@@ -22,7 +22,6 @@ import config from '../../config';
 import { TWithdrawBid } from '../../api/restApi/auction/types';
 import { TextInput } from '../../components/TextInput/TextInput';
 import { AdditionalLight, BlueGrey300, Primary100, Primary500 } from '../../styles/colors';
-import AccountTooltip from './Tooltips/AccountTooltip';
 import IconWithHint from 'components/IconWithHint/IconWithHint';
 import ConfirmModal from 'components/ConfirmModal';
 import { AccountInfo } from './types';
@@ -50,14 +49,13 @@ const getAccountsColumns = ({
     onShowGetKsmModal
   }: AccountsColumnsProps): TableColumnProps[] => [
   {
-    title: 'Account',
+    title: (<IconWithHint placement={'right-start'}>
+      <>Substrate account addresses (Kusama, Quartz, Polkadot, Unique, etc.) may be represented by a different address
+        character sequence, but they can be converted between each other because they share the same public key. You
+        can see all transformations for any given address on <StyledLink href='https://quartz.subscan.io/' target='_blank' rel='noreferrer'>Subscan</StyledLink>.</>
+    </IconWithHint>),
     width: '25%',
     field: 'accountInfo',
-    iconRight: {
-      name: 'question',
-      size: 20,
-      color: Primary500
-    },
     render(accountInfo: AccountInfo) {
       if (accountInfo.deposit && !isSmallDevice) return <></>;
       return (
@@ -110,7 +108,7 @@ const getAccountsColumns = ({
         return (
           <DepositActionsWrapper>
             <Button title={'Withdraw'} onClick={onShowWithdrawDepositModal(accountInfo.address)} role={'primary'} />
-            <IconWithHint>Learn more in <a href='/FAQ' target='_blank' rel='noreferrer'>FAQ</a></IconWithHint>
+            <IconWithHint placement={'bottom-end'}>Learn more in <StyledLink href='/FAQ' target='_blank' rel='noreferrer'>FAQ</StyledLink></IconWithHint>
           </DepositActionsWrapper>
         );
       }
@@ -126,7 +124,7 @@ const getAccountsColumns = ({
           </ActionsWrapper>
           {(accountInfo.deposit && isSmallDevice) && <DepositActionsWrapper>
             <Button title={'Withdraw'} onClick={onShowWithdrawDepositModal(accountInfo.address)} role={'primary'} />
-            <IconWithHint />
+            <IconWithHint placement={'bottom-end'}>Learn more in <StyledLink href='/FAQ' target='_blank' rel='noreferrer'>FAQ</StyledLink></IconWithHint>
           </DepositActionsWrapper>}
         </>
       );
@@ -309,7 +307,6 @@ export const AccountsPage = () => {
         </SearchInputWrapper>
       </Row>
       <TableWrapper>
-        <AccountTooltip/>
         <Table
           columns={getAccountsColumns({
             isSmallDevice: deviceSize === DeviceSize.sm,
@@ -526,5 +523,14 @@ const DropdownMenuItem = styled.div`
   &:active {
     background: ${BlueGrey300};
     color: ${Primary100};
+  }
+`;
+
+const StyledLink = styled.a`
+  color: ${AdditionalLight};
+  text-decoration: underline;
+  
+  &&:hover {
+    text-decoration: none;
   }
 `;
