@@ -5,7 +5,7 @@ export const serializeToQuery = (value: QueryParams) => {
     if (value[key] === undefined) return acc;
     if (Array.isArray(value[key])) {
       acc.push(...(value[key] as (number | string | object)[]).map((item) => {
-        if (typeof value[key] === 'object') {
+        if (typeof item === 'object') {
           return `${key}=${JSON.stringify(item)}`;
         }
         return `${key}=${item}`;

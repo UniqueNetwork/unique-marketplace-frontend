@@ -43,7 +43,7 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
 
   const onChangeSelectedCollection = useCallback(async (collection: NFTCollection | string) => {
     if (typeof collection === 'string') {
-      if (!/^\d+$/.test(collection) && collection !== '') return;
+      if (!/^\d{0,9}$/.test(collection) && collection !== '') return;
       if (!api?.collection) return;
 
       const collectionData = await api.collection.getCollection(Number(collection));
@@ -90,7 +90,7 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
         onClick={onConfirmClick}
         role='primary'
         title='Confirm'
-        disabled={!selectedCollection}
+        disabled={!selectedCollection || Number(selectedCollection) === 0}
       />
     </ButtonWrapper>
   </>);

@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 import { Button, Heading, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
@@ -8,18 +8,35 @@ import { TextInput } from 'components/TextInput/TextInput';
 import { NotificationSeverity } from '../../../notification/NotificationContext';
 import { useNotification } from '../../../hooks/useNotification';
 
+const MAX_SAFE_ID = 2147483647;
+
+const NOT_VALID_TOKEN_MESSAGE = 'List of token IDs is incorrect. It must be like "1-10,20" and maximum value of ID is 2147483647';
+
 export const SelectNFTsModal: FC<TAdminPanelModalBodyProps> = ({ collection, onFinish }) => {
   const { setAllowedTokens } = useAdminCollections();
   const [tokens, setTokens] = useState(collection?.allowedTokens || '');
-  const [isInvalidTokensValue, setIsInvalidTokensValue] = useState<boolean>(false);
   const { push } = useNotification();
+
+  const isValidAllowedTokens = useMemo(() => {
+    if (tokens && !/^\d+(-\d+)?(,\d+(-\d+)?)*$/.test(tokens)) {
+      return false;
+    }
+    if (tokens.split(',').some((value) => {
+      if (value.includes('-')) { // its range like 1-100
+        const [start, end] = value.split('-').map(Number);
+        return start > end || start > MAX_SAFE_ID || end > MAX_SAFE_ID;
+      } else { // its single value
+        return Number(value) > MAX_SAFE_ID;
+      }
+      return false;
+    })) return false;
+
+    return true;
+  }, [tokens]);
 
   const onAcceptClick = useCallback(async () => {
     if (!collection?.id) return;
-    if (tokens && !/^\d+(-\d+)?(,\d+(-\d+)?)*$/.test(tokens)) {
-      setIsInvalidTokensValue(true);
-      return;
-    }
+    if (!isValidAllowedTokens) return;
 
     await setAllowedTokens(collection?.id, tokens);
 
@@ -48,7 +65,7 @@ export const SelectNFTsModal: FC<TAdminPanelModalBodyProps> = ({ collection, onF
         <TextInput placeholder='ID of the tokens'
           value={tokens}
           onChange={onTokensChanged}
-          errorText={isInvalidTokensValue ? 'List of token IDs is incorrect' : undefined}
+          errorText={!isValidAllowedTokens ? NOT_VALID_TOKEN_MESSAGE : undefined}
         />
       </InputWrapper>
       <ButtonWrapper>
@@ -56,6 +73,7 @@ export const SelectNFTsModal: FC<TAdminPanelModalBodyProps> = ({ collection, onF
           onClick={onAcceptClick}
           role='primary'
           title='Accept'
+          disabled={!isValidAllowedTokens}
         />
       </ButtonWrapper>
     </>

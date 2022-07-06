@@ -20,6 +20,7 @@ import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import { MyTokensFilterState } from './Filters/types';
 import SearchField from '../../components/SearchField/SearchField';
 import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
+import { setUrlParameter, parseFilterState } from '../../utils/helpers';
 
 type TOption = SelectOptionProps & {
   direction: 'asc' | 'desc';
@@ -78,9 +79,10 @@ const pageSize = 1000;
 const defaultSortingValue = sortingOptions[sortingOptions.length - 1];
 
 export const NFTPage = () => {
-  const [filterState, setFilterState] = useState<MyTokensFilterState | null>(null);
-  const [sortingValue, setSortingValue] = useState<string>(defaultSortingValue.id);
-  const [searchString, setSearchString] = useState<string>();
+  const searchParams = new URLSearchParams(window.location.search);
+  const [filterState, setFilterState] = useState<MyTokensFilterState | null>(parseFilterState(searchParams.get('filterState')));
+  const [sortingValue, setSortingValue] = useState<string>(searchParams.get('sortingValue') || defaultSortingValue.id);
+  const [searchString, setSearchString] = useState<string>(searchParams.get('searchValue') || '');
   const [selectOption, setSelectOption] = useState<TOption>();
   const { selectedAccount, isLoading } = useAccounts();
   const [tokens, setTokens] = useState<NFTToken[]>([]);
@@ -111,15 +113,17 @@ export const NFTPage = () => {
 
   const onSortingChange = useCallback((val: TOption) => {
     setSortingValue(val.id);
+    setUrlParameter('sortingValue', val.id);
   }, []);
 
   const onSearch = useCallback((value: string) => {
     setSearchString(value);
+    setUrlParameter('searchValue', value || '');
   }, [setSearchString]);
 
   const filter = useCallback((token: NFTToken & Partial<Offer>) => {
       const { statuses, prices } = filterState || {};
-
+      setUrlParameter('filterState', filterState ? JSON.stringify(filterState) : '');
       const filterByStatus = (token: NFTToken & Partial<Offer>) => {
         const { onSell, fixedPrice, timedAuction, notOnSale } = statuses || {};
         if (!onSell && !fixedPrice && !timedAuction && !notOnSale) return true;
@@ -229,14 +233,16 @@ export const NFTPage = () => {
         </TokensListWrapper>
       </MainContent>
       {deviceSize <= DeviceSize.md && <MobileFilters<MyTokensFilterState>
-        value={filterState}
         filterCount={filterCount}
         defaultSortingValue={defaultSortingValue}
         sortingValue={sortingValue}
         sortingOptions={sortingOptions}
         onFilterChange={setFilterState}
         onSortingChange={onSortingChange}
-        filterComponent={Filters}
+        filterComponent={<Filters
+          value={filterState}
+          onFilterChange={setFilterState}
+        />}
       />}
     </MarketMainPageStyled>
   </PagePaper>);
