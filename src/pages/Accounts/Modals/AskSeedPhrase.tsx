@@ -1,17 +1,17 @@
 import React, { ChangeEvent, FC, useCallback, useEffect, useState } from 'react';
-import { mnemonicGenerate } from '@polkadot/util-crypto';
-import { Button, Checkbox, Heading, Link, Select, Text, Icon, Tooltip } from '@unique-nft/ui-kit';
+import { mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
+import { Button, Checkbox, Heading, Link, Select, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
 import { TCreateAccountBodyModalProps } from './types';
 import { addressFromSeed } from '../../../utils/seedUtils';
 
-import DefaultAvatar from '../../../static/icons/default-avatar.svg';
+import DefaultAvatar from 'static/icons/default-avatar.svg';
 import { defaultPairType, derivePath } from './CreateAccount';
-import { AdditionalWarning100 } from '../../../styles/colors';
+import { AdditionalWarning100, Coral700 } from 'styles/colors';
 import { Avatar } from 'components/Avatar/Avatar';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
-import { IconButton } from 'components/IconButton/IconButton';
+import IconWithHint from 'components/IconWithHint/IconWithHint';
 
 type TOption = SelectOptionProps & { id: string, title: string };
 
@@ -24,11 +24,17 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish 
   const [address, setAddress] = useState<string>('');
   const [confirmSeedSaved, setConfirmSeedSaved] = useState<boolean>(false);
   const [seedGenerator, setSeedGenerator] = useState('Mnemonic');
+  const [seedValid, setSeedValid] = useState(true);
 
   const changeSeed = useCallback((value: string) => {
     setSeed(value);
-    const newAddress = addressFromSeed(value, derivePath, defaultPairType);
-    setAddress(newAddress);
+    setSeedValid(mnemonicValidate(value));
+    if (mnemonicValidate(value)) {
+      const newAddress = addressFromSeed(value, derivePath, defaultPairType);
+      setAddress(newAddress);
+    } else {
+      setAddress('');
+    }
   }, [setSeed]);
 
   const generateSeed = useCallback(() => {
@@ -49,7 +55,7 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish 
   }, []);
 
   const onNextClick = useCallback(() => {
-    if (!address || !confirmSeedSaved) return;
+    if (!address || !confirmSeedSaved || !seedValid) return;
     onFinish({ seed, address });
   }, [seed, address, confirmSeedSaved, onFinish]);
 
@@ -59,19 +65,20 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish 
       <Text color={'grey-500'}>{address}</Text>
     </AddressWrapper>
     <Heading size={'4'} >The secret seed value for this account</Heading>
-    {seedGenerators.length > 1 && <SeedGeneratorSelectWrapper>
+    <SeedGeneratorSelectWrapper>
       <Select options={seedGenerators} value={seedGenerator} onChange={onSeedGeneratorChange} />
-      <Tooltip content={<div><Icon name={'question'} size={24} color={'var(--color-primary-500)'} /></div>} placement={'top'} >
+      <IconWithHint placement={'top'}>
         <>Find out more on <TooltipLink href='https://' title={'Polkadot Wiki'}>Polkadot Wiki</TooltipLink></>
-      </Tooltip>
-    </SeedGeneratorSelectWrapper>}
+      </IconWithHint>
+    </SeedGeneratorSelectWrapper>
     <InputSeedWrapper>
       <SeedInput
         onChange={onSeedChange}
         value={seed}
       />
-      <IconButton onClick={generateSeed} size={24} name={'reload'}/>
+      <Button onClick={generateSeed} title='Regenerate seed' />
     </InputSeedWrapper>
+    {!seedValid && <ErrorText>Seed phrase is invalid</ErrorText>}
     <TextStyled
       color='additional-warning-500'
       size='s'
@@ -88,7 +95,7 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish 
     <ButtonWrapper>
       <StepsTextStyled size={'m'}>Step 1/3</StepsTextStyled>
       <Button
-        disabled={!address || !confirmSeedSaved}
+        disabled={!address || !confirmSeedSaved || !seedValid}
         onClick={onNextClick}
         role='primary'
         title='Next'
@@ -123,16 +130,19 @@ const SeedGeneratorSelectWrapper = styled.div`
 `;
 
 const InputSeedWrapper = styled.div`
+  border: 1px solid var(--grey-300);
+  border-radius: 4px;
+  padding: var(--gap);
   display: flex;
   margin-bottom: var(--gap);
-  column-gap: calc(var(--gap) / 2);
-  align-items: flex-start;
+  button {
+    line-height: normal !important;
+  }
 `;
 
 const SeedInput = styled.textarea`
-  border: 1px solid var(--grey-300);
   border-radius: 4px;
-  padding: calc(var(--gap) / 2) var(--gap);
+  padding-right: var(--gap);
   width: 100%;
   height: auto;
   resize: none;
@@ -142,16 +152,18 @@ const SeedInput = styled.textarea`
   font-weight: 400;
   font-size: 16px;
   line-height: 24px;
+  margin-bottom: var(--gap);
+  border: none;
 `;
 
 const TextStyled = styled(Text)`
   box-sizing: border-box;
   display: flex;
   padding: 8px 16px;
-  margin: var(--gap) 0;
   border-radius: var(--gap);
   background-color: ${AdditionalWarning100};
   width: 100%;
+  margin: calc(var(--gap) * 1.5) 0;
 `;
 
 const ConfirmWrapperRow = styled.div`
@@ -172,4 +184,11 @@ const ButtonWrapper = styled.div`
 const TooltipLink = styled(Link)`
   color: var(--color-additional-light);
   text-decoration: underline;
+`;
+
+const ErrorText = styled.p`
+  color: ${Coral700};
+  text-align: right;
+  margin-top: calc(var(--gap) * (-0.5));
+  margin-right: calc(var(--gap) * 2);
 `;
