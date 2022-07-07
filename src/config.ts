@@ -30,7 +30,7 @@ const config: Config = {
   IPFSGateway: window.ENV?.IPFS_GATEWAY || process.env.REACT_APP_IPFS_GATEWAY,
   scanUrl: window.ENV?.SCAN_URL || process.env.REACT_APP_SCAN_URL,
   walletUrl: window.ENV?.WALLET_URL || process.env.REACT_APP_WALLET_URL,
-  rampApiKey: window.ENV?.RAMP_API_KEY || process.env.REACT_APP_RAMP_API_KEY
+  rampApiKey: window.ENV && 'RAMP_API_KEY' in window.ENV ? window.ENV.RAMP_API_KEY : process.env.REACT_APP_RAMP_API_KEY
 };
 
 export default config;

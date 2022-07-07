@@ -1,4 +1,5 @@
 import { PaginatedResponse, Pagination } from '../base/types';
+import { OfferTokenAttribute } from '../offers/types';
 
 export type GetTradesRequestPayload = {
   sort?: string // ex. "asc(Price)"
@@ -6,6 +7,15 @@ export type GetTradesRequestPayload = {
   collectionId?: number | number[]
   searchText?: string
 } & Pagination;
+
+export type TokenDescription = {
+  collectionName: string
+  collectionCover: string | null
+  description: string
+  image: string
+  prefix: string
+  attributes: OfferTokenAttribute[]
+}
 
 export type Trade = {
   buyer: string
@@ -17,6 +27,7 @@ export type Trade = {
   quoteId: number
   tokenId: number
   tradeDate: number
+  tokenDescription: TokenDescription
 }
 
 export type TradesResponse = PaginatedResponse<Trade>

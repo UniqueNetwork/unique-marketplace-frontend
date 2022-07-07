@@ -1,15 +1,15 @@
 import React, { useCallback } from 'react';
 import { Heading, Modal } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
-import { Primary600 } from '../../../styles/colors';
-import { NotificationSeverity } from '../../../notification/NotificationContext';
-import { useNotification } from '../../../hooks/useNotification';
-import copyIcon from '../../../static/icons/copy_blue.svg';
-import facebookIcon from '../../../static/icons/facebook.svg';
-import redditIcon from '../../../static/icons/reddit.svg';
-import telegramIcon from '../../../static/icons/telegram.svg';
-import twitterIcon from '../../../static/icons/twitter.svg';
-import { TelegramShareButton, TwitterShareButton, FacebookShareButton, RedditShareButton } from '../../../components/ShareButton';
+import { Primary600 } from 'styles/colors';
+import { NotificationSeverity } from 'notification/NotificationContext';
+import { useNotification } from 'hooks/useNotification';
+import copyIcon from 'static/icons/copy_blue.svg';
+import facebookIcon from 'static/icons/facebook.svg';
+import redditIcon from 'static/icons/reddit.svg';
+import telegramIcon from 'static/icons/telegram.svg';
+import twitterIcon from 'static/icons/twitter.svg';
+import { TelegramShareButton, TwitterShareButton, FacebookShareButton, RedditShareButton } from 'components/ShareButton';
 
 interface IShareTokenModalProps {
   isVisible: boolean;
@@ -90,6 +90,11 @@ const SocialButtonsWrapper = styled.div`
   }
   button:hover span {
     color: ${Primary600};
+  }
+  @media (max-width: 567px) {
+    button:first-of-type {
+      margin-right: 18px;
+    }
   }
 `;
 

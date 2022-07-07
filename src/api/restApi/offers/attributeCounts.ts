@@ -14,21 +14,25 @@ export const useAttributeCounts = () => {
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [fetchingError, setFetchingError] = useState<ResponseError | undefined>();
 
-  const fetch = useCallback((collectionIds: number[]) => {
+  const fetch = useCallback(async (collectionIds: number[]) => {
     setIsFetching(true);
-    getAttributeCounts(collectionIds).then((response) => {
-      if (response.status === 200) {
-        setAttributeCounts(response.data);
+    try {
+      const { status, data } = await getAttributeCounts(collectionIds);
+      if (status === 200) {
+        setAttributeCounts(data);
         setIsFetching(false);
+        return data;
       }
-    }).catch((err: AxiosError) => {
+    } catch (err) {
+      const { response, message } = err as AxiosError;
       setFetchingError({
-        status: err.response?.status,
-        message: err.message
+        status: response?.status,
+        message
       });
       setIsFetching(false);
       getAttributeCounts([]);
-    });
+    }
+    return [];
   }, [getAttributeCounts, setIsFetching]);
 
   const reset = useCallback(() => {

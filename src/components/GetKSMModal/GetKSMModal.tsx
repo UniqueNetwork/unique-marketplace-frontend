@@ -41,14 +41,15 @@ function GetKSMModal ({ onClose }: Props): React.ReactElement<Props> {
   }, [handleGetKSMClickByRamp]);
 
   return (
-    <Modal
-      isVisible
-      isClosable
-      onClose={onClose}
-    >
-      <Content ref={ref}>
-      </Content>
-    </Modal>
+    <GetKSMModalWrapper>
+      <Modal
+        isVisible
+        isClosable
+        onClose={onClose}
+      >
+        <Content ref={ref} />
+      </Modal>
+    </GetKSMModalWrapper>
   );
 }
 
@@ -56,8 +57,24 @@ const Content = styled.div`
   height: 720px;
   width: calc(640px - var(--prop-gap) * 3);
   @media (max-width: 567px) {
-    width: 325px;
-    height: 667px;
+    width: unset;
+  }
+`;
+
+const GetKSMModalWrapper = styled.div`
+  @media (max-width: 567px) {
+    .unique-modal-wrapper {
+      background-color: transparent;
+    }
+    .unique-modal {
+      top: 85px;
+      padding: 0;
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100vw;
+    }
   }
 `;
 

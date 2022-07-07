@@ -16,4 +16,9 @@ a{
 .unique-modal {
   overflow: visible;
 }
+
+.unique-tooltip {
+  z-index: 1000;
+}
+
 `;

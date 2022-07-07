@@ -7,6 +7,7 @@ import { AcceptSponsorshipModal } from './AcceptSponsorshipModal';
 import { AddCollectionModal } from './AddCollectionModal';
 import { SelectNFTsModal } from './SelectNFTsModal';
 import { CollectionData } from '../../../api/restApi/admin/types';
+import styled from 'styled-components';
 
 export type TAdminPanelModalProps = {
   collection?: CollectionData
@@ -53,13 +54,21 @@ export const AdminPanelModal = ({ onClose, onFinish, collection, modalType }: TA
   if (!ModalBodyComponent) return null;
 
   return (
-    <Modal isVisible={isVisible} isClosable={isClosable} onClose={onClose}>
-      <ModalBodyComponent
-        collection={collection}
-        onFinish={onFinish}
-        onClose={onClose}
-        setIsClosable={setIsClosable}
-      />
-    </Modal>
+    <AdminModalWrapper>
+      <Modal isVisible={isVisible} isClosable={isClosable} onClose={onClose}>
+        <ModalBodyComponent
+          collection={collection}
+          onFinish={onFinish}
+          onClose={onClose}
+          setIsClosable={setIsClosable}
+        />
+      </Modal>
+    </AdminModalWrapper>
   );
 };
+
+const AdminModalWrapper = styled.div`
+  & .unique-modal-wrapper .unique-modal {
+    overflow: initial;
+  }
+`;

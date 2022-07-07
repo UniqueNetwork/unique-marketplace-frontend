@@ -26,6 +26,7 @@ export const Avatar: FC<IAvatarProps> = ({
     <AvatarStyled $type={type}
       src={src}
       height={size}
+      alt={''}
     />
   </AvatarWrapper>;
 };
@@ -43,4 +44,7 @@ const AvatarStyled = styled.img<{ $type: 'circle' | 'square' }>`
   border-radius: ${(props) => (props.$type === 'circle' ? '50%' : '4px')};
   outline: ${(props) =>
     props.$type === 'circle' ? '1px solid $color-grey-200' : 'none'};
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
 `;

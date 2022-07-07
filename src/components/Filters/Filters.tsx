@@ -7,7 +7,7 @@ import { AttributeItem, FiltersProps, PriceRange, Statuses } from './types';
 import CollectionsFilter from './CollectionsFilter';
 import { useAccounts } from '../../hooks/useAccounts';
 
-export const Filters: FC<FiltersProps> = ({ value, onFilterChange }) => {
+export const Filters: FC<FiltersProps> = ({ value, attributes, attributeCounts, onFilterChange }) => {
   const { selectedAccount } = useAccounts();
 
   const onStatusFilterChange = useCallback((statuses: Statuses) => {
@@ -18,8 +18,8 @@ export const Filters: FC<FiltersProps> = ({ value, onFilterChange }) => {
     onFilterChange({ ...value, prices });
   }, [value, onFilterChange]);
 
-  const onCollectionsFilterChange = useCallback((collections: number[], attributes?: AttributeItem[], attributeCounts?: number[]) => {
-    onFilterChange({ ...value, collections, attributes, attributeCounts });
+  const onCollectionsFilterChange = useCallback((collections: number[]) => {
+    onFilterChange({ ...value, collections, attributes: [] });
   }, [value, onFilterChange]);
 
   const onCollectionAttributesFilterChange = useCallback((attributes: AttributeItem[]) => {
@@ -35,6 +35,8 @@ export const Filters: FC<FiltersProps> = ({ value, onFilterChange }) => {
     <PricesFilter value={value?.prices} onChange={onPricesFilterChange} />
     <CollectionsFilter
       value={value}
+      attributes={attributes}
+      attributeCounts={attributeCounts}
       onChange={onCollectionsFilterChange}
       onAttributesChange={onCollectionAttributesFilterChange}
       onAttributeCountsChange={onCollectionAttributeCountsFilterChange}
@@ -47,4 +49,8 @@ const FiltersStyled = styled.div`
   display: flex;
   flex-direction: column;
   row-gap: calc(var(--gap) * 2);
+
+  @media (max-width: 1024px) {
+    width: 100%;
+  }
 `;

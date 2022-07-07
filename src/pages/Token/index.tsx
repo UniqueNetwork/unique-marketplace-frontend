@@ -133,6 +133,7 @@ const BackLink = styled.button`
   font-style: normal;
   font-weight: 400;
   font-size: 16px;
+  font-family: var(--font-inter);
   line-height: 24px;
   color: ${BlueGrey500};
   display: flex;
