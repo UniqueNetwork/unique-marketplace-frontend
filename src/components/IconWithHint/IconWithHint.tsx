@@ -9,7 +9,7 @@ interface IProps {
   placement?: 'left' | 'right' | 'bottom' | 'top' | 'left-start' | 'left-end' | 'right-start' | 'right-end' | 'bottom-start' | 'bottom-end' | 'top-start' | 'top-end';
 }
 
-const IconWithHint: FC<IProps> = ({ placement, offset = 5, children }) => {
+const IconWithHint: FC<IProps> = ({ placement = 'bottom', offset = 5, children }) => {
   const [isHovered, setIsHovered] = useState(false);
   const onHover = useCallback(
     () => {

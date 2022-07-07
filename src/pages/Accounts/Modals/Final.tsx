@@ -7,6 +7,7 @@ import { defaultPairType, derivePath } from './CreateAccount';
 import { TCreateAccountBodyModalProps } from './types';
 import { AdditionalWarning100, Grey300 } from '../../../styles/colors';
 import { Avatar } from '../../../components/Avatar/Avatar';
+import IconWithHint from '../../../components/IconWithHint/IconWithHint';
 
 export const FinalModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties, onFinish, onGoBack }) => {
   const onSaveClick = useCallback(() => {
@@ -24,23 +25,23 @@ export const FinalModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties
     <CredentialsWrapper >
       <LabelTextWrapper>
         <Text size={'m'}>Partial seed</Text>
-        <Tooltip content={<div><Icon name={'question'} size={24} color={'var(--color-primary-500)'} /></div>} >
-          The seed is your key to the account. Knowing the seed allows you, or anyone else who knows the seed, to re-generate and control this account.
-        </Tooltip>
+        <IconWithHint>
+          <>The seed is your key to the account. Knowing the seed allows you, or anyone else who knows the seed, to re-generate and control this account.</>
+        </IconWithHint>
       </LabelTextWrapper>
       <ValueTextStyled>{shortSeed}</ValueTextStyled>
       <LabelTextWrapper>
         <Text size={'m'}>Keypair type</Text>
-        <Tooltip content={<div><Icon name={'question'} size={24} color={'var(--color-primary-500)'} /></div>} >
-          Substrate supports a number of different crypto mechanisms. As such the keyring allows for the creation and management of different types of crypto.
-        </Tooltip>
+        <IconWithHint>
+          <>Substrate supports a number of different crypto mechanisms. As such the keyring allows for the creation and management of different types of crypto.</>
+        </IconWithHint>
       </LabelTextWrapper>
       <ValueTextStyled>{defaultPairType}</ValueTextStyled>
       <LabelTextWrapper>
         <Text size={'m'}>Derivation path</Text>
-        <Tooltip content={<div><Icon name={'question'} size={24} color={'var(--color-primary-500)'} /></div>} >
-          If you would like to create and manage several accounts on the network using the same seed, you can use derivation paths.
-        </Tooltip>
+        <IconWithHint>
+          <>If you would like to create and manage several accounts on the network using the same seed, you can use derivation paths.</>
+        </IconWithHint>
       </LabelTextWrapper>
       <ValueTextStyled>{derivePath || 'None provided'}</ValueTextStyled>
     </CredentialsWrapper>
