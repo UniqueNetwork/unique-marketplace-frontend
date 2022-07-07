@@ -25,7 +25,6 @@ const IconWithHint: FC<IProps> = ({ placement = 'bottom', offset = 5, children }
   );
   return (
     <Cell>
-      Account
       <IconContainer
         onMouseOver={onHover}
         onMouseOut={onHoverEnd}

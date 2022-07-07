@@ -165,7 +165,9 @@ export const NFTPage = () => {
       }
       let filteredBySearchValue = true;
       if (searchString) {
-        filteredBySearchValue = token.collectionName?.includes(searchString) || token.prefix?.includes(searchString) || token.id === Number(searchString);
+        filteredBySearchValue = token.collectionName?.toLowerCase().includes(searchString.toLowerCase()) ||
+          token.prefix?.toLowerCase().includes(searchString.toLowerCase()) ||
+          token.id === Number(searchString);
       }
 
       return filterByStatus(token) && filteredByPrice && filteredByCollections && filteredByAttributeCounts && filteredByAttributes && filteredBySearchValue;

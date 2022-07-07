@@ -20,4 +20,7 @@ const StyledButton = styled.button`
   background: transparent;
   padding: 0;
   cursor: pointer;
+  &:hover svg {
+    fill: var(--color-primary-500);
+  }
 `;

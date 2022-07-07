@@ -123,7 +123,9 @@ const InputWrapper = styled(TextInput)`
   width: 100%;
 
   label {
-    margin-bottom: 16px;
+    margin-bottom: 16px;    
+    white-space: break-spaces;
+    height: auto;
   }
 `;
 

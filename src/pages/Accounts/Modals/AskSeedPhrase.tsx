@@ -12,6 +12,7 @@ import { AdditionalWarning100, Coral700 } from 'styles/colors';
 import { Avatar } from 'components/Avatar/Avatar';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import IconWithHint from 'components/IconWithHint/IconWithHint';
+import { IconButton } from '../../../components/IconButton/IconButton';
 
 type TOption = SelectOptionProps & { id: string, title: string };
 
@@ -76,7 +77,12 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish 
         onChange={onSeedChange}
         value={seed}
       />
-      <Button onClick={generateSeed} title='Regenerate seed' />
+      <IconButton
+        size={24}
+        name={'reload'}
+        color={'var(--color-additional-dark)'}
+        onClick={generateSeed}
+      />
     </InputSeedWrapper>
     {!seedValid && <ErrorText>Seed phrase is invalid</ErrorText>}
     <TextStyled
@@ -130,19 +136,16 @@ const SeedGeneratorSelectWrapper = styled.div`
 `;
 
 const InputSeedWrapper = styled.div`
-  border: 1px solid var(--grey-300);
-  border-radius: 4px;
-  padding: var(--gap);
   display: flex;
   margin-bottom: var(--gap);
-  button {
-    line-height: normal !important;
-  }
+  column-gap: calc(var(--gap) / 2);
+  align-items: flex-start;
 `;
 
 const SeedInput = styled.textarea`
+  border: 1px solid var(--grey-300);
   border-radius: 4px;
-  padding-right: var(--gap);
+  padding: calc(var(--gap) / 2) var(--gap);
   width: 100%;
   height: auto;
   resize: none;
@@ -152,8 +155,6 @@ const SeedInput = styled.textarea`
   font-weight: 400;
   font-size: 16px;
   line-height: 24px;
-  margin-bottom: var(--gap);
-  border: none;
 `;
 
 const TextStyled = styled(Text)`

@@ -66,7 +66,7 @@ export const FinalModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties
       <Button
         onClick={onSaveClick}
         role='primary'
-        title='Save'
+        title='Create account'
       />
     </ButtonWrapper>
   </>);

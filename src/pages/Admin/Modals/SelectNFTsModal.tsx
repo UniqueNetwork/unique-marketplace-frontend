@@ -39,8 +39,7 @@ export const SelectNFTsModal: FC<TAdminPanelModalBodyProps> = ({ collection, onF
     if (!isValidAllowedTokens) return;
 
     await setAllowedTokens(collection?.id, tokens);
-
-    push({ message: `Add allowed tokens: ${tokens} for collection: ${collection?.id}`, severity: NotificationSeverity.success });
+    push({ message: `Add allowed tokens: ${tokens || 'all tokens'} for collection: ${collection?.id}`, severity: NotificationSeverity.success });
     onFinish();
   }, [collection, tokens]);
 
@@ -60,6 +59,7 @@ export const SelectNFTsModal: FC<TAdminPanelModalBodyProps> = ({ collection, onF
       </Row>
       <Row>
         <Text size='s' color='grey-500'>You can enter individual numbers separated by commas and intervals separated by hyphens</Text>
+        <Text size='s' color='grey-500'>Without filling in the data you put up for sale all the tokens on the marketplace</Text>
       </Row>
       <InputWrapper>
         <TextInput placeholder='ID of the tokens'
