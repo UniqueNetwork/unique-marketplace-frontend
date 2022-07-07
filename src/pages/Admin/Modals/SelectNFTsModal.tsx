@@ -82,18 +82,29 @@ export const SelectNFTsModal: FC<TAdminPanelModalBodyProps> = ({ collection, onF
 
 const Content = styled.div`
   && h2 {
-    margin-bottom: 0;
+    margin-bottom: calc(var(--gap) * 1.5);
+  }
+  @media (max-width: 567px) {
+    && h2 {
+      font-size: 24px;
+      line-height: 36px;
+      width: 100% !important;
+    }
   }
 `;
 
 const Row = styled.div`
-  margin: calc(var(--gap) * 1.5) 0;
+  margin: 4px 0;
+  .unique-text[class*=size-s] {
+    line-height: 22px;
+  }
 `;
 
 const InputWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 2);
   margin-bottom: calc(var(--gap) * 2);
+  margin-top: var(--gap);
   &>div {
     width: 100%;
     .unique-input-text {
@@ -106,4 +117,9 @@ const InputWrapper = styled.div`
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
+  @media (max-width: 567px) {
+    button {
+      width: 100%;
+    }
+  }
 `;

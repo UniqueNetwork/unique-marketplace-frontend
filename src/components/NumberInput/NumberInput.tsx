@@ -35,7 +35,7 @@ export const NumberInput: FC<AmountInputProps> = ({ value, onChange, placeholder
       value={value}
       label={label}
     />
-    {value && <ClearButton name={'circle-close'} size={24} onClick={onClear} />}
+    {value && <ClearButton name={'circle-close'} size={16} onClick={onClear} />}
   </InputWrapper>;
 };
 
@@ -53,6 +53,6 @@ const InputWrapper = styled.div`
 const ClearButton = styled(IconButton)`
   position: absolute;
   right: calc(var(--gap) / 2);
-  bottom: 5px;
+  bottom: calc(var(--gap) / 2);
   width: auto !important;
 `;

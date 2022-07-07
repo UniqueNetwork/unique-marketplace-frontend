@@ -55,13 +55,19 @@ export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collecti
         <Text size={'m'}>{`The author of the collection ${collection?.name || collection?.collectionName} [ID ${collection?.id}] has chosen this address as a sponsor. Do you confirm the choice?`}</Text>
       </Row>
       <AddressWrapper>
-        {collectionDetails?.sponsorship?.unconfirmed && <AccountCard accountName={''} accountAddress={collectionDetails?.sponsorship?.unconfirmed || ''} canCopy={true} />}
+        {collectionDetails?.sponsorship?.unconfirmed && <AccountCard
+            accountName={''}
+            accountAddress={collectionDetails?.sponsorship?.unconfirmed || ''} canCopy={true}
+            canCopy
+            hideName
+            isShort
+        />}
       </AddressWrapper>
       <TextStyled
         color='additional-warning-500'
         size='s'
       >
-        {`A fee of ~ ${kusamaFee} ${tokenSymbol} can be applied to the transaction`}
+        {`A fee of ~ ${kusamaFee} ${tokenSymbol} can be applied to the transaction if you accept this sponsor`}
       </TextStyled>
       <ButtonWrapper>
         <Button
@@ -80,12 +86,17 @@ export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collecti
 
 const Content = styled.div`
   && h2 {
-    margin-bottom: 0;
+    margin-bottom: calc(var(--gap) * 1.5);
+  }
+  @media (max-width: 567px) {
+    && h2 {
+      font-size: 24px;
+      line-height: 36px;
+    }
   }
 `;
 
 const Row = styled.div`
-  margin: calc(var(--gap) * 1.5) 0;
 `;
 
 const AddressWrapper = styled.div`
@@ -94,11 +105,15 @@ const AddressWrapper = styled.div`
   border: 1px solid var(--grey-300);
   border-radius: 4px;
   padding: calc(var(--gap) / 2) var(--gap);
-  margin: calc(var(--gap) * 1.5) 0;
+  margin: calc(var(--gap)) 0 calc(var(--gap) * 2);
   align-items: center;
   .unique-text {
     text-overflow: ellipsis;
     overflow: hidden;
+  }
+  .icon-copy {
+    width: 24px;
+    height: 24px;
   }
 `;
 
@@ -116,4 +131,11 @@ const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
   column-gap: var(--gap);
+  gap: calc(var(--gap) / 2);
+  @media (max-width: 567px) {
+    justify-content: normal;
+    button {
+      width: 100%;
+    }
+  }
 `;
