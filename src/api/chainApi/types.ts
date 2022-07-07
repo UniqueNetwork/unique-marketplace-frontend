@@ -42,6 +42,9 @@ export interface ICollectionController<Collection, Token> {
   getCollections(): Promise<Collection[]>
   getFeaturedCollections(): Promise<Collection[]>
   getTokensOfCollection(collectionId: number, ownerId: string): Promise<TokenId[]>
+  setCollectionSponsor(collectionId: number, sponsorAddress: string, options: TransactionOptions): Promise<void>
+  confirmSponsorship(collectionId: number, options: TransactionOptions): Promise<void>
+  removeCollectionSponsor(collectionId: number, options: TransactionOptions): Promise<void>
 }
 
 export interface IAccountController<Collection, Token> {
@@ -76,9 +79,6 @@ export interface IMarketController {
   transferBidBalance: (from: string, amount: string, options: TransactionOptions) => Promise<void>
   transferBalance: (from: string, to: string, amount: string, options: TransactionOptions) => Promise<void>
   getKusamaFee: (sender: AddressOrPair, recipient?: string, value?: BN) => Promise<Balance>
-  setCollectionSponsor(collectionId: number, sponsorAddress: string, options: TransactionOptions): Promise<void>
-  confirmSponsorship(collectionId: number, options: TransactionOptions): Promise<void>
-  removeCollectionSponsor(collectionId: number, options: TransactionOptions): Promise<void>
 }
 
 export type Chain = {

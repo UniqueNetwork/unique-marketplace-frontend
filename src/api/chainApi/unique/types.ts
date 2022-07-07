@@ -36,7 +36,7 @@ export interface NFTCollection {
   coverImageUrl?: string
   collectionName?: string
   description?: string
-  owner: GenericAccountId
+  owner: CrossAccountId
   sponsorship?: NFTCollectionSponsorship | null
 }
 

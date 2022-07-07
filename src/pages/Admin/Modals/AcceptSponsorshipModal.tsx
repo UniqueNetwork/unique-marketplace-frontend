@@ -13,7 +13,7 @@ import { useRejectSponsorshipStages } from 'hooks/adminStages/useRejectSponsorsh
 
 const tokenSymbol = 'KSM';
 
-export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collection, onClose, setIsClosable, onFinish }) => {
+export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collection, setIsClosable, onFinish }) => {
   const { kusamaFee } = useFee();
   const [step, setStep] = useState<'ask' | 'accept-stages' | 'reject-stages'>('ask');
   const { initiate: initiateAccept, status: acceptStatus, stages: acceptStages } = useAcceptSponsorshipStages(collection?.id || 0);
@@ -31,7 +31,6 @@ export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collecti
     initiateAccept(null);
   }, []);
 
-// TODO: remove this after the API provides complete collection details (cover, sponsorship, etc)
   const { api } = useApi();
   const collectionApi = api?.collection;
   const [collectionDetails, setCollectionDetails] = useState<NFTCollection | null>();
@@ -56,11 +55,11 @@ export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collecti
       </Row>
       <AddressWrapper>
         {collectionDetails?.sponsorship?.unconfirmed && <AccountCard
-            accountName={''}
-            accountAddress={collectionDetails?.sponsorship?.unconfirmed || ''} canCopy={true}
-            canCopy
-            hideName
-            isShort
+          accountName={''}
+          accountAddress={collectionDetails?.sponsorship?.unconfirmed || ''}
+          canCopy
+          hideName
+          isShort
         />}
       </AddressWrapper>
       <TextStyled

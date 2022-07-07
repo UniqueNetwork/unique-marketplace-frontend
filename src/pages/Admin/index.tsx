@@ -4,7 +4,6 @@ import styled from 'styled-components/macro';
 
 import NoItems from '../../components/NoItems';
 import { Secondary400 } from '../../styles/colors';
-import { NFTCollection } from '../../api/chainApi/unique/types';
 import { CollectionCard } from '../../components/CollectionCard/CollectionCard';
 import { AdminPanelModal } from './Modals/AdminPanelModal';
 import { AdminPanelModalType } from './Modals/types';
@@ -68,7 +67,7 @@ export const AdminPanelPage: FC = () => {
   const [searchValue, setSearchValue] = useState<string>();
   const [hasAccess, setHasAccess] = useState<boolean>(false);
   const [modalType, setModalType] = useState(AdminPanelModalType.default);
-  const [selectedCollection, setSelectedCollection] = useState<NFTCollection>();
+  const [selectedCollection, setSelectedCollection] = useState<CollectionData>();
   const { hasAdminPermission, getJWToken } = useAdminLoggingIn();
   const { collections, isFetching, fetchCollections } = useAdminCollections();
   const { isLoading: isAccountsLoading } = useAccounts();
@@ -119,27 +118,27 @@ export const AdminPanelPage: FC = () => {
     window.open(config.walletUrl, '_blank')?.focus();
   }, [config.walletUrl, hasAccess]);
 
-  const onManageSponsorshipClick = useCallback((collection: NFTCollection) => () => {
+  const onManageSponsorshipClick = useCallback((collection: CollectionData) => () => {
     setModalType(AdminPanelModalType.acceptSponsorship);
     setSelectedCollection(collection);
   }, []);
 
-  const onRemoveSponsorshipClick = useCallback((collection: NFTCollection) => () => {
+  const onRemoveSponsorshipClick = useCallback((collection: CollectionData) => () => {
     setModalType(AdminPanelModalType.rejectSponsorship);
     setSelectedCollection(collection);
   }, []);
 
-  const onRemoveCollectionClick = useCallback((collection: NFTCollection) => () => {
+  const onRemoveCollectionClick = useCallback((collection: CollectionData) => () => {
     setModalType(AdminPanelModalType.removeCollection);
     setSelectedCollection(collection);
   }, []);
 
-  const onManageTokensClick = useCallback((collection: NFTCollection) => () => {
+  const onManageTokensClick = useCallback((collection: CollectionData) => () => {
     setModalType(AdminPanelModalType.selectNFTs);
     setSelectedCollection(collection);
   }, []);
 
-  const onViewOnScanClick = useCallback((collection: NFTCollection) => () => {
+  const onViewOnScanClick = useCallback((collection: CollectionData) => () => {
     if (!config.scanUrl) return;
     window.open(`${config.scanUrl}collections/${collection.id}`, '_blank')?.focus();
   }, []);

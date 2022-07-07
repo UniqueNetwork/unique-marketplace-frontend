@@ -19,4 +19,5 @@ export type CollectionData = NFTCollection & {
   updatedAt?: string
   status?: string
   name?: string
+  owner?: string
 }
