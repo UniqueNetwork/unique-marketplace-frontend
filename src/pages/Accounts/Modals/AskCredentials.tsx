@@ -16,7 +16,9 @@ export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountP
     setName(value);
   }, []);
 
-  const validPassword = useMemo(() => password === confirmPassword, [password, confirmPassword]);
+  const nameIsValid = useMemo(() => name.length > 2, [name]);
+  const passwordIsValid = useMemo(() => password.length > 4, [password]);
+  const passwordsMatch = useMemo(() => password === confirmPassword, [password, confirmPassword]);
 
   const onNextClick = useCallback(() => {
     if (!accountProperties) return;
@@ -31,10 +33,10 @@ export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountP
     <CredentialsWrapper>
       <Text size={'m'}>Name</Text>
       <Text size={'s'} color={'grey-500'}>Give your account a name for easier identification and handling. </Text>
-      <TextInput onChange={onAccountNameChange} value={name} />
+      <TextInput onChange={onAccountNameChange} value={name} errorText={!nameIsValid && name ? 'Name must be 3 characters or more' : undefined} />
 
       <Text size={'m'}>Password</Text>
-      <Text size={'s'} color={'grey-500'}>This is necessary to authenticate all committed transactions and encrypt the key pair. Ensure you are using a strong password for proper account protection. </Text>
+      <Text size={'s'} color={'grey-500'}>This is necessary to authenticate all committed transactions and encrypt the key pair.<br/> Ensure you are using a strong password for proper account protection. </Text>
       <PasswordInput
         onChange={setPassword}
         value={password}
@@ -44,6 +46,8 @@ export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountP
         onChange={setConfirmPassword}
         value={confirmPassword}
       />
+      {!passwordIsValid && password && <Text size={'s'} color={'coral-500'}>Password must be 5 characters or more</Text>}
+      {!passwordsMatch && confirmPassword && <Text size={'s'} color={'coral-500'}>Passwords do not match</Text>}
     </CredentialsWrapper>
     <ButtonWrapper>
       <StepsTextStyled size={'m'}>Step 2/3</StepsTextStyled>
@@ -52,7 +56,7 @@ export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountP
         title='Previous'
       />
       <Button
-        disabled={!validPassword || !password || !name}
+        disabled={!passwordsMatch || !passwordIsValid || !nameIsValid}
         onClick={onNextClick}
         role='primary'
         title='Next'
