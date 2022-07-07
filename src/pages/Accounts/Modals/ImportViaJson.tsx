@@ -14,6 +14,7 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
   const { rawRpcApi } = useApi();
   const [pair, setPair] = useState<KeyringPair | null>(null);
   const [password, setPassword] = useState<string>('');
+  const [passwordIncorrect, setPasswordIncorrect] = useState<boolean>(false);
 
   const onUploadChange = useCallback((data: { url: string; file: Blob } | null) => {
     if (!data) return;
@@ -36,6 +37,8 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
       keyring.addPair(pair, password);
     } catch (error) {
       console.error(error);
+      setPasswordIncorrect(true);
+      return;
     }
     onFinish();
   }, [pair, password, onFinish]);
@@ -60,6 +63,7 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
         onChange={setPassword}
         value={password}
       />
+      {passwordIncorrect && <Text size={'s'} color={'coral-500'}>Password incorrect</Text>}
     </InputWrapper>
     <TextStyled
       color='additional-warning-500'
