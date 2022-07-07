@@ -7,7 +7,6 @@ export const useScreenWidthFromThreshold = (threshold: number): { lessThanThresh
 
   useEffect(() => {
     const listener = () => {
-      const media = window.matchMedia(`(max-width: ${threshold}px)`);
       setLessThanThreshold(media.matches);
     };
 
