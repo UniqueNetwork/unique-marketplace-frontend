@@ -1,25 +1,49 @@
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import { Button, Heading, Text } from '@unique-nft/ui-kit';
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
 import styled from 'styled-components/macro';
-import { useAccounts } from '../../../hooks/useAccounts';
 import AccountCard from '../../../components/Account/Account';
 import { AdditionalWarning100 } from '../../../styles/colors';
 import { useFee } from '../../../hooks/useFee';
+import StagesModal from '../../Token/Modals/StagesModal';
+import { useAcceptSponsorshipStages } from '../../../hooks/adminStages/useAcceptSponsorshipStages';
+import { useApi } from '../../../hooks/useApi';
+import { NFTCollection } from '../../../api/chainApi/unique/types';
+import { useRejectSponsorshipStages } from 'hooks/adminStages/useRejectSponsorshipStages';
 
 const tokenSymbol = 'KSM';
 
-export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collection, onClose }) => {
-  const { selectedAccount } = useAccounts();
+export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collection, setIsClosable, onFinish }) => {
   const { kusamaFee } = useFee();
+  const [step, setStep] = useState<'ask' | 'accept-stages' | 'reject-stages'>('ask');
+  const { initiate: initiateAccept, status: acceptStatus, stages: acceptStages } = useAcceptSponsorshipStages(collection?.id || 0);
+  const { initiate: initiateReject, status: rejectStatus, stages: rejectStages } = useRejectSponsorshipStages(collection?.id || 0);
 
   const onRefuseClick = useCallback(() => {
-    onClose();
+    setIsClosable(false);
+    setStep('reject-stages');
+    initiateReject(null);
   }, []);
 
-  const onAcceptClick = useCallback(() => {
-    onClose();
+  const onConfirmClick = useCallback(() => {
+    setIsClosable(false);
+    setStep('accept-stages');
+    initiateAccept(null);
   }, []);
+
+  const { api } = useApi();
+  const collectionApi = api?.collection;
+  const [collectionDetails, setCollectionDetails] = useState<NFTCollection | null>();
+  useEffect(() => {
+    if (!collection) return;
+    (async () => {
+      setCollectionDetails(await collectionApi?.getCollection(collection.id));
+    })();
+  }, [collection, collectionApi]);
+  if (!collection) return null;
+
+  if (step === 'accept-stages') { return (<StagesModal stages={acceptStages} status={acceptStatus} onFinish={onFinish} />); }
+  if (step === 'reject-stages') { return (<StagesModal stages={rejectStages} status={rejectStatus} onFinish={onFinish} />); }
 
   return (
     <>
@@ -27,16 +51,16 @@ export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collecti
         <Heading size='2'>Accept sponsorship</Heading>
       </Content>
       <Row>
-        <Text size={'m'}>The author of the collection “collection name” has chosen this address as a sponsor. Do you confirm the choice?</Text>
+        <Text size={'m'}>{`The author of the collection ${collection?.name || collection?.collectionName} [ID ${collection?.id}] has chosen this address as a sponsor. Do you confirm the choice?`}</Text>
       </Row>
       <AddressWrapper>
-        <AccountCard
-          accountName={selectedAccount?.meta.name || ''}
-          accountAddress={selectedAccount?.address || ''}
-          canCopy={true}
+        {collectionDetails?.sponsorship?.unconfirmed && <AccountCard
+          accountName={''}
+          accountAddress={collectionDetails?.sponsorship?.unconfirmed || ''}
+          canCopy
           hideName
           isShort
-        />
+        />}
       </AddressWrapper>
       <TextStyled
         color='additional-warning-500'
@@ -50,7 +74,7 @@ export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collecti
           title='Refuse'
         />
         <Button
-          onClick={onAcceptClick}
+          onClick={onConfirmClick}
           role='primary'
           title='Accept'
         />
@@ -105,6 +129,7 @@ const TextStyled = styled(Text)`
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
+  column-gap: var(--gap);
   gap: calc(var(--gap) / 2);
   @media (max-width: 567px) {
     justify-content: normal;

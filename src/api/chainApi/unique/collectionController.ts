@@ -1,9 +1,11 @@
 import { ApiPromise } from '@polkadot/api';
-import { ICollectionController } from '../types';
-import { NFTCollection, NFTToken, TokenId, UniqueDecoratedRpc } from './types';
+import { ICollectionController, TransactionOptions } from '../types';
+import { NFTCollection, NFTCollectionSponsorship, NFTToken, TokenId, UniqueDecoratedRpc } from './types';
 import { collectionName16Decoder, getCollectionProperties, hex2a } from '../utils/decoder';
 import { getTokenImage } from '../utils/imageUtils';
 import config from '../../../config';
+import { normalizeAccountId } from '../utils/addressUtils';
+import { repeatCheckForTransactionFinish } from '../utils/repeatCheckTransaction';
 
 const { IPFSGateway } = config;
 
@@ -42,7 +44,8 @@ class UniqueCollectionController implements ICollectionController<NFTCollection,
 
     return {
       id: collectionId,
-      owner: collection.owner,
+      owner: normalizeAccountId(collection.owner),
+      sponsorship: collection.sponsorship?.toJSON() as NFTCollectionSponsorship,
       tokenPrefix: collection.tokenPrefix?.toUtf8() || '',
       collectionName: collection.name ? collectionName16Decoder(collection.name.toJSON() as number[]) : '',
       description: hex2a(collection.description?.toHex() || ''),
@@ -101,6 +104,63 @@ class UniqueCollectionController implements ICollectionController<NFTCollection,
     }
 
     return (await this.api.rpc.unique?.accountTokens(collectionId, { Substrate: ownerId })) || [];
+  }
+
+  public async setCollectionSponsor(collectionId: number, sponsorAddress: string, options: TransactionOptions): Promise<void> {
+    const tx = this.api.tx.unique.setCollectionSponsor(collectionId);
+    const signedTx = await options.sign(tx);
+
+    if (!signedTx) throw new Error('Transaction cancelled');
+
+    if (options.send) {
+      await options.send(signedTx);
+    } else {
+      await signedTx.send();
+    }
+
+    await repeatCheckForTransactionFinish(async () => {
+      const { sponsorship } = (await this.getCollection(Number(collectionId))) as NFTCollection;
+      if (sponsorship?.unconfirmed === sponsorAddress) return true;
+      return false;
+    });
+  }
+
+  public async confirmSponsorship(collectionId: number, options: TransactionOptions): Promise<void> {
+    const tx = this.api.tx.unique.confirmSponsorship(collectionId);
+    const signedTx = await options.sign(tx);
+
+    if (!signedTx) throw new Error('Transaction cancelled');
+
+    if (options.send) {
+      await options.send(signedTx);
+    } else {
+      await signedTx.send();
+    }
+
+    await repeatCheckForTransactionFinish(async () => {
+      const { sponsorship } = (await this.getCollection(Number(collectionId))) as NFTCollection;
+      if (sponsorship?.confirmed) return true;
+      return false;
+    });
+  }
+
+  public async removeCollectionSponsor(collectionId: number, options: TransactionOptions): Promise<void> {
+    const tx = this.api.tx.unique.removeCollectionSponsor(collectionId);
+    const signedTx = await options.sign(tx);
+
+    if (!signedTx) throw new Error('Transaction cancelled');
+
+    if (options.send) {
+      await options.send(signedTx);
+    } else {
+      await signedTx.send();
+    }
+
+    await repeatCheckForTransactionFinish(async () => {
+      const { sponsorship } = (await this.getCollection(Number(collectionId))) as NFTCollection;
+      if (!sponsorship?.confirmed && !sponsorship?.unconfirmed) return true;
+      return false;
+    });
   }
 }
 

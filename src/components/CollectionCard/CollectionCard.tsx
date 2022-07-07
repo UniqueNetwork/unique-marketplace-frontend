@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import { Dropdown, Icon, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
@@ -7,6 +7,9 @@ import { AdditionalDark, AdditionalLight } from '../../styles/colors';
 import { CollectionData } from 'api/restApi/admin/types';
 import { useApi } from '../../hooks/useApi';
 import { NFTCollection } from '../../api/chainApi/unique/types';
+import { shortcutText } from '../../utils/textUtils';
+import { useAccounts } from '../../hooks/useAccounts';
+import { compareEncodedAddresses } from '../../api/chainApi/utils/addressUtils';
 
 export type TCollectionCard = {
   collection: CollectionData
@@ -17,16 +20,37 @@ export type TCollectionCard = {
   onViewOnScanClick(): void
 };
 
-export const CollectionCard: FC<TCollectionCard> = ({ collection, onManageTokensClick, onRemoveCollectionClick, onViewOnScanClick }) => {
+export const CollectionCard: FC<TCollectionCard> = ({
+  collection,
+  onManageSponsorshipClick,
+  onRemoveSponsorshipClick,
+  onManageTokensClick,
+  onRemoveCollectionClick,
+  onViewOnScanClick
+}) => {
   const { api } = useApi();
+  const { selectedAccount } = useAccounts();
   const collectionApi = api?.collection;
   const [collectionDetails, setCollectionDetails] = useState<NFTCollection | null>();
   useEffect(() => {
-    if (!collection) return;
+    if (!collection?.id) return;
     (async () => {
       setCollectionDetails(await collectionApi?.getCollection(collection.id));
     })();
   }, [collection, collectionApi]);
+
+  const canConfirmSponsorships = useMemo(() => {
+    return selectedAccount?.address &&
+      collectionDetails?.sponsorship?.unconfirmed &&
+      compareEncodedAddresses(selectedAccount.address, collectionDetails.sponsorship.unconfirmed);
+  }, [selectedAccount?.address, collectionDetails?.sponsorship?.unconfirmed]);
+
+  const canRemoveSponsorships = useMemo(() => {
+    return selectedAccount?.address &&
+      collectionDetails?.sponsorship?.confirmed &&
+      (compareEncodedAddresses(selectedAccount.address, collectionDetails.sponsorship.confirmed) ||
+        compareEncodedAddresses(selectedAccount.address, collection?.owner || ''));
+  }, [selectedAccount?.address, collectionDetails?.sponsorship?.confirmed, collection?.owner]);
 
   return (
     <CollectionCardStyled>
@@ -35,8 +59,8 @@ export const CollectionCard: FC<TCollectionCard> = ({ collection, onManageTokens
         <ActionsMenuWrapper>
           <Dropdown placement={'right'}
             dropdownRender={() => (<DropdownMenu>
-              {/* <DropdownMenuItem onClick={onManageSponsorshipClick}>Manage sponsorship</DropdownMenuItem> */}
-              {/* <DropdownMenuItem onClick={onRemoveSponsorshipClick}>Remove sponsorship</DropdownMenuItem> */}
+              {canConfirmSponsorships && <DropdownMenuItem onClick={onManageSponsorshipClick}>Manage sponsorship</DropdownMenuItem>}
+              {canRemoveSponsorships && <DropdownMenuItem onClick={onRemoveSponsorshipClick}>Remove sponsorship</DropdownMenuItem>}
               <DropdownMenuItem onClick={onManageTokensClick}>Manage tokens</DropdownMenuItem>
               <DropdownMenuItem onClick={onRemoveCollectionClick}>Remove collection</DropdownMenuItem>
               <DropdownMenuItem onClick={onViewOnScanClick}>View on Scan
@@ -61,10 +85,13 @@ export const CollectionCard: FC<TCollectionCard> = ({ collection, onManageTokens
             <Text size='s' color={'grey-500'} >Allowed tokens:</Text>
             <Text size='s' >{collection.allowedTokens || 'all'}</Text>
           </Row>
-          <Row>
+          {collectionDetails?.sponsorship && <Row>
             <Text size='s' color={'grey-500'} >Sponsor:</Text>
-            <Text size='s' >{'not assigned'}</Text>
-          </Row>
+            <Text size='s' >{collectionDetails.sponsorship.confirmed ? shortcutText(collectionDetails.sponsorship.confirmed) : 'not assigned'}</Text>
+          </Row>}
+          {collectionDetails?.sponsorship?.unconfirmed && <Row>
+            <Text size='s' color={'coral-500'} >Waiting for sponsorship approval</Text>
+          </Row>}
         </AttributesWrapper>
 
       </Description>
@@ -76,7 +103,7 @@ const CollectionCardStyled = styled.div`
   display: flex;
   align-items: flex-start;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   position: relative;
   cursor: pointer;
 `;

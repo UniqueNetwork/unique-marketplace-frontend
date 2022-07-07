@@ -1,9 +1,9 @@
-import React, { FC, useMemo } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import { Icon, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
 import { Picture } from '..';
-import { formatKusamaBalance } from '../../utils/textUtils';
+import { formatKusamaBalance, shortcutText } from '../../utils/textUtils';
 import { Offer } from '../../api/restApi/offers/types';
 import { compareEncodedAddresses } from '../../api/chainApi/utils/addressUtils';
 import { useAccounts } from '../../hooks/useAccounts';
@@ -11,6 +11,8 @@ import { timeDifference } from '../../utils/timestampUtils';
 import config from '../../config';
 import { Primary600 } from '../../styles/colors';
 import { Link } from 'react-router-dom';
+import { useApi } from '../../hooks/useApi';
+import { NFTCollection } from '../../api/chainApi/unique/types';
 
 export type TTokensCard = {
   offer: Offer
@@ -18,6 +20,15 @@ export type TTokensCard = {
 
 export const OfferCard: FC<TTokensCard> = ({ offer }) => {
   const { selectedAccount } = useAccounts();
+  // TODO: remove this after the API provides complete collection details (cover, sponsorship, etc)
+  const { api } = useApi();
+  const collectionApi = api?.collection;
+  const [collectionDetails, setCollectionDetails] = useState<NFTCollection | null>();
+  useEffect(() => {
+    (async () => {
+      setCollectionDetails(await collectionApi?.getCollection(offer.collectionId));
+    })();
+  }, [offer.collectionId, collectionApi]);
 
   const {
     collectionName,
@@ -69,6 +80,10 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
           }</Text>}
           <StyledText color={'dark'} size={'xs'}>{`${timeDifference(new Date(offer.auction?.stopAt || '').getTime() / 1000)} left`}</StyledText>
         </AuctionInfoWrapper>}
+        {collectionDetails?.sponsorship?.confirmed && <Row>
+          <Text size='s' color={'grey-500'} >Sponsor:</Text>
+          <Text size='s' >{shortcutText(collectionDetails.sponsorship.confirmed)}</Text>
+        </Row>}
       </Description>
     </TokensCardStyled>
   );
@@ -151,4 +166,12 @@ const Description = styled.div`
 const AuctionInfoWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 2);
+`;
+
+const Row = styled.div` 
+  && {
+    display: flex;
+    align-items: center;
+    column-gap: calc(var(--gap) / 4);
+  }
 `;

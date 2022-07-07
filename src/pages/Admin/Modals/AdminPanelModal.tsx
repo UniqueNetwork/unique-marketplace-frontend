@@ -27,8 +27,10 @@ export const AdminPanelModal = ({ onClose, onFinish, collection, modalType }: TA
   const [isClosable, setIsClosable] = useState<boolean>(true);
 
   useEffect(() => {
-    if (modalType === AdminPanelModalType.default) setIsVisible(false);
-    else setIsVisible(true);
+    if (modalType === AdminPanelModalType.default) {
+      setIsVisible(false);
+      setIsClosable(true);
+    } else setIsVisible(true);
   }, [modalType]);
 
   const ModalBodyComponent = useMemo<FC<TAdminPanelModalBodyProps> | null>(() => {
