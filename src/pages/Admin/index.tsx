@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Select, SelectOptionProps } from '@unique-nft/ui-kit';
+import { Button, Select, SelectOptionProps, useNotifications } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import NoItems from '../../components/NoItems';
@@ -9,8 +9,6 @@ import { AdminPanelModal } from './Modals/AdminPanelModal';
 import { AdminPanelModalType } from './Modals/types';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
 import { useNavigate } from 'react-router-dom';
-import { useNotification } from '../../hooks/useNotification';
-import { NotificationSeverity } from '../../notification/NotificationContext';
 import { useAdminLoggingIn } from '../../api/restApi/admin/login';
 import { useAdminCollections } from '../../api/restApi/admin/collection';
 import CardSkeleton from '../../components/Skeleton/CardSkeleton';
@@ -72,7 +70,7 @@ export const AdminPanelPage: FC = () => {
   const { collections, isFetching, fetchCollections } = useAdminCollections();
   const { isLoading: isAccountsLoading } = useAccounts();
   const navigate = useNavigate();
-  const { push } = useNotification();
+  const { warning } = useNotifications();
 
   useEffect(() => {
     if (isAccountsLoading) return;
@@ -82,7 +80,10 @@ export const AdminPanelPage: FC = () => {
     void (async () => {
       const jwtoken = await getJWToken();
       if (!jwtoken) {
-        push({ message: 'Unable to login, please try again!', severity: NotificationSeverity.error });
+        warning(
+          'Unable to login, please try again!',
+          { name: 'warning', size: 32, color: 'var(--color-additional-light)' }
+        );
         navigate('/');
         return;
       }

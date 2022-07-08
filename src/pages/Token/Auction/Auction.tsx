@@ -1,10 +1,9 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Text, Button, Heading } from '@unique-nft/ui-kit';
+import { Text, Button, Heading, useNotifications } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import BN from 'bn.js';
 
 import { Offer } from '../../../api/restApi/offers/types';
-import { NFTToken } from '../../../api/chainApi/unique/types';
 import { AdditionalPositive100, AdditionalPositive500, Coral100, Coral500, Grey300 } from '../../../styles/colors';
 import { useOfferSubscription } from '../../../hooks/useOfferSubscription';
 import { useAccounts } from '../../../hooks/useAccounts';
@@ -14,8 +13,6 @@ import { useAuction } from '../../../api/restApi/auction/auction';
 import { TCalculatedBid } from '../../../api/restApi/auction/types';
 import Bids from './Bids';
 import Timer from '../../../components/Timer';
-import { useNotification } from '../../../hooks/useNotification';
-import { NotificationSeverity } from '../../../notification/NotificationContext';
 import AccountLink from '../../../components/Account/AccountLink';
 
 interface AuctionProps {
@@ -30,7 +27,7 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
   const [offer, setOffer] = useState<Offer>(initialOffer);
   const { selectedAccount } = useAccounts();
   const { getCalculatedBid } = useAuction();
-  const { push } = useNotification();
+  const { info } = useNotifications();
 
   const [calculatedBid, setCalculatedBid] = useState<TCalculatedBid>();
 
@@ -88,12 +85,12 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
   }, [setOffer]);
 
   const onAuctionStopped = useCallback((_offer: Offer) => {
-    push({
-      severity: NotificationSeverity.success,
-      message: 'Auction is stopped'
-    });
+    info(
+      'Auction is stopped',
+      { name: 'success', size: 32, color: 'var(--color-additional-light)' }
+    );
     setOffer(_offer);
-  }, [setOffer, push]);
+  }, [setOffer, info]);
 
   const onAuctionClosed = useCallback((_offer: Offer) => {
     if (offer.auction?.bids?.length) {

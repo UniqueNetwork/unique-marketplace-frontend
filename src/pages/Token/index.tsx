@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Icon, Link } from '@unique-nft/ui-kit';
+import { Icon, Link, useNotifications } from '@unique-nft/ui-kit';
 
 import { useApi } from '../../hooks/useApi';
 import { NFTToken } from '../../api/chainApi/unique/types';
@@ -11,8 +11,6 @@ import { TokenTrading } from './TokenDetail/TokenTrading';
 import { Error404 } from '../errors/404';
 import TokenPageModal from './Modals/TokenPageModal';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
-import { useNotification } from '../../hooks/useNotification';
-import { NotificationSeverity } from '../../notification/NotificationContext';
 import { useAccounts } from '../../hooks/useAccounts';
 import { shortcutText } from '../../utils/textUtils';
 import { compareEncodedAddresses } from '../../api/chainApi/utils/addressUtils';
@@ -29,7 +27,7 @@ const TokenPage = () => {
   const [marketType, setMarketType] = useState<MarketType>(MarketType.default);
   const navigate = useNavigate();
 
-  const { push } = useNotification();
+  const { info } = useNotifications();
 
   const fetchToken = useCallback(async () => {
     if (!api?.nft) return;
@@ -64,13 +62,21 @@ const TokenPage = () => {
 
   const onAuctionClose = useCallback((newOwnerAddress: string) => {
     if (!token) return;
-    push({
-      severity: NotificationSeverity.success,
-      message: <>{compareEncodedAddresses(newOwnerAddress, selectedAccount?.address || '') ? 'You are' : `${shortcutText(newOwnerAddress)} is` }  the new owner of <Link href={`/token/${token.collectionId}/${token.id}`} title={`${token.prefix} #${token.id}`}/></>
-    });
+    info(
+      <>
+        {compareEncodedAddresses(
+          newOwnerAddress,
+          selectedAccount?.address || ''
+        )
+          ? 'You are'
+          : `${shortcutText(newOwnerAddress)} is` }  the new owner of <Link href={`/token/${token.collectionId}/${token.id}`} title={`${token.prefix} #${token.id}`}/>
+      </>,
+      { name: 'success', size: 32, color: 'var(--color-additional-light)' }
+    );
+
     fetchOffer(Number(collectionId), Number(id));
     fetchToken();
-  }, [push, fetchOffer, fetchToken, selectedAccount?.address, collectionId, id, token]);
+  }, [info, fetchOffer, fetchToken, selectedAccount?.address, collectionId, id, token]);
 
   const backClickHandler = useCallback(() => {
     // if user opened token page with a direct link, redirect him to /market, otherwise redirect him back

@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Heading, Link, Select, Text } from '@unique-nft/ui-kit';
+import { Button, Heading, Link, Select, Text, SelectOptionProps, useNotifications } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { BN } from '@polkadot/util';
 
@@ -10,7 +10,6 @@ import { TTokenPageModalBodyProps } from './TokenPageModal';
 import { useAuctionBidStages } from '../../../hooks/marketplaceStages';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useFee } from '../../../hooks/useFee';
-import { useNotification } from '../../../hooks/useNotification';
 import { useApi } from '../../../hooks/useApi';
 import { formatKusamaBalance } from '../../../utils/textUtils';
 import { fromStringToBnString } from '../../../utils/bigNum';
@@ -19,8 +18,6 @@ import { StageStatus } from '../../../types/StagesTypes';
 import { Offer } from '../../../api/restApi/offers/types';
 import { useAuction } from '../../../api/restApi/auction/auction';
 import { TCalculatedBid } from '../../../api/restApi/auction/types';
-import { NotificationSeverity } from '../../../notification/NotificationContext';
-import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
 export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosable, onFinish }) => {
   const [status, setStatus] = useState<'ask' | 'place-bid-stage'>('ask'); // TODO: naming
@@ -159,7 +156,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
 
 const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ offer, accountAddress, onFinish, amount }) => {
   const { stages, status, initiate } = useAuctionBidStages(offer?.collectionId || 0, offer?.tokenId || 0);
-  const { push } = useNotification();
+  const { info } = useNotifications();
 
   useEffect(() => {
     if (!amount || !accountAddress) return;
@@ -171,7 +168,10 @@ const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ offer, 
 
   useEffect(() => {
     if (status === StageStatus.success) {
-      push({ severity: NotificationSeverity.success, message: <>You made a new bid on <Link href={`/token/${collectionId || ''}/${tokenId || ''}`} title={`${prefix || ''} #${tokenId || ''}`}/></> });
+      info(
+        <>You made a new bid on <Link href={`/token/${collectionId || ''}/${tokenId || ''}`} title={`${prefix || ''} #${tokenId || ''}`}/></>,
+        { name: 'success', size: 32, color: 'var(--color-additional-light)' }
+      );
     }
   }, [status]);
 

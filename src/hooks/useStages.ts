@@ -1,14 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { TTransaction } from '../api/chainApi/types';
 import { InternalStage, SignFunction, StageStatus, useStagesReturn } from '../types/StagesTypes';
-import { useNotification } from './useNotification';
-import { NotificationSeverity } from '../notification/NotificationContext';
+import { useNotifications } from '@unique-nft/ui-kit';
 
 const useStages = <T>(stages: InternalStage<T>[], signFunction: SignFunction): useStagesReturn<T> => {
   const [internalStages, setInternalStages] = useState<InternalStage<T>[]>(stages);
   const [stagesStatus, setStagesStatus] = useState<StageStatus>(StageStatus.default);
   const [executionError, setExecutionError] = useState<Error | undefined | null>(null);
-  const { push } = useNotification();
+  const { error } = useNotifications();
 
   useEffect(() => {
     setInternalStages(stages);
@@ -61,7 +60,10 @@ const useStages = <T>(stages: InternalStage<T>[], signFunction: SignFunction): u
       } catch (e) {
         setStagesStatus(StageStatus.error);
         setExecutionError(new Error(`Stage "${internalStage.title}" failed`));
-        push({ severity: NotificationSeverity.error, message: `Stage "${internalStage.title}" failed` });
+        error(
+          `Stage "${internalStage.title}" failed`,
+          { name: 'warning', size: 16, color: 'var(--color-additional-light)' }
+        );
         return;
       }
     }

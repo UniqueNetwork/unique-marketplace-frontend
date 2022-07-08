@@ -1,16 +1,16 @@
 import { Outlet } from 'react-router-dom';
+import { Notifications } from '@unique-nft/ui-kit';
 import config from './config';
 // contains gql and rpc with contexts and providers
 import ApiWrapper from './api/ApiWrapper';
 import { PageLayout } from './components';
 import AccountWrapper from './account/AccountProvider';
-import NotificationWrapper from './notification/NotificationWrapper';
 
 document.title = config.documentTitle || 'Unique Market';
 
 export default function App() {
   return (
-    <NotificationWrapper>
+    <Notifications closingDelay={2 * 1000}>
       <ApiWrapper>
         <AccountWrapper>
           <PageLayout>
@@ -18,6 +18,6 @@ export default function App() {
           </PageLayout>
         </AccountWrapper>
       </ApiWrapper>
-    </NotificationWrapper>
+    </Notifications>
   );
 }

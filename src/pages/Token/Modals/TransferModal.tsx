@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import { Button, Heading, Link, Text } from '@unique-nft/ui-kit';
+import { Button, Heading, Link, Text, useNotifications } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
 import { TTransfer } from './types';
@@ -9,8 +9,6 @@ import { useTransferStages } from '../../../hooks/marketplaceStages';
 import DefaultMarketStages from './StagesModal';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { StageStatus } from '../../../types/StagesTypes';
-import { NotificationSeverity } from '../../../notification/NotificationContext';
-import { useNotification } from '../../../hooks/useNotification';
 import { TextInput } from '../../../components/TextInput/TextInput';
 
 export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosable, onFinish }) => {
@@ -89,7 +87,7 @@ const AskTransferModal: FC<{ onTransfer(receiver: string): void }> = ({ onTransf
 
 const TransferStagesModal: FC<TTokenPageModalBodyProps & TTransfer> = ({ token, onFinish, sender, recipient }) => {
   const { stages, status, initiate } = useTransferStages(token?.collectionId || 0, token?.id || 0);
-  const { push } = useNotification();
+  const { info } = useNotifications();
 
   useEffect(() => {
     initiate({ sender, recipient });
@@ -97,7 +95,10 @@ const TransferStagesModal: FC<TTokenPageModalBodyProps & TTransfer> = ({ token, 
 
   useEffect(() => {
     if (status === StageStatus.success) {
-      push({ severity: NotificationSeverity.success, message: <><Link href={`/token/${token?.collectionId}/${token?.id}`} title={`${token?.prefix} #${token?.id}`}/> transferred</> });
+      info(
+        <><Link href={`/token/${token?.collectionId}/${token?.id}`} title={`${token?.prefix} #${token?.id}`}/> transferred</>,
+        { name: 'success', size: 32, color: 'var(--color-additional-light)' }
+      );
     }
   }, [status]);
 

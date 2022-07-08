@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Heading, Modal, Text, Loader } from '@unique-nft/ui-kit';
+import { Button, Heading, Modal, Text, Loader, useNotifications } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
 import { TTransferFunds } from './types';
@@ -11,8 +11,6 @@ import DefaultMarketStages from '../../Token/Modals/StagesModal';
 import { useTransferFundsStages } from 'hooks/accountStages/useTransferFundsStages';
 import { formatKusamaBalance } from 'utils/textUtils';
 import { StageStatus } from 'types/StagesTypes';
-import { NotificationSeverity } from 'notification/NotificationContext';
-import { useNotification } from 'hooks/useNotification';
 import { NumberInput } from 'components/NumberInput/NumberInput';
 import AccountCard from 'components/Account/Account';
 import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
@@ -211,14 +209,17 @@ type TransferFundsStagesModalProps = {
 
 const TransferFundsStagesModal: FC<TransferFundsStagesModalProps & TTransferFunds> = ({ isVisible, onFinish, sender, amount, recipient }) => {
   const { stages, status, initiate } = useTransferFundsStages(sender);
-  const { push } = useNotification();
+  const { info } = useNotifications();
   useEffect(() => { initiate({ sender, recipient, amount }); }, [sender, recipient, amount]);
 
   useEffect(() => {
     if (status === StageStatus.success) {
-      push({ severity: NotificationSeverity.success, message: 'Funds transfer completed' });
+      info(
+        'Funds transfer completed',
+        { name: 'success', size: 32, color: 'var(--color-additional-light)' }
+      );
     }
-  }, [push, status]);
+  }, [info, status]);
 
   return (<Modal isVisible={isVisible} isClosable={false}>
     <div>

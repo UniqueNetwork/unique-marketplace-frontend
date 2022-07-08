@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import { Button, Heading, Text } from '@unique-nft/ui-kit';
+import { Button, Heading, Text, useNotifications } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
@@ -10,15 +10,13 @@ import { useAdminCollections } from '../../../api/restApi/admin/collection';
 import { SelectInput } from '../../../components/SelectInput/SelectInput';
 import { CollectionData } from '../../../api/restApi/admin/types';
 import { useApi } from '../../../hooks/useApi';
-import { useNotification } from '../../../hooks/useNotification';
-import { NotificationSeverity } from '../../../notification/NotificationContext';
 
 export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) => {
   const [selectedCollection, setSelectedCollection] = useState<CollectionData | string | undefined>();
   const { appendCollection, collections, fetchCollections } = useAdminCollections();
   const [collectionItems, setCollectionItems] = useState<CollectionData[]>([]);
   const { api } = useApi();
-  const { push } = useNotification();
+  const { info, error } = useNotifications();
 
   useEffect(() => {
     void fetchCollections();
@@ -32,12 +30,18 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
     if (!selectedCollection) return;
     const collectionId = typeof selectedCollection === 'string' ? Number(selectedCollection) : selectedCollection.id;
     if (collections.find(({ id }) => id.toString() === collectionId.toString())?.status === 'Enabled') {
-      push({ message: `Collection [ID ${collectionId}] has already enabled`, severity: NotificationSeverity.error });
+      error(
+        `Collection [ID ${collectionId}] has already enabled`,
+        { name: 'warning', size: 16, color: 'var(--color-additional-light)' }
+      );
       return;
     }
     await appendCollection(collectionId);
 
-    push({ message: `Collection [ID ${collectionId}] successfully enabled`, severity: NotificationSeverity.success });
+    info(
+      `Collection [ID ${collectionId}] successfully enabled`,
+      { name: 'success', size: 32, color: 'var(--color-additional-light)' }
+    );
     onFinish();
   }, [selectedCollection, collections]);
 
