@@ -1,16 +1,16 @@
-import { FC, useEffect } from 'react';
+import React, { FC, useEffect } from 'react';
+import { useNotifications } from '@unique-nft/ui-kit';
+
 import { useCancelSellFixStages } from '../../../hooks/marketplaceStages';
 import DefaultMarketStages from './StagesModal';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { StageStatus } from '../../../types/StagesTypes';
-import { NotificationSeverity } from '../../../notification/NotificationContext';
-import { useNotification } from '../../../hooks/useNotification';
 
 export const CancelSellFixStagesModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, setIsClosable }) => {
   const { selectedAccount } = useAccounts();
   const { stages, status, initiate } = useCancelSellFixStages(offer?.collectionId || 0, offer?.tokenId || 0);
-  const { push } = useNotification();
+  const { info } = useNotifications();
 
   useEffect(() => {
     if (!selectedAccount) throw new Error('Account not selected');
@@ -20,7 +20,10 @@ export const CancelSellFixStagesModal: FC<TTokenPageModalBodyProps> = ({ offer, 
 
   useEffect(() => {
     if (status === StageStatus.success) {
-      push({ severity: NotificationSeverity.success, message: 'Sale canceled' });
+      info(
+        'Sale canceled',
+        { name: 'success', size: 32, color: 'var(--color-additional-light)' }
+      );
     }
   }, [status]);
 

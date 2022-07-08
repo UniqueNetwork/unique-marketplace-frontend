@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { AccountsManager, Button, Text } from '@unique-nft/ui-kit';
+import { AccountsManager, Button, Text, useNotifications } from '@unique-nft/ui-kit';
 
 import { useAccounts } from 'hooks/useAccounts';
 import { Account } from 'account/AccountContext';
@@ -9,8 +9,6 @@ import { BalanceOption } from './types';
 import { useApi } from 'hooks/useApi';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import { Avatar } from 'components/Avatar/Avatar';
-import { NotificationSeverity } from 'notification/NotificationContext';
-import { useNotification } from 'hooks/useNotification';
 import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import GetKSMModal from 'components/GetKSMModal/GetKSMModal';
 import { formatKusamaBalance } from 'utils/textUtils';
@@ -29,7 +27,7 @@ export const WalletManager: FC = () => {
   const [isGetKsmOpened, setIsGetKsmOpened] = useState(false);
   const navigate = useNavigate();
   const { chainData } = useApi();
-  const { push } = useNotification();
+  const { info } = useNotifications();
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainData?.properties.ss58Format || 0);
   }, [chainData?.properties.ss58Format]);
@@ -46,9 +44,12 @@ export const WalletManager: FC = () => {
 
   const onCopyAddress = useCallback((account: string) => {
     navigator.clipboard.writeText(formatAddress(account)).then(() => {
-      push({ severity: NotificationSeverity.success, message: 'Address copied' });
+      info(
+        'Address copied',
+        { name: 'success', size: 32, color: 'var(--color-additional-light)' }
+      );
     });
-  }, [formatAddress, push]);
+  }, [formatAddress, info]);
 
   useEffect(() => {
     (async () => {
@@ -140,13 +141,6 @@ const GetKsmButton = styled(Button)`
 const WalletManagerWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
-  .unique-accounts-manager .accounts-manager-selected-account {
-    margin: unset;
-  }
-  .accounts-manager-accounts .dropdown-options {
-    max-height: 300px;
-    overflow: auto;
-  }
   & > .unique-dropdown .dropdown-options.right {
     @media (max-width: 567px) {
       position: fixed;

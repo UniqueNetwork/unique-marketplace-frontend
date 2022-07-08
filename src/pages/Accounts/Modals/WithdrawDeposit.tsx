@@ -1,14 +1,12 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Checkbox, Heading, Modal, Text } from '@unique-nft/ui-kit';
+import { Button, Checkbox, Heading, Modal, Text, useNotifications } from '@unique-nft/ui-kit';
 import { BN } from '@polkadot/util';
 import styled from 'styled-components';
 
 import DefaultMarketStages from '../../Token/Modals/StagesModal';
 import { useWithdrawDepositStages } from '../../../hooks/accountStages/useWithdrawDepositStages';
 import { useApi } from '../../../hooks/useApi';
-import { useNotification } from '../../../hooks/useNotification';
 import { StageStatus } from '../../../types/StagesTypes';
-import { NotificationSeverity } from '../../../notification/NotificationContext';
 import { TWithdrawBid } from '../../../api/restApi/auction/types';
 import { NFTToken } from '../../../api/chainApi/unique/types';
 import { formatKusamaBalance } from '../../../utils/textUtils';
@@ -221,7 +219,7 @@ export type WithdrawDepositStagesModalProps = {
 export const WithdrawDepositStagesModal: FC<WithdrawDepositStagesModalProps> = ({ bids, withdrawSponsorshipFee, isVisible, address, onFinish }) => {
   const { stages, status, initiate } = useWithdrawDepositStages(address || '', bids, withdrawSponsorshipFee);
   const { api } = useApi();
-  const { push } = useNotification();
+  const { info } = useNotifications();
 
   useEffect(() => {
     if (!isVisible) return;
@@ -230,7 +228,10 @@ export const WithdrawDepositStagesModal: FC<WithdrawDepositStagesModalProps> = (
 
   useEffect(() => {
     if (status === StageStatus.success) {
-      push({ severity: NotificationSeverity.success, message: 'Deposit withdrawn' });
+      info(
+        'Deposit withdrawn',
+        { name: 'success', size: 32, color: 'var(--color-additional-light)' }
+      );
     }
   }, [status]);
 

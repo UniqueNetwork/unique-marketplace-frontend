@@ -1,13 +1,11 @@
 import React, { FC, useCallback, useMemo } from 'react';
-import { Text, Icon } from '@unique-nft/ui-kit';
+import { Text, Icon, useNotifications } from '@unique-nft/ui-kit';
 
 import DefaultAvatar from '../../static/icons/default-avatar.svg';
 import styled from 'styled-components';
 import { useApi } from '../../hooks/useApi';
 import { toChainFormatAddress } from '../../api/chainApi/utils/addressUtils';
 import { shortcutText } from '../../utils/textUtils';
-import { NotificationSeverity } from '../../notification/NotificationContext';
-import { useNotification } from '../../hooks/useNotification';
 import { Avatar } from '../Avatar/Avatar';
 
 interface AccountProps {
@@ -28,7 +26,7 @@ const AccountCard: FC<AccountProps> = ({
   hideName = false
 }) => {
   const { chainData } = useApi();
-  const { push } = useNotification();
+  const { info } = useNotifications();
 
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainData?.properties.ss58Format || 0);
@@ -36,7 +34,10 @@ const AccountCard: FC<AccountProps> = ({
 
   const onCopyAddress = (account: string) => () => {
     navigator.clipboard.writeText(account).then(() => {
-      push({ severity: NotificationSeverity.success, message: 'Address copied' });
+      info(
+        'Address copied',
+        { name: 'success', size: 32, color: 'var(--color-additional-light)' }
+      );
     });
   };
 

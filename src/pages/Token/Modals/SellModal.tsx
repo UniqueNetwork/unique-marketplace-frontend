@@ -1,4 +1,4 @@
-import { Button, Heading, Tabs, Text, Select, Link } from '@unique-nft/ui-kit';
+import { Button, Heading, Tabs, Text, Select, Link, useNotifications } from '@unique-nft/ui-kit';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
@@ -7,13 +7,11 @@ import DefaultMarketStages from './StagesModal';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 import { TAuctionProps, TFixPriceProps } from './types';
 import { useAuctionSellStages, useSellFixStages } from '../../../hooks/marketplaceStages';
-import { useNotification } from '../../../hooks/useNotification';
 import { useFee } from '../../../hooks/useFee';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { NumberInput } from '../../../components/NumberInput/NumberInput';
 import { AdditionalWarning100 } from '../../../styles/colors';
 import { StageStatus } from '../../../types/StagesTypes';
-import { NotificationSeverity } from '../../../notification/NotificationContext';
 
 const tokenSymbol = 'KSM';
 
@@ -233,13 +231,16 @@ type TSellAuctionStagesModal = {
 
 export const SellFixStagesModal: FC<TSellFixStagesModal> = ({ collectionId, tokenId, tokenPrefix, sellFix, onFinish }) => {
   const { stages, status, initiate } = useSellFixStages(collectionId, tokenId);
-  const { push } = useNotification();
+  const { info } = useNotifications();
 
   useEffect(() => { initiate(sellFix); }, [sellFix]);
 
   useEffect(() => {
     if (status === StageStatus.success) {
-      push({ severity: NotificationSeverity.success, message: <><Link href={`/token/${collectionId}/${tokenId}`} title={`${tokenPrefix} #${tokenId}`}/> offered for sale</> });
+      info(
+        <><Link href={`/token/${collectionId}/${tokenId}`} title={`${tokenPrefix} #${tokenId}`}/> offered for sale</>,
+        { name: 'success', size: 32, color: 'var(--color-additional-light)' }
+      );
     }
   }, [status]);
 
@@ -252,13 +253,13 @@ export const SellFixStagesModal: FC<TSellFixStagesModal> = ({ collectionId, toke
 
 export const SellAuctionStagesModal: FC<TSellAuctionStagesModal> = ({ collectionId, tokenId, tokenPrefix, auction, onFinish }) => {
   const { stages, status, initiate } = useAuctionSellStages(collectionId, tokenId);
-  const { push } = useNotification();
+  const { info } = useNotifications();
 
   useEffect(() => { initiate(auction); }, [auction]); //
 
   useEffect(() => {
     if (status === StageStatus.success) {
-      push({ severity: NotificationSeverity.success, message: <><Link href={`/token/${collectionId}/${tokenId}`} title={`${tokenPrefix} #${tokenId}`}/> is up for auction</> });
+      info(<><Link href={`/token/${collectionId}/${tokenId}`} title={`${tokenPrefix} #${tokenId}`}/> is up for auction</>, { name: 'success', size: 32, color: 'var(--color-additional-light)' });
     }
   }, [status]);
 

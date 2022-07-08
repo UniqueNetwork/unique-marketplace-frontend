@@ -1,12 +1,10 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
-import { Button, Heading, Text } from '@unique-nft/ui-kit';
+import { Button, Heading, Text, useNotifications } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
 import { useAdminCollections } from '../../../api/restApi/admin/collection';
 import { TextInput } from 'components/TextInput/TextInput';
-import { NotificationSeverity } from '../../../notification/NotificationContext';
-import { useNotification } from '../../../hooks/useNotification';
 
 const MAX_SAFE_ID = 2147483647;
 
@@ -15,7 +13,7 @@ const NOT_VALID_TOKEN_MESSAGE = 'List of token IDs is incorrect. It must be like
 export const SelectNFTsModal: FC<TAdminPanelModalBodyProps> = ({ collection, onFinish }) => {
   const { setAllowedTokens } = useAdminCollections();
   const [tokens, setTokens] = useState(collection?.allowedTokens || '');
-  const { push } = useNotification();
+  const { info } = useNotifications();
 
   const isValidAllowedTokens = useMemo(() => {
     if (tokens && !/^\d+(-\d+)?(,\d+(-\d+)?)*$/.test(tokens)) {
@@ -39,7 +37,10 @@ export const SelectNFTsModal: FC<TAdminPanelModalBodyProps> = ({ collection, onF
     if (!isValidAllowedTokens) return;
 
     await setAllowedTokens(collection?.id, tokens);
-    push({ message: `Add allowed tokens: ${tokens || 'all tokens'} for collection: ${collection?.id}`, severity: NotificationSeverity.success });
+    info(
+      `Add allowed tokens: ${tokens || 'all tokens'} for collection: ${collection?.id}`,
+      { name: 'success', size: 32, color: 'var(--color-additional-light)' }
+    );
     onFinish();
   }, [collection, tokens]);
 
