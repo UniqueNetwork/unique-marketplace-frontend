@@ -99,9 +99,8 @@ export const MarketPage = () => {
   }, [selectedAccount?.address]);
 
   const onClickSeeMore = useCallback(() => {
-    // Todo: fix twice rendering
     if (!isFetching) {
-      fetchMore({
+      void fetchMore({
         page: Math.ceil(offers.length / pageSize) + 1,
         pageSize,
         ...(getFilterByState(filterState)),
@@ -109,7 +108,7 @@ export const MarketPage = () => {
         sort: [sortingValue]
       });
     }
-  }, [fetchMore, offers, pageSize, isFetching, searchValue]);
+  }, [fetchMore, offers, pageSize, isFetching, searchValue, filterState]);
 
   const onSortingChange = useCallback((value: TOption) => {
     setSortingValue(value.id);
@@ -148,10 +147,16 @@ export const MarketPage = () => {
     setFilterState({ ...filterState, attributeCounts: _selectedAttributeCounts });
   }, [fetch, sortingValue, getFilterByState, searchValue]);
 
+  const onChangeAccount = useCallback(() => {
+    if (isFetching) return;
+    if (filterState?.statuses?.myNFTs || filterState?.statuses?.myBets) {
+      void onFilterChange(filterState);
+    }
+  }, [filterState?.statuses?.myNFTs, filterState?.statuses?.myBets]);
+
   useEffect(() => {
-    if ((!filterState?.statuses?.myNFTs && !filterState?.statuses?.myBets) || isFetching) return;
-    onFilterChange(filterState);
-  }, [filterState, selectedAccount?.address]);
+    onChangeAccount();
+  }, [selectedAccount?.address]);
 
   const filterCount = useMemo(() => {
     const { statuses, prices, collections = [], attributes = [], attributeCounts = [] } = filterState || {};
