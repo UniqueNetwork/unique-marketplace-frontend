@@ -7,14 +7,14 @@ import useStages from '../useStages';
 
 export const useSellFixStages = (collectionId: number, tokenId: number) => {
   const { api } = useApi();
-  const { signTx, selectedAccount } = useAccounts();
+  const { signTx, selectedAccount, signMessage } = useAccounts();
   const marketApi = api?.market;
   const addToWhiteListStage: InternalStage<TFixPriceProps> = useMemo(() => ({
     title: 'Register sponsorship',
     description: '',
     status: StageStatus.default,
-    action: (params) => marketApi?.addToWhiteList(params.txParams.accountAddress, params.options)
-  }), [marketApi]);
+    action: (params) => marketApi?.addToWhiteList(params.txParams.accountAddress, params.options, signMessage)
+  }), [marketApi, signMessage]);
 
   const sellFixStages: InternalStage<TFixPriceProps>[] = useMemo(() => [
   ...(!selectedAccount?.isOnWhiteList ? [addToWhiteListStage] : []),

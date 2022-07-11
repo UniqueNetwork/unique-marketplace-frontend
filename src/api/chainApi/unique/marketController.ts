@@ -11,6 +11,8 @@ import { collectionIdToAddress, compareEncodedAddresses, getEthAccount, isTokenO
 import { CrossAccountId, EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType } from './types';
 import { formatKsm } from '../utils/textFormat';
 import { repeatCheckForTransactionFinish } from '../utils/repeatCheckTransaction';
+import { addToWhitelist } from '../../restApi/settings/settings';
+import { Account } from 'account/AccountContext';
 
 // TODO: Global todo list
 /*
@@ -93,14 +95,14 @@ class MarketController implements IMarketController {
   }
 
   // #region helpers
-  private getMatcherContractInstance (ethAccount: string): { methods: MarketplaceAbiMethods } {
+  private getMatcherContractInstance(ethAccount: string): { methods: MarketplaceAbiMethods } {
     // @ts-ignore
     return new this.web3Instance.eth.Contract(marketplaceAbi.abi, this.contractAddress, {
       from: ethAccount
     });
   }
 
-  private getEvmCollectionInstance (collectionId: string): { methods: EvmCollectionAbiMethods, options: any } {
+  private getEvmCollectionInstance(collectionId: string): { methods: EvmCollectionAbiMethods, options: any } {
     // @ts-ignore
     return new this.web3Instance.eth.Contract(nonFungibleAbi, collectionIdToAddress(parseInt(collectionId, 10)), { from: this.contractOwner });
   }
@@ -123,21 +125,23 @@ class MarketController implements IMarketController {
     }
   }
 
-  public async addToWhiteList(account: string, options: TransactionOptions): Promise<void> {
+  public async addToWhiteList(account: string, options: TransactionOptions, signMessage: { (message: string, account?: string | Account | undefined): Promise<string>; (arg0: string): any; }): Promise<void> {
     const ethAddress = getEthAccount(account);
     const isWhiteListed = await this.checkWhiteListed(ethAddress);
     if (isWhiteListed) {
       return;
     }
-    const minDeposit = this.kusamaApi?.consts.balances?.existentialDeposit;
+    const signaturePhrase = 'allowedlist';
 
-    const tx = this.kusamaApi.tx.balances.transfer(this.escrowAddress, minDeposit);
-    const signedTx = await options.sign(tx);
-
-    if (!signedTx) throw new Error('Breaking transaction');
+    let signature;
+      try {
+        signature = await signMessage(signaturePhrase);
+        await addToWhitelist({ account: account }, signature);
+      } catch (e) {
+        console.error('Adding to whitelist failed');
+      }
 
     try {
-      await signedTx.send();
       await repeatCheckForTransactionFinish(async () => await this.checkWhiteListed(account));
       return;
     } catch (e) {
