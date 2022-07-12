@@ -6,11 +6,13 @@ import { encodeAddress } from '@polkadot/util-crypto';
 import marketplaceAbi from './abi/marketPlaceAbi.json';
 import nonFungibleAbi from './abi/nonFungibleAbi.json';
 import { sleep } from '../../../utils/helpers';
-import { IMarketController, INFTController, TransactionOptions } from '../types';
+import { IMarketController, INFTController, TransactionOptions, TSignMessage } from '../types';
 import { collectionIdToAddress, compareEncodedAddresses, getEthAccount, isTokenOwner, normalizeAccountId } from '../utils/addressUtils';
 import { CrossAccountId, EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType } from './types';
 import { formatKsm } from '../utils/textFormat';
 import { repeatCheckForTransactionFinish } from '../utils/repeatCheckTransaction';
+import { addToWhitelist } from '../../restApi/settings/settings';
+import { Account } from 'account/AccountContext';
 
 // TODO: Global todo list
 /*
@@ -93,14 +95,14 @@ class MarketController implements IMarketController {
   }
 
   // #region helpers
-  private getMatcherContractInstance (ethAccount: string): { methods: MarketplaceAbiMethods } {
+  private getMatcherContractInstance(ethAccount: string): { methods: MarketplaceAbiMethods } {
     // @ts-ignore
     return new this.web3Instance.eth.Contract(marketplaceAbi.abi, this.contractAddress, {
       from: ethAccount
     });
   }
 
-  private getEvmCollectionInstance (collectionId: string): { methods: EvmCollectionAbiMethods, options: any } {
+  private getEvmCollectionInstance(collectionId: string): { methods: EvmCollectionAbiMethods, options: any } {
     // @ts-ignore
     return new this.web3Instance.eth.Contract(nonFungibleAbi, collectionIdToAddress(parseInt(collectionId, 10)), { from: this.contractOwner });
   }
@@ -123,28 +125,29 @@ class MarketController implements IMarketController {
     }
   }
 
-  public async addToWhiteList(account: string, options: TransactionOptions): Promise<void> {
+  public async addToWhiteList(account: string, options: TransactionOptions, signMessage: TSignMessage): Promise<void> {
     const ethAddress = getEthAccount(account);
     const isWhiteListed = await this.checkWhiteListed(ethAddress);
     if (isWhiteListed) {
       return;
     }
-    const minDeposit = this.kusamaApi?.consts.balances?.existentialDeposit;
-
-    const tx = this.kusamaApi.tx.balances.transfer(this.escrowAddress, minDeposit);
-    const signedTx = await options.sign(tx);
-
-    if (!signedTx) throw new Error('Breaking transaction');
 
     try {
-      await signedTx.send();
+      const signaturePhrase = 'allowedlist';
+      const signature = await signMessage(signaturePhrase);
+      if (options.send) await options.send(signature);
+    } catch (e) {
+      console.error('Administrator authorization failed', e);
+      return;
+    }
+
+    try {
       await repeatCheckForTransactionFinish(async () => await this.checkWhiteListed(account));
       return;
     } catch (e) {
       console.error('addToWhiteList error pushed upper');
       throw e;
     }
-    // execute tx
   }
 
   private async checkOnEth (account: string, collectionId: string, tokenId: string): Promise<boolean> {
@@ -491,7 +494,7 @@ class MarketController implements IMarketController {
       tx = this.uniqApi.tx.unique.transferFrom(normalizeAccountId({ Ethereum: ethFrom } as CrossAccountId), recipient, collectionId, tokenId, 1);
     }
 
-    const signedTx = await options.sign(tx);
+    const signedTx = await options.sign(tx); // sdasdas
 
     if (!signedTx) throw new Error('Transaction cancelled');
 

@@ -20,3 +20,7 @@ export type Settings = {
   mainSaleSeedAddress: string,
   administrators: string[]
 }
+
+export type WhitelistBody = {
+  account: string
+}
