@@ -3,13 +3,13 @@ import styled from 'styled-components';
 import { Checkbox, Text } from '@unique-nft/ui-kit';
 import { useCollections } from '../../hooks/useCollections';
 import Accordion from '../Accordion/Accordion';
-import { Avatar } from '../Avatar/Avatar';
 import CheckboxSkeleton from '../Skeleton/CheckboxSkeleton';
 import { AttributeItem } from './types';
 import AttributesFilter from './AttributesFilter';
 import AttributeCountsFilter from './AttributeCountsFilter';
 import { useApi } from '../../hooks/useApi';
 import { Attribute, AttributeCount } from '../../api/restApi/offers/types';
+import { CollectionCover } from '../CollectionCover/CollectionCover';
 
 interface CollectionsFilterProps {
   value?: { collections?: number[], attributes?: { key: string, attribute: string }[], attributeCounts?: number[] } | null
@@ -57,7 +57,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attr
               size={'m'}
               onChange={onCollectionSelect(collection.id)}
             />
-            <Avatar src={collection.coverImageUrl} size={22} type={'circle'}/>
+            <CollectionCover src={collection.coverImageUrl} size={22} type={'circle'}/>
             <Text>{collection.collectionName || ''}</Text>
           </CheckboxWrapper>
           ))}

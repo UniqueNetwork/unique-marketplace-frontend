@@ -5,14 +5,18 @@ import Skeleton from './Skeleton/Skeleton';
 interface PictureProps {
   src?: string
   alt: string
+  size?: number
 }
 
-export const Picture: FC<PictureProps> = ({ alt, src }) => {
+export const Picture: FC<PictureProps> = ({ alt, src, size }) => {
   const [imageSrc, setImageSrc] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    if (!src) return;
+    if (!src || !src.trim()) {
+      setImageSrc(undefined);
+      return;
+    }
 
     const image = new Image();
 
@@ -35,7 +39,8 @@ export const Picture: FC<PictureProps> = ({ alt, src }) => {
     {!isLoading && imageSrc &&
       <img
         alt={alt}
-        src={src}
+        src={imageSrc}
+        height={size || undefined}
       />}
     {!isLoading && !imageSrc && <svg
       fill={'white'}
@@ -50,7 +55,7 @@ export const Picture: FC<PictureProps> = ({ alt, src }) => {
         x={0}
         y={0}
       />
-      <g transform='translate(500.000000,500.000000) scale(3.8000,3.8000)'>
+      <g transform={`translate(500.000000,500.000000) scale(${size ? size / 2 : 3.2},${size ? size / 2 : 3.2})`}>
         <g transform='translate(-32.000000,-32.000000)'>
           <path fillRule='evenodd'
             clipRule='evenodd'
