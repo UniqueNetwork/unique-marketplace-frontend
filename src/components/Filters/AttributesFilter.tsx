@@ -6,6 +6,7 @@ import CheckboxSkeleton from '../Skeleton/CheckboxSkeleton';
 import { AttributeItem } from './types';
 import { Attribute } from '../../api/restApi/offers/types';
 import { capitalize } from '../../utils/textUtils';
+import { sortAttributes } from './utils/sortAttributes';
 
 interface AttributesFilterProps {
   selectedAttributes?: AttributeItem[]
@@ -31,14 +32,14 @@ const AttributesFilter: FC<AttributesFilterProps> = ({ selectedAttributes = [], 
 
   return (<AttributesFilterWrapper>
     {isAttributesFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
-    {Object.keys(attributes).map((attributeName) => (
+    {Object.keys(attributes).sort().map((attributeName) => (
       <Accordion title={capitalize(attributeName)}
         isOpen={true}
         onClear={onClear(attributeName)}
         isClearShow={selectedAttributes?.some((attribute) => attributeName === attribute.key)}
       >
         <CollectionFilterWrapper>
-          {attributes[attributeName].map((attribute) => (
+          {attributes[attributeName].sort(sortAttributes).map((attribute) => (
             <AttributeWrapper key={`attribute-${attribute.key}`}>
               <Checkbox
                 checked={selectedAttributes.findIndex((item) => item.key === attributeName && item.attribute === attribute.key) !== -1}
