@@ -80,10 +80,6 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
           }</Text>}
           <StyledText color={'dark'} size={'xs'}>{`${timeDifference(new Date(offer.auction?.stopAt || '').getTime() / 1000)} left`}</StyledText>
         </AuctionInfoWrapper>}
-        {collectionDetails?.sponsorship?.confirmed && <Row>
-          <Text size='s' color={'grey-500'} >Sponsor:</Text>
-          <Text size='s' >{shortcutText(collectionDetails.sponsorship.confirmed)}</Text>
-        </Row>}
       </Description>
     </TokensCardStyled>
   );
