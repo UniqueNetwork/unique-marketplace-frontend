@@ -51,7 +51,7 @@ export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collecti
         <Heading size='2'>Accept sponsorship</Heading>
       </Content>
       <Row>
-        <Text size={'m'}>{`The author of the collection ${collection?.name || collection?.collectionName} [ID ${collection?.id}] has chosen this address as a sponsor. Do you confirm the choice?`}</Text>
+        <Text size={'m'}>{`The author of the collection "${collection?.name || collection?.collectionName}" [ID ${collection?.id}] has chosen this address as a sponsor. Do you confirm the choice?`}</Text>
       </Row>
       <AddressWrapper>
         {collectionDetails?.sponsorship?.unconfirmed && <AccountCard
@@ -59,7 +59,6 @@ export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collecti
           accountAddress={collectionDetails?.sponsorship?.unconfirmed || ''}
           canCopy
           hideName
-          isShort
         />}
       </AddressWrapper>
       <WarningBlock>

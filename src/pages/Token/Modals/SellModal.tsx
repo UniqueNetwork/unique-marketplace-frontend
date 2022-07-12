@@ -146,9 +146,6 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
         onChange={onPriceInputChange}
         value={priceInputValue?.toString()}
       />
-      {!selectedAccount?.isOnWhiteList && <WarningBlock>
-        {`A fee of ~ ${kusamaFee} ${tokenSymbol} can be applied to the transaction`}
-      </WarningBlock>}
       <ButtonWrapper>
         <Button
           disabled={!priceInputValue || !Number(priceInputValue)}
