@@ -6,7 +6,7 @@ import { encodeAddress } from '@polkadot/util-crypto';
 import marketplaceAbi from './abi/marketPlaceAbi.json';
 import nonFungibleAbi from './abi/nonFungibleAbi.json';
 import { sleep } from '../../../utils/helpers';
-import { IMarketController, INFTController, TransactionOptions } from '../types';
+import { IMarketController, INFTController, TransactionOptions, TSignMessage } from '../types';
 import { collectionIdToAddress, compareEncodedAddresses, getEthAccount, isTokenOwner, normalizeAccountId } from '../utils/addressUtils';
 import { CrossAccountId, EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType } from './types';
 import { formatKsm } from '../utils/textFormat';
@@ -125,21 +125,21 @@ class MarketController implements IMarketController {
     }
   }
 
-  public async addToWhiteList(account: string, options: TransactionOptions, signMessage: { (message: string, account?: string | Account | undefined): Promise<string>; (arg0: string): any; }): Promise<void> {
+  public async addToWhiteList(account: string, options: TransactionOptions, signMessage: TSignMessage): Promise<void> {
     const ethAddress = getEthAccount(account);
     const isWhiteListed = await this.checkWhiteListed(ethAddress);
     if (isWhiteListed) {
       return;
     }
-    const signaturePhrase = 'allowedlist';
 
-    let signature;
-      try {
-        signature = await signMessage(signaturePhrase);
-        await addToWhitelist({ account: account }, signature);
-      } catch (e) {
-        console.error('Adding to whitelist failed');
-      }
+    try {
+      const signaturePhrase = 'allowedlist';
+      const signature = await signMessage(signaturePhrase);
+      if (options.send) await options.send(signature);
+    } catch (e) {
+      console.error('Administrator authorization failed', e);
+      return;
+    }
 
     try {
       await repeatCheckForTransactionFinish(async () => await this.checkWhiteListed(account));
@@ -148,7 +148,6 @@ class MarketController implements IMarketController {
       console.error('addToWhiteList error pushed upper');
       throw e;
     }
-    // execute tx
   }
 
   private async checkOnEth (account: string, collectionId: string, tokenId: string): Promise<boolean> {
@@ -495,7 +494,7 @@ class MarketController implements IMarketController {
       tx = this.uniqApi.tx.unique.transferFrom(normalizeAccountId({ Ethereum: ethFrom } as CrossAccountId), recipient, collectionId, tokenId, 1);
     }
 
-    const signedTx = await options.sign(tx);
+    const signedTx = await options.sign(tx); // sdasdas
 
     if (!signedTx) throw new Error('Transaction cancelled');
 

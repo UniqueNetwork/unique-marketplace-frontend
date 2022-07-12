@@ -4,6 +4,7 @@ import { TFixPriceProps } from '../../pages/Token/Modals/types';
 import { InternalStage, StageStatus } from '../../types/StagesTypes';
 import { useAccounts } from '../useAccounts';
 import useStages from '../useStages';
+import { addToWhitelist } from 'api/restApi/settings/settings';
 
 export const useSellFixStages = (collectionId: number, tokenId: number) => {
   const { api } = useApi();
@@ -13,7 +14,22 @@ export const useSellFixStages = (collectionId: number, tokenId: number) => {
     title: 'Register sponsorship',
     description: '',
     status: StageStatus.default,
-    action: (params) => marketApi?.addToWhiteList(params.txParams.accountAddress, params.options, signMessage)
+    action: (params) =>
+      marketApi?.addToWhiteList(
+        params.txParams.accountAddress,
+        {
+          ...params.options,
+          send:
+            async (signature) => {
+              try {
+                await addToWhitelist({ account: params.txParams.accountAddress }, signature as string);
+              } catch (e) {
+                console.error('Adding to whitelist failed');
+              }
+            }
+        },
+        signMessage
+      )
   }), [marketApi, signMessage]);
 
   const sellFixStages: InternalStage<TFixPriceProps>[] = useMemo(() => [
