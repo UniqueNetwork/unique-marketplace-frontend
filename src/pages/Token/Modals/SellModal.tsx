@@ -1,4 +1,4 @@
-import { Button, Heading, Tabs, Text, Select, Link, useNotifications } from '@unique-nft/ui-kit';
+import { Button, Heading, Tabs, Select, Link, useNotifications } from '@unique-nft/ui-kit';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
@@ -9,9 +9,9 @@ import { TAuctionProps, TFixPriceProps } from './types';
 import { useAuctionSellStages, useSellFixStages } from '../../../hooks/marketplaceStages';
 import { useFee } from '../../../hooks/useFee';
 import { useAccounts } from '../../../hooks/useAccounts';
-import { NumberInput } from '../../../components/NumberInput/NumberInput';
-import { AdditionalWarning100 } from '../../../styles/colors';
 import { StageStatus } from '../../../types/StagesTypes';
+import { NumberInput } from 'components/NumberInput/NumberInput';
+import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 
 const tokenSymbol = 'KSM';
 
@@ -263,16 +263,6 @@ export const SellAuctionStagesModal: FC<TSellAuctionStagesModal> = ({ collection
     </div>
   );
 };
-
-const TextStyled = styled(Text)`
-  box-sizing: border-box;
-  display: flex;
-  padding: 8px 16px;
-  margin-bottom: 24px;
-  border-radius: 4px;
-  background-color: ${AdditionalWarning100};
-  width: 100%;
-`;
 
 const InputWrapper = styled(NumberInput)`
   margin-bottom: 32px;

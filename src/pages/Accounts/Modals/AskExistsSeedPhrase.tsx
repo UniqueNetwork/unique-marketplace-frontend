@@ -6,8 +6,9 @@ import { TCreateAccountBodyModalProps } from './types';
 import { addressFromSeed } from '../../../utils/seedUtils';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import { defaultPairType, derivePath } from './CreateAccount';
-import { AdditionalWarning100, Grey300 } from '../../../styles/colors';
-import { Avatar } from '../../../components/Avatar/Avatar';
+import { Grey300 } from '../../../styles/colors';
+import { Avatar } from 'components/Avatar/Avatar';
+import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 
 export const AskExistsSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish }) => {
   const [seed, setSeed] = useState<string>('');
@@ -39,12 +40,9 @@ export const AskExistsSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onF
         value={seed}
       />
     </InputSeedWrapper>
-    <TextStyled
-      color='additional-warning-500'
-      size='s'
-    >
+    <WarningBlock>
       Ensure that you keep this seed in a safe place. Anyone with access to it can re-create the account and gain full access to it.
-    </TextStyled>
+    </WarningBlock>
     <ConfirmWrapperRow>
       <Checkbox label={'I have saved my mnemnic seed safely'}
         checked={confirmSeedSaved}
@@ -93,16 +91,6 @@ const SeedInput = styled.textarea`
   height: auto;
   resize: none;
   outline: 0px none transparent;
-`;
-
-const TextStyled = styled(Text)`
-  box-sizing: border-box;
-  display: flex;
-  padding: 8px 16px;
-  margin: calc(var(--gap) * 1.5) 0;
-  border-radius: 4px;
-  background-color: ${AdditionalWarning100};
-  width: 100%;
 `;
 
 const ConfirmWrapperRow = styled.div`

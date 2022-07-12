@@ -3,14 +3,14 @@ import styled from 'styled-components';
 import { Checkbox, Text } from '@unique-nft/ui-kit';
 import { useCollections } from '../../../hooks/useCollections';
 import { useApi } from '../../../hooks/useApi';
-import Accordion from '../../../components/Accordion/Accordion';
-import AttributeCountsFilter from '../../../components/Filters/AttributeCountsFilter';
-import AttributesFilter from '../../../components/Filters/AttributesFilter';
-import CheckboxSkeleton from '../../../components/Skeleton/CheckboxSkeleton';
-import { Avatar } from '../../../components/Avatar/Avatar';
-import { AttributeItem } from '../../../components/Filters/types';
+import Accordion from 'components/Accordion/Accordion';
+import AttributeCountsFilter from 'components/Filters/AttributeCountsFilter';
+import AttributesFilter from 'components/Filters/AttributesFilter';
+import CheckboxSkeleton from 'components/Skeleton/CheckboxSkeleton';
+import { AttributeItem } from 'components/Filters/types';
 import { useAttributes } from '../../../api/restApi/offers/attributes';
 import { useAttributeCounts } from '../../../api/restApi/offers/attributeCounts';
+import { CollectionCover } from 'components/CollectionCover/CollectionCover';
 
 interface CollectionsFilterProps {
   value?: { collections?: number[], attributes?: { key: string, attribute: string }[], attributeCounts?: number[] } | null
@@ -77,7 +77,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onAttr
               size={'m'}
               onChange={onCollectionSelect(collection.id)}
             />
-            <Avatar src={collection.coverImageUrl} size={22} type={'circle'}/>
+            <CollectionCover src={collection.coverImageUrl} size={22} type={'circle'}/>
             <Text>{collection.collectionName || ''}</Text>
           </CheckboxWrapper>
         ))}

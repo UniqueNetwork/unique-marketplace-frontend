@@ -44,7 +44,7 @@ class UniqueCollectionController implements ICollectionController<NFTCollection,
 
     return {
       id: collectionId,
-      owner: normalizeAccountId(collection.owner),
+      owner: collection.owner?.toJSON(),
       sponsorship: collection.sponsorship?.toJSON() as NFTCollectionSponsorship,
       tokenPrefix: collection.tokenPrefix?.toUtf8() || '',
       collectionName: collection.name ? collectionName16Decoder(collection.name.toJSON() as number[]) : '',

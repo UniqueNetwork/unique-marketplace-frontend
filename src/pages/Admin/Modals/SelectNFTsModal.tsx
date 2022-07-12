@@ -16,7 +16,7 @@ export const SelectNFTsModal: FC<TAdminPanelModalBodyProps> = ({ collection, onF
   const { info } = useNotifications();
 
   const isValidAllowedTokens = useMemo(() => {
-    if (tokens && !/^\d+(-\d+)?(,\d+(-\d+)?)*$/.test(tokens)) {
+    if (tokens && !/^[1-9]\d*(-[1-9]\d*)?(,[1-9]\d*(-[1-9]\d*)?)*$/.test(tokens)) {
       return false;
     }
     if (tokens.split(',').some((value) => {
@@ -60,6 +60,8 @@ export const SelectNFTsModal: FC<TAdminPanelModalBodyProps> = ({ collection, onF
       </Row>
       <Row>
         <Text size='s' color='grey-500'>You can enter individual numbers separated by commas and intervals separated by hyphens</Text>
+      </Row>
+      <Row>
         <Text size='s' color='grey-500'>Without filling in the data you put up for sale all the tokens on the marketplace</Text>
       </Row>
       <InputWrapper>

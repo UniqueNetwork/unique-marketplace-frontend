@@ -1,8 +1,8 @@
 import { FC } from 'react';
 import styled from 'styled-components';
 import { Heading, Text } from '@unique-nft/ui-kit';
-import { Avatar } from '../../../components/Avatar/Avatar';
 import noCollections from '../../../static/icons/no-collections.svg';
+import { CollectionCover } from 'components/CollectionCover/CollectionCover';
 
 interface ICollectionsCardProps {
   id: number;
@@ -21,7 +21,7 @@ export const CollectionsCard: FC<ICollectionsCardProps> = ({
   return (
     <CollectionsCardStyled>
       <AvatarStyled>
-        <Avatar size={40} src={avatarImg} type='circle' />
+        <CollectionCover size={40} src={avatarImg} type='circle' />
       </AvatarStyled>
       <Content>
         <Heading className='heading' size='4'>
