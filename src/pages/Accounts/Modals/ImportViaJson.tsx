@@ -4,11 +4,11 @@ import { KeyringPair } from '@polkadot/keyring/types';
 import styled from 'styled-components';
 
 import { TAccountModalProps } from './types';
-import { AdditionalWarning100 } from '../../../styles/colors';
-import { PasswordInput } from '../../../components/PasswordInput/PasswordInput';
+import { PasswordInput } from 'components/PasswordInput/PasswordInput';
 import { convertToU8a, keyringFromFile } from '../../../utils/jsonUtils';
 import { useApi } from '../../../hooks/useApi';
 import keyring from '@polkadot/ui-keyring';
+import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 
 export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish }) => {
   const { rawRpcApi } = useApi();
@@ -65,12 +65,9 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
       />
       {passwordIncorrect && <Text size={'s'} color={'coral-500'}>Password incorrect</Text>}
     </InputWrapper>
-    <TextStyled
-      color='additional-warning-500'
-      size='s'
-    >
+    <WarningBlock>
       Consider storing your account in a signer such as a browser extension, hardware device, QR-capable phone wallet (non-connected) or desktop application for optimal account security. Future versions of the web-only interface will drop support for non-external accounts, much like the IPFS version.
-    </TextStyled>
+    </WarningBlock>
     <ButtonWrapper>
       <Button
         disabled={!password || !pair}
@@ -107,16 +104,6 @@ const TitleWrapper = styled.div`
   display: flex;
   flex-direction: column;
   row-gap: calc(var(--gap) / 4);
-`;
-
-const TextStyled = styled(Text)`
-  box-sizing: border-box;
-  display: flex;
-  padding: 8px 16px;
-  margin: var(--gap) 0;
-  border-radius: 4px;
-  background-color: ${AdditionalWarning100};
-  width: 100%;
 `;
 
 const ButtonWrapper = styled.div`

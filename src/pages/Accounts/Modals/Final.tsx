@@ -1,13 +1,14 @@
 import React, { FC, useCallback, useMemo } from 'react';
-import { Button, Icon, Text, Tooltip } from '@unique-nft/ui-kit';
+import { Button, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import { defaultPairType, derivePath } from './CreateAccount';
 import { TCreateAccountBodyModalProps } from './types';
-import { AdditionalWarning100, Grey300 } from '../../../styles/colors';
-import { Avatar } from '../../../components/Avatar/Avatar';
-import IconWithHint from '../../../components/IconWithHint/IconWithHint';
+import { Grey300 } from '../../../styles/colors';
+import { Avatar } from 'components/Avatar/Avatar';
+import IconWithHint from 'components/IconWithHint/IconWithHint';
+import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 
 export const FinalModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties, onFinish, onGoBack }) => {
   const onSaveClick = useCallback(() => {
@@ -45,18 +46,12 @@ export const FinalModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties
       </LabelTextWrapper>
       <ValueTextStyled>{derivePath || 'None provided'}</ValueTextStyled>
     </CredentialsWrapper>
-    <TextStyled
-      color='additional-warning-500'
-      size='s'
-    >
+    <WarningBlock >
       Consider storing your account in a signer such as a browser extension, hardware device, QR-capable phone wallet (non-connected) or desktop application for optimal account security. Future versions of the web-only interface will drop support for non-external accounts, much like the IPFS version.
-    </TextStyled>
-    <TextStyled
-      color='additional-warning-500'
-      size='s'
-    >
+    </WarningBlock>
+    <WarningBlock >
       You will be provided with a generated backup file after your account is created. Please make sure to save this file in a secure location as it is required, together with your password, to restore your account.
-    </TextStyled>
+    </WarningBlock>
     <ButtonWrapper>
       <StepsTextStyled size={'m'}>Step 3/3</StepsTextStyled>
       <Button
@@ -94,16 +89,6 @@ const LabelTextWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 4);
   margin-top: calc(var(--gap) * 1.5);
-`;
-
-const TextStyled = styled(Text)`
-  box-sizing: border-box;
-  display: flex;
-  padding: 8px 16px;
-  margin: var(--gap) 0;
-  border-radius: 4px;
-  background-color: ${AdditionalWarning100};
-  width: 100%;
 `;
 
 const ButtonWrapper = styled.div`
