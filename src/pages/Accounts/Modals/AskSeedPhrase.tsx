@@ -63,7 +63,7 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish 
 
   return (<>
     <AddressWrapper>
-      <Avatar size={24} src={DefaultAvatar} address={address} />
+      {address && <Avatar size={24} src={DefaultAvatar} address={address} />}
       <Text color={'grey-500'}>{address}</Text>
     </AddressWrapper>
     <Heading size={'4'} >The secret seed value for this account</Heading>
@@ -168,6 +168,14 @@ const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
   align-items: center;
+  @media (max-width: 568px) {
+    flex-direction: column;
+    align-items: flex-start;
+    row-gap: calc(var(--gap) /2);
+    button {
+      width: 100%;
+    }
+  }
 `;
 
 const TooltipLink = styled(Link)`
