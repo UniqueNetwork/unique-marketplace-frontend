@@ -68,7 +68,11 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish 
     </AddressWrapper>
     <Heading size={'4'} >The secret seed value for this account</Heading>
     <SeedGeneratorSelectWrapper>
-      <Select options={seedGenerators} value={seedGenerator} onChange={onSeedGeneratorChange} />
+      <Select options={seedGenerators}
+        value={seedGenerator}
+        onChange={onSeedGeneratorChange}
+        disabled={seedGenerators.length === 1}
+      />
       <IconWithHint placement={'top'}>
         <>Find out more on <TooltipLink href='https://' title={'Polkadot Wiki'}>Polkadot Wiki</TooltipLink></>
       </IconWithHint>

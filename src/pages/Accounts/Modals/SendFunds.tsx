@@ -278,7 +278,6 @@ const KusamaFeeMessageWrapper = styled.div`
   border-radius: 4px;
   background-color: ${AdditionalWarning100};
   width: 100%;
-  min-height: 58px;
 
   .unique-loader {
     display: flex;
