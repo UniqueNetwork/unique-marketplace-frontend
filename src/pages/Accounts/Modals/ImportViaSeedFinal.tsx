@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FC, useCallback } from 'react';
 import { Button, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
@@ -10,13 +10,11 @@ import { Avatar } from 'components/Avatar/Avatar';
 import IconWithHint from 'components/IconWithHint/IconWithHint';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 
-export const FinalModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties, onFinish, onGoBack }) => {
+export const ImportViaSeedFinalModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties, onFinish, onGoBack }) => {
   const onSaveClick = useCallback(() => {
     if (!accountProperties) return;
     onFinish(accountProperties);
   }, [accountProperties]);
-
-  const shortSeed = useMemo(() => accountProperties?.seed.split(' ').map((value, index) => (index % 3) ? '…' : value).join(' '), [accountProperties]);
 
   return (<>
     <AddressWrapper>
@@ -30,7 +28,7 @@ export const FinalModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties
           <>The seed is your key to the account. Knowing the seed allows you, or anyone else who knows the seed, to re-generate and control this account.</>
         </IconWithHint>
       </LabelTextWrapper>
-      <ValueTextStyled>{shortSeed}</ValueTextStyled>
+      <ValueTextStyled>{accountProperties?.seed}</ValueTextStyled>
       <LabelTextWrapper>
         <Text size={'m'}>Keypair type</Text>
         <IconWithHint>
@@ -48,9 +46,6 @@ export const FinalModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties
     </CredentialsWrapper>
     <WarningBlock >
       Consider storing your account in a signer such as a browser extension, hardware device, QR-capable phone wallet (non-connected) or desktop application for optimal account security. Future versions of the web-only interface will drop support for non-external accounts, much like the IPFS version.
-    </WarningBlock>
-    <WarningBlock >
-      You will be provided with a generated backup file after your account is created. Please make sure to save this file in a secure location as it is required, together with your password, to restore your account.
     </WarningBlock>
     <ButtonWrapper>
       <StepsTextStyled size={'m'}>Step 3/3</StepsTextStyled>

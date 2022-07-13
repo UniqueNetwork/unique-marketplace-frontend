@@ -49,11 +49,11 @@ const getAccountsColumns = ({
     onShowGetKsmModal
   }: AccountsColumnsProps): TableColumnProps[] => [
   {
-    title: (<IconWithHint placement={'right-start'}>
+    title: (<>Accounts<IconWithHint placement={'right-start'}>
       <>Substrate account addresses (Kusama, Quartz, Polkadot, Unique, etc.) may be represented by a different address
         character sequence, but they can be converted between each other because they share the same public key. You
         can see all transformations for any given address on <StyledLink href='https://quartz.subscan.io/' target='_blank' rel='noreferrer'>Subscan</StyledLink>.</>
-    </IconWithHint>),
+    </IconWithHint></>),
     width: '25%',
     field: 'accountInfo',
     render(accountInfo: AccountInfo) {
