@@ -13,7 +13,6 @@ import { shortcutText } from '../../../utils/textUtils';
 export const AskExistsSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties, onFinish }) => {
   const [seed, setSeed] = useState<string>(accountProperties?.seed || '');
   const [address, setAddress] = useState<string>(accountProperties?.address || '');
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   const deviceSize = useDeviceSize();
 
   const changeSeed = useCallback((value: string) => {
