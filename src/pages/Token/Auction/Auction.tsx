@@ -21,9 +21,10 @@ interface AuctionProps {
   onDelistAuctionClick(): void
   onWithdrawClick(): void
   onClose(newOwnerAddress: string): void
+  testid: string
 }
 
-const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDelistAuctionClick, onWithdrawClick, onClose }) => {
+const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDelistAuctionClick, onWithdrawClick, onClose, testid }) => {
   const [offer, setOffer] = useState<Offer>(initialOffer);
   const { selectedAccount } = useAccounts();
   const { getCalculatedBid } = useAuction();
@@ -86,7 +87,7 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
 
   const onAuctionStopped = useCallback((_offer: Offer) => {
     info(
-      'Auction is stopped',
+      <div data-testid={`${testid}-auction-stop-notification`}>Auction is stopped</div>,
       { name: 'success', size: 32, color: 'var(--color-additional-light)' }
     );
     setOffer(_offer);
@@ -119,13 +120,22 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
         {canDelist && <Button title={'Delist'}
           role={'danger'}
           onClick={onDelistAuctionClick}
+          // @ts-ignore
+          testid={`${testid}-delist-button`}
         />}
         {canPlaceABid && <Button title={'Place a bid'}
           role={'primary'}
           onClick={onPlaceABidClick}
           disabled={!canPlaceABid}
+          // @ts-ignore
+          testid={`${testid}-place-bid-button`}
         />}
-        {canWithdraw && <Button title={'Withdraw'} onClick={onWithdrawClick} />}
+        {canWithdraw && <Button
+          title={'Withdraw'}
+          onClick={onWithdrawClick}
+          // @ts-ignore
+          testid={`${testid}-withdraw-button`}
+        />}
       </Row>}
       {offer.auction?.status === 'active' && offer?.auction?.stopAt && <TimerWrapper>
         <Timer time={offer.auction.stopAt} />

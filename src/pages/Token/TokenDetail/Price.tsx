@@ -8,15 +8,20 @@ import { useApi } from '../../../hooks/useApi';
 
 interface PriceProps {
   price: string;
+  testid?: string
 }
 
-export const Price: FC<PriceProps> = ({ price }) => {
+export const Price: FC<PriceProps> = ({ price, testid = '' }) => {
   const { api } = useApi();
 
   return (
     <PriceWrapper>
       <Row>
-        <Heading size={'1'}>{`${formatKusamaBalance(new BN(price).toString(), api?.market?.kusamaDecimals)}`}</Heading>
+        <Heading
+          // @ts-ignore
+          testid={`${testid}-price`}
+          size={'1'}
+        >{`${formatKusamaBalance(new BN(price).toString(), api?.market?.kusamaDecimals)}`}</Heading>
         <Icon name={'chain-kusama'} size={32} />
       </Row>
     </PriceWrapper>

@@ -5,9 +5,10 @@ import Skeleton from './Skeleton/Skeleton';
 interface PictureProps {
   src?: string
   alt: string
+  testid?: string
 }
 
-export const Picture: FC<PictureProps> = ({ alt, src }) => {
+export const Picture: FC<PictureProps> = ({ alt, src, testid = '' }) => {
   const [imageSrc, setImageSrc] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -36,6 +37,7 @@ export const Picture: FC<PictureProps> = ({ alt, src }) => {
       <img
         alt={alt}
         src={src}
+        data-testid={`${testid}`}
       />}
     {!isLoading && !imageSrc && <svg
       fill={'white'}

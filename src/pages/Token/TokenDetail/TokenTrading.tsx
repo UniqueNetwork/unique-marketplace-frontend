@@ -21,9 +21,10 @@ interface TokenTradingProps {
   onDelistAuctionClick(): void
   onWithdrawClick(): void
   onAuctionClose(newOwnerAddress: string): void
+  testid: string
 }
 
-export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick, onTransferClick, onDelistClick, onDelistAuctionClick, onPlaceABidClick, onWithdrawClick, onBuyClick, onAuctionClose }) => {
+export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick, onTransferClick, onDelistClick, onDelistAuctionClick, onPlaceABidClick, onWithdrawClick, onBuyClick, onAuctionClose, testid }) => {
   const { selectedAccount } = useContext(accountContext);
   const { settings } = useApi();
 
@@ -49,6 +50,7 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
       onWithdrawClick={onWithdrawClick}
       onDelistAuctionClick={onDelistAuctionClick}
       onClose={onAuctionClose}
+      testid={`${testid}-auction`}
     />);
   }
 
@@ -59,6 +61,7 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
       onSellClick={onSellClick}
       onTransferClick={onTransferClick}
       onDelistClick={onDelistClick}
+      testid={`${testid}-sell`}
     />);
   }
 

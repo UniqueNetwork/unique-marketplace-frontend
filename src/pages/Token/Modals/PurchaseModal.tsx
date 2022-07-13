@@ -7,7 +7,7 @@ import { TTokenPageModalBodyProps } from './TokenPageModal';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { StageStatus } from '../../../types/StagesTypes';
 
-const PurchaseModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, setIsClosable }) => {
+const PurchaseModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, setIsClosable, testid }) => {
   const { selectedAccount } = useAccounts();
   const { stages, status, initiate } = usePurchaseFixStages(offer?.collectionId || 0, offer?.tokenId || 0);
   const { info } = useNotifications();
@@ -24,7 +24,7 @@ const PurchaseModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, setIsClo
   useEffect(() => {
     if (status === StageStatus.success) {
       info(
-        <>You are the new owner of <Link href={`/token/${collectionId || ''}/${tokenId || ''}`} title={`${prefix || ''} #${tokenId || ''}`}/></>,
+        <div data-testid={`${testid}-success-notification`}>You are the new owner of <Link href={`/token/${collectionId || ''}/${tokenId || ''}`} title={`${prefix || ''} #${tokenId || ''}`}/></div>,
         { name: 'success', size: 32, color: 'var(--color-additional-light)' }
       );
     }
@@ -32,7 +32,12 @@ const PurchaseModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, setIsClo
 
   return (
     <div>
-      <DefaultMarketStages stages={stages} status={status} onFinish={onFinish} />
+      <DefaultMarketStages
+        stages={stages}
+        status={status}
+        onFinish={onFinish}
+        testid={testid}
+      />
     </div>
   );
 };

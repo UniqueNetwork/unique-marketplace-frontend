@@ -14,9 +14,10 @@ interface SellTokenProps {
   onSellClick(): void
   onTransferClick(): void
   onDelistClick(): void
+  testid: string
 }
 
-export const SellToken: FC<SellTokenProps> = ({ offer, isAllowed, onSellClick, onTransferClick, onDelistClick }) => {
+export const SellToken: FC<SellTokenProps> = ({ offer, isAllowed, onSellClick, onTransferClick, onDelistClick, testid }) => {
   const { selectedAccount } = useAccounts();
   const { settings } = useApi();
 
@@ -27,9 +28,15 @@ export const SellToken: FC<SellTokenProps> = ({ offer, isAllowed, onSellClick, o
   if (offer) {
     return (<>
       <Text size={'l'}>{'Price'}</Text>
-      <Price price={offer.price} />
+      <Price testid={testid} price={offer.price} />
       <ButtonWrapper>
-        <Button title={'Delist'} role={'danger'} onClick={onDelistClick} />
+        <Button
+          title={'Delist'}
+          role={'danger'}
+          onClick={onDelistClick}
+          // @ts-ignore
+          testid={`${testid}-delist-button`}
+        />
       </ButtonWrapper>
       <Divider />
     </>);
@@ -40,8 +47,19 @@ export const SellToken: FC<SellTokenProps> = ({ offer, isAllowed, onSellClick, o
   return (
     <>
       <ActionsWrapper>
-        {!hideSellBtn && <Button title={'Sell'} role={'primary'} onClick={onSellClick}/>}
-        <Button title={'Transfer'} onClick={onTransferClick} />
+        {!hideSellBtn && <Button
+          title={'Sell'}
+          role={'primary'}
+          onClick={onSellClick}
+          // @ts-ignore
+          testid={`${testid}-sell-button`}
+        />}
+        <Button
+          title={'Transfer'}
+          onClick={onTransferClick}
+          // @ts-ignore
+          testid={`${testid}-transfer-button`}
+        />
       </ActionsWrapper>
       {(settings?.marketType !== 'primary' && !selectedAccount?.isOnWhiteList) && <WarningWrapper>
         A fee of ~0,001 KSM may be applied to the first sale transaction. Your address will be added to the transaction sponsoring whitelist allowing you to make feeless transactions.

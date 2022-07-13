@@ -8,9 +8,10 @@ type TStagesModalProps = {
   stages: Stage[],
   status: StageStatus,
   onFinish: () => void, // TODO: copy-pasted
+  testid?: string
 }
 
-const DefaultMarketStages: FC<TStagesModalProps> = ({ stages, status, onFinish }) => {
+const DefaultMarketStages: FC<TStagesModalProps> = ({ stages, status, onFinish, testid = '' }) => {
   useEffect(() => {
     if (status === StageStatus.success || status === StageStatus.error) {
       setTimeout(() => onFinish(), 500);
@@ -29,7 +30,11 @@ const DefaultMarketStages: FC<TStagesModalProps> = ({ stages, status, onFinish }
             {stage.status === StageStatus.success && <Icon name={'check-circle'} size={24} color={'var(--color-additional-dark)'} />}
           </StatusWrapper>
           <TitleWrapper>
-            <Text size={'m'}>{stage.title}</Text>
+            <Text
+              size={'m'}
+              // @ts-ignore
+              testid={`${testid}-stage${index + 1}`}
+            >{stage.title}</Text>
             {stages.length > 1 && <Text size={'s'} color={'grey-500'}>
                 {`Step ${index + 1}`}
               </Text>}
