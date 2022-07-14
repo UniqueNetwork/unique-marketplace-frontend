@@ -235,11 +235,13 @@ type KusamaFeeMessageProps = {
 
 const KusamaFeeMessage: FC<KusamaFeeMessageProps> = ({ isFeeLoading, kusamaFee }) => {
   return (
-    <TextStyled color='additional-warning-500' size='s'>
-      {isFeeLoading
-        ? <Loader label='Loading fee...' />
-        : <>A fee of {kusamaFee === '0' ? 'some' : `~ ${kusamaFee}`} KSM can be applied to the transaction, unless the transaction is sponsored</>}
-    </TextStyled>
+    <KusamaFeeMessageWrapper>
+      <Text color='additional-warning-500' size='s'>
+        {isFeeLoading
+          ? <Loader label='Loading fee...' />
+          : <>A fee of {kusamaFee === '0' ? 'some' : `~ ${kusamaFee}`} KSM can be applied to the transaction, unless the transaction is sponsored</>}
+      </Text>
+    </KusamaFeeMessageWrapper>
   );
 };
 
@@ -268,7 +270,7 @@ const AddressOptionWrapper = styled.div`
   column-gap: calc(var(--gap) / 2);
 `;
 
-const TextStyled = styled(Text)`
+const KusamaFeeMessageWrapper = styled.div`
   box-sizing: border-box;
   display: flex;
   padding: 8px 16px;
@@ -276,8 +278,7 @@ const TextStyled = styled(Text)`
   border-radius: 4px;
   background-color: ${AdditionalWarning100};
   width: 100%;
-  min-height: 58px;
-  
+
   .unique-loader {
     display: flex;
   }

@@ -28,8 +28,35 @@ export type Trade = {
   tokenId: number
   tradeDate: number
   tokenDescription: TokenDescription
+  status: string
+  offerId: string
 }
 
 export type TradesResponse = PaginatedResponse<Trade>
 
 export type UseFetchTradesProps = Partial<GetTradesRequestPayload>
+
+export type TradeDetails = {
+  id: string
+  createdAt: string
+  updatedAt: string
+  priceStep: string
+  startPrice: string
+  status: string
+  stopAt: string
+  contractAskId: string
+  bids: Bid[]
+}
+
+export type Bid = {
+  id: string
+  amount: string
+  balance: string
+  blockNumber: string
+  auctionId: string
+  bidderAddress: string
+  status: string
+  createdAt: string
+  updatedAt: string
+  isWinner?: boolean
+}

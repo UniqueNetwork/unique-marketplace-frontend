@@ -8,11 +8,12 @@ import { addressFromSeed } from '../../../utils/seedUtils';
 
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import { defaultPairType, derivePath } from './CreateAccount';
-import { AdditionalWarning100, Coral700 } from 'styles/colors';
+import { Coral700 } from 'styles/colors';
 import { Avatar } from 'components/Avatar/Avatar';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import IconWithHint from 'components/IconWithHint/IconWithHint';
-import { IconButton } from '../../../components/IconButton/IconButton';
+import { IconButton } from 'components/IconButton/IconButton';
+import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 
 type TOption = SelectOptionProps & { id: string, title: string };
 
@@ -62,12 +63,16 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish 
 
   return (<>
     <AddressWrapper>
-      <Avatar size={24} src={DefaultAvatar} address={address} />
+      {address && <Avatar size={24} src={DefaultAvatar} address={address} />}
       <Text color={'grey-500'}>{address}</Text>
     </AddressWrapper>
     <Heading size={'4'} >The secret seed value for this account</Heading>
     <SeedGeneratorSelectWrapper>
-      <Select options={seedGenerators} value={seedGenerator} onChange={onSeedGeneratorChange} />
+      <Select options={seedGenerators}
+        value={seedGenerator}
+        onChange={onSeedGeneratorChange}
+        disabled={seedGenerators.length === 1}
+      />
       <IconWithHint placement={'top'}>
         <>Find out more on <TooltipLink href='https://' title={'Polkadot Wiki'}>Polkadot Wiki</TooltipLink></>
       </IconWithHint>
@@ -85,12 +90,9 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish 
       />
     </InputSeedWrapper>
     {!seedValid && <ErrorText>Seed phrase is invalid</ErrorText>}
-    <TextStyled
-      color='additional-warning-500'
-      size='s'
-    >
+    <WarningBlock>
       Ensure that you keep this seed in a safe place. Anyone with access to it can re-create the account and gain full access to it.
-    </TextStyled>
+    </WarningBlock>
     <ConfirmWrapperRow>
       <Checkbox label={'I have saved my mnemonic seed safely'}
         checked={confirmSeedSaved}
@@ -157,16 +159,6 @@ const SeedInput = styled.textarea`
   line-height: 24px;
 `;
 
-const TextStyled = styled(Text)`
-  box-sizing: border-box;
-  display: flex;
-  padding: 8px 16px;
-  border-radius: var(--gap);
-  background-color: ${AdditionalWarning100};
-  width: 100%;
-  margin: calc(var(--gap) * 1.5) 0;
-`;
-
 const ConfirmWrapperRow = styled.div`
   display: flex;
   margin-bottom: calc(var(--gap) * 1.5);
@@ -180,6 +172,14 @@ const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
   align-items: center;
+  @media (max-width: 568px) {
+    flex-direction: column;
+    align-items: flex-start;
+    row-gap: calc(var(--gap) /2);
+    button {
+      width: 100%;
+    }
+  }
 `;
 
 const TooltipLink = styled(Link)`

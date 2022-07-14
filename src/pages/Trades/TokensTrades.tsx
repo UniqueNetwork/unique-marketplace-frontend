@@ -5,12 +5,15 @@ import styled from 'styled-components';
 import { useTrades } from '../../api/restApi/trades/trades';
 import { Table } from '../../components/Table';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
-import { tradesColumns } from './columns';
+import getTradesColumns from './columns';
 import { useAccounts } from '../../hooks/useAccounts';
 import { TradesTabs } from './types';
 import SearchField from '../../components/SearchField/SearchField';
 
 import NoTradesIcon from '../../static/icons/no-trades.svg';
+import useDeviceSize from '../../hooks/useDeviceSize';
+import TokenTradesDetailsModal from './TradesDetailsModal';
+import { Trade } from '../../api/restApi/trades/types';
 
 type TokensTradesPage = {
   currentTab: TradesTabs
@@ -22,6 +25,8 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
   const [sortString, setSortString] = useState<string>();
   const [pageSize, setPageSize] = useState<number>(10);
   const [searchValue, setSearchValue] = useState<string>();
+  const [selectedOfferDetails, setSelectedOfferDetails] = useState<Trade | null>(null);
+  const deviceSize = useDeviceSize();
 
   const { trades, tradesCount, fetch, isFetching } = useTrades();
 
@@ -105,6 +110,14 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
     });
   }, [selectedAccount?.address, currentTab, setSortString, pageSize, searchValue]);
 
+  const onShowTradesDetailsModal = useCallback((trade: Trade) => {
+    setSelectedOfferDetails(trade);
+  }, []);
+
+  const closeDetailsModal = useCallback(() => {
+    setSelectedOfferDetails(null);
+  }, [setSelectedOfferDetails]);
+
   return (<PagePaper>
     <TradesPageWrapper>
       <StyledSearchField
@@ -115,7 +128,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
       <StyledTable
         onSort={onSortChange}
         data={trades || []}
-        columns={tradesColumns}
+        columns={getTradesColumns({ deviceSize, onShowTradesDetailsModal })}
         loading={isLoadingAccounts || isFetching}
         emptyIconProps={searchValue ? { name: 'magnifier-found' } : { file: NoTradesIcon }}
       />
@@ -129,12 +142,25 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
           withIcons
         />
       </PaginationWrapper>}
+      <TokenTradesDetailsModal trade={selectedOfferDetails} onCancel={closeDetailsModal}/>
     </TradesPageWrapper>
   </PagePaper>);
 };
 
 const TradesPageWrapper = styled.div`
-  width: 100%
+  width: 100%;
+
+  @media (max-width: 640px) {
+    .unique-modal-wrapper .unique-modal {
+      width: calc(520px - var(--prop-gap) * 3);
+    }
+  }
+
+  @media (max-width: 567px) {
+    .unique-modal-wrapper .unique-modal {
+      width: calc(288px - var(--prop-gap) * 3);
+    }
+  }
 `;
 
 const StyledSearchField = styled(SearchField)`

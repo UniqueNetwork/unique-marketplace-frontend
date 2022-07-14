@@ -52,6 +52,9 @@ export const CollectionCard: FC<TCollectionCard> = ({
         compareEncodedAddresses(selectedAccount.address, collection?.owner || ''));
   }, [selectedAccount?.address, collectionDetails?.sponsorship?.confirmed, collection?.owner]);
 
+  const hasSponsorship = useMemo(() => collectionDetails?.sponsorship && !collectionDetails?.sponsorship?.unconfirmed, [collectionDetails]);
+  const hasUnconfirmedSponsorship = useMemo(() => collectionDetails?.sponsorship?.unconfirmed, [collectionDetails]);
+
   return (
     <CollectionCardStyled>
       <PictureWrapper>
@@ -60,7 +63,8 @@ export const CollectionCard: FC<TCollectionCard> = ({
           <Dropdown placement={'right'}
             dropdownRender={() => (<DropdownMenu>
               {canConfirmSponsorships && <DropdownMenuItem onClick={onManageSponsorshipClick}>Manage sponsorship</DropdownMenuItem>}
-              {canRemoveSponsorships && <DropdownMenuItem onClick={onRemoveSponsorshipClick}>Remove sponsorship</DropdownMenuItem>}
+              {/* TODO: wait until the network can grant access to remove sponsorship */}
+              {/* canRemoveSponsorships && <DropdownMenuItem onClick={onRemoveSponsorshipClick}>Remove sponsorship</DropdownMenuItem> */}
               <DropdownMenuItem onClick={onManageTokensClick}>Manage tokens</DropdownMenuItem>
               <DropdownMenuItem onClick={onRemoveCollectionClick}>Remove collection</DropdownMenuItem>
               <DropdownMenuItem onClick={onViewOnScanClick}>View on Scan
@@ -85,11 +89,11 @@ export const CollectionCard: FC<TCollectionCard> = ({
             <Text size='s' color={'grey-500'} >Allowed tokens:</Text>
             <Text size='s' >{collection.allowedTokens || 'all'}</Text>
           </Row>
-          {collectionDetails?.sponsorship && <Row>
+          {hasSponsorship && <Row>
             <Text size='s' color={'grey-500'} >Sponsor:</Text>
-            <Text size='s' >{collectionDetails.sponsorship.confirmed ? shortcutText(collectionDetails.sponsorship.confirmed) : 'not assigned'}</Text>
+            <Text size='s' >{collectionDetails?.sponsorship?.confirmed ? shortcutText(collectionDetails.sponsorship.confirmed) : 'not assigned'}</Text>
           </Row>}
-          {collectionDetails?.sponsorship?.unconfirmed && <Row>
+          {hasUnconfirmedSponsorship && <Row>
             <Text size='s' color={'coral-500'} >Waiting for sponsorship approval</Text>
           </Row>}
         </AttributesWrapper>

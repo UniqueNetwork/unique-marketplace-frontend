@@ -3,13 +3,13 @@ import { Button, Heading, Text } from '@unique-nft/ui-kit';
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
 import styled from 'styled-components/macro';
 import AccountCard from '../../../components/Account/Account';
-import { AdditionalWarning100 } from '../../../styles/colors';
 import { useFee } from '../../../hooks/useFee';
 import StagesModal from '../../Token/Modals/StagesModal';
 import { useAcceptSponsorshipStages } from '../../../hooks/adminStages/useAcceptSponsorshipStages';
 import { useApi } from '../../../hooks/useApi';
 import { NFTCollection } from '../../../api/chainApi/unique/types';
 import { useRejectSponsorshipStages } from 'hooks/adminStages/useRejectSponsorshipStages';
+import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 
 const tokenSymbol = 'KSM';
 
@@ -51,7 +51,7 @@ export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collecti
         <Heading size='2'>Accept sponsorship</Heading>
       </Content>
       <Row>
-        <Text size={'m'}>{`The author of the collection ${collection?.name || collection?.collectionName} [ID ${collection?.id}] has chosen this address as a sponsor. Do you confirm the choice?`}</Text>
+        <Text size={'m'}>{`The author of the collection "${collection?.name || collection?.collectionName}" [ID ${collection?.id}] has chosen this address as a sponsor. Do you confirm the choice?`}</Text>
       </Row>
       <AddressWrapper>
         {collectionDetails?.sponsorship?.unconfirmed && <AccountCard
@@ -59,15 +59,11 @@ export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collecti
           accountAddress={collectionDetails?.sponsorship?.unconfirmed || ''}
           canCopy
           hideName
-          isShort
         />}
       </AddressWrapper>
-      <TextStyled
-        color='additional-warning-500'
-        size='s'
-      >
+      <WarningBlock>
         {`A fee of ~ ${kusamaFee} ${tokenSymbol} can be applied to the transaction if you accept this sponsor`}
-      </TextStyled>
+      </WarningBlock>
       <ButtonWrapper>
         <Button
           onClick={onRefuseClick}
@@ -114,16 +110,6 @@ const AddressWrapper = styled.div`
     width: 24px;
     height: 24px;
   }
-`;
-
-const TextStyled = styled(Text)`
-  box-sizing: border-box;
-  display: flex;
-  padding: 8px 16px;
-  margin-bottom: 24px;
-  border-radius: 4px;
-  background-color: ${AdditionalWarning100};
-  width: 100%;
 `;
 
 const ButtonWrapper = styled.div`

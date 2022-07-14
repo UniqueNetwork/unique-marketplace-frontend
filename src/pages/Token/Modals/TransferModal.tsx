@@ -1,15 +1,15 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import { Button, Heading, Link, Text, useNotifications } from '@unique-nft/ui-kit';
+import { Button, Heading, Link, useNotifications } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
 import { TTransfer } from './types';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
-import { AdditionalWarning100 } from '../../../styles/colors';
 import { useTransferStages } from '../../../hooks/marketplaceStages';
 import DefaultMarketStages from './StagesModal';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { StageStatus } from '../../../types/StagesTypes';
-import { TextInput } from '../../../components/TextInput/TextInput';
+import { TextInput } from 'components/TextInput/TextInput';
+import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 
 export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosable, onFinish, testid }) => {
   const { selectedAccount } = useAccounts();
@@ -64,18 +64,12 @@ const AskTransferModal: FC<{ onTransfer(receiver: string): void, testid: string 
         // @ts-ignore
         testid={`${testid}-address-input`}
       />
-      <TextStyled
-        color='additional-warning-500'
-        size='s'
-      >
+      <WarningBlock>
         Proceed with caution, once confirmed the transaction cannot be reverted.
-      </TextStyled>
-      <TextStyled
-        color='additional-warning-500'
-        size='s'
-      >
+      </WarningBlock>
+      <WarningBlock>
         Make sure to use a Substrate address created with a Polkadot.&#123;js&#125; wallet. There is no guarantee that third-party wallets, exchanges or hardware wallets can successfully sign and process your transfer which will result in a possible loss of the NFT.
-      </TextStyled>
+      </WarningBlock>
       <ButtonWrapper>
         <Button
           disabled={!address}
@@ -118,16 +112,6 @@ const TransferStagesModal: FC<TTokenPageModalBodyProps & TTransfer> = ({ token, 
     </div>
   );
 };
-
-const TextStyled = styled(Text)`
-  box-sizing: border-box;
-  display: flex;
-  padding: 8px 16px;
-  margin-bottom: 16px;
-  border-radius: 4px;
-  background-color: ${AdditionalWarning100};
-  width: 100%;
-`;
 
 const InputWrapper = styled(TextInput)`
   margin-bottom: 32px;

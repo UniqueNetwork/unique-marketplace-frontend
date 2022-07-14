@@ -32,18 +32,18 @@ export const useAdminLoggingIn = () => {
     let signature;
     try {
       signature = await signMessage(logInMessage);
-    } catch (e) {
-      console.error('Administrator authorization failed', e);
-      return null;
-    }
-    const response = await adminLogIn({
-      account: selectedAccount.address
-    }, signature);
+      const response = await adminLogIn({
+        account: selectedAccount.address
+      }, signature);
 
-    setIsLoggingIn(false);
-    if (response.status === 200) {
-      localStorage.setItem(JWTokenLocalStorageKey, response.data.accessToken);
-      return response.data.accessToken;
+      setIsLoggingIn(false);
+      if (response.status === 200) {
+        localStorage.setItem(JWTokenLocalStorageKey, response.data.accessToken);
+        return response.data.accessToken;
+      }
+    } catch (e) {
+      setIsLoggingIn(false);
+      console.error('Administrator authorization failed', e);
     }
     return null;
   }, [selectedAccount, signMessage]);

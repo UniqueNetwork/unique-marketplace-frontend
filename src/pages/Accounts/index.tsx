@@ -49,11 +49,11 @@ const getAccountsColumns = ({
     onShowGetKsmModal
   }: AccountsColumnsProps): TableColumnProps[] => [
   {
-    title: (<IconWithHint placement={'right-start'}>
+    title: (<>Accounts<IconWithHint placement={'right-start'}>
       <>Substrate account addresses (Kusama, Quartz, Polkadot, Unique, etc.) may be represented by a different address
         character sequence, but they can be converted between each other because they share the same public key. You
         can see all transformations for any given address on <StyledLink href='https://quartz.subscan.io/' target='_blank' rel='noreferrer'>Subscan</StyledLink>.</>
-    </IconWithHint>),
+    </IconWithHint></>),
     width: '25%',
     field: 'accountInfo',
     render(accountInfo: AccountInfo) {
@@ -327,7 +327,7 @@ export const AccountsPage = () => {
       <ImportViaSeedAccountModal isVisible={currentModal === AccountModal.importViaSeed} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
       <ImportViaJSONAccountModal isVisible={currentModal === AccountModal.importViaJSON} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
       <ImportViaQRCodeAccountModal isVisible={currentModal === AccountModal.importViaQRCode} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
-      <TransferFundsModal isVisible={currentModal === AccountModal.sendFunds} onFinish={onModalClose} senderAddress={selectedAddress} />
+      <TransferFundsModal isVisible={currentModal === AccountModal.sendFunds} onFinish={onChangeAccountsFinish} senderAddress={selectedAddress} />
       <WithdrawDepositModal
         isVisible={currentModal === AccountModal.withdrawDeposit}
         onFinish={onChangeAccountsFinish}

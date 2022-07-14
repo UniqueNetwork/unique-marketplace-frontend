@@ -5,6 +5,7 @@ import { Settings } from '../restApi/settings/types';
 import { BN } from '@polkadot/util';
 import { Balance } from '@polkadot/types/interfaces';
 import { TokenId } from './unique/types';
+import { Account } from '../../account/AccountContext';
 
 export interface IRpc {
   rpcEndpoint: string
@@ -57,13 +58,15 @@ export type TransactionOptions = {
   // this function will be called after transaction is created and awaited before proceeding
   sign: (tx: TTransaction) => Promise<TTransaction>
   // if not provided, signed.send() will be called instead
-  send?: (signedTx: TTransaction) => Promise<any | void>
+  send?: (signedTx: TTransaction | string) => Promise<any | void>
 };
+
+export type TSignMessage = { (message: string, account?: string | Account | undefined): Promise<string>; (arg0: string): any; }
 
 export interface IMarketController {
   kusamaDecimals: number
   // substrate address
-  addToWhiteList: (account: string, options: TransactionOptions) => Promise<void>
+  addToWhiteList: (account: string, options: TransactionOptions, signMessage: TSignMessage) => Promise<void>
   checkWhiteListed: (account: string) => Promise<boolean>
   lockNftForSale: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
   sendNftToSmartContract: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>

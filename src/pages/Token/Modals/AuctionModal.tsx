@@ -19,7 +19,7 @@ import { Offer } from '../../../api/restApi/offers/types';
 import { useAuction } from '../../../api/restApi/auction/auction';
 import { TCalculatedBid } from '../../../api/restApi/auction/types';
 
-export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosable, onFinish, testid }) => {
+export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosable, onFinish }) => {
   const [status, setStatus] = useState<'ask' | 'place-bid-stage'>('ask'); // TODO: naming
   const [bidValue, setBidValue] = useState<TPlaceABid>();
 
@@ -29,7 +29,7 @@ export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosabl
     setIsClosable(false);
   }, [setStatus, setBidValue, setIsClosable]);
 
-  if (status === 'ask') return (<AskBidModal offer={offer} onConfirmPlaceABid={onConfirmPlaceABid} testid={`${testid}-bid`} />);
+  if (status === 'ask') return (<AskBidModal offer={offer} onConfirmPlaceABid={onConfirmPlaceABid} />);
   if (status === 'place-bid-stage') {
     return (<AuctionStagesModal
       accountAddress={bidValue?.accountAddress}
@@ -37,7 +37,6 @@ export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosabl
       onFinish={onFinish}
       offer={offer}
       setIsClosable={setIsClosable}
-      testid={`${testid}-stages`}
     />);
   }
   return null;
@@ -45,7 +44,7 @@ export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosabl
 
 const chainOptions = [{ id: 'KSM', title: 'KSM', iconRight: { size: 18, name: 'chain-kusama' } }];
 
-export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceABid): void, testid: string }> = ({ offer, onConfirmPlaceABid, testid }) => {
+export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceABid): void}> = ({ offer, onConfirmPlaceABid }) => {
   const [chain, setChain] = useState<string | undefined>('KSM');
   const { kusamaFee } = useFee();
   const { selectedAccount } = useAccounts();
@@ -125,32 +124,17 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
         <Heading size='2'>Place a bid</Heading>
       </Content>
       <InputWrapper>
-        <SelectStyled
-          options={chainOptions}
-          value={chain}
-          onChange={onChainChange}
-          testid={`${testid}-chain-select`}
-        />
+        <SelectStyled options={chainOptions} value={chain} onChange={onChainChange} />
         <InputStyled
-          testid={`${testid}-bid-input`}
           onChange={onBidAmountChange}
           value={bidAmount.toString()}
         />
       </InputWrapper>
-      <Text
-        size={'s'}
-        color={'grey-500'}
-        // @ts-ignore
-        testid={`${testid}-min-bid`}
-      >
+      <Text size={'s'} color={'grey-500'} >
         {`Minimum bid ${formatKusamaBalance(minimalBid.toString(), api?.market?.kusamaDecimals)} ${chain || ''}`}
       </Text>
       <CautionTextWrapper>
-        {!isEnoughBalance && <Text
-          color={'coral-500'}
-          // @ts-ignore
-          testid={`${testid}-too-low-balance`}
-        >Your balance is too low to place a bid</Text>}
+        {!isEnoughBalance && <Text color={'coral-500'}>Your balance is too low to place a bid</Text>}
       </CautionTextWrapper>
       <TextStyled
         color='additional-warning-500'
@@ -162,8 +146,6 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
       </TextStyled>
       <ButtonWrapper>
         <Button
-          // @ts-ignore
-          testid={`${testid}-confirm-button`}
           disabled={!isAmountValid || !isEnoughBalance || isFetchingCalculatedbid}
           onClick={onConfirmPlaceABidClick}
           role='primary'
@@ -174,7 +156,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
   );
 };
 
-const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ offer, accountAddress, onFinish, amount, testid }) => {
+const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ offer, accountAddress, onFinish, amount }) => {
   const { stages, status, initiate } = useAuctionBidStages(offer?.collectionId || 0, offer?.tokenId || 0);
   const { info } = useNotifications();
 
@@ -189,7 +171,7 @@ const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ offer, 
   useEffect(() => {
     if (status === StageStatus.success) {
       info(
-        <div data-testid={`${testid}-bid-notification`}>You made a new bid on <Link href={`/token/${collectionId || ''}/${tokenId || ''}`} title={`${prefix || ''} #${tokenId || ''}`}/></div>,
+        <>You made a new bid on <Link href={`/token/${collectionId || ''}/${tokenId || ''}`} title={`${prefix || ''} #${tokenId || ''}`}/></>,
         { name: 'success', size: 32, color: 'var(--color-additional-light)' }
       );
     }
@@ -197,12 +179,7 @@ const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ offer, 
 
   return (
     <div>
-      <DefaultMarketStages
-        stages={stages}
-        status={status}
-        onFinish={onFinish}
-        testid={testid}
-      />
+      <DefaultMarketStages stages={stages} status={status} onFinish={onFinish} />
     </div>
   );
 };

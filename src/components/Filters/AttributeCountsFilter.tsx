@@ -4,6 +4,7 @@ import { Checkbox, Text } from '@unique-nft/ui-kit';
 import Accordion from '../Accordion/Accordion';
 import CheckboxSkeleton from '../Skeleton/CheckboxSkeleton';
 import { AttributeCount } from '../../api/restApi/offers/types';
+import { sortAttributeCounts } from './utils/sortAttributes';
 
 interface AttributeCountsFilterProps {
   attributeCounts?: AttributeCount[]
@@ -35,7 +36,7 @@ const AttributeCountsFilter: FC<AttributeCountsFilterProps> = ({ attributeCounts
     >
       <CollectionFilterWrapper>
         {isAttributeCountsFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
-        {attributeCounts.map((attributeCount) => (
+        {attributeCounts.sort(sortAttributeCounts).map((attributeCount) => (
           <AttributeWrapper key={`attribute-${attributeCount.numberOfAttributes}`}>
             <Checkbox
               checked={selectedAttributeCounts.indexOf(attributeCount.numberOfAttributes) !== -1}

@@ -82,7 +82,7 @@ const AccountWrapper: FC = ({ children }) => {
 
   const getAccountBalance = useCallback(async (account: Account) => {
     const balances = await rpcClient?.rawKusamaRpcApi?.derive.balances?.all(account.address);
-    return balances?.availableBalance || new BN(0);
+    return balances?.freeBalance || new BN(0);
   }, [rpcClient]);
 
   const getAccountsBalances = useCallback(async (accounts: Account[]) => Promise.all(accounts.map(async (account: Account) => ({
@@ -107,7 +107,7 @@ const AccountWrapper: FC = ({ children }) => {
     const unsubscribes = await Promise.all(accounts.map(async (account) => {
       const unsubscribe = await rawKusamaRpcApi.query.system.account(account.address, ({ data: { free } }: { data: { free: BN } }) => {
         if (!account.balance?.KSM || !free.sub(account.balance.KSM).isZero()) {
-          setAccounts(accounts.map((_account: Account) => ({
+          setAccounts((accounts) => accounts.map((_account: Account) => ({
             ..._account,
             balance: account.address === _account.address ? { KSM: free } : _account.balance
           })));
@@ -117,7 +117,7 @@ const AccountWrapper: FC = ({ children }) => {
     }));
 
     unsubscribesBalancesChanges.current = unsubscribes.reduce<Record<string, Codec>>((acc, item) => ({ ...acc, ...item }), {});
-  }, [rawKusamaRpcApi]);
+  }, [rawKusamaRpcApi, setAccounts]);
 
   const fetchAccounts = useCallback(async () => {
     if (!rpcClient?.isKusamaApiConnected) return;
