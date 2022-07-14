@@ -205,6 +205,15 @@ const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
   column-gap: var(--gap);
+
+  @media (max-width: 568px) {
+    flex-direction: column;
+    align-items: flex-start;
+    row-gap: calc(var(--gap) /2);
+    button {
+      width: 100%;
+    }
+  }
 `;
 
 export type WithdrawDepositStagesModalProps = {

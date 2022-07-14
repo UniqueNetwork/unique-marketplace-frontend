@@ -8,11 +8,12 @@ import { Avatar } from '../../../components/Avatar/Avatar';
 import { TextInput } from '../../../components/TextInput/TextInput';
 
 export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties, onFinish, onGoBack }) => {
-  const [name, setName] = useState<string>('');
+  const [name, setName] = useState<string>(accountProperties?.name || '');
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
 
   const onAccountNameChange = useCallback((value: string) => {
+    if (value.length > 64) return;
     setName(value);
   }, []);
 
@@ -87,6 +88,14 @@ const ButtonWrapper = styled.div`
   justify-content: flex-end;
   column-gap: var(--gap);
   align-items: center;
+  @media (max-width: 568px) {
+    flex-direction: column;
+    align-items: flex-start;
+    row-gap: calc(var(--gap) /2);
+    button {
+      width: 100%;
+    }
+  }
 `;
 
 const CredentialsWrapper = styled.div`

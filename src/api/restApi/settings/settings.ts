@@ -9,7 +9,7 @@ const endpoint = '/api/settings';
 
 export const getSettings = () => get<Settings>(`${endpoint}`, { ...defaultParams });
 
-export const addToWhitelist = (body: WhitelistBody, signature: string) => post(`${endpoint}/allowed_list/${body.account}`, null, { headers: { ...defaultParams.headers, Authorization: `Bearer ${signature}` }, params: body, ...defaultParams });
+export const addToWhitelist = (body: WhitelistBody, signature: string) => post(`${endpoint}/allowed_list/${body.account}`, null, { headers: { ...defaultParams.headers, Authorization: `Bearer ${signature}` }, ...defaultParams });
 
 export const useSettings = () => {
   const [settings, setSettings] = useState<Settings | undefined>();
