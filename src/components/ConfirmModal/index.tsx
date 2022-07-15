@@ -11,6 +11,7 @@ export interface IConfirmModalProps {
   onConfirm: () => void
   onCancel: () => void
   isClosable?: boolean
+  testid?: string
 }
 
 const ConfirmModal: FC<IConfirmModalProps> = ({
@@ -21,7 +22,8 @@ const ConfirmModal: FC<IConfirmModalProps> = ({
   cancelText = 'Cancel',
   onConfirm,
   onCancel,
-  isClosable = false
+  isClosable = false,
+  testid
 }) => {
   const onConfirmClick = useCallback(() => {
     onConfirm();
@@ -34,8 +36,20 @@ const ConfirmModal: FC<IConfirmModalProps> = ({
         {children}
       </Content>
       <Footer>
-        <Button onClick={onCancel} role='outlined' title={cancelText} />
-        <Button onClick={onConfirmClick} role='primary' title={confirmText} />
+        <Button
+          // @ts-ignore
+          testid={`${testid}-cancel-button`}
+          onClick={onCancel}
+          role='outlined'
+          title={cancelText}
+        />
+        <Button
+          // @ts-ignore
+          testid={`${testid}-confirm-button`}
+          onClick={onConfirmClick}
+          role='primary'
+          title={confirmText}
+        />
       </Footer>
     </Modal>
   );

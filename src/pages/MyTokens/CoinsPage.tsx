@@ -62,43 +62,43 @@ const getAccountsColumns = ({ onShowSendFundsModal }: AccountsColumnsProps): Tab
 
 const chains: Record<string, string> = { KSM: 'Kusama' };
 
-export const CoinsPage: FC = () => {
-  const { selectedAccount } = useAccounts();
-  const [isTransferFundsVisible, setIsTransferFundsVisible] = useState(false);
-
-  const onSendFundsClick = useCallback(() => () => {
-    setIsTransferFundsVisible(true);
-  }, []);
-
-  const onFinish = useCallback(() => {
-    setIsTransferFundsVisible(false);
-    // void fetchBalances();
-  }, []);
-
-  const balances = useMemo(() => {
-    return Object.keys(chains).map((chainKey: string) => ({
-      chainInfo: {
-        key: chainKey.toLowerCase(),
-        name: chains[chainKey],
-        address: selectedAccount?.address
-      },
-      balance: selectedAccount?.balance?.[tokenSymbol]?.toString()
-    }));
-  }, [selectedAccount]);
-
-  return (<PagePaper>
-    <CoinsPageWrapper>
-      <Row>
-        <Heading size={'4'} >Network</Heading>
-      </Row>
-      <Table
-        columns={getAccountsColumns({ onShowSendFundsModal: onSendFundsClick })}
-        data={balances}
-      />
-      <TransferFundsModal isVisible={isTransferFundsVisible} onFinish={onFinish} senderAddress={selectedAccount?.address} />
-    </CoinsPageWrapper>
-  </PagePaper>);
-};
+// export const CoinsPage: FC = () => {
+//   const { selectedAccount } = useAccounts();
+//   const [isTransferFundsVisible, setIsTransferFundsVisible] = useState(false);
+//
+//   const onSendFundsClick = useCallback(() => () => {
+//     setIsTransferFundsVisible(true);
+//   }, []);
+//
+//   const onFinish = useCallback(() => {
+//     setIsTransferFundsVisible(false);
+//     // void fetchBalances();
+//   }, []);
+//
+//   const balances = useMemo(() => {
+//     return Object.keys(chains).map((chainKey: string) => ({
+//       chainInfo: {
+//         key: chainKey.toLowerCase(),
+//         name: chains[chainKey],
+//         address: selectedAccount?.address
+//       },
+//       balance: selectedAccount?.balance?.[tokenSymbol]?.toString()
+//     }));
+//   }, [selectedAccount]);
+//
+//   return (<PagePaper>
+//     <CoinsPageWrapper>
+//       <Row>
+//         <Heading size={'4'} >Network</Heading>
+//       </Row>
+//       <Table
+//         columns={getAccountsColumns({ onShowSendFundsModal: onSendFundsClick })}
+//         data={balances}
+//       />
+//       <TransferFundsModal isVisible={isTransferFundsVisible} onFinish={onFinish} senderAddress={selectedAccount?.address} />
+//     </CoinsPageWrapper>
+//   </PagePaper>);
+// };
 
 const CoinsPageWrapper = styled.div`
   display: flex;

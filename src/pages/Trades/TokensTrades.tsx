@@ -17,9 +17,10 @@ import { Trade } from '../../api/restApi/trades/types';
 
 type TokensTradesPage = {
   currentTab: TradesTabs
+  testid: string
 }
 
-export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
+export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) => {
   const { selectedAccount, isLoading: isLoadingAccounts } = useAccounts();
   const [page, setPage] = useState<number>(0);
   const [sortString, setSortString] = useState<string>();
@@ -124,6 +125,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
         placeholder='Collection / token'
         searchValue={searchValue}
         onSearch={onSearch}
+        testid={`${testid}-search-field`}
       />
       <StyledTable
         onSort={onSortChange}

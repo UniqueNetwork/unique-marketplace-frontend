@@ -12,7 +12,7 @@ export const derivePath = '';
 
 export const defaultPairType = 'sr25519';
 
-export const CreateAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish, onClose }) => {
+export const CreateAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish, onClose, testid }) => {
   const [stage, setStage] = useState<CreateAccountModalStages>(CreateAccountModalStages.AskSeed);
   const [accountProperties, setAccountProperties] = useState<TAccountProperties>();
   const { addLocalAccount } = useAccounts();
@@ -57,6 +57,7 @@ export const CreateAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish
       accountProperties={accountProperties}
       onFinish={onStageFinish}
       onGoBack={onGoBack}
+      testid={`${testid}-${stage}`}
     />
   </Modal>);
 };

@@ -7,7 +7,7 @@ import { PasswordInput } from '../../../components/PasswordInput/PasswordInput';
 import { Avatar } from '../../../components/Avatar/Avatar';
 import { TextInput } from '../../../components/TextInput/TextInput';
 
-export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties, onFinish, onGoBack }) => {
+export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties, onFinish, onGoBack, testid }) => {
   const [name, setName] = useState<string>(accountProperties?.name || '');
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
@@ -29,21 +29,32 @@ export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountP
   return (<>
     <AddressWrapper>
       <Avatar size={24} src={DefaultAvatar} address={accountProperties?.address} />
-      <Text color={'grey-500'}>{accountProperties?.address || ''}</Text>
+      <Text
+        // @ts-ignore
+        testid={`${testid}-address`}
+        color={'grey-500'}
+      >{accountProperties?.address || ''}</Text>
     </AddressWrapper>
     <CredentialsWrapper>
       <Text size={'m'}>Name</Text>
       <Text size={'s'} color={'grey-500'}>Give your account a name for easier identification and handling. </Text>
-      <TextInput onChange={onAccountNameChange} value={name} errorText={!nameIsValid && name ? 'Name must be 3 characters or more' : undefined} />
+      <TextInput
+        testid={`${testid}-name-input`}
+        onChange={onAccountNameChange}
+        value={name}
+        errorText={!nameIsValid && name ? 'Name must be 3 characters or more' : undefined}
+      />
 
       <Text size={'m'}>Password</Text>
       <Text size={'s'} color={'grey-500'}>This is necessary to authenticate all committed transactions and encrypt the key pair.<br/> Ensure you are using a strong password for proper account protection. </Text>
       <PasswordInput
+        testid={`${testid}-password`}
         onChange={setPassword}
         value={password}
       />
       <Text size={'m'}>Repeat password</Text>
       <PasswordInput
+        testid={`${testid}-confirm-password`}
         onChange={setConfirmPassword}
         value={confirmPassword}
       />
@@ -53,10 +64,14 @@ export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountP
     <ButtonWrapper>
       <StepsTextStyled size={'m'}>Step 2/3</StepsTextStyled>
       <Button
+        // @ts-ignore
+        testid={`${testid}-previous-button`}
         onClick={onGoBack}
         title='Previous'
       />
       <Button
+        // @ts-ignore
+        testid={`${testid}-next-button`}
         disabled={!passwordsMatch || !passwordIsValid || !nameIsValid}
         onClick={onNextClick}
         role='primary'

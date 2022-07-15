@@ -10,7 +10,7 @@ import { useApi } from '../../../hooks/useApi';
 import keyring from '@polkadot/ui-keyring';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 
-export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish }) => {
+export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish, testid }) => {
   const { rawRpcApi } = useApi();
   const [pair, setPair] = useState<KeyringPair | null>(null);
   const [password, setPassword] = useState<string>('');
@@ -52,7 +52,13 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
         <Text size={'m'}>Upload</Text>
         <Text size={'s'} color={'grey-500'}>Click to select or drop the file here</Text>
       </TitleWrapper>
-      <Upload onChange={onUploadChange} type={'square'} accept={'.json'} />
+      <Upload
+        // @ts-ignore
+        testid={`${testid}-upload-button`}
+        onChange={onUploadChange}
+        type={'square'}
+        accept={'.json'}
+      />
     </InputWrapper>
     <InputWrapper>
       <TitleWrapper>
@@ -60,6 +66,7 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
         <Text size={'s'} color={'grey-500'}>The password that was previously used to encrypt this account</Text>
       </TitleWrapper>
       <PasswordInput
+        testid={`${testid}-password`}
         onChange={setPassword}
         value={password}
       />
@@ -70,6 +77,8 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
     </WarningBlock>
     <ButtonWrapper>
       <Button
+        // @ts-ignore
+        testid={`${testid}-restore-button`}
         disabled={!password || !pair}
         onClick={onRestoreClick}
         role='primary'

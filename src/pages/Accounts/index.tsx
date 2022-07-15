@@ -31,6 +31,8 @@ import NoAccountsIcon from 'static/icons/no-accounts.svg';
 
 const tokenSymbol = 'KSM';
 
+const testid = 'accounts-page';
+
 type AccountsColumnsProps = {
   isSmallDevice: boolean
   formatAddress(address: string): string
@@ -289,18 +291,30 @@ export const AccountsPage = () => {
   return (<PagePaper>
     <AccountPageWrapper>
       <Row>
-        <CreateAccountButton title={'Create substrate account'} onClick={onCreateAccountClick}/>
+        <CreateAccountButton
+          // @ts-ignore
+          testid={`${testid}-create-substrate-button`}
+          title={'Create substrate account'}
+          onClick={onCreateAccountClick}
+        />
         <DropdownStyled
           dropdownRender={() => <DropdownMenu>
-            <DropdownMenuItem onClick={onImportViaSeedClick}>Seed phrase</DropdownMenuItem>
-            <DropdownMenuItem onClick={onImportViaJSONClick}>Backup JSON file</DropdownMenuItem>
-            <DropdownMenuItem onClick={onImportViaQRClick}>QR-code</DropdownMenuItem>
+            <DropdownMenuItem onClick={onImportViaSeedClick} data-testid={`${testid}-seed-button`}>Seed phrase</DropdownMenuItem>
+            <DropdownMenuItem onClick={onImportViaJSONClick} data-testid={`${testid}-json-file-button`}>Backup JSON file</DropdownMenuItem>
+            <DropdownMenuItem onClick={onImportViaQRClick} data-testid={`${testid}-qr-button`}>QR-code</DropdownMenuItem>
           </DropdownMenu>}
         >
-          <AddAccountButton title={'Add account via'} role={'primary'} iconRight={caretDown}/>
+          <AddAccountButton
+            // @ts-ignore
+            testid={`${testid}-add-via-button`}
+            title={'Add account via'}
+            role={'primary'}
+            iconRight={caretDown}
+          />
         </DropdownStyled>
         <SearchInputWrapper>
           <SearchInputStyled
+            testid={`${testid}-search`}
             placeholder={'Account'}
             iconLeft={{ name: 'magnify', size: 18 }}
             value={searchString}
@@ -323,22 +337,49 @@ export const AccountsPage = () => {
           emptyIconProps={searchString ? { name: 'magnifier-found' } : { file: NoAccountsIcon }}
         />
       </TableWrapper>
-      <CreateAccountModal isVisible={currentModal === AccountModal.create} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
-      <ImportViaSeedAccountModal isVisible={currentModal === AccountModal.importViaSeed} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
-      <ImportViaJSONAccountModal isVisible={currentModal === AccountModal.importViaJSON} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
-      <ImportViaQRCodeAccountModal isVisible={currentModal === AccountModal.importViaQRCode} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
-      <TransferFundsModal isVisible={currentModal === AccountModal.sendFunds} onFinish={onChangeAccountsFinish} senderAddress={selectedAddress} />
+      <CreateAccountModal
+        isVisible={currentModal === AccountModal.create}
+        onFinish={onChangeAccountsFinish}
+        onClose={onModalClose}
+        testid={`${testid}-create-modal`}
+      />
+      <ImportViaSeedAccountModal
+        isVisible={currentModal === AccountModal.importViaSeed}
+        onFinish={onChangeAccountsFinish}
+        onClose={onModalClose}
+        testid={`${testid}-import-via-seed-modal`}
+      />
+      <ImportViaJSONAccountModal
+        isVisible={currentModal === AccountModal.importViaJSON}
+        onFinish={onChangeAccountsFinish}
+        onClose={onModalClose}
+        testid={`${testid}-import-via-json-modal`}
+      />
+      <ImportViaQRCodeAccountModal
+        isVisible={currentModal === AccountModal.importViaQRCode}
+        onFinish={onChangeAccountsFinish}
+        onClose={onModalClose}
+        testid={`${testid}-import-via-qr-modal`}
+      />
+      <TransferFundsModal
+        isVisible={currentModal === AccountModal.sendFunds}
+        onFinish={onChangeAccountsFinish}
+        senderAddress={selectedAddress}
+        testid={`${testid}-transfer-funds-modal`}
+      />
       <WithdrawDepositModal
         isVisible={currentModal === AccountModal.withdrawDeposit}
         onFinish={onChangeAccountsFinish}
         onClose={onModalClose}
         address={selectedAddress}
+        testid={`${testid}-withdraw-modal`}
       />
       <ConfirmModal
         isVisible={currentModal === AccountModal.deleteLocalAccount}
         onCancel={onModalClose}
         onConfirm={deleteLocalAccountConfirmed}
         headerText={'Delete local account'}
+        testid={`${testid}-delete-account-modal`}
       >
         <p>Are you sure, you want to perform this action? You won&apos;t be able to recover this account in future.</p>
       </ConfirmModal>

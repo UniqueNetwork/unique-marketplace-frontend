@@ -10,7 +10,7 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import { Avatar } from '../../../components/Avatar/Avatar';
 
-export const ImportViaQRCodeAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish }) => {
+export const ImportViaQRCodeAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish, testid }) => {
   const [address, setAddress] = useState<string>();
   const [scanned, setScanned] = useState<ScannedResult>();
   const [password, setPassword] = useState<string>('');
@@ -48,7 +48,10 @@ export const ImportViaQRCodeAccountModal: FC<TAccountModalProps> = ({ isVisible,
       {!address && <QRReader onScan={onScan} />}
       {address && <AddressWrapper>
         <Avatar size={24} src={DefaultAvatar} address={address} />
-        <Text>{address}</Text>
+        <Text
+          // @ts-ignore
+          testid={`${testid}-address`}
+        >{address}</Text>
       </AddressWrapper>}
     </InputWrapper>
     <InputWrapper>
@@ -57,6 +60,7 @@ export const ImportViaQRCodeAccountModal: FC<TAccountModalProps> = ({ isVisible,
         <Text size={'s'} color={'grey-500'}>The password that was previously used to encrypt this account</Text>
       </PasswordTitle>
       <PasswordInput
+        testid={`${testid}-password`}
         onChange={setPassword}
         value={password}
       />
@@ -64,6 +68,8 @@ export const ImportViaQRCodeAccountModal: FC<TAccountModalProps> = ({ isVisible,
 
     <ButtonWrapper>
       <Button
+        // @ts-ignore
+        testid={`${testid}-save-button`}
         disabled={!address || !password}
         onClick={onSaveClick}
         role='primary'

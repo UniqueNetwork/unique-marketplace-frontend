@@ -16,9 +16,10 @@ import { NFTCollection } from '../../api/chainApi/unique/types';
 
 export type TTokensCard = {
   offer: Offer
+  testid: string
 };
 
-export const OfferCard: FC<TTokensCard> = ({ offer }) => {
+export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
   const { selectedAccount } = useAccounts();
   // TODO: remove this after the API provides complete collection details (cover, sponsorship, etc)
   const { api } = useApi();
@@ -58,24 +59,54 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
       </PictureWrapper>
       <Description>
         <Link to={`/token/${offer?.collectionId}/${offer?.tokenId}`} title={`${prefix || ''} #${offer?.tokenId}`}>
-          <Text size='l' weight='regular' color={'secondary-500'}>
+          <Text
+            size='l'
+            weight='regular'
+            color={'secondary-500'}
+            // @ts-ignore
+            testid={`${testid}-tokenId`}
+          >
             {`${prefix || ''} #${offer?.tokenId}`}
           </Text>
         </Link>
-        <a href={`${config.scanUrl || ''}collections/${offer?.collectionId}`} target={'_blank'} rel='noreferrer'>
+        <a
+          data-testid={`${testid}-collection-${offer?.collectionId}-link`}
+          href={`${config.scanUrl || ''}collections/${offer?.collectionId}`}
+          target={'_blank'}
+          rel='noreferrer'
+        >
           <Text color='primary-600' size='s'>
             {`${collectionName?.substring(0, 15) || ''} [id ${offer?.collectionId || ''}]`}
           </Text>
         </a>
         <PriceWrapper>
-          <Text size='l'>{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(offer?.price)}` }</Text>
+          <Text
+            // @ts-ignore
+            testid={`${testid}-price`}
+            size='l'
+          >{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(offer?.price)}` }</Text>
           <Icon name={'chain-kusama'} size={16} />
         </PriceWrapper>
         {!offer?.auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         {offer?.auction && <AuctionInfoWrapper>
-          {isTopBidder && <Text size={'xs'} color={'additional-positive-500'} >Leading bid</Text>}
-          {isBidder && !isTopBidder && <Text size={'xs'} color={'coral-500'} >Outbid</Text>}
-          {!isBidder && !isTopBidder && <Text size={'xs'} color={'grey-500'} >{
+          {isTopBidder && <Text
+            // @ts-ignore
+            testid={`${testid}-leading-bid`}
+            size={'xs'}
+            color={'additional-positive-500'}
+          >Leading bid</Text>}
+          {isBidder && !isTopBidder && <Text
+            // @ts-ignore
+            testid={`${testid}-outbid`}
+            size={'xs'}
+            color={'coral-500'}
+          >Outbid</Text>}
+          {!isBidder && !isTopBidder && <Text
+            // @ts-ignore
+            testid={`${testid}-bids`}
+            size={'xs'}
+            color={'grey-500'}
+          >{
             offer.auction.bids.length > 0 ? 'Last bid' : 'Minimum bid'
           }</Text>}
           <StyledText color={'dark'} size={'xs'}>{`${timeDifference(new Date(offer.auction?.stopAt || '').getTime() / 1000)} left`}</StyledText>

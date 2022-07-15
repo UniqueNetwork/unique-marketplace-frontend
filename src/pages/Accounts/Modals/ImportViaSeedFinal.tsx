@@ -10,7 +10,7 @@ import { Avatar } from 'components/Avatar/Avatar';
 import IconWithHint from 'components/IconWithHint/IconWithHint';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 
-export const ImportViaSeedFinalModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties, onFinish, onGoBack }) => {
+export const ImportViaSeedFinalModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties, onFinish, onGoBack, testid }) => {
   const onSaveClick = useCallback(() => {
     if (!accountProperties) return;
     onFinish(accountProperties);
@@ -19,7 +19,10 @@ export const ImportViaSeedFinalModal: FC<TCreateAccountBodyModalProps> = ({ acco
   return (<>
     <AddressWrapper>
       <Avatar size={24} src={DefaultAvatar} address={accountProperties?.address} />
-      <Text>{accountProperties?.address || ''}</Text>
+      <Text
+        // @ts-ignore
+        testid={`${testid}-address`}
+      >{accountProperties?.address || ''}</Text>
     </AddressWrapper>
     <CredentialsWrapper >
       <LabelTextWrapper>
@@ -50,10 +53,14 @@ export const ImportViaSeedFinalModal: FC<TCreateAccountBodyModalProps> = ({ acco
     <ButtonWrapper>
       <StepsTextStyled size={'m'}>Step 3/3</StepsTextStyled>
       <Button
+        // @ts-ignore
+        testid={`${testid}-previous-button`}
         onClick={onGoBack}
         title='Previous'
       />
       <Button
+        // @ts-ignore
+        testid={`${testid}-create-button`}
         onClick={onSaveClick}
         role='primary'
         title='Create account'

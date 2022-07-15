@@ -7,9 +7,10 @@ import Accordion from '../../../components/Accordion/Accordion';
 interface StatusFilterProps {
   value: MyTokensStatuses | undefined
   onChange(value: MyTokensStatuses): void
+  testid: string
 }
 
-const StatusFilter: FC<StatusFilterProps> = ({ value, onChange }) => {
+const StatusFilter: FC<StatusFilterProps> = ({ value, onChange, testid }) => {
   const { onSell, fixedPrice, timedAuction, notOnSale } = value || {};
 
   const onMyNFTsOnSellChange = useCallback((value: boolean) => {
@@ -37,6 +38,7 @@ const StatusFilter: FC<StatusFilterProps> = ({ value, onChange }) => {
       isOpen={true}
       onClear={onClear}
       isClearShow={onSell || fixedPrice || timedAuction || notOnSale}
+      testid={`${testid}-accordion`}
     >
       <StatusFilterWrapper>
         <Checkbox
@@ -44,24 +46,28 @@ const StatusFilter: FC<StatusFilterProps> = ({ value, onChange }) => {
           label={'My NFTs on sale'}
           size={'m'}
           onChange={onMyNFTsOnSellChange}
+          testid={`${testid}-myNft-checkbox`}
         />
         <Checkbox
           checked={!!fixedPrice}
           label={'Fixed price'}
           size={'m'}
           onChange={onFixedPriceChange}
+          testid={`${testid}-fixedPrice-checkbox`}
         />
         <Checkbox
           checked={!!timedAuction}
           label={'Timed auction'}
           size={'m'}
           onChange={onTimedAuctionChange}
+          testid={`${testid}-timedAuction-checkbox`}
         />
         <Checkbox
           checked={!!notOnSale}
           label={'Not on sale'}
           size={'m'}
           onChange={onNotOnSaleChange}
+          testid={`${testid}-notOnSale-checkbox`}
         />
       </StatusFilterWrapper>
     </Accordion>

@@ -11,9 +11,10 @@ interface AttributeCountsFilterProps {
   selectedAttributeCounts: number[]
   isAttributeCountsFetching?: boolean
   onAttributeCountsChange?(value: number[]): void
+  testid: string
 }
 
-const AttributeCountsFilter: FC<AttributeCountsFilterProps> = ({ attributeCounts = [], selectedAttributeCounts = [], isAttributeCountsFetching, onAttributeCountsChange }) => {
+const AttributeCountsFilter: FC<AttributeCountsFilterProps> = ({ attributeCounts = [], selectedAttributeCounts = [], isAttributeCountsFetching, onAttributeCountsChange, testid }) => {
   const onAttributeCountSelect = useCallback((attributeCount: number) => (value: boolean) => {
     let _selectedAttributeCounts;
     if (value) {
@@ -33,6 +34,7 @@ const AttributeCountsFilter: FC<AttributeCountsFilterProps> = ({ attributeCounts
       isOpen={true}
       onClear={onClear}
       isClearShow={selectedAttributeCounts.length > 0}
+      testid={`${testid}-accordion`}
     >
       <CollectionFilterWrapper>
         {isAttributeCountsFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
@@ -43,8 +45,13 @@ const AttributeCountsFilter: FC<AttributeCountsFilterProps> = ({ attributeCounts
               label={attributeCount.numberOfAttributes.toString()}
               size={'m'}
               onChange={onAttributeCountSelect(attributeCount.numberOfAttributes)}
+              testid={`${testid}-checkbox-${attributeCount.numberOfAttributes}`}
             />
-            <Text color={'grey-500'}>{attributeCount.amount.toString()}</Text>
+            <Text
+              // @ts-ignore
+              testid={`${testid}-amount-${attributeCount.amount}`}
+              color={'grey-500'}
+            >{attributeCount.amount.toString()}</Text>
           </AttributeWrapper>
               ))}
       </CollectionFilterWrapper>

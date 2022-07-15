@@ -10,9 +10,10 @@ interface SearchFieldProps {
   onSearch?(value: string | undefined): void
   onSearchStringChange?(value: string | undefined): void
   hideButton?: boolean
+  testid?: string
 }
 
-const SearchField: FC<SearchFieldProps> = ({ className, searchValue, placeholder, onSearch, onSearchStringChange, hideButton }) => {
+const SearchField: FC<SearchFieldProps> = ({ className, searchValue, placeholder, onSearch, onSearchStringChange, hideButton, testid }) => {
   const [value, setValue] = useState<string | number | undefined>(searchValue);
 
   const onValueChange = useCallback((value: string | undefined) => {
@@ -49,14 +50,24 @@ const SearchField: FC<SearchFieldProps> = ({ className, searchValue, placeholder
           onKeyDown={onSearchInputKeyDown}
           placeholder={placeholder}
           value={value?.toString()}
+          testid={`${testid}-input`}
         />
 
-        {value && <ClearButton name={'circle-close'} size={24} onClick={onClear} />}
+        {value &&
+          <ClearButton
+            name={'circle-close'}
+            size={24}
+            onClick={onClear}
+            testid={`${testid}-clear-button`}
+          />
+        }
       </InputWrapper>
       {!hideButton && <Button
         onClick={onSearchClick}
         role='primary'
         title='Search'
+        // @ts-ignore
+        testid={`${testid}-search-button`}
       />}
     </SearchWrapper>
   );

@@ -19,9 +19,10 @@ export type TTokensCard = {
   tokenId?: number
   collectionId?: number
   tokenImageUrl?: string
+  testid: string
 };
 
-export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, ...props }) => {
+export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, ...props }) => {
   const [token, setToken] = useState<(NFTToken & Partial<Offer>) | undefined>(props.token);
   const [isFetching, setIsFetching] = useState<boolean>(false);
 
@@ -79,24 +80,53 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, ...props })
       </PictureWrapper>
       <Description>
         <Link to={`/token/${collectionId}/${tokenId}`} title={`${prefix || ''} #${tokenId}`}>
-          <Text size='l' weight='regular'>
+          <Text
+            size='l'
+            weight='regular'
+            // @ts-ignore
+            testid={`${testid}-tokenId`}
+          >
             {`${prefix || ''} #${tokenId || ''}`}
           </Text>
         </Link>
-        <a href={`${config.scanUrl || ''}collections/${collectionId || ''}`} target={'_blank'} rel='noreferrer'>
+        <a
+          data-testid={`${testid}-collection-${collectionId}-link`}
+          href={`${config.scanUrl || ''}collections/${collectionId || ''}`}
+          target={'_blank'}
+          rel='noreferrer'
+        >
           <Text color='primary-600' size='s'>
             {`${collectionName?.substring(0, 15) || ''} [id ${collectionId || ''}]`}
           </Text>
         </a>
         {price && <PriceWrapper>
-          <Text size='s'>{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(price)}` }</Text>
+          <Text
+            // @ts-ignore
+            testid={`${testid}-price`}
+            size='s'
+          >{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(price)}` }</Text>
           <Icon name={'chain-kusama'} size={16} />
         </PriceWrapper>}
         {price && !auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         {auction && <AuctionInfoWrapper>
-          {isTopBidder && <Text size={'xs'} color={'additional-positive-500'} >Leading bid</Text>}
-          {isBidder && !isTopBidder && <Text size={'xs'} color={'coral-500'} >Outbid</Text>}
-          {!isBidder && !isTopBidder && <Text size={'xs'} color={'grey-500'} >{
+          {isTopBidder && <Text
+            // @ts-ignore
+            testid={`${testid}-leading-bid`}
+            size={'xs'}
+            color={'additional-positive-500'}
+          >Leading bid</Text>}
+          {isBidder && !isTopBidder && <Text
+            // @ts-ignore
+            testid={`${testid}-outbid`}
+            size={'xs'}
+            color={'coral-500'}
+          >Outbid</Text>}
+          {!isBidder && !isTopBidder && <Text
+            // @ts-ignore
+            testid={`${testid}-bids`}
+            size={'xs'}
+            color={'grey-500'}
+          >{
             auction.bids.length > 0 ? 'Last bid' : 'Minimum bid'
           }</Text>}
           <StyledText color={'dark'} size={'xs'}>{`${timeDifference(new Date(auction?.stopAt || '').getTime() / 1000)} left`}</StyledText>

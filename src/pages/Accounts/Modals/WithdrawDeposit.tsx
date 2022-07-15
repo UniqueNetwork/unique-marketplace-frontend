@@ -20,13 +20,14 @@ export type WithdrawDepositModalProps = {
   address?: string
   onFinish(): void
   onClose(): void
+  testid: string
 }
 
 type BidDeposit = TWithdrawBid & {
   token?: NFTToken
 };
 
-export const WithdrawDepositModal: FC<WithdrawDepositModalProps> = ({ isVisible, address, onFinish, onClose }) => {
+export const WithdrawDepositModal: FC<WithdrawDepositModalProps> = ({ isVisible, address, onFinish, onClose, testid }) => {
   const [status, setStatus] = useState<'ask' | 'stage'>('ask');
   const [withdrawSponsorshipFee, setWithdrawSponsorshipFee] = useState<BN>();
   const [withdrawBids, setWithdrawBids] = useState<BidDeposit[]>([]);
@@ -48,6 +49,7 @@ export const WithdrawDepositModal: FC<WithdrawDepositModalProps> = ({ isVisible,
       isVisible={isVisible}
       onFinish={onWithdraw}
       onClose={onClose}
+      testid={`${testid}-ask`}
     />);
   }
   if (status === 'stage') {
@@ -58,6 +60,7 @@ export const WithdrawDepositModal: FC<WithdrawDepositModalProps> = ({ isVisible,
       withdrawSponsorshipFee={withdrawSponsorshipFee}
       onFinish={onFinishStages}
       onClose={onClose}
+      testid={`${testid}-stages`}
     />);
   }
   return null;
@@ -68,9 +71,10 @@ export type WithdrawDepositAskModalProps = {
   address?: string
   onFinish(withdrawBids: BidDeposit[], amountToWithdraw?: BN): void
   onClose(): void
+  testid: string
 }
 
-export const WithdrawDepositAskModal: FC<WithdrawDepositAskModalProps> = ({ isVisible, address, onClose, onFinish }) => {
+export const WithdrawDepositAskModal: FC<WithdrawDepositAskModalProps> = ({ isVisible, address, onClose, onFinish, testid }) => {
   const { accounts } = useAccounts();
   const [isSelectedAll, setIsSelectedAll] = useState<boolean>(true);
   const [selectedBids, setSelectedBids] = useState<BidDeposit[]>([]);
@@ -140,12 +144,18 @@ export const WithdrawDepositAskModal: FC<WithdrawDepositAskModalProps> = ({ isVi
     </Content>
     {(withdraw.length > 0) && <Content>
       <Text size={'m'} color={'grey-500'}>All deposit</Text>
-      <Checkbox checked={isSelectedAll} label={`${formatKusamaBalance(totalAmount.toString())} ${tokenSymbol}`} onChange={onSelectAll} />
+      <Checkbox
+        testid={`${testid}-all-checkbox`}
+        checked={isSelectedAll}
+        label={`${formatKusamaBalance(totalAmount.toString())} ${tokenSymbol}`}
+        onChange={onSelectAll}
+      />
     </Content>}
     {(leader.length > 0 || withdraw.length > 0) && <Content>
       <Text size={'m'} color={'grey-500'}>Bids</Text>
       {[...leader, ...withdraw].map((bid, index) => (<Row>
         <Checkbox
+          testid={`${testid}-bid-${bid.auctionId}-checkbox`}
           disabled={index < leader.length}
           label={''}
           checked={selectedBids.some((item) => item.auctionId === bid.auctionId)}
@@ -155,21 +165,35 @@ export const WithdrawDepositAskModal: FC<WithdrawDepositAskModalProps> = ({ isVi
           tokenId={Number(bid.tokenId)}
           collectionId={Number(bid.collectionId)}
         >
-          <Text size={'m'} >{`${formatKusamaBalance(bid.amount)} ${tokenSymbol}`}</Text>
+          <Text
+            // @ts-ignore
+            testid={`${testid}-bid-${bid.auctionId}-amount`}
+            size={'m'}
+          >{`${formatKusamaBalance(bid.amount)} ${tokenSymbol}`}</Text>
           {index < leader.length && <Text size={'s'} color={'additional-positive-500'}>Leading bid</Text>}
         </InlineTokenCard>
       </Row>))}
     </Content>}
     {sponsorshipFee && !sponsorshipFee?.isZero() && <Content>
       <Text size={'m'} color={'grey-500'}>Sponsorship fee</Text>
-      <Checkbox checked={isSelectedSponsorshipFee} label={`${formatKusamaBalance(sponsorshipFee?.toString() || '0')} ${tokenSymbol}`} onChange={onSelectSponsorshipFee} />
+      <Checkbox
+        testid={`${testid}-sponsorship-fee-checkbox`}
+        checked={isSelectedSponsorshipFee}
+        label={`${formatKusamaBalance(sponsorshipFee?.toString() || '0')} ${tokenSymbol}`}
+        onChange={onSelectSponsorshipFee}
+      />
     </Content>}
     <Row>
       <Text color='grey-500'>Amount to withdraw:&nbsp;</Text>
-      <Text>{`${formatKusamaBalance(amountToWithdraw.toString())} ${tokenSymbol}`}</Text>
+      <Text
+        // @ts-ignore
+        testid={`${testid}-withdraw-amount`}
+      >{`${formatKusamaBalance(amountToWithdraw.toString())} ${tokenSymbol}`}</Text>
     </Row>
     <ButtonWrapper>
       <Button
+        // @ts-ignore
+        testid={`${testid}-confirm-button`}
         disabled={amountToWithdraw.eq(new BN(0))}
         onClick={onSubmit}
         role='primary'
@@ -223,9 +247,10 @@ export type WithdrawDepositStagesModalProps = {
   withdrawSponsorshipFee?: BN
   onFinish(): void
   onClose(): void
+  testid: string
 }
 
-export const WithdrawDepositStagesModal: FC<WithdrawDepositStagesModalProps> = ({ bids, withdrawSponsorshipFee, isVisible, address, onFinish }) => {
+export const WithdrawDepositStagesModal: FC<WithdrawDepositStagesModalProps> = ({ bids, withdrawSponsorshipFee, isVisible, address, onFinish, testid }) => {
   const { stages, status, initiate } = useWithdrawDepositStages(address || '', bids, withdrawSponsorshipFee);
   const { api } = useApi();
   const { info } = useNotifications();
@@ -248,7 +273,12 @@ export const WithdrawDepositStagesModal: FC<WithdrawDepositStagesModalProps> = (
 
   return (<Modal isVisible={isVisible} isClosable={false}>
     <div>
-      <DefaultMarketStages stages={stages} status={status} onFinish={onFinish} />
+      <DefaultMarketStages
+        stages={stages}
+        status={status}
+        onFinish={onFinish}
+        testid={`${testid}`}
+      />
     </div>
   </Modal>);
 };
