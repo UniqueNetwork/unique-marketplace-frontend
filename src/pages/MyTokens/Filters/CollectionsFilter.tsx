@@ -17,9 +17,10 @@ interface CollectionsFilterProps {
   onChange(collections: number[], attributes?: AttributeItem[], attributeCounts?: number[]): void
   onAttributesChange?(value: { key: string, attribute: string }[]): void
   onAttributeCountsChange?(value: number[]): void
+  testid: string
 }
 
-const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onAttributesChange, onAttributeCountsChange }) => {
+const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onAttributesChange, onAttributeCountsChange, testid }) => {
   const { collections, isFetching } = useCollections();
   const { attributes, fetch: fetchAttributes, reset: resetAttributes, isFetching: isAttributesFetching } = useAttributes();
   const { attributeCounts, fetch: fetchAttributeCounts, isFetching: isAttributeCountsFetching } = useAttributeCounts();
@@ -64,6 +65,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onAttr
       isOpen={true}
       onClear={onCollectionsClear}
       isClearShow={selectedCollections.length > 0}
+      testid={`${testid}-accordion`}
     >
       <CollectionFilterWrapper>
         {isFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
@@ -76,9 +78,13 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onAttr
               label={''}
               size={'m'}
               onChange={onCollectionSelect(collection.id)}
+              testid={`${testid}-checkbox-${collection.id}`}
             />
             <CollectionCover src={collection.coverImageUrl} size={22} type={'circle'}/>
-            <Text>{collection.collectionName || ''}</Text>
+            <Text
+              // @ts-ignore
+              testid={`${testid}-name-${collection.id}`}
+            >{collection.collectionName || ''}</Text>
           </CheckboxWrapper>
         ))}
       </CollectionFilterWrapper>
@@ -88,12 +94,14 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onAttr
       selectedAttributeCounts={selectedAttributeCounts}
       onAttributeCountsChange={onAttributeCountsChange}
       isAttributeCountsFetching={isAttributeCountsFetching}
+      testid={`${testid}-attribute-count`}
     />}
     {onAttributesChange && selectedCollections.length === 1 && <AttributesFilter
       attributes={attributes || {}}
       selectedAttributes={selectedAttributes}
       onAttributesChange={onAttributesChange}
       isAttributesFetching={isAttributesFetching}
+      testid={`${testid}-attributes`}
     />}
   </>);
 };

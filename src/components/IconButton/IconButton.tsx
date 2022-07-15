@@ -5,11 +5,12 @@ import styled from 'styled-components';
 interface IconButtonProps extends IconProps {
   onClick(): void;
   className?: string;
+  testid: string
 }
 
-export const IconButton: FC<IconButtonProps> = ({ onClick, className, ...iconProps }) => {
+export const IconButton: FC<IconButtonProps> = ({ onClick, className, testid, ...iconProps }) => {
   return (
-    <StyledButton onClick={onClick} className={className}>
+    <StyledButton onClick={onClick} className={className} data-testid={`${testid}`}>
       <Icon {...iconProps} />
     </StyledButton>
   );

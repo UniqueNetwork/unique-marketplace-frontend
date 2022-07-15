@@ -78,6 +78,8 @@ const pageSize = 1000;
 
 const defaultSortingValue = sortingOptions[sortingOptions.length - 1];
 
+const testid = 'my-tokens-page';
+
 export const NFTPage = () => {
   const searchParams = new URLSearchParams(window.location.search);
   const [filterState, setFilterState] = useState<MyTokensFilterState | null>(parseFilterState(searchParams.get('filterState')));
@@ -209,7 +211,7 @@ export const NFTPage = () => {
   return (<PagePaper>
     <MarketMainPageStyled>
       <LeftColumn>
-        {deviceSize !== DeviceSize.md && <Filters value={filterState} onFilterChange={setFilterState} />}
+        {deviceSize !== DeviceSize.md && <Filters value={filterState} onFilterChange={setFilterState} testid={`${testid}-filters`} />}
       </LeftColumn>
       <MainContent>
         <SearchAndSortingWrapper>
@@ -217,21 +219,28 @@ export const NFTPage = () => {
             searchValue={searchString}
             placeholder='Collection / token'
             onSearch={onSearch}
+            testid={`${testid}-search-field`}
           />
           <SortSelectWrapper>
             <Select
               onChange={onSortingChange}
               options={sortingOptions}
               value={sortingValue}
+              // @ts-ignore
+              testid={`${testid}-sorting-select`}
             />
           </SortSelectWrapper>
         </SearchAndSortingWrapper>
         <div>
-          <Text size='m'>{isFetchingTokens || isFetchingOffers || isLoading ? 'Loading items' : `${featuredTokens.length} items`}</Text>
+          <Text
+            // @ts-ignore
+            testid={`${testid}-items-count`}
+            size='m'
+          >{isFetchingTokens || isFetchingOffers || isLoading ? 'Loading items' : `${featuredTokens.length} items`}</Text>
         </div>
         <TokensListWrapper >
           {!isFetchingTokens && !isFetchingOffers && !isLoading && featuredTokens.length === 0 && <NoItems />}
-          <TokensList tokens={featuredTokens} isLoading={isFetchingTokens || isFetchingOffers || isLoading} />
+          <TokensList tokens={featuredTokens} isLoading={isFetchingTokens || isFetchingOffers || isLoading} testid={`${testid}-tokens`} />
         </TokensListWrapper>
       </MainContent>
       {deviceSize <= DeviceSize.md && <MobileFilters<MyTokensFilterState>
@@ -241,9 +250,11 @@ export const NFTPage = () => {
         sortingOptions={sortingOptions}
         onFilterChange={setFilterState}
         onSortingChange={onSortingChange}
+        testid={`${testid}-mobile-filters`}
         filterComponent={<Filters
           value={filterState}
           onFilterChange={setFilterState}
+          testid={`${testid}-filters`}
         />}
       />}
     </MarketMainPageStyled>

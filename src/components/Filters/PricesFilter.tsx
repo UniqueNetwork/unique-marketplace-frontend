@@ -8,9 +8,10 @@ import { NumberInput } from '../NumberInput/NumberInput';
 interface PricesFilterProps {
   value: PriceRange | undefined
   onChange(value: PriceRange | undefined): void
+  testid: string
 }
 
-const PricesFilter: FC<PricesFilterProps> = ({ value, onChange }) => {
+const PricesFilter: FC<PricesFilterProps> = ({ value, onChange, testid }) => {
   const { minPrice, maxPrice } = value || {};
   const [minPriceValue, setMinPriceValue] = useState<string>();
   const [maxPriceValue, setMaxPriceValue] = useState<string>();
@@ -60,14 +61,30 @@ const PricesFilter: FC<PricesFilterProps> = ({ value, onChange }) => {
       isOpen={true}
       onClear={onPricesClear}
       isClearShow={!!minPrice || !!maxPrice}
+      testid={`${testid}-accordion`}
     >
       <PriceFilterWrapper>
         <PricesRangeWrapper>
-          <NumberInput value={minPriceValue?.toString()} onChange={onChangeMinPrice} placeholder={'Min'} />
+          <NumberInput
+            value={minPriceValue?.toString()}
+            onChange={onChangeMinPrice}
+            placeholder={'Min'}
+            testid={`${testid}-minPrice`}
+          />
           <Text>to</Text>
-          <NumberInput value={maxPriceValue?.toString()} onChange={onChangeMaxPrice} placeholder={'Max'} />
+          <NumberInput
+            value={maxPriceValue?.toString()}
+            onChange={onChangeMaxPrice}
+            placeholder={'Max'}
+            testid={`${testid}-maxPrice`}
+          />
         </PricesRangeWrapper>
-        <Button title={'Apply'} onClick={onApply}/>
+        <Button
+          title={'Apply'}
+          onClick={onApply}
+          // @ts-ignore
+          testid={`${testid}-apply-button`}
+        />
       </PriceFilterWrapper>
     </Accordion>
   );

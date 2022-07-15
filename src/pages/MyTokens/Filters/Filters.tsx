@@ -7,7 +7,7 @@ import { MyTokensFilterState, MyTokensStatuses } from './types';
 import StatusFilter from './StatusFilter';
 import CollectionsFilter from './CollectionsFilter';
 
-export const Filters: FC<FiltersProps<MyTokensFilterState>> = ({ value, onFilterChange }) => {
+export const Filters: FC<FiltersProps<MyTokensFilterState>> = ({ value, onFilterChange, testid }) => {
   const onStatusFilterChange = useCallback((statuses: MyTokensStatuses) => {
     onFilterChange({ ...(value || {}), statuses });
   }, [value, onFilterChange]);
@@ -29,13 +29,14 @@ export const Filters: FC<FiltersProps<MyTokensFilterState>> = ({ value, onFilter
   }, [value, onFilterChange]);
 
   return <FiltersStyled>
-    <StatusFilter value={value?.statuses} onChange={onStatusFilterChange}/>
-    <PricesFilter value={value?.prices} onChange={onPricesFilterChange} />
+    <StatusFilter value={value?.statuses} onChange={onStatusFilterChange} testid={`${testid}-status`} />
+    <PricesFilter value={value?.prices} onChange={onPricesFilterChange} testid={`${testid}-prices`} />
     <CollectionsFilter
       value={value}
       onChange={onCollectionsFilterChange}
       onAttributesChange={onCollectionAttributesFilterChange}
       onAttributeCountsChange={onCollectionAttributeCountsFilterChange}
+      testid={`${testid}-collections`}
     />
   </FiltersStyled>;
 };

@@ -25,4 +25,5 @@ export type FiltersProps<T = FilterState> = {
   attributes?: Record<string, Attribute[]>
   attributeCounts?: AttributeCount[]
   onFilterChange: FilterChangeHandler<T>
+  testid: string
 }

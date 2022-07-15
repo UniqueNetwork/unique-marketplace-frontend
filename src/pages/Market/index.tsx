@@ -59,6 +59,8 @@ const pageSize = 20;
 
 const defaultSortingValue = sortingOptions[sortingOptions.length - 1];
 
+const testid = 'market-page';
+
 export const MarketPage = () => {
   const searchParams = new URLSearchParams(window.location.search);
 
@@ -176,6 +178,7 @@ export const MarketPage = () => {
           attributes={attributes}
           attributeCounts={attributeCounts}
           onFilterChange={onFilterChange}
+          testid={`${testid}-filters`}
         />}
       </LeftColumn>
       <MainContent>
@@ -184,17 +187,24 @@ export const MarketPage = () => {
             searchValue={searchValue}
             placeholder='Collection / token'
             onSearch={onSearch}
+            testid={`${testid}-search-field`}
           />
           <SortSelectWrapper>
             <Select
               onChange={onSortingChange}
               options={sortingOptions}
               value={sortingValue}
+              // @ts-ignore
+              testid={`${testid}-sorting-select`}
             />
           </SortSelectWrapper>
         </SearchAndSortingWrapper>
         <div>
-          <Text size='m'>{isFetching ? 'Loading items' : `${offersCount} items`}</Text>
+          <Text
+            // @ts-ignore
+            testid={`${testid}-items-count`}
+            size='m'
+          >{isFetching ? 'Loading items' : `${offersCount} items`}</Text>
         </div>
         <InfiniteScroll
           hasMore={hasMore}
@@ -205,7 +215,7 @@ export const MarketPage = () => {
           useWindow={true}
         >
           {!isFetching && !offers?.length && <NoItems isSearchResult={!!searchValue || !!filterCount} />}
-          <OffersList offers={offers || []} isLoading={isFetching} />
+          <OffersList offers={offers || []} isLoading={isFetching} testid={`${testid}-offers`} />
         </InfiniteScroll>
       </MainContent>
     </MarketMainPageStyled>
@@ -216,11 +226,13 @@ export const MarketPage = () => {
       sortingOptions={sortingOptions}
       onFilterChange={onFilterChange}
       onSortingChange={onSortingChange}
+      testid={`${testid}-mobile-filters`}
       filterComponent={<Filters
         value={filterState}
         attributes={attributes}
         attributeCounts={attributeCounts}
         onFilterChange={onFilterChange}
+        testid={`${testid}-filters`}
       />}
     />}
   </PagePaper>);

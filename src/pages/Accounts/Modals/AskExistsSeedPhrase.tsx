@@ -10,7 +10,7 @@ import { Avatar } from 'components/Avatar/Avatar';
 import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';
 import { shortcutText } from '../../../utils/textUtils';
 
-export const AskExistsSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties, onFinish }) => {
+export const AskExistsSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties, onFinish, testid }) => {
   const [seed, setSeed] = useState<string>(accountProperties?.seed || '');
   const [address, setAddress] = useState<string>(accountProperties?.address || '');
   const deviceSize = useDeviceSize();
@@ -38,13 +38,20 @@ export const AskExistsSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ acc
   return (<>
     <AddressWrapper>
       {address && <><Avatar size={24} src={DefaultAvatar} address={address} />
-        <Text size={'s'} color={'grey-500'}>{deviceSize === DeviceSize.sm ? shortcutText(address) : address}</Text>
+        <Text
+          // @ts-ignore
+          testid={`${testid}-address`}
+          size={'s'}
+          color={'grey-500'}
+        >{deviceSize === DeviceSize.sm ? shortcutText(address) : address}</Text>
       </>}
       {!address && <Text size={'s'} color={'grey-400'}>The account address will appear while entering the secret seed value</Text>}
     </AddressWrapper>
     <InputSeedWrapper>
       <Text>The secret seed value</Text>
       <InputText
+        // @ts-ignore
+        testid={`${testid}-seed-input`}
         onChange={onSeedChange}
         value={seed}
       />
@@ -52,6 +59,8 @@ export const AskExistsSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ acc
     <ButtonWrapper>
       <StepsTextStyled size={'m'}>Step 1/3</StepsTextStyled>
       <Button
+        // @ts-ignore
+        testid={`${testid}-next-button`}
         disabled={!address}
         onClick={onNextClick}
         role='primary'

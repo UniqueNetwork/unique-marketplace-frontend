@@ -10,9 +10,10 @@ interface AmountInputProps {
   decimals?: number
   label?: string
   className?: string
+  testid?: string
 }
 
-export const NumberInput: FC<AmountInputProps> = ({ value, onChange, placeholder, decimals = 6, label, className }) => {
+export const NumberInput: FC<AmountInputProps> = ({ value, onChange, placeholder, decimals = 6, label, className, testid = '' }) => {
   const onChangeInput = useCallback((_value: string) => {
     if (_value === '') onChange(_value);
     // regExp to check value according to valid number format
@@ -34,8 +35,16 @@ export const NumberInput: FC<AmountInputProps> = ({ value, onChange, placeholder
       onChange={onChangeInput}
       value={value}
       label={label}
+      // @ts-ignore
+      testid={`${testid}`}
     />
-    {value && <ClearButton name={'circle-close'} size={16} onClick={onClear} />}
+    {value &&
+      <ClearButton
+        name={'circle-close'}
+        size={16}
+        onClick={onClear}
+        testid={`${testid}-clear-button`}
+    />}
   </InputWrapper>;
 };
 

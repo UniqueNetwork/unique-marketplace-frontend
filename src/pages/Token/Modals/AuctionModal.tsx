@@ -5,6 +5,7 @@ import { BN } from '@polkadot/util';
 
 import { TPlaceABid } from './types';
 import DefaultMarketStages from './StagesModal';
+import { AdditionalWarning100 } from '../../../styles/colors';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 import { useAuctionBidStages } from '../../../hooks/marketplaceStages';
 import { useAccounts } from '../../../hooks/useAccounts';
@@ -12,12 +13,11 @@ import { useFee } from '../../../hooks/useFee';
 import { useApi } from '../../../hooks/useApi';
 import { formatKusamaBalance } from '../../../utils/textUtils';
 import { fromStringToBnString } from '../../../utils/bigNum';
-import { NumberInput } from 'components/NumberInput/NumberInput';
+import { NumberInput } from '../../../components/NumberInput/NumberInput';
 import { StageStatus } from '../../../types/StagesTypes';
 import { Offer } from '../../../api/restApi/offers/types';
 import { useAuction } from '../../../api/restApi/auction/auction';
 import { TCalculatedBid } from '../../../api/restApi/auction/types';
-import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 
 export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosable, onFinish }) => {
   const [status, setStatus] = useState<'ask' | 'place-bid-stage'>('ask'); // TODO: naming
@@ -136,9 +136,14 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
       <CautionTextWrapper>
         {!isEnoughBalance && <Text color={'coral-500'}>Your balance is too low to place a bid</Text>}
       </CautionTextWrapper>
-      <WarningBlock>
+      <TextStyled
+        color='additional-warning-500'
+        size='s'
+        // @ts-ignore
+        testid={`${testid}-fee-warning`}
+      >
         {`A fee of ~ ${kusamaFee} ${chain || ''} can be applied to the transaction`}
-      </WarningBlock>
+      </TextStyled>
       <ButtonWrapper>
         <Button
           disabled={!isAmountValid || !isEnoughBalance || isFetchingCalculatedbid}
@@ -199,6 +204,17 @@ const InputStyled = styled(NumberInput)`
     border-left: 0 solid;
     height: 38px;
   }
+`;
+
+const TextStyled = styled(Text)`
+  margin-top: calc(var(--gap) / 2);
+  box-sizing: border-box;
+  display: flex;
+  padding: 8px 16px;
+  margin-bottom: 24px;
+  border-radius: 4px;
+  background-color: ${AdditionalWarning100};
+  width: 100%;
 `;
 
 const ButtonWrapper = styled.div`

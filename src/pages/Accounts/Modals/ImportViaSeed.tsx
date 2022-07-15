@@ -9,7 +9,7 @@ import { defaultPairType, derivePath } from './CreateAccount';
 import { AskExistsSeedPhraseModal } from './AskExistsSeedPhrase';
 import { ImportViaSeedFinalModal } from './ImportViaSeedFinal';
 
-export const ImportViaSeedAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish, onClose }) => {
+export const ImportViaSeedAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish, onClose, testid }) => {
   const [stage, setStage] = useState<CreateAccountModalStages>(CreateAccountModalStages.AskSeed);
   const [accountProperties, setAccountProperties] = useState<TAccountProperties>();
   const { addLocalAccount } = useAccounts();
@@ -55,6 +55,7 @@ export const ImportViaSeedAccountModal: FC<TAccountModalProps> = ({ isVisible, o
       accountProperties={accountProperties}
       onFinish={onStageFinish}
       onGoBack={onGoBack}
+      testid={`${testid}-${stage}`}
     />
   </Modal>);
 };

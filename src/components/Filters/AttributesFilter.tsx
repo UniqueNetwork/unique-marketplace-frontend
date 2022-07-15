@@ -13,9 +13,10 @@ interface AttributesFilterProps {
   attributes: Record<string, Attribute[]>
   isAttributesFetching?: boolean
   onAttributesChange?(value: { key: string, attribute: string }[]): void
+  testid: string
 }
 
-const AttributesFilter: FC<AttributesFilterProps> = ({ selectedAttributes = [], attributes, isAttributesFetching, onAttributesChange }) => {
+const AttributesFilter: FC<AttributesFilterProps> = ({ selectedAttributes = [], attributes, isAttributesFetching, onAttributesChange, testid }) => {
   const onAttributeSelect = useCallback((attributeItem: AttributeItem) => (value: boolean) => {
     let _selectedAttributes;
     if (value) {
@@ -37,6 +38,7 @@ const AttributesFilter: FC<AttributesFilterProps> = ({ selectedAttributes = [], 
         isOpen={true}
         onClear={onClear(attributeName)}
         isClearShow={selectedAttributes?.some((attribute) => attributeName === attribute.key)}
+        testid={`${testid}-accordion`}
       >
         <CollectionFilterWrapper>
           {attributes[attributeName].sort(sortAttributes).map((attribute) => (
@@ -46,8 +48,13 @@ const AttributesFilter: FC<AttributesFilterProps> = ({ selectedAttributes = [], 
                 label={attribute.key}
                 size={'m'}
                 onChange={onAttributeSelect({ key: attributeName, attribute: attribute.key })}
+                testid={`${testid}-checkbox-${attribute.key}`}
               />
-              <Text color={'grey-500'}>{attribute.count.toString()}</Text>
+              <Text
+                // @ts-ignore
+                testid={`${testid}-count-${attribute.key}`}
+                color={'grey-500'}
+              >{attribute.count.toString()}</Text>
             </AttributeWrapper>
             ))}
         </CollectionFilterWrapper>

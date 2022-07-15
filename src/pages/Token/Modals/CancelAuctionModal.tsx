@@ -6,7 +6,7 @@ import DefaultMarketStages from './StagesModal';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 import { StageStatus } from '../../../types/StagesTypes';
 
-export const CancelAuctionStagesModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, setIsClosable }) => {
+export const CancelAuctionStagesModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, setIsClosable, testid }) => {
   const { stages, status, initiate } = useCancelAuctionStages(offer?.collectionId || 0, offer?.tokenId || 0);
   useEffect(() => {
     setIsClosable(false);
@@ -17,7 +17,7 @@ export const CancelAuctionStagesModal: FC<TTokenPageModalBodyProps> = ({ offer, 
   useEffect(() => {
     if (status === StageStatus.success) {
       info(
-        'Auction cancelled',
+        <div data-testid={`${testid}-success-notification`}>Auction cancelled</div>,
         { name: 'success', size: 32, color: 'var(--color-additional-light)' }
       );
     }
@@ -25,7 +25,12 @@ export const CancelAuctionStagesModal: FC<TTokenPageModalBodyProps> = ({ offer, 
 
   return (
     <div>
-      <DefaultMarketStages stages={stages} status={status} onFinish={onFinish} />
+      <DefaultMarketStages
+        stages={stages}
+        status={status}
+        onFinish={onFinish}
+        testid={testid}
+      />
     </div>
   );
 };

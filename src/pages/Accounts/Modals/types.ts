@@ -15,12 +15,14 @@ export type TAccountModalProps = {
   isVisible: boolean
   onFinish(): void
   onClose(): void
+  testid: string
 };
 
 export type TCreateAccountBodyModalProps = {
   accountProperties?: TAccountProperties
   onFinish(account: TAccountProperties): void
   onGoBack(): void
+  testid: string
 };
 
 export type Scanned = {

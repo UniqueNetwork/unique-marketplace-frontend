@@ -11,7 +11,7 @@ import { StageStatus } from '../../../types/StagesTypes';
 import { TextInput } from 'components/TextInput/TextInput';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 
-export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosable, onFinish }) => {
+export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosable, onFinish, testid }) => {
   const { selectedAccount } = useAccounts();
   const [status, setStatus] = useState<'ask' | 'transfer-stage'>('ask'); // TODO: naming
   const [recipient, setRecipient] = useState<string>('');
@@ -24,7 +24,7 @@ export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosab
 
   if (!selectedAccount) return null;
 
-  if (status === 'ask') return (<AskTransferModal onTransfer={onTransfer} />);
+  if (status === 'ask') return (<AskTransferModal onTransfer={onTransfer} testid={`${testid}-ask-transfer`} />);
   if (status === 'transfer-stage') {
     return (<TransferStagesModal
       recipient={recipient}
@@ -32,12 +32,13 @@ export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosab
       token={token}
       setIsClosable={setIsClosable}
       sender={selectedAccount.address}
+      testid={testid}
     />);
   }
   return null;
 };
 
-const AskTransferModal: FC<{ onTransfer(receiver: string): void }> = ({ onTransfer }) => {
+const AskTransferModal: FC<{ onTransfer(receiver: string): void, testid: string }> = ({ onTransfer, testid }) => {
   const [address, setAddress] = useState<string>('');
   const onAddressInputChange = useCallback((value: string) => {
     setAddress(value);
@@ -60,6 +61,8 @@ const AskTransferModal: FC<{ onTransfer(receiver: string): void }> = ({ onTransf
         label='Please enter the address you wish to send the NFT to'
         onChange={onAddressInputChange}
         value={address}
+        // @ts-ignore
+        testid={`${testid}-address-input`}
       />
       <WarningBlock>
         Proceed with caution, once confirmed the transaction cannot be reverted.
@@ -73,13 +76,15 @@ const AskTransferModal: FC<{ onTransfer(receiver: string): void }> = ({ onTransf
           onClick={onConfirmTransferClick}
           role='primary'
           title='Confirm'
+          // @ts-ignore
+          testid={`${testid}-confirm-button`}
         />
       </ButtonWrapper>
     </>
   );
 };
 
-const TransferStagesModal: FC<TTokenPageModalBodyProps & TTransfer> = ({ token, onFinish, sender, recipient }) => {
+const TransferStagesModal: FC<TTokenPageModalBodyProps & TTransfer> = ({ token, onFinish, sender, recipient, testid }) => {
   const { stages, status, initiate } = useTransferStages(token?.collectionId || 0, token?.id || 0);
   const { info } = useNotifications();
 
@@ -90,7 +95,7 @@ const TransferStagesModal: FC<TTokenPageModalBodyProps & TTransfer> = ({ token, 
   useEffect(() => {
     if (status === StageStatus.success) {
       info(
-        <><Link href={`/token/${token?.collectionId}/${token?.id}`} title={`${token?.prefix} #${token?.id}`}/> transferred</>,
+        <div data-testid={`${testid}-success-notification`}><Link href={`/token/${token?.collectionId}/${token?.id}`} title={`${token?.prefix} #${token?.id}`}/> transferred</div>,
         { name: 'success', size: 32, color: 'var(--color-additional-light)' }
       );
     }
@@ -98,7 +103,12 @@ const TransferStagesModal: FC<TTokenPageModalBodyProps & TTransfer> = ({ token, 
 
   return (
     <div>
-      <DefaultMarketStages stages={stages} status={status} onFinish={onFinish} />
+      <DefaultMarketStages
+        stages={stages}
+        status={status}
+        onFinish={onFinish}
+        testid={testid}
+      />
     </div>
   );
 };

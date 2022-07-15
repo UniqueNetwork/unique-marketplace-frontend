@@ -12,15 +12,16 @@ import { TelegramShareButton, TwitterShareButton, FacebookShareButton, RedditSha
 interface IShareTokenModalProps {
   isVisible: boolean;
   onClose(): void;
+  testid: string;
 }
 
-const ShareTokenModal = ({ isVisible, onClose }: IShareTokenModalProps) => {
+const ShareTokenModal = ({ isVisible, onClose, testid }: IShareTokenModalProps) => {
   const { info } = useNotifications();
 
   const copyUrl = useCallback(() => {
     void navigator.clipboard.writeText(window.location.href).then(() => {
       info(
-        'Link copied',
+        <div data-testid={`${testid}-link-copy-success-notification`}>Link copied</div>,
         { name: 'success', size: 32, color: 'var(--color-additional-light)' }
       );
     });
