@@ -6,6 +6,7 @@ import { BN } from '@polkadot/util';
 import { Balance } from '@polkadot/types/interfaces';
 import { TokenId } from './unique/types';
 import { Account } from '../../account/AccountContext';
+import { SignerPayloadJSON } from '@polkadot/types/types/extrinsic';
 
 export interface IRpc {
   rpcEndpoint: string
@@ -56,7 +57,10 @@ export type TTransaction = SubmittableExtrinsic<'promise'>
 
 export type TransactionOptions = {
   // this function will be called after transaction is created and awaited before proceeding
+  signer?: string
   sign: (tx: TTransaction) => Promise<TTransaction>
+  signMessage?: (message: string) => Promise<string>
+  signPayloadJSON?: (json: SignerPayloadJSON) => Promise<`0x${string}` | null>
   // if not provided, signed.send() will be called instead
   send?: (signedTx: TTransaction | string) => Promise<any | void>
 };
@@ -81,7 +85,7 @@ export interface IMarketController {
   transferToAuction: (owner: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
   transferBidBalance: (from: string, amount: string, options: TransactionOptions) => Promise<void>
   transferBalance: (from: string, to: string, amount: string, options: TransactionOptions) => Promise<void>
-  getKusamaFee: (sender: AddressOrPair, recipient?: string, value?: BN) => Promise<Balance>
+  getKusamaFee: (sender: AddressOrPair, recipient?: string, value?: BN) => Promise<Balance | null>
 }
 
 export type Chain = {

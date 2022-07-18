@@ -4,7 +4,6 @@ import { NFTCollection, NFTCollectionSponsorship, NFTToken, TokenId, UniqueDecor
 import { collectionName16Decoder, getCollectionProperties, hex2a } from '../utils/decoder';
 import { getTokenImage } from '../utils/imageUtils';
 import config from '../../../config';
-import { normalizeAccountId } from '../utils/addressUtils';
 import { repeatCheckForTransactionFinish } from '../utils/repeatCheckTransaction';
 
 const { IPFSGateway } = config;
@@ -120,7 +119,7 @@ class UniqueCollectionController implements ICollectionController<NFTCollection,
 
     await repeatCheckForTransactionFinish(async () => {
       const { sponsorship } = (await this.getCollection(Number(collectionId))) as NFTCollection;
-      if (sponsorship?.unconfirmed === sponsorAddress) return true;
+      if (sponsorship?.address === sponsorAddress) return true;
       return false;
     });
   }
@@ -139,7 +138,7 @@ class UniqueCollectionController implements ICollectionController<NFTCollection,
 
     await repeatCheckForTransactionFinish(async () => {
       const { sponsorship } = (await this.getCollection(Number(collectionId))) as NFTCollection;
-      if (sponsorship?.confirmed) return true;
+      if (sponsorship?.isConfirmed) return true;
       return false;
     });
   }
@@ -158,7 +157,7 @@ class UniqueCollectionController implements ICollectionController<NFTCollection,
 
     await repeatCheckForTransactionFinish(async () => {
       const { sponsorship } = (await this.getCollection(Number(collectionId))) as NFTCollection;
-      if (!sponsorship?.confirmed && !sponsorship?.unconfirmed) return true;
+      if (!sponsorship?.isConfirmed) return true;
       return false;
     });
   }

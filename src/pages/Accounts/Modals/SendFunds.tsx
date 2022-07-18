@@ -85,7 +85,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
       const recipient = typeof recipientAddress === 'string' ? recipientAddress : recipientAddress?.address;
       api?.market?.getKusamaFee(selectedAccount.address, recipient, new BN(fromStringToBnString(amount)))
       .then((fee) => {
-        setKusamaFee(formatKusamaBalance(fee.toString()));
+        setKusamaFee(formatKusamaBalance(fee?.toString() || '0'));
       }).catch((e) => {
         console.log(e);
       }).finally(() => {

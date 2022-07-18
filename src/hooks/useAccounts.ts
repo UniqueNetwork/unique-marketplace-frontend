@@ -8,6 +8,7 @@ import { useApi } from './useApi';
 import AccountContext, { Account, AccountSigner } from '../account/AccountContext';
 import { getSuri, PairType } from '../utils/seedUtils';
 import { TTransaction } from '../api/chainApi/types';
+import { SignerPayloadJSON } from '@polkadot/types/types';
 
 export const useAccounts = () => {
   const { rawRpcApi } = useApi();
@@ -98,6 +99,40 @@ export const useAccounts = () => {
     return signedMessage;
   }, [showSignDialog, selectedAccount, accounts]);
 
+  const signPayloadJSON = useCallback(
+    async (
+      signerPayloadJSON: SignerPayloadJSON,
+      account?: Account
+    ): Promise<`0x${string}` | null> => {
+      const _account = account || selectedAccount;
+      if (!_account) {
+        throw new Error('Account was not provided');
+      }
+
+      const injector = await web3FromSource(_account.meta.source);
+
+      if (!injector.signer.signPayload) {
+        throw new Error('Web3 not available');
+      }
+
+      return injector.signer
+        .signPayload(signerPayloadJSON)
+        .then(({ signature }) => {
+          if (!signature) {
+            throw new Error('Signing failed');
+          }
+
+          return signature;
+        })
+        .catch((err) => {
+          console.log('err', err);
+
+          return null;
+        });
+    },
+    [selectedAccount]
+  );
+
   const deleteLocalAccount = useCallback((address: string) => {
       keyring.forgetAccount(address);
     }, []);
@@ -113,6 +148,7 @@ export const useAccounts = () => {
     unlockLocalAccount,
     signTx,
     signMessage,
+    signPayloadJSON,
     fetchAccounts,
     fetchAccountsWithDeposits,
     changeAccount,

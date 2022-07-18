@@ -20,7 +20,7 @@ export const useFee = (): UseFeeReturn => {
     if (!selectedAccount || !api?.market) return;
     setFetchingKusamaFee(true);
     const fee = await api.market.getKusamaFee(selectedAccount.address);
-    const feeFormatted = formatKusamaBalance(fee.toString());
+    const feeFormatted = formatKusamaBalance(fee?.toString() || '0');
     setKusamaFee(feeFormatted);
     setFetchingKusamaFee(false);
     return feeFormatted;

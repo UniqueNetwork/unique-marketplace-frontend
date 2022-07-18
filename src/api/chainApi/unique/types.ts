@@ -26,8 +26,8 @@ export type UniqueDecoratedQuery = DecoratedRpc<'promise', RpcInterface> & {
 }
 
 export interface NFTCollectionSponsorship {
-  unconfirmed?: string
-  confirmed?: string
+  isConfirmed?: boolean
+  address?: string
 }
 
 export interface NFTCollection {
