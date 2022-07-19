@@ -6,11 +6,14 @@ import styled from 'styled-components';
 import { PasswordInput } from '../../../components/PasswordInput/PasswordInput';
 import { Avatar } from '../../../components/Avatar/Avatar';
 import { TextInput } from '../../../components/TextInput/TextInput';
+import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';
+import { shortcutText } from '../../../utils/textUtils';
 
 export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties, onFinish, onGoBack }) => {
   const [name, setName] = useState<string>(accountProperties?.name || '');
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
+  const deviceSize = useDeviceSize();
 
   const onAccountNameChange = useCallback((value: string) => {
     if (value.length > 64) return;
@@ -23,21 +26,33 @@ export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountP
 
   const onNextClick = useCallback(() => {
     if (!accountProperties) return;
-    onFinish({ ...accountProperties, name, password });
+    onFinish({ ...accountProperties, name: name.trim(), password });
   }, [name, password]);
+
+  const formatAddress = useMemo(() => {
+    if (!accountProperties?.address) return '';
+    return deviceSize === DeviceSize.sm ? shortcutText(accountProperties.address) : accountProperties.address;
+  }, [accountProperties, deviceSize]);
 
   return (<>
     <AddressWrapper>
       <Avatar size={24} src={DefaultAvatar} address={accountProperties?.address} />
-      <Text color={'grey-500'}>{accountProperties?.address || ''}</Text>
+      <Text color={'grey-500'}>{formatAddress}</Text>
     </AddressWrapper>
     <CredentialsWrapper>
       <Text size={'m'}>Name</Text>
       <Text size={'s'} color={'grey-500'}>Give your account a name for easier identification and handling. </Text>
-      <TextInput onChange={onAccountNameChange} value={name} errorText={!nameIsValid && name ? 'Name must be 3 characters or more' : undefined} />
+      <TextInput
+        onChange={onAccountNameChange}
+        value={name}
+        errorText={!nameIsValid && name ? 'Name must be 3 characters or more' : undefined}
+        allowSpaces
+      />
 
       <Text size={'m'}>Password</Text>
-      <Text size={'s'} color={'grey-500'}>This is necessary to authenticate all committed transactions and encrypt the key pair.<br/> Ensure you are using a strong password for proper account protection. </Text>
+      <Text size={'s'} color={'grey-500'}>This is necessary to authenticate all committed transactions and encrypt the key pair.
+        {deviceSize !== DeviceSize.sm ? <br/> : ' '}
+        Ensure you are using a strong password for proper account protection. </Text>
       <PasswordInput
         onChange={setPassword}
         value={password}
@@ -81,6 +96,9 @@ const AddressWrapper = styled.div`
 
 const StepsTextStyled = styled(Text)`
   flex-grow: 1;
+  @media (max-width: 568px) {
+    width: 100%;
+  }
 `;
 
 const ButtonWrapper = styled.div`
@@ -89,11 +107,11 @@ const ButtonWrapper = styled.div`
   column-gap: var(--gap);
   align-items: center;
   @media (max-width: 568px) {
-    flex-direction: column;
-    align-items: flex-start;
-    row-gap: calc(var(--gap) /2);
+    flex-wrap: wrap;
+    row-gap: var(--gap);
+    justify-content: space-between;
     button {
-      width: 100%;
+      width: 120px;
     }
   }
 `;

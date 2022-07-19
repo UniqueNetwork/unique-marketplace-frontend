@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 import { Button, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
@@ -9,17 +9,25 @@ import { Grey300 } from '../../../styles/colors';
 import { Avatar } from 'components/Avatar/Avatar';
 import IconWithHint from 'components/IconWithHint/IconWithHint';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
+import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';
+import { shortcutText } from '../../../utils/textUtils';
 
 export const ImportViaSeedFinalModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties, onFinish, onGoBack }) => {
+  const deviceSize = useDeviceSize();
   const onSaveClick = useCallback(() => {
     if (!accountProperties) return;
     onFinish(accountProperties);
   }, [accountProperties]);
 
+  const formatAddress = useMemo(() => {
+    if (!accountProperties?.address) return '';
+    return deviceSize === DeviceSize.sm ? shortcutText(accountProperties.address) : accountProperties.address;
+  }, [accountProperties, deviceSize]);
+
   return (<>
     <AddressWrapper>
       <Avatar size={24} src={DefaultAvatar} address={accountProperties?.address} />
-      <Text>{accountProperties?.address || ''}</Text>
+      <Text color={'grey-500'}>{formatAddress}</Text>
     </AddressWrapper>
     <CredentialsWrapper >
       <LabelTextWrapper>
@@ -83,7 +91,7 @@ const StepsTextStyled = styled(Text)`
 const LabelTextWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 4);
-  margin-top: calc(var(--gap) * 1.5);
+  margin-top: calc(var(--gap) * 2);
 `;
 
 const ButtonWrapper = styled.div`
@@ -95,7 +103,7 @@ const ButtonWrapper = styled.div`
   @media (max-width: 568px) {
     flex-direction: column;
     align-items: flex-start;
-    row-gap: calc(var(--gap) /2);
+    row-gap: var(--gap);
     button {
       width: 100%;
     }
