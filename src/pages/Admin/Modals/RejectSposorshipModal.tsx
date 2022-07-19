@@ -52,4 +52,9 @@ const Row = styled.div`
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
+  @media (max-width: 567px) {
+    button {
+      width: 100%;
+    }
+  }
 `;
