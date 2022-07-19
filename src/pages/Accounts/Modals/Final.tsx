@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import { defaultPairType, derivePath } from './CreateAccount';
 import { TCreateAccountBodyModalProps } from './types';
-import { Grey300 } from '../../../styles/colors';
+import { Grey300, Grey500 } from '../../../styles/colors';
 import { Avatar } from 'components/Avatar/Avatar';
 import IconWithHint from 'components/IconWithHint/IconWithHint';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
@@ -78,6 +78,7 @@ const AddressWrapper = styled.div`
   .unique-text {
     text-overflow: ellipsis;
     overflow: hidden;
+    color: ${Grey500};
   }
 `;
 

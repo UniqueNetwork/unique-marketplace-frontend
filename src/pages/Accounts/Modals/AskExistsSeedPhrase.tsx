@@ -1,5 +1,5 @@
-import React, { FC, useCallback, useState } from 'react';
-import { Button, InputText, Text } from '@unique-nft/ui-kit';
+import React, { ChangeEvent, FC, useCallback, useState } from 'react';
+import { Button, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
 import { TCreateAccountBodyModalProps } from './types';
@@ -26,8 +26,8 @@ export const AskExistsSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ acc
     setAddress(newAddress);
   }, [setSeed]);
 
-  const onSeedChange = useCallback((value: string) => {
-    changeSeed(value);
+  const onSeedChange = useCallback(({ target }: ChangeEvent<HTMLTextAreaElement>) => {
+    changeSeed(target.value);
   }, []);
 
   const onNextClick = useCallback(() => {
@@ -40,13 +40,14 @@ export const AskExistsSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ acc
       {address && <><Avatar size={24} src={DefaultAvatar} address={address} />
         <Text size={'s'} color={'grey-500'}>{deviceSize === DeviceSize.sm ? shortcutText(address) : address}</Text>
       </>}
-      {!address && <Text size={'s'} color={'grey-400'}>The account address will appear while entering the secret seed value</Text>}
+      {!address && <Text size={'s'} color={'grey-400'}>The account address will appear while entering the secret seed{deviceSize === DeviceSize.sm ? '...' : ' value'}</Text>}
     </AddressWrapper>
     <InputSeedWrapper>
       <Text>The secret seed value</Text>
-      <InputText
+      <SeedInput
         onChange={onSeedChange}
         value={seed}
+        rows={deviceSize === DeviceSize.sm ? 3 : 1}
       />
     </InputSeedWrapper>
     <ButtonWrapper>
@@ -75,17 +76,43 @@ const AddressWrapper = styled.div`
       color: var(--color-grey-400);
     }
   }
+  @media (max-width: 567px) {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 22px;
+    padding: 0 16px;
+    height: 62px;
+    align-items: baseline;
+    &>div {
+      margin: auto 0;
+    }
+    .unique-text {
+      margin: auto 0;
+    }
+  }
 `;
 
 const InputSeedWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  margin-bottom: calc(var(--gap) * 2);
+  margin-bottom: 30px;
   width: 100%;
-  .unique-input-text {
-    margin-top: var(--gap);
-    width: 100%;
-  }
+`;
+
+const SeedInput = styled.textarea`
+  border: 1px solid var(--grey-300);
+  border-radius: 4px;
+  padding: calc(var(--gap) / 2) var(--gap);
+  width: calc(100% - var(--gap) * 2);
+  height: auto;
+  resize: none;
+  outline: 0px none transparent;
+  margin-top: var(--gap);
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
 `;
 
 const StepsTextStyled = styled(Text)`
@@ -95,12 +122,5 @@ const StepsTextStyled = styled(Text)`
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
-  @media (max-width: 568px) {
-    flex-direction: column;
-    align-items: flex-start;
-    row-gap: calc(var(--gap) /2);
-    button {
-      width: 100%;
-    }
-  }
+  align-items: baseline;
 `;
