@@ -8,7 +8,7 @@ import { addToWhitelist } from 'api/restApi/settings/settings';
 
 export const useSellFixStages = (collectionId: number, tokenId: number) => {
   const { api } = useApi();
-  const { signTx, selectedAccount, signMessage } = useAccounts();
+  const { signPayloadJSON, selectedAccount, signMessage } = useAccounts();
   const marketApi = api?.market;
   const addToWhiteListStage: InternalStage<TFixPriceProps> = useMemo(() => ({
     title: 'Register sponsorship',
@@ -38,21 +38,21 @@ export const useSellFixStages = (collectionId: number, tokenId: number) => {
     title: 'Prepare NFT to be sent to smart contract',
     description: '',
     status: StageStatus.default,
-    action: (params) => marketApi?.lockNftForSale(params.txParams.accountAddress, collectionId.toString(), tokenId.toString(), params.options)
+    action: (params) => marketApi?.lockNftForSale(params.txParams.accountAddress, collectionId.toString(), tokenId.toString(), { ...params.options, signer: selectedAccount?.address })
   },
   {
     title: 'Allow smart contract to receive an NFT',
     description: '',
     status: StageStatus.default,
-    action: (params) => marketApi?.sendNftToSmartContract(params.txParams.accountAddress, collectionId.toString(), tokenId.toString(), params.options)
+    action: (params) => marketApi?.sendNftToSmartContract(params.txParams.accountAddress, collectionId.toString(), tokenId.toString(), { ...params.options, signer: selectedAccount?.address })
   },
   {
     title: 'Set the NFT price',
     description: '',
     status: StageStatus.default,
-    action: (params) => marketApi?.setForFixPriceSale(params.txParams.accountAddress, collectionId.toString(), tokenId.toString(), params?.txParams?.price.toString() || '-1', params.options)
+    action: (params) => marketApi?.setForFixPriceSale(params.txParams.accountAddress, collectionId.toString(), tokenId.toString(), params?.txParams?.price.toString() || '-1', { ...params.options, signer: selectedAccount?.address })
   }], [selectedAccount?.isOnWhiteList, addToWhiteListStage, marketApi, collectionId, tokenId]);
-  const { stages, error, status, initiate } = useStages<TFixPriceProps>(sellFixStages, signTx);
+  const { stages, error, status, initiate } = useStages<TFixPriceProps>(sellFixStages, signPayloadJSON);
 
   return {
     stages,

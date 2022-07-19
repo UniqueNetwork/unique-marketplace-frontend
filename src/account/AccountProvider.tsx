@@ -1,9 +1,9 @@
-import React, { FC, useCallback, useMemo, useRef, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Account, AccountProvider, AccountSigner } from './AccountContext';
 import { SignModal } from '../components/SignModal/SignModal';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { web3Accounts, web3Enable } from '@polkadot/extension-dapp';
+import { web3Accounts, web3Enable, web3AccountsSubscribe } from '@polkadot/extension-dapp';
 import { sleep } from '../utils/helpers';
 import keyring from '@polkadot/ui-keyring';
 import { BN } from '@polkadot/util';
@@ -160,6 +160,23 @@ const AccountWrapper: FC = ({ children }) => {
     setIsLoadingDeposits(false);
     return _accounts;
   }, [accounts]);
+
+  // useEffect(() => {
+  //   let unsubscribe: Unsubcall;
+  //   (async () => {
+  //     unsubscribe = await web3AccountsSubscribe(async (injectedAccounts) => {
+  //       injectedAccounts.map((injectedAccounts) => {
+  //         setAccounts((accounts) => [...injectedAccounts, accounts.filter((account) => account.t);
+  //
+  //         await subscribeBalancesChanges(accountsWithWhiteListStatus);
+  //       });
+  //     });
+  //   })();
+  //
+  //   return () => {
+  //     unsubscribe && unsubscribe();
+  //   };
+  // }, []);
 
   const value = useMemo(() => ({
     isLoading,

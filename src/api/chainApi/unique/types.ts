@@ -1,8 +1,8 @@
 import { DecoratedRpc } from '@polkadot/api/types';
 import { RpcInterface } from '@polkadot/rpc-core/types/jsonrpc';
-import { GenericAccountId } from '@polkadot/types';
 import { UpDataStructsCollection, UpDataStructsCreateCollectionData, UpDataStructsCreateNftExData } from '@unique-nft/unique-mainnet-types/default/types';
 import { BN } from '@polkadot/util';
+import { DecodedAttributes } from '@unique-nft/sdk/tokens';
 
 export type TokenId = {
   toNumber(): number
@@ -47,7 +47,7 @@ export type AttributesDecoded = {
 export interface NFTToken {
   id: number
   owner?: CrossAccountId
-  attributes?: AttributesDecoded
+  attributes?: DecodedAttributes
   imageUrl: string
   collectionId?: number
   collectionName?: string

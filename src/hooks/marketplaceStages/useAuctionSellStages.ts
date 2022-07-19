@@ -10,7 +10,7 @@ import { useAccounts } from '../useAccounts';
 
 export const useAuctionSellStages = (collectionId: number, tokenId: number) => {
   const { api } = useApi();
-  const { signTx } = useAccounts();
+  const { signPayloadJSON } = useAccounts();
   const marketApi = api?.market;
 
   const sellAuctionStages: InternalStage<TAuctionProps>[] = useMemo(() => [
@@ -36,7 +36,7 @@ export const useAuctionSellStages = (collectionId: number, tokenId: number) => {
     }
   ], [marketApi, api?.market?.kusamaDecimals, collectionId, tokenId]);
 
-  const { stages, error, status, initiate } = useStages<TAuctionProps>(sellAuctionStages, signTx);
+  const { stages, error, status, initiate } = useStages<TAuctionProps>(sellAuctionStages, signPayloadJSON);
 
   return {
     stages,

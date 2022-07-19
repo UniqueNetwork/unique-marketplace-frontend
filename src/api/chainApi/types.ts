@@ -58,8 +58,8 @@ export type TTransaction = SubmittableExtrinsic<'promise'>
 export type TransactionOptions = {
   // this function will be called after transaction is created and awaited before proceeding
   signer?: string
-  sign: (tx: TTransaction) => Promise<TTransaction>
-  signMessage?: (message: string) => Promise<string>
+  sign: (signerPayloadJSON: SignerPayloadJSON) => Promise<`0x${string}` | null>
+  signMessage?: (message: string) => Promise<`0x${string}` | null>
   signPayloadJSON?: (json: SignerPayloadJSON) => Promise<`0x${string}` | null>
   // if not provided, signed.send() will be called instead
   send?: (signedTx: TTransaction | string) => Promise<any | void>

@@ -6,7 +6,7 @@ import { useAccounts } from '../useAccounts';
 
 export const useRejectSponsorshipStages = (collectionId: number) => {
   const { api } = useApi();
-  const { signTx } = useAccounts();
+  const { signPayloadJSON } = useAccounts();
   const collectionApi = api?.collection;
   const rejectSponsorshipStages: InternalStage<null>[] = useMemo(() => [{
     title: 'Cancelling sponsorship',
@@ -15,7 +15,7 @@ export const useRejectSponsorshipStages = (collectionId: number) => {
     action: (params) => collectionApi?.removeCollectionSponsor(collectionId, params.options)
   }], [collectionApi]);
 
-  const { stages, error, status, initiate } = useStages<null>(rejectSponsorshipStages, signTx);
+  const { stages, error, status, initiate } = useStages<null>(rejectSponsorshipStages, signPayloadJSON);
 
   return {
     stages,

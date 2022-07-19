@@ -1,15 +1,9 @@
 import { INFTController } from '../chainApi/types';
 import { NFTCollection, NFTToken, TokenId } from '../chainApi/unique/types';
 import { Sdk } from '@unique-nft/sdk';
-import { CollectionInfo } from '@unique-nft/sdk/tokens';
 import { Settings } from '../restApi/settings/types';
 import { getEthAccount, normalizeAccountId } from './utils/addressUtils';
 import { checkTokenIsAllowed, filterAllowedTokens } from './utils/checkTokenIsAllowed';
-import { getTokenImage } from './utils/imageUtils';
-import { getAttributes } from './utils/attributesUtils';
-import config from '../../config';
-
-const { IPFSGateway } = config;
 
 export class UniqueSDKNFTController implements INFTController<NFTCollection, NFTToken> {
   private sdk: Sdk;
@@ -52,30 +46,15 @@ export class UniqueSDKNFTController implements INFTController<NFTCollection, NFT
   }
 
   async getToken(collectionId: number, tokenId: number): Promise<NFTToken | null> {
-    const token = await this.sdk.tokens.get({ collectionId, tokenId });
-    const collection: CollectionInfo | null = await this.sdk.collections.get({ collectionId });
+    const token = await this.sdk.tokens.get_new({ collectionId, tokenId });
+    const collection = await this.sdk.collections.get_new({ collectionId });
     if (!token || !collection) return null;
 
-    let owner;
-    if (token.owner) { owner = token.owner.startsWith('0x') ? { Ethereum: token.owner } : { Substrate: token.owner }; }
+    const { owner, attributes, image } = token;
+    const { name, tokenPrefix, description, schema } = collection;
 
-    let collectionCover = '';
-    const { properties } = collection;
-    if (properties?.variableOnChainSchema) {
-      const image = JSON.parse(properties?.variableOnChainSchema)?.collectionCover as string;
-      collectionCover = `${IPFSGateway}/${image}`;
-    } else {
-      if (properties?.offchainSchema) {
-        collectionCover = await getTokenImage(properties, 1);
-      }
-    }
-
-    const imageUrl = token.url || '';
-
-    const { constData } = token.properties;
-    const { fields } = collection.properties;
-
-    const attributes = getAttributes(constData, fields);
+    const imageUrl = image?.fullUrl || '';
+    const collectionCover = schema?.coverPicture?.fullUrl || '';
 
     const isAllowed = this.allowedTokens[collectionId] ? checkTokenIsAllowed(tokenId, this.allowedTokens[collectionId].split(',')) : true;
 
@@ -85,9 +64,9 @@ export class UniqueSDKNFTController implements INFTController<NFTCollection, NFT
       attributes,
       imageUrl,
       collectionId,
-      collectionName: collection?.name,
-      prefix: collection?.tokenPrefix,
-      description: collection?.description,
+      collectionName: name,
+      prefix: tokenPrefix,
+      description,
       collectionCover,
       isAllowed
     };

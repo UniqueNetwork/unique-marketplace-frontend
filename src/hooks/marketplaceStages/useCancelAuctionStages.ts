@@ -6,7 +6,7 @@ import { InternalStage, StageStatus } from '../../types/StagesTypes';
 import useStages from '../useStages';
 
 export const useCancelAuctionStages = (collectionId: number, tokenId: number) => {
-  const { selectedAccount, signMessage, signTx } = useAccounts();
+  const { selectedAccount, signMessage, signPayloadJSON } = useAccounts();
   const cancelAuctionStages: InternalStage<null>[] = useMemo(() => [
     {
       title: 'Cancelling auction',
@@ -25,7 +25,7 @@ export const useCancelAuctionStages = (collectionId: number, tokenId: number) =>
       }
     }
   ], [collectionId, tokenId, signMessage]);
-  const { stages, error, status, initiate } = useStages<null>(cancelAuctionStages, signTx);
+  const { stages, error, status, initiate } = useStages<null>(cancelAuctionStages, signPayloadJSON);
 
   return {
     stages,

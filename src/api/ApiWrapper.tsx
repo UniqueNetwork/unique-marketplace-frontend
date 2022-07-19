@@ -10,11 +10,11 @@ import { ApolloProvider } from '@apollo/client';
 import AuctionSocketProvider from './restApi/auction/AuctionSocketProvider';
 import { Settings } from './restApi/settings/types';
 import config from '../config';
-// import { SdkClient } from './uniqueSdk/sdkClient';
 import { SDKFactory } from './sdk/sdk';
 import { Sdk } from '@unique-nft/sdk';
 import { UniqueSDKNFTController } from './uniqueSdk/NFTController';
 import { UniqueSDKCollectionController } from './uniqueSdk/collectionController';
+import { UniqueSDKMarketController } from './uniqueSdk/marketController';
 
 interface ChainProviderProps {
   children: React.ReactNode
@@ -28,13 +28,15 @@ const ApiWrapper = ({ children, gqlClient = gql, rpcClient = rpc }: ChainProvide
   const [isRpcClientInitialized, setRpcClientInitialized] = useState<boolean>(false);
   const { chainId } = useParams<'chainId'>();
   const [settings, setSettings] = useState<Settings>();
-  const sdkRef = useRef<Sdk>();
+  const uniqueSdkRef = useRef<Sdk>();
+  const kusamaSdkRef = useRef<Sdk>();
 
   useEffect(() => {
     (async () => {
       const { data: settings } = await getSettings();
       setSettings(settings);
-      sdkRef.current = await SDKFactory(settings);
+      uniqueSdkRef.current = await SDKFactory(settings.blockchain.unique.wsEndpoint);
+      kusamaSdkRef.current = await SDKFactory(settings.blockchain.kusama.wsEndpoint);
 
       rpcClient?.setOnChainReadyListener(setChainData);
       await rpcClient?.initialize(settings);
@@ -47,11 +49,11 @@ const ApiWrapper = ({ children, gqlClient = gql, rpcClient = rpc }: ChainProvide
   const value = useMemo<ApiContextProps>(
     () => ({
       // try pro SDK
-      sdk: sdkRef.current,
-      api: (sdkRef.current && settings && isRpcClientInitialized && {
-        collection: new UniqueSDKCollectionController(sdkRef.current, settings), // rpcClient.collectionController,
-        nft: new UniqueSDKNFTController(sdkRef.current, settings), // rpcClient.nftController,
-        market: rpcClient.marketController
+      sdk: uniqueSdkRef.current,
+      api: (uniqueSdkRef.current && kusamaSdkRef.current && settings && isRpcClientInitialized && {
+        collection: new UniqueSDKCollectionController(uniqueSdkRef.current, settings), // rpcClient.collectionController,
+        nft: new UniqueSDKNFTController(uniqueSdkRef.current, settings), // rpcClient.nftController,
+        market: new UniqueSDKMarketController(uniqueSdkRef.current, kusamaSdkRef.current, settings) // rpcClient.marketController
       }) || undefined,
       chainData,
       rawRpcApi: rpcClient.rawUniqRpcApi,

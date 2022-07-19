@@ -5,8 +5,8 @@ import { TypeRegistry } from '@polkadot/types/create';
 import { unique } from '@unique-nft/unique-mainnet-types/definitions';
 
 import { IRpcClient, INFTController, IRpcClientOptions, ICollectionController, IMarketController, IRpcConfig } from './types';
-import UniqueNFTController from './unique/NFTController';
-import UniqueCollectionController from './unique/collectionController';
+// import UniqueNFTController from './unique/NFTController';
+// import UniqueCollectionController from './unique/collectionController';
 import MarketKusamaController from './unique/marketController';
 import { ChainData } from '../ApiContext';
 
@@ -98,19 +98,19 @@ export class RpcClient implements IRpcClient {
       }
     });
     this.rawUniqRpcApi = _api;
-    this.nftController = new UniqueNFTController(_api, {
-      collectionsIds: this.config?.blockchain.unique.collectionIds || [],
-      allowedTokens: this.config?.blockchain.unique.allowedTokens || []
-    });
-    this.collectionController = new UniqueCollectionController(_api, this.config?.blockchain.unique.collectionIds || []);
-    if (!this.rawKusamaRpcApi) throw new Error('Kusama API is not initialized');
-    this.marketController = new MarketKusamaController(_api, this.rawKusamaRpcApi, {
-      contractAddress: this.config?.blockchain.unique.contractAddress,
-      escrowAddress: this.config?.blockchain.escrowAddress,
-      uniqueSubstrateApiRpc: this.config?.blockchain.unique.wsEndpoint,
-      auctionAddress: this.config?.auction.address,
-      nftController: this.nftController
-    });
+    // this.nftController = new UniqueNFTController(_api, {
+    //   collectionsIds: this.config?.blockchain.unique.collectionIds || [],
+    //   allowedTokens: this.config?.blockchain.unique.allowedTokens || []
+    // });
+    // this.collectionController = new UniqueCollectionController(_api, this.config?.blockchain.unique.collectionIds || []);
+    // if (!this.rawKusamaRpcApi) throw new Error('Kusama API is not initialized');
+    // this.marketController = new MarketKusamaController(_api, this.rawKusamaRpcApi, {
+    //   contractAddress: this.config?.blockchain.unique.contractAddress,
+    //   escrowAddress: this.config?.blockchain.escrowAddress,
+    //   uniqueSubstrateApiRpc: this.config?.blockchain.unique.wsEndpoint,
+    //   auctionAddress: this.config?.auction.address,
+    //   nftController: this.nftController
+    // });
 
     return new Promise<void>((resolve, reject) => {
       _api.on('connected', () => this.setIsApiConnected(true));

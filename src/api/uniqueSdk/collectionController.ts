@@ -1,11 +1,8 @@
 import { ICollectionController, TransactionOptions } from '../chainApi/types';
 import { NFTCollection, NFTToken, TokenId } from '../chainApi/unique/types';
 import { Sdk } from '@unique-nft/sdk';
+import '@unique-nft/sdk/tokens';
 import { Settings } from '../restApi/settings/types';
-import { getTokenImage } from './utils/imageUtils';
-import config from '../../config';
-
-const { IPFSGateway } = config;
 
 export class UniqueSDKCollectionController implements ICollectionController<NFTCollection, NFTToken> {
   private sdk: Sdk;
@@ -16,13 +13,7 @@ export class UniqueSDKCollectionController implements ICollectionController<NFTC
   }
 
   async confirmSponsorship(collectionId: number, options: TransactionOptions): Promise<void> {
-    const tx = await this.sdk.extrinsics.build({
-      section: 'unique',
-      method: 'confirmSponsorship',
-      args: [collectionId],
-      address: options.signer || '',
-      isImmortal: false
-    });
+    const tx = await this.sdk.sponsorhip.confirmSponsorship(collectionId, options.signer);
     const { signerPayloadJSON } = tx;
     const signature = await options.signPayloadJSON?.(tx.signerPayloadJSON);
     if (!signature) throw new Error('Signing failed');
@@ -36,19 +27,9 @@ export class UniqueSDKCollectionController implements ICollectionController<NFTC
     const collection = await this.sdk.collections.get({ collectionId });
 
     if (!collection) return null;
-    const { name, description, owner, properties, tokenPrefix, sponsorship } = collection;
 
-    let coverImageUrl = '';
-
-    if (properties?.variableOnChainSchema) {
-      const image = JSON.parse(properties?.variableOnChainSchema)?.collectionCover as string;
-
-      coverImageUrl = `${IPFSGateway}/${image}`;
-    } else {
-      if (properties?.offchainSchema) {
-        coverImageUrl = await getTokenImage(properties, 1);
-      }
-    }
+    const { name, description, owner, schema, tokenPrefix, sponsorship } = collection;
+    const coverImageUrl = schema?.coverPicture?.fullUrl || '';
 
     return {
       id: collectionId,
@@ -61,6 +42,7 @@ export class UniqueSDKCollectionController implements ICollectionController<NFTC
     };
   }
 
+  // TODO: unused method
   getCollections(): Promise<NFTCollection[]> {
     return Promise.resolve([]);
   }
@@ -84,16 +66,11 @@ export class UniqueSDKCollectionController implements ICollectionController<NFTC
   }
 
   async removeCollectionSponsor(collectionId: number, options: TransactionOptions): Promise<void> {
-    const tx = await this.sdk.extrinsics.build({
-      section: 'unique',
-      method: 'removeCollectionSponsor',
-      args: [collectionId],
-      address: options.signer || '',
-      isImmortal: false
-    });
+    const tx = await this.sdk.sponsorhip.removeCollectionSponsor(collectionId, options.signer);
     const { signerPayloadJSON } = tx;
     const signature = await options.signPayloadJSON?.(tx.signerPayloadJSON);
     if (!signature) throw new Error('Signing failed');
+    // @ts-ignore
     await this.sdk.extrinsics.submitWaitCompleted({
       signerPayloadJSON,
       signature
@@ -101,16 +78,11 @@ export class UniqueSDKCollectionController implements ICollectionController<NFTC
   }
 
   async setCollectionSponsor(collectionId: number, sponsorAddress: string, options: TransactionOptions): Promise<void> {
-    const tx = await this.sdk.extrinsics.build({
-      section: 'unique',
-      method: 'setCollectionSponsor',
-      args: [collectionId],
-      address: options.signer || '',
-      isImmortal: false
-    });
+    const tx = await this.sdk.sponsorhip.setCollectionSponsor(collectionId, sponsorAddress, options.signer);
     const { signerPayloadJSON } = tx;
     const signature = await options.signPayloadJSON?.(tx.signerPayloadJSON);
     if (!signature) throw new Error('Signing failed');
+    // @ts-ignore
     await this.sdk.extrinsics.submitWaitCompleted({
       signerPayloadJSON,
       signature

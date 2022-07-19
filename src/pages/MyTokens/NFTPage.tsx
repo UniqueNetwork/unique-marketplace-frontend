@@ -159,7 +159,9 @@ export const NFTPage = () => {
       let filteredByAttributes = true;
       if (filterState?.attributes && filterState.attributes.length > 0) {
         filteredByAttributes = filterState?.attributes.some((attributeItem) => {
-          return token.attributes?.[attributeItem.key] && Array.isArray(token.attributes[attributeItem.key]) && (token.attributes[attributeItem.key] as string[])
+          const attribute = Object.values(token.attributes || {}).find((attribute) => attribute.name === attributeItem.key);
+          return attribute &&
+            attribute.isArray && (attribute.value as string[])
             .some((_attribute) => _attribute === attributeItem.attribute);
         });
       }

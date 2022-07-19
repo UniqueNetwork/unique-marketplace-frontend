@@ -102,33 +102,43 @@ export const useAccounts = () => {
   const signPayloadJSON = useCallback(
     async (
       signerPayloadJSON: SignerPayloadJSON,
-      account?: Account
+      account?: Account | string
     ): Promise<`0x${string}` | null> => {
-      const _account = account || selectedAccount;
+      let _account = account || selectedAccount;
+      if (typeof _account === 'string') {
+        _account = accounts.find((account) => account.address === _account);
+      }
       if (!_account) {
         throw new Error('Account was not provided');
       }
+      if (_account.signerType === AccountSigner.local) {
+        const pair = await showSignDialog(_account);
+        if (pair) {
+          return u8aToHex(pair.sign(stringToHex(JSON.stringify(signerPayloadJSON))));
+        }
+      } else {
+        const injector = await web3FromSource(_account.meta.source);
 
-      const injector = await web3FromSource(_account.meta.source);
+        if (!injector.signer.signPayload) {
+          throw new Error('Web3 not available');
+        }
 
-      if (!injector.signer.signPayload) {
-        throw new Error('Web3 not available');
+        return injector.signer
+          .signPayload(signerPayloadJSON)
+          .then(({ signature }) => {
+            if (!signature) {
+              throw new Error('Signing failed');
+            }
+
+            return signature;
+          })
+          .catch((err) => {
+            console.log('err', err);
+
+            return null;
+          });
       }
-
-      return injector.signer
-        .signPayload(signerPayloadJSON)
-        .then(({ signature }) => {
-          if (!signature) {
-            throw new Error('Signing failed');
-          }
-
-          return signature;
-        })
-        .catch((err) => {
-          console.log('err', err);
-
-          return null;
-        });
+      return null;
     },
     [selectedAccount]
   );

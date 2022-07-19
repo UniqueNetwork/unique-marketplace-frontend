@@ -1,3 +1,4 @@
+// @ts-nocheck
 import Web3 from 'web3';
 import { ApiPromise } from '@polkadot/api';
 import { AddressOrPair } from '@polkadot/api/types';
@@ -11,8 +12,6 @@ import { collectionIdToAddress, compareEncodedAddresses, getEthAccount, isTokenO
 import { CrossAccountId, EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType } from './types';
 import { formatKsm } from '../utils/textFormat';
 import { repeatCheckForTransactionFinish } from '../utils/repeatCheckTransaction';
-import { addToWhitelist } from '../../restApi/settings/settings';
-import { Account } from 'account/AccountContext';
 
 // TODO: Global todo list
 /*
