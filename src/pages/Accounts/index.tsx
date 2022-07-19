@@ -362,6 +362,19 @@ const AccountPageWrapper = styled.div`
   .unique-table-data-row {
     height: fit-content;
   }
+
+  @media (max-width: 640px) {
+    .unique-modal-wrapper .unique-modal {
+      width: calc(520px - var(--prop-gap) * 3);
+    }
+  }
+
+  @media (max-width: 567px) {
+    .unique-modal-wrapper .unique-modal {
+      width: calc(288px - var(--prop-gap) * 2);
+      padding: 24px 16px;
+    }
+  }
 `;
 
 const Row = styled.div`

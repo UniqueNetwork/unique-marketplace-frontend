@@ -22,4 +22,7 @@ const WarningBlockWrapper = styled.div`
   border-radius: 4px;
   background-color: ${AdditionalWarning100};
   width: 100%;
+  span {
+    line-height: 22px !important;
+  }
 `;
