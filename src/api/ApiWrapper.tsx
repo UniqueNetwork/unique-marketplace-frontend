@@ -18,7 +18,6 @@ import { UniqueSDKMarketController } from './uniqueSdk/marketController';
 
 interface ChainProviderProps {
   children: React.ReactNode
-  // sdkClient?: SdkClient
   gqlClient?: IGqlClient
   rpcClient?: IRpcClient
 }
@@ -48,8 +47,6 @@ const ApiWrapper = ({ children, gqlClient = gql, rpcClient = rpc }: ChainProvide
   // get context value for ApiContext
   const value = useMemo<ApiContextProps>(
     () => ({
-      // try pro SDK
-      sdk: uniqueSdkRef.current,
       api: (uniqueSdkRef.current && kusamaSdkRef.current && settings && isRpcClientInitialized && {
         collection: new UniqueSDKCollectionController(uniqueSdkRef.current, settings), // rpcClient.collectionController,
         nft: new UniqueSDKNFTController(uniqueSdkRef.current, settings), // rpcClient.nftController,

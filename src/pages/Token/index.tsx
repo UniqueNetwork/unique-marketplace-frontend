@@ -18,7 +18,7 @@ import styled from 'styled-components';
 import { BlueGrey500 } from 'styles/colors';
 
 const TokenPage = () => {
-  const { api, sdk } = useApi();
+  const { api } = useApi();
   const { selectedAccount } = useAccounts();
   const { id, collectionId } = useParams<{ id: string, collectionId: string}>();
   const [token, setToken] = useState<NFTToken>();
@@ -32,7 +32,6 @@ const TokenPage = () => {
   const fetchToken = useCallback(async () => {
     if (!api?.nft) return;
     setIsFetchingToken(true);
-    // const token = await api?.nft?.getToken(Number(collectionId), Number(id)) as NFTToken;
     const token = await api?.nft?.getToken(Number(collectionId), Number(id));
     setToken(token);
     setIsFetchingToken(false);

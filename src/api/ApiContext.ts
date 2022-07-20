@@ -19,18 +19,12 @@ type Api = {
   market?: IMarketController
 }
 
-type AugmentedSdkApi = {
-  collections?: ICollectionController<any, any>
-  nft?: INFTController<any, any>
-}
-
 export type ApiContextProps = {
   // TODO: remove this
   rpcClient: IRpcClient
   rawRpcApi?: ApiPromise
   rawKusamaRpcApi?: ApiPromise
   api: Api | undefined
-  sdk?: Sdk
   chainData?: ChainData
   settings?: Settings
 }

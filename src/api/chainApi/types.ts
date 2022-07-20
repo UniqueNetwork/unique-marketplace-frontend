@@ -36,7 +36,7 @@ export interface IRpcClientOptions {
 
 export interface INFTController<Collection, Token> {
   getToken(collectionId: number, tokenId: number): Promise<Token | null>
-  getAccountTokens(account: string): Promise<Token[]>
+  getAccountMarketableTokens(account: string): Promise<Token[]>
 }
 
 export interface ICollectionController<Collection, Token> {
@@ -85,7 +85,7 @@ export interface IMarketController {
   transferToAuction: (owner: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
   transferBidBalance: (from: string, amount: string, options: TransactionOptions) => Promise<void>
   transferBalance: (from: string, to: string, amount: string, options: TransactionOptions) => Promise<void>
-  getKusamaFee: (sender: AddressOrPair, recipient?: string, value?: BN) => Promise<Balance | null>
+  getKusamaFee: (sender: string, recipient?: string, value?: BN) => Promise<string | null>
 }
 
 export type Chain = {

@@ -1,7 +1,5 @@
 import { BN } from '@polkadot/util';
 import { IMarketController, TransactionOptions, TSignMessage } from '../chainApi/types';
-import { AddressOrPair } from '@polkadot/api/types';
-import { Balance } from '@polkadot/types/interfaces';
 import { Sdk } from '@unique-nft/sdk';
 import { Settings } from '../restApi/settings/types';
 import { CrossAccountId, EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType } from '../chainApi/unique/types';
@@ -89,7 +87,7 @@ export class UniqueSDKMarketController implements IMarketController {
     if ((new BN(availableBalance.raw)).lt(needed)) {
       throw new Error(`Your KSM balance is too low: ${availableBalance.formatted} KSM. You need at least: ${formatKsm(needed, this.kusamaDecimals, this.minPrice)} KSM`);
     }
-    return this.transferBalance(address, this.escrowAddress, needed.toString(), options);
+    return this.transferBalance(address, this.escrowAddress, formatKsm(needed, this.kusamaDecimals, 0), options);
   }
 
   async addToWhiteList(account: string, options: TransactionOptions, signMessage: TSignMessage): Promise<void> {
@@ -117,8 +115,8 @@ export class UniqueSDKMarketController implements IMarketController {
     }
   }
 
-  async buyToken(account: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
-    const ethAddress = getEthAccount(account);
+  async buyToken(address: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+    const ethAddress = getEthAccount(address);
     const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
     const matcherContractInstance = this.getMatcherContractInstance(ethAddress);
     const abi = (matcherContractInstance.methods).buyKSM(evmCollectionInstance.options.address, tokenId, ethAddress, ethAddress).encodeABI();
@@ -126,7 +124,7 @@ export class UniqueSDKMarketController implements IMarketController {
     console.log(abi);
 
     const { signerPayloadJSON } = await this.uniqueSdk.extrinsics.build({
-      address: options.signer,
+      address,
       section: 'evm',
       method: 'call',
       args: [
@@ -204,17 +202,17 @@ export class UniqueSDKMarketController implements IMarketController {
     return Promise.resolve(false);
   }
 
-  async getKusamaFee(sender: AddressOrPair, recipient: string | undefined, value: BN | undefined): Promise<Balance | null> {
+  async getKusamaFee(sender: string, recipient: string | undefined, value: BN | undefined): Promise<string | null> {
     const transferFee = await this.kusamaSdk.extrinsics.getFee({
       address: sender,
       section: 'balances',
       method: 'transfer',
       args: [
-        recipient,
-        value
+        recipient || '',
+        value || 0
       ]
     });
-    return transferFee.freeBalance; // TODO: check that - for some reason getFee returns Fee which is Balance type
+    return transferFee.amount;
   }
 
   async getUserDeposit(account: string): Promise<BN> {
@@ -238,6 +236,7 @@ export class UniqueSDKMarketController implements IMarketController {
     };
 
     const token = await this.uniqueSdk.tokens.get_new(tokenIdArguments);
+    if (!token) throw new Error('Token not found');
     if (isTokenOwner(ethAddress, token.owner)) return;
 
     const { signerPayloadJSON } = await this.uniqueSdk.extrinsics.build({
@@ -266,12 +265,13 @@ export class UniqueSDKMarketController implements IMarketController {
     return approvedCount === 1;
   }
 
-  async sendNftToSmartContract(account: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+  async sendNftToSmartContract(address: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
     const tokenIdArguments: TokenIdArguments = {
       collectionId: Number(collectionId), tokenId: Number(tokenId)
     };
 
     const token = await this.uniqueSdk.tokens.get_new(tokenIdArguments);
+    if (!token) throw new Error('Token not found');
 
     const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
     const approved = await this.checkIfNftApproved(token.owner, collectionId, tokenId);
@@ -281,11 +281,11 @@ export class UniqueSDKMarketController implements IMarketController {
     const abi = evmCollectionInstance.methods.approve(this.contractAddress, tokenId).encodeABI();
 
     const { signerPayloadJSON } = await this.uniqueSdk.extrinsics.build({
-      address: options.signer,
+      address,
       section: 'evm',
       method: 'call',
       args: [
-        getEthAccount(account),
+        getEthAccount(address),
         evmCollectionInstance.options.address,
         abi,
         0,
@@ -306,8 +306,8 @@ export class UniqueSDKMarketController implements IMarketController {
     });
   }
 
-  async setForFixPriceSale(account: string, collectionId: string, tokenId: string, price: string, options: TransactionOptions): Promise<void> {
-    const ethAddress = getEthAccount(account);
+  async setForFixPriceSale(address: string, collectionId: string, tokenId: string, price: string, options: TransactionOptions): Promise<void> {
+    const ethAddress = getEthAccount(address);
     const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
     const matcherContractInstance = this.getMatcherContractInstance(ethAddress);
 
@@ -319,7 +319,7 @@ export class UniqueSDKMarketController implements IMarketController {
     ).encodeABI();
 
     const { signerPayloadJSON } = await this.uniqueSdk.extrinsics.build({
-      address: options.signer,
+      address,
       section: 'evm',
       method: 'call',
       args: [
@@ -345,17 +345,19 @@ export class UniqueSDKMarketController implements IMarketController {
   }
 
   async transferBalance(address: string, destination: string, amount: string, options: TransactionOptions): Promise<void> {
-    const { signerPayloadJSON } = this.kusamaSdk.balance.transfer.transferBalance({
+    const { signerPayloadJSON } = await this.kusamaSdk.extrinsics.build({
+      section: 'balances',
+      method: 'transfer',
+      args: [destination, Number(amount) * Math.pow(10, this.kusamaDecimals)],
       address,
-      destination,
-      amount
+      isImmortal: false
     });
 
     const signature = await options.sign?.(signerPayloadJSON);
 
     if (!signature) throw new Error('Signing failed');
 
-    await this.uniqueSdk.extrinsics.submitWaitCompleted({
+    await this.kusamaSdk.extrinsics.submitWaitCompleted({
       signerPayloadJSON,
       signature
     });
@@ -406,13 +408,13 @@ export class UniqueSDKMarketController implements IMarketController {
     if (!token) throw new Error('Token for unlock not found');
     const { owner } = token;
 
-    if (compareEncodedAddresses(owner.Substrate, address)) return;
+    if (owner.Substrate && compareEncodedAddresses(owner.Substrate, address)) return;
 
     const { signerPayloadJSON } = await this.uniqueSdk.extrinsics.build({
       section: 'unique',
-      method: 'transfer',
-      args: [{ substrate: address }, tokenIdArguments.collectionId, tokenIdArguments.tokenId, 1],
-      address: ethAddress,
+      method: 'transferFrom',
+      args: [{ ethereum: ethAddress }, { substrate: address }, tokenIdArguments.collectionId, tokenIdArguments.tokenId, 1],
+      address: address,
       isImmortal: false
     });
     const signature = await options.sign?.(signerPayloadJSON);
@@ -436,7 +438,7 @@ export class UniqueSDKMarketController implements IMarketController {
     const abi = (matcherContractInstance.methods).withdrawAllKSM(ethAddress).encodeABI();
 
     const { signerPayloadJSON } = await this.uniqueSdk.extrinsics.build({
-      address: options.signer,
+      address,
       section: 'evm',
       method: 'call',
       args: [

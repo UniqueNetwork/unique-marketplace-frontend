@@ -15,7 +15,7 @@ export class UniqueSDKNFTController implements INFTController<NFTCollection, NFT
     this.allowedTokens = settings.blockchain?.unique?.allowedTokens.reduce((acc, item) => ({ ...acc, [item.collection]: item.tokens }), {}) || {};
   }
 
-  async getAccountTokens(account: string): Promise<NFTToken[]> {
+  async getAccountMarketableTokens(account: string): Promise<NFTToken[]> {
     if (!this.sdk?.api || !account) {
       return [];
     }

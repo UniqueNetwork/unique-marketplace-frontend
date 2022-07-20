@@ -21,9 +21,7 @@
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
-    "@unique-nft/opal-testnet-types": "^0.5.3",
-    "@unique-nft/quartz-mainnet-types": "^0.6.1",
-    "@unique-nft/sdk": "0.4.13",
+    "@unique-nft/sdk": "0.4.19",
     "@unique-nft/ui-kit": "0.0.27",
     "@unique-nft/unique-mainnet-types": "^0.6.3",
     "axios": "^0.24.0",
@@ -59,7 +57,6 @@
     "eslint-plugin-sort-keys-fix": "^1.1.2",
     "https-browserify": "^1.0.0",
     "os-browserify": "^0.3.0",
-    "path-browserify": "^1.0.1",
     "postcss": "^8.0.0",
     "process": "^0.11.10",
     "react-app-rewired": "^2.2.1",
@@ -75,6 +72,13 @@
     "typescript": "^4.5.2",
     "url": "^0.11.0"
   },
+  "externalDependencies": [
+    "@nestjs/microservices",
+    "@nestjs/platform-express",
+    "class-transformer",
+    "class-validator",
+    "cache-manager"
+  ],
   "scripts": {
     "start": "react-app-rewired start",
     "build": "react-app-rewired --max_old_space_size=4096 build",

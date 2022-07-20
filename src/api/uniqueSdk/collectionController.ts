@@ -24,7 +24,7 @@ export class UniqueSDKCollectionController implements ICollectionController<NFTC
   }
 
   async getCollection(collectionId: number): Promise<NFTCollection | null> {
-    const collection = await this.sdk.collections.get({ collectionId });
+    const collection = await this.sdk.collections.get_new({ collectionId });
 
     if (!collection) return null;
 
