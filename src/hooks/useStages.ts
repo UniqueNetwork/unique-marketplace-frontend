@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
-import { InternalStage, SignFunction, StageStatus, useStagesReturn } from '../types/StagesTypes';
 import { useNotifications } from '@unique-nft/ui-kit';
-import { SignerPayloadJSON } from '@polkadot/types/types';
+import { InternalStage, SignFunction, StageStatus, useStagesReturn } from '../types/StagesTypes';
+import { UnsignedTxPayload } from '@unique-nft/sdk/types';
 
 const useStages = <T>(stages: InternalStage<T>[], signFunction: SignFunction): useStagesReturn<T> => {
   const [internalStages, setInternalStages] = useState<InternalStage<T>[]>(stages);
@@ -28,9 +28,9 @@ const useStages = <T>(stages: InternalStage<T>[], signFunction: SignFunction): u
   }, [setInternalStages]);
 
   const getSignFunction = useCallback((index: number, internalStage: InternalStage<T>) => {
-    const sign = async (signerPayloadJSON: SignerPayloadJSON): Promise<`0x${string}` | null> => {
+    const sign = async (unsignedTxPayload: UnsignedTxPayload): Promise<`0x${string}` | null> => {
       updateStage(index, { ...internalStage, status: StageStatus.awaitingSign });
-      const signedTx = await signFunction(signerPayloadJSON);
+      const signedTx = await signFunction(unsignedTxPayload);
       updateStage(index, { ...internalStage, status: StageStatus.inProgress });
       return signedTx;
     };

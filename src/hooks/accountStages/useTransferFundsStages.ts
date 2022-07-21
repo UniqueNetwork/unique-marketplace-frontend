@@ -4,7 +4,7 @@ import { TTransferFunds } from '../../pages/Accounts/Modals/types';
 import { InternalStage, StageStatus } from '../../types/StagesTypes';
 import useStages from '../useStages';
 import { useAccounts } from '../useAccounts';
-import { SignerPayloadJSON } from '@polkadot/types/types';
+import { UnsignedTxPayload } from '@unique-nft/sdk/types';
 
 export const useTransferFundsStages = (accountAddress: string) => {
   const { api } = useApi();
@@ -17,8 +17,8 @@ export const useTransferFundsStages = (accountAddress: string) => {
     action: (params) => marketApi?.transferBalance(params.txParams.sender, params.txParams?.recipient || '', params.txParams?.amount, params.options)
   }], [marketApi]) as InternalStage<TTransferFunds>[];
 
-  const sign = useCallback(async (signerPayloadJSON: SignerPayloadJSON) => {
-    return await signPayloadJSON(signerPayloadJSON, accountAddress);
+  const sign = useCallback(async (unsignedTxPayload: UnsignedTxPayload) => {
+    return await signPayloadJSON(unsignedTxPayload, accountAddress);
   }, [signPayloadJSON, accountAddress]);
 
   const { stages, error, status, initiate } = useStages<TTransferFunds>(transferStages, sign);

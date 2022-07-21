@@ -5,15 +5,12 @@ export const formatKsm = (value: BN, kusamaDecimals: number, minPrice: number) =
         return '0';
     }
 
-    // const tokenDecimals = incomeDecimals || formatBalance.getDefaults().decimals;
-    const tokenDecimals = kusamaDecimals; // TODO:
-
-    if (value.lte(new BN(minPrice * Math.pow(10, tokenDecimals)))) {
+    if (value.lte(new BN(minPrice * Math.pow(10, kusamaDecimals)))) {
         return ` ${minPrice}`;
     }
 
     // calculate number after decimal point
-    const decNum = value?.toString().length - tokenDecimals;
+    const decNum = value?.toString().length - kusamaDecimals;
     let balanceStr = '';
 
     if (decNum < 0) {
@@ -21,11 +18,11 @@ export const formatKsm = (value: BN, kusamaDecimals: number, minPrice: number) =
     }
 
     if (decNum > 0) {
-        balanceStr = [value.toString().substr(0, decNum), '.', value.toString().substr(decNum, tokenDecimals - decNum)].join('');
+        balanceStr = [value.toString().substr(0, decNum), '.', value.toString().substr(decNum, kusamaDecimals - decNum)].join('');
     }
 
     if (decNum === 0) {
-        balanceStr = ['0', '.', value.toString().substr(decNum, tokenDecimals - decNum)].join('');
+        balanceStr = ['0', '.', value.toString().substr(decNum, kusamaDecimals - decNum)].join('');
     }
 
     const arr = balanceStr.toString().split('.');

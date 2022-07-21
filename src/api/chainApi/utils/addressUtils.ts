@@ -9,8 +9,6 @@ import { subToEthLowercase } from './decoder';
 import { CrossAccountId } from '../unique/types';
 import { PalletEvmAccountBasicCrossAccountIdRepr } from '@unique-nft/unique-mainnet-types';
 
-keyring.loadAll({});
-
 export const compareEncodedAddresses = (subAddress1: string, subAddress2: string): boolean => {
   if (!subAddress1 || !subAddress2) return false;
   return encodeAddress(subAddress1) === encodeAddress(subAddress2);

@@ -1,17 +1,15 @@
-import { BN } from '@polkadot/util';
-import { IMarketController, TransactionOptions, TSignMessage } from '../chainApi/types';
 import { Sdk } from '@unique-nft/sdk';
-import { Settings } from '../restApi/settings/types';
-import { CrossAccountId, EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType } from '../chainApi/unique/types';
+import { TokenIdArguments } from '@unique-nft/sdk/tokens';
+import { BN } from '@polkadot/util';
+import { IMarketController, CrossAccountId, EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType, TransactionOptions, TSignMessage, UniqueDecoratedRpc } from './types';
 import marketplaceAbi from './abi/marketPlaceAbi.json';
 import nonFungibleAbi from './abi/nonFungibleAbi.json';
-import { collectionIdToAddress, getEthAccount } from './utils/addressUtils';
-import Web3 from 'web3';
+import { collectionIdToAddress, getEthAccount, compareEncodedAddresses, isTokenOwner, normalizeAccountId } from './utils/addressUtils';
 import { formatKsm, fromStringToBnString } from './utils/textFormat';
 import { repeatCheckForTransactionFinish } from './utils/repeatCheckTransaction';
-import { compareEncodedAddresses, isTokenOwner, normalizeAccountId } from '../chainApi/utils/addressUtils';
-import { TokenIdArguments } from '@unique-nft/sdk/tokens';
+import { Settings } from '../restApi/settings/types';
 import '@unique-nft/sdk/balance';
+import Web3 from 'web3';
 
 export class UniqueSDKMarketController implements IMarketController {
   private uniqueSdk: Sdk;
@@ -59,6 +57,7 @@ export class UniqueSDKMarketController implements IMarketController {
     return new this.web3Instance.eth.Contract(nonFungibleAbi, collectionIdToAddress(parseInt(collectionId, 10)), { from: this.contractOwner });
   }
 
+  // purchase
   async addDeposit(address: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
     const matcherContractInstance = this.getMatcherContractInstance(getEthAccount(address));
     const userDeposit = await this.getUserDeposit(address);
@@ -90,6 +89,7 @@ export class UniqueSDKMarketController implements IMarketController {
     return this.transferBalance(address, this.escrowAddress, formatKsm(needed, this.kusamaDecimals, 0), options);
   }
 
+  // purchase
   async addToWhiteList(account: string, options: TransactionOptions, signMessage: TSignMessage): Promise<void> {
     const ethAddress = getEthAccount(account);
     const isWhiteListed = await this.checkWhiteListed(ethAddress);
@@ -115,15 +115,14 @@ export class UniqueSDKMarketController implements IMarketController {
     }
   }
 
+  // purchase
   async buyToken(address: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
     const ethAddress = getEthAccount(address);
     const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
     const matcherContractInstance = this.getMatcherContractInstance(ethAddress);
-    const abi = (matcherContractInstance.methods).buyKSM(evmCollectionInstance.options.address, tokenId, ethAddress, ethAddress).encodeABI();
+    const abi = matcherContractInstance.methods.buyKSM(evmCollectionInstance.options.address, tokenId, ethAddress, ethAddress).encodeABI();
 
-    console.log(abi);
-
-    const { signerPayloadJSON } = await this.uniqueSdk.extrinsics.build({
+    const unsignedTxPayload = await this.uniqueSdk.extrinsics.build({
       address,
       section: 'evm',
       method: 'call',
@@ -139,16 +138,17 @@ export class UniqueSDKMarketController implements IMarketController {
         []
       ]
     });
-    const signature = await options.sign?.(signerPayloadJSON);
+    const signature = await options.sign?.(unsignedTxPayload);
 
     if (!signature) throw new Error('Signing failed');
 
     await this.uniqueSdk.extrinsics.submitWaitCompleted({
-      signerPayloadJSON,
+      signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });
   }
 
+  // sell
   async cancelSell(address: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
     const ethAddress = getEthAccount(address);
     const matcherContractInstance = this.getMatcherContractInstance(ethAddress);
@@ -163,7 +163,7 @@ export class UniqueSDKMarketController implements IMarketController {
       tokenId
     ).encodeABI();
 
-    const { signerPayloadJSON } = await this.uniqueSdk.extrinsics.build({
+    const unsignedTxPayload = await this.uniqueSdk.extrinsics.build({
       address,
       section: 'evm',
       method: 'call',
@@ -179,20 +179,20 @@ export class UniqueSDKMarketController implements IMarketController {
         []
       ]
     });
-    const signature = await options.sign?.(signerPayloadJSON);
+    const signature = await options.sign?.(unsignedTxPayload);
 
     if (!signature) throw new Error('Signing failed');
 
     await this.uniqueSdk.extrinsics.submitWaitCompleted({
-      signerPayloadJSON,
+      signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });
   }
 
+  // account
   async checkWhiteListed(account: string): Promise<boolean> {
     const ethAddress = getEthAccount(account);
     try {
-      // @ts-ignore
       return (await this.uniqueSdk.api.query.evmContractHelpers.allowlist(this.contractAddress, ethAddress)).toJSON() as boolean;
     } catch (e) {
       console.error('Check for whitelist failed', e);
@@ -202,6 +202,7 @@ export class UniqueSDKMarketController implements IMarketController {
     return Promise.resolve(false);
   }
 
+  // fee
   async getKusamaFee(sender: string, recipient: string | undefined, value: BN | undefined): Promise<string | null> {
     const transferFee = await this.kusamaSdk.extrinsics.getFee({
       address: sender,
@@ -215,6 +216,7 @@ export class UniqueSDKMarketController implements IMarketController {
     return transferFee.amount;
   }
 
+  // account
   async getUserDeposit(account: string): Promise<BN> {
     const ethAddress = getEthAccount(account);
 
@@ -228,6 +230,7 @@ export class UniqueSDKMarketController implements IMarketController {
     throw new Error('Failed to get user deposit');
   }
 
+  // sell
   async lockNftForSale(account: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
     const ethAddress = getEthAccount(account);
 
@@ -239,32 +242,33 @@ export class UniqueSDKMarketController implements IMarketController {
     if (!token) throw new Error('Token not found');
     if (isTokenOwner(ethAddress, token.owner)) return;
 
-    const { signerPayloadJSON } = await this.uniqueSdk.extrinsics.build({
+    const unsignedTxPayload = await this.uniqueSdk.extrinsics.build({
       section: 'unique',
       method: 'transfer',
       args: [{ ethereum: ethAddress }, tokenIdArguments.collectionId, tokenIdArguments.tokenId, 1],
       address: options.signer || '',
       isImmortal: false
     });
-    console.log(options);
 
-    const signature = await options.sign?.(signerPayloadJSON);
+    const signature = await options.sign?.(unsignedTxPayload);
 
     if (!signature) throw new Error('Signing failed');
 
     await this.uniqueSdk.extrinsics.submitWaitCompleted({
-      signerPayloadJSON,
+      signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });
   }
 
+  // ???
   private async checkIfNftApproved (tokenOwner: CrossAccountId, collectionId: string, tokenId: string): Promise<boolean> {
-    // @ts-ignore
-    const approvedCount = (await this.uniqueSdk.api.rpc.unique.allowance(collectionId, normalizeAccountId(tokenOwner), normalizeAccountId({ Ethereum: this.contractAddress }), tokenId)).toJSON() as number;
+    const { unique } = (this.uniqueSdk?.api.rpc as UniqueDecoratedRpc);
+    const approvedCount = (await unique?.allowance(collectionId, normalizeAccountId(tokenOwner), normalizeAccountId({ Ethereum: this.contractAddress }), tokenId))?.toJSON();
 
     return approvedCount === 1;
   }
 
+  // sell
   async sendNftToSmartContract(address: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
     const tokenIdArguments: TokenIdArguments = {
       collectionId: Number(collectionId), tokenId: Number(tokenId)
@@ -280,7 +284,7 @@ export class UniqueSDKMarketController implements IMarketController {
 
     const abi = evmCollectionInstance.methods.approve(this.contractAddress, tokenId).encodeABI();
 
-    const { signerPayloadJSON } = await this.uniqueSdk.extrinsics.build({
+    const unsignedTxPayload = await this.uniqueSdk.extrinsics.build({
       address,
       section: 'evm',
       method: 'call',
@@ -296,16 +300,17 @@ export class UniqueSDKMarketController implements IMarketController {
         []
       ]
     });
-    const signature = await options.sign?.(signerPayloadJSON);
+    const signature = await options.sign?.(unsignedTxPayload);
 
     if (!signature) throw new Error('Signing failed');
 
     await this.uniqueSdk.extrinsics.submitWaitCompleted({
-      signerPayloadJSON,
+      signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });
   }
 
+  // sell
   async setForFixPriceSale(address: string, collectionId: string, tokenId: string, price: string, options: TransactionOptions): Promise<void> {
     const ethAddress = getEthAccount(address);
     const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
@@ -318,7 +323,7 @@ export class UniqueSDKMarketController implements IMarketController {
       tokenId
     ).encodeABI();
 
-    const { signerPayloadJSON } = await this.uniqueSdk.extrinsics.build({
+    const unsignedTxPayload = await this.uniqueSdk.extrinsics.build({
       address,
       section: 'evm',
       method: 'call',
@@ -334,18 +339,19 @@ export class UniqueSDKMarketController implements IMarketController {
         []
       ]
     });
-    const signature = await options.sign?.(signerPayloadJSON);
+    const signature = await options.sign?.(unsignedTxPayload);
 
     if (!signature) throw new Error('Signing failed');
 
     await this.uniqueSdk.extrinsics.submitWaitCompleted({
-      signerPayloadJSON,
+      signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });
   }
 
+  // account
   async transferBalance(address: string, destination: string, amount: string, options: TransactionOptions): Promise<void> {
-    const { signerPayloadJSON } = await this.kusamaSdk.extrinsics.build({
+    const unsignedTxPayload = await this.kusamaSdk.extrinsics.build({
       section: 'balances',
       method: 'transfer',
       args: [destination, Number(amount) * Math.pow(10, this.kusamaDecimals)],
@@ -353,12 +359,12 @@ export class UniqueSDKMarketController implements IMarketController {
       isImmortal: false
     });
 
-    const signature = await options.sign?.(signerPayloadJSON);
+    const signature = await options.sign?.(unsignedTxPayload);
 
     if (!signature) throw new Error('Signing failed');
 
     await this.kusamaSdk.extrinsics.submitWaitCompleted({
-      signerPayloadJSON,
+      signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });
   }
@@ -371,6 +377,7 @@ export class UniqueSDKMarketController implements IMarketController {
     return this.transferToken(owner, this.auctionAddress, collectionId, tokenId, options);
   }
 
+  // token
   async transferToken(from: string, to: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
     const tokenIdArguments: TokenIdArguments = {
       collectionId: Number(collectionId), tokenId: Number(tokenId)
@@ -381,22 +388,23 @@ export class UniqueSDKMarketController implements IMarketController {
 
     if (!isTokenOwner(from, token.owner)) throw new Error('You are not owner of this token');
 
-    const { signerPayloadJSON } = await this.uniqueSdk.tokens.transfer({
+    const unsignedTxPayload = await this.uniqueSdk.tokens.transfer({
       from,
       to,
       ...tokenIdArguments
     });
 
-    const signature = await options.sign?.(signerPayloadJSON);
+    const signature = await options.sign?.(unsignedTxPayload);
 
     if (!signature) throw new Error('Signing failed');
 
     await this.uniqueSdk.extrinsics.submitWaitCompleted({
-      signerPayloadJSON,
+      signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });
   }
 
+  // purchase
   async unlockNft(address: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
     const ethAddress = getEthAccount(address);
 
@@ -410,23 +418,24 @@ export class UniqueSDKMarketController implements IMarketController {
 
     if (owner.Substrate && compareEncodedAddresses(owner.Substrate, address)) return;
 
-    const { signerPayloadJSON } = await this.uniqueSdk.extrinsics.build({
+    const unsignedTxPayload = await this.uniqueSdk.extrinsics.build({
       section: 'unique',
       method: 'transferFrom',
       args: [{ ethereum: ethAddress }, { substrate: address }, tokenIdArguments.collectionId, tokenIdArguments.tokenId, 1],
       address: address,
       isImmortal: false
     });
-    const signature = await options.sign?.(signerPayloadJSON);
+    const signature = await options.sign?.(unsignedTxPayload);
 
     if (!signature) throw new Error('Signing failed');
 
     await this.uniqueSdk.extrinsics.submitWaitCompleted({
-      signerPayloadJSON,
+      signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });
   }
 
+  // account
   async withdrawDeposit(address: string, options: TransactionOptions): Promise<void> {
     if (!address || address === '') throw new Error('Address not provided');
     const ethAddress = getEthAccount(address);
@@ -437,7 +446,7 @@ export class UniqueSDKMarketController implements IMarketController {
 
     const abi = (matcherContractInstance.methods).withdrawAllKSM(ethAddress).encodeABI();
 
-    const { signerPayloadJSON } = await this.uniqueSdk.extrinsics.build({
+    const unsignedTxPayload = await this.uniqueSdk.extrinsics.build({
       address,
       section: 'evm',
       method: 'call',
@@ -453,12 +462,12 @@ export class UniqueSDKMarketController implements IMarketController {
         []
       ]
     });
-    const signature = await options.sign?.(signerPayloadJSON);
+    const signature = await options.sign?.(unsignedTxPayload);
 
     if (!signature) throw new Error('Signing failed');
 
     await this.uniqueSdk.extrinsics.submitWaitCompleted({
-      signerPayloadJSON,
+      signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });
   }

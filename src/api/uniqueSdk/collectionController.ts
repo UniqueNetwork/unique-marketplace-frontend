@@ -1,24 +1,22 @@
-import { ICollectionController, TransactionOptions } from '../chainApi/types';
-import { NFTCollection, NFTToken, TokenId } from '../chainApi/unique/types';
 import { Sdk } from '@unique-nft/sdk';
 import '@unique-nft/sdk/tokens';
+import { ICollectionController, TransactionOptions, NFTCollection, NFTToken } from './types';
 import { Settings } from '../restApi/settings/types';
 
 export class UniqueSDKCollectionController implements ICollectionController<NFTCollection, NFTToken> {
   private sdk: Sdk;
-  private settings;
+  private collectionIds: number[];
   constructor(sdk: Sdk, settings: Settings) {
     this.sdk = sdk;
-    this.settings = settings;
+    this.collectionIds = settings.blockchain.unique.collectionIds;
   }
 
   async confirmSponsorship(collectionId: number, options: TransactionOptions): Promise<void> {
-    const tx = await this.sdk.sponsorhip.confirmSponsorship(collectionId, options.signer);
-    const { signerPayloadJSON } = tx;
-    const signature = await options.signPayloadJSON?.(tx.signerPayloadJSON);
+    const unsignedTxPayload = await this.sdk.sponsorhip.confirmSponsorship(collectionId, options.signer);
+    const signature = await options.sign?.(unsignedTxPayload);
     if (!signature) throw new Error('Signing failed');
     await this.sdk.extrinsics.submitWaitCompleted({
-      signerPayloadJSON,
+      signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });
   }
@@ -42,49 +40,37 @@ export class UniqueSDKCollectionController implements ICollectionController<NFTC
     };
   }
 
-  // TODO: unused method
-  getCollections(): Promise<NFTCollection[]> {
-    return Promise.resolve([]);
-  }
-
   async getFeaturedCollections(): Promise<NFTCollection[]> {
     const collections: Array<NFTCollection> = [];
-    const { collectionIds } = this.settings.blockchain.unique;
-    for (let i = 0; i < collectionIds.length; i++) {
-      const collectionInf = await this.getCollection(collectionIds[i]);
+    for (let i = 0; i < this.collectionIds.length; i++) {
+      const collectionInf = await this.getCollection(this.collectionIds[i]);
 
-      if (collectionInf && collectionInf.owner && collectionInf.owner.toString() !== '5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM' && !collections.find((collection) => collection.id === collectionIds[i])) {
-        collections.push({ ...collectionInf, id: collectionIds[i] });
+      if (collectionInf &&
+        collectionInf.owner &&
+        collectionInf.owner.toString() !== '5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM' &&
+        !collections.find((collection) => collection.id === this.collectionIds[i])) {
+        collections.push({ ...collectionInf, id: this.collectionIds[i] });
       }
     }
     return collections;
   }
 
-  // TODO: unused method
-  getTokensOfCollection(collectionId: number, ownerId: string): Promise<TokenId[]> {
-    return Promise.resolve([]);
-  }
-
   async removeCollectionSponsor(collectionId: number, options: TransactionOptions): Promise<void> {
-    const tx = await this.sdk.sponsorhip.removeCollectionSponsor(collectionId, options.signer);
-    const { signerPayloadJSON } = tx;
-    const signature = await options.signPayloadJSON?.(tx.signerPayloadJSON);
+    const unsignedTxPayload = await this.sdk.sponsorhip.removeCollectionSponsor(collectionId, options.signer);
+    const signature = await options.sign?.(unsignedTxPayload);
     if (!signature) throw new Error('Signing failed');
-    // @ts-ignore
     await this.sdk.extrinsics.submitWaitCompleted({
-      signerPayloadJSON,
+      signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });
   }
 
   async setCollectionSponsor(collectionId: number, sponsorAddress: string, options: TransactionOptions): Promise<void> {
-    const tx = await this.sdk.sponsorhip.setCollectionSponsor(collectionId, sponsorAddress, options.signer);
-    const { signerPayloadJSON } = tx;
-    const signature = await options.signPayloadJSON?.(tx.signerPayloadJSON);
+    const unsignedTxPayload = await this.sdk.sponsorhip.setCollectionSponsor(collectionId, sponsorAddress, options.signer);
+    const signature = await options.sign?.(unsignedTxPayload);
     if (!signature) throw new Error('Signing failed');
-    // @ts-ignore
     await this.sdk.extrinsics.submitWaitCompleted({
-      signerPayloadJSON,
+      signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });
   }

@@ -29,8 +29,8 @@ export const WalletManager: FC = () => {
   const { chainData } = useApi();
   const { info } = useNotifications();
   const formatAddress = useCallback((address: string) => {
-    return toChainFormatAddress(address, chainData?.properties.ss58Format || 0);
-  }, [chainData?.properties.ss58Format]);
+    return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
+  }, [chainData?.SS58Prefix]);
 
   const widgetAccounts = useMemo(() => accounts.map((account) => (
     { name: account.meta.name, ...account, address: formatAddress(account.address), substrateAddress: account?.address })
@@ -63,8 +63,8 @@ export const WalletManager: FC = () => {
   }, [navigate]);
 
   const currentBalance: BalanceOption = useMemo(() => {
-    return { value: selectedAccount?.balance?.KSM?.toString() || '0', chain: chainData?.systemChain || '' };
-  }, [selectedAccount, chainData?.systemChain]);
+    return { value: selectedAccount?.balance?.KSM?.toString() || '0', chain: chainData?.token || '' };
+  }, [selectedAccount, chainData?.token]);
 
   const closeModal = useCallback(() => {
     setIsGetKsmOpened(false);

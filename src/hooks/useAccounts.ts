@@ -8,10 +8,10 @@ import { useApi } from './useApi';
 import AccountContext, { Account, AccountSigner } from '../account/AccountContext';
 import { getSuri, PairType } from '../utils/seedUtils';
 import { TTransaction } from '../api/chainApi/types';
-import { SignerPayloadJSON } from '@polkadot/types/types';
+import { UnsignedTxPayload } from '@unique-nft/sdk/types';
 
 export const useAccounts = () => {
-  const { rawRpcApi } = useApi();
+  const { rawRpcApi, uniqueSdk } = useApi();
   const {
     accounts,
     selectedAccount,
@@ -101,7 +101,7 @@ export const useAccounts = () => {
 
   const signPayloadJSON = useCallback(
     async (
-      signerPayloadJSON: SignerPayloadJSON,
+      { signerPayloadJSON, signerPayloadHex }: UnsignedTxPayload,
       account?: Account | string
     ): Promise<`0x${string}` | null> => {
       let _account = account || selectedAccount;
@@ -113,8 +113,10 @@ export const useAccounts = () => {
       }
       if (_account.signerType === AccountSigner.local) {
         const pair = await showSignDialog(_account);
-        if (pair) {
-          return u8aToHex(pair.sign(stringToHex(JSON.stringify(signerPayloadJSON))));
+        if (pair && uniqueSdk) {
+          return u8aToHex(pair.sign(signerPayloadHex, {
+            withType: true
+          }));
         }
       } else {
         const injector = await web3FromSource(_account.meta.source);
@@ -140,7 +142,7 @@ export const useAccounts = () => {
       }
       return null;
     },
-    [selectedAccount]
+    [selectedAccount, uniqueSdk]
   );
 
   const deleteLocalAccount = useCallback((address: string) => {

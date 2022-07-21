@@ -12,7 +12,7 @@ export const useAcceptSponsorshipStages = (collectionId: number) => {
     title: 'Accepting sponsorship',
     description: '',
     status: StageStatus.default,
-    action: (params) => collectionApi?.confirmSponsorship(collectionId, { ...params.options, signer: selectedAccount?.address, signPayloadJSON })
+    action: (params) => collectionApi?.confirmSponsorship(collectionId, { ...params.options, signer: selectedAccount?.address })
   }], [collectionApi, selectedAccount]);
 
   const { stages, error, status, initiate } = useStages<null>(acceptSponsorshipStages, signPayloadJSON);

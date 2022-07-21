@@ -3,11 +3,11 @@ import { useCallback, useMemo } from 'react';
 import { InternalStage, StageStatus } from '../../types/StagesTypes';
 import { useAccounts } from '../useAccounts';
 import useStages from '../useStages';
-import { TWithdrawBid } from '../../api/restApi/auction/types';
+import { TWithdrawBid } from 'api/restApi/auction/types';
 import { BN } from '@polkadot/util';
-import { withdrawChooseBids } from '../../api/restApi/auction/auction';
+import { withdrawChooseBids } from 'api/restApi/auction/auction';
 import { formatKusamaBalance } from '../../utils/textUtils';
-import { SignerPayloadJSON } from '@polkadot/types/types';
+import { UnsignedTxPayload } from '@unique-nft/sdk/types';
 
 const tokenSymbol = 'KSM';
 
@@ -59,8 +59,8 @@ export const useWithdrawDepositStages = (accountAddress: string, bids: TWithdraw
     ...withdrawBidsStage
   ], [withdrawSponsorshipFeeStage, withdrawBidsStage]);
 
-  const sign = useCallback(async (signerPayloadJSON: SignerPayloadJSON) => {
-    return await signPayloadJSON(signerPayloadJSON, account);
+  const sign = useCallback(async (unsignedTxPayload: UnsignedTxPayload) => {
+    return await signPayloadJSON(unsignedTxPayload, account);
   }, [signPayloadJSON, account]);
 
   const { stages, error, status, initiate: initiateStages } = useStages<TWithdrawDeposit>(withdrawDepositStages, sign);

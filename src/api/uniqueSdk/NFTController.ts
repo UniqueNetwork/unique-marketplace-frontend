@@ -1,17 +1,16 @@
-import { INFTController } from '../chainApi/types';
-import { NFTCollection, NFTToken, TokenId } from '../chainApi/unique/types';
 import { Sdk } from '@unique-nft/sdk';
+import { INFTController, NFTCollection, NFTToken, TokenId, UniqueDecoratedRpc } from './types';
 import { Settings } from '../restApi/settings/types';
 import { getEthAccount, normalizeAccountId } from './utils/addressUtils';
 import { checkTokenIsAllowed, filterAllowedTokens } from './utils/checkTokenIsAllowed';
 
 export class UniqueSDKNFTController implements INFTController<NFTCollection, NFTToken> {
   private sdk: Sdk;
-  private settings;
-  private allowedTokens: Record<number, string>;
+  private readonly collectionIds: number[];
+  private readonly allowedTokens: Record<number, string>;
   constructor(sdk: Sdk, settings: Settings) {
     this.sdk = sdk;
-    this.settings = settings;
+    this.collectionIds = settings.blockchain.unique.collectionIds;
     this.allowedTokens = settings.blockchain?.unique?.allowedTokens.reduce((acc, item) => ({ ...acc, [item.collection]: item.tokens }), {}) || {};
   }
 
@@ -20,15 +19,14 @@ export class UniqueSDKNFTController implements INFTController<NFTCollection, NFT
       return [];
     }
     const tokens: NFTToken[] = [];
+    const { unique } = (this.sdk?.api.rpc as UniqueDecoratedRpc);
 
-    for (const collectionId of this.settings.blockchain.unique.collectionIds) {
+    for (const collectionId of this.collectionIds) {
       try {
         const tokensIds =
-          // @ts-ignore
-          await this.sdk?.api.rpc.unique?.accountTokens(collectionId, normalizeAccountId(account)) as TokenId[];
+          await unique?.accountTokens(collectionId, normalizeAccountId(account)) || [];
         const tokensIdsOnEth =
-          // @ts-ignore
-          await this.sdk?.api.rpc.unique?.accountTokens(collectionId, normalizeAccountId(getEthAccount(account))) as TokenId[];
+          await unique?.accountTokens(collectionId, normalizeAccountId(getEthAccount(account))) || [];
 
         const currentAllowedTokens = this.allowedTokens[collectionId];
         const allowedIds = filterAllowedTokens([...tokensIds, ...tokensIdsOnEth], currentAllowedTokens);
@@ -41,7 +39,6 @@ export class UniqueSDKNFTController implements INFTController<NFTCollection, NFT
         console.log(`Wrong ID of collection ${collectionId}`, e);
       }
     }
-
     return tokens;
   }
 

@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { useApi } from '../useApi';
 import { TAuctionProps } from '../../pages/Token/Modals/types';
 import { startAuction } from '../../api/restApi/auction/auction';
-import { TTransaction } from '../../api/chainApi/types';
 import { InternalStage, StageStatus } from '../../types/StagesTypes';
 import { fromStringToBnString } from '../../utils/bigNum';
 import useStages from '../useStages';
