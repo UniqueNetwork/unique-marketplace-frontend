@@ -56,6 +56,7 @@ const ApiWrapper = ({ children, rpcClient = rpc }: ChainProviderProps) => {
       chainData,
       rawRpcApi: rpcClient.rawUniqRpcApi,
       rawKusamaRpcApi: rpcClient.rawKusamaRpcApi,
+      rawKusamaSdk: kusamaSdkRef.current,
       rpcClient,
       settings
     }),

@@ -11,7 +11,7 @@ import { TTransaction } from '../api/chainApi/types';
 import { UnsignedTxPayload } from '@unique-nft/sdk/types';
 
 export const useAccounts = () => {
-  const { rawRpcApi, uniqueSdk } = useApi();
+  const { rawRpcApi, api, uniqueSdk, rawKusamaSdk } = useApi();
   const {
     accounts,
     selectedAccount,
@@ -28,23 +28,23 @@ export const useAccounts = () => {
   useEffect(() => {
     const updatedSelectedAccount = accounts.find((account) => account.address === selectedAccount?.address);
     if (updatedSelectedAccount) setSelectedAccount(updatedSelectedAccount);
-  }, [accounts, setSelectedAccount, selectedAccount, rawRpcApi]);
+  }, [accounts, setSelectedAccount, selectedAccount, api]);
 
   const addLocalAccount = useCallback((seed: string, derivePath: string, name: string, password: string, pairType: PairType) => {
-    const options = { genesisHash: rawRpcApi?.genesisHash.toString(), isHardware: false, name: name.trim(), tags: [] };
+    const options = { genesisHash: rawKusamaSdk?.api.genesisHash.toString(), isHardware: false, name: name.trim(), tags: [] };
     keyring.addUri(getSuri(seed, derivePath, pairType), password, options, pairType as KeypairType);
-  }, [rawRpcApi]);
+  }, [rawKusamaSdk]);
 
   const addAccountViaQR = useCallback((scanned: { name: string, isAddress: boolean, content: string, password: string, genesisHash: string}) => {
     const { name, isAddress, content, password, genesisHash } = scanned;
 
     const meta = {
-      genesisHash: genesisHash || rawRpcApi?.genesisHash.toHex(),
+      genesisHash: genesisHash || rawKusamaSdk?.api.genesisHash.toHex(),
       name: name?.trim()
     };
     if (isAddress) keyring.addExternal(content, meta);
     else keyring.addUri(content, password, meta, 'sr25519');
-  }, [rawRpcApi]);
+  }, [rawKusamaSdk]);
 
   const unlockLocalAccount = useCallback((password: string, account?: Account) => {
     const _account = account || selectedAccount;

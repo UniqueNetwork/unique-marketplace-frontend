@@ -13,13 +13,15 @@ import { getWithdrawBids } from '../api/restApi/auction/auction';
 
 export const DefaultAccountKey = 'unique_market_account_address';
 
+type TQueryAccountResponse = { data: { free: BN } };
+
 const AccountWrapper: FC = ({ children }) => {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isLoadingDeposits, setIsLoadingDeposits] = useState<boolean>(false);
   const [fetchAccountsError, setFetchAccountsError] = useState<string | undefined>();
   const [selectedAccount, setSelectedAccount] = useState<Account>();
-  const { rpcClient, api, rawKusamaRpcApi } = useApi();
+  const { rpcClient, api, rawKusamaRpcApi, rawKusamaSdk } = useApi();
 
   const changeAccount = useCallback((account: Account) => {
     localStorage.setItem(DefaultAccountKey, account.address);
@@ -81,9 +83,10 @@ const AccountWrapper: FC = ({ children }) => {
   }, [getExtensionAccounts, getLocalAccounts]);
 
   const getAccountBalance = useCallback(async (account: Account) => {
-    const balances = await rpcClient?.rawKusamaRpcApi?.derive.balances?.all(account.address);
-    return balances?.freeBalance || new BN(0);
-  }, [rpcClient]);
+    // const balances = await rpcClient?.rawKusamaRpcApi?.derive.balances?.all(account.address);
+    const balances = await api?.market?.getAccountBalance(account.address);
+    return new BN(balances?.freeBalance?.raw || 0);
+  }, [api]);
 
   const getAccountsBalances = useCallback(async (accounts: Account[]) => Promise.all(accounts.map(async (account: Account) => ({
     ...account,
@@ -102,10 +105,10 @@ const AccountWrapper: FC = ({ children }) => {
 
   const unsubscribesBalancesChanges = useRef<Record<string, Codec>>({});
   const subscribeBalancesChanges = useCallback(async (accounts: Account[]) => {
-    if (!rawKusamaRpcApi) return;
+    if (!rawKusamaSdk?.api) return;
 
     const unsubscribes = await Promise.all(accounts.map(async (account) => {
-      const unsubscribe = await rawKusamaRpcApi.query.system.account(account.address, ({ data: { free } }: { data: { free: BN } }) => {
+      const unsubscribe = await rawKusamaSdk.api.query.system.account(account.address, ({ data: { free } }: TQueryAccountResponse) => {
         if (!account.balance?.KSM || !free.sub(account.balance.KSM).isZero()) {
           setAccounts((accounts) => accounts.map((_account: Account) => ({
             ..._account,
@@ -117,10 +120,11 @@ const AccountWrapper: FC = ({ children }) => {
     }));
 
     unsubscribesBalancesChanges.current = unsubscribes.reduce<Record<string, Codec>>((acc, item) => ({ ...acc, ...item }), {});
-  }, [rawKusamaRpcApi, setAccounts]);
+  }, [rawKusamaSdk, setAccounts]);
 
   const fetchAccounts = useCallback(async () => {
-    if (!rpcClient?.isKusamaApiConnected) return;
+    // if (!rpcClient?.isKusamaApiConnected) return;
+    if (!rawKusamaSdk) return;
     setIsLoading(true);
 
     const allAccounts = await getAccounts();
@@ -145,7 +149,7 @@ const AccountWrapper: FC = ({ children }) => {
       setFetchAccountsError('No accounts in extension');
     }
     setIsLoading(false);
-  }, [rpcClient?.isKusamaApiConnected, getAccountsBalances, getAccountsWhiteListStatus]);
+  }, [rawKusamaSdk, getAccountsBalances, getAccountsWhiteListStatus]);
 
   const fetchAccountsWithDeposits = useCallback(async () => {
     setIsLoadingDeposits(true);
@@ -160,23 +164,6 @@ const AccountWrapper: FC = ({ children }) => {
     setIsLoadingDeposits(false);
     return _accounts;
   }, [accounts]);
-
-  // useEffect(() => {
-  //   let unsubscribe: Unsubcall;
-  //   (async () => {
-  //     unsubscribe = await web3AccountsSubscribe(async (injectedAccounts) => {
-  //       injectedAccounts.map((injectedAccounts) => {
-  //         setAccounts((accounts) => [...injectedAccounts, accounts.filter((account) => account.t);
-  //
-  //         await subscribeBalancesChanges(accountsWithWhiteListStatus);
-  //       });
-  //     });
-  //   })();
-  //
-  //   return () => {
-  //     unsubscribe && unsubscribe();
-  //   };
-  // }, []);
 
   const value = useMemo(() => ({
     isLoading,

@@ -3,8 +3,10 @@ import { ApiPromise } from '@polkadot/api';
 import { AddressOrPair, SubmittableExtrinsic } from '@polkadot/api/types';
 import { Settings } from '../restApi/settings/types';
 import { BN } from '@polkadot/util';
+import { TokenId } from './unique/types';
 import { Account } from '../../account/AccountContext';
 import { SignerPayloadJSON } from '@polkadot/types/types/extrinsic';
+import { AllBalances } from '@unique-nft/sdk/types';
 
 export interface IRpc {
   rpcEndpoint: string
@@ -81,6 +83,9 @@ export interface IMarketController {
   transferBidBalance: (from: string, amount: string, options: TransactionOptions) => Promise<void>
   transferBalance: (from: string, to: string, amount: string, options: TransactionOptions) => Promise<void>
   getKusamaFee: (sender: string, recipient?: string, value?: BN) => Promise<string | null>
+  getAccountBalance: (address: string) => Promise<AllBalances>
+  isUniqueSdkConnected: () => boolean
+  isKusamaSdkConnected: () => boolean
 }
 
 export type Chain = {
