@@ -40,6 +40,7 @@ export const Table: FC<TableProps> = ({ columns, data, loading, onSort, classNam
           data={!loading ? data : []}
           loading={loading}
           className={className}
+          emptyIconProps={emptyIconProps}
         />
       )}
     </TableWrapper>
