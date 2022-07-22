@@ -12,6 +12,7 @@ import { repeatCheckForTransactionFinish } from './utils/repeatCheckTransaction'
 import { compareEncodedAddresses, isTokenOwner, normalizeAccountId } from '../chainApi/utils/addressUtils';
 import { TokenIdArguments } from '@unique-nft/sdk/tokens';
 import '@unique-nft/sdk/balance';
+import { AllBalances } from '@unique-nft/sdk/types';
 
 export class UniqueSDKMarketController implements IMarketController {
   private uniqueSdk: Sdk;
@@ -45,6 +46,14 @@ export class UniqueSDKMarketController implements IMarketController {
 
     const web3 = new Web3(provider);
     this.web3Instance = web3;
+  }
+
+  isUniqueSdkConnected(): boolean {
+    return this.uniqueSdk.connection.isReady;
+  }
+
+  isKusamaSdkConnected(): boolean {
+    return this.kusamaSdk.connection.isReady;
   }
 
   private getMatcherContractInstance(ethAddress: string): { methods: MarketplaceAbiMethods } {
@@ -461,5 +470,9 @@ export class UniqueSDKMarketController implements IMarketController {
       signerPayloadJSON,
       signature
     });
+  }
+
+  async getAccountBalance(address: string): Promise<AllBalances> {
+    return await this.kusamaSdk.balance.get({ address });
   }
 }

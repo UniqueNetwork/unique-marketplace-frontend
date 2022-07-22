@@ -27,6 +27,7 @@ export type ApiContextProps = {
   api: Api | undefined
   chainData?: ChainData
   settings?: Settings
+  rawKusamaSdk: Sdk | undefined
 }
 
 const ApiContext: Context<ApiContextProps> = createContext({} as unknown as ApiContextProps);
