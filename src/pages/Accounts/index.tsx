@@ -167,8 +167,8 @@ export const AccountsPage = () => {
   }, [isLoading]);
 
   const formatAddress = useCallback((address: string) => {
-    return toChainFormatAddress(address, chainData?.properties.ss58Format || 0);
-  }, [chainData?.properties.ss58Format]);
+    return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
+  }, [chainData?.SS58Prefix]);
 
   const onCreateAccountClick = useCallback(() => {
     setCurrentModal(AccountModal.create);

@@ -7,10 +7,7 @@ import Web3 from 'web3';
 
 import { PalletEvmAccountBasicCrossAccountIdRepr } from '@unique-nft/unique-mainnet-types';
 import { subToEthLowercase } from './decoder';
-import { CrossAccountId } from '../../chainApi/unique/types';
-
-// TODO: uncomment this after remove ../chainApi/..
-// keyring.loadAll({});
+import { CrossAccountId } from '../types';
 
 export const compareEncodedAddresses = (subAddress1: string, subAddress2: string): boolean => {
   if (!subAddress1 || !subAddress2) return false;

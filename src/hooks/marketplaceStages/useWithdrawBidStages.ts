@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { withdrawBid } from '../../api/restApi/auction/auction';
+import { withdrawBid } from 'api/restApi/auction/auction';
 import { useAccounts } from '../useAccounts';
 import { InternalStage, StageStatus } from '../../types/StagesTypes';
 import useStages from '../useStages';

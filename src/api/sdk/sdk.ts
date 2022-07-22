@@ -15,6 +15,6 @@ declare module '@unique-nft/sdk' {
   }
 }
 
-export const SDKFactory = async (chainWsUrl: string) => {
+export const SDKFactory = async (chainWsUrl = '') => {
   return await Sdk.create({ chainWsUrl });
 };

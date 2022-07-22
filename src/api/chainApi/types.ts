@@ -41,9 +41,7 @@ export interface INFTController<Collection, Token> {
 
 export interface ICollectionController<Collection, Token> {
   getCollection(collectionId: number): Promise<Collection | null>
-  getCollections(): Promise<Collection[]>
   getFeaturedCollections(): Promise<Collection[]>
-  getTokensOfCollection(collectionId: number, ownerId: string): Promise<TokenId[]>
   setCollectionSponsor(collectionId: number, sponsorAddress: string, options: TransactionOptions): Promise<void>
   confirmSponsorship(collectionId: number, options: TransactionOptions): Promise<void>
   removeCollectionSponsor(collectionId: number, options: TransactionOptions): Promise<void>
@@ -60,9 +58,8 @@ export type TransactionOptions = {
   signer?: string
   sign: (signerPayloadJSON: SignerPayloadJSON) => Promise<`0x${string}` | null>
   signMessage?: (message: string) => Promise<`0x${string}` | null>
-  signPayloadJSON?: (json: SignerPayloadJSON) => Promise<`0x${string}` | null>
   // if not provided, signed.send() will be called instead
-  send?: (signedTx: TTransaction | string) => Promise<any | void>
+  send?: (signature: string) => Promise<any | void>
 };
 
 export type TSignMessage = { (message: string, account?: string | Account | undefined): Promise<string>; (arg0: string): any; }
@@ -70,17 +67,17 @@ export type TSignMessage = { (message: string, account?: string | Account | unde
 export interface IMarketController {
   kusamaDecimals: number
   // substrate address
-  addToWhiteList: (account: string, options: TransactionOptions, signMessage: TSignMessage) => Promise<void>
-  checkWhiteListed: (account: string) => Promise<boolean>
-  lockNftForSale: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
-  sendNftToSmartContract: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
-  setForFixPriceSale: (account: string, collectionId: string, tokenId: string, price: string, options: TransactionOptions) => Promise<void>
-  cancelSell: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
-  unlockNft: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
-  getUserDeposit: (account: string) => Promise<BN>
-  addDeposit: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
-  withdrawDeposit: (account: string, options: TransactionOptions) => Promise<void>
-  buyToken: (account: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
+  addToWhiteList: (address: string, options: TransactionOptions, signMessage: TSignMessage) => Promise<void>
+  checkWhiteListed: (address: string) => Promise<boolean>
+  lockNftForSale: (address: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
+  sendNftToSmartContract: (address: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
+  setForFixPriceSale: (address: string, collectionId: string, tokenId: string, price: string, options: TransactionOptions) => Promise<void>
+  cancelSell: (address: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
+  unlockNft: (address: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
+  getUserDeposit: (address: string) => Promise<BN>
+  addDeposit: (address: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
+  withdrawDeposit: (address: string, options: TransactionOptions) => Promise<void>
+  buyToken: (address: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
   transferToken: (from: string, to: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
   transferToAuction: (owner: string, collectionId: string, tokenId: string, options: TransactionOptions) => Promise<void>
   transferBidBalance: (from: string, amount: string, options: TransactionOptions) => Promise<void>

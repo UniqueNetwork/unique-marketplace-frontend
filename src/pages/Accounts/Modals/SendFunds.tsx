@@ -95,8 +95,8 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   }, [api?.market, recipientAddress, selectedAccount, amount]);
 
   const formatAddress = useCallback((address: string) => {
-    return toChainFormatAddress(address, chainData?.properties.ss58Format || 0);
-  }, [chainData?.properties.ss58Format]);
+    return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
+  }, [chainData?.SS58Prefix]);
 
   const accountsWithQuartzAdresses = useMemo(() => (
     accounts.map((account) => ({ ...account, quartzAddress: formatAddress(account.address) }))

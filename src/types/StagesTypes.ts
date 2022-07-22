@@ -1,5 +1,5 @@
-import { TransactionOptions, TTransaction } from '../api/chainApi/types';
-import { SignerPayloadJSON } from '@polkadot/types/types';
+import { TransactionOptions, TTransaction } from '../api/uniqueSdk/types';
+import { UnsignedTxPayload } from '@unique-nft/sdk/types';
 
 export enum StageStatus {
   default = 'Default',
@@ -40,4 +40,4 @@ export interface InternalStage<T> extends Stage {
 }
 
 export type ActionFunction<T> = (action: TInternalStageAction<T>, txParams: T, options: TransactionOptions) => Promise<TTransaction | void>;
-export type SignFunction = (signerPayloadJSON: SignerPayloadJSON) => Promise<`0x${string}` | null>;
+export type SignFunction = (unsignedTxPayload: UnsignedTxPayload) => Promise<`0x${string}` | null>;

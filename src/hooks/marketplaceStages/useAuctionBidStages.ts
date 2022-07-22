@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { useApi } from '../useApi';
-import { TTransaction } from '../../api/chainApi/types';
 import { placeBid } from '../../api/restApi/auction/auction';
 import { TAuctionBidProps } from '../../pages/Token/Modals/types';
 import { InternalStage, StageStatus } from '../../types/StagesTypes';
