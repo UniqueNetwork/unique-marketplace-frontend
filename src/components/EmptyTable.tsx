@@ -23,6 +23,9 @@ const NoItemsWrapper = styled.div`
   height: 640px;
   align-items: center;
   justify-content: center;
+  @media (max-width: 567px) {
+    height: 340px;
+  }
 `;
 
 export default EmptyTable;

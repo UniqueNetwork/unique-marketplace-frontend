@@ -32,7 +32,6 @@ export const Table: FC<TableProps> = ({ columns, data, loading, onSort, classNam
           data={loading ? Array.from({ length: 20 }).map(getSkeletonItem) : data || []}
           onSort={onSort}
         />
-        {!loading && !data?.length && <EmptyTable iconProps={emptyIconProps} />}
       </>)}
       {deviceSize <= DeviceSize.sm && (
         <MobileTable
@@ -40,6 +39,7 @@ export const Table: FC<TableProps> = ({ columns, data, loading, onSort, classNam
           data={!loading ? data : []}
           loading={loading}
           className={className}
+          emptyIconProps={emptyIconProps}
         />
       )}
     </TableWrapper>
