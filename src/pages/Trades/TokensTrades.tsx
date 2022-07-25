@@ -43,19 +43,9 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
     });
   }, [currentTab, selectedAccount?.address, isLoadingAccounts]);
 
-  const onSearch = useCallback((value: string) => {
-    setSearchValue(value);
-    fetch({
-      page: 1,
-      pageSize,
-      sort: sortString,
-      searchText: value,
-      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
-    });
-  }, [selectedAccount?.address, currentTab, sortString, pageSize]);
-
-  const debouncedFetchTrades = useCallback(() => {
+  const debouncedSearch = useCallback(() => {
     return debounce(function (...args: string[]) {
+      setSearchValue(args[0]);
       fetch({
         page: 1,
         pageSize,
@@ -136,8 +126,8 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
       <StyledSearchField
         placeholder='NFT / collection'
         searchValue={searchValue}
-        onSearch={onSearch}
-        onSearchStringChange={debouncedFetchTrades()}
+        onSearch={debouncedSearch()}
+        onSearchStringChange={debouncedSearch()}
       />
       <StyledTable
         onSort={onSortChange}
