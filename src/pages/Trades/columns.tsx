@@ -23,10 +23,10 @@ const getTradesColumns = ({ deviceSize, onShowTradesDetailsModal }: ColumnProps)
     title: 'NFT',
     width: '11.84%',
     isSortable: true,
-    render(tokenDescription: TokenDescription, { collectionId, tokenId }: Trade): React.ReactNode {
+    render(tokenId: number, { collectionId, tokenDescription }: Trade): React.ReactNode {
       return <TokenComponent {...{ collectionId, tokenId, tokenDescription }} />;
     },
-    field: 'tokenDescription'
+    field: 'tokenId'
   },
   {
     title: 'Collection',
@@ -81,8 +81,8 @@ const getTradesColumns = ({ deviceSize, onShowTradesDetailsModal }: ColumnProps)
   {
     title: '',
     width: '5.74%',
-    render: (data: string, row: Trade) => <ShowTradesDetailsButton status={data} trade={row} onShowTradesDetailsModal={onShowTradesDetailsModal} />,
-    field: 'status'
+    render: (data, row: Trade) => <ShowTradesDetailsButton status={row.status} trade={row} onShowTradesDetailsModal={onShowTradesDetailsModal} />,
+    field: 'modalButton'
   }
 ];
 
