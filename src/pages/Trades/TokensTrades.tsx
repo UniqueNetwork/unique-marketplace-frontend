@@ -14,6 +14,7 @@ import NoTradesIcon from '../../static/icons/no-trades.svg';
 import useDeviceSize from '../../hooks/useDeviceSize';
 import TokenTradesDetailsModal from './TradesDetailsModal';
 import { Trade } from '../../api/restApi/trades/types';
+import { debounce } from 'utils/helpers';
 
 type TokensTradesPage = {
   currentTab: TradesTabs
@@ -42,15 +43,17 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
     });
   }, [currentTab, selectedAccount?.address, isLoadingAccounts]);
 
-  const onSearch = useCallback((value: string) => {
-    setSearchValue(value);
-    fetch({
-      page: 1,
-      pageSize,
-      sort: sortString,
-      searchText: value,
-      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
-    });
+  const debouncedSearch = useCallback(() => {
+    return debounce(function (...args: string[]) {
+      setSearchValue(args[0]);
+      fetch({
+        page: 1,
+        pageSize,
+        sort: sortString,
+        searchText: args[0],
+        seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
+      });
+    }, 300);
   }, [selectedAccount?.address, currentTab, sortString, pageSize]);
 
   const onPageChange = useCallback((newPage: number) => {
@@ -121,9 +124,10 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
   return (<PagePaper>
     <TradesPageWrapper>
       <StyledSearchField
-        placeholder='Collection / token'
+        placeholder='NFT / collection'
         searchValue={searchValue}
-        onSearch={onSearch}
+        onSearch={debouncedSearch()}
+        onSearchStringChange={debouncedSearch()}
       />
       <StyledTable
         onSort={onSortChange}
@@ -165,13 +169,22 @@ const TradesPageWrapper = styled.div`
 
 const StyledSearchField = styled(SearchField)`
   margin-bottom: calc(var(--gap) * 2);
+  @media (max-width: 567px) {
+    button {
+      display: none;
+    }
+  }
 `;
 
 const StyledTable = styled(Table)`
   && > div > div:first-child {
-    grid-column: 1 / span 2;
     & > .unique-text {
       display: none;
+    }
+  }
+  @media (max-width: 567px) {
+    & > div {
+      grid-template-columns: 1fr !important;
     }
   }
 `;

@@ -20,20 +20,20 @@ const tokenSymbol = 'KSM';
 const columns = [
   {
     title: 'Bid',
-    width: '33.33%',
+    width: '32%',
     render: (value: string) => <Text color={AdditionalDark}>{`${formatKusamaBalance(value)} ${tokenSymbol}`}</Text>,
     field: 'balance'
   },
   {
     title: 'Time',
-    width: '33.33%',
+    width: '32%',
     isSortable: true,
     render: (time: number) => <TimeCell><Text color={BlueGrey600}>{timestampTableFormat(new Date(time).valueOf())}</Text></TimeCell>,
     field: 'updatedAt'
   },
   {
     title: 'Bidder',
-    width: '33.33%',
+    width: '36%',
     render: (data: string, row: Bid) => <BidderCell><AddressComponent text={data} />{row.isWinner && <Icon size={32} file={Winner}/>}</BidderCell>,
     field: 'bidderAddress'
   }
@@ -55,9 +55,9 @@ const TokenTradesDetailsModal: FC<IConfirmModalProps> = ({ trade, onCancel }) =>
         return (!bid.amount.startsWith('-') && bid.status === 'finished');
       })
       .sort((a, b) => {
-        return a.updatedAt > b.updatedAt ? 1 : -1;
+        return a.updatedAt < b.updatedAt ? 1 : -1;
       });
-      bids[bids.length - 1] = { ...bids[bids.length - 1], isWinner: true };
+      bids[0] = { ...bids[0], isWinner: true };
       setFilteredBids(bids);
     }
   }, [tradeDetails]);
@@ -79,7 +79,15 @@ const TokenTradesDetailsModal: FC<IConfirmModalProps> = ({ trade, onCancel }) =>
   );
 };
 
-const Content = styled.div``;
+const Content = styled.div`
+  .unique-table-data {
+    max-height: 400px;
+    overflow: auto;
+    @media (max-width: 640px) {
+      max-height: unset;
+    }
+  }
+`;
 
 const TableStyled = styled(Table)`
   @media (max-width: 640px) {

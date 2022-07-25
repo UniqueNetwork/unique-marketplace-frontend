@@ -7,6 +7,7 @@ export const MobileTableRow = styled.div`
   grid-row-gap: var(--gap);
   grid-column-gap: calc(var(--gap) / 2);
   padding: var(--gap) 0;
+  position: relative;
 
   & > div {
     display: flex;
