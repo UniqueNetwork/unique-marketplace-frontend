@@ -11,12 +11,14 @@ interface TextInputProps {
   className?: string
   iconLeft?: IconProps
   errorText?: string
+  allowSpaces?: boolean
 }
 
-export const TextInput: FC<TextInputProps> = ({ value, onChange, placeholder, label, className, iconLeft, errorText }) => {
+export const TextInput: FC<TextInputProps> = ({ value, onChange, placeholder, label, className, iconLeft, errorText, allowSpaces }) => {
   const onChangeInput = useCallback((_value: string) => {
-    onChange(_value.trim());
-  }, [onChange]);
+    if (!allowSpaces) onChange(_value.trim());
+    else onChange(_value);
+  }, [onChange, allowSpaces]);
 
   const onClear = useCallback(() => {
     onChange('');

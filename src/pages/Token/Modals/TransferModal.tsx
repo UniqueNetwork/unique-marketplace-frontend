@@ -104,7 +104,7 @@ const TransferStagesModal: FC<TTokenPageModalBodyProps & TTransfer> = ({ token, 
 };
 
 const InputWrapper = styled(TextInput)`
-  margin-bottom: 32px;
+  margin-bottom: 8px;
   width: 100%;
 
   label {

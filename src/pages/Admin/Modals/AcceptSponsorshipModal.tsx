@@ -54,14 +54,14 @@ export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collecti
       <Row>
         <Text size={'m'}>{`The author of the collection "${collection?.name || collection?.collectionName}" [ID ${collection?.id}] has chosen this address as a sponsor. Do you confirm the choice?`}</Text>
       </Row>
-      <AddressWrapper>
-        {!collectionDetails?.sponsorship?.isConfirmed && collectionDetails?.sponsorship?.address && <AccountCard
+      {collectionDetails?.sponsorship?.isConfirmed && collectionDetails?.sponsorship?.address && <AddressWrapper>
+        <AccountCard
           accountName={''}
           accountAddress={collectionDetails?.sponsorship?.address || ''}
           canCopy
           hideName
-        />}
-      </AddressWrapper>
+        />
+      </AddressWrapper>}
       <WarningBlock>
         {`A fee of ~ ${kusamaFee} ${tokenSymbol} can be applied to the transaction if you accept this sponsor`}
       </WarningBlock>

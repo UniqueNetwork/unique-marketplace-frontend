@@ -49,11 +49,18 @@ const getAccountsColumns = ({
     onShowGetKsmModal
   }: AccountsColumnsProps): TableColumnProps[] => [
   {
-    title: (<>Accounts<IconWithHint placement={'right-start'}>
-      <>Substrate account addresses (Kusama, Quartz, Polkadot, Unique, etc.) may be represented by a different address
-        character sequence, but they can be converted between each other because they share the same public key. You
-        can see all transformations for any given address on <StyledLink href='https://quartz.subscan.io/' target='_blank' rel='noreferrer'>Subscan</StyledLink>.</>
-    </IconWithHint></>),
+    title: (
+      <>
+        <p>Account</p>
+        {!isSmallDevice &&
+          <IconWithHint placement={'right-start'}>
+            <>Substrate account addresses (Kusama, Quartz, Polkadot, Unique, etc.) may be represented by a different address
+              character sequence, but they can be converted between each other because they share the same public key. You
+              can see all transformations for any given address on <StyledLink href='https://quartz.subscan.io/' target='_blank' rel='noreferrer'>Subscan</StyledLink>.</>
+          </IconWithHint>
+        }
+      </>
+    ),
     width: '25%',
     field: 'accountInfo',
     render(accountInfo: AccountInfo) {
@@ -354,6 +361,19 @@ const AccountPageWrapper = styled.div`
   width: 100%;
   .unique-table-data-row {
     height: fit-content;
+  }
+
+  @media (max-width: 640px) {
+    .unique-modal-wrapper .unique-modal {
+      width: calc(520px - var(--prop-gap) * 3);
+    }
+  }
+
+  @media (max-width: 567px) {
+    .unique-modal-wrapper .unique-modal {
+      width: calc(288px - var(--prop-gap) * 2);
+      padding: 24px 16px;
+    }
   }
 `;
 
