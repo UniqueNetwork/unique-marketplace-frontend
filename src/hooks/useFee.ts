@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAccounts } from './useAccounts';
 import { useApi } from './useApi';
-import { formatKusamaBalance } from '../utils/textUtils';
+import { formatKusamaBalance } from 'utils/textUtils';
 
 interface UseFeeReturn {
   marketCommission: string,
@@ -20,7 +20,7 @@ export const useFee = (): UseFeeReturn => {
     if (!selectedAccount || !api?.market) return;
     setFetchingKusamaFee(true);
     const fee = await api.market.getKusamaFee(selectedAccount.address);
-    const feeFormatted = formatKusamaBalance(fee.toString());
+    const feeFormatted = formatKusamaBalance(fee?.toString() || '0');
     setKusamaFee(feeFormatted);
     setFetchingKusamaFee(false);
     return feeFormatted;

@@ -7,7 +7,7 @@ import { useAccounts } from '../useAccounts';
 
 export const usePurchaseFixStages = (collectionId: number, tokenId: number) => {
   const { api } = useApi();
-  const { signTx } = useAccounts();
+  const { signPayloadJSON } = useAccounts();
   const marketApi = api?.market;
   const purchaseStages: InternalStage<TPurchaseProps>[] = useMemo(() => [{
     title: 'Place a deposit',
@@ -27,7 +27,7 @@ export const usePurchaseFixStages = (collectionId: number, tokenId: number) => {
     status: StageStatus.default,
     action: (params) => marketApi?.unlockNft(params.txParams.accountAddress, collectionId.toString(), tokenId.toString(), params.options)
   }], [marketApi, collectionId, tokenId]);
-  const { stages, error, status, initiate } = useStages<TPurchaseProps>(purchaseStages, signTx);
+  const { stages, error, status, initiate } = useStages<TPurchaseProps>(purchaseStages, signPayloadJSON);
 
   return {
     stages,

@@ -1,7 +1,4 @@
-import RpcClient from './chainApi/rpcClient';
-import { GqlClient } from './graphQL/gqlClient';
+import { SdkClient } from './sdk/sdkClient';
 
-// TODO remove gqlClient
-export const gqlClient = new GqlClient('');
-
-export const rpcClient = new RpcClient();
+export const uniqueSdkClient = new SdkClient('');
+export const kusamaSdkClient = new SdkClient('');

@@ -1,12 +1,12 @@
 import { useMemo } from 'react';
 
-import { withdrawBid } from '../../api/restApi/auction/auction';
+import { withdrawBid } from 'api/restApi/auction/auction';
 import { useAccounts } from '../useAccounts';
 import { InternalStage, StageStatus } from '../../types/StagesTypes';
 import useStages from '../useStages';
 
 export const useWithdrawBidStages = (collectionId: number, tokenId: number) => {
-  const { selectedAccount, signMessage, signTx } = useAccounts();
+  const { selectedAccount, signMessage, signPayloadJSON } = useAccounts();
   const bidAuctionStages: InternalStage<null>[] = useMemo(() => [
     {
       title: 'Withdraw bid',
@@ -25,7 +25,7 @@ export const useWithdrawBidStages = (collectionId: number, tokenId: number) => {
       }
     }
   ], [collectionId, tokenId]);
-  const { stages, error, status, initiate } = useStages<null>(bidAuctionStages, signTx);
+  const { stages, error, status, initiate } = useStages<null>(bidAuctionStages, signPayloadJSON);
 
   return {
     stages,

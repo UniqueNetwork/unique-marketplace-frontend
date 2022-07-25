@@ -5,11 +5,9 @@ import { IKeyringPair } from '@polkadot/types/types';
 import { keyring } from '@polkadot/ui-keyring';
 import Web3 from 'web3';
 
-import { subToEthLowercase } from './decoder';
-import { CrossAccountId } from '../unique/types';
 import { PalletEvmAccountBasicCrossAccountIdRepr } from '@unique-nft/unique-mainnet-types';
-
-keyring.loadAll({});
+import { subToEthLowercase } from './decoder';
+import { CrossAccountId } from '../types';
 
 export const compareEncodedAddresses = (subAddress1: string, subAddress2: string): boolean => {
   if (!subAddress1 || !subAddress2) return false;

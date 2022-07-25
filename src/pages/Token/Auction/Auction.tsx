@@ -3,17 +3,17 @@ import { Text, Button, Heading, useNotifications } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import BN from 'bn.js';
 
-import { Offer } from '../../../api/restApi/offers/types';
-import { AdditionalPositive100, AdditionalPositive500, Coral100, Coral500, Grey300 } from '../../../styles/colors';
-import { useOfferSubscription } from '../../../hooks/useOfferSubscription';
-import { useAccounts } from '../../../hooks/useAccounts';
-import { compareEncodedAddresses, isTokenOwner } from '../../../api/chainApi/utils/addressUtils';
+import { AdditionalPositive100, AdditionalPositive500, Coral100, Coral500, Grey300 } from 'styles/colors';
+import { useOfferSubscription } from 'hooks/useOfferSubscription';
+import { useAccounts } from 'hooks/useAccounts';
+import { compareEncodedAddresses, isTokenOwner } from 'api/uniqueSdk/utils/addressUtils';
+import { Offer } from 'api/restApi/offers/types';
+import { useAuction } from 'api/restApi/auction/auction';
+import { TCalculatedBid } from 'api/restApi/auction/types';
+import Timer from 'components/Timer';
+import AccountLink from 'components/Account/AccountLink';
 import { PriceForAuction } from '../TokenDetail/PriceForAuction';
-import { useAuction } from '../../../api/restApi/auction/auction';
-import { TCalculatedBid } from '../../../api/restApi/auction/types';
 import Bids from './Bids';
-import Timer from '../../../components/Timer';
-import AccountLink from '../../../components/Account/AccountLink';
 
 interface AuctionProps {
   offer: Offer

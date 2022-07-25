@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
-import { TTransaction } from '../api/chainApi/types';
-import { InternalStage, SignFunction, StageStatus, useStagesReturn } from '../types/StagesTypes';
 import { useNotifications } from '@unique-nft/ui-kit';
+import { UnsignedTxPayload } from '@unique-nft/sdk/types';
+import { InternalStage, SignFunction, StageStatus, useStagesReturn } from '../types/StagesTypes';
 
 const useStages = <T>(stages: InternalStage<T>[], signFunction: SignFunction): useStagesReturn<T> => {
   const [internalStages, setInternalStages] = useState<InternalStage<T>[]>(stages);
@@ -28,9 +28,9 @@ const useStages = <T>(stages: InternalStage<T>[], signFunction: SignFunction): u
   }, [setInternalStages]);
 
   const getSignFunction = useCallback((index: number, internalStage: InternalStage<T>) => {
-    const sign = async (tx: TTransaction): Promise<TTransaction> => {
+    const sign = async (unsignedTxPayload: UnsignedTxPayload): Promise<`0x${string}` | null> => {
       updateStage(index, { ...internalStage, status: StageStatus.awaitingSign });
-      const signedTx = await signFunction(tx);
+      const signedTx = await signFunction(unsignedTxPayload);
       updateStage(index, { ...internalStage, status: StageStatus.inProgress });
       return signedTx;
     };
@@ -43,7 +43,6 @@ const useStages = <T>(stages: InternalStage<T>[], signFunction: SignFunction): u
       // if sign is required by action -> promise wouldn't be resolved until transaction is signed
       // transaction sign could be triggered in the component that uses current stage (you can track it by using stage.signer)
       await stage.action({ txParams, options: { sign: getSignFunction(index, stage) } });
-      // await actionFunction(stage.action, txParams, { sign: getSignFunction(index, stage) });
       updateStage(index, { ...stage, status: StageStatus.success });
     } catch (e) {
       updateStage(index, { ...stage, status: StageStatus.error });

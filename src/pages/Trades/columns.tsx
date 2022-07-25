@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Button, Icon, TableColumnProps, Text } from '@unique-nft/ui-kit';
+import { Icon, TableColumnProps, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
 import { AddressComponent } from './AddressComponent/AddressComponent';

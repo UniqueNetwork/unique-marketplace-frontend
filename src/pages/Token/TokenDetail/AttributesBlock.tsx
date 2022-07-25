@@ -2,10 +2,10 @@ import React, { FC } from 'react';
 import styled from 'styled-components';
 import { Heading, Text } from '@unique-nft/ui-kit';
 import { Trait } from './Trait';
-import { TAttributes } from '../../../api/graphQL';
+import { DecodedAttributes, LocalizedStringDictionary } from '@unique-nft/sdk/tokens';
 
 interface IProps {
-  attributes: TAttributes;
+  attributes: DecodedAttributes;
 }
 
 export const AttributesBlock: FC<IProps> = ({ attributes }: IProps) => {
@@ -31,8 +31,11 @@ export const AttributesBlock: FC<IProps> = ({ attributes }: IProps) => {
   return (
     <div>
       <HeadingStyled size={'4'}>Attributes</HeadingStyled>
-      {Object.keys(attributes).filter((key) => key !== 'ipfsJson').map((key) => {
-        return AttributesRow({ attribute: key, enumeration: attributes[key] });
+      {Object.values(attributes).map((attribute) => {
+        return AttributesRow({
+          attribute: typeof attribute.name === 'string' ? attribute.name : attribute?.name?.en || '',
+          enumeration: Array.isArray(attribute.value) ? attribute.value.map((item) => (item as LocalizedStringDictionary).en || item.toString()) : attribute.value as string
+        });
       })}
     </div>
   );

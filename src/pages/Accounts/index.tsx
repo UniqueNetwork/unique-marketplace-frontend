@@ -3,30 +3,30 @@ import { Button, Dropdown, Icon, TableColumnProps, Text } from '@unique-nft/ui-k
 import styled from 'styled-components';
 import { BN } from '@polkadot/util';
 
+import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
+import { TWithdrawBid } from 'api/restApi/auction/types';
+import { Account } from 'account/AccountContext';
+import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
+import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
+import AccountCard from 'components/Account/Account';
+import { Table } from 'components/Table';
+import { PagePaper } from 'components/PagePaper/PagePaper';
+import { TextInput } from 'components/TextInput/TextInput';
+import IconWithHint from 'components/IconWithHint/IconWithHint';
+import ConfirmModal from 'components/ConfirmModal';
+import GetKSMModal from 'components/GetKSMModal/GetKSMModal';
+import { formatKusamaBalance } from 'utils/textUtils';
 import { CreateAccountModal } from './Modals/CreateAccount';
 import { ImportViaSeedAccountModal } from './Modals/ImportViaSeed';
 import { ImportViaJSONAccountModal } from './Modals/ImportViaJson';
 import { ImportViaQRCodeAccountModal } from './Modals/ImportViaQRCode';
-import { TransferFundsModal } from './Modals/SendFunds';
-import { Table } from '../../components/Table';
-import { formatKusamaBalance } from '../../utils/textUtils';
-import { PagePaper } from '../../components/PagePaper/PagePaper';
 import { WithdrawDepositModal } from './Modals/WithdrawDeposit';
-import { Account } from '../../account/AccountContext';
-import { toChainFormatAddress } from '../../api/chainApi/utils/addressUtils';
-import { useApi } from '../../hooks/useApi';
-import AccountCard from '../../components/Account/Account';
-import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
-import config from '../../config';
-import { TWithdrawBid } from '../../api/restApi/auction/types';
-import { TextInput } from '../../components/TextInput/TextInput';
-import { AdditionalLight, BlueGrey300, Primary100, Primary500 } from '../../styles/colors';
-import IconWithHint from 'components/IconWithHint/IconWithHint';
-import ConfirmModal from 'components/ConfirmModal';
-import { AccountInfo } from './types';
+import { TransferFundsModal } from './Modals/SendFunds';
 import BalanceCell from './BalanceCell';
-import GetKSMModal from 'components/GetKSMModal/GetKSMModal';
+import { AdditionalLight, BlueGrey300, Primary100, Primary500 } from 'styles/colors';
+import config from '../../config';
+import { AccountInfo } from './types';
 import NoAccountsIcon from 'static/icons/no-accounts.svg';
 
 const tokenSymbol = 'KSM';
@@ -174,8 +174,8 @@ export const AccountsPage = () => {
   }, [isLoading]);
 
   const formatAddress = useCallback((address: string) => {
-    return toChainFormatAddress(address, chainData?.properties.ss58Format || 0);
-  }, [chainData?.properties.ss58Format]);
+    return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
+  }, [chainData?.SS58Prefix]);
 
   const onCreateAccountClick = useCallback(() => {
     setCurrentModal(AccountModal.create);
@@ -514,19 +514,6 @@ const IconWrapper = styled.div`
 
 const TableWrapper = styled.div`
   position: relative;
-`;
-
-const DropdownButtonWrapper = styled.div`
-  position: relative;
-  .unique-button {
-    padding-right: calc(var(--gap) * 3);
-  }
-  .icon {
-    position: absolute;
-    right: var(--gap);
-    top: 50%;
-    margin-top: -8px;
-  }
 `;
 
 const DropdownMenu = styled.div`

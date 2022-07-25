@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
+import { NFTCollection } from 'api/uniqueSdk/types';
 import { useApi } from './useApi';
-import { NFTCollection } from '../api/chainApi/unique/types';
 
 export const useCollections = () => {
   const { api } = useApi();

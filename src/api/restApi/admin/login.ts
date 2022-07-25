@@ -1,12 +1,12 @@
 import { useCallback, useMemo, useState } from 'react';
 
+import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
+import { useAccounts } from 'hooks/useAccounts';
+import { useApi } from 'hooks/useApi';
+import { LoginPayload, LoginResponse } from './types';
+import { JWTDecode } from 'utils/JWTDecode';
 import { post } from '../base';
 import { defaultParams } from '../base/axios';
-import { LoginPayload, LoginResponse } from './types';
-import { useAccounts } from '../../../hooks/useAccounts';
-import { compareEncodedAddresses } from '../../chainApi/utils/addressUtils';
-import { JWTDecode } from '../../../utils/JWTDecode';
-import { useApi } from '../../../hooks/useApi';
 
 export const JWTokenLocalStorageKey = 'unique_market_jwt';
 

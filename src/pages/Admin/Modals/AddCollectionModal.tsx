@@ -2,14 +2,14 @@ import React, { FC, useCallback, useEffect, useState } from 'react';
 import { Button, Heading, Text, useNotifications } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
+import { NFTCollection } from 'api/uniqueSdk/types';
+import { useAdminCollections } from 'api/restApi/admin/collection';
+import { CollectionData } from 'api/restApi/admin/types';
+import { useApi } from 'hooks/useApi';
+import { CollectionCover } from 'components/CollectionCover/CollectionCover';
+import { SelectInput } from 'components/SelectInput/SelectInput';
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
-import { NFTCollection } from '../../../api/chainApi/unique/types';
-import { BlueGrey100 } from '../../../styles/colors';
-import { useAdminCollections } from '../../../api/restApi/admin/collection';
-import { SelectInput } from '../../../components/SelectInput/SelectInput';
-import { CollectionData } from '../../../api/restApi/admin/types';
-import { useApi } from '../../../hooks/useApi';
-import { CollectionCover } from '../../../components/CollectionCover/CollectionCover';
+import { BlueGrey100 } from 'styles/colors';
 
 export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) => {
   const [selectedCollection, setSelectedCollection] = useState<CollectionData | string | undefined>();

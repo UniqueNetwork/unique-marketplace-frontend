@@ -3,15 +3,15 @@ import { Button, Checkbox, Heading, Modal, Text, useNotifications } from '@uniqu
 import { BN } from '@polkadot/util';
 import styled from 'styled-components';
 
+import { NFTToken } from 'api/uniqueSdk/types';
+import { TWithdrawBid } from 'api/restApi/auction/types';
 import DefaultMarketStages from '../../Token/Modals/StagesModal';
-import { useWithdrawDepositStages } from '../../../hooks/accountStages/useWithdrawDepositStages';
-import { useApi } from '../../../hooks/useApi';
-import { StageStatus } from '../../../types/StagesTypes';
-import { TWithdrawBid } from '../../../api/restApi/auction/types';
-import { NFTToken } from '../../../api/chainApi/unique/types';
+import { useApi } from 'hooks/useApi';
+import { useAccounts } from 'hooks/useAccounts';
+import { useWithdrawDepositStages } from 'hooks/accountStages/useWithdrawDepositStages';
+import InlineTokenCard from 'components/TokensCard/InlineTokenCard';
+import { StageStatus } from 'types/StagesTypes';
 import { formatKusamaBalance } from '../../../utils/textUtils';
-import { useAccounts } from '../../../hooks/useAccounts';
-import InlineTokenCard from '../../../components/TokensCard/InlineTokenCard';
 
 const tokenSymbol = 'KSM';
 

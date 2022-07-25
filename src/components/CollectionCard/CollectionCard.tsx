@@ -2,14 +2,14 @@ import React, { FC, useEffect, useMemo, useState } from 'react';
 import { Dropdown, Icon, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
-import { Picture } from '..';
-import { AdditionalDark, AdditionalLight } from '../../styles/colors';
 import { CollectionData } from 'api/restApi/admin/types';
-import { useApi } from '../../hooks/useApi';
-import { NFTCollection } from '../../api/chainApi/unique/types';
-import { shortcutText } from '../../utils/textUtils';
-import { useAccounts } from '../../hooks/useAccounts';
-import { compareEncodedAddresses } from '../../api/chainApi/utils/addressUtils';
+import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
+import { NFTCollection } from 'api/uniqueSdk/types';
+import { useApi } from 'hooks/useApi';
+import { useAccounts } from 'hooks/useAccounts';
+import { shortcutText } from 'utils/textUtils';
+import { Picture } from '..';
+import { AdditionalDark, AdditionalLight } from 'styles/colors';
 
 export type TCollectionCard = {
   collection: CollectionData
@@ -41,19 +41,21 @@ export const CollectionCard: FC<TCollectionCard> = ({
 
   const canConfirmSponsorships = useMemo(() => {
     return selectedAccount?.address &&
-      collectionDetails?.sponsorship?.unconfirmed &&
-      compareEncodedAddresses(selectedAccount.address, collectionDetails.sponsorship.unconfirmed);
-  }, [selectedAccount?.address, collectionDetails?.sponsorship?.unconfirmed]);
+      collectionDetails?.sponsorship?.address &&
+      !collectionDetails?.sponsorship?.isConfirmed &&
+      compareEncodedAddresses(selectedAccount.address, collectionDetails.sponsorship.address);
+  }, [selectedAccount?.address, collectionDetails?.sponsorship?.isConfirmed, collectionDetails?.sponsorship?.address]);
 
   const canRemoveSponsorships = useMemo(() => {
     return selectedAccount?.address &&
-      collectionDetails?.sponsorship?.confirmed &&
-      (compareEncodedAddresses(selectedAccount.address, collectionDetails.sponsorship.confirmed) ||
+      collectionDetails?.sponsorship?.address &&
+      collectionDetails?.sponsorship?.isConfirmed &&
+      (compareEncodedAddresses(selectedAccount.address, collectionDetails.sponsorship.address) ||
         compareEncodedAddresses(selectedAccount.address, collection?.owner || ''));
-  }, [selectedAccount?.address, collectionDetails?.sponsorship?.confirmed, collection?.owner]);
+  }, [selectedAccount?.address, collectionDetails?.sponsorship?.isConfirmed, collectionDetails?.sponsorship?.address, collection?.owner]);
 
-  const hasSponsorship = useMemo(() => collectionDetails?.sponsorship && !collectionDetails?.sponsorship?.unconfirmed, [collectionDetails]);
-  const hasUnconfirmedSponsorship = useMemo(() => collectionDetails?.sponsorship?.unconfirmed, [collectionDetails]);
+  const hasSponsorship = useMemo(() => collectionDetails?.sponsorship && collectionDetails?.sponsorship?.isConfirmed, [collectionDetails]);
+  const hasUnconfirmedSponsorship = useMemo(() => !collectionDetails?.sponsorship?.isConfirmed, [collectionDetails]);
 
   return (
     <CollectionCardStyled>
@@ -91,7 +93,7 @@ export const CollectionCard: FC<TCollectionCard> = ({
           </Row>
           {hasSponsorship && <Row>
             <Text size='s' color={'grey-500'} >Sponsor:</Text>
-            <Text size='s' >{collectionDetails?.sponsorship?.confirmed ? shortcutText(collectionDetails.sponsorship.confirmed) : 'not assigned'}</Text>
+            <Text size='s' >{collectionDetails?.sponsorship?.isConfirmed ? shortcutText(collectionDetails?.sponsorship?.address || '') : 'not assigned'}</Text>
           </Row>}
           {hasUnconfirmedSponsorship && <Row>
             <Text size='s' color={'coral-500'} >Waiting for sponsorship approval</Text>

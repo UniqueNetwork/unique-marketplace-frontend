@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { Picture } from 'components';
 import { CollectionsCard } from './CollectionsCard';
 import { AttributesBlock } from './AttributesBlock';
-import { NFTToken } from 'api/chainApi/unique/types';
+import { NFTToken } from 'api/uniqueSdk/types';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { shortcutText } from 'utils/textUtils';
 import { Grey300, Grey500, Primary600 } from 'styles/colors';
@@ -13,7 +13,7 @@ import { Avatar } from 'components/Avatar/Avatar';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import config from 'config';
 import { useAccounts } from 'hooks/useAccounts';
-import { isTokenOwner, normalizeAccountId, toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
+import { isTokenOwner, normalizeAccountId, toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
 import { Offer } from 'api/restApi/offers/types';
 import { useApi } from 'hooks/useApi';
 import Skeleton from 'components/Skeleton/Skeleton';
@@ -45,7 +45,7 @@ export const CommonTokenDetail: FC<IProps> = ({
   } = useMemo(() => {
     if (offer) {
       const { collectionName, image, prefix, collectionCover, description } = offer.tokenDescription || {};
-      const attributes = offer.tokenDescription?.attributes.reduce((acc, item) => ({ ...acc, [item.key]: item.value }), {}) || [];
+      const attributes = offer.tokenDescription?.attributes.reduce((acc, item) => ({ ...acc, [item.key]: { name: item.key, value: item.value } }), {}) || [];
       return {
         ...offer,
         collectionName,
@@ -69,15 +69,15 @@ export const CommonTokenDetail: FC<IProps> = ({
   const { chainData } = useApi();
 
   const formatAddress = useCallback((address: string) => {
-    return toChainFormatAddress(address, chainData?.properties.ss58Format || 0);
-  }, [chainData?.properties.ss58Format]);
+    return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
+  }, [chainData?.SS58Prefix]);
 
   const owner = useMemo(() => {
     if (offer) {
       return formatAddress(offer?.seller);
     }
     if (!token?.owner) return undefined;
-    return token.owner.Substrate ? formatAddress(token.owner.Substrate) : token.owner.Ethereum;
+    return (token.owner as { Substrate: string }).Substrate ? formatAddress((token.owner as { Substrate: string }).Substrate) : (token.owner as { Ethereum: string }).Ethereum;
   }, [token, offer, formatAddress]);
 
   const isOwner = useMemo(() => {

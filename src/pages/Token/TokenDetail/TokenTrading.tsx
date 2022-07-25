@@ -1,14 +1,14 @@
 import React, { FC, useContext, useMemo } from 'react';
 
-import { NFTToken } from '../../../api/chainApi/unique/types';
+import { NFTToken } from 'api/uniqueSdk/types';
 import { Offer } from '../../../api/restApi/offers/types';
 import accountContext from '../../../account/AccountContext';
 import { SellToken } from '../SellToken/SellToken';
 import { BuyToken } from '../BuyToken/BuyToken';
 import Auction from '../Auction/Auction';
-import { isTokenOwner, normalizeAccountId } from '../../../api/chainApi/utils/addressUtils';
+import { isTokenOwner, normalizeAccountId } from 'api/uniqueSdk/utils/addressUtils';
 import { useApi } from '../../../hooks/useApi';
-import { checkAllowedTokenInSettings } from '../../../api/chainApi/utils/checkTokenIsAllowed';
+import { checkAllowedTokenInSettings } from 'api/uniqueSdk/utils/checkTokenIsAllowed';
 
 interface TokenTradingProps {
   token?: NFTToken

@@ -3,14 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { AccountsManager, Button, Text, useNotifications } from '@unique-nft/ui-kit';
 
+import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
 import { useAccounts } from 'hooks/useAccounts';
 import { Account } from 'account/AccountContext';
+import { Avatar } from 'components/Avatar/Avatar';
+import GetKSMModal from 'components/GetKSMModal/GetKSMModal';
 import { BalanceOption } from './types';
 import { useApi } from 'hooks/useApi';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
-import { Avatar } from 'components/Avatar/Avatar';
-import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
-import GetKSMModal from 'components/GetKSMModal/GetKSMModal';
 import { formatKusamaBalance } from 'utils/textUtils';
 import BalanceSkeleton from '../../Skeleton/BalanceSkeleton';
 import config from '../../../config';
@@ -29,8 +29,8 @@ export const WalletManager: FC = () => {
   const { chainData } = useApi();
   const { info } = useNotifications();
   const formatAddress = useCallback((address: string) => {
-    return toChainFormatAddress(address, chainData?.properties.ss58Format || 0);
-  }, [chainData?.properties.ss58Format]);
+    return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
+  }, [chainData?.SS58Prefix]);
 
   const widgetAccounts = useMemo(() => accounts.map((account) => (
     { name: account.meta.name, ...account, address: formatAddress(account.address), substrateAddress: account?.address })
@@ -63,8 +63,8 @@ export const WalletManager: FC = () => {
   }, [navigate]);
 
   const currentBalance: BalanceOption = useMemo(() => {
-    return { value: selectedAccount?.balance?.KSM?.toString() || '0', chain: chainData?.systemChain || '' };
-  }, [selectedAccount, chainData?.systemChain]);
+    return { value: selectedAccount?.balance?.KSM?.toString() || '0', chain: chainData?.token || '' };
+  }, [selectedAccount, chainData?.token]);
 
   const closeModal = useCallback(() => {
     setIsGetKsmOpened(false);

@@ -11,7 +11,7 @@ import keyring from '@polkadot/ui-keyring';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 
 export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish }) => {
-  const { rawRpcApi } = useApi();
+  const { uniqueSdk } = useApi();
   const [pair, setPair] = useState<KeyringPair | null>(null);
   const [password, setPassword] = useState<string>('');
   const [passwordIncorrect, setPasswordIncorrect] = useState<boolean>(false);
@@ -20,16 +20,16 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
     if (!data) return;
     const reader = new FileReader();
     reader.onload = ({ target }: ProgressEvent<FileReader>): void => {
-      if (target && target.result && rawRpcApi) {
+      if (target && target.result && uniqueSdk) {
         console.log(target.result);
         const data = convertToU8a(target.result as ArrayBuffer);
 
-        setPair(keyringFromFile(data, rawRpcApi.genesisHash.toHex()));
+        setPair(keyringFromFile(data, uniqueSdk.api.genesisHash.toHex()));
       }
     };
 
     reader.readAsArrayBuffer(data.file);
-  }, [setPair, rawRpcApi]);
+  }, [setPair, uniqueSdk?.api]);
 
   const onRestoreClick = useCallback(() => {
     if (!pair || !password) return;

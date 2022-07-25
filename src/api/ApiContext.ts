@@ -1,7 +1,10 @@
-import { ApiPromise } from '@polkadot/api';
 import { Context, Consumer, Provider, createContext } from 'react';
-import { ICollectionController, IMarketController, INFTController, IRpcClient } from './chainApi/types';
 import { Settings } from './restApi/settings/types';
+import { ChainProperties } from '@unique-nft/sdk/types';
+import { UniqueSDKNFTController } from './uniqueSdk/NFTController';
+import { UniqueSDKCollectionController } from './uniqueSdk/collectionController';
+import { UniqueSDKMarketController } from './uniqueSdk/marketController';
+import { Sdk } from '@unique-nft/sdk';
 
 export type ChainData = {
   properties: {
@@ -13,17 +16,16 @@ export type ChainData = {
 }
 
 type Api = {
-  nft?: INFTController<any, any>
-  collection?: ICollectionController<any, any>
-  market?: IMarketController
+  nft?: UniqueSDKNFTController
+  collection?: UniqueSDKCollectionController
+  market?: UniqueSDKMarketController
 }
 
 export type ApiContextProps = {
-  rpcClient: IRpcClient
-  rawRpcApi?: ApiPromise
-  rawKusamaRpcApi?: ApiPromise
   api: Api | undefined
-  chainData?: ChainData
+  uniqueSdk?: Sdk
+  kusamaSdk?: Sdk
+  chainData?: ChainProperties
   settings?: Settings
 }
 

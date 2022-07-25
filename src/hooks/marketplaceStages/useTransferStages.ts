@@ -7,7 +7,7 @@ import useStages from '../useStages';
 
 export const useTransferStages = (collectionId: number, tokenId: number) => {
   const { api } = useApi();
-  const { signTx } = useAccounts();
+  const { signPayloadJSON } = useAccounts();
   const marketApi = api?.market;
   const transferStages: InternalStage<TTransfer>[] = useMemo(() => [{
     title: 'Transfer in progress',
@@ -15,7 +15,7 @@ export const useTransferStages = (collectionId: number, tokenId: number) => {
     status: StageStatus.default,
     action: (params) => marketApi?.transferToken(params.txParams.sender, params.txParams?.recipient || '', collectionId.toString(), tokenId.toString(), params.options)
   }], [marketApi, collectionId, tokenId]);
-  const { stages, error, status, initiate } = useStages<TTransfer>(transferStages, signTx);
+  const { stages, error, status, initiate } = useStages<TTransfer>(transferStages, signPayloadJSON);
 
   return {
     stages,

@@ -2,14 +2,15 @@ import React, { FC, useCallback, useEffect, useState } from 'react';
 import { Button, Heading, Text } from '@unique-nft/ui-kit';
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
 import styled from 'styled-components/macro';
-import AccountCard from '../../../components/Account/Account';
-import { useFee } from '../../../hooks/useFee';
-import StagesModal from '../../Token/Modals/StagesModal';
-import { useAcceptSponsorshipStages } from '../../../hooks/adminStages/useAcceptSponsorshipStages';
-import { useApi } from '../../../hooks/useApi';
-import { NFTCollection } from '../../../api/chainApi/unique/types';
+
+import { NFTCollection } from 'api/uniqueSdk/types';
+import { useApi } from 'hooks/useApi';
+import { useFee } from 'hooks/useFee';
+import { useAcceptSponsorshipStages } from 'hooks/adminStages/useAcceptSponsorshipStages';
 import { useRejectSponsorshipStages } from 'hooks/adminStages/useRejectSponsorshipStages';
+import AccountCard from 'components/Account/Account';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
+import StagesModal from '../../Token/Modals/StagesModal';
 
 const tokenSymbol = 'KSM';
 
@@ -53,10 +54,10 @@ export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collecti
       <Row>
         <Text size={'m'}>{`The author of the collection "${collection?.name || collection?.collectionName}" [ID ${collection?.id}] has chosen this address as a sponsor. Do you confirm the choice?`}</Text>
       </Row>
-      {collectionDetails?.sponsorship?.unconfirmed && <AddressWrapper>
+      {collectionDetails?.sponsorship?.isConfirmed && collectionDetails?.sponsorship?.address && <AddressWrapper>
         <AccountCard
           accountName={''}
-          accountAddress={collectionDetails?.sponsorship?.unconfirmed || ''}
+          accountAddress={collectionDetails?.sponsorship?.address || ''}
           canCopy
           hideName
         />
