@@ -7,15 +7,17 @@ import { IconButton } from '../IconButton/IconButton';
 interface PasswordInputProps {
   placeholder?: string
   value: string
+  maxLength?: number
   onChange(value: string): void
 }
 
-export const PasswordInput: FC<PasswordInputProps> = ({ placeholder, value, onChange }) => {
+export const PasswordInput: FC<PasswordInputProps> = ({ placeholder, value, onChange, maxLength = 40 }) => {
   const [isVisibleValue, setIsVisibleValue] = useState<boolean>(false);
 
   const onPasswordChange = useCallback(({ target }: ChangeEvent<HTMLInputElement>) => {
+    if (target.value.length > maxLength) return;
     onChange(target.value);
-  }, [onChange]);
+  }, [onChange, maxLength]);
 
   const onVisibleValueClick = useCallback(() => {
     setIsVisibleValue(!isVisibleValue);

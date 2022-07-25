@@ -14,6 +14,7 @@ import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import IconWithHint from 'components/IconWithHint/IconWithHint';
 import { IconButton } from 'components/IconButton/IconButton';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
+import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 
 type TOption = SelectOptionProps & { id: string, title: string };
 
@@ -27,6 +28,7 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish 
   const [confirmSeedSaved, setConfirmSeedSaved] = useState<boolean>(false);
   const [seedGenerator, setSeedGenerator] = useState('Mnemonic');
   const [seedValid, setSeedValid] = useState(true);
+  const deviceSize = useDeviceSize();
 
   const changeSeed = useCallback((value: string) => {
     setSeed(value);
@@ -81,6 +83,7 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish 
       <SeedInput
         onChange={onSeedChange}
         value={seed}
+        rows={deviceSize === DeviceSize.sm ? 4 : 2}
       />
       <IconButton
         size={24}
