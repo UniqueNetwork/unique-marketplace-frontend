@@ -92,6 +92,7 @@ export function SelectInput<T = SelectInputOption>({ className, placeholder, opt
         ref={InputRef}
       />
       {(inputValue || (isClearable && value)) && <ClearButton name={'circle-close'} size={16} onClick={onClear} />}
+      <Icon name={'triangle'} size={8} />
     </InputWrapper>
     <Dropdown isOpen={isDropdownVisible} ref={DropdownRef}>
       {options.map((item, index) => (
@@ -122,6 +123,11 @@ const InputWrapper = styled.div`
     background: transparent;
     outline: none;
     padding: var(--gap);
+  }
+  & .icon-triangle{
+    position: absolute;
+    top: calc(50% - 4px);
+    right: calc(var(--gap) / 2);
   }
   &.left-icon {
     padding-left: calc(var(--gap) * 2);
@@ -168,8 +174,7 @@ const Placeholder = styled.div`
 
 const ClearButton = styled(IconButton)`
   position: absolute;
-  //right: calc(var(--gap) * 2);
-  left: calc(100% - calc(var(--gap) * 1.5));
+  left: calc(100% - calc(var(--gap) * 2.5));
   top: 50%;
   margin-top: -8px;
   width: auto !important;

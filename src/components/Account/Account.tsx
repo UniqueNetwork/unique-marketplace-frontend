@@ -29,6 +29,7 @@ const AccountCard: FC<AccountProps> = ({
   const { info } = useNotifications();
 
   const formatAddress = useCallback((address: string) => {
+    if (!address) return '';
     return toChainFormatAddress(address, chainData?.properties.ss58Format || 0);
   }, [chainData?.properties.ss58Format]);
 
