@@ -21,7 +21,7 @@
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
-    "@unique-nft/sdk": "0.4.19",
+    "@unique-nft/sdk": "0.4.20",
     "@unique-nft/ui-kit": "0.0.27",
     "@unique-nft/unique-mainnet-types": "^0.6.3",
     "axios": "^0.24.0",
@@ -72,13 +72,6 @@
     "typescript": "^4.5.2",
     "url": "^0.11.0"
   },
-  "externalDependencies": [
-    "@nestjs/microservices",
-    "@nestjs/platform-express",
-    "class-transformer",
-    "class-validator",
-    "cache-manager"
-  ],
   "scripts": {
     "start": "react-app-rewired start",
     "build": "react-app-rewired --max_old_space_size=4096 build",

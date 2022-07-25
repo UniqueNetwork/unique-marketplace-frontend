@@ -2,14 +2,14 @@ import React, { FC, useEffect, useMemo, useState } from 'react';
 import { Dropdown, Icon, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
-import { Picture } from '..';
-import { AdditionalDark, AdditionalLight } from '../../styles/colors';
 import { CollectionData } from 'api/restApi/admin/types';
-import { useApi } from '../../hooks/useApi';
-import { NFTCollection } from '../../api/chainApi/unique/types';
-import { shortcutText } from '../../utils/textUtils';
-import { useAccounts } from '../../hooks/useAccounts';
-import { compareEncodedAddresses } from '../../api/chainApi/utils/addressUtils';
+import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
+import { NFTCollection } from 'api/uniqueSdk/types';
+import { useApi } from 'hooks/useApi';
+import { useAccounts } from 'hooks/useAccounts';
+import { shortcutText } from 'utils/textUtils';
+import { Picture } from '..';
+import { AdditionalDark, AdditionalLight } from 'styles/colors';
 
 export type TCollectionCard = {
   collection: CollectionData

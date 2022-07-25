@@ -4,7 +4,7 @@ import styled from 'styled-components';
 
 import config from '../../../config';
 import { useApi } from '../../../hooks/useApi';
-import { toChainFormatAddress } from '../../../api/chainApi/utils/addressUtils';
+import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
 import { Avatar } from '../../../components/Avatar/Avatar';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 

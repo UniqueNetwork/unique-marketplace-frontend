@@ -3,7 +3,7 @@ import { Button, Heading, Text, useNotifications } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
-import { useAdminCollections } from '../../../api/restApi/admin/collection';
+import { useAdminCollections } from 'api/restApi/admin/collection';
 import { TextInput } from 'components/TextInput/TextInput';
 
 const MAX_SAFE_ID = 2147483647;
@@ -12,7 +12,7 @@ const NOT_VALID_TOKEN_MESSAGE = 'List of token IDs is incorrect. It must be like
 
 export const SelectNFTsModal: FC<TAdminPanelModalBodyProps> = ({ collection, onFinish }) => {
   const { setAllowedTokens } = useAdminCollections();
-  const [tokens, setTokens] = useState(collection?.allowedTokens || '');
+  const [tokens, setTokens] = useState<string>(collection?.allowedTokens || '');
   const { info } = useNotifications();
 
   const isValidAllowedTokens = useMemo(() => {

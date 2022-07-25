@@ -1,5 +1,5 @@
-import { Settings } from '../../restApi/settings/types';
-import { TokenId } from '../../chainApi/unique/types';
+import { Settings } from 'api/restApi/settings/types';
+import { TokenId } from 'api/uniqueSdk/types';
 
 export const checkAllowedTokenInSettings = (tokenId: number, collectionId: number, settings?: Settings) => {
   const allowedTokens = settings?.blockchain.unique.allowedTokens.find((item) => item.collection === collectionId)?.tokens.split(',') || [];

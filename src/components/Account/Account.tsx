@@ -1,11 +1,11 @@
 import React, { FC, useCallback, useMemo } from 'react';
 import { Text, Icon, useNotifications } from '@unique-nft/ui-kit';
-
-import DefaultAvatar from '../../static/icons/default-avatar.svg';
 import styled from 'styled-components';
-import { useApi } from '../../hooks/useApi';
-import { toChainFormatAddress } from '../../api/chainApi/utils/addressUtils';
-import { shortcutText } from '../../utils/textUtils';
+
+import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
+import DefaultAvatar from 'static/icons/default-avatar.svg';
+import { useApi } from 'hooks/useApi';
+import { shortcutText } from 'utils/textUtils';
 import { Avatar } from '../Avatar/Avatar';
 
 interface AccountProps {

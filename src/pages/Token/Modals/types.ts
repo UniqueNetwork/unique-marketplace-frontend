@@ -1,5 +1,3 @@
-import { Token } from '../../../api/graphQL/tokens/types';
-
 export type TTransfer = {
   sender: string
   recipient: string
@@ -28,11 +26,6 @@ export type TAuctionProps = {
 export type TPlaceABid = {
   accountAddress?: string
   amount?: string
-}
-
-export interface ModalProps {
-  token?: Token
-  [key: string]: any
 }
 
 export type TAuctionBidProps = {

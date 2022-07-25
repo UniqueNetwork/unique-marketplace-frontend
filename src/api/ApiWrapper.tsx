@@ -1,63 +1,59 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { keyring } from '@polkadot/ui-keyring';
 import { ApiContextProps, ApiProvider } from './ApiContext';
 import { getSettings } from './restApi/settings/settings';
 import AuctionSocketProvider from './restApi/auction/AuctionSocketProvider';
 import { Settings } from './restApi/settings/types';
-import config from '../config';
-import { SDKFactory } from './sdk/sdk';
-import { Sdk } from '@unique-nft/sdk';
+import { SdkClient } from './sdk/sdkClient';
 import { UniqueSDKNFTController } from './uniqueSdk/NFTController';
 import { UniqueSDKCollectionController } from './uniqueSdk/collectionController';
 import { UniqueSDKMarketController } from './uniqueSdk/marketController';
 import { ChainProperties } from '@unique-nft/sdk/types';
+import config from '../config';
 
-import { rpcClient as rpc } from '.';
-import { IRpcClient } from './chainApi/types';
+import { uniqueSdkClient as unique, kusamaSdkClient as kusama } from '.';
 
 keyring.loadAll({});
 
 interface ChainProviderProps {
   children: React.ReactNode
-  rpcClient?: IRpcClient
+  uniqueSdk?: SdkClient
+  kusamaSdk?: SdkClient
 }
 
-const ApiWrapper = ({ children, rpcClient = rpc }: ChainProviderProps) => {
+const ApiWrapper = ({ children, uniqueSdk = unique, kusamaSdk = kusama }: ChainProviderProps) => {
   const [chainData, setChainData] = useState<ChainProperties>();
   const [isRpcClientInitialized, setRpcClientInitialized] = useState<boolean>(false);
   const { chainId } = useParams<'chainId'>();
   const [settings, setSettings] = useState<Settings>();
-  const uniqueSdkRef = useRef<Sdk>();
-  const kusamaSdkRef = useRef<Sdk>();
 
   useEffect(() => {
     (async () => {
       const { data: settings } = await getSettings();
       setSettings(settings);
-      uniqueSdkRef.current = await SDKFactory(settings.blockchain.unique.wsEndpoint);
-      kusamaSdkRef.current = await SDKFactory(settings.blockchain.kusama.wsEndpoint);
 
-      await rpcClient?.initialize(settings);
-      setRpcClientInitialized(true);
-      setChainData(uniqueSdkRef.current?.chainProperties());
+      await uniqueSdk.connect(settings.blockchain.unique.wsEndpoint);
+      await kusamaSdk.connect(settings.blockchain.kusama.wsEndpoint);
+
+      console.log(uniqueSdk?.isReady && kusamaSdk?.isReady);
+
+      setRpcClientInitialized(uniqueSdk?.isReady && kusamaSdk?.isReady);
+      setChainData(uniqueSdk?.sdk?.chainProperties());
     })().then(() => console.log('Rpc connection: success')).catch((e) => console.log('Rpc connection: failed', e));
   }, []);
 
   // get context value for ApiContext
   const value = useMemo<ApiContextProps>(
     () => ({
-      api: (uniqueSdkRef.current && kusamaSdkRef.current && settings && isRpcClientInitialized && {
-        collection: new UniqueSDKCollectionController(uniqueSdkRef.current, settings), // rpcClient.collectionController,
-        nft: new UniqueSDKNFTController(uniqueSdkRef.current, settings), // rpcClient.nftController,
-        market: new UniqueSDKMarketController(uniqueSdkRef.current, kusamaSdkRef.current, settings) // rpcClient.marketController
+      api: (isRpcClientInitialized && settings && uniqueSdk?.sdk && kusamaSdk.sdk && {
+        collection: new UniqueSDKCollectionController(uniqueSdk.sdk, settings),
+        nft: new UniqueSDKNFTController(uniqueSdk.sdk, settings),
+        market: new UniqueSDKMarketController(uniqueSdk.sdk, kusamaSdk.sdk, settings)
       }) || undefined,
-      uniqueSdk: uniqueSdkRef.current,
+      uniqueSdk: uniqueSdk?.sdk,
+      kusamaSdk: kusamaSdk?.sdk,
       chainData,
-      rawRpcApi: rpcClient.rawUniqRpcApi,
-      rawKusamaRpcApi: rpcClient.rawKusamaRpcApi,
-      rawKusamaSdk: kusamaSdkRef.current,
-      rpcClient,
       settings
     }),
     [isRpcClientInitialized, chainId, chainData, settings]

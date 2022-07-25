@@ -1,10 +1,10 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { Modal } from '@unique-nft/ui-kit';
 
-import { Offer } from '../../../api/restApi/offers/types';
+import { Offer } from 'api/restApi/offers/types';
+import { NFTToken } from 'api/uniqueSdk/types';
 import { MarketType } from '../../../types/MarketTypes';
 import { SellModal } from './SellModal';
-import { NFTToken } from '../../../api/chainApi/unique/types';
 import { CancelSellFixStagesModal } from './CancelSellModal';
 import PurchaseModal from './PurchaseModal';
 import { TransferModal } from './TransferModal';

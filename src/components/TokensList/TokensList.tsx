@@ -1,8 +1,9 @@
 import { FC } from 'react';
 import styled from 'styled-components';
+
+import { NFTToken } from 'api/uniqueSdk/types';
+import { Offer } from 'api/restApi/offers/types';
 import { TokensCard } from '..';
-import { NFTToken } from '../../api/chainApi/unique/types';
-import { Offer } from '../../api/restApi/offers/types';
 import CardSkeleton from '../Skeleton/CardSkeleton';
 
 type TTokensList = {

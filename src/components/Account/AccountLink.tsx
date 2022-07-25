@@ -1,9 +1,9 @@
 import React, { FC, useCallback } from 'react';
 
-import { useApi } from '../../hooks/useApi';
-import { toChainFormatAddress } from '../../api/chainApi/utils/addressUtils';
+import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
+import { useApi } from 'hooks/useApi';
+import { shortcutText } from 'utils/textUtils';
 import config from '../../config';
-import { shortcutText } from '../../utils/textUtils';
 
 interface AccountLinkProps {
   accountAddress: string

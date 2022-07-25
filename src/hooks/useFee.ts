@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAccounts } from './useAccounts';
 import { useApi } from './useApi';
-import { formatKusamaBalance } from '../utils/textUtils';
+import { formatKusamaBalance } from 'utils/textUtils';
 
 interface UseFeeReturn {
   marketCommission: string,

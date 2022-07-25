@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef } from 'react';
 
-import { Offer } from '../api/restApi/offers/types';
-import AuctionContext from '../api/restApi/auction/AuctionContext';
+import { Offer } from 'api/restApi/offers/types';
+import AuctionContext from 'api/restApi/auction/AuctionContext';
 
 type useOfferSubscriptionProps = {
   offer: Offer,

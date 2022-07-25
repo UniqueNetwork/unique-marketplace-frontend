@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
+
+import { addToWhitelist } from 'api/restApi/settings/settings';
 import { useApi } from '../useApi';
-import { TFixPriceProps } from '../../pages/Token/Modals/types';
-import { InternalStage, StageStatus } from '../../types/StagesTypes';
+import { TFixPriceProps } from 'pages/Token/Modals/types';
+import { InternalStage, StageStatus } from 'types/StagesTypes';
 import { useAccounts } from '../useAccounts';
 import useStages from '../useStages';
-import { addToWhitelist } from 'api/restApi/settings/settings';
 
 export const useSellFixStages = (collectionId: number, tokenId: number) => {
   const { api } = useApi();
@@ -22,7 +23,7 @@ export const useSellFixStages = (collectionId: number, tokenId: number) => {
           send:
             async (signature) => {
               try {
-                await addToWhitelist({ account: params.txParams.accountAddress }, signature as string);
+                await addToWhitelist({ account: params.txParams.accountAddress }, signature);
               } catch (e) {
                 console.error('Adding to whitelist failed');
               }

@@ -1,3 +1,4 @@
-import RpcClient from './chainApi/rpcClient';
+import { SdkClient } from './sdk/sdkClient';
 
-export const rpcClient = new RpcClient();
+export const uniqueSdkClient = new SdkClient('');
+export const kusamaSdkClient = new SdkClient('');

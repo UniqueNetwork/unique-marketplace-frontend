@@ -1,7 +1,7 @@
 import { Sdk } from '@unique-nft/sdk';
-import { TokenIdArguments } from '@unique-nft/sdk/tokens';
+import { TokenDecoded, TokenIdArguments } from '@unique-nft/sdk/tokens';
 import { BN } from '@polkadot/util';
-import { IMarketController, CrossAccountId, EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType, TransactionOptions, TSignMessage, UniqueDecoratedRpc } from './types';
+import { CrossAccountId, EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType, TransactionOptions, TSignMessage, UniqueDecoratedRpc } from './types';
 import marketplaceAbi from './abi/marketPlaceAbi.json';
 import nonFungibleAbi from './abi/nonFungibleAbi.json';
 import { collectionIdToAddress, getEthAccount, compareEncodedAddresses, isTokenOwner, normalizeAccountId } from './utils/addressUtils';
@@ -12,7 +12,7 @@ import '@unique-nft/sdk/balance';
 import { AllBalances } from '@unique-nft/sdk/types';
 import Web3 from 'web3';
 
-export class UniqueSDKMarketController implements IMarketController {
+export class UniqueSDKMarketController {
   private uniqueSdk: Sdk;
   private kusamaSdk: Sdk;
   private settings;
@@ -46,14 +46,6 @@ export class UniqueSDKMarketController implements IMarketController {
     this.web3Instance = web3;
   }
 
-  isUniqueSdkConnected(): boolean {
-    return this.uniqueSdk.connection.isReady;
-  }
-
-  isKusamaSdkConnected(): boolean {
-    return this.kusamaSdk.connection.isReady;
-  }
-
   private getMatcherContractInstance(ethAddress: string): { methods: MarketplaceAbiMethods } {
     // @ts-ignore
     return new this.web3Instance.eth.Contract(marketplaceAbi.abi, this.contractAddress, {
@@ -79,7 +71,7 @@ export class UniqueSDKMarketController implements IMarketController {
     const token = await this.uniqueSdk.tokens.get_new(tokenIdArguments);
     if (!token) throw new Error('Token not found');
 
-    const ask = await (matcherContractInstance.methods).getOrder(collectionIdToAddress(Number(collectionId)), tokenId).call();
+    const ask = await matcherContractInstance.methods.getOrder(collectionIdToAddress(Number(collectionId)), tokenId).call();
     if (!ask?.price) throw new Error('Token has no price');
 
     const price = new BN(ask.price);
@@ -212,7 +204,7 @@ export class UniqueSDKMarketController implements IMarketController {
   }
 
   // fee
-  async getKusamaFee(sender: string, recipient: string | undefined, value: BN | undefined): Promise<string | null> {
+  async getKusamaFee(sender: string, recipient?: string, value?: BN): Promise<string | null> {
     const transferFee = await this.kusamaSdk.extrinsics.getFee({
       address: sender,
       section: 'balances',
@@ -421,11 +413,11 @@ export class UniqueSDKMarketController implements IMarketController {
       collectionId: Number(collectionId), tokenId: Number(tokenId)
     };
 
-    const token = await this.uniqueSdk.tokens.get_new(tokenIdArguments);
+    const token: TokenDecoded | null = await this.uniqueSdk.tokens.get_new(tokenIdArguments);
     if (!token) throw new Error('Token for unlock not found');
-    const { owner } = token;
+    const owner = token.owner as { Substrate: string };
 
-    if (owner.Substrate && compareEncodedAddresses(owner.Substrate, address)) return;
+    if (owner && owner.Substrate && compareEncodedAddresses(owner.Substrate, address)) return;
 
     const unsignedTxPayload = await this.uniqueSdk.extrinsics.build({
       section: 'unique',
@@ -453,7 +445,7 @@ export class UniqueSDKMarketController implements IMarketController {
 
     if (!userDeposit || userDeposit.isZero()) throw new Error('No user deposit');
 
-    const abi = (matcherContractInstance.methods).withdrawAllKSM(ethAddress).encodeABI();
+    const abi = matcherContractInstance.methods.withdrawAllKSM(ethAddress).encodeABI();
 
     const unsignedTxPayload = await this.uniqueSdk.extrinsics.build({
       address,

@@ -1,10 +1,10 @@
 import { Context, Consumer, Provider, createContext } from 'react';
-import { ICollectionController, IMarketController, INFTController } from './uniqueSdk/types';
-import { IRpcClient } from './chainApi/types';
 import { Settings } from './restApi/settings/types';
-import { Sdk } from '@unique-nft/sdk';
 import { ChainProperties } from '@unique-nft/sdk/types';
-import { ApiPromise } from '@polkadot/api';
+import { UniqueSDKNFTController } from './uniqueSdk/NFTController';
+import { UniqueSDKCollectionController } from './uniqueSdk/collectionController';
+import { UniqueSDKMarketController } from './uniqueSdk/marketController';
+import { Sdk } from '@unique-nft/sdk';
 
 export type ChainData = {
   properties: {
@@ -16,21 +16,17 @@ export type ChainData = {
 }
 
 type Api = {
-  nft?: INFTController<any, any>
-  collection?: ICollectionController<any, any>
-  market?: IMarketController
+  nft?: UniqueSDKNFTController
+  collection?: UniqueSDKCollectionController
+  market?: UniqueSDKMarketController
 }
 
 export type ApiContextProps = {
-  // TODO: remove this
-  rpcClient: IRpcClient
-  rawRpcApi?: ApiPromise
-  rawKusamaRpcApi?: ApiPromise
-  uniqueSdk?: Sdk
   api: Api | undefined
+  uniqueSdk?: Sdk
+  kusamaSdk?: Sdk
   chainData?: ChainProperties
   settings?: Settings
-  rawKusamaSdk: Sdk | undefined
 }
 
 const ApiContext: Context<ApiContextProps> = createContext({} as unknown as ApiContextProps);

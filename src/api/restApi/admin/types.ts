@@ -1,4 +1,4 @@
-import { NFTCollection } from '../../chainApi/unique/types';
+import { NFTCollection } from 'api/uniqueSdk/types';
 
 export type LoginPayload = {
     account: string

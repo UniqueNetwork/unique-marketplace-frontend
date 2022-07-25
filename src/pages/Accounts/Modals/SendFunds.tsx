@@ -1,23 +1,23 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Heading, Modal, Text, Loader, useNotifications } from '@unique-nft/ui-kit';
+import { BN } from '@polkadot/util';
 import styled from 'styled-components';
 
-import { TTransferFunds } from './types';
-import { useAccounts } from 'hooks/useAccounts';
-import { AdditionalWarning100, Coral700 } from 'styles/colors';
-import { SelectInput } from 'components/SelectInput/SelectInput';
+import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
 import { Account } from 'account/AccountContext';
-import DefaultMarketStages from '../../Token/Modals/StagesModal';
+import { useApi } from 'hooks/useApi';
+import { useAccounts } from 'hooks/useAccounts';
 import { useTransferFundsStages } from 'hooks/accountStages/useTransferFundsStages';
-import { formatKusamaBalance } from 'utils/textUtils';
-import { StageStatus } from 'types/StagesTypes';
+import { SelectInput } from 'components/SelectInput/SelectInput';
 import { NumberInput } from 'components/NumberInput/NumberInput';
 import AccountCard from 'components/Account/Account';
-import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
-import { useApi } from 'hooks/useApi';
-import { BN } from '@polkadot/util';
+import { StageStatus } from 'types/StagesTypes';
+import { formatKusamaBalance } from 'utils/textUtils';
 import { fromStringToBnString } from 'utils/bigNum';
 import { debounce } from 'utils/helpers';
+import { AdditionalWarning100, Coral700 } from 'styles/colors';
+import DefaultMarketStages from '../../Token/Modals/StagesModal';
+import { TTransferFunds } from './types';
 
 const tokenSymbol = 'KSM';
 

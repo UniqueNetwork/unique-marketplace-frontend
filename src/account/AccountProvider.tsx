@@ -21,7 +21,7 @@ const AccountWrapper: FC = ({ children }) => {
   const [isLoadingDeposits, setIsLoadingDeposits] = useState<boolean>(false);
   const [fetchAccountsError, setFetchAccountsError] = useState<string | undefined>();
   const [selectedAccount, setSelectedAccount] = useState<Account>();
-  const { rpcClient, api, rawKusamaRpcApi, rawKusamaSdk } = useApi();
+  const { api, kusamaSdk } = useApi();
 
   const changeAccount = useCallback((account: Account) => {
     localStorage.setItem(DefaultAccountKey, account.address);
@@ -105,10 +105,10 @@ const AccountWrapper: FC = ({ children }) => {
 
   const unsubscribesBalancesChanges = useRef<Record<string, Codec>>({});
   const subscribeBalancesChanges = useCallback(async (accounts: Account[]) => {
-    if (!rawKusamaSdk?.api) return;
+    if (!kusamaSdk?.api) return;
 
     const unsubscribes = await Promise.all(accounts.map(async (account) => {
-      const unsubscribe = await rawKusamaSdk.api.query.system.account(account.address, ({ data: { free } }: TQueryAccountResponse) => {
+      const unsubscribe = await kusamaSdk.api.query.system.account(account.address, ({ data: { free } }: TQueryAccountResponse) => {
         if (!account.balance?.KSM || !free.sub(account.balance.KSM).isZero()) {
           setAccounts((accounts) => accounts.map((_account: Account) => ({
             ..._account,
@@ -120,11 +120,11 @@ const AccountWrapper: FC = ({ children }) => {
     }));
 
     unsubscribesBalancesChanges.current = unsubscribes.reduce<Record<string, Codec>>((acc, item) => ({ ...acc, ...item }), {});
-  }, [rawKusamaSdk, setAccounts]);
+  }, [kusamaSdk, setAccounts]);
 
   const fetchAccounts = useCallback(async () => {
     // if (!rpcClient?.isKusamaApiConnected) return;
-    if (!rawKusamaSdk) return;
+    if (!kusamaSdk) return;
     setIsLoading(true);
 
     const allAccounts = await getAccounts();
@@ -149,7 +149,7 @@ const AccountWrapper: FC = ({ children }) => {
       setFetchAccountsError('No accounts in extension');
     }
     setIsLoading(false);
-  }, [rawKusamaSdk, getAccountsBalances, getAccountsWhiteListStatus]);
+  }, [kusamaSdk, getAccountsBalances, getAccountsWhiteListStatus]);
 
   const fetchAccountsWithDeposits = useCallback(async () => {
     setIsLoadingDeposits(true);

@@ -1,7 +1,7 @@
 import { BN } from '@polkadot/util';
 import { DecoratedRpc, SubmittableExtrinsic } from '@polkadot/api/types';
 import { RpcInterface } from '@polkadot/rpc-core/types/jsonrpc';
-import { DecodedAttributes } from '@unique-nft/sdk/tokens';
+import { DecodedAttributes, OwnerAddress } from '@unique-nft/sdk/tokens';
 import { Account } from '../../account/AccountContext';
 import { UnsignedTxPayload } from '@unique-nft/sdk/types';
 
@@ -40,7 +40,7 @@ export interface NFTCollection {
   coverImageUrl?: string
   collectionName?: string
   description?: string
-  owner?: CrossAccountId | string
+  owner?: string
   sponsorship?: NFTCollectionSponsorship | null
 }
 
@@ -50,7 +50,7 @@ export type AttributesDecoded = {
 
 export interface NFTToken {
   id: number
-  owner?: CrossAccountId
+  owner?: OwnerAddress
   attributes?: DecodedAttributes
   imageUrl: string
   collectionId?: number
@@ -116,37 +116,4 @@ export type MarketplaceAbiMethods = {
   withdrawAllKSM: (ethAddress: string) => {
     encodeABI: () => any;
   };
-}
-
-export interface INFTController<Collection, Token> {
-  getToken(collectionId: number, tokenId: number): Promise<Token | null>
-  getAccountMarketableTokens(account: string): Promise<Token[]>
-}
-
-export interface ICollectionController<Collection, Token> {
-  getCollection(collectionId: number): Promise<Collection | null>
-  getFeaturedCollections(): Promise<Collection[]>
-  setCollectionSponsor(collectionId: number, sponsorAddress: string, options: TransactionOptions): Promise<void>
-  confirmSponsorship(collectionId: number, options: TransactionOptions): Promise<void>
-  removeCollectionSponsor(collectionId: number, options: TransactionOptions): Promise<void>
-}
-
-export interface IMarketController {
-  kusamaDecimals: number
-  addToWhiteList(account: string, options: TransactionOptions, signMessage: TSignMessage): Promise<void>
-  checkWhiteListed(account: string): Promise<boolean>
-  lockNftForSale(account: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void>
-  sendNftToSmartContract(account: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void>
-  setForFixPriceSale(account: string, collectionId: string, tokenId: string, price: string, options: TransactionOptions): Promise<void>
-  cancelSell(account: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void>
-  unlockNft(account: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void>
-  getUserDeposit(account: string): Promise<BN>
-  addDeposit(account: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void>
-  withdrawDeposit(account: string, options: TransactionOptions): Promise<void>
-  buyToken(account: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void>
-  transferToken(from: string, to: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void>
-  transferToAuction(owner: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void>
-  transferBidBalance(from: string, amount: string, options: TransactionOptions): Promise<void>
-  transferBalance(from: string, to: string, amount: string, options: TransactionOptions): Promise<void>
-  getKusamaFee(sender: string, recipient?: string, value?: BN): Promise<string | null>
 }

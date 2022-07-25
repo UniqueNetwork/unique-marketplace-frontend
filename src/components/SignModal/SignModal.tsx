@@ -1,9 +1,8 @@
 import React, { FC, useCallback, useState } from 'react';
-import { Avatar, Button, Heading, Modal, Text } from '@unique-nft/ui-kit';
+import { Button, Heading, Modal, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { KeyringPair } from '@polkadot/keyring/types';
 
-import DefaultAvatar from '../../static/icons/default-avatar.svg';
 import { Account, AccountSigner } from '../../account/AccountContext';
 import { useAccounts } from '../../hooks/useAccounts';
 import { PasswordInput } from '../PasswordInput/PasswordInput';

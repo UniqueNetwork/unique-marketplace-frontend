@@ -3,15 +3,15 @@ import { Icon, Loader, Text } from '@unique-nft/ui-kit';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { NFTToken } from 'api/uniqueSdk/types';
+import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
+import { Offer } from 'api/restApi/offers/types';
+import { useApi } from 'hooks/useApi';
+import { useAccounts } from 'hooks/useAccounts';
 import { Picture } from '..';
-import { useApi } from '../../hooks/useApi';
-import { NFTToken } from '../../api/chainApi/unique/types';
-import { formatKusamaBalance } from '../../utils/textUtils';
-import { Primary600 } from '../../styles/colors';
-import { timeDifference } from '../../utils/timestampUtils';
-import { Offer } from '../../api/restApi/offers/types';
-import { compareEncodedAddresses } from '../../api/chainApi/utils/addressUtils';
-import { useAccounts } from '../../hooks/useAccounts';
+import { formatKusamaBalance } from 'utils/textUtils';
+import { timeDifference } from 'utils/timestampUtils';
+import { Primary600 } from 'styles/colors';
 import config from '../../config';
 
 export type TTokensCard = {
@@ -49,9 +49,9 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, ...props })
 
     if (tokenId && collectionId) {
       setIsFetching(true);
-      void api?.nft?.getToken(collectionId, tokenId).then((token: NFTToken) => {
+      void api?.nft?.getToken(collectionId, tokenId).then((token: NFTToken | null) => {
         setIsFetching(false);
-        setToken(token);
+        if (token) { setToken(token); }
       });
     }
     return {};

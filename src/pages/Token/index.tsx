@@ -3,17 +3,17 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Icon, Link, useNotifications } from '@unique-nft/ui-kit';
 
 import { useApi } from '../../hooks/useApi';
-import { NFTToken } from '../../api/chainApi/unique/types';
+import { NFTToken } from 'api/uniqueSdk/types';
 import { MarketType } from '../../types/MarketTypes';
 import { CommonTokenDetail } from './TokenDetail/CommonTokenDetail';
-import { useOffer } from '../../api/restApi/offers/offer';
+import { useOffer } from 'api/restApi/offers/offer';
 import { TokenTrading } from './TokenDetail/TokenTrading';
 import { Error404 } from '../errors/404';
 import TokenPageModal from './Modals/TokenPageModal';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
 import { useAccounts } from '../../hooks/useAccounts';
 import { shortcutText } from '../../utils/textUtils';
-import { compareEncodedAddresses } from '../../api/chainApi/utils/addressUtils';
+import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
 import styled from 'styled-components';
 import { BlueGrey500 } from 'styles/colors';
 
@@ -33,7 +33,7 @@ const TokenPage = () => {
     if (!api?.nft) return;
     setIsFetchingToken(true);
     const token = await api?.nft?.getToken(Number(collectionId), Number(id));
-    setToken(token);
+    if (token) setToken(token);
     setIsFetchingToken(false);
   }, [api?.nft, collectionId, id]);
 

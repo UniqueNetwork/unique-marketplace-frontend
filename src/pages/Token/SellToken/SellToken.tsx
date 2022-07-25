@@ -53,15 +53,6 @@ const ActionsWrapper = styled.div`
   column-gap: var(--gap);
 `;
 
-const WarningWrapper = styled.div`
-  background: ${AdditionalWarning100};
-  color: ${AdditionalWarning500};
-  border-radius: 4px;
-  padding: calc(var(--gap) / 2) var(--gap);
-  margin-top: var(--gap);
-  max-width: 704px;
-`;
-
 const ButtonWrapper = styled.div`
   width: 200px;
   margin-top: calc(var(--gap) * 1.5);

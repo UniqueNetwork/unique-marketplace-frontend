@@ -1,10 +1,10 @@
 import { Sdk } from '@unique-nft/sdk';
-import { INFTController, NFTCollection, NFTToken, TokenId, UniqueDecoratedRpc } from './types';
+import { NFTToken, UniqueDecoratedRpc } from './types';
 import { Settings } from '../restApi/settings/types';
 import { getEthAccount, normalizeAccountId } from './utils/addressUtils';
 import { checkTokenIsAllowed, filterAllowedTokens } from './utils/checkTokenIsAllowed';
 
-export class UniqueSDKNFTController implements INFTController<NFTCollection, NFTToken> {
+export class UniqueSDKNFTController {
   private sdk: Sdk;
   private readonly collectionIds: number[];
   private readonly allowedTokens: Record<number, string>;

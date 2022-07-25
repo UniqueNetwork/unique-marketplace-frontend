@@ -7,11 +7,9 @@ import DefaultMarketStages from './StagesModal';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 import { TAuctionProps, TFixPriceProps } from './types';
 import { useAuctionSellStages, useSellFixStages } from '../../../hooks/marketplaceStages';
-import { useFee } from '../../../hooks/useFee';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { StageStatus } from '../../../types/StagesTypes';
 import { NumberInput } from 'components/NumberInput/NumberInput';
-import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 
 const tokenSymbol = 'KSM';
 
@@ -66,7 +64,6 @@ type TAskSellModalProps = {
 
 export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixPrice }) => {
   const { selectedAccount } = useAccounts();
-  const { kusamaFee } = useFee();
   const [activeTab, setActiveTab] = useState<number>(0);
   const [priceInputValue, setPriceInputValue] = useState<string>();
 

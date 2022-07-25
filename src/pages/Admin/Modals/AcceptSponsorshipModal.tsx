@@ -2,14 +2,15 @@ import React, { FC, useCallback, useEffect, useState } from 'react';
 import { Button, Heading, Text } from '@unique-nft/ui-kit';
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
 import styled from 'styled-components/macro';
-import AccountCard from '../../../components/Account/Account';
-import { useFee } from '../../../hooks/useFee';
-import StagesModal from '../../Token/Modals/StagesModal';
-import { useAcceptSponsorshipStages } from '../../../hooks/adminStages/useAcceptSponsorshipStages';
-import { useApi } from '../../../hooks/useApi';
-import { NFTCollection } from '../../../api/chainApi/unique/types';
+
+import { NFTCollection } from 'api/uniqueSdk/types';
+import { useApi } from 'hooks/useApi';
+import { useFee } from 'hooks/useFee';
+import { useAcceptSponsorshipStages } from 'hooks/adminStages/useAcceptSponsorshipStages';
 import { useRejectSponsorshipStages } from 'hooks/adminStages/useRejectSponsorshipStages';
+import AccountCard from 'components/Account/Account';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
+import StagesModal from '../../Token/Modals/StagesModal';
 
 const tokenSymbol = 'KSM';
 
