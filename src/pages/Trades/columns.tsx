@@ -1,12 +1,12 @@
 import React, { useCallback } from 'react';
-import { Button, Icon, TableColumnProps, Text } from '@unique-nft/ui-kit';
+import { Icon, TableColumnProps, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
 import { AddressComponent } from './AddressComponent/AddressComponent';
 import { timestampTableFormat } from '../../utils/timestampUtils';
 import { TokenComponent } from './TokenComponent/TokenComponent';
 import { formatKusamaBalance } from '../../utils/textUtils';
-import { BlueGrey600, Grey300 } from '../../styles/colors';
+import { BlueGrey600, Grey300, Grey500, Secondary400 } from '../../styles/colors';
 import config from '../../config';
 import { TokenDescription, Trade } from '../../api/restApi/trades/types';
 import { DeviceSize } from '../../hooks/useDeviceSize';
@@ -47,14 +47,14 @@ const getTradesColumns = ({ deviceSize, onShowTradesDetailsModal }: ColumnProps)
   },
   {
     title: 'Time',
-    width: '11.84%',
+    width: '11.2%',
     isSortable: true,
     render: (time: number) => <TimeCell><Text color={BlueGrey600}>{timestampTableFormat(new Date(time).valueOf())}</Text></TimeCell>,
     field: 'tradeDate'
   },
   {
     title: 'Price',
-    width: '12.84%',
+    width: '14.48%',
     isSortable: true,
     render: (value: string) => <Text color={BlueGrey600}>{`${formatKusamaBalance(value)} ${tokenSymbol}`}</Text>,
     field: 'price'
@@ -68,13 +68,13 @@ const getTradesColumns = ({ deviceSize, onShowTradesDetailsModal }: ColumnProps)
   },
   {
     title: 'Seller',
-      width: '17.52%',
+      width: '17.02%',
     render: (data: string) => <AddressComponent text={data} />,
     field: 'seller'
   },
   {
     title: 'Buyer',
-    width: '17.52%',
+    width: '17.02%',
     render: (data: string) => <AddressComponent text={data} />,
     field: 'buyer'
   },
@@ -112,6 +112,11 @@ const HeaderCutted = styled.div`
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+  span {
+    font-size: 16px;
+    line-height: 24px;
+    color: ${Grey500};
+  }
 `;
 
 const StyledButton = styled.button`
@@ -122,6 +127,14 @@ const StyledButton = styled.button`
   padding: 8px;
   width: 32px;
   height: 32px;
+  svg {
+    fill: ${Secondary400};
+  }
+  @media (max-width: 768px) {
+    position: absolute;
+    top: var(--gap);
+    right: 0;
+  }
 `;
 
 const TimeCell = styled.div`

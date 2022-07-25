@@ -29,8 +29,8 @@ const MobileTable: FC<MobileTableProps> = ({
       <MobileTableRow
         key={index}
       >
-        {columns?.map((column) => (
-          <div key={`column-${column.field || ''}`}>
+        {columns?.map((column, index) => (
+          <div key={`column-${column.field || ''}-${index}`}>
             {typeof column?.title === 'object' ? <>{column.title}</> : <Text color={'grey-500'}>{`${column?.title || ''}`}</Text>}
             {column.render && <>{column.render(item[column.field as keyof TableRowProps], item)}</>}
             {!column.render && <Text>{item[column.field as keyof TableRowProps]?.toString() || ''}</Text>}

@@ -55,9 +55,9 @@ const TokenTradesDetailsModal: FC<IConfirmModalProps> = ({ trade, onCancel }) =>
         return (!bid.amount.startsWith('-') && bid.status === 'finished');
       })
       .sort((a, b) => {
-        return a.updatedAt > b.updatedAt ? 1 : -1;
+        return a.updatedAt < b.updatedAt ? 1 : -1;
       });
-      bids[bids.length - 1] = { ...bids[bids.length - 1], isWinner: true };
+      bids[0] = { ...bids[0], isWinner: true };
       setFilteredBids(bids);
     }
   }, [tradeDetails]);
@@ -79,7 +79,15 @@ const TokenTradesDetailsModal: FC<IConfirmModalProps> = ({ trade, onCancel }) =>
   );
 };
 
-const Content = styled.div``;
+const Content = styled.div`
+  .unique-table-data {
+    max-height: 400px;
+    overflow: auto;
+    @media (max-width: 640px) {
+      max-height: unset;
+    }
+  }
+`;
 
 const TableStyled = styled(Table)`
   @media (max-width: 640px) {
