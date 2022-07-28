@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { Checkbox, Text } from '@unique-nft/ui-kit';
 import { useCollections } from '../../hooks/useCollections';
@@ -24,7 +24,9 @@ interface CollectionsFilterProps {
 const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attributeCounts, onChange, onAttributesChange, onAttributeCountsChange, testid }) => {
   const { collections, isFetching } = useCollections();
   const { collections: selectedCollections = [], attributes: selectedAttributes = [], attributeCounts: selectedAttributeCounts = [] } = value || {};
-  const { settings } = useApi();
+  const { settings, currentChain } = useApi();
+
+  const collectionIds = useMemo(() => currentChain && settings ? settings.blockchains[currentChain].blockchain.unique.collectionIds : [], [settings, currentChain]);
 
   const onCollectionSelect = useCallback((collectionId: number) => (value: boolean) => {
     let _selectedCollections;
@@ -34,7 +36,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attr
       _selectedCollections = selectedCollections.filter((item) => item !== collectionId);
     }
     onChange(_selectedCollections);
-  }, [selectedCollections, selectedAttributeCounts, onAttributesChange, onChange, settings?.blockchain.unique.collectionIds]);
+  }, [selectedCollections, selectedAttributeCounts, onAttributesChange, onChange, collectionIds]);
 
   const onCollectionsClear = useCallback(() => {
     onChange([]);

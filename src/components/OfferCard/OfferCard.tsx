@@ -11,6 +11,7 @@ import { formatKusamaBalance } from 'utils/textUtils';
 import { timeDifference } from 'utils/timestampUtils';
 import { Primary600 } from 'styles/colors';
 import config from '../../config';
+import { useApi } from '../../hooks/useApi';
 
 export type TTokensCard = {
   offer: Offer
@@ -19,6 +20,7 @@ export type TTokensCard = {
 
 export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
   const { selectedAccount } = useAccounts();
+  const { currentChain } = useApi();
 
   const {
     collectionName,
@@ -43,11 +45,11 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
 
   return (
     <TokensCardStyled>
-      <PictureWrapper to={`/token/${offer?.collectionId}/${offer?.tokenId}`}>
+      <PictureWrapper to={`/${currentChain || ''}/token/${offer?.collectionId}/${offer?.tokenId}`}>
         <Picture alt={offer?.tokenId?.toString() || ''} src={image} />
       </PictureWrapper>
       <Description>
-        <Link to={`/token/${offer?.collectionId}/${offer?.tokenId}`} title={`${prefix || ''} #${offer?.tokenId}`}>
+        <Link to={`/${currentChain || ''}/token/${offer?.collectionId}/${offer?.tokenId}`} title={`${prefix || ''} #${offer?.tokenId}`}>
           <Text
             size='l'
             weight='regular'

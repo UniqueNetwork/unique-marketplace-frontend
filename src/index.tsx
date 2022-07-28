@@ -5,6 +5,45 @@ import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-d
 import { Market, MyTokens, Accounts, Trades, FAQ, TokenPage, AdminPanel, AdminLogin } from './pages';
 import { GlobalStyle } from './styles';
 
+const commonRoutes = (<>
+  <Route
+    element={<TokenPage />}
+    path={'token/:collectionId/:id'}
+  />
+  <Route
+    element={<Market />}
+    path={'market'}
+  />
+  <Route
+    element={<MyTokens />}
+    path={'myTokens'}
+  />
+  <Route
+    element={<Accounts />}
+    path={'accounts'}
+  />
+  <Route
+    element={<Trades />}
+    path={'trades'}
+  />
+  <Route
+    element={<FAQ />}
+    path={'faq'}
+  />
+  <Route
+    path={'administration'}
+  >
+    <Route
+      element={<AdminLogin />}
+      path={'login'}
+    />
+    <Route
+      element={<AdminPanel />}
+      index
+    />
+  </Route>
+</>);
+
 ReactDOM.render(
   <React.StrictMode>
     <GlobalStyle />
@@ -18,46 +57,9 @@ ReactDOM.render(
             element={<Navigate to='market' />}
             index
           />
-          <Route
-            element={<TokenPage />}
-            path={'/token/:collectionId/:id'}
-          />
-          <Route
-            element={<Market />}
-            path={'market'}
-          >
-            <Route
-              element={<Market />}
-              index
-            />
-          </Route>
-          <Route
-            element={<MyTokens />}
-            path={'myTokens'}
-          />
-          <Route
-            element={<Accounts />}
-            path={'accounts'}
-          />
-          <Route
-            element={<Trades />}
-            path={'trades'}
-          />
-          <Route
-            element={<FAQ />}
-            path={'faq'}
-          />
-          <Route
-            path={'administration'}
-          >
-            <Route
-              element={<AdminLogin />}
-              path={'login'}
-            />
-            <Route
-              element={<AdminPanel />}
-              index
-            />
+          {commonRoutes}
+          <Route path={':chainId/'}>
+            {commonRoutes}
           </Route>
           <Route
             element={<Navigate to='market' />}

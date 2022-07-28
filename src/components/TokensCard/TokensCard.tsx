@@ -26,7 +26,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, ...
   const [token, setToken] = useState<(NFTToken & Partial<Offer>) | undefined>(props.token);
   const [isFetching, setIsFetching] = useState<boolean>(false);
 
-  const { api } = useApi();
+  const { api, currentChain } = useApi();
   const { selectedAccount } = useAccounts();
 
   const {
@@ -75,11 +75,11 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, ...
 
   return (
     <TokensCardStyled>
-      <PictureWrapper to={`/token/${collectionId || ''}/${tokenId || ''}`}>
+      <PictureWrapper to={`/${currentChain || ''}/token/${collectionId || ''}/${tokenId || ''}`}>
         <Picture alt={tokenId?.toString() || ''} src={imageUrl} />
       </PictureWrapper>
       <Description>
-        <Link to={`/token/${collectionId}/${tokenId}`} title={`${prefix || ''} #${tokenId}`}>
+        <Link to={`/${currentChain || ''}/token/${collectionId}/${tokenId}`} title={`${prefix || ''} #${tokenId}`}>
           <Text
             size='l'
             weight='regular'

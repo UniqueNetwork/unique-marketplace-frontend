@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAccounts } from './useAccounts';
 import { useApi } from './useApi';
 import { formatKusamaBalance } from 'utils/textUtils';
@@ -11,7 +11,7 @@ interface UseFeeReturn {
 }
 
 export const useFee = (): UseFeeReturn => {
-  const { api, settings } = useApi();
+  const { api, settings, currentChain } = useApi();
   const { selectedAccount } = useAccounts();
   const [kusamaFee, setKusamaFee] = useState<string>('0');
   const [fetchingKusamaFee, setFetchingKusamaFee] = useState<boolean>(false);
@@ -30,7 +30,7 @@ export const useFee = (): UseFeeReturn => {
     getKusamaFee();
   }, [getKusamaFee]);
 
-  const marketCommission = settings?.blockchain.kusama.marketCommission || '0';
+  const marketCommission = useMemo(() => currentChain && settings ? settings.blockchains[currentChain].blockchain.kusama.marketCommission : '0', [settings, currentChain]);
 
   return { marketCommission, kusamaFee, fetchingKusamaFee, getKusamaFee };
 };
