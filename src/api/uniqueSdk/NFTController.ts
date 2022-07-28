@@ -8,10 +8,10 @@ export class UniqueSDKNFTController {
   private sdk: Sdk;
   private readonly collectionIds: number[];
   private readonly allowedTokens: Record<number, string>;
-  constructor(sdk: Sdk, settings: Settings) {
+  constructor(sdk: Sdk, options: { collectionIds: number[], allowedTokens: { collection: number, tokens: string }[] }) {
     this.sdk = sdk;
-    this.collectionIds = settings.blockchain.unique.collectionIds;
-    this.allowedTokens = settings.blockchain?.unique?.allowedTokens.reduce((acc, item) => ({ ...acc, [item.collection]: item.tokens }), {}) || {};
+    this.collectionIds = options.collectionIds;
+    this.allowedTokens = options.allowedTokens.reduce((acc, item) => ({ ...acc, [item.collection]: item.tokens }), {}) || {};
   }
 
   async getAccountMarketableTokens(account: string): Promise<NFTToken[]> {

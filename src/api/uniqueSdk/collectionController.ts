@@ -1,14 +1,13 @@
 import { Sdk } from '@unique-nft/sdk';
 import '@unique-nft/sdk/tokens';
 import { TransactionOptions, NFTCollection } from './types';
-import { Settings } from '../restApi/settings/types';
 
 export class UniqueSDKCollectionController {
   private sdk: Sdk;
   private collectionIds: number[];
-  constructor(sdk: Sdk, settings: Settings) {
+  constructor(sdk: Sdk, options: { collectionIds: number[] }) {
     this.sdk = sdk;
-    this.collectionIds = settings.blockchain.unique.collectionIds;
+    this.collectionIds = options.collectionIds;
   }
 
   async confirmSponsorship(collectionId: number, options: TransactionOptions): Promise<void> {

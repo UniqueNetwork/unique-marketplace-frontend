@@ -117,3 +117,10 @@ export type MarketplaceAbiMethods = {
     encodeABI: () => any;
   };
 }
+
+export type UniqueSDKMarketControllerOptions = {
+  escrowAddress: string
+  contractAddress: string
+  auctionAddress: string
+  wsEndpoint: string
+};

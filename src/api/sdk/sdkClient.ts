@@ -14,31 +14,47 @@ declare module '@unique-nft/sdk' {
   }
 }
 
+type SdkSet = {
+  [chainId: string]: { unique: Sdk, kusama: Sdk }
+};
+
 export class SdkClient {
   public sdk: Sdk | undefined;
   public isReady = false;
   public error: Error | undefined;
+  public sdkSet: SdkSet = {};
 
-  constructor(url?: string) {
-    if (url) { this.connect(url); }
+  async disconnect(chainId: string) {
+    await this.sdkSet[chainId]?.unique.api.disconnect();
+    await this.sdkSet[chainId]?.kusama.api.disconnect();
+    delete this.sdkSet[chainId];
   }
 
-  async disconnect() {
-    await this.sdk?.api.disconnect();
-    this.sdk = undefined;
-  }
+  private async connectSdk(url: string) {
+    const sdk = await Sdk.create({ chainWsUrl: url });
 
-  async connect(url: string) {
-    this.sdk = await Sdk.create({ chainWsUrl: url });
-
-    this.sdk.api.on('disconnected', () => {
+    sdk.api.on('disconnected', () => {
       this.isReady = false;
     });
 
-    this.sdk.api.on('error', (error: Error) => {
+    sdk.api.on('error', (error: Error) => {
       this.error = error;
       this.isReady = false;
     });
+    return sdk;
+  }
+
+  async connect(chainId: string, uniqueWsUrl: string, kusamaWsUrl: string) {
+    this.isReady = false;
+    const sdkPair = {
+      unique: await this.connectSdk(uniqueWsUrl),
+      kusama: await this.connectSdk(kusamaWsUrl)
+    };
+
+    this.sdkSet = {
+      ...this.sdkSet,
+      [chainId]: sdkPair
+    };
 
     this.isReady = true;
   }

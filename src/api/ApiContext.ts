@@ -27,6 +27,7 @@ export type ApiContextProps = {
   kusamaSdk?: Sdk
   chainData?: ChainProperties
   settings?: Settings
+  currentChain?: string
 }
 
 const ApiContext: Context<ApiContextProps> = createContext({} as unknown as ApiContextProps);

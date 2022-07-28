@@ -1,0 +1,72 @@
+{
+  "marketType": "secondary",
+  "administrators": [
+    "5HGjWAeFDfFCWPsjFQdVV2Msvz2XtMktvgocEZcCj68kUMaw",
+    "yGDRdyKPLudSprAQgeCfeWLHkyZFD6yyuttoeGgRUeHBQgPod",
+    "5EALag5gFWyjbz9kYV5VNUr7tjg9MrAMg2nZhWwSmAHdaiZp",
+    "5GWhYuX6v6JB7PpqLDnNNXiykUMrPbT2ytyZyeQsbK5Yenz9",
+    "5FyM6ZTLNKQniseGKUwcqCL9hxoCGka62xV7ouTQ94afdqG5",
+    "5FBgzTRTXjNn2SEkvEuNGS37dq9PqgfgmyB2pGozafJBebtd",
+    "5F4qHSL8dyqj5GsDUGp2QpEJG2upsRoWmfr7ody7ffJevSwy",
+    "5DqTZVx8UdoskNjA1Q7sSALXz4A7dnggCHppdxTbabQhpnUE",
+    "5FyJMntLrXfgKHtfupvhbhsTNa59oYj2QjeAKQEQfFnL7jRS",
+    "yGCvuCHN71FyzUWcEjQiLEs194HbpfEAcvKmsVVfs3KVGyUGR",
+    "yGETrojQbEcpYyk9j5h1DXuTSEi91i6FgXdvmWsQdkxWGTXHz",
+    "5EWnhLXhCDHMDKMooJ2JxRRneLbnGFVPGB7Ho5RRcRBfHnWZ",
+    "5CG6aX3W8XnFBHCbjsJYsvdshtua3G6FruRSkx1mviCvpS1r",
+    "5FyM6ZTLNKQniseGKUwcqCL9hxoCGka62xV7ouTQ94afdqG5"
+  ],
+  "mainSaleSeedAddress": "5FyM6ZTLNKQniseGKUwcqCL9hxoCGka62xV7ouTQ94afdqG5",
+  "blockchains": {
+    "unique": {
+      "chainName": "Unique",
+      "blockchain": {
+        "escrowAddress": "5FNhZPs3tXhUCpLuKEh5mntAiuaLt9ofVqH5yDTp6pu1KuPe",
+        "unique": {
+          "wsEndpoint": "wss://ws-rc.unique.network",
+          "collectionIds": [
+            1560,
+            1562,
+            1573,
+            2
+          ],
+          "allowedTokens": [],
+          "contractAddress": "0xFD8BF5B04ADB44DeBeC75816876413ebC52be6C5"
+        },
+        "kusama": {
+          "wsEndpoint": "wss://ws-relay-bench.unique.network",
+          "marketCommission": "10"
+        }
+      },
+      "auction": {
+        "commission": 10,
+        "address": "unibmqqL6HgvBNWdyF6so95NkigTTumCaVRergyxHmtFBvbe8"
+      }
+    },
+    "quartz": {
+      "chainName": "QUARTZ by UNIQUE",
+      "blockchain": {
+        "escrowAddress": "5DFkqWGc7aa5a6YYx2Y626mpoyVwwYRz57uJTBciUJawaLrt",
+        "unique": {
+          "wsEndpoint": "wss://ws-quartz.unique.network",
+          "collectionIds": [
+            1,
+            2,
+            5,
+            6
+          ],
+          "allowedTokens": [],
+          "contractAddress": "0x8AE9E0334341B9F79686055841Ec643C83848ffe"
+        },
+        "kusama": {
+          "wsEndpoint": "wss://ws-relay-bench.unique.network",
+          "marketCommission": "10"
+        }
+      },
+      "auction": {
+        "commission": 10,
+        "address": "yGJSVVMivc2mwssTzduYtASSMGCNp3vKMX7ZkGy36sWq69pGK"
+      }
+    }
+  }
+}

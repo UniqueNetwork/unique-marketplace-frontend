@@ -9,52 +9,84 @@ import { SdkClient } from './sdk/sdkClient';
 import { UniqueSDKNFTController } from './uniqueSdk/NFTController';
 import { UniqueSDKCollectionController } from './uniqueSdk/collectionController';
 import { UniqueSDKMarketController } from './uniqueSdk/marketController';
-import { ChainProperties } from '@unique-nft/sdk/types';
 import config from '../config';
 
-import { uniqueSdkClient as unique, kusamaSdkClient as kusama } from '.';
+import mockSettings from './mockSettings.json';
+
+import { sdkClient as sdk } from '.';
 
 keyring.loadAll({});
 
 interface ChainProviderProps {
   children: React.ReactNode
-  uniqueSdk?: SdkClient
-  kusamaSdk?: SdkClient
+  sdkClient?: SdkClient
 }
 
-const ApiWrapper = ({ children, uniqueSdk = unique, kusamaSdk = kusama }: ChainProviderProps) => {
-  const [chainData, setChainData] = useState<ChainProperties>();
+const ApiWrapper = ({ children, sdkClient = sdk }: ChainProviderProps) => {
   const [isRpcClientInitialized, setRpcClientInitialized] = useState<boolean>(false);
   const { chainId } = useParams<'chainId'>();
   const [settings, setSettings] = useState<Settings>();
 
   useEffect(() => {
     (async () => {
-      const { data: settings } = await getSettings();
-      setSettings(settings);
+      // const { data: settings } = await getSettings();
+      const settings: Settings = await Promise.resolve(mockSettings);
+      setSettings(mockSettings);
 
-      await uniqueSdk.connect(settings.blockchain.unique.wsEndpoint);
-      await kusamaSdk.connect(settings.blockchain.kusama.wsEndpoint);
+      for (const chainId in settings.blockchains) {
+        const { unique, kusama } = settings.blockchains[chainId].blockchain;
+        await sdkClient?.connect(
+          chainId,
+          unique.wsEndpoint,
+          kusama.wsEndpoint
+        );
+      }
 
-      setRpcClientInitialized(uniqueSdk?.isReady && kusamaSdk?.isReady);
-      setChainData(uniqueSdk?.sdk?.chainProperties());
+      setRpcClientInitialized(sdkClient?.isReady);
     })().then(() => console.log('Rpc connection: success')).catch((e) => console.log('Rpc connection: failed', e));
   }, []);
+
+  const currentChainId = useMemo(() => chainId || Object.keys(settings?.blockchains || {})[0], [settings, chainId]);
+
+  const currentChain = useMemo(() => {
+    console.log(currentChainId);
+    if (!sdkClient?.isReady) return;
+    return sdkClient?.sdkSet[currentChainId];
+  }, [currentChainId, sdkClient?.isReady]);
+
+  const currentSettings = useMemo(() => {
+    return currentChainId ? settings?.blockchains[currentChainId] : undefined;
+  }, [settings, currentChainId]);
 
   // get context value for ApiContext
   const value = useMemo<ApiContextProps>(
     () => ({
-      api: (isRpcClientInitialized && settings && uniqueSdk?.sdk && kusamaSdk.sdk && {
-        collection: new UniqueSDKCollectionController(uniqueSdk.sdk, settings),
-        nft: new UniqueSDKNFTController(uniqueSdk.sdk, settings),
-        market: new UniqueSDKMarketController(uniqueSdk.sdk, kusamaSdk.sdk, settings)
+      api: (isRpcClientInitialized && settings && currentChain && currentSettings && {
+        collection: new UniqueSDKCollectionController(currentChain.unique, {
+          collectionIds: currentSettings.blockchain.unique.collectionIds
+        }),
+        nft: new UniqueSDKNFTController(currentChain.unique, {
+          collectionIds: currentSettings.blockchain.unique.collectionIds,
+          allowedTokens: currentSettings.blockchain.unique.allowedTokens
+        }),
+        market: new UniqueSDKMarketController(
+          currentChain.unique,
+          currentChain.kusama,
+          {
+            auctionAddress: currentSettings.auction.address,
+            contractAddress: currentSettings.blockchain.unique.contractAddress,
+            escrowAddress: currentSettings.blockchain.escrowAddress,
+            wsEndpoint: currentSettings.blockchain.unique.wsEndpoint
+          }
+        )
       }) || undefined,
-      uniqueSdk: uniqueSdk?.sdk,
-      kusamaSdk: kusamaSdk?.sdk,
-      chainData,
-      settings
+      uniqueSdk: currentChain?.unique,
+      kusamaSdk: currentChain?.kusama,
+      chainData: currentChain?.unique.chainProperties(),
+      settings,
+      currentChain: currentChainId
     }),
-    [isRpcClientInitialized, chainId, chainData, settings]
+    [isRpcClientInitialized, currentChain, settings, currentChainId, currentSettings]
   );
 
   return (

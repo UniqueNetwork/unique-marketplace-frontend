@@ -1,7 +1,7 @@
 import { Sdk } from '@unique-nft/sdk';
 import { TokenDecoded, TokenIdArguments } from '@unique-nft/sdk/tokens';
 import { BN } from '@polkadot/util';
-import { CrossAccountId, EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType, TransactionOptions, TSignMessage, UniqueDecoratedRpc } from './types';
+import { CrossAccountId, EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType, TransactionOptions, TSignMessage, UniqueDecoratedRpc, UniqueSDKMarketControllerOptions } from './types';
 import marketplaceAbi from './abi/marketPlaceAbi.json';
 import nonFungibleAbi from './abi/nonFungibleAbi.json';
 import { collectionIdToAddress, getEthAccount, compareEncodedAddresses, isTokenOwner, normalizeAccountId } from './utils/addressUtils';
@@ -15,7 +15,6 @@ import Web3 from 'web3';
 export class UniqueSDKMarketController {
   private uniqueSdk: Sdk;
   private kusamaSdk: Sdk;
-  private settings;
   private web3Instance: Web3;
   private minPrice = 0.000001;
   private defaultGasAmount = 2500000;
@@ -24,16 +23,15 @@ export class UniqueSDKMarketController {
   private auctionAddress: string;
   kusamaDecimals: number;
 
-  constructor(uniqueSdk: Sdk, kusamaSdk: Sdk, settings: Settings) {
+  constructor(uniqueSdk: Sdk, kusamaSdk: Sdk, options: UniqueSDKMarketControllerOptions) {
     this.uniqueSdk = uniqueSdk;
     this.kusamaSdk = kusamaSdk;
-    this.settings = settings;
     this.kusamaDecimals = this.kusamaSdk.chainProperties().decimals;
-    this.escrowAddress = settings.blockchain.escrowAddress;
-    this.contractAddress = settings.blockchain.unique.contractAddress;
-    this.auctionAddress = settings.auction.address;
+    this.escrowAddress = options.escrowAddress;
+    this.contractAddress = options.contractAddress;
+    this.auctionAddress = options.auctionAddress;
 
-    const provider = new Web3.providers.WebsocketProvider(this.settings.blockchain.unique.wsEndpoint, {
+    const provider = new Web3.providers.WebsocketProvider(options.wsEndpoint, {
       reconnect: {
         auto: true,
         delay: 5000,
