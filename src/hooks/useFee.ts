@@ -11,7 +11,7 @@ interface UseFeeReturn {
 }
 
 export const useFee = (): UseFeeReturn => {
-  const { api, settings, currentChain } = useApi();
+  const { api, settings, currentChainId } = useApi();
   const { selectedAccount } = useAccounts();
   const [kusamaFee, setKusamaFee] = useState<string>('0');
   const [fetchingKusamaFee, setFetchingKusamaFee] = useState<boolean>(false);
@@ -30,7 +30,7 @@ export const useFee = (): UseFeeReturn => {
     getKusamaFee();
   }, [getKusamaFee]);
 
-  const marketCommission = useMemo(() => currentChain && settings ? settings.blockchains[currentChain].blockchain.kusama.marketCommission : '0', [settings, currentChain]);
+  const marketCommission = useMemo(() => currentChainId && settings ? settings.blockchains[currentChainId].blockchain.kusama.marketCommission : '0', [settings, currentChainId]);
 
   return { marketCommission, kusamaFee, fetchingKusamaFee, getKusamaFee };
 };

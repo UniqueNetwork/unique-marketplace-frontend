@@ -27,7 +27,7 @@ export const WalletManager: FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isGetKsmOpened, setIsGetKsmOpened] = useState(false);
   const navigate = useNavigate();
-  const { chainData, settings, currentChain } = useApi();
+  const { chainData, settings, currentChainId } = useApi();
   const { info } = useNotifications();
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
@@ -42,7 +42,7 @@ export const WalletManager: FC = () => {
     }
   })), [settings]);
 
-  const currentNetwork = useMemo(() => networks.find(({ id }) => id === currentChain), [networks, currentChain]);
+  const currentNetwork = useMemo(() => networks.find(({ id }) => id === currentChainId), [networks, currentChainId]);
 
   const onNetworkChange = useCallback((network: INetwork) => {
     navigate(`${network.id}/market`);

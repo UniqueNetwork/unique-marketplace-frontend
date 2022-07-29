@@ -26,9 +26,9 @@ interface TokenTradingProps {
 
 export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick, onTransferClick, onDelistClick, onDelistAuctionClick, onPlaceABidClick, onWithdrawClick, onBuyClick, onAuctionClose, testid }) => {
   const { selectedAccount } = useContext(accountContext);
-  const { settings, currentChain } = useApi();
+  const { settings, currentChainId } = useApi();
 
-  const allowedTokens = useMemo(() => settings && currentChain ? settings.blockchains[currentChain].blockchain.unique.allowedTokens : undefined, [settings, currentChain]);
+  const allowedTokens = useMemo(() => settings && currentChainId ? settings.blockchains[currentChainId].blockchain.unique.allowedTokens : undefined, [settings, currentChainId]);
 
   const isAllowed = useMemo(() => {
     if (offer) {

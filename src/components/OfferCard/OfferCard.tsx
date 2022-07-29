@@ -20,7 +20,7 @@ export type TTokensCard = {
 
 export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
   const { selectedAccount } = useAccounts();
-  const { currentChain } = useApi();
+  const { currentChainId } = useApi();
 
   const {
     collectionName,
@@ -45,11 +45,11 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
 
   return (
     <TokensCardStyled>
-      <PictureWrapper to={`/${currentChain || ''}/token/${offer?.collectionId}/${offer?.tokenId}`}>
+      <PictureWrapper to={`/${currentChainId || ''}/token/${offer?.collectionId}/${offer?.tokenId}`}>
         <Picture alt={offer?.tokenId?.toString() || ''} src={image} />
       </PictureWrapper>
       <Description>
-        <Link to={`/${currentChain || ''}/token/${offer?.collectionId}/${offer?.tokenId}`} title={`${prefix || ''} #${offer?.tokenId}`}>
+        <Link to={`/${currentChainId || ''}/token/${offer?.collectionId}/${offer?.tokenId}`} title={`${prefix || ''} #${offer?.tokenId}`}>
           <Text
             size='l'
             weight='regular'

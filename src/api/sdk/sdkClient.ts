@@ -19,7 +19,6 @@ type SdkSet = {
 };
 
 export class SdkClient {
-  public sdk: Sdk | undefined;
   public isReady = false;
   public error: Error | undefined;
   public sdkSet: SdkSet = {};
@@ -30,7 +29,7 @@ export class SdkClient {
     delete this.sdkSet[chainId];
   }
 
-  private async connectSdk(url: string) {
+  private async createSdkInstance(url: string) {
     const sdk = await Sdk.create({ chainWsUrl: url });
 
     sdk.api.on('disconnected', () => {
@@ -47,8 +46,8 @@ export class SdkClient {
   async connect(chainId: string, uniqueWsUrl: string, kusamaWsUrl: string) {
     this.isReady = false;
     const sdkPair = {
-      unique: await this.connectSdk(uniqueWsUrl),
-      kusama: await this.connectSdk(kusamaWsUrl)
+      unique: await this.createSdkInstance(uniqueWsUrl),
+      kusama: await this.createSdkInstance(kusamaWsUrl)
     };
 
     this.sdkSet = {

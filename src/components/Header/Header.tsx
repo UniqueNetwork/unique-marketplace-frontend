@@ -22,7 +22,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
     toggleMobileMenu((prevState) => !prevState);
   }, []);
   const { hasAdminPermission } = useAdminLoggingIn();
-  const { currentChain } = useApi();
+  const { currentChainId } = useApi();
 
   const deviceSize = useDeviceSize();
 
@@ -39,7 +39,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
         </LogoLink>
         {!showMobileMenu && (
           <nav>
-            <Link to={`/${currentChain || ''}/market`}>
+            <Link to={`/${currentChainId || ''}/market`}>
               <DesktopMenuItem
                 $active={activeItem === 'Market'}
                 color='additional-dark'
@@ -49,7 +49,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 Market
               </DesktopMenuItem>
             </Link>
-            <Link to={`/${currentChain || ''}/myTokens`}>
+            <Link to={`/${currentChainId || ''}/myTokens`}>
               <DesktopMenuItem
                 $active={activeItem === 'My tokens'}
                 color='additional-dark'
@@ -59,7 +59,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 My tokens
               </DesktopMenuItem>
             </Link>
-            <Link to={`/${currentChain || ''}/trades`}>
+            <Link to={`/${currentChainId || ''}/trades`}>
               <DesktopMenuItem
                 $active={activeItem === 'Trades'}
                 color='additional-dark'
@@ -69,7 +69,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 Trades
               </DesktopMenuItem>
             </Link>
-            <Link to={`/${currentChain || ''}/faq`}>
+            <Link to={`/${currentChainId || ''}/faq`}>
               <DesktopMenuItem
                 $active={activeItem === 'FAQ'}
                 color='additional-dark'
@@ -79,7 +79,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 FAQ
               </DesktopMenuItem>
             </Link>
-            {hasAdminPermission && <Link to={`/${currentChain || ''}/administration`}>
+            {hasAdminPermission && <Link to={`/${currentChainId || ''}/administration`}>
               <DesktopMenuItem
                 $active={activeItem === 'Collections'}
                 color='additional-dark'
@@ -98,7 +98,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
       {showMobileMenu && mobileMenuIsOpen && (
         <MobileMenu>
           <LinkWrapper onClick={mobileMenuToggler}>
-            <Link to={`/${currentChain || ''}/`}>
+            <Link to={`/${currentChainId || ''}/`}>
               <TextStyled
                 $active={activeItem === 'Market'}
                 color='additional-dark'
@@ -110,7 +110,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
             </Link>
           </LinkWrapper>
           <LinkWrapper onClick={mobileMenuToggler}>
-            <Link to={`/${currentChain || ''}/myTokens`}>
+            <Link to={`/${currentChainId || ''}/myTokens`}>
               <TextStyled
                 $active={activeItem === 'My tokens'}
                 color='additional-dark'
@@ -122,7 +122,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
             </Link>
           </LinkWrapper>
           <LinkWrapper onClick={mobileMenuToggler}>
-            <Link to={`/${currentChain || ''}/trades`}>
+            <Link to={`/${currentChainId || ''}/trades`}>
               <TextStyled
                 $active={activeItem === 'Trades'}
                 color='additional-dark'
@@ -134,7 +134,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
             </Link>
           </LinkWrapper>
           <LinkWrapper onClick={mobileMenuToggler}>
-            <Link to={`/${currentChain || ''}/faq`}>
+            <Link to={`/${currentChainId || ''}/faq`}>
               <TextStyled
                 $active={activeItem === 'FAQ'}
                 color='additional-dark'
@@ -146,7 +146,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
             </Link>
           </LinkWrapper>
           {deviceSize !== DeviceSize.lg && <LinkWrapper onClick={mobileMenuToggler}>
-            <Link to={`/${currentChain || ''}/accounts`}>
+            <Link to={`/${currentChainId || ''}/accounts`}>
               <TextStyled
                 $active={activeItem === 'Manage accounts'}
                 color='additional-dark'
@@ -158,7 +158,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
             </Link>
           </LinkWrapper>}
           {hasAdminPermission && <LinkWrapper onClick={mobileMenuToggler}>
-            <Link to={`/${currentChain || ''}/administration`}>
+            <Link to={`/${currentChainId || ''}/administration`}>
               <TextStyled
                 $active={activeItem === 'Collections'}
                 color='additional-dark'

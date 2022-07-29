@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { keyring } from '@polkadot/ui-keyring';
+import { useNotifications } from '@unique-nft/ui-kit';
 import { ApiContextProps, ApiProvider } from './ApiContext';
-import { getSettings } from './restApi/settings/settings';
+// import { getSettings } from './restApi/settings/settings';
 import AuctionSocketProvider from './restApi/auction/AuctionSocketProvider';
 import { Settings } from './restApi/settings/types';
 import { SdkClient } from './sdk/sdkClient';
@@ -26,6 +27,7 @@ const ApiWrapper = ({ children, sdkClient = sdk }: ChainProviderProps) => {
   const [isRpcClientInitialized, setRpcClientInitialized] = useState<boolean>(false);
   const { chainId } = useParams<'chainId'>();
   const [settings, setSettings] = useState<Settings>();
+  const { error } = useNotifications();
 
   useEffect(() => {
     (async () => {
@@ -43,13 +45,23 @@ const ApiWrapper = ({ children, sdkClient = sdk }: ChainProviderProps) => {
       }
 
       setRpcClientInitialized(sdkClient?.isReady);
-    })().then(() => console.log('Rpc connection: success')).catch((e) => console.log('Rpc connection: failed', e));
+    })().then(() => {
+      console.log('Rpc connection: success');
+    }).catch((e) => {
+      error('Rpc connection: failed', { name: 'warning', size: 16 });
+      console.log('Rpc connection: failed', e);
+    });
   }, []);
+
+  useEffect(() => {
+    if (sdkClient?.error) {
+      error(sdkClient?.error, { name: 'warning', size: 16 });
+    }
+  }, [sdkClient?.error]);
 
   const currentChainId = useMemo(() => chainId || Object.keys(settings?.blockchains || {})[0], [settings, chainId]);
 
   const currentChain = useMemo(() => {
-    console.log(currentChainId);
     if (!sdkClient?.isReady) return;
     return sdkClient?.sdkSet[currentChainId];
   }, [currentChainId, sdkClient?.isReady]);
@@ -84,7 +96,7 @@ const ApiWrapper = ({ children, sdkClient = sdk }: ChainProviderProps) => {
       kusamaSdk: currentChain?.kusama,
       chainData: currentChain?.unique.chainProperties(),
       settings,
-      currentChain: currentChainId
+      currentChainId
     }),
     [isRpcClientInitialized, currentChain, settings, currentChainId, currentSettings]
   );
