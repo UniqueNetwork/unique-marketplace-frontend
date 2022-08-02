@@ -1,27 +1,29 @@
 import { Sdk } from '@unique-nft/sdk';
 import '@unique-nft/sdk/tokens';
-import { TransactionOptions, NFTCollection } from './types';
+import { TransactionOptions, NFTCollection, UniqueController } from './types';
 
-export class UniqueSDKCollectionController {
-  private sdk: Sdk;
-  private collectionIds: number[];
-  constructor(sdk: Sdk, options: { collectionIds: number[] }) {
-    this.sdk = sdk;
+export class UniqueSDKCollectionController implements UniqueController {
+  private sdk: Sdk | undefined;
+  private collectionIds: number[] = [];
+
+  initiate(options: { sdk: Sdk, collectionIds: number[] }): void {
+    this.sdk = options.sdk;
     this.collectionIds = options.collectionIds;
   }
 
   async confirmSponsorship(collectionId: number, options: TransactionOptions): Promise<void> {
-    const unsignedTxPayload = await this.sdk.sponsorhip.confirmSponsorship(collectionId, options.signer);
+    const unsignedTxPayload = await this.sdk?.sponsorhip.confirmSponsorship(collectionId, options.signer);
+    if (!unsignedTxPayload) throw new Error('Transaction build error');
     const signature = await options.sign?.(unsignedTxPayload);
     if (!signature) throw new Error('Signing failed');
-    await this.sdk.extrinsics.submitWaitCompleted({
+    await this.sdk?.extrinsics.submitWaitCompleted({
       signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });
   }
 
   async getCollection(collectionId: number): Promise<NFTCollection | null> {
-    const collection = await this.sdk.collections.get_new({ collectionId });
+    const collection = await this.sdk?.collections.get_new({ collectionId });
 
     if (!collection) return null;
 
@@ -55,10 +57,11 @@ export class UniqueSDKCollectionController {
   }
 
   async removeCollectionSponsor(collectionId: number, options: TransactionOptions): Promise<void> {
-    const unsignedTxPayload = await this.sdk.sponsorhip.removeCollectionSponsor(collectionId, options.signer);
+    const unsignedTxPayload = await this.sdk?.sponsorhip.removeCollectionSponsor(collectionId, options.signer);
+    if (!unsignedTxPayload) throw new Error('Transaction build error');
     const signature = await options.sign?.(unsignedTxPayload);
     if (!signature) throw new Error('Signing failed');
-    await this.sdk.extrinsics.submitWaitCompleted({
+    await this.sdk?.extrinsics.submitWaitCompleted({
       signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });

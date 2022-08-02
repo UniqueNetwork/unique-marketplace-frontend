@@ -16,6 +16,10 @@ export type UniqueDecoratedRpc = DecoratedRpc<'promise', RpcInterface> & {
   }
 }
 
+export interface UniqueController {
+  initiate(options: unknown): void
+}
+
 export type TTransaction = SubmittableExtrinsic<'promise'>
 
 export type TSignMessage = { (message: string, account?: string | Account | undefined): Promise<string>; (arg0: string): any; }
@@ -117,10 +121,3 @@ export type MarketplaceAbiMethods = {
     encodeABI: () => any;
   };
 }
-
-export type UniqueSDKMarketControllerOptions = {
-  escrowAddress: string
-  contractAddress: string
-  auctionAddress: string
-  wsEndpoint: string
-};

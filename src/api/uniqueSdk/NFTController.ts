@@ -1,15 +1,17 @@
 import { Sdk } from '@unique-nft/sdk';
-import { NFTToken, UniqueDecoratedRpc } from './types';
-import { Settings } from '../restApi/settings/types';
+import { NFTToken, UniqueDecoratedRpc, UniqueController } from './types';
 import { getEthAccount, normalizeAccountId } from './utils/addressUtils';
 import { checkTokenIsAllowed, filterAllowedTokens } from './utils/checkTokenIsAllowed';
 
-export class UniqueSDKNFTController {
-  private sdk: Sdk;
-  private readonly collectionIds: number[];
-  private readonly allowedTokens: Record<number, string>;
-  constructor(sdk: Sdk, options: { collectionIds: number[], allowedTokens: { collection: number, tokens: string }[] }) {
-    this.sdk = sdk;
+type UniqueSDKNFTControllerOptions = { sdk: Sdk, collectionIds: number[], allowedTokens: { collection: number, tokens: string }[] };
+
+export class UniqueSDKNFTController implements UniqueController {
+  private sdk: Sdk | undefined;
+  private collectionIds: number[] = [];
+  private allowedTokens: Record<number, string> = {};
+
+  initiate(options: UniqueSDKNFTControllerOptions): void {
+    this.sdk = options.sdk;
     this.collectionIds = options.collectionIds;
     this.allowedTokens = options.allowedTokens.reduce((acc, item) => ({ ...acc, [item.collection]: item.tokens }), {}) || {};
   }
@@ -43,8 +45,8 @@ export class UniqueSDKNFTController {
   }
 
   async getToken(collectionId: number, tokenId: number): Promise<NFTToken | null> {
-    const token = await this.sdk.tokens.get_new({ collectionId, tokenId });
-    const collection = await this.sdk.collections.get_new({ collectionId });
+    const token = await this.sdk?.tokens.get_new({ collectionId, tokenId });
+    const collection = await this.sdk?.collections.get_new({ collectionId });
     if (!token || !collection) return null;
 
     const { owner, attributes, image } = token;
