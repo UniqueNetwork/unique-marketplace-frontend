@@ -1,7 +1,7 @@
 import { BN } from '@polkadot/util';
 import { DecoratedRpc, SubmittableExtrinsic } from '@polkadot/api/types';
 import { RpcInterface } from '@polkadot/rpc-core/types/jsonrpc';
-import { DecodedAttributes, OwnerAddress } from '@unique-nft/sdk/tokens';
+import { DecodedAttributes, DecodedInfixOrUrlOrCidAndHash, OwnerAddress } from '@unique-nft/sdk/tokens';
 import { Account } from '../../account/AccountContext';
 import { UnsignedTxPayload } from '@unique-nft/sdk/types';
 
@@ -52,6 +52,8 @@ export type AttributesDecoded = {
   [key: string]: string | string[]
 }
 
+export type VideoAttribute = DecodedInfixOrUrlOrCidAndHash | undefined;
+
 export interface NFTToken {
   id: number
   owner?: OwnerAddress
@@ -63,6 +65,7 @@ export interface NFTToken {
   description?: string
   collectionCover?: string
   isAllowed?: boolean
+  video: VideoAttribute
 }
 
 export type MetadataType = {

@@ -1,6 +1,7 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { BN } from '@polkadot/util';
 import { AccountsManager, Button, INetwork, Text, useNotifications } from '@unique-nft/ui-kit';
 
 import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
@@ -11,6 +12,7 @@ import GetKSMModal from 'components/GetKSMModal/GetKSMModal';
 import { BalanceOption } from './types';
 import { useApi } from 'hooks/useApi';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
+import { TWithdrawBid } from 'api/restApi/auction/types';
 import { formatKusamaBalance } from 'utils/textUtils';
 import BalanceSkeleton from '../../Skeleton/BalanceSkeleton';
 import config from '../../../config';
@@ -92,11 +94,22 @@ export const WalletManager: FC = () => {
   }, [setIsGetKsmOpened]);
 
   const formattedAccountDeposit = useMemo(() => {
-    if (!selectedAccount?.deposits?.sponsorshipFee || selectedAccount?.deposits?.sponsorshipFee?.toString() === '0') {
+    if (!selectedAccount?.deposits) {
       return undefined;
     }
-    return formatKusamaBalance(selectedAccount?.deposits?.sponsorshipFee?.toString());
-      }, [selectedAccount?.deposits]);
+
+    const { sponsorshipFee, bids } = selectedAccount.deposits;
+    const { leader, withdraw } = bids || { leader: [], withdraw: [] };
+    if ((sponsorshipFee?.isZero() && leader.length === 0 && withdraw.length === 0)) {
+      return undefined;
+    }
+
+    const getTotalAmount = (acc: BN, bid: TWithdrawBid) => acc.add(new BN(bid.amount));
+    const deposit = (sponsorshipFee || new BN(0))
+    .add(withdraw.reduce(getTotalAmount, new BN(0)))
+    .add(leader.reduce(getTotalAmount, new BN(0)));
+    return formatKusamaBalance(deposit.toString());
+  }, [selectedAccount?.deposits]);
 
   if (!isLoading && accounts.length === 0) {
     return (

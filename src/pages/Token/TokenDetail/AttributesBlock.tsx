@@ -2,7 +2,7 @@ import React, { FC } from 'react';
 import styled from 'styled-components';
 import { Heading, Text } from '@unique-nft/ui-kit';
 import { Trait } from './Trait';
-import { DecodedAttributes, LocalizedStringDictionary } from '@unique-nft/sdk/tokens';
+import { DecodedAttributes } from '@unique-nft/sdk/tokens';
 
 interface IProps {
   attributes: DecodedAttributes;
@@ -34,10 +34,9 @@ export const AttributesBlock: FC<IProps> = ({ attributes }: IProps) => {
       {Object.values(attributes).map((attribute) => {
         return AttributesRow({
           attribute: typeof attribute.name === 'string' ? attribute.name : attribute?.name?.en || '',
-          enumeration:
-            Array.isArray(attribute.value)
-              ? attribute.value.map((item) => (item as LocalizedStringDictionary).en || item.toString())
-              : typeof attribute.value === 'string' ? attribute.value : (attribute.value as LocalizedStringDictionary).en
+          enumeration: Array.isArray(attribute.value)
+            ? attribute.value.map((item) => item._.toString())
+            : attribute.value._.toString()
         });
       })}
     </div>

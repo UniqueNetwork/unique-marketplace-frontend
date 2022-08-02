@@ -1,4 +1,5 @@
 import { PaginatedResponse, Pagination, Sortable } from '../base/types';
+import { VideoAttribute } from '../../uniqueSdk/types';
 
 export type GetOffersRequestPayload = {
   collectionId?: number | number[]
@@ -52,6 +53,7 @@ export type Offer = {
     prefix: string
     attributes: OfferTokenAttribute[]
   }
+  video: VideoAttribute
 }
 
 export type OffersResponse = PaginatedResponse<Offer> & {

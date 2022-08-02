@@ -43,7 +43,8 @@ export const CommonTokenDetail: FC<IProps> = ({
     attributes,
     imageUrl,
     tokenId,
-    prefix
+    prefix,
+    video
   } = useMemo(() => {
     if (offer) {
       const { collectionName, image, prefix, collectionCover, description } = offer.tokenDescription || {};
@@ -104,7 +105,14 @@ export const CommonTokenDetail: FC<IProps> = ({
     <CommonTokenDetailStyled>
       <PictureWrapper>
         {isLoading && <Skeleton />}
-        {!isLoading && <Picture alt={tokenId?.toString() || ''} src={imageUrl} testid={`${testid}-token-picture`} />}
+        {!isLoading &&
+          <Picture
+            alt={tokenId?.toString() || ''}
+            src={imageUrl}
+            video={video}
+            testid={`${testid}-token-picture`}
+          />
+        }
       </PictureWrapper>
       <Description>
         {isLoading && <TokenSkeleton />}

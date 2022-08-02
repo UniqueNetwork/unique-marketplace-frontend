@@ -1,5 +1,5 @@
 import { Sdk } from '@unique-nft/sdk';
-import { UniqueTokenDecoded, TokenIdArguments } from '@unique-nft/sdk/tokens';
+import { TokenIdArguments, UniqueTokenDecoded } from '@unique-nft/sdk/tokens';
 import { BN } from '@polkadot/util';
 import { CrossAccountId, EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType, TransactionOptions, TSignMessage, UniqueController, UniqueDecoratedRpc } from './types';
 import marketplaceAbi from './abi/marketPlaceAbi.json';

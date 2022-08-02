@@ -17,12 +17,12 @@ function GetKSMModal ({ onClose }: Props): React.ReactElement<Props> {
 
   const handleGetKSMClickByRamp = useCallback(() => {
     const containerNode = ref.current ?? document.getElementById('root') as HTMLDivElement;
-
+    const logoUrl = `${window.location.origin}/logos/logo.svg`;
     const RampModal = new RampInstantSDK({
       containerNode,
       hostApiKey: config.rampApiKey,
       hostAppName: 'Unique Marketplace',
-      hostLogoUrl: 'https://wallet.unique.network/logos/unique_logo.svg',
+      hostLogoUrl: logoUrl,
       swapAsset: 'KSM',
       variant: 'embedded-mobile'
     });
