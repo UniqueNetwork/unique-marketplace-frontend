@@ -3,12 +3,12 @@ import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Icon, Text } from '@unique-nft/ui-kit';
 
-import { useScreenWidthFromThreshold } from '../../hooks/useScreenWidthFromThreshold';
+import { useScreenWidthFromThreshold } from 'hooks/useScreenWidthFromThreshold';
+import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
+import { useApi } from 'hooks/useApi';
+import { useAdminLoggingIn } from 'api/restApi/admin/login';
 import { TMenuItems } from '../PageLayout';
 import { WalletManager } from './WalletManager/WalletManager';
-import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
-import { useAdminLoggingIn } from '../../api/restApi/admin/login';
-import { useApi } from '../../hooks/useApi';
 
 interface HeaderProps {
   activeItem: TMenuItems;
@@ -69,7 +69,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 Trades
               </DesktopMenuItem>
             </Link>
-            <Link to={`/${currentChainId || ''}/faq`}>
+            <Link to={'/faq'}>
               <DesktopMenuItem
                 $active={activeItem === 'FAQ'}
                 color='additional-dark'
@@ -98,7 +98,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
       {showMobileMenu && mobileMenuIsOpen && (
         <MobileMenu>
           <LinkWrapper onClick={mobileMenuToggler}>
-            <Link to={`/${currentChainId || ''}/`}>
+            <Link to={`/${currentChainId || ''}/market`}>
               <TextStyled
                 $active={activeItem === 'Market'}
                 color='additional-dark'
@@ -134,7 +134,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
             </Link>
           </LinkWrapper>
           <LinkWrapper onClick={mobileMenuToggler}>
-            <Link to={`/${currentChainId || ''}/faq`}>
+            <Link to={'/faq'}>
               <TextStyled
                 $active={activeItem === 'FAQ'}
                 color='additional-dark'

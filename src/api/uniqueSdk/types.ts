@@ -17,7 +17,7 @@ export type UniqueDecoratedRpc = DecoratedRpc<'promise', RpcInterface> & {
 }
 
 export interface UniqueController {
-  initiate(options: unknown): void
+  initialize(options: unknown): void
 }
 
 export type TTransaction = SubmittableExtrinsic<'promise'>

@@ -6,7 +6,7 @@ export class UniqueSDKCollectionController implements UniqueController {
   private sdk: Sdk | undefined;
   private collectionIds: number[] = [];
 
-  initiate(options: { sdk: Sdk, collectionIds: number[] }): void {
+  initialize(options: { sdk: Sdk, collectionIds: number[] }): void {
     this.sdk = options.sdk;
     this.collectionIds = options.collectionIds;
   }

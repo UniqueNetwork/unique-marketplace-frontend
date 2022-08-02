@@ -16,7 +16,6 @@ import { TWithdrawBid } from 'api/restApi/auction/types';
 import { formatKusamaBalance } from 'utils/textUtils';
 import BalanceSkeleton from '../../Skeleton/BalanceSkeleton';
 import config from '../../../config';
-import { Network } from '@polkadot/networks/types';
 
 const tokenSymbol = 'KSM';
 
@@ -28,9 +27,10 @@ export const WalletManager: FC = () => {
   const { selectedAccount, accounts, isLoading, fetchAccounts, changeAccount } = useAccounts();
   const [isOpen, setIsOpen] = useState(false);
   const [isGetKsmOpened, setIsGetKsmOpened] = useState(false);
-  const navigate = useNavigate();
-  const { chainData, settings, currentChainId } = useApi();
+  const { chainData, settings, currentChainId, onChangeChainId } = useApi();
   const { info } = useNotifications();
+  const navigate = useNavigate();
+
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
   }, [chainData?.SS58Prefix]);
@@ -47,8 +47,8 @@ export const WalletManager: FC = () => {
   const currentNetwork = useMemo(() => networks.find(({ id }) => id === currentChainId), [networks, currentChainId]);
 
   const onNetworkChange = useCallback((network: INetwork) => {
-    navigate(`${network.id}/market`);
-  }, []);
+    onChangeChainId(network.id);
+  }, [onChangeChainId]);
 
   const widgetAccounts = useMemo(() => accounts.map((account) => (
     { name: account.meta.name, ...account, address: formatAddress(account.address), substrateAddress: account?.address })
