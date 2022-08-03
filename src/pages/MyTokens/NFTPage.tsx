@@ -95,8 +95,7 @@ export const NFTPage = () => {
   const deviceSize = useDeviceSize();
 
   const { offers, isFetching: isFetchingOffers, fetch } = useOffers();
-
-  const { api } = useApi();
+  const { api, currentChainId } = useApi();
 
   useEffect(() => {
     if (!api?.nft || !selectedAccount?.address) return;
@@ -108,7 +107,7 @@ export const NFTPage = () => {
       setTokens(_tokens);
       setIsFetchingTokens(false);
     })();
-  }, [api?.nft, selectedAccount?.address, setIsFetchingTokens, fetch]);
+  }, [api?.nft, selectedAccount?.address, setIsFetchingTokens, fetch, currentChainId]);
 
   useEffect(() => {
     const option = sortingOptions.find((option) => { return option.id === sortingValue; });

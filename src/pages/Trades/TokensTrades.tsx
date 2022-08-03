@@ -15,6 +15,7 @@ import useDeviceSize from '../../hooks/useDeviceSize';
 import TokenTradesDetailsModal from './TradesDetailsModal';
 import { Trade } from '../../api/restApi/trades/types';
 import { debounce } from 'utils/helpers';
+import { useApi } from '../../hooks/useApi';
 
 type TokensTradesPage = {
   currentTab: TradesTabs
@@ -29,6 +30,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
   const [searchValue, setSearchValue] = useState<string>();
   const [selectedOfferDetails, setSelectedOfferDetails] = useState<Trade | null>(null);
   const deviceSize = useDeviceSize();
+  const { currentChainId } = useApi();
 
   const { trades, tradesCount, fetch, isFetching } = useTrades();
 
@@ -42,7 +44,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
       sort: sortString,
       seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
     });
-  }, [currentTab, selectedAccount?.address, isLoadingAccounts]);
+  }, [currentTab, selectedAccount?.address, isLoadingAccounts, currentChainId]);
 
   const debouncedSearch = useCallback(() => {
     return debounce(function (...args: string[]) {

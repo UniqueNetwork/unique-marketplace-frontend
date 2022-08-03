@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { BN } from '@polkadot/util';
 import { AccountsManager, Button, INetwork, Text, useNotifications } from '@unique-nft/ui-kit';
@@ -30,6 +30,7 @@ export const WalletManager: FC = () => {
   const { chainData, settings, currentChainId, onChangeChainId } = useApi();
   const { info } = useNotifications();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
 
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
@@ -47,8 +48,8 @@ export const WalletManager: FC = () => {
   const currentNetwork = useMemo(() => networks.find(({ id }) => id === currentChainId), [networks, currentChainId]);
 
   const onNetworkChange = useCallback((network: INetwork) => {
-    onChangeChainId(network.id);
-  }, [onChangeChainId]);
+    onChangeChainId(network.id, pathname);
+  }, [onChangeChainId, pathname]);
 
   const widgetAccounts = useMemo(() => accounts.map((account) => (
     { name: account.meta.name, ...account, address: formatAddress(account.address), substrateAddress: account?.address })

@@ -35,7 +35,6 @@ const ApiWrapper = ({
 }: ChainProviderProps) => {
   const [isRpcClientInitialized, setRpcClientInitialized] = useState<boolean>(false);
   const navigate = useNavigate();
-  const { pathname } = useLocation();
   const { chainId: chainIdParam } = useParams<'chainId'>();
   const [settings, setSettings] = useState<Settings>();
   const [currentChainId, setCurrentChainId] = useState<string>();
@@ -84,17 +83,22 @@ const ApiWrapper = ({
     setCurrentChainId((currentChainId) => currentChainId && initialChainId && currentChainId === initialChainId ? currentChainId : initialChainId);
   }, [settings, chainIdParam]);
 
-  const onChangeChainId = useCallback((newChainId: string) => {
+  const onChangeChainId = useCallback((newChainId: string, pathname: string) => {
     if (currentChainId === newChainId) return;
     setCurrentChainId(newChainId);
     // redirect to correct URL with chainId
     if (pathname.includes('faq')) return;
+    const tokenPageUrlRegex = /token[/]\d+[/]\d+$/;
+    if (tokenPageUrlRegex.test(pathname)) {
+      navigate(`/${newChainId}/market`);
+      return;
+    }
     if (currentChainId && pathname.includes(currentChainId)) {
       navigate(pathname.replace(currentChainId, newChainId));
     } else {
       navigate(`/${newChainId}${pathname}`);
     }
-  }, [currentChainId, pathname]);
+  }, [currentChainId, navigate]);
 
   // get current chain and current chain settings
   const [currentChain, currentSettings] = useMemo(() => {

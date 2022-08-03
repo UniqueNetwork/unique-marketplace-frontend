@@ -35,8 +35,8 @@ export const AttributesBlock: FC<IProps> = ({ attributes }: IProps) => {
         return AttributesRow({
           attribute: typeof attribute.name === 'string' ? attribute.name : attribute?.name?.en || '',
           enumeration: Array.isArray(attribute.value)
-            ? attribute.value.map((item) => item._.toString())
-            : attribute.value._.toString()
+            ? attribute.value.map((item) => item._?.toString() || item.toString())
+            : (attribute.value._?.toString() || attribute.value.toString())
         });
       })}
     </div>

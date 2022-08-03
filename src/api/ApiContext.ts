@@ -19,7 +19,7 @@ export type ApiContextProps = {
   chainData?: ChainProperties
   settings?: Settings
   currentChainId?: string
-  onChangeChainId(chainId: string): void
+  onChangeChainId(chainId: string, pathname: string): void
 }
 
 const ApiContext: Context<ApiContextProps> = createContext({} as unknown as ApiContextProps);
