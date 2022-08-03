@@ -3,7 +3,7 @@ import { NFTCollection } from 'api/uniqueSdk/types';
 import { useApi } from './useApi';
 
 export const useCollections = () => {
-  const { api } = useApi();
+  const { api, currentChainId } = useApi();
   const [collections, setCollections] = useState<NFTCollection[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(false);
 
@@ -15,7 +15,7 @@ export const useCollections = () => {
       setCollections(collections);
       setIsFetching(false);
     })();
-  }, [api?.collection?.getFeaturedCollections]);
+  }, [api?.collection?.getFeaturedCollections, currentChainId]);
 
   return {
     collections,
