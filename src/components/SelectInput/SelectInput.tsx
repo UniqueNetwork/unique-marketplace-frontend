@@ -131,7 +131,8 @@ const InputWrapper = styled.div`
     border: none;
     background: transparent;
     outline: none;
-    padding: var(--gap);
+    padding: calc(var(--gap) / 2) var(--gap);
+    width: 100%;
   }
   & .icon-triangle{
     position: absolute;
@@ -156,17 +157,19 @@ const Dropdown = styled.div<{ isOpen: boolean }>`
   width: 100%;
   top: calc(100% + 4px);
   flex-direction: column;
+  row-gap: calc(var(--gap) / 4);
   background: ${AdditionalLight};
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
   border-radius: 4px;
-  max-height: 200px;
+  max-height: 180px;
   overflow-x: hidden;
   overflow-y: auto;
   z-index: 10;
+  padding: calc(var(--gap) / 2);
 `;
 
 const OptionWrapper = styled.div`
-  padding: var(--gap);
+  padding: 0 calc(var(--gap) / 2);
   cursor: pointer;
   &:hover {
     background: ${Primary100};
