@@ -51,7 +51,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attr
     >
       <CollectionFilterWrapper>
         {isFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
-        {collections.map((collection) => (
+        {!isFetching && collections.map((collection) => (
           <CheckboxWrapper
             key={`collection-${collection.id}`}
           >

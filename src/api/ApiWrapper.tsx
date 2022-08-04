@@ -122,7 +122,7 @@ const ApiWrapper = ({
     } else {
       navigate(`/${newChainId}${pathname}`);
     }
-  }, [currentChainId, pathname, sdkClient, settings]);
+  }, [currentChainId, sdkClient, settings]);
 
   // get current chain and current chain settings
   const [currentChain, currentSettings] = useMemo(() => {
