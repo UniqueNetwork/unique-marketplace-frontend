@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { keyring } from '@polkadot/ui-keyring';
 import { useNotifications } from '@unique-nft/ui-kit';
 import { ApiContextProps, ApiProvider } from './ApiContext';
@@ -45,7 +45,7 @@ const ApiWrapper = ({
       // mock received settings
       // const { data: settings } = await getSettings();
       const settings: Settings = await Promise.resolve(mockSettings);
-      setSettings(mockSettings);
+      setSettings(settings);
 
       for (const chainId in settings.blockchains) {
         const { unique, kusama } = settings.blockchains[chainId].blockchain;
@@ -56,6 +56,21 @@ const ApiWrapper = ({
         );
       }
 
+      if (chainIdParam && !settings?.blockchains[chainIdParam]) {
+        navigate('/404');
+        return;
+      }
+      const defaultChainId = Object.keys(settings?.blockchains || {})[0];
+      const storedChainId = localStorage.getItem(ChainIdLocalStorageKey);
+
+      if (!storedChainId || (chainIdParam && storedChainId !== chainIdParam)) {
+        defaultChainId && localStorage.setItem(ChainIdLocalStorageKey, chainIdParam || defaultChainId);
+      }
+
+      const initialChainId = chainIdParam || storedChainId || defaultChainId;
+      setCurrentChainId(initialChainId);
+      initializeControllers(initialChainId, sdkClient, settings);
+
       setRpcClientInitialized(sdkClient?.isReady);
     })().then(() => {
       console.log('Rpc connection: success');
@@ -65,53 +80,12 @@ const ApiWrapper = ({
     });
   }, []);
 
-  // effect that track changes to chainId in the URL
-  useEffect(() => {
-    if (!settings) return;
-    if (chainIdParam && !settings?.blockchains[chainIdParam]) {
-      navigate('/404');
-      return;
-    }
-    const defaultChainId = Object.keys(settings?.blockchains || {})[0];
-    const storedChainId = localStorage.getItem(ChainIdLocalStorageKey);
+  const initializeControllers = useCallback((chainId: string, sdkClient: SdkClient, settings: Settings) => {
+    const currentChain = sdkClient?.sdkSet[chainId];
+    const currentSettings = settings?.blockchains[chainId];
 
-    if (!storedChainId || (chainIdParam && storedChainId !== chainIdParam)) {
-      defaultChainId && localStorage.setItem(ChainIdLocalStorageKey, chainIdParam || defaultChainId);
-    }
-
-    const initialChainId = chainIdParam || storedChainId || defaultChainId;
-    setCurrentChainId((currentChainId) => currentChainId && initialChainId && currentChainId === initialChainId ? currentChainId : initialChainId);
-  }, [settings, chainIdParam]);
-
-  const onChangeChainId = useCallback((newChainId: string, pathname: string) => {
-    if (currentChainId === newChainId) return;
-    setCurrentChainId(newChainId);
-    // redirect to correct URL with chainId
-    if (pathname.includes('faq')) return;
-    const tokenPageUrlRegex = /token[/]\d+[/]\d+$/;
-    if (tokenPageUrlRegex.test(pathname)) {
-      navigate(`/${newChainId}/market`);
-      return;
-    }
-    if (currentChainId && pathname.includes(currentChainId)) {
-      navigate(pathname.replace(currentChainId, newChainId));
-    } else {
-      navigate(`/${newChainId}${pathname}`);
-    }
-  }, [currentChainId, navigate]);
-
-  // get current chain and current chain settings
-  const [currentChain, currentSettings] = useMemo(() => {
-    if (!sdkClient?.isReady || !currentChainId) return [];
-    return [
-      sdkClient?.sdkSet[currentChainId],
-      currentChainId ? settings?.blockchains[currentChainId] : undefined
-    ];
-  }, [currentChainId, settings, sdkClient?.isReady]);
-
-  // effect to reinitialize controllers if currentChainId has changed
-  useEffect(() => {
     if (!currentChain || !currentSettings) return;
+
     nftController?.initialize({
       sdk: currentChain.unique,
       allowedTokens: currentSettings.blockchain.unique.allowedTokens,
@@ -129,7 +103,35 @@ const ApiWrapper = ({
       escrowAddress: currentSettings.blockchain.escrowAddress,
       wsEndpoint: currentSettings.blockchain.unique.wsEndpoint
     });
-  }, [currentChain, currentSettings]);
+  }, []);
+
+  const onChangeChainId = useCallback((newChainId: string) => {
+    if (currentChainId === newChainId || !settings) return;
+    setCurrentChainId(newChainId);
+    initializeControllers(newChainId, sdkClient, settings);
+    // redirect to correct URL with chainId
+    const { pathname } = window.location;
+    if (pathname.includes('faq')) return;
+    const tokenPageUrlRegex = /token[/]\d+[/]\d+$/;
+    if (tokenPageUrlRegex.test(pathname)) {
+      navigate(`/${newChainId}/market`);
+      return;
+    }
+    if (currentChainId && pathname.includes(currentChainId)) {
+      navigate(pathname.replace(currentChainId, newChainId));
+    } else {
+      navigate(`/${newChainId}${pathname}`);
+    }
+  }, [currentChainId, pathname, sdkClient, settings]);
+
+  // get current chain and current chain settings
+  const [currentChain, currentSettings] = useMemo(() => {
+    if (!sdkClient?.isReady || !currentChainId) return [];
+    return [
+      sdkClient?.sdkSet[currentChainId],
+      currentChainId ? settings?.blockchains[currentChainId] : undefined
+    ];
+  }, [currentChainId, settings, sdkClient?.isReady]);
 
   useEffect(() => {
     if (sdkClient?.error) {
