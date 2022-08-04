@@ -30,7 +30,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
   const [searchValue, setSearchValue] = useState<string>();
   const [selectedOfferDetails, setSelectedOfferDetails] = useState<Trade | null>(null);
   const deviceSize = useDeviceSize();
-  const { currentChainId } = useApi();
+  const { currentChainId = 'unique' } = useApi();
 
   const { trades, tradesCount, fetch, isFetching } = useTrades();
 
@@ -42,7 +42,8 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
       page: 1,
       pageSize,
       sort: sortString,
-      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
+      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined,
+      network: currentChainId
     });
   }, [currentTab, selectedAccount?.address, isLoadingAccounts, currentChainId]);
 
@@ -54,10 +55,11 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
         pageSize,
         sort: sortString,
         searchText: args[0],
-        seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
+        seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined,
+        network: currentChainId
       });
     }, 300);
-  }, [selectedAccount?.address, currentTab, sortString, pageSize]);
+  }, [selectedAccount?.address, currentTab, sortString, pageSize, currentChainId]);
 
   const onPageChange = useCallback((newPage: number) => {
     if ((currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address) || page === newPage) return;
@@ -67,9 +69,10 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
       pageSize,
       sort: sortString,
       searchText: searchValue,
-      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
+      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined,
+      network: currentChainId
     });
-  }, [selectedAccount?.address, currentTab, page, sortString, searchValue, pageSize]);
+  }, [selectedAccount?.address, currentTab, page, sortString, searchValue, pageSize, currentChainId]);
 
   const onPageSizeChange = useCallback((newPageSize: number) => {
     if (currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address) return;
@@ -80,9 +83,10 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
       pageSize: newPageSize,
       sort: sortString,
       searchText: searchValue,
-      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
+      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined,
+      network: currentChainId
     });
-  }, [selectedAccount?.address, currentTab, page, sortString, searchValue]);
+  }, [selectedAccount?.address, currentTab, page, sortString, searchValue, currentChainId]);
 
   const onSortChange = useCallback((newSort: SortQuery) => {
     let sortString;
@@ -113,9 +117,10 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
       pageSize,
       sort: sortString,
       searchText: searchValue,
-      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
+      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined,
+      network: currentChainId
     });
-  }, [selectedAccount?.address, currentTab, setSortString, pageSize, searchValue]);
+  }, [selectedAccount?.address, currentTab, setSortString, pageSize, searchValue, currentChainId]);
 
   const onShowTradesDetailsModal = useCallback((trade: Trade) => {
     setSelectedOfferDetails(trade);

@@ -95,13 +95,13 @@ export const NFTPage = () => {
   const deviceSize = useDeviceSize();
 
   const { offers, isFetching: isFetchingOffers, fetch } = useOffers();
-  const { api, currentChainId } = useApi();
+  const { api, currentChainId = 'unique' } = useApi();
 
   useEffect(() => {
     if (!api?.nft || !selectedAccount?.address) return;
     setIsFetchingTokens(true);
     void (async () => {
-      await fetch({ page: 1, pageSize, seller: selectedAccount?.address });
+      await fetch({ page: 1, pageSize, seller: selectedAccount?.address, network: currentChainId });
       const _tokens = await api.nft?.getAccountMarketableTokens(selectedAccount.address) as NFTToken[];
 
       setTokens(_tokens);

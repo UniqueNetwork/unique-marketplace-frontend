@@ -11,14 +11,26 @@ export type TStartAuctionParams = {
   startPrice: string
   priceStep: string
 }
+export interface TStartAuctionParamsWithNetwork extends TStartAuctionParams {
+  network: string
+}
+
 export type TPlaceBidParams = {
   tx: unknown, collectionId: number, tokenId: number
 }
+export interface TPlaceBidParamsWithNetwork extends TPlaceBidParams {
+  network: string
+}
+
 export type TDeleteParams = {
   collectionId: number
   tokenId: number
   timestamp: number
 }
+export interface TDeleteParamsWithNetwork extends TDeleteParams {
+  network: string
+}
+
 export type TSignature = {
   signature: string,
   signer: string
@@ -27,6 +39,9 @@ export type TCalculateBidParams = {
   collectionId: number
   tokenId: number
   bidderAddress: string
+}
+export interface TCalculateBidParamsWithNetwork extends TCalculateBidParams {
+  network: string
 }
 
 export type TCalculatedBid = {
@@ -39,9 +54,15 @@ export type TCalculatedBid = {
   // step for this auction
   priceStep: string
 }
+export interface TCalculatedBidWithNetwork extends TCalculatedBid {
+  network: string
+}
 
 export type TWithdrawBidsParams = {
   owner: string
+}
+export interface TWithdrawBidsParamsWithNetwork extends TWithdrawBidsParams {
+  network: string
 }
 
 export type TWithdrawBid = {
@@ -51,6 +72,9 @@ export type TWithdrawBid = {
   contractAskId: string
   tokenId: string
 };
+export interface TWithdrawBidWithNetwork extends TWithdrawBid {
+  network: string
+}
 
 export type TWithdrawBidsResponse = {
   leader: TWithdrawBid[]
@@ -60,4 +84,7 @@ export type TWithdrawBidsResponse = {
 export type TWithdrawChooseBidsParams = {
   timestamp: number
   auctionIds: string
+}
+export interface TWithdrawChooseBidsParamsWithNetwork extends TWithdrawChooseBidsParams {
+  network: string
 }

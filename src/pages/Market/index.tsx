@@ -71,7 +71,7 @@ export const MarketPage = () => {
   const { offers, offersCount, isFetching, fetchMore, fetch, attributes, attributeCounts } = useOffers();
   const { selectedAccount } = useAccounts();
   const deviceSize = useDeviceSize();
-  const { currentChainId } = useApi();
+  const { currentChainId = 'unique' } = useApi();
 
   const hasMore = offers && offers.length < offersCount;
 
@@ -81,7 +81,8 @@ export const MarketPage = () => {
       pageSize,
       ...(getFilterByState(filterState)),
       searchText: searchValue,
-      sort: [sortingValue]
+      sort: [sortingValue],
+      network: currentChainId
     });
   }, [currentChainId]);
 
@@ -109,10 +110,11 @@ export const MarketPage = () => {
         pageSize,
         ...(getFilterByState(filterState)),
         searchText: searchValue || undefined,
-        sort: [sortingValue]
+        sort: [sortingValue],
+        network: currentChainId
       });
     }
-  }, [fetchMore, offers, pageSize, isFetching, searchValue, filterState]);
+  }, [fetchMore, offers, pageSize, isFetching, searchValue, filterState, currentChainId]);
 
   const onSortingChange = useCallback((value: TOption) => {
     setSortingValue(value.id);
@@ -122,9 +124,10 @@ export const MarketPage = () => {
       pageSize,
       ...(getFilterByState(filterState)),
       searchText: searchValue || undefined,
-      sort: [value.id]
+      sort: [value.id],
+      network: currentChainId
     });
-  }, [fetch, filterState, getFilterByState, searchValue]);
+  }, [fetch, filterState, getFilterByState, searchValue, currentChainId]);
 
   const onSearch = useCallback((value?: string) => {
     setSearchValue(value);
@@ -134,9 +137,10 @@ export const MarketPage = () => {
       pageSize,
       ...(getFilterByState(filterState)),
       searchText: value || undefined,
-      sort: [sortingValue]
+      sort: [sortingValue],
+      network: currentChainId
     });
-  }, [fetch, sortingValue, searchValue, filterState, getFilterByState]);
+  }, [fetch, sortingValue, searchValue, filterState, getFilterByState, currentChainId]);
 
   const onFilterChange = useCallback(async (filterState: FilterState | null) => {
     setUrlParameter('filterState', filterState ? JSON.stringify(filterState) : '');
@@ -145,11 +149,12 @@ export const MarketPage = () => {
       pageSize,
       ...(getFilterByState(filterState)),
       searchText: searchValue || undefined,
-      sort: [sortingValue]
+      sort: [sortingValue],
+      network: currentChainId
     });
     const _selectedAttributeCounts = filterState?.attributeCounts?.filter((item) => attributesCount.findIndex(({ numberOfAttributes }) => numberOfAttributes === item) > -1);
     setFilterState({ ...filterState, attributeCounts: _selectedAttributeCounts });
-  }, [fetch, sortingValue, getFilterByState, searchValue]);
+  }, [fetch, sortingValue, getFilterByState, searchValue, currentChainId]);
 
   const onChangeAccount = useCallback(() => {
     if (isFetching) return;
