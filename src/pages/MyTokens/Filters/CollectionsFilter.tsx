@@ -25,9 +25,9 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onAttr
   const { attributes, fetch: fetchAttributes, reset: resetAttributes, isFetching: isAttributesFetching } = useAttributes();
   const { attributeCounts, fetch: fetchAttributeCounts, isFetching: isAttributeCountsFetching } = useAttributeCounts();
   const { collections: selectedCollections = [], attributes: selectedAttributes = [], attributeCounts: selectedAttributeCounts = [] } = value || {};
-  const { settings, currentChainId } = useApi();
+  const { settings } = useApi();
 
-  const collectionIds = useMemo(() => settings && currentChainId ? settings.blockchains[currentChainId].blockchain.unique.collectionIds : [], [settings, currentChainId]);
+  const collectionIds = useMemo(() => settings ? settings.blockchain.unique.collectionIds : [], [settings]);
 
   useEffect(() => {
     if (selectedCollections.length === 1 && !isAttributesFetching) fetchAttributes(selectedCollections[0]);

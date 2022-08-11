@@ -196,7 +196,7 @@ export const NFTPage = () => {
     if (selectOption) {
       return tokensWithOffers.sort((tokenA, tokenB) => {
         const order = selectOption.direction === 'asc' ? 1 : -1;
-        return (tokenA[selectOption.field] || '') > (tokenB[selectOption.field] || '') ? order : -order;
+        return (tokenA?.[selectOption.field] || '') > (tokenB?.[selectOption.field] || '') ? order : -order;
       });
     }
     return tokensWithOffers;

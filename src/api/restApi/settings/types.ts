@@ -1,6 +1,4 @@
-
-export type ChainSettings = {
-  chainName: string,
+export type Settings = {
   blockchain: {
     escrowAddress: string
     unique: {
@@ -18,12 +16,6 @@ export type ChainSettings = {
     commission: number,
     address: string
   }
-}
-
-export type Settings = {
-  blockchains: {
-    [K: string]: ChainSettings
-  },
   marketType: string,
   mainSaleSeedAddress: string,
   administrators: string[]
