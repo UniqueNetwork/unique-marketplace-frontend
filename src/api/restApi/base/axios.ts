@@ -1,5 +1,4 @@
 import axios, { AxiosRequestConfig } from 'axios';
-import config from '../../../config';
 import { serializeToQuery } from './helper';
 
 const axiosInstance = axios;

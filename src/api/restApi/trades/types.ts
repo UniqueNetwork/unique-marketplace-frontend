@@ -6,7 +6,6 @@ export type GetTradesRequestPayload = {
   seller?: string
   collectionId?: number | number[]
   searchText?: string
-  network: string
 } & Pagination;
 
 export type TokenDescription = {

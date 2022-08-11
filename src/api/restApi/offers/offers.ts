@@ -19,7 +19,7 @@ export const useOffers = () => {
   const [attributeCounts, setAttributeCounts] = useState<AttributeCount[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [fetchingError, setFetchingError] = useState<ResponseError | undefined>();
-  const { api, currentChainId = 'unique' } = useApi();
+  const { api } = useApi();
 
   const fetch = useCallback(async ({ minPrice, maxPrice, ...payload }: GetOffersRequestPayload) => {
     setIsFetching(true);
@@ -27,8 +27,7 @@ export const useOffers = () => {
       const { status, data } = await getOffers({
         ...payload,
         minPrice: minPrice && fromStringToBnString(minPrice, api?.market?.kusamaDecimals),
-        maxPrice: maxPrice && fromStringToBnString(maxPrice, api?.market?.kusamaDecimals),
-        network: currentChainId
+        maxPrice: maxPrice && fromStringToBnString(maxPrice, api?.market?.kusamaDecimals)
       });
       if (status === 200) {
         setOffers(data.items);
@@ -46,7 +45,7 @@ export const useOffers = () => {
       });
     }
     return { items: [], attributes: {}, attributesCount: [], itemsCount: 0, page: 1, pageSize: 10 };
-  }, [api?.market?.kusamaDecimals, currentChainId]);
+  }, [api?.market?.kusamaDecimals]);
 
   const fetchMore = useCallback(async ({ minPrice, maxPrice, ...payload }: GetOffersRequestPayload) => {
     setIsFetching(true);
@@ -54,8 +53,7 @@ export const useOffers = () => {
       const { status, data } = await getOffers({
         ...payload,
         minPrice: minPrice && fromStringToBnString(minPrice, api?.market?.kusamaDecimals),
-        maxPrice: maxPrice && fromStringToBnString(maxPrice, api?.market?.kusamaDecimals),
-        network: currentChainId
+        maxPrice: maxPrice && fromStringToBnString(maxPrice, api?.market?.kusamaDecimals)
       });
       if (status === 200) {
         setOffers([...offers, ...data.items]);
@@ -68,7 +66,7 @@ export const useOffers = () => {
         message
       });
     }
-  }, [offers, api?.market?.kusamaDecimals, currentChainId]);
+  }, [offers, api?.market?.kusamaDecimals]);
 
   return {
     offers,

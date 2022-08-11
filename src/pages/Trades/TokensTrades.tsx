@@ -15,7 +15,6 @@ import useDeviceSize from '../../hooks/useDeviceSize';
 import TokenTradesDetailsModal from './TradesDetailsModal';
 import { Trade } from '../../api/restApi/trades/types';
 import { debounce } from 'utils/helpers';
-import { useApi } from '../../hooks/useApi';
 
 type TokensTradesPage = {
   currentTab: TradesTabs
@@ -30,7 +29,6 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
   const [searchValue, setSearchValue] = useState<string>();
   const [selectedOfferDetails, setSelectedOfferDetails] = useState<Trade | null>(null);
   const deviceSize = useDeviceSize();
-  const { currentChainId = 'unique' } = useApi();
 
   const { trades, tradesCount, fetch, isFetching } = useTrades();
 
@@ -42,10 +40,9 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
       page: 1,
       pageSize,
       sort: sortString,
-      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined,
-      network: currentChainId
+      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
     });
-  }, [currentTab, selectedAccount?.address, isLoadingAccounts, currentChainId]);
+  }, [currentTab, selectedAccount?.address, isLoadingAccounts]);
 
   const debouncedSearch = useCallback(() => {
     return debounce(function (...args: string[]) {
@@ -55,11 +52,10 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
         pageSize,
         sort: sortString,
         searchText: args[0],
-        seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined,
-        network: currentChainId
+        seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
       });
     }, 300);
-  }, [selectedAccount?.address, currentTab, sortString, pageSize, currentChainId]);
+  }, [selectedAccount?.address, currentTab, sortString, pageSize]);
 
   const onPageChange = useCallback((newPage: number) => {
     if ((currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address) || page === newPage) return;
@@ -69,10 +65,9 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
       pageSize,
       sort: sortString,
       searchText: searchValue,
-      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined,
-      network: currentChainId
+      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
     });
-  }, [selectedAccount?.address, currentTab, page, sortString, searchValue, pageSize, currentChainId]);
+  }, [selectedAccount?.address, currentTab, page, sortString, searchValue, pageSize]);
 
   const onPageSizeChange = useCallback((newPageSize: number) => {
     if (currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address) return;
@@ -83,10 +78,9 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
       pageSize: newPageSize,
       sort: sortString,
       searchText: searchValue,
-      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined,
-      network: currentChainId
+      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
     });
-  }, [selectedAccount?.address, currentTab, page, sortString, searchValue, currentChainId]);
+  }, [selectedAccount?.address, currentTab, page, sortString, searchValue]);
 
   const onSortChange = useCallback((newSort: SortQuery) => {
     let sortString;
@@ -117,10 +111,9 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
       pageSize,
       sort: sortString,
       searchText: searchValue,
-      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined,
-      network: currentChainId
+      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
     });
-  }, [selectedAccount?.address, currentTab, setSortString, pageSize, searchValue, currentChainId]);
+  }, [selectedAccount?.address, currentTab, setSortString, pageSize, searchValue]);
 
   const onShowTradesDetailsModal = useCallback((trade: Trade) => {
     setSelectedOfferDetails(trade);

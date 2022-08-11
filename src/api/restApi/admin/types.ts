@@ -11,8 +11,7 @@ export type LoginResponse = {
 
 export type SetCollectionTokensPayload = {
   collectionId: number,
-  tokens: string,
-  currentChainId: string
+  tokens: string
 }
 
 export type CollectionData = NFTCollection & {

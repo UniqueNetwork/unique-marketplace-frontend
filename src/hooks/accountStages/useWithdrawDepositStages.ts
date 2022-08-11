@@ -16,7 +16,7 @@ export type TWithdrawDeposit = {
 };
 
 export const useWithdrawDepositStages = (accountAddress: string, bids: TWithdrawBid[], withdrawSponsorshipFee?: BN) => {
-  const { api, currentChainId = 'unique' } = useApi();
+  const { api } = useApi();
   const { signPayloadJSON, accounts, signMessage } = useAccounts();
   const marketApi = api?.market;
 
@@ -47,12 +47,12 @@ export const useWithdrawDepositStages = (accountAddress: string, bids: TWithdraw
         const message = `${auctionIds}&timestamp=${timestamp}`;
         const signature = await signMessage(message, account);
         await withdrawChooseBids(
-          { auctionIds: `${auctionIds}`, timestamp, network: currentChainId },
+          { auctionIds: `${auctionIds}`, timestamp },
           { signature, signer: account.address }
         );
       }
     }]
-    : [], [bids, account, bidsAmount, currentChainId]);
+    : [], [bids, account, bidsAmount]);
 
   const withdrawDepositStages: InternalStage<TWithdrawDeposit>[] = useMemo(() => [
     ...withdrawSponsorshipFeeStage,

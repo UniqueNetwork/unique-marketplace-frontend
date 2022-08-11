@@ -12,7 +12,6 @@ export type GetOffersRequestPayload = {
   numberOfAttributes?: number[]
   searchText?: string
   searchLocale?: string
-  network: string
 } & Pagination & Sortable;
 
 export type Bid = {

@@ -8,7 +8,7 @@ import useStages from '../useStages';
 import { useAccounts } from '../useAccounts';
 
 export const useAuctionSellStages = (collectionId: number, tokenId: number) => {
-  const { api, currentChainId = 'unique' } = useApi();
+  const { api } = useApi();
   const { signPayloadJSON } = useAccounts();
   const marketApi = api?.market;
 
@@ -28,12 +28,12 @@ export const useAuctionSellStages = (collectionId: number, tokenId: number) => {
               (signedTx) => {
                 const startPrice = fromStringToBnString(params.txParams.startingPrice.toString(), api?.market?.kusamaDecimals);
                 const priceStep = fromStringToBnString(params.txParams.minimumStep.toString(), api?.market?.kusamaDecimals);
-                return startAuctionRequest({ tx: signedTx, days: params.txParams.duration, startPrice, priceStep, network: currentChainId });
+                return startAuctionRequest({ tx: signedTx, days: params.txParams.duration, startPrice, priceStep });
               }
             }
           )
     }
-  ], [marketApi, api?.market?.kusamaDecimals, collectionId, tokenId, currentChainId]);
+  ], [marketApi, api?.market?.kusamaDecimals, collectionId, tokenId]);
 
   const { stages, error, status, initiate } = useStages<TAuctionProps>(sellAuctionStages, signPayloadJSON);
 

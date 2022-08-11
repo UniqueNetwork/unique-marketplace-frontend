@@ -16,7 +16,6 @@ import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import SearchField from '../../components/SearchField/SearchField';
 import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
 import { parseFilterState, setUrlParameter } from '../../utils/helpers';
-import { useApi } from '../../hooks/useApi';
 
 type TOption = SelectOptionProps &{
   id: string
@@ -71,7 +70,6 @@ export const MarketPage = () => {
   const { offers, offersCount, isFetching, fetchMore, fetch, attributes, attributeCounts } = useOffers();
   const { selectedAccount } = useAccounts();
   const deviceSize = useDeviceSize();
-  const { currentChainId = 'unique' } = useApi();
 
   const hasMore = offers && offers.length < offersCount;
 
@@ -81,10 +79,9 @@ export const MarketPage = () => {
       pageSize,
       ...(getFilterByState(filterState)),
       searchText: searchValue,
-      sort: [sortingValue],
-      network: currentChainId
+      sort: [sortingValue]
     });
-  }, [currentChainId]);
+  }, []);
 
   const getFilterByState = useCallback((filterState: FilterState | null) => {
     if (!filterState) return {};
@@ -110,11 +107,10 @@ export const MarketPage = () => {
         pageSize,
         ...(getFilterByState(filterState)),
         searchText: searchValue || undefined,
-        sort: [sortingValue],
-        network: currentChainId
+        sort: [sortingValue]
       });
     }
-  }, [fetchMore, offers, pageSize, isFetching, searchValue, filterState, currentChainId]);
+  }, [fetchMore, offers, pageSize, isFetching, searchValue, filterState]);
 
   const onSortingChange = useCallback((value: TOption) => {
     setSortingValue(value.id);
@@ -124,10 +120,9 @@ export const MarketPage = () => {
       pageSize,
       ...(getFilterByState(filterState)),
       searchText: searchValue || undefined,
-      sort: [value.id],
-      network: currentChainId
+      sort: [value.id]
     });
-  }, [fetch, filterState, getFilterByState, searchValue, currentChainId]);
+  }, [fetch, filterState, getFilterByState, searchValue]);
 
   const onSearch = useCallback((value?: string) => {
     setSearchValue(value);
@@ -137,10 +132,9 @@ export const MarketPage = () => {
       pageSize,
       ...(getFilterByState(filterState)),
       searchText: value || undefined,
-      sort: [sortingValue],
-      network: currentChainId
+      sort: [sortingValue]
     });
-  }, [fetch, sortingValue, searchValue, filterState, getFilterByState, currentChainId]);
+  }, [fetch, sortingValue, searchValue, filterState, getFilterByState]);
 
   const onFilterChange = useCallback(async (filterState: FilterState | null) => {
     setUrlParameter('filterState', filterState ? JSON.stringify(filterState) : '');
@@ -149,12 +143,11 @@ export const MarketPage = () => {
       pageSize,
       ...(getFilterByState(filterState)),
       searchText: searchValue || undefined,
-      sort: [sortingValue],
-      network: currentChainId
+      sort: [sortingValue]
     });
     const _selectedAttributeCounts = filterState?.attributeCounts?.filter((item) => attributesCount.findIndex(({ numberOfAttributes }) => numberOfAttributes === item) > -1);
     setFilterState({ ...filterState, attributeCounts: _selectedAttributeCounts });
-  }, [fetch, sortingValue, getFilterByState, searchValue, currentChainId]);
+  }, [fetch, sortingValue, getFilterByState, searchValue]);
 
   const onChangeAccount = useCallback(() => {
     if (isFetching) return;
