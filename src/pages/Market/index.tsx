@@ -16,6 +16,7 @@ import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import SearchField from '../../components/SearchField/SearchField';
 import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
 import { parseFilterState, setUrlParameter } from '../../utils/helpers';
+import { useApi } from '../../hooks/useApi';
 
 type TOption = SelectOptionProps &{
   id: string
@@ -70,18 +71,21 @@ export const MarketPage = () => {
   const { offers, offersCount, isFetching, fetchMore, fetch, attributes, attributeCounts } = useOffers();
   const { selectedAccount } = useAccounts();
   const deviceSize = useDeviceSize();
+  const { currentChainId } = useApi();
 
   const hasMore = offers && offers.length < offersCount;
 
   useEffect(() => {
-    void fetch({
-      page: 1,
-      pageSize,
-      ...(getFilterByState(filterState)),
-      searchText: searchValue,
-      sort: [sortingValue]
-    });
-  }, []);
+    if (currentChainId) {
+      void fetch({
+        page: 1,
+        pageSize,
+        ...(getFilterByState(filterState)),
+        searchText: searchValue,
+        sort: [sortingValue]
+      });
+    }
+  }, [currentChainId]);
 
   const getFilterByState = useCallback((filterState: FilterState | null) => {
     if (!filterState) return {};
