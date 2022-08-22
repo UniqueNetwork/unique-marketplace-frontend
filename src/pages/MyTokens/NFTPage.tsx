@@ -102,15 +102,19 @@ export const NFTPage = () => {
   const { api } = useApi();
 
   useEffect(() => {
-    if (!api?.nft || !selectedAccount?.address) return;
-
-    setIsFetchingTokens(true);
+    if (!selectedAccount?.address) return;
     // clear filter if user selected another account on my tokens page
     if (isInitialCall.current) isInitialCall.current = false;
     else {
       history.pushState(null, '', `${window.location.pathname}`);
       setFilterState(null);
     }
+  }, [selectedAccount?.address]);
+
+  useEffect(() => {
+    if (!api?.nft || !selectedAccount?.address) return;
+
+    setIsFetchingTokens(true);
 
     void (async () => {
       await fetch({ page: 1, pageSize, seller: selectedAccount?.address });
