@@ -16,7 +16,6 @@ import { shortcutText } from '../../utils/textUtils';
 import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
 import styled from 'styled-components';
 import { BlueGrey500 } from 'styles/colors';
-import { Tree } from '../../components/TreeView/Tree';
 
 const testid = 'token-page';
 
@@ -101,81 +100,38 @@ const TokenPage = () => {
         <p>back</p>
       </BackLink>
       <TokenPagePaper>
-        <Tree dataSource={dataSource}/>
-        {/* <CommonTokenDetail // TODO revert this */}
-        {/*   token={token} */}
-        {/*   offer={offer} */}
-        {/*   isLoading={isFetchingOffer || isFetchingToken} */}
-        {/*   testid={`${testid}`} */}
-        {/* > */}
-        {/*   <TokenTrading */}
-        {/*     token={token} */}
-        {/*     offer={offer} */}
-        {/*     onSellClick={onActionClick(MarketType.sellFix)} */}
-        {/*     onBuyClick={onActionClick(MarketType.purchase)} */}
-        {/*     onTransferClick={onActionClick(MarketType.transfer)} */}
-        {/*     onDelistClick={onActionClick(MarketType.delist)} */}
-        {/*     onDelistAuctionClick={onActionClick(MarketType.delistAuction)} */}
-        {/*     onPlaceABidClick={onActionClick(MarketType.bid)} */}
-        {/*     onWithdrawClick={onActionClick(MarketType.withdrawBid)} */}
-        {/*     onAuctionClose={onAuctionClose} */}
-        {/*     testid={`${testid}`} */}
-        {/*   /> */}
-        {/*   <TokenPageModal */}
-        {/*     token={token} */}
-        {/*     offer={offer} */}
-        {/*     marketType={marketType} */}
-        {/*     onFinish={onFinish} */}
-        {/*     onClose={onClose} */}
-        {/*     testid={`${testid}`} */}
-        {/*   /> */}
-        {/* </CommonTokenDetail> */}
+        <CommonTokenDetail
+          token={token}
+          offer={offer}
+          isLoading={isFetchingOffer || isFetchingToken}
+          testid={`${testid}`}
+        >
+          <TokenTrading
+            token={token}
+            offer={offer}
+            onSellClick={onActionClick(MarketType.sellFix)}
+            onBuyClick={onActionClick(MarketType.purchase)}
+            onTransferClick={onActionClick(MarketType.transfer)}
+            onDelistClick={onActionClick(MarketType.delist)}
+            onDelistAuctionClick={onActionClick(MarketType.delistAuction)}
+            onPlaceABidClick={onActionClick(MarketType.bid)}
+            onWithdrawClick={onActionClick(MarketType.withdrawBid)}
+            onAuctionClose={onAuctionClose}
+            testid={`${testid}`}
+          />
+          <TokenPageModal
+            token={token}
+            offer={offer}
+            marketType={marketType}
+            onFinish={onFinish}
+            onClose={onClose}
+            testid={`${testid}`}
+          />
+        </CommonTokenDetail>
       </TokenPagePaper>
     </>
   );
 };
-
-const dataSource = [{
-  id: '1',
-  text: 'myNode',
-  icon: '',
-  opened: false,
-  selected: false,
-  children: [{
-    id: '3',
-    text: 'myNode3',
-    icon: '',
-    opened: false,
-    selected: false,
-    children: [
-      {
-        id: '5',
-        text: 'myNode5',
-        icon: '',
-        opened: false,
-        selected: false,
-        children: []
-      }
-    ]
-  },
-    {
-      id: '4',
-      text: 'myNode4',
-      icon: '',
-      opened: false,
-      selected: false,
-      children: []
-    }
-  ]
-},
-  {
-    id: '2',
-    text: 'myNode2',
-    icon: '',
-    opened: false,
-    selected: false,
-    children: []
-  }];
 
 const TokenPagePaper = styled(PagePaper)`
   && {

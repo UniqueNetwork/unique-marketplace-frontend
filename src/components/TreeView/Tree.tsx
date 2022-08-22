@@ -1,8 +1,12 @@
-import React, { FC, useCallback, useMemo, useRef, useState } from 'react';
-import { IData, ITree, TTreeNodeClickHandler } from './types';
+import React, { FC, useCallback, useState } from 'react';
+import { IData, INode, ITree } from './types';
 import { Node } from './Node';
 
-export const Tree: FC<ITree> = ({ dataSource }) => {
+/**
+ * usage example:
+ * <Tree dataSource={dataSource} nodeView={NodeView} onNodeClicked={onNodeClicked}/>
+ * */
+export const Tree: FC<ITree> = ({ dataSource, nodeView, onNodeClicked }) => {
   const [stateData, setStateData] = useState(dataSource);
   const onTreeNodeClick = useCallback((nodeId: string, event: React.MouseEvent) => {
     function helper(node: IData) {
@@ -27,16 +31,20 @@ export const Tree: FC<ITree> = ({ dataSource }) => {
 
     helper(newData);
     setStateData(newData.children);
-  }, [dataSource]);
-
-  // console.log('stateData', stateData);
+    if (onNodeClicked) onNodeClicked(nodeId);
+  }, [dataSource, onNodeClicked]);
 
   return (
     <div>
       {stateData.map((data) => (
-        <Node key={data.id} data={data} onTreeNodeClick={onTreeNodeClick}>
+        <Node
+          key={data.id}
+          data={data}
+          onTreeNodeClick={onTreeNodeClick}
+          nodeView={nodeView}
+        >
           {data.children.map((node) => (
-            iter(node, onTreeNodeClick)
+            iter({ data: node, onTreeNodeClick, nodeView })
           ))}
         </Node>
       ))}
@@ -47,10 +55,10 @@ export const Tree: FC<ITree> = ({ dataSource }) => {
 /**
  * iterate through datasource and return treenode
  */
-function iter(node: IData, treeNodeClick: TTreeNodeClickHandler) {
-  return (<Node data={node} onTreeNodeClick={treeNodeClick}>
-    {node.children.map((val) => {
-      return iter(val, treeNodeClick);
+function iter({ data, onTreeNodeClick, nodeView }: INode) {
+  return (<Node data={data} onTreeNodeClick={onTreeNodeClick} nodeView={nodeView}>
+    {data.children.map((val) => {
+      return iter({ data: val, onTreeNodeClick, nodeView });
     })}
   </Node>);
 }
