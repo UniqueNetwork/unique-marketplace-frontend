@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import BN from 'bn.js';
 import { Select, Text } from '@unique-nft/ui-kit';
@@ -95,6 +95,7 @@ export const NFTPage = () => {
   const [isFetchingTokens, setIsFetchingTokens] = useState<boolean>(false);
   const deviceSize = useDeviceSize();
   const { collections } = useCollections();
+  const isInitialCall = useRef(true);
 
   const { offers, isFetching: isFetchingOffers, fetch } = useOffers();
 
@@ -104,6 +105,13 @@ export const NFTPage = () => {
     if (!api?.nft || !selectedAccount?.address) return;
 
     setIsFetchingTokens(true);
+    // clear filter if user selected another account on my tokens page
+    if (isInitialCall.current) isInitialCall.current = false;
+    else {
+      history.pushState(null, '', `${window.location.pathname}`);
+      setFilterState(null);
+    }
+
     void (async () => {
       await fetch({ page: 1, pageSize, seller: selectedAccount?.address });
       const _tokens = await api.nft?.getAccountMarketableTokens(selectedAccount.address) as NFTToken[];
