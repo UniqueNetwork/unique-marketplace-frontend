@@ -102,20 +102,9 @@ export const NFTPage = () => {
   const { api } = useApi();
 
   useEffect(() => {
-    if (!selectedAccount?.address) return;
-    // clear filter if user selected another account on my tokens page
-    if (isInitialCall.current) isInitialCall.current = false;
-    else {
-      history.pushState(null, '', `${window.location.pathname}`);
-      setFilterState(null);
-    }
-  }, [selectedAccount?.address]);
-
-  useEffect(() => {
     if (!api?.nft || !selectedAccount?.address) return;
 
     setIsFetchingTokens(true);
-
     void (async () => {
       await fetch({ page: 1, pageSize, seller: selectedAccount?.address });
       const _tokens = await api.nft?.getAccountMarketableTokens(selectedAccount.address) as NFTToken[];
@@ -235,6 +224,20 @@ export const NFTPage = () => {
 
     return statusesCount + collectionsCount + attributesCount + numberOfAttributesCount + (prices ? 1 : 0);
   }, [filterState]);
+
+  const clearFilter = useCallback(() => {
+    if (!selectedAccount?.address) return;
+    // clear filter if user selected another account on my tokens page
+    if (isInitialCall.current) isInitialCall.current = false;
+    else {
+      history.pushState(null, '', `${window.location.pathname}`);
+      setFilterState(null);
+    }
+  }, [selectedAccount?.address]);
+
+  useEffect(() => {
+    clearFilter();
+  }, [clearFilter]);
 
   return (<PagePaper>
     <MarketMainPageStyled>
