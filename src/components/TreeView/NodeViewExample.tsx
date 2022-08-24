@@ -3,20 +3,20 @@ import { Icon } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { INodeView } from './types';
 
-const NodeView: FC<INodeView> = ({ arrowClicked, isOpened, data, textClicked, children }) => {
+const NodeView: FC<INodeView> = ({ arrowClicked, isOpened, data, textClicked, isFirst, children }) => {
   return (
-    <ViewContainer>
-      <Arrow onClick={arrowClicked} isOpened={isOpened}><Icon size={14} name={data.children.length ? 'triangle' : ''} /></Arrow>
-      <IconStyled size={16} name={data.icon || 'badge-nft'}></IconStyled>
-      <Name onClick={textClicked} isSelected={data.selected}>{data.text}</Name>
+    <ViewContainer isFirst={isFirst}>
+      <Arrow onClick={arrowClicked} isOpened={isOpened}><Icon size={14} name={data.nestingChildTokens?.length ? 'triangle' : ''} /></Arrow>
+      <IconStyled size={16} name={data.image.fullUrl || 'badge-nft'}></IconStyled>
+      <Name onClick={textClicked} isSelected={!!data.selected}>T-#{data.tokenId} C-#{data.collectionId}</Name>
       {children}
     </ViewContainer>
   );
 };
 
-const ViewContainer = styled.div`
-  margin-left: 24px;
-  margin-top: 8px;
+const ViewContainer = styled.div<{ isFirst: boolean | undefined }>`
+  padding-left: ${({ isFirst }) => (isFirst ? 'calc(var(--gap) * 1.5)' : 'calc(var(--gap) * 3)')};
+  padding-top: 8px;
 `;
 
 const Arrow = styled.div<{ isOpened: boolean }>`

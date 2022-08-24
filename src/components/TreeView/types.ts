@@ -1,21 +1,25 @@
 import React from 'react';
+import { DecodedAttributes, DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/sdk/tokens';
 
 export interface IData {
-  id: string
-  text: string
-  icon?: string
-  opened: boolean
+  tokenId: number
+  collectionId: number
+  owner: string
+  nestingChildTokens?: IData[]
+  attributes: DecodedAttributes
+  image: DecodedInfixOrUrlOrCidAndHash
+  opened?: boolean
   disabled?: boolean
-  selected: boolean
-  children: IData[]
+  selected?: boolean
 }
 
-export type TTreeNodeClickHandler = (id: string, event: React.MouseEvent) => void
+export type TTreeNodeClickHandler = (tokenId: number, collectionId: number) => void
 
 export interface INode {
   data: IData
-  onTreeNodeClick?: TTreeNodeClickHandler
+  onNodeClicked?: TTreeNodeClickHandler
   nodeView: React.FC<INodeView>
+  isFirst?: boolean
 }
 
 export interface INodeView {
@@ -23,10 +27,11 @@ export interface INodeView {
   isOpened: boolean
   data: IData
   textClicked: (event: React.MouseEvent) => void
+  isFirst?: boolean
 }
 
 export interface ITree {
   dataSource: IData[]
   nodeView: React.FC<INodeView>
-  onNodeClicked?: (id: string) => void
+  onNodeClicked?: TTreeNodeClickHandler
 }

@@ -7,44 +7,46 @@ import { Node } from './Node';
  * <Tree dataSource={dataSource} nodeView={NodeView} onNodeClicked={onNodeClicked}/>
  * */
 export const Tree: FC<ITree> = ({ dataSource, nodeView, onNodeClicked }) => {
-  const [stateData, setStateData] = useState(dataSource);
-  const onTreeNodeClick = useCallback((nodeId: string, event: React.MouseEvent) => {
-    function helper(node: IData) {
-      node.children.forEach((child) => {
-        helper(child);
-      });
-
-      if (node.id === nodeId) {
-        node.selected = !node.selected;
-      } else if (!event.ctrlKey) {
-        node.selected = false;
-      }
-    }
-
-    const newData = {
-      id: '#',
-      text: '',
-      opened: false,
-      selected: false,
-      children: [...dataSource]
-    };
-
-    helper(newData);
-    setStateData(newData.children);
-    if (onNodeClicked) onNodeClicked(nodeId);
-  }, [dataSource, onNodeClicked]);
+  // const [stateData, setStateData] = useState(dataSource);
+  // const onTreeNodeClick = useCallback((nodeId: number, collectionId: number) => {
+  //   function helper(node: IData) {
+  //     node.nestingChildTokens.forEach((child) => {
+  //       helper(child);
+  //     });
+  //
+  //     if (node.tokenId === nodeId) {
+  //       node.selected = !node.selected;
+  //     }
+  //   }
+  //
+  //   const newData = {
+  //     tokenId: -1,
+  //     collectionId: -1,
+  //     owner: '',
+  //     opened: false,
+  //     selected: false,
+  //     nestingChildTokens: [...dataSource],
+  //     attributes: {},
+  //     image: { ipfsCid: '', fullUrl: '' }
+  //   };
+  //
+  //   helper(newData);
+  //   setStateData(newData.nestingChildTokens);
+  //   if (onNodeClicked) onNodeClicked(nodeId, collectionId);
+  // }, [dataSource, onNodeClicked]);
 
   return (
     <div>
-      {stateData.map((data) => (
+      {dataSource.map((data, index) => (
         <Node
-          key={data.id}
+          key={`T${data.tokenId}C${data.collectionId}`}
           data={data}
-          onTreeNodeClick={onTreeNodeClick}
+          onNodeClicked={onNodeClicked}
           nodeView={nodeView}
+          isFirst={index === 0}
         >
-          {data.children.map((node) => (
-            iter({ data: node, onTreeNodeClick, nodeView })
+          {data.nestingChildTokens?.map((node) => (
+            iter({ data: node, onNodeClicked, nodeView })
           ))}
         </Node>
       ))}
@@ -55,10 +57,10 @@ export const Tree: FC<ITree> = ({ dataSource, nodeView, onNodeClicked }) => {
 /**
  * iterate through datasource and return treenode
  */
-function iter({ data, onTreeNodeClick, nodeView }: INode) {
-  return (<Node data={data} onTreeNodeClick={onTreeNodeClick} nodeView={nodeView}>
-    {data.children.map((val) => {
-      return iter({ data: val, onTreeNodeClick, nodeView });
+function iter({ data, onNodeClicked, nodeView }: INode) {
+  return (<Node data={data} onNodeClicked={onNodeClicked} nodeView={nodeView}>
+    {data.nestingChildTokens?.map((val) => {
+      return iter({ data: val, onNodeClicked, nodeView });
     })}
   </Node>);
 }
