@@ -21,6 +21,7 @@ interface CollectionsFilterProps {
   tokens: NFTToken[]
   collections: NFTCollection[]
   isFetchingTokens: boolean
+  featuredTokensForAttributeCounts: NFTToken[]
 }
 
 const CollectionsFilter: FC<CollectionsFilterProps> = ({
@@ -32,7 +33,8 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({
   featuredTokens,
   collections: myCollections,
   isFetchingTokens,
-  tokens
+  tokens,
+  featuredTokensForAttributeCounts
 }) => {
   const [attributes, setAttributes] = useState<Record<string, Attribute[]>>({});
   const [attributeCounts, setAttributeCounts] = useState<AttributeCount[]>([]);
@@ -40,9 +42,9 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({
 
   useEffect(() => {
     if (!isFetchingTokens && tokens.length > 0) {
-      setAttributeCounts(getAttributesCountFromTokens(selectedCollections.length === 1 ? featuredTokens : tokens));
+      setAttributeCounts(getAttributesCountFromTokens(featuredTokensForAttributeCounts));
     }
-  }, [isFetchingTokens, tokens, selectedCollections.length, featuredTokens]);
+  }, [isFetchingTokens, tokens, featuredTokensForAttributeCounts]);
 
   useEffect(() => {
     if (!isFetchingTokens && featuredTokens.length > 0 && selectedCollections.length === 1) {

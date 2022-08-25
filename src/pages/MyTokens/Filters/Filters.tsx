@@ -6,7 +6,7 @@ import { AttributeItem, FiltersProps, PriceRange, MyTokensFilterState, MyTokensS
 import StatusFilter from './StatusFilter';
 import CollectionsFilter from './CollectionsFilter';
 
-export const Filters: FC<FiltersProps<MyTokensFilterState>> = ({ value, onFilterChange, featuredTokens, collections, isFetchingTokens, testid, tokens }) => {
+export const Filters: FC<FiltersProps<MyTokensFilterState>> = ({ value, onFilterChange, featuredTokens, collections, isFetchingTokens, testid, tokens, featuredTokensForAttributeCounts }) => {
   const onStatusFilterChange = useCallback((statuses: MyTokensStatuses) => {
     onFilterChange({ ...(value || {}), statuses });
   }, [value, onFilterChange]);
@@ -40,6 +40,7 @@ export const Filters: FC<FiltersProps<MyTokensFilterState>> = ({ value, onFilter
       tokens={tokens}
       collections={collections}
       isFetchingTokens={isFetchingTokens}
+      featuredTokensForAttributeCounts={featuredTokensForAttributeCounts}
     />
   </FiltersStyled>;
 };

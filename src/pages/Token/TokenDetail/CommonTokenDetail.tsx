@@ -56,7 +56,8 @@ export const CommonTokenDetail: FC<IProps> = ({
         imageUrl: image,
         attributes,
         description,
-        collectionCover
+        collectionCover,
+        video: offer.tokenDescription.video
       };
     }
 
@@ -101,6 +102,8 @@ export const CommonTokenDetail: FC<IProps> = ({
     setShareModalVisible(false);
   }, []);
 
+  const videoProp = useMemo(() => typeof video === 'string' ? { fullUrl: video, ipfsCid: '' } : video, [video]);
+
   return (
     <CommonTokenDetailStyled>
       <PictureWrapper>
@@ -109,7 +112,7 @@ export const CommonTokenDetail: FC<IProps> = ({
           <Picture
             alt={tokenId?.toString() || ''}
             src={imageUrl}
-            video={video}
+            video={videoProp}
             testid={`${testid}-token-picture`}
           />
         }
@@ -162,6 +165,8 @@ const CommonTokenDetailStyled = styled.div`
   width: 100%;
 
   @media (max-width: 767px) {
+    flex-direction: column;
+    row-gap: var(--gap);
     & .unique-modal-wrapper .unique-modal {
       width: calc(520px - (var(--gap) * 3));
     }
@@ -172,8 +177,6 @@ const CommonTokenDetailStyled = styled.div`
       padding: 24px 16px;
       width: calc(304px - (var(--gap) * 3));
     }
-    flex-direction: column;
-    row-gap: var(--gap);
   }
 `;
 
@@ -204,12 +207,20 @@ const PictureWrapper = styled.div`
     position: absolute;
   }
 
-  @media (max-width: 1024px) {
+  @media (max-width: 1919px) {
     width: 326px;
   }
   
-  @media (max-width: 768px) {
+  @media (max-width: 1023px) {
     width: 224px;
+  }
+
+  @media (max-width: 767px) {
+    width: calc(100vw - var(--gap) * 3);
+  }
+
+  @media (max-width: 567px) {
+    width: calc(100vw - var(--gap) * 2);
   }
   
   .picture {
@@ -222,35 +233,19 @@ const PictureWrapper = styled.div`
     text-align: center;
     max-height: 100%;
     border-radius: 8px;
-    
+    overflow: hidden;
+    width: 100%;
 
     img {
       max-width: 100%;
       max-height: 100%;
+      
     }
 
     svg {
       border-radius: 8px;
       height: auto;
     }
-
-    @media (max-width: 1024px) {
-      width: 326px;
-    }
-
-
-    @media (max-width: 768px) {
-      width: 224px;
-    }
-
-    @media (max-width: 567px) {
-      width: 100vw;
-      min-width: 100vw;
-    }
-  }
-  @media (max-width: 567px) {
-    width: 100vw;
-    margin-left: calc(0px - var(--gap));
   }
 `;
 

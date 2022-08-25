@@ -151,10 +151,8 @@ export const MarketPage = () => {
 
   const onChangeAccount = useCallback(() => {
     if (isFetching) return;
-    if (filterState?.statuses?.myNFTs || filterState?.statuses?.myBets) {
-      void onFilterChange(filterState);
-    }
-  }, [filterState?.statuses?.myNFTs, filterState?.statuses?.myBets]);
+    void onFilterChange(filterState);
+  }, [filterState, isFetching, onFilterChange]);
 
   useEffect(() => {
     onChangeAccount();

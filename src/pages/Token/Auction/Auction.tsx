@@ -116,7 +116,7 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
       topBid={topBid?.balance !== '0' ? topBid?.balance : topBid?.amount}
     />
     <AuctionWrapper>
-      {offer.auction?.status === 'active' && <Row>
+      {offer.auction?.status === 'active' && <ButtonsWrapper>
         {canDelist && <Button title={'Delist'}
           role={'danger'}
           onClick={onDelistAuctionClick}
@@ -133,7 +133,7 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
           onClick={onWithdrawClick}
           testid={`${testid}-withdraw-button`}
         />}
-      </Row>}
+      </ButtonsWrapper>}
       {offer.auction?.status === 'active' && offer?.auction?.stopAt && <TimerWrapper>
         <Timer time={offer.auction.stopAt} />
       </TimerWrapper>}
@@ -145,12 +145,12 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
       {!isBidder && topBid && <LeadingBidWrapper>
         <Text color={'grey-500'}>Highest Bidder</Text><AccountLink accountAddress={topBid?.bidderAddress || ''} />
       </LeadingBidWrapper>}
-      {!isTopBidder && isBidder && <Row>
+      {!isTopBidder && isBidder && <BidderStatusWrapper>
         <BidderTextStyled >You are outbid</BidderTextStyled>
         <LeadingBidWrapper>
           <Text color={'grey-500'}>Leading bid</Text><AccountLink accountAddress={topBid?.bidderAddress || ''} />
         </LeadingBidWrapper>
-      </Row>}
+      </BidderStatusWrapper>}
       <Bids offer={offer} />
     </AuctionWrapper>
   </>);
@@ -166,10 +166,28 @@ const TimerWrapper = styled.div`
   margin-top: 24px;
 `;
 
-const Row = styled.div`
+const BidderStatusWrapper = styled.div`
   display: flex;
   align-items: center;
-  column-gap: var(--gap)
+  column-gap: var(--gap);
+  @media (max-width: 320px) {
+    flex-direction: column;
+    row-gap: calc(var(--gap) / 2);
+    align-items: flex-start;
+  }
+`;
+
+const ButtonsWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  column-gap: var(--gap);
+  @media (max-width: 320px) {
+    flex-direction: column;
+    row-gap: calc(var(--gap) / 2);
+    & button {
+      width: 100%;
+    }
+  }
 `;
 
 const Divider = styled.div`
@@ -199,6 +217,9 @@ const BidderTextStyled = styled(Text)`
   background-color: ${Coral100};
   color: ${Coral500} !important;
   width: fit-content;
+  @media (max-width: 320px) {
+    margin-bottom: 0;
+  }
 `;
 
 const LeadingBidWrapper = styled.div`
@@ -206,6 +227,9 @@ const LeadingBidWrapper = styled.div`
   display: flex;
   align-items: center;
   column-gap: calc(var(--gap) / 2);
+  a {
+    font-size: 16px;
+  }
 `;
 
 const PlaceABidButton = styled(Button)`

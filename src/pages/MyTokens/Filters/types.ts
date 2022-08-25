@@ -33,6 +33,7 @@ export type FiltersProps<T = FilterState> = {
     collections: NFTCollection[]
     isFetchingTokens: boolean
     testid: string
+    featuredTokensForAttributeCounts: NFTToken[]
 }
 
 export type TFilterAttribute = {

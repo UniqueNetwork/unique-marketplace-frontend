@@ -133,7 +133,8 @@ export const NFTPage = () => {
     setUrlParameter('searchValue', value || '');
   }, [setSearchString]);
 
-  const filter = useCallback((token: NFTToken & Partial<Offer>) => {
+  // attribute counts calculated based on tokens filtered by all filters except attribute count filter
+  const filterForAttributeCounts = useCallback((token: NFTToken & Partial<Offer>) => {
       const { statuses, prices } = filterState || {};
       setUrlParameter('filterState', filterState ? JSON.stringify(filterState) : '');
       const filterByStatus = (token: NFTToken & Partial<Offer>) => {
@@ -160,12 +161,6 @@ export const NFTPage = () => {
       if (filterState?.collections && filterState.collections.length > 0) {
         filteredByCollections = filterState.collections.findIndex((collectionId: number) => token.collectionId === collectionId) > -1;
       }
-      let filteredByAttributeCounts = true;
-      if (filterState?.attributeCounts && filterState.attributeCounts.length > 0) {
-        filteredByAttributeCounts = filterState?.attributeCounts.some((attributeCount) => {
-          return countTokenAttributes(token.attributes) === attributeCount;
-        });
-      }
       let filteredByAttributes = true;
       if (filterState?.attributes && filterState.attributes.length > 0) {
         filteredByAttributes = filterState?.attributes.every((attributeItem) => {
@@ -183,10 +178,20 @@ export const NFTPage = () => {
           token.id === Number(searchString);
       }
 
-      return filterByStatus(token) && filteredByPrice && filteredByCollections && filteredByAttributeCounts && filteredByAttributes && filteredBySearchValue;
+      return filterByStatus(token) && filteredByPrice && filteredByCollections && filteredByAttributes && filteredBySearchValue;
     },
     [filterState, searchString, api?.market?.kusamaDecimals]
   );
+
+  const filterByAttributeCounts = useCallback((token: NFTToken & Partial<Offer>) => {
+    let filteredByAttributeCounts = true;
+    if (filterState?.attributeCounts && filterState.attributeCounts.length > 0) {
+      filteredByAttributeCounts = filterState?.attributeCounts.some((attributeCount) => {
+        return countTokenAttributes(token.attributes) === attributeCount;
+      });
+    }
+    return filteredByAttributeCounts;
+  }, [filterState]);
 
   const tokensWithOffers: (NFTToken & Partial<Offer>)[] = useMemo(() => {
     return [
@@ -196,14 +201,19 @@ export const NFTPage = () => {
         prefix: offer.tokenDescription?.prefix || '',
         imageUrl: offer.tokenDescription?.image || '',
         attributes: toTokenAttributes(offer.tokenDescription?.attributes),
+        video: typeof offer.tokenDescription.video === 'string' ? { fullUrl: offer.tokenDescription.video, ipfsCid: '' } : offer.tokenDescription.video,
         ...offer
       })) || []),
       ...tokens
     ];
   }, [tokens, offers]);
 
+  const featuredTokensForAttributeCounts: (NFTToken & Partial<Offer>)[] = useMemo(() => {
+    return tokensWithOffers.filter(filterForAttributeCounts);
+  }, [tokensWithOffers, filterForAttributeCounts]);
+
   const featuredTokens: (NFTToken & Partial<Offer>)[] = useMemo(() => {
-    const filteredTokens: (NFTToken & Partial<Offer>)[] = tokensWithOffers.filter(filter);
+    const filteredTokens: (NFTToken & Partial<Offer>)[] = featuredTokensForAttributeCounts.filter(filterByAttributeCounts);
 
     if (selectOption) {
       return filteredTokens.sort((tokenA, tokenB) => {
@@ -212,7 +222,7 @@ export const NFTPage = () => {
       });
     }
     return filteredTokens;
-  }, [tokensWithOffers, filter, selectOption]);
+  }, [featuredTokensForAttributeCounts, selectOption, filterByAttributeCounts]);
 
   const filterCount = useMemo(() => {
     const { statuses, prices, collections = [], attributes = [], attributeCounts = [] } = filterState || {};
@@ -236,6 +246,7 @@ export const NFTPage = () => {
             collections={myCollections}
             isFetchingTokens={isFetchingTokens}
             testid={`${testid}-filters`}
+            featuredTokensForAttributeCounts={featuredTokensForAttributeCounts}
           />
         }
       </LeftColumn>
@@ -283,6 +294,7 @@ export const NFTPage = () => {
           featuredTokens={featuredTokens}
           collections={myCollections}
           isFetchingTokens={isFetchingTokens}
+          featuredTokensForAttributeCounts={featuredTokensForAttributeCounts}
         />}
       />}
     </MarketMainPageStyled>

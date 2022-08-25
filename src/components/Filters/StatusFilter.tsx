@@ -24,7 +24,7 @@ const StatusFilter: FC<StatusFilterProps> = ({ value, onChange, testid }) => {
   }, [myNFTs, timedAuction, myBets, onChange]);
 
   const onTimedAuctionChange = useCallback((value: boolean) => {
-    onChange({ myNFTs, fixedPrice, timedAuction: myBets || value, myBets });
+    onChange({ myNFTs, fixedPrice, timedAuction: value, myBets: value ? myBets : value });
   }, [myNFTs, fixedPrice, myBets, onChange]);
 
   const onMyBetsChange = useCallback((value: boolean) => {
@@ -47,10 +47,9 @@ const StatusFilter: FC<StatusFilterProps> = ({ value, onChange, testid }) => {
   return (
     <>
       <Accordion
-        title={'Selling Method'}
+        title={'Selling method'}
         isOpen={true}
         onClear={onMethodClear}
-        isClearShow={fixedPrice || timedAuction}
         testid={`${testid}-selling-method-accordion`}
       >
         <StatusFilterWrapper>
@@ -74,7 +73,6 @@ const StatusFilter: FC<StatusFilterProps> = ({ value, onChange, testid }) => {
         title={'Status'}
         isOpen={true}
         onClear={onStatusClear}
-        isClearShow={myNFTs || myBets}
         testid={`${testid}-status-accordion`}
       >
         <StatusFilterWrapper>

@@ -52,8 +52,8 @@ export type Offer = {
     image: string
     prefix: string
     attributes: OfferTokenAttribute[]
+    video?: string | VideoAttribute
   }
-  video: VideoAttribute
 }
 
 export type OffersResponse = PaginatedResponse<Offer> & {

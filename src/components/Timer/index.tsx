@@ -105,12 +105,12 @@ const Cell = styled.div`
     flex-direction: column;   
 
     h4 {
-      margin-bottom: 0;
+      margin-bottom: 4px;
       border: 1px solid #D2D3D6;
       border-radius: 8px;
       width: 28px;
       height: 28px;
-      padding: 14px;
+      padding: 13px;
       text-align: center;
     }
   }
