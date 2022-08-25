@@ -2,39 +2,8 @@ import React, { FC, useCallback, useState } from 'react';
 import { IData, INode, ITree } from './types';
 import { Node } from './Node';
 
-/**
- * usage example:
- * <Tree dataSource={dataSource} nodeView={NodeView} onNodeClicked={onNodeClicked}/>
- * */
+const level = 1;
 export const Tree: FC<ITree> = ({ dataSource, nodeView, onNodeClicked }) => {
-  // const [stateData, setStateData] = useState(dataSource);
-  // const onTreeNodeClick = useCallback((nodeId: number, collectionId: number) => {
-  //   function helper(node: IData) {
-  //     node.nestingChildTokens.forEach((child) => {
-  //       helper(child);
-  //     });
-  //
-  //     if (node.tokenId === nodeId) {
-  //       node.selected = !node.selected;
-  //     }
-  //   }
-  //
-  //   const newData = {
-  //     tokenId: -1,
-  //     collectionId: -1,
-  //     owner: '',
-  //     opened: false,
-  //     selected: false,
-  //     nestingChildTokens: [...dataSource],
-  //     attributes: {},
-  //     image: { ipfsCid: '', fullUrl: '' }
-  //   };
-  //
-  //   helper(newData);
-  //   setStateData(newData.nestingChildTokens);
-  //   if (onNodeClicked) onNodeClicked(nodeId, collectionId);
-  // }, [dataSource, onNodeClicked]);
-
   return (
     <div>
       {dataSource.map((data, index) => (
@@ -44,9 +13,10 @@ export const Tree: FC<ITree> = ({ dataSource, nodeView, onNodeClicked }) => {
           onNodeClicked={onNodeClicked}
           nodeView={nodeView}
           isFirst={index === 0}
+          level={level}
         >
           {data.nestingChildTokens?.map((node) => (
-            iter({ data: node, onNodeClicked, nodeView })
+            iter({ data: node, onNodeClicked, nodeView, level })
           ))}
         </Node>
       ))}
@@ -54,13 +24,18 @@ export const Tree: FC<ITree> = ({ dataSource, nodeView, onNodeClicked }) => {
   );
 };
 
-/**
- * iterate through datasource and return treenode
- */
-function iter({ data, onNodeClicked, nodeView }: INode) {
-  return (<Node data={data} onNodeClicked={onNodeClicked} nodeView={nodeView}>
+// iterate through datasource and return treenode
+function iter({ data, onNodeClicked, nodeView, level }: INode) {
+  // eslint-disable-next-line
+  const nextLevel = (level as number) + 1;
+  return (<Node
+    data={data}
+    onNodeClicked={onNodeClicked}
+    nodeView={nodeView}
+    level={nextLevel}
+  >
     {data.nestingChildTokens?.map((val) => {
-      return iter({ data: val, onNodeClicked, nodeView });
+      return iter({ data: val, onNodeClicked, nodeView, level: nextLevel });
     })}
   </Node>);
 }

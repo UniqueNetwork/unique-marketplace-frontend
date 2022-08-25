@@ -2,24 +2,50 @@ import React, { FC } from 'react';
 import { Icon } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { INodeView } from './types';
+import { Grey300, Primary500 } from '../../styles/colors';
+import { Picture } from '../Picture';
 
-const NodeView: FC<INodeView> = ({ arrowClicked, isOpened, data, textClicked, isFirst, children }) => {
+const NodeView: FC<INodeView> = ({ arrowClicked, isOpened, data, textClicked, isFirst, level, children }) => {
   return (
-    <ViewContainer isFirst={isFirst}>
-      <Arrow onClick={arrowClicked} isOpened={isOpened}><Icon size={14} name={data.nestingChildTokens?.length ? 'triangle' : ''} /></Arrow>
-      <IconStyled size={16} name={data.image.fullUrl || 'badge-nft'}></IconStyled>
-      <Name onClick={textClicked} isSelected={!!data.selected}>T-#{data.tokenId} C-#{data.collectionId}</Name>
+    <>
+      <ViewContainer isFirst={isFirst}>
+        <Arrow
+          isFirst={isFirst}
+          level={level}
+          onClick={arrowClicked}
+          isOpened={isOpened}
+        >
+          <Icon size={16} name={data.nestingChildTokens?.length ? 'triangle' : ''} color={Primary500} />
+        </Arrow>
+        <Picture alt={`T-#${data.tokenId} C-#${data.collectionId}`} src={data.image.fullUrl || undefined}/>
+        <Name onClick={textClicked} isSelected={!!data.selected}>T-#{data.tokenId} C-#{data.collectionId}</Name>
+        <hr/>
+      </ViewContainer>
       {children}
-    </ViewContainer>
+    </>
   );
 };
 
 const ViewContainer = styled.div<{ isFirst: boolean | undefined }>`
-  padding-left: ${({ isFirst }) => (isFirst ? 'calc(var(--gap) * 1.5)' : 'calc(var(--gap) * 3)')};
-  padding-top: 8px;
+  //height: 58px;
+  hr {
+    border-top: 1px dashed ${Grey300};
+    border-left: none;
+  }
+  .picture {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    img {
+      border-radius: 4px;
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
+    }
+  }
 `;
 
-const Arrow = styled.div<{ isOpened: boolean }>`
+const Arrow = styled.div<{ isOpened: boolean | undefined, isFirst: boolean | undefined, level: number }>`
   cursor: pointer;
   margin-right: 6px;
   display: inline-block;
@@ -29,12 +55,7 @@ const Arrow = styled.div<{ isOpened: boolean }>`
   user-select: none;
 
   transform: ${({ isOpened }) => (!isOpened && 'rotate(-90deg)')};
-`;
-
-const IconStyled = styled(Icon)`
-  display: inline-block;
-  margin: 0;
-  padding-right: 10px;
+  margin-left: ${({ isFirst, level }) => (isFirst ? 24 : 24 + 16 * level)}px;
 `;
 
 const Name = styled.p<{ isSelected: boolean }>`
@@ -51,45 +72,3 @@ const Name = styled.p<{ isSelected: boolean }>`
 `;
 
 export default NodeView;
-
-const dataSource = [{
-  id: '1',
-  text: 'myNode',
-  icon: '',
-  opened: false,
-  selected: false,
-  children: [{
-    id: '3',
-    text: 'myNode3',
-    icon: '',
-    opened: false,
-    selected: false,
-    children: [
-      {
-        id: '5',
-        text: 'myNode5',
-        icon: '',
-        opened: false,
-        selected: false,
-        children: []
-      }
-    ]
-  },
-    {
-      id: '4',
-      text: 'myNode4',
-      icon: '',
-      opened: false,
-      selected: false,
-      children: []
-    }
-  ]
-},
-  {
-    id: '2',
-    text: 'myNode2',
-    icon: '',
-    opened: false,
-    selected: false,
-    children: []
-  }];

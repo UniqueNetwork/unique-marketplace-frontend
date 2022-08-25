@@ -13,13 +13,14 @@ export interface IData {
   selected?: boolean
 }
 
-export type TTreeNodeClickHandler = (tokenId: number, collectionId: number) => void
+export type TTreeNodeClickHandler = (data: IData) => void
 
 export interface INode {
   data: IData
   onNodeClicked?: TTreeNodeClickHandler
   nodeView: React.FC<INodeView>
   isFirst?: boolean
+  level: number
 }
 
 export interface INodeView {
@@ -28,6 +29,7 @@ export interface INodeView {
   data: IData
   textClicked: (event: React.MouseEvent) => void
   isFirst?: boolean
+  level: number
 }
 
 export interface ITree {

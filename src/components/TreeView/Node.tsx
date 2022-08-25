@@ -2,7 +2,7 @@ import React, { FC, useCallback, useState } from 'react';
 import { INode } from './types';
 import styled from 'styled-components';
 
-export const Node: FC<INode> = ({ data, onNodeClicked, nodeView: NodeView, isFirst, children }) => {
+export const Node: FC<INode> = ({ data, onNodeClicked, nodeView: NodeView, isFirst, level, children }) => {
   const [isOpened, setIsOpened] = useState(data.opened);
   const [isSelected, setIsSelected] = useState(data.selected);
 
@@ -12,7 +12,7 @@ export const Node: FC<INode> = ({ data, onNodeClicked, nodeView: NodeView, isFir
 
   const textClicked = useCallback(() => {
     setIsSelected(!isSelected);
-    if (onNodeClicked) onNodeClicked(data.tokenId, data.collectionId);
+    if (onNodeClicked) onNodeClicked(data);
     // if (onTreeNodeClick) onTreeNodeClick(data.tokenId, event);
     // else arrowClicked();
   }, [isSelected, data, onNodeClicked]);
@@ -25,13 +25,14 @@ export const Node: FC<INode> = ({ data, onNodeClicked, nodeView: NodeView, isFir
         data={data}
         textClicked={textClicked}
         isFirst={isFirst}
+        level={level}
       >{children}</NodeView>
     </NodeContainer>
   );
 };
 
 const NodeContainer = styled.div<{ isOpened: boolean }>`
-  & > div > .treenode {
+  & > div + .treenode {
     display: ${({ isOpened }) => (!isOpened ? 'none' : 'block')};
   }
 `;
