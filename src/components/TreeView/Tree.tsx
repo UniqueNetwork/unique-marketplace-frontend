@@ -26,8 +26,7 @@ export const Tree: FC<ITree> = ({ dataSource, nodeView, onNodeClicked }) => {
 
 // iterate through datasource and return treenode
 function iter({ data, onNodeClicked, nodeView, level }: INode) {
-  // eslint-disable-next-line
-  const nextLevel = (level as number) + 1;
+  const nextLevel = level + 1;
   return (<Node
     data={data}
     onNodeClicked={onNodeClicked}
