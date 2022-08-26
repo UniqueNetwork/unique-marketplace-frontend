@@ -3,6 +3,7 @@ import { BlueGrey100 } from '../styles/colors';
 import Skeleton from './Skeleton/Skeleton';
 import { VideoAttribute } from '../api/uniqueSdk/types';
 import styled from 'styled-components';
+import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/sdk/tokens';
 
 interface VideoProps {
   autoplay?: boolean
@@ -12,7 +13,7 @@ interface VideoProps {
 }
 
 interface PictureProps {
-  src?: string
+  src?: string | DecodedInfixOrUrlOrCidAndHash
   alt: string
   testid?: string
   size?: number
@@ -36,7 +37,8 @@ export const Picture: FC<PictureProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    if (!src || !src.trim()) {
+    const imageUrl = src ? (typeof src === 'string' ? src.trim() : src.fullUrl) : '';
+    if (!imageUrl) {
       setImageSrc(undefined);
       return;
     }
@@ -47,14 +49,14 @@ export const Picture: FC<PictureProps> = ({
 
     image.onload = () => {
       setIsLoading(false);
-      setImageSrc(src);
+      setImageSrc(imageUrl);
     };
 
     image.onerror = () => {
       setIsLoading(false);
     };
 
-    image.src = src;
+    image.src = imageUrl;
   }, [src]);
 
   useEffect(() => {
@@ -65,12 +67,21 @@ export const Picture: FC<PictureProps> = ({
     }
   }, [isPlaying]);
 
+  const videoUrl = useMemo(() => {
+    if (!video) return undefined;
+    const url = video.fullUrl || video.url;
+    // if video doesn't have poster, we rewind video to 0.001 sec
+    // because iphone doesn't render first frame as a poster https://developer.apple.com/forums/thread/129377
+    if (!imageSrc) return `${url}#t=0.001`;
+    else return url;
+  }, [video, imageSrc]);
+
   return (<div className={'picture'}>
     {isLoading && <Skeleton width={'100%'} height={'100%'} />}
     {!isLoading && video &&
       <VideoStyled
         ref={videoRef}
-        src={video.fullUrl || video.url}
+        src={videoUrl}
         poster={imageSrc || undefined}
         controls={controls}
         autoPlay={autoplay}
