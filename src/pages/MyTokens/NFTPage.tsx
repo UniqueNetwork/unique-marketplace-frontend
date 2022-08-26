@@ -200,7 +200,7 @@ export const NFTPage = () => {
         collectionName: offer.tokenDescription?.collectionName || '',
         prefix: offer.tokenDescription?.prefix || '',
         imageUrl: offer.tokenDescription?.image || '',
-        attributes: toTokenAttributes(offer.tokenDescription?.attributes),
+        attributes: offer.tokenDescription?.attributes,
         video: typeof offer.tokenDescription.video === 'string' ? { fullUrl: offer.tokenDescription.video, ipfsCid: '' } : offer.tokenDescription.video,
         ...offer
       })) || []),
