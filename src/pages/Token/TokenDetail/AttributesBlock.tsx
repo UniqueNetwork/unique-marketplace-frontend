@@ -33,7 +33,7 @@ export const AttributesBlock: FC<IProps> = ({ attributes }: IProps) => {
       <HeadingStyled size={'4'}>Attributes</HeadingStyled>
       {Object.values(attributes).map((attribute) => {
         return AttributesRow({
-          attribute: typeof attribute.name === 'string' ? attribute.name : attribute?.name?.en || '',
+          attribute: typeof attribute.name === 'string' ? attribute.name : attribute?.name?._ || '',
           enumeration: Array.isArray(attribute.value)
             ? attribute.value.map((item) => typeof item === 'string' ? item : item._.toString())
             : typeof attribute.value === 'string' ? attribute.value : attribute.value._.toString()
