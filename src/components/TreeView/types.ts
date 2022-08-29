@@ -24,8 +24,9 @@ export interface INode {
 }
 
 export interface INodeView {
-  arrowClicked: () => void
+  arrowClicked: (event: React.MouseEvent) => void
   isOpened: boolean
+  isSelected: boolean
   data: IData
   textClicked: (event: React.MouseEvent) => void
   isFirst?: boolean

@@ -67,7 +67,7 @@ const TreeContainer = styled.div`
 const NestedDetails = styled.div`
   padding: 16px 32px;
   background-color: ${Grey100};
-  width: 100%;
+  width: calc(100vw - 780px);
 `;
 
 const NestedTokens = styled.div`

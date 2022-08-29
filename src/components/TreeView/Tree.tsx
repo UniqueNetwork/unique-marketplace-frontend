@@ -5,7 +5,7 @@ import { Node } from './Node';
 const level = 1;
 export const Tree: FC<ITree> = ({ dataSource, nodeView, onNodeClicked }) => {
   return (
-    <div>
+    <>
       {dataSource.map((data, index) => (
         <Node
           key={`T${data.tokenId}C${data.collectionId}`}
@@ -20,7 +20,7 @@ export const Tree: FC<ITree> = ({ dataSource, nodeView, onNodeClicked }) => {
           ))}
         </Node>
       ))}
-    </div>
+    </>
   );
 };
 
