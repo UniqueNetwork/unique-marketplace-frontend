@@ -90,7 +90,7 @@ export function MobileFilters<T = FilterState>({ filterCount, filterComponent, d
 const MobileFilterActionsWrapper = styled.div`
   display: none;
   position: fixed;
-  top: calc(100vh - 60px);    
+  top: calc(100% - 60px);    
   right: 0;
   left: 0;
   padding: 10px calc(var(--gap) * 1.5);
@@ -115,11 +115,12 @@ const MobileFilterModal = styled.div<{ isVisible: boolean }>`
   position: fixed;
   background-color: ${AdditionalLight};
   padding: calc(var(--gap) * 1.5);
-  height: calc(100vh - 140px);
+  height: calc(100% - 184px);
   top: 80px;
   right: 0;
   left: 0;
-  overflow-y: auto;
+  overflow-y: scroll;
+  z-index: 2;
 
   & div[class^=Filters] {
     width: 100%;

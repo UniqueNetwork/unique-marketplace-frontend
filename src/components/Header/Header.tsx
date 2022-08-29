@@ -1,7 +1,8 @@
 import { FC, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { Icon } from '@unique-nft/ui-kit';
+// import { Icon } from '@unique-nft/ui-kit';
+import { Icon } from '../IconTest/IconTest';
 
 import { useScreenWidthFromThreshold } from 'hooks/useScreenWidthFromThreshold';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
@@ -35,6 +36,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
           onClick={mobileMenuToggler}
         >
           <Icon name={'menu'} size={32} />
+          {/* <img src={menuIcon} alt='menu_icon' /> */}
         </MenuIcon>}
         <LogoLink to={'/'}>
           <LogoIcon src={activeItem === 'Collections' ? '/logos/admin.svg' : '/logos/logo.svg'} />
