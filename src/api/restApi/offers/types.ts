@@ -1,5 +1,6 @@
 import { PaginatedResponse, Pagination, Sortable } from '../base/types';
 import { VideoAttribute } from '../../uniqueSdk/types';
+import { DecodedAttributes, DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/sdk/tokens';
 
 export type GetOffersRequestPayload = {
   collectionId?: number | number[]
@@ -49,9 +50,9 @@ export type Offer = {
     collectionName: string
     collectionCover: string | null
     description: string
-    image: string
+    image?: DecodedInfixOrUrlOrCidAndHash | string
     prefix: string
-    attributes: OfferTokenAttribute[]
+    attributes: DecodedAttributes
     video?: string | VideoAttribute
   }
 }

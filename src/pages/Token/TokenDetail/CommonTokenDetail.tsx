@@ -48,7 +48,7 @@ export const CommonTokenDetail: FC<IProps> = ({
   } = useMemo(() => {
     if (offer) {
       const { collectionName, image, prefix, collectionCover, description } = offer.tokenDescription || {};
-      const attributes = offer.tokenDescription?.attributes.reduce((acc, item) => ({ ...acc, [item.key]: { name: item.key, value: item.value } }), {}) || [];
+      const attributes = offer.tokenDescription?.attributes;
       return {
         ...offer,
         collectionName,

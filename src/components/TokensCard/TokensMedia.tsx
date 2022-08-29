@@ -6,11 +6,12 @@ import { Link } from 'react-router-dom';
 import playIcon from 'static/icons/play.svg';
 import pauseIcon from 'static/icons/pause.svg';
 import { Picture } from '../Picture';
+import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/sdk/tokens';
 
 interface ITokensMedia {
   to: string
   tokenId?: number
-  imageUrl?: string
+  imageUrl?: string | DecodedInfixOrUrlOrCidAndHash
   video?: VideoAttribute
   testid: string
 }
