@@ -57,7 +57,7 @@ export interface NFTToken {
   id: number
   owner?: OwnerAddress
   attributes?: DecodedAttributes
-  imageUrl: string
+  imageUrl?: DecodedInfixOrUrlOrCidAndHash | string
   collectionId?: number
   collectionName?: string
   prefix?: string
