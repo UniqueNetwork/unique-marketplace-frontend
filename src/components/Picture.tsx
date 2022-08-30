@@ -3,7 +3,7 @@ import { BlueGrey100 } from '../styles/colors';
 import Skeleton from './Skeleton/Skeleton';
 import { VideoAttribute } from '../api/uniqueSdk/types';
 import styled from 'styled-components';
-import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/sdk/tokens';
+import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
 
 interface VideoProps {
   autoplay?: boolean

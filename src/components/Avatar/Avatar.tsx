@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import Identicon from '@polkadot/react-identicon';
 import styled from 'styled-components';
-import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/sdk/tokens';
+import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
 
 export interface IAvatarProps {
   src?: string | DecodedInfixOrUrlOrCidAndHash;
