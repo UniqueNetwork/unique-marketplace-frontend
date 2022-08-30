@@ -1,5 +1,5 @@
-import { Sdk, addFeature } from '@unique-nft/sdk';
-import { UnsignedTxPayload } from '@unique-nft/sdk/types';
+import { Sdk, addFeature } from '@unique-nft/substrate-client';
+import { UnsignedTxPayload } from '@unique-nft/substrate-client/types';
 
 class SponsorshipSdkModule {
   private sdk: Sdk;
@@ -39,7 +39,7 @@ class SponsorshipSdkModule {
   }
 }
 
-declare module '@unique-nft/sdk' {
+declare module '@unique-nft/substrate-client' {
   export interface Sdk {
     sponsorhip: SponsorshipSdkModule;
   }

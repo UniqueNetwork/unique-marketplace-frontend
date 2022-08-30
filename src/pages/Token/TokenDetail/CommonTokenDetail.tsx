@@ -81,7 +81,7 @@ export const CommonTokenDetail: FC<IProps> = ({
       return formatAddress(offer?.seller);
     }
     if (!token?.owner) return undefined;
-    return (token.owner as { Substrate: string }).Substrate ? formatAddress((token.owner as { Substrate: string }).Substrate) : (token.owner as { Ethereum: string }).Ethereum;
+    return (token.owner ? formatAddress(token.owner) : token.owner);
   }, [token, offer, formatAddress]);
 
   const isOwner = useMemo(() => {

@@ -1,4 +1,4 @@
-import { Sdk } from '@unique-nft/sdk';
+import { Sdk } from '@unique-nft/substrate-client';
 import { NFTToken, UniqueDecoratedRpc } from './types';
 import { Settings } from '../restApi/settings/types';
 import { getEthAccount, normalizeAccountId } from './utils/addressUtils';

@@ -2,7 +2,7 @@ import React, { FC } from 'react';
 import styled from 'styled-components';
 import { Heading, Text } from '@unique-nft/ui-kit';
 import { Trait } from './Trait';
-import { DecodedAttributes } from '@unique-nft/sdk/tokens';
+import { DecodedAttributes } from '@unique-nft/substrate-client/tokens';
 
 interface IProps {
   attributes: DecodedAttributes;

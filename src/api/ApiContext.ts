@@ -1,10 +1,10 @@
 import { Context, Consumer, Provider, createContext } from 'react';
 import { Settings } from './restApi/settings/types';
-import { ChainProperties } from '@unique-nft/sdk/types';
+import { ChainProperties } from '@unique-nft/substrate-client/types';
 import { UniqueSDKNFTController } from './uniqueSdk/NFTController';
 import { UniqueSDKCollectionController } from './uniqueSdk/collectionController';
 import { UniqueSDKMarketController } from './uniqueSdk/marketController';
-import { Sdk } from '@unique-nft/sdk';
+import { Sdk } from '@unique-nft/substrate-client';
 
 export type ChainData = {
   properties: {

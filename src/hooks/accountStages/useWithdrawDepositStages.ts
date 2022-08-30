@@ -7,7 +7,7 @@ import { TWithdrawBid } from 'api/restApi/auction/types';
 import { BN } from '@polkadot/util';
 import { withdrawChooseBids } from 'api/restApi/auction/auction';
 import { formatKusamaBalance } from '../../utils/textUtils';
-import { UnsignedTxPayload } from '@unique-nft/sdk/types';
+import { UnsignedTxPayload } from '@unique-nft/substrate-client/types';
 
 const tokenSymbol = 'KSM';
 

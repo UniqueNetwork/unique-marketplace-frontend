@@ -1,6 +1,6 @@
 import { Attribute, AttributeCount, OfferTokenAttribute } from 'api/restApi/offers/types';
 import { NFTToken } from 'api/uniqueSdk/types';
-import { AttributeType, DecodedAttributes } from '@unique-nft/sdk/tokens';
+import { AttributeType, DecodedAttributes } from '@unique-nft/substrate-client/tokens';
 
 export const sortAttributeCounts = (attributeCountA: AttributeCount, attributeCountB: AttributeCount) => attributeCountA.numberOfAttributes > attributeCountB.numberOfAttributes ? 1 : -1;
 

@@ -9,7 +9,7 @@ import { SdkClient } from './sdk/sdkClient';
 import { UniqueSDKNFTController } from './uniqueSdk/NFTController';
 import { UniqueSDKCollectionController } from './uniqueSdk/collectionController';
 import { UniqueSDKMarketController } from './uniqueSdk/marketController';
-import { ChainProperties } from '@unique-nft/sdk/types';
+import { ChainProperties } from '@unique-nft/substrate-client/types';
 import config from '../config';
 
 import { uniqueSdkClient as unique, kusamaSdkClient as kusama } from '.';

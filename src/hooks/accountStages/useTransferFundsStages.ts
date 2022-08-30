@@ -4,7 +4,7 @@ import { TTransferFunds } from '../../pages/Accounts/Modals/types';
 import { InternalStage, StageStatus } from '../../types/StagesTypes';
 import useStages from '../useStages';
 import { useAccounts } from '../useAccounts';
-import { UnsignedTxPayload } from '@unique-nft/sdk/types';
+import { UnsignedTxPayload } from '@unique-nft/substrate-client/types';
 
 export const useTransferFundsStages = (accountAddress: string) => {
   const { api } = useApi();
