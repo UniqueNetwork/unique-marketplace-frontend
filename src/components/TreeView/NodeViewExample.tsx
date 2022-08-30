@@ -43,6 +43,8 @@ const ViewContainer = styled.div<{ isFirst: boolean | undefined, isSelected: boo
   display: flex;
   align-items: center;
   justify-content: space-between;
+  cursor: pointer;
+  border: 1px solid transparent;
   hr {
     position: absolute;
     border-top: 1px dashed var(--color-grey-300);
@@ -64,9 +66,8 @@ const ViewContainer = styled.div<{ isFirst: boolean | undefined, isSelected: boo
     }
   }
   &:hover {
-    cursor: pointer;
     background: ${Primary100};
-    outline: 1px solid ${Primary400};
+    border: 1px solid ${Primary400};
     
     .action-buttons { display: flex; }
     .pin-icon { display: none; }

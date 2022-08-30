@@ -4,19 +4,38 @@ import { Node } from './Node';
 
 const level = 1;
 export const Tree: FC<ITree> = ({ dataSource, nodeView, onNodeClicked }) => {
+  const [dataSourceState, setDataSourceState] = useState(dataSource);
+
+  const nodeClickHandler = useCallback((data: IData) => {
+    const selectNode = (node: IData) => {
+      if (node.collectionId === data.collectionId && node.tokenId === data.tokenId) {
+        node.selected = !node.selected;
+      } else node.selected = false;
+      node.nestingChildTokens?.forEach((child) => {
+        return selectNode(child);
+      });
+      return node;
+    };
+
+    const newDataSourceState = [...dataSourceState];
+    setDataSourceState([selectNode(newDataSourceState[0])]);
+
+    if (onNodeClicked) onNodeClicked(data);
+  }, [onNodeClicked]);
+
   return (
     <>
-      {dataSource.map((data, index) => (
+      {dataSourceState.map((data, index) => (
         <Node
           key={`T${data.tokenId}C${data.collectionId}`}
           data={data}
-          onNodeClicked={onNodeClicked}
+          onNodeClicked={nodeClickHandler}
           nodeView={nodeView}
           isFirst={index === 0}
           level={level}
         >
           {data.nestingChildTokens?.map((node) => (
-            iter({ data: node, onNodeClicked, nodeView, level })
+            iter({ data: node, onNodeClicked: nodeClickHandler, nodeView, level })
           ))}
         </Node>
       ))}

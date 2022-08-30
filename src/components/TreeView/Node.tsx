@@ -4,7 +4,6 @@ import styled from 'styled-components';
 
 export const Node: FC<INode> = ({ data, onNodeClicked, nodeView: NodeView, isFirst, level, children }) => {
   const [isOpened, setIsOpened] = useState(data.opened);
-  const [isSelected, setIsSelected] = useState(!!data.selected);
 
   const arrowClicked = useCallback((event: React.MouseEvent) => {
     event.stopPropagation();
@@ -12,9 +11,8 @@ export const Node: FC<INode> = ({ data, onNodeClicked, nodeView: NodeView, isFir
   }, [isOpened]);
 
   const textClicked = useCallback(() => {
-    setIsSelected(!isSelected);
     if (onNodeClicked) onNodeClicked(data);
-  }, [isSelected, data, onNodeClicked]);
+  }, [data, onNodeClicked]);
 
   return (
     <NodeContainer isOpened={!!isOpened} className={'treenode'}>
@@ -25,7 +23,7 @@ export const Node: FC<INode> = ({ data, onNodeClicked, nodeView: NodeView, isFir
         textClicked={textClicked}
         isFirst={isFirst}
         level={level}
-        isSelected={isSelected}
+        isSelected={!!data.selected}
       >{children}</NodeView>
     </NodeContainer>
   );
