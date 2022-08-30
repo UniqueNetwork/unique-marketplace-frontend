@@ -47,6 +47,7 @@ export const Tree: FC<ITree> = ({ dataSource, nodeView, onNodeClicked }) => {
 function iter({ data, onNodeClicked, nodeView, level }: INode) {
   const nextLevel = level + 1;
   return (<Node
+    key={`T${data.tokenId}C${data.collectionId}`}
     data={data}
     onNodeClicked={onNodeClicked}
     nodeView={nodeView}

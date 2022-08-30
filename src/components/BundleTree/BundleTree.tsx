@@ -2,19 +2,19 @@ import React, { useCallback, useState } from 'react';
 import { Heading, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { PagePaper } from 'components/PagePaper/PagePaper';
-import { Grey100, Grey300 } from 'styles/colors';
+import { Grey300 } from 'styles/colors';
 import { Tree } from '../TreeView/Tree';
-import NodeView from '../TreeView/NodeViewExample';
+import NodeView from './NodeView';
 import dataSource from '../TreeView/mockData';
 import { IData } from '../TreeView/types';
+import { NestedSection } from './NestedSection';
 
 function BundleTree() {
-  const [selectedToken, setSelectedToken] = useState<IData>();
+  const [selectedToken, setSelectedToken] = useState<IData | null>(null);
   const onNodeClicked = useCallback((data: IData) => {
-    setSelectedToken(data);
+    if (!data.selected) setSelectedToken(null);
+    else setSelectedToken(data);
   }, []);
-
-  // console.log('dataSource', dataSource);
 
   return (
     <BundlePagePaper>
@@ -31,14 +31,7 @@ function BundleTree() {
             onNodeClicked={onNodeClicked}
           />
         </TreeContainer>
-        <NestedDetails>
-          <Text color='additional-dark' size='l'>Nested in magi #5</Text>
-          <NestedTokens>
-            {selectedToken?.nestingChildTokens?.map((token) => (
-              <div key={`T${token.tokenId}C${token.collectionId}`}>T-#{token.tokenId} C-#{token.collectionId}</div>
-            ))}
-          </NestedTokens>
-        </NestedDetails>
+        <NestedSection selectedToken={selectedToken} />
       </Content>
     </BundlePagePaper>
   );
@@ -62,17 +55,6 @@ const Content = styled.div`
 
 const TreeContainer = styled.div`
   width: 536px;
-`;
-
-const NestedDetails = styled.div`
-  padding: 16px 32px;
-  background-color: ${Grey100};
-  width: calc(100vw - 780px);
-`;
-
-const NestedTokens = styled.div`
-  display: flex;
-  gap: 40px;
 `;
 
 export default BundleTree;
