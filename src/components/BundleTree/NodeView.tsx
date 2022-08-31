@@ -6,8 +6,9 @@ import Square from 'static/icons/square.svg';
 import Pin from 'static/icons/pin.svg';
 import { INodeView } from '../TreeView/types';
 import { Picture } from '../Picture';
+import { IData } from './types';
 
-const NodeView: FC<INodeView> = ({ arrowClicked, isOpened, data, textClicked, isFirst, level, isSelected, children }) => {
+const NodeView: FC<INodeView<IData>> = ({ arrowClicked, isOpened, data, textClicked, isFirst, level, isSelected, children }) => {
   const [menuVisible, setMenuVisible] = useState(false);
 
   const onTransfer = useCallback(() => {

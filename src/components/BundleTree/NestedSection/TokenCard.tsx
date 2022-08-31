@@ -1,15 +1,11 @@
-import React, { FC, useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Dropdown, Icon, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
-import { AdditionalDark, AdditionalLight, Coral500, Grey100, Grey300, Primary500 } from 'styles/colors';
-import { IData } from '../TreeView/types';
-import { Picture } from '../Picture';
+import { AdditionalDark, AdditionalLight, Coral500, Grey300, Primary500 } from 'styles/colors';
+import { Picture } from '../../Picture';
+import { ITokenCard } from '../types';
 
-interface IProps {
-  selectedToken: IData | null
-}
-
-export const NestedSection: FC<IProps> = ({ selectedToken }) => {
+function TokenCard({ token }: ITokenCard) {
   const [menuVisible, setMenuVisible] = useState(false);
 
   const onTransfer = useCallback(() => {
@@ -29,57 +25,39 @@ export const NestedSection: FC<IProps> = ({ selectedToken }) => {
   }, []);
 
   return (
-    <NestedDetails>
-      {selectedToken && <Text color='additional-dark' size='l'>Nested in T-{selectedToken.tokenId} C-{selectedToken.collectionId}</Text>}
-      <NestedTokens>
-        {selectedToken?.nestingChildTokens?.map((token) => (
-          <TokenCard key={`T-${token.tokenId} C-${token.collectionId}`} onMouseEnter={showMenu} onMouseLeave={hideMenu}>
-            <Picture alt={`T-${token.tokenId} C-${token.collectionId}`} src={token.image.fullUrl || undefined}/>
-            <Text color='additional-dark' size='m'>{`T-${token.tokenId} C-${token.collectionId}`}</Text>
-            <Text color='grey-500' size='s'>NFT</Text>
-            {token.nestingChildTokens && <Text color='grey-500' size='xs'>{token.nestingChildTokens.length} item{token.nestingChildTokens.length > 1 && 's'}</Text>}
-            {menuVisible && <ActionsMenuWrapper className={'menu'}>
-              <Dropdown
-                placement={'left'}
-                dropdownRender={() => (<DropdownMenu>
-                  <TransferMenuItem onClick={onTransfer}>Transfer
-                    <IconWrapper>
-                      <Icon name={'sorting-initial'} size={16} color={'var(--color-primary-500)'} />
-                    </IconWrapper>
-                  </TransferMenuItem>
-                  <UnnestMenuItem onClick={onUnnest}>Unnest token
-                    <IconWrapper>
-                      <Icon name={'logout'} size={16} color={'var(--color-coral-500)'} />
-                    </IconWrapper>
-                  </UnnestMenuItem>
-                </DropdownMenu>)}
-              >
-                <DropdownWrapper>
-                  <Icon size={24} name={'more-horiz'} color={AdditionalLight}/>
-                </DropdownWrapper>
-              </Dropdown>
-            </ActionsMenuWrapper>}
-          </TokenCard>
-        ))}
-      </NestedTokens>
-    </NestedDetails>
+    <TokenCardWrapper onMouseEnter={showMenu} onMouseLeave={hideMenu}>
+      <Picture alt={`T-${token.tokenId} C-${token.collectionId}`} src={token.image.fullUrl || undefined}/>
+      <Text color='additional-dark' size='m'>{`T-${token.tokenId} C-${token.collectionId}`}</Text>
+      <Text color='grey-500' size='s'>NFT</Text>
+      {token.nestingChildTokens && <Text color='grey-500' size='xs'>{token.nestingChildTokens.length} item{token.nestingChildTokens.length > 1 && 's'}</Text>}
+      {menuVisible && <ActionsMenuWrapper className={'menu'}>
+        <Dropdown
+          placement={'left'}
+          dropdownRender={() => (
+            <DropdownMenu>
+              <TransferMenuItem onClick={onTransfer}>Transfer
+                <IconWrapper>
+                  <Icon name={'sorting-initial'} size={16} color={'var(--color-primary-500)'} />
+                </IconWrapper>
+              </TransferMenuItem>
+              <UnnestMenuItem onClick={onUnnest}>Unnest token
+                <IconWrapper>
+                  <Icon name={'logout'} size={16} color={'var(--color-coral-500)'} />
+                </IconWrapper>
+              </UnnestMenuItem>
+            </DropdownMenu>
+          )}
+        >
+          <DropdownWrapper>
+            <Icon size={24} name={'more-horiz'} color={AdditionalLight}/>
+          </DropdownWrapper>
+        </Dropdown>
+      </ActionsMenuWrapper>}
+    </TokenCardWrapper>
   );
-};
+}
 
-const NestedDetails = styled.div`
-  padding: 16px 32px;
-  background-color: ${Grey100};
-  width: calc(100vw - 780px);
-`;
-
-const NestedTokens = styled.div`
-  margin-top: var(--gap);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-`;
-
-const TokenCard = styled.div`
+const TokenCardWrapper = styled.div`
   position: relative;
   display: flex;
   flex-direction: column;
@@ -185,3 +163,5 @@ const IconWrapper = styled.div`
     }
   }
 `;
+
+export default TokenCard;

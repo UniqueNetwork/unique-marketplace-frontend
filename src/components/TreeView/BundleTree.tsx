@@ -1,0 +1,39 @@
+import React, { useCallback, useState } from 'react';
+import { Tree } from './Tree';
+import { IBundleTree, INode } from './types';
+
+function BundleTree<T extends INode>({
+  dataSource,
+  nodeView: NodeView,
+  onNodeClicked: onNodeClickedProps,
+  nestedSectionView: NestedSectionView,
+  className,
+  compareNodes,
+  childrenProperty,
+  getKey
+}: IBundleTree<T>) {
+  const [selectedToken, setSelectedToken] = useState<T | null>(null);
+  const onNodeClicked = useCallback((data: T) => {
+    if (!data.selected) setSelectedToken(null);
+    else setSelectedToken(data);
+    onNodeClickedProps(data);
+  }, []);
+
+  return (
+    <>
+      <Tree<T>
+        // @ts-ignore
+        dataSource={dataSource}
+        nodeView={NodeView}
+        onNodeClicked={onNodeClicked}
+        className={className}
+        compareNodes={compareNodes}
+        childrenProperty={childrenProperty}
+        getKey={getKey}
+      />
+      <NestedSectionView selectedToken={selectedToken} />
+    </>
+  );
+}
+
+export default BundleTree;

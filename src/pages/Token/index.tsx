@@ -16,7 +16,8 @@ import { shortcutText } from '../../utils/textUtils';
 import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
 import styled from 'styled-components';
 import { BlueGrey500 } from 'styles/colors';
-import BundleTree from '../../components/BundleTree/BundleTree';
+import BundleTree from '../../components/TreeView/BundleTree';
+import BundleTreeSection from './BundleTreeSection';
 
 const testid = 'token-page';
 
@@ -130,7 +131,7 @@ const TokenPage = () => {
           />
         </CommonTokenDetail>
       </TokenPagePaper>
-      <BundleTree />
+      <BundleTreeSection />
     </>
   );
 };
