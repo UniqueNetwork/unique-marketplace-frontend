@@ -74,7 +74,7 @@ const NodeView: FC<INodeView> = ({ arrowClicked, isOpened, data, textClicked, is
         </PinIcon>}
         <hr/>
       </ViewContainer>
-      {children}
+      {isOpened ? children : null}
     </>
   );
 };
