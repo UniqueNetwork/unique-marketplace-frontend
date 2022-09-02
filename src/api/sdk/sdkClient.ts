@@ -3,7 +3,6 @@ import '@unique-nft/substrate-client/state-queries';
 import { SdkExtrinsics } from '@unique-nft/substrate-client/extrinsics';
 import { SdkTokens, SdkCollections } from '@unique-nft/substrate-client/tokens';
 import { SdkBalance } from '@unique-nft/substrate-client/balance';
-import './sponsorshipModule';
 
 declare module '@unique-nft/substrate-client' {
   interface Sdk {
