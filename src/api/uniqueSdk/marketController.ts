@@ -2,7 +2,7 @@ import { Sdk } from '@unique-nft/substrate-client';
 import { TokenIdArguments, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 import { isEthereumAddress } from '@unique-nft/substrate-client/utils';
 import { BN } from '@polkadot/util';
-import { CrossAccountId, EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType, TransactionOptions, TSignMessage, UniqueController, UniqueDecoratedRpc } from './types';
+import { EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType, TransactionOptions, TSignMessage, UniqueController, UniqueDecoratedRpc } from './types';
 import marketplaceAbi from './abi/marketPlaceAbi.json';
 import nonFungibleAbi from './abi/nonFungibleAbi.json';
 import { collectionIdToAddress, getEthAccount, compareEncodedAddresses, isTokenOwner, normalizeAccountId } from './utils/addressUtils';
@@ -398,6 +398,7 @@ export class UniqueSDKMarketController implements UniqueController {
   }
 
   async transferBidBalance(address: string, amount: string, options: TransactionOptions): Promise<void> {
+    if (!this.kusamaSdk) throw new Error('Controller isn\'t ready');
     const unsignedTxPayload = await this.kusamaSdk.extrinsics.build({
       section: 'balances',
       method: 'transferKeepAlive',

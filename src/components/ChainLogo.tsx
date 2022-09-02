@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { chainLogos, emptyLogos, namedLogos, nodeLogos } from '../logos';
+import { chainLogos, emptyLogos, namedLogos } from '../logos';
 import { useApi } from '../hooks/useApi';
 
 interface Props {

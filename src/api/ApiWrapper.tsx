@@ -9,7 +9,6 @@ import { SdkClient } from './sdk/sdkClient';
 import { UniqueSDKNFTController } from './uniqueSdk/NFTController';
 import { UniqueSDKCollectionController } from './uniqueSdk/collectionController';
 import { UniqueSDKMarketController } from './uniqueSdk/marketController';
-import { ChainProperties } from '@unique-nft/substrate-client/types';
 import config from '../config';
 import axios from '../api/restApi/base/axios';
 import { sdkClient as sdk, nftController as nft, collectionController as collection, marketController as market } from '.';
@@ -43,8 +42,6 @@ const ApiWrapper = ({
 
   useEffect(() => {
     (async () => {
-      // mock received settings
-
       const defaultChainId = Object.keys(config?.blockchains || {})[0];
       const storedChainId = localStorage.getItem(ChainIdLocalStorageKey);
 
@@ -119,6 +116,7 @@ const ApiWrapper = ({
 
     await initializeControllers(newChainId, sdkClient, settings);
     setCurrentChainId(newChainId);
+    localStorage.setItem(ChainIdLocalStorageKey, newChainId);
     // redirect to correct URL with chainId
     const { pathname } = window.location;
     if (pathname.includes('faq')) return;

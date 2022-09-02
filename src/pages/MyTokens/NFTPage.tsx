@@ -24,7 +24,7 @@ import { useCollections } from 'hooks/useCollections';
 import { MobileFilters } from './Filters/MobileFilter';
 import { Filters } from './Filters/Filters';
 import { MyTokensFilterState } from './Filters/types';
-import { countTokenAttributes, toTokenAttributes } from './Filters/utils/attributes';
+import { countTokenAttributes } from './Filters/utils/attributes';
 
 type TOption = SelectOptionProps & {
   direction: 'asc' | 'desc';

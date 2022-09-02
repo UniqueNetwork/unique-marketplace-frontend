@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import { decodeAddress } from '@polkadot/util-crypto';
 import { QrReader } from 'react-qr-reader';
 import Result from '@zxing/library/esm/core/Result';
-import { AdditionalCoral500 } from '../../styles/colors';
 
 export interface ScannedResult {
   content: string

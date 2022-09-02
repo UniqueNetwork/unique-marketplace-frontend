@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useApi } from '../useApi';
-import { placeBid } from '../../api/restApi/auction/auction';
+import { placeBidRequest } from '../../api/restApi/auction/auction';
 import { TAuctionBidProps } from '../../pages/Token/Modals/types';
 import { InternalStage, StageStatus } from '../../types/StagesTypes';
 import useStages from '../useStages';
@@ -19,7 +19,7 @@ export const useAuctionBidStages = (collectionId: number, tokenId: number) => {
         marketApi?.transferBidBalance(
           params.txParams.accountAddress,
           params.txParams.value,
-          { ...params.options, send: ({ signature, signerPayloadJSON }) => placeBid({ signerPayloadJSON, signature, collectionId, tokenId }) }
+          { ...params.options, send: ({ signature, signerPayloadJSON }) => placeBidRequest({ signerPayloadJSON, signature, collectionId, tokenId }) }
         )
     }
   ], [marketApi, collectionId, tokenId]);

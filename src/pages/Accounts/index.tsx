@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Button, Dropdown, Icon, TableColumnProps, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { BN } from '@polkadot/util';

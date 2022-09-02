@@ -130,6 +130,7 @@ export const WalletManager: FC = () => {
         activeNetwork={currentNetwork}
         balance={formatKusamaBalance(currentBalance.value)}
         deposit={formattedAccountDeposit}
+
         depositDescription={
           <>
             {formattedAccountDeposit && <Text color='grey-500' size='xs'>The total market deposit for participation in auctions and
