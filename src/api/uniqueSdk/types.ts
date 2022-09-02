@@ -64,7 +64,7 @@ export interface NFTToken {
   description?: string
   collectionCover?: string
   isAllowed?: boolean
-  video: VideoAttribute
+  video?: VideoAttribute
 }
 
 export type MetadataType = {

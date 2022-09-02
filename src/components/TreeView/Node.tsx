@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { INode, INodeContainer } from './types';
 import styled from 'styled-components';
 
-export function Node<T extends INode>({ data, onNodeClicked, nodeView: NodeView, isFirst, level, children }: INodeContainer<T>) {
+export function Node<T extends INode>({ data, onNodeClicked, nodeView: NodeView, isFirst, level, children, onViewNodeDetails }: INodeContainer<T>) {
   const [isOpened, setIsOpened] = useState(data.opened);
 
   const arrowClicked = useCallback((event: React.MouseEvent) => {
@@ -24,6 +24,7 @@ export function Node<T extends INode>({ data, onNodeClicked, nodeView: NodeView,
         isFirst={isFirst}
         level={level}
         isSelected={!!data.selected}
+        onViewNodeDetails={onViewNodeDetails}
       >{children}</NodeView>
     </NodeContainer>
   );

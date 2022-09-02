@@ -10,7 +10,8 @@ function BundleTree<T extends INode>({
   className,
   compareNodes,
   childrenProperty,
-  getKey
+  getKey,
+  onViewNodeDetails
 }: IBundleTree<T>) {
   const [selectedToken, setSelectedToken] = useState<T | null>(null);
   const onNodeClicked = useCallback((data: T) => {
@@ -22,7 +23,6 @@ function BundleTree<T extends INode>({
   return (
     <>
       <Tree<T>
-        // @ts-ignore
         dataSource={dataSource}
         nodeView={NodeView}
         onNodeClicked={onNodeClicked}
@@ -30,8 +30,9 @@ function BundleTree<T extends INode>({
         compareNodes={compareNodes}
         childrenProperty={childrenProperty}
         getKey={getKey}
+        onViewNodeDetails={onViewNodeDetails}
       />
-      <NestedSectionView selectedToken={selectedToken} />
+      {NestedSectionView && <NestedSectionView selectedToken={selectedToken} onViewNodeDetails={onViewNodeDetails} />}
     </>
   );
 }

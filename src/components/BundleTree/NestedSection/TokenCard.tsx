@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { Picture } from '../../Picture';
 import { ITokenCard } from '../types';
 
-function TokenCard({ token }: ITokenCard) {
+function TokenCard({ token, onViewNodeDetails }: ITokenCard) {
   const [menuVisible, setMenuVisible] = useState(false);
 
   const onTransfer = useCallback(() => {
@@ -25,8 +25,12 @@ function TokenCard({ token }: ITokenCard) {
     setMenuVisible(false);
   }, []);
 
+  const viewTokenDetails = useCallback(() => {
+    if (onViewNodeDetails) onViewNodeDetails(token);
+  }, [onViewNodeDetails, token]);
+
   return (
-    <TokenCardWrapper to={`/token/${token.collectionId}/${token.tokenId}`} onMouseEnter={showMenu} onMouseLeave={hideMenu}>
+    <TokenCardWrapper onMouseEnter={showMenu} onMouseLeave={hideMenu} onClick={viewTokenDetails}>
       <Picture alt={`T-${token.tokenId} C-${token.collectionId}`} src={token.image.fullUrl || undefined}/>
       <Text color='additional-dark' size='m'>{`T-${token.tokenId} C-${token.collectionId}`}</Text>
       <Text color='grey-500' size='s'>NFT</Text>
@@ -58,7 +62,7 @@ function TokenCard({ token }: ITokenCard) {
   );
 }
 
-const TokenCardWrapper = styled(Link)`
+const TokenCardWrapper = styled.div`
   position: relative;
   display: flex;
   flex-direction: column;

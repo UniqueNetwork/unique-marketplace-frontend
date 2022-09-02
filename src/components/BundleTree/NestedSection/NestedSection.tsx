@@ -2,16 +2,17 @@ import React, { FC } from 'react';
 import { Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { Grey100 } from 'styles/colors';
-import { INestedSection } from '../types';
+import { IData } from '../types';
 import TokenCard from './TokenCard';
+import { INestedSectionView } from '../../TreeView/types';
 
-export const NestedSection: FC<INestedSection> = ({ selectedToken }) => {
+export const NestedSection: FC<INestedSectionView<IData>> = ({ selectedToken, onViewNodeDetails }) => {
   return (
     <NestedDetails>
       {selectedToken && <Text color='additional-dark' size='l'>Nested in T-{selectedToken.tokenId} C-{selectedToken.collectionId}</Text>}
       <NestedTokens>
         {selectedToken?.nestingChildTokens?.map((token) => (
-          <TokenCard key={`T-${token.tokenId} C-${token.collectionId}`} token={token}/>
+          <TokenCard key={`T-${token.tokenId} C-${token.collectionId}`} token={token} onViewNodeDetails={onViewNodeDetails}/>
         ))}
       </NestedTokens>
     </NestedDetails>

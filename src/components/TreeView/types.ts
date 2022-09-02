@@ -8,6 +8,7 @@ export interface INodeView<T> {
   textClicked: (event: React.MouseEvent) => void
   isFirst?: boolean
   level: number
+  onViewNodeDetails?: (node: T) => void
 }
 
 export interface INode {
@@ -33,6 +34,7 @@ export interface INodeContainer<T> {
   isFirst?: boolean
   level: number
   children?: React.ReactNode
+  onViewNodeDetails?: (node: T) => void
 }
 
 export interface ITree<T> {
@@ -43,12 +45,14 @@ export interface ITree<T> {
   compareNodes: (a: T, b: T) => boolean
   getKey: (a: T) => string
   childrenProperty: string
+  onViewNodeDetails?: (node: T) => void
 }
 
 export interface IBundleTree<T> extends ITree<T>{
-  nestedSectionView: React.FC<INestedSectionView<T>>
+  nestedSectionView?: React.FC<INestedSectionView<T>>
 }
 
 export interface INestedSectionView<T> {
   selectedToken: T | null
+  onViewNodeDetails?: (node: T) => void
 }

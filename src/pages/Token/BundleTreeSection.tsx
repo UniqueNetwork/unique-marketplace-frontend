@@ -8,13 +8,19 @@ import dataSource from 'components/TreeView/mockData';
 import { IData } from 'components/BundleTree/types';
 import { NestedSection } from 'components/BundleTree/NestedSection/NestedSection';
 import BundleTree from 'components/TreeView/BundleTree';
+import { useNavigate } from 'react-router-dom';
+import { NFTToken } from '../../api/uniqueSdk/types';
 
 const areNodesEqual = (a: IData, b: IData) => a.collectionId === b.collectionId && a.tokenId === b.tokenId;
 
 const getKey = (a: IData) => `T${a.tokenId}C${a.collectionId}`;
 
-function BundleTreeSection() {
-  // const [selectedToken, setSelectedToken] = useState<IData | null>(null);
+interface IProps {
+  onViewTokenDetails(token: NFTToken): void
+}
+
+function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps }: IProps) {
+  const navigate = useNavigate();
   const onNodeClicked = useCallback((data: IData) => {
     console.log('onNodeClicked');
   }, []);
@@ -33,6 +39,16 @@ function BundleTreeSection() {
     return count;
   }, []);
 
+  const onViewTokenDetails = useCallback((token: IData) => {
+    navigate(`/token/${token.collectionId}/${token.tokenId}`);
+    onViewTokenDetailsProps({
+      ...token,
+      id: token.tokenId,
+      imageUrl: token.image,
+      owner: { Substrate: token.owner }
+    });
+  }, [onViewTokenDetailsProps]);
+
   return (
     <BundlePagePaper>
       <HeaderStyled>
@@ -50,6 +66,7 @@ function BundleTreeSection() {
           compareNodes={areNodesEqual}
           childrenProperty={'nestingChildTokens'}
           getKey={getKey}
+          onViewNodeDetails={onViewTokenDetails}
         />
       </Content>
     </BundlePagePaper>

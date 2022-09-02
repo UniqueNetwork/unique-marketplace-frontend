@@ -12,10 +12,11 @@ export interface IData {
   selected?: boolean
 }
 
-export interface INestedSection {
-  selectedToken: IData | null
-}
+// export interface INestedSection {
+//   selectedToken: IData | null
+// }
 
 export interface ITokenCard {
   token: IData
+  onViewNodeDetails?: (token: IData) => void
 }

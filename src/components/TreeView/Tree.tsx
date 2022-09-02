@@ -3,7 +3,7 @@ import { INode, INodeContainer, ITree } from './types';
 import { Node } from './Node';
 
 const level = 1;
-export function Tree<T extends INode>({ dataSource, nodeView, onNodeClicked, className, compareNodes, childrenProperty, getKey }: ITree<T>) {
+export function Tree<T extends INode>({ dataSource, nodeView, onNodeClicked, className, compareNodes, childrenProperty, getKey, onViewNodeDetails }: ITree<T>) {
   const [dataSourceState, setDataSourceState] = useState(dataSource);
 
   const nodeClickHandler = useCallback((data: T) => {
@@ -35,9 +35,10 @@ export function Tree<T extends INode>({ dataSource, nodeView, onNodeClicked, cla
           level={level}
           getKey={getKey}
           childrenProperty={childrenProperty}
+          onViewNodeDetails={onViewNodeDetails}
         >
           {data[childrenProperty]?.map((node: T) => (
-            iter<T>({ data: node, onNodeClicked: nodeClickHandler, nodeView, level, getKey, childrenProperty })
+            iter<T>({ data: node, onNodeClicked: nodeClickHandler, nodeView, level, getKey, childrenProperty, onViewNodeDetails })
           ))}
         </Node>
       ))}
@@ -46,7 +47,7 @@ export function Tree<T extends INode>({ dataSource, nodeView, onNodeClicked, cla
 }
 
 // iterate through datasource and return treenode
-function iter<T extends INode>({ data, onNodeClicked, nodeView, level, getKey, childrenProperty }: INodeContainer<T>) {
+function iter<T extends INode>({ data, onNodeClicked, nodeView, level, getKey, childrenProperty, onViewNodeDetails }: INodeContainer<T>) {
   const nextLevel = Number(level) + 1;
   return (<Node
     key={getKey(data)}
@@ -56,9 +57,10 @@ function iter<T extends INode>({ data, onNodeClicked, nodeView, level, getKey, c
     level={nextLevel}
     getKey={getKey}
     childrenProperty={childrenProperty}
+    onViewNodeDetails={onViewNodeDetails}
   >
     {(data as any)[childrenProperty]?.map((val: T) => {
-      return iter({ data: val, onNodeClicked, nodeView, level: nextLevel, childrenProperty, getKey });
+      return iter({ data: val, onNodeClicked, nodeView, level: nextLevel, childrenProperty, getKey, onViewNodeDetails });
     })}
   </Node>);
 }

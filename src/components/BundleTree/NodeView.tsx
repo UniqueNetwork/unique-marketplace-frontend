@@ -7,8 +7,20 @@ import Pin from 'static/icons/pin.svg';
 import { INodeView } from '../TreeView/types';
 import { Picture } from '../Picture';
 import { IData } from './types';
+import { useParams } from 'react-router-dom';
 
-const NodeView: FC<INodeView<IData>> = ({ arrowClicked, isOpened, data, textClicked, isFirst, level, isSelected, children }) => {
+const NodeView: FC<INodeView<IData>> = ({
+  arrowClicked,
+  isOpened,
+  data,
+  textClicked,
+  isFirst,
+  level,
+  isSelected,
+  children,
+  onViewNodeDetails
+}) => {
+  const { id, collectionId } = useParams<{ id: string, collectionId: string}>();
   const [menuVisible, setMenuVisible] = useState(false);
 
   const onTransfer = useCallback(() => {
@@ -26,6 +38,10 @@ const NodeView: FC<INodeView<IData>> = ({ arrowClicked, isOpened, data, textClic
   const hideMenu = useCallback(() => {
     setMenuVisible(false);
   }, []);
+
+  const viewTokenDetails = useCallback(() => {
+    if (onViewNodeDetails) onViewNodeDetails(data);
+  }, [onViewNodeDetails, data]);
 
   return (
     <>
@@ -68,9 +84,11 @@ const NodeView: FC<INodeView<IData>> = ({ arrowClicked, isOpened, data, textClic
               <Icon size={32} name={'more-horiz'} color={Secondary400}/>
             </Dropdown>
           </ActionsMenuWrapper>}
-          <Icon size={32} file={Square} color={Secondary400}/>
+          <div onClick={viewTokenDetails}>
+            <Icon size={32} file={Square} color={Secondary400}/>
+          </div>
         </ActionButtons>
-        {isSelected && <PinIcon className={'pin-icon'}>
+        {(id === data.tokenId.toString() && collectionId === data.collectionId.toString()) && <PinIcon className={'pin-icon'}>
           <Icon size={32} file={Pin}/>
         </PinIcon>}
         <hr/>
