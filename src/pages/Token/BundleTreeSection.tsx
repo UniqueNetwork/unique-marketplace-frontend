@@ -59,6 +59,9 @@ function BundleTreeSection() {
 const BundlePagePaper = styled(PagePaper)`
   .tree-container {
     width: 536px;
+    @media (max-width: 768px) {
+      width: 100%;
+    }
   }
 `;
 

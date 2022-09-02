@@ -20,6 +20,8 @@ interface INodeChildren<T> {
   [k: string]: T[]
 }
 
+type NodeOptions<T> = INode | INodeChildren<T>;
+
 export type TTreeNodeClickHandler<T> = (data: T) => void
 
 export interface INodeContainer<T> {

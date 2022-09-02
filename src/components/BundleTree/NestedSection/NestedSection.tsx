@@ -19,9 +19,19 @@ export const NestedSection: FC<INestedSection> = ({ selectedToken }) => {
 };
 
 const NestedDetails = styled.div`
+  display: block;
   padding: 16px 32px;
   background-color: ${Grey100};
   width: calc(100vw - 780px);
+  @media (max-width: 1440px) {
+    width: calc(100vw - 730px);
+  }
+  @media (max-width: 1024px) {
+    width: calc(100vw - 667px);
+  }
+  @media (max-width: 768px) {
+    display: none;
+  }
 `;
 
 const NestedTokens = styled.div`

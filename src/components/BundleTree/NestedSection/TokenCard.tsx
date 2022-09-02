@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { Dropdown, Icon, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { AdditionalDark, AdditionalLight, Coral500, Grey300, Primary500 } from 'styles/colors';
+import { Link } from 'react-router-dom';
 import { Picture } from '../../Picture';
 import { ITokenCard } from '../types';
 
@@ -25,7 +26,7 @@ function TokenCard({ token }: ITokenCard) {
   }, []);
 
   return (
-    <TokenCardWrapper onMouseEnter={showMenu} onMouseLeave={hideMenu}>
+    <TokenCardWrapper to={`/token/${token.collectionId}/${token.tokenId}`} onMouseEnter={showMenu} onMouseLeave={hideMenu}>
       <Picture alt={`T-${token.tokenId} C-${token.collectionId}`} src={token.image.fullUrl || undefined}/>
       <Text color='additional-dark' size='m'>{`T-${token.tokenId} C-${token.collectionId}`}</Text>
       <Text color='grey-500' size='s'>NFT</Text>
@@ -57,7 +58,7 @@ function TokenCard({ token }: ITokenCard) {
   );
 }
 
-const TokenCardWrapper = styled.div`
+const TokenCardWrapper = styled(Link)`
   position: relative;
   display: flex;
   flex-direction: column;
