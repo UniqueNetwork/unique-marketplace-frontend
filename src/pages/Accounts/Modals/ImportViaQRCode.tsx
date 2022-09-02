@@ -79,7 +79,7 @@ export const ImportViaQRCodeAccountModal: FC<TAccountModalProps> = ({ isVisible,
 };
 
 const Content = styled.div`
-  && h2 {
+  && h2, && h3 {
     margin-bottom: 0;
   }
 `;
@@ -101,6 +101,13 @@ const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
   margin-top: var(--gap);
+
+
+  @media (max-width: 567px) {
+    button {
+      width: 100%;
+    }
+  }
 `;
 
 const PasswordTitle = styled.div`

@@ -24,7 +24,7 @@ import { ImportViaQRCodeAccountModal } from './Modals/ImportViaQRCode';
 import { WithdrawDepositModal } from './Modals/WithdrawDeposit';
 import { TransferFundsModal } from './Modals/SendFunds';
 import BalanceCell from './BalanceCell';
-import { AdditionalLight, BlueGrey300, Primary100, Primary500 } from 'styles/colors';
+import { AdditionalLight, BlueGrey300, Grey500, Primary100, Primary500 } from 'styles/colors';
 import config from '../../config';
 import { AccountInfo } from './types';
 import NoAccountsIcon from 'static/icons/no-accounts.svg';
@@ -53,7 +53,7 @@ const getAccountsColumns = ({
   {
     title: (
       <>
-        <p>Account</p>
+        <Title>Account</Title>
         {!isSmallDevice &&
           <IconWithHint align={{ appearance: 'horizontal', vertical: 'top', horizontal: 'right' }}>
             <span>Substrate account addresses (Kusama, Quartz, Polkadot, Unique, etc.) may be represented by a different address
@@ -79,18 +79,18 @@ const getAccountsColumns = ({
     }
   },
   {
-    title: 'Balance',
+    title: (<Title>Balance</Title>),
     width: '25%',
-    field: 'accountInfo',
-    render(accountInfo: AccountInfo) {
+    field: 'balance',
+    render(data, { accountInfo }: (Account & { accountInfo: AccountInfo })) {
       return (<BalanceCell accountInfo={accountInfo} isSmallDevice={isSmallDevice} tokenSymbol={tokenSymbol} />);
     }
   },
   {
-    title: 'Block explorer',
+    title: (<Title>Block explorer</Title>),
     width: '25%',
-    field: 'accountInfo',
-    render(accountInfo: AccountInfo) {
+    field: 'blockExplorer',
+    render(data, { accountInfo }: (Account & { accountInfo: AccountInfo })) {
       if (accountInfo.deposit && !isSmallDevice) return <></>;
       return (
         <LinksWrapper>
@@ -109,10 +109,10 @@ const getAccountsColumns = ({
     }
   },
   {
-    title: isSmallDevice ? '' : 'Actions',
+    title: isSmallDevice ? '' : (<Title>Actions</Title>),
     width: '25%',
-    field: 'accountInfo',
-    render(accountInfo: AccountInfo) {
+    field: 'actions',
+    render(data, { accountInfo }: (Account & { accountInfo: AccountInfo })) {
       if (accountInfo.deposit && !isSmallDevice) {
         return (
           <DepositActionsWrapper>
@@ -147,6 +147,7 @@ const getAccountsColumns = ({
 ];
 
 const caretDown = { name: 'carret-down', size: 16, color: AdditionalLight };
+const caretUp = { name: 'carret-up', size: 16, color: AdditionalLight };
 
 enum AccountModal {
   create,
@@ -165,19 +166,14 @@ export const AccountsPage = () => {
     fetchAccounts,
     isLoading,
     isLoadingDeposits,
-    fetchAccountsWithDeposits,
     deleteLocalAccount
   } = useAccounts();
   const [searchString, setSearchString] = useState<string>('');
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
   const [selectedAddress, setSelectedAddress] = useState<string>();
+  const [isDropdownOpened, setIsDropdownOpened] = useState(false);
   const deviceSize = useDeviceSize();
   const { chainData } = useApi();
-
-  useEffect(() => {
-    if (isLoading) return;
-    void fetchAccountsWithDeposits();
-  }, [isLoading]);
 
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
@@ -287,8 +283,7 @@ export const AccountsPage = () => {
   const onChangeAccountsFinish = useCallback(async () => {
     setCurrentModal(undefined);
     await fetchAccounts();
-    await fetchAccountsWithDeposits();
-  }, []);
+  }, [fetchAccounts]);
 
   const onModalClose = useCallback(() => {
     setCurrentModal(undefined);
@@ -313,12 +308,13 @@ export const AccountsPage = () => {
             <DropdownMenuItem onClick={onImportViaJSONClick} data-testid={`${testid}-json-file-button`}>Backup JSON file</DropdownMenuItem>
             <DropdownMenuItem onClick={onImportViaQRClick} data-testid={`${testid}-qr-button`}>QR-code</DropdownMenuItem>
           </DropdownMenu>}
+          onOpenChange={setIsDropdownOpened}
         >
           <AddAccountButton
             testid={`${testid}-add-via-button`}
             title={'Add account via'}
             role={'primary'}
-            iconRight={caretDown}
+            iconRight={isDropdownOpened ? caretUp : caretDown}
           />
         </DropdownStyled>
         <SearchInputWrapper>
@@ -344,6 +340,7 @@ export const AccountsPage = () => {
           data={filteredAccounts}
           loading={isLoading || isLoadingDeposits}
           emptyIconProps={searchString ? { name: 'magnifier-found' } : { file: NoAccountsIcon }}
+          idColumnName={'address'}
         />
       </TableWrapper>
       <CreateAccountModal
@@ -481,9 +478,17 @@ const AddAccountButton = styled(Button)`
   }
 `;
 
+const Title = styled.p`
+  color: ${Grey500};
+  font-size: 16px;
+  line-height: 24px;
+  @media (max-width: 768px) {
+    margin-bottom: 4px;
+  }
+`;
+
 const AccountCellWrapper = styled.div`
   display: flex;
-  padding: 20px 0 !important;
   column-gap: calc(var(--gap) / 2);
   align-items: center;
 `;

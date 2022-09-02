@@ -53,19 +53,22 @@ function Timer({ time }: Props): React.ReactElement<Props> {
         <DetailedTimer>
           <Cell>
             <Heading size='4'>{checkTime(daysLeft.toString())}</Heading>
-            <Description>{daysLeft > 1 ? 'Days' : 'Day'}</Description>
+            <Description>{daysLeft > 1 ? 'days' : 'day'}</Description>
           </Cell>
+          <Heading size='4'>:</Heading>
           <Cell>
             <Heading size='4'>{checkTime(hoursLeft.toString())}</Heading>
-            <Description>{hoursLeft > 1 ? 'Hours' : 'Hour'}</Description>
+            <Description>{hoursLeft > 1 ? 'hours' : 'hour'}</Description>
           </Cell>
+          <Heading size='4'>:</Heading>
           <Cell>
             <Heading size='4'>{checkTime(minutesLeft.toString())}</Heading>
-            <Description>{minutesLeft > 1 ? 'Minutes' : 'Minute'}</Description>
+            <Description>{minutesLeft > 1 ? 'minutes' : 'minute'}</Description>
           </Cell>
+          <Heading size='4'>:</Heading>
           <Cell>
             <Heading size='4'>{checkTime(secondsLeft.toString())}</Heading>
-            <Description>{secondsLeft > 1 ? 'Seconds' : 'Second'}</Description>
+            <Description>{secondsLeft > 1 ? 'seconds' : 'second'}</Description>
           </Cell>
         </DetailedTimer>
       </>}
@@ -83,7 +86,7 @@ const TimerStyled = styled.div`
 const ShortTimer = styled.div`
   font-size: 16px;
   line-height: 24px;
-  font-weight:400px;
+  font-weight: 400;
   font-family: var(--font-inter);
   color: #81858E;
   margin-bottom: 16px;
@@ -91,16 +94,24 @@ const ShortTimer = styled.div`
 
 const DetailedTimer = styled.div`
   display: flex;
+  align-items: baseline;
+  column-gap: 8px;
+  margin-bottom: 4px;
 `;
 
 const Cell = styled.div`
   && {
     display: flex;
-    flex-direction: column;
-    margin-right: 24px;
+    flex-direction: column;   
 
     h4 {
-      margin-bottom: 0;
+      margin-bottom: 4px;
+      border: 1px solid #D2D3D6;
+      border-radius: 8px;
+      width: 28px;
+      height: 28px;
+      padding: 13px;
+      text-align: center;
     }
   }
 `;
@@ -108,9 +119,8 @@ const Cell = styled.div`
 const Description = styled.div`
   font-size: 16px;
   line-height: 24px;
-  font-weight:400px;
+  font-weight: 400;
   font-family: var(--font-inter);
-  color: #81858E;
 `;
 
 export default React.memo(Timer);

@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FC, useCallback, useEffect, useMemo } from 'react';
 import { Button, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { BN } from '@polkadot/util';

@@ -1,3 +1,5 @@
+import { SignerPayloadJSON } from '@polkadot/types/types';
+
 export enum FetchStatus {
   default = 'Default',
   inProgress = 'InProgress',
@@ -6,14 +8,18 @@ export enum FetchStatus {
 }
 
 export type TStartAuctionParams = {
-  tx: unknown
+  signerPayloadJSON?: SignerPayloadJSON,
+  signature: `0x${string}`
   days: number
   startPrice: string
   priceStep: string
 }
 
 export type TPlaceBidParams = {
-  tx: unknown, collectionId: number, tokenId: number
+  signerPayloadJSON?: SignerPayloadJSON
+  signature: `0x${string}`
+  collectionId: number
+  tokenId: number
 }
 
 export type TDeleteParams = {

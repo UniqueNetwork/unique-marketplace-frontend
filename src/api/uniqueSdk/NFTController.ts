@@ -1,4 +1,4 @@
-import { Sdk } from '@unique-nft/sdk';
+import { Sdk } from '@unique-nft/substrate-client';
 import { NFTToken, UniqueDecoratedRpc, UniqueController } from './types';
 import { getEthAccount, normalizeAccountId } from './utils/addressUtils';
 import { checkTokenIsAllowed, filterAllowedTokens } from './utils/checkTokenIsAllowed';

@@ -15,7 +15,7 @@ type TTokensList = {
 export const TokensList: FC<TTokensList> = ({ tokens, isLoading, testid }) => {
   return (
     <TokensListStyled>
-      {tokens?.map &&
+      {(!isLoading && tokens?.map) &&
         tokens.map((token) => (
           <TokensCard
             key={`token-${token?.collectionId || ''}-${token?.id}`}

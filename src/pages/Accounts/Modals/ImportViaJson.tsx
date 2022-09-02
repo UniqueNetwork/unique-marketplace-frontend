@@ -43,6 +43,11 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
     onFinish();
   }, [pair, password, onFinish]);
 
+  const onPasswordChange = useCallback((value: string) => {
+    setPasswordIncorrect(false);
+    setPassword(value);
+  }, []);
+
   return (<Modal isVisible={isVisible} isClosable={true} onClose={onFinish}>
     <Content>
       <Heading size='2'>{'Add an account via backup JSON file'}</Heading>
@@ -66,7 +71,7 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
       </TitleWrapper>
       <PasswordInput
         testid={`${testid}-password`}
-        onChange={setPassword}
+        onChange={onPasswordChange}
         value={password}
       />
       {passwordIncorrect && <Text size={'s'} color={'coral-500'}>Password incorrect</Text>}

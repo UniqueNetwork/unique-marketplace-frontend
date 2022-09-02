@@ -103,11 +103,11 @@ export function SelectInput<T = SelectInputOption>({ className, placeholder, opt
       }
       <Icon name={'triangle'} size={8} />
     </InputWrapper>
-    <Dropdown isOpen={isDropdownVisible} ref={DropdownRef} data-testid={`${testid}-dropdown`}>
+    {!!options.length && <Dropdown isOpen={isDropdownVisible} ref={DropdownRef} data-testid={`${testid}-dropdown`}>
       {options.map((item, index) => (
         <OptionWrapper key={index} onClick={onOptionClick(item)} data-testid={`${testid}-option-${index}`} >{showOption(item)}</OptionWrapper>
       ))}
-    </Dropdown>
+    </Dropdown>}
   </SelectInputWrapper>);
 }
 
@@ -126,13 +126,12 @@ const InputWrapper = styled.div`
     position: absolute;
     top: 0;
     left: 0;
-    right: 0;
+    right: calc(var(--gap) * 2);
     bottom: 0;
     border: none;
     background: transparent;
     outline: none;
     padding: calc(var(--gap) / 2) var(--gap);
-    width: 100%;
   }
   & .icon-triangle{
     position: absolute;

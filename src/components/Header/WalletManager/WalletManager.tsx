@@ -54,9 +54,11 @@ export const WalletManager: FC = () => {
   const widgetAccounts = useMemo(() => accounts.map((account) => (
     { name: account.meta.name, ...account, address: formatAddress(account.address), substrateAddress: account?.address })
   ), [accounts, formatAddress]);
+
   const widgetSelectedAccount = useMemo(() => (
     { name: selectedAccount?.meta.name, ...selectedAccount, address: selectedAccount?.address ? formatAddress(selectedAccount.address) : '', substrateAddress: selectedAccount?.address }
   ), [selectedAccount, formatAddress]);
+
   const widgetAccountChange = useCallback((account) => {
     changeAccount({ ...account, address: account.substrateAddress } as Account);
   }, [changeAccount]);
@@ -112,7 +114,7 @@ export const WalletManager: FC = () => {
     return formatKusamaBalance(deposit.toString());
   }, [selectedAccount?.deposits]);
 
-  if (!isLoading && accounts.length === 0) {
+  if (!isLoading && !selectedAccount) {
     return (
       <Button title={'Connect or create account'} onClick={onCreateAccountClick} />
     );
@@ -144,7 +146,7 @@ export const WalletManager: FC = () => {
         manageBalanceLinkTitle='Manage my balance'
         networks={networks}
         onAccountChange={widgetAccountChange}
-        onCopyAddressClick={onCopyAddress}
+        // onCopyAddressClick={onCopyAddress}
         onManageBalanceClick={onCreateAccountClick}
         onNetworkChange={onNetworkChange}
         selectedAccount={widgetSelectedAccount}

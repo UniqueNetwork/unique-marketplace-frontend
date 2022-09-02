@@ -20,8 +20,9 @@ type ColumnProps = {
 
 const getTradesColumns = ({ deviceSize, onShowTradesDetailsModal }: ColumnProps): TableColumnProps[] => [
   {
-    title: 'NFT',
-    width: '11.84%',
+    title: deviceSize !== DeviceSize.sm ? (<Header>NFT</Header>) : null,
+    // width: '11.84%',
+    width: deviceSize !== DeviceSize.md ? '14.3%' : '11.84%',
     isSortable: true,
     render(tokenId: number, { collectionId, tokenDescription }: Trade): React.ReactNode {
       return <TokenComponent {...{ collectionId, tokenId, tokenDescription }} />;
@@ -29,8 +30,9 @@ const getTradesColumns = ({ deviceSize, onShowTradesDetailsModal }: ColumnProps)
     field: 'tokenId'
   },
   {
-    title: 'Collection',
-    width: '11.84%',
+    title: (<Header>Collection</Header>),
+    // width: '12%',
+    width: deviceSize !== DeviceSize.md ? '14.3%' : '11.84%',
     isSortable: true,
     render(tokenDescription: TokenDescription, { collectionId }: Trade): React.ReactNode {
       const collectionName = tokenDescription.collectionName || '';
@@ -46,41 +48,46 @@ const getTradesColumns = ({ deviceSize, onShowTradesDetailsModal }: ColumnProps)
     field: 'tokenDescription'
   },
   {
-    title: 'Time',
-    width: '11.2%',
+    title: (<Header>Time</Header>),
+    // width: '11.7%',
+    width: deviceSize !== DeviceSize.md ? '14.3%' : '11.84%',
     isSortable: true,
     render: (time: number) => <TimeCell><Text color={BlueGrey600}>{timestampTableFormat(new Date(time).valueOf())}</Text></TimeCell>,
     field: 'tradeDate'
   },
   {
-    title: 'Price',
-    width: '14.48%',
+    title: (<Header>Price</Header>),
+    // width: deviceSize !== DeviceSize.md ? '7%' : '14.48%',
+    width: deviceSize !== DeviceSize.md ? '14.3%' : '11.84%',
     isSortable: true,
     render: (value: string) => <Text color={BlueGrey600}>{`${formatKusamaBalance(value)} ${tokenSymbol}`}</Text>,
     field: 'price'
   },
   {
     title: (<HeaderCutted><span>Selling method</span></HeaderCutted>),
-    width: '11.84%',
+    // width: '11.84%',
+    width: deviceSize !== DeviceSize.md ? '14.3%' : '11.84%',
     render: (data: string) => <Text color={BlueGrey600}>{data === 'FixedPrice' ? 'Fixed price' : data}</Text>,
     isSortable: true,
     field: 'status'
   },
   {
-    title: 'Seller',
-      width: '17.02%',
+    title: (<Header>Seller</Header>),
+    // width: '16.35%',
+    width: deviceSize !== DeviceSize.md ? '14.3%' : '17.52%',
     render: (data: string) => <AddressComponent text={data} />,
     field: 'seller'
   },
   {
-    title: 'Buyer',
-    width: '17.02%',
+    title: (<Header>Buyer</Header>),
+    // width: '15.6%',
+    width: deviceSize !== DeviceSize.md ? '14.3%' : '17.52%',
     render: (data: string) => <AddressComponent text={data} />,
     field: 'buyer'
   },
   {
     title: '',
-    width: '5.74%',
+    width: '56px',
     render: (data, row: Trade) => <ShowTradesDetailsButton status={row.status} trade={row} onShowTradesDetailsModal={onShowTradesDetailsModal} />,
     field: 'modalButton'
   }
@@ -108,6 +115,15 @@ const LinkWrapper = styled.span`
   }
 `;
 
+const Header = styled.span`
+  font-size: 16px;
+  line-height: 24px;
+  color: ${Grey500};
+  @media (max-width: 768px) {
+    margin-bottom: 4px;
+  }
+`;
+
 const HeaderCutted = styled.div`
   text-overflow: ellipsis;
   overflow: hidden;
@@ -116,6 +132,9 @@ const HeaderCutted = styled.div`
     font-size: 16px;
     line-height: 24px;
     color: ${Grey500};
+  }
+  @media (max-width: 768px) {
+    margin-bottom: 4px;
   }
 `;
 
@@ -138,7 +157,7 @@ const StyledButton = styled.button`
 `;
 
 const TimeCell = styled.div`
-  padding: 9px 0 !important;
+  //padding: 9px 0 !important;
 `;
 
 export default getTradesColumns;

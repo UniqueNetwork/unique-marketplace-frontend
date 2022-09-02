@@ -1,5 +1,5 @@
-import { Sdk } from '@unique-nft/sdk';
-import '@unique-nft/sdk/tokens';
+import { Sdk } from '@unique-nft/substrate-client';
+import '@unique-nft/substrate-client/tokens';
 import { TransactionOptions, NFTCollection, UniqueController } from './types';
 
 export class UniqueSDKCollectionController implements UniqueController {

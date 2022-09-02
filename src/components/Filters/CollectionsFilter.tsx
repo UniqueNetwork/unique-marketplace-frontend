@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FC, useCallback } from 'react';
 import styled from 'styled-components';
 import { Checkbox, Text } from '@unique-nft/ui-kit';
 import { useCollections } from '../../hooks/useCollections';
@@ -7,7 +7,6 @@ import CheckboxSkeleton from '../Skeleton/CheckboxSkeleton';
 import { AttributeItem } from './types';
 import AttributesFilter from './AttributesFilter';
 import AttributeCountsFilter from './AttributeCountsFilter';
-import { useApi } from '../../hooks/useApi';
 import { Attribute, AttributeCount } from '../../api/restApi/offers/types';
 import { CollectionCover } from '../CollectionCover/CollectionCover';
 
@@ -24,9 +23,6 @@ interface CollectionsFilterProps {
 const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attributeCounts, onChange, onAttributesChange, onAttributeCountsChange, testid }) => {
   const { collections, isFetching } = useCollections();
   const { collections: selectedCollections = [], attributes: selectedAttributes = [], attributeCounts: selectedAttributeCounts = [] } = value || {};
-  const { settings } = useApi();
-
-  const collectionIds = useMemo(() => settings ? settings.blockchain.unique.collectionIds : [], [settings]);
 
   const onCollectionSelect = useCallback((collectionId: number) => (value: boolean) => {
     let _selectedCollections;
@@ -36,7 +32,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attr
       _selectedCollections = selectedCollections.filter((item) => item !== collectionId);
     }
     onChange(_selectedCollections);
-  }, [selectedCollections, selectedAttributeCounts, onAttributesChange, onChange, collectionIds]);
+  }, [selectedCollections, onChange]);
 
   const onCollectionsClear = useCallback(() => {
     onChange([]);
@@ -51,7 +47,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attr
     >
       <CollectionFilterWrapper>
         {isFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
-        {!isFetching && collections.map((collection) => (
+        {collections.map((collection) => (
           <CheckboxWrapper
             key={`collection-${collection.id}`}
           >

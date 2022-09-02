@@ -64,16 +64,32 @@ export const QRReader: FC<QRReaderProps> = ({ isEthereum, onScan }) => {
 };
 
 const QRReaderWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: calc(var(--gap) / 2);
+  section {
+    width: 362px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    @media (max-width: 567px) {
+      width: 100%;
+    }
+  }
   div {
     height: 362px;
     padding-top: 0 !important;
     video {
-      height: unset !important;
+      // height: unset !important;
+    }
+    @media (max-width: 567px) {
+      height: 248px !important;
+      width: 248px !important;
     }
     &:after {
       position: absolute;
       content: '';
-      border: 5px solid ${AdditionalCoral500};
+      border: 5px solid var(--color-coral-400);
       box-sizing: border-box;
       width: 282px;
       height: 282px;
@@ -81,7 +97,15 @@ const QRReaderWrapper = styled.div`
       left: 50%;
       margin-top: -141px;
       margin-left: -141px;
-      outline: 200px solid rgba(174,175,178, 0.5);
+      outline: 200px solid var(--color-blue-grey-200);
+
+      @media (max-width: 567px) {
+        outline: none;
+        width: 248px;
+        height: 248px;
+        margin-top: -124px;
+        margin-left: -124px;
+      }
     }
   }
 `;

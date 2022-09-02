@@ -20,7 +20,7 @@ export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountP
     setName(value);
   }, []);
 
-  const nameIsValid = useMemo(() => name.length > 2, [name]);
+  const nameIsValid = useMemo(() => name.trim().length > 2, [name]);
   const passwordIsValid = useMemo(() => password.length > 4, [password]);
   const passwordsMatch = useMemo(() => password === confirmPassword, [password, confirmPassword]);
 

@@ -45,7 +45,7 @@ export const PageLayout: FC = () => {
   }, [pathname]);
 
   return (
-    <BgLayoutStyled backgroundImage={backgroundImage}>
+    <BgLayoutStyled backgroundImage={backgroundImage} hasFooterSpacing={pathname === '/market' || pathname === '/myTokens'}>
       <Layout
         {...layoutProps}
         footer={<div dangerouslySetInnerHTML={{ __html: footer }} />}
@@ -61,7 +61,7 @@ export const PageLayout: FC = () => {
   );
 };
 
-const LayoutStyled = styled.div`
+const LayoutStyled = styled.div<{hasFooterSpacing: boolean}>`
 
   /* specific for dafc */
   .unique-layout {
@@ -84,7 +84,7 @@ const LayoutStyled = styled.div`
         line-height: 24px;
       }
       @media (max-width: 568px) {
-        padding-bottom: calc(var(--gap) * 5);
+        padding-bottom: ${({ hasFooterSpacing }) => hasFooterSpacing ? 'calc(var(--gap) * 5)' : 'var(--gap)'};
       }
     }
   }

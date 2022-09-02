@@ -1,7 +1,8 @@
 import { FC, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { Icon } from '@unique-nft/ui-kit';
+// import { Icon } from '@unique-nft/ui-kit';
+import { Icon } from '../IconTest/IconTest';
 
 import { useScreenWidthFromThreshold } from 'hooks/useScreenWidthFromThreshold';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
@@ -20,12 +21,12 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
   const { lessThanThreshold: showMobileMenu } =
     useScreenWidthFromThreshold(1279);
   const [mobileMenuIsOpen, toggleMobileMenu] = useState(false);
-  const { selectedAccount } = useAccounts();
+  const { selectedAccount, isLoading } = useAccounts();
   const { hasAdminPermission } = useAdminLoggingIn();
   const { currentChainId } = useApi();
 
   const mobileMenuToggler = useCallback(() => {
-    if (selectedAccount) toggleMobileMenu((prevState) => !prevState);
+    toggleMobileMenu((prevState) => !prevState);
   }, [selectedAccount]);
 
   const deviceSize = useDeviceSize();
@@ -37,6 +38,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
           onClick={mobileMenuToggler}
         >
           <Icon name={'menu'} size={32} />
+          {/* <img src={menuIcon} alt='menu_icon' /> */}
         </MenuIcon>}
         <LogoLink to={'/'}>
           <LogoIcon src={activeItem === 'Collections' ? '/logos/admin.svg' : '/logos/logo.svg'} />
@@ -46,7 +48,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
             <DesktopMenuLink to={`/${currentChainId || ''}/market`} active={activeItem === 'Market'}>
               Market
             </DesktopMenuLink>
-            <DesktopMenuLink to={`/${currentChainId || ''}/myTokens`} active={activeItem === 'My tokens'} disabled={!selectedAccount}>
+            <DesktopMenuLink to={`/${currentChainId || ''}/myTokens`} active={activeItem === 'My tokens'} disabled={!selectedAccount && !isLoading}>
               My tokens
             </DesktopMenuLink>
             <DesktopMenuLink to={`/${currentChainId || ''}/trades`} active={activeItem === 'Trades'}>
@@ -75,7 +77,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
             to={`/${currentChainId || ''}/myTokens`}
             active={activeItem === 'My tokens'}
             onClick={mobileMenuToggler}
-            disabled={!selectedAccount}
+            disabled={!selectedAccount && !isLoading}
           >
             My tokens
           </MobileMenuLink>

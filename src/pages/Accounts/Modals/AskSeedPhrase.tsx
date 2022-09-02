@@ -81,7 +81,7 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish,
         disabled={seedGenerators.length === 1}
       />
       <IconWithHint align={{ appearance: 'vertical', vertical: 'top', horizontal: 'middle' }}>
-        <span>Find out more on <TooltipLink href='https://' title={'Polkadot Wiki'}>Polkadot Wiki</TooltipLink></span>
+        <span>Find out more on <TooltipLink href='https://wiki.polkadot.network/docs/learn-accounts' target='_blank' title={'Polkadot Wiki'}>Polkadot Wiki</TooltipLink></span>
       </IconWithHint>
     </SeedGeneratorSelectWrapper>
     <InputSeedWrapper>

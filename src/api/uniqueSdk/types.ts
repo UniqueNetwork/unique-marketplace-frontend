@@ -1,9 +1,9 @@
 import { BN } from '@polkadot/util';
-import { DecoratedRpc, SubmittableExtrinsic } from '@polkadot/api/types';
+import { DecoratedRpc } from '@polkadot/api/types';
 import { RpcInterface } from '@polkadot/rpc-core/types/jsonrpc';
-import { DecodedAttributes, DecodedInfixOrUrlOrCidAndHash, OwnerAddress } from '@unique-nft/sdk/tokens';
+import { DecodedAttributes, DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
 import { Account } from '../../account/AccountContext';
-import { UnsignedTxPayload } from '@unique-nft/sdk/types';
+import { SignerPayloadJSON, UnsignedTxPayload, Address } from '@unique-nft/substrate-client/types';
 
 export type TokenId = {
   toNumber(): number
@@ -20,9 +20,12 @@ export interface UniqueController {
   initialize(options: unknown): void
 }
 
-export type TTransaction = SubmittableExtrinsic<'promise'>
+export type TTransaction = {
+  signerPayloadJSON?: SignerPayloadJSON
+  signature: `0x${string}`
+}
 
-export type TSignMessage = { (message: string, account?: string | Account | undefined): Promise<string>; (arg0: string): any; }
+export type TSignMessage = { (message: string, account?: string | Account | undefined): Promise<`0x${string}`>; (arg0: string): any; }
 
 export type TransactionOptions = {
   // this function will be called after transaction is created and awaited before proceeding
@@ -30,7 +33,7 @@ export type TransactionOptions = {
   sign: (unsignedTxPayload: UnsignedTxPayload) => Promise<`0x${string}` | null>
   signMessage?: (message: string) => Promise<`0x${string}` | null>
   // if not provided, signed.send() will be called instead
-  send?: (signature: string) => Promise<any | void>
+  send?: (tx: TTransaction) => Promise<any | void>
 };
 
 export interface NFTCollectionSponsorship {
@@ -56,9 +59,9 @@ export type VideoAttribute = DecodedInfixOrUrlOrCidAndHash | undefined;
 
 export interface NFTToken {
   id: number
-  owner?: OwnerAddress
+  owner?: Address
   attributes?: DecodedAttributes
-  imageUrl: string
+  imageUrl?: DecodedInfixOrUrlOrCidAndHash | string
   collectionId?: number
   collectionName?: string
   prefix?: string

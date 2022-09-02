@@ -19,32 +19,26 @@ const timeDifference = (when: number, sinceWhen: number | null = null) => {
 
   const secondsDifference = Math.floor(difference / 1000);
   // just an example, later on oculd be extended to calculate time difference (trying to avoid any external libs for this matter)
-  let amount = secondsDifference;
-  let timeType = 'second';
 
-  if (minutesDifference >= 1) {
-    timeType = 'minute';
-    amount = minutesDifference;
+  const getUnit = (type: 'day' | 'hr' | 'min' | 'sec', plural: boolean) => {
+    return `${type}${plural ? 's' : ''}`;
+  };
+
+  if (daysDifference >= 1) {
+    return `${daysDifference} ${getUnit('day', daysDifference > 1)} ${hoursDifference} ${getUnit('hr', hoursDifference > 1)}`;
   }
 
   if (hoursDifference >= 1) {
-    timeType = 'hour';
-    amount = hoursDifference;
+    return `${hoursDifference} ${getUnit('hr', hoursDifference > 1)} ${minutesDifference} ${getUnit('min', minutesDifference > 1)}`;
   }
 
-  if (daysDifference >= 1) {
-    timeType = 'day';
-    amount = daysDifference;
+  if (minutesDifference >= 1) {
+    return `${minutesDifference} ${getUnit('min', minutesDifference > 1)} ${secondsDifference} ${getUnit('sec', secondsDifference > 1)}`;
   }
 
-  if (daysDifference >= 7) {
-    timeType = 'week';
-    amount = Math.round(daysDifference / 7);
-  }
+  if (secondsDifference < 1) return 'Less than a second';
 
-  if (amount < 1 && timeType === 'second') return 'Less than a second';
-
-  return `${amount} ${timeType}${amount >= 2 ? 's' : ''}`;
+  return `${secondsDifference} ${getUnit('sec', minutesDifference > 1)}`;
 };
 
 const timestampTableFormat = (timestamp: number) => new Date(timestamp).toLocaleString('en-GB', {

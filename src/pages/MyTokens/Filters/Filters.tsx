@@ -1,13 +1,12 @@
 import React, { FC, useCallback } from 'react';
 import styled from 'styled-components';
 
-import PricesFilter from '../../../components/Filters/PricesFilter';
-import { AttributeItem, FiltersProps, PriceRange } from '../../../components/Filters/types';
-import { MyTokensFilterState, MyTokensStatuses } from './types';
+import PricesFilter from 'components/Filters/PricesFilter';
+import { AttributeItem, FiltersProps, PriceRange, MyTokensFilterState, MyTokensStatuses } from './types';
 import StatusFilter from './StatusFilter';
 import CollectionsFilter from './CollectionsFilter';
 
-export const Filters: FC<FiltersProps<MyTokensFilterState>> = ({ value, onFilterChange, testid }) => {
+export const Filters: FC<FiltersProps<MyTokensFilterState>> = ({ value, onFilterChange, featuredTokens, collections, isFetchingTokens, testid, tokens, featuredTokensForAttributeCounts }) => {
   const onStatusFilterChange = useCallback((statuses: MyTokensStatuses) => {
     onFilterChange({ ...(value || {}), statuses });
   }, [value, onFilterChange]);
@@ -37,6 +36,11 @@ export const Filters: FC<FiltersProps<MyTokensFilterState>> = ({ value, onFilter
       onAttributesChange={onCollectionAttributesFilterChange}
       onAttributeCountsChange={onCollectionAttributeCountsFilterChange}
       testid={`${testid}-collections`}
+      featuredTokens={featuredTokens}
+      tokens={tokens}
+      collections={collections}
+      isFetchingTokens={isFetchingTokens}
+      featuredTokensForAttributeCounts={featuredTokensForAttributeCounts}
     />
   </FiltersStyled>;
 };

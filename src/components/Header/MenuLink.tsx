@@ -58,7 +58,6 @@ const DesktopMenuItem = styled(Text) <{ $active?: boolean, $disabled?: boolean }
     margin-right: 24px;
     color: ${(props) => props.$disabled ? 'var(--color-blue-grey-500)' : (props.$active ? 'var(--color-additional-dark)' : 'var(--color-primary-500)')};
     border-bottom: ${(props) => props.$active ? '1px solid var(--color-additional-dark)' : 'none'};
-    padding: ${(props) => props.$disabled && '8px 16px'};
     &:hover {
       color: ${(props) => props.$disabled ? 'var(--color-blue-grey-500)' : (props.$active ? 'var(--color-additional-dark)' : 'var(--color-primary-400)')};
       cursor: ${(props) => props.$disabled ? 'not-allowed' : 'pointer'};
@@ -79,7 +78,7 @@ export const MobileMenuLink: FC<IMobileMenuLink> = ({
 }) => {
   if (disabled) {
     return (
-      <DesktopMenuItem
+      <MobileMenuItem
         $disabled
         $active={active}
         color={color}
@@ -88,7 +87,7 @@ export const MobileMenuLink: FC<IMobileMenuLink> = ({
         appearance={appearance}
       >
         {children}
-      </DesktopMenuItem>
+      </MobileMenuItem>
     );
   }
   return (
@@ -107,6 +106,19 @@ export const MobileMenuLink: FC<IMobileMenuLink> = ({
     </LinkWrapper>
   );
 };
+
+const MobileMenuItem = styled(Text) <{ $active?: boolean, $disabled?: boolean }>`
+  && {
+    margin-right: 24px;
+    color: ${(props) => props.$disabled ? 'var(--color-blue-grey-500)' : (props.$active ? 'var(--color-additional-dark)' : 'var(--color-primary-500)')};
+    border-bottom: ${(props) => props.$active ? '1px solid var(--color-additional-dark)' : 'none'};
+    padding: ${(props) => props.$disabled && '8px 16px'};
+    &:hover {
+      color: ${(props) => props.$disabled ? 'var(--color-blue-grey-500)' : (props.$active ? 'var(--color-additional-dark)' : 'var(--color-primary-400)')};
+      cursor: ${(props) => props.$disabled ? 'not-allowed' : 'pointer'};
+    }
+  }
+`;
 
 const TextStyled = styled(Text) <{ $active?: boolean }>`
   && {

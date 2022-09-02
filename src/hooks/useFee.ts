@@ -1,13 +1,13 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useAccounts } from './useAccounts';
 import { useApi } from './useApi';
-import { formatKusamaBalance } from 'utils/textUtils';
+import { BN } from '@polkadot/util';
 
 interface UseFeeReturn {
   marketCommission: string,
   kusamaFee: string,
   fetchingKusamaFee: boolean,
-  getKusamaFee: () => Promise<string | undefined>
+  getKusamaFee: (recipient: string, value: BN) => Promise<string | undefined>
 }
 
 export const useFee = (): UseFeeReturn => {
@@ -16,19 +16,14 @@ export const useFee = (): UseFeeReturn => {
   const [kusamaFee, setKusamaFee] = useState<string>('0');
   const [fetchingKusamaFee, setFetchingKusamaFee] = useState<boolean>(false);
 
-  const getKusamaFee = useCallback(async () => {
+  const getKusamaFee = useCallback(async (recipient: string, value: BN) => {
     if (!selectedAccount || !api?.market) return;
     setFetchingKusamaFee(true);
-    const fee = await api.market.getKusamaFee(selectedAccount.address);
-    const feeFormatted = formatKusamaBalance(fee?.toString() || '0');
-    setKusamaFee(feeFormatted);
+    const fee = await api.market.getKusamaFee(selectedAccount.address, recipient, value);
+    setKusamaFee(fee || '0');
     setFetchingKusamaFee(false);
-    return feeFormatted;
+    return fee || '0';
   }, [api, selectedAccount]);
-
-  useEffect(() => {
-    getKusamaFee();
-  }, [getKusamaFee]);
 
   const marketCommission = useMemo(() => settings ? settings.blockchain.kusama.marketCommission : '0', [settings]);
 

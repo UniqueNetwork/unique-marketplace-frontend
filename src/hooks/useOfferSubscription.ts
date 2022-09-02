@@ -40,6 +40,9 @@ export const useOfferSubscription = ({ offer, onPlaceBid, onAuctionStopped, onAu
     });
     return () => {
       socket?.emit('unsubscribeToAuction', offer);
+      socket.off('auctionStopped');
+      socket.off('auctionClosed');
+      socket.off('bidPlaced');
     };
   }, [socket, offer]);
 

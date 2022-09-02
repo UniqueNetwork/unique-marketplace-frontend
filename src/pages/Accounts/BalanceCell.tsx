@@ -40,7 +40,7 @@ const BalancesWrapper = styled.div`
   && {
     display: flex;
     flex-direction: column;
-    padding: 20px 0 !important;
+    gap: 4px;
   }
 `;
 

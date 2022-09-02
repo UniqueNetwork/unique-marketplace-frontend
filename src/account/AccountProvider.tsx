@@ -3,13 +3,14 @@ import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 're
 import { Account, AccountProvider, AccountSigner } from './AccountContext';
 import { SignModal } from '../components/SignModal/SignModal';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { web3Accounts, web3Enable, web3AccountsSubscribe } from '@polkadot/extension-dapp';
+import { web3Accounts, web3Enable, web3AccountsSubscribe, web3EnablePromise } from '@polkadot/extension-dapp';
 import { sleep } from '../utils/helpers';
 import keyring from '@polkadot/ui-keyring';
 import { BN } from '@polkadot/util';
 import { Codec } from '@polkadot/types/types';
 import { useApi } from '../hooks/useApi';
 import { getWithdrawBids } from '../api/restApi/auction/auction';
+import { Unsubcall } from '@polkadot/extension-inject/types';
 
 export const DefaultAccountKey = 'unique_market_account_address';
 
@@ -26,6 +27,12 @@ const AccountWrapper: FC = ({ children }) => {
   const changeAccount = useCallback((account: Account) => {
     localStorage.setItem(DefaultAccountKey, account.address);
     setSelectedAccount(account);
+  }, []);
+
+  const clearAllAccounts = useCallback(() => {
+    localStorage.removeItem(DefaultAccountKey);
+    setSelectedAccount(undefined);
+    setAccounts([]);
   }, []);
 
   const [isSignModalVisible, setIsSignModalVisible] = useState<boolean>(false);
@@ -53,14 +60,16 @@ const AccountWrapper: FC = ({ children }) => {
   }, []);
 
   const getExtensionAccounts = useCallback(async () => {
-    // this call fires up the authorization popup
-    let extensions = await web3Enable('my cool dapp');
-    if (extensions.length === 0) {
-      console.log('Extension not found, retry in 1s');
-      await sleep(1000);
-      extensions = await web3Enable('my cool dapp');
+    if (!web3EnablePromise) {
+      // this call fires up the authorization popup
+      let extensions = await web3Enable('my cool dapp');
       if (extensions.length === 0) {
-        return [];
+        console.log('Extension not found, retry in 1s');
+        await sleep(1000);
+        extensions = await web3Enable('my cool dapp');
+        if (extensions.length === 0) {
+          return [];
+        }
       }
     }
 
@@ -122,6 +131,20 @@ const AccountWrapper: FC = ({ children }) => {
     unsubscribesBalancesChanges.current = unsubscribes.reduce<Record<string, Codec>>((acc, item) => ({ ...acc, ...item }), {});
   }, [kusamaSdk, setAccounts]);
 
+  const fetchAccountsWithDeposits = useCallback(async (fetchedAccounts: Account[]) => {
+    setIsLoadingDeposits(true);
+    const _accounts = await Promise.all(fetchedAccounts.map(async (account) => ({
+      ...account,
+      deposits: {
+        bids: (await getWithdrawBids({ owner: account.address })).data || { withdraw: [], leader: [] },
+        sponsorshipFee: await api?.market?.getUserDeposit(account.address)
+      }
+    })));
+    setAccounts(_accounts);
+    setIsLoadingDeposits(false);
+    return _accounts;
+  }, [api?.market]);
+
   const fetchAccounts = useCallback(async () => {
     // if (!rpcClient?.isKusamaApiConnected) return;
     if (!kusamaSdk) return;
@@ -132,7 +155,6 @@ const AccountWrapper: FC = ({ children }) => {
     if (allAccounts?.length) {
       const accountsWithBalance = await getAccountsBalances(allAccounts);
       const accountsWithWhiteListStatus = await getAccountsWhiteListStatus(accountsWithBalance);
-
       setAccounts(accountsWithWhiteListStatus);
 
       await subscribeBalancesChanges(accountsWithWhiteListStatus);
@@ -145,25 +167,29 @@ const AccountWrapper: FC = ({ children }) => {
       } else {
         changeAccount(allAccounts[0]);
       }
+      await fetchAccountsWithDeposits(accountsWithWhiteListStatus);
     } else {
+      clearAllAccounts();
       setFetchAccountsError('No accounts in extension');
     }
     setIsLoading(false);
-  }, [kusamaSdk, getAccountsBalances, getAccountsWhiteListStatus]);
+  }, [kusamaSdk, getAccountsBalances, getAccountsWhiteListStatus, fetchAccountsWithDeposits]);
 
-  const fetchAccountsWithDeposits = useCallback(async () => {
-    setIsLoadingDeposits(true);
-    const _accounts = await Promise.all(accounts.map(async (account) => ({
-      ...account,
-      deposits: {
-        bids: (await getWithdrawBids({ owner: account.address })).data || { withdraw: [], leader: [] },
-        sponsorshipFee: await api?.market?.getUserDeposit(account.address)
-      }
-    })));
-    setAccounts(_accounts);
-    setIsLoadingDeposits(false);
-    return _accounts;
-  }, [accounts]);
+  useEffect(() => {
+    let unsubscribe: Unsubcall;
+    if (web3EnablePromise) { // if polkadot extension is enabled
+      const listenExtensionChanges = async () => {
+        unsubscribe = await web3AccountsSubscribe(() => {
+          fetchAccounts();
+        });
+      };
+
+      listenExtensionChanges();
+      return () => {
+        unsubscribe && unsubscribe();
+      };
+    }
+  }, [web3EnablePromise, fetchAccounts]);
 
   const value = useMemo(() => ({
     isLoading,

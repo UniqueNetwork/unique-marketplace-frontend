@@ -8,11 +8,11 @@ import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
 import { Offer } from 'api/restApi/offers/types';
 import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
-import { Picture } from '..';
 import { formatKusamaBalance } from 'utils/textUtils';
 import { timeDifference } from 'utils/timestampUtils';
 import { Primary600 } from 'styles/colors';
 import config from '../../config';
+import { TokensMedia } from './TokensMedia';
 
 export type TTokensCard = {
   token?: NFTToken & Partial<Offer>
@@ -34,7 +34,8 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, ...
     imageUrl,
     prefix,
     price,
-    auction
+    auction,
+    video
   } = useMemo<Partial<Offer & NFTToken>>(() => {
     if (token?.tokenDescription) {
       const { collectionName, prefix, image } = token.tokenDescription;
@@ -75,11 +76,15 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, ...
 
   return (
     <TokensCardStyled>
-      <PictureWrapper to={`/${currentChainId || ''}/token/${collectionId || ''}/${tokenId || ''}`}>
-        <Picture alt={tokenId?.toString() || ''} src={imageUrl} />
-      </PictureWrapper>
+      <TokensMedia
+        to={`/${currentChainId ? `${currentChainId}/` : ''}token/${collectionId || ''}/${tokenId || ''}`}
+        tokenId={tokenId}
+        imageUrl={imageUrl}
+        video={video}
+        testid={`${testid}-token-media`}
+      />
       <Description>
-        <Link to={`/${currentChainId || ''}/token/${collectionId}/${tokenId}`} title={`${prefix || ''} #${tokenId}`}>
+        <Link to={`/${currentChainId ? `${currentChainId}/` : ''}token/${collectionId}/${tokenId}`} title={`${prefix || ''} #${tokenId}`}>
           <Text
             size='l'
             weight='regular'
@@ -95,7 +100,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, ...
           rel='noreferrer'
         >
           <Text color='primary-600' size='s'>
-            {`${collectionName?.substring(0, 15) || ''} [id ${collectionId || ''}]`}
+            {`${collectionName?.substring(0, 25) || ''} [id ${collectionId || ''}]`}
           </Text>
         </a>
         {price && <PriceWrapper>
@@ -140,49 +145,6 @@ const TokensCardStyled = styled.div`
   justify-content: flex-start;
   position: relative;
   cursor: pointer;
-`;
-
-const PictureWrapper = styled(Link)`
-  position: relative;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 8px;
-
-  &::before {
-    content: "";
-    display: block;
-    padding-top: 100%;
-  }
-
-  .picture {
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    color: white;
-    text-align: center;
-    max-height: 100%;
-    border-radius: 8px;
-    transition: 50ms;
-    overflow: hidden;
-
-    img {
-      max-width: 100%;
-      max-height: 100%;
-    }
-
-    svg {
-      border-radius: 8px;
-    }
-    
-    &:hover {
-      transform: translate(0, -5px);
-      text-decoration: none;
-    }
-  }
 `;
 
 const Description = styled.div`

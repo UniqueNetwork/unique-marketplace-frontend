@@ -31,6 +31,9 @@ const BidderWrapper = styled.div`
   display: flex;
   align-items: center;
   column-gap: calc(var(--gap) / 2);
+  & > a {
+    font-size: 16px;
+  }
 `;
 
 export default Bidder;

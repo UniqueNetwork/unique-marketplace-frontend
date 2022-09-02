@@ -1,22 +1,44 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { BlueGrey100 } from '../styles/colors';
 import Skeleton from './Skeleton/Skeleton';
 import { VideoAttribute } from '../api/uniqueSdk/types';
+import styled from 'styled-components';
+import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
+
+interface VideoProps {
+  autoplay?: boolean
+  controls?: boolean
+  loop?: boolean
+  muted?: boolean
+}
 
 interface PictureProps {
-  src?: string
+  src?: string | DecodedInfixOrUrlOrCidAndHash
   alt: string
   testid?: string
   size?: number
   video?: VideoAttribute
+  videoProps?: VideoProps
+  isPlaying?: boolean
 }
 
-export const Picture: FC<PictureProps> = ({ alt, src, size, testid = '', video }) => {
+export const Picture: FC<PictureProps> = ({
+  alt,
+  src,
+  size,
+  testid = '',
+  video,
+  videoProps,
+  isPlaying
+}) => {
   const [imageSrc, setImageSrc] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { autoplay = true, controls = true, loop = true, muted = true } = useMemo(() => videoProps || {}, [videoProps]);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    if (!src || !src.trim()) {
+    const imageUrl = src ? (typeof src === 'string' ? src.trim() : src.fullUrl) : '';
+    if (!imageUrl) {
       setImageSrc(undefined);
       return;
     }
@@ -27,29 +49,47 @@ export const Picture: FC<PictureProps> = ({ alt, src, size, testid = '', video }
 
     image.onload = () => {
       setIsLoading(false);
-      setImageSrc(src);
+      setImageSrc(imageUrl);
     };
 
     image.onerror = () => {
       setIsLoading(false);
     };
 
-    image.src = src;
+    image.src = imageUrl;
   }, [src]);
+
+  useEffect(() => {
+    if (isPlaying && videoRef.current?.paused) {
+      void videoRef.current.play();
+    } else if (!isPlaying && !videoRef.current?.paused) {
+      void videoRef.current?.pause();
+    }
+  }, [isPlaying]);
+
+  const videoUrl = useMemo(() => {
+    if (!video) return undefined;
+    const url = video.fullUrl || video.url;
+    // if video doesn't have poster, we rewind video to 0.001 sec
+    // because iphone doesn't render first frame as a poster https://developer.apple.com/forums/thread/129377
+    if (!imageSrc) return `${url}#t=0.001`;
+    else return url;
+  }, [video, imageSrc]);
 
   return (<div className={'picture'}>
     {isLoading && <Skeleton width={'100%'} height={'100%'} />}
     {!isLoading && video &&
-      <video
-        width='100%'
-        height='100%'
-        src={video.fullUrl || video.url}
-        poster={imageSrc}
-        controls
-        autoPlay
-        loop
+      <VideoStyled
+        ref={videoRef}
+        src={videoUrl}
+        poster={imageSrc || undefined}
+        controls={controls}
+        autoPlay={autoplay}
+        playsInline
+        loop={loop}
+        muted={muted}
         data-testid={`${testid}-video`}
-      ></video>
+      ></VideoStyled>
     }
     {!isLoading && imageSrc && !video &&
       <img
@@ -58,7 +98,7 @@ export const Picture: FC<PictureProps> = ({ alt, src, size, testid = '', video }
         height={size || undefined}
         data-testid={`${testid}`}
       />}
-    {!isLoading && !imageSrc && <svg
+    {!isLoading && !imageSrc && !video && <svg
       fill={'white'}
       height='100%'
       viewBox='0 0 1000 1000'
@@ -90,3 +130,13 @@ export const Picture: FC<PictureProps> = ({ alt, src, size, testid = '', video }
     }
   </div>);
 };
+
+const VideoStyled = styled.video`
+  width: 100%;
+  @media (min-width: 1920px) {
+    height: 536px;
+  }
+  @media (max-width: 767px) {
+    height: 100%;
+  }
+`;

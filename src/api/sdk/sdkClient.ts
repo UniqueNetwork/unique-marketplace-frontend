@@ -1,11 +1,11 @@
-import { Sdk } from '@unique-nft/sdk';
-import '@unique-nft/sdk/state-queries';
-import { SdkExtrinsics } from '@unique-nft/sdk/extrinsics';
-import { SdkTokens, SdkCollections } from '@unique-nft/sdk/tokens';
-import { SdkBalance } from '@unique-nft/sdk/balance';
+import { Sdk } from '@unique-nft/substrate-client';
+import '@unique-nft/substrate-client/state-queries';
+import { SdkExtrinsics } from '@unique-nft/substrate-client/extrinsics';
+import { SdkTokens, SdkCollections } from '@unique-nft/substrate-client/tokens';
+import { SdkBalance } from '@unique-nft/substrate-client/balance';
 import './sponsorshipModule';
 
-declare module '@unique-nft/sdk' {
+declare module '@unique-nft/substrate-client' {
   interface Sdk {
     readonly extrinsics: SdkExtrinsics;
     readonly tokens: SdkTokens;

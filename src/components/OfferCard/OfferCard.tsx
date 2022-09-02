@@ -6,11 +6,11 @@ import styled from 'styled-components';
 import { Offer } from 'api/restApi/offers/types';
 import { useAccounts } from 'hooks/useAccounts';
 import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
-import { Picture } from '..';
 import { formatKusamaBalance } from 'utils/textUtils';
 import { timeDifference } from 'utils/timestampUtils';
 import { Primary600 } from 'styles/colors';
 import config from '../../config';
+import { TokensMedia } from '../TokensCard/TokensMedia';
 import { useApi } from '../../hooks/useApi';
 
 export type TTokensCard = {
@@ -25,8 +25,11 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
   const {
     collectionName,
     image,
-    prefix
+    prefix,
+    video
   } = offer?.tokenDescription || {};
+
+  const videoProp = useMemo(() => typeof video === 'string' ? { fullUrl: video, ipfsCid: '' } : video, [video]);
 
   const isBidder = useMemo(() => {
     if (!selectedAccount) return false;
@@ -45,11 +48,15 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
 
   return (
     <TokensCardStyled>
-      <PictureWrapper to={`/${currentChainId || ''}/token/${offer?.collectionId}/${offer?.tokenId}`}>
-        <Picture alt={offer?.tokenId?.toString() || ''} src={image} />
-      </PictureWrapper>
+      <TokensMedia
+        to={`/${currentChainId ? `${currentChainId}/` : ''}token/${offer?.collectionId}/${offer?.tokenId}`}
+        tokenId={offer?.tokenId}
+        imageUrl={image}
+        video={videoProp}
+        testid={`${testid}-token-media`}
+      />
       <Description>
-        <Link to={`/${currentChainId || ''}/token/${offer?.collectionId}/${offer?.tokenId}`} title={`${prefix || ''} #${offer?.tokenId}`}>
+        <Link to={`/${currentChainId ? `${currentChainId}/` : ''}token/${offer?.collectionId}/${offer?.tokenId}`} title={`${prefix || ''} #${offer?.tokenId}`}>
           <Text
             size='l'
             weight='regular'
@@ -66,7 +73,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
           rel='noreferrer'
         >
           <Text color='primary-600' size='s'>
-            {`${collectionName?.substring(0, 15) || ''} [id ${offer?.collectionId || ''}]`}
+            {`${collectionName?.substring(0, 25) || ''} [id ${offer?.collectionId || ''}]`}
           </Text>
         </a>
         <PriceWrapper>

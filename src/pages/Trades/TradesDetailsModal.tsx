@@ -73,6 +73,7 @@ const TokenTradesDetailsModal: FC<IConfirmModalProps> = ({ trade, onCancel }) =>
           columns={columns}
           data={filteredBids}
           loading={isFetching}
+          idColumnName={'id'}
         />
       </Content>
     </Modal>

@@ -3,7 +3,7 @@ import { web3FromSource } from '@polkadot/extension-dapp';
 import keyring from '@polkadot/ui-keyring';
 import { stringToHex, u8aToHex } from '@polkadot/util';
 import { KeypairType } from '@polkadot/util-crypto/types';
-import { UnsignedTxPayload } from '@unique-nft/sdk/types';
+import { UnsignedTxPayload } from '@unique-nft/substrate-client/types';
 
 import { useApi } from './useApi';
 import AccountContext, { Account, AccountSigner } from 'account/AccountContext';
@@ -53,7 +53,7 @@ export const useAccounts = () => {
     return pair;
   }, [selectedAccount]);
 
-  const signMessage = useCallback(async (message: string, account?: Account | string): Promise<string> => {
+  const signMessage = useCallback(async (message: string, account?: Account | string): Promise<`0x${string}`> => {
     let _account = account || selectedAccount;
     if (typeof _account === 'string') {
       _account = accounts.find((account) => account.address === _account);

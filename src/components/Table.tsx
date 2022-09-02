@@ -14,6 +14,7 @@ interface TableProps {
   onSort?(sorting: SortQuery): void
   className?: string
   emptyIconProps?: Omit<IconProps, 'size'>
+  idColumnName: string
 }
 
 export const Table: FC<TableProps> = ({
@@ -22,7 +23,8 @@ export const Table: FC<TableProps> = ({
   loading,
   onSort,
   className,
-  emptyIconProps
+  emptyIconProps,
+  idColumnName
 }) => {
   const deviceSize = useDeviceSize();
 
@@ -47,6 +49,7 @@ export const Table: FC<TableProps> = ({
           loading={loading}
           className={className}
           emptyIconProps={emptyIconProps}
+          idColumnName={idColumnName}
         />
       )}
     </TableWrapper>

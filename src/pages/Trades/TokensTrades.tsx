@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Pagination, SortQuery } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
@@ -11,10 +11,11 @@ import { TradesTabs } from './types';
 import SearchField from '../../components/SearchField/SearchField';
 
 import NoTradesIcon from '../../static/icons/no-trades.svg';
-import useDeviceSize from '../../hooks/useDeviceSize';
+import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import TokenTradesDetailsModal from './TradesDetailsModal';
 import { Trade } from '../../api/restApi/trades/types';
 import { debounce } from 'utils/helpers';
+import { useInfinityScroll } from 'hooks/useInfinityScroll';
 
 type TokensTradesPage = {
   currentTab: TradesTabs
@@ -29,8 +30,9 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
   const [searchValue, setSearchValue] = useState<string>();
   const [selectedOfferDetails, setSelectedOfferDetails] = useState<Trade | null>(null);
   const deviceSize = useDeviceSize();
-
   const { trades, tradesCount, fetch, isFetching } = useTrades();
+  const [loadedTrades, setLoadedTrades] = useState<Trade[]>([]);
+  const [searched, setSearched] = useState(false);
 
   useEffect(() => {
     if (isLoadingAccounts || (currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address)) return;
@@ -44,6 +46,15 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
     });
   }, [currentTab, selectedAccount?.address, isLoadingAccounts]);
 
+  useEffect(() => {
+    // append loaded trades to the existing list if screen is with infinity scroll
+    if (deviceSize !== DeviceSize.lg && !searched) setLoadedTrades((currentTrades) => { return [...currentTrades, ...trades]; });
+    else {
+      setLoadedTrades(trades);
+      setSearched(false);
+    }
+  }, [trades]);
+
   const debouncedSearch = useCallback(() => {
     return debounce(function (...args: string[]) {
       setSearchValue(args[0]);
@@ -54,6 +65,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
         searchText: args[0],
         seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
       });
+      setSearched(true);
     }, 300);
   }, [selectedAccount?.address, currentTab, sortString, pageSize]);
 
@@ -119,9 +131,21 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
     setSelectedOfferDetails(trade);
   }, []);
 
+  const onScrollBottomReached = useCallback(() => {
+    if (tradesCount !== loadedTrades.length) {
+      onPageChange(page + 1);
+    }
+  }, [onPageChange, page, tradesCount, loadedTrades.length]);
+
+  useInfinityScroll(onScrollBottomReached);
+
   const closeDetailsModal = useCallback(() => {
     setSelectedOfferDetails(null);
   }, [setSelectedOfferDetails]);
+
+  // do not show skeleton when next page is loading with infinity scroll
+  const showSkeleton = useMemo(() => (deviceSize === DeviceSize.lg || !loadedTrades.length),
+    [deviceSize, loadedTrades.length]);
 
   return (<PagePaper>
     <TradesPageWrapper>
@@ -134,12 +158,13 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
       />
       <StyledTable
         onSort={onSortChange}
-        data={trades || []}
+        data={loadedTrades}
         columns={getTradesColumns({ deviceSize, onShowTradesDetailsModal })}
-        loading={isLoadingAccounts || isFetching}
+        loading={(isLoadingAccounts || isFetching) && showSkeleton}
         emptyIconProps={searchValue ? { name: 'magnifier-found' } : { file: NoTradesIcon }}
+        idColumnName={'offerId'}
       />
-      {!!tradesCount && <PaginationWrapper>
+      {(!!tradesCount && deviceSize === DeviceSize.lg) && <PaginationWrapper>
         <Pagination
           current={page}
           size={tradesCount}
@@ -156,6 +181,9 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
 
 const TradesPageWrapper = styled.div`
   width: 100%;
+  .unique-pagination-wrapper .per-page-selector-wrapper {
+    font-size: 16px;
+  }
 
   @media (max-width: 640px) {
     .unique-modal-wrapper .unique-modal {

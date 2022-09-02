@@ -9,6 +9,7 @@ import { SdkClient } from './sdk/sdkClient';
 import { UniqueSDKNFTController } from './uniqueSdk/NFTController';
 import { UniqueSDKCollectionController } from './uniqueSdk/collectionController';
 import { UniqueSDKMarketController } from './uniqueSdk/marketController';
+import { ChainProperties } from '@unique-nft/substrate-client/types';
 import config from '../config';
 import axios from '../api/restApi/base/axios';
 import { sdkClient as sdk, nftController as nft, collectionController as collection, marketController as market } from '.';
