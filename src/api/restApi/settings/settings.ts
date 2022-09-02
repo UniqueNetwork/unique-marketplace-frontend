@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { get, post } from '../base';
 import { defaultParams } from '../base/axios';
 import { Settings, WhitelistBody } from './types';
 import { ResponseError } from '../base/types';
+import { AxiosError } from 'axios';
 
 const endpoint = '/api/settings';
 
@@ -16,24 +17,25 @@ export const useSettings = () => {
   const [isFetching, setIsFetching] = useState<boolean | undefined>(false);
   const [fetchingError, setFetchingError] = useState<ResponseError | undefined>();
 
-  useEffect(() => {
+  const fetchSettings = useCallback(async () => {
     setIsFetching(true);
-    getSettings()
-      .then((response) => {
+    try {
+      const response = await getSettings();
+      setIsFetching(false);
+      if (response.status === 200) {
         setIsFetching(false);
-        if (response.status === 200) {
-          setIsFetching(false);
-          setSettings(response.data);
-        }
-      })
-      .catch((error) => {
-        setFetchingError(error);
-      });
+        setSettings(response.data);
+      }
+    } catch (error) {
+      setFetchingError(error as AxiosError);
+      setIsFetching(false);
+    }
   }, []);
 
   return {
     settings,
     isFetching,
-    fetchingError
+    fetchingError,
+    fetchSettings
   };
 };

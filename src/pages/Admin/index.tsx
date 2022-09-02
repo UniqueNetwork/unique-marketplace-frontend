@@ -16,6 +16,7 @@ import SearchField from '../../components/SearchField/SearchField';
 import { useAccounts } from '../../hooks/useAccounts';
 import { CollectionData } from '../../api/restApi/admin/types';
 import config from '../../config';
+import { useApi } from '../../hooks/useApi';
 
 type TOption = {
   iconRight: {
@@ -71,6 +72,7 @@ export const AdminPanelPage: FC = () => {
   const { isLoading: isAccountsLoading } = useAccounts();
   const navigate = useNavigate();
   const { warning } = useNotifications();
+  const { currentChainId } = useApi();
 
   useEffect(() => {
     if (isAccountsLoading) return;
@@ -90,7 +92,7 @@ export const AdminPanelPage: FC = () => {
       setHasAccess(true);
       void await fetchCollections();
     })();
-  }, [hasAdminPermission, isAccountsLoading]);
+  }, [hasAdminPermission, isAccountsLoading, currentChainId]);
 
   const onSortingChange = useCallback((value: SelectOptionProps) => {
     setSortingValue(value as TOption);

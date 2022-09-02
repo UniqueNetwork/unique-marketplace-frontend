@@ -6,8 +6,8 @@ import { FetchStatus, TCalculateBidParams, TCalculatedBid, TDeleteParams, TPlace
 
 const endpoint = '/api/auction';
 
-export const startAuction = (body: TStartAuctionParams) => post<TStartAuctionParams>(`${endpoint}/create_auction`, body, { ...defaultParams });
-export const placeBid = (body: TPlaceBidParams) => post<TPlaceBidParams>(`${endpoint}/place_bid`, body, { ...defaultParams });
+export const startAuctionRequest = (body: TStartAuctionParams) => post<TStartAuctionParams>(`${endpoint}/create_auction`, body, { ...defaultParams });
+export const placeBidRequest = (body: TPlaceBidParams) => post<TPlaceBidParams>(`${endpoint}/place_bid`, body, { ...defaultParams });
 export const withdrawBid = (body: TDeleteParams, { signer, signature }: TSignature) => deleteRequest(`${endpoint}/withdraw_bid`, { headers: { ...defaultParams.headers, Authorization: `${signer}:${signature}` }, params: body, ...defaultParams });
 export const cancelAuction = (body: TDeleteParams, { signer, signature }: TSignature) => deleteRequest(`${endpoint}/cancel_auction`, { headers: { ...defaultParams.headers, Authorization: `${signer}:${signature}` }, params: body, ...defaultParams });
 export const calculate = (body: TCalculateBidParams) => post<TCalculateBidParams, TCalculatedBid>(`${endpoint}/calculate`, body, { ...defaultParams });
@@ -18,10 +18,11 @@ export const useAuction = () => {
   const [startAuctionStatus, setStartAuctionStatus] = useState<FetchStatus>(FetchStatus.default);
   const [placeBidStatus, setPlaceBidStatus] = useState<FetchStatus>(FetchStatus.default);
   const [calculateBidStatus, setCalculateBidStatus] = useState<FetchStatus>(FetchStatus.default);
+
   const startAuction = useCallback(async (params: TStartAuctionParams) => {
     try {
       setStartAuctionStatus(FetchStatus.inProgress);
-      await startAuction(params);
+      await startAuctionRequest({ ...params });
       setStartAuctionStatus(FetchStatus.success);
     } catch (e) {
       setStartAuctionStatus(FetchStatus.error);
@@ -32,7 +33,7 @@ export const useAuction = () => {
   const placeBid = useCallback(async (params: TPlaceBidParams) => {
     try {
       setPlaceBidStatus(FetchStatus.inProgress);
-      await placeBid(params);
+      await placeBidRequest({ ...params });
       setPlaceBidStatus(FetchStatus.success);
     } catch (e) {
       setPlaceBidStatus(FetchStatus.error);
@@ -43,7 +44,7 @@ export const useAuction = () => {
   const getCalculatedBid = useCallback(async (params: TCalculateBidParams) => {
     try {
       setCalculateBidStatus(FetchStatus.inProgress);
-      const { data } = await calculate(params);
+      const { data } = await calculate({ ...params });
       setCalculateBidStatus(FetchStatus.success);
       return data;
     } catch (e) {

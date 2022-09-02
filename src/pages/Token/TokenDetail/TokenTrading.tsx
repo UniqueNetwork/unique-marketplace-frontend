@@ -28,7 +28,7 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
   const { selectedAccount } = useContext(accountContext);
   const { settings, currentChainId } = useApi();
 
-  const allowedTokens = useMemo(() => settings && currentChainId ? settings.blockchains[currentChainId].blockchain.unique.allowedTokens : undefined, [settings, currentChainId]);
+  const allowedTokens = useMemo(() => settings && currentChainId ? settings.blockchain.unique.allowedTokens : undefined, [settings]);
 
   const isAllowed = useMemo(() => {
     if (offer) {

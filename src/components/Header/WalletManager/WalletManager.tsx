@@ -27,7 +27,7 @@ export const WalletManager: FC = () => {
   const { selectedAccount, accounts, isLoading, fetchAccounts, changeAccount } = useAccounts();
   const [isOpen, setIsOpen] = useState(false);
   const [isGetKsmOpened, setIsGetKsmOpened] = useState(false);
-  const { chainData, settings, currentChainId, onChangeChainId } = useApi();
+  const { chainData, settings, currentChainId, onChangeChainId, api } = useApi();
   const { info } = useNotifications();
   const navigate = useNavigate();
 
@@ -35,9 +35,9 @@ export const WalletManager: FC = () => {
     return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
   }, [chainData?.SS58Prefix]);
 
-  const networks: INetwork[] = useMemo(() => Object.keys(settings?.blockchains || {}).map<INetwork>((id) => ({
+  const networks: INetwork[] = useMemo(() => Object.keys(config?.blockchains || {}).map<INetwork>((id) => ({
     id,
-    name: settings?.blockchains[id]?.chainName || '',
+    name: config?.blockchains[id]?.name || '',
     icon: {
       name: `chain-${id.toLowerCase()}`,
       size: 40
@@ -48,6 +48,7 @@ export const WalletManager: FC = () => {
 
   const onNetworkChange = useCallback((network: INetwork) => {
     onChangeChainId(network.id);
+    setIsOpen(false);
   }, [onChangeChainId]);
 
   const widgetAccounts = useMemo(() => accounts.map((account) => (
@@ -117,7 +118,7 @@ export const WalletManager: FC = () => {
     );
   }
 
-  if (isLoading) return <BalanceSkeleton />;
+  if (isLoading || !api) return <BalanceSkeleton />;
 
   return (
     <WalletManagerWrapper>

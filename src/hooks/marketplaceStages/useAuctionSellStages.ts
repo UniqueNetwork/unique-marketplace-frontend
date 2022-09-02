@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useApi } from '../useApi';
 import { TAuctionProps } from '../../pages/Token/Modals/types';
-import { startAuction } from '../../api/restApi/auction/auction';
+import { startAuctionRequest } from '../../api/restApi/auction/auction';
 import { InternalStage, StageStatus } from '../../types/StagesTypes';
 import { fromStringToBnString } from '../../utils/bigNum';
 import useStages from '../useStages';
@@ -28,7 +28,7 @@ export const useAuctionSellStages = (collectionId: number, tokenId: number) => {
               (signedTx) => {
                 const startPrice = fromStringToBnString(params.txParams.startingPrice.toString(), api?.market?.kusamaDecimals);
                 const priceStep = fromStringToBnString(params.txParams.minimumStep.toString(), api?.market?.kusamaDecimals);
-                return startAuction({ tx: signedTx, days: params.txParams.duration, startPrice, priceStep });
+                return startAuctionRequest({ tx: signedTx, days: params.txParams.duration, startPrice, priceStep });
               }
             }
           )

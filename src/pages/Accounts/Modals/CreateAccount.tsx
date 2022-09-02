@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Heading, Modal } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
@@ -47,9 +47,15 @@ export const CreateAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish
     setStage(stage - 1);
   }, [stage]);
 
+  const onCloseModal = useCallback(() => {
+    setAccountProperties(undefined);
+    setStage(CreateAccountModalStages.AskSeed);
+    onClose();
+  }, [isVisible]);
+
   if (!ModalBodyComponent) return null;
 
-  return (<Modal isVisible={isVisible} isClosable={true} onClose={onClose}>
+  return (<Modal isVisible={isVisible} isClosable={true} onClose={onCloseModal}>
     <Content>
       <Heading size='2'>Create substrate account</Heading>
     </Content>

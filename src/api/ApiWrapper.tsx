@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { keyring } from '@polkadot/ui-keyring';
 import { useNotifications } from '@unique-nft/ui-kit';
 import { ApiContextProps, ApiProvider } from './ApiContext';
@@ -10,9 +10,9 @@ import { UniqueSDKNFTController } from './uniqueSdk/NFTController';
 import { UniqueSDKCollectionController } from './uniqueSdk/collectionController';
 import { UniqueSDKMarketController } from './uniqueSdk/marketController';
 import config from '../config';
+import axios from '../api/restApi/base/axios';
 import { sdkClient as sdk, nftController as nft, collectionController as collection, marketController as market } from '.';
-
-import mockSettings from './mockSettings.json';
+import { getSettings } from './restApi/settings/settings';
 
 keyring.loadAll({});
 
@@ -35,33 +35,16 @@ const ApiWrapper = ({
 }: ChainProviderProps) => {
   const [isRpcClientInitialized, setRpcClientInitialized] = useState<boolean>(false);
   const navigate = useNavigate();
-  const { pathname } = useLocation();
   const { chainId: chainIdParam } = useParams<'chainId'>();
   const [settings, setSettings] = useState<Settings>();
-  const [currentChainId, setCurrentChainId] = useState<string>();
+  const [currentChainId, setCurrentChainId] = useState<string>('');
   const { error } = useNotifications();
 
   useEffect(() => {
     (async () => {
       // mock received settings
-      // const { data: settings } = await getSettings();
-      const settings: Settings = await Promise.resolve(mockSettings);
-      setSettings(settings);
 
-      for (const chainId in settings.blockchains) {
-        const { unique, kusama } = settings.blockchains[chainId].blockchain;
-        await sdkClient?.connect(
-          chainId,
-          unique.wsEndpoint,
-          kusama.wsEndpoint
-        );
-      }
-
-      if (chainIdParam && !settings?.blockchains[chainIdParam]) {
-        navigate('/404');
-        return;
-      }
-      const defaultChainId = Object.keys(settings?.blockchains || {})[0];
+      const defaultChainId = Object.keys(config?.blockchains || {})[0];
       const storedChainId = localStorage.getItem(ChainIdLocalStorageKey);
 
       if (!storedChainId || (chainIdParam && storedChainId !== chainIdParam)) {
@@ -70,8 +53,19 @@ const ApiWrapper = ({
 
       const initialChainId = chainIdParam || storedChainId || defaultChainId;
       setCurrentChainId(initialChainId);
-      initializeControllers(initialChainId, sdkClient, settings);
 
+      axios.defaults.baseURL = config.blockchains[initialChainId].apiEndpoint;
+
+      const { data: settings } = await getSettings();
+
+      await sdkClient?.connect(
+        initialChainId,
+        settings.blockchain.unique.wsEndpoint,
+        settings.blockchain.kusama.wsEndpoint
+      );
+
+      setSettings(settings);
+      initializeControllers(initialChainId, sdkClient, settings);
       setRpcClientInitialized(sdkClient?.isReady);
     })().then(() => {
       console.log('Rpc connection: success');
@@ -81,53 +75,70 @@ const ApiWrapper = ({
     });
   }, []);
 
-  const initializeControllers = useCallback((chainId: string, sdkClient: SdkClient, settings: Settings) => {
-    const currentChain = sdkClient?.sdkSet[chainId];
-    const currentSettings = settings?.blockchains[chainId];
+  const initializeControllers = useCallback(async (chainId: string, sdkClient: SdkClient, settings: Settings) => {
+    if (!sdkClient?.sdkSet[chainId]) {
+      setRpcClientInitialized(false);
+      await sdkClient?.connect(
+        chainId,
+        settings.blockchain.unique.wsEndpoint,
+        settings.blockchain.kusama.wsEndpoint
+      );
+      setRpcClientInitialized(sdkClient?.isReady);
+    }
 
-    if (!currentChain || !currentSettings) return;
+    const currentChain = sdkClient?.sdkSet[chainId];
+
+    if (!currentChain) return;
 
     nftController?.initialize({
       sdk: currentChain.unique,
-      allowedTokens: currentSettings.blockchain.unique.allowedTokens,
-      collectionIds: currentSettings.blockchain.unique.collectionIds
+      allowedTokens: settings.blockchain.unique.allowedTokens,
+      collectionIds: settings.blockchain.unique.collectionIds
     });
     collectionController?.initialize({
       sdk: currentChain.unique,
-      collectionIds: currentSettings.blockchain.unique.collectionIds
+      collectionIds: settings.blockchain.unique.collectionIds
     });
     marketController?.initialize({
       uniqueSdk: currentChain.unique,
       kusamaSdk: currentChain.kusama,
-      auctionAddress: currentSettings.auction.address,
-      contractAddress: currentSettings.blockchain.unique.contractAddress,
-      escrowAddress: currentSettings.blockchain.escrowAddress,
-      wsEndpoint: currentSettings.blockchain.unique.wsEndpoint
+      auctionAddress: settings.auction.address,
+      contractAddress: settings.blockchain.unique.contractAddress,
+      escrowAddress: settings.blockchain.escrowAddress,
+      wsEndpoint: settings.blockchain.unique.wsEndpoint
     });
   }, []);
 
-  const onChangeChainId = useCallback((newChainId: string) => {
-    if (currentChainId === newChainId || !settings) return;
+  const onChangeChainId = useCallback(async (newChainId: string) => {
+    if (currentChainId === newChainId) return;
+    axios.defaults.baseURL = config.blockchains[newChainId].apiEndpoint;
+
+    const { data: settings } = await getSettings();
+    setSettings(settings);
+
+    await initializeControllers(newChainId, sdkClient, settings);
     setCurrentChainId(newChainId);
-    initializeControllers(newChainId, sdkClient, settings);
     // redirect to correct URL with chainId
     const { pathname } = window.location;
     if (pathname.includes('faq')) return;
+    const tokenPageUrlRegex = /token[/]\d+[/]\d+$/;
+    if (tokenPageUrlRegex.test(pathname)) {
+      navigate(`/${newChainId}/market`);
+      return;
+    }
     if (currentChainId && pathname.includes(currentChainId)) {
       navigate(pathname.replace(currentChainId, newChainId));
     } else {
       navigate(`/${newChainId}${pathname}`);
     }
-  }, [currentChainId, pathname, sdkClient, settings]);
+  }, [currentChainId, sdkClient, settings]);
 
   // get current chain and current chain settings
-  const [currentChain, currentSettings] = useMemo(() => {
-    if (!sdkClient?.isReady || !currentChainId) return [];
-    return [
-      sdkClient?.sdkSet[currentChainId],
-      currentChainId ? settings?.blockchains[currentChainId] : undefined
-    ];
-  }, [currentChainId, settings, sdkClient?.isReady]);
+  const currentChain = useMemo(() => {
+    if (!sdkClient?.isReady || !currentChainId) return undefined;
+
+    return sdkClient?.sdkSet[currentChainId];
+  }, [currentChainId, sdkClient?.isReady]);
 
   useEffect(() => {
     if (sdkClient?.error) {
@@ -138,7 +149,7 @@ const ApiWrapper = ({
   // get context value for ApiContext
   const value = useMemo<ApiContextProps>(
     () => ({
-      api: (isRpcClientInitialized && settings && currentChain && currentSettings
+      api: (isRpcClientInitialized && settings && currentChain && settings
         ? {
           collection: collectionController,
           nft: nftController,
@@ -152,12 +163,12 @@ const ApiWrapper = ({
       currentChainId,
       onChangeChainId
     }),
-    [isRpcClientInitialized, currentChain, settings, currentChainId, currentSettings]
+    [isRpcClientInitialized, currentChain, settings, currentChainId]
   );
 
   return (
     <ApiProvider value={value}>
-      <AuctionSocketProvider url={config.uniqueApiUrl}>
+      <AuctionSocketProvider url={config.blockchains[currentChainId]?.apiEndpoint}>
         {children}
       </AuctionSocketProvider>
     </ApiProvider>

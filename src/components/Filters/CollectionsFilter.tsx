@@ -24,9 +24,9 @@ interface CollectionsFilterProps {
 const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attributeCounts, onChange, onAttributesChange, onAttributeCountsChange, testid }) => {
   const { collections, isFetching } = useCollections();
   const { collections: selectedCollections = [], attributes: selectedAttributes = [], attributeCounts: selectedAttributeCounts = [] } = value || {};
-  const { settings, currentChainId } = useApi();
+  const { settings } = useApi();
 
-  const collectionIds = useMemo(() => currentChainId && settings ? settings.blockchains[currentChainId].blockchain.unique.collectionIds : [], [settings, currentChainId]);
+  const collectionIds = useMemo(() => settings ? settings.blockchain.unique.collectionIds : [], [settings]);
 
   const onCollectionSelect = useCallback((collectionId: number) => (value: boolean) => {
     let _selectedCollections;
@@ -51,7 +51,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attr
     >
       <CollectionFilterWrapper>
         {isFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
-        {collections.map((collection) => (
+        {!isFetching && collections.map((collection) => (
           <CheckboxWrapper
             key={`collection-${collection.id}`}
           >

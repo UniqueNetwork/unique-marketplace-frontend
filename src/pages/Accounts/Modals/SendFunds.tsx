@@ -179,7 +179,9 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
         options={accounts as unknown as SelectOptionProps[]}
         onChange={onChangeSender}
         optionRender={(option) => (
-          <AccountCard accountName={(option as unknown as Account)?.meta.name || ''} accountAddress={(option as unknown as Account)?.address || ''} canCopy={false} />
+          <AddressOptionWrapper>
+            <AccountCard accountName={(option as unknown as Account)?.meta.name || ''} accountAddress={(option as unknown as Account)?.address || ''} canCopy={false} />
+          </AddressOptionWrapper>
         )}
         iconRight={{ name: 'triangle', size: 8 }}
       >
@@ -306,6 +308,12 @@ const SenderSelectWrapper = styled.div`
   
   & .unique-dropdown {
     width: 100%;
+    cursor: pointer;
+    .dropdown-options {
+      max-height: 229px;
+      overflow-y: auto;
+      row-gap: calc(var(--gap) / 4);
+    }
   }
   & .icon-triangle{
     position: absolute;
