@@ -44,14 +44,14 @@ export class UniqueSDKNFTController {
 
   async getToken(collectionId: number, tokenId: number): Promise<NFTToken | null> {
     const token = await this.sdk.tokens.get_new({ collectionId, tokenId });
-    const collection = await this.sdk.collections.get_new({ collectionId });
-    if (!token || !collection) return null;
+    // const collection = await this.sdk.collections.get_new({ collectionId });
+    if (!token) return null;
 
     const { owner, attributes, image, video } = token;
-    const { name, tokenPrefix, description, schema } = collection;
+    // const { name, tokenPrefix, description, schema } = collection;
 
     const imageUrl = image?.fullUrl || '';
-    const collectionCover = schema?.coverPicture?.fullUrl || '';
+    // const collectionCover = schema?.coverPicture?.fullUrl || '';
 
     const isAllowed = this.allowedTokens[collectionId] ? checkTokenIsAllowed(tokenId, this.allowedTokens[collectionId].split(',')) : true;
 
@@ -61,10 +61,10 @@ export class UniqueSDKNFTController {
       attributes,
       imageUrl,
       collectionId,
-      collectionName: name,
-      prefix: tokenPrefix,
-      description,
-      collectionCover,
+      // collectionName: name,
+      // prefix: tokenPrefix,
+      // description,
+      // collectionCover,
       isAllowed,
       video
     };

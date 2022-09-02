@@ -6,7 +6,7 @@ import { BN_MAX_INTEGER } from '@polkadot/util';
 import { BoxedNumberWithDefault, LocalizedStringWithDefault } from '@unique-nft/substrate-client/tokens';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
-import { NFTToken } from 'api/uniqueSdk/types';
+import { NFTCollection, NFTToken } from 'api/uniqueSdk/types';
 import { useOffers } from 'api/restApi/offers/offers';
 import { Offer } from 'api/restApi/offers/types';
 import { TokensList } from 'components';
@@ -91,7 +91,7 @@ export const NFTPage = () => {
   const [searchString, setSearchString] = useState<string>(searchParams.get('searchValue') || '');
   const [selectOption, setSelectOption] = useState<TOption>();
   const { selectedAccount, isLoading } = useAccounts();
-  const [tokens, setTokens] = useState<NFTToken[]>([]);
+  const [tokens, setTokens] = useState<(NFTToken & NFTCollection)[]>([]);
   const [isFetchingTokens, setIsFetchingTokens] = useState<boolean>(false);
   const deviceSize = useDeviceSize();
   const { collections } = useCollections();
@@ -108,7 +108,10 @@ export const NFTPage = () => {
       await fetch({ page: 1, pageSize, seller: selectedAccount?.address });
       const _tokens = await api.nft?.getAccountMarketableTokens(selectedAccount.address) as NFTToken[];
 
-      setTokens(_tokens);
+      setTokens(await Promise.all(_tokens.map(async (token) => ({
+        ...(await api.collection?.getCollection(token.collectionId!) || { prefix: '', collectionName: '' }),
+        ...token
+      }))));
       setIsFetchingTokens(false);
     })();
   }, [api?.nft, selectedAccount?.address, setIsFetchingTokens, fetch]);
@@ -134,7 +137,7 @@ export const NFTPage = () => {
   }, [setSearchString]);
 
   // attribute counts calculated based on tokens filtered by all filters except attribute count filter
-  const filterForAttributeCounts = useCallback((token: NFTToken & Partial<Offer>) => {
+  const filterForAttributeCounts = useCallback((token: NFTToken & NFTCollection & Partial<Offer>) => {
       const { statuses, prices } = filterState || {};
       setUrlParameter('filterState', filterState ? JSON.stringify(filterState) : '');
       const filterByStatus = (token: NFTToken & Partial<Offer>) => {

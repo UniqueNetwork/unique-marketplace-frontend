@@ -14,13 +14,17 @@ interface InlineTokenCardProps {
 export const InlineTokenCard: FC<InlineTokenCardProps> = ({ tokenId, collectionId, children }) => {
   const { api } = useApi();
   const [token, setToken] = useState<NFTToken>();
+  const [prefix, setPrefix] = useState<string>();
+
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (!api?.nft) return;
     (async () => {
       setIsLoading(true);
-      setToken((await api?.nft?.getToken(collectionId, tokenId)) || undefined);
+      setToken((await api.nft?.getToken(collectionId, tokenId)) || undefined);
+      const { prefix } = await api.collection?.getCollection(collectionId) || { tokenPrefix: '' };
+      setPrefix(prefix);
       setIsLoading(false);
     })();
   }, [tokenId, collectionId, api?.nft]);
@@ -29,7 +33,7 @@ export const InlineTokenCard: FC<InlineTokenCardProps> = ({ tokenId, collectionI
     <InlineTokenCardWrapper>
       <Avatar src={token?.imageUrl || ''} size={64} type={'square'} />
       {token && <TokenInfoWrapper>
-        <Text size={'s'} color={'grey-500'}>{`${token?.prefix} #${token?.id}`}</Text>
+        <Text size={'s'} color={'grey-500'}>{`${prefix} #${token?.id}`}</Text>
         {children}
       </TokenInfoWrapper>}
       {isLoading && <Loader isFullPage />}

@@ -31,7 +31,7 @@ export class UniqueSDKCollectionController {
 
     return {
       id: collectionId,
-      tokenPrefix,
+      prefix: tokenPrefix,
       coverImageUrl,
       collectionName: name,
       description,

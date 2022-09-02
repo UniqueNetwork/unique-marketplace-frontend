@@ -39,7 +39,7 @@ export interface NFTCollectionSponsorship {
 
 export interface NFTCollection {
   id: number
-  tokenPrefix: string
+  prefix?: string
   coverImageUrl?: string
   collectionName?: string
   description?: string
@@ -59,10 +59,10 @@ export interface NFTToken {
   attributes?: DecodedAttributes
   imageUrl?: DecodedInfixOrUrlOrCidAndHash | string
   collectionId?: number
-  collectionName?: string
-  prefix?: string
-  description?: string
-  collectionCover?: string
+  // collectionName?: string
+  // prefix?: string
+  // description?: string
+  // collectionCover?: string
   isAllowed?: boolean
   video: VideoAttribute
 }

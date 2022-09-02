@@ -50,7 +50,7 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
     const collectionData = await api.collection.getCollection(Number(collection));
 
     setCollectionItems([
-      ...(collectionData && collectionData.tokenPrefix ? [collectionData] : []),
+      ...(collectionData && collectionData.prefix ? [collectionData] : []),
       ...collections.filter(({ id, status }) => status === 'Disabled' && id.toString().includes(collection) && id !== collectionData?.id)
     ]);
   }, [api, collections]);

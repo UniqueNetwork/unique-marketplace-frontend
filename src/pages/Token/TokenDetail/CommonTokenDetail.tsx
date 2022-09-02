@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { Picture } from 'components';
 import { CollectionsCard } from './CollectionsCard';
 import { AttributesBlock } from './AttributesBlock';
-import { NFTToken } from 'api/uniqueSdk/types';
+import { NFTCollection, NFTToken } from 'api/uniqueSdk/types';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { shortcutText } from 'utils/textUtils';
 import { Grey300, Grey500, Primary600 } from 'styles/colors';
@@ -23,6 +23,7 @@ import ShareTokenModal from './ShareTokenModal';
 interface IProps {
   children: ReactChild[]
   token?: NFTToken
+  collection?: NFTCollection
   offer?: Offer
   isLoading?: boolean
   testid: string
@@ -31,6 +32,7 @@ interface IProps {
 export const CommonTokenDetail: FC<IProps> = ({
   children,
   token,
+  collection,
   offer,
   isLoading,
   testid
@@ -38,7 +40,7 @@ export const CommonTokenDetail: FC<IProps> = ({
   const {
     collectionId,
     collectionName,
-    collectionCover,
+    coverImageUrl,
     description,
     attributes,
     imageUrl,
@@ -56,16 +58,17 @@ export const CommonTokenDetail: FC<IProps> = ({
         imageUrl: image,
         attributes,
         description,
-        collectionCover,
+        coverImageUrl: collectionCover,
         video: offer.tokenDescription.video
       };
     }
 
     return {
+      ...collection,
       ...token,
       tokenId: token?.id
     };
-  }, [token, offer]);
+  }, [token, collection, offer]);
 
   const { selectedAccount } = useAccounts();
   const deviceSize = useDeviceSize();
@@ -148,7 +151,7 @@ export const CommonTokenDetail: FC<IProps> = ({
           {attributes && <AttributesBlock attributes={attributes} />}
           <Divider />
           <CollectionsCard
-            avatarSrc={collectionCover || ''}
+            avatarSrc={coverImageUrl || ''}
             description={description || ''}
             id={collectionId || -1}
             title={collectionName || ''}

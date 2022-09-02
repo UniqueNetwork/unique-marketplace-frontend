@@ -3,7 +3,7 @@ import { Icon, Loader, Text } from '@unique-nft/ui-kit';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { NFTToken } from 'api/uniqueSdk/types';
+import { NFTCollection, NFTToken } from 'api/uniqueSdk/types';
 import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
 import { Offer } from 'api/restApi/offers/types';
 import { useApi } from 'hooks/useApi';
@@ -23,7 +23,7 @@ export type TTokensCard = {
 };
 
 export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, ...props }) => {
-  const [token, setToken] = useState<(NFTToken & Partial<Offer>) | undefined>(props.token);
+  const [token, setToken] = useState<(NFTToken & NFTCollection & Partial<Offer>) | undefined>(props.token);
   const [isFetching, setIsFetching] = useState<boolean>(false);
 
   const { api } = useApi();
@@ -36,7 +36,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, ...
     price,
     auction,
     video
-  } = useMemo<Partial<Offer & NFTToken>>(() => {
+  } = useMemo<Partial<Offer & NFTToken & NFTCollection>>(() => {
     if (token?.tokenDescription) {
       const { collectionName, prefix, image } = token.tokenDescription;
       return { ...token,
@@ -51,10 +51,12 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, ...
 
     if (tokenId && collectionId) {
       setIsFetching(true);
-      void api?.nft?.getToken(collectionId, tokenId).then((token: NFTToken | null) => {
+      (async () => {
+        const token = await api?.nft?.getToken(collectionId, tokenId);
+        const collection = await api?.collection?.getCollection(collectionId);
         setIsFetching(false);
-        if (token) { setToken(token); }
-      });
+        if (token) { setToken({ ...collection, ...token }); }
+      })();
     }
     return {};
   }, [collectionId, tokenId, token, api]);

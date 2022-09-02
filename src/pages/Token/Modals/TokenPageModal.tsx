@@ -2,7 +2,7 @@ import React, { FC, useEffect, useMemo, useState } from 'react';
 import { Modal } from '@unique-nft/ui-kit';
 
 import { Offer } from 'api/restApi/offers/types';
-import { NFTToken } from 'api/uniqueSdk/types';
+import { NFTCollection, NFTToken } from 'api/uniqueSdk/types';
 import { MarketType } from '../../../types/MarketTypes';
 import { SellModal } from './SellModal';
 import { CancelSellFixStagesModal } from './CancelSellModal';
@@ -15,6 +15,7 @@ import { CancelAuctionStagesModal } from './CancelAuctionModal';
 export type TTokenPageModalProps = {
   offer?: Offer
   token?: NFTToken
+  collection?: NFTCollection
   // once button is clicked (sell/bid/etc) -> we will change marketType for modal and therefore this component decides what to show and how
   marketType: MarketType
   onClose(): void
@@ -24,13 +25,14 @@ export type TTokenPageModalProps = {
 
 export type TTokenPageModalBodyProps = {
   token?: NFTToken
+  collection?: NFTCollection
   offer?: Offer
   onFinish(): void // TODO: make a type, in future we would definitly wan't to pass smth like success/error/error.message
   setIsClosable(value: boolean): void
   testid: string
 }
 
-const TokenPageModal = ({ onClose, onFinish, marketType, offer, token, testid }: TTokenPageModalProps) => {
+const TokenPageModal = ({ onClose, onFinish, marketType, offer, token, collection, testid }: TTokenPageModalProps) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const [isClosable, setIsClosable] = useState<boolean>(true);
 
@@ -69,6 +71,7 @@ const TokenPageModal = ({ onClose, onFinish, marketType, offer, token, testid }:
       <ModalBodyComponent
         setIsClosable={setIsClosable}
         token={token}
+        collection={collection}
         offer={offer}
         onFinish={onFinish}
         testid={`${testid}-${marketType.toLowerCase().replaceAll(' ', '-')}-modal`}
