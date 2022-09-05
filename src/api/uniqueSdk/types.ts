@@ -4,6 +4,7 @@ import { RpcInterface } from '@polkadot/rpc-core/types/jsonrpc';
 import { DecodedAttributes, DecodedInfixOrUrlOrCidAndHash, OwnerAddress } from '@unique-nft/sdk/tokens';
 import { Account } from '../../account/AccountContext';
 import { SignerPayloadJSON, UnsignedTxPayload } from '@unique-nft/sdk/types';
+import { INestingToken } from '../../components/BundleTree/types';
 
 export type TokenId = {
   toNumber(): number
@@ -65,6 +66,7 @@ export interface NFTToken {
   collectionCover?: string
   isAllowed?: boolean
   video?: VideoAttribute
+  nestingChildTokens?: INestingToken[]
 }
 
 export type MetadataType = {

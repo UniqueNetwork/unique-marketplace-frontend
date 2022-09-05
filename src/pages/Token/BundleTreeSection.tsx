@@ -3,17 +3,17 @@ import { Heading, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { PagePaper } from 'components/PagePaper/PagePaper';
 import { Grey300 } from 'styles/colors';
-import NodeView from 'components/BundleTree/NodeView';
+import NodeView from 'components/BundleTree/Node/NodeView';
 import dataSource from 'components/TreeView/mockData';
-import { IData } from 'components/BundleTree/types';
+import { INestingToken } from 'components/BundleTree/types';
 import { NestedSection } from 'components/BundleTree/NestedSection/NestedSection';
 import BundleTree from 'components/TreeView/BundleTree';
 import { useNavigate } from 'react-router-dom';
 import { NFTToken } from '../../api/uniqueSdk/types';
 
-const areNodesEqual = (a: IData, b: IData) => a.collectionId === b.collectionId && a.tokenId === b.tokenId;
+const areNodesEqual = (a: INestingToken, b: INestingToken) => a.collectionId === b.collectionId && a.tokenId === b.tokenId;
 
-const getKey = (a: IData) => `T${a.tokenId}C${a.collectionId}`;
+const getKey = (a: INestingToken) => `T${a.tokenId}C${a.collectionId}`;
 
 interface IProps {
   onViewTokenDetails(token: NFTToken): void
@@ -21,13 +21,13 @@ interface IProps {
 
 function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps }: IProps) {
   const navigate = useNavigate();
-  const onNodeClicked = useCallback((data: IData) => {
+  const onNodeClicked = useCallback((data: INestingToken) => {
     console.log('onNodeClicked');
   }, []);
 
   const tokensCount = useMemo(() => {
     let count = 1;
-    const countChildren = (nodeChildren: IData[]) => {
+    const countChildren = (nodeChildren: INestingToken[]) => {
       if (nodeChildren.length === 0) return count;
       else {
         count += nodeChildren.length;
@@ -39,7 +39,7 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps }: IPro
     return count;
   }, []);
 
-  const onViewTokenDetails = useCallback((token: IData) => {
+  const onViewTokenDetails = useCallback((token: INestingToken) => {
     navigate(`/token/${token.collectionId}/${token.tokenId}`);
     onViewTokenDetailsProps({
       ...token,
@@ -56,7 +56,7 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps }: IPro
         <Text color='grey-500' size='m'>{tokensCount} items total</Text>
       </HeaderStyled>
       <Content>
-        <BundleTree<IData>
+        <BundleTree<INestingToken>
           // @ts-ignore
           dataSource={[dataSource]}
           nodeView={NodeView}

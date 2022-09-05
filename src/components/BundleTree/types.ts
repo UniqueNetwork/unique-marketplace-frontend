@@ -1,10 +1,10 @@
 import { DecodedAttributes, DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/sdk/tokens';
 
-export interface IData {
+export interface INestingToken {
   tokenId: number
   collectionId: number
   owner: string
-  nestingChildTokens: IData[]
+  nestingChildTokens: INestingToken[]
   attributes: DecodedAttributes
   image: DecodedInfixOrUrlOrCidAndHash
   opened?: boolean
@@ -13,10 +13,10 @@ export interface IData {
 }
 
 // export interface INestedSection {
-//   selectedToken: IData | null
+//   selectedToken: INestingToken | null
 // }
 
 export interface ITokenCard {
-  token: IData
-  onViewNodeDetails?: (token: IData) => void
+  token: INestingToken
+  onViewNodeDetails?: (token: INestingToken) => void
 }
