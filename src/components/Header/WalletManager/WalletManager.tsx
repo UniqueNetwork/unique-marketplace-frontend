@@ -55,12 +55,6 @@ export const WalletManager: FC = () => {
     });
   }, [formatAddress, info]);
 
-  useEffect(() => {
-    (async () => {
-      await fetchAccounts();
-    })();
-  }, [fetchAccounts]);
-
   const onCreateAccountClick = useCallback(() => {
     navigate('/accounts');
     setIsOpen(false);
