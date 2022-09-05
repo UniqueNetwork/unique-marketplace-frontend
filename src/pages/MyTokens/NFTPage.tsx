@@ -106,7 +106,7 @@ export const NFTPage = () => {
     setIsFetchingTokens(true);
     void (async () => {
       await fetch({ page: 1, pageSize, seller: selectedAccount?.address });
-      const _tokens = await api.nft?.getAccountMarketableTokens(selectedAccount.address) as NFTToken[];
+      const _tokens = (await api.nft?.getAccountMarketableTokens(selectedAccount.address)) || [];
 
       setTokens(await Promise.all(_tokens.map(async (token) => ({
         ...(await api.collection?.getCollection(token.collectionId!) || { prefix: '', collectionName: '' }),
@@ -200,8 +200,8 @@ export const NFTPage = () => {
     return [
       ...(offers?.map<NFTToken & Partial<Offer>>((offer) => ({
         id: offer.tokenId,
-        collectionName: offer.tokenDescription?.collectionName || '',
-        prefix: offer.tokenDescription?.prefix || '',
+        collectionName: offer.collectionDescription?.collectionName || '',
+        prefix: offer.collectionDescription?.prefix || '',
         imageUrl: offer.tokenDescription?.image || '',
         attributes: offer.tokenDescription?.attributes,
         video: typeof offer.tokenDescription.video === 'string' ? { fullUrl: offer.tokenDescription.video, ipfsCid: '' } : offer.tokenDescription.video,

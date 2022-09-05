@@ -21,11 +21,14 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
   const { selectedAccount } = useAccounts();
 
   const {
-    collectionName,
     image,
-    prefix,
     video
   } = offer?.tokenDescription || {};
+
+  const {
+    collectionName,
+    prefix
+  } = offer?.collectionDescription || {};
 
   const videoProp = useMemo(() => typeof video === 'string' ? { fullUrl: video, ipfsCid: '' } : video, [video]);
 

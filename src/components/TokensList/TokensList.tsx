@@ -21,7 +21,7 @@ export const TokensList: FC<TTokensList> = ({ tokens, isLoading, testid }) => {
             key={`token-${token?.collectionId || ''}-${token?.id}`}
             tokenId={token?.id}
             collectionId={token?.collectionId}
-            token={token}
+            {...('seller' in token ? { offer: token } : { token })}
             testid={`${testid}-card`}
           />
         ))}

@@ -15,15 +15,17 @@ import config from '../../config';
 import { TokensMedia } from './TokensMedia';
 
 export type TTokensCard = {
-  token?: NFTToken & Partial<Offer>
+  token?: NFTToken
+  offer?: Partial<Offer>
   tokenId?: number
   collectionId?: number
   tokenImageUrl?: string
   testid: string
 };
 
-export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, ...props }) => {
-  const [token, setToken] = useState<(NFTToken & NFTCollection & Partial<Offer>) | undefined>(props.token);
+export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, testid, ...props }) => {
+  const [token, setToken] = useState<NFTToken | undefined>(props.token);
+  const [collection, setCollection] = useState<(NFTCollection) | undefined>();
   const [isFetching, setIsFetching] = useState<boolean>(false);
 
   const { api } = useApi();
@@ -37,16 +39,23 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, ...
     auction,
     video
   } = useMemo<Partial<Offer & NFTToken & NFTCollection>>(() => {
-    if (token?.tokenDescription) {
-      const { collectionName, prefix, image } = token.tokenDescription;
-      return { ...token,
+    if (offer) {
+      const { image } = offer?.tokenDescription || {};
+      const { collectionName, prefix } = offer?.collectionDescription || {};
+      return {
+        ...offer,
         collectionName,
         prefix,
-        imageUrl: image };
+        imageUrl: image
+      };
     }
 
-    if (token) {
-      return token;
+    if (token && collection) {
+      return {
+        ...token,
+        prefix: collection.prefix,
+        collectionName: collection.collectionName
+      };
     }
 
     if (tokenId && collectionId) {
@@ -55,11 +64,16 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, ...
         const token = await api?.nft?.getToken(collectionId, tokenId);
         const collection = await api?.collection?.getCollection(collectionId);
         setIsFetching(false);
-        if (token) { setToken({ ...collection, ...token }); }
+        if (token) {
+          setToken(token);
+        }
+        if (collection) {
+          setCollection(collection);
+        }
       })();
     }
     return {};
-  }, [collectionId, tokenId, token, api]);
+  }, [collectionId, tokenId, collection, token, api]);
 
   const isBidder = useMemo(() => {
     if (!selectedAccount) return false;
