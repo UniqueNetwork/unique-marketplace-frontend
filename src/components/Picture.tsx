@@ -3,7 +3,7 @@ import { BlueGrey100 } from '../styles/colors';
 import Skeleton from './Skeleton/Skeleton';
 import { VideoAttribute } from '../api/uniqueSdk/types';
 import styled from 'styled-components';
-import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/sdk/tokens';
+import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
 
 interface VideoProps {
   autoplay?: boolean
@@ -67,12 +67,21 @@ export const Picture: FC<PictureProps> = ({
     }
   }, [isPlaying]);
 
+  const videoUrl = useMemo(() => {
+    if (!video) return undefined;
+    const url = video.fullUrl || video.url;
+    // if video doesn't have poster, we rewind video to 0.001 sec
+    // because iphone doesn't render first frame as a poster https://developer.apple.com/forums/thread/129377
+    if (!imageSrc) return `${url}#t=0.001`;
+    else return url;
+  }, [video, imageSrc]);
+
   return (<div className={'picture'}>
     {isLoading && <Skeleton width={'100%'} height={'100%'} />}
     {!isLoading && video &&
       <VideoStyled
         ref={videoRef}
-        src={video.fullUrl || video.url}
+        src={videoUrl}
         poster={imageSrc || undefined}
         controls={controls}
         autoPlay={autoplay}

@@ -1,5 +1,6 @@
-import { Sdk } from '@unique-nft/sdk';
-import { TokenIdArguments, UniqueTokenDecoded } from '@unique-nft/sdk/tokens';
+import { Sdk } from '@unique-nft/substrate-client';
+import { TokenIdArguments, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
+import { isEthereumAddress } from '@unique-nft/substrate-client/utils';
 import { BN } from '@polkadot/util';
 import { CrossAccountId, EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType, TransactionOptions, TSignMessage, UniqueDecoratedRpc } from './types';
 import marketplaceAbi from './abi/marketPlaceAbi.json';
@@ -8,8 +9,8 @@ import { collectionIdToAddress, getEthAccount, compareEncodedAddresses, isTokenO
 import { formatKsm, fromStringToBnString } from './utils/textFormat';
 import { repeatCheckForTransactionFinish } from './utils/repeatCheckTransaction';
 import { Settings } from '../restApi/settings/types';
-import '@unique-nft/sdk/balance';
-import { AllBalances } from '@unique-nft/sdk/types';
+import '@unique-nft/substrate-client/balance';
+import { AllBalances } from '@unique-nft/substrate-client/types';
 import Web3 from 'web3';
 
 export class UniqueSDKMarketController {
@@ -246,7 +247,7 @@ export class UniqueSDKMarketController {
 
     const token = await this.uniqueSdk.tokens.get_new(tokenIdArguments);
     if (!token) throw new Error('Token not found');
-    if (isTokenOwner(ethAddress, token.owner)) return;
+    if (isTokenOwner(ethAddress, normalizeAccountId(token.owner))) return;
 
     const unsignedTxPayload = await this.uniqueSdk.extrinsics.build({
       section: 'unique',
@@ -267,7 +268,7 @@ export class UniqueSDKMarketController {
   }
 
   // ???
-  private async checkIfNftApproved (tokenOwner: CrossAccountId, collectionId: string, tokenId: string): Promise<boolean> {
+  private async checkIfNftApproved (tokenOwner: string, collectionId: string, tokenId: string): Promise<boolean> {
     const { unique } = (this.uniqueSdk?.api.rpc as UniqueDecoratedRpc);
     const approvedCount = (await unique?.allowance(collectionId, normalizeAccountId(tokenOwner), normalizeAccountId({ Ethereum: this.contractAddress }), tokenId))?.toJSON();
 
@@ -306,6 +307,7 @@ export class UniqueSDKMarketController {
         []
       ]
     });
+
     const signature = await options.sign?.(unsignedTxPayload);
 
     if (!signature) throw new Error('Signing failed');
@@ -417,9 +419,10 @@ export class UniqueSDKMarketController {
     const token = await this.uniqueSdk.tokens.get_new(tokenIdArguments);
     if (!token) throw new Error('Token not found');
 
-    if (!isTokenOwner(from, token.owner)) throw new Error('You are not owner of this token');
+    if (!isTokenOwner(from, normalizeAccountId(token.owner))) throw new Error('You are not owner of this token');
 
     const unsignedTxPayload = await this.uniqueSdk.tokens.transfer.build({
+      address: from,
       from,
       to,
       ...tokenIdArguments
@@ -449,11 +452,11 @@ export class UniqueSDKMarketController {
       collectionId: Number(collectionId), tokenId: Number(tokenId)
     };
 
-    const token: UniqueTokenDecoded | null = await this.uniqueSdk.tokens.get_new(tokenIdArguments);
+    const token: TokenByIdResult | null = await this.uniqueSdk.tokens.get_new(tokenIdArguments);
     if (!token) throw new Error('Token for unlock not found');
-    const owner = token.owner as { Substrate: string };
+    const owner = token.owner;
 
-    if (owner && owner.Substrate && compareEncodedAddresses(owner.Substrate, address)) return;
+    if (owner && !isEthereumAddress(owner) && compareEncodedAddresses(owner, address)) return;
 
     const unsignedTxPayload = await this.uniqueSdk.extrinsics.build({
       section: 'unique',

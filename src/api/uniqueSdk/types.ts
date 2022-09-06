@@ -1,9 +1,9 @@
 import { BN } from '@polkadot/util';
 import { DecoratedRpc } from '@polkadot/api/types';
 import { RpcInterface } from '@polkadot/rpc-core/types/jsonrpc';
-import { DecodedAttributes, DecodedInfixOrUrlOrCidAndHash, OwnerAddress } from '@unique-nft/sdk/tokens';
+import { DecodedAttributes, DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
 import { Account } from '../../account/AccountContext';
-import { SignerPayloadJSON, UnsignedTxPayload } from '@unique-nft/sdk/types';
+import { SignerPayloadJSON, UnsignedTxPayload, Address } from '@unique-nft/substrate-client/types';
 import { INestingToken } from '../../components/BundleTree/types';
 
 export type TokenId = {
@@ -56,7 +56,7 @@ export type VideoAttribute = DecodedInfixOrUrlOrCidAndHash | undefined;
 
 export interface NFTToken {
   id: number
-  owner?: OwnerAddress
+  owner?: Address
   attributes?: DecodedAttributes
   imageUrl?: DecodedInfixOrUrlOrCidAndHash | string
   collectionId?: number

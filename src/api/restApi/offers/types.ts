@@ -1,6 +1,6 @@
 import { PaginatedResponse, Pagination, Sortable } from '../base/types';
 import { VideoAttribute } from '../../uniqueSdk/types';
-import { DecodedAttributes, DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/sdk/tokens';
+import { DecodedAttributes, DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
 
 export type GetOffersRequestPayload = {
   collectionId?: number | number[]

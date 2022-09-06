@@ -1,5 +1,5 @@
-import { Sdk } from '@unique-nft/sdk';
-import '@unique-nft/sdk/tokens';
+import { Sdk } from '@unique-nft/substrate-client';
+import '@unique-nft/substrate-client/tokens';
 import { TransactionOptions, NFTCollection } from './types';
 import { Settings } from '../restApi/settings/types';
 
@@ -12,7 +12,8 @@ export class UniqueSDKCollectionController {
   }
 
   async confirmSponsorship(collectionId: number, options: TransactionOptions): Promise<void> {
-    const unsignedTxPayload = await this.sdk.sponsorhip.confirmSponsorship(collectionId, options.signer);
+    if (!options.signer) return;
+    const unsignedTxPayload = await this.sdk.collections.confirmSponsorship.build({ collectionId, address: options.signer });
     const signature = await options.sign?.(unsignedTxPayload);
     if (!signature) throw new Error('Signing failed');
     await this.sdk.extrinsics.submitWaitCompleted({
@@ -56,7 +57,8 @@ export class UniqueSDKCollectionController {
   }
 
   async removeCollectionSponsor(collectionId: number, options: TransactionOptions): Promise<void> {
-    const unsignedTxPayload = await this.sdk.sponsorhip.removeCollectionSponsor(collectionId, options.signer);
+    if (!options.signer) return;
+    const unsignedTxPayload = await this.sdk.collections.removeSponsorship.build({ collectionId, address: options.signer });
     const signature = await options.sign?.(unsignedTxPayload);
     if (!signature) throw new Error('Signing failed');
     await this.sdk.extrinsics.submitWaitCompleted({
