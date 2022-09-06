@@ -46,6 +46,7 @@ export class UniqueSDKNFTController {
     const token = await this.sdk.tokens.get_new({ collectionId, tokenId });
     const collection = await this.sdk.collections.get_new({ collectionId });
     if (!token || !collection) return null;
+    const isBundle = !!await this.sdk.tokens.isBundle({ collectionId, tokenId });
 
     const { owner, attributes, image, video } = token;
     const { name, tokenPrefix, description, schema } = collection;
@@ -66,7 +67,8 @@ export class UniqueSDKNFTController {
       description,
       collectionCover,
       isAllowed,
-      video
+      video,
+      isBundle
     };
   }
 }

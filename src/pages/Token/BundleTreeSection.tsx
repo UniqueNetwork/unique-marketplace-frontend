@@ -1,16 +1,17 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Heading, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { PagePaper } from 'components/PagePaper/PagePaper';
 import { Grey300 } from 'styles/colors';
 import NodeView from 'components/BundleTree/Node/NodeView';
-import dataSource from 'components/TreeView/mockData';
 import { INestingToken } from 'components/BundleTree/types';
 import { NestedSection } from 'components/BundleTree/NestedSection/NestedSection';
 import BundleTree from 'components/TreeView/BundleTree';
 import { useNavigate } from 'react-router-dom';
-import { NFTToken } from '../../api/uniqueSdk/types';
+import { NFTToken } from 'api/uniqueSdk/types';
 import MobileBundleTreeSection from './MobileBundleTreeSection';
+import { useApi } from 'hooks/useApi';
+import Skeleton from '../../components/Skeleton/Skeleton';
 
 const areNodesEqual = (a: INestingToken, b: INestingToken) => a.collectionId === b.collectionId && a.tokenId === b.tokenId;
 
@@ -18,11 +19,24 @@ const getKey = (a: INestingToken) => `T${a.tokenId}C${a.collectionId}`;
 
 interface IProps {
   onViewTokenDetails(token: NFTToken): void
+  token: NFTToken
 }
 
-function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps }: IProps) {
+function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token }: IProps) {
   const navigate = useNavigate();
+  const { uniqueSdk } = useApi();
   const [isMobileViewVisible, setIsMobileViewVisible] = useState(false);
+  const [bundle, setBundle] = useState<INestingToken[]>();
+  const [isBundleLoading, setIsBundleLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      setIsBundleLoading(true);
+      const response = await uniqueSdk?.tokens.getBundle({ collectionId: token.collectionId, tokenId: token.id });
+      if (response) setBundle([response]);
+      setIsBundleLoading(false);
+    })();
+  }, [uniqueSdk, token]);
 
   const closeView = useCallback(() => {
     setIsMobileViewVisible(false);
@@ -37,6 +51,7 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps }: IPro
   }, []);
 
   const tokensCount = useMemo(() => {
+    if (!bundle || !bundle[0]?.nestingChildTokens) return 0;
     let count = 1;
     const countChildren = (tokenChildren: INestingToken[]) => {
       if (tokenChildren.length === 0) return count;
@@ -45,20 +60,22 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps }: IPro
         tokenChildren.forEach((child) => countChildren(child.nestingChildTokens || []));
       }
     };
-    // @ts-ignore
-    countChildren(dataSource.nestingChildTokens || []);
+    countChildren(bundle[0].nestingChildTokens || []);
     return count;
-  }, []);
+  }, [bundle]);
 
   const onViewTokenDetails = useCallback((token: INestingToken) => {
     navigate(`/token/${token.collectionId}/${token.tokenId}`);
     onViewTokenDetailsProps({
       ...token,
       id: token.tokenId,
-      imageUrl: token.image
+      imageUrl: token.image,
+      isBundle: true
     });
     if (isMobileViewVisible) closeView();
   }, [onViewTokenDetailsProps, isMobileViewVisible, closeView]);
+
+  if (isBundleLoading) return (<BundleIsLoading/>);
 
   return (
     <>
@@ -68,8 +85,7 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps }: IPro
         openView={openView}
         bundleTreeComponent={
           <BundleTree<INestingToken>
-            // @ts-ignore
-            dataSource={[dataSource]}
+            dataSource={bundle || []}
             nodeView={NodeView}
             onNodeClicked={onNodeClicked}
             nestedSectionView={NestedSection}
@@ -88,8 +104,7 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps }: IPro
         </HeaderStyled>
         <Content>
           <BundleTree<INestingToken>
-            // @ts-ignore
-            dataSource={[dataSource]}
+            dataSource={bundle || []}
             nodeView={NodeView}
             onNodeClicked={onNodeClicked}
             nestedSectionView={NestedSection}
@@ -132,3 +147,12 @@ const Content = styled.div`
 `;
 
 export default BundleTreeSection;
+
+const BundleIsLoading = () => (
+  <BundlePagePaper>
+    <HeaderStyled>
+      <Heading size={'2'}>Bundle tree structure</Heading>
+    </HeaderStyled>
+    <Skeleton height={58} width={'100%'} />
+  </BundlePagePaper>
+);

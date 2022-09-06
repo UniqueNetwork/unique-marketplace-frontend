@@ -130,7 +130,7 @@ const TokenPage = () => {
           />
         </CommonTokenDetail>
       </TokenPagePaper>
-      <BundleTreeSection onViewTokenDetails={setToken} />
+      {token?.isBundle && <BundleTreeSection onViewTokenDetails={setToken} token={token} />}
     </>
   );
 };

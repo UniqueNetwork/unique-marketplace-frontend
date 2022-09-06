@@ -59,7 +59,7 @@ export interface NFTToken {
   owner?: Address
   attributes?: DecodedAttributes
   imageUrl?: DecodedInfixOrUrlOrCidAndHash | string
-  collectionId?: number
+  collectionId: number
   collectionName?: string
   prefix?: string
   description?: string
@@ -67,6 +67,7 @@ export interface NFTToken {
   isAllowed?: boolean
   video?: VideoAttribute
   nestingChildTokens?: INestingToken[]
+  isBundle: boolean
 }
 
 export type MetadataType = {

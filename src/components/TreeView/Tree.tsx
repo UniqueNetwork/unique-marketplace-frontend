@@ -1,10 +1,14 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { INode, INodeContainer, ITree } from './types';
 import { Node } from './Node';
 
 const level = 1;
 export function Tree<T extends INode>({ dataSource, nodeView, onNodeClicked, className, compareNodes, childrenProperty, getKey, onViewNodeDetails }: ITree<T>) {
   const [dataSourceState, setDataSourceState] = useState(dataSource);
+
+  useEffect(() => {
+    setDataSourceState(dataSource);
+  }, [dataSource]);
 
   const nodeClickHandler = useCallback((data: T) => {
     const selectNode = (node: any) => {
@@ -21,7 +25,7 @@ export function Tree<T extends INode>({ dataSource, nodeView, onNodeClicked, cla
     setDataSourceState([selectNode(newDataSourceState[0])]);
 
     if (onNodeClicked) onNodeClicked(data);
-  }, [onNodeClicked]);
+  }, [onNodeClicked, dataSourceState]);
 
   return (
     <div className={className || ''}>
