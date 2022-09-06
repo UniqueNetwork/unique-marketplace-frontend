@@ -136,6 +136,7 @@ const ViewContainer = styled.div<{ isFirst: boolean | undefined, isSelected: boo
   justify-content: space-between;
   cursor: pointer;
   border: 1px solid transparent;
+  min-width: 524px;
   hr {
     position: absolute;
     border-top: 1px dashed var(--color-grey-300);

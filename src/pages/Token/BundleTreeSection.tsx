@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Heading, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { PagePaper } from 'components/PagePaper/PagePaper';
@@ -10,6 +10,7 @@ import { NestedSection } from 'components/BundleTree/NestedSection/NestedSection
 import BundleTree from 'components/TreeView/BundleTree';
 import { useNavigate } from 'react-router-dom';
 import { NFTToken } from '../../api/uniqueSdk/types';
+import MobileBundleTreeSection from './MobileBundleTreeSection';
 
 const areNodesEqual = (a: INestingToken, b: INestingToken) => a.collectionId === b.collectionId && a.tokenId === b.tokenId;
 
@@ -21,17 +22,27 @@ interface IProps {
 
 function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps }: IProps) {
   const navigate = useNavigate();
+  const [isMobileViewVisible, setIsMobileViewVisible] = useState(false);
+
+  const closeView = useCallback(() => {
+    setIsMobileViewVisible(false);
+  }, []);
+
+  const openView = useCallback(() => {
+    setIsMobileViewVisible(true);
+  }, []);
+
   const onNodeClicked = useCallback((data: INestingToken) => {
     console.log('onNodeClicked');
   }, []);
 
   const tokensCount = useMemo(() => {
     let count = 1;
-    const countChildren = (nodeChildren: INestingToken[]) => {
-      if (nodeChildren.length === 0) return count;
+    const countChildren = (tokenChildren: INestingToken[]) => {
+      if (tokenChildren.length === 0) return count;
       else {
-        count += nodeChildren.length;
-        nodeChildren.forEach((child) => countChildren(child.nestingChildTokens || []));
+        count += tokenChildren.length;
+        tokenChildren.forEach((child) => countChildren(child.nestingChildTokens || []));
       }
     };
     // @ts-ignore
@@ -44,41 +55,66 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps }: IPro
     onViewTokenDetailsProps({
       ...token,
       id: token.tokenId,
-      imageUrl: token.image,
-      owner: { Substrate: token.owner }
+      imageUrl: token.image
     });
-  }, [onViewTokenDetailsProps]);
+    if (isMobileViewVisible) closeView();
+  }, [onViewTokenDetailsProps, isMobileViewVisible, closeView]);
 
   return (
-    <BundlePagePaper>
-      <HeaderStyled>
-        <Heading size={'2'}>Bundle tree structure</Heading>
-        <Text color='grey-500' size='m'>{tokensCount} items total</Text>
-      </HeaderStyled>
-      <Content>
-        <BundleTree<INestingToken>
-          // @ts-ignore
-          dataSource={[dataSource]}
-          nodeView={NodeView}
-          onNodeClicked={onNodeClicked}
-          nestedSectionView={NestedSection}
-          className={'tree-container'}
-          compareNodes={areNodesEqual}
-          childrenProperty={'nestingChildTokens'}
-          getKey={getKey}
-          onViewNodeDetails={onViewTokenDetails}
-        />
-      </Content>
-    </BundlePagePaper>
+    <>
+      <MobileBundleTreeSection
+        isVisible={isMobileViewVisible}
+        closeView={closeView}
+        openView={openView}
+        bundleTreeComponent={
+          <BundleTree<INestingToken>
+            // @ts-ignore
+            dataSource={[dataSource]}
+            nodeView={NodeView}
+            onNodeClicked={onNodeClicked}
+            nestedSectionView={NestedSection}
+            className={'tree-container'}
+            compareNodes={areNodesEqual}
+            childrenProperty={'nestingChildTokens'}
+            getKey={getKey}
+            onViewNodeDetails={onViewTokenDetails}
+          />
+        }
+      />
+      <BundlePagePaper>
+        <HeaderStyled>
+          <Heading size={'2'}>Bundle tree structure</Heading>
+          <Text color='grey-500' size='m'>{tokensCount} items total</Text>
+        </HeaderStyled>
+        <Content>
+          <BundleTree<INestingToken>
+            // @ts-ignore
+            dataSource={[dataSource]}
+            nodeView={NodeView}
+            onNodeClicked={onNodeClicked}
+            nestedSectionView={NestedSection}
+            className={'tree-container'}
+            compareNodes={areNodesEqual}
+            childrenProperty={'nestingChildTokens'}
+            getKey={getKey}
+            onViewNodeDetails={onViewTokenDetails}
+          />
+        </Content>
+      </BundlePagePaper>
+    </>
   );
 }
 
 const BundlePagePaper = styled(PagePaper)`
+  display: block;
   .tree-container {
     width: 536px;
     @media (max-width: 768px) {
       width: 100%;
     }
+  }
+  @media (max-width: 567px) {
+    display: none;
   }
 `;
 

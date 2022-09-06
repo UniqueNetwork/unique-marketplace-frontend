@@ -46,7 +46,7 @@ export const PageLayout: FC = () => {
   }, [pathname]);
 
   return (
-    <BgLayoutStyled backgroundImage={backgroundImage} hasFooterSpacing={pathname === '/market' || pathname === '/myTokens'}>
+    <BgLayoutStyled backgroundImage={backgroundImage} hasFooterSpacing={pathname === '/market' || pathname === '/myTokens' || pathname.includes('/token')}>
       <Layout
         {...layoutProps}
         footer={<div dangerouslySetInnerHTML={{ __html: footer }} />}
