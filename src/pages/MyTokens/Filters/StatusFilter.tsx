@@ -94,46 +94,6 @@ const StatusFilter: FC<StatusFilterProps> = ({ value, onChange, testid }) => {
       </Accordion>}
     </>
   );
-
-  // return (
-  //   <Accordion title={'Status'}
-  //     isOpen={true}
-  //     onClear={onClear}
-  //     isClearShow={onSell || fixedPrice || timedAuction || notOnSale}
-  //     testid={`${testid}-accordion`}
-  //   >
-  //     <StatusFilterWrapper>
-  //       <Checkbox
-  //         checked={!!onSell}
-  //         label={'My NFTs on sale'}
-  //         size={'m'}
-  //         onChange={onMyNFTsOnSellChange}
-  //         testid={`${testid}-myNft-checkbox`}
-  //       />
-  //       <Checkbox
-  //         checked={!!fixedPrice}
-  //         label={'Fixed price'}
-  //         size={'m'}
-  //         onChange={onFixedPriceChange}
-  //         testid={`${testid}-fixedPrice-checkbox`}
-  //       />
-  //       <Checkbox
-  //         checked={!!timedAuction}
-  //         label={'Timed auction'}
-  //         size={'m'}
-  //         onChange={onTimedAuctionChange}
-  //         testid={`${testid}-timedAuction-checkbox`}
-  //       />
-  //       <Checkbox
-  //         checked={!!notOnSale}
-  //         label={'Not on sale'}
-  //         size={'m'}
-  //         onChange={onNotOnSaleChange}
-  //         testid={`${testid}-notOnSale-checkbox`}
-  //       />
-  //     </StatusFilterWrapper>
-  //   </Accordion>
-  // );
 };
 
 const StatusFilterWrapper = styled.div`
