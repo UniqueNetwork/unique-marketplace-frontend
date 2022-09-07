@@ -114,6 +114,7 @@ export const CommonTokenDetail: FC<IProps> = ({
             src={imageUrl}
             video={videoProp}
             testid={`${testid}-token-picture`}
+            badge={(!token?.isBundle && deviceSize > DeviceSize.md) ? 'Bundle' : ''}
           />
         }
       </PictureWrapper>

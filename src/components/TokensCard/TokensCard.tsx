@@ -20,9 +20,10 @@ export type TTokensCard = {
   collectionId?: number
   tokenImageUrl?: string
   testid: string
+  badge?: string
 };
 
-export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, ...props }) => {
+export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, badge, ...props }) => {
   const [token, setToken] = useState<(NFTToken & Partial<Offer>) | undefined>(props.token);
   const [isFetching, setIsFetching] = useState<boolean>(false);
 
@@ -82,6 +83,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, ...
         imageUrl={imageUrl}
         video={video}
         testid={`${testid}-token-media`}
+        badge={badge}
       />
       <Description>
         <Link to={`/token/${collectionId}/${tokenId}`} title={`${prefix || ''} #${tokenId}`}>

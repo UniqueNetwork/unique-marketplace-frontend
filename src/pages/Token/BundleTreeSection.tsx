@@ -75,7 +75,7 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token 
     if (isMobileViewVisible) closeView();
   }, [onViewTokenDetailsProps, isMobileViewVisible, closeView]);
 
-  if (isBundleLoading) return (<BundleIsLoading/>);
+  if (isBundleLoading) return (<BundleIsLoading />);
 
   return (
     <>

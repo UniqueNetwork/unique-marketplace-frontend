@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
-import { BlueGrey100 } from '../styles/colors';
+import { AdditionalDark, AdditionalLight, BlueGrey100, BlueGrey200 } from '../styles/colors';
 import Skeleton from './Skeleton/Skeleton';
 import { VideoAttribute } from '../api/uniqueSdk/types';
 import styled from 'styled-components';
@@ -20,6 +20,7 @@ interface PictureProps {
   video?: VideoAttribute
   videoProps?: VideoProps
   isPlaying?: boolean
+  badge?: string
 }
 
 export const Picture: FC<PictureProps> = ({
@@ -29,7 +30,8 @@ export const Picture: FC<PictureProps> = ({
   testid = '',
   video,
   videoProps,
-  isPlaying
+  isPlaying,
+  badge
 }) => {
   const [imageSrc, setImageSrc] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -78,6 +80,7 @@ export const Picture: FC<PictureProps> = ({
 
   return (<div className={'picture'}>
     {isLoading && <Skeleton width={'100%'} height={'100%'} />}
+    {badge && <Badge className={'badge'}>{badge}</Badge>}
     {!isLoading && video &&
       <VideoStyled
         ref={videoRef}
@@ -139,4 +142,22 @@ const VideoStyled = styled.video`
   @media (max-width: 767px) {
     height: 100%;
   }
+`;
+
+const Badge = styled.div`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 4px 8px;
+  background-color: ${AdditionalLight};
+  border: 1px solid ${BlueGrey200};
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
+  color: ${AdditionalDark};
+  z-index: 2;
 `;
