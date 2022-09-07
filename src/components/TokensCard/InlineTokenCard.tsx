@@ -31,7 +31,7 @@ export const InlineTokenCard: FC<InlineTokenCardProps> = ({ tokenId, collectionI
 
   return (
     <InlineTokenCardWrapper>
-      <Avatar src={token?.imageUrl || ''} size={64} type={'square'} />
+      <Avatar src={token?.image || ''} size={64} type={'square'} />
       {token && <TokenInfoWrapper>
         <Text size={'s'} color={'grey-500'}>{`${prefix} #${token?.id}`}</Text>
         {children}

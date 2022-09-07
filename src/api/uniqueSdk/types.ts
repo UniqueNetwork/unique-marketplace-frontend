@@ -57,7 +57,7 @@ export interface NFTToken {
   id: number
   owner?: Address
   attributes?: DecodedAttributes
-  imageUrl?: DecodedInfixOrUrlOrCidAndHash | string
+  image?: DecodedInfixOrUrlOrCidAndHash | string
   collectionId?: number
   isAllowed?: boolean
   video: VideoAttribute

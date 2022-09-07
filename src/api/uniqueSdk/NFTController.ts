@@ -43,12 +43,11 @@ export class UniqueSDKNFTController {
   }
 
   async getToken(collectionId: number, tokenId: number): Promise<NFTToken | null> {
+    console.log('getToken');
     const token = await this.sdk.tokens.get_new({ collectionId, tokenId });
     if (!token) return null;
 
     const { owner, attributes, image, video } = token;
-
-    const imageUrl = image?.fullUrl || '';
 
     const isAllowed = this.allowedTokens[collectionId] ? checkTokenIsAllowed(tokenId, this.allowedTokens[collectionId].split(',')) : true;
 
@@ -56,7 +55,7 @@ export class UniqueSDKNFTController {
       id: tokenId,
       owner,
       attributes,
-      imageUrl,
+      image: image?.fullUrl || '',
       collectionId,
       isAllowed,
       video

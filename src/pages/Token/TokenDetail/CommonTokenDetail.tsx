@@ -43,7 +43,7 @@ export const CommonTokenDetail: FC<IProps> = ({
     coverImageUrl,
     description,
     attributes,
-    imageUrl,
+    image,
     tokenId,
     prefix,
     video
@@ -55,7 +55,7 @@ export const CommonTokenDetail: FC<IProps> = ({
         ...offer,
         collectionName,
         prefix,
-        imageUrl: image,
+        image,
         attributes,
         description,
         coverImageUrl: collectionCover,
@@ -114,7 +114,7 @@ export const CommonTokenDetail: FC<IProps> = ({
         {!isLoading &&
           <Picture
             alt={tokenId?.toString() || ''}
-            src={imageUrl}
+            src={image}
             video={videoProp}
             testid={`${testid}-token-picture`}
           />

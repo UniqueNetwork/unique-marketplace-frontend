@@ -43,7 +43,7 @@ export const NumberInput: FC<AmountInputProps> = ({ value, onChange, placeholder
         size={16}
         onClick={onClear}
         testid={`${testid}-clear-button`}
-    />}
+      />}
   </InputWrapper>;
 };
 

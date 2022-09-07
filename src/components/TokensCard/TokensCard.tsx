@@ -32,44 +32,40 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
   const { selectedAccount } = useAccounts();
 
   const {
-    collectionName,
+    tokenTitle,
+    collectionTitle,
     imageUrl,
-    prefix,
     price,
     auction,
     video
-  } = useMemo<Partial<Offer & NFTToken & NFTCollection>>(() => {
-    if (offer) {
-      const { image } = offer?.tokenDescription || {};
-      const { collectionName, prefix } = offer?.collectionDescription || {};
+  } = useMemo(() => {
+    if (offer || (token && collection)) {
+      const { image, video } = offer?.tokenDescription || token || {};
+      const { collectionName, prefix } = offer?.collectionDescription || collection || {};
+      const { auction, price } = offer || {};
       return {
-        ...offer,
-        collectionName,
-        prefix,
-        imageUrl: image
-      };
-    }
-
-    if (token && collection) {
-      return {
-        ...token,
-        prefix: collection.prefix,
-        collectionName: collection.collectionName
+        tokenTitle: `${prefix || ''} #${tokenId || ''}`,
+        collectionTitle: `${collectionName?.substring(0, 25) || ''} [id ${collectionId || ''}]`,
+        imageUrl: image,
+        video: typeof video === 'string' ? { fullUrl: video, ipfsCid: '' } : video,
+        auction,
+        price
       };
     }
 
     if (tokenId && collectionId) {
       setIsFetching(true);
       (async () => {
-        const token = await api?.nft?.getToken(collectionId, tokenId);
-        const collection = await api?.collection?.getCollection(collectionId);
+        if (!token) {
+          const token = await api?.nft?.getToken(collectionId, tokenId);
+          if (token) setToken(token);
+        }
+
+        if (!collection) {
+          const collection = await api?.collection?.getCollection(collectionId);
+          if (collection) setCollection(collection);
+        }
         setIsFetching(false);
-        if (token) {
-          setToken(token);
-        }
-        if (collection) {
-          setCollection(collection);
-        }
       })();
     }
     return {};
@@ -100,13 +96,13 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
         testid={`${testid}-token-media`}
       />
       <Description>
-        <Link to={`/token/${collectionId}/${tokenId}`} title={`${prefix || ''} #${tokenId}`}>
+        <Link to={`/token/${collectionId}/${tokenId}`} title={tokenTitle}>
           <Text
             size='l'
             weight='regular'
             testid={`${testid}-tokenId`}
           >
-            {`${prefix || ''} #${tokenId || ''}`}
+            {tokenTitle}
           </Text>
         </Link>
         <a
@@ -116,7 +112,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
           rel='noreferrer'
         >
           <Text color='primary-600' size='s'>
-            {`${collectionName?.substring(0, 25) || ''} [id ${collectionId || ''}]`}
+            {collectionTitle}
           </Text>
         </a>
         {price && <PriceWrapper>
