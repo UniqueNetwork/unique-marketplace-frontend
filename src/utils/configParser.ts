@@ -51,6 +51,9 @@ export const getNetworkParams = (
 
 export const getChainList = (config: Record<string, string | undefined>): Record<string, Chain> => {
   return getNetworkList(config).reduce<Record<string, Chain>>((acc, network) => {
+    const params = getNetworkParams(config, network);
+    if (!params.apiEndpoint) return acc;
+
     acc[network.toLowerCase()] = getNetworkParams(config, network);
 
     return acc;
