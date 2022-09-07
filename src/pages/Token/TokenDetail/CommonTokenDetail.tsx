@@ -47,7 +47,9 @@ export const CommonTokenDetail: FC<IProps> = ({
     video
   } = useMemo(() => {
     if (offer) {
-      const { collectionName, image, prefix, collectionCover, description } = offer.tokenDescription || {};
+      const { image, description } = offer.tokenDescription || {};
+      const { name: collectionName, tokenPrefix: prefix } = offer.collectionDescription || {};
+      const collectionCover = offer?.collectionDescription?.schema?.coverPicture.fullUrl;
       const attributes = offer.tokenDescription?.attributes;
       return {
         ...offer,

@@ -19,7 +19,7 @@ const PurchaseModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, setIsClo
   }, [selectedAccount?.address]);
 
   const { tokenId, collectionId } = offer || {};
-  const { prefix } = offer?.tokenDescription || {};
+  const { tokenPrefix: prefix } = offer?.collectionDescription || {};
 
   useEffect(() => {
     if (status === StageStatus.success) {

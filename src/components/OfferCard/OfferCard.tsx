@@ -20,12 +20,8 @@ export type TTokensCard = {
 export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
   const { selectedAccount } = useAccounts();
 
-  const {
-    collectionName,
-    image,
-    prefix,
-    video
-  } = offer?.tokenDescription || {};
+  const { image, video } = offer?.tokenDescription || {};
+  const { name: collectionName, tokenPrefix: prefix } = offer.collectionDescription || {};
 
   const videoProp = useMemo(() => typeof video === 'string' ? { fullUrl: video, ipfsCid: '' } : video, [video]);
 
@@ -116,49 +112,6 @@ const TokensCardStyled = styled.div`
   cursor: pointer;
 `;
 
-const PictureWrapper = styled(Link)`
-  position: relative;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 8px;
-
-  &::before {
-    content: "";
-    display: block;
-    padding-top: 100%;
-  }
-
-  .picture {
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    color: white;
-    text-align: center;
-    max-height: 100%;
-    border-radius: 8px;
-    transition: 50ms;
-    overflow: hidden;
-
-    img {
-      max-width: 100%;
-      max-height: 100%;
-    }
-
-    svg {
-      border-radius: 8px;
-    }
-    
-    &:hover {
-      transform: translate(0, -5px);
-      text-decoration: none;
-    }
-  }
-`;
-
 const PriceWrapper = styled.div` 
   display: flex;
   align-items: center;
@@ -184,12 +137,4 @@ const Description = styled.div`
 const AuctionInfoWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 2);
-`;
-
-const Row = styled.div` 
-  && {
-    display: flex;
-    align-items: center;
-    column-gap: calc(var(--gap) / 4);
-  }
 `;

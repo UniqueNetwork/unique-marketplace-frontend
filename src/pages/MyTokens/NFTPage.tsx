@@ -24,7 +24,7 @@ import { useCollections } from 'hooks/useCollections';
 import { MobileFilters } from './Filters/MobileFilter';
 import { Filters } from './Filters/Filters';
 import { MyTokensFilterState } from './Filters/types';
-import { countTokenAttributes, toTokenAttributes } from './Filters/utils/attributes';
+import { countTokenAttributes } from './Filters/utils/attributes';
 
 type TOption = SelectOptionProps & {
   direction: 'asc' | 'desc';
@@ -197,8 +197,8 @@ export const NFTPage = () => {
     return [
       ...(offers?.map<NFTToken & Partial<Offer>>((offer) => ({
         id: offer.tokenId,
-        collectionName: offer.tokenDescription?.collectionName || '',
-        prefix: offer.tokenDescription?.prefix || '',
+        collectionName: offer.collectionDescription?.name || '',
+        prefix: offer.collectionDescription?.tokenPrefix || '',
         imageUrl: offer.tokenDescription?.image || '',
         attributes: offer.tokenDescription?.attributes,
         video: typeof offer.tokenDescription.video === 'string' ? { fullUrl: offer.tokenDescription.video, ipfsCid: '' } : offer.tokenDescription.video,

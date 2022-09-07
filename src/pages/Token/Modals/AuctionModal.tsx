@@ -169,7 +169,7 @@ const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ offer, 
   }, [amount, accountAddress]);
 
   const { tokenId, collectionId } = offer || {};
-  const { prefix } = offer?.tokenDescription || {};
+  const { tokenPrefix: prefix } = offer?.collectionDescription || {};
 
   useEffect(() => {
     if (status === StageStatus.success) {
