@@ -10,7 +10,7 @@ interface AccountLinkProps {
 }
 
 const AccountLink: FC<AccountLinkProps> = ({ accountAddress }) => {
-  const { chainData } = useApi();
+  const { chainData, currentChainId } = useApi();
 
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
@@ -19,7 +19,7 @@ const AccountLink: FC<AccountLinkProps> = ({ accountAddress }) => {
     <a
       target={'_blank'}
       rel={'noreferrer'}
-      href={`${config.scanUrl}account/${formatAddress(accountAddress) || '404'}`}
+      href={`${config.blockchains[currentChainId || '']?.scanUrl || ''}account/${formatAddress(accountAddress) || '404'}`}
       className={'unique-link primary'}
     >{shortcutText(formatAddress(accountAddress) || '')}</a>
   );

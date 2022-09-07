@@ -117,9 +117,10 @@ export const AdminPanelPage: FC = () => {
   }, [hasAccess]);
 
   const onCreateCollectionViaWalletClick = useCallback(() => {
-    if (!config.walletUrl || !hasAccess) return;
-    window.open(config.walletUrl, '_blank')?.focus();
-  }, [config.walletUrl, hasAccess]);
+    const { walletUrl } = config.blockchains[currentChainId || ''] || {};
+    if (!walletUrl || !hasAccess) return;
+    window.open(walletUrl, '_blank')?.focus();
+  }, [hasAccess, currentChainId]);
 
   const onManageSponsorshipClick = useCallback((collection: CollectionData) => () => {
     setModalType(AdminPanelModalType.acceptSponsorship);
@@ -142,9 +143,10 @@ export const AdminPanelPage: FC = () => {
   }, []);
 
   const onViewOnScanClick = useCallback((collection: CollectionData) => () => {
-    if (!config.scanUrl) return;
-    window.open(`${config.scanUrl}collections/${collection.id}`, '_blank')?.focus();
-  }, []);
+    const { scanUrl } = config.blockchains[currentChainId || ''] || {};
+    if (!scanUrl) return;
+    window.open(`${scanUrl}collections/${collection.id}`, '_blank')?.focus();
+  }, [currentChainId]);
 
   const filteredCollections = useMemo(() => {
     if (!collections || !hasAccess) return [];

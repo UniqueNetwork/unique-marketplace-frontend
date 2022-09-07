@@ -1,6 +1,6 @@
 import React, { FC, useMemo } from 'react';
 import { Icon, Text } from '@unique-nft/ui-kit';
-import { Link } from 'react-router-dom';
+import { generatePath, Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { Offer } from 'api/restApi/offers/types';
@@ -46,17 +46,23 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
     return compareEncodedAddresses(offer?.auction!.bids[0].bidderAddress, selectedAccount.address);
   }, [isBidder, topBid, selectedAccount]);
 
+  const tokenPath = useMemo(() => generatePath('/:currentChainId/token/:collectionId/:tokenId', {
+    currentChainId,
+    collectionId: offer?.collectionId.toString(),
+    tokenId: offer?.tokenId.toString()
+  }), [currentChainId, offer]);
+
   return (
     <TokensCardStyled>
       <TokensMedia
-        to={`/${currentChainId ? `${currentChainId}/` : ''}token/${offer?.collectionId}/${offer?.tokenId}`}
+        to={tokenPath}
         tokenId={offer?.tokenId}
         imageUrl={image}
         video={videoProp}
         testid={`${testid}-token-media`}
       />
       <Description>
-        <Link to={`/${currentChainId ? `${currentChainId}/` : ''}token/${offer?.collectionId}/${offer?.tokenId}`} title={`${prefix || ''} #${offer?.tokenId}`}>
+        <Link to={tokenPath} title={`${prefix || ''} #${offer?.tokenId}`}>
           <Text
             size='l'
             weight='regular'
@@ -68,7 +74,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
         </Link>
         <a
           data-testid={`${testid}-collection-${offer?.collectionId}-link`}
-          href={`${config.scanUrl || ''}collections/${offer?.collectionId}`}
+          href={`${config.blockchains[currentChainId || ''].scanUrl || ''}collections/${offer?.collectionId}`}
           target={'_blank'}
           rel='noreferrer'
         >
