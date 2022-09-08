@@ -1,6 +1,5 @@
 import React, { FC, useContext, useMemo } from 'react';
 
-import { NFTToken } from 'api/uniqueSdk/types';
 import { Offer } from '../../../api/restApi/offers/types';
 import accountContext from '../../../account/AccountContext';
 import { SellToken } from '../SellToken/SellToken';
@@ -9,9 +8,10 @@ import Auction from '../Auction/Auction';
 import { isTokenOwner, normalizeAccountId } from 'api/uniqueSdk/utils/addressUtils';
 import { useApi } from '../../../hooks/useApi';
 import { checkAllowedTokenInSettings } from 'api/uniqueSdk/utils/checkTokenIsAllowed';
+import { TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 
 interface TokenTradingProps {
-  token?: NFTToken
+  token?: TokenByIdResult
   offer?: Offer
   onSellClick(): void
   onBuyClick(): void
@@ -29,10 +29,9 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
   const { settings } = useApi();
 
   const isAllowed = useMemo(() => {
-    if (offer) {
-      return checkAllowedTokenInSettings(offer.tokenId, offer.collectionId, settings);
-    }
-    return token?.isAllowed;
+    if (!token && !offer) return;
+    const { tokenId, collectionId } = offer || token!;
+    return checkAllowedTokenInSettings(tokenId, collectionId, settings);
   }, [settings, token, offer]);
 
   const isOwner = useMemo(() => {

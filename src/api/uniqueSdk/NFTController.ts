@@ -1,8 +1,9 @@
 import { Sdk } from '@unique-nft/substrate-client';
-import { NFTToken, UniqueDecoratedRpc } from './types';
+import { UniqueDecoratedRpc } from './types';
 import { Settings } from '../restApi/settings/types';
 import { getEthAccount, normalizeAccountId } from './utils/addressUtils';
-import { checkTokenIsAllowed, filterAllowedTokens } from './utils/checkTokenIsAllowed';
+import { filterAllowedTokens } from './utils/checkTokenIsAllowed';
+import { TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 
 export class UniqueSDKNFTController {
   private sdk: Sdk;
@@ -14,11 +15,11 @@ export class UniqueSDKNFTController {
     this.allowedTokens = settings.blockchain?.unique?.allowedTokens.reduce((acc, item) => ({ ...acc, [item.collection]: item.tokens }), {}) || {};
   }
 
-  async getAccountMarketableTokens(account: string): Promise<NFTToken[]> {
+  async getAccountMarketableTokens(account: string): Promise<TokenByIdResult[]> {
     if (!this.sdk?.api || !account) {
       return [];
     }
-    const tokens: NFTToken[] = [];
+    const tokens: TokenByIdResult[] = [];
     const { unique } = (this.sdk?.api.rpc as UniqueDecoratedRpc);
 
     for (const collectionId of this.collectionIds) {
@@ -32,7 +33,7 @@ export class UniqueSDKNFTController {
         const allowedIds = filterAllowedTokens([...tokensIds, ...tokensIdsOnEth], currentAllowedTokens);
         const tokensOfCollection = (await Promise.all(allowedIds
           .map((item) =>
-            this.getToken(collectionId, item.toNumber())))) as NFTToken[];
+            this.getToken(collectionId, item.toNumber())))) as TokenByIdResult[];
 
         tokens.push(...tokensOfCollection);
       } catch (e) {
@@ -42,31 +43,7 @@ export class UniqueSDKNFTController {
     return tokens;
   }
 
-  async getToken(collectionId: number, tokenId: number): Promise<NFTToken | null> {
-    const token = await this.sdk.tokens.get_new({ collectionId, tokenId });
-    const collection = await this.sdk.collections.get_new({ collectionId });
-    if (!token || !collection) return null;
-
-    const { owner, attributes, image, video } = token;
-    const { name, tokenPrefix, description, schema } = collection;
-
-    const imageUrl = image?.fullUrl || '';
-    const collectionCover = schema?.coverPicture?.fullUrl || '';
-
-    const isAllowed = this.allowedTokens[collectionId] ? checkTokenIsAllowed(tokenId, this.allowedTokens[collectionId].split(',')) : true;
-
-    return {
-      id: tokenId,
-      owner,
-      attributes,
-      imageUrl,
-      collectionId,
-      collectionName: name,
-      prefix: tokenPrefix,
-      description,
-      collectionCover,
-      isAllowed,
-      video
-    };
+  async getToken(collectionId: number, tokenId: number): Promise<TokenByIdResult | null> {
+    return await this.sdk.tokens.get_new({ collectionId, tokenId });
   }
 }

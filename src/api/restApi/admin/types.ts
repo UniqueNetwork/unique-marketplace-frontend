@@ -1,4 +1,4 @@
-import { NFTCollection } from 'api/uniqueSdk/types';
+import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
 
 export type LoginPayload = {
     account: string
@@ -14,7 +14,7 @@ export type SetCollectionTokensPayload = {
   tokens: string
 }
 
-export type CollectionData = NFTCollection & {
+export type CollectionData = CollectionInfoWithSchema & {
   allowedTokens?: string
   updatedAt?: string
   status?: string

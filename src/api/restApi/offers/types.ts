@@ -47,7 +47,6 @@ export type Offer = {
   creationDate: string
   auction: Auction | null
   tokenDescription: {
-    description: string
     image?: DecodedInfixOrUrlOrCidAndHash | string
     attributes: DecodedAttributes
     video?: string | VideoAttribute

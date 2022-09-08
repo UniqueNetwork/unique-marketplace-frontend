@@ -169,12 +169,12 @@ const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ offer, 
   }, [amount, accountAddress]);
 
   const { tokenId, collectionId } = offer || {};
-  const { tokenPrefix: prefix } = offer?.collectionDescription || {};
+  const { tokenPrefix } = offer?.collectionDescription || {};
 
   useEffect(() => {
     if (status === StageStatus.success) {
       info(
-        <>You made a new bid on <Link href={`/token/${collectionId || ''}/${tokenId || ''}`} title={`${prefix || ''} #${tokenId || ''}`}/></>,
+        <>You made a new bid on <Link href={`/token/${collectionId || ''}/${tokenId || ''}`} title={`${tokenPrefix || ''} #${tokenId || ''}`}/></>,
         { name: 'success', size: 32, color: 'var(--color-additional-light)' }
       );
     }

@@ -31,7 +31,7 @@ export function normalizeAccountId(
   input: string | AccountId | CrossAccountId | IKeyringPair | PalletEvmAccountBasicCrossAccountIdRepr
 ): CrossAccountId {
   if (typeof input === 'string') {
-    if (input.length === 48 || input.length === 47) {
+    if (input.length === 49 || input.length === 48 || input.length === 47) {
       return { Substrate: input };
     } else if (input.length === 42 && input.startsWith('0x')) {
       return { Ethereum: input.toLowerCase() };

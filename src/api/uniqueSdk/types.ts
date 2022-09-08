@@ -1,9 +1,9 @@
 import { BN } from '@polkadot/util';
 import { DecoratedRpc } from '@polkadot/api/types';
 import { RpcInterface } from '@polkadot/rpc-core/types/jsonrpc';
-import { DecodedAttributes, DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
+import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
 import { Account } from '../../account/AccountContext';
-import { SignerPayloadJSON, UnsignedTxPayload, Address } from '@unique-nft/substrate-client/types';
+import { SignerPayloadJSON, UnsignedTxPayload } from '@unique-nft/substrate-client/types';
 
 export type TokenId = {
   toNumber(): number
@@ -37,35 +37,11 @@ export interface NFTCollectionSponsorship {
   address?: string
 }
 
-export interface NFTCollection {
-  id: number
-  tokenPrefix: string
-  coverImageUrl?: string
-  collectionName?: string
-  description?: string
-  owner?: string
-  sponsorship?: NFTCollectionSponsorship | null
-}
-
 export type AttributesDecoded = {
   [key: string]: string | string[]
 }
 
 export type VideoAttribute = DecodedInfixOrUrlOrCidAndHash | undefined;
-
-export interface NFTToken {
-  id: number
-  owner?: Address
-  attributes?: DecodedAttributes
-  imageUrl?: DecodedInfixOrUrlOrCidAndHash | string
-  collectionId?: number
-  collectionName?: string
-  prefix?: string
-  description?: string
-  collectionCover?: string
-  isAllowed?: boolean
-  video: VideoAttribute
-}
 
 export type MetadataType = {
   metadata?: string
