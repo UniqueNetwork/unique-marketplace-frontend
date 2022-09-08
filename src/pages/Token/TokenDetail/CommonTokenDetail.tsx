@@ -13,7 +13,7 @@ import { Avatar } from 'components/Avatar/Avatar';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import config from 'config';
 import { useAccounts } from 'hooks/useAccounts';
-import { isTokenOwner, normalizeAccountId, toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
+import { isTokenOwner, toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
 import { Offer } from 'api/restApi/offers/types';
 import { useApi } from 'hooks/useApi';
 import Skeleton from 'components/Skeleton/Skeleton';
@@ -87,9 +87,9 @@ export const CommonTokenDetail: FC<IProps> = ({
   const isOwner = useMemo(() => {
     if (!selectedAccount || isLoading) return false;
     if (offer) {
-      return isTokenOwner(selectedAccount.address, { Substrate: offer.seller });
+      return isTokenOwner(selectedAccount.address, offer.seller);
     }
-    return isTokenOwner(selectedAccount.address, normalizeAccountId(token?.owner || ''));
+    return token?.owner ? isTokenOwner(selectedAccount.address, token.owner) : false;
   }, [isLoading, selectedAccount, token, offer]);
 
   const [shareModalVisible, setShareModalVisible] = useState(false);

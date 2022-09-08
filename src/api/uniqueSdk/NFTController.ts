@@ -1,8 +1,9 @@
 import { Sdk } from '@unique-nft/substrate-client';
-import { NFTToken, UniqueDecoratedRpc } from './types';
+import { NFTToken, TokenId } from './types';
 import { Settings } from '../restApi/settings/types';
-import { getEthAccount, normalizeAccountId } from './utils/addressUtils';
+import { getEthAccount } from './utils/addressUtils';
 import { checkTokenIsAllowed, filterAllowedTokens } from './utils/checkTokenIsAllowed';
+import { Address } from '@unique-nft/substrate-client/types';
 
 export class UniqueSDKNFTController {
   private sdk: Sdk;
@@ -14,25 +15,27 @@ export class UniqueSDKNFTController {
     this.allowedTokens = settings.blockchain?.unique?.allowedTokens.reduce((acc, item) => ({ ...acc, [item.collection]: item.tokens }), {}) || {};
   }
 
-  async getAccountMarketableTokens(account: string): Promise<NFTToken[]> {
-    if (!this.sdk?.api || !account) {
+  async getAccountMarketableTokens(address: Address): Promise<NFTToken[]> {
+    if (!this.sdk?.api || !address) {
       return [];
     }
     const tokens: NFTToken[] = [];
-    const { unique } = (this.sdk?.api.rpc as UniqueDecoratedRpc);
+
+    // @ts-ignore
+    const { unique } = this.sdk?.api.rpc || {};
 
     for (const collectionId of this.collectionIds) {
       try {
-        const tokensIds =
-          await unique?.accountTokens(collectionId, normalizeAccountId(account)) || [];
-        const tokensIdsOnEth =
-          await unique?.accountTokens(collectionId, normalizeAccountId(getEthAccount(account))) || [];
+        const tokensIds: TokenId[] =
+          await unique?.accountTokens(collectionId, { Substrate: address }) || [];
+        const tokensIdsOnEth: TokenId[] =
+          await unique?.accountTokens(collectionId, { Ethereum: getEthAccount(address) }) || [];
 
         const currentAllowedTokens = this.allowedTokens[collectionId];
         const allowedIds = filterAllowedTokens([...tokensIds, ...tokensIdsOnEth], currentAllowedTokens);
         const tokensOfCollection = (await Promise.all(allowedIds
-          .map((item) =>
-            this.getToken(collectionId, item.toNumber())))) as NFTToken[];
+          .map((tokenId) =>
+            this.getToken(collectionId, tokenId.toNumber())))) as NFTToken[];
 
         tokens.push(...tokensOfCollection);
       } catch (e) {
