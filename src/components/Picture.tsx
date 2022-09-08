@@ -81,7 +81,7 @@ export const Picture: FC<PictureProps> = ({
   return (<div className={'picture'}>
     {isLoading && <Skeleton width={'100%'} height={'100%'} />}
     {badge && <Badge className={'badge'}>{badge}</Badge>}
-    {!isLoading && video &&
+    {!isLoading && video?.fullUrl &&
       <VideoStyled
         ref={videoRef}
         src={videoUrl}
@@ -94,14 +94,14 @@ export const Picture: FC<PictureProps> = ({
         data-testid={`${testid}-video`}
       ></VideoStyled>
     }
-    {!isLoading && imageSrc && !video &&
+    {!isLoading && imageSrc && !video?.fullUrl &&
       <img
         alt={alt}
         src={imageSrc}
         height={size || undefined}
         data-testid={`${testid}`}
       />}
-    {!isLoading && !imageSrc && !video && <svg
+    {!isLoading && !imageSrc && !video?.fullUrl && <svg
       fill={'white'}
       height='100%'
       viewBox='0 0 1000 1000'

@@ -1,10 +1,10 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { Dropdown, Icon, Text } from '@unique-nft/ui-kit';
+import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
 import styled from 'styled-components/macro';
 
 import { CollectionData } from 'api/restApi/admin/types';
 import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
-import { NFTCollection } from 'api/uniqueSdk/types';
 import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
 import { shortcutText } from 'utils/textUtils';
@@ -31,7 +31,7 @@ export const CollectionCard: FC<TCollectionCard> = ({
   const { api } = useApi();
   const { selectedAccount } = useAccounts();
   const collectionApi = api?.collection;
-  const [collectionDetails, setCollectionDetails] = useState<NFTCollection | null>();
+  const [collectionDetails, setCollectionDetails] = useState<CollectionInfoWithSchema | null>();
   useEffect(() => {
     if (!collection?.id) return;
     (async () => {
@@ -60,7 +60,7 @@ export const CollectionCard: FC<TCollectionCard> = ({
   return (
     <CollectionCardStyled>
       <PictureWrapper>
-        <Picture alt={collection?.id?.toString() || ''} src={collection.coverImageUrl || collectionDetails?.coverImageUrl} />
+        <Picture alt={collection?.id?.toString() || ''} src={collection.schema?.coverPicture.fullUrl || collectionDetails?.schema?.coverPicture.fullUrl || ''} />
         <ActionsMenuWrapper>
           <Dropdown placement={'right'}
             dropdownRender={() => (<DropdownMenu>
@@ -84,7 +84,7 @@ export const CollectionCard: FC<TCollectionCard> = ({
       </PictureWrapper>
       <Description>
         <Text size='l' weight='regular' color={'secondary-500'}>
-          {`${collection.name || collection.collectionName || ''} [id ${collection?.id}]`}
+          {`${collection.name || ''} [id ${collection?.id}]`}
         </Text>
         <AttributesWrapper>
           <Row>

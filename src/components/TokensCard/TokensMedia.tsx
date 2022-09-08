@@ -36,7 +36,7 @@ export const TokensMedia: FC<ITokensMedia> = ({ to, imageUrl, tokenId, video, te
         isPlaying={isPlaying}
         badge={badge}
       />
-      {video &&
+      {video?.fullUrl &&
         <div className={'play-button'} onClick={togglePlay}>
           <img src={isPlaying ? pauseIcon : playIcon} alt='icon' />
         </div>

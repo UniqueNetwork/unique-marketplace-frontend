@@ -1,13 +1,13 @@
 import { FC } from 'react';
 import styled from 'styled-components';
 
-import { NFTToken } from 'api/uniqueSdk/types';
 import { Offer } from 'api/restApi/offers/types';
 import { TokensCard } from '..';
 import CardSkeleton from '../Skeleton/CardSkeleton';
+import { TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 
 type TTokensList = {
-  tokens: (NFTToken & Partial<Offer>)[]
+  tokens: (TokenByIdResult & Partial<Offer>)[]
   isLoading?: boolean
   testid: string
 };
@@ -18,10 +18,10 @@ export const TokensList: FC<TTokensList> = ({ tokens, isLoading, testid }) => {
       {(!isLoading && tokens?.map) &&
         tokens.map((token) => (
           <TokensCard
-            key={`token-${token?.collectionId || ''}-${token?.id}`}
-            tokenId={token?.id}
+            key={`token-${token?.collectionId || ''}-${token?.tokenId}`}
+            tokenId={token?.tokenId}
             collectionId={token?.collectionId}
-            token={token}
+            {...('seller' in token ? { offer: token } : { token })}
             testid={`${testid}-card`}
             badge={(token.isBundle || token.nestingChildTokens) ? 'Bundle' : ''}
           />
