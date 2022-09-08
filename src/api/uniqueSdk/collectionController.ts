@@ -15,7 +15,8 @@ export class UniqueSDKCollectionController {
   }
 
   async confirmSponsorship(collectionId: number, options: TransactionOptions): Promise<void> {
-    const unsignedTxPayload = await this.sdk.sponsorhip.confirmSponsorship(collectionId, options.signer);
+    if (!options.signer) return;
+    const unsignedTxPayload = await this.sdk.collections.confirmSponsorship.build({ collectionId, address: options.signer });
     const signature = await options.sign?.(unsignedTxPayload);
     if (!signature) throw new Error('Signing failed');
     await this.sdk.extrinsics.submitWaitCompleted({
@@ -44,7 +45,8 @@ export class UniqueSDKCollectionController {
   }
 
   async removeCollectionSponsor(collectionId: number, options: TransactionOptions): Promise<void> {
-    const unsignedTxPayload = await this.sdk.sponsorhip.removeCollectionSponsor(collectionId, options.signer);
+    if (!options.signer) return;
+    const unsignedTxPayload = await this.sdk.collections.removeSponsorship.build({ collectionId, address: options.signer });
     const signature = await options.sign?.(unsignedTxPayload);
     if (!signature) throw new Error('Signing failed');
     await this.sdk.extrinsics.submitWaitCompleted({

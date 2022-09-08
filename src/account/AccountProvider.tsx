@@ -95,7 +95,7 @@ const AccountWrapper: FC = ({ children }) => {
     // const balances = await rpcClient?.rawKusamaRpcApi?.derive.balances?.all(account.address);
     const balances = await api?.market?.getAccountBalance(account.address);
     return new BN(balances?.freeBalance?.raw || 0);
-  }, [api]);
+  }, [api?.market]);
 
   const getAccountsBalances = useCallback(async (accounts: Account[]) => Promise.all(accounts.map(async (account: Account) => ({
     ...account,
@@ -146,8 +146,7 @@ const AccountWrapper: FC = ({ children }) => {
   }, [api?.market]);
 
   const fetchAccounts = useCallback(async () => {
-    // if (!rpcClient?.isKusamaApiConnected) return;
-    if (!kusamaSdk) return;
+    if (!api?.market) return;
     setIsLoading(true);
 
     const allAccounts = await getAccounts();
@@ -173,22 +172,27 @@ const AccountWrapper: FC = ({ children }) => {
       setFetchAccountsError('No accounts in extension');
     }
     setIsLoading(false);
-  }, [kusamaSdk, getAccountsBalances, getAccountsWhiteListStatus, fetchAccountsWithDeposits]);
+  }, [api?.market, getAccountsBalances, getAccountsWhiteListStatus, fetchAccountsWithDeposits]);
 
   useEffect(() => {
     let unsubscribe: Unsubcall;
     if (web3EnablePromise) { // if polkadot extension is enabled
       const listenExtensionChanges = async () => {
         unsubscribe = await web3AccountsSubscribe(() => {
-          fetchAccounts();
+          setIsLoading((_isLoading) => {
+            if (_isLoading) return true;
+            void fetchAccounts();
+            return true;
+          });
         });
       };
 
-      listenExtensionChanges();
+      void listenExtensionChanges();
       return () => {
         unsubscribe && unsubscribe();
       };
     }
+    void fetchAccounts();
   }, [web3EnablePromise, fetchAccounts]);
 
   const value = useMemo(() => ({

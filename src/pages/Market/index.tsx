@@ -155,6 +155,7 @@ export const MarketPage = () => {
   }, [filterState, isFetching, onFilterChange]);
 
   useEffect(() => {
+    if (!selectedAccount) return;
     onChangeAccount();
   }, [selectedAccount?.address]);
 

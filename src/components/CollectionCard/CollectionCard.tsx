@@ -55,7 +55,7 @@ export const CollectionCard: FC<TCollectionCard> = ({
   }, [selectedAccount?.address, collectionDetails?.sponsorship?.isConfirmed, collectionDetails?.sponsorship?.address, collection?.owner]);
 
   const hasSponsorship = useMemo(() => collectionDetails?.sponsorship && collectionDetails?.sponsorship?.isConfirmed, [collectionDetails]);
-  const hasUnconfirmedSponsorship = useMemo(() => !collectionDetails?.sponsorship?.isConfirmed, [collectionDetails]);
+  const hasUnconfirmedSponsorship = useMemo(() => collectionDetails?.sponsorship && !collectionDetails?.sponsorship?.isConfirmed, [collectionDetails]);
 
   return (
     <CollectionCardStyled>
