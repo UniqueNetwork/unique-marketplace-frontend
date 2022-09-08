@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Icon, Link, useNotifications } from '@unique-nft/ui-kit';
+import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 
 import { useApi } from '../../hooks/useApi';
-import { NFTCollection, NFTToken } from 'api/uniqueSdk/types';
 import { MarketType } from '../../types/MarketTypes';
 import { CommonTokenDetail } from './TokenDetail/CommonTokenDetail';
 import { useOffer } from 'api/restApi/offers/offer';
@@ -23,8 +23,8 @@ const TokenPage = () => {
   const { api } = useApi();
   const { selectedAccount } = useAccounts();
   const { id, collectionId } = useParams<{ id: string, collectionId: string}>();
-  const [token, setToken] = useState<NFTToken>();
-  const [collection, setCollection] = useState<NFTCollection>();
+  const [token, setToken] = useState<TokenByIdResult>();
+  const [collection, setCollection] = useState<CollectionInfoWithSchema>();
   const [isFetchingToken, setIsFetchingToken] = useState<boolean>(true);
   const { offer, fetch: fetchOffer, isFetching: isFetchingOffer } = useOffer(Number(collectionId), Number(id));
   const [marketType, setMarketType] = useState<MarketType>(MarketType.default);
@@ -74,7 +74,7 @@ const TokenPage = () => {
           selectedAccount?.address || ''
         )
           ? 'You are'
-          : `${shortcutText(newOwnerAddress)} is` }  the new owner of <Link href={`/token/${token.collectionId}/${token.id}`} title={`${collection?.prefix} #${token.id}`}/>
+          : `${shortcutText(newOwnerAddress)} is` }  the new owner of <Link href={`/token/${token.collectionId}/${token.tokenId}`} title={`${collection?.tokenPrefix} #${token.tokenId}`}/>
       </div>,
       { name: 'success', size: 32, color: 'var(--color-additional-light)' }
     );
@@ -99,7 +99,7 @@ const TokenPage = () => {
   return (
     <>
       <BackLink onClick={backClickHandler} data-testid={`${testid}-back-link`}>
-        <Icon name='arrow-left' color={BlueGrey500} size={16}></Icon>
+        <Icon name='arrow-left' color={BlueGrey500} size={16}/>
         <p>back</p>
       </BackLink>
       <TokenPagePaper>

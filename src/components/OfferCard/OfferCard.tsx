@@ -8,6 +8,7 @@ import { useAccounts } from 'hooks/useAccounts';
 import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
 import { formatKusamaBalance } from 'utils/textUtils';
 import { timeDifference } from 'utils/timestampUtils';
+import { stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
 import { Primary600 } from 'styles/colors';
 import config from '../../config';
 import { TokensMedia } from '../TokensCard/TokensMedia';
@@ -26,11 +27,11 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
   } = offer?.tokenDescription || {};
 
   const {
-    collectionName,
-    prefix
+    name: collectionName,
+    tokenPrefix
   } = offer?.collectionDescription || {};
 
-  const videoProp = useMemo(() => typeof video === 'string' ? { fullUrl: video, ipfsCid: '' } : video, [video]);
+  const videoProp = useMemo(() => stringToDecodedInfixOrUrlOrCidAndHash(video), [video]);
 
   const isBidder = useMemo(() => {
     if (!selectedAccount) return false;
@@ -57,14 +58,14 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
         testid={`${testid}-token-media`}
       />
       <Description>
-        <Link to={`/token/${offer?.collectionId}/${offer?.tokenId}`} title={`${prefix || ''} #${offer?.tokenId}`}>
+        <Link to={`/token/${offer?.collectionId}/${offer?.tokenId}`} title={`${tokenPrefix || ''} #${offer?.tokenId}`}>
           <Text
             size='l'
             weight='regular'
             color={'secondary-500'}
             testid={`${testid}-tokenId`}
           >
-            {`${prefix || ''} #${offer?.tokenId}`}
+            {`${tokenPrefix || ''} #${offer?.tokenId}`}
           </Text>
         </Link>
         <a

@@ -1,8 +1,8 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
+import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 import { Modal } from '@unique-nft/ui-kit';
 
 import { Offer } from 'api/restApi/offers/types';
-import { NFTCollection, NFTToken } from 'api/uniqueSdk/types';
 import { MarketType } from '../../../types/MarketTypes';
 import { SellModal } from './SellModal';
 import { CancelSellFixStagesModal } from './CancelSellModal';
@@ -14,8 +14,8 @@ import { CancelAuctionStagesModal } from './CancelAuctionModal';
 
 export type TTokenPageModalProps = {
   offer?: Offer
-  token?: NFTToken
-  collection?: NFTCollection
+  token?: TokenByIdResult
+  collection?: CollectionInfoWithSchema
   // once button is clicked (sell/bid/etc) -> we will change marketType for modal and therefore this component decides what to show and how
   marketType: MarketType
   onClose(): void
@@ -24,8 +24,8 @@ export type TTokenPageModalProps = {
 }
 
 export type TTokenPageModalBodyProps = {
-  token?: NFTToken
-  collection?: NFTCollection
+  token?: TokenByIdResult
+  collection?: CollectionInfoWithSchema
   offer?: Offer
   onFinish(): void // TODO: make a type, in future we would definitly wan't to pass smth like success/error/error.message
   setIsClosable(value: boolean): void

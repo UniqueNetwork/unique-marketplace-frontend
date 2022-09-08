@@ -5,7 +5,6 @@ import styled from 'styled-components';
 import { Picture } from 'components';
 import { CollectionsCard } from './CollectionsCard';
 import { AttributesBlock } from './AttributesBlock';
-import { NFTCollection, NFTToken } from 'api/uniqueSdk/types';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { shortcutText } from 'utils/textUtils';
 import { Grey300, Grey500, Primary600 } from 'styles/colors';
@@ -19,11 +18,13 @@ import { useApi } from 'hooks/useApi';
 import Skeleton from 'components/Skeleton/Skeleton';
 import { TokenSkeleton } from 'components/Skeleton/TokenSkeleton';
 import ShareTokenModal from './ShareTokenModal';
+import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
+import { stringToDecodedInfixOrUrlOrCidAndHash } from '../../../utils/helpers';
 
 interface IProps {
   children: ReactChild[]
-  token?: NFTToken
-  collection?: NFTCollection
+  token?: TokenByIdResult
+  collection?: CollectionInfoWithSchema
   offer?: Offer
   isLoading?: boolean
   testid: string
@@ -48,25 +49,21 @@ export const CommonTokenDetail: FC<IProps> = ({
     prefix,
     video
   } = useMemo(() => {
-    if (offer) {
-      const { image, attributes } = offer.tokenDescription || {};
-      const { collectionName, prefix, collectionCover, description } = offer.collectionDescription || {};
-      return {
-        ...offer,
-        collectionName,
-        prefix,
-        image,
-        attributes,
-        description,
-        coverImageUrl: collectionCover,
-        video: offer.tokenDescription.video
-      };
-    }
-
+    const { tokenId, collectionId } = offer || token || {};
+    const { image, attributes, video } = offer?.tokenDescription || token || {};
+    const { name: collectionName, tokenPrefix: prefix, schema, description } = offer?.collectionDescription || collection || {};
+    const owner = offer?.seller || token?.owner;
     return {
-      ...collection,
-      ...token,
-      tokenId: token?.id
+      tokenId,
+      collectionId,
+      collectionName,
+      prefix,
+      coverImageUrl: schema?.coverPicture.fullUrl || '',
+      description,
+      attributes,
+      image: typeof image === 'string' ? image : image?.fullUrl || '',
+      video,
+      owner
     };
   }, [token, collection, offer]);
 
@@ -105,7 +102,7 @@ export const CommonTokenDetail: FC<IProps> = ({
     setShareModalVisible(false);
   }, []);
 
-  const videoProp = useMemo(() => typeof video === 'string' ? { fullUrl: video, ipfsCid: '' } : video, [video]);
+  const videoProp = useMemo(() => stringToDecodedInfixOrUrlOrCidAndHash(video), [video]);
 
   return (
     <CommonTokenDetailStyled>

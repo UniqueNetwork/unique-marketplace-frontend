@@ -2,9 +2,9 @@ import React, { FC, useEffect, useState } from 'react';
 import { Loader, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
-import { NFTToken } from 'api/uniqueSdk/types';
 import { useApi } from 'hooks/useApi';
 import { Avatar } from '../Avatar/Avatar';
+import { TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 
 interface InlineTokenCardProps {
   tokenId: number
@@ -13,7 +13,7 @@ interface InlineTokenCardProps {
 
 export const InlineTokenCard: FC<InlineTokenCardProps> = ({ tokenId, collectionId, children }) => {
   const { api } = useApi();
-  const [token, setToken] = useState<NFTToken>();
+  const [token, setToken] = useState<TokenByIdResult>();
   const [prefix, setPrefix] = useState<string>();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -23,8 +23,8 @@ export const InlineTokenCard: FC<InlineTokenCardProps> = ({ tokenId, collectionI
     (async () => {
       setIsLoading(true);
       setToken((await api.nft?.getToken(collectionId, tokenId)) || undefined);
-      const { prefix } = await api.collection?.getCollection(collectionId) || { tokenPrefix: '' };
-      setPrefix(prefix);
+      const { tokenPrefix } = await api.collection?.getCollection(collectionId) || { tokenPrefix: '' };
+      setPrefix(tokenPrefix);
       setIsLoading(false);
     })();
   }, [tokenId, collectionId, api?.nft]);
@@ -33,7 +33,7 @@ export const InlineTokenCard: FC<InlineTokenCardProps> = ({ tokenId, collectionI
     <InlineTokenCardWrapper>
       <Avatar src={token?.image || ''} size={64} type={'square'} />
       {token && <TokenInfoWrapper>
-        <Text size={'s'} color={'grey-500'}>{`${prefix} #${token?.id}`}</Text>
+        <Text size={'s'} color={'grey-500'}>{`${prefix} #${token?.tokenId}`}</Text>
         {children}
       </TokenInfoWrapper>}
       {isLoading && <Loader isFullPage />}

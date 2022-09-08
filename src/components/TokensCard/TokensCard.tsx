@@ -1,9 +1,9 @@
 import React, { FC, useMemo, useState } from 'react';
 import { Icon, Loader, Text } from '@unique-nft/ui-kit';
+import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { NFTCollection, NFTToken } from 'api/uniqueSdk/types';
 import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
 import { Offer } from 'api/restApi/offers/types';
 import { useApi } from 'hooks/useApi';
@@ -13,9 +13,10 @@ import { timeDifference } from 'utils/timestampUtils';
 import { Primary600 } from 'styles/colors';
 import config from '../../config';
 import { TokensMedia } from './TokensMedia';
+import { stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
 
 export type TTokensCard = {
-  token?: NFTToken
+  token?: TokenByIdResult
   offer?: Partial<Offer>
   tokenId?: number
   collectionId?: number
@@ -24,8 +25,8 @@ export type TTokensCard = {
 };
 
 export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, testid, ...props }) => {
-  const [token, setToken] = useState<NFTToken | undefined>(props.token);
-  const [collection, setCollection] = useState<(NFTCollection) | undefined>();
+  const [token, setToken] = useState<TokenByIdResult | undefined>(props.token);
+  const [collection, setCollection] = useState<(CollectionInfoWithSchema) | undefined>();
   const [isFetching, setIsFetching] = useState<boolean>(false);
 
   const { api } = useApi();
@@ -41,13 +42,13 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
   } = useMemo(() => {
     if (offer || (token && collection)) {
       const { image, video } = offer?.tokenDescription || token || {};
-      const { collectionName, prefix } = offer?.collectionDescription || collection || {};
+      const { name: collectionName, tokenPrefix } = offer?.collectionDescription || collection || {};
       const { auction, price } = offer || {};
       return {
-        tokenTitle: `${prefix || ''} #${tokenId || ''}`,
+        tokenTitle: `${tokenPrefix || ''} #${tokenId || ''}`,
         collectionTitle: `${collectionName?.substring(0, 25) || ''} [id ${collectionId || ''}]`,
         imageUrl: image,
-        video: typeof video === 'string' ? { fullUrl: video, ipfsCid: '' } : video,
+        video: stringToDecodedInfixOrUrlOrCidAndHash(video),
         auction,
         price
       };
