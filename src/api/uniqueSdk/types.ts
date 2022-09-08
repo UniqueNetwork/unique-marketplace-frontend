@@ -68,6 +68,16 @@ export interface NFTToken {
   video?: VideoAttribute
   nestingChildTokens?: INestingToken[]
   isBundle: boolean
+  tokenDescription: {
+    collectionName: string
+    collectionCover: string | null
+    description: string
+    image?: DecodedInfixOrUrlOrCidAndHash | string
+    prefix: string
+    attributes: DecodedAttributes
+    video?: string | VideoAttribute
+    nestingChildTokens?: INestingToken[]
+  }
 }
 
 export type MetadataType = {

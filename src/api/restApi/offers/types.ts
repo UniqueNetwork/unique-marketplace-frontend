@@ -1,6 +1,7 @@
 import { PaginatedResponse, Pagination, Sortable } from '../base/types';
 import { VideoAttribute } from '../../uniqueSdk/types';
 import { DecodedAttributes, DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
+import { INestingToken } from 'components/BundleTree/types';
 
 export type GetOffersRequestPayload = {
   collectionId?: number | number[]
@@ -54,6 +55,7 @@ export type Offer = {
     prefix: string
     attributes: DecodedAttributes
     video?: string | VideoAttribute
+    nestingChildTokens?: INestingToken[]
   }
 }
 

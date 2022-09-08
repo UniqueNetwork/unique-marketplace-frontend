@@ -1,20 +1,17 @@
 import { DecodedAttributes, DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
+import { Address } from '@unique-nft/substrate-client/types';
 
 export interface INestingToken {
   tokenId: number
   collectionId: number
-  owner: string
+  owner?: Address
   nestingChildTokens: INestingToken[]
   attributes: DecodedAttributes
-  image: DecodedInfixOrUrlOrCidAndHash
+  image?: DecodedInfixOrUrlOrCidAndHash | string
   opened?: boolean
   disabled?: boolean
   selected?: boolean
 }
-
-// export interface INestedSection {
-//   selectedToken: INestingToken | null
-// }
 
 export interface ITokenCard {
   token: INestingToken

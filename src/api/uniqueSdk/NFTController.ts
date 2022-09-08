@@ -68,7 +68,15 @@ export class UniqueSDKNFTController {
       collectionCover,
       isAllowed,
       video,
-      isBundle
+      isBundle,
+      tokenDescription: {
+        collectionName: '', // TODO fix this
+        collectionCover: '',
+        description: '',
+        image: token.image,
+        prefix: '',
+        attributes: token.attributes
+      }
     };
   }
 }

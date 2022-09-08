@@ -12,6 +12,7 @@ import { NFTToken } from 'api/uniqueSdk/types';
 import MobileBundleTreeSection from './MobileBundleTreeSection';
 import { useApi } from 'hooks/useApi';
 import Skeleton from '../../components/Skeleton/Skeleton';
+import { Offer } from '../../api/restApi/offers/types';
 
 const areNodesEqual = (a: INestingToken, b: INestingToken) => a.collectionId === b.collectionId && a.tokenId === b.tokenId;
 
@@ -19,10 +20,12 @@ const getKey = (a: INestingToken) => `T${a.tokenId}C${a.collectionId}`;
 
 interface IProps {
   onViewTokenDetails(token: NFTToken): void
-  token: NFTToken
+  token?: NFTToken
+  offer?: Offer
+  fetchOffer: (collectionId: number, tokenId: number) => Promise<Offer | null>
 }
 
-function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token }: IProps) {
+function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token, offer, fetchOffer }: IProps) {
   const navigate = useNavigate();
   const { uniqueSdk } = useApi();
   const [isMobileViewVisible, setIsMobileViewVisible] = useState(false);
@@ -30,13 +33,27 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token 
   const [isBundleLoading, setIsBundleLoading] = useState(true);
 
   useEffect(() => {
+    if (bundle) return;
     (async () => {
-      setIsBundleLoading(true);
-      const response = await uniqueSdk?.tokens.getBundle({ collectionId: token.collectionId, tokenId: token.id });
-      if (response) setBundle([response]);
+      if (offer && offer.tokenDescription.nestingChildTokens) {
+        const bundle: INestingToken = {
+          ...offer.tokenDescription,
+          tokenId: offer.tokenId,
+          collectionId: offer.collectionId,
+          nestingChildTokens: offer.tokenDescription.nestingChildTokens
+        };
+        setBundle([bundle]);
+      } else if (token) {
+        setIsBundleLoading(true);
+        const response = await uniqueSdk?.tokens.getBundle({ collectionId: token.collectionId, tokenId: token.id });
+        // console.log('getbundle response', response);
+        if (response) {
+          setBundle([response]);
+        }
+      }
       setIsBundleLoading(false);
     })();
-  }, [uniqueSdk, token]);
+  }, [uniqueSdk, token, offer, bundle]);
 
   const closeView = useCallback(() => {
     setIsMobileViewVisible(false);
@@ -70,7 +87,16 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token 
       ...token,
       id: token.tokenId,
       imageUrl: token.image,
-      isBundle: true
+      isBundle: true,
+      tokenDescription: {
+        collectionName: '', // TODO fix this
+        collectionCover: '',
+        description: '',
+        image: token.image,
+        prefix: '',
+        attributes: token.attributes,
+        nestingChildTokens: token.nestingChildTokens
+      }
     });
     if (isMobileViewVisible) closeView();
   }, [onViewTokenDetailsProps, isMobileViewVisible, closeView]);

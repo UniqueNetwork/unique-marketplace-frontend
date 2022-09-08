@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Icon, Link, useNotifications } from '@unique-nft/ui-kit';
 
@@ -90,6 +90,9 @@ const TokenPage = () => {
     }
   }, [navigate]);
 
+  // if we opened child token from bundle which is on sale
+  const isIgnoreOffer = useMemo(() => (!(!token || !offer || (token.id === offer.tokenId && token.collectionId === offer.collectionId))), [token, offer]);
+
   if (!isFetchingOffer && !isFetchingToken && !token && !offer) return <Error404 />;
 
   // TODO: split into more categories here instead of just "buy/sell" and putting splitting inside them
@@ -103,13 +106,13 @@ const TokenPage = () => {
       <TokenPagePaper>
         <CommonTokenDetail
           token={token}
-          offer={offer}
+          offer={!isIgnoreOffer ? offer : undefined}
           isLoading={isFetchingOffer || isFetchingToken}
           testid={`${testid}`}
         >
           <TokenTrading
             token={token}
-            offer={offer}
+            offer={!isIgnoreOffer ? offer : undefined}
             onSellClick={onActionClick(MarketType.sellFix)}
             onBuyClick={onActionClick(MarketType.purchase)}
             onTransferClick={onActionClick(MarketType.transfer)}
@@ -122,7 +125,7 @@ const TokenPage = () => {
           />
           <TokenPageModal
             token={token}
-            offer={offer}
+            offer={!isIgnoreOffer ? offer : undefined}
             marketType={marketType}
             onFinish={onFinish}
             onClose={onClose}
@@ -130,7 +133,12 @@ const TokenPage = () => {
           />
         </CommonTokenDetail>
       </TokenPagePaper>
-      {token?.isBundle && <BundleTreeSection onViewTokenDetails={setToken} token={token} />}
+      {(token?.isBundle || offer?.tokenDescription.nestingChildTokens) && <BundleTreeSection
+        onViewTokenDetails={setToken}
+        token={token}
+        offer={offer}
+        fetchOffer={fetchOffer}
+      />}
     </>
   );
 };

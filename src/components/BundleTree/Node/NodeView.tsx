@@ -92,7 +92,7 @@ const NodeView: FC<INodeView<INestingToken>> = ({
           >
             <Icon size={16} name={data.nestingChildTokens?.length ? 'triangle' : ''} color={Primary500} />
           </Arrow>
-          <Picture alt={`T-${data.tokenId} C-${data.collectionId}`} src={data.image.fullUrl || undefined}/>
+          <Picture alt={`T-${data.tokenId} C-${data.collectionId}`} src={(typeof data.image === 'string' ? data.image : data.image?.fullUrl) || undefined}/>
           <Name>T-{data.tokenId} C-{data.collectionId}</Name>
         </NftInfo>
         {deviceSize !== DeviceSize.sm && <ActionButtons className={'action-buttons'}>

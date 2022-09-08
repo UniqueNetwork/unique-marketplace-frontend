@@ -31,7 +31,7 @@ function TokenCard({ token, onViewNodeDetails }: ITokenCard) {
 
   return (
     <TokenCardWrapper onMouseEnter={showMenu} onMouseLeave={hideMenu} onClick={viewTokenDetails}>
-      <Picture alt={`T-${token.tokenId} C-${token.collectionId}`} src={token.image.fullUrl || undefined}/>
+      <Picture alt={`T-${token.tokenId} C-${token.collectionId}`} src={(typeof token.image === 'string' ? token.image : token.image?.fullUrl) || undefined}/>
       <Text color='additional-dark' size='m'>{`T-${token.tokenId} C-${token.collectionId}`}</Text>
       <Text color='grey-500' size='s'>NFT</Text>
       {token.nestingChildTokens && <Text color='grey-500' size='xs'>{token.nestingChildTokens.length} item{token.nestingChildTokens.length > 1 && 's'}</Text>}

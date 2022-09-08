@@ -33,7 +33,7 @@ export const useOffer = (collectionId: number, tokenId: number) => {
         message
       });
     }
-    return [];
+    return null;
   }, []);
 
   useEffect(() => {
