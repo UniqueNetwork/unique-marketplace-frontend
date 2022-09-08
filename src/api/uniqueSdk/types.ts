@@ -1,6 +1,4 @@
 import { BN } from '@polkadot/util';
-import { DecoratedRpc } from '@polkadot/api/types';
-import { RpcInterface } from '@polkadot/rpc-core/types/jsonrpc';
 import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
 import { Account } from '../../account/AccountContext';
 import { SignerPayloadJSON, UnsignedTxPayload } from '@unique-nft/substrate-client/types';
@@ -8,13 +6,6 @@ import { SignerPayloadJSON, UnsignedTxPayload } from '@unique-nft/substrate-clie
 export type TokenId = {
   toNumber(): number
 };
-
-export type UniqueDecoratedRpc = DecoratedRpc<'promise', RpcInterface> & {
-  unique?: {
-    accountTokens(collectionId: number, accountId: CrossAccountId): Promise<TokenId[]>
-    allowance(collectionId: string, accountId: CrossAccountId, contractAccountId: CrossAccountId, tokenId: string): Promise<{ toJSON(): number }>
-  }
-}
 
 export type TTransaction = {
   signerPayloadJSON?: SignerPayloadJSON
@@ -45,11 +36,6 @@ export type VideoAttribute = DecodedInfixOrUrlOrCidAndHash | undefined;
 
 export type MetadataType = {
   metadata?: string
-}
-
-export type CrossAccountId = {
-  Substrate?: string
-  Ethereum?: string
 }
 
 export type EvmCollectionAbiMethods = {
@@ -91,7 +77,6 @@ export type MarketplaceAbiMethods = {
   setEscrow: (escrow: string) => {
     encodeABI: () => any;
   },
-  // (amount: string, currencyCode: string, address: string) => any;
   withdraw: (amount: string, currencyCode: string, address: string) => {
     encodeABI: () => any;
   };
