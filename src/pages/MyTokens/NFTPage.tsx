@@ -140,7 +140,7 @@ export const NFTPage = () => {
       const filterByStatus = (token: NFTToken & Partial<Offer>) => {
         const { onSell, fixedPrice, timedAuction, notOnSale } = statuses || {};
         if (!onSell && !fixedPrice && !timedAuction && !notOnSale) return true;
-        return (onSell && !!token.seller) ||
+        return (onSell && !fixedPrice && !timedAuction && !!token.seller) ||
           (fixedPrice && !!token.seller && !token.auction) ||
           (timedAuction && !!token.seller && !!token.auction) ||
           (notOnSale && !token.seller);
