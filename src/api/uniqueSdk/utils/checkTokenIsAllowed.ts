@@ -1,8 +1,7 @@
-import { Settings } from 'api/restApi/settings/types';
-import { TokenId } from '../types';
+import { TokenId } from 'api/uniqueSdk/types';
 
-export const checkAllowedTokenInSettings = (tokenId: number, collectionId: number, settings?: Settings) => {
-  const allowedTokens = settings?.blockchain.unique.allowedTokens.find((item) => item.collection === collectionId)?.tokens.split(',') || [];
+export const checkAllowedTokenInSettings = (tokenId: number, collectionId: number, allowedTokensList?: { collection: number, tokens: string }[]) => {
+  const allowedTokens = allowedTokensList?.find((item) => item.collection === collectionId)?.tokens.split(',') || [];
   return checkTokenIsAllowed(tokenId, allowedTokens);
 };
 
@@ -14,5 +13,5 @@ export const checkTokenIsAllowed = (tokenId: number, allowedTokens: string[]) =>
 
 export const filterAllowedTokens = (tokens: TokenId[], allowedTokens?: string) => {
   if (!allowedTokens) return tokens;
-  return tokens.filter((tokenId) => checkTokenIsAllowed(tokenId.toNumber(), allowedTokens.split(',')));
+  return tokens.filter((id) => checkTokenIsAllowed(id.toNumber(), allowedTokens.split(',')));
 };

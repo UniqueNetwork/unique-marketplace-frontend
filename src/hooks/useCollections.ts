@@ -3,7 +3,7 @@ import { useApi } from './useApi';
 import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
 
 export const useCollections = () => {
-  const { api } = useApi();
+  const { api, currentChainId } = useApi();
   const [collections, setCollections] = useState<CollectionInfoWithSchema[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(false);
 
@@ -15,7 +15,7 @@ export const useCollections = () => {
       setCollections(collections);
       setIsFetching(false);
     })();
-  }, [api?.collection?.getFeaturedCollections]);
+  }, [api?.collection?.getFeaturedCollections, currentChainId]);
 
   return {
     collections,

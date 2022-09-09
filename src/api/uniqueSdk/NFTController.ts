@@ -1,19 +1,21 @@
 import { Sdk } from '@unique-nft/substrate-client';
-import { TokenId } from './types';
-import { Settings } from '../restApi/settings/types';
+import { TokenId, UniqueController } from './types';
 import { getEthAccount } from './utils/addressUtils';
 import { filterAllowedTokens } from './utils/checkTokenIsAllowed';
 import { TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 import { Address } from '@unique-nft/substrate-client/types';
 
-export class UniqueSDKNFTController {
-  private sdk: Sdk;
-  private readonly collectionIds: number[];
-  private readonly allowedTokens: Record<number, string>;
-  constructor(sdk: Sdk, settings: Settings) {
-    this.sdk = sdk;
-    this.collectionIds = settings.blockchain.unique.collectionIds;
-    this.allowedTokens = settings.blockchain?.unique?.allowedTokens.reduce((acc, item) => ({ ...acc, [item.collection]: item.tokens }), {}) || {};
+type UniqueSDKNFTControllerOptions = { sdk: Sdk, collectionIds: number[], allowedTokens: { collection: number, tokens: string }[] };
+
+export class UniqueSDKNFTController implements UniqueController {
+  private sdk: Sdk | undefined;
+  private collectionIds: number[] = [];
+  private allowedTokens: Record<number, string> = {};
+
+  initialize(options: UniqueSDKNFTControllerOptions): void {
+    this.sdk = options.sdk;
+    this.collectionIds = options.collectionIds;
+    this.allowedTokens = options.allowedTokens.reduce((acc, item) => ({ ...acc, [item.collection]: item.tokens }), {}) || {};
   }
 
   async getAccountMarketableTokens(address: Address): Promise<TokenByIdResult[]> {
@@ -46,6 +48,6 @@ export class UniqueSDKNFTController {
   }
 
   async getToken(collectionId: number, tokenId: number): Promise<TokenByIdResult | null> {
-    return await this.sdk.tokens.get_new({ collectionId, tokenId });
+    return await this.sdk?.tokens.get_new({ collectionId, tokenId }) || null;
   }
 }

@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 import { Heading, Modal } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 

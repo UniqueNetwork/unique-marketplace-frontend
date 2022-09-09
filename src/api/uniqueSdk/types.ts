@@ -7,6 +7,10 @@ export type TokenId = {
   toNumber(): number
 };
 
+export interface UniqueController {
+  initialize(options: unknown): void
+}
+
 export type TTransaction = {
   signerPayloadJSON?: SignerPayloadJSON
   signature: `0x${string}`

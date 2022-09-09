@@ -7,7 +7,6 @@ import { timestampTableFormat } from '../../utils/timestampUtils';
 import { TokenComponent } from './TokenComponent/TokenComponent';
 import { formatKusamaBalance } from '../../utils/textUtils';
 import { BlueGrey600, Grey300, Grey500, Secondary400 } from '../../styles/colors';
-import config from '../../config';
 import { TokenDescription, Trade } from '../../api/restApi/trades/types';
 import { DeviceSize } from '../../hooks/useDeviceSize';
 
@@ -16,9 +15,10 @@ const tokenSymbol = 'KSM';
 type ColumnProps = {
   deviceSize: DeviceSize
   onShowTradesDetailsModal: (trade: Trade) => void
+  scanUrl: string
 }
 
-const getTradesColumns = ({ deviceSize, onShowTradesDetailsModal }: ColumnProps): TableColumnProps[] => [
+const getTradesColumns = ({ deviceSize, onShowTradesDetailsModal, scanUrl }: ColumnProps): TableColumnProps[] => [
   {
     title: deviceSize !== DeviceSize.sm ? (<Header>NFT</Header>) : null,
     // width: '11.84%',
@@ -40,7 +40,7 @@ const getTradesColumns = ({ deviceSize, onShowTradesDetailsModal }: ColumnProps)
         <a
           target={'_blank'}
           rel={'noreferrer'}
-          href={`${config?.scanUrl || ''}collections/${collectionId || ''}`}
+          href={`${scanUrl}collections/${collectionId || ''}`}
           className={'unique-link primary'}
         >{`${deviceSize === DeviceSize.lg ? collectionName : `${collectionName.slice(0, 6)}...`} [ID ${collectionId || ''}]`}</a>
       </LinkWrapper>;

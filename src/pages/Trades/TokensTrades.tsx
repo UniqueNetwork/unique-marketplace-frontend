@@ -13,9 +13,11 @@ import SearchField from '../../components/SearchField/SearchField';
 import NoTradesIcon from '../../static/icons/no-trades.svg';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import TokenTradesDetailsModal from './TradesDetailsModal';
-import { Trade } from '../../api/restApi/trades/types';
+import { Trade } from 'api/restApi/trades/types';
+import { useApi } from 'hooks/useApi';
 import { debounce } from 'utils/helpers';
 import { useInfinityScroll } from 'hooks/useInfinityScroll';
+import config from '../../config';
 
 type TokensTradesPage = {
   currentTab: TradesTabs
@@ -24,6 +26,7 @@ type TokensTradesPage = {
 
 export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) => {
   const { selectedAccount, isLoading: isLoadingAccounts } = useAccounts();
+  const { currentChainId } = useApi();
   const [page, setPage] = useState<number>(0);
   const [sortString, setSortString] = useState<string>();
   const [pageSize, setPageSize] = useState<number>(10);
@@ -159,7 +162,11 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
       <StyledTable
         onSort={onSortChange}
         data={loadedTrades}
-        columns={getTradesColumns({ deviceSize, onShowTradesDetailsModal })}
+        columns={getTradesColumns({
+          deviceSize,
+          onShowTradesDetailsModal,
+          scanUrl: config.blockchains[currentChainId || '']?.scanUrl
+        })}
         loading={(isLoadingAccounts || isFetching) && showSkeleton}
         emptyIconProps={searchValue ? { name: 'magnifier-found' } : { file: NoTradesIcon }}
         idColumnName={'offerId'}

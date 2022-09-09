@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { AxiosError } from 'axios';
 
 import { get } from '../base';
 import { defaultParams } from '../base/axios';
 import { ResponseError } from '../base/types';
-import { GetTradesRequestPayload, Trade, UseFetchTradesProps } from './types';
+import { GetTradesRequestPayload, Trade } from './types';
 
 const endpoint = '/api/Trades';
 

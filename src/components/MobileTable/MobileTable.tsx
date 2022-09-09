@@ -1,6 +1,5 @@
 import React, { FC } from 'react';
 import { IconProps, TableColumnProps, TableRowProps, Text } from '@unique-nft/ui-kit';
-import styled from 'styled-components';
 
 import { MobileTableRow } from './MobileTableRow';
 import MobileTableSkeleton from '../Skeleton/MobileTableSkeleton';

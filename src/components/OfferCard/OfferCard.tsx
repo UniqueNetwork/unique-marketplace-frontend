@@ -1,6 +1,6 @@
 import React, { FC, useMemo } from 'react';
 import { Icon, Text } from '@unique-nft/ui-kit';
-import { Link } from 'react-router-dom';
+import { generatePath, Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { Offer } from 'api/restApi/offers/types';
@@ -12,6 +12,7 @@ import { stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
 import { Primary600 } from 'styles/colors';
 import config from '../../config';
 import { TokensMedia } from '../TokensCard/TokensMedia';
+import { useApi } from '../../hooks/useApi';
 
 export type TTokensCard = {
   offer: Offer
@@ -20,6 +21,7 @@ export type TTokensCard = {
 
 export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
   const { selectedAccount } = useAccounts();
+  const { currentChainId } = useApi();
 
   const {
     image,
@@ -48,17 +50,23 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
     return compareEncodedAddresses(offer?.auction!.bids[0].bidderAddress, selectedAccount.address);
   }, [isBidder, topBid, selectedAccount]);
 
+  const tokenPath = useMemo(() => generatePath('/:currentChainId/token/:collectionId/:tokenId', {
+    currentChainId,
+    collectionId: offer?.collectionId.toString(),
+    tokenId: offer?.tokenId.toString()
+  }), [currentChainId, offer]);
+
   return (
     <TokensCardStyled>
       <TokensMedia
-        to={`/token/${offer?.collectionId}/${offer?.tokenId}`}
+        to={tokenPath}
         tokenId={offer?.tokenId}
         imageUrl={image}
         video={videoProp}
         testid={`${testid}-token-media`}
       />
       <Description>
-        <Link to={`/token/${offer?.collectionId}/${offer?.tokenId}`} title={`${tokenPrefix || ''} #${offer?.tokenId}`}>
+        <Link to={tokenPath} title={`${tokenPrefix || ''} #${offer?.tokenId}`}>
           <Text
             size='l'
             weight='regular'
@@ -70,7 +78,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
         </Link>
         <a
           data-testid={`${testid}-collection-${offer?.collectionId}-link`}
-          href={`${config.scanUrl || ''}collections/${offer?.collectionId}`}
+          href={`${config.blockchains[currentChainId || ''].scanUrl || ''}collections/${offer?.collectionId}`}
           target={'_blank'}
           rel='noreferrer'
         >

@@ -96,7 +96,6 @@ export const NFTPage = () => {
   const { collections } = useCollections();
 
   const { offers, isFetching: isFetchingOffers, fetch } = useOffers();
-
   const { api } = useApi();
 
   useEffect(() => {
@@ -221,7 +220,7 @@ export const NFTPage = () => {
     if (selectOption) {
       return filteredTokens.sort((tokenA, tokenB) => {
         const order = selectOption.direction === 'asc' ? 1 : -1;
-        return (tokenA[selectOption.field] || '') > (tokenB[selectOption.field] || '') ? order : -order;
+        return (tokenA?.[selectOption.field] || '') > (tokenB?.[selectOption.field] || '') ? order : -order;
       });
     }
     return filteredTokens;

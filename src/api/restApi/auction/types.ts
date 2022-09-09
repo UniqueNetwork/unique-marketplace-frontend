@@ -14,17 +14,20 @@ export type TStartAuctionParams = {
   startPrice: string
   priceStep: string
 }
+
 export type TPlaceBidParams = {
   signerPayloadJSON?: SignerPayloadJSON
   signature: `0x${string}`
   collectionId: number
   tokenId: number
 }
+
 export type TDeleteParams = {
   collectionId: number
   tokenId: number
   timestamp: number
 }
+
 export type TSignature = {
   signature: string,
   signer: string
@@ -48,6 +51,9 @@ export type TCalculatedBid = {
 
 export type TWithdrawBidsParams = {
   owner: string
+}
+export interface TWithdrawBidsParamsWithNetwork extends TWithdrawBidsParams {
+  network: string
 }
 
 export type TWithdrawBid = {

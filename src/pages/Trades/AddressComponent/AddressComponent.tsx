@@ -9,7 +9,7 @@ import { Avatar } from '../../../components/Avatar/Avatar';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 
 export const AddressComponent = ({ text }: { text: string }) => {
-  const { chainData } = useApi();
+  const { chainData, currentChainId } = useApi();
 
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
@@ -22,7 +22,7 @@ export const AddressComponent = ({ text }: { text: string }) => {
     <a
       target={'_blank'}
       rel={'noreferrer'}
-      href={`${config?.scanUrl || ''}account/${formatAddress(text)}`}
+      href={`${config.blockchains[currentChainId || '']?.scanUrl || ''}account/${formatAddress(text)}`}
       className={'unique-link primary'}
     >{shortCut}</a>
   </LinkWrapper>;
