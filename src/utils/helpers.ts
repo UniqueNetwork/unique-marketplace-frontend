@@ -1,3 +1,5 @@
+import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
+
 export const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
@@ -22,4 +24,8 @@ export const debounce = (fn: () => any, ms = 300) => {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => fn.apply(this, args), ms);
   };
+};
+
+export const stringToDecodedInfixOrUrlOrCidAndHash = (value: DecodedInfixOrUrlOrCidAndHash | string | undefined) => {
+  return typeof value === 'string' ? { fullUrl: value, ipfsCid: '' } : value || { fullUrl: '', ipfsCid: '' };
 };

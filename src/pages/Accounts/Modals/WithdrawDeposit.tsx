@@ -3,7 +3,6 @@ import { Button, Checkbox, Heading, Modal, Text, useNotifications } from '@uniqu
 import { BN } from '@polkadot/util';
 import styled from 'styled-components';
 
-import { NFTToken } from 'api/uniqueSdk/types';
 import { TWithdrawBid } from 'api/restApi/auction/types';
 import DefaultMarketStages from '../../Token/Modals/StagesModal';
 import { useApi } from 'hooks/useApi';
@@ -12,6 +11,7 @@ import { useWithdrawDepositStages } from 'hooks/accountStages/useWithdrawDeposit
 import InlineTokenCard from 'components/TokensCard/InlineTokenCard';
 import { StageStatus } from 'types/StagesTypes';
 import { formatKusamaBalance } from '../../../utils/textUtils';
+import { TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 
 const tokenSymbol = 'KSM';
 
@@ -24,7 +24,7 @@ export type WithdrawDepositModalProps = {
 }
 
 type BidDeposit = TWithdrawBid & {
-  token?: NFTToken
+  token?: TokenByIdResult
 };
 
 export const WithdrawDepositModal: FC<WithdrawDepositModalProps> = ({ isVisible, address, onFinish, onClose, testid }) => {

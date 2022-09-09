@@ -1,7 +1,10 @@
 import { Sdk } from '@unique-nft/substrate-client';
-import '@unique-nft/substrate-client/tokens';
-import { TransactionOptions, NFTCollection } from './types';
+// eslint-disable-next-line import/no-duplicates
+import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
+import { TransactionOptions } from './types';
 import { Settings } from '../restApi/settings/types';
+// eslint-disable-next-line import/no-duplicates
+import '@unique-nft/substrate-client/tokens';
 
 export class UniqueSDKCollectionController {
   private sdk: Sdk;
@@ -22,27 +25,12 @@ export class UniqueSDKCollectionController {
     });
   }
 
-  async getCollection(collectionId: number): Promise<NFTCollection | null> {
-    const collection = await this.sdk.collections.get_new({ collectionId });
-
-    if (!collection) return null;
-
-    const { name, description, owner, schema, tokenPrefix, sponsorship } = collection;
-    const coverImageUrl = schema?.coverPicture?.fullUrl || '';
-
-    return {
-      id: collectionId,
-      tokenPrefix,
-      coverImageUrl,
-      collectionName: name,
-      description,
-      owner,
-      sponsorship
-    };
+  async getCollection(collectionId: number): Promise<CollectionInfoWithSchema | null> {
+    return await this.sdk.collections.get_new({ collectionId });
   }
 
-  async getFeaturedCollections(): Promise<NFTCollection[]> {
-    const collections: Array<NFTCollection> = [];
+  async getFeaturedCollections(): Promise<CollectionInfoWithSchema[]> {
+    const collections: Array<CollectionInfoWithSchema> = [];
     for (let i = 0; i < this.collectionIds.length; i++) {
       const collectionInf = await this.getCollection(this.collectionIds[i]);
 

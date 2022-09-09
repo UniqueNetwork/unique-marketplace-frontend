@@ -1,9 +1,9 @@
 import React, { FC, useMemo, useState } from 'react';
 import { Icon, Loader, Text } from '@unique-nft/ui-kit';
+import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { NFTToken } from 'api/uniqueSdk/types';
 import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
 import { Offer } from 'api/restApi/offers/types';
 import { useApi } from 'hooks/useApi';
@@ -13,51 +13,64 @@ import { timeDifference } from 'utils/timestampUtils';
 import { Primary600 } from 'styles/colors';
 import config from '../../config';
 import { TokensMedia } from './TokensMedia';
+import { stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
 
 export type TTokensCard = {
-  token?: NFTToken & Partial<Offer>
+  token?: TokenByIdResult
+  offer?: Partial<Offer>
   tokenId?: number
   collectionId?: number
   tokenImageUrl?: string
   testid: string
 };
 
-export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, ...props }) => {
-  const [token, setToken] = useState<(NFTToken & Partial<Offer>) | undefined>(props.token);
+export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, testid, ...props }) => {
+  const [token, setToken] = useState<TokenByIdResult | undefined>(props.token);
+  const [collection, setCollection] = useState<(CollectionInfoWithSchema) | undefined>();
   const [isFetching, setIsFetching] = useState<boolean>(false);
 
   const { api } = useApi();
   const { selectedAccount } = useAccounts();
 
   const {
-    collectionName,
+    tokenTitle,
+    collectionTitle,
     imageUrl,
-    prefix,
     price,
     auction,
     video
-  } = useMemo<Partial<Offer & NFTToken>>(() => {
-    if (token?.tokenDescription) {
-      const { collectionName, prefix, image } = token.tokenDescription;
-      return { ...token,
-        collectionName,
-        prefix,
-        imageUrl: image };
-    }
-
-    if (token) {
-      return token;
+  } = useMemo(() => {
+    if (offer || (token && collection)) {
+      const { image, video } = offer?.tokenDescription || token || {};
+      const { name: collectionName, tokenPrefix } = offer?.collectionDescription || collection || {};
+      const { auction, price } = offer || {};
+      return {
+        tokenTitle: `${tokenPrefix || ''} #${tokenId || ''}`,
+        collectionTitle: `${collectionName?.substring(0, 25) || ''} [id ${collectionId || ''}]`,
+        imageUrl: image,
+        video: stringToDecodedInfixOrUrlOrCidAndHash(video),
+        auction,
+        price
+      };
     }
 
     if (tokenId && collectionId) {
       setIsFetching(true);
-      void api?.nft?.getToken(collectionId, tokenId).then((token: NFTToken | null) => {
+      (async () => {
+        if (!token) {
+          const token = await api?.nft?.getToken(collectionId, tokenId);
+          if (token) setToken(token);
+        }
+
+        if (!collection) {
+          const collection = await api?.collection?.getCollection(collectionId);
+          if (collection) setCollection(collection);
+        }
         setIsFetching(false);
-        if (token) { setToken(token); }
-      });
+      })();
     }
     return {};
-  }, [collectionId, tokenId, token, api]);
+  }, [collectionId, tokenId, collection, token, api]);
 
   const isBidder = useMemo(() => {
     if (!selectedAccount) return false;
@@ -84,13 +97,13 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, ...
         testid={`${testid}-token-media`}
       />
       <Description>
-        <Link to={`/token/${collectionId}/${tokenId}`} title={`${prefix || ''} #${tokenId}`}>
+        <Link to={`/token/${collectionId}/${tokenId}`} title={tokenTitle}>
           <Text
             size='l'
             weight='regular'
             testid={`${testid}-tokenId`}
           >
-            {`${prefix || ''} #${tokenId || ''}`}
+            {tokenTitle}
           </Text>
         </Link>
         <a
@@ -100,7 +113,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, ...
           rel='noreferrer'
         >
           <Text color='primary-600' size='s'>
-            {`${collectionName?.substring(0, 25) || ''} [id ${collectionId || ''}]`}
+            {collectionTitle}
           </Text>
         </a>
         {price && <PriceWrapper>

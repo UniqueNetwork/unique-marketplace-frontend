@@ -19,12 +19,12 @@ const PurchaseModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, setIsClo
   }, [selectedAccount?.address]);
 
   const { tokenId, collectionId } = offer || {};
-  const { prefix } = offer?.tokenDescription || {};
+  const { tokenPrefix } = offer?.collectionDescription || {};
 
   useEffect(() => {
     if (status === StageStatus.success) {
       info(
-        <div data-testid={`${testid}-success-notification`}>You are the new owner of <Link href={`/token/${collectionId || ''}/${tokenId || ''}`} title={`${prefix || ''} #${tokenId || ''}`}/></div>,
+        <div data-testid={`${testid}-success-notification`}>You are the new owner of <Link href={`/token/${collectionId || ''}/${tokenId || ''}`} title={`${tokenPrefix || ''} #${tokenId || ''}`}/></div>,
         { name: 'success', size: 32, color: 'var(--color-additional-light)' }
       );
     }
