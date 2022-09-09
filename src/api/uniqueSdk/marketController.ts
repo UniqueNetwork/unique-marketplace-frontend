@@ -2,14 +2,14 @@ import { Sdk } from '@unique-nft/substrate-client';
 import { TokenIdArguments, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 import { isEthereumAddress } from '@unique-nft/substrate-client/utils';
 import { BN } from '@polkadot/util';
-import { EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType, TransactionOptions, TSignMessage, UniqueController, UniqueDecoratedRpc } from './types';
+import { EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType, TransactionOptions, TSignMessage, UniqueController } from './types';
 import marketplaceAbi from './abi/marketPlaceAbi.json';
 import nonFungibleAbi from './abi/nonFungibleAbi.json';
-import { collectionIdToAddress, getEthAccount, compareEncodedAddresses, isTokenOwner, normalizeAccountId } from './utils/addressUtils';
+import { collectionIdToAddress, getEthAccount, compareEncodedAddresses, isTokenOwner } from './utils/addressUtils';
 import { formatKsm, fromStringToBnString } from './utils/textFormat';
 import { repeatCheckForTransactionFinish } from './utils/repeatCheckTransaction';
 import '@unique-nft/substrate-client/balance';
-import { AllBalances } from '@unique-nft/substrate-client/types';
+import { Address, AllBalances } from '@unique-nft/substrate-client/types';
 import Web3 from 'web3';
 
 export type UniqueSDKMarketControllerOptions = {
@@ -66,7 +66,7 @@ export class UniqueSDKMarketController implements UniqueController {
   }
 
   // purchase
-  async addDeposit(address: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+  async addDeposit(address: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
     if (!this.kusamaSdk) throw new Error('SDK isn\'t ready');
     const matcherContractInstance = this.getMatcherContractInstance(getEthAccount(address));
     const userDeposit = await this.getUserDeposit(address);
@@ -104,8 +104,8 @@ export class UniqueSDKMarketController implements UniqueController {
   }
 
   // purchase
-  async addToWhiteList(account: string, options: TransactionOptions, signMessage: TSignMessage): Promise<void> {
-    const ethAddress = getEthAccount(account);
+  async addToWhiteList(address: Address, options: TransactionOptions, signMessage: TSignMessage): Promise<void> {
+    const ethAddress = getEthAccount(address);
     const isWhiteListed = await this.checkWhiteListed(ethAddress);
     if (isWhiteListed) {
       return;
@@ -121,7 +121,7 @@ export class UniqueSDKMarketController implements UniqueController {
     }
 
     try {
-      await repeatCheckForTransactionFinish(async () => await this.checkWhiteListed(account));
+      await repeatCheckForTransactionFinish(async () => await this.checkWhiteListed(address));
       return;
     } catch (e) {
       console.error('addToWhiteList error pushed upper');
@@ -130,7 +130,7 @@ export class UniqueSDKMarketController implements UniqueController {
   }
 
   // purchase
-  async buyToken(address: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+  async buyToken(address: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
     if (!this.kusamaSdk || !this.uniqueSdk || !this.web3Instance) throw new Error('Controller isn\'t ready');
     const ethAddress = getEthAccount(address);
     const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
@@ -164,7 +164,7 @@ export class UniqueSDKMarketController implements UniqueController {
   }
 
   // sell
-  async cancelSell(address: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+  async cancelSell(address: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk || !this.web3Instance) throw new Error('Controller isn\'t ready');
     const ethAddress = getEthAccount(address);
     const matcherContractInstance = this.getMatcherContractInstance(ethAddress);
@@ -206,7 +206,7 @@ export class UniqueSDKMarketController implements UniqueController {
   }
 
   // account
-  async checkWhiteListed(account: string): Promise<boolean> {
+  async checkWhiteListed(account: Address): Promise<boolean> {
     if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
     const ethAddress = getEthAccount(account);
     try {
@@ -220,7 +220,7 @@ export class UniqueSDKMarketController implements UniqueController {
   }
 
   // fee
-  async getKusamaFee(sender: string, recipient?: string, value?: BN): Promise<string | null> {
+  async getKusamaFee(sender: Address, recipient?: string, value?: BN): Promise<string | null> {
     if (!this.kusamaSdk) throw new Error('Controller isn\'t ready');
     const transferFee = await this.kusamaSdk.extrinsics.getFee({
       address: sender,
@@ -235,8 +235,8 @@ export class UniqueSDKMarketController implements UniqueController {
   }
 
   // account
-  async getUserDeposit(account: string): Promise<BN> {
-    const ethAddress = getEthAccount(account);
+  async getUserDeposit(address: Address): Promise<BN> {
+    const ethAddress = getEthAccount(address);
 
     const matcherContractInstance = this.getMatcherContractInstance(ethAddress);
     const result = await matcherContractInstance.methods.balanceKSM(ethAddress).call();
@@ -249,7 +249,7 @@ export class UniqueSDKMarketController implements UniqueController {
   }
 
   // sell
-  async lockNftForSale(account: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+  async lockNftForSale(account: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
     const ethAddress = getEthAccount(account);
 
@@ -259,7 +259,7 @@ export class UniqueSDKMarketController implements UniqueController {
 
     const token = await this.uniqueSdk.tokens.get_new(tokenIdArguments);
     if (!token) throw new Error('Token not found');
-    if (isTokenOwner(ethAddress, normalizeAccountId(token.owner))) return;
+    if (token.owner.toLowerCase() === ethAddress.toLowerCase()) return;
 
     const unsignedTxPayload = await this.uniqueSdk.extrinsics.build({
       section: 'unique',
@@ -279,16 +279,22 @@ export class UniqueSDKMarketController implements UniqueController {
     });
   }
 
-  // ???
-  private async checkIfNftApproved (tokenOwner: string, collectionId: string, tokenId: string): Promise<boolean> {
-    const { unique } = (this.uniqueSdk?.api.rpc as UniqueDecoratedRpc);
-    const approvedCount = (await unique?.allowance(collectionId, normalizeAccountId(tokenOwner), normalizeAccountId({ Ethereum: this.contractAddress }), tokenId))?.toJSON();
+  // sell
+  private async checkIfNftApproved (tokenOwner: Address, collectionId: string, tokenId: string): Promise<boolean> {
+    // @ts-ignore
+    const { unique } = this.uniqueSdk?.api.rpc || {};
+    const approvedCount = (await unique?.allowance(
+      Number(collectionId),
+      isEthereumAddress(tokenOwner) ? { Ethereum: tokenOwner } : { Substrate: tokenOwner },
+      { Ethereum: this.contractAddress },
+      Number(tokenId)
+    ))?.toJSON();
 
     return approvedCount === 1;
   }
 
   // sell
-  async sendNftToSmartContract(address: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+  async sendNftToSmartContract(address: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk || !this.web3Instance) throw new Error('Controller isn\'t ready');
     const tokenIdArguments: TokenIdArguments = {
       collectionId: Number(collectionId), tokenId: Number(tokenId)
@@ -332,7 +338,7 @@ export class UniqueSDKMarketController implements UniqueController {
   }
 
   // sell
-  async setForFixPriceSale(address: string, collectionId: string, tokenId: string, price: string, options: TransactionOptions): Promise<void> {
+  async setForFixPriceSale(address: Address, collectionId: string, tokenId: string, price: string, options: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk || !this.web3Instance) throw new Error('Controller isn\'t ready');
     const ethAddress = getEthAccount(address);
     const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
@@ -372,7 +378,7 @@ export class UniqueSDKMarketController implements UniqueController {
   }
 
   // account
-  async transferBalance(address: string, destination: string, amount: string, options: TransactionOptions): Promise<void> {
+  async transferBalance(address: Address, destination: string, amount: string, options: TransactionOptions): Promise<void> {
     if (!this.kusamaSdk) throw new Error('Controller isn\'t ready');
     const unsignedTxPayload = await this.kusamaSdk.extrinsics.build({
       section: 'balances',
@@ -397,7 +403,7 @@ export class UniqueSDKMarketController implements UniqueController {
     }
   }
 
-  async transferBidBalance(address: string, amount: string, options: TransactionOptions): Promise<void> {
+  async transferBidBalance(address: Address, amount: string, options: TransactionOptions): Promise<void> {
     if (!this.kusamaSdk) throw new Error('Controller isn\'t ready');
     const unsignedTxPayload = await this.kusamaSdk.extrinsics.build({
       section: 'balances',
@@ -422,12 +428,12 @@ export class UniqueSDKMarketController implements UniqueController {
     }
   }
 
-  transferToAuction(owner: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+  transferToAuction(owner: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
     return this.transferToken(owner, this.auctionAddress, collectionId, tokenId, options);
   }
 
   // token
-  async transferToken(from: string, to: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+  async transferToken(from: Address, to: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
     const tokenIdArguments: TokenIdArguments = {
       collectionId: Number(collectionId), tokenId: Number(tokenId)
@@ -436,7 +442,7 @@ export class UniqueSDKMarketController implements UniqueController {
     const token = await this.uniqueSdk.tokens.get_new(tokenIdArguments);
     if (!token) throw new Error('Token not found');
 
-    if (!isTokenOwner(from, normalizeAccountId(token.owner))) throw new Error('You are not owner of this token');
+    if (!isTokenOwner(from, token.owner)) throw new Error('You are not owner of this token');
 
     const unsignedTxPayload = await this.uniqueSdk.tokens.transfer.build({
       address: from,
@@ -462,7 +468,7 @@ export class UniqueSDKMarketController implements UniqueController {
   }
 
   // purchase
-  async unlockNft(address: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+  async unlockNft(address: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
     const ethAddress = getEthAccount(address);
 
@@ -494,7 +500,7 @@ export class UniqueSDKMarketController implements UniqueController {
   }
 
   // account
-  async withdrawDeposit(address: string, options: TransactionOptions): Promise<void> {
+  async withdrawDeposit(address: Address, options: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk || !this.web3Instance) throw new Error('Controller isn\'t ready');
     if (!address || address === '') throw new Error('Address not provided');
     const ethAddress = getEthAccount(address);
@@ -531,7 +537,7 @@ export class UniqueSDKMarketController implements UniqueController {
     });
   }
 
-  async getAccountBalance(address: string): Promise<AllBalances> {
+  async getAccountBalance(address: Address): Promise<AllBalances> {
     if (!this.kusamaSdk) throw new Error('Controller isn\'t ready');
     return await this.kusamaSdk.balance.get({ address });
   }

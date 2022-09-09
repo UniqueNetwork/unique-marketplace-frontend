@@ -1,7 +1,9 @@
 import { Sdk } from '@unique-nft/substrate-client';
-import { NFTToken, UniqueDecoratedRpc, UniqueController } from './types';
-import { getEthAccount, normalizeAccountId } from './utils/addressUtils';
-import { checkTokenIsAllowed, filterAllowedTokens } from './utils/checkTokenIsAllowed';
+import { TokenId, UniqueController } from './types';
+import { getEthAccount } from './utils/addressUtils';
+import { filterAllowedTokens } from './utils/checkTokenIsAllowed';
+import { TokenByIdResult } from '@unique-nft/substrate-client/tokens';
+import { Address } from '@unique-nft/substrate-client/types';
 
 type UniqueSDKNFTControllerOptions = { sdk: Sdk, collectionIds: number[], allowedTokens: { collection: number, tokens: string }[] };
 
@@ -16,25 +18,26 @@ export class UniqueSDKNFTController implements UniqueController {
     this.allowedTokens = options.allowedTokens.reduce((acc, item) => ({ ...acc, [item.collection]: item.tokens }), {}) || {};
   }
 
-  async getAccountMarketableTokens(account: string): Promise<NFTToken[]> {
-    if (!this.sdk?.api || !account) {
+  async getAccountMarketableTokens(address: Address): Promise<TokenByIdResult[]> {
+    if (!this.sdk?.api || !address) {
       return [];
     }
-    const tokens: NFTToken[] = [];
-    const { unique } = (this.sdk?.api.rpc as UniqueDecoratedRpc);
+    const tokens: TokenByIdResult[] = [];
+    // @ts-ignore
+    const { unique } = this.sdk?.api.rpc || {};
 
     for (const collectionId of this.collectionIds) {
       try {
-        const tokensIds =
-          await unique?.accountTokens(collectionId, normalizeAccountId(account)) || [];
-        const tokensIdsOnEth =
-          await unique?.accountTokens(collectionId, normalizeAccountId(getEthAccount(account))) || [];
+        const tokensIds: TokenId[] =
+          await unique?.accountTokens(collectionId, { Substrate: address }) || [];
+        const tokensIdsOnEth: TokenId[] =
+          await unique?.accountTokens(collectionId, { Ethereum: getEthAccount(address) }) || [];
 
         const currentAllowedTokens = this.allowedTokens[collectionId];
         const allowedIds = filterAllowedTokens([...tokensIds, ...tokensIdsOnEth], currentAllowedTokens);
         const tokensOfCollection = (await Promise.all(allowedIds
-          .map((item) =>
-            this.getToken(collectionId, item.toNumber())))) as NFTToken[];
+          .map((tokenId) =>
+            this.getToken(collectionId, tokenId.toNumber())))) as TokenByIdResult[];
 
         tokens.push(...tokensOfCollection);
       } catch (e) {
@@ -44,31 +47,7 @@ export class UniqueSDKNFTController implements UniqueController {
     return tokens;
   }
 
-  async getToken(collectionId: number, tokenId: number): Promise<NFTToken | null> {
-    const token = await this.sdk?.tokens.get_new({ collectionId, tokenId });
-    const collection = await this.sdk?.collections.get_new({ collectionId });
-    if (!token || !collection) return null;
-
-    const { owner, attributes, image, video } = token;
-    const { name, tokenPrefix, description, schema } = collection;
-
-    const imageUrl = image?.fullUrl || '';
-    const collectionCover = schema?.coverPicture?.fullUrl || '';
-
-    const isAllowed = this.allowedTokens[collectionId] ? checkTokenIsAllowed(tokenId, this.allowedTokens[collectionId].split(',')) : true;
-
-    return {
-      id: tokenId,
-      owner,
-      attributes,
-      imageUrl,
-      collectionId,
-      collectionName: name,
-      prefix: tokenPrefix,
-      description,
-      collectionCover,
-      isAllowed,
-      video
-    };
+  async getToken(collectionId: number, tokenId: number): Promise<TokenByIdResult | null> {
+    return await this.sdk?.tokens.get_new({ collectionId, tokenId }) || null;
   }
 }

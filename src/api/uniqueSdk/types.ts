@@ -1,20 +1,11 @@
 import { BN } from '@polkadot/util';
-import { DecoratedRpc } from '@polkadot/api/types';
-import { RpcInterface } from '@polkadot/rpc-core/types/jsonrpc';
-import { DecodedAttributes, DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
+import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
 import { Account } from '../../account/AccountContext';
-import { SignerPayloadJSON, UnsignedTxPayload, Address } from '@unique-nft/substrate-client/types';
+import { SignerPayloadJSON, UnsignedTxPayload } from '@unique-nft/substrate-client/types';
 
 export type TokenId = {
   toNumber(): number
 };
-
-export type UniqueDecoratedRpc = DecoratedRpc<'promise', RpcInterface> & {
-  unique?: {
-    accountTokens(collectionId: number, accountId: CrossAccountId): Promise<TokenId[]>
-    allowance(collectionId: string, accountId: CrossAccountId, contractAccountId: CrossAccountId, tokenId: string): Promise<{ toJSON(): number }>
-  }
-}
 
 export interface UniqueController {
   initialize(options: unknown): void
@@ -41,43 +32,14 @@ export interface NFTCollectionSponsorship {
   address?: string
 }
 
-export interface NFTCollection {
-  id: number
-  tokenPrefix: string
-  coverImageUrl?: string
-  collectionName?: string
-  description?: string
-  owner?: string
-  sponsorship?: NFTCollectionSponsorship | null
-}
-
 export type AttributesDecoded = {
   [key: string]: string | string[]
 }
 
 export type VideoAttribute = DecodedInfixOrUrlOrCidAndHash | undefined;
 
-export interface NFTToken {
-  id: number
-  owner?: Address
-  attributes?: DecodedAttributes
-  imageUrl?: DecodedInfixOrUrlOrCidAndHash | string
-  collectionId?: number
-  collectionName?: string
-  prefix?: string
-  description?: string
-  collectionCover?: string
-  isAllowed?: boolean
-  video: VideoAttribute
-}
-
 export type MetadataType = {
   metadata?: string
-}
-
-export type CrossAccountId = {
-  Substrate?: string
-  Ethereum?: string
 }
 
 export type EvmCollectionAbiMethods = {
@@ -119,7 +81,6 @@ export type MarketplaceAbiMethods = {
   setEscrow: (escrow: string) => {
     encodeABI: () => any;
   },
-  // (amount: string, currencyCode: string, address: string) => any;
   withdraw: (amount: string, currencyCode: string, address: string) => {
     encodeABI: () => any;
   };

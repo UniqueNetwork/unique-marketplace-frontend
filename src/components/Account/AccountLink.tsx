@@ -15,6 +15,7 @@ const AccountLink: FC<AccountLinkProps> = ({ accountAddress }) => {
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
   }, [chainData?.SS58Prefix]);
+
   return (
     <a
       target={'_blank'}

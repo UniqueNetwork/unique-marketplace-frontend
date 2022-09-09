@@ -18,7 +18,7 @@ export const RemoveCollectionModal: FC<TAdminPanelModalBodyProps> = ({ collectio
     onFinish();
   }, [info]);
 
-  const collectionName = collection?.name || collection?.collectionName || '';
+  const collectionName = collection?.name || '';
 
   return (
     <>

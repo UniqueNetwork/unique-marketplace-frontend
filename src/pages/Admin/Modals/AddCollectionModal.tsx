@@ -1,8 +1,8 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import { Button, Heading, Text, useNotifications } from '@unique-nft/ui-kit';
+import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
 import styled from 'styled-components/macro';
 
-import { NFTCollection } from 'api/uniqueSdk/types';
 import { useAdminCollections } from 'api/restApi/admin/collection';
 import { CollectionData } from 'api/restApi/admin/types';
 import { useApi } from 'hooks/useApi';
@@ -55,7 +55,7 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
     ]);
   }, [api, collections]);
 
-  const onChangeSelectedCollection = useCallback((collection: NFTCollection | string) => {
+  const onChangeSelectedCollection = useCallback((collection: CollectionInfoWithSchema | string) => {
     if (typeof collection === 'string') {
       if (!/^\d{0,9}$/.test(collection) && collection !== '') return;
 
@@ -77,16 +77,16 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
         leftIcon={{ name: 'magnify', size: 16 }}
         onChange={onChangeSelectedCollection}
         renderOption={(option) => <CollectionOption>
-          <CollectionCover src={option.coverImageUrl} size={24} type={'circle'} />
-          <Text>{`${option?.name || option?.collectionName} [ID ${option?.id}]`}</Text>
+          <CollectionCover src={option.schema?.coverPicture.fullUrl || ''} size={24} type={'circle'} />
+          <Text>{`${option?.name} [ID ${option?.id}]`}</Text>
         </CollectionOption>}
       />
     </SelectWrapper>
     {selectedCollection && typeof selectedCollection !== 'string' && <>
       <Text size={'m'}>You have selected collection</Text>
       <CollectionNameStyled>
-        <CollectionCover src={selectedCollection.coverImageUrl} size={24} type={'circle'} />
-        <Text>{`${selectedCollection?.name || selectedCollection?.collectionName} [ID ${selectedCollection?.id}]`}</Text>
+        <CollectionCover src={selectedCollection.schema?.coverPicture.fullUrl || ''} size={24} type={'circle'} />
+        <Text>{`${selectedCollection?.name} [ID ${selectedCollection?.id}]`}</Text>
       </CollectionNameStyled>
     </>}
     <ButtonWrapper>

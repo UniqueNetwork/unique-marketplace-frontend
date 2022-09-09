@@ -1,17 +1,17 @@
 import React, { FC, useContext, useMemo } from 'react';
 
-import { NFTToken } from 'api/uniqueSdk/types';
 import { Offer } from '../../../api/restApi/offers/types';
 import accountContext from '../../../account/AccountContext';
 import { SellToken } from '../SellToken/SellToken';
 import { BuyToken } from '../BuyToken/BuyToken';
 import Auction from '../Auction/Auction';
-import { isTokenOwner, normalizeAccountId } from 'api/uniqueSdk/utils/addressUtils';
+import { isTokenOwner } from 'api/uniqueSdk/utils/addressUtils';
 import { useApi } from '../../../hooks/useApi';
 import { checkAllowedTokenInSettings } from 'api/uniqueSdk/utils/checkTokenIsAllowed';
+import { TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 
 interface TokenTradingProps {
-  token?: NFTToken
+  token?: TokenByIdResult
   offer?: Offer
   onSellClick(): void
   onBuyClick(): void
@@ -31,18 +31,17 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
   const allowedTokens = useMemo(() => settings && currentChainId ? settings.blockchain.unique.allowedTokens : undefined, [settings]);
 
   const isAllowed = useMemo(() => {
-    if (offer) {
-      return checkAllowedTokenInSettings(offer.tokenId, offer.collectionId, allowedTokens);
-    }
-    return token?.isAllowed;
+    if (!token && !offer) return;
+    const { tokenId, collectionId } = offer || token!;
+    return checkAllowedTokenInSettings(tokenId, collectionId, allowedTokens);
   }, [allowedTokens, token, offer]);
 
   const isOwner = useMemo(() => {
     if (!selectedAccount) return false;
     if (offer) {
-      return isTokenOwner(selectedAccount.address, { Substrate: offer.seller });
+      return isTokenOwner(selectedAccount.address, offer.seller);
     }
-    return isTokenOwner(selectedAccount.address, normalizeAccountId(token?.owner || ''));
+    return token?.owner ? isTokenOwner(selectedAccount.address, token.owner) : false;
   }, [selectedAccount, token, offer]);
 
   if (offer?.auction) {
