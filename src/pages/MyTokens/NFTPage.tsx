@@ -96,7 +96,7 @@ export const NFTPage = () => {
   const { collections } = useCollections();
 
   const { offers, isFetching: isFetchingOffers, fetch } = useOffers();
-  const { api } = useApi();
+  const { api, currentChainId } = useApi();
 
   useEffect(() => {
     if (!api?.nft || !selectedAccount?.address) return;
@@ -109,7 +109,7 @@ export const NFTPage = () => {
       setTokens(_tokens);
       setIsFetchingTokens(false);
     })();
-  }, [api?.nft, selectedAccount?.address, setIsFetchingTokens, fetch]);
+  }, [api?.nft, currentChainId, selectedAccount?.address, setIsFetchingTokens, fetch]);
 
   const myCollections = useMemo(() => {
     const myTokensCollectionIds = [...tokens, ...offers].map((token) => token.collectionId);

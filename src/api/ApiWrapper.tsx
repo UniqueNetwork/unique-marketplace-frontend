@@ -50,20 +50,17 @@ const ApiWrapper = ({
       }
 
       const initialChainId = chainIdParam || storedChainId || defaultChainId;
+
+      await Promise.all(Object.values(config.blockchains).map(async (blockchain) => {
+        axios.defaults.baseURL = blockchain.apiEndpoint;
+        const { data: settings } = await getSettings();
+        await sdkClient.addNetwork(blockchain.network.toLowerCase(), settings);
+      }));
+
+      axios.defaults.baseURL = config.blockchains[initialChainId]?.apiEndpoint;
+      setSettings(sdkClient?.networks[initialChainId].settings);
       setCurrentChainId(initialChainId);
-
-      axios.defaults.baseURL = config.blockchains[initialChainId].apiEndpoint;
-
-      const { data: settings } = await getSettings();
-
-      await sdkClient?.connect(
-        initialChainId,
-        settings.blockchain.unique.wsEndpoint,
-        settings.blockchain.kusama.wsEndpoint
-      );
-
-      setSettings(settings);
-      initializeControllers(initialChainId, sdkClient, settings);
+      initializeControllers(initialChainId, sdkClient, sdkClient.networks[initialChainId]?.settings);
       setRpcClientInitialized(sdkClient?.isReady);
     })().then(() => {
       console.log('Rpc connection: success');
@@ -73,33 +70,26 @@ const ApiWrapper = ({
     });
   }, []);
 
-  const initializeControllers = useCallback(async (chainId: string, sdkClient: SdkClient, settings: Settings) => {
-    if (!sdkClient?.sdkSet[chainId]) {
-      setRpcClientInitialized(false);
-      await sdkClient?.connect(
-        chainId,
-        settings.blockchain.unique.wsEndpoint,
-        settings.blockchain.kusama.wsEndpoint
-      );
-      setRpcClientInitialized(sdkClient?.isReady);
+  const initializeControllers = useCallback((chainId: string, sdkClient: SdkClient, settings: Settings) => {
+    if (!sdkClient) {
+      throw new Error('SdkClient is not available');
     }
+    const currentChain = sdkClient?.networks[chainId];
 
-    const currentChain = sdkClient?.sdkSet[chainId];
-
-    if (!currentChain) return;
+    if (!currentChain || !currentChain.sdkSet) return;
 
     nftController?.initialize({
-      sdk: currentChain.unique,
+      sdk: currentChain.sdkSet.unique,
       allowedTokens: settings.blockchain.unique.allowedTokens,
       collectionIds: settings.blockchain.unique.collectionIds
     });
     collectionController?.initialize({
-      sdk: currentChain.unique,
+      sdk: currentChain.sdkSet?.unique,
       collectionIds: settings.blockchain.unique.collectionIds
     });
     marketController?.initialize({
-      uniqueSdk: currentChain.unique,
-      kusamaSdk: currentChain.kusama,
+      uniqueSdk: currentChain.sdkSet.unique,
+      kusamaSdk: currentChain.sdkSet.kusama,
       auctionAddress: settings.auction.address,
       contractAddress: settings.blockchain.unique.contractAddress,
       escrowAddress: settings.blockchain.escrowAddress,
@@ -107,14 +97,19 @@ const ApiWrapper = ({
     });
   }, []);
 
-  const onChangeChainId = useCallback(async (newChainId: string) => {
+  const onChangeChainId = useCallback((newChainId: string) => {
     if (currentChainId === newChainId) return;
+    if (!sdkClient) {
+      throw new Error('SdkClient is not available');
+    }
+
     axios.defaults.baseURL = config.blockchains[newChainId].apiEndpoint;
 
-    const { data: settings } = await getSettings();
+    const { settings } = sdkClient.networks[newChainId];
+
     setSettings(settings);
 
-    await initializeControllers(newChainId, sdkClient, settings);
+    initializeControllers(newChainId, sdkClient, settings);
     setCurrentChainId(newChainId);
     localStorage.setItem(ChainIdLocalStorageKey, newChainId);
     // redirect to correct URL with chainId
@@ -136,19 +131,13 @@ const ApiWrapper = ({
   const currentChain = useMemo(() => {
     if (!sdkClient?.isReady || !currentChainId) return undefined;
 
-    return sdkClient?.sdkSet[currentChainId];
+    return sdkClient?.networks[currentChainId].sdkSet;
   }, [currentChainId, sdkClient?.isReady]);
-
-  useEffect(() => {
-    if (sdkClient?.error) {
-      error(sdkClient?.error, { name: 'warning', size: 16 });
-    }
-  }, [sdkClient?.error]);
 
   // get context value for ApiContext
   const value = useMemo<ApiContextProps>(
     () => ({
-      api: (isRpcClientInitialized && settings && currentChain && settings
+      api: (isRpcClientInitialized && settings && currentChain
         ? {
           collection: collectionController,
           nft: nftController,

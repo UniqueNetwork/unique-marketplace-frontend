@@ -3,6 +3,7 @@ import '@unique-nft/substrate-client/state-queries';
 import { SdkExtrinsics } from '@unique-nft/substrate-client/extrinsics';
 import { SdkTokens, SdkCollections } from '@unique-nft/substrate-client/tokens';
 import { SdkBalance } from '@unique-nft/substrate-client/balance';
+import { Settings } from '../restApi/settings/types';
 
 declare module '@unique-nft/substrate-client' {
   interface Sdk {
@@ -13,19 +14,22 @@ declare module '@unique-nft/substrate-client' {
   }
 }
 
-type SdkSet = {
-  [chainId: string]: { unique: Sdk, kusama: Sdk }
-};
+type SdkSet = { unique: Sdk, kusama: Sdk };
 
-export class SdkClient {
+export class SdkNetworkProvider {
   public isReady = false;
   public error: Error | undefined;
-  public sdkSet: SdkSet = {};
+  public sdkSet: SdkSet | undefined;
+  public settings: Settings;
 
-  async disconnect(chainId: string) {
-    await this.sdkSet[chainId]?.unique.api.disconnect();
-    await this.sdkSet[chainId]?.kusama.api.disconnect();
-    delete this.sdkSet[chainId];
+  constructor(settings: Settings) {
+    this.settings = settings;
+  }
+
+  async disconnect() {
+    await this.sdkSet?.unique.api.disconnect();
+    await this.sdkSet?.kusama.api.disconnect();
+    this.isReady = false;
   }
 
   private async createSdkInstance(url: string) {
@@ -42,18 +46,25 @@ export class SdkClient {
     return sdk;
   }
 
-  async connect(chainId: string, uniqueWsUrl: string, kusamaWsUrl: string) {
+  async connect() {
     this.isReady = false;
-    const sdkPair = {
-      unique: await this.createSdkInstance(uniqueWsUrl),
-      kusama: await this.createSdkInstance(kusamaWsUrl)
-    };
-
     this.sdkSet = {
-      ...this.sdkSet,
-      [chainId]: sdkPair
+      unique: await this.createSdkInstance(this.settings.blockchain.unique.wsEndpoint),
+      kusama: await this.createSdkInstance(this.settings.blockchain.kusama.wsEndpoint)
     };
 
     this.isReady = true;
+  }
+}
+
+export class SdkClient {
+  public isReady = false;
+  public networks: Record<string, SdkNetworkProvider> = {};
+
+  async addNetwork(networkId: string, settings: Settings) {
+    const network = new SdkNetworkProvider(settings);
+    await network.connect();
+    this.networks[networkId] = network;
+    this.isReady = network.isReady;
   }
 }
