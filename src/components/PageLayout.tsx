@@ -14,34 +14,33 @@ export const PageLayout: FC = () => {
   const backgroundImage = useBackground();
 
   const layoutProps = useMemo(() => {
-    if (pathname === '/market') return { heading: 'Market' };
-
-    if (pathname === '/administration') {
-      return { heading: 'Collections' };
-    }
-
-    if (pathname === '/myTokens') {
-      return { heading: 'My tokens' };
-    }
-
-    if (pathname === '/trades') {
-      return { heading: 'Trades' };
-    }
-
-    if (pathname === '/faq') {
-      return { heading: 'FAQ' };
-    }
-
-    if (pathname === '/accounts') {
-      return { heading: 'Manage accounts' };
-    }
-
-    if (pathname === '/market/token') {
+    if (pathname.includes('/market/token')) {
       return {
         breadcrumbs: {
           options: [{ link: '/market', title: 'Market' }, { title: 'Token' }]
         }
       };
+    }
+    if (pathname.includes('/market')) return { heading: 'Market' };
+
+    if (pathname.includes('/administration')) {
+      return { heading: 'Collections' };
+    }
+
+    if (pathname.includes('/myTokens')) {
+      return { heading: 'My tokens' };
+    }
+
+    if (pathname.includes('/trades')) {
+      return { heading: 'Trades' };
+    }
+
+    if (pathname.includes('/faq')) {
+      return { heading: 'FAQ' };
+    }
+
+    if (pathname.includes('/accounts')) {
+      return { heading: 'Manage accounts' };
     }
   }, [pathname]);
 

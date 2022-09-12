@@ -8,6 +8,7 @@ import { useScreenWidthFromThreshold } from 'hooks/useScreenWidthFromThreshold';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { useAdminLoggingIn } from 'api/restApi/admin/login';
 import { useAccounts } from 'hooks/useAccounts';
+import { useApi } from 'hooks/useApi';
 import { TMenuItems } from '../PageLayout';
 import { WalletManager } from './WalletManager/WalletManager';
 import { DesktopMenuLink, MobileMenuLink } from './MenuLink';
@@ -22,6 +23,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
   const [mobileMenuIsOpen, toggleMobileMenu] = useState(false);
   const { selectedAccount, isLoading } = useAccounts();
   const { hasAdminPermission } = useAdminLoggingIn();
+  const { currentChainId } = useApi();
 
   const mobileMenuToggler = useCallback(() => {
     toggleMobileMenu((prevState) => !prevState);
@@ -43,20 +45,20 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
         </LogoLink>
         {!showMobileMenu && (
           <nav>
-            <DesktopMenuLink to='/' active={activeItem === 'Market'}>
+            <DesktopMenuLink to={`/${currentChainId || ''}/market`} active={activeItem === 'Market'}>
               Market
             </DesktopMenuLink>
-            <DesktopMenuLink to='myTokens' active={activeItem === 'My tokens'} disabled={!selectedAccount && !isLoading}>
+            <DesktopMenuLink to={`/${currentChainId || ''}/myTokens`} active={activeItem === 'My tokens'} disabled={!selectedAccount && !isLoading}>
               My tokens
             </DesktopMenuLink>
-            <DesktopMenuLink to='trades' active={activeItem === 'Trades'}>
+            <DesktopMenuLink to={`/${currentChainId || ''}/trades`} active={activeItem === 'Trades'}>
               Trades
             </DesktopMenuLink>
-            <DesktopMenuLink to='faq' active={activeItem === 'FAQ'}>
+            <DesktopMenuLink to='/faq' active={activeItem === 'FAQ'}>
               FAQ
             </DesktopMenuLink>
             {hasAdminPermission &&
-              <DesktopMenuLink to='administration' active={activeItem === 'Collections'}>
+              <DesktopMenuLink to={`/${currentChainId || ''}/administration`} active={activeItem === 'Collections'}>
                 Admin panel
               </DesktopMenuLink>
             }
@@ -68,30 +70,30 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
       </RightSide>
       {showMobileMenu && mobileMenuIsOpen && (
         <MobileMenu>
-          <MobileMenuLink to='/' active={activeItem === 'Market'} onClick={mobileMenuToggler}>
+          <MobileMenuLink to={`/${currentChainId || ''}/market`} active={activeItem === 'Market'} onClick={mobileMenuToggler}>
             Market
           </MobileMenuLink>
           <MobileMenuLink
-            to='myTokens'
+            to={`/${currentChainId || ''}/myTokens`}
             active={activeItem === 'My tokens'}
             onClick={mobileMenuToggler}
             disabled={!selectedAccount && !isLoading}
           >
             My tokens
           </MobileMenuLink>
-          <MobileMenuLink to='trades' active={activeItem === 'Trades'} onClick={mobileMenuToggler}>
+          <MobileMenuLink to={`/${currentChainId || ''}/trades`} active={activeItem === 'Trades'} onClick={mobileMenuToggler}>
             Trades
           </MobileMenuLink>
-          <MobileMenuLink to='faq' active={activeItem === 'FAQ'} onClick={mobileMenuToggler}>
+          <MobileMenuLink to='/faq' active={activeItem === 'FAQ'} onClick={mobileMenuToggler}>
             FAQ
           </MobileMenuLink>
           {deviceSize !== DeviceSize.lg &&
-            <MobileMenuLink to='accounts' active={activeItem === 'Manage accounts'} onClick={mobileMenuToggler}>
+            <MobileMenuLink to={`/${currentChainId || ''}/accounts`} active={activeItem === 'Manage accounts'} onClick={mobileMenuToggler}>
               Manage accounts
             </MobileMenuLink>
           }
           {hasAdminPermission &&
-            <MobileMenuLink to='administration' active={activeItem === 'Collections'} onClick={mobileMenuToggler}>
+            <MobileMenuLink to={`/${currentChainId || ''}/administration`} active={activeItem === 'Collections'} onClick={mobileMenuToggler}>
               Admin panel
             </MobileMenuLink>
           }

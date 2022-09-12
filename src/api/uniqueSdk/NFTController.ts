@@ -1,19 +1,21 @@
 import { Sdk } from '@unique-nft/substrate-client';
-import { TokenId } from './types';
-import { Settings } from '../restApi/settings/types';
+import { TokenId, UniqueController } from './types';
 import { getEthAccount } from './utils/addressUtils';
 import { filterAllowedTokens } from './utils/checkTokenIsAllowed';
 import { NestedToken, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 import { Address } from '@unique-nft/substrate-client/types';
 
-export class UniqueSDKNFTController {
-  private sdk: Sdk;
-  private readonly collectionIds: number[];
-  private readonly allowedTokens: Record<number, string>;
-  constructor(sdk: Sdk, settings: Settings) {
-    this.sdk = sdk;
-    this.collectionIds = settings.blockchain.unique.collectionIds;
-    this.allowedTokens = settings.blockchain?.unique?.allowedTokens.reduce((acc, item) => ({ ...acc, [item.collection]: item.tokens }), {}) || {};
+type UniqueSDKNFTControllerOptions = { sdk: Sdk, collectionIds: number[], allowedTokens: { collection: number, tokens: string }[] };
+
+export class UniqueSDKNFTController implements UniqueController {
+  private sdk: Sdk | undefined;
+  private collectionIds: number[] = [];
+  private allowedTokens: Record<number, string> = {};
+
+  initialize(options: UniqueSDKNFTControllerOptions): void {
+    this.sdk = options.sdk;
+    this.collectionIds = options.collectionIds;
+    this.allowedTokens = options.allowedTokens.reduce((acc, item) => ({ ...acc, [item.collection]: item.tokens }), {}) || {};
   }
 
   async getAccountMarketableTokens(address: Address): Promise<TokenByIdResult[]> {
@@ -46,50 +48,14 @@ export class UniqueSDKNFTController {
   }
 
   async getToken(collectionId: number, tokenId: number): Promise<TokenByIdResult | null> {
-    return await this.sdk.tokens.get_new({ collectionId, tokenId });
-  // async getToken(collectionId: number, tokenId: number): Promise<NFTToken | null> {
-  //   const token = await this.sdk.tokens.get_new({ collectionId, tokenId });
-  //   const collection = await this.sdk.collections.get_new({ collectionId });
-  //   if (!token || !collection) return null;
-  //   const isBundle = !!await this.sdk.tokens.isBundle({ collectionId, tokenId });
-  //
-  //   const { owner, attributes, image, video } = token;
-  //   const { name, tokenPrefix, description, schema } = collection;
-  //
-  //   const imageUrl = image?.fullUrl || '';
-  //   const collectionCover = schema?.coverPicture?.fullUrl || '';
-  //
-  //   const isAllowed = this.allowedTokens[collectionId] ? checkTokenIsAllowed(tokenId, this.allowedTokens[collectionId].split(',')) : true;
-  //
-  //   return {
-  //     id: tokenId,
-  //     owner,
-  //     attributes,
-  //     imageUrl,
-  //     collectionId,
-  //     collectionName: name,
-  //     prefix: tokenPrefix,
-  //     description,
-  //     collectionCover,
-  //     isAllowed,
-  //     video,
-  //     isBundle,
-  //     tokenDescription: {
-  //       collectionName: '', // TODO fix this
-  //       collectionCover: '',
-  //       description: '',
-  //       image: token.image,
-  //       prefix: '',
-  //       attributes: token.attributes
-  //     }
-  //   };
+    return await this.sdk?.tokens.get_new({ collectionId, tokenId }) || null;
   }
 
   async isBundle(collectionId: number, tokenId: number): Promise<boolean> {
-    return !!await this.sdk.tokens.isBundle({ collectionId, tokenId });
+    return !!await this.sdk?.tokens.isBundle({ collectionId, tokenId });
   }
 
   async getBundle(collectionId: number, tokenId: number): Promise<NestedToken | null> {
-    return await this.sdk.tokens.getBundle({ collectionId, tokenId });
+    return await this.sdk?.tokens.getBundle({ collectionId, tokenId }) || null;
   }
 }

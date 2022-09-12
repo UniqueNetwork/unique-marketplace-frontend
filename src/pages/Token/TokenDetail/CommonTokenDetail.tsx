@@ -72,7 +72,7 @@ export const CommonTokenDetail: FC<IProps> = ({
   const { selectedAccount } = useAccounts();
   const deviceSize = useDeviceSize();
 
-  const { chainData } = useApi();
+  const { chainData, currentChainId } = useApi();
 
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
@@ -138,7 +138,7 @@ export const CommonTokenDetail: FC<IProps> = ({
               <Text color='grey-500' size='m'>
                 Owned&nbsp;by
               </Text>
-              <Account href={`${config.scanUrl}account/${owner || '404'}`}>
+              <Account href={`${config.blockchains[currentChainId || '']?.scanUrl}account/${owner || '404'}`}>
                 <Avatar size={24} src={DefaultAvatar} address={owner}/>
                 <Text color='primary-600' size='m' data-testid={`${testid}-owner-address`}>
                   {deviceSize === DeviceSize.lg ? owner || '' : shortcutText(owner || '') }

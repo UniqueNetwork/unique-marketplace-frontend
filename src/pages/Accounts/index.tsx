@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Button, Dropdown, Icon, TableColumnProps, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { BN } from '@polkadot/util';
@@ -40,6 +40,7 @@ type AccountsColumnsProps = {
   onShowWithdrawDepositModal(address: string): () => void
   onShowDeleteLocalAccountModal(address: string): () => void
   onShowGetKsmModal: () => void
+  scanUrl: string
 };
 
 const getAccountsColumns = ({
@@ -48,7 +49,8 @@ const getAccountsColumns = ({
     onShowWithdrawDepositModal,
     isSmallDevice,
     onShowDeleteLocalAccountModal,
-    onShowGetKsmModal
+    onShowGetKsmModal,
+    scanUrl
   }: AccountsColumnsProps): TableColumnProps[] => [
   {
     title: (
@@ -97,7 +99,7 @@ const getAccountsColumns = ({
           <LinkStyled
             target={'_blank'}
             rel={'noreferrer'}
-            href={`${config.scanUrl}account/${formatAddress(accountInfo.address)}`}
+            href={`${scanUrl}account/${formatAddress(accountInfo.address)}`}
           >
             <TextStyled>UniqueScan</TextStyled>
             <IconWrapper>
@@ -173,7 +175,7 @@ export const AccountsPage = () => {
   const [selectedAddress, setSelectedAddress] = useState<string>();
   const [isDropdownOpened, setIsDropdownOpened] = useState(false);
   const deviceSize = useDeviceSize();
-  const { chainData } = useApi();
+  const { chainData, currentChainId } = useApi();
 
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
@@ -335,7 +337,8 @@ export const AccountsPage = () => {
             onShowSendFundsModal,
             onShowWithdrawDepositModal,
             onShowDeleteLocalAccountModal,
-            onShowGetKsmModal
+            onShowGetKsmModal,
+            scanUrl: currentChainId ? config.blockchains[currentChainId]?.scanUrl : ''
           })}
           data={filteredAccounts}
           loading={isLoading || isLoadingDeposits}

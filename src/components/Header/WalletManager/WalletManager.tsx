@@ -1,8 +1,8 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { AccountsManager, Button, Text, useNotifications } from '@unique-nft/ui-kit';
 import { BN } from '@polkadot/util';
+import { AccountsManager, Button, INetwork, Text, useNotifications } from '@unique-nft/ui-kit';
 
 import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
 import { useAccounts } from 'hooks/useAccounts';
@@ -27,12 +27,29 @@ export const WalletManager: FC = () => {
   const { selectedAccount, accounts, isLoading, fetchAccounts, changeAccount } = useAccounts();
   const [isOpen, setIsOpen] = useState(false);
   const [isGetKsmOpened, setIsGetKsmOpened] = useState(false);
-  const navigate = useNavigate();
-  const { chainData } = useApi();
+  const { chainData, settings, currentChainId, onChangeChainId, api } = useApi();
   const { info } = useNotifications();
+  const navigate = useNavigate();
+
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
   }, [chainData?.SS58Prefix]);
+
+  const networks: INetwork[] = useMemo(() => Object.keys(config?.blockchains || {}).map<INetwork>((id) => ({
+    id,
+    name: config?.blockchains[id]?.name || '',
+    icon: {
+      name: `chain-${id.toLowerCase()}`,
+      size: 40
+    }
+  })), [settings]);
+
+  const currentNetwork = useMemo(() => networks.find(({ id }) => id === currentChainId), [networks, currentChainId]);
+
+  const onNetworkChange = useCallback((network: INetwork) => {
+    onChangeChainId(network.id);
+    setIsOpen(false);
+  }, [onChangeChainId]);
 
   const widgetAccounts = useMemo(() => accounts.map((account) => (
     { name: account.meta.name, ...account, address: formatAddress(account.address), substrateAddress: account?.address })
@@ -97,23 +114,17 @@ export const WalletManager: FC = () => {
     );
   }
 
-  if (isLoading) return <BalanceSkeleton />;
+  if (isLoading || !api) return <BalanceSkeleton />;
 
   return (
     <WalletManagerWrapper>
       <AccountsManager
         open={isOpen}
         accounts={widgetAccounts}
-        activeNetwork={{
-          icon: {
-            name: 'chain-quartz',
-            size: 40
-          },
-          id: 'quartz',
-          name: 'Quartz'
-        }}
+        activeNetwork={currentNetwork}
         balance={formatKusamaBalance(currentBalance.value)}
         deposit={formattedAccountDeposit}
+
         depositDescription={
           <>
             {formattedAccountDeposit && <Text color='grey-500' size='xs'>The total market deposit for participation in auctions and
@@ -128,11 +139,11 @@ export const WalletManager: FC = () => {
           </>
         }
         manageBalanceLinkTitle='Manage my balance'
-        networks={[]}
+        networks={networks}
         onAccountChange={widgetAccountChange}
         // onCopyAddressClick={onCopyAddress}
         onManageBalanceClick={onCreateAccountClick}
-        onNetworkChange={function noRefCheck() { }}
+        onNetworkChange={onNetworkChange}
         selectedAccount={widgetSelectedAccount}
         symbol={tokenSymbol}
         avatarRender={widgetAvatarRender}

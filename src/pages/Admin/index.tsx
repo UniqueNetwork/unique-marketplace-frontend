@@ -16,6 +16,7 @@ import SearchField from '../../components/SearchField/SearchField';
 import { useAccounts } from '../../hooks/useAccounts';
 import { CollectionData } from '../../api/restApi/admin/types';
 import config from '../../config';
+import { useApi } from '../../hooks/useApi';
 
 type TOption = {
   iconRight: {
@@ -71,6 +72,7 @@ export const AdminPanelPage: FC = () => {
   const { isLoading: isAccountsLoading } = useAccounts();
   const navigate = useNavigate();
   const { warning } = useNotifications();
+  const { currentChainId } = useApi();
 
   useEffect(() => {
     if (isAccountsLoading) return;
@@ -90,7 +92,7 @@ export const AdminPanelPage: FC = () => {
       setHasAccess(true);
       void await fetchCollections();
     })();
-  }, [hasAdminPermission, isAccountsLoading]);
+  }, [hasAdminPermission, isAccountsLoading, currentChainId]);
 
   const onSortingChange = useCallback((value: SelectOptionProps) => {
     setSortingValue(value as TOption);
@@ -115,9 +117,10 @@ export const AdminPanelPage: FC = () => {
   }, [hasAccess]);
 
   const onCreateCollectionViaWalletClick = useCallback(() => {
-    if (!config.walletUrl || !hasAccess) return;
-    window.open(config.walletUrl, '_blank')?.focus();
-  }, [config.walletUrl, hasAccess]);
+    const { walletUrl } = config.blockchains[currentChainId || ''] || {};
+    if (!walletUrl || !hasAccess) return;
+    window.open(walletUrl, '_blank')?.focus();
+  }, [hasAccess, currentChainId]);
 
   const onManageSponsorshipClick = useCallback((collection: CollectionData) => () => {
     setModalType(AdminPanelModalType.acceptSponsorship);
@@ -140,9 +143,10 @@ export const AdminPanelPage: FC = () => {
   }, []);
 
   const onViewOnScanClick = useCallback((collection: CollectionData) => () => {
-    if (!config.scanUrl) return;
-    window.open(`${config.scanUrl}collections/${collection.id}`, '_blank')?.focus();
-  }, []);
+    const { scanUrl } = config.blockchains[currentChainId || ''] || {};
+    if (!scanUrl) return;
+    window.open(`${scanUrl}collections/${collection.id}`, '_blank')?.focus();
+  }, [currentChainId]);
 
   const filteredCollections = useMemo(() => {
     if (!collections || !hasAccess) return [];

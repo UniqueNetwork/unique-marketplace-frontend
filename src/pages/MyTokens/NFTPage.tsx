@@ -96,7 +96,6 @@ export const NFTPage = () => {
   const { collections } = useCollections();
 
   const { offers, isFetching: isFetchingOffers, fetch } = useOffers();
-
   const { api } = useApi();
 
   useEffect(() => {
@@ -139,7 +138,7 @@ export const NFTPage = () => {
       const filterByStatus = (token: TokenByIdResult & Partial<Offer>) => {
         const { onSell, fixedPrice, timedAuction, notOnSale } = statuses || {};
         if (!onSell && !fixedPrice && !timedAuction && !notOnSale) return true;
-        return (onSell && !!token.seller) ||
+        return (onSell && !fixedPrice && !timedAuction && !!token.seller) ||
           (fixedPrice && !!token.seller && !token.auction) ||
           (timedAuction && !!token.seller && !!token.auction) ||
           (notOnSale && !token.seller);
@@ -222,7 +221,7 @@ export const NFTPage = () => {
     if (selectOption) {
       return filteredTokens.sort((tokenA, tokenB) => {
         const order = selectOption.direction === 'asc' ? 1 : -1;
-        return (tokenA[selectOption.field] || '') > (tokenB[selectOption.field] || '') ? order : -order;
+        return (tokenA?.[selectOption.field] || '') > (tokenB?.[selectOption.field] || '') ? order : -order;
       });
     }
     return filteredTokens;

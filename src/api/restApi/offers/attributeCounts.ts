@@ -33,13 +33,13 @@ export const useAttributeCounts = () => {
       getAttributeCounts([]);
     }
     return [];
-  }, [getAttributeCounts, setIsFetching]);
+  }, [setIsFetching]);
 
   const reset = useCallback(() => {
     getAttributeCounts([]);
     setIsFetching(false);
     setFetchingError(undefined);
-  }, [getAttributeCounts]);
+  }, []);
 
   return {
     attributeCounts,

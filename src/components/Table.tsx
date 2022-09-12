@@ -5,7 +5,6 @@ import { IconProps, SortQuery, Table as UITable, TableColumnProps } from '@uniqu
 import useDeviceSize, { DeviceSize } from '../hooks/useDeviceSize';
 import MobileTable from './MobileTable/MobileTable';
 import Skeleton from './Skeleton/Skeleton';
-import EmptyTable from './EmptyTable';
 
 interface TableProps {
   columns: TableColumnProps[]
