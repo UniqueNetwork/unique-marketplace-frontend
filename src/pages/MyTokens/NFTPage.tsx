@@ -204,7 +204,6 @@ export const NFTPage = () => {
         attributes: offer.tokenDescription?.attributes,
         video: stringToDecodedInfixOrUrlOrCidAndHash(offer.tokenDescription?.video),
         owner: offer.seller,
-        isBundle: false, // TODO fix this once offer will have nested info
         ...offer
       })) || []),
       ...tokens

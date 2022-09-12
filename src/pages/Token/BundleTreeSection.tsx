@@ -45,7 +45,6 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
       } else if (token) {
         setIsBundleLoading(true);
         const response = await uniqueSdk?.tokens.getBundle({ collectionId: token.collectionId, tokenId: token.tokenId });
-        // console.log('getbundle response', response);
         if (response) {
           setBundle([response]);
         }
