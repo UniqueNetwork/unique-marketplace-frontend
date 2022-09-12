@@ -5,11 +5,14 @@ import { Grey100 } from 'styles/colors';
 import { INestingToken } from '../types';
 import TokenCard from './TokenCard';
 import { INestedSectionView } from '../../TreeView/types';
+import { useCollection } from '../useCollection';
+import Skeleton from '../../Skeleton/Skeleton';
 
 export const NestedSection: FC<INestedSectionView<INestingToken>> = ({ selectedToken, onViewNodeDetails }) => {
+  const { isCollectionLoading, collection } = useCollection(selectedToken?.collectionId);
   return (
     <NestedDetails>
-      {selectedToken && <Text color='additional-dark' size='l'>Nested in T-{selectedToken.tokenId} C-{selectedToken.collectionId}</Text>}
+      {selectedToken && <Title token={selectedToken} isCollectionLoading={isCollectionLoading} prefix={collection?.tokenPrefix || ''}/>}
       <NestedTokens>
         {selectedToken?.nestingChildTokens?.map((token) => (
           <TokenCard key={`T-${token.tokenId} C-${token.collectionId}`} token={token} onViewNodeDetails={onViewNodeDetails}/>
@@ -41,3 +44,10 @@ const NestedTokens = styled.div`
   flex-wrap: wrap;
   gap: 16px;
 `;
+
+const Title: FC<{isCollectionLoading: boolean, prefix: string, token: INestingToken }> = ({ isCollectionLoading, prefix, token }) => {
+  if (isCollectionLoading) return <Skeleton height={28} width={156} />;
+  return (
+    <Text color='additional-dark' size='l'>Nested in {prefix} #{token.tokenId}</Text>
+  );
+};

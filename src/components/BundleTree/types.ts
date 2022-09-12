@@ -1,13 +1,6 @@
-import { DecodedAttributes, DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
-import { Address } from '@unique-nft/substrate-client/types';
+import { NestedToken } from '@unique-nft/substrate-client/tokens';
 
-export interface INestingToken {
-  tokenId: number
-  collectionId: number
-  owner?: Address
-  nestingChildTokens: INestingToken[]
-  attributes: DecodedAttributes
-  image?: DecodedInfixOrUrlOrCidAndHash | string
+export type INestingToken = NestedToken & {
   opened?: boolean
   disabled?: boolean
   selected?: boolean

@@ -22,13 +22,13 @@ export type TTokensCard = {
   collectionId?: number
   tokenImageUrl?: string
   testid: string
-  badge?: string
 };
 
-export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, badge, testid, ...props }) => {
+export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, testid, ...props }) => {
   const [token, setToken] = useState<TokenByIdResult | undefined>(props.token);
   const [collection, setCollection] = useState<(CollectionInfoWithSchema) | undefined>();
   const [isFetching, setIsFetching] = useState<boolean>(false);
+  const [isBundle, setIsBundle] = useState<boolean>();
 
   const { api } = useApi();
   const { selectedAccount } = useAccounts();
@@ -61,6 +61,10 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, badg
         if (!token) {
           const token = await api?.nft?.getToken(collectionId, tokenId);
           if (token) setToken(token);
+        }
+
+        if (typeof isBundle !== 'undefined') {
+          setIsBundle(await api?.nft?.isBundle(collectionId, tokenId));
         }
 
         if (!collection) {
@@ -96,7 +100,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, badg
         imageUrl={imageUrl}
         video={video}
         testid={`${testid}-token-media`}
-        badge={badge}
+        badge={isBundle ? 'Bundle' : ''}
       />
       <Description>
         <Link to={`/token/${collectionId}/${tokenId}`} title={tokenTitle}>

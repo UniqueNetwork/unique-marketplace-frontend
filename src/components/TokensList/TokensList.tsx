@@ -23,7 +23,6 @@ export const TokensList: FC<TTokensList> = ({ tokens, isLoading, testid }) => {
             collectionId={token?.collectionId}
             {...('seller' in token ? { offer: token } : { token })}
             testid={`${testid}-card`}
-            badge={(token.isBundle || token.nestingChildTokens) ? 'Bundle' : ''}
           />
         ))}
 

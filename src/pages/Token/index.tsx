@@ -29,6 +29,7 @@ const TokenPage = () => {
   const [isFetchingToken, setIsFetchingToken] = useState<boolean>(true);
   const { offer, fetch: fetchOffer, isFetching: isFetchingOffer } = useOffer(Number(collectionId), Number(id));
   const [marketType, setMarketType] = useState<MarketType>(MarketType.default);
+  const [isBundle, setIsBundle] = useState(false);
   const navigate = useNavigate();
 
   const { info } = useNotifications();
@@ -37,6 +38,7 @@ const TokenPage = () => {
     if (!api?.nft) return;
     setIsFetchingToken(true);
     const token = await api.nft?.getToken(Number(collectionId), Number(id));
+    setIsBundle(await api.nft?.isBundle(Number(collectionId), Number(id)));
     const collection = await api.collection?.getCollection(Number(collectionId));
     if (token) setToken(token);
     if (collection) setCollection(collection);
@@ -45,12 +47,19 @@ const TokenPage = () => {
 
   useEffect(() => {
     if (isFetchingOffer) return;
-    if (offer || token) {
-      setIsFetchingToken(false);
-      return;
-    }
-    void fetchToken();
-  }, [fetchToken, isFetchingOffer, offer, token]);
+    (async () => {
+      if (offer) {
+        const collection = await api?.collection?.getCollection(Number(collectionId));
+        if (collection) setCollection(collection);
+        setIsBundle(!!offer.tokenDescription.nestingChildTokens);
+      }
+      if (offer || token) {
+        setIsFetchingToken(false);
+        return;
+      }
+      await fetchToken();
+    })();
+  }, [fetchToken, isFetchingOffer, offer, token, api, collectionId]);
 
   const onClose = useCallback(() => {
     setMarketType(MarketType.default);
@@ -94,7 +103,7 @@ const TokenPage = () => {
   }, [navigate]);
 
   // if we opened child token from bundle which is on sale
-  const isIgnoreOffer = useMemo(() => (!(!token || !offer || (token.id === offer.tokenId && token.collectionId === offer.collectionId))), [token, offer]);
+  const isIgnoreOffer = useMemo(() => (!(!token || !offer || (token.tokenId === offer.tokenId && token.collectionId === offer.collectionId))), [token, offer]);
 
   if (!isFetchingOffer && !isFetchingToken && !token && !offer) return <Error404 />;
 
@@ -113,6 +122,7 @@ const TokenPage = () => {
           offer={!isIgnoreOffer ? offer : undefined}
           isLoading={isFetchingOffer || isFetchingToken}
           testid={`${testid}`}
+          isBundle={isBundle}
         >
           <TokenTrading
             token={token}
@@ -138,11 +148,10 @@ const TokenPage = () => {
           />
         </CommonTokenDetail>
       </TokenPagePaper>
-      {(token?.isBundle || offer?.tokenDescription.nestingChildTokens) && <BundleTreeSection
+      {isBundle && <BundleTreeSection
         onViewTokenDetails={setToken}
         token={token}
         offer={offer}
-        fetchOffer={fetchOffer}
       />}
     </>
   );

@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import { Dropdown, Icon } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
-import { AdditionalDark, AdditionalLight, Coral500, Grey300, Primary100, Primary200, Primary400, Primary500, Secondary400 } from 'styles/colors';
+import { AdditionalDark, AdditionalLight, BlueGrey500, Coral500, Grey300, Primary100, Primary200, Primary400, Primary500, Secondary400 } from 'styles/colors';
 import Square from 'static/icons/square.svg';
 import Pin from 'static/icons/pin.svg';
 import { INodeView } from '../../TreeView/types';
@@ -10,6 +10,8 @@ import { INestingToken } from '../types';
 import { useParams } from 'react-router-dom';
 import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';
 import MobileModalActions from './MobileModalActions';
+import Skeleton from '../../Skeleton/Skeleton';
+import { useCollection } from '../useCollection';
 
 const NodeView: FC<INodeView<INestingToken>> = ({
   arrowClicked,
@@ -26,6 +28,7 @@ const NodeView: FC<INodeView<INestingToken>> = ({
   const [menuVisible, setMenuVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const deviceSize = useDeviceSize();
+  const { isCollectionLoading, collection } = useCollection(data.collectionId);
 
   const onClick = useCallback((event: React.MouseEvent) => {
     if (deviceSize === DeviceSize.sm) setModalVisible(true);
@@ -93,7 +96,7 @@ const NodeView: FC<INodeView<INestingToken>> = ({
             <Icon size={16} name={data.nestingChildTokens?.length ? 'triangle' : ''} color={Primary500} />
           </Arrow>
           <Picture alt={`T-${data.tokenId} C-${data.collectionId}`} src={(typeof data.image === 'string' ? data.image : data.image?.fullUrl) || undefined}/>
-          <Name>T-{data.tokenId} C-{data.collectionId}</Name>
+          <TokenTitle token={data} isCollectionLoading={isCollectionLoading} prefix={collection?.tokenPrefix || ''}/>
         </NftInfo>
         {deviceSize !== DeviceSize.sm && <ActionButtons className={'action-buttons'}>
           {menuVisible && <ActionsMenuWrapper className={'menu'}>
@@ -197,14 +200,6 @@ const Arrow = styled.div<{ isOpened: boolean | undefined, isFirst: boolean | und
   margin-left: ${({ isFirst, level }) => (isFirst ? 24 : 24 + 16 * level)}px;
 `;
 
-const Name = styled.p`
-  cursor: pointer;
-  display: inline-block;
-  font-size: 16px;
-  line-height: 24px;
-  color: ${AdditionalDark};
-`;
-
 const ActionsMenuWrapper = styled.div`
   display: flex;
 
@@ -282,3 +277,30 @@ const IconWrapper = styled.div`
 `;
 
 export default NodeView;
+
+const TokenTitle: FC<{isCollectionLoading: boolean, prefix: string, token: INestingToken}> = ({ isCollectionLoading, prefix, token }) => {
+  if (isCollectionLoading) return <Skeleton height={24} width={60} />;
+  return (
+    <TitleContainer>
+      <Name>{prefix} #{token.tokenId}</Name>
+      {token.nestingChildTokens?.length > 0 && <NestedCount>{token.nestingChildTokens.length} item{token.nestingChildTokens.length > 1 && 's'}</NestedCount>}
+    </TitleContainer>
+  );
+};
+
+const TitleContainer = styled.div`
+  cursor: pointer;
+  display: inline-block;
+`;
+
+const Name = styled.p`
+  font-size: 16px;
+  line-height: 24px;
+  color: ${AdditionalDark};
+`;
+
+const NestedCount = styled.p`
+  font-size: 12px;
+  line-height: 18px;
+  color: ${BlueGrey500};
+`;

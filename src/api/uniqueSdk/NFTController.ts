@@ -3,7 +3,7 @@ import { TokenId } from './types';
 import { Settings } from '../restApi/settings/types';
 import { getEthAccount } from './utils/addressUtils';
 import { filterAllowedTokens } from './utils/checkTokenIsAllowed';
-import { TokenByIdResult } from '@unique-nft/substrate-client/tokens';
+import { NestedToken, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 import { Address } from '@unique-nft/substrate-client/types';
 
 export class UniqueSDKNFTController {
@@ -83,5 +83,13 @@ export class UniqueSDKNFTController {
   //       attributes: token.attributes
   //     }
   //   };
+  }
+
+  async isBundle(collectionId: number, tokenId: number): Promise<boolean> {
+    return !!await this.sdk.tokens.isBundle({ collectionId, tokenId });
+  }
+
+  async getBundle(collectionId: number, tokenId: number): Promise<NestedToken | null> {
+    return await this.sdk.tokens.getBundle({ collectionId, tokenId });
   }
 }

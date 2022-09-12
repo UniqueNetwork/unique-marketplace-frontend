@@ -28,6 +28,7 @@ interface IProps {
   offer?: Offer
   isLoading?: boolean
   testid: string
+  isBundle: boolean
 }
 
 export const CommonTokenDetail: FC<IProps> = ({
@@ -36,7 +37,8 @@ export const CommonTokenDetail: FC<IProps> = ({
   collection,
   offer,
   isLoading,
-  testid
+  testid,
+  isBundle
 }) => {
   const {
     collectionId,
@@ -114,7 +116,7 @@ export const CommonTokenDetail: FC<IProps> = ({
             src={image}
             video={videoProp}
             testid={`${testid}-token-picture`}
-            badge={(!token?.isBundle && deviceSize > DeviceSize.md) ? 'Bundle' : ''}
+            badge={(isBundle && deviceSize > DeviceSize.md) ? 'Bundle' : ''}
           />
         }
       </PictureWrapper>

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
 import { Heading, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { PagePaper } from 'components/PagePaper/PagePaper';
@@ -8,24 +8,23 @@ import { INestingToken } from 'components/BundleTree/types';
 import { NestedSection } from 'components/BundleTree/NestedSection/NestedSection';
 import BundleTree from 'components/TreeView/BundleTree';
 import { useNavigate } from 'react-router-dom';
-import { NFTToken } from 'api/uniqueSdk/types';
 import MobileBundleTreeSection from './MobileBundleTreeSection';
 import { useApi } from 'hooks/useApi';
 import Skeleton from '../../components/Skeleton/Skeleton';
 import { Offer } from '../../api/restApi/offers/types';
+import { TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 
 const areNodesEqual = (a: INestingToken, b: INestingToken) => a.collectionId === b.collectionId && a.tokenId === b.tokenId;
 
 const getKey = (a: INestingToken) => `T${a.tokenId}C${a.collectionId}`;
 
 interface IProps {
-  onViewTokenDetails(token: NFTToken): void
-  token?: NFTToken
+  onViewTokenDetails: Dispatch<SetStateAction<TokenByIdResult | undefined>>
+  token?: TokenByIdResult
   offer?: Offer
-  fetchOffer: (collectionId: number, tokenId: number) => Promise<Offer | null>
 }
 
-function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token, offer, fetchOffer }: IProps) {
+function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token, offer }: IProps) {
   const navigate = useNavigate();
   const { uniqueSdk } = useApi();
   const [isMobileViewVisible, setIsMobileViewVisible] = useState(false);
@@ -45,7 +44,7 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
         setBundle([bundle]);
       } else if (token) {
         setIsBundleLoading(true);
-        const response = await uniqueSdk?.tokens.getBundle({ collectionId: token.collectionId, tokenId: token.id });
+        const response = await uniqueSdk?.tokens.getBundle({ collectionId: token.collectionId, tokenId: token.tokenId });
         // console.log('getbundle response', response);
         if (response) {
           setBundle([response]);
@@ -81,23 +80,9 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
     return count;
   }, [bundle]);
 
-  const onViewTokenDetails = useCallback((token: INestingToken) => {
+  const onViewTokenDetails = useCallback((token: TokenByIdResult) => {
     navigate(`/token/${token.collectionId}/${token.tokenId}`);
-    onViewTokenDetailsProps({
-      ...token,
-      id: token.tokenId,
-      imageUrl: token.image,
-      isBundle: true,
-      tokenDescription: {
-        collectionName: '', // TODO fix this
-        collectionCover: '',
-        description: '',
-        image: token.image,
-        prefix: '',
-        attributes: token.attributes,
-        nestingChildTokens: token.nestingChildTokens
-      }
-    });
+    onViewTokenDetailsProps(token);
     if (isMobileViewVisible) closeView();
   }, [onViewTokenDetailsProps, isMobileViewVisible, closeView]);
 

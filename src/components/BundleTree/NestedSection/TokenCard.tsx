@@ -1,13 +1,15 @@
-import React, { useCallback, useState } from 'react';
+import React, { FC, useCallback, useState } from 'react';
 import { Dropdown, Icon, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { AdditionalDark, AdditionalLight, Coral500, Grey300, Primary500 } from 'styles/colors';
-import { Link } from 'react-router-dom';
 import { Picture } from '../../Picture';
-import { ITokenCard } from '../types';
+import { INestingToken, ITokenCard } from '../types';
+import { useCollection } from '../useCollection';
+import Skeleton from '../../Skeleton/Skeleton';
 
 function TokenCard({ token, onViewNodeDetails }: ITokenCard) {
   const [menuVisible, setMenuVisible] = useState(false);
+  const { isCollectionLoading, collection } = useCollection(token.collectionId);
 
   const onTransfer = useCallback(() => {
     console.log('onTransfer');
@@ -32,8 +34,12 @@ function TokenCard({ token, onViewNodeDetails }: ITokenCard) {
   return (
     <TokenCardWrapper onMouseEnter={showMenu} onMouseLeave={hideMenu} onClick={viewTokenDetails}>
       <Picture alt={`T-${token.tokenId} C-${token.collectionId}`} src={(typeof token.image === 'string' ? token.image : token.image?.fullUrl) || undefined}/>
-      <Text color='additional-dark' size='m'>{`T-${token.tokenId} C-${token.collectionId}`}</Text>
-      <Text color='grey-500' size='s'>NFT</Text>
+      <TokenTitle
+        token={token}
+        mode={collection?.mode || ''}
+        prefix={collection?.tokenPrefix || ''}
+        isCollectionLoading={isCollectionLoading}
+      />
       {token.nestingChildTokens && <Text color='grey-500' size='xs'>{token.nestingChildTokens.length} item{token.nestingChildTokens.length > 1 && 's'}</Text>}
       {menuVisible && <ActionsMenuWrapper className={'menu'}>
         <Dropdown
@@ -170,3 +176,13 @@ const IconWrapper = styled.div`
 `;
 
 export default TokenCard;
+
+const TokenTitle: FC<{isCollectionLoading: boolean, prefix: string, token: INestingToken, mode: string }> = ({ isCollectionLoading, prefix, token, mode }) => {
+  if (isCollectionLoading) return <Skeleton height={52} width={62} />;
+  return (
+    <>
+      <Text color='additional-dark' size='m'>{prefix} #{token.tokenId}</Text>
+      <Text color='grey-500' size='s'>{mode}</Text>
+    </>
+  );
+};
