@@ -6,13 +6,10 @@ import { ApiContextProps, ApiProvider } from './ApiContext';
 import AuctionSocketProvider from './restApi/auction/AuctionSocketProvider';
 import { Settings } from './restApi/settings/types';
 import { SdkClient } from './sdk/sdkClient';
-import { UniqueSDKNFTController } from './uniqueSdk/NFTController';
-import { UniqueSDKCollectionController } from './uniqueSdk/collectionController';
-import { UniqueSDKMarketController } from './uniqueSdk/marketController';
 import config from '../config';
 import axios from '../api/restApi/base/axios';
-import { sdkClient as sdk, nftController as nft, collectionController as collection, marketController as market } from '.';
-import { getSettings } from './restApi/settings/settings';
+import { sdkClient as sdk } from '.';
+import { getSettings, useSettings } from './restApi/settings/settings';
 
 keyring.loadAll({});
 
@@ -21,17 +18,11 @@ const ChainIdLocalStorageKey = 'unique_market_chain_id';
 interface ChainProviderProps {
   children: React.ReactNode
   sdkClient?: SdkClient
-  nftController?: UniqueSDKNFTController
-  collectionController?: UniqueSDKCollectionController
-  marketController?: UniqueSDKMarketController
 }
 
 const ApiWrapper = ({
   children,
-  sdkClient = sdk,
-  nftController = nft,
-  collectionController = collection,
-  marketController = market
+  sdkClient = sdk
 }: ChainProviderProps) => {
   const [isRpcClientInitialized, setRpcClientInitialized] = useState<boolean>(false);
   const navigate = useNavigate();
@@ -39,6 +30,7 @@ const ApiWrapper = ({
   const [settings, setSettings] = useState<Settings>();
   const [currentChainId, setCurrentChainId] = useState<string>('');
   const { error } = useNotifications();
+  const { fetchSettings } = useSettings();
 
   useEffect(() => {
     (async () => {
@@ -51,49 +43,21 @@ const ApiWrapper = ({
 
       const initialChainId = chainIdParam || storedChainId || defaultChainId;
 
-      await Promise.all(Object.values(config.blockchains).map(async (blockchain) => {
-        axios.defaults.baseURL = blockchain.apiEndpoint;
-        const { data: settings } = await getSettings();
-        await sdkClient.addNetwork(blockchain.network.toLowerCase(), settings);
-      }));
+      const settings = await fetchSettings(config.blockchains);
+
+      await sdk.addNetworks(settings);
 
       axios.defaults.baseURL = config.blockchains[initialChainId]?.apiEndpoint;
       setSettings(sdkClient?.networks[initialChainId].settings);
+      sdkClient?.setNetwork(initialChainId);
+
       setCurrentChainId(initialChainId);
-      initializeControllers(initialChainId, sdkClient, sdkClient.networks[initialChainId]?.settings);
       setRpcClientInitialized(sdkClient?.isReady);
     })().then(() => {
       console.log('Rpc connection: success');
     }).catch((e) => {
       error('Rpc connection: failed', { name: 'warning', size: 16 });
       console.log('Rpc connection: failed', e);
-    });
-  }, []);
-
-  const initializeControllers = useCallback((chainId: string, sdkClient: SdkClient, settings: Settings) => {
-    if (!sdkClient) {
-      throw new Error('SdkClient is not available');
-    }
-    const currentChain = sdkClient?.networks[chainId];
-
-    if (!currentChain || !currentChain.sdkSet) return;
-
-    nftController?.initialize({
-      sdk: currentChain.sdkSet.unique,
-      allowedTokens: settings.blockchain.unique.allowedTokens,
-      collectionIds: settings.blockchain.unique.collectionIds
-    });
-    collectionController?.initialize({
-      sdk: currentChain.sdkSet?.unique,
-      collectionIds: settings.blockchain.unique.collectionIds
-    });
-    marketController?.initialize({
-      uniqueSdk: currentChain.sdkSet.unique,
-      kusamaSdk: currentChain.sdkSet.kusama,
-      auctionAddress: settings.auction.address,
-      contractAddress: settings.blockchain.unique.contractAddress,
-      escrowAddress: settings.blockchain.escrowAddress,
-      wsEndpoint: settings.blockchain.unique.wsEndpoint
     });
   }, []);
 
@@ -109,7 +73,7 @@ const ApiWrapper = ({
 
     setSettings(settings);
 
-    initializeControllers(newChainId, sdkClient, settings);
+    sdkClient?.setNetwork(newChainId);
     setCurrentChainId(newChainId);
     localStorage.setItem(ChainIdLocalStorageKey, newChainId);
     // redirect to correct URL with chainId
@@ -139,9 +103,9 @@ const ApiWrapper = ({
     () => ({
       api: (isRpcClientInitialized && settings && currentChain
         ? {
-          collection: collectionController,
-          nft: nftController,
-          market: marketController
+          collection: sdkClient?.collectionController,
+          nft: sdkClient?.nftController,
+          market: sdkClient?.marketController
         }
         : undefined),
       uniqueSdk: currentChain?.unique,
