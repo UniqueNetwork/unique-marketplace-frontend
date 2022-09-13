@@ -4,33 +4,36 @@ import { AxiosError } from 'axios';
 import { get } from '../base';
 import { defaultParams } from '../base/axios';
 import { ResponseError } from '../base/types';
-import { GetTradesRequestPayload, Trade } from './types';
+import { GetTradesRequestPayload, Trade, TradesResponse } from './types';
+import { useApi } from '../../../hooks/useApi';
 
 const endpoint = '/api/Trades';
 
-export const getTrades = ({ seller, ...payload }: GetTradesRequestPayload) => get(`${endpoint}${seller ? '/' + seller : ''}`, { ...defaultParams, params: payload });
+export const getTrades = (baseURL: string, { seller, ...payload }: GetTradesRequestPayload) => get<TradesResponse>(`${endpoint}${seller ? '/' + seller : ''}`, { ...defaultParams, baseURL, params: payload });
 
 export const useTrades = () => {
   const [trades, setTrades] = useState<Trade[]>([]);
   const [tradesCount, setTradesCount] = useState<number>(0);
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [fetchingError, setFetchingError] = useState<ResponseError | undefined>();
+  const { baseURL } = useApi();
 
-  const fetch = useCallback((payload: GetTradesRequestPayload) => {
+  const fetch = useCallback(async (payload: GetTradesRequestPayload) => {
     setIsFetching(true);
-    getTrades(payload).then((response) => {
+    try {
+      const response = await getTrades(baseURL, payload);
       if (response.status === 200) {
         setTrades(response.data.items);
         setTradesCount(response.data.itemsCount);
         setIsFetching(false);
       }
-    }).catch((err: AxiosError) => {
+    } catch (err) {
       setFetchingError({
-        status: err.response?.status,
-        message: err.message
+        status: (err as AxiosError).response?.status,
+        message: (err as AxiosError).message
       });
-    });
-  }, []);
+    }
+  }, [baseURL]);
 
   return {
     trades,

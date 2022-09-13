@@ -10,7 +10,7 @@ import { fromStringToBnString } from '../../../utils/bigNum';
 
 const endpoint = '/api/Offers';
 
-export const getOffers = (payload: GetOffersRequestPayload) => get<OffersResponse>(endpoint, { ...defaultParams, params: payload });
+export const getOffers = (baseURL: string, payload: GetOffersRequestPayload) => get<OffersResponse>(endpoint, { ...defaultParams, baseURL, params: payload });
 
 export const useOffers = () => {
   const [offers, setOffers] = useState<Offer[]>([]);
@@ -19,12 +19,12 @@ export const useOffers = () => {
   const [attributeCounts, setAttributeCounts] = useState<AttributeCount[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [fetchingError, setFetchingError] = useState<ResponseError | undefined>();
-  const { api } = useApi();
+  const { api, baseURL } = useApi();
 
   const fetch = useCallback(async ({ minPrice, maxPrice, ...payload }: GetOffersRequestPayload) => {
     setIsFetching(true);
     try {
-      const { status, data } = await getOffers({
+      const { status, data } = await getOffers(baseURL, {
         ...payload,
         minPrice: minPrice && fromStringToBnString(minPrice, api?.market?.kusamaDecimals),
         maxPrice: maxPrice && fromStringToBnString(maxPrice, api?.market?.kusamaDecimals)
@@ -45,12 +45,12 @@ export const useOffers = () => {
       });
     }
     return { items: [], attributes: {}, attributesCount: [], itemsCount: 0, page: 1, pageSize: 10 };
-  }, [api?.market?.kusamaDecimals]);
+  }, [baseURL, api?.market?.kusamaDecimals]);
 
   const fetchMore = useCallback(async ({ minPrice, maxPrice, ...payload }: GetOffersRequestPayload) => {
     setIsFetching(true);
     try {
-      const { status, data } = await getOffers({
+      const { status, data } = await getOffers(baseURL, {
         ...payload,
         minPrice: minPrice && fromStringToBnString(minPrice, api?.market?.kusamaDecimals),
         maxPrice: maxPrice && fromStringToBnString(maxPrice, api?.market?.kusamaDecimals)
@@ -66,7 +66,7 @@ export const useOffers = () => {
         message
       });
     }
-  }, [offers, api?.market?.kusamaDecimals]);
+  }, [baseURL, offers, api?.market?.kusamaDecimals]);
 
   return {
     offers,

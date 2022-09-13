@@ -16,11 +16,11 @@ const StatusFilter: FC<StatusFilterProps> = ({ value, onChange, testid }) => {
   const { selectedAccount } = useAccounts();
 
   const onFixedPriceChange = useCallback((value: boolean) => {
-    onChange({ onSell: value, fixedPrice: value, timedAuction, notOnSale: false });
-  }, [timedAuction, notOnSale, onChange]);
+    onChange({ onSell: value || onSell, fixedPrice: value, timedAuction, notOnSale: false });
+  }, [timedAuction, onSell, onChange]);
 
   const onTimedAuctionChange = useCallback((value: boolean) => {
-    onChange({ onSell: value, fixedPrice, timedAuction: value, notOnSale: false });
+    onChange({ onSell: value || onSell, fixedPrice, timedAuction: value, notOnSale: false });
   }, [onSell, fixedPrice, onChange]);
 
   const onMyNFTsOnSellChange = useCallback((value: boolean) => {

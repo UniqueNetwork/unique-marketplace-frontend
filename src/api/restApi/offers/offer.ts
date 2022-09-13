@@ -5,20 +5,22 @@ import { get } from '../base';
 import { Offer } from './types';
 import { defaultParams } from '../base/axios';
 import { ResponseError } from '../base/types';
+import { useApi } from 'hooks/useApi';
 
 const endpoint = '/api/offer';
 
-export const getOffer = (collectionId: number, tokenId: number) => get<Offer>(`${endpoint}/${collectionId}/${tokenId}`, { ...defaultParams });
+export const getOffer = (baseURL: string, collectionId: number, tokenId: number) => get<Offer>(`${endpoint}/${collectionId}/${tokenId}`, { ...defaultParams, baseURL });
 
 export const useOffer = (collectionId: number, tokenId: number) => {
   const [offer, setOffer] = useState<Offer>();
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const [fetchingError, setFetchingError] = useState<ResponseError | undefined>();
+  const { baseURL } = useApi();
 
   const fetch = useCallback(async (collectionId: number, tokenId: number) => {
     setIsFetching(true);
     try {
-      const { status, data } = await getOffer(collectionId, tokenId);
+      const { status, data } = await getOffer(baseURL, collectionId, tokenId);
       if (status === 200) {
         setOffer(data);
         setIsFetching(false);
@@ -33,8 +35,8 @@ export const useOffer = (collectionId: number, tokenId: number) => {
         message
       });
     }
-    return null;
-  }, []);
+    return [];
+  }, [baseURL]);
 
   useEffect(() => {
     fetch(collectionId, tokenId);

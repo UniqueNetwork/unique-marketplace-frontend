@@ -9,7 +9,7 @@ export class UniqueSDKCollectionController implements UniqueController {
   private sdk: Sdk | undefined;
   private collectionIds: number[] = [];
 
-  initialize(options: { sdk: Sdk, collectionIds: number[] }): void {
+  setNetwork(options: { sdk: Sdk, collectionIds: number[] }): void {
     this.sdk = options.sdk;
     this.collectionIds = options.collectionIds;
   }

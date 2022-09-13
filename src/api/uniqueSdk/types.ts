@@ -9,7 +9,7 @@ export type TokenId = {
 };
 
 export interface UniqueController {
-  initialize(options: unknown): void
+  setNetwork(options: unknown): void
 }
 
 export type TTransaction = {

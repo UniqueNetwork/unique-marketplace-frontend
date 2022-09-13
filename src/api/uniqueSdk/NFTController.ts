@@ -12,7 +12,7 @@ export class UniqueSDKNFTController implements UniqueController {
   private collectionIds: number[] = [];
   private allowedTokens: Record<number, string> = {};
 
-  initialize(options: UniqueSDKNFTControllerOptions): void {
+  setNetwork(options: UniqueSDKNFTControllerOptions): void {
     this.sdk = options.sdk;
     this.collectionIds = options.collectionIds;
     this.allowedTokens = options.allowedTokens.reduce((acc, item) => ({ ...acc, [item.collection]: item.tokens }), {}) || {};
