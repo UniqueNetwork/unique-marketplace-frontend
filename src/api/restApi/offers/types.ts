@@ -1,6 +1,8 @@
 import { PaginatedResponse, Pagination, Sortable } from '../base/types';
 import { VideoAttribute } from '../../uniqueSdk/types';
 import { CollectionMode, DecodedAttributes, DecodedInfixOrUrlOrCidAndHash, UniqueCollectionSchemaDecoded } from '@unique-nft/substrate-client/tokens';
+import { INestingToken } from 'components/BundleTree/types';
+import { Address } from '@unique-nft/substrate-client/types';
 
 export type GetOffersRequestPayload = {
   collectionId?: number | number[]
@@ -47,9 +49,11 @@ export type Offer = {
   creationDate: string
   auction: Auction | null
   tokenDescription: {
-    image?: DecodedInfixOrUrlOrCidAndHash | string
+    image: DecodedInfixOrUrlOrCidAndHash
     attributes: DecodedAttributes
-    video?: string | VideoAttribute
+    video?: VideoAttribute
+    nestingChildTokens?: INestingToken[]
+    owner: Address
   },
   collectionDescription: {
     description: string;

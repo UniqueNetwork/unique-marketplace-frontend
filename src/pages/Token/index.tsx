@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Icon, Link, useNotifications } from '@unique-nft/ui-kit';
 import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
@@ -16,6 +16,7 @@ import { shortcutText } from '../../utils/textUtils';
 import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
 import styled from 'styled-components';
 import { BlueGrey500 } from 'styles/colors';
+import BundleTreeSection from './BundleTreeSection';
 
 const testid = 'token-page';
 
@@ -28,6 +29,7 @@ const TokenPage = () => {
   const [isFetchingToken, setIsFetchingToken] = useState<boolean>(true);
   const { offer, fetch: fetchOffer, isFetching: isFetchingOffer } = useOffer(Number(collectionId), Number(id));
   const [marketType, setMarketType] = useState<MarketType>(MarketType.default);
+  const [isBundle, setIsBundle] = useState(false);
   const navigate = useNavigate();
 
   const { info } = useNotifications();
@@ -36,6 +38,7 @@ const TokenPage = () => {
     if (!api?.nft) return;
     setIsFetchingToken(true);
     const token = await api.nft?.getToken(Number(collectionId), Number(id));
+    setIsBundle(await api.nft?.isBundle(Number(collectionId), Number(id)));
     const collection = await api.collection?.getCollection(Number(collectionId));
     if (token) setToken(token);
     if (collection) setCollection(collection);
@@ -44,12 +47,19 @@ const TokenPage = () => {
 
   useEffect(() => {
     if (isFetchingOffer) return;
-    if (offer || token) {
-      setIsFetchingToken(false);
-      return;
-    }
-    void fetchToken();
-  }, [fetchToken, isFetchingOffer, offer, token]);
+    (async () => {
+      if (offer) {
+        const collection = await api?.collection?.getCollection(Number(collectionId));
+        if (collection) setCollection(collection);
+        setIsBundle(!!offer.tokenDescription.nestingChildTokens);
+      }
+      if (offer || token) {
+        setIsFetchingToken(false);
+        return;
+      }
+      await fetchToken();
+    })();
+  }, [fetchToken, isFetchingOffer, offer, token, api, collectionId]);
 
   const onClose = useCallback(() => {
     setMarketType(MarketType.default);
@@ -92,6 +102,9 @@ const TokenPage = () => {
     }
   }, [navigate]);
 
+  // if we opened child token from bundle which is on sale
+  const isIgnoreOffer = useMemo(() => (!(!token || !offer || (token.tokenId === offer.tokenId && token.collectionId === offer.collectionId))), [token, offer]);
+
   if (!isFetchingOffer && !isFetchingToken && !token && !offer) return <Error404 />;
 
   // TODO: split into more categories here instead of just "buy/sell" and putting splitting inside them
@@ -105,14 +118,15 @@ const TokenPage = () => {
       <TokenPagePaper>
         <CommonTokenDetail
           token={token}
-          offer={offer}
           collection={collection}
+          offer={!isIgnoreOffer ? offer : undefined}
           isLoading={isFetchingOffer || isFetchingToken}
           testid={`${testid}`}
+          isBundle={isBundle}
         >
           <TokenTrading
             token={token}
-            offer={offer}
+            offer={!isIgnoreOffer ? offer : undefined}
             onSellClick={onActionClick(MarketType.sellFix)}
             onBuyClick={onActionClick(MarketType.purchase)}
             onTransferClick={onActionClick(MarketType.transfer)}
@@ -126,7 +140,7 @@ const TokenPage = () => {
           <TokenPageModal
             token={token}
             collection={collection}
-            offer={offer}
+            offer={!isIgnoreOffer ? offer : undefined}
             marketType={marketType}
             onFinish={onFinish}
             onClose={onClose}
@@ -134,6 +148,11 @@ const TokenPage = () => {
           />
         </CommonTokenDetail>
       </TokenPagePaper>
+      {isBundle && <BundleTreeSection
+        onViewTokenDetails={setToken}
+        token={token}
+        offer={offer}
+      />}
     </>
   );
 };

@@ -2,7 +2,7 @@ import { Sdk } from '@unique-nft/substrate-client';
 import { TokenId, UniqueController } from './types';
 import { getEthAccount } from './utils/addressUtils';
 import { filterAllowedTokens } from './utils/checkTokenIsAllowed';
-import { TokenByIdResult } from '@unique-nft/substrate-client/tokens';
+import { NestedToken, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 import { Address } from '@unique-nft/substrate-client/types';
 
 type UniqueSDKNFTControllerOptions = { sdk: Sdk, collectionIds: number[], allowedTokens: { collection: number, tokens: string }[] };
@@ -49,5 +49,13 @@ export class UniqueSDKNFTController implements UniqueController {
 
   async getToken(collectionId: number, tokenId: number): Promise<TokenByIdResult | null> {
     return await this.sdk?.tokens.get_new({ collectionId, tokenId }) || null;
+  }
+
+  async isBundle(collectionId: number, tokenId: number): Promise<boolean> {
+    return !!await this.sdk?.tokens.isBundle({ collectionId, tokenId });
+  }
+
+  async getBundle(collectionId: number, tokenId: number): Promise<NestedToken | null> {
+    return await this.sdk?.tokens.getBundle({ collectionId, tokenId }) || null;
   }
 }

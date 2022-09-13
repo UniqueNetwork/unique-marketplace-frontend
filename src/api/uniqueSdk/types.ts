@@ -1,7 +1,8 @@
 import { BN } from '@polkadot/util';
 import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
 import { Account } from '../../account/AccountContext';
-import { SignerPayloadJSON, UnsignedTxPayload } from '@unique-nft/substrate-client/types';
+import { SignerPayloadJSON, UnsignedTxPayload, Address } from '@unique-nft/substrate-client/types';
+import { INestingToken } from '../../components/BundleTree/types';
 
 export type TokenId = {
   toNumber(): number

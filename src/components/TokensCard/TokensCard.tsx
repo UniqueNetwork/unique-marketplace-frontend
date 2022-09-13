@@ -28,6 +28,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
   const [token, setToken] = useState<TokenByIdResult | undefined>(props.token);
   const [collection, setCollection] = useState<(CollectionInfoWithSchema) | undefined>();
   const [isFetching, setIsFetching] = useState<boolean>(false);
+  const [isBundle, setIsBundle] = useState<boolean>();
 
   const { api, currentChainId } = useApi();
   const { selectedAccount } = useAccounts();
@@ -60,6 +61,10 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
         if (!token) {
           const token = await api?.nft?.getToken(collectionId, tokenId);
           if (token) setToken(token);
+        }
+
+        if (typeof isBundle !== 'undefined') {
+          setIsBundle(await api?.nft?.isBundle(collectionId, tokenId));
         }
 
         if (!collection) {
@@ -101,6 +106,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
         imageUrl={imageUrl}
         video={video}
         testid={`${testid}-token-media`}
+        badge={isBundle ? 'Bundle' : ''}
       />
       <Description>
         <Link to={tokenPath} title={tokenTitle}>
