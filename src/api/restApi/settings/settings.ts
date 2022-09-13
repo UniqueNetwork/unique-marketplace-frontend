@@ -9,7 +9,7 @@ import { Chain } from 'utils/configParser';
 
 const endpoint = '/api/settings';
 
-export const getSettings = () => get<Settings>(`${endpoint}`, { ...defaultParams });
+export const getSettings = (baseURL: string) => get<Settings>(`${endpoint}`, { ...defaultParams, baseURL });
 
 export const addToWhitelist = (body: WhitelistBody, signature: string) => post(`${endpoint}/allowed_list/${body.account}`, null, { headers: { ...defaultParams.headers, Authorization: `Bearer ${signature}` }, ...defaultParams });
 
@@ -21,9 +21,7 @@ export const useSettings = () => {
     setIsFetching(true);
     try {
       const settingsSet = await Promise.all(Object.values(blockchains).map(async (blockchain) => {
-        axios.defaults.baseURL = blockchain.apiEndpoint;
-
-        const { data: settings, status } = await getSettings();
+        const { data: settings, status } = await getSettings(blockchain.apiEndpoint);
         if (status === 200) {
           return { networkId: blockchain.network.toLowerCase(), settings };
         }

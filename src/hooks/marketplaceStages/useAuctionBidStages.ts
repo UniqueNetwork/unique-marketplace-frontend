@@ -7,7 +7,7 @@ import useStages from '../useStages';
 import { useAccounts } from '../useAccounts';
 
 export const useAuctionBidStages = (collectionId: number, tokenId: number) => {
-  const { api } = useApi();
+  const { api, baseURL } = useApi();
   const { signPayloadJSON } = useAccounts();
   const marketApi = api?.market;
   const bidAuctionStages: InternalStage<TAuctionBidProps>[] = useMemo(() => [
@@ -19,10 +19,10 @@ export const useAuctionBidStages = (collectionId: number, tokenId: number) => {
         marketApi?.transferBidBalance(
           params.txParams.accountAddress,
           params.txParams.value,
-          { ...params.options, send: ({ signature, signerPayloadJSON }) => placeBidRequest({ signerPayloadJSON, signature, collectionId, tokenId }) }
+          { ...params.options, send: ({ signature, signerPayloadJSON }) => placeBidRequest(baseURL, { signerPayloadJSON, signature, collectionId, tokenId }) }
         )
     }
-  ], [marketApi, collectionId, tokenId]);
+  ], [baseURL, marketApi, collectionId, tokenId]);
 
   const { stages, error, status, initiate } = useStages<TAuctionBidProps>(bidAuctionStages, signPayloadJSON);
 

@@ -9,7 +9,7 @@ import { SdkClient } from './sdk/sdkClient';
 import config from '../config';
 import axios from '../api/restApi/base/axios';
 import { sdkClient as sdk } from '.';
-import { getSettings, useSettings } from './restApi/settings/settings';
+import { useSettings } from './restApi/settings/settings';
 
 keyring.loadAll({});
 
@@ -35,7 +35,13 @@ const ApiWrapper = ({
   useEffect(() => {
     (async () => {
       const defaultChainId = Object.keys(config?.blockchains || {})[0];
-      const storedChainId = localStorage.getItem(ChainIdLocalStorageKey);
+
+      const getStoredChainId = () => {
+        const chainId = localStorage.getItem(ChainIdLocalStorageKey);
+        return chainId && config?.blockchains[chainId] ? chainId : undefined;
+      };
+
+      const storedChainId = getStoredChainId();
 
       if (!storedChainId || (chainIdParam && storedChainId !== chainIdParam)) {
         defaultChainId && localStorage.setItem(ChainIdLocalStorageKey, chainIdParam || defaultChainId);
@@ -45,9 +51,8 @@ const ApiWrapper = ({
 
       const settings = await fetchSettings(config.blockchains);
 
-      await sdk.addNetworks(settings);
+      await sdk.initialize(settings);
 
-      axios.defaults.baseURL = config.blockchains[initialChainId]?.apiEndpoint;
       setSettings(sdkClient?.networks[initialChainId].settings);
       sdkClient?.setNetwork(initialChainId);
 
@@ -66,8 +71,6 @@ const ApiWrapper = ({
     if (!sdkClient) {
       throw new Error('SdkClient is not available');
     }
-
-    axios.defaults.baseURL = config.blockchains[newChainId].apiEndpoint;
 
     const { settings } = sdkClient.networks[newChainId];
 
@@ -101,16 +104,17 @@ const ApiWrapper = ({
   // get context value for ApiContext
   const value = useMemo<ApiContextProps>(
     () => ({
-      api: (isRpcClientInitialized && settings && currentChain
+      api: (isRpcClientInitialized && settings && currentChain && sdkClient
         ? {
-          collection: sdkClient?.collectionController,
-          nft: sdkClient?.nftController,
-          market: sdkClient?.marketController
+          collection: sdkClient.collectionController,
+          nft: sdkClient.nftController,
+          market: sdkClient.marketController
         }
         : undefined),
       uniqueSdk: currentChain?.unique,
       kusamaSdk: currentChain?.kusama,
       chainData: currentChain?.unique.chainProperties(),
+      baseURL: config.blockchains[currentChainId]?.apiEndpoint || '',
       settings,
       currentChainId,
       onChangeChainId
