@@ -32,7 +32,7 @@ export class UniqueSDKMarketController implements UniqueController {
   private auctionAddress = '';
   kusamaDecimals = 12;
 
-  initialize(options: UniqueSDKMarketControllerOptions): void {
+  setNetwork(options: UniqueSDKMarketControllerOptions): void {
     this.uniqueSdk = options.uniqueSdk;
     this.kusamaSdk = options.kusamaSdk;
     this.kusamaDecimals = this.kusamaSdk?.chainProperties().decimals || 12;

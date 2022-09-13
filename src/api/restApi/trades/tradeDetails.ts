@@ -4,30 +4,34 @@ import { AxiosError } from 'axios';
 import { get } from '../base';
 import { defaultParams } from '../base/axios';
 import { ResponseError } from '../base/types';
-import { TradeDetails } from './types';
+import { TradeDetails, TradeDetailsResponse } from './types';
+import { useApi } from '../../../hooks/useApi';
 
 const endpoint = '/api/Trades/auction';
 
-export const getTradesByAuction = (offerId: string) => get(`${endpoint}/${offerId}`, { ...defaultParams });
+export const getTradesByAuction = (baseURL: string, offerId: string) => get<TradeDetailsResponse>(`${endpoint}/${offerId}`, { ...defaultParams, baseURL });
 
 export const useTradeDetails = () => {
   const [tradeDetails, setTradeDetails] = useState<TradeDetails>();
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [fetchingError, setFetchingError] = useState<ResponseError | undefined>();
+  const { baseURL } = useApi();
 
-  const fetch = useCallback((auctionId: string) => {
+  const fetch = useCallback(async (auctionId: string) => {
     setIsFetching(true);
-    getTradesByAuction(auctionId).then((response) => {
+    try {
+      const response = await getTradesByAuction(baseURL, auctionId);
       if (response.status === 200) {
         setTradeDetails(response.data[0]);
       }
-    }).catch((err: AxiosError) => {
+    } catch (err) {
       setFetchingError({
-        status: err.response?.status,
-        message: err.message
+        status: (err as AxiosError).response?.status,
+        message: (err as AxiosError).message
       });
-    }).finally(() => setIsFetching(false));
-  }, []);
+    }
+    setIsFetching(false);
+  }, [baseURL]);
 
   return {
     tradeDetails,

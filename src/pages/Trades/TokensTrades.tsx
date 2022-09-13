@@ -47,7 +47,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
       sort: sortString,
       seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
     });
-  }, [currentTab, selectedAccount?.address, isLoadingAccounts]);
+  }, [currentTab, currentChainId, selectedAccount?.address, isLoadingAccounts]);
 
   useEffect(() => {
     // append loaded trades to the existing list if screen is with infinity scroll

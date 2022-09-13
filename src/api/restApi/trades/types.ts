@@ -48,6 +48,8 @@ export type TradeDetails = {
   bids: Bid[]
 }
 
+export type TradeDetailsResponse = TradeDetails[]
+
 export type Bid = {
   id: string
   amount: string

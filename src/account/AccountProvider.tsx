@@ -22,7 +22,7 @@ const AccountWrapper: FC = ({ children }) => {
   const [isLoadingDeposits, setIsLoadingDeposits] = useState<boolean>(false);
   const [fetchAccountsError, setFetchAccountsError] = useState<string | undefined>();
   const [selectedAccount, setSelectedAccount] = useState<Account>();
-  const { api, kusamaSdk } = useApi();
+  const { api, kusamaSdk, baseURL } = useApi();
 
   const changeAccount = useCallback((account: Account) => {
     localStorage.setItem(DefaultAccountKey, account.address);
@@ -136,14 +136,14 @@ const AccountWrapper: FC = ({ children }) => {
     const _accounts = await Promise.all(fetchedAccounts.map(async (account) => ({
       ...account,
       deposits: {
-        bids: (await getWithdrawBids({ owner: account.address })).data || { withdraw: [], leader: [] },
+        bids: (await getWithdrawBids(baseURL, { owner: account.address })).data || { withdraw: [], leader: [] },
         sponsorshipFee: await api?.market?.getUserDeposit(account.address)
       }
     })));
     setAccounts(_accounts);
     setIsLoadingDeposits(false);
     return _accounts;
-  }, [api?.market]);
+  }, [baseURL, api?.market]);
 
   const fetchAccounts = useCallback(async () => {
     if (!api?.market) return;
