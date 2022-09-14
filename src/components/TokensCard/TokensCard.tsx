@@ -11,9 +11,10 @@ import { useAccounts } from 'hooks/useAccounts';
 import { formatKusamaBalance } from 'utils/textUtils';
 import { timeDifference } from 'utils/timestampUtils';
 import { Primary600 } from 'styles/colors';
-import config from '../../config';
+import config from 'config';
 import { TokensMedia } from './TokensMedia';
 import { stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
+import { useCollections } from 'hooks/useCollections';
 
 export type TTokensCard = {
   token?: TokenByIdResult
@@ -32,6 +33,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
 
   const { api, currentChainId } = useApi();
   const { selectedAccount } = useAccounts();
+  const { getCollection } = useCollections();
 
   const {
     tokenTitle,
@@ -68,7 +70,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
         }
 
         if (!collection) {
-          const collection = await api?.collection?.getCollection(collectionId);
+          const collection = await getCollection(collectionId);
           if (collection) setCollection(collection);
         }
         setIsFetching(false);

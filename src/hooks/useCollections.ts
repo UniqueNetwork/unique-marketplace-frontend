@@ -1,24 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useContext } from 'react';
+import CollectionsContext from 'collections/CollectionsContext';
 import { useApi } from './useApi';
-import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
 
 export const useCollections = () => {
-  const { api, currentChainId } = useApi();
-  const [collections, setCollections] = useState<CollectionInfoWithSchema[]>([]);
-  const [isFetching, setIsFetching] = useState<boolean>(false);
+  const { isFetching, collections, fetchCollections } = useContext(CollectionsContext);
+  const { api } = useApi();
 
-  useEffect(() => {
-    setIsFetching(true);
-    if (!api) return;
-    (async () => {
-      const collections = await api?.collection?.getFeaturedCollections() as CollectionInfoWithSchema[];
-      setCollections(collections);
-      setIsFetching(false);
-    })();
-  }, [api?.collection?.getFeaturedCollections, currentChainId]);
+  const getCollection = useCallback(async (collectionId: number) => {
+    const collection = collections.find(({ id }) => collectionId === id);
+    return collection || await api?.collection?.getCollection(Number(collectionId));
+  }, [api?.collection, collections]);
 
   return {
     collections,
-    isFetching
+    isFetching,
+    fetchCollections,
+    getCollection
   };
 };

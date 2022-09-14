@@ -8,7 +8,7 @@ import { useAccounts } from '../useAccounts';
 import useStages from '../useStages';
 
 export const useSellFixStages = (collectionId: number, tokenId: number) => {
-  const { api } = useApi();
+  const { api, baseURL } = useApi();
   const { signPayloadJSON, selectedAccount, signMessage } = useAccounts();
   const marketApi = api?.market;
   const addToWhiteListStage: InternalStage<TFixPriceProps> = useMemo(() => ({
@@ -23,7 +23,7 @@ export const useSellFixStages = (collectionId: number, tokenId: number) => {
           send:
             async ({ signature }) => {
               try {
-                await addToWhitelist({ account: params.txParams.accountAddress }, signature as string);
+                await addToWhitelist(baseURL, { account: params.txParams.accountAddress }, signature as string);
               } catch (e) {
                 console.error('Adding to whitelist failed');
               }

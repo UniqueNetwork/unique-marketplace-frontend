@@ -17,39 +17,41 @@ import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
 import styled from 'styled-components';
 import { BlueGrey500 } from 'styles/colors';
 import BundleTreeSection from './BundleTreeSection';
+import { useCollections } from 'hooks/useCollections';
 
 const testid = 'token-page';
 
 const TokenPage = () => {
-  const { api } = useApi();
+  const { api, currentChainId } = useApi();
   const { selectedAccount, updateCurrentAccountDeposit } = useAccounts();
   const { id, collectionId } = useParams<{ id: string, collectionId: string}>();
   const [token, setToken] = useState<TokenByIdResult>();
   const [collection, setCollection] = useState<CollectionInfoWithSchema>();
   const [isFetchingToken, setIsFetchingToken] = useState<boolean>(true);
   const { offer, fetch: fetchOffer, isFetching: isFetchingOffer } = useOffer(Number(collectionId), Number(id));
+  const { getCollection } = useCollections();
   const [marketType, setMarketType] = useState<MarketType>(MarketType.default);
   const [isBundle, setIsBundle] = useState(false);
   const navigate = useNavigate();
-
   const { info } = useNotifications();
 
   const fetchToken = useCallback(async () => {
-    if (!api?.nft) return;
+    if (!api?.nft || !currentChainId) return;
     setIsFetchingToken(true);
     const token = await api.nft?.getToken(Number(collectionId), Number(id));
     setIsBundle(await api.nft?.isBundle(Number(collectionId), Number(id)));
-    const collection = await api.collection?.getCollection(Number(collectionId));
+
+    const collection = await getCollection(Number(collectionId));
     if (token) setToken(token);
     if (collection) setCollection(collection);
     setIsFetchingToken(false);
-  }, [api?.nft, collectionId, id]);
+  }, [api?.nft, currentChainId, collectionId, id]);
 
   useEffect(() => {
     if (isFetchingOffer) return;
     (async () => {
       if (offer) {
-        const collection = await api?.collection?.getCollection(Number(collectionId));
+        const collection = await getCollection(Number(collectionId));
         if (collection) setCollection(collection);
         setIsBundle(!!offer.tokenDescription.nestingChildTokens);
       }

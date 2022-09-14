@@ -15,7 +15,7 @@ export const useOffer = (collectionId: number, tokenId: number) => {
   const [offer, setOffer] = useState<Offer>();
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const [fetchingError, setFetchingError] = useState<ResponseError | undefined>();
-  const { baseURL } = useApi();
+  const { baseURL, currentChainId } = useApi();
 
   const fetch = useCallback(async (collectionId: number, tokenId: number) => {
     setIsFetching(true);
@@ -39,8 +39,9 @@ export const useOffer = (collectionId: number, tokenId: number) => {
   }, [baseURL]);
 
   useEffect(() => {
-    fetch(collectionId, tokenId);
-  }, [collectionId, tokenId, fetch]);
+    if (!currentChainId) return;
+    void fetch(collectionId, tokenId);
+  }, [currentChainId, collectionId, tokenId, fetch]);
 
   return {
     offer,

@@ -5,6 +5,7 @@ import config from './config';
 import ApiWrapper from './api/ApiWrapper';
 import { PageLayout } from './components';
 import AccountWrapper from './account/AccountProvider';
+import CollectionsWrapper from './collections/CollectionsProvider';
 
 document.title = config.documentTitle || 'Unique Market';
 
@@ -13,9 +14,11 @@ export default function App() {
     <Notifications closingDelay={2 * 1000}>
       <ApiWrapper>
         <AccountWrapper>
-          <PageLayout>
-            <Outlet />
-          </PageLayout>
+          <CollectionsWrapper>
+            <PageLayout>
+              <Outlet />
+            </PageLayout>
+          </CollectionsWrapper>
         </AccountWrapper>
       </ApiWrapper>
     </Notifications>
