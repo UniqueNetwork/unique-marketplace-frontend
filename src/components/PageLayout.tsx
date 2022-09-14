@@ -91,7 +91,6 @@ const LayoutStyled = styled.div<{hasFooterSpacing: boolean}>`
 
   .unique-modal-wrapper .unique-modal {
     max-height: 90vh;
-    overflow-y: auto;
   }
   
   .unique-layout__content {

@@ -24,7 +24,7 @@ function widgetAvatarRender(accountAddress: string) {
 }
 
 export const WalletManager: FC = () => {
-  const { selectedAccount, accounts, isLoading, fetchAccounts, changeAccount } = useAccounts();
+  const { selectedAccount, accounts, isLoading, changeAccount } = useAccounts();
   const [isOpen, setIsOpen] = useState(false);
   const [isGetKsmOpened, setIsGetKsmOpened] = useState(false);
   const { chainData, settings, currentChainId, onChangeChainId, api } = useApi();
@@ -63,14 +63,12 @@ export const WalletManager: FC = () => {
     changeAccount({ ...account, address: account.substrateAddress } as Account);
   }, [changeAccount]);
 
-  const onCopyAddress = useCallback((account: string) => {
-    navigator.clipboard.writeText(formatAddress(account)).then(() => {
-      info(
-        'Address copied',
-        { name: 'success', size: 32, color: 'var(--color-additional-light)' }
-      );
-    });
-  }, [formatAddress, info]);
+  const onCopyAddress = useCallback(() => {
+    info(
+      'Address copied',
+      { name: 'success', size: 32, color: 'var(--color-additional-light)' }
+    );
+  }, []);
 
   const onCreateAccountClick = useCallback(() => {
     navigate('/accounts');
@@ -124,7 +122,6 @@ export const WalletManager: FC = () => {
         activeNetwork={currentNetwork}
         balance={formatKusamaBalance(currentBalance.value)}
         deposit={formattedAccountDeposit}
-
         depositDescription={
           <>
             {formattedAccountDeposit && <Text color='grey-500' size='xs'>The total market deposit for participation in auctions and
@@ -141,7 +138,7 @@ export const WalletManager: FC = () => {
         manageBalanceLinkTitle='Manage my balance'
         networks={networks}
         onAccountChange={widgetAccountChange}
-        // onCopyAddressClick={onCopyAddress}
+        onCopyAddressClick={onCopyAddress}
         onManageBalanceClick={onCreateAccountClick}
         onNetworkChange={onNetworkChange}
         selectedAccount={widgetSelectedAccount}

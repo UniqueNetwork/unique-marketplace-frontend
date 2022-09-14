@@ -22,8 +22,7 @@ export const Table: FC<TableProps> = ({
   loading,
   onSort,
   className,
-  emptyIconProps,
-  idColumnName
+  emptyIconProps
 }) => {
   const deviceSize = useDeviceSize();
 
@@ -42,13 +41,12 @@ export const Table: FC<TableProps> = ({
         />
       </>)}
       {deviceSize <= DeviceSize.sm && (
-        <MobileTable
+        <MobileTable<any>
           columns={columns}
           data={!loading ? data : []}
           loading={loading}
           className={className}
           emptyIconProps={emptyIconProps}
-          idColumnName={idColumnName}
         />
       )}
     </TableWrapper>

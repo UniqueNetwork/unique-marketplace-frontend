@@ -307,7 +307,6 @@ const Row = styled.div`
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  min-height: 180px;
 `;
 
 const SellModalStyled = styled.div`
