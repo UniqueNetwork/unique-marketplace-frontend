@@ -131,19 +131,23 @@ const AccountWrapper: FC = ({ children }) => {
     unsubscribesBalancesChanges.current = unsubscribes.reduce<Record<string, Codec>>((acc, item) => ({ ...acc, ...item }), {});
   }, [kusamaSdk, setAccounts]);
 
+  const getAccountDeposit = useCallback(async (account: Account) => {
+      return {
+        ...account,
+        deposits: {
+          bids: (await getWithdrawBids(baseURL, { owner: account.address })).data || { withdraw: [], leader: [] },
+          sponsorshipFee: await api?.market?.getUserDeposit(account.address)
+        }
+      };
+  }, [baseURL, api?.market]);
+
   const fetchAccountsWithDeposits = useCallback(async (fetchedAccounts: Account[]) => {
     setIsLoadingDeposits(true);
-    const _accounts = await Promise.all(fetchedAccounts.map(async (account) => ({
-      ...account,
-      deposits: {
-        bids: (await getWithdrawBids(baseURL, { owner: account.address })).data || { withdraw: [], leader: [] },
-        sponsorshipFee: await api?.market?.getUserDeposit(account.address)
-      }
-    })));
+    const _accounts = await Promise.all(fetchedAccounts.map(getAccountDeposit));
     setAccounts(_accounts);
     setIsLoadingDeposits(false);
     return _accounts;
-  }, [baseURL, api?.market]);
+  }, [getAccountDeposit]);
 
   const fetchAccounts = useCallback(async () => {
     if (!api?.market) return;
@@ -195,6 +199,18 @@ const AccountWrapper: FC = ({ children }) => {
     void fetchAccounts();
   }, [web3EnablePromise, fetchAccounts]);
 
+  const updateCurrentAccountDeposit = useCallback(async () => {
+    if (!selectedAccount) return;
+    const _account = await getAccountDeposit(selectedAccount);
+    setAccounts((accounts) => accounts.map((account) => {
+      if (account.address === _account.address) {
+        return { ...account, deposits: _account.deposits };
+      }
+      return account;
+    }));
+    setSelectedAccount(_account);
+  }, [selectedAccount]);
+
   const value = useMemo(() => ({
     isLoading,
     isLoadingDeposits,
@@ -205,7 +221,8 @@ const AccountWrapper: FC = ({ children }) => {
     setSelectedAccount,
     showSignDialog,
     fetchAccounts,
-    fetchAccountsWithDeposits
+    fetchAccountsWithDeposits,
+    updateCurrentAccountDeposit
   }), [isLoading, isLoadingDeposits, accounts, fetchAccounts, fetchAccountsWithDeposits, selectedAccount, fetchAccountsError, changeAccount]);
 
   return (

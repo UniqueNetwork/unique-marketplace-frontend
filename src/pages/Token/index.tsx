@@ -3,16 +3,16 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Icon, Link, useNotifications } from '@unique-nft/ui-kit';
 import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 
-import { useApi } from '../../hooks/useApi';
-import { MarketType } from '../../types/MarketTypes';
+import { useApi } from 'hooks/useApi';
+import { MarketType } from 'types/MarketTypes';
 import { CommonTokenDetail } from './TokenDetail/CommonTokenDetail';
 import { useOffer } from 'api/restApi/offers/offer';
 import { TokenTrading } from './TokenDetail/TokenTrading';
 import { Error404 } from '../errors/404';
 import TokenPageModal from './Modals/TokenPageModal';
-import { PagePaper } from '../../components/PagePaper/PagePaper';
-import { useAccounts } from '../../hooks/useAccounts';
-import { shortcutText } from '../../utils/textUtils';
+import { PagePaper } from 'components/PagePaper/PagePaper';
+import { useAccounts } from 'hooks/useAccounts';
+import { shortcutText } from 'utils/textUtils';
 import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
 import styled from 'styled-components';
 import { BlueGrey500 } from 'styles/colors';
@@ -22,7 +22,7 @@ const testid = 'token-page';
 
 const TokenPage = () => {
   const { api } = useApi();
-  const { selectedAccount } = useAccounts();
+  const { selectedAccount, updateCurrentAccountDeposit } = useAccounts();
   const { id, collectionId } = useParams<{ id: string, collectionId: string}>();
   const [token, setToken] = useState<TokenByIdResult>();
   const [collection, setCollection] = useState<CollectionInfoWithSchema>();
@@ -66,10 +66,14 @@ const TokenPage = () => {
   }, []);
 
   const onFinish = useCallback(() => {
+    if (marketType === MarketType.bid || marketType === MarketType.withdrawBid) {
+      void updateCurrentAccountDeposit();
+    }
+
     setMarketType(MarketType.default);
     void fetchToken();
-    fetchOffer(Number(collectionId), Number(id));
-  }, [fetchOffer, fetchToken, collectionId, id]);
+    void fetchOffer(Number(collectionId), Number(id));
+  }, [fetchOffer, fetchToken, collectionId, id, marketType, updateCurrentAccountDeposit]);
 
   const onActionClick = useCallback((action: MarketType) => () => {
     setMarketType(action);
