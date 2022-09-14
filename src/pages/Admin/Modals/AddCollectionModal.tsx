@@ -10,12 +10,14 @@ import { CollectionCover } from 'components/CollectionCover/CollectionCover';
 import { SelectInput } from 'components/SelectInput/SelectInput';
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
 import { BlueGrey100 } from 'styles/colors';
+import { useCollections } from 'hooks/useCollections';
 
 export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) => {
   const [selectedCollection, setSelectedCollection] = useState<CollectionData | string | undefined>();
   const { appendCollection, collections, fetchCollections } = useAdminCollections();
   const [collectionItems, setCollectionItems] = useState<CollectionData[]>([]);
   const { api } = useApi();
+  const { getCollection } = useCollections();
   const { info, error } = useNotifications();
 
   useEffect(() => {
@@ -45,9 +47,9 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
     onFinish();
   }, [selectedCollection, collections]);
 
-  const getCollection = useCallback(async (collection: string) => {
+  const findCollection = useCallback(async (collection: string) => {
     if (!api?.collection) return;
-    const collectionData = await api.collection.getCollection(Number(collection));
+    const collectionData = await getCollection(Number(collection));
 
     setCollectionItems([
       ...(collectionData && collectionData.tokenPrefix ? [collectionData] : []),
@@ -59,10 +61,10 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
     if (typeof collection === 'string') {
       if (!/^\d{0,9}$/.test(collection) && collection !== '') return;
 
-      void getCollection(collection);
+      void findCollection(collection);
     }
     setSelectedCollection(collection as unknown as CollectionData);
-  }, [getCollection]);
+  }, [findCollection]);
 
   return (<>
     <Content>

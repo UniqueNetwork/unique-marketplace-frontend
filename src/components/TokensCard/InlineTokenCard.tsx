@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { useApi } from 'hooks/useApi';
 import { Avatar } from '../Avatar/Avatar';
 import { TokenByIdResult } from '@unique-nft/substrate-client/tokens';
+import { useCollections } from 'hooks/useCollections';
 
 interface InlineTokenCardProps {
   tokenId: number
@@ -13,6 +14,7 @@ interface InlineTokenCardProps {
 
 export const InlineTokenCard: FC<InlineTokenCardProps> = ({ tokenId, collectionId, children }) => {
   const { api } = useApi();
+  const { getCollection } = useCollections();
   const [token, setToken] = useState<TokenByIdResult>();
   const [prefix, setPrefix] = useState<string>();
 
@@ -23,7 +25,7 @@ export const InlineTokenCard: FC<InlineTokenCardProps> = ({ tokenId, collectionI
     (async () => {
       setIsLoading(true);
       setToken((await api.nft?.getToken(collectionId, tokenId)) || undefined);
-      const { tokenPrefix } = await api.collection?.getCollection(collectionId) || { tokenPrefix: '' };
+      const { tokenPrefix } = await getCollection(collectionId) || { tokenPrefix: '' };
       setPrefix(tokenPrefix);
       setIsLoading(false);
     })();
