@@ -3,9 +3,9 @@ import styled from 'styled-components';
 import { Text } from '@unique-nft/ui-kit';
 import { AdditionalWarning100 } from '../../styles/colors';
 
-export const WarningBlock: FC = ({ children }) => {
+export const WarningBlock: FC<{ margin?: number}> = ({ margin = 1.5, children }) => {
   return (
-    <WarningBlockWrapper>
+    <WarningBlockWrapper margin={margin}>
       <Text
         color='additional-warning-500'
         size='s'
@@ -14,11 +14,11 @@ export const WarningBlock: FC = ({ children }) => {
   );
 };
 
-const WarningBlockWrapper = styled.div`
+const WarningBlockWrapper = styled.div<{ margin: number }>`
   box-sizing: border-box;
   display: flex;
   padding: 8px 16px;
-  margin: calc(var(--gap) * 1.5) 0;
+  margin: ${({ margin }) => `calc(var(--gap) * ${margin}) 0`};
   border-radius: 4px;
   background-color: ${AdditionalWarning100};
   width: 100%;

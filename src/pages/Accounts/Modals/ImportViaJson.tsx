@@ -74,9 +74,9 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
         onChange={onPasswordChange}
         value={password}
       />
-      {passwordIncorrect && <Text size={'s'} color={'coral-500'}>Password incorrect</Text>}
     </InputWrapper>
-    <WarningBlock>
+    <PasswordIncorrectText size={'s'} color={'coral-500'}>{passwordIncorrect ? 'Password incorrect' : ''}</PasswordIncorrectText>
+    <WarningBlock margin={1}>
       Consider storing your account in a signer such as a browser extension, hardware device, QR-capable phone wallet (non-connected) or desktop application for optimal account security. Future versions of the web-only interface will drop support for non-external accounts, much like the IPFS version.
     </WarningBlock>
     <ButtonWrapper>
@@ -110,6 +110,10 @@ const InputWrapper = styled.div`
       width: 100%;
     }
   }
+`;
+
+const PasswordIncorrectText = styled(Text)`
+  
 `;
 
 const TitleWrapper = styled.div`
