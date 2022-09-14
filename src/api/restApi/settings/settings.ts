@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 
 import { get, post } from '../base';
-import axios, { defaultParams } from '../base/axios';
+import { defaultParams } from '../base/axios';
 import { Settings, WhitelistBody } from './types';
 import { ResponseError } from '../base/types';
 import { AxiosError } from 'axios';
@@ -11,7 +11,7 @@ const endpoint = '/api/settings';
 
 export const getSettings = (baseURL: string) => get<Settings>(`${endpoint}`, { ...defaultParams, baseURL });
 
-export const addToWhitelist = (body: WhitelistBody, signature: string) => post(`${endpoint}/allowed_list/${body.account}`, null, { headers: { ...defaultParams.headers, Authorization: `Bearer ${signature}` }, ...defaultParams });
+export const addToWhitelist = (baseURL: string, body: WhitelistBody, signature: string) => post(`${endpoint}/allowed_list/${body.account}`, null, { headers: { ...defaultParams.headers, Authorization: `Bearer ${signature}` }, ...defaultParams });
 
 export const useSettings = () => {
   const [isFetching, setIsFetching] = useState<boolean | undefined>(false);
