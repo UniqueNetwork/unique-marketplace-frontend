@@ -34,6 +34,7 @@ export type AccountContextProps = {
   showSignDialog(account: Account): Promise<KeyringPair>
   fetchAccounts(): Promise<void>
   fetchAccountsWithDeposits(accounts: Account[]): Promise<Account[]>
+  updateCurrentAccountDeposit(): Promise<void>
 }
 
 const AccountContext: Context<AccountContextProps> = createContext({} as unknown as AccountContextProps);

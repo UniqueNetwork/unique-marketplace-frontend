@@ -23,7 +23,7 @@ const testid = 'token-page';
 
 const TokenPage = () => {
   const { api, currentChainId } = useApi();
-  const { selectedAccount } = useAccounts();
+  const { selectedAccount, updateCurrentAccountDeposit } = useAccounts();
   const { id, collectionId } = useParams<{ id: string, collectionId: string}>();
   const [token, setToken] = useState<TokenByIdResult>();
   const [collection, setCollection] = useState<CollectionInfoWithSchema>();
@@ -68,10 +68,14 @@ const TokenPage = () => {
   }, []);
 
   const onFinish = useCallback(() => {
+    if (marketType === MarketType.bid || marketType === MarketType.withdrawBid) {
+      void updateCurrentAccountDeposit();
+    }
+
     setMarketType(MarketType.default);
     void fetchToken();
-    fetchOffer(Number(collectionId), Number(id));
-  }, [fetchOffer, fetchToken, collectionId, id]);
+    void fetchOffer(Number(collectionId), Number(id));
+  }, [fetchOffer, fetchToken, collectionId, id, marketType, updateCurrentAccountDeposit]);
 
   const onActionClick = useCallback((action: MarketType) => () => {
     setMarketType(action);

@@ -21,7 +21,8 @@ export const useAccounts = () => {
     setSelectedAccount,
     fetchAccounts,
     fetchAccountsWithDeposits,
-    showSignDialog
+    showSignDialog,
+    updateCurrentAccountDeposit
   } = useContext(AccountContext);
 
   useEffect(() => {
@@ -141,6 +142,7 @@ export const useAccounts = () => {
     fetchAccounts,
     fetchAccountsWithDeposits,
     changeAccount,
-    deleteLocalAccount
+    deleteLocalAccount,
+    updateCurrentAccountDeposit
   };
 };
