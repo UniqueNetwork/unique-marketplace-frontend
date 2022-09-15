@@ -111,6 +111,13 @@ export const NFTPage = () => {
     })();
   }, [api?.nft, currentChainId, selectedAccount?.address, setIsFetchingTokens, fetch]);
 
+  useEffect(() => {
+    if (!api) return;
+    // clear filters and searchString if chainId has been changed
+    setFilterState(null);
+    setSearchString('');
+  }, [currentChainId]);
+
   const myCollections = useMemo(() => {
     const myTokensCollectionIds = [...tokens, ...offers].map((token) => token.collectionId);
     return collections.filter((collection) => myTokensCollectionIds.includes(collection.id));

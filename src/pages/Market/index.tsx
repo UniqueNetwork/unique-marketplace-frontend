@@ -71,20 +71,19 @@ export const MarketPage = () => {
   const { offers, offersCount, isFetching, fetchMore, fetch, attributes, attributeCounts } = useOffers();
   const { selectedAccount } = useAccounts();
   const deviceSize = useDeviceSize();
-  const { currentChainId } = useApi();
+  const { currentChainId, api } = useApi();
 
   const hasMore = offers && offers.length < offersCount;
 
   useEffect(() => {
-    if (currentChainId) {
-      void fetch({
-        page: 1,
-        pageSize,
-        ...(getFilterByState(filterState)),
-        searchText: searchValue,
-        sort: [sortingValue]
-      });
-    }
+    if (!currentChainId || !api) return;
+    setFilterState(null);
+    setSearchValue(undefined);
+    void fetch({
+      page: 1,
+      pageSize,
+      sort: [sortingValue]
+    });
   }, [currentChainId]);
 
   const getFilterByState = useCallback((filterState: FilterState | null) => {
