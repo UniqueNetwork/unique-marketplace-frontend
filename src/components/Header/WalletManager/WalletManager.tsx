@@ -1,8 +1,8 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { BN } from '@polkadot/util';
-import { AccountsManager, Button, INetwork, Text, useNotifications } from '@unique-nft/ui-kit';
+import { Button, INetwork, Text, useNotifications } from '@unique-nft/ui-kit';
 
 import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
 import { useAccounts } from 'hooks/useAccounts';
@@ -16,6 +16,7 @@ import { TWithdrawBid } from 'api/restApi/auction/types';
 import { formatKusamaBalance } from 'utils/textUtils';
 import BalanceSkeleton from '../../Skeleton/BalanceSkeleton';
 import config from '../../../config';
+import { AccountsManager } from '../../UI/widgets/AccountsManager';
 
 const tokenSymbol = 'KSM';
 
@@ -63,7 +64,8 @@ export const WalletManager: FC = () => {
     changeAccount({ ...account, address: account.substrateAddress } as Account);
   }, [changeAccount]);
 
-  const onCopyAddress = useCallback(() => {
+  const onCopyAddress = useCallback((address: string) => {
+    console.log(address);
     info(
       'Address copied',
       { name: 'success', size: 32, color: 'var(--color-additional-light)' }
