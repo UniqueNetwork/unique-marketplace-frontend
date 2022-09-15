@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { keyring } from '@polkadot/ui-keyring';
 import { useNotifications } from '@unique-nft/ui-kit';
 import { ApiContextProps, ApiProvider } from './ApiContext';
@@ -7,18 +7,18 @@ import AuctionSocketProvider from './restApi/auction/AuctionSocketProvider';
 import { Settings } from './restApi/settings/types';
 import { SdkClient } from './sdk/sdkClient';
 import config from '../config';
-import axios from '../api/restApi/base/axios';
 import { sdkClient as sdk } from '.';
 import { useSettings } from './restApi/settings/settings';
+import { ChainIdLocalStorageKey, getInitialChainId } from '../utils/initialChainId';
 
 keyring.loadAll({});
-
-const ChainIdLocalStorageKey = 'unique_market_chain_id';
 
 interface ChainProviderProps {
   children: React.ReactNode
   sdkClient?: SdkClient
 }
+
+const initialChainId = getInitialChainId();
 
 const ApiWrapper = ({
   children,
@@ -26,37 +26,20 @@ const ApiWrapper = ({
 }: ChainProviderProps) => {
   const [isRpcClientInitialized, setRpcClientInitialized] = useState<boolean>(false);
   const navigate = useNavigate();
-  const { chainId: chainIdParam } = useParams<'chainId'>();
   const [settings, setSettings] = useState<Settings>();
-  const [currentChainId, setCurrentChainId] = useState<string>('');
+  const [currentChainId, setCurrentChainId] = useState<string>(initialChainId);
   const { error } = useNotifications();
   const { fetchSettings } = useSettings();
 
   useEffect(() => {
     (async () => {
-      const defaultChainId = Object.keys(config?.blockchains || {})[0];
-
-      const getStoredChainId = () => {
-        const chainId = localStorage.getItem(ChainIdLocalStorageKey);
-        return chainId && config?.blockchains[chainId] ? chainId : undefined;
-      };
-
-      const storedChainId = getStoredChainId();
-
-      if (!storedChainId || (chainIdParam && storedChainId !== chainIdParam)) {
-        defaultChainId && localStorage.setItem(ChainIdLocalStorageKey, chainIdParam || defaultChainId);
-      }
-
-      const initialChainId = chainIdParam || storedChainId || defaultChainId;
-
       const settings = await fetchSettings(config.blockchains);
 
       await sdk.initialize(settings);
 
-      setSettings(sdkClient?.networks[initialChainId].settings);
-      sdkClient?.setNetwork(initialChainId);
+      setSettings(sdkClient?.networks[currentChainId].settings);
+      sdkClient?.setNetwork(currentChainId);
 
-      setCurrentChainId(initialChainId);
       setRpcClientInitialized(sdkClient?.isReady);
     })().then(() => {
       console.log('Rpc connection: success');
