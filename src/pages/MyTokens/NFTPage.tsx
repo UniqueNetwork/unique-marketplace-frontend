@@ -113,10 +113,10 @@ export const NFTPage = () => {
 
   useEffect(() => {
     if (!api) return;
-    // clear filters and searchString if chainId has been changed
+    // clear filters and searchString if chainId or selectedAccount has been changed
     setFilterState(null);
     setSearchString('');
-  }, [currentChainId]);
+  }, [currentChainId, selectedAccount?.address]);
 
   const myCollections = useMemo(() => {
     const myTokensCollectionIds = [...tokens, ...offers].map((token) => token.collectionId);
