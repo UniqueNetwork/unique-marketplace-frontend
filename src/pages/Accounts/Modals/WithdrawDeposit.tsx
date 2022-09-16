@@ -140,10 +140,10 @@ export const WithdrawDepositAskModal: FC<WithdrawDepositAskModalProps> = ({ isVi
 
   return (<Modal isVisible={isVisible} isClosable={true} onClose={onClose}>
     <Content>
-      <Heading size='2'>Withdraw deposit</Heading>
+      <Heading size='2' testid={`${testid}-heading`}>Withdraw deposit</Heading>
     </Content>
     {(withdraw.length > 0) && <Content>
-      <Text size={'m'} color={'grey-500'}>All deposit</Text>
+      <Text size={'m'} color={'grey-500'} testid={`${testid}-all-deposit-label`}>All deposit</Text>
       <Checkbox
         testid={`${testid}-all-checkbox`}
         checked={isSelectedAll}
@@ -152,7 +152,7 @@ export const WithdrawDepositAskModal: FC<WithdrawDepositAskModalProps> = ({ isVi
       />
     </Content>}
     {(leader.length > 0 || withdraw.length > 0) && <Content>
-      <Text size={'m'} color={'grey-500'}>Bids</Text>
+      <Text size={'m'} color={'grey-500'} testid={`${testid}-bids-label`}>Bids</Text>
       {[...leader, ...withdraw].map((bid, index) => (<Row>
         <Checkbox
           testid={`${testid}-bid-${bid.auctionId}-checkbox`}
@@ -164,6 +164,7 @@ export const WithdrawDepositAskModal: FC<WithdrawDepositAskModalProps> = ({ isVi
         <InlineTokenCard
           tokenId={Number(bid.tokenId)}
           collectionId={Number(bid.collectionId)}
+          testid={`${testid}-bid-${bid.auctionId}`}
         >
           <Text
             testid={`${testid}-bid-${bid.auctionId}-amount`}
@@ -174,7 +175,7 @@ export const WithdrawDepositAskModal: FC<WithdrawDepositAskModalProps> = ({ isVi
       </Row>))}
     </Content>}
     {sponsorshipFee && !sponsorshipFee?.isZero() && <Content>
-      <Text size={'m'} color={'grey-500'}>Sponsorship fee</Text>
+      <Text size={'m'} color={'grey-500'} testid={`${testid}-sponsorship-fee-label`}>Sponsorship fee</Text>
       <Checkbox
         testid={`${testid}-sponsorship-fee-checkbox`}
         checked={isSelectedSponsorshipFee}
@@ -183,7 +184,7 @@ export const WithdrawDepositAskModal: FC<WithdrawDepositAskModalProps> = ({ isVi
       />
     </Content>}
     <Row>
-      <Text color='grey-500'>Amount to withdraw:&nbsp;</Text>
+      <Text color='grey-500' testid={`${testid}-withdraw-amount-label`}>Amount to withdraw:&nbsp;</Text>
       <Text
         testid={`${testid}-withdraw-amount`}
       >{`${formatKusamaBalance(amountToWithdraw.toString())} ${tokenSymbol}`}</Text>

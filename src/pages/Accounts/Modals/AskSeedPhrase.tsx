@@ -100,7 +100,7 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish,
       />
     </InputSeedWrapper>
     {!seedValid && <ErrorText>Seed phrase is invalid</ErrorText>}
-    <WarningBlock>
+    <WarningBlock testid={`${testid}-warning`}>
       Ensure that you keep this seed in a safe place. Anyone with access to it can re-create the account and gain full access to it.
     </WarningBlock>
     <ConfirmWrapperRow>
@@ -113,7 +113,7 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish,
       />
     </ConfirmWrapperRow>
     <ButtonWrapper>
-      <StepsTextStyled size={'m'}>Step 1/3</StepsTextStyled>
+      <StepsTextStyled size={'m'} testid={`${testid}-step`}>Step 1/3</StepsTextStyled>
       <Button
         testid={`${testid}-next-button`}
         disabled={!address || !confirmSeedSaved || !seedValid}

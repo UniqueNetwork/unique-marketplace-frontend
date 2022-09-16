@@ -31,7 +31,7 @@ const ConfirmModal: FC<IConfirmModalProps> = ({
 
   return (
     <Modal isVisible={isVisible} onClose={onCancel} isClosable={isClosable}>
-      {headerText && <Heading size='2'>{headerText}</Heading>}
+      {headerText && <Heading size='2' testid={`${testid}-heading`}>{headerText}</Heading>}
       <Content>
         {children}
       </Content>

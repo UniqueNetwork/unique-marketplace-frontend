@@ -10,9 +10,10 @@ import { useCollections } from 'hooks/useCollections';
 interface InlineTokenCardProps {
   tokenId: number
   collectionId: number
+  testid?: string
 }
 
-export const InlineTokenCard: FC<InlineTokenCardProps> = ({ tokenId, collectionId, children }) => {
+export const InlineTokenCard: FC<InlineTokenCardProps> = ({ tokenId, collectionId, children, testid }) => {
   const { api } = useApi();
   const { getCollection } = useCollections();
   const [token, setToken] = useState<TokenByIdResult>();
@@ -33,9 +34,13 @@ export const InlineTokenCard: FC<InlineTokenCardProps> = ({ tokenId, collectionI
 
   return (
     <InlineTokenCardWrapper>
-      <Avatar src={token?.image || ''} size={64} type={'square'} />
+      <Avatar src={token?.image || ''}
+        size={64}
+        type={'square'}
+        testid={`${testid}-token-image`}
+      />
       {token && <TokenInfoWrapper>
-        <Text size={'s'} color={'grey-500'}>{`${prefix} #${token?.tokenId}`}</Text>
+        <Text size={'s'} color={'grey-500'} testid={`${testid}-token-title`}>{`${prefix} #${token?.tokenId}`}</Text>
         {children}
       </TokenInfoWrapper>}
       {isLoading && <Loader isFullPage />}

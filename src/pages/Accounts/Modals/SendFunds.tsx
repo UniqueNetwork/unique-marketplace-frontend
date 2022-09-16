@@ -182,7 +182,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
 
   return (<Modal isVisible={isVisible} isClosable={true} onClose={onCloseModal}>
     <Content>
-      <Heading size='2'>{'Send funds'}</Heading>
+      <Heading size='2' testid={`${testid}-heading`}>{'Send funds'}</Heading>
     </Content>
 
     <Text size={'s'} color={'grey-500'}>{'From'}</Text>
@@ -230,6 +230,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
             accountAddress={option.address}
             canCopy={false}
             isShort={deviceSize < DeviceSize.md}
+            testid={`${testid}-selected`}
           />
         </AddressOptionWrapper>}
       />
