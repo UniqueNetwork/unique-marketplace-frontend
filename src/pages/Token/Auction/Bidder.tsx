@@ -10,18 +10,24 @@ import { Avatar } from '../../../components/Avatar/Avatar';
 
 interface BidderProps {
   accountAddress: string;
+  testid?: string
 }
 
-const Bidder: FC<BidderProps> = ({ accountAddress }) => {
+const Bidder: FC<BidderProps> = ({ accountAddress, testid }) => {
   const { selectedAccount } = useAccounts();
 
   if (compareEncodedAddresses(accountAddress, selectedAccount?.address || '')) {
-    return <Text size={'m'} color={'grey-600'}>You</Text>;
+    return <Text size={'m'} color={'grey-600'} testid={`${testid}-you`}>You</Text>;
   }
 
   return (<BidderWrapper>
-    <Avatar size={24} src={DefaultAvatar} address={accountAddress} />
-    <AccountLink accountAddress={accountAddress} />
+    <Avatar
+      size={24}
+      src={DefaultAvatar}
+      address={accountAddress}
+      testid={`${testid}-avatar`}
+    />
+    <AccountLink accountAddress={accountAddress} testid={`${testid}-address`}/>
   </BidderWrapper>
 
   );

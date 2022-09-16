@@ -196,9 +196,9 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
   );
 
   return (
-    <SellModalStyled>
+    <SellModalStyled data-testid={testid}>
       <Content>
-        <Heading size='2'>Selling method</Heading>
+        <Heading size='2' testid={`${testid}-heading`}>Selling method</Heading>
       </Content>
       <Tabs
         activeIndex={activeTab}

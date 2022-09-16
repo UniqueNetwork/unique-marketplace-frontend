@@ -123,22 +123,28 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
   );
 
   return (
-    <>
+    <div data-testid={testid}>
       <Content>
-        <Heading size='2'>Place a bid</Heading>
+        <Heading size='2' testid={`${testid}-heading`}>Place a bid</Heading>
       </Content>
       <InputWrapper>
-        <SelectStyled options={chainOptions} value={chain} onChange={onChainChange} />
+        <SelectStyled
+          options={chainOptions}
+          value={chain}
+          onChange={onChainChange}
+          testid={`${testid}-currency-select`}
+        />
         <InputStyled
           onChange={onBidAmountChange}
           value={bidAmount.toString()}
+          testid={`${testid}-amount`}
         />
       </InputWrapper>
-      <Text size={'s'} color={'grey-500'} >
+      <Text size={'s'} color={'grey-500'} testid={`${testid}-minimum-bid-text`}>
         {`Minimum bid ${formatKusamaBalance(minimalBid.toString(), api?.market?.kusamaDecimals)} ${chain || ''}`}
       </Text>
       <CautionTextWrapper>
-        {!isEnoughBalance && <WarningStyled color={'coral-500'}>Your balance is too low to place a bid</WarningStyled>}
+        {!isEnoughBalance && <WarningStyled color={'coral-500'} testid={`${testid}-low-balance-warning`}>Your balance is too low to place a bid</WarningStyled>}
         {isEnoughBalance && <TextStyled
           color='additional-warning-500'
           size='s'
@@ -153,9 +159,10 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
           onClick={onConfirmPlaceABidClick}
           role='primary'
           title='Confirm'
+          testid={`${testid}-confirm-button`}
         />
       </ButtonWrapper>
-    </>
+    </div>
   );
 };
 

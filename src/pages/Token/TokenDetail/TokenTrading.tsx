@@ -69,6 +69,6 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
   if (!isAllowed) return null;
 
   return (
-    <BuyToken offer={offer} onBuy={onBuyClick}/>
+    <BuyToken offer={offer} onBuy={onBuyClick} testid={`${testid}-buy`}/>
   );
 };
