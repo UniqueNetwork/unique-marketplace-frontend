@@ -1,5 +1,5 @@
 import { Sdk } from '@unique-nft/substrate-client';
-import { TokenId, UniqueController } from './types';
+import { TokenId, TransactionOptions, UniqueController } from './types';
 import { getEthAccount } from './utils/addressUtils';
 import { filterAllowedTokens } from './utils/checkTokenIsAllowed';
 import { NestedToken, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
@@ -57,5 +57,21 @@ export class UniqueSDKNFTController implements UniqueController {
 
   async getBundle(collectionId: number, tokenId: number): Promise<NestedToken | null> {
     return await this.sdk?.tokens.getBundle({ collectionId, tokenId }) || null;
+  }
+
+  async unnest(nested: { collectionId: number, tokenId: number }, parent: { collectionId: number, tokenId: number }, options: TransactionOptions): Promise<void> {
+    if (!options.signer) return;
+    const unsignedTxPayload = await this.sdk?.tokens.unnest.build({
+      parent,
+      nested,
+      address: options.signer
+    });
+    if (!unsignedTxPayload) throw new Error('Transaction build error');
+    const signature = await options.sign?.(unsignedTxPayload);
+    if (!signature) throw new Error('Signing failed');
+    await this.sdk?.extrinsics.submitWaitCompleted({
+      signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
+      signature
+    });
   }
 }

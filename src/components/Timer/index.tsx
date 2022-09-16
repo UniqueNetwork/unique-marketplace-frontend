@@ -5,9 +5,10 @@ import { useCalculateTimeLeft } from '../../hooks/useCalculateTimeLeft';
 
 interface Props {
   time: string;
+  testid?: string;
 }
 
-function Timer({ time }: Props): React.ReactElement<Props> {
+function Timer({ time, testid }: Props): React.ReactElement<Props> {
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   function checkTime(i: string) {
@@ -47,28 +48,28 @@ function Timer({ time }: Props): React.ReactElement<Props> {
   return (
     <TimerStyled>
       {daysLeft >= 0 && <>
-        <ShortTimer>
+        <ShortTimer data-testid={`${testid}-auction-ends-text`}>
           {`Auction ends ${months[monthNumber]} ${day}, ${year} at  ${hoursFormat}:${minutes} ${suffix} ${timezone}`}
         </ShortTimer>
         <DetailedTimer>
           <Cell>
-            <Heading size='4'>{checkTime(daysLeft.toString())}</Heading>
-            <Description>{daysLeft > 1 ? 'days' : 'day'}</Description>
+            <Heading size='4' testid={`${testid}-days`}>{checkTime(daysLeft.toString())}</Heading>
+            <Description data-testid={`${testid}-days-label`}>{daysLeft > 1 ? 'days' : 'day'}</Description>
           </Cell>
           <Heading size='4'>:</Heading>
           <Cell>
-            <Heading size='4'>{checkTime(hoursLeft.toString())}</Heading>
-            <Description>{hoursLeft > 1 ? 'hours' : 'hour'}</Description>
+            <Heading size='4' testid={`${testid}-hours`}>{checkTime(hoursLeft.toString())}</Heading>
+            <Description data-testid={`${testid}-hours-label`}>{hoursLeft > 1 ? 'hours' : 'hour'}</Description>
           </Cell>
           <Heading size='4'>:</Heading>
           <Cell>
-            <Heading size='4'>{checkTime(minutesLeft.toString())}</Heading>
-            <Description>{minutesLeft > 1 ? 'minutes' : 'minute'}</Description>
+            <Heading size='4' testid={`${testid}-minutes`}>{checkTime(minutesLeft.toString())}</Heading>
+            <Description data-testid={`${testid}-minutes-label`}>{minutesLeft > 1 ? 'minutes' : 'minute'}</Description>
           </Cell>
           <Heading size='4'>:</Heading>
           <Cell>
-            <Heading size='4'>{checkTime(secondsLeft.toString())}</Heading>
-            <Description>{secondsLeft > 1 ? 'seconds' : 'second'}</Description>
+            <Heading size='4' testid={`${testid}-seconds`}>{checkTime(secondsLeft.toString())}</Heading>
+            <Description data-testid={`${testid}-seconds-label`}>{secondsLeft > 1 ? 'seconds' : 'second'}</Description>
           </Cell>
         </DetailedTimer>
       </>}

@@ -8,13 +8,15 @@ export interface IAvatarProps {
   address?: string;
   size: number;
   type?: 'circle' | 'square';
+  testid?: string
 }
 
 export const Avatar: FC<IAvatarProps> = ({
   size = 38,
   src,
   address,
-  type = 'square'
+  type = 'square',
+  testid
 }: IAvatarProps) => {
   const imgUrl = typeof src === 'string' ? src : (src?.fullUrl || src?.url);
 
@@ -30,6 +32,7 @@ export const Avatar: FC<IAvatarProps> = ({
       src={imgUrl}
       height={size}
       alt={''}
+      data-testid={testid}
     />
   </AvatarWrapper>;
 };

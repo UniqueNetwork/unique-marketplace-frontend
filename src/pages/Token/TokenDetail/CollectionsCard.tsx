@@ -9,13 +9,15 @@ interface ICollectionsCardProps {
   title: string;
   avatarSrc: string;
   description: string;
+  testid?: string;
 }
 
 export const CollectionsCard: FC<ICollectionsCardProps> = ({
   avatarSrc,
   description,
   id,
-  title
+  title,
+  testid
 }: ICollectionsCardProps) => {
   const avatarImg = avatarSrc || noCollections;
   return (
@@ -24,11 +26,16 @@ export const CollectionsCard: FC<ICollectionsCardProps> = ({
         <CollectionCover size={40} src={avatarImg} type='circle' />
       </AvatarStyled>
       <Content>
-        <Heading className='heading' size='4'>
+        <Heading className='heading' size='4' testid={`${testid}-title`}>
           {`${title} [id ${id}]`}
         </Heading>
         {description && (
-          <Text className='description' color='grey-500' size='s'>
+          <Text
+            className='description'
+            color='grey-500'
+            size='s'
+            testid={`${testid}-description`}
+          >
             {description}
           </Text>
         )}

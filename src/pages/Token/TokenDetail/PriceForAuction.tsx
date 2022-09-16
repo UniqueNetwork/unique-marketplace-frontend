@@ -10,11 +10,12 @@ interface PriceProps {
   price: string;
   minStep?: string;
   topBid?: string;
+  testid?: string
 }
 
 const tokenSymbol = 'KSM';
 
-export const PriceForAuction: FC<PriceProps> = ({ price, minStep, topBid }) => {
+export const PriceForAuction: FC<PriceProps> = ({ price, minStep, topBid, testid }) => {
   const { api } = useApi();
 
   const priceBN = new BN(price);
@@ -25,19 +26,19 @@ export const PriceForAuction: FC<PriceProps> = ({ price, minStep, topBid }) => {
   return (
     <PriceWrapper>
       <Row>
-        <Heading size={'1'}>{topBid
+        <Heading size={'1'} testid={`${testid}-value`}>{topBid
           ? `${formatKusamaBalance(priceBN.add(minStepBN).toString(), api?.market?.kusamaDecimals)}`
           : `${formatKusamaBalance(startPrice.toString(), api?.market?.kusamaDecimals)}`
         }</Heading>
         <Icon name={'chain-kusama'} size={32} />
       </Row>
       {topBid && <Row>
-        <Text color='grey-500' size='m'>
+        <Text color='grey-500' size='m' testid={`${testid}-current-bid`}>
           {`Current bid: ${formatKusamaBalance(price)} ${tokenSymbol}`}
         </Text>
       </Row>}
       {topBid && minStep && <Row>
-        <Text color='grey-500' size='m'>
+        <Text color='grey-500' size='m' testid={`${testid}-minimum-step`}>
           {`Minimum step: ${formatKusamaBalance(minStep)} ${tokenSymbol}`}
         </Text>
       </Row>}

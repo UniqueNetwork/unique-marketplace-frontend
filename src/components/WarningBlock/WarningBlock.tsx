@@ -3,12 +3,13 @@ import styled from 'styled-components';
 import { Text } from '@unique-nft/ui-kit';
 import { AdditionalWarning100 } from '../../styles/colors';
 
-export const WarningBlock: FC<{ margin?: number}> = ({ margin = 1.5, children }) => {
+export const WarningBlock: FC<{ margin?: number, testid?: string }> = ({ margin = 1.5, children, testid }) => {
   return (
     <WarningBlockWrapper margin={margin}>
       <Text
         color='additional-warning-500'
         size='s'
+        testid={testid}
       >{children}</Text>
     </WarningBlockWrapper>
   );

@@ -7,9 +7,10 @@ import config from '../../config';
 
 interface AccountLinkProps {
   accountAddress: string
+  testid?: string
 }
 
-const AccountLink: FC<AccountLinkProps> = ({ accountAddress }) => {
+const AccountLink: FC<AccountLinkProps> = ({ accountAddress, testid }) => {
   const { chainData, currentChainId } = useApi();
 
   const formatAddress = useCallback((address: string) => {
@@ -22,6 +23,7 @@ const AccountLink: FC<AccountLinkProps> = ({ accountAddress }) => {
       rel={'noreferrer'}
       href={`${config.blockchains[currentChainId || '']?.scanUrl || ''}account/${formatAddress(accountAddress) || '404'}`}
       className={'unique-link primary'}
+      data-testid={testid}
     >{shortcutText(formatAddress(accountAddress) || '')}</a>
   );
 };

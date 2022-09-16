@@ -12,9 +12,10 @@ import { useAccounts } from '../../../hooks/useAccounts';
 interface BuyTokenProps {
   offer?: Offer;
   onBuy(): void
+  testid?: string
 }
 
-export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy }) => {
+export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy, testid }) => {
   const { marketCommission } = useFee();
   const { selectedAccount } = useAccounts();
 
@@ -43,7 +44,7 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy }) => {
         disabled={!isEnoughBalance}
       />
     </ButtonWrapper>
-    {!isEnoughBalance && <Text color={'coral-500'}>Your balance is too low to buy</Text>}
+    {!isEnoughBalance && <Text color={'coral-500'} testid={`${testid}-low-balance-warning`}>Your balance is too low to buy</Text>}
     <Divider />
   </>);
 };

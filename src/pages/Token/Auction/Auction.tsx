@@ -110,10 +110,11 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
   const price = offer.price;
 
   return (<>
-    <Text size={'l'}>{topBid ? 'Next minimum bid' : 'Starting bid'}</Text>
+    <Text size={'l'} testid={`${testid}-bid-title`}>{topBid ? 'Next minimum bid' : 'Starting bid'}</Text>
     <PriceForAuction price={price}
       minStep={offer.auction?.priceStep}
       topBid={topBid?.balance !== '0' ? topBid?.balance : topBid?.amount}
+      testid={`${testid}-bid`}
     />
     <AuctionWrapper>
       {offer.auction?.status === 'active' && <ButtonsWrapper>
@@ -135,23 +136,23 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
         />}
       </ButtonsWrapper>}
       {offer.auction?.status === 'active' && offer?.auction?.stopAt && <TimerWrapper>
-        <Timer time={offer.auction.stopAt} />
+        <Timer time={offer.auction.stopAt} testid={`${testid}-timer`} />
       </TimerWrapper>}
       {(offer.auction?.status === 'stopped' || offer.auction?.status === 'withdrawing') &&
       <Text>Auction is stopped</Text>}
       <Divider />
       <Heading size={'4'}>Offers</Heading>
-      {isTopBidder && <TopBidderTextStyled >You are Top Bidder</TopBidderTextStyled>}
+      {isTopBidder && <TopBidderTextStyled testid={`${testid}-you-are-top-bidder-text`}>You are Top Bidder</TopBidderTextStyled>}
       {!isBidder && topBid && <LeadingBidWrapper>
-        <Text color={'grey-500'}>Highest Bidder</Text><AccountLink accountAddress={topBid?.bidderAddress || ''} />
+        <Text color={'grey-500'} testid={`${testid}-highest-bidder-text`}>Highest Bidder</Text><AccountLink accountAddress={topBid?.bidderAddress || ''} testid={`${testid}-highest-bidder-address`}/>
       </LeadingBidWrapper>}
       {!isTopBidder && isBidder && <BidderStatusWrapper>
-        <BidderTextStyled >You are outbid</BidderTextStyled>
+        <BidderTextStyled testid={`${testid}-you-are-outbid-text`}>You are outbid</BidderTextStyled>
         <LeadingBidWrapper>
-          <Text color={'grey-500'}>Leading bid</Text><AccountLink accountAddress={topBid?.bidderAddress || ''} />
+          <Text color={'grey-500'} testid={`${testid}-leading-bid-text`}>Leading bid</Text><AccountLink accountAddress={topBid?.bidderAddress || ''} testid={`${testid}-leading-bid-address`}/>
         </LeadingBidWrapper>
       </BidderStatusWrapper>}
-      <Bids offer={offer} />
+      <Bids offer={offer} testid={`${testid}-bids`} />
     </AuctionWrapper>
   </>);
 };

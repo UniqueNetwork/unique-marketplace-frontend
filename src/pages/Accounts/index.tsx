@@ -55,7 +55,7 @@ const getAccountsColumns = ({
   {
     title: (
       <>
-        <Title>Account</Title>
+        <Title data-testid={`${testid}-account-column`}>Account</Title>
         {!isSmallDevice &&
           <IconWithHint align={{ appearance: 'horizontal', vertical: 'top', horizontal: 'right' }}>
             <span>Substrate account addresses (Kusama, Quartz, Polkadot, Unique, etc.) may be represented by a different address
@@ -75,21 +75,26 @@ const getAccountsColumns = ({
             accountAddress={accountInfo.address}
             canCopy
             isShort={isSmallDevice}
+            testid={`${testid}-${accountInfo.address}`}
           />
         </AccountCellWrapper>
       );
     }
   },
   {
-    title: (<Title>Balance</Title>),
+    title: (<Title data-testid={`${testid}-balance-column`}>Balance</Title>),
     width: '25%',
     field: 'balance',
     render(data, { accountInfo }: (Account & { accountInfo: AccountInfo })) {
-      return (<BalanceCell accountInfo={accountInfo} isSmallDevice={isSmallDevice} tokenSymbol={tokenSymbol} />);
+      return (<BalanceCell accountInfo={accountInfo}
+        isSmallDevice={isSmallDevice}
+        tokenSymbol={tokenSymbol}
+        data-testid={`${testid}-${accountInfo.address}`}
+      />);
     }
   },
   {
-    title: (<Title>Block explorer</Title>),
+    title: (<Title data-testid={`${testid}-blockexpolorer-column`}>Block explorer</Title>),
     width: '25%',
     field: 'blockExplorer',
     render(data, { accountInfo }: (Account & { accountInfo: AccountInfo })) {
@@ -100,6 +105,7 @@ const getAccountsColumns = ({
             target={'_blank'}
             rel={'noreferrer'}
             href={`${scanUrl}account/${formatAddress(accountInfo.address)}`}
+            data-testid={`${testid}-${accountInfo.address}-blockexpolorer-link`}
           >
             <TextStyled>UniqueScan</TextStyled>
             <IconWrapper>
@@ -111,14 +117,18 @@ const getAccountsColumns = ({
     }
   },
   {
-    title: isSmallDevice ? '' : (<Title>Actions</Title>),
+    title: isSmallDevice ? '' : (<Title data-testid={`${testid}-actions-column`}>Actions</Title>),
     width: '25%',
     field: 'actions',
     render(data, { accountInfo }: (Account & { accountInfo: AccountInfo })) {
       if (accountInfo.deposit && !isSmallDevice) {
         return (
           <DepositActionsWrapper>
-            <Button title={'Withdraw'} onClick={onShowWithdrawDepositModal(accountInfo.address)} role={'primary'} />
+            <Button title={'Withdraw'}
+              onClick={onShowWithdrawDepositModal(accountInfo.address)}
+              role={'primary'}
+              testid={`${testid}-${accountInfo.address}-withdraw-button`}
+            />
             <IconWithHint align={{ appearance: 'vertical', vertical: 'bottom', horizontal: 'right' }}>
               <span>Learn more in <StyledLink href='/FAQ' target='_blank' rel='noreferrer'>FAQ</StyledLink></span>
             </IconWithHint>
@@ -133,11 +143,16 @@ const getAccountsColumns = ({
               title={'Get'}
               onClick={onShowGetKsmModal}
               disabled={!config.rampApiKey}
+              testid={`${testid}-${accountInfo.address}-get-button`}
             />
-            {accountInfo.signerType === 'Local' && <Button title={'Delete'} onClick={onShowDeleteLocalAccountModal(accountInfo.address)} />}
+            {accountInfo.signerType === 'Local' && <Button title={'Delete'} onClick={onShowDeleteLocalAccountModal(accountInfo.address)} testid={`${testid}-${accountInfo.address}-delete-button`} />}
           </ActionsWrapper>
           {(accountInfo.deposit && isSmallDevice) && <DepositActionsWrapper>
-            <Button title={'Withdraw'} onClick={onShowWithdrawDepositModal(accountInfo.address)} role={'primary'} />
+            <Button title={'Withdraw'}
+              onClick={onShowWithdrawDepositModal(accountInfo.address)}
+              role={'primary'}
+              testid={`${testid}-${accountInfo.address}-get-button`}
+            />
             <IconWithHint align={{ appearance: 'vertical', vertical: 'bottom', horizontal: 'right' }}>
               <span>Learn more in <StyledLink href='/FAQ' target='_blank' rel='noreferrer'>FAQ</StyledLink></span>
             </IconWithHint>
@@ -390,7 +405,7 @@ export const AccountsPage = () => {
         headerText={'Delete local account'}
         testid={`${testid}-delete-account-modal`}
       >
-        <p>Are you sure, you want to perform this action? You won&apos;t be able to recover this account in future.</p>
+        <p data-testid={`${testid}-delete-account-modal-content`}>Are you sure, you want to perform this action? You won&apos;t be able to recover this account in future.</p>
       </ConfirmModal>
     </AccountPageWrapper>
     {config.rampApiKey && currentModal === AccountModal.getKsmModal && <GetKSMModal key={'modal-accounts-getKsm'} onClose={onModalClose}/>}
