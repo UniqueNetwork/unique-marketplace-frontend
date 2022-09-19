@@ -74,8 +74,6 @@ export const AccountsManager = (props: AccountsManagerProps) => {
       placement='right'
       open={open}
       onOpenChange={onOpenChange}
-      isTouch={touchDevice}
-      verticalOffset={verticalOffset}
     >
       <AccountsManagerWrapper>
         <div className='accounts-manager-selected-account'>
@@ -101,7 +99,6 @@ export const AccountsManager = (props: AccountsManagerProps) => {
           {activeNetwork && (
             <Icon
               {...activeNetwork.icon}
-              className='active-network-icon'
               size={16}
             />
           )}

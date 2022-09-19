@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Button, Dropdown, Icon, TableColumnProps, Text } from '@unique-nft/ui-kit';
+import { Button, Dropdown, Icon, TableColumnProps, TableRowProps, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { BN } from '@polkadot/util';
 
@@ -222,7 +222,7 @@ export const AccountsPage = () => {
   }, []);
 
   const filteredAccounts = useMemo(() => {
-    const reduceAccounts = (acc: (Account & { accountInfo: AccountInfo })[], account: Account) => {
+    const reduceAccounts = (acc: (Account & { accountInfo: AccountInfo } & TableRowProps)[], account: Account) => {
       acc.push({
         ...account,
         accountInfo: {
@@ -330,7 +330,7 @@ export const AccountsPage = () => {
         </SearchInputWrapper>
       </Row>
       <TableWrapper>
-        <Table
+        <Table<(Account & { accountInfo: AccountInfo } & TableRowProps)>
           columns={getAccountsColumns({
             isSmallDevice: deviceSize === DeviceSize.sm,
             formatAddress,

@@ -5,24 +5,24 @@ import { AccountCard } from './AccountCard';
 import styled from 'styled-components';
 
 export const AccountsManagerDropdown = ({
-    accounts,
-    selectedAccount,
-    networks,
-    activeNetwork,
-    deposit,
-    depositDescription,
-    manageBalanceLinkTitle,
-    balance,
-    symbol,
-    isTouch,
-    stakeVisibility,
-    isStakeDisabled,
-    avatarRender,
-    onAccountChange,
-    onNetworkChange,
-    onManageBalanceClick,
-    onCopyAddressClick,
-    onStakeClick
+  accounts,
+  selectedAccount,
+  networks,
+  activeNetwork,
+  deposit,
+  depositDescription,
+  manageBalanceLinkTitle,
+  balance,
+  symbol,
+  isTouch,
+  stakeVisibility,
+  isStakeDisabled,
+  avatarRender,
+  onAccountChange,
+  onNetworkChange,
+  onManageBalanceClick,
+  onCopyAddressClick,
+  onStakeClick
 }: AccountsManagerProps) => {
     return (
       <AccountsManagerDropdownWrapper>
@@ -45,7 +45,6 @@ export const AccountsManagerDropdown = ({
                         size: 8
                     }}
             onChange={onAccountChange}
-            isTouch={isTouch}
           >
             <div
               className='accounts-select'

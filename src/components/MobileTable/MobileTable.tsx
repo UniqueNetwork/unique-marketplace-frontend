@@ -26,7 +26,7 @@ function MobileTable<T>({
   else if (!loading) {
     children = <>{data?.map((item, rowIndex) => (
       <MobileTableRow
-        key={item.key}
+        key={item.key.toString()}
       >
         {columns?.map((column, columnIndex) => (
           <div key={`column-${column.field || ''}`}>

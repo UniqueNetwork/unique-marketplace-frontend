@@ -11,11 +11,11 @@ interface AccountCardProps extends IAccount {
 }
 
 export const AccountCard = ({
-                              name,
-                              address,
-                              avatarRender,
-                              onCopyAddressClick
-                            }: AccountCardProps) => {
+    name,
+    address,
+    avatarRender,
+    onCopyAddressClick
+  }: AccountCardProps) => {
   const shortAddress =
     address && address?.length > 13
       ? `${address.slice(0, 5)}...${address.slice(-5)}`

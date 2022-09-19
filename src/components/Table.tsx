@@ -1,14 +1,14 @@
 import React, { FC } from 'react';
 import styled from 'styled-components';
-import { IconProps, SortQuery, Table as UITable, TableColumnProps } from '@unique-nft/ui-kit';
+import { IconProps, SortQuery, Table as UITable, TableColumnProps, TableRowProps } from '@unique-nft/ui-kit';
 
 import useDeviceSize, { DeviceSize } from '../hooks/useDeviceSize';
 import MobileTable from './MobileTable/MobileTable';
 import Skeleton from './Skeleton/Skeleton';
 
-interface TableProps {
+interface TableProps<T> {
   columns: TableColumnProps[]
-  data?: any[]
+  data?: T[]
   loading?: boolean
   onSort?(sorting: SortQuery): void
   className?: string
@@ -16,14 +16,14 @@ interface TableProps {
   idColumnName: string
 }
 
-export const Table: FC<TableProps> = ({
+export function Table<T extends TableRowProps = TableRowProps>({
   columns,
   data,
   loading,
   onSort,
   className,
   emptyIconProps
-}) => {
+}: TableProps<T>) {
   const deviceSize = useDeviceSize();
 
   const getSkeletonItem = () => ({});
@@ -41,9 +41,9 @@ export const Table: FC<TableProps> = ({
         />
       </>)}
       {deviceSize <= DeviceSize.sm && (
-        <MobileTable<any>
+        <MobileTable<T>
           columns={columns}
-          data={!loading ? data : []}
+          data={!loading ? data || [] : []}
           loading={loading}
           className={className}
           emptyIconProps={emptyIconProps}
@@ -51,7 +51,7 @@ export const Table: FC<TableProps> = ({
       )}
     </TableWrapper>
   );
-};
+}
 
 const TableWrapper = styled.div`
   position: relative;

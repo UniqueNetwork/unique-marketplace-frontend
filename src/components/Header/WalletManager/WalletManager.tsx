@@ -65,7 +65,6 @@ export const WalletManager: FC = () => {
   }, [changeAccount]);
 
   const onCopyAddress = useCallback((address: string) => {
-    console.log(address);
     info(
       'Address copied',
       { name: 'success', size: 32, color: 'var(--color-additional-light)' }
