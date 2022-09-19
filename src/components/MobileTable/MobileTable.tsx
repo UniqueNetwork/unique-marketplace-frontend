@@ -1,34 +1,32 @@
-import React, { FC } from 'react';
+import React from 'react';
 import { IconProps, TableColumnProps, TableRowProps, Text } from '@unique-nft/ui-kit';
 
 import { MobileTableRow } from './MobileTableRow';
 import MobileTableSkeleton from '../Skeleton/MobileTableSkeleton';
 import EmptyTable from '../EmptyTable';
 
-interface MobileTableProps {
+interface MobileTableProps<T> {
   className?: string
   columns?: TableColumnProps[]
-  data?: TableRowProps[]
+  data?: (TableRowProps & T)[]
   loading?: boolean
   emptyIconProps?: Omit<IconProps, 'size'>
-  idColumnName: string
 }
 
-const MobileTable: FC<MobileTableProps> = ({
+function MobileTable<T>({
   columns,
   data,
   loading,
   className,
-  emptyIconProps,
-  idColumnName
-}) => {
+  emptyIconProps
+}: MobileTableProps<T>) {
   let children = <MobileTableSkeleton columns={columns || []} />;
 
   if (!loading && data?.length === 0) children = <EmptyTable iconProps={emptyIconProps} />;
   else if (!loading) {
     children = <>{data?.map((item, rowIndex) => (
       <MobileTableRow
-        key={item[idColumnName] as string}
+        key={item.key.toString()}
       >
         {columns?.map((column, columnIndex) => (
           <div key={`column-${column.field || ''}`}>
@@ -44,6 +42,6 @@ const MobileTable: FC<MobileTableProps> = ({
   return (
     <div className={className}>{children}</div>
   );
-};
+}
 
 export default MobileTable;
