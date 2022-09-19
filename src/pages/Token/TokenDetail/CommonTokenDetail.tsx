@@ -123,7 +123,7 @@ export const CommonTokenDetail: FC<IProps> = ({
       <Description>
         {isLoading && <TokenSkeleton />}
         {!isLoading && <>
-          <Heading size={'1'} data-testid={`${testid}-token-name`}>{`${prefix || ''} #${tokenId}`}</Heading>
+          <Heading size={'1'} testid={`${testid}-token-name`}>{`${prefix || ''} #${tokenId}`}</Heading>
           <ShareLink onClick={openShareModal} data-testid={`${testid}-share-button`}>
             <Text color='grey-500' size='m'>
               Share

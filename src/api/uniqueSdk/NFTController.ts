@@ -59,12 +59,26 @@ export class UniqueSDKNFTController implements UniqueController {
     return await this.sdk?.tokens.getBundle({ collectionId, tokenId }) || null;
   }
 
-  async unnest(nested: { collectionId: number, tokenId: number }, parent: { collectionId: number, tokenId: number }, options: TransactionOptions): Promise<void> {
-    if (!options.signer) return;
+  async unnest(address: string, nested: { collectionId: number, tokenId: number }, parent: { collectionId: number, tokenId: number }, options: TransactionOptions): Promise<void> {
     const unsignedTxPayload = await this.sdk?.tokens.unnest.build({
       parent,
       nested,
-      address: options.signer
+      address
+    });
+    if (!unsignedTxPayload) throw new Error('Transaction build error');
+    const signature = await options.sign?.(unsignedTxPayload);
+    if (!signature) throw new Error('Signing failed');
+    await this.sdk?.extrinsics.submitWaitCompleted({
+      signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
+      signature
+    });
+  }
+
+  async transferToBundle(address: string, nested: { collectionId: number, tokenId: number }, parent: { collectionId: number, tokenId: number }, options: TransactionOptions): Promise<void> {
+    const unsignedTxPayload = await this.sdk?.tokens.nest.build({
+      parent,
+      nested,
+      address
     });
     if (!unsignedTxPayload) throw new Error('Transaction build error');
     const signature = await options.sign?.(unsignedTxPayload);

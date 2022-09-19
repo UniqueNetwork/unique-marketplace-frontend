@@ -13,23 +13,35 @@ import { useApi } from 'hooks/useApi';
 import Skeleton from '../../components/Skeleton/Skeleton';
 import { Offer } from '../../api/restApi/offers/types';
 import { TokenByIdResult } from '@unique-nft/substrate-client/tokens';
+import BundleModal from './BundleModals/BundleModal';
+import { BundleModalType } from './BundleModals/types';
 
 const areNodesEqual = (a: INestingToken, b: INestingToken) => a.collectionId === b.collectionId && a.tokenId === b.tokenId;
 
 const getKey = (a: INestingToken) => `T${a.tokenId}C${a.collectionId}`;
 
 interface IProps {
-  onViewTokenDetails: Dispatch<SetStateAction<TokenByIdResult | undefined>>
   token?: TokenByIdResult
   offer?: Offer
+  onViewTokenDetails: Dispatch<SetStateAction<TokenByIdResult | undefined>>
+  testid?: string
 }
 
-function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token, offer }: IProps) {
+function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token, offer, testid }: IProps) {
   const navigate = useNavigate();
   const { uniqueSdk } = useApi();
   const [isMobileViewVisible, setIsMobileViewVisible] = useState(false);
   const [bundle, setBundle] = useState<INestingToken[]>();
   const [isBundleLoading, setIsBundleLoading] = useState(true);
+  const [modalType, setModalType] = useState(BundleModalType.default);
+  const [selectedToken, setSelectedToken] = useState<INestingToken>();
+  const [selectedParent, setSelectedParent] = useState<INestingToken>();
+
+  const onActionClick = useCallback((action: BundleModalType) => (token: INestingToken, parent: INestingToken) => {
+    setSelectedToken(token);
+    setSelectedParent(parent);
+    setModalType(action);
+  }, []);
 
   useEffect(() => {
     if (bundle) return;
@@ -65,6 +77,15 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
     console.log('onNodeClicked');
   }, []);
 
+  const onFinish = useCallback(() => {
+    setModalType(BundleModalType.default);
+    setBundle(undefined);
+  }, []);
+
+  const onClose = useCallback(() => {
+    setModalType(BundleModalType.default);
+  }, []);
+
   const tokensCount = useMemo(() => {
     if (!bundle || !bundle[0]?.nestingChildTokens) return 0;
     let count = 1;
@@ -87,6 +108,8 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
 
   if (isBundleLoading) return (<BundleIsLoading />);
 
+  if (!token) return null;
+
   return (
     <>
       <MobileBundleTreeSection
@@ -95,6 +118,7 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
         openView={openView}
         bundleTreeComponent={
           <BundleTree<INestingToken>
+            parent={{ ...token, nestingChildTokens: bundle || [] }}
             dataSource={bundle || []}
             nodeView={NodeView}
             onNodeClicked={onNodeClicked}
@@ -104,6 +128,8 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
             childrenProperty={'nestingChildTokens'}
             getKey={getKey}
             onViewNodeDetails={onViewTokenDetails}
+            onTransferClick={onActionClick(BundleModalType.nestedTransfer)}
+            onUnnestClick={onActionClick(BundleModalType.unnest)}
           />
         }
       />
@@ -114,6 +140,7 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
         </HeaderStyled>
         <Content>
           <BundleTree<INestingToken>
+            parent={{ ...token, nestingChildTokens: bundle || [] }}
             dataSource={bundle || []}
             nodeView={NodeView}
             onNodeClicked={onNodeClicked}
@@ -123,9 +150,19 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
             childrenProperty={'nestingChildTokens'}
             getKey={getKey}
             onViewNodeDetails={onViewTokenDetails}
+            onTransferClick={onActionClick(BundleModalType.nestedTransfer)}
+            onUnnestClick={onActionClick(BundleModalType.unnest)}
           />
         </Content>
       </BundlePagePaper>
+      <BundleModal
+        token={selectedToken}
+        parent={selectedParent}
+        bundleModalType={modalType}
+        onFinish={onFinish}
+        testid={`${testid}-modal`}
+        onClose={onClose}
+      />
     </>
   );
 }

@@ -95,8 +95,8 @@ const TokenPage = () => {
       { name: 'success', size: 32, color: 'var(--color-additional-light)' }
     );
 
-    fetchOffer(Number(collectionId), Number(id));
-    fetchToken();
+    void fetchOffer(Number(collectionId), Number(id));
+    void fetchToken();
   }, [info, fetchOffer, fetchToken, selectedAccount?.address, collectionId, id, token]);
 
   const backClickHandler = useCallback(() => {
@@ -158,6 +158,7 @@ const TokenPage = () => {
         onViewTokenDetails={setToken}
         token={token}
         offer={offer}
+        testid={`${testid}-bundle`}
       />}
     </>
   );

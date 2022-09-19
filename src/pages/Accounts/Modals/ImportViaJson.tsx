@@ -21,7 +21,6 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
     const reader = new FileReader();
     reader.onload = ({ target }: ProgressEvent<FileReader>): void => {
       if (target && target.result && uniqueSdk) {
-        console.log(target.result);
         const data = convertToU8a(target.result as ArrayBuffer);
 
         setPair(keyringFromFile(data, uniqueSdk.api.genesisHash.toHex()));

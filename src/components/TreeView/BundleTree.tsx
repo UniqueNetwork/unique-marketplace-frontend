@@ -3,6 +3,7 @@ import { Tree } from './Tree';
 import { IBundleTree, INode } from './types';
 
 function BundleTree<T extends INode>({
+  parent,
   dataSource,
   nodeView: NodeView,
   onNodeClicked: onNodeClickedProps,
@@ -11,7 +12,9 @@ function BundleTree<T extends INode>({
   compareNodes,
   childrenProperty,
   getKey,
-  onViewNodeDetails
+  onViewNodeDetails,
+  onUnnestClick,
+  onTransferClick
 }: IBundleTree<T>) {
   const [selectedToken, setSelectedToken] = useState<T | null>(null);
   const onNodeClicked = useCallback((data: T) => {
@@ -23,6 +26,7 @@ function BundleTree<T extends INode>({
   return (
     <>
       <Tree<T>
+        parent={parent}
         dataSource={dataSource}
         nodeView={NodeView}
         onNodeClicked={onNodeClicked}
@@ -31,8 +35,15 @@ function BundleTree<T extends INode>({
         childrenProperty={childrenProperty}
         getKey={getKey}
         onViewNodeDetails={onViewNodeDetails}
+        onUnnestClick={onUnnestClick}
+        onTransferClick={onTransferClick}
       />
-      {NestedSectionView && <NestedSectionView selectedToken={selectedToken} onViewNodeDetails={onViewNodeDetails} />}
+      {NestedSectionView && <NestedSectionView
+        selectedToken={selectedToken}
+        onViewNodeDetails={onViewNodeDetails}
+        onUnnestClick={onUnnestClick}
+        onTransferClick={onTransferClick}
+      />}
     </>
   );
 }
