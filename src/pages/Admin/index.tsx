@@ -91,6 +91,9 @@ export const AdminPanelPage: FC = () => {
       }
       setHasAccess(true);
       void await fetchCollections();
+      setSearchValue(undefined);
+      setSortingValue(sortingOptions[0]);
+      setModalType(AdminPanelModalType.default);
     })();
   }, [hasAdminPermission, isAccountsLoading, currentChainId]);
 
@@ -175,6 +178,7 @@ export const AdminPanelPage: FC = () => {
         <SearchAndSortingWrapper>
           <SearchField
             placeholder='Search'
+            searchValue={searchValue}
             onSearchStringChange={onSearch}
             hideButton
           />

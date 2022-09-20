@@ -79,10 +79,11 @@ export const MarketPage = () => {
     if (!currentChainId || !api) return;
     setFilterState(null);
     setSearchValue(undefined);
+    setSortingValue(defaultSortingValue.id);
     void fetch({
       page: 1,
       pageSize,
-      sort: [sortingValue]
+      sort: [defaultSortingValue.id]
     });
   }, [currentChainId]);
 
