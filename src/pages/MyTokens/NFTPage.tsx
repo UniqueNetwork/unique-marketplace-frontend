@@ -91,7 +91,7 @@ export const NFTPage = () => {
   const [selectOption, setSelectOption] = useState<TOption>();
   const { selectedAccount, isLoading } = useAccounts();
   const [tokens, setTokens] = useState<TokenByIdResult[]>([]);
-  const [isFetchingTokens, setIsFetchingTokens] = useState<boolean>(false);
+  const [isFetchingTokens, setIsFetchingTokens] = useState<boolean>(true);
   const deviceSize = useDeviceSize();
   const { collections } = useCollections();
 
@@ -113,16 +113,33 @@ export const NFTPage = () => {
 
   useEffect(() => {
     if (!api) return;
-    // clear filters and searchString if chainId or selectedAccount has been changed
+    // clear filters and searchString if chainId has been changed
     setFilterState(null);
     setSearchString('');
     setSortingValue(defaultSortingValue.id);
-  }, [currentChainId, selectedAccount?.address]);
+  }, [currentChainId]);
 
   const myCollections = useMemo(() => {
     const myTokensCollectionIds = [...tokens, ...offers].map((token) => token.collectionId);
     return collections.filter((collection) => myTokensCollectionIds.includes(collection.id));
   }, [collections, tokens, offers]);
+
+  useEffect(() => {
+    if (isFetchingTokens) return;
+    if (!myCollections.length) {
+      setFilterState(null);
+      return;
+    }
+    setFilterState((filter) => filter
+      ? {
+        ...filter,
+        collections: [],
+        attributeCounts: [],
+        attributes: []
+      }
+      : null
+    );
+  }, [myCollections, isFetchingTokens]);
 
   useEffect(() => {
     const option = sortingOptions.find((option) => { return option.id === sortingValue; });
