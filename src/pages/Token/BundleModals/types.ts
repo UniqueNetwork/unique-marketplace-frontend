@@ -3,7 +3,3 @@ export enum BundleModalType {
     unnest = 'Unnest',
     nestedTransfer = 'NestedTransfer'
 }
-
-export type TUnnest = {
-  accountAddress: string
-}

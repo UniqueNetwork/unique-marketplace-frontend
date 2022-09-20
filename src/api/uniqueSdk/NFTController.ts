@@ -2,7 +2,7 @@ import { Sdk } from '@unique-nft/substrate-client';
 import { TokenId, TransactionOptions, UniqueController } from './types';
 import { getEthAccount } from './utils/addressUtils';
 import { filterAllowedTokens } from './utils/checkTokenIsAllowed';
-import { NestedToken, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
+import { getNestingTokenAddress, NestedToken, TokenByIdResult, TokenIdArguments } from '@unique-nft/substrate-client/tokens';
 import { Address } from '@unique-nft/substrate-client/types';
 
 type UniqueSDKNFTControllerOptions = { sdk: Sdk, collectionIds: number[], allowedTokens: { collection: number, tokens: string }[] };
@@ -59,10 +59,14 @@ export class UniqueSDKNFTController implements UniqueController {
     return await this.sdk?.tokens.getBundle({ collectionId, tokenId }) || null;
   }
 
-  async unnest(address: string, nested: { collectionId: number, tokenId: number }, parent: { collectionId: number, tokenId: number }, options: TransactionOptions): Promise<void> {
+  async unnest(collectionId: number, tokenId: number, address: string, options: TransactionOptions): Promise<void> {
+    const parent = await this.sdk?.tokens.parent({ collectionId, tokenId });
+
+    if (!parent) return;
+
     const unsignedTxPayload = await this.sdk?.tokens.unnest.build({
       parent,
-      nested,
+      nested: { collectionId, tokenId },
       address
     });
     if (!unsignedTxPayload) throw new Error('Transaction build error');
@@ -74,11 +78,23 @@ export class UniqueSDKNFTController implements UniqueController {
     });
   }
 
-  async transferToBundle(address: string, nested: { collectionId: number, tokenId: number }, parent: { collectionId: number, tokenId: number }, options: TransactionOptions): Promise<void> {
-    const unsignedTxPayload = await this.sdk?.tokens.nest.build({
-      parent,
-      nested,
-      address
+  async transferToBundle(nested: TokenIdArguments, newParent: TokenIdArguments, options: TransactionOptions): Promise<void> {
+    const parent = await this.sdk?.tokens.parent(nested);
+    if (!parent) return;
+    const { collectionId, tokenId } = nested;
+    const from = getNestingTokenAddress(parent.collectionId, parent.tokenId);
+    const to = getNestingTokenAddress(newParent.collectionId, newParent.tokenId);
+    const unsignedTxPayload = await this.sdk?.extrinsics.build({
+      section: 'unique',
+      method: 'transferFrom',
+      address: options.signer || '',
+      args: [
+        { Ethereum: from },
+        { Ethereum: to },
+        collectionId,
+        tokenId,
+        1
+      ]
     });
     if (!unsignedTxPayload) throw new Error('Transaction build error');
     const signature = await options.sign?.(unsignedTxPayload);

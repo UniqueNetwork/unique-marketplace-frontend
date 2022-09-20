@@ -13,7 +13,7 @@ import { useApi } from 'hooks/useApi';
 import Skeleton from '../../components/Skeleton/Skeleton';
 import { Offer } from '../../api/restApi/offers/types';
 import { TokenByIdResult } from '@unique-nft/substrate-client/tokens';
-import BundleModal from './BundleModals/BundleModal';
+import BundleModal from './BundleModals/BundleTrunsferModal';
 import { BundleModalType } from './BundleModals/types';
 
 const areNodesEqual = (a: INestingToken, b: INestingToken) => a.collectionId === b.collectionId && a.tokenId === b.tokenId;
@@ -35,11 +35,9 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
   const [isBundleLoading, setIsBundleLoading] = useState(true);
   const [modalType, setModalType] = useState(BundleModalType.default);
   const [selectedToken, setSelectedToken] = useState<INestingToken>();
-  const [selectedParent, setSelectedParent] = useState<INestingToken>();
 
-  const onActionClick = useCallback((action: BundleModalType) => (token: INestingToken, parent: INestingToken) => {
+  const onActionClick = useCallback((action: BundleModalType) => (token: INestingToken) => {
     setSelectedToken(token);
-    setSelectedParent(parent);
     setModalType(action);
   }, []);
 
@@ -118,7 +116,6 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
         openView={openView}
         bundleTreeComponent={
           <BundleTree<INestingToken>
-            parent={{ ...token, nestingChildTokens: bundle || [] }}
             dataSource={bundle || []}
             nodeView={NodeView}
             onNodeClicked={onNodeClicked}
@@ -140,7 +137,6 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
         </HeaderStyled>
         <Content>
           <BundleTree<INestingToken>
-            parent={{ ...token, nestingChildTokens: bundle || [] }}
             dataSource={bundle || []}
             nodeView={NodeView}
             onNodeClicked={onNodeClicked}
@@ -157,7 +153,6 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
       </BundlePagePaper>
       <BundleModal
         token={selectedToken}
-        parent={selectedParent}
         bundleModalType={modalType}
         onFinish={onFinish}
         testid={`${testid}-modal`}

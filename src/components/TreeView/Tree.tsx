@@ -3,7 +3,7 @@ import { INode, INodeContainer, ITree } from './types';
 import { Node } from './Node';
 
 const level = 1;
-export function Tree<T extends INode>({ parent, dataSource, nodeView, onNodeClicked, className, compareNodes, childrenProperty, getKey, onViewNodeDetails, onTransferClick, onUnnestClick }: ITree<T>) {
+export function Tree<T extends INode>({ dataSource, nodeView, onNodeClicked, className, compareNodes, childrenProperty, getKey, onViewNodeDetails, onTransferClick, onUnnestClick }: ITree<T>) {
   const [dataSourceState, setDataSourceState] = useState(dataSource);
 
   useEffect(() => {
@@ -33,7 +33,6 @@ export function Tree<T extends INode>({ parent, dataSource, nodeView, onNodeClic
       {dataSourceState.map((data: T, index) => (
         <Node<T>
           key={getKey(data)}
-          parent={parent}
           data={data}
           onNodeClicked={nodeClickHandler}
           nodeView={nodeView}
@@ -46,7 +45,7 @@ export function Tree<T extends INode>({ parent, dataSource, nodeView, onNodeClic
           onUnnestClick={onUnnestClick}
         >
           {(data[childrenProperty] as unknown as T[])?.map((node: T) => (
-            iter<T>({ parent: data, data: node, onNodeClicked: nodeClickHandler, nodeView, level, getKey, childrenProperty, onViewNodeDetails, onTransferClick, onUnnestClick })
+            iter<T>({ data: node, onNodeClicked: nodeClickHandler, nodeView, level, getKey, childrenProperty, onViewNodeDetails, onTransferClick, onUnnestClick })
           ))}
         </Node>
       ))}
@@ -55,11 +54,10 @@ export function Tree<T extends INode>({ parent, dataSource, nodeView, onNodeClic
 }
 
 // iterate through datasource and return treenode
-function iter<T extends INode>({ parent, data, onNodeClicked, nodeView, level, getKey, childrenProperty, onViewNodeDetails, onTransferClick, onUnnestClick }: INodeContainer<T>) {
+function iter<T extends INode>({ data, onNodeClicked, nodeView, level, getKey, childrenProperty, onViewNodeDetails, onTransferClick, onUnnestClick }: INodeContainer<T>) {
   const nextLevel = Number(level) + 1;
   return (<Node
     key={getKey(data)}
-    parent={parent}
     data={data}
     onNodeClicked={onNodeClicked}
     nodeView={nodeView}
@@ -71,7 +69,7 @@ function iter<T extends INode>({ parent, data, onNodeClicked, nodeView, level, g
     onUnnestClick={onUnnestClick}
   >
     {(data[childrenProperty] as unknown as T[])?.map((val: T) => {
-      return iter({ parent: data, data: val, onNodeClicked, nodeView, level: nextLevel, childrenProperty, getKey, onViewNodeDetails, onTransferClick, onUnnestClick });
+      return iter({ data: val, onNodeClicked, nodeView, level: nextLevel, childrenProperty, getKey, onViewNodeDetails, onTransferClick, onUnnestClick });
     })}
   </Node>);
 }

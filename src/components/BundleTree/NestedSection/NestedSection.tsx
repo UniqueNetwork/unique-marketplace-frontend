@@ -17,7 +17,6 @@ export const NestedSection: FC<INestedSectionView<INestingToken>> = ({ selectedT
         {selectedToken?.nestingChildTokens?.map((token) => (
           <TokenCard
             key={`T-${token.tokenId} C-${token.collectionId}`}
-            parent={selectedToken}
             token={token}
             onViewNodeDetails={onViewNodeDetails}
             onUnnestClick={onUnnestClick}

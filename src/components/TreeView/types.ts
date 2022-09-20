@@ -5,13 +5,12 @@ export interface INodeView<T> {
   isOpened: boolean
   isSelected: boolean
   data: T
-  parent: T
   textClicked: (event: React.MouseEvent) => void
   isFirst?: boolean
   level: number
   onViewNodeDetails?: (node: T) => void
-  onTransferClick?: (node: T, parent: T) => void
-  onUnnestClick?: (node: T, parent: T) => void
+  onUnnestClick?: (node: T) => void
+  onTransferClick?: (node: T) => void
 }
 
 export interface INode {
@@ -20,14 +19,9 @@ export interface INode {
   selected?: boolean
 }
 
-interface INodeChildren<T> {
-  [k: string]: T[]
-}
-
 export type TTreeNodeClickHandler<T> = (data: T) => void
 
 export interface INodeContainer<T> {
-  parent: T
   data: T
   nodeView: React.FC<INodeView<T>>
   onNodeClicked: TTreeNodeClickHandler<T>
@@ -37,13 +31,12 @@ export interface INodeContainer<T> {
   level: number
   children?: React.ReactNode
   onViewNodeDetails?: (node: T) => void
-  onUnnestClick?: (node: T, parent: T) => void
-  onTransferClick?: (node: T, parent: T) => void
+  onUnnestClick?: (node: T) => void
+  onTransferClick?: (node: T) => void
 }
 
 export interface ITree<T> {
   dataSource: T[]
-  parent: T
   nodeView: React.FC<INodeView<T>>
   onNodeClicked: TTreeNodeClickHandler<T>
   className?: string
@@ -51,8 +44,8 @@ export interface ITree<T> {
   getKey: (a: T) => string
   childrenProperty: keyof T
   onViewNodeDetails?: (node: T) => void
-  onUnnestClick?: (node: T, parent: T) => void
-  onTransferClick?: (node: T, parent: T) => void
+  onUnnestClick?: (node: T) => void
+  onTransferClick?: (node: T) => void
 }
 
 export interface IBundleTree<T> extends ITree<T>{
@@ -62,6 +55,6 @@ export interface IBundleTree<T> extends ITree<T>{
 export interface INestedSectionView<T> {
   selectedToken: T | null
   onViewNodeDetails?: (node: T) => void
-  onUnnestClick?: (node: T, parent: T) => void
-  onTransferClick?: (node: T, parent: T) => void
+  onUnnestClick?: (node: T) => void
+  onTransferClick?: (node: T) => void
 }

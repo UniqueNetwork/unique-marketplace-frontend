@@ -17,7 +17,6 @@ const NodeView: FC<INodeView<INestingToken>> = ({
   arrowClicked,
   isOpened,
   data,
-  parent,
   textClicked,
   isFirst,
   level,
@@ -39,14 +38,14 @@ const NodeView: FC<INodeView<INestingToken>> = ({
   }, [deviceSize, textClicked]);
 
   const onTransfer = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
-    onTransferClick?.(data, parent);
+    onTransferClick?.(data);
     event.stopPropagation();
-  }, [onTransferClick, data, parent]);
+  }, [onTransferClick, data]);
 
   const onUnnest = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
-    onUnnestClick?.(data, parent);
+    onUnnestClick?.(data);
     event.stopPropagation();
-  }, [onUnnestClick, data, parent]);
+  }, [onUnnestClick, data]);
 
   const showMenu = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
     setMenuVisible(true);

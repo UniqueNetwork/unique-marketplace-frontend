@@ -3,20 +3,19 @@ import { useApi } from '../useApi';
 import { InternalStage, StageStatus } from '../../types/StagesTypes';
 import { useAccounts } from '../useAccounts';
 import useStages from '../useStages';
-import { TUnnest } from 'pages/Token/BundleModals/types';
-import { INestedTokenId } from 'components/BundleTree/types';
+import { TokenIdArguments } from '@unique-nft/substrate-client/tokens';
 
-export const useUnnestStages = (token: INestedTokenId, parent: INestedTokenId) => {
+export const useUnnestStages = (token: TokenIdArguments) => {
   const { api } = useApi();
-  const { signPayloadJSON } = useAccounts();
+  const { selectedAccount, signPayloadJSON } = useAccounts();
   const nftApi = api?.nft;
-  const unnestStages: InternalStage<TUnnest>[] = useMemo(() => [{
+  const unnestStages: InternalStage<null>[] = useMemo(() => [{
     title: 'Unnest in progress',
     description: '',
     status: StageStatus.default,
-    action: (params) => nftApi?.unnest(params.txParams.accountAddress, token, parent, params.options)
-  }], [nftApi, token, parent]);
-  const { stages, error, status, initiate } = useStages<TUnnest>(unnestStages, signPayloadJSON);
+    action: (params) => nftApi?.unnest(token.collectionId, token.tokenId, selectedAccount?.address || '', params.options)
+  }], [nftApi, token, selectedAccount?.address]);
+  const { stages, error, status, initiate } = useStages<null>(unnestStages, signPayloadJSON);
 
   return {
     stages,

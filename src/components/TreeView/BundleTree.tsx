@@ -3,7 +3,6 @@ import { Tree } from './Tree';
 import { IBundleTree, INode } from './types';
 
 function BundleTree<T extends INode>({
-  parent,
   dataSource,
   nodeView: NodeView,
   onNodeClicked: onNodeClickedProps,
@@ -26,7 +25,6 @@ function BundleTree<T extends INode>({
   return (
     <>
       <Tree<T>
-        parent={parent}
         dataSource={dataSource}
         nodeView={NodeView}
         onNodeClicked={onNodeClicked}

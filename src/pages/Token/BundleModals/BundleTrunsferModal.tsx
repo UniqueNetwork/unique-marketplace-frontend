@@ -6,24 +6,22 @@ import { UnnestModal } from './UnnestModal';
 import { TransferToBundleModal } from './TransferToBundleModal';
 import { INestingToken } from 'components/BundleTree/types';
 
-export type TBundleModalProps = {
+export type TBundleTrunsferModalProps = {
   token?: INestingToken
-  parent?: INestingToken
   bundleModalType: BundleModalType
   onClose(): void
   onFinish(): void
   testid: string
 }
 
-export type TBundleModalBodyProps = {
+export type TBundleTrunsferModalBodyProps = {
   token: INestingToken
-  parent: INestingToken
   onFinish(): void
   setIsClosable(value: boolean): void
   testid: string
 }
 
-const BundleModal = ({ token, parent, onClose, onFinish, bundleModalType, testid }: TBundleModalProps) => {
+const BundleTrunsferModal = ({ token, onClose, onFinish, bundleModalType, testid }: TBundleTrunsferModalProps) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const [isClosable, setIsClosable] = useState<boolean>(true);
 
@@ -32,7 +30,7 @@ const BundleModal = ({ token, parent, onClose, onFinish, bundleModalType, testid
     else setIsVisible(true);
   }, [bundleModalType]);
 
-  const ModalBodyComponent = useMemo<FC<TBundleModalBodyProps> | null>(() => {
+  const ModalBodyComponent = useMemo<FC<TBundleTrunsferModalBodyProps> | null>(() => {
     switch (bundleModalType) {
       case BundleModalType.unnest:
         return UnnestModal;
@@ -53,10 +51,9 @@ const BundleModal = ({ token, parent, onClose, onFinish, bundleModalType, testid
         onFinish={onFinish}
         testid={`${testid}-${bundleModalType.toLowerCase().replaceAll(' ', '-')}-modal`}
         token={token}
-        parent={parent}
       />
     </Modal>
   );
 };
 
-export default BundleModal;
+export default BundleTrunsferModal;

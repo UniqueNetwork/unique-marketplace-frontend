@@ -7,9 +7,9 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import { StageStatus } from '../../../types/StagesTypes';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 import { useUnnestStages } from '../../../hooks/marketplaceStages/useUnnestStages';
-import { TBundleModalBodyProps } from './BundleModal';
+import { TBundleTrunsferModalBodyProps } from './BundleTrunsferModal';
 
-export const UnnestModal: FC<TBundleModalBodyProps> = ({ token, parent, setIsClosable, onFinish, testid }) => {
+export const UnnestModal: FC<TBundleTrunsferModalBodyProps> = ({ token, setIsClosable, onFinish, testid }) => {
   const { selectedAccount } = useAccounts();
   const [status, setStatus] = useState<'ask' | 'unnest-stage'>('ask'); // TODO: naming
 
@@ -25,7 +25,6 @@ export const UnnestModal: FC<TBundleModalBodyProps> = ({ token, parent, setIsClo
     return (<UnnestStagesModal
       onFinish={onFinish}
       token={token}
-      parent={parent}
       setIsClosable={setIsClosable}
       testid={testid}
     />);
@@ -64,16 +63,15 @@ const AskUnnestModal: FC<{ onUnnest(): void, testid: string }> = ({ onUnnest, te
   );
 };
 
-const UnnestStagesModal: FC<TBundleModalBodyProps> = ({ token, parent, onFinish, testid }) => {
+const UnnestStagesModal: FC<TBundleTrunsferModalBodyProps> = ({ token, onFinish, testid }) => {
   const { collectionId, tokenId } = token;
-  const { collectionId: parentCollectionId, tokenId: parentTokenId } = parent;
-  const { stages, status, initiate } = useUnnestStages({ tokenId, collectionId }, { collectionId: parentCollectionId, tokenId: parentTokenId });
+  const { stages, status, initiate } = useUnnestStages({ tokenId, collectionId });
   const { info } = useNotifications();
   const { selectedAccount } = useAccounts();
 
   useEffect(() => {
     if (!selectedAccount?.address) return;
-    initiate({ accountAddress: selectedAccount?.address });
+    initiate(null);
   }, [selectedAccount?.address]);
 
   useEffect(() => {

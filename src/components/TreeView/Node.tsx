@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { INode, INodeContainer } from './types';
 import styled from 'styled-components';
 
-export function Node<T extends INode>({ parent, data, onNodeClicked, nodeView: NodeView, isFirst, level, children, onViewNodeDetails, onTransferClick, onUnnestClick }: INodeContainer<T>) {
+export function Node<T extends INode>({ data, onNodeClicked, nodeView: NodeView, isFirst, level, children, onViewNodeDetails, onTransferClick, onUnnestClick }: INodeContainer<T>) {
   const [isOpened, setIsOpened] = useState(data.opened);
 
   const arrowClicked = useCallback((event: React.MouseEvent) => {
@@ -17,7 +17,6 @@ export function Node<T extends INode>({ parent, data, onNodeClicked, nodeView: N
   return (
     <NodeContainer isOpened={!!isOpened} className={'treenode'}>
       <NodeView
-        parent={parent}
         arrowClicked={arrowClicked}
         isOpened={!!isOpened}
         data={data}
