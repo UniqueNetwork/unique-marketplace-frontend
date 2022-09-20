@@ -29,7 +29,8 @@ export const Icon = forwardRef(
     height={size}
     src={file}
     ref={ref}
-    {...props} />)
+    {...props}
+/>)
 : (
   <svg
     className={`icon icon-${name}`}

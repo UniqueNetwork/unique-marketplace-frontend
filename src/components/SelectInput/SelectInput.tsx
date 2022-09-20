@@ -144,6 +144,7 @@ const InputWrapper = styled.div`
     background: transparent;
     outline: none;
     padding: calc(var(--gap) / 2) var(--gap);
+    width: -moz-available;
   }
 
   &.left-icon {

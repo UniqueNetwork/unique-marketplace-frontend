@@ -33,7 +33,7 @@ export const getAttributesFromTokens = (tokens: TokenByIdResult[]) => {
     // Calculate filters to show
     for (const i in attributes) {
       const { name, value } = attributes[i];
-      const attributeName = name._.toLocaleLowerCase();
+      const attributeName = name?._.toLocaleLowerCase();
 
       if (Array.isArray(value)) {
         attributesMap[attributeName] = attributesMap[attributeName] ? [...attributesMap[attributeName], ...value.map((attr) => attr._)] : value.map((attr) => attr._);

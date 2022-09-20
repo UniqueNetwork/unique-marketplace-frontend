@@ -53,6 +53,13 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({
     }
   }, [isFetchingTokens, featuredTokens, selectedCollections.length]);
 
+  useEffect(() => {
+    if (!myCollections.length) {
+      setAttributeCounts([]);
+      setAttributes({});
+    }
+  }, [myCollections]);
+
   const onCollectionSelect = useCallback((collectionId: number) => (value: boolean) => {
     let _selectedCollections;
     if (value) {

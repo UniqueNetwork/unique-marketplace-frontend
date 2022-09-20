@@ -11,7 +11,7 @@ const endpoint = '/api/settings';
 
 export const getSettings = (baseURL: string) => get<Settings>(`${endpoint}`, { ...defaultParams, baseURL });
 
-export const addToWhitelist = (baseURL: string, body: WhitelistBody, signature: string) => post(`${endpoint}/allowed_list/${body.account}`, null, { headers: { ...defaultParams.headers, Authorization: `Bearer ${signature}` }, ...defaultParams });
+export const addToWhitelist = (baseURL: string, body: WhitelistBody, signature: string) => post(`${endpoint}/allowed_list/${body.account}`, null, { headers: { ...defaultParams.headers, Authorization: `Bearer ${signature}` }, ...defaultParams, baseURL });
 
 export const useSettings = () => {
   const [isFetching, setIsFetching] = useState<boolean | undefined>(false);

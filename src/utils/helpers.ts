@@ -4,11 +4,19 @@ export const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
-export const setUrlParameter = (parameter: string, value: string) => {
-  const searchParams = new URLSearchParams(window.location.search);
-  searchParams.set(parameter, value);
-  history.pushState(null, '', `${window.location.pathname}?${searchParams.toString()}`);
-};
+// Just for FF: becouse it throw an error too many calls to History API
+export const setUrlParameter = (() => {
+  let delayId: NodeJS.Timeout | undefined;
+
+  return (parameter: string, value: string) => {
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set(parameter, value);
+    if (delayId) clearTimeout(delayId);
+    delayId = setTimeout(() => {
+      history.pushState(null, '', `${window.location.pathname}?${searchParams.toString()}`);
+    }, 100);
+  };
+})();
 
 export const parseFilterState = (value: string | null) => {
   try {
