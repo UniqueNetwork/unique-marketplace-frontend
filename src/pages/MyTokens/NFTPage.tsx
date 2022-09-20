@@ -116,6 +116,7 @@ export const NFTPage = () => {
     // clear filters and searchString if chainId or selectedAccount has been changed
     setFilterState(null);
     setSearchString('');
+    setSortingValue(defaultSortingValue.id);
   }, [currentChainId, selectedAccount?.address]);
 
   const myCollections = useMemo(() => {

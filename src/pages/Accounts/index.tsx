@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Dropdown, Icon, TableColumnProps, TableRowProps, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { BN } from '@polkadot/util';
@@ -191,6 +191,11 @@ export const AccountsPage = () => {
   const [isDropdownOpened, setIsDropdownOpened] = useState(false);
   const deviceSize = useDeviceSize();
   const { chainData, currentChainId } = useApi();
+
+  useEffect(() => {
+    setSearchString('');
+    setCurrentModal(undefined);
+  }, [currentChainId]);
 
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
