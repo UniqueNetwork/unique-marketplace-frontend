@@ -88,11 +88,7 @@ const LayoutStyled = styled.div<{hasFooterSpacing: boolean}>`
       }
     }
   }
-
-  .unique-modal-wrapper .unique-modal {
-    max-height: 90vh;
-  }
-  
+ 
   .unique-layout__content {
     padding: 0 !important;
     background-color: transparent !important;
