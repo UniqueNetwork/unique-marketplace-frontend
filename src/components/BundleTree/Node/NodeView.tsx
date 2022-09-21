@@ -22,7 +22,9 @@ const NodeView: FC<INodeView<INestingToken>> = ({
   level,
   isSelected,
   children,
-  onViewNodeDetails
+  onViewNodeDetails,
+  onTransferClick,
+  onUnnestClick
 }) => {
   const { id, collectionId } = useParams<{ id: string, collectionId: string}>();
   const [menuVisible, setMenuVisible] = useState(false);
@@ -35,16 +37,19 @@ const NodeView: FC<INodeView<INestingToken>> = ({
     else textClicked(event);
   }, [deviceSize, textClicked]);
 
-  const onTransfer = useCallback(() => {
-    console.log('onTransfer');
-  }, []);
+  const onTransfer = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    onTransferClick?.(data);
+    event.stopPropagation();
+  }, [onTransferClick, data]);
 
-  const onUnnest = useCallback(() => {
-    console.log('onUnnest');
-  }, []);
+  const onUnnest = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    onUnnestClick?.(data);
+    event.stopPropagation();
+  }, [onUnnestClick, data]);
 
-  const showMenu = useCallback(() => {
+  const showMenu = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
     setMenuVisible(true);
+    event.stopPropagation();
   }, []);
 
   const hideMenu = useCallback(() => {

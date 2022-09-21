@@ -7,17 +7,17 @@ import { INestingToken, ITokenCard } from '../types';
 import { useCollection } from '../useCollection';
 import Skeleton from '../../Skeleton/Skeleton';
 
-function TokenCard({ token, onViewNodeDetails }: ITokenCard) {
+function TokenCard({ token, onViewNodeDetails, onUnnestClick, onTransferClick }: ITokenCard) {
   const [menuVisible, setMenuVisible] = useState(false);
   const { isCollectionLoading, collection } = useCollection(token.collectionId);
 
   const onTransfer = useCallback(() => {
-    console.log('onTransfer');
-  }, []);
+    onTransferClick?.(token);
+  }, [token, onTransferClick]);
 
   const onUnnest = useCallback(() => {
-    console.log('onUnnest');
-  }, []);
+    onUnnestClick?.(token);
+  }, [token, onUnnestClick]);
 
   const showMenu = useCallback(() => {
     setMenuVisible(true);

@@ -1,6 +1,6 @@
 import React, { ChangeEvent, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { AdditionalLight, Grey300, Grey500, Primary100, Primary500 } from '../../styles/colors';
+import { AdditionalLight, Grey100, Grey300, Grey500, Primary100, Primary500 } from '../../styles/colors';
 import { IconButton } from '../IconButton/IconButton';
 import { Icon, IconProps } from '@unique-nft/ui-kit';
 import { classNames } from '../../utils/classNames';
@@ -20,9 +20,10 @@ interface SelectInputProps<T = SelectInputOption> {
   isClearable?: boolean
   leftIcon?: IconProps
   testid?: string
+  disabled?: boolean
 }
 
-export function SelectInput<T = SelectInputOption>({ className, placeholder, options, value, onChange, renderOption, isClearable, leftIcon, testid }: SelectInputProps<T>) {
+export function SelectInput<T = SelectInputOption>({ className, placeholder, options, value, disabled, onChange, renderOption, isClearable, leftIcon, testid }: SelectInputProps<T>) {
   const [selectedValue, setSelectedValue] = useState<T>();
   const [inputValue, setInputValue] = useState<string>('');
   const [isDropdownVisible, setIsDropdownVisible] = useState<boolean>(false);
@@ -33,8 +34,9 @@ export function SelectInput<T = SelectInputOption>({ className, placeholder, opt
   }, [onChange]);
 
   const onInputFocus = useCallback(() => {
+    if (disabled) return;
     setIsDropdownVisible(true);
-  }, [setIsDropdownVisible]);
+  }, [setIsDropdownVisible, disabled]);
 
   const onOptionClick = useCallback((option: T) => () => {
     setIsDropdownVisible(false);
@@ -76,8 +78,9 @@ export function SelectInput<T = SelectInputOption>({ className, placeholder, opt
   }, [value, setSelectedValue, setInputValue]);
 
   const onTriangleButtonClick = useCallback(() => {
+    if (disabled) return;
     setIsDropdownVisible(!isDropdownVisible);
-  }, [isDropdownVisible]);
+  }, [isDropdownVisible, disabled]);
 
   const onMouseEnter = useCallback(() => {
     setIsCursorInside(true);
@@ -87,7 +90,7 @@ export function SelectInput<T = SelectInputOption>({ className, placeholder, opt
   }, []);
 
   return (<SelectInputWrapper onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
-    <InputWrapper className={classNames({ className, 'left-icon': !!leftIcon, dropped: isDropdownVisible })} >
+    <InputWrapper className={classNames({ className, 'left-icon': !!leftIcon, dropped: isDropdownVisible, disabled })} >
       {leftIcon && <Icon {...leftIcon}/>}
       {!selectedValue && !inputValue && placeholder && !isDropdownVisible && <Placeholder>{placeholder}</Placeholder>}
       {selectedValue && <div>
@@ -162,6 +165,10 @@ const InputWrapper = styled.div`
     .icon.icon-triangle {
       transform: rotate(180deg);
     }
+  }
+  
+  &.disabled {
+    background-color: ${Grey100}
   }
 `;
 

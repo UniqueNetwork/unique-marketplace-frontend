@@ -8,14 +8,20 @@ import { INestedSectionView } from '../../TreeView/types';
 import { useCollection } from '../useCollection';
 import Skeleton from '../../Skeleton/Skeleton';
 
-export const NestedSection: FC<INestedSectionView<INestingToken>> = ({ selectedToken, onViewNodeDetails }) => {
+export const NestedSection: FC<INestedSectionView<INestingToken>> = ({ selectedToken, onViewNodeDetails, onUnnestClick, onTransferClick }) => {
   const { isCollectionLoading, collection } = useCollection(selectedToken?.collectionId);
   return (
     <NestedDetails>
       {selectedToken && <Title token={selectedToken} isCollectionLoading={isCollectionLoading} prefix={collection?.tokenPrefix || ''}/>}
       <NestedTokens>
         {selectedToken?.nestingChildTokens?.map((token) => (
-          <TokenCard key={`T-${token.tokenId} C-${token.collectionId}`} token={token} onViewNodeDetails={onViewNodeDetails}/>
+          <TokenCard
+            key={`T-${token.tokenId} C-${token.collectionId}`}
+            token={token}
+            onViewNodeDetails={onViewNodeDetails}
+            onUnnestClick={onUnnestClick}
+            onTransferClick={onTransferClick}
+          />
         ))}
       </NestedTokens>
     </NestedDetails>
