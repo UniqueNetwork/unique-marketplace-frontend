@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
-import { Icon, TableColumnProps, Text } from '@unique-nft/ui-kit';
+import { Icon, TableColumnProps, TableRowProps, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import Calendar from '../../../static/icons/calendar.svg';
 
@@ -37,6 +37,16 @@ const getColumns = (tokenSymbol: string, timeRender: 'Age' | 'Time', onTimeRende
 
 const tokenSymbol = 'KSM';
 
+interface IBid extends TableRowProps {
+  bidValue: string,
+  amount: string,
+  balance: string,
+  bidderAddress: string,
+  createdAt: string,
+  pendingAmount: string,
+  updatedAt: string
+}
+
 const Bids: FC<BidsProps> = ({ offer, testid }) => {
   const [timeRender, setTimeRender] = useState<'Time' | 'Age'>('Time');
 
@@ -44,7 +54,7 @@ const Bids: FC<BidsProps> = ({ offer, testid }) => {
     setTimeRender((value) => value === 'Time' ? 'Age' : 'Time');
   }, [setTimeRender]);
 
-  const bids = useMemo(() => {
+  const bids: IBid[] = useMemo(() => {
     return offer?.auction?.bids?.map((item) => ({
       ...item,
       bidValue: item.balance !== '0' ? item.balance : item.amount

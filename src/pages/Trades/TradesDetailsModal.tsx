@@ -1,20 +1,21 @@
 import React, { FC, useEffect, useState } from 'react';
-import { Heading, Icon, Modal, Text } from '@unique-nft/ui-kit';
+import { Heading, Icon, Modal, TableRowProps, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { TokenComponent } from './TokenComponent/TokenComponent';
 import { AdditionalDark, BlueGrey600 } from 'styles/colors';
 import { timestampTableFormat } from 'utils/timestampUtils';
 import { AddressComponent } from './AddressComponent/AddressComponent';
-import Winner from 'static/icons/winner.svg';
 import { Table } from 'components/Table';
 import { useTradeDetails } from 'api/restApi/trades/tradeDetails';
 import { Bid, Trade } from 'api/restApi/trades/types';
 import { formatKusamaBalance } from 'utils/textUtils';
+import Winner from 'static/icons/winner.svg';
 
 export interface IConfirmModalProps {
   trade: Trade | null
   onCancel: () => void
 }
+
 const tokenSymbol = 'KSM';
 
 const columns = [
@@ -40,7 +41,7 @@ const columns = [
 ];
 
 const TokenTradesDetailsModal: FC<IConfirmModalProps> = ({ trade, onCancel }) => {
-  const [filteredBids, setFilteredBids] = useState<Bid[]>();
+  const [filteredBids, setFilteredBids] = useState<(Bid & TableRowProps)[]>();
   const { tradeDetails, fetch, isFetching } = useTradeDetails();
   useEffect(() => {
     if (trade) {
@@ -117,7 +118,6 @@ const TimeCell = styled.div`
 
 const BidderCell = styled.div`
   display: flex;
-  
   img {
     margin-left: var(--gap);
   }
