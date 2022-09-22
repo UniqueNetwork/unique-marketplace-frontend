@@ -23,10 +23,11 @@ export const formatBlockNumber = (blockNumber: number | undefined) => {
   return blockNumber.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 };
 
-export const formatKusamaBalance = (balance: string | number, decimals = 12) => {
+export const formatKusamaBalance = (balance: string | number, options?: { decimals?: number, fractionDigits?: number }) => {
+  const { decimals, fractionDigits } = options || {};
   const balanceValue = Number(balance);
-  return (balanceValue / Math.pow(10, decimals)).toLocaleString('en-US', {
+  return (balanceValue / Math.pow(10, decimals || 12)).toLocaleString('en-US', {
     minimumFractionDigits: 0,
-    maximumFractionDigits: decimals
+    maximumFractionDigits: fractionDigits || decimals || 12
   });
 };

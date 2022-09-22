@@ -20,6 +20,8 @@ import { AccountsManager } from '../../UI/widgets/AccountsManager';
 
 const tokenSymbol = 'KSM';
 
+const fractionDigits = 4;
+
 function widgetAvatarRender(accountAddress: string) {
   return (<Avatar size={24} src={DefaultAvatar} address={accountAddress} />);
 }
@@ -31,6 +33,7 @@ export const WalletManager: FC = () => {
   const { chainData, settings, currentChainId, onChangeChainId, api } = useApi();
   const { info } = useNotifications();
   const navigate = useNavigate();
+  const decimals = api?.market?.kusamaDecimals;
 
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
@@ -104,7 +107,7 @@ export const WalletManager: FC = () => {
     const deposit = (sponsorshipFee || new BN(0))
     .add(withdraw.reduce(getTotalAmount, new BN(0)))
     .add(leader.reduce(getTotalAmount, new BN(0)));
-    return formatKusamaBalance(deposit.toString());
+    return formatKusamaBalance(deposit.toString(), { decimals, fractionDigits });
   }, [selectedAccount?.deposits]);
 
   if (!isLoading && !selectedAccount) {
@@ -121,7 +124,7 @@ export const WalletManager: FC = () => {
         open={isOpen}
         accounts={widgetAccounts}
         activeNetwork={currentNetwork}
-        balance={formatKusamaBalance(currentBalance.value)}
+        balance={formatKusamaBalance(currentBalance.value, { decimals, fractionDigits })}
         deposit={formattedAccountDeposit}
         depositDescription={
           <>

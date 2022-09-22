@@ -53,6 +53,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
   const [calculatedBid, setCalculatedBid] = useState<TCalculatedBid>();
   const [isFetchingCalculatedbid, setIsFetchingCalculatedBid] = useState<boolean>(true);
   const { getCalculatedBid } = useAuction();
+  const decimals = api?.market?.kusamaDecimals;
 
   const fetchCalculatedBid = useCallback(async () => {
     if (!offer || !selectedAccount || !settings) return;
@@ -83,7 +84,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
     return new BN(Number(leadingBid) + Number(offer?.auction?.priceStep || '0'));
   }, [offer?.auction, leadingBid]);
 
-  const [bidAmount, setBidAmount] = useState<string>(formatKusamaBalance(minimalBid.toString(), api?.market?.kusamaDecimals));
+  const [bidAmount, setBidAmount] = useState<string>(formatKusamaBalance(minimalBid.toString(), { decimals }));
 
   const isEnoughBalance = useMemo(() => {
     if (!selectedAccount?.balance?.KSM || selectedAccount?.balance?.KSM.isZero()) return false;
@@ -141,7 +142,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
         />
       </InputWrapper>
       <Text size={'s'} color={'grey-500'} testid={`${testid}-minimum-bid-text`}>
-        {`Minimum bid ${formatKusamaBalance(minimalBid.toString(), api?.market?.kusamaDecimals)} ${chain || ''}`}
+        {`Minimum bid ${formatKusamaBalance(minimalBid.toString(), { decimals })} ${chain || ''}`}
       </Text>
       <CautionTextWrapper>
         {!isEnoughBalance && <WarningStyled color={'coral-500'} testid={`${testid}-low-balance-warning`}>Your balance is too low to place a bid</WarningStyled>}

@@ -23,12 +23,14 @@ export const PriceForAuction: FC<PriceProps> = ({ price, minStep, topBid, testid
 
   const startPrice = !priceBN.isZero() ? priceBN : minStepBN;
 
+  const decimals = api?.market?.kusamaDecimals;
+
   return (
     <PriceWrapper>
       <Row>
         <Heading size={'1'} testid={`${testid}-value`}>{topBid
-          ? `${formatKusamaBalance(priceBN.add(minStepBN).toString(), api?.market?.kusamaDecimals)}`
-          : `${formatKusamaBalance(startPrice.toString(), api?.market?.kusamaDecimals)}`
+          ? `${formatKusamaBalance(priceBN.add(minStepBN).toString(), { decimals })}`
+          : `${formatKusamaBalance(startPrice.toString(), { decimals })}`
         }</Heading>
         <Icon name={'chain-kusama'} size={32} />
       </Row>
