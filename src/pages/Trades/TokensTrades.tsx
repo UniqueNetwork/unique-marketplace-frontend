@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Pagination, SortQuery } from '@unique-nft/ui-kit';
+import { Pagination, SortQuery, TableRowProps } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
 import { useTrades } from '../../api/restApi/trades/trades';
@@ -34,7 +34,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
   const [selectedOfferDetails, setSelectedOfferDetails] = useState<Trade | null>(null);
   const deviceSize = useDeviceSize();
   const { trades, tradesCount, fetch, isFetching } = useTrades();
-  const [loadedTrades, setLoadedTrades] = useState<Trade[]>([]);
+  const [loadedTrades, setLoadedTrades] = useState<(Trade & TableRowProps)[]>([]);
   const [searched, setSearched] = useState(false);
 
   useEffect(() => {
