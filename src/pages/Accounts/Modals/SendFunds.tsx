@@ -336,6 +336,7 @@ const SenderSelectWrapper = styled.div`
   & .unique-dropdown {
     width: 100%;
     cursor: pointer;
+    min-height: 64px;
     .dropdown-options {
       max-height: 229px;
       overflow-y: auto;
