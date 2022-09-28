@@ -51,9 +51,15 @@ export const ImportViaSeedAccountModal: FC<TAccountModalProps> = ({ isVisible, o
     setStage(stage - 1);
   }, [stage]);
 
+  const onCloseClick = useCallback(() => {
+    setStage(CreateAccountModalStages.AskSeed);
+    setAccountProperties(undefined);
+    onClose();
+  }, [onClose]);
+
   if (!ModalBodyComponent) return null;
 
-  return (<Modal isVisible={isVisible} isClosable={true} onClose={onClose}>
+  return (<Modal isVisible={isVisible} isClosable={true} onClose={onCloseClick}>
     <Content>
       <Heading size='2'>{'Add an account via seed phrase'}</Heading>
     </Content>
