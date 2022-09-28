@@ -295,6 +295,12 @@ const SelectWrapper = styled(Select)`
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
+
+  @media (max-width: 568px) {
+    button {
+      width: 100%;
+    }
+  }
 `;
 
 const Content = styled.div`
@@ -307,6 +313,9 @@ const Row = styled.div`
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  @media (max-width: 568px) {
+    flex-direction: column;
+  }
 `;
 
 const SellModalStyled = styled.div`
@@ -318,6 +327,10 @@ const SellModalStyled = styled.div`
 
   .unique-select {
     margin-left: 24px;
+
+    @media (max-width: 568px) {
+      margin-left: 0px;
+    }
   }
 
   .unique-select .select-wrapper > svg {

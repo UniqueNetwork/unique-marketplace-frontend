@@ -113,6 +113,9 @@ const HeaderStyled = styled.div`
       padding: 0;
     }
   }
+  @media (min-width: 1920px) {
+    width: 1374px;
+  }
 `;
 
 const LeftSideColumn = styled.div`
