@@ -96,6 +96,9 @@ const LayoutStyled = styled.div<{hasFooterSpacing: boolean}>`
     display: flex;
     flex-direction: column;
     row-gap: calc(var(--gap) * 1.5);
+    @media (min-width: 1920px) {
+      width: 1374px;
+    }
   }
 
 
@@ -115,12 +118,19 @@ const LayoutStyled = styled.div<{hasFooterSpacing: boolean}>`
     @media (max-width: 1024px) {
       padding-bottom: 40px;
     }
+    @media (min-width: 1920px) {
+      align-items: center;
+      &>h1 {
+        width: 1374px;
+      }
+    }
   }
 
   header {
     top: 0;
     position: sticky !important;
     z-index: 990;
+    justify-content: center;
     @media (max-width: 620px) {
       height: 80px !important;
     }
@@ -129,6 +139,10 @@ const LayoutStyled = styled.div<{hasFooterSpacing: boolean}>`
   footer {
     @media (max-width: 568px) {
       height: unset;
+    }
+    @media (min-width: 1920px) {
+      display: flex;
+      justify-content: center;
     }
     &>div {
       display: flex;
@@ -140,6 +154,9 @@ const LayoutStyled = styled.div<{hasFooterSpacing: boolean}>`
         padding: var(--gap) 0;
         flex-direction: column;
         align-items: flex-start;
+      }
+      @media (min-width: 1920px) {
+        width: 1374px;
       }
     }
   }
