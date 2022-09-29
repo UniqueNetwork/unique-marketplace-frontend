@@ -1,7 +1,6 @@
 import { FC, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-// import { Icon } from '@unique-nft/ui-kit';
 import { Icon } from '../IconTest/IconTest';
 
 import { useScreenWidthFromThreshold } from 'hooks/useScreenWidthFromThreshold';

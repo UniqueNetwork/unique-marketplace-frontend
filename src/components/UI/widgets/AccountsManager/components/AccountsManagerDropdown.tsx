@@ -1,8 +1,9 @@
-import { Button, Dropdown, Icon, Toggle, Text, Link, SelectOptionProps } from '@unique-nft/ui-kit';
+import { Button, Dropdown, Icon, Toggle, Text } from '@unique-nft/ui-kit';
 import React from 'react';
 import { AccountsManagerProps } from '../AccountsManager';
 import { AccountCard } from './AccountCard';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 
 export const AccountsManagerDropdown = ({
   accounts,
@@ -11,10 +12,8 @@ export const AccountsManagerDropdown = ({
   activeNetwork,
   deposit,
   depositDescription,
-  manageBalanceLinkTitle,
   balance,
   symbol,
-  isTouch,
   stakeVisibility,
   isStakeDisabled,
   avatarRender,
@@ -57,31 +56,25 @@ export const AccountsManagerDropdown = ({
               />
             </div>
           </Dropdown>
+          <div
+            className='wallet-link'
+            data-testid={'wallet-link'}
+          >
+            <Link
+              to={`/${activeNetwork?.id}/accounts`}
+              onClick={onManageBalanceClick}
+              title='Manage accounts'
+            >Manage accounts</Link>
+          </div>
         </div>
         <div className='accounts-manager-wallet'>
           <Text color='grey-500' size='s'>
-            Wallet
+            Balance
           </Text>
           <div className='wallet-content' data-testid='wallet-content'>
             <Text size='l'>{`${balance} ${symbol}`}</Text>
             {deposit && <Text size='s'>{`${deposit} ${symbol}`}</Text>}
             {depositDescription}
-            {manageBalanceLinkTitle && (
-            <div
-              className='wallet-link'
-              data-testid={'wallet-link'}
-            >
-              <Link
-                onClick={onManageBalanceClick}
-                title={manageBalanceLinkTitle}
-              />
-              <Icon
-                size={12}
-                name='arrow-right'
-                color='var(--color-primary-500)'
-              />
-            </div>
-                    )}
           </div>
         </div>
         {stakeVisibility && (
@@ -136,71 +129,87 @@ const AccountsManagerDropdownWrapper = styled.div`
         width: 100%;
     }
 
-    .accounts-manager-accounts {
-        .unique-dropdown.touch > .dropdown-wrapper {
-            width: 100%;
-        }
-        .unique-dropdown.touch > .dropdown-options {
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
-            width: 100%;
-        }
+  .accounts-manager-accounts {
+    .unique-dropdown.touch > .dropdown-wrapper {
+      width: 100%;
+    }
+    .unique-dropdown.touch > .dropdown-options {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+      width: 100%;
+    }
 
-        display: flex;
-        flex-direction: column;
-        row-gap: calc(var(--prop-gap) / 2);
-        width: 100%;
-        .accounts-select {
-            border-radius: var(--prop-border-radius);
-            border: 1px solid var(--color-grey-300);
-            padding: 5px calc(var(--prop-gap) / 2);
-            cursor: pointer;
-        }
-        .dropdown-options {
-            max-height: 288px;
-            overflow-y: auto;
-        }
-        .icon.icon-copy:hover {
-            fill: var(--color-primary-500);
-        }
+    display: flex;
+    flex-direction: column;
+    row-gap: calc(var(--prop-gap) / 2);
+    width: 100%;
+    .accounts-select {
+      border-radius: var(--prop-border-radius);
+      border: 1px solid var(--color-grey-300);
+      padding: 5px calc(var(--prop-gap) / 2);
+      cursor: pointer;
     }
-    .accounts-manager-wallet {
-        display: flex;
-        flex-direction: column;
-        row-gap: calc(var(--prop-gap) / 2);
-        width: 100%;
-        .wallet-content {
-            display: flex;
-            flex-direction: column;
-            row-gap: calc(var(--prop-gap) / 4);
-            width: 100%;
-            .wallet-link {
-                display: flex;
-                column-gap: calc(var(--prop-gap) / 4);
-                align-items: center;
-            }
-        }
+    .dropdown-options {
+      max-height: 288px;
+      overflow-y: auto;
     }
-    .accounts-manager-networks {
-        display: flex;
-        flex-direction: column;
-        padding-top: calc(var(--prop-gap) * 1.5);
-        border-top: 1px dashed var(--color-blue-grey-300);
-        row-gap: calc(var(--prop-gap) / 2);
-        width: 100%;
-        .network {
-            display: flex;
-            align-items: center;
-            column-gap: calc(var(--prop-gap) / 2);
-            width: 100%;
-            & > .unique-text {
-                flex-grow: 1;
-            }
-        }
-        .networks-list {
-            display: flex;
-            flex-direction: column;
-            row-gap: calc(var(--prop-gap) / 2);
-            width: 100%;
-        }
+    .icon.icon-copy:hover {
+      fill: var(--color-primary-500);
     }
+  }
+
+  .wallet-link {
+    margin-top: calc(var(--gap) / 2);
+    a {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--color-primary-500);
+    }
+  }
+  .accounts-manager-wallet {
+    display: flex;
+    flex-direction: column;
+    row-gap: calc(var(--prop-gap) / 2);
+    width: 100%;
+    .wallet-content {
+      display: flex;
+      flex-direction: column;
+      row-gap: calc(var(--prop-gap) / 4);
+      width: 100%;
+    }
+  }
+  .accounts-manager-networks {
+    display: flex;
+    flex-direction: column;
+    padding-top: calc(var(--prop-gap) * 1.5);
+    border-top: 1px dashed var(--color-blue-grey-300);
+    row-gap: calc(var(--prop-gap) / 2);
+    width: 100%;
+    .network {
+      display: flex;
+      align-items: center;
+      column-gap: calc(var(--prop-gap) / 2);
+      width: 100%;
+      & > .unique-text {
+        flex-grow: 1;
+      }
+    }
+    .networks-list {
+      display: flex;
+      flex-direction: column;
+      row-gap: calc(var(--prop-gap) / 2);
+      width: 100%;
+    }
+    
+    .unique-toggle-wrapper .inner{
+      &:after {
+        width: 10px;
+        height: 10px;
+        top: 4px;
+        left: 4px;
+      }
+      &.on:after {
+        left: 18px;
+      }
+    }
+  }
 `;

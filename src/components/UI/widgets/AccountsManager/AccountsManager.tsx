@@ -30,7 +30,6 @@ export interface AccountsManagerProps {
   symbol: string;
   isLoading?: boolean;
   isTouch?: boolean;
-  verticalOffset?: number | string;
   stakeVisibility?: boolean;
   isStakeDisabled?: boolean;
   avatarRender?(address: string): ReactNode;
@@ -50,7 +49,6 @@ export const AccountsManager = (props: AccountsManagerProps) => {
     balance,
     symbol,
     isTouch,
-    verticalOffset,
     onOpenChange,
     onCopyAddressClick
   } = props;
@@ -77,7 +75,6 @@ export const AccountsManager = (props: AccountsManagerProps) => {
     >
       <AccountsManagerWrapper>
         <div className='accounts-manager-selected-account'>
-          <Icon size={20} name='user' />
           <div className='accounts-manager-selected-account-name'>
             <Text color='blue-grey-500' size='s'>
               {selectedAccount?.name}
@@ -117,10 +114,6 @@ const AccountsManagerWrapper = styled.div`
   padding: calc(var(--prop-gap) * 1.5 / 4) calc(var(--prop-gap) * 2)
   calc(var(--prop-gap) * 1.5 / 4) var(--prop-gap);
 
-  svg:not(.active-network-icon) {
-    display: none;
-  }
-
   .accounts-manager-selected-account {
     display: flex;
     flex-direction: column;
@@ -134,8 +127,9 @@ const AccountsManagerWrapper = styled.div`
     .accounts-manager-selected-account-name {
       display: flex;
       column-gap: calc(var(--prop-gap) / 4);
-      .account-copy {
+      .address-copy {
         cursor: pointer;
+        
       }
     }
   }

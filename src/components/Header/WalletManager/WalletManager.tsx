@@ -129,7 +129,7 @@ export const WalletManager: FC = () => {
         depositDescription={
           <>
             {formattedAccountDeposit && <Text color='grey-500' size='xs'>The total market deposit for participation in auctions and
-              sponsorship. <br/> Use the “Manage my balance” section to withdraw.</Text>}
+              sponsorship. <br/> Use the “Manage accounts” section to withdraw.</Text>}
             {config.rampApiKey && <GetKsmButton
               title={'Get KSM'}
               size={'middle'}
@@ -139,7 +139,6 @@ export const WalletManager: FC = () => {
             />}
           </>
         }
-        manageBalanceLinkTitle='Manage my balance'
         networks={networks}
         onAccountChange={widgetAccountChange}
         onCopyAddressClick={onCopyAddress}
@@ -156,7 +155,7 @@ export const WalletManager: FC = () => {
 };
 
 const GetKsmButton = styled(Button)`
-  margin: 8px 0;
+  margin-top: 12px;
 `;
 
 const WalletManagerWrapper = styled.div`
