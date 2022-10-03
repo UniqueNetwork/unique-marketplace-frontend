@@ -2,15 +2,15 @@ import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Pagination, SortQuery, TableRowProps } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
-import { useTrades } from '../../api/restApi/trades/trades';
-import { Table } from '../../components/Table';
-import { PagePaper } from '../../components/PagePaper/PagePaper';
+import { useTrades } from 'api/restApi/trades/trades';
+import { Table } from 'components/Table';
+import { PagePaper } from 'components/PagePaper/PagePaper';
 import getTradesColumns from './columns';
-import { useAccounts } from '../../hooks/useAccounts';
+import { useAccounts } from 'hooks/useAccounts';
 import { TradesTabs } from './types';
-import SearchField from '../../components/SearchField/SearchField';
+import SearchField from 'components/SearchField/SearchField';
 
-import NoTradesIcon from '../../static/icons/no-trades.svg';
+import NoTradesIcon from 'static/icons/no-trades.svg';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import TokenTradesDetailsModal from './TradesDetailsModal';
 import { Trade } from 'api/restApi/trades/types';
@@ -41,13 +41,19 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
     if (isLoadingAccounts || (currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address)) return;
     setSearchValue(undefined);
     setPage(0);
-    fetch({
+    void fetch({
       page: 1,
       pageSize,
       sort: sortString,
       seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
     });
   }, [currentTab, currentChainId, selectedAccount?.address, isLoadingAccounts]);
+
+  useEffect(() => {
+    if (deviceSize !== DeviceSize.lg && !searched) {
+      setLoadedTrades([]);
+    }
+  }, [currentTab]);
 
   useEffect(() => {
     // append loaded trades to the existing list if screen is with infinity scroll
@@ -61,7 +67,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
   const debouncedSearch = useCallback(() => {
     return debounce(function (...args: string[]) {
       setSearchValue(args[0]);
-      fetch({
+      void fetch({
         page: 1,
         pageSize,
         sort: sortString,
@@ -75,7 +81,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
   const onPageChange = useCallback((newPage: number) => {
     if ((currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address) || page === newPage) return;
     setPage(newPage);
-    fetch({
+    void fetch({
       page: newPage + 1,
       pageSize,
       sort: sortString,
@@ -88,7 +94,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
     if (currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address) return;
     setPageSize(newPageSize);
     setPage(0);
-    fetch({
+    void fetch({
       page: 1,
       pageSize: newPageSize,
       sort: sortString,
@@ -121,7 +127,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
 
     if (sortString && sortString.length) sortString += `(${associatedSortValues[newSort.field]})`;
     setSortString(sortString);
-    fetch({
+    void fetch({
       page: 1,
       pageSize,
       sort: sortString,

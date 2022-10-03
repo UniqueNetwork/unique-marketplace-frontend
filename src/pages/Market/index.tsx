@@ -17,6 +17,7 @@ import SearchField from '../../components/SearchField/SearchField';
 import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
 import { parseFilterState, setUrlParameter } from '../../utils/helpers';
 import { useApi } from '../../hooks/useApi';
+import { useCollections } from 'hooks/useCollections';
 
 type TOption = SelectOptionProps &{
   id: string
@@ -69,6 +70,7 @@ export const MarketPage = () => {
   const [sortingValue, setSortingValue] = useState<string>(searchParams.get('sortingValue') || defaultSortingValue.id);
   const [searchValue, setSearchValue] = useState<string | undefined>(searchParams.get('searchValue') || '');
   const { offers, offersCount, isFetching, fetchMore, fetch, attributes, attributeCounts } = useOffers();
+  const { isFetching: isFetchingCollections } = useCollections();
   const { selectedAccount } = useAccounts();
   const deviceSize = useDeviceSize();
   const { currentChainId, api } = useApi();
@@ -215,8 +217,8 @@ export const MarketPage = () => {
           threshold={200}
           useWindow={true}
         >
-          {!isFetching && !offers?.length && <NoItems isSearchResult={!!searchValue || !!filterCount} />}
-          <OffersList offers={offers || []} isLoading={isFetching} testid={`${testid}-offers`} />
+          {!isFetching && !isFetchingCollections && !offers?.length && <NoItems isSearchResult={!!searchValue || !!filterCount} />}
+          <OffersList offers={offers || []} isLoading={isFetchingCollections || isFetching} testid={`${testid}-offers`} />
         </InfiniteScroll>
       </MainContent>
     </MarketMainPageStyled>
