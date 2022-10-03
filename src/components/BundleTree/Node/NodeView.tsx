@@ -144,13 +144,14 @@ const ViewContainer = styled.div<{ isFirst: boolean | undefined, isSelected: boo
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
-  border: 1px solid transparent;
   min-width: 524px;
+  border: 1px solid ${({ isSelected }) => isSelected ? Primary200 : 'white'};
+  margin-bottom: 1px;
   hr {
     position: absolute;
-    border-top: 1px dashed var(--color-grey-300);
+    border: 1px dashed ${Grey300};
     border-left: none;
-    bottom: 0;
+    bottom: -2px;
     width: 100%;
   }
   .picture {
@@ -167,9 +168,10 @@ const ViewContainer = styled.div<{ isFirst: boolean | undefined, isSelected: boo
     }
   }
   &:hover {
-    background: ${Primary100};
     border: 1px solid ${Primary400};
-    
+    hr {
+      display: none;
+    }
     .action-buttons { display: flex; }
     @media (min-width: 768px) {
       .pin-icon { display: none; }
