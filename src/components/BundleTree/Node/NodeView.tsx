@@ -12,6 +12,7 @@ import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';
 import MobileModalActions from './MobileModalActions';
 import Skeleton from '../../Skeleton/Skeleton';
 import { useCollection } from '../useCollection';
+import Triangle from 'static/icons/triangle.svg';
 
 const NodeView: FC<INodeView<INestingToken>> = ({
   arrowClicked,
@@ -98,7 +99,7 @@ const NodeView: FC<INodeView<INestingToken>> = ({
             onClick={arrowClicked}
             isOpened={isOpened}
           >
-            <Icon size={16} name={data.nestingChildTokens?.length ? 'triangle' : ''} color={Primary500} />
+            <Icon size={16} file={Triangle} color={Primary500} />
           </Arrow>
           <Picture alt={`T-${data.tokenId} C-${data.collectionId}`} src={(typeof data.image === 'string' ? data.image : data.image?.fullUrl) || undefined}/>
           <TokenTitle token={data} isCollectionLoading={isCollectionLoading} prefix={collection?.tokenPrefix || ''}/>
@@ -200,8 +201,8 @@ const Arrow = styled.div<{ isOpened: boolean | undefined, isFirst: boolean | und
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-
-  transform: ${({ isOpened }) => (!isOpened && 'rotate(-90deg)')};
+  transition: 0.2s;
+  transform: ${({ isOpened }) => (!isOpened && 'rotate(180deg)')};
   margin-left: ${({ isFirst, level }) => (isFirst ? 24 : 24 + 16 * level)}px;
 `;
 
