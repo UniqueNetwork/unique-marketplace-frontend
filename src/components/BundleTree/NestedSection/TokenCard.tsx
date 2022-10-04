@@ -1,11 +1,13 @@
 import React, { FC, useCallback, useState } from 'react';
-import { Dropdown, Icon, Text } from '@unique-nft/ui-kit';
+import { Icon, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
-import { AdditionalDark, AdditionalLight, Coral500, Grey300, Primary500 } from 'styles/colors';
+import { AdditionalDark, AdditionalLight, Coral100, Coral500, Grey300, Primary500, Primary600 } from 'styles/colors';
 import { Picture } from '../../Picture';
 import { INestingToken, ITokenCard } from '../types';
 import { useCollection } from '../useCollection';
 import Skeleton from '../../Skeleton/Skeleton';
+import MeatballMenu from 'static/icons/meatball-menu-dark.svg';
+import { Dropdown } from 'components/UI/Dropdown/Dropdown';
 
 function TokenCard({ token, onViewNodeDetails, onUnnestClick, onTransferClick }: ITokenCard) {
   const [menuVisible, setMenuVisible] = useState(false);
@@ -60,7 +62,7 @@ function TokenCard({ token, onViewNodeDetails, onUnnestClick, onTransferClick }:
           )}
         >
           <DropdownWrapper>
-            <Icon size={24} name={'more-horiz'} color={AdditionalLight}/>
+            <Icon size={32} file={MeatballMenu} color={AdditionalLight}/>
           </DropdownWrapper>
         </Dropdown>
       </ActionsMenuWrapper>}
@@ -150,16 +152,20 @@ const DropdownMenuItem = styled.div`
 const TransferMenuItem = styled(DropdownMenuItem)`
   border-bottom: 1px dashed ${Grey300};
   color: ${Primary500};
+  &:hover {
+    color: ${Primary600};
+  }
 `;
 
 const UnnestMenuItem = styled(DropdownMenuItem)`
   color: ${Coral500};
+  &:hover {
+    background-color: ${Coral100};
+  }
 `;
 
 const DropdownWrapper = styled.div`
-  background: var(--color-additional-dark);
-  border-radius: 4px;
-  padding: calc(var(--gap) / 4) calc(var(--gap) / 4) 0 calc(var(--gap) / 4);
+
 `;
 
 const IconWrapper = styled.div`

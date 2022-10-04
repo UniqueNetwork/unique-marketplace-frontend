@@ -32,12 +32,12 @@ const NestedDetails = styled.div`
   display: block;
   padding: 16px 32px;
   background-color: ${Grey100};
-  width: calc(100vw - 780px);
+  width: calc(100vw - 777px);
   @media (max-width: 1440px) {
-    width: calc(100vw - 730px);
+    width: calc(100vw - 729px);
   }
   @media (max-width: 1024px) {
-    width: calc(100vw - 667px);
+    width: calc(100vw - 665px);
   }
   @media (max-width: 768px) {
     display: none;

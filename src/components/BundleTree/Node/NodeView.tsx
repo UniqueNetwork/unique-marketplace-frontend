@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
-import { Dropdown, Icon } from '@unique-nft/ui-kit';
+import { Icon } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
-import { AdditionalDark, AdditionalLight, BlueGrey500, Coral500, Grey300, Primary100, Primary200, Primary400, Primary500, Secondary400 } from 'styles/colors';
+import { AdditionalDark, AdditionalLight, BlueGrey500, Coral100, Coral500, Grey300, Primary200, Primary400, Primary500, Primary600, Secondary400 } from 'styles/colors';
 import Square from 'static/icons/square.svg';
 import Pin from 'static/icons/pin.svg';
 import { INodeView } from '../../TreeView/types';
@@ -13,6 +13,8 @@ import MobileModalActions from './MobileModalActions';
 import Skeleton from '../../Skeleton/Skeleton';
 import { useCollection } from '../useCollection';
 import Triangle from 'static/icons/triangle.svg';
+import MeatballMenu from 'static/icons/meatball-menu.svg';
+import { Dropdown } from 'components/UI/Dropdown/Dropdown';
 
 const NodeView: FC<INodeView<INestingToken>> = ({
   arrowClicked,
@@ -83,6 +85,8 @@ const NodeView: FC<INodeView<INestingToken>> = ({
     setModalVisible(false);
   }, []);
 
+  const isCurrent = id === data.tokenId.toString() && collectionId === data.collectionId.toString();
+
   return (
     <>
       <ViewContainer
@@ -99,29 +103,31 @@ const NodeView: FC<INodeView<INestingToken>> = ({
             onClick={arrowClicked}
             isOpened={isOpened}
           >
-            <Icon size={16} file={Triangle} color={Primary500} />
+            {!!children && <Icon size={16} file={Triangle} color={Primary500} />}
           </Arrow>
           <Picture alt={`T-${data.tokenId} C-${data.collectionId}`} src={(typeof data.image === 'string' ? data.image : data.image?.fullUrl) || undefined}/>
           <TokenTitle token={data} isCollectionLoading={isCollectionLoading} prefix={collection?.tokenPrefix || ''}/>
         </NftInfo>
-        {deviceSize !== DeviceSize.sm && <ActionButtons className={'action-buttons'}>
-          {menuVisible && <ActionsMenuWrapper className={'menu'}>
-            <Dropdown
-              placement={'left'}
-              dropdownRender={() => (<DropdownMenu>
-                {tokenMenuActions}
-              </DropdownMenu>)}
-            >
-              <Icon size={32} name={'more-horiz'} color={Secondary400}/>
-            </Dropdown>
-          </ActionsMenuWrapper>}
-          <div onClick={viewTokenDetails}>
-            <Icon size={32} file={Square} color={Secondary400}/>
-          </div>
-        </ActionButtons>}
-        {(id === data.tokenId.toString() && collectionId === data.collectionId.toString()) && <PinIcon className={'pin-icon'}>
-          <Icon size={32} file={Pin}/>
-        </PinIcon>}
+        <Actions>
+          {deviceSize !== DeviceSize.sm && <ActionButtons className={'action-buttons'}>
+            {menuVisible && <ActionsMenuWrapper className={'menu'}>
+              <Dropdown
+                placement={'left'}
+                dropdownRender={() => (<DropdownMenu>
+                  {tokenMenuActions}
+                </DropdownMenu>)}
+              >
+                <Icon size={32} file={MeatballMenu} color={Secondary400}/>
+              </Dropdown>
+            </ActionsMenuWrapper>}
+            {!isCurrent && <div onClick={viewTokenDetails}>
+              <Icon size={32} file={Square} color={Secondary400}/>
+            </div>}
+          </ActionButtons>}
+          {isCurrent && <PinIcon className={'pin-icon'}>
+            <Icon size={32} file={Pin}/>
+          </PinIcon>}
+        </Actions>
         <hr/>
       </ViewContainer>
       <MobileModalActions isVisible={modalVisible} onClose={closeModal}>
@@ -145,14 +151,14 @@ const ViewContainer = styled.div<{ isFirst: boolean | undefined, isSelected: boo
   justify-content: space-between;
   cursor: pointer;
   min-width: 524px;
-  border: 1px solid ${({ isSelected }) => isSelected ? Primary200 : 'white'};
-  margin-bottom: 1px;
+  border: 1px solid ${({ isSelected }) => isSelected ? Primary200 : 'transparent'};
   hr {
     position: absolute;
-    border: 1px dashed ${Grey300};
+    border-top: 1px dashed ${Grey300};
     border-left: none;
-    bottom: -2px;
+    bottom: -3px;
     width: 100%;
+    z-index: 0;
   }
   .picture {
     display: inline-block;
@@ -173,9 +179,6 @@ const ViewContainer = styled.div<{ isFirst: boolean | undefined, isSelected: boo
       display: none;
     }
     .action-buttons { display: flex; }
-    @media (min-width: 768px) {
-      .pin-icon { display: none; }
-    }
   }
   background-color: ${({ isSelected }) => (isSelected && Primary200)} !important;
 `;
@@ -185,15 +188,22 @@ const NftInfo = styled.div`
   align-items: center;
 `;
 
-const ActionButtons = styled.div`
+const Actions = styled.div`
+  display: flex;
+  gap: 4px;
   margin-right: 24px;
+`;
+
+const ActionButtons = styled.div`
   gap: 4px;
   display: none;
   align-items: center;
+  svg:hover {
+    fill: ${Primary500};
+  }
 `;
 
 const PinIcon = styled.div`
-  margin-right: 24px;
 `;
 
 const Arrow = styled.div<{ isOpened: boolean | undefined, isFirst: boolean | undefined, level: number }>`
@@ -206,10 +216,12 @@ const Arrow = styled.div<{ isOpened: boolean | undefined, isFirst: boolean | und
   transition: 0.2s;
   transform: ${({ isOpened }) => (!isOpened && 'rotate(180deg)')};
   margin-left: ${({ isFirst, level }) => (isFirst ? 24 : 24 + 16 * level)}px;
+  width: 16px;
 `;
 
 const ActionsMenuWrapper = styled.div`
   display: flex;
+  position: relative;
 
   div[class*=DropdownMenuButtonWrapper] {
     & > button {
@@ -228,6 +240,7 @@ const ActionsMenuWrapper = styled.div`
     }
   }
   div[class*=DropdownMenuDropdown] {
+    position: absolute;
     width: max-content;
     & > div {
       padding: calc(var(--gap) / 2) var(--gap);
@@ -258,10 +271,16 @@ const DropdownMenuItem = styled.div`
 const TransferMenuItem = styled(DropdownMenuItem)`
   border-bottom: 1px dashed ${Grey300};
   color: ${Primary500};
+  &:hover {
+    color: ${Primary600};
+  }
 `;
 
 const UnnestMenuItem = styled(DropdownMenuItem)`
   color: ${Coral500};
+  &:hover {
+    background-color: ${Coral100};
+  }
 `;
 
 const ViewTokenAction = styled(TransferMenuItem)`

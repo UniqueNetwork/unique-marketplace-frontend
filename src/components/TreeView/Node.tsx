@@ -35,7 +35,7 @@ export function Node<T extends INode>({ data, onNodeClicked, nodeView: NodeView,
 }
 
 const NodeContainer = styled.div<{ isOpened: boolean }>`
-  & > div + .treenode {
+  .treenode {
     display: ${({ isOpened }) => (!isOpened ? 'none' : 'block')};
     &.selected {
       background-color: ${Primary100};
