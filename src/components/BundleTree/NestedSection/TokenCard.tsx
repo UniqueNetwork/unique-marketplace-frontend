@@ -1,13 +1,13 @@
 import React, { FC, useCallback, useState } from 'react';
-import { Icon, Text } from '@unique-nft/ui-kit';
+import { Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { AdditionalDark, AdditionalLight, Coral100, Coral500, Grey300, Primary500, Primary600 } from 'styles/colors';
 import { Picture } from '../../Picture';
 import { INestingToken, ITokenCard } from '../types';
 import { useCollection } from '../useCollection';
 import Skeleton from '../../Skeleton/Skeleton';
-import MeatballMenu from 'static/icons/meatball-menu-dark.svg';
 import { Dropdown } from 'components/UI/Dropdown/Dropdown';
+import { Icon } from 'components/IconTest/IconTest';
 
 function TokenCard({ token, onViewNodeDetails, onUnnestClick, onTransferClick }: ITokenCard) {
   const [menuVisible, setMenuVisible] = useState(false);
@@ -62,7 +62,7 @@ function TokenCard({ token, onViewNodeDetails, onUnnestClick, onTransferClick }:
           )}
         >
           <DropdownWrapper>
-            <Icon size={32} file={MeatballMenu} color={AdditionalLight}/>
+            <Icon size={32} name={'meatball-menu-dark'} color={'transparent'}/>
           </DropdownWrapper>
         </Dropdown>
       </ActionsMenuWrapper>}

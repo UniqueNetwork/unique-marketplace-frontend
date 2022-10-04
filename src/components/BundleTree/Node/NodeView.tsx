@@ -1,8 +1,6 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
-import { Icon } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { AdditionalDark, AdditionalLight, BlueGrey500, Coral100, Coral500, Grey300, Primary200, Primary400, Primary500, Primary600, Secondary400 } from 'styles/colors';
-import Square from 'static/icons/square.svg';
 import Pin from 'static/icons/pin.svg';
 import { INodeView } from '../../TreeView/types';
 import { Picture } from '../../Picture';
@@ -12,9 +10,8 @@ import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';
 import MobileModalActions from './MobileModalActions';
 import Skeleton from '../../Skeleton/Skeleton';
 import { useCollection } from '../useCollection';
-import Triangle from 'static/icons/triangle.svg';
-import MeatballMenu from 'static/icons/meatball-menu.svg';
 import { Dropdown } from 'components/UI/Dropdown/Dropdown';
+import { Icon } from 'components/IconTest/IconTest';
 
 const NodeView: FC<INodeView<INestingToken>> = ({
   arrowClicked,
@@ -103,7 +100,7 @@ const NodeView: FC<INodeView<INestingToken>> = ({
             onClick={arrowClicked}
             isOpened={isOpened}
           >
-            {!!children && <Icon size={16} file={Triangle} color={Primary500} />}
+            {!!children && <Icon size={16} name={'triangle'} color={Primary500} />}
           </Arrow>
           <Picture alt={`T-${data.tokenId} C-${data.collectionId}`} src={(typeof data.image === 'string' ? data.image : data.image?.fullUrl) || undefined}/>
           <TokenTitle token={data} isCollectionLoading={isCollectionLoading} prefix={collection?.tokenPrefix || ''}/>
@@ -117,11 +114,11 @@ const NodeView: FC<INodeView<INestingToken>> = ({
                   {tokenMenuActions}
                 </DropdownMenu>)}
               >
-                <Icon size={32} file={MeatballMenu} color={Secondary400}/>
+                <Icon size={32} name={'meatball-menu'} color={Secondary400}/>
               </Dropdown>
             </ActionsMenuWrapper>}
             {!isCurrent && <div onClick={viewTokenDetails}>
-              <Icon size={32} file={Square} color={Secondary400}/>
+              <Icon size={32} name={'square'} color={Secondary400}/>
             </div>}
           </ActionButtons>}
           {isCurrent && <PinIcon className={'pin-icon'}>
