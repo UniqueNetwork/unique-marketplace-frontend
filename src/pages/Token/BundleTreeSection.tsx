@@ -186,6 +186,7 @@ const HeaderStyled = styled.div`
 const Content = styled.div`
   display: flex;
   border: 1px solid ${Grey300};
+  border-radius: 4px;
 `;
 
 export default BundleTreeSection;

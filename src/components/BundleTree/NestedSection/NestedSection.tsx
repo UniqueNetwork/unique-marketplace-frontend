@@ -12,7 +12,10 @@ export const NestedSection: FC<INestedSectionView<INestingToken>> = ({ selectedT
   const { isCollectionLoading, collection } = useCollection(selectedToken?.collectionId);
   return (
     <NestedDetails>
-      {selectedToken && <Title token={selectedToken} isCollectionLoading={isCollectionLoading} prefix={collection?.tokenPrefix || ''}/>}
+      {selectedToken && <TitleWrapper>
+        <Title token={selectedToken} isCollectionLoading={isCollectionLoading} prefix={collection?.tokenPrefix || ''}/>
+        {!selectedToken?.nestingChildTokens?.length && <Text color='grey-500' size='m'>No nested tokens</Text>}
+      </TitleWrapper>}
       <NestedTokens>
         {selectedToken?.nestingChildTokens?.map((token) => (
           <TokenCard
@@ -32,12 +35,12 @@ const NestedDetails = styled.div`
   display: block;
   padding: 16px 32px;
   background-color: ${Grey100};
-  width: calc(100vw - 780px);
+  width: calc(100vw - 777px);
   @media (max-width: 1440px) {
-    width: calc(100vw - 730px);
+    width: calc(100vw - 729px);
   }
   @media (max-width: 1024px) {
-    width: calc(100vw - 667px);
+    width: calc(100vw - 665px);
   }
   @media (max-width: 768px) {
     display: none;
@@ -49,6 +52,11 @@ const NestedTokens = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
+`;
+
+const TitleWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
 `;
 
 const Title: FC<{isCollectionLoading: boolean, prefix: string, token: INestingToken }> = ({ isCollectionLoading, prefix, token }) => {

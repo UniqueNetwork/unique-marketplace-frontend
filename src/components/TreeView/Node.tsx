@@ -1,6 +1,8 @@
 import React, { useCallback, useState } from 'react';
 import { INode, INodeContainer } from './types';
 import styled from 'styled-components';
+import { classNames } from 'utils/classNames';
+import { Primary100 } from 'styles/colors';
 
 export function Node<T extends INode>({ data, onNodeClicked, nodeView: NodeView, isFirst, level, children, onViewNodeDetails, onTransferClick, onUnnestClick }: INodeContainer<T>) {
   const [isOpened, setIsOpened] = useState(data.opened);
@@ -15,7 +17,7 @@ export function Node<T extends INode>({ data, onNodeClicked, nodeView: NodeView,
   }, [data, onNodeClicked]);
 
   return (
-    <NodeContainer isOpened={!!isOpened} className={'treenode'}>
+    <NodeContainer isOpened={!!isOpened} className={classNames({ className: 'treenode', selected: !!data.selected })}>
       <NodeView
         arrowClicked={arrowClicked}
         isOpened={!!isOpened}
@@ -33,7 +35,10 @@ export function Node<T extends INode>({ data, onNodeClicked, nodeView: NodeView,
 }
 
 const NodeContainer = styled.div<{ isOpened: boolean }>`
-  & > div + .treenode {
+  .treenode {
     display: ${({ isOpened }) => (!isOpened ? 'none' : 'block')};
+    &.selected {
+      background-color: ${Primary100};
+    }
   }
 `;
