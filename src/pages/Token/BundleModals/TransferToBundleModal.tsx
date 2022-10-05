@@ -6,7 +6,6 @@ import styled from 'styled-components';
 import DefaultMarketStages from '../Modals/StagesModal';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { StageStatus } from '../../../types/StagesTypes';
-import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 import { TBundleTrunsferModalBodyProps } from './BundleTrunsferModal';
 import { useCollections } from 'hooks/useCollections';
 import { useApi } from 'hooks/useApi';
@@ -47,11 +46,13 @@ export const TransferToBundleModal: FC<TBundleTrunsferModalBodyProps> = ({ token
   return null;
 };
 
-interface ITokenOption {
+type TokenOption = {
   tokenId: number
   collectionId: number
   image: DecodedInfixOrUrlOrCidAndHash
-}
+};
+
+type ITokenOption = TokenOption | null;
 
 const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(newParent: TokenIdArguments): void, testid: string }> = ({ token, onTransferToBundle, testid }) => {
   const [collection, setCollection] = useState<CollectionInfoWithSchema | null>();
@@ -81,6 +82,7 @@ const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(ne
   }, [tokens, offers, collections]);
 
   const tokenItems: ITokenOption[] = useMemo(() => {
+    if (!collection) return [];
     return [
       ...offers.filter(({ collectionId }) => collectionId === collection?.id).map(({ collectionId, tokenId, tokenDescription }) => ({
         collectionId,
@@ -125,7 +127,7 @@ const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(ne
         <CollectionsSuggestStyled
           isLoading={isLoading}
           suggestions={collectionItems}
-          getSuggestionValue={(suggestion) => suggestion.name}
+          getSuggestionValue={(suggestion) => `${suggestion.name} ${suggestion.id}`}
           getActiveSuggestOption={(suggest, activeValue) => suggest.id === activeValue.id}
           components={{
             SuggestItem: ({ suggestion }) => <ItemOption>
@@ -142,25 +144,27 @@ const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(ne
           <Text size='s' color='grey-500'>A token that will become the bundle owner and the root of the nested structure. You can provide only a token that you own.</Text>
         </RowLabel>
         <TokensSuggestStyled
+          key={collection?.id}
           isLoading={isLoading}
-          suggestions={tokenItems}
-          getSuggestionValue={(suggestion) => suggestion.tokenId.toString()}
-          getActiveSuggestOption={(suggest, activeValue) => suggest.tokenId === activeValue.tokenId}
+          suggestions={collection ? tokenItems : []}
+          getSuggestionValue={(suggestion) => suggestion?.tokenId?.toString() || ''}
+          getActiveSuggestOption={(suggest, activeValue) => suggest?.tokenId === activeValue?.tokenId}
           components={{
             SuggestItem: ({ suggestion }) => <ItemOption>
-              <CollectionCover src={suggestion.image.fullUrl || ''} size={24} type={'square'} />
+              <CollectionCover src={suggestion?.image?.fullUrl || ''} size={24} type={'square'} />
               <Text>{`${collection?.tokenPrefix || ''} #${suggestion?.tokenId}`}</Text>
             </ItemOption>
           }}
           onChange={onChangeSelectedToken}
+          value={selectedToken}
+          inputProps={{
+            disabled: !collection
+          }}
         />
       </Row>
-      <WarningBlock margin={2}>
-        A fee of ~ 2.07 QTZ can be applied to the transaction
-      </WarningBlock>
       <ButtonWrapper>
         <Button
-          disabled={!token}
+          disabled={!selectedToken}
           onClick={onConfirmTransferToBundleClick}
           role='primary'
           title='Confirm'
@@ -219,6 +223,11 @@ const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
   margin-top: 24px;
+  @media (max-width: 567px) {
+    button {
+      width: 100%;
+    }
+  }
 `;
 
 const Content = styled.div`
