@@ -8,12 +8,12 @@ import { useAccounts } from 'hooks/useAccounts';
 import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
 import { formatKusamaBalance } from 'utils/textUtils';
 import { timeDifference } from 'utils/timestampUtils';
-import { stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
+import { countNestedChildren, stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
 import { Primary600 } from 'styles/colors';
 import config from '../../config';
 import { TokensMedia } from '../TokensCard/TokensMedia';
 import { useApi } from '../../hooks/useApi';
-import { INestingToken } from '../BundleTree/types';
+import BundleItemsCount from '../BundleItemsCount/BundleItemsCount';
 
 export type TTokensCard = {
   offer: Offer
@@ -62,16 +62,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
 
   const tokensCount = useMemo(() => {
     if (!isBundle) return 0;
-    let count = 1;
-    const countChildren = (tokenChildren: INestingToken[]) => {
-      if (tokenChildren.length === 0) return count;
-      else {
-        count += tokenChildren.length;
-        tokenChildren.forEach((child) => countChildren(child.nestingChildTokens || []));
-      }
-    };
-    countChildren(nestingChildTokens || []);
-    return count;
+    return countNestedChildren(nestingChildTokens);
   }, [nestingChildTokens]);
 
   return (
@@ -105,18 +96,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
             {`${collectionName?.substring(0, 25) || ''} [id ${offer?.collectionId || ''}]`}
           </Text>
         </a>
-        {isBundle && <BundleItemsCount>
-          <Text
-            testid={`${testid}-bundle-items`}
-            size={'s'}
-            color={'grey-500'}
-          >Nested items: </Text>
-          <Text
-            testid={`${testid}-bundle-items`}
-            size={'s'}
-            color={'additional-dark'}
-          >{tokensCount || ''}</Text>
-        </BundleItemsCount>}
+        {isBundle && <BundleItemsCount count={tokensCount || 0} testId={testid} />}
         <PriceWrapper>
           <Text
             testid={`${testid}-price`}
@@ -184,10 +164,6 @@ const Description = styled.div`
 const AuctionInfoWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 2);
-`;
-
-const BundleItemsCount = styled.div`
-  margin-top: calc(var(--gap) / 2);
 `;
 
 const IconStyled = styled(Icon)`

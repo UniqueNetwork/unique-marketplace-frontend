@@ -13,9 +13,9 @@ import { timeDifference } from 'utils/timestampUtils';
 import { Primary600 } from 'styles/colors';
 import config from 'config';
 import { TokensMedia } from './TokensMedia';
-import { stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
+import { countNestedChildren, stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
 import { useCollections } from 'hooks/useCollections';
-import { INestingToken } from '../BundleTree/types';
+import BundleItemsCount from '../BundleItemsCount/BundleItemsCount';
 
 export type TTokensCard = {
   token?: TokenByIdResult
@@ -79,25 +79,14 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
 
   useEffect(() => {
     (async () => {
-      let isBundle;
-      let count = 1;
-      const countChildren = (tokenChildren: INestingToken[]) => {
-        if (tokenChildren.length === 0) return count;
-        else {
-          count += tokenChildren.length;
-          tokenChildren.forEach((child) => countChildren(child.nestingChildTokens || []));
-        }
-      };
+      let count;
       if (offer) {
-        if (!offer.tokenDescription?.nestingChildTokens) return;
-        isBundle = !!offer.tokenDescription.nestingChildTokens.length;
-        countChildren(offer.tokenDescription.nestingChildTokens);
+        count = countNestedChildren(offer?.tokenDescription?.nestingChildTokens || []);
       } else if (tokenId && collectionId) {
-        isBundle = await api?.nft?.isBundle(collectionId, tokenId);
         const bundle = await api?.nft?.getBundle(collectionId, tokenId);
-        countChildren(bundle?.nestingChildTokens || []);
+        count = countNestedChildren(bundle?.nestingChildTokens || []);
       }
-      setIsBundleState(isBundle);
+      setIsBundleState(!!count);
       setTokensCount(count);
     })();
   }, [offer, tokenId, collectionId, api?.nft]);
@@ -153,18 +142,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
             {collectionTitle}
           </Text>
         </a>
-        {isBundleState && <BundleItemsCount>
-          <Text
-            testid={`${testid}-bundle-items`}
-            size={'s'}
-            color={'grey-500'}
-          >Nested items: </Text>
-          <Text
-            testid={`${testid}-bundle-items`}
-            size={'s'}
-            color={'additional-dark'}
-          >{tokensCount || ''}</Text>
-        </BundleItemsCount>}
+        {isBundleState && <BundleItemsCount count={tokensCount || 0} testId={testid} />}
         {price && <PriceWrapper>
           <Text
             testid={`${testid}-price`}
@@ -234,10 +212,6 @@ const StyledText = styled(Text)`
 const AuctionInfoWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 2);
-`;
-
-const BundleItemsCount = styled.div`
-  margin-top: calc(var(--gap) / 2);
 `;
 
 const IconStyled = styled(Icon)`
