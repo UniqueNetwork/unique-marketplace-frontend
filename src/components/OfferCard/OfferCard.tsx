@@ -8,11 +8,12 @@ import { useAccounts } from 'hooks/useAccounts';
 import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
 import { formatKusamaBalance } from 'utils/textUtils';
 import { timeDifference } from 'utils/timestampUtils';
-import { stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
+import { countNestedChildren, stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
 import { Primary600 } from 'styles/colors';
 import config from '../../config';
 import { TokensMedia } from '../TokensCard/TokensMedia';
 import { useApi } from '../../hooks/useApi';
+import BundleItemsCount from '../BundleItemsCount/BundleItemsCount';
 
 export type TTokensCard = {
   offer: Offer
@@ -25,8 +26,11 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
 
   const {
     image,
-    video
+    video,
+    nestingChildTokens
   } = offer?.tokenDescription || {};
+
+  const isBundle = !!nestingChildTokens?.length;
 
   const {
     name: collectionName,
@@ -56,6 +60,11 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
     tokenId: offer?.tokenId.toString()
   }), [currentChainId, offer]);
 
+  const tokensCount = useMemo(() => {
+    if (!isBundle) return 0;
+    return countNestedChildren(nestingChildTokens);
+  }, [nestingChildTokens]);
+
   return (
     <TokensCardStyled>
       <TokensMedia
@@ -64,6 +73,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
         imageUrl={image}
         video={videoProp}
         testid={`${testid}-token-media`}
+        badge={isBundle ? 'Bundle' : ''}
       />
       <Description>
         <Link to={tokenPath} title={`${tokenPrefix || ''} #${offer?.tokenId}`}>
@@ -86,14 +96,15 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
             {`${collectionName?.substring(0, 25) || ''} [id ${offer?.collectionId || ''}]`}
           </Text>
         </a>
+        {isBundle && <BundleItemsCount count={tokensCount || 0} testId={testid} />}
         <PriceWrapper>
           <Text
             testid={`${testid}-price`}
             size='l'
           >{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(offer?.price)}` }</Text>
-          <Icon name={'chain-kusama'} size={16} />
+          <IconStyled name={'chain-kusama'} size={16} />
+          {!offer?.auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         </PriceWrapper>
-        {!offer?.auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         {offer?.auction && <AuctionInfoWrapper>
           {isTopBidder && <Text
             testid={`${testid}-leading-bid`}
@@ -153,4 +164,8 @@ const Description = styled.div`
 const AuctionInfoWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 2);
+`;
+
+const IconStyled = styled(Icon)`
+  margin: 0 calc(var(--gap) / 4);
 `;

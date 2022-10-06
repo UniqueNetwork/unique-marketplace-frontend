@@ -1,4 +1,4 @@
-import React, { FC, useMemo, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import { Icon, Loader, Text } from '@unique-nft/ui-kit';
 import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 import { generatePath, Link } from 'react-router-dom';
@@ -13,8 +13,9 @@ import { timeDifference } from 'utils/timestampUtils';
 import { Primary600 } from 'styles/colors';
 import config from 'config';
 import { TokensMedia } from './TokensMedia';
-import { stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
+import { countNestedChildren, stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
 import { useCollections } from 'hooks/useCollections';
+import BundleItemsCount from '../BundleItemsCount/BundleItemsCount';
 
 export type TTokensCard = {
   token?: TokenByIdResult
@@ -29,7 +30,8 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
   const [token, setToken] = useState<TokenByIdResult | undefined>(props.token);
   const [collection, setCollection] = useState<(CollectionInfoWithSchema) | undefined>();
   const [isFetching, setIsFetching] = useState<boolean>(false);
-  const [isBundle, setIsBundle] = useState<boolean>();
+  const [isBundleState, setIsBundleState] = useState<boolean>();
+  const [tokensCount, setTokensCount] = useState<number>();
 
   const { api, currentChainId } = useApi();
   const { selectedAccount } = useAccounts();
@@ -65,10 +67,6 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
           if (token) setToken(token);
         }
 
-        if (typeof isBundle !== 'undefined') {
-          setIsBundle(await api?.nft?.isBundle(collectionId, tokenId));
-        }
-
         if (!collection) {
           const collection = await getCollection(collectionId);
           if (collection) setCollection(collection);
@@ -78,6 +76,20 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
     }
     return {};
   }, [collectionId, tokenId, collection, token, api]);
+
+  useEffect(() => {
+    (async () => {
+      let count;
+      if (offer) {
+        count = countNestedChildren(offer?.tokenDescription?.nestingChildTokens || []);
+      } else if (tokenId && collectionId) {
+        const bundle = await api?.nft?.getBundle(collectionId, tokenId);
+        count = countNestedChildren(bundle?.nestingChildTokens || []);
+      }
+      setIsBundleState(!!count);
+      setTokensCount(count);
+    })();
+  }, [offer, tokenId, collectionId, api?.nft]);
 
   const isBidder = useMemo(() => {
     if (!selectedAccount) return false;
@@ -108,7 +120,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
         imageUrl={imageUrl}
         video={video}
         testid={`${testid}-token-media`}
-        badge={isBundle ? 'Bundle' : ''}
+        badge={isBundleState ? 'Bundle' : ''}
       />
       <Description>
         <Link to={tokenPath} title={tokenTitle}>
@@ -130,14 +142,15 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
             {collectionTitle}
           </Text>
         </a>
+        {isBundleState && <BundleItemsCount count={tokensCount || 0} testId={testid} />}
         {price && <PriceWrapper>
           <Text
             testid={`${testid}-price`}
             size='s'
           >{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(price)}` }</Text>
-          <Icon name={'chain-kusama'} size={16} />
+          <IconStyled name={'chain-kusama'} size={16} />
+          {!auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         </PriceWrapper>}
-        {price && !auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         {auction && <AuctionInfoWrapper>
           {isTopBidder && <Text
             testid={`${testid}-leading-bid`}
@@ -180,10 +193,6 @@ const Description = styled.div`
 
   span {
     color: ${Primary600};
-
-    &:nth-of-type(2) {
-      margin-bottom: 8px;
-    }
   }
 `;
 
@@ -191,6 +200,7 @@ const PriceWrapper = styled.div`
   display: flex;
   align-items: center;
   column-gap: calc(var(--gap) / 4);
+  margin-top: calc(var(--gap) / 2);
 `;
 
 const StyledText = styled(Text)` 
@@ -202,4 +212,8 @@ const StyledText = styled(Text)`
 const AuctionInfoWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 2);
+`;
+
+const IconStyled = styled(Icon)`
+  margin: 0 calc(var(--gap) / 4);
 `;

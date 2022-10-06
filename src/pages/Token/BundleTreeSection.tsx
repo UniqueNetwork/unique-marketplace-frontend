@@ -15,6 +15,7 @@ import { Offer } from '../../api/restApi/offers/types';
 import { TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 import BundleModal from './BundleModals/BundleTrunsferModal';
 import { BundleModalType } from './BundleModals/types';
+import { countNestedChildren } from '../../utils/helpers';
 
 const areNodesEqual = (a: INestingToken, b: INestingToken) => a.collectionId === b.collectionId && a.tokenId === b.tokenId;
 
@@ -72,7 +73,6 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
   }, []);
 
   const onNodeClicked = useCallback((data: INestingToken) => {
-    console.log('onNodeClicked');
   }, []);
 
   const onFinish = useCallback(() => {
@@ -86,16 +86,7 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
 
   const tokensCount = useMemo(() => {
     if (!bundle || !bundle[0]?.nestingChildTokens) return 0;
-    let count = 1;
-    const countChildren = (tokenChildren: INestingToken[]) => {
-      if (tokenChildren.length === 0) return count;
-      else {
-        count += tokenChildren.length;
-        tokenChildren.forEach((child) => countChildren(child.nestingChildTokens || []));
-      }
-    };
-    countChildren(bundle[0].nestingChildTokens || []);
-    return count;
+    return countNestedChildren(bundle[0].nestingChildTokens);
   }, [bundle]);
 
   const onViewTokenDetails = useCallback((token: TokenByIdResult) => {
@@ -105,8 +96,6 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
   }, [onViewTokenDetailsProps, isMobileViewVisible, closeView]);
 
   if (isBundleLoading) return (<BundleIsLoading />);
-
-  if (!token) return null;
 
   return (
     <>
