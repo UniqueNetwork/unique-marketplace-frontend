@@ -43,7 +43,7 @@ function TokenCard({ token, onViewNodeDetails, onUnnestClick, onTransferClick }:
         isCollectionLoading={isCollectionLoading}
       />
       {token.nestingChildTokens && <Text color='grey-500' size='xs'>{token.nestingChildTokens.length} item{token.nestingChildTokens.length > 1 && 's'}</Text>}
-      {menuVisible && <ActionsMenuWrapper className={'menu'}>
+      {(menuVisible && token.isCurrentAccountOwner) && <ActionsMenuWrapper className={'menu'}>
         <Dropdown
           placement={'left'}
           dropdownRender={() => (
@@ -83,8 +83,8 @@ const TokenCardWrapper = styled.div`
     height: 128px;
     img {
       border-radius: 4px;
-      width: 100%;
-      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
       object-fit: fill;
     }
   }

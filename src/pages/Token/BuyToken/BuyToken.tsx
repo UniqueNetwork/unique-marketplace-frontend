@@ -8,6 +8,7 @@ import { Price } from '../TokenDetail/Price';
 import { Grey300 } from '../../../styles/colors';
 import { Offer } from '../../../api/restApi/offers/types';
 import { useAccounts } from '../../../hooks/useAccounts';
+import BuyBundleInformation from '../TokenDetail/BuyBundleInformation';
 
 interface BuyTokenProps {
   offer?: Offer;
@@ -45,6 +46,7 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy, testid }) => {
       />
     </ButtonWrapper>
     {!isEnoughBalance && <Text color={'coral-500'} testid={`${testid}-low-balance-warning`}>Your balance is too low to buy</Text>}
+    {offer.tokenDescription.nestingChildTokens?.length && <BuyBundleInformation testid={testid}/>}
     <Divider />
   </>);
 };

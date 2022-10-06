@@ -2,7 +2,7 @@ import { Sdk } from '@unique-nft/substrate-client';
 import { TokenId, TransactionOptions, UniqueController } from './types';
 import { getEthAccount } from './utils/addressUtils';
 import { filterAllowedTokens } from './utils/checkTokenIsAllowed';
-import { getNestingTokenAddress, NestedToken, TokenByIdResult, TokenIdArguments } from '@unique-nft/substrate-client/tokens';
+import { getNestingTokenAddress, NestedToken, TokenByIdResult, TokenIdArguments, TokenOwnerResult } from '@unique-nft/substrate-client/tokens';
 import { Address } from '@unique-nft/substrate-client/types';
 
 type UniqueSDKNFTControllerOptions = { sdk: Sdk, collectionIds: number[], allowedTokens: { collection: number, tokens: string }[] };
@@ -103,5 +103,9 @@ export class UniqueSDKNFTController implements UniqueController {
       signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });
+  }
+
+  async getOwner(collectionId: number, tokenId: number): Promise<TokenOwnerResult | null> {
+    return await this.sdk?.tokens.owner({ collectionId, tokenId }) || null;
   }
 }

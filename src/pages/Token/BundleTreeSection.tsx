@@ -21,14 +21,22 @@ const areNodesEqual = (a: INestingToken, b: INestingToken) => a.collectionId ===
 
 const getKey = (a: INestingToken) => `T${a.tokenId}C${a.collectionId}`;
 
+const addIsCurrentAccountOwnerToBundleAndSort = (bundle: INestingToken, isOwner: boolean) => {
+  bundle.isCurrentAccountOwner = isOwner;
+  if (bundle.nestingChildTokens?.length === 0) return bundle;
+  bundle.nestingChildTokens = bundle.nestingChildTokens?.sort((a, b) => a.tokenId > b.tokenId ? 1 : -1).map((token) => addIsCurrentAccountOwnerToBundleAndSort(token, isOwner));
+  return bundle;
+};
+
 interface IProps {
   token?: TokenByIdResult
   offer?: Offer
   onViewTokenDetails: Dispatch<SetStateAction<TokenByIdResult | undefined>>
   testid?: string
+  isOwner: boolean
 }
 
-function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token, offer, testid }: IProps) {
+function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token, offer, testid, isOwner }: IProps) {
   const navigate = useNavigate();
   const { uniqueSdk } = useApi();
   const [isMobileViewVisible, setIsMobileViewVisible] = useState(false);
@@ -43,7 +51,7 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
   }, []);
 
   useEffect(() => {
-    if (bundle) return;
+    if (bundle && bundle[0].isCurrentAccountOwner === isOwner) return;
     (async () => {
       if (offer && offer.tokenDescription.nestingChildTokens) {
         const bundle: INestingToken = {
@@ -52,17 +60,17 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
           collectionId: offer.collectionId,
           nestingChildTokens: offer.tokenDescription.nestingChildTokens
         };
-        setBundle([bundle]);
+        setBundle([addIsCurrentAccountOwnerToBundleAndSort(bundle, isOwner)]);
       } else if (token) {
         setIsBundleLoading(true);
         const response = await uniqueSdk?.tokens.getBundle({ collectionId: token.collectionId, tokenId: token.tokenId });
         if (response) {
-          setBundle([response]);
+          setBundle([addIsCurrentAccountOwnerToBundleAndSort(response, isOwner)]);
         }
       }
       setIsBundleLoading(false);
     })();
-  }, [uniqueSdk, token, offer, bundle]);
+  }, [uniqueSdk, token, offer, bundle, isOwner]);
 
   const closeView = useCallback(() => {
     setIsMobileViewVisible(false);
@@ -120,9 +128,9 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
         }
       />
       <BundlePagePaper>
-        <HeaderStyled>
+        <HeaderStyled id={'bundle'}>
           <Heading size={'2'}>Bundle tree structure</Heading>
-          <Text color='grey-500' size='m'>{tokensCount} items total</Text>
+          <Text color='grey-500' size='m'>{tokensCount + 1} items total</Text>
         </HeaderStyled>
         <Content>
           <BundleTree<INestingToken>

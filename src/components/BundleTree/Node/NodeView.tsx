@@ -107,7 +107,7 @@ const NodeView: FC<INodeView<INestingToken>> = ({
         </NftInfo>
         <Actions>
           {deviceSize !== DeviceSize.sm && <ActionButtons className={'action-buttons'}>
-            {menuVisible && <ActionsMenuWrapper className={'menu'}>
+            {(menuVisible && data.isCurrentAccountOwner) && <ActionsMenuWrapper className={'menu'}>
               <Dropdown
                 placement={'left'}
                 dropdownRender={() => (<DropdownMenu>
@@ -165,8 +165,8 @@ const ViewContainer = styled.div<{ isFirst: boolean | undefined, isSelected: boo
     margin-right: calc(var(--gap) / 2);
     img {
       border-radius: 4px;
-      width: 100%;
-      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
       object-fit: fill;
     }
   }
