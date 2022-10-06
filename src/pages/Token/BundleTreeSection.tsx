@@ -72,7 +72,6 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
   }, []);
 
   const onNodeClicked = useCallback((data: INestingToken) => {
-    console.log('onNodeClicked');
   }, []);
 
   const onFinish = useCallback(() => {
@@ -105,8 +104,6 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
   }, [onViewTokenDetailsProps, isMobileViewVisible, closeView]);
 
   if (isBundleLoading) return (<BundleIsLoading />);
-
-  if (!token) return null;
 
   return (
     <>
