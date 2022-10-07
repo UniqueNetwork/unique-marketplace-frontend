@@ -15,15 +15,31 @@ export function Tree<T extends INode>({ dataSource, nodeView, onNodeClicked, cla
       if (compareNodes(node, data)) {
         node.selected = !node.selected;
       } else node.selected = false;
-      // if (!Array.isArray(node[childrenProperty])) throw new Error(`Property '${childrenProperty.toString()}' isn't array of children of Node`);
       (node[childrenProperty] as unknown as T[])?.forEach((child: T) => {
         return selectNode(child);
       });
       return node;
     };
 
-    const newDataSourceState = [...dataSourceState];
-    setDataSourceState([selectNode(newDataSourceState[0])]);
+    const markSelectedNodeChildren = (node: T, grandParentSelected?: boolean) => {
+      if (node.selected || grandParentSelected) {
+        (node[childrenProperty] as unknown as T[])?.forEach((child: T) => {
+          child.parentSelected = true;
+          markSelectedNodeChildren(child, true);
+        });
+      } else {
+        (node[childrenProperty] as unknown as T[])?.forEach((child: T) => {
+          child.parentSelected = false;
+          markSelectedNodeChildren(child);
+        });
+      }
+      return node;
+    };
+
+    let newDataSourceState = [...dataSourceState];
+    newDataSourceState = [selectNode(newDataSourceState[0])];
+    newDataSourceState = [markSelectedNodeChildren(newDataSourceState[0])];
+    setDataSourceState(newDataSourceState);
 
     if (onNodeClicked) onNodeClicked(data);
   }, [onNodeClicked, dataSourceState]);

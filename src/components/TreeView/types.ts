@@ -4,6 +4,7 @@ export interface INodeView<T> {
   arrowClicked: (event: React.MouseEvent) => void
   isOpened: boolean
   isSelected: boolean
+  isParentSelected: boolean
   data: T
   textClicked: (event: React.MouseEvent) => void
   isFirst?: boolean
@@ -17,6 +18,7 @@ export interface INode {
   opened?: boolean
   disabled?: boolean
   selected?: boolean
+  parentSelected?: boolean
 }
 
 export type TTreeNodeClickHandler<T> = (data: T) => void
