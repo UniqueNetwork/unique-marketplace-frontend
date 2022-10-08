@@ -13,7 +13,7 @@ import TokenPageModal from './Modals/TokenPageModal';
 import { PagePaper } from 'components/PagePaper/PagePaper';
 import { useAccounts } from 'hooks/useAccounts';
 import { shortcutText } from 'utils/textUtils';
-import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
+import { compareEncodedAddresses, isTokenOwner } from 'api/uniqueSdk/utils/addressUtils';
 import styled from 'styled-components';
 import { BlueGrey500 } from 'styles/colors';
 import BundleTreeSection from './BundleTreeSection';
@@ -115,6 +115,14 @@ const TokenPage = () => {
   // if we opened child token from bundle which is on sale
   const isIgnoreOffer = useMemo(() => (!(!token || !offer || (token.tokenId === offer.tokenId && token.collectionId === offer.collectionId))), [token, offer]);
 
+  const isOwner = useMemo(() => {
+    if (!selectedAccount || isFetchingOffer || isFetchingToken) return false;
+    if (offer) {
+      return isTokenOwner(selectedAccount.address, offer.seller);
+    }
+    return token?.owner ? isTokenOwner(selectedAccount.address, token.owner) : false;
+  }, [isFetchingOffer, isFetchingToken, selectedAccount, token, offer]);
+
   if (!isFetchingOffer && !isFetchingToken && !token && !offer) return <Error404 />;
 
   // TODO: split into more categories here instead of just "buy/sell" and putting splitting inside them
@@ -133,6 +141,7 @@ const TokenPage = () => {
           isLoading={isFetchingOffer || isFetchingToken}
           testid={`${testid}`}
           isBundle={isBundle}
+          isOwner={isOwner}
         >
           <TokenTrading
             token={token}
@@ -163,6 +172,7 @@ const TokenPage = () => {
         token={token}
         offer={offer}
         testid={`${testid}-bundle`}
+        isOwner={isOwner}
       />}
     </>
   );

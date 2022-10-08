@@ -1,7 +1,6 @@
 import React, { FC } from 'react';
 import { Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
-import { Grey100 } from 'styles/colors';
 import { INestingToken } from '../types';
 import TokenCard from './TokenCard';
 import { INestedSectionView } from '../../TreeView/types';
@@ -34,7 +33,7 @@ export const NestedSection: FC<INestedSectionView<INestingToken>> = ({ selectedT
 const NestedDetails = styled.div`
   display: block;
   padding: 16px 32px;
-  background-color: ${Grey100};
+  background-color: #EDEDEE50;
   width: calc(100vw - 777px);
   @media (max-width: 1440px) {
     width: calc(100vw - 729px);

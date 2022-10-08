@@ -4,6 +4,7 @@ export interface INestingToken extends NestedToken {
   opened?: boolean
   disabled?: boolean
   selected?: boolean
+  isCurrentAccountOwner?: boolean
 }
 
 export interface ITokenCard {

@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { AdditionalDark, AdditionalLight, BlueGrey500, Coral100, Coral500, Grey300, Primary200, Primary400, Primary500, Primary600, Secondary400 } from 'styles/colors';
+import { AdditionalDark, AdditionalLight, BlueGrey500, Coral100, Coral500, Grey300, Primary100, Primary200, Primary400, Primary500, Primary600, Secondary400 } from 'styles/colors';
 import Pin from 'static/icons/pin.svg';
 import { INodeView } from '../../TreeView/types';
 import { Picture } from '../../Picture';
@@ -21,6 +21,7 @@ const NodeView: FC<INodeView<INestingToken>> = ({
   isFirst,
   level,
   isSelected,
+  isParentSelected,
   children,
   onViewNodeDetails,
   onTransferClick,
@@ -90,6 +91,7 @@ const NodeView: FC<INodeView<INestingToken>> = ({
         isFirst={isFirst}
         onClick={onClick}
         isSelected={isSelected}
+        isParentSelected={isParentSelected}
         onMouseEnter={showMenu}
         onMouseLeave={hideMenu}
       >
@@ -107,7 +109,7 @@ const NodeView: FC<INodeView<INestingToken>> = ({
         </NftInfo>
         <Actions>
           {deviceSize !== DeviceSize.sm && <ActionButtons className={'action-buttons'}>
-            {menuVisible && <ActionsMenuWrapper className={'menu'}>
+            {(menuVisible && data.isCurrentAccountOwner) && <ActionsMenuWrapper className={'menu'}>
               <Dropdown
                 placement={'left'}
                 dropdownRender={() => (<DropdownMenu>
@@ -140,7 +142,7 @@ const NodeView: FC<INodeView<INestingToken>> = ({
   );
 };
 
-const ViewContainer = styled.div<{ isFirst: boolean | undefined, isSelected: boolean | undefined }>`
+const ViewContainer = styled.div<{ isFirst: boolean | undefined, isSelected: boolean | undefined, isParentSelected: boolean | undefined }>`
   height: 58px;
   position: relative;
   display: flex;
@@ -155,7 +157,7 @@ const ViewContainer = styled.div<{ isFirst: boolean | undefined, isSelected: boo
     border-left: none;
     bottom: -3px;
     width: 100%;
-    z-index: 0;
+    z-index: 1;
   }
   .picture {
     display: inline-block;
@@ -165,19 +167,20 @@ const ViewContainer = styled.div<{ isFirst: boolean | undefined, isSelected: boo
     margin-right: calc(var(--gap) / 2);
     img {
       border-radius: 4px;
-      width: 100%;
-      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
       object-fit: fill;
     }
   }
   &:hover {
     border: 1px solid ${Primary400};
+    z-index: 2;
     hr {
       display: none;
     }
     .action-buttons { display: flex; }
   }
-  background-color: ${({ isSelected }) => (isSelected && Primary200)} !important;
+  background-color: ${({ isSelected, isParentSelected }) => (isSelected ? Primary200 : isParentSelected ? Primary100 : 'none')} !important;
 `;
 
 const NftInfo = styled.div`

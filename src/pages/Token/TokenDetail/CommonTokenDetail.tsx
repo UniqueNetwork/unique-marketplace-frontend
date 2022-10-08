@@ -11,8 +11,7 @@ import { Grey300, Grey500, Primary600 } from 'styles/colors';
 import { Avatar } from 'components/Avatar/Avatar';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import config from 'config';
-import { useAccounts } from 'hooks/useAccounts';
-import { isTokenOwner, toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
+import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
 import { Offer } from 'api/restApi/offers/types';
 import { useApi } from 'hooks/useApi';
 import Skeleton from 'components/Skeleton/Skeleton';
@@ -29,6 +28,7 @@ interface IProps {
   isLoading?: boolean
   testid: string
   isBundle: boolean
+  isOwner: boolean
 }
 
 export const CommonTokenDetail: FC<IProps> = ({
@@ -38,7 +38,8 @@ export const CommonTokenDetail: FC<IProps> = ({
   offer,
   isLoading,
   testid,
-  isBundle
+  isBundle,
+  isOwner
 }) => {
   const {
     collectionId,
@@ -69,7 +70,6 @@ export const CommonTokenDetail: FC<IProps> = ({
     };
   }, [token, collection, offer]);
 
-  const { selectedAccount } = useAccounts();
   const deviceSize = useDeviceSize();
 
   const { chainData, currentChainId } = useApi();
@@ -85,14 +85,6 @@ export const CommonTokenDetail: FC<IProps> = ({
     if (!token?.owner) return undefined;
     return (token.owner ? formatAddress(token.owner) : token.owner);
   }, [token, offer, formatAddress]);
-
-  const isOwner = useMemo(() => {
-    if (!selectedAccount || isLoading) return false;
-    if (offer) {
-      return isTokenOwner(selectedAccount.address, offer.seller);
-    }
-    return token?.owner ? isTokenOwner(selectedAccount.address, token.owner) : false;
-  }, [isLoading, selectedAccount, token, offer]);
 
   const [shareModalVisible, setShareModalVisible] = useState(false);
 

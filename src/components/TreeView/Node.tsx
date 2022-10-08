@@ -26,6 +26,7 @@ export function Node<T extends INode>({ data, onNodeClicked, nodeView: NodeView,
         isFirst={isFirst}
         level={level}
         isSelected={!!data.selected}
+        isParentSelected={!!data.parentSelected}
         onViewNodeDetails={onViewNodeDetails}
         onUnnestClick={onUnnestClick}
         onTransferClick={onTransferClick}

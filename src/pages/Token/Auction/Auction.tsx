@@ -14,6 +14,7 @@ import Timer from 'components/Timer';
 import AccountLink from 'components/Account/AccountLink';
 import { PriceForAuction } from '../TokenDetail/PriceForAuction';
 import Bids from './Bids';
+import BuyBundleInformation from '../TokenDetail/BuyBundleInformation';
 
 interface AuctionProps {
   offer: Offer
@@ -135,6 +136,7 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
           testid={`${testid}-withdraw-button`}
         />}
       </ButtonsWrapper>}
+      {offer.tokenDescription.nestingChildTokens?.length && <BuyBundleInformation testid={testid}/>}
       {offer.auction?.status === 'active' && offer?.auction?.stopAt && <TimerWrapper>
         <Timer time={offer.auction.stopAt} testid={`${testid}-timer`} />
       </TimerWrapper>}
