@@ -7,7 +7,7 @@ import { INestingToken, ITokenCard } from '../types';
 import { useCollection } from '../useCollection';
 import Skeleton from '../../Skeleton/Skeleton';
 import { Dropdown } from 'components/UI/Dropdown/Dropdown';
-import { Icon } from 'components/IconTest/IconTest';
+import { Icon } from 'components/Icon/Icon';
 
 function TokenCard({ token, onViewNodeDetails, onUnnestClick, onTransferClick }: ITokenCard) {
   const [menuVisible, setMenuVisible] = useState(false);

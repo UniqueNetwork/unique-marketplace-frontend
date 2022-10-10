@@ -1,6 +1,7 @@
 import React, { VFC } from 'react';
 import styled from 'styled-components';
-import { Icon, IconProps, Text } from '@unique-nft/ui-kit';
+import { IconProps, Text } from '@unique-nft/ui-kit';
+import { Icon } from 'components/Icon/Icon';
 
 interface EmptyTableProps {
   iconProps?: Omit<IconProps, 'size'>

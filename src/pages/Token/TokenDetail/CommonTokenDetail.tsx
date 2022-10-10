@@ -1,7 +1,7 @@
-import { Heading, Icon, Text } from '@unique-nft/ui-kit';
+import { Heading, Text } from '@unique-nft/ui-kit';
 import React, { FC, ReactChild, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-
+import { Icon } from 'components/Icon/Icon';
 import { Picture } from 'components';
 import { CollectionsCard } from './CollectionsCard';
 import { AttributesBlock } from './AttributesBlock';
