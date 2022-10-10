@@ -55,13 +55,12 @@ const TokenPage = () => {
         if (collection) setCollection(collection);
         setIsBundle(!!offer.tokenDescription.nestingChildTokens);
       }
+      if (!token) await fetchToken();
       if (offer || token) {
         setIsFetchingToken(false);
-        return;
       }
-      await fetchToken();
     })();
-  }, [fetchToken, isFetchingOffer, offer, token, api, collectionId]);
+  }, [fetchToken, isFetchingOffer, offer, token, collectionId]);
 
   useEffect(() => {
     setMarketType(MarketType.default);
@@ -113,7 +112,7 @@ const TokenPage = () => {
   }, [navigate]);
 
   // if we opened child token from bundle which is on sale
-  const isIgnoreOffer = useMemo(() => (!(!token || !offer || (token.tokenId === offer.tokenId && token.collectionId === offer.collectionId))), [token, offer]);
+  const isIgnoreOffer = useMemo(() => (!(!token || !offer || (id === offer.tokenId.toString() && collectionId === offer.collectionId.toString()))), [token, offer]);
 
   const isOwner = useMemo(() => {
     if (!selectedAccount || isFetchingOffer || isFetchingToken) return false;
