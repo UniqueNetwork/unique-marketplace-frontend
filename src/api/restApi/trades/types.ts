@@ -15,6 +15,7 @@ export type TokenDescription = {
   image: string
   prefix: string
   attributes: OfferTokenAttribute[]
+  video?: string
 }
 
 export type Trade = {
