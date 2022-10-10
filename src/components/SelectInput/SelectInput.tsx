@@ -1,8 +1,9 @@
-import React, { ChangeEvent, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import React, { ChangeEvent, ReactNode, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
+import { IconProps } from '@unique-nft/ui-kit';
+import { Icon } from 'components/Icon/Icon';
 import { AdditionalLight, Grey100, Grey300, Grey500, Primary100, Primary500 } from '../../styles/colors';
 import { IconButton } from '../IconButton/IconButton';
-import { Icon, IconProps } from '@unique-nft/ui-kit';
 import { classNames } from '../../utils/classNames';
 
 interface SelectInputOption {

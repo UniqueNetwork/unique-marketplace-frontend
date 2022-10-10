@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
-import { Icon, TableColumnProps, Text } from '@unique-nft/ui-kit';
+import { TableColumnProps, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
-
+import { Icon } from 'components/Icon/Icon';
 import { AddressComponent } from './AddressComponent/AddressComponent';
 import { timestampTableFormat } from '../../utils/timestampUtils';
 import { TokenComponent } from './TokenComponent/TokenComponent';

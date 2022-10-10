@@ -1,7 +1,7 @@
 import { FC, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { Icon } from '../IconTest/IconTest';
+import { Icon } from '../Icon/Icon';
 
 import { useScreenWidthFromThreshold } from 'hooks/useScreenWidthFromThreshold';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
