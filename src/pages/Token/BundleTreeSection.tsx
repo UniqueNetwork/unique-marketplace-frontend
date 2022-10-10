@@ -193,6 +193,6 @@ const BundleIsLoading = () => (
     <HeaderStyled>
       <Heading size={'2'}>Bundle tree structure</Heading>
     </HeaderStyled>
-    <Skeleton height={58} width={'100%'} />
+    <Skeleton height={60} width={'100%'} />
   </BundlePagePaper>
 );

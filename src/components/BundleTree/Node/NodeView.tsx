@@ -143,7 +143,7 @@ const NodeView: FC<INodeView<INestingToken>> = ({
 };
 
 const ViewContainer = styled.div<{ isFirst: boolean | undefined, isSelected: boolean | undefined, isParentSelected: boolean | undefined }>`
-  height: 58px;
+  height: 60px;
   position: relative;
   display: flex;
   align-items: center;
