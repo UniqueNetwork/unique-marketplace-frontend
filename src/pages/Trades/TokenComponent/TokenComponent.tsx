@@ -17,7 +17,12 @@ export const TokenComponent = ({ collectionId, tokenId, tokenDescription }: Pick
 
   return <Link to={tokenUrl}>
     <TokenComponentWrapper>
-      <Avatar src={tokenDescription.image || ''} size={40} type={'square'} />
+      <Avatar
+        src={tokenDescription.image || ''}
+        video={tokenDescription.video}
+        size={40}
+        type={'square'}
+      />
       <Text>{`${tokenDescription.prefix} #${tokenId}`}</Text>
     </TokenComponentWrapper>
   </Link>;

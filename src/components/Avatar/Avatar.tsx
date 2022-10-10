@@ -9,6 +9,7 @@ export interface IAvatarProps {
   size: number;
   type?: 'circle' | 'square';
   testid?: string
+  video?: string | DecodedInfixOrUrlOrCidAndHash;
 }
 
 export const Avatar: FC<IAvatarProps> = ({
@@ -16,15 +17,30 @@ export const Avatar: FC<IAvatarProps> = ({
   src,
   address,
   type = 'square',
-  testid
+  testid,
+  video
 }: IAvatarProps) => {
   const imgUrl = typeof src === 'string' ? src : (src?.fullUrl || src?.url);
+  const videoUrl = typeof video === 'string' ? video : (video?.fullUrl || video?.url);
 
   if (address) {
     return <Identicon
       value={address}
       size={size}
     />;
+  }
+
+  if (videoUrl && imgUrl?.endsWith('/ipfs/')) {
+    return <AvatarWrapper size={size}>
+      <video
+        src={videoUrl}
+        controls={false}
+        autoPlay={false}
+        playsInline
+        loop={false}
+        data-testid={`${testid}-video`}
+      />
+    </AvatarWrapper>;
   }
 
   return <AvatarWrapper size={size}>
@@ -44,6 +60,9 @@ const AvatarWrapper = styled.div<{ size: number }>`
   display: flex;
   align-items: center;
   justify-content: center;
+  video {
+    width: 100%;
+  }
 `;
 
 const AvatarStyled = styled.img<{ $type: 'circle' | 'square' }>`
