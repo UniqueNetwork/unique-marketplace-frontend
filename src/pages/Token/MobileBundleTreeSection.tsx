@@ -16,10 +16,13 @@ function MobileBundleTreeSection({ bundleTreeComponent, isVisible, openView, clo
       {!isVisible && <Button
         onClick={openView}
         title={'Show bundle tree structure'}
+        role={'primary'}
       />}
       {isVisible && <Button
         onClick={closeView}
         title={'Back'}
+        role={'primary'}
+        iconLeft={{ name: 'arrow-left', size: 16, color: AdditionalLight }}
       />}
       <MobileFilterModal isVisible={isVisible}>
         {isVisible && bundleTreeComponent}
