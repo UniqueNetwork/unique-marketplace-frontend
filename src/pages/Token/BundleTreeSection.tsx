@@ -25,6 +25,7 @@ const addIsCurrentAccountOwnerToBundleAndSort = (bundle: INestingToken, isOwner:
   bundle.isCurrentAccountOwner = isOwner;
   if (bundle.nestingChildTokens?.length === 0) return bundle;
   bundle.nestingChildTokens = bundle.nestingChildTokens?.sort((a, b) => a.tokenId > b.tokenId ? 1 : -1).map((token) => addIsCurrentAccountOwnerToBundleAndSort(token, isOwner));
+  bundle.opened = true;
   return bundle;
 };
 
