@@ -5,7 +5,6 @@ import styled from 'styled-components';
 import DefaultMarketStages from '../Modals/StagesModal';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { StageStatus } from '../../../types/StagesTypes';
-import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 import { useUnnestStages } from '../../../hooks/marketplaceStages/useUnnestStages';
 import { TBundleTrunsferModalBodyProps } from './BundleTrunsferModal';
 

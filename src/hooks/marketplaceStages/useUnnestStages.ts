@@ -12,7 +12,7 @@ export const useUnnestStages = (token: TokenIdArguments) => {
   const unnestStages: InternalStage<null>[] = useMemo(() => [{
     title: 'Unnest in progress',
     description: '',
-    status: StageStatus.default,
+    status: StageStatus.inProgress,
     action: (params) => nftApi?.unnest(token.collectionId, token.tokenId, selectedAccount?.address || '', params.options)
   }], [nftApi, token, selectedAccount?.address]);
   const { stages, error, status, initiate } = useStages<null>(unnestStages, signPayloadJSON);
