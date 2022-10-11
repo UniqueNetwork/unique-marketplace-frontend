@@ -1,8 +1,9 @@
 import React, { FC } from 'react';
 import styled from 'styled-components';
-import { Heading, Text } from '@unique-nft/ui-kit';
+import { Heading, Text, TooltipAlign } from '@unique-nft/ui-kit';
 import { Trait } from './Trait';
 import { DecodedAttributes } from '@unique-nft/substrate-client/tokens';
+import IconWithHint from '../../../components/IconWithHint/IconWithHint';
 
 interface IProps {
   attributes: DecodedAttributes;
@@ -30,7 +31,12 @@ export const AttributesBlock: FC<IProps> = ({ attributes }: IProps) => {
 
   return (
     <div>
-      <HeadingStyled size={'4'}>Attributes</HeadingStyled>
+      <HeadingWrapper>
+        <HeadingStyled size={'4'}>Attributes</HeadingStyled>
+        <IconWithHint align={{ appearance: 'horizontal', horizontal: 'right', vertical: 'middle' }}>
+          Special features of the token that the collection creator specifies when minting
+        </IconWithHint>
+      </HeadingWrapper>
       {Object.values(attributes).map((attribute) => {
         return AttributesRow({
           attribute: typeof attribute.name === 'string' ? attribute.name : attribute?.name?._ || '',
@@ -42,6 +48,19 @@ export const AttributesBlock: FC<IProps> = ({ attributes }: IProps) => {
     </div>
   );
 };
+
+const HeadingWrapper = styled.div`
+  display: flex;
+  align-items: self-end;
+  margin-bottom: 16px;
+  column-gap: calc(var(--gap) / 2);
+  & > h4.unique-font-heading {
+    margin-bottom: 0px;
+  }
+  & > div {
+    height: 24px;
+  }
+`;
 
 const HeadingStyled = styled(Heading)`
   && {
