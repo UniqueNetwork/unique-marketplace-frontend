@@ -316,7 +316,6 @@ const UnnestMenuItem = styled(DropdownMenuItem)`
 `;
 
 const ViewTokenAction = styled(TransferMenuItem)`
-  border-top: 1px dashed ${Grey300};
   svg {
     transform: rotateX(180deg);
   }
