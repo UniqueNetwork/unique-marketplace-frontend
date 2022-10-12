@@ -207,7 +207,7 @@ export const MarketPage = () => {
           <Text
             testid={`${testid}-items-count`}
             size='m'
-          >{isFetching ? 'Loading items' : `${offersCount} items`}</Text>
+          >{isFetchingCollections || isFetching ? 'Loading items' : `${offersCount} items`}</Text>
         </div>
         <InfiniteScroll
           hasMore={hasMore}

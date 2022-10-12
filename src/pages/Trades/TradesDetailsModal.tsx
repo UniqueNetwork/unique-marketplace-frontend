@@ -46,7 +46,7 @@ const TokenTradesDetailsModal: FC<IConfirmModalProps> = ({ trade, onCancel }) =>
   const { tradeDetails, fetch, isFetching } = useTradeDetails();
   useEffect(() => {
     if (trade) {
-      fetch(trade.offerId);
+      void fetch(trade.offerId);
     }
   }, [fetch, trade]);
 

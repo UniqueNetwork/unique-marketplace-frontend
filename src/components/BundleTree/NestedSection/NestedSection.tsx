@@ -6,6 +6,8 @@ import TokenCard from './TokenCard';
 import { INestedSectionView } from '../../TreeView/types';
 import { useCollection } from '../useCollection';
 import Skeleton from '../../Skeleton/Skeleton';
+import { Icon } from 'components/UI';
+import NoTrades from 'static/icons/no-trades.svg';
 
 export const NestedSection: FC<INestedSectionView<INestingToken>> = ({ selectedToken, onViewNodeDetails, onUnnestClick, onTransferClick }) => {
   const { isCollectionLoading, collection } = useCollection(selectedToken?.collectionId);
@@ -13,10 +15,10 @@ export const NestedSection: FC<INestedSectionView<INestingToken>> = ({ selectedT
     <NestedDetails>
       {selectedToken && <TitleWrapper>
         <Title token={selectedToken} isCollectionLoading={isCollectionLoading} prefix={collection?.tokenPrefix || ''}/>
-        {!selectedToken?.nestingChildTokens?.length && <Text color='grey-500' size='m'>No nested tokens</Text>}
       </TitleWrapper>}
-      <NestedTokens>
-        {selectedToken?.nestingChildTokens?.map((token) => (
+      {selectedToken && !selectedToken?.nestingChildTokens?.length && <NoNestedWrapper><Icon file={NoTrades} size={80}/><Text color='grey-500' size='m'>No nested tokens</Text></NoNestedWrapper>}
+      {!!selectedToken?.nestingChildTokens?.length && <NestedTokens>
+        {selectedToken.nestingChildTokens.map((token) => (
           <TokenCard
             key={`T-${token.tokenId} C-${token.collectionId}`}
             token={token}
@@ -25,7 +27,7 @@ export const NestedSection: FC<INestedSectionView<INestingToken>> = ({ selectedT
             onTransferClick={onTransferClick}
           />
         ))}
-      </NestedTokens>
+      </NestedTokens>}
     </NestedDetails>
   );
 };
@@ -50,7 +52,7 @@ const NestedTokens = styled.div`
   margin-top: var(--gap);
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: var(--gap);
 `;
 
 const TitleWrapper = styled.div`
@@ -64,3 +66,14 @@ const Title: FC<{isCollectionLoading: boolean, prefix: string, token: INestingTo
     <Text color='additional-dark' size='l'>Nested in {prefix} #{token.tokenId}</Text>
   );
 };
+
+const NoNestedWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  row-gap: var(--gap);
+  width: 100%;
+  height: 100%;
+  min-height: 140px;
+`;

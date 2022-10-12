@@ -1,5 +1,5 @@
-import React, { FC, useCallback, useState } from 'react';
-import { Text } from '@unique-nft/ui-kit';
+import React, { FC, useCallback, useRef, useState } from 'react';
+import { Text, Tooltip } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { AdditionalDark, AdditionalLight, Coral100, Coral500, Grey300, Primary500, Primary600 } from 'styles/colors';
 import { Picture } from '../../Picture';
@@ -12,13 +12,16 @@ import { Icon } from 'components/UI/Icon/Icon';
 function TokenCard({ token, onViewNodeDetails, onUnnestClick, onTransferClick }: ITokenCard) {
   const [menuVisible, setMenuVisible] = useState(false);
   const { isCollectionLoading, collection } = useCollection(token.collectionId);
+  const meatballIconMenu = useRef(null);
 
-  const onTransfer = useCallback(() => {
+  const onTransfer = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
     onTransferClick?.(token);
+    event.stopPropagation();
   }, [token, onTransferClick]);
 
-  const onUnnest = useCallback(() => {
+  const onUnnest = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
     onUnnestClick?.(token);
+    event.stopPropagation();
   }, [token, onUnnestClick]);
 
   const showMenu = useCallback(() => {
@@ -44,6 +47,12 @@ function TokenCard({ token, onViewNodeDetails, onUnnestClick, onTransferClick }:
       />
       {token.nestingChildTokens && <Text color='grey-500' size='xs'>{token.nestingChildTokens.length} item{token.nestingChildTokens.length > 1 && 's'}</Text>}
       {(menuVisible && token.isCurrentAccountOwner) && <ActionsMenuWrapper className={'menu'}>
+        <Tooltip
+          align={{ vertical: 'top', horizontal: 'middle', appearance: 'vertical' }}
+          targetRef={meatballIconMenu}
+        >
+          Open additional menu
+        </Tooltip>
         <Dropdown
           placement={'left'}
           dropdownRender={() => (
@@ -62,7 +71,12 @@ function TokenCard({ token, onViewNodeDetails, onUnnestClick, onTransferClick }:
           )}
         >
           <DropdownWrapper>
-            <Icon size={32} name={'meatball-menu-dark'} color={'transparent'}/>
+            <Icon
+              size={32}
+              name={'meatball-menu-dark'}
+              color={'transparent'}
+              ref={meatballIconMenu}
+            />
           </DropdownWrapper>
         </Dropdown>
       </ActionsMenuWrapper>}

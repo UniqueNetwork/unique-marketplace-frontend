@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { AdditionalDark, AdditionalLight, BlueGrey500, Coral100, Coral500, Grey300, Primary100, Primary200, Primary400, Primary500, Primary600, Secondary400 } from 'styles/colors';
 import Pin from 'static/icons/pin.svg';
@@ -10,8 +10,8 @@ import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';
 import MobileModalActions from './MobileModalActions';
 import Skeleton from '../../Skeleton/Skeleton';
 import { useCollection } from '../useCollection';
-import { Dropdown } from 'components/UI/Dropdown/Dropdown';
-import { Icon } from 'components/UI/Icon/Icon';
+import { Icon, Dropdown } from 'components/UI';
+import { Tooltip } from '@unique-nft/ui-kit';
 
 const NodeView: FC<INodeView<INestingToken>> = ({
   arrowClicked,
@@ -32,6 +32,9 @@ const NodeView: FC<INodeView<INestingToken>> = ({
   const [modalVisible, setModalVisible] = useState(false);
   const deviceSize = useDeviceSize();
   const { isCollectionLoading, collection } = useCollection(data.collectionId);
+  const meatballIconMenu = useRef(null);
+  const squareIcon = useRef(null);
+  const pinIconRef = useRef(null);
 
   const onClick = useCallback((event: React.MouseEvent) => {
     if (deviceSize === DeviceSize.sm) setModalVisible(true);
@@ -110,21 +113,49 @@ const NodeView: FC<INodeView<INestingToken>> = ({
         <Actions>
           {deviceSize !== DeviceSize.sm && <ActionButtons className={'action-buttons'}>
             {(menuVisible && data.isCurrentAccountOwner) && <ActionsMenuWrapper className={'menu'}>
+              <Tooltip
+                align={{ vertical: 'top', horizontal: 'middle', appearance: 'vertical' }}
+                targetRef={meatballIconMenu}
+              >
+                Open additional menu
+              </Tooltip>
               <Dropdown
                 placement={'left'}
                 dropdownRender={() => (<DropdownMenu>
                   {tokenMenuActions}
                 </DropdownMenu>)}
               >
-                <Icon size={32} name={'meatball-menu'} color={Secondary400}/>
+                <Icon
+                  size={32}
+                  name={'meatball-menu'}
+                  color={Secondary400}
+                  ref={meatballIconMenu}
+                />
               </Dropdown>
             </ActionsMenuWrapper>}
             {!isCurrent && <div onClick={viewTokenDetails}>
-              <Icon size={32} name={'square'} color={Secondary400}/>
+              <Tooltip
+                align={{ vertical: 'top', horizontal: 'middle', appearance: 'vertical' }}
+                targetRef={squareIcon}
+              >
+                Go to the token page
+              </Tooltip>
+              <Icon
+                size={32}
+                name={'square'}
+                color={Secondary400}
+                ref={squareIcon}
+              />
             </div>}
           </ActionButtons>}
           {isCurrent && <PinIcon className={'pin-icon'}>
-            <Icon size={32} file={Pin}/>
+            <Tooltip
+              align={{ vertical: 'top', horizontal: 'middle', appearance: 'vertical' }}
+              targetRef={pinIconRef}
+            >
+              Current token page
+            </Tooltip>
+            <Icon size={32} file={Pin} ref={pinIconRef}/>
           </PinIcon>}
         </Actions>
         <hr/>
@@ -143,7 +174,7 @@ const NodeView: FC<INodeView<INestingToken>> = ({
 };
 
 const ViewContainer = styled.div<{ isFirst: boolean | undefined, isSelected: boolean | undefined, isParentSelected: boolean | undefined }>`
-  height: 58px;
+  height: 60px;
   position: relative;
   display: flex;
   align-items: center;
@@ -284,7 +315,6 @@ const UnnestMenuItem = styled(DropdownMenuItem)`
 `;
 
 const ViewTokenAction = styled(TransferMenuItem)`
-  border-top: 1px dashed ${Grey300};
   svg {
     transform: rotateX(180deg);
   }

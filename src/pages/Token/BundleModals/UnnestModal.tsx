@@ -48,9 +48,6 @@ const AskUnnestModal: FC<{ onUnnest(): void, testid: string }> = ({ onUnnest, te
       <Row>
         <Text size={'m'}>{'This will disconnect your token from the parent NFT. All other nesting connections will remain intact.'}</Text>
       </Row>
-      <WarningBlock>
-        A fee of ~ 2.07 QTZ can be applied to the transaction
-      </WarningBlock>
       <ButtonWrapper>
         <Button
           onClick={onConfirmUnnestClick}
