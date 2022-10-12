@@ -2,7 +2,7 @@ import React, { FC, useMemo } from 'react';
 import { Text } from '@unique-nft/ui-kit';
 import { generatePath, Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { Icon } from 'components/Icon/Icon';
+import { Icon } from 'components/UI/Icon/Icon';
 import { Offer } from 'api/restApi/offers/types';
 import { useAccounts } from 'hooks/useAccounts';
 import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';

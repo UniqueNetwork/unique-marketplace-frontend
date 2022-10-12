@@ -11,7 +11,7 @@ import MobileModalActions from './MobileModalActions';
 import Skeleton from '../../Skeleton/Skeleton';
 import { useCollection } from '../useCollection';
 import { Dropdown } from 'components/UI/Dropdown/Dropdown';
-import { Icon } from 'components/Icon/Icon';
+import { Icon } from 'components/UI/Icon/Icon';
 
 const NodeView: FC<INodeView<INestingToken>> = ({
   arrowClicked,

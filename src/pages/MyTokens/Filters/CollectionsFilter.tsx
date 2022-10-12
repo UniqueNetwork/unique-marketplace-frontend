@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import { Checkbox, Text } from '@unique-nft/ui-kit';
+import { Text } from '@unique-nft/ui-kit';
+import { Checkbox } from 'components/UI';
 import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 import styled from 'styled-components';
 

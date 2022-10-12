@@ -2,7 +2,7 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import { TableColumnProps, TableRowProps, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import Calendar from '../../../static/icons/calendar.svg';
-import { Icon } from 'components/Icon/Icon';
+import { Icon } from 'components/UI/Icon/Icon';
 import { Offer } from '../../../api/restApi/offers/types';
 import { timeDifference, timestampTableFormat } from '../../../utils/timestampUtils';
 import { formatKusamaBalance } from '../../../utils/textUtils';

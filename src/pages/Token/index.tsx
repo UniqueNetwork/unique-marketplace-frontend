@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Link, useNotifications } from '@unique-nft/ui-kit';
 import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
-import { Icon } from 'components/Icon/Icon';
+import { Icon } from 'components/UI/Icon/Icon';
 import { useApi } from 'hooks/useApi';
 import { MarketType } from 'types/MarketTypes';
 import { CommonTokenDetail } from './TokenDetail/CommonTokenDetail';

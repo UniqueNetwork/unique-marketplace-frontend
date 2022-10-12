@@ -1,7 +1,7 @@
 import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { AdditionalLight, Grey500, Primary100, Primary500 } from '../../../../styles/colors';
-import { Icon } from 'components/Icon/Icon';
+import { Icon } from 'components/UI/Icon/Icon';
 
 export interface DropdownSelectProps<T> {
   className?: string

@@ -4,7 +4,7 @@ import DefaultAvatar from 'static/icons/default-avatar.svg';
 import useCopyToClipboard from '../hooks/useCopyToClipboard';
 import { Text, Avatar } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
-import { Icon } from 'components/Icon/Icon';
+import { Icon } from 'components/UI/Icon/Icon';
 
 interface AccountCardProps extends IAccount {
   avatarRender?(address: string): ReactNode;

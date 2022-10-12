@@ -1,7 +1,7 @@
 import React, { VFC } from 'react';
 import styled from 'styled-components';
 import { Text } from '@unique-nft/ui-kit';
-import { Icon } from 'components/Icon/Icon';
+import { Icon } from 'components/UI/Icon/Icon';
 
 interface NoItemsProps {
   isSearchResult?: boolean

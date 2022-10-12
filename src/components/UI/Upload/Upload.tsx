@@ -1,7 +1,7 @@
 import { Text } from '@unique-nft/ui-kit';
 import React, { ChangeEvent, useCallback, useRef, useState, VFC } from 'react';
 import styled from 'styled-components';
-import { Icon } from 'components/Icon/Icon';
+import { Icon } from 'components/UI/Icon/Icon';
 import UploadIcon from 'static/icons/upload.svg';
 import { Primary500 } from 'styles/colors';
 
