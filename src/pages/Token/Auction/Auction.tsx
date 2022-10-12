@@ -83,7 +83,7 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
   }, [isBidder, isTopBidder, selectedAccount]);
 
   const onPlaceBid = useCallback((_offer: Offer) => {
-    setOffer(_offer);
+    setOffer((offer) => ({ ...offer, ..._offer }));
   }, [setOffer]);
 
   const onAuctionStopped = useCallback((_offer: Offer) => {
@@ -91,7 +91,7 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
       <div data-testid={`${testid}-auction-stop-notification`}>Auction is stopped</div>,
       { name: 'success', size: 32, color: 'var(--color-additional-light)' }
     );
-    setOffer(_offer);
+    setOffer((offer) => ({ ...offer, ..._offer }));
   }, [setOffer, info]);
 
   const onAuctionClosed = useCallback((_offer: Offer) => {
@@ -136,7 +136,7 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
           testid={`${testid}-withdraw-button`}
         />}
       </ButtonsWrapper>}
-      {offer.tokenDescription.nestingChildTokens?.length && <BuyBundleInformation testid={testid}/>}
+      {offer.tokenDescription?.nestingChildTokens?.length && <BuyBundleInformation testid={testid}/>}
       {offer.auction?.status === 'active' && offer?.auction?.stopAt && <TimerWrapper>
         <Timer time={offer.auction.stopAt} testid={`${testid}-timer`} />
       </TimerWrapper>}
