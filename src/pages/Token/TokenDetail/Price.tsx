@@ -1,7 +1,8 @@
 import React, { FC } from 'react';
-import { Heading, Icon } from '@unique-nft/ui-kit';
+import { Heading } from '@unique-nft/ui-kit';
 import BN from 'bn.js';
 import styled from 'styled-components';
+import { Icon } from 'components/UI/Icon/Icon';
 
 import { formatKusamaBalance } from '../../../utils/textUtils';
 import { useApi } from '../../../hooks/useApi';

@@ -1,7 +1,8 @@
 import React, { FC, KeyboardEvent, useCallback, useEffect, useState } from 'react';
-import { Button, InputText } from '@unique-nft/ui-kit';
+import { Button } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { IconButton } from '../IconButton/IconButton';
+import { InputText } from '../UI';
 
 interface SearchFieldProps {
   className?: string

@@ -1,6 +1,7 @@
 import React, { FC, useCallback } from 'react';
 import styled from 'styled-components';
-import { Checkbox, Text } from '@unique-nft/ui-kit';
+import { Text } from '@unique-nft/ui-kit';
+import { Checkbox } from 'components/UI';
 import Accordion from '../Accordion/Accordion';
 import CheckboxSkeleton from '../Skeleton/CheckboxSkeleton';
 import { AttributeItem } from './types';

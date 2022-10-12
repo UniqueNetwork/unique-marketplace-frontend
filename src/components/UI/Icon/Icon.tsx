@@ -29,6 +29,7 @@ export const Icon = forwardRef(
     height={size}
     src={file}
     ref={ref}
+    alt={'icon'}
     {...props}
 />)
 : (

@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useMemo } from 'react';
-import { Checkbox } from '@unique-nft/ui-kit';
+import { Checkbox } from 'components/UI';
 import styled from 'styled-components';
 import { Statuses } from './types';
 import Accordion from '../Accordion/Accordion';

@@ -1,6 +1,7 @@
 import React, { FC, useEffect, useState } from 'react';
-import { Heading, Icon, Modal, TableRowProps, Text } from '@unique-nft/ui-kit';
+import { Heading, Modal, TableRowProps, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
+import { Icon } from 'components/UI/Icon/Icon';
 import { TokenComponent } from './TokenComponent/TokenComponent';
 import { AdditionalDark, BlueGrey600 } from 'styles/colors';
 import { timestampTableFormat } from 'utils/timestampUtils';
