@@ -10,8 +10,7 @@ import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';
 import MobileModalActions from './MobileModalActions';
 import Skeleton from '../../Skeleton/Skeleton';
 import { useCollection } from '../useCollection';
-import { Dropdown } from 'components/UI/Dropdown/Dropdown';
-import { Icon } from 'components/IconTest/IconTest';
+import { Icon, Dropdown } from 'components/UI';
 import { Tooltip } from '@unique-nft/ui-kit';
 
 const NodeView: FC<INodeView<INestingToken>> = ({

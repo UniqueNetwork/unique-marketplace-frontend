@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useMemo } from 'react';
-import { Text, Icon, useNotifications } from '@unique-nft/ui-kit';
+import { Text, useNotifications } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
-
+import { Icon } from 'components/UI/Icon/Icon';
 import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import { useApi } from 'hooks/useApi';

@@ -1,6 +1,7 @@
 import React, { ChangeEvent, FC, useCallback, useEffect, useState } from 'react';
 import { mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
-import { Button, Checkbox, Heading, Link, Select, Text } from '@unique-nft/ui-kit';
+import { Button, Heading, Link, Select, Text } from '@unique-nft/ui-kit';
+import { Checkbox } from 'components/UI';
 import styled from 'styled-components';
 
 import { TCreateAccountBodyModalProps } from './types';
@@ -164,7 +165,7 @@ const SeedInput = styled.textarea`
   width: 100%;
   height: auto;
   resize: none;
-  outline: 0px none transparent;
+  outline: 0 none transparent;
   font-family: 'Roboto';
   font-style: normal;
   font-weight: 400;
