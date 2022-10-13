@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { AdditionalDark, AdditionalLight, BlueGrey500, Coral100, Coral500, Grey300, Primary100, Primary200, Primary400, Primary500, Primary600, Secondary400 } from 'styles/colors';
+import { AdditionalDark, AdditionalLight, BlueGrey500, Coral100, Coral500, Grey300, Primary100, Primary200, Primary400, Primary500, Primary600, Secondary400, Secondary200 } from 'styles/colors';
 import Pin from 'static/icons/pin.svg';
 import { INodeView } from '../../TreeView/types';
 import { Picture } from '../../Picture';
@@ -230,7 +230,7 @@ const ActionButtons = styled.div`
   display: none;
   align-items: center;
   svg:hover {
-    fill: ${Primary500};
+    fill: ${Secondary200};
   }
 `;
 

@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useRef, useState } from 'react';
 import { Text, Tooltip } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
-import { AdditionalDark, AdditionalLight, Coral100, Coral500, Grey300, Primary500, Primary600 } from 'styles/colors';
+import { AdditionalLight, Coral100, Coral500, Grey300, Primary500, Primary600, Secondary400, Secondary500 } from 'styles/colors';
 import { Picture } from '../../Picture';
 import { INestingToken, ITokenCard } from '../types';
 import { useCollection } from '../useCollection';
@@ -117,23 +117,6 @@ const ActionsMenuWrapper = styled.div`
   position: absolute;
   top: 0;
   right: 0;
-
-  div[class*=DropdownMenuButtonWrapper] {
-    & > button {
-      padding: 4px;
-      background-color: ${AdditionalDark};
-      border: 2px solid #FFFFFF;
-      border-radius: 4px;
-      color: ${AdditionalLight};
-      height: 32px;
-      &:hover {
-        background-color: ${AdditionalDark};
-      }
-    }
-    & > img {
-      display: none;
-    }
-  }
   div[class*=DropdownMenuDropdown] {
     width: max-content;
     & > div {
@@ -179,7 +162,12 @@ const UnnestMenuItem = styled(DropdownMenuItem)`
 `;
 
 const DropdownWrapper = styled.div`
-
+  & svg {
+    fill: ${Secondary500};
+    &:hover {
+      fill: ${Secondary400};
+    }
+  }
 `;
 
 const IconWrapper = styled.div`
