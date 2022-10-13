@@ -53,12 +53,8 @@ export const AccountsManager = (props: AccountsManagerProps) => {
     onCopyAddressClick
   } = props;
 
-  const [copied, copy] = useCopyToClipboard();
+  const [_, copy] = useCopyToClipboard();
   const touchDevice = isTouch || isTouchDevice;
-
-  useEffect(() => {
-    copied && onCopyAddressClick?.(copied);
-  }, [copied]);
 
   return (
     <Dropdown
@@ -82,8 +78,10 @@ export const AccountsManager = (props: AccountsManagerProps) => {
             <div
               className='address-copy'
               onClick={(event) => {
+                if (!selectedAccount?.address) return;
                 event.stopPropagation();
-                copy(`${selectedAccount?.address}`);
+                copy(selectedAccount.address);
+                onCopyAddressClick?.(selectedAccount.address);
               }}
               data-testid={`selected-address-copy-${selectedAccount?.address}`}
             >
