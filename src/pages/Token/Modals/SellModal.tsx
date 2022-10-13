@@ -1,5 +1,5 @@
-import { Button, Heading, Select, Link, useNotifications } from '@unique-nft/ui-kit';
-import { Tabs } from 'components/UI';
+import { Button, Heading, Link } from '@unique-nft/ui-kit';
+import { Tabs, Select, useNotifications } from 'components/UI';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';

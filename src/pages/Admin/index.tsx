@@ -1,7 +1,8 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Select, SelectOptionProps, useNotifications } from '@unique-nft/ui-kit';
+import { Button, SelectOptionProps } from '@unique-nft/ui-kit';
+import { useNotifications } from 'components/UI';
 import styled from 'styled-components/macro';
-
+import { Select } from 'components/UI';
 import NoItems from '../../components/NoItems';
 import { Secondary400 } from '../../styles/colors';
 import { CollectionCard } from '../../components/CollectionCard/CollectionCard';

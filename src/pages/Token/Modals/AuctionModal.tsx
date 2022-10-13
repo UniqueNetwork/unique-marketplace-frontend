@@ -1,8 +1,9 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Heading, Link, Select, Text, SelectOptionProps, useNotifications } from '@unique-nft/ui-kit';
+import { Button, Heading, Link, SelectOptionProps } from '@unique-nft/ui-kit';
+import { Text, useNotifications } from 'components/UI';
 import styled from 'styled-components';
 import { BN } from '@polkadot/util';
-
+import { Select } from 'components/UI';
 import { TPlaceABid } from './types';
 import DefaultMarketStages from './StagesModal';
 import { AdditionalWarning100, Coral100 } from '../../../styles/colors';

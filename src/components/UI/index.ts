@@ -5,3 +5,7 @@ export { InputText } from './InputText/InputText';
 export { Upload } from './Upload/Upload';
 export { Tabs } from './Tabs/Tabs';
 export { Pagination } from './Pagination/Pagination';
+export { Select } from './Select/Select';
+export { Text } from './Text/Text';
+export { Table } from './Table/Table';
+export { Notifications, useNotifications } from './Notifications';

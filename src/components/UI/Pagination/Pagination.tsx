@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import classNames from 'classnames';
 import { Icon, InputText } from '..';
-import { Select, Text } from '@unique-nft/ui-kit';
-import { usePrevious } from 'utils/helpers';
+import { Text } from '@unique-nft/ui-kit';
+import { Select } from 'components/UI';
+import { usePrevious } from 'utils/uiUtils';
 import styled from 'styled-components';
 
 export interface IPaginationProps {

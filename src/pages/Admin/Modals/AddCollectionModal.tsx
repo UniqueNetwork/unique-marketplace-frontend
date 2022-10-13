@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import { Button, Heading, Text, useNotifications } from '@unique-nft/ui-kit';
+import { Button, Heading } from '@unique-nft/ui-kit';
+import { Text, useNotifications } from 'components/UI';
 import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
 import styled from 'styled-components/macro';
 

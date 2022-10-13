@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
-import { Select, Text } from '@unique-nft/ui-kit';
+import { Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
-
+import { Select } from 'components/UI';
 import { Filters } from '../../components';
 import { Secondary400 } from '../../styles/colors';
 import { FilterState } from '../../components/Filters/types';

@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Heading, Modal, Text, useNotifications } from '@unique-nft/ui-kit';
-import { Checkbox } from 'components/UI';
+import { Button, Heading, Modal } from '@unique-nft/ui-kit';
+import { Checkbox, Text, useNotifications } from 'components/UI';
 import { BN } from '@polkadot/util';
 import styled from 'styled-components';
 

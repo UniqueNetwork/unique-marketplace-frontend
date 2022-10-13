@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { keyring } from '@polkadot/ui-keyring';
-import { useNotifications } from '@unique-nft/ui-kit';
+import { useNotifications } from 'components/UI';
 import { ApiContextProps, ApiProvider } from './ApiContext';
 import AuctionSocketProvider from './restApi/auction/AuctionSocketProvider';
 import { Settings } from './restApi/settings/types';

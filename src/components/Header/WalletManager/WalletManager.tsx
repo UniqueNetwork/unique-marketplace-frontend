@@ -2,8 +2,8 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { BN } from '@polkadot/util';
-import { Button, INetwork, Text, useNotifications } from '@unique-nft/ui-kit';
-
+import { Button, INetwork } from '@unique-nft/ui-kit';
+import { Text, useNotifications } from 'components/UI';
 import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
 import { useAccounts } from 'hooks/useAccounts';
 import { Account } from 'account/AccountContext';

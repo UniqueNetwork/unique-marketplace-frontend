@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router-dom';
-import { Notifications } from '@unique-nft/ui-kit';
+import { Notifications } from 'components/UI';
 import config from './config';
 // contains gql and rpc with contexts and providers
 import ApiWrapper from './api/ApiWrapper';
