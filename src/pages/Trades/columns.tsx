@@ -13,28 +13,27 @@ import { DeviceSize } from '../../hooks/useDeviceSize';
 const tokenSymbol = 'KSM';
 
 type ColumnProps = {
-  deviceSize: DeviceSize
-  onShowTradesDetailsModal: (trade: Trade) => void
-  scanUrl: string
+  deviceSize: DeviceSize,
+  onShowTradesDetailsModal: (trade: Trade) => void,
+  scanUrl: string,
+  testid: string
 }
 
-const getTradesColumns = ({ deviceSize, onShowTradesDetailsModal, scanUrl }: ColumnProps): TableColumnProps[] => [
+const getTradesColumns = ({ deviceSize, onShowTradesDetailsModal, scanUrl, testid }: ColumnProps): TableColumnProps[] => [
   {
-    title: deviceSize !== DeviceSize.sm ? (<Header>NFT</Header>) : null,
-    // width: '11.84%',
+    title: deviceSize !== DeviceSize.sm ? (<Header data-testid={`${testid}-header-nft`}>NFT</Header>) : null,
     width: deviceSize !== DeviceSize.md ? '14.3%' : '11.84%',
     isSortable: true,
     render(tokenId: number, { collectionId, tokenDescription }: Trade): React.ReactNode {
-      return <TokenComponent {...{ collectionId, tokenId, tokenDescription }} />;
+      return <TokenComponent testid={`${testid}-token`} {...{ collectionId, tokenId, tokenDescription }} />;
     },
     field: 'tokenId'
   },
   {
-    title: (<Header>Collection</Header>),
-    // width: '12%',
+    title: (<Header data-testid={`${testid}-header-collection`}>Collection</Header>),
     width: deviceSize !== DeviceSize.md ? '14.3%' : '11.84%',
     isSortable: true,
-    render(tokenDescription: TokenDescription, { collectionId }: Trade): React.ReactNode {
+    render(tokenDescription: TokenDescription, { collectionId, offerId }: Trade): React.ReactNode {
       const collectionName = tokenDescription.collectionName || '';
       return <LinkWrapper>
         <a
@@ -42,65 +41,66 @@ const getTradesColumns = ({ deviceSize, onShowTradesDetailsModal, scanUrl }: Col
           rel={'noreferrer'}
           href={`${scanUrl}collections/${collectionId || ''}`}
           className={'unique-link primary'}
+          data-testid={`${testid}-${offerId}-collection`}
         >{`${deviceSize === DeviceSize.lg ? collectionName : `${collectionName.slice(0, 6)}...`} [ID ${collectionId || ''}]`}</a>
       </LinkWrapper>;
     },
     field: 'tokenDescription'
   },
   {
-    title: (<Header>Time</Header>),
-    // width: '11.7%',
+    title: (<Header data-testid={`${testid}-header-time`}>Time</Header>),
     width: deviceSize !== DeviceSize.md ? '14.3%' : '11.84%',
     isSortable: true,
-    render: (time: number) => <TimeCell><Text color={BlueGrey600}>{timestampTableFormat(new Date(time).valueOf())}</Text></TimeCell>,
+    render: (time: number, { offerId }: Trade) => <TimeCell><Text testid={`${testid}-${offerId}-time`} color={BlueGrey600}>{timestampTableFormat(new Date(time).valueOf())}</Text></TimeCell>,
     field: 'tradeDate'
   },
   {
-    title: (<Header>Price</Header>),
-    // width: deviceSize !== DeviceSize.md ? '7%' : '14.48%',
+    title: (<Header data-testid={`${testid}-header-price`}>Price</Header>),
     width: deviceSize !== DeviceSize.md ? '14.3%' : '11.84%',
     isSortable: true,
-    render: (value: string) => <Text color={BlueGrey600}>{`${formatKusamaBalance(value)} ${tokenSymbol}`}</Text>,
+    render: (value: string, { offerId }: Trade) => <Text testid={`${testid}-${offerId}-price`} color={BlueGrey600}>{`${formatKusamaBalance(value)} ${tokenSymbol}`}</Text>,
     field: 'price'
   },
   {
-    title: (<HeaderCutted><span>Selling method</span></HeaderCutted>),
-    // width: '11.84%',
+    title: (<HeaderCutted><span data-testid={`${testid}-header-method`}>Selling method</span></HeaderCutted>),
     width: deviceSize !== DeviceSize.md ? '14.3%' : '11.84%',
-    render: (data: string) => <Text color={BlueGrey600}>{data === 'FixedPrice' ? 'Fixed price' : data}</Text>,
+    render: (data: string, { offerId }: Trade) => <Text testid={`${testid}-${offerId}-price`} color={BlueGrey600}>{data === 'FixedPrice' ? 'Fixed price' : data}</Text>,
     isSortable: true,
     field: 'status'
   },
   {
-    title: (<Header>Seller</Header>),
-    // width: '16.35%',
+    title: (<Header data-testid={`${testid}-header-seller`}>Seller</Header>),
     width: deviceSize !== DeviceSize.md ? '14.3%' : '17.52%',
-    render: (data: string) => <AddressComponent text={data} />,
+    render: (data: string) => <AddressComponent testid={`${testid}-seller`} text={data} />,
     field: 'seller'
   },
   {
-    title: (<Header>Buyer</Header>),
-    // width: '15.6%',
+    title: (<Header data-testid={`${testid}-header-buyer`}>Buyer</Header>),
     width: deviceSize !== DeviceSize.md ? '14.3%' : '17.52%',
-    render: (data: string) => <AddressComponent text={data} />,
+    render: (data: string) => <AddressComponent testid={`${testid}-buyer`} text={data} />,
     field: 'buyer'
   },
   {
     title: '',
     width: '56px',
-    render: (data, row: Trade) => <ShowTradesDetailsButton status={row.status} trade={row} onShowTradesDetailsModal={onShowTradesDetailsModal} />,
+    render: (data, row: Trade) => <ShowTradesDetailsButton
+      status={row.status}
+      trade={row}
+      onShowTradesDetailsModal={onShowTradesDetailsModal}
+      testid={testid}
+    />,
     field: 'modalButton'
   }
 ];
 
-const ShowTradesDetailsButton = ({ status, trade, onShowTradesDetailsModal }: { status: string, trade: Trade, onShowTradesDetailsModal: (trade: Trade) => void }) => {
+const ShowTradesDetailsButton = ({ status, trade, onShowTradesDetailsModal, testid }: { status: string, trade: Trade, onShowTradesDetailsModal: (trade: Trade) => void, testid: string }) => {
   const showTradesDetailsModal = useCallback(() => {
     onShowTradesDetailsModal(trade);
   }, [onShowTradesDetailsModal, trade]);
 
   return (
     <>{status === 'Auction' &&
-      <StyledButton title={''} onClick={showTradesDetailsModal}>
+      <StyledButton title={''} onClick={showTradesDetailsModal} data-testid={`${testid}-details-button-C${trade.collectionId}-T${trade.tokenId}`}>
         <Icon name={'carret-right'} size={16} />
       </StyledButton>
     }</>

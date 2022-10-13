@@ -1,6 +1,7 @@
 import React, { ReactElement, useCallback, useState } from 'react';
 import styled from 'styled-components/macro';
-import { Button, IconProps, Select, Tabs } from '@unique-nft/ui-kit';
+import { Button, IconProps, Select } from '@unique-nft/ui-kit';
+import { Tabs } from 'components/UI';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
 import { AdditionalLight } from 'styles/colors';
@@ -55,9 +56,11 @@ export function MobileFilters<T = MyTokensFilterState>({ filterCount, filterComp
         activeIndex={activeTabIndex}
         labels={tabs}
         onClick={setActiveTabIndex}
+        testid={testid}
       />
       <Tabs
         activeIndex={activeTabIndex}
+        testid={testid}
       >
         {filterComponent || <></>}
         <SortStyled>
