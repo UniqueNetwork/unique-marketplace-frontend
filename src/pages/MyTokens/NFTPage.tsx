@@ -128,8 +128,11 @@ export const NFTPage = () => {
     if (isFetchingTokens) return;
     if (!myCollections.length) {
       setFilterState(null);
-      return;
     }
+  }, [myCollections, isFetchingTokens]);
+
+  useEffect(() => {
+    if (isFetchingTokens) return;
     setFilterState((filter) => filter
       ? {
         ...filter,
@@ -139,7 +142,7 @@ export const NFTPage = () => {
       }
       : null
     );
-  }, [myCollections, isFetchingTokens]);
+  }, [selectedAccount]);
 
   useEffect(() => {
     const option = sortingOptions.find((option) => { return option.id === sortingValue; });
