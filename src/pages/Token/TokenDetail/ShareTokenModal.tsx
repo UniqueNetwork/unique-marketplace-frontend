@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
-import { Heading, Modal, useNotifications } from '@unique-nft/ui-kit';
+import { Heading, Modal } from '@unique-nft/ui-kit';
+import { useNotifications } from 'components/UI';
 import styled from 'styled-components/macro';
 import { Primary600 } from 'styles/colors';
 import copyIcon from 'static/icons/copy_blue.svg';

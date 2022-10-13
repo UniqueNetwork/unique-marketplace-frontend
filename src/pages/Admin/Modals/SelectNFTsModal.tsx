@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
-import { Button, Heading, Text, useNotifications } from '@unique-nft/ui-kit';
+import { Button, Heading } from '@unique-nft/ui-kit';
+import { Text, useNotifications } from 'components/UI';
 import styled from 'styled-components/macro';
 
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
@@ -26,7 +27,6 @@ export const SelectNFTsModal: FC<TAdminPanelModalBodyProps> = ({ collection, onF
       } else { // its single value
         return Number(value) > MAX_SAFE_ID;
       }
-      return false;
     })) return false;
 
     return true;

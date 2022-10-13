@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useMemo } from 'react';
-import { Text, useNotifications } from '@unique-nft/ui-kit';
+import { Text, useNotifications } from 'components/UI';
 import styled from 'styled-components';
 import { Icon } from 'components/UI/Icon/Icon';
 import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';

@@ -1,6 +1,5 @@
 import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
 import { INestingToken } from '../components/BundleTree/types';
-import { useEffect, useRef } from 'react';
 
 export const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -51,12 +50,4 @@ export const countNestedChildren = (nestingChildTokens: INestingToken[]) => {
   };
   countChildren(nestingChildTokens || []);
   return count;
-};
-
-export const usePrevious = <T>(value: T): T => {
-  const ref: any = useRef<T>();
-  useEffect(() => {
-    ref.current = value;
-  }, [value]);
-  return ref.current;
 };
