@@ -39,6 +39,8 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
       setPasswordIncorrect(true);
       return;
     }
+    setPassword('');
+    setPair(null);
     onFinish();
   }, [pair, password, onFinish]);
 
@@ -49,6 +51,7 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
 
   const onClose = useCallback(() => {
     setPassword('');
+    setPair(null);
     onFinish();
   }, [onFinish]);
 
