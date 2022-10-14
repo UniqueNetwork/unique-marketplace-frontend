@@ -9,3 +9,4 @@ export { Select } from './Select/Select';
 export { Text } from './Text/Text';
 export { Table } from './Table/Table';
 export { Notifications, useNotifications } from './Notifications';
+export { Modal } from './Modal';
