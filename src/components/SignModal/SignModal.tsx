@@ -1,14 +1,14 @@
 import React, { FC, useCallback, useState } from 'react';
-import { Button, Heading, Text } from '@unique-nft/ui-kit';
+import { Heading } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { KeyringPair } from '@polkadot/keyring/types';
+import { Button, Text, Modal } from 'components/UI';
 
 import { Account, AccountSigner } from '../../account/AccountContext';
 import { useAccounts } from '../../hooks/useAccounts';
 import { PasswordInput } from '../PasswordInput/PasswordInput';
 import AccountCard from '../Account/Account';
 import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
-import { Modal } from 'components/UI';
 
 const testid = 'sign-modal';
 

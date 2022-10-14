@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useState } from 'react';
-import { Button, Heading, Text } from '@unique-nft/ui-kit';
+import { Heading } from '@unique-nft/ui-kit';
+import { Button, Text, Modal } from 'components/UI';
 import keyring from '@polkadot/ui-keyring';
 import styled from 'styled-components';
 
@@ -9,7 +10,6 @@ import { QRReader, ScannedResult } from '../../../components/QRReader/QRReader';
 import { useAccounts } from '../../../hooks/useAccounts';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import { Avatar } from '../../../components/Avatar/Avatar';
-import { Modal } from 'components/UI';
 
 export const ImportViaQRCodeAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish, testid }) => {
   const [address, setAddress] = useState<string>();

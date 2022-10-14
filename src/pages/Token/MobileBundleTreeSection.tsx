@@ -1,5 +1,5 @@
 import React, { ReactElement } from 'react';
-import { Button } from '@unique-nft/ui-kit';
+import { Button } from 'components/UI';
 import styled from 'styled-components';
 import { AdditionalLight } from '../../styles/colors';
 

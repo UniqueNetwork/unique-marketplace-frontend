@@ -1,7 +1,7 @@
 import React, { ReactElement, useCallback, useState } from 'react';
 import styled from 'styled-components/macro';
-import { Button, IconProps } from '@unique-nft/ui-kit';
-import { Tabs, Select } from 'components/UI';
+import { IconProps } from '@unique-nft/ui-kit';
+import { Tabs, Select, Button } from 'components/UI';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
 import { AdditionalLight } from 'styles/colors';

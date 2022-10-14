@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Dropdown, TableColumnProps, TableRowProps, Text } from '@unique-nft/ui-kit';
+import { TableColumnProps, TableRowProps } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { BN } from '@polkadot/util';
-import { Icon } from 'components/UI/Icon/Icon';
+import { Icon, Dropdown, Text, Button } from 'components/UI';
 import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
 import { TWithdrawBid } from 'api/restApi/auction/types';
 import { Account } from 'account/AccountContext';

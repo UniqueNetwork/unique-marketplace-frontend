@@ -1,7 +1,7 @@
 /* eslint-disable react/jsx-no-bind */
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Heading, Link, Suggest, SuggestProps } from '@unique-nft/ui-kit';
-import { Text, useNotifications } from 'components/UI';
+import { Heading, Link, Suggest, SuggestProps } from '@unique-nft/ui-kit';
+import { Text, useNotifications, Button } from 'components/UI';
 import styled from 'styled-components';
 
 import DefaultMarketStages from '../Modals/StagesModal';

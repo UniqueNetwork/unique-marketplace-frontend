@@ -1,7 +1,7 @@
 import React, { ChangeEvent, FC, useCallback, useEffect, useState } from 'react';
 import { mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
-import { Button, Heading, Link, Text } from '@unique-nft/ui-kit';
-import { Checkbox, Select } from 'components/UI';
+import { Heading, Link } from '@unique-nft/ui-kit';
+import { Checkbox, Select, Button, Text } from 'components/UI';
 import styled from 'styled-components';
 
 import { TCreateAccountBodyModalProps } from './types';
