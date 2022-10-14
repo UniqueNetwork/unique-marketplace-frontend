@@ -84,7 +84,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
     return new BN(Number(leadingBid) + Number(offer?.auction?.priceStep || '0'));
   }, [offer?.auction, leadingBid]);
 
-  const [bidAmount, setBidAmount] = useState<string>(formatKusamaBalance(minimalBid.toString(), { decimals }));
+  const [bidAmount, setBidAmount] = useState<string>(formatKusamaBalance(minimalBid.toString(), { decimals }).replaceAll(' ', ''));
 
   const isEnoughBalance = useMemo(() => {
     if (!selectedAccount?.balance?.KSM || selectedAccount?.balance?.KSM.isZero()) return false;

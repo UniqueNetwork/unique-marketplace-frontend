@@ -29,5 +29,5 @@ export const formatKusamaBalance = (balance: string | number, options?: { decima
   return (balanceValue / Math.pow(10, decimals || 12)).toLocaleString('en-US', {
     minimumFractionDigits: 0,
     maximumFractionDigits: fractionDigits || decimals || 12
-  });
+  }).replaceAll(',', ' ');
 };
