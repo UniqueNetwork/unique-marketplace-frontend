@@ -2,21 +2,21 @@ import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { SelectOptionProps } from '@unique-nft/ui-kit';
 import { useNotifications, Select, Button } from 'components/UI';
 import styled from 'styled-components/macro';
-import NoItems from '../../components/NoItems';
-import { Secondary400 } from '../../styles/colors';
-import { CollectionCard } from '../../components/CollectionCard/CollectionCard';
+import NoItems from 'components/NoItems';
+import { Secondary400 } from 'styles/colors';
+import { CollectionCard } from 'components/CollectionCard/CollectionCard';
 import { AdminPanelModal } from './Modals/AdminPanelModal';
 import { AdminPanelModalType } from './Modals/types';
-import { PagePaper } from '../../components/PagePaper/PagePaper';
+import { PagePaper } from 'components/PagePaper/PagePaper';
 import { useNavigate } from 'react-router-dom';
-import { useAdminLoggingIn } from '../../api/restApi/admin/login';
-import { useAdminCollections } from '../../api/restApi/admin/collection';
-import CardSkeleton from '../../components/Skeleton/CardSkeleton';
-import SearchField from '../../components/SearchField/SearchField';
-import { useAccounts } from '../../hooks/useAccounts';
-import { CollectionData } from '../../api/restApi/admin/types';
-import config from '../../config';
-import { useApi } from '../../hooks/useApi';
+import { useAdminLoggingIn } from 'api/restApi/admin/login';
+import { useAdminCollections } from 'api/restApi/admin/collection';
+import CardSkeleton from 'components/Skeleton/CardSkeleton';
+import SearchField from 'components/SearchField/SearchField';
+import { useAccounts } from 'hooks/useAccounts';
+import { CollectionData } from 'api/restApi/admin/types';
+import config from 'config';
+import { useApi } from 'hooks/useApi';
 
 type TOption = {
   iconRight: {

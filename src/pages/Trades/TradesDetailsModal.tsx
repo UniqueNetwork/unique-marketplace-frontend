@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useState } from 'react';
-import { Heading, Modal, TableRowProps, Text } from '@unique-nft/ui-kit';
+import { Heading, TableRowProps, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { Icon } from 'components/UI/Icon/Icon';
 import { TokenComponent } from './TokenComponent/TokenComponent';
@@ -11,6 +11,7 @@ import { useTradeDetails } from 'api/restApi/trades/tradeDetails';
 import { Bid, Trade } from 'api/restApi/trades/types';
 import { formatKusamaBalance } from 'utils/textUtils';
 import Winner from 'static/icons/winner.svg';
+import { Modal } from 'components/UI';
 
 export interface IConfirmModalProps {
   trade: Trade | null

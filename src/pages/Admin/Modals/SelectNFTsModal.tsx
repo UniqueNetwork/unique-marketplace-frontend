@@ -28,8 +28,6 @@ export const SelectNFTsModal: FC<TAdminPanelModalBodyProps> = ({ collection, onF
         return Number(value) > MAX_SAFE_ID;
       }
     });
-
-
   }, [tokens]);
 
   const onAcceptClick = useCallback(async () => {
