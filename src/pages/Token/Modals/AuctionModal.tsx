@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Heading, Link, SelectOptionProps } from '@unique-nft/ui-kit';
-import { Text, useNotifications, Select } from 'components/UI';
+import { Heading, Link, SelectOptionProps } from '@unique-nft/ui-kit';
+import { Text, useNotifications, Select, Button } from 'components/UI';
 import styled from 'styled-components';
 import { BN } from '@polkadot/util';
 import { TPlaceABid } from './types';

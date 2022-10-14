@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import { Button, Heading, Link } from '@unique-nft/ui-kit';
-import { Text, useNotifications } from 'components/UI';
+import { Heading, Link } from '@unique-nft/ui-kit';
+import { Text, useNotifications, Button } from 'components/UI';
 import styled from 'styled-components';
 
 import DefaultMarketStages from '../Modals/StagesModal';

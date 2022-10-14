@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useState } from 'react';
-import { Button, Heading, Modal, Text } from '@unique-nft/ui-kit';
+import { Heading, Modal } from '@unique-nft/ui-kit';
+import { Button, Text } from 'components/UI';
 import { KeyringPair } from '@polkadot/keyring/types';
 import styled from 'styled-components';
 
