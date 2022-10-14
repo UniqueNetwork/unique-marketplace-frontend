@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useState } from 'react';
-import { Button, Heading, Modal, Text } from '@unique-nft/ui-kit';
+import { Button, Heading, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { KeyringPair } from '@polkadot/keyring/types';
 
@@ -8,6 +8,7 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { PasswordInput } from '../PasswordInput/PasswordInput';
 import AccountCard from '../Account/Account';
 import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
+import { Modal } from 'components/UI';
 
 const testid = 'sign-modal';
 
@@ -41,7 +42,11 @@ export const SignModal: FC<TSignModalProps> = ({ account, isVisible, onFinish, o
 
   if (!account) return null;
 
-  return (<Modal isVisible={isVisible} isClosable={true} onClose={onClose}>
+  return (<Modal isVisible={isVisible}
+    isClosable={true}
+    onClose={onClose}
+    isGlobalBackdrop
+  >
     <Content>
       <Heading size='2'>{'Authorize transaction'}</Heading>
     </Content>

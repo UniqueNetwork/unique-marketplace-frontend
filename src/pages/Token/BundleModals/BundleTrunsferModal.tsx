@@ -1,10 +1,10 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
-import { Modal } from '@unique-nft/ui-kit';
 
 import { BundleModalType } from './types';
 import { UnnestModal } from './UnnestModal';
 import { TransferToBundleModal } from './TransferToBundleModal';
 import { INestingToken } from 'components/BundleTree/types';
+import { Modal } from 'components/UI';
 
 export type TBundleTrunsferModalProps = {
   token?: INestingToken
@@ -45,7 +45,11 @@ const BundleTrunsferModal = ({ token, onClose, onFinish, bundleModalType, testid
   if (!ModalBodyComponent || !token || !parent) return null;
 
   return (
-    <Modal isVisible={isVisible} isClosable={isClosable} onClose={onClose}>
+    <Modal isVisible={isVisible}
+      isClosable={isClosable}
+      onClose={onClose}
+      isGlobalBackdrop
+    >
       <ModalBodyComponent
         setIsClosable={setIsClosable}
         onFinish={onFinish}

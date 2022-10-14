@@ -62,10 +62,6 @@ const TokenPage = () => {
     })();
   }, [fetchToken, isFetchingOffer, offer, token, collectionId]);
 
-  useEffect(() => {
-    setMarketType(MarketType.default);
-  }, [selectedAccount]);
-
   const onClose = useCallback(() => {
     setMarketType(MarketType.default);
   }, []);

@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useState } from 'react';
-import { Button, Heading, Modal, Text } from '@unique-nft/ui-kit';
+import { Button, Heading, Text } from '@unique-nft/ui-kit';
 import { KeyringPair } from '@polkadot/keyring/types';
 import styled from 'styled-components';
 
@@ -10,6 +10,7 @@ import { useApi } from '../../../hooks/useApi';
 import keyring from '@polkadot/ui-keyring';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 import { Upload } from 'components/UI/Upload/Upload';
+import { Modal } from 'components/UI';
 
 export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish, testid }) => {
   const { uniqueSdk } = useApi();

@@ -1,12 +1,13 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
-import { Heading, Modal } from '@unique-nft/ui-kit';
+import { Heading } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
 import { TAccountModalProps, CreateAccountModalStages, TAccountProperties, TCreateAccountBodyModalProps } from './types';
-import { useAccounts } from '../../../hooks/useAccounts';
+import { useAccounts } from 'hooks/useAccounts';
 import { FinalModal } from './Final';
 import { AskCredentialsModal } from './AskCredentials';
 import { AskSeedPhraseModal } from './AskSeedPhrase';
+import { Modal } from 'components/UI';
 
 export const derivePath = '';
 
