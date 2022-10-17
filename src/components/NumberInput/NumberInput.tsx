@@ -1,10 +1,12 @@
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useState } from 'react';
 import { InputText } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { IconButton } from '../IconButton/IconButton';
+import { formatKusamaBalance } from '../../utils/textUtils';
+import BN from 'bn.js';
 
 interface AmountInputProps {
-  value: string | undefined
+  value: string | undefined | BN
   onChange(value: string): void
   placeholder?: string
   decimals?: number
@@ -14,14 +16,25 @@ interface AmountInputProps {
 }
 
 export const NumberInput: FC<AmountInputProps> = ({ value, onChange, placeholder, decimals = 6, label, className, testid = '' }) => {
+  const getNormalizedValue = useCallback((_value) => {
+    if (typeof _value === 'object') return formatKusamaBalance(_value.toString(), { decimals }).replaceAll(' ', '');
+    return _value || '';
+  }, [decimals, formatKusamaBalance]);
+
+  const [normalizedValue, setNormalizedValue] = useState<string>(getNormalizedValue(value));
+
   const onChangeInput = useCallback((_value: string) => {
-    if (_value === '') onChange(_value);
+    if (_value === '') {
+      onChange(_value);
+      setNormalizedValue(_value);
+    }
     // regExp to check value according to valid number format
     const regExp = new RegExp(`^([1-9]\\d{0,4}|0)(\\.\\d{0,${decimals}})?$`);
     // check value is correct
     if (_value.length > 1 && _value.startsWith('0') && !_value.startsWith('0.')) _value = _value.replace('0', '');
     if (regExp.test(_value.trim())) {
       onChange(_value.trim());
+      setNormalizedValue(_value.trim());
     }
   }, [onChange, decimals]);
 
@@ -33,11 +46,11 @@ export const NumberInput: FC<AmountInputProps> = ({ value, onChange, placeholder
     <InputText
       placeholder={placeholder}
       onChange={onChangeInput}
-      value={value}
+      value={normalizedValue}
       label={label}
       testid={`${testid}`}
     />
-    {value &&
+    {normalizedValue &&
       <ClearButton
         name={'circle-close'}
         size={16}

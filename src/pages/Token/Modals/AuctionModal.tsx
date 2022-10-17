@@ -84,33 +84,31 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
     return new BN(Number(leadingBid) + Number(offer?.auction?.priceStep || '0'));
   }, [offer?.auction, leadingBid]);
 
-  const [bidAmount, setBidAmount] = useState<string>(formatKusamaBalance(minimalBid.toString(), { decimals }).replaceAll(' ', ''));
+  const [bidAmount, setBidAmount] = useState<BN>(minimalBid);
 
   const isEnoughBalance = useMemo(() => {
     if (!selectedAccount?.balance?.KSM || selectedAccount?.balance?.KSM.isZero()) return false;
-    const bnAmount = new BN(fromStringToBnString(bidAmount, api?.market?.kusamaDecimals));
-    return selectedAccount?.balance?.KSM.gte(bnAmount.sub(new BN(lastBidFromThisAccount || 0)));
+    return selectedAccount?.balance?.KSM.gte(bidAmount.sub(new BN(lastBidFromThisAccount || 0)));
   }, [selectedAccount?.balance?.KSM, bidAmount, api?.market?.kusamaDecimals, lastBidFromThisAccount]);
 
   const onBidAmountChange = useCallback((value: string) => {
-    setBidAmount(value);
+    setBidAmount(new BN(fromStringToBnString(value, api?.market?.kusamaDecimals)));
     if (!settings) return;
     getKusamaFee(settings.auction.address, new BN(fromStringToBnString(value, api?.market?.kusamaDecimals)));
-  }, [setBidAmount]);
+  }, [setBidAmount, api?.market?.kusamaDecimals]);
 
   const isAmountValid = useMemo(() => {
-    if (!bidAmount || bidAmount === '0') return false;
-    return new BN(fromStringToBnString(bidAmount, api?.market?.kusamaDecimals)).gte(minimalBid);
+    if (!bidAmount || bidAmount.isZero()) return false;
+    return bidAmount.gte(minimalBid);
   }, [bidAmount, minimalBid, api?.market?.kusamaDecimals]);
 
   const onConfirmPlaceABidClick = useCallback(
     () => {
       if (!isAmountValid || !isEnoughBalance) return;
-      const bnAmount = new BN(fromStringToBnString(bidAmount, api?.market?.kusamaDecimals));
 
       onConfirmPlaceABid({
         accountAddress: selectedAccount?.address || '',
-        amount: formatKusamaBalance(Number(bnAmount.toString()) - Number(lastBidFromThisAccount))
+        amount: formatKusamaBalance(Number(bidAmount.toString()) - Number(lastBidFromThisAccount))
       });
     },
     [onConfirmPlaceABid, bidAmount, isEnoughBalance, isAmountValid, chain, api?.market?.kusamaDecimals, lastBidFromThisAccount]
@@ -137,8 +135,9 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
         />
         <InputStyled
           onChange={onBidAmountChange}
-          value={bidAmount.toString()}
+          value={bidAmount}
           testid={`${testid}-amount`}
+          decimals={decimals}
         />
       </InputWrapper>
       <Text size={'s'} color={'grey-500'} testid={`${testid}-minimum-bid-text`}>
