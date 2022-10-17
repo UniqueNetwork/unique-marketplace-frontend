@@ -46,7 +46,7 @@ const AttributeCountsFilter: FC<AttributeCountsFilterProps> = ({ attributeCounts
               label={attributeCount.numberOfAttributes.toString()}
               size={'m'}
               onChange={onAttributeCountSelect(attributeCount.numberOfAttributes)}
-              testid={`${testid}-checkbox-${attributeCount.numberOfAttributes}`}
+              testid={`${testid}-checkbox`}
             />
             <Text
               testid={`${testid}-amount-${attributeCount.amount}`}
