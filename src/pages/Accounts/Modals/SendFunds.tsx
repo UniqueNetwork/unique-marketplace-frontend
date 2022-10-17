@@ -138,9 +138,14 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     return amountBN.gt(sender?.balance?.KSM || new BN(0));
   }, [amount, sender?.balance?.KSM]);
 
+  const isAmountPlusFeeGreaterThanBalance = useMemo(() => {
+    const amountBN = new BN(fromStringToBnString(amount));
+    return amountBN.add(new BN(fromStringToBnString(kusamaFee))).gt(sender?.balance?.KSM || new BN(0));
+  }, [amount, sender?.balance?.KSM, kusamaFee]);
+
   const isConfirmDisabled = useMemo(() => {
-    return !isValidRecipientAddress || !sender || !recipientAddress || Number(amount) <= 0 || isAmountGreaterThanBalance;
-  }, [amount, recipientAddress, sender, isAmountGreaterThanBalance, isValidRecipientAddress]);
+    return !isValidRecipientAddress || !sender || !recipientAddress || Number(amount) <= 0 || isAmountGreaterThanBalance || isAmountPlusFeeGreaterThanBalance;
+  }, [amount, recipientAddress, sender, isAmountGreaterThanBalance, isValidRecipientAddress, isAmountPlusFeeGreaterThanBalance]);
 
   const onSend = useCallback(() => {
     if (isConfirmDisabled) return;
@@ -252,6 +257,9 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     </AmountInputWrapper>
     {isAmountGreaterThanBalance && <LowBalanceWrapper>
       <Text size={'s'}>Your balance is too low</Text>
+    </LowBalanceWrapper>}
+    {(!isAmountGreaterThanBalance && isAmountPlusFeeGreaterThanBalance) && <LowBalanceWrapper>
+      <Text size={'s'}>Your balance is insufficient due to transaction fee</Text>
     </LowBalanceWrapper>}
     <KusamaFeeMessage
       isFeeLoading={isFeeLoading}
