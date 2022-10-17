@@ -162,7 +162,7 @@ export const Select = ({
           {multi &&
             selectedMulti.length > 0 &&
             selectedMulti.map((selectedOption, index) => (
-              <div className={'select-tag'} key={index}>
+              <div className={'select-tag'} key={index} data-testid={`${testid}-${index}`}>
                 {
                   selectedOption?.[
                     optionValue as keyof SelectOptionProps
@@ -200,6 +200,7 @@ export const Select = ({
               const selected = isSelected(option);
               return (
                 <div
+                  data-testid={`${testid}-${(option)[optionKey]}`}
                   className={classNames('dropdown-option', {
                     selected,
                     'with-icon': icon,
