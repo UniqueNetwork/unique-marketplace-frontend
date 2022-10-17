@@ -90,10 +90,11 @@ export function SelectInput<T = SelectInputOption>({ className, placeholder, opt
   }, []);
 
   const onKeyUp = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!selectedValue) return;
     if (event.key === 'Delete' || event.key === 'Backspace') {
       onClear();
     }
-  }, [onClear]);
+  }, [onClear, selectedValue]);
 
   return (<SelectInputWrapper onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
     <InputWrapper className={classNames({ className, 'left-icon': !!leftIcon, dropped: isDropdownVisible, disabled })} >
