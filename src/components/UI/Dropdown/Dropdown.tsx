@@ -185,6 +185,7 @@ const DropDownWrapper = styled.div`
       right: var(--prop-gap);
       top: 50%;
       margin-top: -4px;
+      cursor: pointer;
     }
     &.dropped .icon-triangle {
       transform: rotate(180deg);
