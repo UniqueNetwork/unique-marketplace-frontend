@@ -60,7 +60,7 @@ const getAccountsColumns = ({
           <IconWithHint align={{ appearance: 'horizontal', vertical: 'top', horizontal: 'right' }}>
             <span>Substrate account addresses (Kusama, Quartz, Polkadot, Unique, etc.) may be represented by a different address
               character sequence, but they can be converted between each other because they share the same public key. You
-              can see all transformations for any given address on <StyledLink href='https://quartz.subscan.io/' target='_blank' rel='noreferrer'>Subscan</StyledLink>.</span>
+              can see all transformations for any given address on <StyledLink href='https://polkadot.subscan.io/tools/ss58_transform' target='_blank' rel='noreferrer'>Subscan</StyledLink>.</span>
           </IconWithHint>
         }
       </>
