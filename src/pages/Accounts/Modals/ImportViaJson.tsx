@@ -41,6 +41,8 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
       setPasswordIncorrect(true);
       return;
     }
+    setPassword('');
+    setPair(null);
     onFinish();
 
     info(`Account ${pair.meta.name} successfully restored`);
@@ -53,6 +55,8 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
 
   const onClose = useCallback(() => {
     setPassword('');
+    setPair(null);
+    setPasswordIncorrect(false);
     onFinish();
   }, [onFinish]);
 
