@@ -6,7 +6,7 @@ import TokenCard from './TokenCard';
 import { INestedSectionView } from '../../TreeView/types';
 import { useCollection } from '../useCollection';
 import Skeleton from '../../Skeleton/Skeleton';
-import { Icon } from '../../IconTest/IconTest';
+import { Icon } from 'components/UI';
 import NoTrades from 'static/icons/no-trades.svg';
 
 export const NestedSection: FC<INestedSectionView<INestingToken>> = ({ selectedToken, onViewNodeDetails, onUnnestClick, onTransferClick }) => {

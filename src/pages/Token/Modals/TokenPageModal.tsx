@@ -1,6 +1,5 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
-import { Modal } from '@unique-nft/ui-kit';
 
 import { Offer } from 'api/restApi/offers/types';
 import { MarketType } from '../../../types/MarketTypes';
@@ -11,6 +10,7 @@ import { TransferModal } from './TransferModal';
 import { AuctionModal } from './AuctionModal';
 import { WithdrawBidStagesModal } from './WithdrawBidModal';
 import { CancelAuctionStagesModal } from './CancelAuctionModal';
+import { Modal } from 'components/UI';
 
 export type TTokenPageModalProps = {
   offer?: Offer
@@ -67,7 +67,11 @@ const TokenPageModal = ({ onClose, onFinish, marketType, offer, token, collectio
   if (!ModalBodyComponent) return null;
 
   return (
-    <Modal isVisible={isVisible} isClosable={isClosable} onClose={onClose}>
+    <Modal isVisible={isVisible}
+      isClosable={isClosable}
+      onClose={onClose}
+      isGlobalBackdrop
+    >
       <ModalBodyComponent
         setIsClosable={setIsClosable}
         token={token}

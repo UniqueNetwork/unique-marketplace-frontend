@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Pagination, SortQuery, TableRowProps } from '@unique-nft/ui-kit';
+import { SortQuery, TableRowProps } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
-
+import { Pagination } from 'components/UI';
 import { useTrades } from 'api/restApi/trades/trades';
 import { Table } from 'components/Table';
 import { PagePaper } from 'components/PagePaper/PagePaper';
@@ -171,7 +171,8 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
         columns={getTradesColumns({
           deviceSize,
           onShowTradesDetailsModal,
-          scanUrl: config.blockchains[currentChainId || '']?.scanUrl
+          scanUrl: config.blockchains[currentChainId || '']?.scanUrl,
+          testid: `${testid}-table`
         })}
         loading={(isLoadingAccounts || isFetching) && showSkeleton}
         emptyIconProps={searchValue ? { name: 'magnifier-found' } : { file: NoTradesIcon }}
@@ -185,9 +186,10 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
           onPageSizeChange={onPageSizeChange}
           withPerPageSelector
           withIcons
+          testid={`${testid}-pagination`}
         />
       </PaginationWrapper>}
-      <TokenTradesDetailsModal trade={selectedOfferDetails} onCancel={closeDetailsModal}/>
+      <TokenTradesDetailsModal trade={selectedOfferDetails} onCancel={closeDetailsModal} testid={`${testid}-details-modal`}/>
     </TradesPageWrapper>
   </PagePaper>);
 };

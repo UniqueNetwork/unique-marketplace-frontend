@@ -1,5 +1,6 @@
-import { Button, Dropdown, Icon, Toggle, Text } from '@unique-nft/ui-kit';
+import { Toggle } from '@unique-nft/ui-kit';
 import React from 'react';
+import { Icon, Dropdown, Button, Text } from 'components/UI';
 import { AccountsManagerProps } from '../AccountsManager';
 import { AccountCard } from './AccountCard';
 import styled from 'styled-components';

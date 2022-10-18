@@ -1,5 +1,6 @@
 import React, { FC, useEffect } from 'react';
-import { Link, useNotifications } from '@unique-nft/ui-kit';
+import { Link } from '@unique-nft/ui-kit';
+import { useNotifications } from 'components/UI';
 
 import { usePurchaseFixStages } from '../../../hooks/marketplaceStages';
 import DefaultMarketStages from './StagesModal';

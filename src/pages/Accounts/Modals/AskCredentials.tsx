@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import { TCreateAccountBodyModalProps } from './types';
-import { Button, Text } from '@unique-nft/ui-kit';
+import { Button, Text } from 'components/UI';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import styled from 'styled-components';
 import { PasswordInput } from '../../../components/PasswordInput/PasswordInput';

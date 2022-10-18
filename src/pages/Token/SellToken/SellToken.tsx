@@ -1,6 +1,6 @@
 import React, { FC, useMemo } from 'react';
 import styled from 'styled-components';
-import { Button, Text } from '@unique-nft/ui-kit';
+import { Button, Text } from 'components/UI';
 
 import { Grey300 } from 'styles/colors';
 import { Offer } from 'api/restApi/offers/types';

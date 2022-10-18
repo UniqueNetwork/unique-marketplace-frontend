@@ -1,6 +1,6 @@
 import React, { FC, ReactNode, useCallback, useState } from 'react';
 import styled from 'styled-components';
-import { Button, Text } from '@unique-nft/ui-kit';
+import { Button, Text } from 'components/UI';
 import { Secondary400 } from '../../styles/colors';
 
 interface AccordionProps {

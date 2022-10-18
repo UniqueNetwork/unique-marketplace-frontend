@@ -1,4 +1,5 @@
-import { Button, Heading, Tabs, Select, Link, useNotifications } from '@unique-nft/ui-kit';
+import { Heading, Link } from '@unique-nft/ui-kit';
+import { Tabs, Select, useNotifications, Button } from 'components/UI';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
@@ -329,7 +330,7 @@ const SellModalStyled = styled.div`
     margin-left: 24px;
 
     @media (max-width: 568px) {
-      margin-left: 0px;
+      margin-left: 0;
     }
   }
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Tabs } from '@unique-nft/ui-kit';
+import { Tabs } from 'components/UI';
 import { TokensTradesPage } from './TokensTrades';
 import { useAccounts } from '../../hooks/useAccounts';
 
