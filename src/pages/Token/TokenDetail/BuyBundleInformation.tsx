@@ -1,7 +1,8 @@
 import React from 'react';
-import { Icon, Text } from '@unique-nft/ui-kit';
+import { Text } from '@unique-nft/ui-kit';
 import { Primary500 } from 'styles/colors';
 import styled from 'styled-components';
+import { Icon } from 'components/UI/Icon/Icon';
 
 function BuyBundleInformation({ testid }: { testid?: string }) {
   return (

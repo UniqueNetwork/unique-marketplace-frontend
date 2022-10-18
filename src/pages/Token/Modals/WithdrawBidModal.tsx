@@ -1,5 +1,5 @@
 import React, { FC, useEffect } from 'react';
-import { useNotifications } from '@unique-nft/ui-kit';
+import { useNotifications } from 'components/UI';
 import { useWithdrawBidStages } from '../../../hooks/marketplaceStages';
 import DefaultMarketStages from './StagesModal';
 import { TTokenPageModalBodyProps } from './TokenPageModal';

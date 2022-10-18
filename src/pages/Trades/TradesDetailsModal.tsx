@@ -1,8 +1,9 @@
 import React, { FC, useEffect, useState } from 'react';
-import { Heading, Icon, Modal, TableRowProps, Text } from '@unique-nft/ui-kit';
+import { Heading, TableRowProps, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
+import { Icon } from 'components/UI/Icon/Icon';
 import { TokenComponent } from './TokenComponent/TokenComponent';
-import { AdditionalDark, BlueGrey600 } from 'styles/colors';
+import { AdditionalDark, BlueGrey600, Grey500 } from 'styles/colors';
 import { timestampTableFormat } from 'utils/timestampUtils';
 import { AddressComponent } from './AddressComponent/AddressComponent';
 import { Table } from 'components/Table';
@@ -10,37 +11,39 @@ import { useTradeDetails } from 'api/restApi/trades/tradeDetails';
 import { Bid, Trade } from 'api/restApi/trades/types';
 import { formatKusamaBalance } from 'utils/textUtils';
 import Winner from 'static/icons/winner.svg';
+import { Modal } from 'components/UI';
 
 export interface IConfirmModalProps {
   trade: Trade | null
   onCancel: () => void
+  testid: string
 }
 
 const tokenSymbol = 'KSM';
 
-const columns = [
+const getColumns = (testid: string) => [
   {
-    title: 'Bid',
+    title: (<Header data-testid={`${testid}-header-bid`}>Bid</Header>),
     width: '32%',
-    render: (value: string) => <Text color={AdditionalDark}>{`${formatKusamaBalance(value)} ${tokenSymbol}`}</Text>,
+    render: (value: string, bid: Bid) => <Text testid={`${testid}-bid-${bid.id}`} color={AdditionalDark}>{`${formatKusamaBalance(value)} ${tokenSymbol}`}</Text>,
     field: 'balance'
   },
   {
-    title: 'Time',
+    title: (<Header data-testid={`${testid}-header-time`}>Time</Header>),
     width: '32%',
     isSortable: true,
-    render: (time: number) => <TimeCell><Text color={BlueGrey600}>{timestampTableFormat(new Date(time).valueOf())}</Text></TimeCell>,
+    render: (time: number, bid: Bid) => <TimeCell><Text testid={`${testid}-time-${bid.id}`} color={BlueGrey600}>{timestampTableFormat(new Date(time).valueOf())}</Text></TimeCell>,
     field: 'updatedAt'
   },
   {
-    title: 'Bidder',
+    title: (<Header data-testid={`${testid}-header-bidder`}>Bidder</Header>),
     width: '36%',
-    render: (data: string, row: Bid) => <BidderCell><AddressComponent text={data} />{row.isWinner && <Icon size={32} file={Winner}/>}</BidderCell>,
+    render: (data: string, bid: Bid) => <BidderCell><AddressComponent text={data} testid={`${testid}-bidder-${bid.id}`} />{bid.isWinner && <Icon size={32} file={Winner}/>}</BidderCell>,
     field: 'bidderAddress'
   }
 ];
 
-const TokenTradesDetailsModal: FC<IConfirmModalProps> = ({ trade, onCancel }) => {
+const TokenTradesDetailsModal: FC<IConfirmModalProps> = ({ trade, onCancel, testid }) => {
   const [filteredBids, setFilteredBids] = useState<(Bid & TableRowProps)[]>();
   const { tradeDetails, fetch, isFetching } = useTradeDetails();
   useEffect(() => {
@@ -65,13 +68,13 @@ const TokenTradesDetailsModal: FC<IConfirmModalProps> = ({ trade, onCancel }) =>
 
   return (
     <Modal isVisible={!!trade?.offerId} onClose={onCancel} isClosable>
-      <Heading size='2'>Auction details</Heading>
+      <Heading size='2' testid={`${testid}-header`}>Auction details</Heading>
       <Content>
         <TokenComponentWrapper>
-          {trade && <TokenComponent {...trade} />}
+          {trade && <TokenComponent testid={testid} {...trade} />}
         </TokenComponentWrapper>
         <TableStyled
-          columns={columns}
+          columns={getColumns(`${testid}-table`)}
           data={filteredBids}
           loading={isFetching}
           idColumnName={'id'}
@@ -80,6 +83,10 @@ const TokenTradesDetailsModal: FC<IConfirmModalProps> = ({ trade, onCancel }) =>
     </Modal>
   );
 };
+
+const Header = styled.span`
+  color: ${Grey500};
+`;
 
 const Content = styled.div`
   .unique-table-data {

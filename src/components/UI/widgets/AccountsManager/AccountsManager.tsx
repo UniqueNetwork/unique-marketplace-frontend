@@ -1,7 +1,8 @@
 import React, { ReactNode, useEffect } from 'react';
 import { AccountsManagerDropdown } from './components';
 import styled from 'styled-components';
-import { Dropdown, Icon, Text, IconProps, SelectOptionProps } from '@unique-nft/ui-kit';
+import { Text, IconProps, SelectOptionProps } from '@unique-nft/ui-kit';
+import { Icon, Dropdown } from 'components/UI';
 import useCopyToClipboard from './hooks/useCopyToClipboard';
 
 export interface IAccount extends SelectOptionProps {

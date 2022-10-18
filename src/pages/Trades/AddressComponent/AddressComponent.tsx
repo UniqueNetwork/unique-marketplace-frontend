@@ -9,7 +9,7 @@ import { Avatar } from '../../../components/Avatar/Avatar';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import { useAccounts } from '../../../hooks/useAccounts';
 
-export const AddressComponent = ({ text }: { text: string }) => {
+export const AddressComponent = ({ text, testid }: { text: string, testid: string }) => {
   const { chainData, currentChainId } = useApi();
   const { selectedAccount } = useAccounts();
 
@@ -29,6 +29,7 @@ export const AddressComponent = ({ text }: { text: string }) => {
       rel={'noreferrer'}
       href={`${config.blockchains[currentChainId || '']?.scanUrl || ''}account/${formatAddress(text)}`}
       className={'unique-link primary'}
+      data-testid={`${testid}-address`}
     >{shortCut}</a>
   </LinkWrapper>;
 };

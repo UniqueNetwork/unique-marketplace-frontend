@@ -7,7 +7,9 @@ import { Avatar } from 'components/Avatar/Avatar';
 import { Trade } from 'api/restApi/trades/types';
 import { useApi } from 'hooks/useApi';
 
-export const TokenComponent = ({ collectionId, tokenId, tokenDescription }: Pick<Trade, 'collectionId' | 'tokenId' | 'tokenDescription'>) => {
+type TTokenComponentProps = Pick<Trade, 'collectionId' | 'tokenId' | 'tokenDescription'> & { testid: string }
+
+export const TokenComponent = ({ collectionId, tokenId, tokenDescription, testid }: TTokenComponentProps) => {
   const { currentChainId } = useApi();
   const tokenUrl = useMemo(() => generatePath('/:currentChainId/token/:collectionId/:tokenId', {
     currentChainId,
@@ -22,8 +24,9 @@ export const TokenComponent = ({ collectionId, tokenId, tokenDescription }: Pick
         video={tokenDescription.video}
         size={40}
         type={'square'}
+        testid={`${testid}-avatar`}
       />
-      <Text>{`${tokenDescription.prefix} #${tokenId}`}</Text>
+      <Text testid={`${testid}-T${tokenId}`}>{`${tokenDescription.prefix} #${tokenId}`}</Text>
     </TokenComponentWrapper>
   </Link>;
 };

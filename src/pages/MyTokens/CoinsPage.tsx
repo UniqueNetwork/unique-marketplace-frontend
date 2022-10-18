@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Button, Text } from '@unique-nft/ui-kit';
+import { Button, Text } from 'components/UI';
 
 import { formatKusamaBalance } from '../../utils/textUtils';
 import ChainLogo from '../../components/ChainLogo';

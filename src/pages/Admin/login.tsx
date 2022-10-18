@@ -1,5 +1,5 @@
 import React, { FC, useEffect } from 'react';
-import { Text, useNotifications } from '@unique-nft/ui-kit';
+import { Text, useNotifications } from 'components/UI';
 import styled from 'styled-components/macro';
 
 import { PagePaper } from '../../components/PagePaper/PagePaper';

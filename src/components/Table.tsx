@@ -1,6 +1,7 @@
-import React, { FC } from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import { Icon, IconProps, SortQuery, Table as UITable, TableColumnProps, TableRowProps } from '@unique-nft/ui-kit';
+import { IconProps, SortQuery, TableColumnProps, TableRowProps } from '@unique-nft/ui-kit';
+import { Table as UITable, Icon } from 'components/UI';
 
 import useDeviceSize, { DeviceSize } from '../hooks/useDeviceSize';
 import MobileTable from './MobileTable/MobileTable';

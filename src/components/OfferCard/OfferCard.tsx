@@ -1,8 +1,8 @@
 import React, { FC, useMemo } from 'react';
-import { Icon, Text } from '@unique-nft/ui-kit';
+import { Text } from '@unique-nft/ui-kit';
 import { generatePath, Link } from 'react-router-dom';
 import styled from 'styled-components';
-
+import { Icon } from 'components/UI/Icon/Icon';
 import { Offer } from 'api/restApi/offers/types';
 import { useAccounts } from 'hooks/useAccounts';
 import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
@@ -123,7 +123,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
           >{
             offer.auction.bids.length > 0 ? 'Last bid' : 'Minimum bid'
           }</Text>}
-          <StyledText color={'dark'} size={'xs'}>{`${timeDifference(new Date(offer.auction?.stopAt || '').getTime() / 1000)} left`}</StyledText>
+          <StyledText color={'dark'} size={'xs'} testid={`${testid}-auction-close-time`}>{`${timeDifference(new Date(offer.auction?.stopAt || '').getTime() / 1000)} left`}</StyledText>
         </AuctionInfoWrapper>}
       </Description>
     </TokensCardStyled>
