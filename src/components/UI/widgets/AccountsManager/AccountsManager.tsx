@@ -62,7 +62,7 @@ export const AccountsManager = (props: AccountsManagerProps) => {
   }, [copied]);
 
   return (
-    <Dropdown
+    <DropdownStyled
       dropdownRender={() => (
         <AccountsManagerDropdown {...props} isTouch={touchDevice} />
       )}
@@ -102,9 +102,15 @@ export const AccountsManager = (props: AccountsManagerProps) => {
           )}
         </div>
       </AccountsManagerWrapper>
-    </Dropdown>
+    </DropdownStyled>
   );
 };
+
+const DropdownStyled = styled(Dropdown)`
+  .dropdown-options {
+    top: calc(100% + 8px)
+  }
+`;
 
 const AccountsManagerWrapper = styled.div`
   border: 1px solid var(--color-blue-grey-200);
@@ -114,7 +120,10 @@ const AccountsManagerWrapper = styled.div`
   position: relative;
   padding: calc(var(--prop-gap) * 1.5 / 4) calc(var(--prop-gap) * 2)
   calc(var(--prop-gap) * 1.5 / 4) var(--prop-gap);
-
+  cursor: pointer;
+  &:hover {
+    border: 1px solid var(--color-blue-grey-400);
+  }
   .accounts-manager-selected-account {
     display: flex;
     flex-direction: column;
@@ -124,13 +133,15 @@ const AccountsManagerWrapper = styled.div`
     justify-content: center;
     .unique-text {
       white-space: nowrap;
+      line-height: 21px;
     }
     .accounts-manager-selected-account-name {
       display: flex;
       column-gap: calc(var(--prop-gap) / 4);
+      align-items: center;
       .address-copy {
         cursor: pointer;
-        
+        height: 16px;
       }
     }
   }
