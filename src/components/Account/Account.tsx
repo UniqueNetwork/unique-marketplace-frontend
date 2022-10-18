@@ -106,9 +106,15 @@ const CopyIconWrapper = styled.div`
     height: 24px;
     color: var(--color-grey-400);
     padding: 0;
-    cursor: copy;
+    cursor: pointer;
     svg {
       transform: translateX(3px);
+    }
+    
+    &:hover {
+      svg {
+        fill: var(--color-primary-500);
+      }
     }
   }
 `;
