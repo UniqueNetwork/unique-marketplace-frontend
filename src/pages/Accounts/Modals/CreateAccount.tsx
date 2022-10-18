@@ -1,12 +1,13 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
-import { Heading, Modal } from '@unique-nft/ui-kit';
+import { Heading } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
 import { TAccountModalProps, CreateAccountModalStages, TAccountProperties, TCreateAccountBodyModalProps } from './types';
-import { useAccounts } from '../../../hooks/useAccounts';
+import { useAccounts } from 'hooks/useAccounts';
 import { FinalModal } from './Final';
 import { AskCredentialsModal } from './AskCredentials';
 import { AskSeedPhraseModal } from './AskSeedPhrase';
+import { Modal, useNotifications } from 'components/UI';
 
 export const derivePath = '';
 
@@ -16,6 +17,7 @@ export const CreateAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish
   const [stage, setStage] = useState<CreateAccountModalStages>(CreateAccountModalStages.AskSeed);
   const [accountProperties, setAccountProperties] = useState<TAccountProperties>();
   const { addLocalAccount } = useAccounts();
+  const { info } = useNotifications();
 
   const ModalBodyComponent = useMemo<FC<TCreateAccountBodyModalProps> | null>(() => {
     switch (stage) {
@@ -36,6 +38,7 @@ export const CreateAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish
       addLocalAccount(accountProperties.seed, derivePath, accountProperties.name || '', accountProperties.password || '', defaultPairType);
       onFinish();
       setStage(CreateAccountModalStages.AskSeed);
+      info(`Account ${accountProperties.name} successfully created`);
       return;
     }
     setAccountProperties(accountProperties);

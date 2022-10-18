@@ -2,8 +2,8 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { BN } from '@polkadot/util';
-import { Button, INetwork, Text, useNotifications } from '@unique-nft/ui-kit';
-
+import { INetwork } from '@unique-nft/ui-kit';
+import { Text, useNotifications, Button } from 'components/UI';
 import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
 import { useAccounts } from 'hooks/useAccounts';
 import { Account } from 'account/AccountContext';
@@ -128,11 +128,11 @@ export const WalletManager: FC = () => {
         deposit={formattedAccountDeposit}
         depositDescription={
           <>
-            {formattedAccountDeposit && <Text color='grey-500' size='xs'>The total market deposit for participation in auctions and
+            {formattedAccountDeposit && <Text color='grey-500' weight={'light'} size='xs'>The total market deposit for participation in auctions and
               sponsorship. <br/> Use the “Manage accounts” section to withdraw.</Text>}
             {config.rampApiKey && <GetKsmButton
               title={'Get KSM'}
-              size={'middle'}
+              size={'small'}
               role={'outlined'}
               wide
               onClick={openModal}
@@ -154,8 +154,13 @@ export const WalletManager: FC = () => {
   );
 };
 
+const DescriptionText = styled(Text)`
+`;
+
 const GetKsmButton = styled(Button)`
   margin-top: 12px;
+  height: 32px;
+  font-size: 14px;
 `;
 
 const WalletManagerWrapper = styled.div`

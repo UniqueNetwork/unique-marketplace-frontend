@@ -1,8 +1,8 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
-import { Dropdown, Icon, Text } from '@unique-nft/ui-kit';
+import { Text } from '@unique-nft/ui-kit';
 import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
 import styled from 'styled-components/macro';
-
+import { Icon, Dropdown } from 'components/UI';
 import { CollectionData } from 'api/restApi/admin/types';
 import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
 import { useApi } from 'hooks/useApi';

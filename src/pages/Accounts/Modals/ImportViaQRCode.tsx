@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useState } from 'react';
-import { Button, Heading, Modal, Text } from '@unique-nft/ui-kit';
+import { Heading } from '@unique-nft/ui-kit';
+import { Button, Text, Modal, useNotifications } from 'components/UI';
 import keyring from '@polkadot/ui-keyring';
 import styled from 'styled-components';
 
@@ -15,6 +16,7 @@ export const ImportViaQRCodeAccountModal: FC<TAccountModalProps> = ({ isVisible,
   const [scanned, setScanned] = useState<ScannedResult>();
   const [password, setPassword] = useState<string>('');
   const { addAccountViaQR } = useAccounts();
+  const { info } = useNotifications();
 
   const onScan = useCallback((scanned: ScannedResult) => {
     setScanned(scanned);
@@ -37,6 +39,8 @@ export const ImportViaQRCodeAccountModal: FC<TAccountModalProps> = ({ isVisible,
       password
     });
     onFinish();
+
+    info(`Account ${name} successfully restored`);
   }, [scanned, password, onFinish]);
 
   return (<Modal isVisible={isVisible} isClosable={true} onClose={onFinish}>

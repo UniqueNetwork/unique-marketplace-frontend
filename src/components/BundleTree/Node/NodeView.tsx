@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { AdditionalDark, AdditionalLight, BlueGrey500, Coral100, Coral500, Grey300, Primary100, Primary200, Primary400, Primary500, Primary600, Secondary400 } from 'styles/colors';
+import { AdditionalDark, AdditionalLight, BlueGrey500, Coral100, Coral500, Grey300, Primary100, Primary200, Primary400, Primary500, Primary600, Secondary400, Secondary200 } from 'styles/colors';
 import Pin from 'static/icons/pin.svg';
 import { INodeView } from '../../TreeView/types';
 import { Picture } from '../../Picture';
@@ -10,8 +10,7 @@ import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';
 import MobileModalActions from './MobileModalActions';
 import Skeleton from '../../Skeleton/Skeleton';
 import { useCollection } from '../useCollection';
-import { Dropdown } from 'components/UI/Dropdown/Dropdown';
-import { Icon } from 'components/IconTest/IconTest';
+import { Icon, Dropdown } from 'components/UI';
 import { Tooltip } from '@unique-nft/ui-kit';
 
 const NodeView: FC<INodeView<INestingToken>> = ({
@@ -149,6 +148,13 @@ const NodeView: FC<INodeView<INestingToken>> = ({
               />
             </div>}
           </ActionButtons>}
+          {deviceSize < DeviceSize.md && !isCurrent &&
+            <Icon
+              size={32}
+              name={'meatball-menu'}
+              color={Secondary400}
+              ref={meatballIconMenu}
+            />}
           {isCurrent && <PinIcon className={'pin-icon'}>
             <Tooltip
               align={{ vertical: 'top', horizontal: 'middle', appearance: 'vertical' }}
@@ -231,7 +237,7 @@ const ActionButtons = styled.div`
   display: none;
   align-items: center;
   svg:hover {
-    fill: ${Primary500};
+    fill: ${Secondary200};
   }
 `;
 

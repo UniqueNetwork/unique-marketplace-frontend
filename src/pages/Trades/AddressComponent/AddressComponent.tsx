@@ -8,7 +8,7 @@ import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
 import { Avatar } from '../../../components/Avatar/Avatar';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 
-export const AddressComponent = ({ text }: { text: string }) => {
+export const AddressComponent = ({ text, testid }: { text: string, testid: string }) => {
   const { chainData, currentChainId } = useApi();
 
   const formatAddress = useCallback((address: string) => {
@@ -24,6 +24,7 @@ export const AddressComponent = ({ text }: { text: string }) => {
       rel={'noreferrer'}
       href={`${config.blockchains[currentChainId || '']?.scanUrl || ''}account/${formatAddress(text)}`}
       className={'unique-link primary'}
+      data-testid={`${testid}-address`}
     >{shortCut}</a>
   </LinkWrapper>;
 };

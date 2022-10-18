@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Icon, Link, useNotifications } from '@unique-nft/ui-kit';
+import { Link } from '@unique-nft/ui-kit';
 import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
-
+import { Icon, useNotifications } from 'components/UI';
 import { useApi } from 'hooks/useApi';
 import { MarketType } from 'types/MarketTypes';
 import { CommonTokenDetail } from './TokenDetail/CommonTokenDetail';
@@ -61,10 +61,6 @@ const TokenPage = () => {
       }
     })();
   }, [fetchToken, isFetchingOffer, offer, token, collectionId]);
-
-  useEffect(() => {
-    setMarketType(MarketType.default);
-  }, [selectedAccount]);
 
   const onClose = useCallback(() => {
     setMarketType(MarketType.default);

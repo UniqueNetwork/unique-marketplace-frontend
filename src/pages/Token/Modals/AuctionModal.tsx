@@ -1,23 +1,23 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Heading, Link, Select, Text, SelectOptionProps, useNotifications } from '@unique-nft/ui-kit';
+import { Heading, Link, SelectOptionProps } from '@unique-nft/ui-kit';
+import { Text, useNotifications, Select, Button } from 'components/UI';
 import styled from 'styled-components';
 import { BN } from '@polkadot/util';
-
 import { TPlaceABid } from './types';
 import DefaultMarketStages from './StagesModal';
-import { AdditionalWarning100, Coral100 } from '../../../styles/colors';
+import { AdditionalWarning100, Coral100 } from 'styles/colors';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
-import { useAuctionBidStages } from '../../../hooks/marketplaceStages';
-import { useAccounts } from '../../../hooks/useAccounts';
-import { useFee } from '../../../hooks/useFee';
-import { useApi } from '../../../hooks/useApi';
-import { formatKusamaBalance } from '../../../utils/textUtils';
-import { fromStringToBnString } from '../../../utils/bigNum';
-import { NumberInput } from '../../../components/NumberInput/NumberInput';
-import { StageStatus } from '../../../types/StagesTypes';
-import { Offer } from '../../../api/restApi/offers/types';
-import { useAuction } from '../../../api/restApi/auction/auction';
-import { TCalculatedBid } from '../../../api/restApi/auction/types';
+import { useAuctionBidStages } from 'hooks/marketplaceStages';
+import { useAccounts } from 'hooks/useAccounts';
+import { useFee } from 'hooks/useFee';
+import { useApi } from 'hooks/useApi';
+import { formatKusamaBalance } from 'utils/textUtils';
+import { fromStringToBnString } from 'utils/bigNum';
+import { NumberInput } from 'components/NumberInput/NumberInput';
+import { StageStatus } from 'types/StagesTypes';
+import { Offer } from 'api/restApi/offers/types';
+import { useAuction } from 'api/restApi/auction/auction';
+import { TCalculatedBid } from 'api/restApi/auction/types';
 
 export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosable, onFinish, testid }) => {
   const [status, setStatus] = useState<'ask' | 'place-bid-stage'>('ask'); // TODO: naming

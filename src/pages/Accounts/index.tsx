@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Dropdown, Icon, TableColumnProps, TableRowProps, Text } from '@unique-nft/ui-kit';
+import { TableColumnProps, TableRowProps } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { BN } from '@polkadot/util';
-
+import { Icon, Dropdown, Text, Button } from 'components/UI';
 import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
 import { TWithdrawBid } from 'api/restApi/auction/types';
 import { Account } from 'account/AccountContext';
@@ -60,7 +60,7 @@ const getAccountsColumns = ({
           <IconWithHint align={{ appearance: 'horizontal', vertical: 'top', horizontal: 'right' }}>
             <span>Substrate account addresses (Kusama, Quartz, Polkadot, Unique, etc.) may be represented by a different address
               character sequence, but they can be converted between each other because they share the same public key. You
-              can see all transformations for any given address on <StyledLink href='https://quartz.subscan.io/' target='_blank' rel='noreferrer'>Subscan</StyledLink>.</span>
+              can see all transformations for any given address on <StyledLink href='https://polkadot.subscan.io/tools/ss58_transform' target='_blank' rel='noreferrer'>Subscan</StyledLink>.</span>
           </IconWithHint>
         }
       </>

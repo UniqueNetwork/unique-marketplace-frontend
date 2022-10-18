@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useState } from 'react';
-import { Button, Heading, Text } from '@unique-nft/ui-kit';
+import { Heading } from '@unique-nft/ui-kit';
+import { Button, Text } from 'components/UI';
 import styled from 'styled-components/macro';
 
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
