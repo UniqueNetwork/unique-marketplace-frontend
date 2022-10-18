@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { IconProps, SortQuery, TableColumnProps, TableRowProps } from '@unique-nft/ui-kit';
-import { Table as UITable } from 'components/UI';
+import { Table as UITable, Icon } from 'components/UI';
 
 import useDeviceSize, { DeviceSize } from '../hooks/useDeviceSize';
 import MobileTable from './MobileTable/MobileTable';
@@ -39,6 +39,7 @@ export function Table<T extends TableRowProps = TableRowProps>({
             : columns}
           data={loading ? Array.from({ length: 5 }).map(getSkeletonItem) : data || []}
           onSort={onSort}
+          noDataIcon={<Icon {...emptyIconProps} size={80} />}
         />
       </>)}
       {deviceSize <= DeviceSize.sm && (
