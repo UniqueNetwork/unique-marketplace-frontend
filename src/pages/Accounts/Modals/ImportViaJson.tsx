@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useState } from 'react';
 import { Heading } from '@unique-nft/ui-kit';
-import { Button, Text, Modal } from 'components/UI';
+import { Button, Text, Modal, useNotifications } from 'components/UI';
 import { KeyringPair } from '@polkadot/keyring/types';
 import styled from 'styled-components';
 
@@ -17,6 +17,7 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
   const [pair, setPair] = useState<KeyringPair | null>(null);
   const [password, setPassword] = useState<string>('');
   const [passwordIncorrect, setPasswordIncorrect] = useState<boolean>(false);
+  const { info } = useNotifications();
 
   const onUploadChange = useCallback((url: string, file: Blob) => {
     const reader = new FileReader();
@@ -41,6 +42,8 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
       return;
     }
     onFinish();
+
+    info(`Account ${pair.meta.name} successfully restored`);
   }, [pair, password, onFinish]);
 
   const onPasswordChange = useCallback((value: string) => {
