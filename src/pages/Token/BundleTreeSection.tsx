@@ -166,6 +166,8 @@ const BundlePagePaper = styled(PagePaper)`
     width: 536px;
     @media (max-width: 768px) {
       width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
     }
   }
   @media (max-width: 567px) {

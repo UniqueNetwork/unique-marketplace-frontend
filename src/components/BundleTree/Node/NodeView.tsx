@@ -148,6 +148,13 @@ const NodeView: FC<INodeView<INestingToken>> = ({
               />
             </div>}
           </ActionButtons>}
+          {deviceSize < DeviceSize.md && !isCurrent &&
+            <Icon
+              size={32}
+              name={'meatball-menu'}
+              color={Secondary400}
+              ref={meatballIconMenu}
+            />}
           {isCurrent && <PinIcon className={'pin-icon'}>
             <Tooltip
               align={{ vertical: 'top', horizontal: 'middle', appearance: 'vertical' }}
