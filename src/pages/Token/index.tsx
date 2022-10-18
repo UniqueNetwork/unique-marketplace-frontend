@@ -46,7 +46,7 @@ const TokenPage = () => {
       if (token) setToken(token);
       if (collection) setCollection(collection);
     } catch (e) {
-      console.error('error while fetching token or collection from RPC');
+      console.error('error while fetching token or collection from RPC', e);
     }
     setIsFetchingToken(false);
   }, [api?.nft, currentChainId, collectionId, id]);
