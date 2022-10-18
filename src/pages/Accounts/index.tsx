@@ -41,6 +41,7 @@ type AccountsColumnsProps = {
   onShowDeleteLocalAccountModal(address: string): () => void
   onShowGetKsmModal: () => void
   scanUrl: string
+  subscanUrl: string
 };
 
 const getAccountsColumns = ({
@@ -50,7 +51,8 @@ const getAccountsColumns = ({
     isSmallDevice,
     onShowDeleteLocalAccountModal,
     onShowGetKsmModal,
-    scanUrl
+    scanUrl,
+    subscanUrl
   }: AccountsColumnsProps): TableColumnProps[] => [
   {
     title: (
@@ -101,6 +103,17 @@ const getAccountsColumns = ({
       if (accountInfo.deposit && !isSmallDevice) return <></>;
       return (
         <LinksWrapper>
+          {subscanUrl && <LinkStyled
+            target={'_blank'}
+            rel={'noreferrer'}
+            href={`${subscanUrl}account/${formatAddress(accountInfo.address)}`}
+            data-testid={`${testid}-${accountInfo.address}-subscan-link`}
+          >
+            <TextStyled>Subscan</TextStyled>
+            <IconWrapper>
+              <Icon name={'arrow-up-right'} size={16} color={Primary500} />
+            </IconWrapper>
+          </LinkStyled>}
           <LinkStyled
             target={'_blank'}
             rel={'noreferrer'}
@@ -358,7 +371,8 @@ export const AccountsPage = () => {
             onShowWithdrawDepositModal,
             onShowDeleteLocalAccountModal,
             onShowGetKsmModal,
-            scanUrl: currentChainId ? config.blockchains[currentChainId]?.scanUrl : ''
+            scanUrl: currentChainId ? config.blockchains[currentChainId]?.scanUrl : '',
+            subscanUrl: currentChainId ? config.blockchains[currentChainId]?.subscanUrl : ''
           })}
           data={filteredAccounts}
           loading={isLoading || isLoadingDeposits}
@@ -518,6 +532,8 @@ const AccountCellWrapper = styled.div`
 
 const LinksWrapper = styled.div`
   padding: 0 !important;
+  display: flex;
+  gap: var(--gap);
 `;
 
 const LinkStyled = styled.a`
