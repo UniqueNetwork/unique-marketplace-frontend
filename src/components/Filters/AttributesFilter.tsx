@@ -72,6 +72,7 @@ const CollectionFilterWrapper = styled.div`
   min-height: 50px;
   max-height: 400px;
   overflow-y: auto;
+  padding-right: var(--gap);
   .unique-checkbox-wrapper label {
     max-width: 230px;
     text-overflow: ellipsis;

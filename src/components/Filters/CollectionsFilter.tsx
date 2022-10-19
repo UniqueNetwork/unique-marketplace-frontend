@@ -92,6 +92,7 @@ const CollectionFilterWrapper = styled.div`
   min-height: 50px;
   max-height: 400px;
   overflow-y: auto;
+  padding-right: var(--gap);
   .unique-checkbox-wrapper label {
     max-width: 230px;
     text-overflow: ellipsis;
@@ -103,6 +104,10 @@ const CheckboxWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 4);
   align-items: flex-start;
+  .unique-text {
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
 `;
 
 export default CollectionsFilter;
