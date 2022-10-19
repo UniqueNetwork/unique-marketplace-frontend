@@ -31,6 +31,7 @@ export const AccountsManagerDropdown = ({
             Account
           </Text>
           <Dropdown
+            value={selectedAccount?.address}
             optionKey='address'
             options={accounts}
             optionRender={(option) => (
@@ -69,12 +70,12 @@ export const AccountsManagerDropdown = ({
           </div>
         </div>
         <div className='accounts-manager-wallet'>
-          <Text color='grey-500' size='s'>
+          <CaptionText color='grey-500' size='s'>
             Balance
-          </Text>
+          </CaptionText>
           <div className='wallet-content' data-testid='wallet-content'>
-            <Text size='l'>{`${balance} ${symbol}`}</Text>
-            {deposit && <Text size='s'>{`${deposit} ${symbol}`}</Text>}
+            <BalanceText size='l'>{`${balance} ${symbol}`}</BalanceText>
+            {deposit && <DepositText size='s' weight={'light'}>{`${deposit} ${symbol}`}</DepositText>}
             {depositDescription}
           </div>
         </div>
@@ -87,9 +88,9 @@ export const AccountsManagerDropdown = ({
         />
             )}
         <div className='accounts-manager-networks'>
-          <Text color='grey-500' size='s'>
+          <CaptionText color='grey-500' size='s'>
             Active network
-          </Text>
+          </CaptionText>
           {(!networks || networks.length === 0) && activeNetwork && (
             <div className='network'>
               <Icon {...activeNetwork.icon} size={16} />
@@ -119,6 +120,18 @@ export const AccountsManagerDropdown = ({
       </AccountsManagerDropdownWrapper>
     );
 };
+
+const CaptionText = styled(Text)`
+  line-height: 20px;
+`;
+
+const BalanceText = styled(Text)`
+  line-height: 28px;
+`;
+
+const DepositText = styled(Text)`
+  line-height: 20px;
+`;
 
 const AccountsManagerDropdownWrapper = styled.div`
     display: flex;
@@ -152,6 +165,16 @@ const AccountsManagerDropdownWrapper = styled.div`
     .dropdown-options {
       max-height: 288px;
       overflow-y: auto;
+      .dropdown-option {
+        padding: 4px 8px;
+        &:hover .account-card-content >.unique-text {
+          color: var(--color-primary-500);
+        }  
+        .address-copy {
+          line-height: 16px;
+        }
+      }
+      
     }
     .icon.icon-copy:hover {
       fill: var(--color-primary-500);
@@ -159,17 +182,20 @@ const AccountsManagerDropdownWrapper = styled.div`
   }
 
   .wallet-link {
-    margin-top: calc(var(--gap) / 2);
+    margin-top: calc(var(--gap));
     a {
       font-size: 16px;
       font-weight: 500;
       color: var(--color-primary-500);
+      &:hover {
+        text-decoration: underline;
+      }
     }
   }
   .accounts-manager-wallet {
     display: flex;
     flex-direction: column;
-    row-gap: calc(var(--prop-gap) / 2);
+    row-gap: calc(var(--prop-gap) / 4);
     width: 100%;
     .wallet-content {
       display: flex;
