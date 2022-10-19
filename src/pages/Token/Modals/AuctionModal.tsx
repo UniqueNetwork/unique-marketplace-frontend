@@ -145,8 +145,8 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
         {`Minimum bid ${formatKusamaBalance(minimalBid.toString(), { decimals })} ${chain || ''}`}
       </Text>
       <CautionTextWrapper>
-        {!isEnoughBalance && <WarningStyled color={'coral-500'} testid={`${testid}-low-balance-warning`}>Your balance is too low to place a bid</WarningStyled>}
-        {isEnoughBalance && <TextStyled
+        {(!isEnoughBalance || !isAmountValid) && <WarningStyled color={'coral-500'} testid={`${testid}-low-balance-warning`}>Check the bid. You may haven’t enough funds or the entered value is less than the minimum or previous bid.</WarningStyled>}
+        {(isEnoughBalance && isAmountValid) && <TextStyled
           color='additional-warning-500'
           size='s'
           testid={`${testid}-fee-warning`}
