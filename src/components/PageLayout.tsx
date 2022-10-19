@@ -51,7 +51,7 @@ export const PageLayout: FC = () => {
         footer={<div dangerouslySetInnerHTML={{ __html: footer }} />}
         header={
           <Header
-            activeItem={(layoutProps?.heading as TMenuItems) || 'Market'}
+            activeItem={layoutProps?.heading as TMenuItems}
           />
         }
       >
