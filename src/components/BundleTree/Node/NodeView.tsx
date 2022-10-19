@@ -105,7 +105,7 @@ const NodeView: FC<INodeView<INestingToken>> = ({
             onClick={arrowClicked}
             isOpened={isOpened}
           >
-            {!!children && <Icon size={16} name={'triangle'} color={Primary500} />}
+            {!!children && <Icon size={16} name={'triangle-large'} color={Primary500} />}
           </Arrow>
           <Picture alt={`T-${data.tokenId} C-${data.collectionId}`} src={(typeof data.image === 'string' ? data.image : data.image?.fullUrl) || undefined}/>
           <TokenTitle token={data} isCollectionLoading={isCollectionLoading} prefix={collection?.tokenPrefix || ''}/>
@@ -245,7 +245,7 @@ const Arrow = styled.div<{ isOpened: boolean | undefined, isFirst: boolean | und
   -ms-user-select: none;
   user-select: none;
   transition: 0.2s;
-  transform: ${({ isOpened }) => (!isOpened && 'rotate(180deg)')};
+  transform: ${({ isOpened }) => (isOpened && 'rotate(180deg)')};
   margin-left: ${({ isFirst, level }) => (isFirst ? 24 : 24 + 16 * level)}px;
   width: 16px;
 `;
