@@ -12,7 +12,7 @@ import { StageStatus } from '../../../types/StagesTypes';
 import { TextInput } from 'components/TextInput/TextInput';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 
-export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosable, onFinish, testid }) => {
+export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosable, onFinish, testid, collection }) => {
   const { selectedAccount } = useAccounts();
   const [status, setStatus] = useState<'ask' | 'transfer-stage'>('ask'); // TODO: naming
   const [recipient, setRecipient] = useState<string>('');
@@ -34,6 +34,7 @@ export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosab
       setIsClosable={setIsClosable}
       sender={selectedAccount.address}
       testid={testid}
+      collection={collection}
     />);
   }
   return null;
