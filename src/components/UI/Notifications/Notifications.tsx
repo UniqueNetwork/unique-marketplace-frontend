@@ -173,6 +173,9 @@ const NotificationStyled = styled.div`
     font-weight: 500;
     animation: slide-open-right 0.5s cubic-bezier(0.190, 1.000, 0.220, 1.000) both;
     overflow-y: hidden;
+    @media (max-width: 1024px) {
+      max-width: calc(100vw - 32px);
+    }
     svg {
       min-width: 32px;
     }
