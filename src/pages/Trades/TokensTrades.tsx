@@ -159,7 +159,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
   return (<PagePaper>
     <TradesPageWrapper>
       <StyledSearchField
-        placeholder='NFT / collection'
+        placeholder='NFT / collection / attribute'
         searchValue={searchValue}
         testid={`${testid}-search-field`}
         onSearch={debouncedSearch()}

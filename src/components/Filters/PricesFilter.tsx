@@ -83,6 +83,7 @@ const PricesFilter: FC<PricesFilterProps> = ({ value, onChange, testid }) => {
           title={'Apply'}
           onClick={onApply}
           testid={`${testid}-apply-button`}
+          disabled={!minPriceValue && !maxPriceValue}
         />
       </PriceFilterWrapper>
     </Accordion>

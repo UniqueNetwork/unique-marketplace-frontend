@@ -190,7 +190,7 @@ export const MarketPage = () => {
         <SearchAndSortingWrapper>
           <SearchField
             searchValue={searchValue}
-            placeholder='Collection / token'
+            placeholder='Collection / token / attribute'
             onSearch={onSearch}
             testid={`${testid}-search-field`}
           />
