@@ -22,11 +22,7 @@ export const AccountCard = ({
       ? `${address.slice(0, 5)}...${address.slice(-5)}`
       : address;
 
-  const [copied, copy] = useCopyToClipboard();
-
-  useEffect(() => {
-    copied && onCopyAddressClick?.(copied);
-  }, [copied]);
+  const [_, copy] = useCopyToClipboard();
 
   return (
     <AccountCardWrapper>
@@ -46,8 +42,10 @@ export const AccountCard = ({
           <div
             className='address-copy'
             onClick={(event) => {
+              if (!address) return;
               event.stopPropagation();
-              copy(address!);
+              copy(address);
+              onCopyAddressClick?.(address);
             }}
             data-testid={`address-copy-${address}`}
           >

@@ -97,18 +97,14 @@ export const Dropdown = ({
       >
         {iconLeft &&
           (isValidElement(iconLeft)
-  ? (
-            iconRight
-          )
+  ? (iconLeft)
   : (
     <Icon {...(iconLeft as IconProps)} />
           ))}
         {children}
         {iconRight &&
           (isValidElement(iconRight)
-  ? (
-            iconRight
-          )
+  ? (iconRight)
   : (
     <Icon {...(iconRight as IconProps)} />
           ))}
@@ -186,6 +182,7 @@ const DropDownWrapper = styled.div`
       top: 50%;
       margin-top: -4px;
       cursor: pointer;
+      transition: transform 0.3s;
     }
     &.dropped .icon-triangle {
       transform: rotate(180deg);

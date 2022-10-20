@@ -414,6 +414,7 @@ const SelectStyled = styled.div`
       margin: 17px;
       cursor: pointer;
       fill: var(--color-blue-grey-400);
+      transition: transform 0.3s;
     }
 
     &.dropped .icon-triangle {
