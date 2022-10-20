@@ -1,5 +1,5 @@
 import React, { FC, useCallback } from 'react';
-import { InputText } from '@unique-nft/ui-kit';
+import { InputText } from 'components/UI';
 import styled from 'styled-components';
 import { IconButton } from '../IconButton/IconButton';
 
