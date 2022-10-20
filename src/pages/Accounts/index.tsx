@@ -164,7 +164,6 @@ const getAccountsColumns = ({
 ];
 
 const caretDown = { name: 'carret-down', size: 16, color: AdditionalLight };
-const caretUp = { name: 'carret-up', size: 16, color: AdditionalLight };
 
 enum AccountModal {
   create,
@@ -336,7 +335,8 @@ export const AccountsPage = () => {
             testid={`${testid}-add-via-button`}
             title={'Add account via'}
             role={'primary'}
-            iconRight={isDropdownOpened ? caretUp : caretDown}
+            iconRight={caretDown}
+            isDropdownOpened={isDropdownOpened}
           />
         </DropdownStyled>
         <SearchInputWrapper>
@@ -494,10 +494,14 @@ const DropdownStyled = styled(Dropdown)`
   }
 `;
 
-const AddAccountButton = styled(Button)`
+const AddAccountButton = styled(Button)<{ isDropdownOpened: boolean }>`
   width: 196px;
   @media (max-width: 1024px) {
     width: 100%;
+  }
+  svg {
+    transform: ${({ isDropdownOpened }) => isDropdownOpened ? 'rotate(180deg);' : 'rotate(0deg);'};
+    transition: transform 0.3s;
   }
 `;
 
