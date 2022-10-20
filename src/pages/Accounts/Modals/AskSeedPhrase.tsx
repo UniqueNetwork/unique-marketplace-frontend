@@ -1,7 +1,7 @@
 import React, { ChangeEvent, FC, useCallback, useEffect, useState } from 'react';
 import { mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { Heading, Link } from '@unique-nft/ui-kit';
-import { Checkbox, Select, Button, Text } from 'components/UI';
+import { Button, Checkbox, Select, Text } from 'components/UI';
 import styled from 'styled-components';
 
 import { TCreateAccountBodyModalProps } from './types';
@@ -16,6 +16,7 @@ import IconWithHint from 'components/IconWithHint/IconWithHint';
 import { IconButton } from 'components/IconButton/IconButton';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
+import { shortcutText } from '../../../utils/textUtils';
 
 type TOption = SelectOptionProps & { id: string, title: string };
 
@@ -70,7 +71,7 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish,
       <Text
         testid={`${testid}-address`}
         color={'grey-500'}
-      >{address}</Text>
+      >{deviceSize === DeviceSize.sm ? shortcutText(address) : address}</Text>
     </AddressWrapper>
     <Heading size={'4'} >The secret seed value for this account</Heading>
     <SeedGeneratorSelectWrapper>
