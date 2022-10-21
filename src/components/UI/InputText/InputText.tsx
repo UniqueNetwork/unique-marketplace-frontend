@@ -206,4 +206,8 @@ const InputTextStyled = styled.div`
       padding: 7px 12px;
     }
   }
+  
+  &:hover .input-wrapper {
+    border: 1px solid var(--color-grey-500);
+  }
 `;

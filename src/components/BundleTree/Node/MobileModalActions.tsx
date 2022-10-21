@@ -1,4 +1,5 @@
-import { Heading, Modal } from '@unique-nft/ui-kit';
+import { Heading } from '@unique-nft/ui-kit';
+import { Modal } from 'components/UI';
 import React from 'react';
 import styled from 'styled-components/macro';
 
