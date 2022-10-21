@@ -173,6 +173,15 @@ const AccountsManagerDropdownWrapper = styled.div`
         .address-copy {
           line-height: 16px;
         }
+
+        @media (max-width: 1024px) {
+          &:hover {
+            background-color: var(--color-additional-light);
+            .account-card-content >.unique-text {
+              color: var(--color-secondary-500);
+            }
+          }
+        }
       }
       
     }
