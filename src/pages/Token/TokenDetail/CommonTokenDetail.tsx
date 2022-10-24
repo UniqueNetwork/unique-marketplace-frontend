@@ -1,7 +1,7 @@
 import { Heading, Text } from '@unique-nft/ui-kit';
 import React, { FC, ReactChild, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { Icon } from 'components/UI/Icon/Icon';
+import { Icon, Link } from 'components/UI';
 import { Picture } from 'components';
 import { CollectionsCard } from './CollectionsCard';
 import { AttributesBlock } from './AttributesBlock';
@@ -274,8 +274,12 @@ const Account = styled.a`
   text-overflow: ellipsis;
   display: flex;
   color: ${Primary600};
+  
   span {
     margin-left: 8px;
+    &:hover {
+      text-decoration: underline;
+    }
   }
 `;
 

@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { TableColumnProps, TableRowProps } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { BN } from '@polkadot/util';
-import { Icon, Dropdown, Text, Button } from 'components/UI';
+import { Icon, Dropdown, Text, Button, Link } from 'components/UI';
 import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
 import { TWithdrawBid } from 'api/restApi/auction/types';
 import { Account } from 'account/AccountContext';
@@ -25,7 +25,7 @@ import { WithdrawDepositModal } from './Modals/WithdrawDeposit';
 import { TransferFundsModal } from './Modals/SendFunds';
 import BalanceCell from './BalanceCell';
 import { AdditionalLight, BlueGrey300, Grey500, Primary100, Primary500 } from 'styles/colors';
-import config from '../../config';
+import config from 'config';
 import { AccountInfo } from './types';
 import NoAccountsIcon from 'static/icons/no-accounts.svg';
 
@@ -524,7 +524,7 @@ const LinksWrapper = styled.div`
   padding: 0 !important;
 `;
 
-const LinkStyled = styled.a`
+const LinkStyled = styled(Link)`
   display: flex;
   align-items: center;
   column-gap: calc(var(--gap) / 4);

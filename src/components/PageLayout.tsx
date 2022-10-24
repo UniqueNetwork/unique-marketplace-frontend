@@ -77,6 +77,10 @@ const LayoutStyled = styled.div<{hasFooterSpacing: boolean}>`
 
     footer {
       background-color: var(--color-footer-background);
+      
+      a:hover {
+        text-decoration: underline;
+      }
 
       .footer__text__dafc {
         color: var(--color-additional-light);
