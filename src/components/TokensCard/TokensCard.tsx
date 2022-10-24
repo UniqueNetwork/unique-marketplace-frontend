@@ -3,7 +3,7 @@ import { Loader, Text } from '@unique-nft/ui-kit';
 import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 import { generatePath, Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { Icon } from 'components/UI/Icon/Icon';
+import { Icon, Link as UILink } from 'components/UI';
 import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
 import { Offer } from 'api/restApi/offers/types';
 import { useApi } from 'hooks/useApi';
@@ -132,7 +132,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
             {tokenTitle}
           </Text>
         </Link>
-        <a
+        <UILink
           data-testid={`${testid}-collection-${collectionId}-link`}
           href={`${config.blockchains[currentChainId || '']?.scanUrl || ''}collections/${collectionId || ''}`}
           target={'_blank'}
@@ -141,7 +141,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
           <Text color='primary-600' size='s'>
             {collectionTitle}
           </Text>
-        </a>
+        </UILink>
         {isBundleState && <BundleItemsCount count={tokensCount || 0} testId={testid} />}
         {price && <PriceWrapper>
           <Text

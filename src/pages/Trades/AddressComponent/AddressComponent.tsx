@@ -7,6 +7,7 @@ import { useApi } from '../../../hooks/useApi';
 import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
 import { Avatar } from '../../../components/Avatar/Avatar';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
+import { Link } from 'components/UI';
 
 export const AddressComponent = ({ text, testid }: { text: string, testid: string }) => {
   const { chainData, currentChainId } = useApi();
@@ -19,13 +20,13 @@ export const AddressComponent = ({ text, testid }: { text: string, testid: strin
 
   return <LinkWrapper>
     <Avatar size={24} src={DefaultAvatar} address={text} />
-    <a
+    <Link
       target={'_blank'}
       rel={'noreferrer'}
       href={`${config.blockchains[currentChainId || '']?.scanUrl || ''}account/${formatAddress(text)}`}
       className={'unique-link primary'}
       data-testid={`${testid}-address`}
-    >{shortCut}</a>
+    >{shortCut}</Link>
   </LinkWrapper>;
 };
 
