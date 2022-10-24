@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { TableColumnProps, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
-import { Icon } from 'components/UI/Icon/Icon';
+import { Icon, Link } from 'components/UI';
 import { AddressComponent } from './AddressComponent/AddressComponent';
 import { timestampTableFormat } from '../../utils/timestampUtils';
 import { TokenComponent } from './TokenComponent/TokenComponent';
@@ -36,13 +36,13 @@ const getTradesColumns = ({ deviceSize, onShowTradesDetailsModal, scanUrl, testi
     render(tokenDescription: TokenDescription, { collectionId, offerId }: Trade): React.ReactNode {
       const collectionName = tokenDescription.collectionName || '';
       return <LinkWrapper>
-        <a
+        <Link
           target={'_blank'}
           rel={'noreferrer'}
           href={`${scanUrl}collections/${collectionId || ''}`}
           className={'unique-link primary'}
           data-testid={`${testid}-${offerId}-collection`}
-        >{`${deviceSize === DeviceSize.lg ? collectionName : `${collectionName.slice(0, 6)}...`} [ID\xa0${collectionId || ''}]`}</a>
+        >{`${deviceSize === DeviceSize.lg ? collectionName : `${collectionName.slice(0, 6)}...`} [ID\xa0${collectionId || ''}]`}</Link>
       </LinkWrapper>;
     },
     field: 'tokenDescription'

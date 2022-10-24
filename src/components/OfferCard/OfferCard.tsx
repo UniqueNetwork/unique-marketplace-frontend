@@ -14,6 +14,7 @@ import config from '../../config';
 import { TokensMedia } from '../TokensCard/TokensMedia';
 import { useApi } from '../../hooks/useApi';
 import BundleItemsCount from '../BundleItemsCount/BundleItemsCount';
+import { Link as UILink } from 'components/UI';
 
 export type TTokensCard = {
   offer: Offer
@@ -86,7 +87,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
             {`${tokenPrefix || ''} #${offer?.tokenId}`}
           </Text>
         </Link>
-        <a
+        <UILink
           data-testid={`${testid}-collection-${offer?.collectionId}-link`}
           href={`${config.blockchains[currentChainId || ''].scanUrl || ''}collections/${offer?.collectionId}`}
           target={'_blank'}
@@ -95,7 +96,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
           <Text color='primary-600' size='s'>
             {`${collectionName?.substring(0, 25) || ''} [id ${offer?.collectionId || ''}]`}
           </Text>
-        </a>
+        </UILink>
         {isBundle && <BundleItemsCount count={tokensCount || 0} testId={testid} />}
         <PriceWrapper>
           <Text
