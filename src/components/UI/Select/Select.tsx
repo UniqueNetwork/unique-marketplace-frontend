@@ -213,6 +213,7 @@ export const Select = ({
                       ? handleOptionUnselect(option)
                       : handleOptionSelect(option)
                   }
+                  data-testid={`${testid}-${(option)[optionKey]}`}
                 >
                   {
                     option[
