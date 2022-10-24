@@ -25,7 +25,8 @@ export const Checkbox = forwardRef(
       size = 's',
       onChange,
       iconRight,
-      iconLeft
+      iconLeft,
+      testid
     }: CheckboxProps,
     ref: LegacyRef<HTMLInputElement>
   ) => {
@@ -49,6 +50,7 @@ export const Checkbox = forwardRef(
           checked={checked}
           ref={ref}
           onChange={(e) => e.preventDefault()}
+          data-testid={testid}
         />
         <span className={classNames('checkmark', { checked })}>
           {checked && (
@@ -65,6 +67,7 @@ export const Checkbox = forwardRef(
             'icon-left': iconLeft,
             'icon-right': iconRight
           })}
+          data-testid={`${testid}-label`}
         >
           {icon && <Icon {...icon} />}
           <span>{label}</span>
