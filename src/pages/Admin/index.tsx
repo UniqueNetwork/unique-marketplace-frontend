@@ -95,7 +95,7 @@ export const AdminPanelPage: FC = () => {
       setSortingValue(sortingOptions[0]);
       setModalType(AdminPanelModalType.default);
     })();
-  }, [hasAdminPermission, isAccountsLoading, currentChainId]);
+  }, [hasAdminPermission, isAccountsLoading, currentChainId, fetchCollections]);
 
   const onSortingChange = useCallback((value: SelectOptionProps) => {
     setSortingValue(value as TOption);
@@ -203,7 +203,7 @@ export const AdminPanelPage: FC = () => {
       <CollectionListWrapper>
         {!(isAccountsLoading || isFetching) && filteredCollections.length === 0 && <NoItems />}
         <CollectionListStyled >
-          {isAccountsLoading && isFetching && <>
+          {(isAccountsLoading || isFetching) && <>
             {Array.from({ length: 4 }).map((_, index) => <CardSkeleton key={`card-skeleton-${index}`} />)}
           </>}
           {filteredCollections?.map((collection) => <CollectionCard
