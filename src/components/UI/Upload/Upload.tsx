@@ -18,10 +18,7 @@ export const Upload: VFC<UploadProps> = ({ className, disabled, accept, onChange
   const [selectedFile, setSelectedFile] = useState<File>();
 
   const onFileChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) {
-      setSelectedFile(undefined);
-      return;
-    }
+    if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
     setSelectedFile(file);
     const objectUrl = URL.createObjectURL(file);

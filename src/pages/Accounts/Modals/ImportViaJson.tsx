@@ -67,7 +67,7 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
     <InputWrapper>
       <TitleWrapper>
         <Text size={'m'}>Upload</Text>
-        <Text size={'s'} color={'grey-500'}>Click to select or drop the file here</Text>
+        <Text size={'s'} color={'grey-500'}>Click to select the file here</Text>
       </TitleWrapper>
       <Upload
         testid={`${testid}-upload-button`}
