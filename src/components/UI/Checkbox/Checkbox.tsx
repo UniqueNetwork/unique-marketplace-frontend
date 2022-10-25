@@ -12,6 +12,7 @@ export interface CheckboxProps extends Omit<ComponentProps, 'onChange'> {
   onChange: (value: boolean) => void;
   iconRight?: IconProps;
   iconLeft?: IconProps;
+  testid: string;
 }
 
 export const Checkbox = forwardRef(
@@ -50,7 +51,7 @@ export const Checkbox = forwardRef(
           checked={checked}
           ref={ref}
           onChange={(e) => e.preventDefault()}
-          data-testid={testid}
+          data-testid={`${testid}-${name || label}`}
         />
         <span className={classNames('checkmark', { checked })}>
           {checked && (

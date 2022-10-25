@@ -38,12 +38,16 @@ const TokenPage = () => {
   const fetchToken = useCallback(async () => {
     if (!api?.nft || !currentChainId) return;
     setIsFetchingToken(true);
-    const token = await api.nft?.getToken(Number(collectionId), Number(id));
-    setIsBundle(await api.nft?.isBundle(Number(collectionId), Number(id)));
+    try {
+      const token = await api.nft?.getToken(Number(collectionId), Number(id));
+      setIsBundle(await api.nft?.isBundle(Number(collectionId), Number(id)));
 
-    const collection = await getCollection(Number(collectionId));
-    if (token) setToken(token);
-    if (collection) setCollection(collection);
+      const collection = await getCollection(Number(collectionId));
+      if (token) setToken(token);
+      if (collection) setCollection(collection);
+    } catch (e) {
+      console.error('error while fetching token or collection from RPC', e);
+    }
     setIsFetchingToken(false);
   }, [api?.nft, currentChainId, collectionId, id]);
 

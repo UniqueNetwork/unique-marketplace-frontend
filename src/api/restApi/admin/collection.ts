@@ -28,7 +28,7 @@ export const useAdminCollections = () => {
       setCollections(response.data);
     }
     setIsFetching(false);
-  }, [baseURL, currentChainId]);
+  }, [baseURL, currentChainId, getJWToken]);
 
   const appendCollection = useCallback(async (id: number) => {
     setIsFetching(true);
