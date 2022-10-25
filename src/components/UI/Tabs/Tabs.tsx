@@ -55,64 +55,66 @@ export const Tabs = ({
 );
 
 const TabsStyled = styled.div`
-  font-family: var(--prop-font-family);
-  font-size: var(--prop-font-size);
-  display: flex;
-  flex-wrap: wrap;
-  font-style: normal;
-  font-weight: 500;
+  .unique-tabs-labels {
+    font-family: var(--prop-font-family);
+    font-size: var(--prop-font-size);
+    display: flex;
+    flex-wrap: wrap;
+    font-style: normal;
+    font-weight: 500;
 
-  &.slim {
-    .tab-label {
-      color: var(--color-additional-dark);
-      display: flex;
-      align-items: center;
-      height: 80px;
-      padding: 0 20px;
-      cursor: pointer;
+    &.slim {
+      .tab-label {
+        color: var(--color-additional-dark);
+        display: flex;
+        align-items: center;
+        height: 80px;
+        padding: 0 20px;
+        cursor: pointer;
 
-      &.active {
-        border-bottom: 2px solid var(--color-primary-500);
+        &.active {
+          border-bottom: 2px solid var(--color-primary-500);
+        }
       }
     }
-  }
 
-  &.default {
-    .tab-label {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-      width: 198px;
-      height: 38px;
-      border: 1px solid var(--color-primary-400);
-      line-height: 24px;
-      color: var(--color-primary-400);
-      cursor: pointer;
-      border-left: none;
+    &.default {
+      .tab-label {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        width: 198px;
+        height: 38px;
+        border: 1px solid var(--color-primary-400);
+        line-height: 24px;
+        color: var(--color-primary-400);
+        cursor: pointer;
+        border-left: none;
 
-      &:first-of-type {
-        border-top-left-radius: var(--prop-border-radius);
-        border-bottom-left-radius: var(--prop-border-radius);
-        border-left: 1px solid var(--color-primary-400);
-      }
+        &:first-of-type {
+          border-top-left-radius: var(--prop-border-radius);
+          border-bottom-left-radius: var(--prop-border-radius);
+          border-left: 1px solid var(--color-primary-400);
+        }
 
-      &:last-of-type {
-        border-top-right-radius: var(--prop-border-radius);
-        border-bottom-right-radius: var(--prop-border-radius);
-      }
+        &:last-of-type {
+          border-top-right-radius: var(--prop-border-radius);
+          border-bottom-right-radius: var(--prop-border-radius);
+        }
 
-      &.disabled {
-        background-color: var(--color-grey-100);
-        color: var(--color-blue-grey-400);
-        border-color: var(--color-blue-grey-300);
-        cursor: default;
-      }
+        &.disabled {
+          background-color: var(--color-grey-100);
+          color: var(--color-blue-grey-400);
+          border-color: var(--color-blue-grey-300);
+          cursor: default;
+        }
 
-      &.active {
-        color: var(--color-additional-light);
-        background-color: var(--color-primary-400);
-        border-color: var(--color-primary-400);
+        &.active {
+          color: var(--color-additional-light);
+          background-color: var(--color-primary-400);
+          border-color: var(--color-primary-400);
+        }
       }
     }
   }

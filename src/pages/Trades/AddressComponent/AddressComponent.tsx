@@ -8,15 +8,20 @@ import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
 import { Avatar } from '../../../components/Avatar/Avatar';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import { Link } from 'components/UI';
+import { useAccounts } from '../../../hooks/useAccounts';
 
 export const AddressComponent = ({ text, testid }: { text: string, testid: string }) => {
   const { chainData, currentChainId } = useApi();
+  const { selectedAccount } = useAccounts();
 
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
   }, [chainData?.SS58Prefix]);
 
-  const shortCut = useMemo(() => (shortcutText(formatAddress(text))), [text]);
+  const shortCut = useMemo(() => {
+    if (selectedAccount?.address === text) return 'Me';
+    return shortcutText(formatAddress(text));
+  }, [text, selectedAccount?.address, formatAddress]);
 
   return <LinkWrapper>
     <Avatar size={24} src={DefaultAvatar} address={text} />

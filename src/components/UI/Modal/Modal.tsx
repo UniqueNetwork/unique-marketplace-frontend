@@ -93,5 +93,11 @@ const ModalWrapper = styled.div<{ isGlobalBackdrop?: boolean }>`
           fill: var(--color-additional-dark);
       }
     }
+    @media (max-width: 568px) {
+      width: calc(100% - var(--prop-gap) * 5);
+      .unique-font-heading.size-2 {
+        font-size: 24px;
+      }
+    }
   }
 `;

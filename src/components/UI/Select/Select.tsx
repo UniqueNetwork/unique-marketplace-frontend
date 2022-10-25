@@ -162,7 +162,7 @@ export const Select = ({
           {multi &&
             selectedMulti.length > 0 &&
             selectedMulti.map((selectedOption, index) => (
-              <div className={'select-tag'} key={index}>
+              <div className={'select-tag'} key={index} data-testid={`${testid}-${index}`}>
                 {
                   selectedOption?.[
                     optionValue as keyof SelectOptionProps

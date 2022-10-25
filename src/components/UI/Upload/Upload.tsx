@@ -4,6 +4,8 @@ import styled from 'styled-components';
 import { Icon } from 'components/UI/Icon/Icon';
 import UploadIcon from 'static/icons/upload.svg';
 import { Primary500 } from 'styles/colors';
+import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';
+import { shortcutText } from '../../../utils/textUtils';
 
 type UploadProps = {
   className?: string;
@@ -16,6 +18,7 @@ type UploadProps = {
 export const Upload: VFC<UploadProps> = ({ className, disabled, accept, onChange, testid }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File>();
+  const deviceSize = useDeviceSize();
 
   const onFileChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
@@ -27,7 +30,7 @@ export const Upload: VFC<UploadProps> = ({ className, disabled, accept, onChange
 
   return <UploadWrapper className={className} onClick={inputRef.current?.click}>
     <Icon file={UploadIcon} size={32} />
-    {selectedFile && <TextStyled weight='light'>{selectedFile.name}</TextStyled>}
+    {selectedFile && <TextStyled weight='light'>{deviceSize === DeviceSize.sm ? shortcutText(selectedFile.name) : selectedFile.name}</TextStyled>}
     <input
       ref={inputRef}
       type='file'
