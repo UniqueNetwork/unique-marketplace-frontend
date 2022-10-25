@@ -363,6 +363,9 @@ const AddressWrapper = styled.div`
     text-overflow: ellipsis;
     overflow: hidden;
   }
+  &:hover {
+    border: 1px solid var(--color-grey-500);
+  }
 `;
 
 const AddressOptionWrapper = styled.div`
