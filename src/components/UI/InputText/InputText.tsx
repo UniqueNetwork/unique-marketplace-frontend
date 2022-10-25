@@ -148,9 +148,15 @@ const InputTextStyled = styled.div`
       border: 1px solid var(--color-grey-400);
     }
 
+    &:focus, &:hover {
+      border: 1px solid var(--color-grey-500);
+    }
+
     &.disabled {
       background-color: var(--color-grey-100);
-
+      &:focus, &:hover {
+        border: 1px solid var(--color-grey-300);
+      }
       input {
         color: var(--color-blue-grey-400);
       }
