@@ -1,20 +1,8 @@
-import { Sdk } from '@unique-nft/substrate-client';
+import { Client } from '@unique-nft/substrate-client';
 import { Settings } from '../restApi/settings/types';
-import { SdkExtrinsics } from '@unique-nft/substrate-client/extrinsics';
-import { SdkCollections, SdkTokens } from '@unique-nft/substrate-client/tokens';
-import { SdkBalance } from '@unique-nft/substrate-client/balance';
 import '@unique-nft/substrate-client/state-queries';
 
-declare module '@unique-nft/substrate-client' {
-  interface Sdk {
-    readonly extrinsics: SdkExtrinsics;
-    readonly tokens: SdkTokens;
-    readonly collections: SdkCollections;
-    readonly balance: SdkBalance;
-  }
-}
-
-type SdkSet = { unique: Sdk, kusama: Sdk };
+type SdkSet = { unique: Client, kusama: Client };
 
 export class SdkNetworkProvider {
   public isReady = false;
@@ -32,25 +20,25 @@ export class SdkNetworkProvider {
     this.isReady = false;
   }
 
-  private async createSdkInstance(url: string) {
-    const sdk = await Sdk.create({ chainWsUrl: url });
+  private async createClientInstance(url: string) {
+    const client = await Client.create({ chainWsUrl: url });
 
-    sdk.api.on('disconnected', () => {
+    client.api.on('disconnected', () => {
       this.isReady = false;
     });
 
-    sdk.api.on('error', (error: Error) => {
+    client.api.on('error', (error: Error) => {
       this.error = error;
       this.isReady = false;
     });
-    return sdk;
+    return client;
   }
 
   async connect() {
     this.isReady = false;
     this.sdkSet = {
-      unique: await this.createSdkInstance(this.settings.blockchain.unique.wsEndpoint),
-      kusama: await this.createSdkInstance(this.settings.blockchain.kusama.wsEndpoint)
+      unique: await this.createClientInstance(this.settings.blockchain.unique.wsEndpoint),
+      kusama: await this.createClientInstance(this.settings.blockchain.kusama.wsEndpoint)
     };
 
     this.isReady = true;

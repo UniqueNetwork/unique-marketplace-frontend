@@ -36,8 +36,8 @@ export const WalletManager: FC = () => {
   const decimals = api?.market?.kusamaDecimals;
 
   const formatAddress = useCallback((address: string) => {
-    return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
-  }, [chainData?.SS58Prefix]);
+    return toChainFormatAddress(address, Number(chainData?.ss58Format.toHuman()) || 0);
+  }, [chainData?.ss58Format]);
 
   const networks: INetwork[] = useMemo(() => Object.keys(config?.blockchains || {}).map<INetwork>((id) => ({
     id,
@@ -80,8 +80,8 @@ export const WalletManager: FC = () => {
   }, [navigate]);
 
   const currentBalance: BalanceOption = useMemo(() => {
-    return { value: selectedAccount?.balance?.KSM?.toString() || '0', chain: chainData?.token || '' };
-  }, [selectedAccount, chainData?.token]);
+    return { value: selectedAccount?.balance?.KSM?.toString() || '0', chain: chainData?.tokenSymbol?.toString() || '' };
+  }, [selectedAccount, chainData?.tokenSymbol?.toString()]);
 
   const closeModal = useCallback(() => {
     setIsGetKsmOpened(false);

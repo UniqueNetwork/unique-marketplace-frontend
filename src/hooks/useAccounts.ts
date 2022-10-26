@@ -39,7 +39,7 @@ export const useAccounts = () => {
     const { name, isAddress, content, password, genesisHash } = scanned;
 
     const meta = {
-      genesisHash: genesisHash || kusamaSdk?.api.genesisHash.toHex(),
+      genesisHash,
       name: name?.trim()
     };
     if (isAddress) keyring.addExternal(content, meta);

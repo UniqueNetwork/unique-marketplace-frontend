@@ -1,4 +1,4 @@
-import { Sdk } from '@unique-nft/substrate-client';
+import { Client } from '@unique-nft/substrate-client';
 // eslint-disable-next-line import/no-duplicates
 import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
 import { TransactionOptions, UniqueController } from './types';
@@ -6,10 +6,10 @@ import { TransactionOptions, UniqueController } from './types';
 import '@unique-nft/substrate-client/tokens';
 
 export class UniqueSDKCollectionController implements UniqueController {
-  private sdk: Sdk | undefined;
+  private sdk: Client | undefined;
   private collectionIds: number[] = [];
 
-  setNetwork(options: { sdk: Sdk, collectionIds: number[] }): void {
+  setNetwork(options: { sdk: Client, collectionIds: number[] }): void {
     this.sdk = options.sdk;
     this.collectionIds = options.collectionIds;
   }
@@ -27,7 +27,7 @@ export class UniqueSDKCollectionController implements UniqueController {
   }
 
   async getCollection(collectionId: number): Promise<CollectionInfoWithSchema | null> {
-    return await this.sdk?.collections.get_new({ collectionId }) || null;
+    return await this.sdk?.collections.get({ collectionId }) || null;
   }
 
   async getFeaturedCollections(): Promise<CollectionInfoWithSchema[]> {

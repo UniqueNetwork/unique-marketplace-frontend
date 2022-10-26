@@ -1,14 +1,14 @@
-import { Sdk } from '@unique-nft/substrate-client';
+import { Client } from '@unique-nft/substrate-client';
 import { TokenId, TransactionOptions, UniqueController } from './types';
 import { getEthAccount } from './utils/addressUtils';
 import { filterAllowedTokens } from './utils/checkTokenIsAllowed';
 import { getNestingTokenAddress, NestedToken, TokenByIdResult, TokenIdArguments, TokenOwnerResult } from '@unique-nft/substrate-client/tokens';
 import { Address } from '@unique-nft/substrate-client/types';
 
-type UniqueSDKNFTControllerOptions = { sdk: Sdk, collectionIds: number[], allowedTokens: { collection: number, tokens: string }[] };
+type UniqueSDKNFTControllerOptions = { sdk: Client, collectionIds: number[], allowedTokens: { collection: number, tokens: string }[] };
 
 export class UniqueSDKNFTController implements UniqueController {
-  private sdk: Sdk | undefined;
+  private sdk: Client | undefined;
   private collectionIds: number[] = [];
   private allowedTokens: Record<number, string> = {};
 
@@ -48,7 +48,7 @@ export class UniqueSDKNFTController implements UniqueController {
   }
 
   async getToken(collectionId: number, tokenId: number): Promise<TokenByIdResult | null> {
-    return await this.sdk?.tokens.get_new({ collectionId, tokenId }) || null;
+    return await this.sdk?.tokens.get({ collectionId, tokenId }) || null;
   }
 
   async isBundle(collectionId: number, tokenId: number): Promise<boolean> {

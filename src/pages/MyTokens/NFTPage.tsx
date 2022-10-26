@@ -228,6 +228,7 @@ export const NFTPage = () => {
   const tokensWithOffers: (TokenByIdResult & Partial<Offer>)[] = useMemo(() => {
     return [
       ...(offers?.map<TokenByIdResult & Partial<Offer>>((offer) => ({
+        properties: [],
         id: offer.tokenId,
         image: stringToDecodedInfixOrUrlOrCidAndHash(offer.tokenDescription?.image),
         attributes: offer.tokenDescription?.attributes,

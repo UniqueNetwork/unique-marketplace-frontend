@@ -1,4 +1,4 @@
-import { Sdk } from '@unique-nft/substrate-client';
+import { Client } from '@unique-nft/substrate-client';
 import { TokenIdArguments, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 import { isEthereumAddress } from '@unique-nft/substrate-client/utils';
 import { BN } from '@polkadot/util';
@@ -8,13 +8,24 @@ import nonFungibleAbi from './abi/nonFungibleAbi.json';
 import { collectionIdToAddress, getEthAccount, compareEncodedAddresses, isTokenOwner } from './utils/addressUtils';
 import { formatKsm, fromStringToBnString } from './utils/textFormat';
 import { repeatCheckForTransactionFinish } from './utils/repeatCheckTransaction';
-import '@unique-nft/substrate-client/balance';
-import { Address, AllBalances } from '@unique-nft/substrate-client/types';
+import { Address } from '@unique-nft/substrate-client/types';
 import Web3 from 'web3';
+import { ApiPromise } from '@polkadot/api';
+// eslint-disable-next-line import/no-duplicates
+import '@unique-nft/substrate-client/balance';
+// eslint-disable-next-line import/no-duplicates
+import { AllBalances, Balance } from '@unique-nft/substrate-client/balance';
+
+declare module '@unique-nft/substrate-client' {
+  interface Client {
+    api: ApiPromise;
+    readonly balance: Balance;
+  }
+}
 
 export type UniqueSDKMarketControllerOptions = {
-  uniqueSdk: Sdk
-  kusamaSdk: Sdk
+  uniqueSdk: Client
+  kusamaSdk: Client
   escrowAddress: string
   contractAddress: string
   auctionAddress: string
@@ -22,8 +33,8 @@ export type UniqueSDKMarketControllerOptions = {
 };
 
 export class UniqueSDKMarketController implements UniqueController {
-  private uniqueSdk: Sdk | undefined;
-  private kusamaSdk: Sdk | undefined;
+  private uniqueSdk: Client | undefined;
+  private kusamaSdk: Client | undefined;
   private web3Instance: Web3 | undefined;
   private minPrice = 0.000001;
   private defaultGasAmount = 2500000;
@@ -76,7 +87,7 @@ export class UniqueSDKMarketController implements UniqueController {
       collectionId: Number(collectionId), tokenId: Number(tokenId)
     };
 
-    const token = await this.uniqueSdk?.tokens.get_new(tokenIdArguments);
+    const token = await this.uniqueSdk?.tokens.get(tokenIdArguments);
     if (!token) throw new Error('Token not found');
 
     const ask = await matcherContractInstance.methods.getOrder(collectionIdToAddress(Number(collectionId)), tokenId).call();
@@ -257,7 +268,7 @@ export class UniqueSDKMarketController implements UniqueController {
       collectionId: Number(collectionId), tokenId: Number(tokenId)
     };
 
-    const token = await this.uniqueSdk.tokens.get_new(tokenIdArguments);
+    const token = await this.uniqueSdk.tokens.get(tokenIdArguments);
     if (!token) throw new Error('Token not found');
     if (token.owner.toLowerCase() === ethAddress.toLowerCase()) return;
 
@@ -300,7 +311,7 @@ export class UniqueSDKMarketController implements UniqueController {
       collectionId: Number(collectionId), tokenId: Number(tokenId)
     };
 
-    const token = await this.uniqueSdk.tokens.get_new(tokenIdArguments);
+    const token = await this.uniqueSdk.tokens.get(tokenIdArguments);
     if (!token) throw new Error('Token not found');
 
     const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
@@ -439,7 +450,7 @@ export class UniqueSDKMarketController implements UniqueController {
       collectionId: Number(collectionId), tokenId: Number(tokenId)
     };
 
-    const token = await this.uniqueSdk.tokens.get_new(tokenIdArguments);
+    const token = await this.uniqueSdk.tokens.get(tokenIdArguments);
     if (!token) throw new Error('Token not found');
 
     if (!isTokenOwner(from, token.owner)) throw new Error('You are not owner of this token');
@@ -476,7 +487,7 @@ export class UniqueSDKMarketController implements UniqueController {
       collectionId: Number(collectionId), tokenId: Number(tokenId)
     };
 
-    const token: TokenByIdResult | null = await this.uniqueSdk.tokens.get_new(tokenIdArguments);
+    const token: TokenByIdResult | null = await this.uniqueSdk.tokens.get(tokenIdArguments);
     if (!token) throw new Error('Token for unlock not found');
     const owner = token.owner;
 
