@@ -40,11 +40,17 @@ export const SignModal: FC<TSignModalProps> = ({ account, isVisible, onFinish, o
     setPassword('');
   }, [account, password]);
 
+  const onCloseClick = useCallback(() => {
+    setPasswordError(undefined);
+    setPassword('');
+    onClose();
+  }, [onClose]);
+
   if (!account) return null;
 
   return (<Modal isVisible={isVisible}
     isClosable={true}
-    onClose={onClose}
+    onClose={onCloseClick}
     isGlobalBackdrop
   >
     <Content>
