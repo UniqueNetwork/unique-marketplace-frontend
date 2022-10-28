@@ -18,7 +18,7 @@ import Skeleton from 'components/Skeleton/Skeleton';
 import { TokenSkeleton } from 'components/Skeleton/TokenSkeleton';
 import ShareTokenModal from './ShareTokenModal';
 import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
-import { stringToDecodedInfixOrUrlOrCidAndHash } from '../../../utils/helpers';
+import { stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
 
 interface IProps {
   children: ReactChild[]
@@ -75,8 +75,8 @@ export const CommonTokenDetail: FC<IProps> = ({
   const { chainData, currentChainId } = useApi();
 
   const formatAddress = useCallback((address: string) => {
-    return toChainFormatAddress(address, Number(chainData?.ss58Format?.toHuman()) || 0);
-  }, [chainData?.ss58Format]);
+    return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
+  }, [chainData?.SS58Prefix]);
 
   const owner = useMemo(() => {
     if (offer) {

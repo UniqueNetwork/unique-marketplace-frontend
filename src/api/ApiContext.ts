@@ -4,12 +4,20 @@ import { UniqueSDKNFTController } from './uniqueSdk/NFTController';
 import { UniqueSDKCollectionController } from './uniqueSdk/collectionController';
 import { UniqueSDKMarketController } from './uniqueSdk/marketController';
 import { Client } from '@unique-nft/substrate-client';
-import { ChainProperties } from '@polkadot/types/interfaces';
+import { HexString } from '@polkadot/util/types';
 
 type Api = {
   nft?: UniqueSDKNFTController
   collection?: UniqueSDKCollectionController
   market?: UniqueSDKMarketController
+}
+
+export interface ChainProperties {
+  SS58Prefix: number;
+  token: string;
+  decimals: number;
+  wsUrl: string;
+  genesisHash: HexString;
 }
 
 export type ApiContextProps = {

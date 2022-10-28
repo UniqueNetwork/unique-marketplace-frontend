@@ -50,12 +50,12 @@ export const WalletManager: FC = () => {
   }, [onChangeChainId]);
 
   const widgetAccounts = useMemo(() => accounts.map((account) => (
-    { ...account, address: account.getAddress(chainData?.ss58Format?.toHuman() as number), substrateAddress: account?.getAddress() })
-  ), [accounts, chainData?.ss58Format]);
+    { ...account, address: account.getAddress(chainData?.SS58Prefix), substrateAddress: account?.getAddress() })
+  ), [accounts, chainData?.SS58Prefix]);
 
   const widgetSelectedAccount = useMemo(() => (
-    { name: selectedAccount?.name, address: selectedAccount ? selectedAccount.getAddress(chainData?.ss58Format?.toHuman() as number) : '', substrateAddress: selectedAccount?.getAddress() }
-  ), [selectedAccount, chainData?.ss58Format]);
+    { name: selectedAccount?.name, address: selectedAccount ? selectedAccount.getAddress(chainData?.SS58Prefix) : '', substrateAddress: selectedAccount?.getAddress() }
+  ), [selectedAccount, chainData?.SS58Prefix]);
 
   const widgetAccountChange = useCallback(({ substrateAddress }: IAccount) => {
     const account = accounts.find((account) => account.getAddress() === substrateAddress);
@@ -76,8 +76,8 @@ export const WalletManager: FC = () => {
   }, [navigate]);
 
   const currentBalance: BalanceOption = useMemo(() => {
-    return { value: selectedAccount?.balance?.KSM?.toString() || '0', chain: chainData?.tokenSymbol?.toString() || '' };
-  }, [selectedAccount, chainData?.tokenSymbol?.toString()]);
+    return { value: selectedAccount?.balance?.KSM?.toString() || '0', chain: chainData?.token || '' };
+  }, [selectedAccount, chainData?.token]);
 
   const closeModal = useCallback(() => {
     setIsGetKsmOpened(false);

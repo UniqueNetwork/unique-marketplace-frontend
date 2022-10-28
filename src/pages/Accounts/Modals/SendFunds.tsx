@@ -112,8 +112,8 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   }, [api?.market, selectedAccount]);
 
   const formatAddress = useCallback((address: string) => {
-    return toChainFormatAddress(address, Number(chainData?.ss58Format?.toHuman()) || 0);
-  }, [chainData?.ss58Format]);
+    return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
+  }, [chainData?.SS58Prefix]);
 
   const accountsWithQuartzAddresses = useMemo(() => (
     accounts.map((account) => ({ ...account, quartzAddress: formatAddress(account.getAddress()) }))
@@ -165,7 +165,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     getKusamaFee(value, amount)();
 
     if (typeof value === 'string') {
-      const [isValid] = value ? checkAddress(value, Number(chainData?.ss58Format.toHuman()) || 255) : [true];
+      const [isValid] = value ? checkAddress(value, Number(chainData?.SS58Prefix) || 255) : [true];
       setIsValidRecipientAddress(isValid);
       onFilter(value);
     } else {

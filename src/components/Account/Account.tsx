@@ -32,8 +32,8 @@ const AccountCard: FC<AccountProps> = ({
 
   const formatAddress = useCallback((address: string) => {
     if (!address) return '';
-    return toChainFormatAddress(address, Number(chainData?.ss58Format?.toHuman()) || 0);
-  }, [chainData?.ss58Format]);
+    return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
+  }, [chainData?.SS58Prefix]);
 
   const onCopyAddress = (account: string) => () => {
     navigator.clipboard.writeText(account).then(() => {

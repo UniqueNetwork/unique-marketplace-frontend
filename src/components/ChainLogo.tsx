@@ -34,10 +34,10 @@ function ChainLogo({
   const [isEmpty, img] = useMemo((): [boolean, string] => {
     const found = logo
       ? namedLogos[logo]
-      : chainLogos[sanitize(nameByPrefix[Number(chainData?.ss58Format.toHuman()) || 42])];
+      : chainLogos[sanitize(nameByPrefix[chainData?.SS58Prefix || 42])];
 
     return [!found || logo === 'empty', (found || emptyLogos.empty) as string];
-  }, [logo, chainData?.ss58Format]);
+  }, [logo, chainData?.SS58Prefix]);
 
   return (
     <img
