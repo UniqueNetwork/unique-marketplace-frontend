@@ -95,8 +95,8 @@ export const MarketPage = () => {
     const { myNFTs, myBets, timedAuction, fixedPrice } = statuses || {};
 
     return {
-      seller: myNFTs ? selectedAccount?.address : undefined,
-      bidderAddress: myBets ? selectedAccount?.address : undefined,
+      seller: myNFTs ? selectedAccount?.getAddress() : undefined,
+      bidderAddress: myBets ? selectedAccount?.getAddress() : undefined,
       isAuction: (timedAuction && fixedPrice) || (!timedAuction && !fixedPrice) ? undefined : !!timedAuction && !fixedPrice,
       ...prices,
       collectionId: collections,
@@ -104,7 +104,7 @@ export const MarketPage = () => {
       attributes: attributes?.map(({ attribute }) => attribute),
       ...otherFilter
     };
-  }, [selectedAccount?.address]);
+  }, [selectedAccount]);
 
   const onClickSeeMore = useCallback(() => {
     if (!isFetching) {
@@ -163,7 +163,7 @@ export const MarketPage = () => {
   useEffect(() => {
     if (!selectedAccount) return;
     onChangeAccount();
-  }, [selectedAccount?.address]);
+  }, [selectedAccount]);
 
   const filterCount = useMemo(() => {
     const { statuses, prices, collections = [], attributes = [], attributeCounts = [] } = filterState || {};

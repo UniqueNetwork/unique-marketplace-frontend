@@ -16,7 +16,7 @@ interface BidderProps {
 const Bidder: FC<BidderProps> = ({ accountAddress, testid }) => {
   const { selectedAccount } = useAccounts();
 
-  if (compareEncodedAddresses(accountAddress, selectedAccount?.address || '')) {
+  if (compareEncodedAddresses(accountAddress, selectedAccount?.getAddress() || '')) {
     return <Text size={'m'} color={'grey-600'} testid={`${testid}-you`}>You</Text>;
   }
 

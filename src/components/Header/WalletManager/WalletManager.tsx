@@ -1,12 +1,10 @@
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { BN } from '@polkadot/util';
 import { INetwork } from '@unique-nft/ui-kit';
 import { Text, useNotifications, Button } from 'components/UI';
-import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
 import { useAccounts } from 'hooks/useAccounts';
-import { Account } from 'account/AccountContext';
 import { Avatar } from 'components/Avatar/Avatar';
 import GetKSMModal from 'components/GetKSMModal/GetKSMModal';
 import { BalanceOption } from './types';
@@ -15,8 +13,8 @@ import DefaultAvatar from 'static/icons/default-avatar.svg';
 import { TWithdrawBid } from 'api/restApi/auction/types';
 import { formatKusamaBalance } from 'utils/textUtils';
 import BalanceSkeleton from '../../Skeleton/BalanceSkeleton';
-import config from '../../../config';
-import { AccountsManager } from '../../UI/widgets/AccountsManager';
+import config from 'config';
+import { AccountsManager, IAccount } from 'components/UI/widgets/AccountsManager';
 
 const tokenSymbol = 'KSM';
 
@@ -35,10 +33,6 @@ export const WalletManager: FC = () => {
   const navigate = useNavigate();
   const decimals = api?.market?.kusamaDecimals;
 
-  const formatAddress = useCallback((address: string) => {
-    return toChainFormatAddress(address, Number(chainData?.ss58Format.toHuman()) || 0);
-  }, [chainData?.ss58Format]);
-
   const networks: INetwork[] = useMemo(() => Object.keys(config?.blockchains || {}).map<INetwork>((id) => ({
     id,
     name: config?.blockchains[id]?.name || '',
@@ -56,18 +50,20 @@ export const WalletManager: FC = () => {
   }, [onChangeChainId]);
 
   const widgetAccounts = useMemo(() => accounts.map((account) => (
-    { name: account.meta.name, ...account, address: formatAddress(account.address), substrateAddress: account?.address })
-  ), [accounts, formatAddress]);
+    { ...account, address: account.getAddress(chainData?.ss58Format?.toHuman() as number), substrateAddress: account?.getAddress() })
+  ), [accounts, chainData?.ss58Format]);
 
   const widgetSelectedAccount = useMemo(() => (
-    { name: selectedAccount?.meta.name, ...selectedAccount, address: selectedAccount?.address ? formatAddress(selectedAccount.address) : '', substrateAddress: selectedAccount?.address }
-  ), [selectedAccount, formatAddress]);
+    { name: selectedAccount?.name, address: selectedAccount ? selectedAccount.getAddress(chainData?.ss58Format?.toHuman() as number) : '', substrateAddress: selectedAccount?.getAddress() }
+  ), [selectedAccount, chainData?.ss58Format]);
 
-  const widgetAccountChange = useCallback((account) => {
-    changeAccount({ ...account, address: account.substrateAddress } as Account);
-  }, [changeAccount]);
+  const widgetAccountChange = useCallback(({ substrateAddress }: IAccount) => {
+    const account = accounts.find((account) => account.getAddress() === substrateAddress);
+    if (!account) return;
+    changeAccount(account);
+  }, [accounts, changeAccount]);
 
-  const onCopyAddress = useCallback((address: string) => {
+  const onCopyAddress = useCallback((_: string) => {
     info(
       'Address copied',
       { name: 'success', size: 32, color: 'var(--color-additional-light)' }

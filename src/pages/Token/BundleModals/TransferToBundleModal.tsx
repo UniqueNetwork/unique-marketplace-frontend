@@ -67,11 +67,11 @@ const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(ne
   const { collections } = useCollections();
 
   useEffect(() => {
-    if (!selectedAccount?.address) return;
+    if (!selectedAccount) return;
     void (async () => {
       setIsLoading(true);
-      await fetch({ page: 1, pageSize, seller: selectedAccount?.address });
-      const tokens = await api?.nft?.getAccountMarketableTokens(selectedAccount.address);
+      await fetch({ page: 1, pageSize, seller: selectedAccount?.getAddress() });
+      const tokens = await api?.nft?.getAccountMarketableTokens(selectedAccount.getAddress());
       setTokens(tokens || []);
       setIsLoading(false);
     })();
@@ -182,9 +182,9 @@ const TransferToBundleStagesModal: FC<TBundleTrunsferModalBodyProps & { newParen
   const { selectedAccount } = useAccounts();
 
   useEffect(() => {
-    if (!selectedAccount?.address) return;
+    if (!selectedAccount) return;
     initiate(null);
-  }, [selectedAccount?.address]);
+  }, [selectedAccount]);
 
   useEffect(() => {
     if (status === StageStatus.success) {

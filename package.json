@@ -26,6 +26,7 @@
     "@unique-nft/unique-mainnet-types": "^0.6.3",
     "@unique-nft/opal-testnet-types": "0.5.3",
     "@unique-nft/quartz-mainnet-types": "0.6.1",
+    "@unique-nft/accounts": "0.3.3",
     "axios": "^0.24.0",
     "graphql": "^16.0.1",
     "protobufjs": "^6.11.2",

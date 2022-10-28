@@ -7,27 +7,41 @@ import { useAccounts } from '../useAccounts';
 
 export const usePurchaseFixStages = (collectionId: number, tokenId: number) => {
   const { api } = useApi();
-  const { signPayloadJSON } = useAccounts();
+  const { selectedAccount } = useAccounts();
   const marketApi = api?.market;
   const purchaseStages: InternalStage<TPurchaseProps>[] = useMemo(() => [{
     title: 'Place a deposit',
     description: '',
     status: StageStatus.default,
-    action: (params) => marketApi?.addDeposit(params.txParams.accountAddress, collectionId.toString(), tokenId.toString(), params.options)
+    action: ({ txParams, options }) => marketApi?.addDeposit(
+      txParams.accountAddress,
+      collectionId.toString(),
+      tokenId.toString(),
+      options)
   },
   {
     title: 'Buy NFT',
     description: '',
     status: StageStatus.default,
-    action: (params) => marketApi?.buyToken(params.txParams.accountAddress, collectionId.toString(), tokenId.toString(), params.options)
+    action: ({ txParams, options }) => marketApi?.buyToken(
+      txParams.accountAddress,
+      collectionId.toString(),
+      tokenId.toString(),
+      options
+    )
   },
   {
     title: 'Sending NFT to wallet',
     description: '',
     status: StageStatus.default,
-    action: (params) => marketApi?.unlockNft(params.txParams.accountAddress, collectionId.toString(), tokenId.toString(), params.options)
+    action: ({ txParams, options }) => marketApi?.unlockNft(
+      txParams.accountAddress,
+      collectionId.toString(),
+      tokenId.toString(),
+      options
+    )
   }], [marketApi, collectionId, tokenId]);
-  const { stages, error, status, initiate } = useStages<TPurchaseProps>(purchaseStages, signPayloadJSON);
+  const { stages, error, status, initiate } = useStages<TPurchaseProps>(purchaseStages, selectedAccount);
 
   return {
     stages,

@@ -1,46 +1,43 @@
 import React, { FC, useCallback, useState } from 'react';
 import { Heading } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
-import { KeyringPair } from '@polkadot/keyring/types';
 import { Button, Text, Modal } from 'components/UI';
 
-import { Account, AccountSigner } from '../../account/AccountContext';
-import { useAccounts } from '../../hooks/useAccounts';
 import { PasswordInput } from '../PasswordInput/PasswordInput';
 import AccountCard from '../Account/Account';
 import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
+import { KeyringPair } from '@polkadot/keyring/types';
 
 const testid = 'sign-modal';
 
 export type TSignModalProps = {
   isVisible: boolean
-  account?: Account
-  onFinish(signature?: KeyringPair): void
+  keyringPair?: KeyringPair
+  onFinish(password?: string): void
   onClose(): void
 }
 
-export const SignModal: FC<TSignModalProps> = ({ account, isVisible, onFinish, onClose }) => {
+export const SignModal: FC<TSignModalProps> = ({ keyringPair, isVisible, onFinish, onClose }) => {
   const [password, setPassword] = useState<string>('');
   const [passwordError, setPasswordError] = useState<string | undefined>();
-  const { unlockLocalAccount } = useAccounts();
   const deviceSize = useDeviceSize();
 
   const onSignClick = useCallback(() => {
-    if (!account || account.signerType !== AccountSigner.local) return;
+    if (!keyringPair) return;
     try {
       setPasswordError(undefined);
-      const signature = unlockLocalAccount(password, account);
-      if (signature) {
-        onFinish(signature);
-      }
+      // const signature = unlockLocalAccount(password, account);
+
+      keyringPair.unlock(password);
+      onFinish(password);
     } catch (e) {
       setPasswordError('Unable to decode using the supplied passphrase');
     }
 
     setPassword('');
-  }, [account, password]);
+  }, [keyringPair, password]);
 
-  if (!account) return null;
+  if (!keyringPair) return null;
 
   return (<Modal isVisible={isVisible}
     isClosable={true}
@@ -52,8 +49,8 @@ export const SignModal: FC<TSignModalProps> = ({ account, isVisible, onFinish, o
     </Content>
     <AddressWrapper>
       <AccountCard
-        accountName={account.meta.name || ''}
-        accountAddress={account.address}
+        accountName={keyringPair?.meta?.name as string || ''}
+        accountAddress={keyringPair.address}
         isShort={deviceSize === DeviceSize.sm}
         canCopy={false}
       />

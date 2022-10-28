@@ -141,7 +141,7 @@ export class UniqueSDKMarketController implements UniqueController {
   }
 
   // purchase
-  async buyToken(address: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+  async buyToken(address: Address, collectionId: string, tokenId: string, { signer }: TransactionOptions): Promise<void> {
     if (!this.kusamaSdk || !this.uniqueSdk || !this.web3Instance) throw new Error('Controller isn\'t ready');
     const ethAddress = getEthAccount(address);
     const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
@@ -164,7 +164,7 @@ export class UniqueSDKMarketController implements UniqueController {
         []
       ]
     });
-    const signature = await options.sign?.(unsignedTxPayload);
+    const { signature } = await this.uniqueSdk.extrinsics.sign(unsignedTxPayload, signer);
 
     if (!signature) throw new Error('Signing failed');
 
@@ -175,7 +175,7 @@ export class UniqueSDKMarketController implements UniqueController {
   }
 
   // sell
-  async cancelSell(address: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+  async cancelSell(address: Address, collectionId: string, tokenId: string, { signer }: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk || !this.web3Instance) throw new Error('Controller isn\'t ready');
     const ethAddress = getEthAccount(address);
     const matcherContractInstance = this.getMatcherContractInstance(ethAddress);
@@ -206,7 +206,7 @@ export class UniqueSDKMarketController implements UniqueController {
         []
       ]
     });
-    const signature = await options.sign?.(unsignedTxPayload);
+    const { signature } = await this.uniqueSdk.extrinsics.sign(unsignedTxPayload, signer);
 
     if (!signature) throw new Error('Signing failed');
 
@@ -260,7 +260,7 @@ export class UniqueSDKMarketController implements UniqueController {
   }
 
   // sell
-  async lockNftForSale(account: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+  async lockNftForSale(account: Address, collectionId: string, tokenId: string, { signer }: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
     const ethAddress = getEthAccount(account);
 
@@ -276,11 +276,11 @@ export class UniqueSDKMarketController implements UniqueController {
       section: 'unique',
       method: 'transfer',
       args: [{ ethereum: ethAddress }, tokenIdArguments.collectionId, tokenIdArguments.tokenId, 1],
-      address: options.signer || '',
+      address: signer?.getAddress() || '',
       isImmortal: false
     });
 
-    const signature = await options.sign?.(unsignedTxPayload);
+    const { signature } = await this.uniqueSdk.extrinsics.sign(unsignedTxPayload, signer);
 
     if (!signature) throw new Error('Signing failed');
 
@@ -305,7 +305,7 @@ export class UniqueSDKMarketController implements UniqueController {
   }
 
   // sell
-  async sendNftToSmartContract(address: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+  async sendNftToSmartContract(address: Address, collectionId: string, tokenId: string, { signer }: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk || !this.web3Instance) throw new Error('Controller isn\'t ready');
     const tokenIdArguments: TokenIdArguments = {
       collectionId: Number(collectionId), tokenId: Number(tokenId)
@@ -338,7 +338,7 @@ export class UniqueSDKMarketController implements UniqueController {
       ]
     });
 
-    const signature = await options.sign?.(unsignedTxPayload);
+    const { signature } = await this.uniqueSdk.extrinsics.sign(unsignedTxPayload, signer);
 
     if (!signature) throw new Error('Signing failed');
 
@@ -349,7 +349,7 @@ export class UniqueSDKMarketController implements UniqueController {
   }
 
   // sell
-  async setForFixPriceSale(address: Address, collectionId: string, tokenId: string, price: string, options: TransactionOptions): Promise<void> {
+  async setForFixPriceSale(address: Address, collectionId: string, tokenId: string, price: string, { signer }: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk || !this.web3Instance) throw new Error('Controller isn\'t ready');
     const ethAddress = getEthAccount(address);
     const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
@@ -378,7 +378,7 @@ export class UniqueSDKMarketController implements UniqueController {
         []
       ]
     });
-    const signature = await options.sign?.(unsignedTxPayload);
+    const { signature } = await this.uniqueSdk.extrinsics.sign(unsignedTxPayload, signer);
 
     if (!signature) throw new Error('Signing failed');
 
@@ -389,7 +389,7 @@ export class UniqueSDKMarketController implements UniqueController {
   }
 
   // account
-  async transferBalance(address: Address, destination: string, amount: string, options: TransactionOptions): Promise<void> {
+  async transferBalance(address: Address, destination: string, amount: string, { signer, send }: TransactionOptions): Promise<void> {
     if (!this.kusamaSdk) throw new Error('Controller isn\'t ready');
     const unsignedTxPayload = await this.kusamaSdk.extrinsics.build({
       section: 'balances',
@@ -399,13 +399,13 @@ export class UniqueSDKMarketController implements UniqueController {
       isImmortal: false
     });
 
-    const signature = await options.sign?.(unsignedTxPayload);
+    const { signature } = await this.kusamaSdk.extrinsics.sign(unsignedTxPayload, signer);
 
     if (!signature) throw new Error('Signing failed');
-    if (options.send) {
+    if (send) {
       const { signerPayloadJSON } = unsignedTxPayload;
 
-      await options.send({ signerPayloadJSON, signature });
+      await send({ signerPayloadJSON, signature });
     } else {
       await this.kusamaSdk.extrinsics.submitWaitCompleted({
         signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
@@ -414,7 +414,7 @@ export class UniqueSDKMarketController implements UniqueController {
     }
   }
 
-  async transferBidBalance(address: Address, amount: string, options: TransactionOptions): Promise<void> {
+  async transferBidBalance(address: Address, amount: string, { signer, send }: TransactionOptions): Promise<void> {
     if (!this.kusamaSdk) throw new Error('Controller isn\'t ready');
     const unsignedTxPayload = await this.kusamaSdk.extrinsics.build({
       section: 'balances',
@@ -424,13 +424,13 @@ export class UniqueSDKMarketController implements UniqueController {
       isImmortal: false
     });
 
-    const signature = await options.sign?.(unsignedTxPayload);
+    const { signature } = await this.kusamaSdk.extrinsics.sign(unsignedTxPayload, signer);
 
     if (!signature) throw new Error('Signing failed');
-    if (options.send) {
+    if (send) {
       const { signerPayloadJSON } = unsignedTxPayload;
 
-      await options.send({ signerPayloadJSON, signature });
+      await send({ signerPayloadJSON, signature });
     } else {
       await this.kusamaSdk.extrinsics.submitWaitCompleted({
         signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
@@ -444,7 +444,7 @@ export class UniqueSDKMarketController implements UniqueController {
   }
 
   // token
-  async transferToken(from: Address, to: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+  async transferToken(from: Address, to: Address, collectionId: string, tokenId: string, { signer, send }: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
     const tokenIdArguments: TokenIdArguments = {
       collectionId: Number(collectionId), tokenId: Number(tokenId)
@@ -462,14 +462,14 @@ export class UniqueSDKMarketController implements UniqueController {
       ...tokenIdArguments
     });
 
-    const signature = await options.sign?.(unsignedTxPayload);
+    const { signature } = await this.uniqueSdk.tokens.transfer.sign(unsignedTxPayload, { signer });
 
     if (!signature) throw new Error('Signing failed');
 
-    if (options.send) {
+    if (send) {
       const { signerPayloadJSON } = unsignedTxPayload;
 
-      await options.send({ signerPayloadJSON, signature });
+      await send({ signerPayloadJSON, signature });
     } else {
       await this.uniqueSdk.extrinsics.submitWaitCompleted({
         signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
@@ -479,7 +479,7 @@ export class UniqueSDKMarketController implements UniqueController {
   }
 
   // purchase
-  async unlockNft(address: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+  async unlockNft(address: Address, collectionId: string, tokenId: string, { signer }: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
     const ethAddress = getEthAccount(address);
 
@@ -500,7 +500,7 @@ export class UniqueSDKMarketController implements UniqueController {
       address: address,
       isImmortal: false
     });
-    const signature = await options.sign?.(unsignedTxPayload);
+    const { signature } = await this.uniqueSdk.extrinsics.sign(unsignedTxPayload, signer);
 
     if (!signature) throw new Error('Signing failed');
 
@@ -511,7 +511,7 @@ export class UniqueSDKMarketController implements UniqueController {
   }
 
   // account
-  async withdrawDeposit(address: Address, options: TransactionOptions): Promise<void> {
+  async withdrawDeposit(address: Address, { signer }: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk || !this.web3Instance) throw new Error('Controller isn\'t ready');
     if (!address || address === '') throw new Error('Address not provided');
     const ethAddress = getEthAccount(address);
@@ -538,7 +538,7 @@ export class UniqueSDKMarketController implements UniqueController {
         []
       ]
     });
-    const signature = await options.sign?.(unsignedTxPayload);
+    const { signature } = await this.uniqueSdk.extrinsics.sign(unsignedTxPayload, signer);
 
     if (!signature) throw new Error('Signing failed');
 

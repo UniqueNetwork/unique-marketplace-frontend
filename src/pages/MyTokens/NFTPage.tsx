@@ -100,17 +100,17 @@ export const NFTPage = () => {
   const { api, currentChainId } = useApi();
 
   useEffect(() => {
-    if (!api?.nft || !selectedAccount?.address) return;
+    if (!api?.nft || !selectedAccount) return;
 
     setIsFetchingTokens(true);
     void (async () => {
-      await fetch({ page: 1, pageSize, seller: selectedAccount?.address });
-      const _tokens = (await api.nft?.getAccountMarketableTokens(selectedAccount.address)) || [];
+      await fetch({ page: 1, pageSize, seller: selectedAccount?.getAddress() });
+      const _tokens = (await api.nft?.getAccountMarketableTokens(selectedAccount.getAddress())) || [];
 
       setTokens(_tokens);
       setIsFetchingTokens(false);
     })();
-  }, [api?.nft, currentChainId, selectedAccount?.address, setIsFetchingTokens, fetch]);
+  }, [api?.nft, currentChainId, selectedAccount, setIsFetchingTokens, fetch]);
 
   useEffect(() => {
     if (!api) return;

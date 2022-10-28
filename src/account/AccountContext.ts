@@ -1,26 +1,30 @@
 import { Consumer, Context, createContext, Provider } from 'react';
-import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
 import { BN } from '@polkadot/util';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { TWithdrawBid } from '../api/restApi/auction/types';
+import { Account, SignResult, UnsignedTxPayload } from '@unique-nft/accounts';
 
-export enum AccountSigner {
-  extension = 'Extension',
-  local = 'Local'
-}
-export interface Account extends InjectedAccountWithMeta {
-  signerType: AccountSigner,
-  balance?: {
-    KSM?: BN
-  },
-  deposits?: {
-    bids: {
-      leader: TWithdrawBid[]
-      withdraw: TWithdrawBid[]
-    }
-    sponsorshipFee?: BN
+export type AccountDeposits = {
+  bids: {
+    leader: TWithdrawBid[]
+    withdraw: TWithdrawBid[]
   }
-  isOnWhiteList?: boolean
+  sponsorshipFee?: BN
+}
+
+declare module '@unique-nft/accounts' {
+  export abstract class Account {
+    name: string;
+    address: string;
+    balance?: {
+      KSM?: BN
+    };
+
+    deposits?: AccountDeposits;
+    isOnWhiteList?: boolean;
+    isLocal?: boolean;
+    abstract sign(unsignedTxPayload: Pick<UnsignedTxPayload, 'signerPayloadHex'> & Partial<UnsignedTxPayload>): Promise<SignResult>
+  }
 }
 
 export type AccountContextProps = {
@@ -31,9 +35,9 @@ export type AccountContextProps = {
   fetchAccountsError: string | undefined
   changeAccount(account: Account): void
   setSelectedAccount(account: Account): void
-  showSignDialog(account: Account): Promise<KeyringPair>
+  showSignDialog(keyringPair: KeyringPair): Promise<string>
   fetchAccounts(): Promise<void>
-  fetchAccountsWithDeposits(accounts: Account[]): Promise<Account[]>
+  updateAccountsDeposits(): Promise<void>
   updateCurrentAccountDeposit(): Promise<void>
 }
 

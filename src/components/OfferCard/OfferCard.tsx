@@ -42,7 +42,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
 
   const isBidder = useMemo(() => {
     if (!selectedAccount) return false;
-    return offer?.auction?.bids.some((bid) => compareEncodedAddresses(bid.bidderAddress, selectedAccount.address));
+    return offer?.auction?.bids.some((bid) => compareEncodedAddresses(bid.bidderAddress, selectedAccount.getAddress()));
   }, [offer, selectedAccount]);
 
   const topBid = useMemo(() => {
@@ -52,7 +52,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
 
   const isTopBidder = useMemo(() => {
     if (!selectedAccount || !isBidder || !topBid) return false;
-    return compareEncodedAddresses(offer?.auction!.bids[0].bidderAddress, selectedAccount.address);
+    return compareEncodedAddresses(offer?.auction!.bids[0].bidderAddress, selectedAccount.getAddress());
   }, [isBidder, topBid, selectedAccount]);
 
   const tokenPath = useMemo(() => generatePath('/:currentChainId/token/:collectionId/:tokenId', {

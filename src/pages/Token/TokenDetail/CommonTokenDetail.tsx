@@ -1,7 +1,7 @@
 import { Heading, Text } from '@unique-nft/ui-kit';
 import React, { FC, ReactChild, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { Icon, Link } from 'components/UI';
+import { Icon } from 'components/UI';
 import { Picture } from 'components';
 import { CollectionsCard } from './CollectionsCard';
 import { AttributesBlock } from './AttributesBlock';
@@ -75,7 +75,7 @@ export const CommonTokenDetail: FC<IProps> = ({
   const { chainData, currentChainId } = useApi();
 
   const formatAddress = useCallback((address: string) => {
-    return toChainFormatAddress(address, Number(chainData?.ss58Format.toHuman()) || 0);
+    return toChainFormatAddress(address, Number(chainData?.ss58Format?.toHuman()) || 0);
   }, [chainData?.ss58Format]);
 
   const owner = useMemo(() => {

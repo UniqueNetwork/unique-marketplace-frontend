@@ -7,23 +7,33 @@ import { useAccounts } from '../useAccounts';
 
 export const useCancelSellFixStages = (collectionId: number, tokenId: number) => {
   const { api } = useApi();
-  const { signPayloadJSON } = useAccounts();
+  const { selectedAccount } = useAccounts();
   const marketApi = api?.market;
   const delistStages: InternalStage<TDelistProps>[] = useMemo(() => [
     {
       title: 'Unlocking NFT',
       description: '',
       status: StageStatus.default,
-      action: (params) => marketApi?.cancelSell(params.txParams.accountAddress, collectionId.toString(), tokenId.toString(), params.options)
+      action: ({ txParams, options }) => marketApi?.cancelSell(
+        txParams.accountAddress,
+        collectionId.toString(),
+        tokenId.toString(),
+        options
+      )
     },
     {
       title: 'Sending NFT to wallet',
       description: '',
       status: StageStatus.default,
-      action: (params) => marketApi?.unlockNft(params.txParams.accountAddress, collectionId.toString(), tokenId.toString(), params.options)
+      action: ({ txParams, options }) => marketApi?.unlockNft(
+        txParams.accountAddress,
+        collectionId.toString(),
+        tokenId.toString(),
+        options
+      )
     }
   ], [marketApi, collectionId, tokenId]);
-  const { stages, error, status, initiate } = useStages<TDelistProps>(delistStages, signPayloadJSON);
+  const { stages, error, status, initiate } = useStages<TDelistProps>(delistStages, selectedAccount);
 
   return {
     stages,
