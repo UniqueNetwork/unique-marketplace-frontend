@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Dropdown, Icon, TableColumnProps, Text } from '@unique-nft/ui-kit';
+import { TableColumnProps, TableRowProps } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { BN } from '@polkadot/util';
-
+import { Icon, Dropdown, Text, Button, Link } from 'components/UI';
 import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
 import { TWithdrawBid } from 'api/restApi/auction/types';
 import { Account } from 'account/AccountContext';
@@ -25,7 +25,7 @@ import { WithdrawDepositModal } from './Modals/WithdrawDeposit';
 import { TransferFundsModal } from './Modals/SendFunds';
 import BalanceCell from './BalanceCell';
 import { AdditionalLight, BlueGrey300, Grey500, Primary100, Primary500 } from 'styles/colors';
-import config from '../../config';
+import config from 'config';
 import { AccountInfo } from './types';
 import NoAccountsIcon from 'static/icons/no-accounts.svg';
 
@@ -40,6 +40,7 @@ type AccountsColumnsProps = {
   onShowWithdrawDepositModal(address: string): () => void
   onShowDeleteLocalAccountModal(address: string): () => void
   onShowGetKsmModal: () => void
+  scanUrl: string
 };
 
 const getAccountsColumns = ({
@@ -48,12 +49,13 @@ const getAccountsColumns = ({
     onShowWithdrawDepositModal,
     isSmallDevice,
     onShowDeleteLocalAccountModal,
-    onShowGetKsmModal
+    onShowGetKsmModal,
+    scanUrl
   }: AccountsColumnsProps): TableColumnProps[] => [
   {
     title: (
       <>
-        <Title>Account</Title>
+        <Title data-testid={`${testid}-account-column`}>Account</Title>
         {!isSmallDevice &&
           <IconWithHint align={{ appearance: 'horizontal', vertical: 'top', horizontal: 'right' }}>
             <span>Substrate account addresses (Kusama, Quartz, Polkadot, Unique, etc.) may be represented by a different address
@@ -73,21 +75,26 @@ const getAccountsColumns = ({
             accountAddress={accountInfo.address}
             canCopy
             isShort={isSmallDevice}
+            testid={`${testid}-${accountInfo.address}`}
           />
         </AccountCellWrapper>
       );
     }
   },
   {
-    title: (<Title>Balance</Title>),
+    title: (<Title data-testid={`${testid}-balance-column`}>Balance</Title>),
     width: '25%',
     field: 'balance',
     render(data, { accountInfo }: (Account & { accountInfo: AccountInfo })) {
-      return (<BalanceCell accountInfo={accountInfo} isSmallDevice={isSmallDevice} tokenSymbol={tokenSymbol} />);
+      return (<BalanceCell accountInfo={accountInfo}
+        isSmallDevice={isSmallDevice}
+        tokenSymbol={tokenSymbol}
+        data-testid={`${testid}-${accountInfo.address}`}
+      />);
     }
   },
   {
-    title: (<Title>Block explorer</Title>),
+    title: (<Title data-testid={`${testid}-blockexpolorer-column`}>Block explorer</Title>),
     width: '25%',
     field: 'blockExplorer',
     render(data, { accountInfo }: (Account & { accountInfo: AccountInfo })) {
@@ -97,7 +104,8 @@ const getAccountsColumns = ({
           <LinkStyled
             target={'_blank'}
             rel={'noreferrer'}
-            href={`${config.scanUrl}account/${formatAddress(accountInfo.address)}`}
+            href={`${scanUrl}account/${formatAddress(accountInfo.address)}`}
+            data-testid={`${testid}-${accountInfo.address}-blockexpolorer-link`}
           >
             <TextStyled>UniqueScan</TextStyled>
             <IconWrapper>
@@ -109,14 +117,18 @@ const getAccountsColumns = ({
     }
   },
   {
-    title: isSmallDevice ? '' : (<Title>Actions</Title>),
+    title: isSmallDevice ? '' : (<Title data-testid={`${testid}-actions-column`}>Actions</Title>),
     width: '25%',
     field: 'actions',
     render(data, { accountInfo }: (Account & { accountInfo: AccountInfo })) {
       if (accountInfo.deposit && !isSmallDevice) {
         return (
           <DepositActionsWrapper>
-            <Button title={'Withdraw'} onClick={onShowWithdrawDepositModal(accountInfo.address)} role={'primary'} />
+            <Button title={'Withdraw'}
+              onClick={onShowWithdrawDepositModal(accountInfo.address)}
+              role={'primary'}
+              testid={`${testid}-${accountInfo.address}-withdraw-button`}
+            />
             <IconWithHint align={{ appearance: 'vertical', vertical: 'bottom', horizontal: 'right' }}>
               <span>Learn more in <StyledLink href='/FAQ' target='_blank' rel='noreferrer'>FAQ</StyledLink></span>
             </IconWithHint>
@@ -131,11 +143,16 @@ const getAccountsColumns = ({
               title={'Get'}
               onClick={onShowGetKsmModal}
               disabled={!config.rampApiKey}
+              testid={`${testid}-${accountInfo.address}-get-button`}
             />
-            {accountInfo.signerType === 'Local' && <Button title={'Delete'} onClick={onShowDeleteLocalAccountModal(accountInfo.address)} />}
+            {accountInfo.signerType === 'Local' && <Button title={'Delete'} onClick={onShowDeleteLocalAccountModal(accountInfo.address)} testid={`${testid}-${accountInfo.address}-delete-button`} />}
           </ActionsWrapper>
           {(accountInfo.deposit && isSmallDevice) && <DepositActionsWrapper>
-            <Button title={'Withdraw'} onClick={onShowWithdrawDepositModal(accountInfo.address)} role={'primary'} />
+            <Button title={'Withdraw'}
+              onClick={onShowWithdrawDepositModal(accountInfo.address)}
+              role={'primary'}
+              testid={`${testid}-${accountInfo.address}-get-button`}
+            />
             <IconWithHint align={{ appearance: 'vertical', vertical: 'bottom', horizontal: 'right' }}>
               <span>Learn more in <StyledLink href='/FAQ' target='_blank' rel='noreferrer'>FAQ</StyledLink></span>
             </IconWithHint>
@@ -147,7 +164,6 @@ const getAccountsColumns = ({
 ];
 
 const caretDown = { name: 'carret-down', size: 16, color: AdditionalLight };
-const caretUp = { name: 'carret-up', size: 16, color: AdditionalLight };
 
 enum AccountModal {
   create,
@@ -173,7 +189,12 @@ export const AccountsPage = () => {
   const [selectedAddress, setSelectedAddress] = useState<string>();
   const [isDropdownOpened, setIsDropdownOpened] = useState(false);
   const deviceSize = useDeviceSize();
-  const { chainData } = useApi();
+  const { chainData, currentChainId } = useApi();
+
+  useEffect(() => {
+    setSearchString('');
+    setCurrentModal(undefined);
+  }, [currentChainId]);
 
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
@@ -220,7 +241,7 @@ export const AccountsPage = () => {
   }, []);
 
   const filteredAccounts = useMemo(() => {
-    const reduceAccounts = (acc: (Account & { accountInfo: AccountInfo })[], account: Account) => {
+    const reduceAccounts = (acc: (Account & { accountInfo: AccountInfo } & TableRowProps)[], account: Account) => {
       acc.push({
         ...account,
         accountInfo: {
@@ -314,7 +335,8 @@ export const AccountsPage = () => {
             testid={`${testid}-add-via-button`}
             title={'Add account via'}
             role={'primary'}
-            iconRight={isDropdownOpened ? caretUp : caretDown}
+            iconRight={caretDown}
+            isDropdownOpened={isDropdownOpened}
           />
         </DropdownStyled>
         <SearchInputWrapper>
@@ -328,14 +350,15 @@ export const AccountsPage = () => {
         </SearchInputWrapper>
       </Row>
       <TableWrapper>
-        <Table
+        <Table<(Account & { accountInfo: AccountInfo } & TableRowProps)>
           columns={getAccountsColumns({
             isSmallDevice: deviceSize === DeviceSize.sm,
             formatAddress,
             onShowSendFundsModal,
             onShowWithdrawDepositModal,
             onShowDeleteLocalAccountModal,
-            onShowGetKsmModal
+            onShowGetKsmModal,
+            scanUrl: currentChainId ? config.blockchains[currentChainId]?.scanUrl : ''
           })}
           data={filteredAccounts}
           loading={isLoading || isLoadingDeposits}
@@ -387,7 +410,7 @@ export const AccountsPage = () => {
         headerText={'Delete local account'}
         testid={`${testid}-delete-account-modal`}
       >
-        <p>Are you sure, you want to perform this action? You won&apos;t be able to recover this account in future.</p>
+        <p data-testid={`${testid}-delete-account-modal-content`}>Are you sure, you want to perform this action? You won&apos;t be able to recover this account in future.</p>
       </ConfirmModal>
     </AccountPageWrapper>
     {config.rampApiKey && currentModal === AccountModal.getKsmModal && <GetKSMModal key={'modal-accounts-getKsm'} onClose={onModalClose}/>}
@@ -471,10 +494,14 @@ const DropdownStyled = styled(Dropdown)`
   }
 `;
 
-const AddAccountButton = styled(Button)`
+const AddAccountButton = styled(Button)<{ isDropdownOpened: boolean }>`
   width: 196px;
   @media (max-width: 1024px) {
     width: 100%;
+  }
+  svg {
+    transform: ${({ isDropdownOpened }) => isDropdownOpened ? 'rotate(180deg);' : 'rotate(0deg);'};
+    transition: transform 0.3s;
   }
 `;
 
@@ -497,7 +524,7 @@ const LinksWrapper = styled.div`
   padding: 0 !important;
 `;
 
-const LinkStyled = styled.a`
+const LinkStyled = styled(Link)`
   display: flex;
   align-items: center;
   column-gap: calc(var(--gap) / 4);

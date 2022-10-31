@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import { TCreateAccountBodyModalProps } from './types';
-import { Button, Text } from '@unique-nft/ui-kit';
+import { Button, Text } from 'components/UI';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import styled from 'styled-components';
 import { PasswordInput } from '../../../components/PasswordInput/PasswordInput';
@@ -40,7 +40,7 @@ export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountP
       <Text testid={`${testid}-address`} color={'grey-500'}>{formatAddress}</Text>
     </AddressWrapper>
     <CredentialsWrapper>
-      <Text size={'m'}>Name</Text>
+      <Text size={'m'} testid={`${testid}-name-label`}>Name</Text>
       <Text size={'s'} color={'grey-500'}>Give your account a name for easier identification and handling. </Text>
       <TextInput
         testid={`${testid}-name-input`}
@@ -50,8 +50,8 @@ export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountP
         allowSpaces
       />
 
-      <Text size={'m'}>Password</Text>
-      <Text size={'s'} color={'grey-500'}>This is necessary to authenticate all committed transactions and encrypt the key pair.
+      <Text size={'m'} testid={`${testid}-password-label`}>Password</Text>
+      <Text size={'s'} color={'grey-500'} testid={`${testid}-password-additional-text`}>This is necessary to authenticate all committed transactions and encrypt the key pair.
         {deviceSize !== DeviceSize.sm ? <br/> : ' '}
         Ensure you are using a strong password for proper account protection. </Text>
       <PasswordInput
@@ -59,7 +59,7 @@ export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountP
         onChange={setPassword}
         value={password}
       />
-      <Text size={'m'}>Repeat password</Text>
+      <Text size={'m'} testid={`${testid}-confirm-password-label`}>Repeat password</Text>
       <PasswordInput
         testid={`${testid}-confirm-password`}
         onChange={setConfirmPassword}
@@ -69,7 +69,7 @@ export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountP
       {!passwordsMatch && confirmPassword && <Text size={'s'} color={'coral-500'}>Passwords do not match</Text>}
     </CredentialsWrapper>
     <ButtonWrapper>
-      <StepsTextStyled size={'m'}>Step 2/3</StepsTextStyled>
+      <StepsTextStyled size={'m'} testid={`${testid}-step`}>Step 2/3</StepsTextStyled>
       <Button
         testid={`${testid}-previous-button`}
         onClick={onGoBack}

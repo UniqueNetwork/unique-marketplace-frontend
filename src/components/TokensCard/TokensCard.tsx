@@ -1,9 +1,9 @@
-import React, { FC, useMemo, useState } from 'react';
-import { Icon, Loader, Text } from '@unique-nft/ui-kit';
-import { Link } from 'react-router-dom';
+import React, { FC, useEffect, useMemo, useState } from 'react';
+import { Loader, Text } from '@unique-nft/ui-kit';
+import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
+import { generatePath, Link } from 'react-router-dom';
 import styled from 'styled-components';
-
-import { NFTToken } from 'api/uniqueSdk/types';
+import { Icon, Link as UILink } from 'components/UI';
 import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
 import { Offer } from 'api/restApi/offers/types';
 import { useApi } from 'hooks/useApi';
@@ -11,53 +11,85 @@ import { useAccounts } from 'hooks/useAccounts';
 import { formatKusamaBalance } from 'utils/textUtils';
 import { timeDifference } from 'utils/timestampUtils';
 import { Primary600 } from 'styles/colors';
-import config from '../../config';
+import config from 'config';
 import { TokensMedia } from './TokensMedia';
+import { countNestedChildren, stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
+import { useCollections } from 'hooks/useCollections';
+import BundleItemsCount from '../BundleItemsCount/BundleItemsCount';
 
 export type TTokensCard = {
-  token?: NFTToken & Partial<Offer>
+  token?: TokenByIdResult
+  offer?: Partial<Offer>
   tokenId?: number
   collectionId?: number
   tokenImageUrl?: string
   testid: string
 };
 
-export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, ...props }) => {
-  const [token, setToken] = useState<(NFTToken & Partial<Offer>) | undefined>(props.token);
+export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, testid, ...props }) => {
+  const [token, setToken] = useState<TokenByIdResult | undefined>(props.token);
+  const [collection, setCollection] = useState<(CollectionInfoWithSchema) | undefined>();
   const [isFetching, setIsFetching] = useState<boolean>(false);
+  const [isBundleState, setIsBundleState] = useState<boolean>();
+  const [tokensCount, setTokensCount] = useState<number>();
 
-  const { api } = useApi();
+  const { api, currentChainId } = useApi();
   const { selectedAccount } = useAccounts();
+  const { getCollection } = useCollections();
 
   const {
-    collectionName,
+    tokenTitle,
+    collectionTitle,
     imageUrl,
-    prefix,
     price,
     auction,
     video
-  } = useMemo<Partial<Offer & NFTToken>>(() => {
-    if (token?.tokenDescription) {
-      const { collectionName, prefix, image } = token.tokenDescription;
-      return { ...token,
-        collectionName,
-        prefix,
-        imageUrl: image };
-    }
-
-    if (token) {
-      return token;
+  } = useMemo(() => {
+    if (offer || (token && collection)) {
+      const { image, video } = offer?.tokenDescription || token || {};
+      const { name: collectionName, tokenPrefix } = offer?.collectionDescription || collection || {};
+      const { auction, price } = offer || {};
+      return {
+        tokenTitle: `${tokenPrefix || ''} #${tokenId || ''}`,
+        collectionTitle: `${collectionName?.substring(0, 25) || ''} [id ${collectionId || ''}]`,
+        imageUrl: image,
+        video: stringToDecodedInfixOrUrlOrCidAndHash(video),
+        auction,
+        price
+      };
     }
 
     if (tokenId && collectionId) {
       setIsFetching(true);
-      void api?.nft?.getToken(collectionId, tokenId).then((token: NFTToken | null) => {
+      (async () => {
+        if (!token) {
+          const token = await api?.nft?.getToken(collectionId, tokenId);
+          if (token) setToken(token);
+        }
+
+        if (!collection) {
+          const collection = await getCollection(collectionId);
+          if (collection) setCollection(collection);
+        }
         setIsFetching(false);
-        if (token) { setToken(token); }
-      });
+      })();
     }
     return {};
-  }, [collectionId, tokenId, token, api]);
+  }, [collectionId, tokenId, collection, token, api]);
+
+  useEffect(() => {
+    (async () => {
+      let count;
+      if (offer) {
+        count = countNestedChildren(offer?.tokenDescription?.nestingChildTokens || []);
+      } else if (tokenId && collectionId) {
+        const bundle = await api?.nft?.getBundle(collectionId, tokenId);
+        count = countNestedChildren(bundle?.nestingChildTokens || []);
+      }
+      setIsBundleState(!!count);
+      setTokensCount(count);
+    })();
+  }, [offer, tokenId, collectionId, api?.nft]);
 
   const isBidder = useMemo(() => {
     if (!selectedAccount) return false;
@@ -74,43 +106,51 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, ...
     return compareEncodedAddresses(auction.bids[0].bidderAddress, selectedAccount.address);
   }, [isBidder, topBid, selectedAccount, auction]);
 
+  const tokenPath = useMemo(() => generatePath('/:currentChainId/token/:collectionId/:tokenId', {
+    currentChainId,
+    collectionId: collectionId?.toString(),
+    tokenId: tokenId?.toString()
+  }), [currentChainId, collectionId, tokenId]);
+
   return (
     <TokensCardStyled>
       <TokensMedia
-        to={`/token/${collectionId || ''}/${tokenId || ''}`}
+        to={tokenPath}
         tokenId={tokenId}
         imageUrl={imageUrl}
         video={video}
         testid={`${testid}-token-media`}
+        badge={isBundleState ? 'Bundle' : ''}
       />
       <Description>
-        <Link to={`/token/${collectionId}/${tokenId}`} title={`${prefix || ''} #${tokenId}`}>
+        <Link to={tokenPath} title={tokenTitle}>
           <Text
             size='l'
             weight='regular'
             testid={`${testid}-tokenId`}
           >
-            {`${prefix || ''} #${tokenId || ''}`}
+            {tokenTitle}
           </Text>
         </Link>
-        <a
+        <UILink
           data-testid={`${testid}-collection-${collectionId}-link`}
-          href={`${config.scanUrl || ''}collections/${collectionId || ''}`}
+          href={`${config.blockchains[currentChainId || '']?.scanUrl || ''}collections/${collectionId || ''}`}
           target={'_blank'}
           rel='noreferrer'
         >
           <Text color='primary-600' size='s'>
-            {`${collectionName?.substring(0, 25) || ''} [id ${collectionId || ''}]`}
+            {collectionTitle}
           </Text>
-        </a>
+        </UILink>
+        {isBundleState && <BundleItemsCount count={tokensCount || 0} testId={testid} />}
         {price && <PriceWrapper>
           <Text
             testid={`${testid}-price`}
             size='s'
           >{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(price)}` }</Text>
-          <Icon name={'chain-kusama'} size={16} />
+          <IconStyled name={'chain-kusama'} size={16} />
+          {!auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         </PriceWrapper>}
-        {price && !auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         {auction && <AuctionInfoWrapper>
           {isTopBidder && <Text
             testid={`${testid}-leading-bid`}
@@ -153,10 +193,6 @@ const Description = styled.div`
 
   span {
     color: ${Primary600};
-
-    &:nth-of-type(2) {
-      margin-bottom: 8px;
-    }
   }
 `;
 
@@ -164,6 +200,7 @@ const PriceWrapper = styled.div`
   display: flex;
   align-items: center;
   column-gap: calc(var(--gap) / 4);
+  margin-top: calc(var(--gap) / 2);
 `;
 
 const StyledText = styled(Text)` 
@@ -175,4 +212,8 @@ const StyledText = styled(Text)`
 const AuctionInfoWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 2);
+`;
+
+const IconStyled = styled(Icon)`
+  margin: 0 calc(var(--gap) / 4);
 `;

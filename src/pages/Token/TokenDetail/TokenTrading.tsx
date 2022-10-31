@@ -1,6 +1,5 @@
 import React, { FC, useContext, useMemo } from 'react';
 
-import { NFTToken } from 'api/uniqueSdk/types';
 import { Offer } from '../../../api/restApi/offers/types';
 import accountContext from '../../../account/AccountContext';
 import { SellToken } from '../SellToken/SellToken';
@@ -9,9 +8,10 @@ import Auction from '../Auction/Auction';
 import { isTokenOwner } from 'api/uniqueSdk/utils/addressUtils';
 import { useApi } from '../../../hooks/useApi';
 import { checkAllowedTokenInSettings } from 'api/uniqueSdk/utils/checkTokenIsAllowed';
+import { TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 
 interface TokenTradingProps {
-  token?: NFTToken
+  token?: TokenByIdResult
   offer?: Offer
   onSellClick(): void
   onBuyClick(): void
@@ -26,14 +26,15 @@ interface TokenTradingProps {
 
 export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick, onTransferClick, onDelistClick, onDelistAuctionClick, onPlaceABidClick, onWithdrawClick, onBuyClick, onAuctionClose, testid }) => {
   const { selectedAccount } = useContext(accountContext);
-  const { settings } = useApi();
+  const { settings, currentChainId } = useApi();
+
+  const allowedTokens = useMemo(() => settings && currentChainId ? settings.blockchain.unique.allowedTokens : undefined, [settings]);
 
   const isAllowed = useMemo(() => {
-    if (offer) {
-      return checkAllowedTokenInSettings(offer.tokenId, offer.collectionId, settings);
-    }
-    return token?.isAllowed;
-  }, [settings, token, offer]);
+    if (!token && !offer) return;
+    const { tokenId, collectionId } = offer || token!;
+    return checkAllowedTokenInSettings(tokenId, collectionId, allowedTokens);
+  }, [allowedTokens, token, offer]);
 
   const isOwner = useMemo(() => {
     if (!selectedAccount) return false;
@@ -68,6 +69,6 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
   if (!isAllowed) return null;
 
   return (
-    <BuyToken offer={offer} onBuy={onBuyClick}/>
+    <BuyToken offer={offer} onBuy={onBuyClick} testid={`${testid}-buy`}/>
   );
 };

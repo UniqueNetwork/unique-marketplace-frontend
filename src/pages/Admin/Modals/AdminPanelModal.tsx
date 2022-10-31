@@ -1,13 +1,13 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
-import { Modal } from '@unique-nft/ui-kit';
 import { AdminPanelModalType } from './types';
 import { RejectSponsorshipModal } from './RejectSposorshipModal';
 import { RemoveCollectionModal } from './RemoveCollectionModal';
 import { AcceptSponsorshipModal } from './AcceptSponsorshipModal';
 import { AddCollectionModal } from './AddCollectionModal';
 import { SelectNFTsModal } from './SelectNFTsModal';
-import { CollectionData } from '../../../api/restApi/admin/types';
+import { CollectionData } from 'api/restApi/admin/types';
 import styled from 'styled-components';
+import { Modal } from 'components/UI';
 
 export type TAdminPanelModalProps = {
   collection?: CollectionData
@@ -55,7 +55,11 @@ export const AdminPanelModal = ({ onClose, onFinish, collection, modalType }: TA
 
   return (
     <AdminModalWrapper>
-      <Modal isVisible={isVisible} isClosable={isClosable} onClose={onClose}>
+      <Modal isVisible={isVisible}
+        isClosable={isClosable}
+        onClose={onClose}
+        isGlobalBackdrop
+      >
         <ModalBodyComponent
           collection={collection}
           onFinish={onFinish}

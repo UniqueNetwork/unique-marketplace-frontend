@@ -1,62 +1,84 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Icon, Link, useNotifications } from '@unique-nft/ui-kit';
-
-import { useApi } from '../../hooks/useApi';
-import { NFTToken } from 'api/uniqueSdk/types';
-import { MarketType } from '../../types/MarketTypes';
+import { Link } from '@unique-nft/ui-kit';
+import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
+import { Icon, useNotifications } from 'components/UI';
+import { useApi } from 'hooks/useApi';
+import { MarketType } from 'types/MarketTypes';
 import { CommonTokenDetail } from './TokenDetail/CommonTokenDetail';
 import { useOffer } from 'api/restApi/offers/offer';
 import { TokenTrading } from './TokenDetail/TokenTrading';
 import { Error404 } from '../errors/404';
 import TokenPageModal from './Modals/TokenPageModal';
-import { PagePaper } from '../../components/PagePaper/PagePaper';
-import { useAccounts } from '../../hooks/useAccounts';
-import { shortcutText } from '../../utils/textUtils';
-import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
+import { PagePaper } from 'components/PagePaper/PagePaper';
+import { useAccounts } from 'hooks/useAccounts';
+import { shortcutText } from 'utils/textUtils';
+import { compareEncodedAddresses, isTokenOwner } from 'api/uniqueSdk/utils/addressUtils';
 import styled from 'styled-components';
 import { BlueGrey500 } from 'styles/colors';
+import BundleTreeSection from './BundleTreeSection';
+import { useCollections } from 'hooks/useCollections';
 
 const testid = 'token-page';
 
 const TokenPage = () => {
-  const { api } = useApi();
-  const { selectedAccount } = useAccounts();
+  const { api, currentChainId } = useApi();
+  const { selectedAccount, updateCurrentAccountDeposit } = useAccounts();
   const { id, collectionId } = useParams<{ id: string, collectionId: string}>();
-  const [token, setToken] = useState<NFTToken>();
+  const [token, setToken] = useState<TokenByIdResult>();
+  const [collection, setCollection] = useState<CollectionInfoWithSchema>();
   const [isFetchingToken, setIsFetchingToken] = useState<boolean>(true);
   const { offer, fetch: fetchOffer, isFetching: isFetchingOffer } = useOffer(Number(collectionId), Number(id));
+  const { getCollection } = useCollections();
   const [marketType, setMarketType] = useState<MarketType>(MarketType.default);
+  const [isBundle, setIsBundle] = useState(false);
   const navigate = useNavigate();
-
   const { info } = useNotifications();
 
   const fetchToken = useCallback(async () => {
-    if (!api?.nft) return;
+    if (!api?.nft || !currentChainId) return;
     setIsFetchingToken(true);
-    const token = await api?.nft?.getToken(Number(collectionId), Number(id));
-    if (token) setToken(token);
+    try {
+      const token = await api.nft?.getToken(Number(collectionId), Number(id));
+      setIsBundle(await api.nft?.isBundle(Number(collectionId), Number(id)));
+
+      const collection = await getCollection(Number(collectionId));
+      if (token) setToken(token);
+      if (collection) setCollection(collection);
+    } catch (e) {
+      console.error('error while fetching token or collection from RPC', e);
+    }
     setIsFetchingToken(false);
-  }, [api?.nft, collectionId, id]);
+  }, [api?.nft, currentChainId, collectionId, id]);
 
   useEffect(() => {
     if (isFetchingOffer) return;
-    if (offer || token) {
-      setIsFetchingToken(false);
-      return;
-    }
-    void fetchToken();
-  }, [fetchToken, isFetchingOffer, offer, token]);
+    (async () => {
+      if (offer) {
+        const collection = await getCollection(Number(collectionId));
+        if (collection) setCollection(collection);
+        setIsBundle(!!offer.tokenDescription.nestingChildTokens);
+      }
+      if (!token) await fetchToken();
+      if (offer || token) {
+        setIsFetchingToken(false);
+      }
+    })();
+  }, [fetchToken, isFetchingOffer, offer, token, collectionId]);
 
   const onClose = useCallback(() => {
     setMarketType(MarketType.default);
   }, []);
 
   const onFinish = useCallback(() => {
+    if (marketType === MarketType.bid || marketType === MarketType.withdrawBid) {
+      void updateCurrentAccountDeposit();
+    }
+
     setMarketType(MarketType.default);
     void fetchToken();
-    fetchOffer(Number(collectionId), Number(id));
-  }, [fetchOffer, fetchToken, collectionId, id]);
+    void fetchOffer(Number(collectionId), Number(id));
+  }, [fetchOffer, fetchToken, collectionId, id, marketType, updateCurrentAccountDeposit]);
 
   const onActionClick = useCallback((action: MarketType) => () => {
     setMarketType(action);
@@ -71,13 +93,13 @@ const TokenPage = () => {
           selectedAccount?.address || ''
         )
           ? 'You are'
-          : `${shortcutText(newOwnerAddress)} is` }  the new owner of <Link href={`/token/${token.collectionId}/${token.id}`} title={`${token.prefix} #${token.id}`}/>
+          : `${shortcutText(newOwnerAddress)} is` }  the new owner of <Link href={`/token/${token.collectionId}/${token.tokenId}`} title={`${collection?.tokenPrefix} #${token.tokenId}`}/>
       </div>,
       { name: 'success', size: 32, color: 'var(--color-additional-light)' }
     );
 
-    fetchOffer(Number(collectionId), Number(id));
-    fetchToken();
+    void fetchOffer(Number(collectionId), Number(id));
+    void fetchToken();
   }, [info, fetchOffer, fetchToken, selectedAccount?.address, collectionId, id, token]);
 
   const backClickHandler = useCallback(() => {
@@ -89,6 +111,17 @@ const TokenPage = () => {
     }
   }, [navigate]);
 
+  // if we opened child token from bundle which is on sale
+  const isIgnoreOffer = useMemo(() => (!(!token || !offer || (id === offer.tokenId.toString() && collectionId === offer.collectionId.toString()))), [token, offer]);
+
+  const isOwner = useMemo(() => {
+    if (!selectedAccount || isFetchingOffer || isFetchingToken) return false;
+    if (offer) {
+      return isTokenOwner(selectedAccount.address, offer.seller);
+    }
+    return token?.owner ? isTokenOwner(selectedAccount.address, token.owner) : false;
+  }, [isFetchingOffer, isFetchingToken, selectedAccount, token, offer]);
+
   if (!isFetchingOffer && !isFetchingToken && !token && !offer) return <Error404 />;
 
   // TODO: split into more categories here instead of just "buy/sell" and putting splitting inside them
@@ -96,19 +129,22 @@ const TokenPage = () => {
   return (
     <>
       <BackLink onClick={backClickHandler} data-testid={`${testid}-back-link`}>
-        <Icon name='arrow-left' color={BlueGrey500} size={16}></Icon>
+        <Icon name='arrow-left' color={BlueGrey500} size={16}/>
         <p>back</p>
       </BackLink>
       <TokenPagePaper>
         <CommonTokenDetail
           token={token}
-          offer={offer}
+          collection={collection}
+          offer={!isIgnoreOffer ? offer : undefined}
           isLoading={isFetchingOffer || isFetchingToken}
           testid={`${testid}`}
+          isBundle={isBundle}
+          isOwner={isOwner}
         >
           <TokenTrading
             token={token}
-            offer={offer}
+            offer={!isIgnoreOffer ? offer : undefined}
             onSellClick={onActionClick(MarketType.sellFix)}
             onBuyClick={onActionClick(MarketType.purchase)}
             onTransferClick={onActionClick(MarketType.transfer)}
@@ -121,7 +157,8 @@ const TokenPage = () => {
           />
           <TokenPageModal
             token={token}
-            offer={offer}
+            collection={collection}
+            offer={!isIgnoreOffer ? offer : undefined}
             marketType={marketType}
             onFinish={onFinish}
             onClose={onClose}
@@ -129,6 +166,13 @@ const TokenPage = () => {
           />
         </CommonTokenDetail>
       </TokenPagePaper>
+      {isBundle && <BundleTreeSection
+        onViewTokenDetails={setToken}
+        token={token}
+        offer={offer}
+        testid={`${testid}-bundle`}
+        isOwner={isOwner}
+      />}
     </>
   );
 };

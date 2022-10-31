@@ -6,15 +6,6 @@ import { UniqueSDKCollectionController } from './uniqueSdk/collectionController'
 import { UniqueSDKMarketController } from './uniqueSdk/marketController';
 import { Sdk } from '@unique-nft/substrate-client';
 
-export type ChainData = {
-  properties: {
-    tokenSymbol: string
-    ss58Format: number
-  }
-  systemChain: string
-  systemName: string
-}
-
 type Api = {
   nft?: UniqueSDKNFTController
   collection?: UniqueSDKCollectionController
@@ -27,6 +18,9 @@ export type ApiContextProps = {
   kusamaSdk?: Sdk
   chainData?: ChainProperties
   settings?: Settings
+  currentChainId?: string
+  baseURL: string
+  onChangeChainId(chainId: string): void
 }
 
 const ApiContext: Context<ApiContextProps> = createContext({} as unknown as ApiContextProps);

@@ -1,21 +1,22 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Select, SelectOptionProps, useNotifications } from '@unique-nft/ui-kit';
+import { SelectOptionProps } from '@unique-nft/ui-kit';
+import { useNotifications, Select, Button } from 'components/UI';
 import styled from 'styled-components/macro';
-
-import NoItems from '../../components/NoItems';
-import { Secondary400 } from '../../styles/colors';
-import { CollectionCard } from '../../components/CollectionCard/CollectionCard';
+import NoItems from 'components/NoItems';
+import { Secondary400 } from 'styles/colors';
+import { CollectionCard } from 'components/CollectionCard/CollectionCard';
 import { AdminPanelModal } from './Modals/AdminPanelModal';
 import { AdminPanelModalType } from './Modals/types';
-import { PagePaper } from '../../components/PagePaper/PagePaper';
+import { PagePaper } from 'components/PagePaper/PagePaper';
 import { useNavigate } from 'react-router-dom';
-import { useAdminLoggingIn } from '../../api/restApi/admin/login';
-import { useAdminCollections } from '../../api/restApi/admin/collection';
-import CardSkeleton from '../../components/Skeleton/CardSkeleton';
-import SearchField from '../../components/SearchField/SearchField';
-import { useAccounts } from '../../hooks/useAccounts';
-import { CollectionData } from '../../api/restApi/admin/types';
-import config from '../../config';
+import { useAdminLoggingIn } from 'api/restApi/admin/login';
+import { useAdminCollections } from 'api/restApi/admin/collection';
+import CardSkeleton from 'components/Skeleton/CardSkeleton';
+import SearchField from 'components/SearchField/SearchField';
+import { useAccounts } from 'hooks/useAccounts';
+import { CollectionData } from 'api/restApi/admin/types';
+import config from 'config';
+import { useApi } from 'hooks/useApi';
 
 type TOption = {
   iconRight: {
@@ -71,6 +72,7 @@ export const AdminPanelPage: FC = () => {
   const { isLoading: isAccountsLoading } = useAccounts();
   const navigate = useNavigate();
   const { warning } = useNotifications();
+  const { currentChainId } = useApi();
 
   useEffect(() => {
     if (isAccountsLoading) return;
@@ -89,8 +91,11 @@ export const AdminPanelPage: FC = () => {
       }
       setHasAccess(true);
       void await fetchCollections();
+      setSearchValue(undefined);
+      setSortingValue(sortingOptions[0]);
+      setModalType(AdminPanelModalType.default);
     })();
-  }, [hasAdminPermission, isAccountsLoading]);
+  }, [hasAdminPermission, isAccountsLoading, currentChainId, fetchCollections]);
 
   const onSortingChange = useCallback((value: SelectOptionProps) => {
     setSortingValue(value as TOption);
@@ -115,9 +120,10 @@ export const AdminPanelPage: FC = () => {
   }, [hasAccess]);
 
   const onCreateCollectionViaWalletClick = useCallback(() => {
-    if (!config.walletUrl || !hasAccess) return;
-    window.open(config.walletUrl, '_blank')?.focus();
-  }, [config.walletUrl, hasAccess]);
+    const { walletUrl } = config.blockchains[currentChainId || ''] || {};
+    if (!walletUrl || !hasAccess) return;
+    window.open(walletUrl, '_blank')?.focus();
+  }, [hasAccess, currentChainId]);
 
   const onManageSponsorshipClick = useCallback((collection: CollectionData) => () => {
     setModalType(AdminPanelModalType.acceptSponsorship);
@@ -140,9 +146,10 @@ export const AdminPanelPage: FC = () => {
   }, []);
 
   const onViewOnScanClick = useCallback((collection: CollectionData) => () => {
-    if (!config.scanUrl) return;
-    window.open(`${config.scanUrl}collections/${collection.id}`, '_blank')?.focus();
-  }, []);
+    const { scanUrl } = config.blockchains[currentChainId || ''] || {};
+    if (!scanUrl) return;
+    window.open(`${scanUrl}collections/${collection.id}`, '_blank')?.focus();
+  }, [currentChainId]);
 
   const filteredCollections = useMemo(() => {
     if (!collections || !hasAccess) return [];
@@ -171,6 +178,7 @@ export const AdminPanelPage: FC = () => {
         <SearchAndSortingWrapper>
           <SearchField
             placeholder='Search'
+            searchValue={searchValue}
             onSearchStringChange={onSearch}
             hideButton
           />
@@ -195,7 +203,7 @@ export const AdminPanelPage: FC = () => {
       <CollectionListWrapper>
         {!(isAccountsLoading || isFetching) && filteredCollections.length === 0 && <NoItems />}
         <CollectionListStyled >
-          {isAccountsLoading && isFetching && <>
+          {(isAccountsLoading || isFetching) && <>
             {Array.from({ length: 4 }).map((_, index) => <CardSkeleton key={`card-skeleton-${index}`} />)}
           </>}
           {filteredCollections?.map((collection) => <CollectionCard

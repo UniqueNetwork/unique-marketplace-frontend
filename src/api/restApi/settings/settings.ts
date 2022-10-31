@@ -1,39 +1,44 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { get, post } from '../base';
 import { defaultParams } from '../base/axios';
 import { Settings, WhitelistBody } from './types';
 import { ResponseError } from '../base/types';
+import { AxiosError } from 'axios';
+import { Chain } from 'utils/configParser';
 
 const endpoint = '/api/settings';
 
-export const getSettings = () => get<Settings>(`${endpoint}`, { ...defaultParams });
+export const getSettings = (baseURL: string) => get<Settings>(`${endpoint}`, { ...defaultParams, baseURL });
 
-export const addToWhitelist = (body: WhitelistBody, signature: string) => post(`${endpoint}/allowed_list/${body.account}`, null, { headers: { ...defaultParams.headers, Authorization: `Bearer ${signature}` }, ...defaultParams });
+export const addToWhitelist = (baseURL: string, body: WhitelistBody, signature: string) => post(`${endpoint}/allowed_list/${body.account}`, null, { headers: { ...defaultParams.headers, Authorization: `Bearer ${signature}` }, ...defaultParams, baseURL });
 
 export const useSettings = () => {
-  const [settings, setSettings] = useState<Settings | undefined>();
   const [isFetching, setIsFetching] = useState<boolean | undefined>(false);
   const [fetchingError, setFetchingError] = useState<ResponseError | undefined>();
 
-  useEffect(() => {
+  const fetchSettings = useCallback(async (blockchains: Record<string, Chain>) => {
     setIsFetching(true);
-    getSettings()
-      .then((response) => {
-        setIsFetching(false);
-        if (response.status === 200) {
-          setIsFetching(false);
-          setSettings(response.data);
+    try {
+      const settingsSet = await Promise.all(Object.values(blockchains).map(async (blockchain) => {
+        const { data: settings, status } = await getSettings(blockchain.apiEndpoint);
+        if (status === 200) {
+          return { networkId: blockchain.network.toLowerCase(), settings };
         }
-      })
-      .catch((error) => {
-        setFetchingError(error);
-      });
+      }));
+
+      setIsFetching(false);
+      return settingsSet.filter((settings) => !!settings) as ({ networkId: string, settings: Settings })[];
+    } catch (error) {
+      setFetchingError(error as AxiosError);
+      setIsFetching(false);
+      return [];
+    }
   }, []);
 
   return {
-    settings,
     isFetching,
-    fetchingError
+    fetchingError,
+    fetchSettings
   };
 };

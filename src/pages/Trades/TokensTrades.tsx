@@ -1,21 +1,23 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Pagination, SortQuery } from '@unique-nft/ui-kit';
+import { SortQuery, TableRowProps } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
-
-import { useTrades } from '../../api/restApi/trades/trades';
-import { Table } from '../../components/Table';
-import { PagePaper } from '../../components/PagePaper/PagePaper';
+import { Pagination } from 'components/UI';
+import { useTrades } from 'api/restApi/trades/trades';
+import { Table } from 'components/Table';
+import { PagePaper } from 'components/PagePaper/PagePaper';
 import getTradesColumns from './columns';
-import { useAccounts } from '../../hooks/useAccounts';
+import { useAccounts } from 'hooks/useAccounts';
 import { TradesTabs } from './types';
-import SearchField from '../../components/SearchField/SearchField';
+import SearchField from 'components/SearchField/SearchField';
 
-import NoTradesIcon from '../../static/icons/no-trades.svg';
+import NoTradesIcon from 'static/icons/no-trades.svg';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import TokenTradesDetailsModal from './TradesDetailsModal';
-import { Trade } from '../../api/restApi/trades/types';
+import { Trade } from 'api/restApi/trades/types';
+import { useApi } from 'hooks/useApi';
 import { debounce } from 'utils/helpers';
 import { useInfinityScroll } from 'hooks/useInfinityScroll';
+import config from '../../config';
 
 type TokensTradesPage = {
   currentTab: TradesTabs
@@ -24,6 +26,7 @@ type TokensTradesPage = {
 
 export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) => {
   const { selectedAccount, isLoading: isLoadingAccounts } = useAccounts();
+  const { currentChainId } = useApi();
   const [page, setPage] = useState<number>(0);
   const [sortString, setSortString] = useState<string>();
   const [pageSize, setPageSize] = useState<number>(10);
@@ -31,20 +34,26 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
   const [selectedOfferDetails, setSelectedOfferDetails] = useState<Trade | null>(null);
   const deviceSize = useDeviceSize();
   const { trades, tradesCount, fetch, isFetching } = useTrades();
-  const [loadedTrades, setLoadedTrades] = useState<Trade[]>([]);
+  const [loadedTrades, setLoadedTrades] = useState<(Trade & TableRowProps)[]>([]);
   const [searched, setSearched] = useState(false);
 
   useEffect(() => {
     if (isLoadingAccounts || (currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address)) return;
     setSearchValue(undefined);
     setPage(0);
-    fetch({
+    void fetch({
       page: 1,
       pageSize,
       sort: sortString,
       seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
     });
-  }, [currentTab, selectedAccount?.address, isLoadingAccounts]);
+  }, [currentTab, currentChainId, selectedAccount?.address, isLoadingAccounts]);
+
+  useEffect(() => {
+    if (deviceSize !== DeviceSize.lg && !searched) {
+      setLoadedTrades([]);
+    }
+  }, [currentTab]);
 
   useEffect(() => {
     // append loaded trades to the existing list if screen is with infinity scroll
@@ -58,7 +67,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
   const debouncedSearch = useCallback(() => {
     return debounce(function (...args: string[]) {
       setSearchValue(args[0]);
-      fetch({
+      void fetch({
         page: 1,
         pageSize,
         sort: sortString,
@@ -72,7 +81,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
   const onPageChange = useCallback((newPage: number) => {
     if ((currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address) || page === newPage) return;
     setPage(newPage);
-    fetch({
+    void fetch({
       page: newPage + 1,
       pageSize,
       sort: sortString,
@@ -85,7 +94,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
     if (currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address) return;
     setPageSize(newPageSize);
     setPage(0);
-    fetch({
+    void fetch({
       page: 1,
       pageSize: newPageSize,
       sort: sortString,
@@ -118,7 +127,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
 
     if (sortString && sortString.length) sortString += `(${associatedSortValues[newSort.field]})`;
     setSortString(sortString);
-    fetch({
+    void fetch({
       page: 1,
       pageSize,
       sort: sortString,
@@ -159,7 +168,12 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
       <StyledTable
         onSort={onSortChange}
         data={loadedTrades}
-        columns={getTradesColumns({ deviceSize, onShowTradesDetailsModal })}
+        columns={getTradesColumns({
+          deviceSize,
+          onShowTradesDetailsModal,
+          scanUrl: config.blockchains[currentChainId || '']?.scanUrl,
+          testid: `${testid}-table`
+        })}
         loading={(isLoadingAccounts || isFetching) && showSkeleton}
         emptyIconProps={searchValue ? { name: 'magnifier-found' } : { file: NoTradesIcon }}
         idColumnName={'offerId'}
@@ -172,9 +186,10 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
           onPageSizeChange={onPageSizeChange}
           withPerPageSelector
           withIcons
+          testid={`${testid}-pagination`}
         />
       </PaginationWrapper>}
-      <TokenTradesDetailsModal trade={selectedOfferDetails} onCancel={closeDetailsModal}/>
+      <TokenTradesDetailsModal trade={selectedOfferDetails} onCancel={closeDetailsModal} testid={`${testid}-details-modal`}/>
     </TradesPageWrapper>
   </PagePaper>);
 };

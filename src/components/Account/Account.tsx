@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useMemo } from 'react';
-import { Text, Icon, useNotifications } from '@unique-nft/ui-kit';
+import { Text, useNotifications } from 'components/UI';
 import styled from 'styled-components';
-
+import { Icon } from 'components/UI/Icon/Icon';
 import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import { useApi } from 'hooks/useApi';
@@ -15,6 +15,7 @@ interface AccountProps {
   canCopy?: boolean
   hideAddress?: boolean
   hideName?: boolean
+  testid?: string
 }
 
 const AccountCard: FC<AccountProps> = ({
@@ -23,7 +24,8 @@ const AccountCard: FC<AccountProps> = ({
   isShort = false,
   canCopy = true,
   hideAddress = false,
-  hideName = false
+  hideName = false,
+  testid
 }) => {
   const { chainData } = useApi();
   const { info } = useNotifications();
@@ -46,15 +48,16 @@ const AccountCard: FC<AccountProps> = ({
     <>
       <Avatar size={24} src={DefaultAvatar} address={accountAddress} />
       <AccountInfoWrapper>
-        {!hideName && <Text>{accountName}</Text>}
+        {!hideName && <Text testid={`${testid}-account-name`}>{accountName}</Text>}
         {!hideAddress && <AddressRow>
           <FormattedAddress
             formatAddress={formatAddress}
             accountAddress={accountAddress}
             isShort={isShort}
             hideName={hideName}
+            testid={testid}
           />
-          {canCopy && <a onClick={onCopyAddress(formatAddress(accountAddress) || '')}>
+          {canCopy && <a onClick={onCopyAddress(formatAddress(accountAddress) || '')} data-testid={`${testid}-copy`}>
             <CopyIconWrapper>
               <Icon name={'copy'} size={16} />
             </CopyIconWrapper>
@@ -70,17 +73,18 @@ interface IAddressProps {
   hideName: boolean,
   formatAddress: (accountAddress: string) => string,
   accountAddress: string
+  testid?: string
 }
 
-const FormattedAddress: FC<IAddressProps> = ({ isShort = false, formatAddress, accountAddress, hideName }) => {
+const FormattedAddress: FC<IAddressProps> = ({ isShort = false, formatAddress, accountAddress, hideName, testid }) => {
   const address = useMemo(() => {
     return isShort ? shortcutText(formatAddress(accountAddress) || '') : formatAddress(accountAddress) || '';
   }, [isShort, formatAddress, accountAddress]);
 
   return (<>
     {hideName
-      ? <Text>{address}</Text>
-      : <Text size={'s'} color={'grey-500'}>{address}</Text>
+      ? <Text testid={`${testid}-address`}>{address}</Text>
+      : <Text testid={`${testid}-address`} size={'s'} color={'grey-500'}>{address}</Text>
     }
   </>);
 };
@@ -102,9 +106,15 @@ const CopyIconWrapper = styled.div`
     height: 24px;
     color: var(--color-grey-400);
     padding: 0;
-    cursor: copy;
+    cursor: pointer;
     svg {
       transform: translateX(3px);
+    }
+    
+    &:hover {
+      svg {
+        fill: var(--color-primary-500);
+      }
     }
   }
 `;

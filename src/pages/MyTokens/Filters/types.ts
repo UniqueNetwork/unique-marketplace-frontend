@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction } from 'react';
 import { Statuses } from 'components/Filters/types';
-import { NFTCollection, NFTToken } from 'api/uniqueSdk/types';
+import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 
 export type MyTokensStatuses = Record<'onSell' | 'fixedPrice' | 'timedAuction' | 'notOnSale', boolean | undefined>;
 
@@ -28,12 +28,12 @@ export type FilterChangeHandler<T> = Dispatch<SetStateAction<T | null>> | ((valu
 export type FiltersProps<T = FilterState> = {
     value: T | null
     onFilterChange: FilterChangeHandler<T>
-    tokens: NFTToken[]
-    featuredTokens: NFTToken[]
-    collections: NFTCollection[]
+    tokens: TokenByIdResult[]
+    featuredTokens: TokenByIdResult[]
+    collections: CollectionInfoWithSchema[]
     isFetchingTokens: boolean
     testid: string
-    featuredTokensForAttributeCounts: NFTToken[]
+    featuredTokensForAttributeCounts: TokenByIdResult[]
 }
 
 export type TFilterAttribute = {

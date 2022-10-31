@@ -1,6 +1,7 @@
 import React, { ChangeEvent, FC, useCallback, useEffect, useState } from 'react';
 import { mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
-import { Button, Checkbox, Heading, Link, Select, Text } from '@unique-nft/ui-kit';
+import { Heading, Link } from '@unique-nft/ui-kit';
+import { Button, Checkbox, Select, Text } from 'components/UI';
 import styled from 'styled-components';
 
 import { TCreateAccountBodyModalProps } from './types';
@@ -15,6 +16,7 @@ import IconWithHint from 'components/IconWithHint/IconWithHint';
 import { IconButton } from 'components/IconButton/IconButton';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
+import { shortcutText } from '../../../utils/textUtils';
 
 type TOption = SelectOptionProps & { id: string, title: string };
 
@@ -69,7 +71,7 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish,
       <Text
         testid={`${testid}-address`}
         color={'grey-500'}
-      >{address}</Text>
+      >{deviceSize === DeviceSize.sm ? shortcutText(address) : address}</Text>
     </AddressWrapper>
     <Heading size={'4'} >The secret seed value for this account</Heading>
     <SeedGeneratorSelectWrapper>
@@ -100,7 +102,7 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish,
       />
     </InputSeedWrapper>
     {!seedValid && <ErrorText>Seed phrase is invalid</ErrorText>}
-    <WarningBlock>
+    <WarningBlock testid={`${testid}-warning`}>
       Ensure that you keep this seed in a safe place. Anyone with access to it can re-create the account and gain full access to it.
     </WarningBlock>
     <ConfirmWrapperRow>
@@ -113,7 +115,7 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish,
       />
     </ConfirmWrapperRow>
     <ButtonWrapper>
-      <StepsTextStyled size={'m'}>Step 1/3</StepsTextStyled>
+      <StepsTextStyled size={'m'} testid={`${testid}-step`}>Step 1/3</StepsTextStyled>
       <Button
         testid={`${testid}-next-button`}
         disabled={!address || !confirmSeedSaved || !seedValid}
@@ -164,12 +166,15 @@ const SeedInput = styled.textarea`
   width: 100%;
   height: auto;
   resize: none;
-  outline: 0px none transparent;
+  outline: 0 none transparent;
   font-family: 'Roboto';
   font-style: normal;
   font-weight: 400;
   font-size: 16px;
   line-height: 24px;
+  &:focus, &:hover {
+    border: 1px solid var(--color-grey-500);
+  }
 `;
 
 const ConfirmWrapperRow = styled.div`

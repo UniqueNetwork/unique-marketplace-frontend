@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Dropdown, Heading, Loader, Modal, SelectOptionProps, Text, useNotifications } from '@unique-nft/ui-kit';
+import { Heading, Loader, SelectOptionProps } from '@unique-nft/ui-kit';
+import { Text, useNotifications, Dropdown, Button, Modal } from 'components/UI';
 import { BN } from '@polkadot/util';
 import styled from 'styled-components';
 import { checkAddress } from '@polkadot/util-crypto';
@@ -19,7 +20,7 @@ import { debounce } from 'utils/helpers';
 import { AdditionalWarning100, Coral700 } from 'styles/colors';
 import DefaultMarketStages from '../../Token/Modals/StagesModal';
 import { TTransferFunds } from './types';
-import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';
+import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 
 const tokenSymbol = 'KSM';
 
@@ -114,15 +115,15 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
   }, [chainData?.SS58Prefix]);
 
-  const accountsWithQuartzAdresses = useMemo(() => (
+  const accountsWithQuartzAddresses = useMemo(() => (
     accounts.map((account) => ({ ...account, quartzAddress: formatAddress(account.address) }))
   ), [accounts, formatAddress]);
 
-  const [filteredAccounts, setFilteredAccounts] = useState(accountsWithQuartzAdresses);
+  const [filteredAccounts, setFilteredAccounts] = useState(accountsWithQuartzAddresses);
 
   useEffect(() => {
-    setFilteredAccounts(accountsWithQuartzAdresses);
-  }, [accountsWithQuartzAdresses]);
+    setFilteredAccounts(accountsWithQuartzAddresses);
+  }, [accountsWithQuartzAddresses]);
 
   const recipientBalance = useMemo(() => {
     return typeof recipientAddress !== 'string' && recipientAddress?.balance?.KSM;
@@ -139,7 +140,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   }, [amount, sender?.balance?.KSM]);
 
   const isConfirmDisabled = useMemo(() => {
-    return !sender || !recipientAddress || Number(amount) <= 0 || isAmountGreaterThanBalance;
+    return !isValidRecipientAddress || !sender || !recipientAddress || Number(amount) <= 0 || isAmountGreaterThanBalance;
   }, [amount, recipientAddress, sender, isAmountGreaterThanBalance, isValidRecipientAddress]);
 
   const onSend = useCallback(() => {
@@ -149,10 +150,10 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   }, [sender, recipientAddress, amount, onFinish, isConfirmDisabled]);
 
   const onFilter = useCallback((input: string) => {
-    setFilteredAccounts(accountsWithQuartzAdresses.filter((account) => {
+    setFilteredAccounts(accountsWithQuartzAddresses.filter((account) => {
       return account.quartzAddress.toLowerCase().includes(input.toLowerCase()) || account.meta.name?.toLowerCase().includes(input.toLowerCase());
     }));
-  }, [accountsWithQuartzAdresses]);
+  }, [accountsWithQuartzAddresses]);
 
   const onChangeAddress = useCallback((value: string | Account) => {
     setRecipientAddress(value);
@@ -163,18 +164,18 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
       setIsValidRecipientAddress(isValid);
       onFilter(value);
     } else {
-      setFilteredAccounts(accountsWithQuartzAdresses);
+      setFilteredAccounts(accountsWithQuartzAddresses);
       setIsValidRecipientAddress(true);
     }
-  }, [accountsWithQuartzAdresses, onFilter, amount, getKusamaFee, chainData]);
+  }, [accountsWithQuartzAddresses, onFilter, amount, getKusamaFee, chainData]);
 
   const onCloseModal = useCallback(() => {
     setRecipientAddress('');
     setAmount('');
-    setFilteredAccounts(accountsWithQuartzAdresses);
+    setFilteredAccounts(accountsWithQuartzAddresses);
     setKusamaFee('0');
     onClose();
-  }, [accountsWithQuartzAdresses, onClose]);
+  }, [accountsWithQuartzAddresses, onClose]);
 
   const onChangeSender = useCallback((value: SelectOptionProps) => {
     setSender(value as unknown as Account);
@@ -182,7 +183,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
 
   return (<Modal isVisible={isVisible} isClosable={true} onClose={onCloseModal}>
     <Content>
-      <Heading size='2'>{'Send funds'}</Heading>
+      <Heading size='2' testid={`${testid}-heading`}>{'Send funds'}</Heading>
     </Content>
 
     <Text size={'s'} color={'grey-500'}>{'From'}</Text>
@@ -230,6 +231,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
             accountAddress={option.address}
             canCopy={false}
             isShort={deviceSize < DeviceSize.md}
+            testid={`${testid}-selected`}
           />
         </AddressOptionWrapper>}
       />
@@ -335,6 +337,7 @@ const SenderSelectWrapper = styled.div`
   & .unique-dropdown {
     width: 100%;
     cursor: pointer;
+    min-height: 64px;
     .dropdown-options {
       max-height: 229px;
       overflow-y: auto;
@@ -359,6 +362,9 @@ const AddressWrapper = styled.div`
   .unique-text {
     text-overflow: ellipsis;
     overflow: hidden;
+  }
+  &:hover {
+    border: 1px solid var(--color-grey-500);
   }
 `;
 

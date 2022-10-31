@@ -1,12 +1,13 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Heading, Modal } from '@unique-nft/ui-kit';
+import React, { FC, useCallback, useMemo, useState } from 'react';
+import { Heading } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
 import { TAccountModalProps, CreateAccountModalStages, TAccountProperties, TCreateAccountBodyModalProps } from './types';
-import { useAccounts } from '../../../hooks/useAccounts';
+import { useAccounts } from 'hooks/useAccounts';
 import { FinalModal } from './Final';
 import { AskCredentialsModal } from './AskCredentials';
 import { AskSeedPhraseModal } from './AskSeedPhrase';
+import { Modal } from 'components/UI';
 
 export const derivePath = '';
 
@@ -57,7 +58,7 @@ export const CreateAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish
 
   return (<Modal isVisible={isVisible} isClosable={true} onClose={onCloseModal}>
     <Content>
-      <Heading size='2'>Create substrate account</Heading>
+      <Heading size='2' testid={`${testid}-heading`}>Create substrate account</Heading>
     </Content>
     <ModalBodyComponent
       accountProperties={accountProperties}

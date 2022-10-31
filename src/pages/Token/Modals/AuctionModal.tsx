@@ -1,23 +1,23 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Heading, Link, Select, Text, SelectOptionProps, useNotifications } from '@unique-nft/ui-kit';
+import { Heading, Link, SelectOptionProps } from '@unique-nft/ui-kit';
+import { Text, useNotifications, Select, Button } from 'components/UI';
 import styled from 'styled-components';
 import { BN } from '@polkadot/util';
-
 import { TPlaceABid } from './types';
 import DefaultMarketStages from './StagesModal';
-import { AdditionalWarning100, Coral100 } from '../../../styles/colors';
+import { AdditionalWarning100, Coral100 } from 'styles/colors';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
-import { useAuctionBidStages } from '../../../hooks/marketplaceStages';
-import { useAccounts } from '../../../hooks/useAccounts';
-import { useFee } from '../../../hooks/useFee';
-import { useApi } from '../../../hooks/useApi';
-import { formatKusamaBalance } from '../../../utils/textUtils';
-import { fromStringToBnString } from '../../../utils/bigNum';
-import { NumberInput } from '../../../components/NumberInput/NumberInput';
-import { StageStatus } from '../../../types/StagesTypes';
-import { Offer } from '../../../api/restApi/offers/types';
-import { useAuction } from '../../../api/restApi/auction/auction';
-import { TCalculatedBid } from '../../../api/restApi/auction/types';
+import { useAuctionBidStages } from 'hooks/marketplaceStages';
+import { useAccounts } from 'hooks/useAccounts';
+import { useFee } from 'hooks/useFee';
+import { useApi } from 'hooks/useApi';
+import { formatKusamaBalance } from 'utils/textUtils';
+import { fromStringToBnString } from 'utils/bigNum';
+import { NumberInput } from 'components/NumberInput/NumberInput';
+import { StageStatus } from 'types/StagesTypes';
+import { Offer } from 'api/restApi/offers/types';
+import { useAuction } from 'api/restApi/auction/auction';
+import { TCalculatedBid } from 'api/restApi/auction/types';
 
 export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosable, onFinish, testid }) => {
   const [status, setStatus] = useState<'ask' | 'place-bid-stage'>('ask'); // TODO: naming
@@ -53,6 +53,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
   const [calculatedBid, setCalculatedBid] = useState<TCalculatedBid>();
   const [isFetchingCalculatedbid, setIsFetchingCalculatedBid] = useState<boolean>(true);
   const { getCalculatedBid } = useAuction();
+  const decimals = api?.market?.kusamaDecimals;
 
   const fetchCalculatedBid = useCallback(async () => {
     if (!offer || !selectedAccount || !settings) return;
@@ -83,7 +84,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
     return new BN(Number(leadingBid) + Number(offer?.auction?.priceStep || '0'));
   }, [offer?.auction, leadingBid]);
 
-  const [bidAmount, setBidAmount] = useState<string>(formatKusamaBalance(minimalBid.toString(), api?.market?.kusamaDecimals));
+  const [bidAmount, setBidAmount] = useState<string>(formatKusamaBalance(minimalBid.toString(), { decimals }));
 
   const isEnoughBalance = useMemo(() => {
     if (!selectedAccount?.balance?.KSM || selectedAccount?.balance?.KSM.isZero()) return false;
@@ -123,22 +124,28 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
   );
 
   return (
-    <>
+    <div data-testid={testid}>
       <Content>
-        <Heading size='2'>Place a bid</Heading>
+        <Heading size='2' testid={`${testid}-heading`}>Place a bid</Heading>
       </Content>
       <InputWrapper>
-        <SelectStyled options={chainOptions} value={chain} onChange={onChainChange} />
+        <SelectStyled
+          options={chainOptions}
+          value={chain}
+          onChange={onChainChange}
+          testid={`${testid}-currency-select`}
+        />
         <InputStyled
           onChange={onBidAmountChange}
           value={bidAmount.toString()}
+          testid={`${testid}-amount`}
         />
       </InputWrapper>
-      <Text size={'s'} color={'grey-500'} >
-        {`Minimum bid ${formatKusamaBalance(minimalBid.toString(), api?.market?.kusamaDecimals)} ${chain || ''}`}
+      <Text size={'s'} color={'grey-500'} testid={`${testid}-minimum-bid-text`}>
+        {`Minimum bid ${formatKusamaBalance(minimalBid.toString(), { decimals })} ${chain || ''}`}
       </Text>
       <CautionTextWrapper>
-        {!isEnoughBalance && <WarningStyled color={'coral-500'}>Your balance is too low to place a bid</WarningStyled>}
+        {!isEnoughBalance && <WarningStyled color={'coral-500'} testid={`${testid}-low-balance-warning`}>Your balance is too low to place a bid</WarningStyled>}
         {isEnoughBalance && <TextStyled
           color='additional-warning-500'
           size='s'
@@ -153,9 +160,10 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
           onClick={onConfirmPlaceABidClick}
           role='primary'
           title='Confirm'
+          testid={`${testid}-confirm-button`}
         />
       </ButtonWrapper>
-    </>
+    </div>
   );
 };
 
@@ -169,12 +177,12 @@ const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ offer, 
   }, [amount, accountAddress]);
 
   const { tokenId, collectionId } = offer || {};
-  const { prefix } = offer?.tokenDescription || {};
+  const { tokenPrefix } = offer?.collectionDescription || {};
 
   useEffect(() => {
     if (status === StageStatus.success) {
       info(
-        <>You made a new bid on <Link href={`/token/${collectionId || ''}/${tokenId || ''}`} title={`${prefix || ''} #${tokenId || ''}`}/></>,
+        <>You made a new bid on <Link href={`/token/${collectionId || ''}/${tokenId || ''}`} title={`${tokenPrefix || ''} #${tokenId || ''}`}/></>,
         { name: 'success', size: 32, color: 'var(--color-additional-light)' }
       );
     }

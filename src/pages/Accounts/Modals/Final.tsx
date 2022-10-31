@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useMemo } from 'react';
-import { Button, Text } from '@unique-nft/ui-kit';
+import { Button, Text } from 'components/UI';
 import styled from 'styled-components';
 
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
@@ -27,35 +27,35 @@ export const FinalModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties
     </AddressWrapper>
     <CredentialsWrapper >
       <LabelTextWrapper>
-        <Text size={'m'}>Partial seed</Text>
-        <IconWithHint>
+        <Text size={'m'} testid={`${testid}-partial-seed-label`}>Partial seed</Text>
+        <IconWithHint testid={`${testid}-partial-seed-tooltip`}>
           <>The seed is your key to the account. Knowing the seed allows you, or anyone else who knows the seed, to re-generate and control this account.</>
         </IconWithHint>
       </LabelTextWrapper>
-      <ValueTextStyled>{shortSeed}</ValueTextStyled>
+      <ValueTextStyled data-testid={`${testid}-seed`}>{shortSeed}</ValueTextStyled>
       <LabelTextWrapper>
-        <Text size={'m'}>Keypair type</Text>
-        <IconWithHint>
+        <Text size={'m'} testid={`${testid}-keypair-type-label`}>Keypair type</Text>
+        <IconWithHint testid={`${testid}-keypair-type-tooltip`}>
           <>Substrate supports a number of different crypto mechanisms. As such the keyring allows for the creation and management of different types of crypto.</>
         </IconWithHint>
       </LabelTextWrapper>
-      <ValueTextStyled>{defaultPairType}</ValueTextStyled>
+      <ValueTextStyled data-testid={`${testid}-keypair-type`}>{defaultPairType}</ValueTextStyled>
       <LabelTextWrapper>
-        <Text size={'m'}>Derivation path</Text>
-        <IconWithHint>
+        <Text size={'m'} testid={`${testid}-derivation-path-label`}>Derivation path</Text>
+        <IconWithHint testid={`${testid}-derivation-path-tooltip`}>
           <>If you would like to create and manage several accounts on the network using the same seed, you can use derivation paths.</>
         </IconWithHint>
       </LabelTextWrapper>
-      <ValueTextStyled>{derivePath || 'None provided'}</ValueTextStyled>
+      <ValueTextStyled data-testid={`${testid}-derivavtion-path`}>{derivePath || 'None provided'}</ValueTextStyled>
     </CredentialsWrapper>
-    <WarningBlock >
+    <WarningBlock testid={`${testid}-non-external-warning`}>
       Consider storing your account in a signer such as a browser extension, hardware device, QR-capable phone wallet (non-connected) or desktop application for optimal account security. Future versions of the web-only interface will drop support for non-external accounts, much like the IPFS version.
     </WarningBlock>
-    <WarningBlock >
+    <WarningBlock testid={`${testid}-backup-warning`}>
       You will be provided with a generated backup file after your account is created. Please make sure to save this file in a secure location as it is required, together with your password, to restore your account.
     </WarningBlock>
     <ButtonWrapper>
-      <StepsTextStyled size={'m'}>Step 3/3</StepsTextStyled>
+      <StepsTextStyled size={'m'} testid={`${testid}-step`}>Step 3/3</StepsTextStyled>
       <Button
         testid={`${testid}-previous-button`}
         onClick={onGoBack}

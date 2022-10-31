@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useState } from 'react';
-import { Button, Heading, Text } from '@unique-nft/ui-kit';
+import { Heading } from '@unique-nft/ui-kit';
+import { Button, Text } from 'components/UI';
 import styled from 'styled-components/macro';
 
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
@@ -26,7 +27,7 @@ export const RejectSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collecti
         <Heading size='2'>Delete sponsorship</Heading>
       </Content>
       <Row>
-        <Text size={'m'}>{`Are you sure you want to delete the sponsorship from the ${collection?.name || collection.collectionName} [ID ${collection.id}] collection?`}</Text>
+        <Text size={'m'}>{`Are you sure you want to delete the sponsorship from the ${collection?.name} [ID ${collection.id}] collection?`}</Text>
       </Row>
       <ButtonWrapper>
         <Button

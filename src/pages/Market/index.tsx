@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
-import { Select, Text } from '@unique-nft/ui-kit';
+import { Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
-
+import { Select } from 'components/UI';
 import { Filters } from '../../components';
 import { Secondary400 } from '../../styles/colors';
 import { FilterState } from '../../components/Filters/types';
@@ -16,6 +16,8 @@ import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import SearchField from '../../components/SearchField/SearchField';
 import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
 import { parseFilterState, setUrlParameter } from '../../utils/helpers';
+import { useApi } from '../../hooks/useApi';
+import { useCollections } from 'hooks/useCollections';
 
 type TOption = SelectOptionProps &{
   id: string
@@ -68,20 +70,24 @@ export const MarketPage = () => {
   const [sortingValue, setSortingValue] = useState<string>(searchParams.get('sortingValue') || defaultSortingValue.id);
   const [searchValue, setSearchValue] = useState<string | undefined>(searchParams.get('searchValue') || '');
   const { offers, offersCount, isFetching, fetchMore, fetch, attributes, attributeCounts } = useOffers();
+  const { isFetching: isFetchingCollections } = useCollections();
   const { selectedAccount } = useAccounts();
   const deviceSize = useDeviceSize();
+  const { currentChainId, api } = useApi();
 
   const hasMore = offers && offers.length < offersCount;
 
   useEffect(() => {
+    if (!currentChainId || !api) return;
+    setFilterState(null);
+    setSearchValue(undefined);
+    setSortingValue(defaultSortingValue.id);
     void fetch({
       page: 1,
       pageSize,
-      ...(getFilterByState(filterState)),
-      searchText: searchValue,
-      sort: [sortingValue]
+      sort: [defaultSortingValue.id]
     });
-  }, []);
+  }, [currentChainId]);
 
   const getFilterByState = useCallback((filterState: FilterState | null) => {
     if (!filterState) return {};
@@ -155,6 +161,7 @@ export const MarketPage = () => {
   }, [filterState, isFetching, onFilterChange]);
 
   useEffect(() => {
+    if (!selectedAccount) return;
     onChangeAccount();
   }, [selectedAccount?.address]);
 
@@ -200,7 +207,7 @@ export const MarketPage = () => {
           <Text
             testid={`${testid}-items-count`}
             size='m'
-          >{isFetching ? 'Loading items' : `${offersCount} items`}</Text>
+          >{isFetchingCollections || isFetching ? 'Loading items' : `${offersCount} items`}</Text>
         </div>
         <InfiniteScroll
           hasMore={hasMore}
@@ -210,8 +217,8 @@ export const MarketPage = () => {
           threshold={200}
           useWindow={true}
         >
-          {!isFetching && !offers?.length && <NoItems isSearchResult={!!searchValue || !!filterCount} />}
-          <OffersList offers={offers || []} isLoading={isFetching} testid={`${testid}-offers`} />
+          {!isFetching && !isFetchingCollections && !offers?.length && <NoItems isSearchResult={!!searchValue || !!filterCount} />}
+          <OffersList offers={offers || []} isLoading={isFetchingCollections || isFetching} testid={`${testid}-offers`} />
         </InfiniteScroll>
       </MainContent>
     </MarketMainPageStyled>

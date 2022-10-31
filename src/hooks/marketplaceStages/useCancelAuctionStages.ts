@@ -4,9 +4,11 @@ import { cancelAuction } from 'api/restApi/auction/auction';
 import { useAccounts } from '../useAccounts';
 import { InternalStage, StageStatus } from '../../types/StagesTypes';
 import useStages from '../useStages';
+import { useApi } from '../useApi';
 
 export const useCancelAuctionStages = (collectionId: number, tokenId: number) => {
   const { selectedAccount, signMessage, signPayloadJSON } = useAccounts();
+  const { baseURL } = useApi();
   const cancelAuctionStages: InternalStage<null>[] = useMemo(() => [
     {
       title: 'Cancelling auction',
@@ -18,13 +20,13 @@ export const useCancelAuctionStages = (collectionId: number, tokenId: number) =>
         const timestamp = Date.now();
         const message = `collectionId=${collectionId}&tokenId=${tokenId}&timestamp=${timestamp}`;
         const signature = await signMessage(message);
-        await cancelAuction(
+        await cancelAuction(baseURL,
           { collectionId, tokenId, timestamp },
           { signature, signer: selectedAccount.address }
         );
       }
     }
-  ], [collectionId, tokenId, signMessage]);
+  ], [baseURL, collectionId, tokenId, signMessage]);
   const { stages, error, status, initiate } = useStages<null>(cancelAuctionStages, signPayloadJSON);
 
   return {

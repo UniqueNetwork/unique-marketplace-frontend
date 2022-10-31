@@ -1,6 +1,7 @@
 import React, { FC, useCallback } from 'react';
 import styled from 'styled-components';
-import { Checkbox, Text } from '@unique-nft/ui-kit';
+import { Text } from '@unique-nft/ui-kit';
+import { Checkbox } from 'components/UI';
 import { useCollections } from '../../hooks/useCollections';
 import Accordion from '../Accordion/Accordion';
 import CheckboxSkeleton from '../Skeleton/CheckboxSkeleton';
@@ -58,10 +59,10 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attr
               onChange={onCollectionSelect(collection.id)}
               testid={`${testid}-checkbox-${collection.id}`}
             />
-            <CollectionCover src={collection.coverImageUrl} size={22} type={'circle'}/>
+            <CollectionCover src={collection.schema?.coverPicture.fullUrl || ''} size={22} type={'circle'}/>
             <Text
               testid={`${testid}-name-${collection.id}`}
-            >{collection.collectionName || ''}</Text>
+            >{collection.name || ''}</Text>
           </CheckboxWrapper>
           ))}
       </CollectionFilterWrapper>

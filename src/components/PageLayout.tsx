@@ -14,39 +14,38 @@ export const PageLayout: FC = () => {
   const backgroundImage = useBackground();
 
   const layoutProps = useMemo(() => {
-    if (pathname === '/market') return { heading: 'Market' };
-
-    if (pathname === '/administration') {
-      return { heading: 'Collections' };
-    }
-
-    if (pathname === '/myTokens') {
-      return { heading: 'My tokens' };
-    }
-
-    if (pathname === '/trades') {
-      return { heading: 'Trades' };
-    }
-
-    if (pathname === '/faq') {
-      return { heading: 'FAQ' };
-    }
-
-    if (pathname === '/accounts') {
-      return { heading: 'Manage accounts' };
-    }
-
-    if (pathname === '/market/token') {
+    if (pathname.includes('/market/token')) {
       return {
         breadcrumbs: {
           options: [{ link: '/market', title: 'Market' }, { title: 'Token' }]
         }
       };
     }
+    if (pathname.includes('/market')) return { heading: 'Market' };
+
+    if (pathname.includes('/administration')) {
+      return { heading: 'Collections' };
+    }
+
+    if (pathname.includes('/myTokens')) {
+      return { heading: 'My tokens' };
+    }
+
+    if (pathname.includes('/trades')) {
+      return { heading: 'Trades' };
+    }
+
+    if (pathname.includes('/faq')) {
+      return { heading: 'FAQ' };
+    }
+
+    if (pathname.includes('/accounts')) {
+      return { heading: 'Manage accounts' };
+    }
   }, [pathname]);
 
   return (
-    <BgLayoutStyled backgroundImage={backgroundImage} hasFooterSpacing={pathname === '/market' || pathname === '/myTokens'}>
+    <BgLayoutStyled backgroundImage={backgroundImage} hasFooterSpacing={pathname === '/market' || pathname === '/myTokens' || pathname.includes('/token')}>
       <Layout
         {...layoutProps}
         footer={<div dangerouslySetInnerHTML={{ __html: footer }} />}
@@ -78,6 +77,10 @@ const LayoutStyled = styled.div<{hasFooterSpacing: boolean}>`
 
     footer {
       background-color: var(--color-footer-background);
+      
+      a:hover {
+        text-decoration: underline;
+      }
 
       .footer__text__dafc {
         color: var(--color-additional-light);
@@ -89,12 +92,7 @@ const LayoutStyled = styled.div<{hasFooterSpacing: boolean}>`
       }
     }
   }
-
-  .unique-modal-wrapper .unique-modal {
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-  
+ 
   .unique-layout__content {
     padding: 0 !important;
     background-color: transparent !important;
@@ -102,6 +100,9 @@ const LayoutStyled = styled.div<{hasFooterSpacing: boolean}>`
     display: flex;
     flex-direction: column;
     row-gap: calc(var(--gap) * 1.5);
+    @media (min-width: 1920px) {
+      width: 1374px;
+    }
   }
 
 
@@ -121,12 +122,19 @@ const LayoutStyled = styled.div<{hasFooterSpacing: boolean}>`
     @media (max-width: 1024px) {
       padding-bottom: 40px;
     }
+    @media (min-width: 1920px) {
+      align-items: center;
+      &>h1 {
+        width: 1374px;
+      }
+    }
   }
 
   header {
     top: 0;
     position: sticky !important;
     z-index: 990;
+    justify-content: center;
     @media (max-width: 620px) {
       height: 80px !important;
     }
@@ -135,6 +143,10 @@ const LayoutStyled = styled.div<{hasFooterSpacing: boolean}>`
   footer {
     @media (max-width: 568px) {
       height: unset;
+    }
+    @media (min-width: 1920px) {
+      display: flex;
+      justify-content: center;
     }
     &>div {
       display: flex;
@@ -146,6 +158,9 @@ const LayoutStyled = styled.div<{hasFooterSpacing: boolean}>`
         padding: var(--gap) 0;
         flex-direction: column;
         align-items: flex-start;
+      }
+      @media (min-width: 1920px) {
+        width: 1374px;
       }
     }
   }

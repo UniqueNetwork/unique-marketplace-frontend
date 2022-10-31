@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useState } from 'react';
-import { Button, Heading, Modal, Text, Upload } from '@unique-nft/ui-kit';
+import { Heading } from '@unique-nft/ui-kit';
+import { Button, Text, Modal } from 'components/UI';
 import { KeyringPair } from '@polkadot/keyring/types';
 import styled from 'styled-components';
 
@@ -9,6 +10,7 @@ import { convertToU8a, keyringFromFile } from '../../../utils/jsonUtils';
 import { useApi } from '../../../hooks/useApi';
 import keyring from '@polkadot/ui-keyring';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
+import { Upload } from 'components/UI/Upload/Upload';
 
 export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish, testid }) => {
   const { uniqueSdk } = useApi();
@@ -16,19 +18,17 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
   const [password, setPassword] = useState<string>('');
   const [passwordIncorrect, setPasswordIncorrect] = useState<boolean>(false);
 
-  const onUploadChange = useCallback((data: { url: string; file: Blob } | null) => {
-    if (!data) return;
+  const onUploadChange = useCallback((url: string, file: Blob) => {
     const reader = new FileReader();
     reader.onload = ({ target }: ProgressEvent<FileReader>): void => {
       if (target && target.result && uniqueSdk) {
-        console.log(target.result);
         const data = convertToU8a(target.result as ArrayBuffer);
 
         setPair(keyringFromFile(data, uniqueSdk.api.genesisHash.toHex()));
       }
     };
 
-    reader.readAsArrayBuffer(data.file);
+    reader.readAsArrayBuffer(file);
   }, [setPair, uniqueSdk?.api]);
 
   const onRestoreClick = useCallback(() => {
@@ -48,7 +48,12 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
     setPassword(value);
   }, []);
 
-  return (<Modal isVisible={isVisible} isClosable={true} onClose={onFinish}>
+  const onClose = useCallback(() => {
+    setPassword('');
+    onFinish();
+  }, [onFinish]);
+
+  return (<Modal isVisible={isVisible} isClosable={true} onClose={onClose}>
     <Content>
       <Heading size='2'>{'Add an account via backup JSON file'}</Heading>
     </Content>
@@ -60,7 +65,6 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
       <Upload
         testid={`${testid}-upload-button`}
         onChange={onUploadChange}
-        type={'square'}
         accept={'.json'}
       />
     </InputWrapper>
@@ -74,9 +78,9 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
         onChange={onPasswordChange}
         value={password}
       />
-      {passwordIncorrect && <Text size={'s'} color={'coral-500'}>Password incorrect</Text>}
     </InputWrapper>
-    <WarningBlock>
+    <PasswordIncorrectText size={'s'} color={'coral-500'}>{passwordIncorrect ? 'Password incorrect' : ''}</PasswordIncorrectText>
+    <WarningBlock margin={1}>
       Consider storing your account in a signer such as a browser extension, hardware device, QR-capable phone wallet (non-connected) or desktop application for optimal account security. Future versions of the web-only interface will drop support for non-external accounts, much like the IPFS version.
     </WarningBlock>
     <ButtonWrapper>
@@ -112,6 +116,10 @@ const InputWrapper = styled.div`
   }
 `;
 
+const PasswordIncorrectText = styled(Text)`
+  
+`;
+
 const TitleWrapper = styled.div`
   display: flex;
   flex-direction: column;
@@ -122,4 +130,12 @@ const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
   margin-top: calc(var(--gap) * 2);
+  @media (max-width: 568px) {
+    flex-direction: column;
+    align-items: flex-start;
+    row-gap: calc(var(--gap) /2);
+    button {
+      width: 100%;
+    }
+  }
 `;

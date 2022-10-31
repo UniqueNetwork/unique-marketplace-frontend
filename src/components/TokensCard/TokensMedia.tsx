@@ -6,16 +6,18 @@ import { Link } from 'react-router-dom';
 import playIcon from 'static/icons/play.svg';
 import pauseIcon from 'static/icons/pause.svg';
 import { Picture } from '../Picture';
+import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
 
 interface ITokensMedia {
   to: string
   tokenId?: number
-  imageUrl?: string
+  imageUrl?: string | DecodedInfixOrUrlOrCidAndHash
   video?: VideoAttribute
   testid: string
+  badge?: string
 }
 
-export const TokensMedia: FC<ITokensMedia> = ({ to, imageUrl, tokenId, video, testid }) => {
+export const TokensMedia: FC<ITokensMedia> = ({ to, imageUrl, tokenId, video, testid, badge }) => {
   const [isPlaying, setIsPlaying] = useState(false);
 
   const togglePlay = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -32,8 +34,9 @@ export const TokensMedia: FC<ITokensMedia> = ({ to, imageUrl, tokenId, video, te
         testid={`${testid}-token-picture`}
         videoProps={{ autoplay: false, controls: false }}
         isPlaying={isPlaying}
+        badge={badge}
       />
-      {video &&
+      {video?.fullUrl &&
         <div className={'play-button'} onClick={togglePlay}>
           <img src={isPlaying ? pauseIcon : playIcon} alt='icon' />
         </div>
@@ -117,7 +120,8 @@ const PictureWrapper = styled(Link)<{ isPlaying: boolean }>`
     }
   }
 
-  &:hover .picture {
+  &:hover .picture,
+  &:hover .badge {
     transform: ${({ isPlaying }) => (!isPlaying && 'translate(0, -5px)')};
     text-decoration: none;
   }

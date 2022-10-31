@@ -15,6 +15,7 @@ export type TokenDescription = {
   image: string
   prefix: string
   attributes: OfferTokenAttribute[]
+  video?: string
 }
 
 export type Trade = {
@@ -47,6 +48,8 @@ export type TradeDetails = {
   contractAskId: string
   bids: Bid[]
 }
+
+export type TradeDetailsResponse = TradeDetails[]
 
 export type Bid = {
   id: string

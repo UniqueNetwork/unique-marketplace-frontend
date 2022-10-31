@@ -1,8 +1,9 @@
 import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
-import { BlueGrey100 } from '../styles/colors';
+import { AdditionalDark, AdditionalLight, BlueGrey100, BlueGrey200 } from '../styles/colors';
 import Skeleton from './Skeleton/Skeleton';
 import { VideoAttribute } from '../api/uniqueSdk/types';
 import styled from 'styled-components';
+import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
 
 interface VideoProps {
   autoplay?: boolean
@@ -12,13 +13,14 @@ interface VideoProps {
 }
 
 interface PictureProps {
-  src?: string
+  src?: string | DecodedInfixOrUrlOrCidAndHash
   alt: string
   testid?: string
   size?: number
   video?: VideoAttribute
   videoProps?: VideoProps
   isPlaying?: boolean
+  badge?: string
 }
 
 export const Picture: FC<PictureProps> = ({
@@ -28,7 +30,8 @@ export const Picture: FC<PictureProps> = ({
   testid = '',
   video,
   videoProps,
-  isPlaying
+  isPlaying,
+  badge
 }) => {
   const [imageSrc, setImageSrc] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -36,7 +39,8 @@ export const Picture: FC<PictureProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    if (!src || !src.trim()) {
+    const imageUrl = src ? (typeof src === 'string' ? src.trim() : src.fullUrl) : '';
+    if (!imageUrl) {
       setImageSrc(undefined);
       return;
     }
@@ -47,14 +51,14 @@ export const Picture: FC<PictureProps> = ({
 
     image.onload = () => {
       setIsLoading(false);
-      setImageSrc(src);
+      setImageSrc(imageUrl);
     };
 
     image.onerror = () => {
       setIsLoading(false);
     };
 
-    image.src = src;
+    image.src = imageUrl;
   }, [src]);
 
   useEffect(() => {
@@ -65,12 +69,22 @@ export const Picture: FC<PictureProps> = ({
     }
   }, [isPlaying]);
 
+  const videoUrl = useMemo(() => {
+    if (!video) return undefined;
+    const url = video.fullUrl || video.url;
+    // if video doesn't have poster, we rewind video to 0.001 sec
+    // because iphone doesn't render first frame as a poster https://developer.apple.com/forums/thread/129377
+    if (!imageSrc) return `${url}#t=0.001`;
+    else return url;
+  }, [video, imageSrc]);
+
   return (<div className={'picture'}>
     {isLoading && <Skeleton width={'100%'} height={'100%'} />}
-    {!isLoading && video &&
+    {badge && <Badge className={'badge'}>{badge}</Badge>}
+    {!isLoading && video?.fullUrl &&
       <VideoStyled
         ref={videoRef}
-        src={video.fullUrl || video.url}
+        src={videoUrl}
         poster={imageSrc || undefined}
         controls={controls}
         autoPlay={autoplay}
@@ -80,14 +94,14 @@ export const Picture: FC<PictureProps> = ({
         data-testid={`${testid}-video`}
       ></VideoStyled>
     }
-    {!isLoading && imageSrc && !video &&
+    {!isLoading && imageSrc && !video?.fullUrl &&
       <img
         alt={alt}
         src={imageSrc}
         height={size || undefined}
         data-testid={`${testid}`}
       />}
-    {!isLoading && !imageSrc && !video && <svg
+    {!isLoading && !imageSrc && !video?.fullUrl && <svg
       fill={'white'}
       height='100%'
       viewBox='0 0 1000 1000'
@@ -128,4 +142,22 @@ const VideoStyled = styled.video`
   @media (max-width: 767px) {
     height: 100%;
   }
+`;
+
+const Badge = styled.div`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 4px 8px;
+  background-color: ${AdditionalLight};
+  border: 1px solid ${BlueGrey200};
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
+  color: ${AdditionalDark};
+  z-index: 2;
 `;

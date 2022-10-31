@@ -1,20 +1,28 @@
 import { FC } from 'react';
 import Identicon from '@polkadot/react-identicon';
 import styled from 'styled-components';
+import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
 
 export interface IAvatarProps {
-  src?: string;
+  src?: string | DecodedInfixOrUrlOrCidAndHash;
   address?: string;
   size: number;
   type?: 'circle' | 'square';
+  testid?: string
+  video?: string | DecodedInfixOrUrlOrCidAndHash;
 }
 
 export const Avatar: FC<IAvatarProps> = ({
   size = 38,
   src,
   address,
-  type = 'square'
+  type = 'square',
+  testid,
+  video
 }: IAvatarProps) => {
+  const imgUrl = typeof src === 'string' ? src : (src?.fullUrl || src?.url);
+  const videoUrl = typeof video === 'string' ? video : (video?.fullUrl || video?.url);
+
   if (address) {
     return <Identicon
       value={address}
@@ -22,11 +30,25 @@ export const Avatar: FC<IAvatarProps> = ({
     />;
   }
 
+  if (videoUrl && imgUrl?.endsWith('/ipfs/')) {
+    return <AvatarWrapper size={size}>
+      <video
+        src={videoUrl}
+        controls={false}
+        autoPlay={false}
+        playsInline
+        loop={false}
+        data-testid={`${testid}-video`}
+      />
+    </AvatarWrapper>;
+  }
+
   return <AvatarWrapper size={size}>
     <AvatarStyled $type={type}
-      src={src}
+      src={imgUrl}
       height={size}
       alt={''}
+      data-testid={testid}
     />
   </AvatarWrapper>;
 };
@@ -38,6 +60,9 @@ const AvatarWrapper = styled.div<{ size: number }>`
   display: flex;
   align-items: center;
   justify-content: center;
+  video {
+    width: 100%;
+  }
 `;
 
 const AvatarStyled = styled.img<{ $type: 'circle' | 'square' }>`

@@ -49,6 +49,9 @@ const PasswordInputWrapper = styled.div`
   display: flex;
   align-items: center;
   padding-right: calc(var(--gap) / 2);
+  &:focus, &:hover {
+    border: 1px solid var(--color-grey-500);
+  }
 `;
 
 const PasswordInputStyled = styled.input`
@@ -56,6 +59,7 @@ const PasswordInputStyled = styled.input`
   padding: 11px 12px;
   flex-grow: 1;
   outline: 0px none transparent;
+  background-color: transparent;
   &::placeholder {
     color: ${Grey500};
   }

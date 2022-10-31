@@ -1,4 +1,5 @@
-import { Button, Heading, Modal } from '@unique-nft/ui-kit';
+import { Heading } from '@unique-nft/ui-kit';
+import { Button, Modal } from 'components/UI';
 import React, { FC, useCallback } from 'react';
 import styled from 'styled-components';
 import { AdditionalDark } from 'styles/colors';
@@ -31,7 +32,7 @@ const ConfirmModal: FC<IConfirmModalProps> = ({
 
   return (
     <Modal isVisible={isVisible} onClose={onCancel} isClosable={isClosable}>
-      {headerText && <Heading size='2'>{headerText}</Heading>}
+      {headerText && <Heading size='2' testid={`${testid}-heading`}>{headerText}</Heading>}
       <Content>
         {children}
       </Content>

@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useAccounts } from './useAccounts';
 import { useApi } from './useApi';
 import { BN } from '@polkadot/util';
@@ -25,7 +25,7 @@ export const useFee = (): UseFeeReturn => {
     return fee || '0';
   }, [api, selectedAccount]);
 
-  const marketCommission = settings?.blockchain.kusama.marketCommission || '0';
+  const marketCommission = useMemo(() => settings ? settings.blockchain.kusama.marketCommission : '0', [settings]);
 
   return { marketCommission, kusamaFee, fetchingKusamaFee, getKusamaFee };
 };

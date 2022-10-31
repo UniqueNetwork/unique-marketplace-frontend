@@ -22,7 +22,7 @@ const AccountWrapper: FC = ({ children }) => {
   const [isLoadingDeposits, setIsLoadingDeposits] = useState<boolean>(false);
   const [fetchAccountsError, setFetchAccountsError] = useState<string | undefined>();
   const [selectedAccount, setSelectedAccount] = useState<Account>();
-  const { api, kusamaSdk } = useApi();
+  const { api, kusamaSdk, baseURL } = useApi();
 
   const changeAccount = useCallback((account: Account) => {
     localStorage.setItem(DefaultAccountKey, account.address);
@@ -95,7 +95,7 @@ const AccountWrapper: FC = ({ children }) => {
     // const balances = await rpcClient?.rawKusamaRpcApi?.derive.balances?.all(account.address);
     const balances = await api?.market?.getAccountBalance(account.address);
     return new BN(balances?.freeBalance?.raw || 0);
-  }, [api]);
+  }, [api?.market]);
 
   const getAccountsBalances = useCallback(async (accounts: Account[]) => Promise.all(accounts.map(async (account: Account) => ({
     ...account,
@@ -131,23 +131,26 @@ const AccountWrapper: FC = ({ children }) => {
     unsubscribesBalancesChanges.current = unsubscribes.reduce<Record<string, Codec>>((acc, item) => ({ ...acc, ...item }), {});
   }, [kusamaSdk, setAccounts]);
 
+  const getAccountDeposit = useCallback(async (account: Account) => {
+      return {
+        ...account,
+        deposits: {
+          bids: (await getWithdrawBids(baseURL, { owner: account.address })).data || { withdraw: [], leader: [] },
+          sponsorshipFee: await api?.market?.getUserDeposit(account.address)
+        }
+      };
+  }, [baseURL, api?.market]);
+
   const fetchAccountsWithDeposits = useCallback(async (fetchedAccounts: Account[]) => {
     setIsLoadingDeposits(true);
-    const _accounts = await Promise.all(fetchedAccounts.map(async (account) => ({
-      ...account,
-      deposits: {
-        bids: (await getWithdrawBids({ owner: account.address })).data || { withdraw: [], leader: [] },
-        sponsorshipFee: await api?.market?.getUserDeposit(account.address)
-      }
-    })));
+    const _accounts = await Promise.all(fetchedAccounts.map(getAccountDeposit));
     setAccounts(_accounts);
     setIsLoadingDeposits(false);
     return _accounts;
-  }, [api?.market]);
+  }, [getAccountDeposit]);
 
   const fetchAccounts = useCallback(async () => {
-    // if (!rpcClient?.isKusamaApiConnected) return;
-    if (!kusamaSdk) return;
+    if (!api?.market) return;
     setIsLoading(true);
 
     const allAccounts = await getAccounts();
@@ -173,23 +176,40 @@ const AccountWrapper: FC = ({ children }) => {
       setFetchAccountsError('No accounts in extension');
     }
     setIsLoading(false);
-  }, [kusamaSdk, getAccountsBalances, getAccountsWhiteListStatus, fetchAccountsWithDeposits]);
+  }, [api?.market, getAccountsBalances, getAccountsWhiteListStatus, fetchAccountsWithDeposits]);
 
   useEffect(() => {
     let unsubscribe: Unsubcall;
     if (web3EnablePromise) { // if polkadot extension is enabled
       const listenExtensionChanges = async () => {
         unsubscribe = await web3AccountsSubscribe(() => {
-          fetchAccounts();
+          setIsLoading((_isLoading) => {
+            if (_isLoading) return true;
+            void fetchAccounts();
+            return true;
+          });
         });
       };
 
-      listenExtensionChanges();
+      void listenExtensionChanges();
       return () => {
         unsubscribe && unsubscribe();
       };
     }
+    void fetchAccounts();
   }, [web3EnablePromise, fetchAccounts]);
+
+  const updateCurrentAccountDeposit = useCallback(async () => {
+    if (!selectedAccount) return;
+    const _account = await getAccountDeposit(selectedAccount);
+    setAccounts((accounts) => accounts.map((account) => {
+      if (account.address === _account.address) {
+        return { ...account, deposits: _account.deposits };
+      }
+      return account;
+    }));
+    setSelectedAccount(_account);
+  }, [selectedAccount]);
 
   const value = useMemo(() => ({
     isLoading,
@@ -201,7 +221,8 @@ const AccountWrapper: FC = ({ children }) => {
     setSelectedAccount,
     showSignDialog,
     fetchAccounts,
-    fetchAccountsWithDeposits
+    fetchAccountsWithDeposits,
+    updateCurrentAccountDeposit
   }), [isLoading, isLoadingDeposits, accounts, fetchAccounts, fetchAccountsWithDeposits, selectedAccount, fetchAccountsError, changeAccount]);
 
   return (

@@ -1,7 +1,8 @@
 import React, { FC } from 'react';
-import { Heading, Icon } from '@unique-nft/ui-kit';
+import { Heading } from '@unique-nft/ui-kit';
 import BN from 'bn.js';
 import styled from 'styled-components';
+import { Icon } from 'components/UI/Icon/Icon';
 
 import { formatKusamaBalance } from '../../../utils/textUtils';
 import { useApi } from '../../../hooks/useApi';
@@ -13,14 +14,14 @@ interface PriceProps {
 
 export const Price: FC<PriceProps> = ({ price, testid = '' }) => {
   const { api } = useApi();
-
+  const decimals = api?.market?.kusamaDecimals;
   return (
     <PriceWrapper>
       <Row>
         <Heading
           testid={`${testid}-price`}
           size={'1'}
-        >{`${formatKusamaBalance(new BN(price).toString(), api?.market?.kusamaDecimals)}`}</Heading>
+        >{`${formatKusamaBalance(new BN(price).toString(), { decimals })}`}</Heading>
         <Icon name={'chain-kusama'} size={32} />
       </Row>
     </PriceWrapper>

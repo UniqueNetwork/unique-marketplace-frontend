@@ -1,5 +1,5 @@
 import React, { ChangeEvent, FC, useCallback, useState } from 'react';
-import { Button, Text } from '@unique-nft/ui-kit';
+import { Button, Text } from 'components/UI';
 import styled from 'styled-components';
 
 import { TCreateAccountBodyModalProps } from './types';
@@ -112,13 +112,16 @@ const SeedInput = styled.textarea`
   width: calc(100% - var(--gap) * 2);
   height: auto;
   resize: none;
-  outline: 0px none transparent;
+  outline: 0 none transparent;
   margin-top: var(--gap);
   font-family: 'Roboto';
   font-style: normal;
   font-weight: 400;
   font-size: 16px;
   line-height: 24px;
+  &:focus, &:hover {
+    border: 1px solid var(--color-grey-500);
+  }
 `;
 
 const StepsTextStyled = styled(Text)`

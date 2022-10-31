@@ -1,6 +1,5 @@
 import { Attribute, AttributeCount, OfferTokenAttribute } from 'api/restApi/offers/types';
-import { NFTToken } from 'api/uniqueSdk/types';
-import { AttributeType, DecodedAttributes } from '@unique-nft/substrate-client/tokens';
+import { AttributeType, DecodedAttributes, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 
 export const sortAttributeCounts = (attributeCountA: AttributeCount, attributeCountB: AttributeCount) => attributeCountA.numberOfAttributes > attributeCountB.numberOfAttributes ? 1 : -1;
 
@@ -23,7 +22,7 @@ export const toTokenAttributes = (offerAttributes: OfferTokenAttribute[]) => {
   return result;
 };
 
-export const getAttributesFromTokens = (tokens: NFTToken[]) => {
+export const getAttributesFromTokens = (tokens: TokenByIdResult[]) => {
   // All attributes from available tokens
   const attributesMap: { [key: string]: any[] } = {};
   // attributes formatted for Filter component
@@ -34,7 +33,7 @@ export const getAttributesFromTokens = (tokens: NFTToken[]) => {
     // Calculate filters to show
     for (const i in attributes) {
       const { name, value } = attributes[i];
-      const attributeName = name._.toLocaleLowerCase();
+      const attributeName = name?._.toLocaleLowerCase();
 
       if (Array.isArray(value)) {
         attributesMap[attributeName] = attributesMap[attributeName] ? [...attributesMap[attributeName], ...value.map((attr) => attr._)] : value.map((attr) => attr._);
@@ -73,7 +72,7 @@ export function countTokenAttributes(attributes: DecodedAttributes | undefined):
   return count;
 }
 
-export const getAttributesCountFromTokens = (tokens: NFTToken[]) => {
+export const getAttributesCountFromTokens = (tokens: TokenByIdResult[]) => {
   const countTokensAttributes: number[] = tokens.map(({ attributes }) => countTokenAttributes(attributes));
   // count tokens with the same amount of attributes, result be like { 7: 2, 6: 1 }
   const counterMap: { [key: number]: number } = {};

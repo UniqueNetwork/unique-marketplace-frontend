@@ -6,9 +6,10 @@ import { Tooltip, TooltipAlign } from '@unique-nft/ui-kit';
 
 interface IProps {
   align?: TooltipAlign;
+  testid?: string
 }
 
-const IconWithHint: FC<IProps> = ({ align, children }) => {
+const IconWithHint: FC<IProps> = ({ align, children, testid }) => {
   const [isHovered, setIsHovered] = useState(false);
   const targetRef = useRef<HTMLDivElement>(null);
   const onHover = useCallback(
@@ -28,6 +29,7 @@ const IconWithHint: FC<IProps> = ({ align, children }) => {
       <IconContainer
         onMouseOver={onHover}
         onMouseOut={onHoverEnd}
+        data-testid={`${testid}-tooltip`}
       >
         <Tooltip
           align={align}

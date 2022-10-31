@@ -1,16 +1,20 @@
 import React, { FC, useMemo } from 'react';
-import { Icon, Text } from '@unique-nft/ui-kit';
-import { Link } from 'react-router-dom';
+import { Text } from '@unique-nft/ui-kit';
+import { generatePath, Link } from 'react-router-dom';
 import styled from 'styled-components';
-
+import { Icon } from 'components/UI/Icon/Icon';
 import { Offer } from 'api/restApi/offers/types';
 import { useAccounts } from 'hooks/useAccounts';
 import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
 import { formatKusamaBalance } from 'utils/textUtils';
 import { timeDifference } from 'utils/timestampUtils';
+import { countNestedChildren, stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
 import { Primary600 } from 'styles/colors';
 import config from '../../config';
 import { TokensMedia } from '../TokensCard/TokensMedia';
+import { useApi } from '../../hooks/useApi';
+import BundleItemsCount from '../BundleItemsCount/BundleItemsCount';
+import { Link as UILink } from 'components/UI';
 
 export type TTokensCard = {
   offer: Offer
@@ -19,15 +23,22 @@ export type TTokensCard = {
 
 export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
   const { selectedAccount } = useAccounts();
+  const { currentChainId } = useApi();
 
   const {
-    collectionName,
     image,
-    prefix,
-    video
+    video,
+    nestingChildTokens
   } = offer?.tokenDescription || {};
 
-  const videoProp = useMemo(() => typeof video === 'string' ? { fullUrl: video, ipfsCid: '' } : video, [video]);
+  const isBundle = !!nestingChildTokens?.length;
+
+  const {
+    name: collectionName,
+    tokenPrefix
+  } = offer?.collectionDescription || {};
+
+  const videoProp = useMemo(() => stringToDecodedInfixOrUrlOrCidAndHash(video), [video]);
 
   const isBidder = useMemo(() => {
     if (!selectedAccount) return false;
@@ -44,44 +55,57 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
     return compareEncodedAddresses(offer?.auction!.bids[0].bidderAddress, selectedAccount.address);
   }, [isBidder, topBid, selectedAccount]);
 
+  const tokenPath = useMemo(() => generatePath('/:currentChainId/token/:collectionId/:tokenId', {
+    currentChainId,
+    collectionId: offer?.collectionId.toString(),
+    tokenId: offer?.tokenId.toString()
+  }), [currentChainId, offer]);
+
+  const tokensCount = useMemo(() => {
+    if (!isBundle) return 0;
+    return countNestedChildren(nestingChildTokens);
+  }, [nestingChildTokens]);
+
   return (
     <TokensCardStyled>
       <TokensMedia
-        to={`/token/${offer?.collectionId}/${offer?.tokenId}`}
+        to={tokenPath}
         tokenId={offer?.tokenId}
         imageUrl={image}
         video={videoProp}
         testid={`${testid}-token-media`}
+        badge={isBundle ? 'Bundle' : ''}
       />
       <Description>
-        <Link to={`/token/${offer?.collectionId}/${offer?.tokenId}`} title={`${prefix || ''} #${offer?.tokenId}`}>
+        <Link to={tokenPath} title={`${tokenPrefix || ''} #${offer?.tokenId}`}>
           <Text
             size='l'
             weight='regular'
             color={'secondary-500'}
             testid={`${testid}-tokenId`}
           >
-            {`${prefix || ''} #${offer?.tokenId}`}
+            {`${tokenPrefix || ''} #${offer?.tokenId}`}
           </Text>
         </Link>
-        <a
+        <UILink
           data-testid={`${testid}-collection-${offer?.collectionId}-link`}
-          href={`${config.scanUrl || ''}collections/${offer?.collectionId}`}
+          href={`${config.blockchains[currentChainId || ''].scanUrl || ''}collections/${offer?.collectionId}`}
           target={'_blank'}
           rel='noreferrer'
         >
           <Text color='primary-600' size='s'>
             {`${collectionName?.substring(0, 25) || ''} [id ${offer?.collectionId || ''}]`}
           </Text>
-        </a>
+        </UILink>
+        {isBundle && <BundleItemsCount count={tokensCount || 0} testId={testid} />}
         <PriceWrapper>
           <Text
             testid={`${testid}-price`}
             size='l'
           >{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(offer?.price)}` }</Text>
-          <Icon name={'chain-kusama'} size={16} />
+          <IconStyled name={'chain-kusama'} size={16} />
+          {!offer?.auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         </PriceWrapper>
-        {!offer?.auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         {offer?.auction && <AuctionInfoWrapper>
           {isTopBidder && <Text
             testid={`${testid}-leading-bid`}
@@ -100,7 +124,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
           >{
             offer.auction.bids.length > 0 ? 'Last bid' : 'Minimum bid'
           }</Text>}
-          <StyledText color={'dark'} size={'xs'}>{`${timeDifference(new Date(offer.auction?.stopAt || '').getTime() / 1000)} left`}</StyledText>
+          <StyledText color={'dark'} size={'xs'} testid={`${testid}-auction-close-time`}>{`${timeDifference(new Date(offer.auction?.stopAt || '').getTime() / 1000)} left`}</StyledText>
         </AuctionInfoWrapper>}
       </Description>
     </TokensCardStyled>
@@ -114,49 +138,6 @@ const TokensCardStyled = styled.div`
   justify-content: center;
   position: relative;
   cursor: pointer;
-`;
-
-const PictureWrapper = styled(Link)`
-  position: relative;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 8px;
-
-  &::before {
-    content: "";
-    display: block;
-    padding-top: 100%;
-  }
-
-  .picture {
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    color: white;
-    text-align: center;
-    max-height: 100%;
-    border-radius: 8px;
-    transition: 50ms;
-    overflow: hidden;
-
-    img {
-      max-width: 100%;
-      max-height: 100%;
-    }
-
-    svg {
-      border-radius: 8px;
-    }
-    
-    &:hover {
-      transform: translate(0, -5px);
-      text-decoration: none;
-    }
-  }
 `;
 
 const PriceWrapper = styled.div` 
@@ -186,10 +167,6 @@ const AuctionInfoWrapper = styled.div`
   column-gap: calc(var(--gap) / 2);
 `;
 
-const Row = styled.div` 
-  && {
-    display: flex;
-    align-items: center;
-    column-gap: calc(var(--gap) / 4);
-  }
+const IconStyled = styled(Icon)`
+  margin: 0 calc(var(--gap) / 4);
 `;

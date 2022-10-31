@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
-import { Button, Heading, Text, useNotifications } from '@unique-nft/ui-kit';
+import { Heading } from '@unique-nft/ui-kit';
+import { Text, useNotifications, Button } from 'components/UI';
 import styled from 'styled-components/macro';
 
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
@@ -19,17 +20,14 @@ export const SelectNFTsModal: FC<TAdminPanelModalBodyProps> = ({ collection, onF
     if (tokens && !/^[1-9]\d*(-[1-9]\d*)?(,[1-9]\d*(-[1-9]\d*)?)*$/.test(tokens)) {
       return false;
     }
-    if (tokens.split(',').some((value) => {
+    return !tokens.split(',').some((value) => {
       if (value.includes('-')) { // its range like 1-100
         const [start, end] = value.split('-').map(Number);
         return start > end || start > MAX_SAFE_ID || end > MAX_SAFE_ID;
       } else { // its single value
         return Number(value) > MAX_SAFE_ID;
       }
-      return false;
-    })) return false;
-
-    return true;
+    });
   }, [tokens]);
 
   const onAcceptClick = useCallback(async () => {

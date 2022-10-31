@@ -1,8 +1,8 @@
 import React, { FC, useMemo } from 'react';
 import styled from 'styled-components';
-import { Button, Text } from '@unique-nft/ui-kit';
+import { Button, Text } from 'components/UI';
 
-import { AdditionalWarning100, AdditionalWarning500, Grey300 } from 'styles/colors';
+import { Grey300 } from 'styles/colors';
 import { Offer } from 'api/restApi/offers/types';
 import { Price } from '../TokenDetail/Price';
 import { useAccounts } from 'hooks/useAccounts';

@@ -1,47 +1,37 @@
 import { Sdk } from '@unique-nft/substrate-client';
+// eslint-disable-next-line import/no-duplicates
+import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
+import { TransactionOptions, UniqueController } from './types';
+// eslint-disable-next-line import/no-duplicates
 import '@unique-nft/substrate-client/tokens';
-import { TransactionOptions, NFTCollection } from './types';
-import { Settings } from '../restApi/settings/types';
 
-export class UniqueSDKCollectionController {
-  private sdk: Sdk;
-  private collectionIds: number[];
-  constructor(sdk: Sdk, settings: Settings) {
-    this.sdk = sdk;
-    this.collectionIds = settings.blockchain.unique.collectionIds;
+export class UniqueSDKCollectionController implements UniqueController {
+  private sdk: Sdk | undefined;
+  private collectionIds: number[] = [];
+
+  setNetwork(options: { sdk: Sdk, collectionIds: number[] }): void {
+    this.sdk = options.sdk;
+    this.collectionIds = options.collectionIds;
   }
 
   async confirmSponsorship(collectionId: number, options: TransactionOptions): Promise<void> {
-    const unsignedTxPayload = await this.sdk.sponsorhip.confirmSponsorship(collectionId, options.signer);
+    if (!options.signer) return;
+    const unsignedTxPayload = await this.sdk?.collections.confirmSponsorship.build({ collectionId, address: options.signer });
+    if (!unsignedTxPayload) throw new Error('Transaction build error');
     const signature = await options.sign?.(unsignedTxPayload);
     if (!signature) throw new Error('Signing failed');
-    await this.sdk.extrinsics.submitWaitCompleted({
+    await this.sdk?.extrinsics.submitWaitCompleted({
       signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });
   }
 
-  async getCollection(collectionId: number): Promise<NFTCollection | null> {
-    const collection = await this.sdk.collections.get_new({ collectionId });
-
-    if (!collection) return null;
-
-    const { name, description, owner, schema, tokenPrefix, sponsorship } = collection;
-    const coverImageUrl = schema?.coverPicture?.fullUrl || '';
-
-    return {
-      id: collectionId,
-      tokenPrefix,
-      coverImageUrl,
-      collectionName: name,
-      description,
-      owner,
-      sponsorship
-    };
+  async getCollection(collectionId: number): Promise<CollectionInfoWithSchema | null> {
+    return await this.sdk?.collections.get_new({ collectionId }) || null;
   }
 
-  async getFeaturedCollections(): Promise<NFTCollection[]> {
-    const collections: Array<NFTCollection> = [];
+  async getFeaturedCollections(): Promise<CollectionInfoWithSchema[]> {
+    const collections: Array<CollectionInfoWithSchema> = [];
     for (let i = 0; i < this.collectionIds.length; i++) {
       const collectionInf = await this.getCollection(this.collectionIds[i]);
 
@@ -56,10 +46,12 @@ export class UniqueSDKCollectionController {
   }
 
   async removeCollectionSponsor(collectionId: number, options: TransactionOptions): Promise<void> {
-    const unsignedTxPayload = await this.sdk.sponsorhip.removeCollectionSponsor(collectionId, options.signer);
+    if (!options.signer) return;
+    const unsignedTxPayload = await this.sdk?.collections.removeSponsorship.build({ collectionId, address: options.signer });
+    if (!unsignedTxPayload) throw new Error('Transaction build error');
     const signature = await options.sign?.(unsignedTxPayload);
     if (!signature) throw new Error('Signing failed');
-    await this.sdk.extrinsics.submitWaitCompleted({
+    await this.sdk?.extrinsics.submitWaitCompleted({
       signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });

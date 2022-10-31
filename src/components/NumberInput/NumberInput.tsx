@@ -1,5 +1,5 @@
 import React, { FC, useCallback } from 'react';
-import { InputText } from '@unique-nft/ui-kit';
+import { InputText } from 'components/UI';
 import styled from 'styled-components';
 import { IconButton } from '../IconButton/IconButton';
 
@@ -43,7 +43,7 @@ export const NumberInput: FC<AmountInputProps> = ({ value, onChange, placeholder
         size={16}
         onClick={onClear}
         testid={`${testid}-clear-button`}
-    />}
+      />}
   </InputWrapper>;
 };
 

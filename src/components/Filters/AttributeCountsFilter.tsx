@@ -1,6 +1,7 @@
 import React, { FC, useCallback } from 'react';
 import styled from 'styled-components';
-import { Checkbox, Text } from '@unique-nft/ui-kit';
+import { Text } from '@unique-nft/ui-kit';
+import { Checkbox } from 'components/UI';
 import Accordion from '../Accordion/Accordion';
 import CheckboxSkeleton from '../Skeleton/CheckboxSkeleton';
 import { AttributeCount } from '../../api/restApi/offers/types';
@@ -45,7 +46,7 @@ const AttributeCountsFilter: FC<AttributeCountsFilterProps> = ({ attributeCounts
               label={attributeCount.numberOfAttributes.toString()}
               size={'m'}
               onChange={onAttributeCountSelect(attributeCount.numberOfAttributes)}
-              testid={`${testid}-checkbox-${attributeCount.numberOfAttributes}`}
+              testid={`${testid}-checkbox`}
             />
             <Text
               testid={`${testid}-amount-${attributeCount.amount}`}

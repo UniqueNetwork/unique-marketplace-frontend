@@ -1,26 +1,28 @@
 import { Sdk } from '@unique-nft/substrate-client';
-import { NFTToken, TokenId } from './types';
-import { Settings } from '../restApi/settings/types';
+import { TokenId, TransactionOptions, UniqueController } from './types';
 import { getEthAccount } from './utils/addressUtils';
-import { checkTokenIsAllowed, filterAllowedTokens } from './utils/checkTokenIsAllowed';
+import { filterAllowedTokens } from './utils/checkTokenIsAllowed';
+import { getNestingTokenAddress, NestedToken, TokenByIdResult, TokenIdArguments, TokenOwnerResult } from '@unique-nft/substrate-client/tokens';
 import { Address } from '@unique-nft/substrate-client/types';
 
-export class UniqueSDKNFTController {
-  private sdk: Sdk;
-  private readonly collectionIds: number[];
-  private readonly allowedTokens: Record<number, string>;
-  constructor(sdk: Sdk, settings: Settings) {
-    this.sdk = sdk;
-    this.collectionIds = settings.blockchain.unique.collectionIds;
-    this.allowedTokens = settings.blockchain?.unique?.allowedTokens.reduce((acc, item) => ({ ...acc, [item.collection]: item.tokens }), {}) || {};
+type UniqueSDKNFTControllerOptions = { sdk: Sdk, collectionIds: number[], allowedTokens: { collection: number, tokens: string }[] };
+
+export class UniqueSDKNFTController implements UniqueController {
+  private sdk: Sdk | undefined;
+  private collectionIds: number[] = [];
+  private allowedTokens: Record<number, string> = {};
+
+  setNetwork(options: UniqueSDKNFTControllerOptions): void {
+    this.sdk = options.sdk;
+    this.collectionIds = options.collectionIds;
+    this.allowedTokens = options.allowedTokens.reduce((acc, item) => ({ ...acc, [item.collection]: item.tokens }), {}) || {};
   }
 
-  async getAccountMarketableTokens(address: Address): Promise<NFTToken[]> {
+  async getAccountMarketableTokens(address: Address): Promise<TokenByIdResult[]> {
     if (!this.sdk?.api || !address) {
       return [];
     }
-    const tokens: NFTToken[] = [];
-
+    const tokens: TokenByIdResult[] = [];
     // @ts-ignore
     const { unique } = this.sdk?.api.rpc || {};
 
@@ -35,7 +37,7 @@ export class UniqueSDKNFTController {
         const allowedIds = filterAllowedTokens([...tokensIds, ...tokensIdsOnEth], currentAllowedTokens);
         const tokensOfCollection = (await Promise.all(allowedIds
           .map((tokenId) =>
-            this.getToken(collectionId, tokenId.toNumber())))) as NFTToken[];
+            this.getToken(collectionId, tokenId.toNumber())))) as TokenByIdResult[];
 
         tokens.push(...tokensOfCollection);
       } catch (e) {
@@ -45,31 +47,65 @@ export class UniqueSDKNFTController {
     return tokens;
   }
 
-  async getToken(collectionId: number, tokenId: number): Promise<NFTToken | null> {
-    const token = await this.sdk.tokens.get_new({ collectionId, tokenId });
-    const collection = await this.sdk.collections.get_new({ collectionId });
-    if (!token || !collection) return null;
+  async getToken(collectionId: number, tokenId: number): Promise<TokenByIdResult | null> {
+    return await this.sdk?.tokens.get_new({ collectionId, tokenId }) || null;
+  }
 
-    const { owner, attributes, image, video } = token;
-    const { name, tokenPrefix, description, schema } = collection;
+  async isBundle(collectionId: number, tokenId: number): Promise<boolean> {
+    return !!await this.sdk?.tokens.isBundle({ collectionId, tokenId });
+  }
 
-    const imageUrl = image?.fullUrl || '';
-    const collectionCover = schema?.coverPicture?.fullUrl || '';
+  async getBundle(collectionId: number, tokenId: number): Promise<NestedToken | null> {
+    return await this.sdk?.tokens.getBundle({ collectionId, tokenId }) || null;
+  }
 
-    const isAllowed = this.allowedTokens[collectionId] ? checkTokenIsAllowed(tokenId, this.allowedTokens[collectionId].split(',')) : true;
+  async unnest(collectionId: number, tokenId: number, address: string, options: TransactionOptions): Promise<void> {
+    const parent = await this.sdk?.tokens.parent({ collectionId, tokenId });
 
-    return {
-      id: tokenId,
-      owner,
-      attributes,
-      imageUrl,
-      collectionId,
-      collectionName: name,
-      prefix: tokenPrefix,
-      description,
-      collectionCover,
-      isAllowed,
-      video
-    };
+    if (!parent) return;
+
+    const unsignedTxPayload = await this.sdk?.tokens.unnest.build({
+      parent,
+      nested: { collectionId, tokenId },
+      address
+    });
+    if (!unsignedTxPayload) throw new Error('Transaction build error');
+    const signature = await options.sign?.(unsignedTxPayload);
+    if (!signature) throw new Error('Signing failed');
+    await this.sdk?.extrinsics.submitWaitCompleted({
+      signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
+      signature
+    });
+  }
+
+  async transferToBundle(nested: TokenIdArguments, newParent: TokenIdArguments, options: TransactionOptions): Promise<void> {
+    const parent = await this.sdk?.tokens.parent(nested);
+    if (!parent) return;
+    const { collectionId, tokenId } = nested;
+    const from = getNestingTokenAddress(parent.collectionId, parent.tokenId);
+    const to = getNestingTokenAddress(newParent.collectionId, newParent.tokenId);
+    const unsignedTxPayload = await this.sdk?.extrinsics.build({
+      section: 'unique',
+      method: 'transferFrom',
+      address: options.signer || '',
+      args: [
+        { Ethereum: from },
+        { Ethereum: to },
+        collectionId,
+        tokenId,
+        1
+      ]
+    });
+    if (!unsignedTxPayload) throw new Error('Transaction build error');
+    const signature = await options.sign?.(unsignedTxPayload);
+    if (!signature) throw new Error('Signing failed');
+    await this.sdk?.extrinsics.submitWaitCompleted({
+      signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
+      signature
+    });
+  }
+
+  async getOwner(collectionId: number, tokenId: number): Promise<TokenOwnerResult | null> {
+    return await this.sdk?.tokens.owner({ collectionId, tokenId }) || null;
   }
 }

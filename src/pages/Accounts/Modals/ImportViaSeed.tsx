@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
-import { Heading, Modal, useNotifications } from '@unique-nft/ui-kit';
+import { Heading } from '@unique-nft/ui-kit';
+import { Modal, useNotifications } from 'components/UI';
 import styled from 'styled-components';
 
 import { TAccountModalProps, CreateAccountModalStages, TAccountProperties, TCreateAccountBodyModalProps } from './types';
@@ -51,9 +52,15 @@ export const ImportViaSeedAccountModal: FC<TAccountModalProps> = ({ isVisible, o
     setStage(stage - 1);
   }, [stage]);
 
+  const onCloseClick = useCallback(() => {
+    setStage(CreateAccountModalStages.AskSeed);
+    setAccountProperties(undefined);
+    onClose();
+  }, [onClose]);
+
   if (!ModalBodyComponent) return null;
 
-  return (<Modal isVisible={isVisible} isClosable={true} onClose={onClose}>
+  return (<Modal isVisible={isVisible} isClosable={true} onClose={onCloseClick}>
     <Content>
       <Heading size='2'>{'Add an account via seed phrase'}</Heading>
     </Content>

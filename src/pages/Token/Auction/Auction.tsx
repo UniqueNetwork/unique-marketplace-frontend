@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Text, Button, Heading, useNotifications } from '@unique-nft/ui-kit';
+import { Heading } from '@unique-nft/ui-kit';
+import { Text, useNotifications, Button } from 'components/UI';
 import styled from 'styled-components';
 import BN from 'bn.js';
 
@@ -14,6 +15,7 @@ import Timer from 'components/Timer';
 import AccountLink from 'components/Account/AccountLink';
 import { PriceForAuction } from '../TokenDetail/PriceForAuction';
 import Bids from './Bids';
+import BuyBundleInformation from '../TokenDetail/BuyBundleInformation';
 
 interface AuctionProps {
   offer: Offer
@@ -110,10 +112,11 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
   const price = offer.price;
 
   return (<>
-    <Text size={'l'}>{topBid ? 'Next minimum bid' : 'Starting bid'}</Text>
+    <Text size={'l'} testid={`${testid}-bid-title`}>{topBid ? 'Next minimum bid' : 'Starting bid'}</Text>
     <PriceForAuction price={price}
       minStep={offer.auction?.priceStep}
       topBid={topBid?.balance !== '0' ? topBid?.balance : topBid?.amount}
+      testid={`${testid}-bid`}
     />
     <AuctionWrapper>
       {offer.auction?.status === 'active' && <ButtonsWrapper>
@@ -134,24 +137,25 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
           testid={`${testid}-withdraw-button`}
         />}
       </ButtonsWrapper>}
+      {offer.tokenDescription.nestingChildTokens?.length && <BuyBundleInformation testid={testid}/>}
       {offer.auction?.status === 'active' && offer?.auction?.stopAt && <TimerWrapper>
-        <Timer time={offer.auction.stopAt} />
+        <Timer time={offer.auction.stopAt} testid={`${testid}-timer`} />
       </TimerWrapper>}
       {(offer.auction?.status === 'stopped' || offer.auction?.status === 'withdrawing') &&
       <Text>Auction is stopped</Text>}
       <Divider />
       <Heading size={'4'}>Offers</Heading>
-      {isTopBidder && <TopBidderTextStyled >You are Top Bidder</TopBidderTextStyled>}
+      {isTopBidder && <TopBidderTextStyled testid={`${testid}-you-are-top-bidder-text`}>You are Top Bidder</TopBidderTextStyled>}
       {!isBidder && topBid && <LeadingBidWrapper>
-        <Text color={'grey-500'}>Highest Bidder</Text><AccountLink accountAddress={topBid?.bidderAddress || ''} />
+        <Text color={'grey-500'} testid={`${testid}-highest-bidder-text`}>Highest Bidder</Text><AccountLink accountAddress={topBid?.bidderAddress || ''} testid={`${testid}-highest-bidder-address`}/>
       </LeadingBidWrapper>}
       {!isTopBidder && isBidder && <BidderStatusWrapper>
-        <BidderTextStyled >You are outbid</BidderTextStyled>
+        <BidderTextStyled testid={`${testid}-you-are-outbid-text`}>You are outbid</BidderTextStyled>
         <LeadingBidWrapper>
-          <Text color={'grey-500'}>Leading bid</Text><AccountLink accountAddress={topBid?.bidderAddress || ''} />
+          <Text color={'grey-500'} testid={`${testid}-leading-bid-text`}>Leading bid</Text><AccountLink accountAddress={topBid?.bidderAddress || ''} testid={`${testid}-leading-bid-address`}/>
         </LeadingBidWrapper>
       </BidderStatusWrapper>}
-      <Bids offer={offer} />
+      <Bids offer={offer} testid={`${testid}-bids`} />
     </AuctionWrapper>
   </>);
 };

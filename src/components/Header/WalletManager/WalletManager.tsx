@@ -1,9 +1,9 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { AccountsManager, Button, Text, useNotifications } from '@unique-nft/ui-kit';
 import { BN } from '@polkadot/util';
-
+import { INetwork } from '@unique-nft/ui-kit';
+import { Text, useNotifications, Button } from 'components/UI';
 import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
 import { useAccounts } from 'hooks/useAccounts';
 import { Account } from 'account/AccountContext';
@@ -16,23 +16,44 @@ import { TWithdrawBid } from 'api/restApi/auction/types';
 import { formatKusamaBalance } from 'utils/textUtils';
 import BalanceSkeleton from '../../Skeleton/BalanceSkeleton';
 import config from '../../../config';
+import { AccountsManager } from '../../UI/widgets/AccountsManager';
 
 const tokenSymbol = 'KSM';
+
+const fractionDigits = 4;
 
 function widgetAvatarRender(accountAddress: string) {
   return (<Avatar size={24} src={DefaultAvatar} address={accountAddress} />);
 }
 
 export const WalletManager: FC = () => {
-  const { selectedAccount, accounts, isLoading, fetchAccounts, changeAccount } = useAccounts();
+  const { selectedAccount, accounts, isLoading, changeAccount } = useAccounts();
   const [isOpen, setIsOpen] = useState(false);
   const [isGetKsmOpened, setIsGetKsmOpened] = useState(false);
-  const navigate = useNavigate();
-  const { chainData } = useApi();
+  const { chainData, settings, currentChainId, onChangeChainId, api } = useApi();
   const { info } = useNotifications();
+  const navigate = useNavigate();
+  const decimals = api?.market?.kusamaDecimals;
+
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
   }, [chainData?.SS58Prefix]);
+
+  const networks: INetwork[] = useMemo(() => Object.keys(config?.blockchains || {}).map<INetwork>((id) => ({
+    id,
+    name: config?.blockchains[id]?.name || '',
+    icon: {
+      name: `chain-${id.toLowerCase()}`,
+      size: 40
+    }
+  })), [settings]);
+
+  const currentNetwork = useMemo(() => networks.find(({ id }) => id === currentChainId), [networks, currentChainId]);
+
+  const onNetworkChange = useCallback((network: INetwork) => {
+    onChangeChainId(network.id);
+    setIsOpen(false);
+  }, [onChangeChainId]);
 
   const widgetAccounts = useMemo(() => accounts.map((account) => (
     { name: account.meta.name, ...account, address: formatAddress(account.address), substrateAddress: account?.address })
@@ -46,20 +67,12 @@ export const WalletManager: FC = () => {
     changeAccount({ ...account, address: account.substrateAddress } as Account);
   }, [changeAccount]);
 
-  const onCopyAddress = useCallback((account: string) => {
-    navigator.clipboard.writeText(formatAddress(account)).then(() => {
-      info(
-        'Address copied',
-        { name: 'success', size: 32, color: 'var(--color-additional-light)' }
-      );
-    });
-  }, [formatAddress, info]);
-
-  useEffect(() => {
-    (async () => {
-      await fetchAccounts();
-    })();
-  }, [fetchAccounts]);
+  const onCopyAddress = useCallback((address: string) => {
+    info(
+      'Address copied',
+      { name: 'success', size: 32, color: 'var(--color-additional-light)' }
+    );
+  }, []);
 
   const onCreateAccountClick = useCallback(() => {
     navigate('/accounts');
@@ -94,7 +107,7 @@ export const WalletManager: FC = () => {
     const deposit = (sponsorshipFee || new BN(0))
     .add(withdraw.reduce(getTotalAmount, new BN(0)))
     .add(leader.reduce(getTotalAmount, new BN(0)));
-    return formatKusamaBalance(deposit.toString());
+    return formatKusamaBalance(deposit.toString(), { decimals, fractionDigits });
   }, [selectedAccount?.deposits]);
 
   if (!isLoading && !selectedAccount) {
@@ -103,42 +116,34 @@ export const WalletManager: FC = () => {
     );
   }
 
-  if (isLoading) return <BalanceSkeleton />;
+  if (isLoading || !api) return <BalanceSkeleton />;
 
   return (
     <WalletManagerWrapper>
       <AccountsManager
         open={isOpen}
         accounts={widgetAccounts}
-        activeNetwork={{
-          icon: {
-            name: 'chain-quartz',
-            size: 40
-          },
-          id: 'quartz',
-          name: 'Quartz'
-        }}
-        balance={formatKusamaBalance(currentBalance.value)}
+        activeNetwork={currentNetwork}
+        balance={formatKusamaBalance(currentBalance.value, { decimals, fractionDigits })}
         deposit={formattedAccountDeposit}
         depositDescription={
           <>
-            {formattedAccountDeposit && <Text color='grey-500' size='xs'>The total market deposit for participation in auctions and
-              sponsorship. <br/> Use the “Manage my balance” section to withdraw.</Text>}
+            {formattedAccountDeposit && <Text color='grey-500' weight={'light'} size='xs'>The total market deposit for participation in auctions and
+              sponsorship. <br/> Use the “Manage accounts” section to withdraw.</Text>}
             {config.rampApiKey && <GetKsmButton
               title={'Get KSM'}
-              size={'middle'}
+              size={'small'}
               role={'outlined'}
               wide
               onClick={openModal}
             />}
           </>
         }
-        manageBalanceLinkTitle='Manage my balance'
-        networks={[]}
+        networks={networks}
         onAccountChange={widgetAccountChange}
-        // onCopyAddressClick={onCopyAddress}
+        onCopyAddressClick={onCopyAddress}
         onManageBalanceClick={onCreateAccountClick}
-        onNetworkChange={function noRefCheck() { }}
+        onNetworkChange={onNetworkChange}
         selectedAccount={widgetSelectedAccount}
         symbol={tokenSymbol}
         avatarRender={widgetAvatarRender}
@@ -149,8 +154,13 @@ export const WalletManager: FC = () => {
   );
 };
 
+const DescriptionText = styled(Text)`
+`;
+
 const GetKsmButton = styled(Button)`
-  margin: 8px 0;
+  margin-top: 12px;
+  height: 32px;
+  font-size: 14px;
 `;
 
 const WalletManagerWrapper = styled.div`

@@ -2,39 +2,45 @@ import { Sdk } from '@unique-nft/substrate-client';
 import { TokenIdArguments, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 import { isEthereumAddress } from '@unique-nft/substrate-client/utils';
 import { BN } from '@polkadot/util';
-import { EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType, TransactionOptions, TSignMessage } from './types';
+import { EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType, TransactionOptions, TSignMessage, UniqueController } from './types';
 import marketplaceAbi from './abi/marketPlaceAbi.json';
 import nonFungibleAbi from './abi/nonFungibleAbi.json';
 import { collectionIdToAddress, getEthAccount, compareEncodedAddresses, isTokenOwner } from './utils/addressUtils';
 import { formatKsm, fromStringToBnString } from './utils/textFormat';
 import { repeatCheckForTransactionFinish } from './utils/repeatCheckTransaction';
-import { Settings } from '../restApi/settings/types';
 import '@unique-nft/substrate-client/balance';
 import { Address, AllBalances } from '@unique-nft/substrate-client/types';
 import Web3 from 'web3';
 
-export class UniqueSDKMarketController {
-  private uniqueSdk: Sdk;
-  private kusamaSdk: Sdk;
-  private settings;
-  private web3Instance: Web3;
+export type UniqueSDKMarketControllerOptions = {
+  uniqueSdk: Sdk
+  kusamaSdk: Sdk
+  escrowAddress: string
+  contractAddress: string
+  auctionAddress: string
+  wsEndpoint: string
+};
+
+export class UniqueSDKMarketController implements UniqueController {
+  private uniqueSdk: Sdk | undefined;
+  private kusamaSdk: Sdk | undefined;
+  private web3Instance: Web3 | undefined;
   private minPrice = 0.000001;
   private defaultGasAmount = 2500000;
-  private contractAddress: string;
-  private escrowAddress: string;
-  private auctionAddress: string;
-  kusamaDecimals: number;
+  private contractAddress = '';
+  private escrowAddress = '';
+  private auctionAddress = '';
+  kusamaDecimals = 12;
 
-  constructor(uniqueSdk: Sdk, kusamaSdk: Sdk, settings: Settings) {
-    this.uniqueSdk = uniqueSdk;
-    this.kusamaSdk = kusamaSdk;
-    this.settings = settings;
-    this.kusamaDecimals = this.kusamaSdk.chainProperties().decimals;
-    this.escrowAddress = settings.blockchain.escrowAddress;
-    this.contractAddress = settings.blockchain.unique.contractAddress;
-    this.auctionAddress = settings.auction.address;
+  setNetwork(options: UniqueSDKMarketControllerOptions): void {
+    this.uniqueSdk = options.uniqueSdk;
+    this.kusamaSdk = options.kusamaSdk;
+    this.kusamaDecimals = this.kusamaSdk?.chainProperties().decimals || 12;
+    this.escrowAddress = options.escrowAddress;
+    this.contractAddress = options.contractAddress;
+    this.auctionAddress = options.auctionAddress;
 
-    const provider = new Web3.providers.WebsocketProvider(this.settings.blockchain.unique.wsEndpoint, {
+    const provider = new Web3.providers.WebsocketProvider(options.wsEndpoint, {
       reconnect: {
         auto: true,
         delay: 5000,
@@ -61,6 +67,7 @@ export class UniqueSDKMarketController {
 
   // purchase
   async addDeposit(address: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+    if (!this.kusamaSdk) throw new Error('SDK isn\'t ready');
     const matcherContractInstance = this.getMatcherContractInstance(getEthAccount(address));
     const userDeposit = await this.getUserDeposit(address);
     if (!userDeposit) throw new Error('No user deposit');
@@ -69,7 +76,7 @@ export class UniqueSDKMarketController {
       collectionId: Number(collectionId), tokenId: Number(tokenId)
     };
 
-    const token = await this.uniqueSdk.tokens.get_new(tokenIdArguments);
+    const token = await this.uniqueSdk?.tokens.get_new(tokenIdArguments);
     if (!token) throw new Error('Token not found');
 
     const ask = await matcherContractInstance.methods.getOrder(collectionIdToAddress(Number(collectionId)), tokenId).call();
@@ -124,6 +131,7 @@ export class UniqueSDKMarketController {
 
   // purchase
   async buyToken(address: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+    if (!this.kusamaSdk || !this.uniqueSdk || !this.web3Instance) throw new Error('Controller isn\'t ready');
     const ethAddress = getEthAccount(address);
     const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
     const matcherContractInstance = this.getMatcherContractInstance(ethAddress);
@@ -157,6 +165,7 @@ export class UniqueSDKMarketController {
 
   // sell
   async cancelSell(address: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+    if (!this.uniqueSdk || !this.web3Instance) throw new Error('Controller isn\'t ready');
     const ethAddress = getEthAccount(address);
     const matcherContractInstance = this.getMatcherContractInstance(ethAddress);
     const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
@@ -197,8 +206,9 @@ export class UniqueSDKMarketController {
   }
 
   // account
-  async checkWhiteListed(address: Address): Promise<boolean> {
-    const ethAddress = getEthAccount(address);
+  async checkWhiteListed(account: Address): Promise<boolean> {
+    if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
+    const ethAddress = getEthAccount(account);
     try {
       return (await this.uniqueSdk.api.query.evmContractHelpers.allowlist(this.contractAddress, ethAddress)).toJSON() as boolean;
     } catch (e) {
@@ -211,6 +221,7 @@ export class UniqueSDKMarketController {
 
   // fee
   async getKusamaFee(sender: Address, recipient?: string, value?: BN): Promise<string | null> {
+    if (!this.kusamaSdk) throw new Error('Controller isn\'t ready');
     const transferFee = await this.kusamaSdk.extrinsics.getFee({
       address: sender,
       section: 'balances',
@@ -238,8 +249,9 @@ export class UniqueSDKMarketController {
   }
 
   // sell
-  async lockNftForSale(address: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
-    const ethAddress = getEthAccount(address);
+  async lockNftForSale(account: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+    if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
+    const ethAddress = getEthAccount(account);
 
     const tokenIdArguments: TokenIdArguments = {
       collectionId: Number(collectionId), tokenId: Number(tokenId)
@@ -283,6 +295,7 @@ export class UniqueSDKMarketController {
 
   // sell
   async sendNftToSmartContract(address: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+    if (!this.uniqueSdk || !this.web3Instance) throw new Error('Controller isn\'t ready');
     const tokenIdArguments: TokenIdArguments = {
       collectionId: Number(collectionId), tokenId: Number(tokenId)
     };
@@ -326,6 +339,7 @@ export class UniqueSDKMarketController {
 
   // sell
   async setForFixPriceSale(address: Address, collectionId: string, tokenId: string, price: string, options: TransactionOptions): Promise<void> {
+    if (!this.uniqueSdk || !this.web3Instance) throw new Error('Controller isn\'t ready');
     const ethAddress = getEthAccount(address);
     const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
     const matcherContractInstance = this.getMatcherContractInstance(ethAddress);
@@ -365,6 +379,7 @@ export class UniqueSDKMarketController {
 
   // account
   async transferBalance(address: Address, destination: string, amount: string, options: TransactionOptions): Promise<void> {
+    if (!this.kusamaSdk) throw new Error('Controller isn\'t ready');
     const unsignedTxPayload = await this.kusamaSdk.extrinsics.build({
       section: 'balances',
       method: 'transfer',
@@ -389,6 +404,7 @@ export class UniqueSDKMarketController {
   }
 
   async transferBidBalance(address: Address, amount: string, options: TransactionOptions): Promise<void> {
+    if (!this.kusamaSdk) throw new Error('Controller isn\'t ready');
     const unsignedTxPayload = await this.kusamaSdk.extrinsics.build({
       section: 'balances',
       method: 'transferKeepAlive',
@@ -418,6 +434,7 @@ export class UniqueSDKMarketController {
 
   // token
   async transferToken(from: Address, to: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+    if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
     const tokenIdArguments: TokenIdArguments = {
       collectionId: Number(collectionId), tokenId: Number(tokenId)
     };
@@ -452,6 +469,7 @@ export class UniqueSDKMarketController {
 
   // purchase
   async unlockNft(address: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+    if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
     const ethAddress = getEthAccount(address);
 
     const tokenIdArguments: TokenIdArguments = {
@@ -483,6 +501,7 @@ export class UniqueSDKMarketController {
 
   // account
   async withdrawDeposit(address: Address, options: TransactionOptions): Promise<void> {
+    if (!this.uniqueSdk || !this.web3Instance) throw new Error('Controller isn\'t ready');
     if (!address || address === '') throw new Error('Address not provided');
     const ethAddress = getEthAccount(address);
     const matcherContractInstance = this.getMatcherContractInstance(ethAddress);
@@ -519,6 +538,7 @@ export class UniqueSDKMarketController {
   }
 
   async getAccountBalance(address: Address): Promise<AllBalances> {
+    if (!this.kusamaSdk) throw new Error('Controller isn\'t ready');
     return await this.kusamaSdk.balance.get({ address });
   }
 }

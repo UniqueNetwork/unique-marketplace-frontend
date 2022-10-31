@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNotifications } from '@unique-nft/ui-kit';
+import { useNotifications } from 'components/UI';
 import { UnsignedTxPayload } from '@unique-nft/substrate-client/types';
 import { InternalStage, SignFunction, StageStatus, useStagesReturn } from '../types/StagesTypes';
 
@@ -28,13 +28,12 @@ const useStages = <T>(stages: InternalStage<T>[], signFunction: SignFunction): u
   }, [setInternalStages]);
 
   const getSignFunction = useCallback((index: number, internalStage: InternalStage<T>) => {
-    const sign = async (unsignedTxPayload: UnsignedTxPayload): Promise<`0x${string}` | null> => {
+    return async (unsignedTxPayload: UnsignedTxPayload): Promise<`0x${string}` | null> => {
       updateStage(index, { ...internalStage, status: StageStatus.awaitingSign });
       const signedTx = await signFunction(unsignedTxPayload);
       updateStage(index, { ...internalStage, status: StageStatus.inProgress });
       return signedTx;
     };
-    return sign;
   }, [updateStage, signFunction]);
 
   const executeStep = useCallback(async (stage: InternalStage<T>, index: number, txParams: T) => {

@@ -1,5 +1,5 @@
-import React, { FC, useCallback, useEffect, useMemo } from 'react';
-import { Button, Text } from '@unique-nft/ui-kit';
+import React, { FC, useCallback, useMemo } from 'react';
+import { Button, Text } from 'components/UI';
 import styled from 'styled-components';
 import { BN } from '@polkadot/util';
 
@@ -8,13 +8,15 @@ import { Price } from '../TokenDetail/Price';
 import { Grey300 } from '../../../styles/colors';
 import { Offer } from '../../../api/restApi/offers/types';
 import { useAccounts } from '../../../hooks/useAccounts';
+import BuyBundleInformation from '../TokenDetail/BuyBundleInformation';
 
 interface BuyTokenProps {
   offer?: Offer;
   onBuy(): void
+  testid?: string
 }
 
-export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy }) => {
+export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy, testid }) => {
   const { marketCommission } = useFee();
   const { selectedAccount } = useAccounts();
 
@@ -43,7 +45,8 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy }) => {
         disabled={!isEnoughBalance}
       />
     </ButtonWrapper>
-    {!isEnoughBalance && <Text color={'coral-500'}>Your balance is too low to buy</Text>}
+    {!isEnoughBalance && <Text color={'coral-500'} testid={`${testid}-low-balance-warning`}>Your balance is too low to buy</Text>}
+    {offer.tokenDescription.nestingChildTokens?.length && <BuyBundleInformation testid={testid}/>}
     <Divider />
   </>);
 };

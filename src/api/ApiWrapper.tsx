@@ -1,65 +1,113 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { keyring } from '@polkadot/ui-keyring';
+import { useNotifications } from 'components/UI';
 import { ApiContextProps, ApiProvider } from './ApiContext';
-import { getSettings } from './restApi/settings/settings';
 import AuctionSocketProvider from './restApi/auction/AuctionSocketProvider';
 import { Settings } from './restApi/settings/types';
 import { SdkClient } from './sdk/sdkClient';
-import { UniqueSDKNFTController } from './uniqueSdk/NFTController';
-import { UniqueSDKCollectionController } from './uniqueSdk/collectionController';
-import { UniqueSDKMarketController } from './uniqueSdk/marketController';
-import { ChainProperties } from '@unique-nft/substrate-client/types';
 import config from '../config';
-
-import { uniqueSdkClient as unique, kusamaSdkClient as kusama } from '.';
+import { sdkClient as sdk } from '.';
+import { useSettings } from './restApi/settings/settings';
+import { ChainIdLocalStorageKey, getInitialChainId } from '../utils/initialChainId';
 
 keyring.loadAll({});
 
 interface ChainProviderProps {
   children: React.ReactNode
-  uniqueSdk?: SdkClient
-  kusamaSdk?: SdkClient
+  sdkClient?: SdkClient
 }
 
-const ApiWrapper = ({ children, uniqueSdk = unique, kusamaSdk = kusama }: ChainProviderProps) => {
-  const [chainData, setChainData] = useState<ChainProperties>();
+const initialChainId = getInitialChainId();
+
+const ApiWrapper = ({
+  children,
+  sdkClient = sdk
+}: ChainProviderProps) => {
   const [isRpcClientInitialized, setRpcClientInitialized] = useState<boolean>(false);
-  const { chainId } = useParams<'chainId'>();
+  const navigate = useNavigate();
   const [settings, setSettings] = useState<Settings>();
+  const [currentChainId, setCurrentChainId] = useState<string>(initialChainId);
+  const { error } = useNotifications();
+  const { fetchSettings } = useSettings();
 
   useEffect(() => {
     (async () => {
-      const { data: settings } = await getSettings();
-      setSettings(settings);
+      const settings = await fetchSettings(config.blockchains);
 
-      await uniqueSdk.connect(settings.blockchain.unique.wsEndpoint);
-      await kusamaSdk.connect(settings.blockchain.kusama.wsEndpoint);
+      await sdk.initialize(settings);
 
-      setRpcClientInitialized(uniqueSdk?.isReady && kusamaSdk?.isReady);
-      setChainData(uniqueSdk?.sdk?.chainProperties());
-    })().then(() => console.log('Rpc connection: success')).catch((e) => console.log('Rpc connection: failed', e));
+      setSettings(sdkClient?.networks[currentChainId].settings);
+      sdkClient?.setNetwork(currentChainId);
+
+      setRpcClientInitialized(sdkClient?.isReady);
+    })().then(() => {
+      console.log('Rpc connection: success');
+    }).catch((e) => {
+      error('Rpc connection: failed', { name: 'warning', size: 16 });
+      console.log('Rpc connection: failed', e);
+    });
   }, []);
+
+  const onChangeChainId = useCallback((newChainId: string) => {
+    if (currentChainId === newChainId) return;
+    if (!sdkClient) {
+      throw new Error('SdkClient is not available');
+    }
+
+    const { settings } = sdkClient.networks[newChainId];
+
+    setSettings(settings);
+
+    sdkClient?.setNetwork(newChainId);
+    setCurrentChainId(newChainId);
+    localStorage.setItem(ChainIdLocalStorageKey, newChainId);
+    // redirect to correct URL with chainId
+    const { pathname } = window.location;
+    if (pathname.includes('faq')) return;
+    const tokenPageUrlRegex = /token[/]\d+[/]\d+$/;
+    if (tokenPageUrlRegex.test(pathname)) {
+      navigate(`/${newChainId}/market`);
+      return;
+    }
+    if (currentChainId && pathname.includes(currentChainId)) {
+      navigate(pathname.replace(currentChainId, newChainId));
+    } else {
+      navigate(`/${newChainId}${pathname}`);
+    }
+  }, [currentChainId, sdkClient, settings]);
+
+  // get current chain and current chain settings
+  const currentChain = useMemo(() => {
+    if (!sdkClient?.isReady || !currentChainId) return undefined;
+
+    return sdkClient?.networks[currentChainId].sdkSet;
+  }, [currentChainId, sdkClient?.isReady]);
 
   // get context value for ApiContext
   const value = useMemo<ApiContextProps>(
     () => ({
-      api: (isRpcClientInitialized && settings && uniqueSdk?.sdk && kusamaSdk.sdk && {
-        collection: new UniqueSDKCollectionController(uniqueSdk.sdk, settings),
-        nft: new UniqueSDKNFTController(uniqueSdk.sdk, settings),
-        market: new UniqueSDKMarketController(uniqueSdk.sdk, kusamaSdk.sdk, settings)
-      }) || undefined,
-      uniqueSdk: uniqueSdk?.sdk,
-      kusamaSdk: kusamaSdk?.sdk,
-      chainData,
-      settings
+      api: (isRpcClientInitialized && settings && currentChain && sdkClient
+        ? {
+          collection: sdkClient.collectionController,
+          nft: sdkClient.nftController,
+          market: sdkClient.marketController
+        }
+        : undefined),
+      uniqueSdk: currentChain?.unique,
+      kusamaSdk: currentChain?.kusama,
+      chainData: currentChain?.unique.chainProperties(),
+      baseURL: config.blockchains[currentChainId]?.apiEndpoint || '',
+      settings,
+      currentChainId,
+      onChangeChainId
     }),
-    [isRpcClientInitialized, chainId, chainData, settings]
+    [isRpcClientInitialized, currentChain, settings, currentChainId]
   );
 
   return (
     <ApiProvider value={value}>
-      <AuctionSocketProvider url={config.uniqueApiUrl}>
+      <AuctionSocketProvider url={config.blockchains[currentChainId]?.apiEndpoint}>
         {children}
       </AuctionSocketProvider>
     </ApiProvider>

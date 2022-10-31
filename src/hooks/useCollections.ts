@@ -1,24 +1,20 @@
-import { useEffect, useState } from 'react';
-import { NFTCollection } from 'api/uniqueSdk/types';
+import { useCallback, useContext } from 'react';
+import CollectionsContext from 'collections/CollectionsContext';
 import { useApi } from './useApi';
 
 export const useCollections = () => {
+  const { isFetching, collections, fetchCollections } = useContext(CollectionsContext);
   const { api } = useApi();
-  const [collections, setCollections] = useState<NFTCollection[]>([]);
-  const [isFetching, setIsFetching] = useState<boolean>(false);
 
-  useEffect(() => {
-    setIsFetching(true);
-    if (!api) return;
-    (async () => {
-      const collections = await api?.collection?.getFeaturedCollections() as NFTCollection[];
-      setCollections(collections);
-      setIsFetching(false);
-    })();
-  }, [api?.collection?.getFeaturedCollections]);
+  const getCollection = useCallback(async (collectionId: number) => {
+    const collection = collections.find(({ id }) => collectionId === id);
+    return collection || await api?.collection?.getCollection(Number(collectionId));
+  }, [api?.collection, collections]);
 
   return {
     collections,
-    isFetching
+    isFetching,
+    fetchCollections,
+    getCollection
   };
 };

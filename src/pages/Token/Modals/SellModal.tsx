@@ -1,4 +1,5 @@
-import { Button, Heading, Tabs, Select, Link, useNotifications } from '@unique-nft/ui-kit';
+import { Heading, Link } from '@unique-nft/ui-kit';
+import { Tabs, Select, useNotifications, Button } from 'components/UI';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
@@ -13,8 +14,8 @@ import { NumberInput } from 'components/NumberInput/NumberInput';
 
 const tokenSymbol = 'KSM';
 
-export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish, setIsClosable, testid }) => {
-  const { collectionId, id: tokenId } = token || {};
+export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, collection, onFinish, setIsClosable, testid }) => {
+  const { collectionId, tokenId } = token || {};
   const [status, setStatus] = useState<'ask' | 'auction-stage' | 'fix-price-stage'>('ask'); // TODO: naming
   const [auction, setAuction] = useState<TAuctionProps>();
   const [fixPrice, setFixPrice] = useState<TFixPriceProps>();
@@ -39,7 +40,7 @@ export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish, setIs
       return (<SellAuctionStagesModal
         collectionId={collectionId || 0}
         tokenId={tokenId || 0}
-        tokenPrefix={token?.prefix || ''}
+        tokenPrefix={collection?.tokenPrefix || ''}
         auction={auction as TAuctionProps}
         onFinish={onFinish}
         testid={`${testid}-sell-auction`}
@@ -48,7 +49,7 @@ export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish, setIs
       return (<SellFixStagesModal
         collectionId={collectionId || 0}
         tokenId={tokenId || 0}
-        tokenPrefix={token?.prefix || ''}
+        tokenPrefix={collection?.tokenPrefix || ''}
         sellFix={fixPrice as TFixPriceProps}
         onFinish={onFinish}
         testid={`${testid}-sell-fix`}
@@ -196,9 +197,9 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
   );
 
   return (
-    <SellModalStyled>
+    <SellModalStyled data-testid={testid}>
       <Content>
-        <Heading size='2'>Selling method</Heading>
+        <Heading size='2' testid={`${testid}-heading`}>Selling method</Heading>
       </Content>
       <Tabs
         activeIndex={activeTab}
@@ -295,6 +296,12 @@ const SelectWrapper = styled(Select)`
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
+
+  @media (max-width: 568px) {
+    button {
+      width: 100%;
+    }
+  }
 `;
 
 const Content = styled.div`
@@ -307,7 +314,9 @@ const Row = styled.div`
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  min-height: 180px;
+  @media (max-width: 568px) {
+    flex-direction: column;
+  }
 `;
 
 const SellModalStyled = styled.div`
@@ -319,6 +328,10 @@ const SellModalStyled = styled.div`
 
   .unique-select {
     margin-left: 24px;
+
+    @media (max-width: 568px) {
+      margin-left: 0;
+    }
   }
 
   .unique-select .select-wrapper > svg {

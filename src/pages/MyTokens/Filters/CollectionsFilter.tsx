@@ -1,13 +1,15 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
+import { Text } from '@unique-nft/ui-kit';
+import { Checkbox } from 'components/UI';
+import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 import styled from 'styled-components';
-import { Checkbox, Text } from '@unique-nft/ui-kit';
+
 import Accordion from 'components/Accordion/Accordion';
 import AttributeCountsFilter from 'components/Filters/AttributeCountsFilter';
 import AttributesFilter from 'components/Filters/AttributesFilter';
 import CheckboxSkeleton from 'components/Skeleton/CheckboxSkeleton';
 import { AttributeItem } from 'components/Filters/types';
 import { CollectionCover } from 'components/CollectionCover/CollectionCover';
-import { NFTCollection, NFTToken } from 'api/uniqueSdk/types';
 import { Attribute, AttributeCount } from 'api/restApi/offers/types';
 import { getAttributesCountFromTokens, getAttributesFromTokens } from './utils/attributes';
 
@@ -17,11 +19,11 @@ interface CollectionsFilterProps {
   onAttributesChange?(value: { key: string, attribute: string }[]): void
   onAttributeCountsChange?(value: number[]): void
   testid: string
-  featuredTokens: NFTToken[]
-  tokens: NFTToken[]
-  collections: NFTCollection[]
+  featuredTokens: TokenByIdResult[]
+  tokens: TokenByIdResult[]
+  collections: CollectionInfoWithSchema[]
   isFetchingTokens: boolean
-  featuredTokensForAttributeCounts: NFTToken[]
+  featuredTokensForAttributeCounts: TokenByIdResult[]
 }
 
 const CollectionsFilter: FC<CollectionsFilterProps> = ({
@@ -51,6 +53,13 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({
       setAttributes(getAttributesFromTokens(featuredTokens));
     }
   }, [isFetchingTokens, featuredTokens, selectedCollections.length]);
+
+  useEffect(() => {
+    if (!myCollections.length) {
+      setAttributeCounts([]);
+      setAttributes({});
+    }
+  }, [myCollections]);
 
   const onCollectionSelect = useCallback((collectionId: number) => (value: boolean) => {
     let _selectedCollections;
@@ -88,10 +97,10 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({
               onChange={onCollectionSelect(collection.id)}
               testid={`${testid}-checkbox-${collection.id}`}
             />
-            <CollectionCover src={collection.coverImageUrl} size={22} type={'circle'}/>
+            <CollectionCover src={collection.schema?.coverPicture.fullUrl || ''} size={22} type={'circle'}/>
             <Text
               testid={`${testid}-name-${collection.id}`}
-            >{collection.collectionName || ''}</Text>
+            >{collection.name || ''}</Text>
           </CheckboxWrapper>
         ))}
       </CollectionFilterWrapper>

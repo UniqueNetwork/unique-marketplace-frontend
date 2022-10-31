@@ -1,76 +1,78 @@
-import { Heading, Icon, Text } from '@unique-nft/ui-kit';
+import { Heading, Text } from '@unique-nft/ui-kit';
 import React, { FC, ReactChild, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-
+import { Icon, Link } from 'components/UI';
 import { Picture } from 'components';
 import { CollectionsCard } from './CollectionsCard';
 import { AttributesBlock } from './AttributesBlock';
-import { NFTToken } from 'api/uniqueSdk/types';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { shortcutText } from 'utils/textUtils';
 import { Grey300, Grey500, Primary600 } from 'styles/colors';
 import { Avatar } from 'components/Avatar/Avatar';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import config from 'config';
-import { useAccounts } from 'hooks/useAccounts';
-import { isTokenOwner, toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
+import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
 import { Offer } from 'api/restApi/offers/types';
 import { useApi } from 'hooks/useApi';
 import Skeleton from 'components/Skeleton/Skeleton';
 import { TokenSkeleton } from 'components/Skeleton/TokenSkeleton';
 import ShareTokenModal from './ShareTokenModal';
+import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
+import { stringToDecodedInfixOrUrlOrCidAndHash } from '../../../utils/helpers';
 
 interface IProps {
   children: ReactChild[]
-  token?: NFTToken
+  token?: TokenByIdResult
+  collection?: CollectionInfoWithSchema
   offer?: Offer
   isLoading?: boolean
   testid: string
+  isBundle: boolean
+  isOwner: boolean
 }
 
 export const CommonTokenDetail: FC<IProps> = ({
   children,
   token,
+  collection,
   offer,
   isLoading,
-  testid
+  testid,
+  isBundle,
+  isOwner
 }) => {
   const {
     collectionId,
     collectionName,
-    collectionCover,
+    coverImageUrl,
     description,
     attributes,
-    imageUrl,
+    image,
     tokenId,
     prefix,
     video
   } = useMemo(() => {
-    if (offer) {
-      const { collectionName, image, prefix, collectionCover, description } = offer.tokenDescription || {};
-      const attributes = offer.tokenDescription?.attributes.reduce((acc, item) => ({ ...acc, [item.key]: { name: item.key, value: item.value } }), {}) || [];
-      return {
-        ...offer,
-        collectionName,
-        prefix,
-        imageUrl: image,
-        attributes,
-        description,
-        collectionCover,
-        video: offer.tokenDescription.video
-      };
-    }
-
+    const { tokenId, collectionId } = offer || token || {};
+    const { image, attributes, video } = offer?.tokenDescription || token || {};
+    const { name: collectionName, tokenPrefix: prefix, schema, description } = offer?.collectionDescription || collection || {};
+    const owner = offer?.seller || token?.owner;
     return {
-      ...token,
-      tokenId: token?.id
+      tokenId,
+      collectionId,
+      collectionName,
+      prefix,
+      coverImageUrl: schema?.coverPicture.fullUrl || '',
+      description,
+      attributes,
+      image: typeof image === 'string' ? image : image?.fullUrl || '',
+      video,
+      owner
     };
-  }, [token, offer]);
+  }, [token, collection, offer]);
 
-  const { selectedAccount } = useAccounts();
   const deviceSize = useDeviceSize();
 
-  const { chainData } = useApi();
+  const { chainData, currentChainId } = useApi();
 
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
@@ -84,14 +86,6 @@ export const CommonTokenDetail: FC<IProps> = ({
     return (token.owner ? formatAddress(token.owner) : token.owner);
   }, [token, offer, formatAddress]);
 
-  const isOwner = useMemo(() => {
-    if (!selectedAccount || isLoading) return false;
-    if (offer) {
-      return isTokenOwner(selectedAccount.address, offer.seller);
-    }
-    return token?.owner ? isTokenOwner(selectedAccount.address, token.owner) : false;
-  }, [isLoading, selectedAccount, token, offer]);
-
   const [shareModalVisible, setShareModalVisible] = useState(false);
 
   const openShareModal = useCallback(() => {
@@ -102,7 +96,7 @@ export const CommonTokenDetail: FC<IProps> = ({
     setShareModalVisible(false);
   }, []);
 
-  const videoProp = useMemo(() => typeof video === 'string' ? { fullUrl: video, ipfsCid: '' } : video, [video]);
+  const videoProp = useMemo(() => stringToDecodedInfixOrUrlOrCidAndHash(video), [video]);
 
   return (
     <CommonTokenDetailStyled>
@@ -111,16 +105,17 @@ export const CommonTokenDetail: FC<IProps> = ({
         {!isLoading &&
           <Picture
             alt={tokenId?.toString() || ''}
-            src={imageUrl}
+            src={image}
             video={videoProp}
             testid={`${testid}-token-picture`}
+            badge={(isBundle && deviceSize > DeviceSize.md) ? 'Bundle' : ''}
           />
         }
       </PictureWrapper>
       <Description>
         {isLoading && <TokenSkeleton />}
         {!isLoading && <>
-          <Heading size={'1'} data-testid={`${testid}-token-name`}>{`${prefix || ''} #${tokenId}`}</Heading>
+          <Heading size={'1'} testid={`${testid}-token-name`}>{`${prefix || ''} #${tokenId}`}</Heading>
           <ShareLink onClick={openShareModal} data-testid={`${testid}-share-button`}>
             <Text color='grey-500' size='m'>
               Share
@@ -135,7 +130,7 @@ export const CommonTokenDetail: FC<IProps> = ({
               <Text color='grey-500' size='m'>
                 Owned&nbsp;by
               </Text>
-              <Account href={`${config.scanUrl}account/${owner || '404'}`}>
+              <Account href={`${config.blockchains[currentChainId || '']?.scanUrl}account/${owner || '404'}`}>
                 <Avatar size={24} src={DefaultAvatar} address={owner}/>
                 <Text color='primary-600' size='m' data-testid={`${testid}-owner-address`}>
                   {deviceSize === DeviceSize.lg ? owner || '' : shortcutText(owner || '') }
@@ -148,10 +143,11 @@ export const CommonTokenDetail: FC<IProps> = ({
           {attributes && <AttributesBlock attributes={attributes} />}
           <Divider />
           <CollectionsCard
-            avatarSrc={collectionCover || ''}
+            avatarSrc={coverImageUrl || ''}
             description={description || ''}
             id={collectionId || -1}
             title={collectionName || ''}
+            testid={`${testid}-collection`}
           />
         </>}
       </Description>
@@ -278,8 +274,12 @@ const Account = styled.a`
   text-overflow: ellipsis;
   display: flex;
   color: ${Primary600};
+  
   span {
     margin-left: 8px;
+    &:hover {
+      text-decoration: underline;
+    }
   }
 `;
 
