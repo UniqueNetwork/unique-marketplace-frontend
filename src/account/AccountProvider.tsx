@@ -68,13 +68,11 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
       }) || [];
 
       const defaultAccountAddress = localStorage.getItem(DefaultAccountKey);
-      const defaultAccount = allAccounts.find((item) => item.address === defaultAccountAddress) as Account;
+      const defaultAccount = allAccounts.find((item) => item.address === defaultAccountAddress) || allAccounts[0];
 
-      if (defaultAccount) {
-        changeAccount(defaultAccount);
-      } else {
-        changeAccount(allAccounts[0]);
-      }
+      defaultAccount.balance = { KSM: new BN((await api.market!.getAccountBalance(defaultAccount.getAddress()))?.freeBalance?.raw || 0) };
+
+      changeAccount(defaultAccount);
 
       setAccounts(await getAccountsWhiteListStatus(allAccounts));
       setIsLoading(false);
