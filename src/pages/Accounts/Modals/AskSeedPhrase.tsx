@@ -172,6 +172,9 @@ const SeedInput = styled.textarea`
   font-weight: 400;
   font-size: 16px;
   line-height: 24px;
+  &:focus, &:hover {
+    border: 1px solid var(--color-grey-500);
+  }
 `;
 
 const ConfirmWrapperRow = styled.div`
