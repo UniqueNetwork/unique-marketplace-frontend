@@ -12,10 +12,10 @@ import MobileBundleTreeSection from './MobileBundleTreeSection';
 import { useApi } from 'hooks/useApi';
 import Skeleton from '../../components/Skeleton/Skeleton';
 import { Offer } from '../../api/restApi/offers/types';
-import { TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 import BundleModal from './BundleModals/BundleTrunsferModal';
 import { BundleModalType } from './BundleModals/types';
 import { countNestedChildren } from '../../utils/helpers';
+import { Token } from 'api/graphQL';
 
 const areNodesEqual = (a: INestingToken, b: INestingToken) => a.collectionId === b.collectionId && a.tokenId === b.tokenId;
 
@@ -30,9 +30,9 @@ const addIsCurrentAccountOwnerToBundleAndSort = (bundle: INestingToken, isOwner:
 };
 
 interface IProps {
-  token?: TokenByIdResult
+  token?: Token
   offer?: Offer
-  onViewTokenDetails: Dispatch<SetStateAction<TokenByIdResult | undefined>>
+  onViewTokenDetails: Dispatch<SetStateAction<Token | undefined>>
   testid?: string
   isOwner: boolean
 }
@@ -64,7 +64,7 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
         setBundle([addIsCurrentAccountOwnerToBundleAndSort(bundle, isOwner)]);
       } else if (token) {
         setIsBundleLoading(true);
-        const response = await uniqueSdk?.tokens.getBundle({ collectionId: token.collectionId, tokenId: token.tokenId });
+        const response = await uniqueSdk?.tokens.getBundle({ collectionId: token.collection_id, tokenId: token.token_id });
         if (response) {
           setBundle([addIsCurrentAccountOwnerToBundleAndSort(response, isOwner)]);
         }
@@ -98,9 +98,17 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
     return countNestedChildren(bundle[0].nestingChildTokens);
   }, [bundle]);
 
-  const onViewTokenDetails = useCallback((token: TokenByIdResult) => {
+  const onViewTokenDetails = useCallback((token: INestingToken) => {
     navigate(`/token/${token.collectionId}/${token.tokenId}`);
-    onViewTokenDetailsProps(token);
+    const { collectionId, tokenId, attributes, video, image, owner } = token;
+    onViewTokenDetailsProps({
+      collection_id: collectionId,
+      token_id: tokenId,
+      attributes,
+      image,
+      owner,
+      video
+    });
     if (isMobileViewVisible) closeView();
   }, [onViewTokenDetailsProps, isMobileViewVisible, closeView]);
 

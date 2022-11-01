@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Link } from '@unique-nft/ui-kit';
-import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
+import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
 import { Icon, useNotifications } from 'components/UI';
 import { useApi } from 'hooks/useApi';
 import { MarketType } from 'types/MarketTypes';
@@ -18,6 +18,7 @@ import styled from 'styled-components';
 import { BlueGrey500 } from 'styles/colors';
 import BundleTreeSection from './BundleTreeSection';
 import { useCollections } from 'hooks/useCollections';
+import { Token, useGraphQlToken } from '../../api/graphQL';
 
 const testid = 'token-page';
 
@@ -25,7 +26,7 @@ const TokenPage = () => {
   const { api, currentChainId } = useApi();
   const { selectedAccount, updateCurrentAccountDeposit } = useAccounts();
   const { id, collectionId } = useParams<{ id: string, collectionId: string}>();
-  const [token, setToken] = useState<TokenByIdResult>();
+  const [token, setToken] = useState<Token>();
   const [collection, setCollection] = useState<CollectionInfoWithSchema>();
   const [isFetchingToken, setIsFetchingToken] = useState<boolean>(true);
   const { offer, fetch: fetchOffer, isFetching: isFetchingOffer } = useOffer(Number(collectionId), Number(id));
@@ -35,15 +36,17 @@ const TokenPage = () => {
   const navigate = useNavigate();
   const { info } = useNotifications();
 
+  const { fetch } = useGraphQlToken(Number(collectionId), Number(id));
+
   const fetchToken = useCallback(async () => {
     if (!api?.nft || !currentChainId) return;
     setIsFetchingToken(true);
     try {
-      const token = await api.nft?.getToken(Number(collectionId), Number(id));
+      const _token = await fetch();
       setIsBundle(await api.nft?.isBundle(Number(collectionId), Number(id)));
 
       const collection = await getCollection(Number(collectionId));
-      if (token) setToken(token);
+      if (_token) setToken(_token);
       if (collection) setCollection(collection);
     } catch (e) {
       console.error('error while fetching token or collection from RPC', e);
@@ -93,7 +96,7 @@ const TokenPage = () => {
           selectedAccount?.address || ''
         )
           ? 'You are'
-          : `${shortcutText(newOwnerAddress)} is` }  the new owner of <Link href={`/token/${token.collectionId}/${token.tokenId}`} title={`${collection?.tokenPrefix} #${token.tokenId}`}/>
+          : `${shortcutText(newOwnerAddress)} is` }  the new owner of <Link href={`/token/${token.collection_id}/${token.token_id}`} title={`${collection?.tokenPrefix} #${token.token_id}`}/>
       </div>,
       { name: 'success', size: 32, color: 'var(--color-additional-light)' }
     );

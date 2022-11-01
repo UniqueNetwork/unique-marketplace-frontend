@@ -17,12 +17,13 @@ import { useApi } from 'hooks/useApi';
 import Skeleton from 'components/Skeleton/Skeleton';
 import { TokenSkeleton } from 'components/Skeleton/TokenSkeleton';
 import ShareTokenModal from './ShareTokenModal';
-import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
+import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
 import { stringToDecodedInfixOrUrlOrCidAndHash } from '../../../utils/helpers';
+import { Token } from 'api/graphQL';
 
 interface IProps {
   children: ReactChild[]
-  token?: TokenByIdResult
+  token?: Token
   collection?: CollectionInfoWithSchema
   offer?: Offer
   isLoading?: boolean
@@ -52,13 +53,14 @@ export const CommonTokenDetail: FC<IProps> = ({
     prefix,
     video
   } = useMemo(() => {
-    const { tokenId, collectionId } = offer || token || {};
+    const { tokenId, collectionId } = offer || {};
+    const { token_id, collection_id } = token || {};
     const { image, attributes, video } = offer?.tokenDescription || token || {};
     const { name: collectionName, tokenPrefix: prefix, schema, description } = offer?.collectionDescription || collection || {};
     const owner = offer?.seller || token?.owner;
     return {
-      tokenId,
-      collectionId,
+      tokenId: tokenId || token_id,
+      collectionId: collectionId || collection_id,
       collectionName,
       prefix,
       coverImageUrl: schema?.coverPicture.fullUrl || '',

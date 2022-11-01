@@ -5,6 +5,7 @@ import { UniqueSDKNFTController } from './uniqueSdk/NFTController';
 import { UniqueSDKCollectionController } from './uniqueSdk/collectionController';
 import { UniqueSDKMarketController } from './uniqueSdk/marketController';
 import { Sdk } from '@unique-nft/substrate-client';
+import { GqlClient } from './graphQL/gqlClient';
 
 type Api = {
   nft?: UniqueSDKNFTController
@@ -16,6 +17,7 @@ export type ApiContextProps = {
   api: Api | undefined
   uniqueSdk?: Sdk
   kusamaSdk?: Sdk
+  gqlClient: GqlClient
   chainData?: ChainProperties
   settings?: Settings
   currentChainId?: string

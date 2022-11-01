@@ -85,7 +85,7 @@ const AskTransferModal: FC<{ onTransfer(receiver: string): void, testid: string 
 };
 
 const TransferStagesModal: FC<TTokenPageModalBodyProps & TTransfer> = ({ token, collection, onFinish, sender, recipient, testid }) => {
-  const { stages, status, initiate } = useTransferStages(token?.collectionId || 0, token?.tokenId || 0);
+  const { stages, status, initiate } = useTransferStages(token?.collection_id || 0, token?.token_id || 0);
   const { info } = useNotifications();
 
   useEffect(() => {
@@ -95,7 +95,7 @@ const TransferStagesModal: FC<TTokenPageModalBodyProps & TTransfer> = ({ token, 
   useEffect(() => {
     if (status === StageStatus.success) {
       info(
-        <div data-testid={`${testid}-success-notification`}><Link href={`/token/${token?.collectionId}/${token?.tokenId}`} title={`${collection?.tokenPrefix} #${token?.tokenId}`}/> transferred</div>,
+        <div data-testid={`${testid}-success-notification`}><Link href={`/token/${token?.collection_id}/${token?.token_id}`} title={`${collection?.tokenPrefix} #${token?.token_id}`}/> transferred</div>,
         { name: 'success', size: 32, color: 'var(--color-additional-light)' }
       );
     }

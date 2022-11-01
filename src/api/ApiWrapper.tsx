@@ -10,19 +10,23 @@ import config from '../config';
 import { sdkClient as sdk } from '.';
 import { useSettings } from './restApi/settings/settings';
 import { ChainIdLocalStorageKey, getInitialChainId } from '../utils/initialChainId';
+import { GqlClient } from './graphQL/gqlClient';
+import { ApolloProvider } from '@apollo/client';
 
 keyring.loadAll({});
 
 interface ChainProviderProps {
   children: React.ReactNode
   sdkClient?: SdkClient
+  gqlClient?: GqlClient
 }
 
 const initialChainId = getInitialChainId();
 
 const ApiWrapper = ({
   children,
-  sdkClient = sdk
+  sdkClient = sdk,
+  gqlClient = new GqlClient(config.blockchains[initialChainId].scanApi)
 }: ChainProviderProps) => {
   const [isRpcClientInitialized, setRpcClientInitialized] = useState<boolean>(false);
   const navigate = useNavigate();
@@ -60,6 +64,7 @@ const ApiWrapper = ({
     setSettings(settings);
 
     sdkClient?.setNetwork(newChainId);
+    gqlClient?.changeEndpoint(config.blockchains[newChainId].scanApi);
     setCurrentChainId(newChainId);
     localStorage.setItem(ChainIdLocalStorageKey, newChainId);
     // redirect to correct URL with chainId
@@ -94,6 +99,7 @@ const ApiWrapper = ({
           market: sdkClient.marketController
         }
         : undefined),
+      gqlClient,
       uniqueSdk: currentChain?.unique,
       kusamaSdk: currentChain?.kusama,
       chainData: currentChain?.unique.chainProperties(),
@@ -102,14 +108,16 @@ const ApiWrapper = ({
       currentChainId,
       onChangeChainId
     }),
-    [isRpcClientInitialized, currentChain, settings, currentChainId]
+    [isRpcClientInitialized, currentChain, settings, currentChainId, gqlClient]
   );
 
   return (
     <ApiProvider value={value}>
-      <AuctionSocketProvider url={config.blockchains[currentChainId]?.apiEndpoint}>
-        {children}
-      </AuctionSocketProvider>
+      <ApolloProvider client={gqlClient?.client}>
+        <AuctionSocketProvider url={config.blockchains[currentChainId]?.apiEndpoint}>
+          {children}
+        </AuctionSocketProvider>
+      </ApolloProvider>
     </ApiProvider>
   );
 };
