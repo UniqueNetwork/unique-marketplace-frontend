@@ -9,7 +9,6 @@ import { Avatar } from '../../../components/Avatar/Avatar';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import { Link } from 'components/UI';
 import { useAccounts } from '../../../hooks/useAccounts';
-import { Link } from 'components/UI';
 
 export const AddressComponent = ({ text, testid }: { text: string, testid: string }) => {
   const { chainData, currentChainId } = useApi();
