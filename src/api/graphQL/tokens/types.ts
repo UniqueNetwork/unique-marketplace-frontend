@@ -12,24 +12,15 @@ export type TokenTypeEnum = 'FRACTIONAL' | 'NESTED' | 'NFT';
 
 export interface Token {
   attributes: DecodedAttributes;
-  token_id: number;
-  collection_id: number;
+  tokenId: number;
+  collectionId: number;
   image: {
     fullUrl: string | null;
   };
   owner: string;
-  owner_normalized?: string;
-  date_of_creation?: number;
   burned?: boolean;
-  image_path?: string;
-  collection_name?: string;
-  children_count?: number;
-  collection_cover?: string;
-  collection_description?: string;
-  token_prefix?: string;
-  parent_id?: string;
-  transfers_count?: number;
-  type?: TokenTypeEnum;
+  prefix?: string;
+  parentId?: string;
   video?: VideoAttribute
 }
 

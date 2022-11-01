@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { Loader, Text } from '@unique-nft/ui-kit';
-import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
+import { CollectionInfoWithSchema, DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
 import { generatePath, Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Icon, Link as UILink } from 'components/UI';
@@ -16,9 +16,10 @@ import { TokensMedia } from './TokensMedia';
 import { countNestedChildren, stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
 import { useCollections } from 'hooks/useCollections';
 import BundleItemsCount from '../BundleItemsCount/BundleItemsCount';
+import { Token } from '../../api/graphQL';
 
 export type TTokensCard = {
-  token?: TokenByIdResult
+  token?: Token
   offer?: Partial<Offer>
   tokenId?: number
   collectionId?: number
@@ -27,7 +28,7 @@ export type TTokensCard = {
 };
 
 export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, testid, ...props }) => {
-  const [token, setToken] = useState<TokenByIdResult | undefined>(props.token);
+  const [token, setToken] = useState<Token | undefined>(props.token);
   const [collection, setCollection] = useState<(CollectionInfoWithSchema) | undefined>();
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isBundleState, setIsBundleState] = useState<boolean>();
@@ -117,7 +118,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
       <TokensMedia
         to={tokenPath}
         tokenId={tokenId}
-        imageUrl={imageUrl}
+        imageUrl={imageUrl?.fullUrl || imageUrl as string | DecodedInfixOrUrlOrCidAndHash | undefined}
         video={video}
         testid={`${testid}-token-media`}
         badge={isBundleState ? 'Bundle' : ''}

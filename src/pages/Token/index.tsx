@@ -96,7 +96,7 @@ const TokenPage = () => {
           selectedAccount?.address || ''
         )
           ? 'You are'
-          : `${shortcutText(newOwnerAddress)} is` }  the new owner of <Link href={`/token/${token.collection_id}/${token.token_id}`} title={`${collection?.tokenPrefix} #${token.token_id}`}/>
+          : `${shortcutText(newOwnerAddress)} is` }  the new owner of <Link href={`/token/${token.collectionId}/${token.tokenId}`} title={`${collection?.tokenPrefix} #${token.tokenId}`}/>
       </div>,
       { name: 'success', size: 32, color: 'var(--color-additional-light)' }
     );

@@ -32,9 +32,8 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
 
   const isAllowed = useMemo(() => {
     if (!token && !offer) return;
-    const { tokenId, collectionId } = offer || {};
-    const { token_id, collection_id } = token!;
-    return checkAllowedTokenInSettings(tokenId || token_id, collectionId || collection_id, allowedTokens);
+    const { tokenId, collectionId } = offer || token! || {};
+    return checkAllowedTokenInSettings(tokenId, collectionId, allowedTokens);
   }, [allowedTokens, token, offer]);
 
   const isOwner = useMemo(() => {

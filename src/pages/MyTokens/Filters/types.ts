@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction } from 'react';
 import { Statuses } from 'components/Filters/types';
-import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
+import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
+import { Token } from 'api/graphQL';
 
 export type MyTokensStatuses = Record<'onSell' | 'fixedPrice' | 'timedAuction' | 'notOnSale', boolean | undefined>;
 
@@ -28,12 +29,12 @@ export type FilterChangeHandler<T> = Dispatch<SetStateAction<T | null>> | ((valu
 export type FiltersProps<T = FilterState> = {
     value: T | null
     onFilterChange: FilterChangeHandler<T>
-    tokens: TokenByIdResult[]
-    featuredTokens: TokenByIdResult[]
+    tokens: Token[]
+    featuredTokens: Token[]
     collections: CollectionInfoWithSchema[]
     isFetchingTokens: boolean
     testid: string
-    featuredTokensForAttributeCounts: TokenByIdResult[]
+    featuredTokensForAttributeCounts: Token[]
 }
 
 export type TFilterAttribute = {

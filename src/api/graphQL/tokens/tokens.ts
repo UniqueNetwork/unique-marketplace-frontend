@@ -13,17 +13,12 @@ const tokensQuery = gql`
     tokens(where: $where, limit: $limit, offset: $offset, order_by: $orderBy) {
       data {
         attributes
-        collection_cover
-        collection_description
-        collection_id
-        collection_name
-        date_of_creation
+        collectionId: collection_id
         owner
-        owner_normalized
         image
-        parent_id
-        token_id
-        token_prefix
+        parentId: parent_id
+        tokenId: token_id
+        prefix: token_prefix
         transfers_count
       }
       count
@@ -133,7 +128,7 @@ export const useGraphQlTokens = ({
     loading: isTokensFetching,
     fetchMore
   } = useQuery<TokensData, TokensVariables>(tokensQuery, {
-    fetchPolicy: 'network-only',
+    fetchPolicy: 'standby',
     // Used for first execution
     nextFetchPolicy: 'cache-first',
     notifyOnNetworkStatusChange: true,

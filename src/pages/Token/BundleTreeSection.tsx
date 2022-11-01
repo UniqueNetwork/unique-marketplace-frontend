@@ -64,7 +64,7 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
         setBundle([addIsCurrentAccountOwnerToBundleAndSort(bundle, isOwner)]);
       } else if (token) {
         setIsBundleLoading(true);
-        const response = await uniqueSdk?.tokens.getBundle({ collectionId: token.collection_id, tokenId: token.token_id });
+        const response = await uniqueSdk?.tokens.getBundle({ collectionId: token.collectionId, tokenId: token.tokenId });
         if (response) {
           setBundle([addIsCurrentAccountOwnerToBundleAndSort(response, isOwner)]);
         }
@@ -100,15 +100,7 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
 
   const onViewTokenDetails = useCallback((token: INestingToken) => {
     navigate(`/token/${token.collectionId}/${token.tokenId}`);
-    const { collectionId, tokenId, attributes, video, image, owner } = token;
-    onViewTokenDetailsProps({
-      collection_id: collectionId,
-      token_id: tokenId,
-      attributes,
-      image,
-      owner,
-      video
-    });
+    onViewTokenDetailsProps(token);
     if (isMobileViewVisible) closeView();
   }, [onViewTokenDetailsProps, isMobileViewVisible, closeView]);
 

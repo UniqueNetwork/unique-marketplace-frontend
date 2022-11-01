@@ -4,10 +4,10 @@ import styled from 'styled-components';
 import { Offer } from 'api/restApi/offers/types';
 import { TokensCard } from '..';
 import CardSkeleton from '../Skeleton/CardSkeleton';
-import { TokenByIdResult } from '@unique-nft/substrate-client/tokens';
+import { Token } from '../../api/graphQL';
 
 type TTokensList = {
-  tokens: (TokenByIdResult & Partial<Offer>)[]
+  tokens: (Token & Partial<Offer>)[]
   isLoading?: boolean
   testid: string
 };

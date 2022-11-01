@@ -15,7 +15,7 @@ import { NumberInput } from 'components/NumberInput/NumberInput';
 const tokenSymbol = 'KSM';
 
 export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, collection, onFinish, setIsClosable, testid }) => {
-  const { collection_id, token_id } = token || {};
+  const { collectionId, tokenId } = token || {};
   const [status, setStatus] = useState<'ask' | 'auction-stage' | 'fix-price-stage'>('ask'); // TODO: naming
   const [auction, setAuction] = useState<TAuctionProps>();
   const [fixPrice, setFixPrice] = useState<TFixPriceProps>();
@@ -38,8 +38,8 @@ export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, collection, onF
   switch (status) {
     case 'auction-stage':
       return (<SellAuctionStagesModal
-        collectionId={collection_id || 0}
-        tokenId={token_id || 0}
+        collectionId={collectionId || 0}
+        tokenId={tokenId || 0}
         tokenPrefix={collection?.tokenPrefix || ''}
         auction={auction as TAuctionProps}
         onFinish={onFinish}
@@ -47,8 +47,8 @@ export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, collection, onF
       />);
     case 'fix-price-stage':
       return (<SellFixStagesModal
-        collectionId={collection_id || 0}
-        tokenId={token_id || 0}
+        collectionId={collectionId || 0}
+        tokenId={tokenId || 0}
         tokenPrefix={collection?.tokenPrefix || ''}
         sellFix={fixPrice as TFixPriceProps}
         onFinish={onFinish}

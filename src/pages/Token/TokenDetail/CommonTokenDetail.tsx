@@ -53,14 +53,13 @@ export const CommonTokenDetail: FC<IProps> = ({
     prefix,
     video
   } = useMemo(() => {
-    const { tokenId, collectionId } = offer || {};
-    const { token_id, collection_id } = token || {};
+    const { tokenId, collectionId } = offer || token || {};
     const { image, attributes, video } = offer?.tokenDescription || token || {};
     const { name: collectionName, tokenPrefix: prefix, schema, description } = offer?.collectionDescription || collection || {};
     const owner = offer?.seller || token?.owner;
     return {
-      tokenId: tokenId || token_id,
-      collectionId: collectionId || collection_id,
+      tokenId,
+      collectionId,
       collectionName,
       prefix,
       coverImageUrl: schema?.coverPicture.fullUrl || '',
