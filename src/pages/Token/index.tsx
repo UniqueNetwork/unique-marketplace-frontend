@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Link } from '@unique-nft/ui-kit';
-import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
+import { Collection } from 'api/graphQL/collections/types';
 import { Icon, useNotifications } from 'components/UI';
 import { useApi } from 'hooks/useApi';
 import { MarketType } from 'types/MarketTypes';
@@ -27,7 +27,7 @@ const TokenPage = () => {
   const { selectedAccount, updateCurrentAccountDeposit } = useAccounts();
   const { id, collectionId } = useParams<{ id: string, collectionId: string}>();
   const [token, setToken] = useState<Token>();
-  const [collection, setCollection] = useState<CollectionInfoWithSchema>();
+  const [collection, setCollection] = useState<Collection>();
   const [isFetchingToken, setIsFetchingToken] = useState<boolean>(true);
   const { offer, fetch: fetchOffer, isFetching: isFetchingOffer } = useOffer(Number(collectionId), Number(id));
   const { getCollection } = useCollections();
@@ -45,7 +45,7 @@ const TokenPage = () => {
       const _token = await fetch();
       setIsBundle(await api.nft?.isBundle(Number(collectionId), Number(id)));
 
-      const collection = await getCollection(Number(collectionId));
+      const collection = getCollection(Number(collectionId));
       if (_token) setToken(_token);
       if (collection) setCollection(collection);
     } catch (e) {
@@ -58,7 +58,7 @@ const TokenPage = () => {
     if (isFetchingOffer) return;
     (async () => {
       if (offer) {
-        const collection = await getCollection(Number(collectionId));
+        const collection = getCollection(Number(collectionId));
         if (collection) setCollection(collection);
         setIsBundle(!!offer.tokenDescription.nestingChildTokens);
       }

@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { Loader, Text } from '@unique-nft/ui-kit';
-import { CollectionInfoWithSchema, DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
+import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
 import { generatePath, Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Icon, Link as UILink } from 'components/UI';
@@ -16,7 +16,8 @@ import { TokensMedia } from './TokensMedia';
 import { countNestedChildren, stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
 import { useCollections } from 'hooks/useCollections';
 import BundleItemsCount from '../BundleItemsCount/BundleItemsCount';
-import { Token } from '../../api/graphQL';
+import { Token } from 'api/graphQL';
+import { Collection } from 'api/graphQL/collections/types';
 
 export type TTokensCard = {
   token?: Token
@@ -29,7 +30,7 @@ export type TTokensCard = {
 
 export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, testid, ...props }) => {
   const [token, setToken] = useState<Token | undefined>(props.token);
-  const [collection, setCollection] = useState<(CollectionInfoWithSchema) | undefined>();
+  const [collection, setCollection] = useState<(Collection) | undefined>();
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isBundleState, setIsBundleState] = useState<boolean>();
   const [tokensCount, setTokensCount] = useState<number>();
@@ -69,7 +70,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
         }
 
         if (!collection) {
-          const collection = await getCollection(collectionId);
+          const collection = getCollection(collectionId);
           if (collection) setCollection(collection);
         }
         setIsFetching(false);

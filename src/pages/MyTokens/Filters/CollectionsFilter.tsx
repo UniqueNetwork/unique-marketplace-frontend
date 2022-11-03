@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import { Text } from '@unique-nft/ui-kit';
 import { Checkbox } from 'components/UI';
-import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
+import { Collection } from 'api/graphQL/collections/types';
 import styled from 'styled-components';
 
 import Accordion from 'components/Accordion/Accordion';
@@ -22,7 +22,7 @@ interface CollectionsFilterProps {
   testid: string
   featuredTokens: Token[]
   tokens: Token[]
-  collections: CollectionInfoWithSchema[]
+  collections: Collection[]
   isFetchingTokens: boolean
   featuredTokensForAttributeCounts: Token[]
 }
@@ -98,7 +98,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({
               onChange={onCollectionSelect(collection.id)}
               testid={`${testid}-checkbox-${collection.id}`}
             />
-            <CollectionCover src={collection.schema?.coverPicture.fullUrl || ''} size={22} type={'circle'}/>
+            <CollectionCover src={collection.collectionCover || ''} size={22} type={'circle'}/>
             <Text
               testid={`${testid}-name-${collection.id}`}
             >{collection.name || ''}</Text>

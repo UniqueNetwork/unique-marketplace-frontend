@@ -1,6 +1,5 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { Text } from '@unique-nft/ui-kit';
-import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
 import styled from 'styled-components/macro';
 import { Icon, Dropdown } from 'components/UI';
 import { CollectionData } from 'api/restApi/admin/types';
@@ -10,6 +9,7 @@ import { useAccounts } from 'hooks/useAccounts';
 import { shortcutText } from 'utils/textUtils';
 import { Picture } from '..';
 import { AdditionalDark, AdditionalLight } from 'styles/colors';
+import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
 
 export type TCollectionCard = {
   collection: CollectionData

@@ -17,14 +17,14 @@ import { useApi } from 'hooks/useApi';
 import Skeleton from 'components/Skeleton/Skeleton';
 import { TokenSkeleton } from 'components/Skeleton/TokenSkeleton';
 import ShareTokenModal from './ShareTokenModal';
-import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
 import { stringToDecodedInfixOrUrlOrCidAndHash } from '../../../utils/helpers';
 import { Token } from 'api/graphQL';
+import { Collection } from 'api/graphQL/collections/types';
 
 interface IProps {
   children: ReactChild[]
   token?: Token
-  collection?: CollectionInfoWithSchema
+  collection?: Collection
   offer?: Offer
   isLoading?: boolean
   testid: string
@@ -55,14 +55,16 @@ export const CommonTokenDetail: FC<IProps> = ({
   } = useMemo(() => {
     const { tokenId, collectionId } = offer || token || {};
     const { image, attributes, video } = offer?.tokenDescription || token || {};
-    const { name: collectionName, tokenPrefix: prefix, schema, description } = offer?.collectionDescription || collection || {};
+    const { name: collectionName, tokenPrefix: prefix, description } = offer?.collectionDescription || collection || {};
+    const { schema } = offer?.collectionDescription || {};
+    const { collectionCover } = collection || {};
     const owner = offer?.seller || token?.owner;
     return {
       tokenId,
       collectionId,
       collectionName,
       prefix,
-      coverImageUrl: schema?.coverPicture.fullUrl || '',
+      coverImageUrl: schema?.coverPicture.fullUrl || collectionCover || '',
       description,
       attributes,
       image: typeof image === 'string' ? image : image?.fullUrl || '',

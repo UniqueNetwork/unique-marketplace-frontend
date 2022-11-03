@@ -1,19 +1,19 @@
 import { useEffect, useState } from 'react';
-import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
 import { useApi } from 'hooks/useApi';
 import { useCollections } from 'hooks/useCollections';
+import { Collection } from 'api/graphQL/collections/types';
 
 export const useCollection = (collectionId: number | undefined) => {
   const [isCollectionLoading, setIsCollectionLoading] = useState(false);
-  const [collection, setCollection] = useState<CollectionInfoWithSchema>();
+  const [collection, setCollection] = useState<Collection>();
   const { getCollection } = useCollections();
   const { api } = useApi();
 
   useEffect(() => {
     if (!collectionId) return;
-    (async () => {
+    (() => {
       setIsCollectionLoading(true);
-      const collection = await getCollection(collectionId);
+      const collection = getCollection(collectionId);
       if (collection) {
         setCollection(collection);
         setIsCollectionLoading(false);

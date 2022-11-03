@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import { Heading } from '@unique-nft/ui-kit';
 import { Text, useNotifications, Button } from 'components/UI';
-import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
+import { Collection } from 'api/graphQL/collections/types';
 import styled from 'styled-components/macro';
 
 import { useAdminCollections } from 'api/restApi/admin/collection';
@@ -50,7 +50,7 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
 
   const findCollection = useCallback(async (collection: string) => {
     if (!api?.collection) return;
-    const collectionData = await getCollection(Number(collection));
+    const collectionData = await api?.collection.getCollection(Number(collection));
 
     setCollectionItems([
       ...(collectionData && collectionData.tokenPrefix ? [collectionData] : []),
@@ -58,13 +58,13 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
     ]);
   }, [api, collections]);
 
-  const onChangeSelectedCollection = useCallback((collection: CollectionInfoWithSchema | string) => {
+  const onChangeSelectedCollection = useCallback((collection: CollectionData | string) => {
     if (typeof collection === 'string') {
       if (!/^\d{0,9}$/.test(collection) && collection !== '') return;
 
       void findCollection(collection);
     }
-    setSelectedCollection(collection as unknown as CollectionData);
+    setSelectedCollection(collection);
   }, [findCollection]);
 
   return (<>

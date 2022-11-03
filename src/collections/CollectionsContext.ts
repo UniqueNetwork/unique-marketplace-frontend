@@ -1,10 +1,9 @@
+import { Collection } from 'api/graphQL/collections/types';
 import { Consumer, Context, createContext, Provider } from 'react';
-import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
 
 export type CollectionsContextProps = {
   isFetching: boolean
-  collections: CollectionInfoWithSchema[]
-  fetchCollections(): Promise<void>
+  collections: Collection[]
 }
 
 const CollectionsContext: Context<CollectionsContextProps> = createContext({} as unknown as CollectionsContextProps);

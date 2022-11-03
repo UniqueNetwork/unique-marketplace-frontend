@@ -1,31 +1,25 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { useApi } from '../hooks/useApi';
+import React, { FC, useMemo } from 'react';
 import { CollectionsProvider } from './CollectionsContext';
-import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
+import { useGraphQlCollections } from 'api/graphQL/collections/collections';
+import { useApi } from 'hooks/useApi';
+
+const MAX_INT32 = 2147483647;
 
 const CollectionsWrapper: FC = ({ children }) => {
-  const [collections, setCollections] = useState<CollectionInfoWithSchema[]>([]);
-  const [isFetching, setIsFetching] = useState<boolean>(true);
+  const { settings } = useApi();
 
-  const { api, currentChainId } = useApi();
-
-  const fetchCollections = useCallback(async () => {
-    if (!api) return;
-    setIsFetching(true);
-    const collections = await api?.collection?.getFeaturedCollections() as CollectionInfoWithSchema[];
-    setCollections(collections);
-    setIsFetching(false);
-  }, [api?.collection?.getFeaturedCollections]);
-
-  useEffect(() => {
-    void fetchCollections();
-  }, [currentChainId, fetchCollections]);
+  const { collections, isCollectionsFetching: isFetching } = useGraphQlCollections({
+    offset: 0,
+    pageSize: MAX_INT32,
+    filter: {
+      collection_id: { _in: settings?.blockchain.unique.collectionIds }
+    }
+  });
 
   const value = useMemo(() => ({
     isFetching,
-    collections,
-    fetchCollections
-  }), [isFetching, collections, fetchCollections]);
+    collections
+  }), [isFetching, collections]);
 
   return (
     <CollectionsProvider value={value}>

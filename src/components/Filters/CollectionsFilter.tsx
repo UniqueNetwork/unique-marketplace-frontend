@@ -59,7 +59,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attr
               onChange={onCollectionSelect(collection.id)}
               testid={`${testid}-checkbox-${collection.id}`}
             />
-            <CollectionCover src={collection.schema?.coverPicture.fullUrl || ''} size={22} type={'circle'}/>
+            <CollectionCover src={collection.collectionCover || ''} size={22} type={'circle'}/>
             <Text
               testid={`${testid}-name-${collection.id}`}
             >{collection.name || ''}</Text>

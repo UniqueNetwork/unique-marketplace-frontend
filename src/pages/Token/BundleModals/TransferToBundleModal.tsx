@@ -10,7 +10,8 @@ import { StageStatus } from '../../../types/StagesTypes';
 import { TBundleTrunsferModalBodyProps } from './BundleTrunsferModal';
 import { useCollections } from 'hooks/useCollections';
 import { useApi } from 'hooks/useApi';
-import { CollectionInfoWithSchema, DecodedInfixOrUrlOrCidAndHash, TokenByIdResult, TokenIdArguments } from '@unique-nft/substrate-client/tokens';
+import { DecodedInfixOrUrlOrCidAndHash, TokenByIdResult, TokenIdArguments } from '@unique-nft/substrate-client/tokens';
+import { Collection } from 'api/graphQL/collections/types';
 import { CollectionCover } from 'components/CollectionCover/CollectionCover';
 import { useOffers } from 'api/restApi/offers/offers';
 import { useTransferToBundleStages } from 'hooks/marketplaceStages/useTransferToBundleStages';
@@ -56,7 +57,7 @@ type TokenOption = {
 type ITokenOption = TokenOption | null;
 
 const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(newParent: TokenIdArguments): void, testid: string }> = ({ token, onTransferToBundle, testid }) => {
-  const [collection, setCollection] = useState<CollectionInfoWithSchema | null>();
+  const [collection, setCollection] = useState<Collection | null>();
   const [selectedToken, setSelectedToken] = useState<ITokenOption | null>();
   const [tokens, setTokens] = useState<TokenByIdResult[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -106,7 +107,7 @@ const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(ne
     [onTransferToBundle, selectedToken]
   );
 
-  const onChangeSelectedCollection = useCallback((collection: CollectionInfoWithSchema | null) => {
+  const onChangeSelectedCollection = useCallback((collection: Collection | null) => {
     setCollection(collection);
     setSelectedToken(null);
   }, []);
@@ -132,7 +133,7 @@ const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(ne
           getActiveSuggestOption={(suggest, activeValue) => suggest.id === activeValue.id}
           components={{
             SuggestItem: ({ suggestion }) => <ItemOption>
-              <CollectionCover src={suggestion.schema?.coverPicture.fullUrl || ''} size={24} type={'circle'} />
+              <CollectionCover src={suggestion.collectionCover || ''} size={24} type={'circle'} />
               <Text>{`${suggestion?.name} [ID ${suggestion?.id}]`}</Text>
             </ItemOption>
           }}
@@ -244,7 +245,7 @@ const ItemOption = styled.div`
   padding: calc(var(--gap) / 2) calc(var(--gap) / 4);
 `;
 
-const CollectionsSuggest = (props: SuggestProps<CollectionInfoWithSchema>) => <Suggest<CollectionInfoWithSchema> {...props} />;
+const CollectionsSuggest = (props: SuggestProps<Collection>) => <Suggest<Collection> {...props} />;
 const CollectionsSuggestStyled = styled(CollectionsSuggest)`
   width: 100%;
   & .unique-input-text {
