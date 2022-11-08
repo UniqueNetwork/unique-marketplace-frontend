@@ -71,7 +71,7 @@ export const MarketPage = () => {
   const [searchValue, setSearchValue] = useState<string | undefined>(searchParams.get('searchValue') || '');
   const { offers, offersCount, isFetching, fetchMore, fetch, attributes, attributeCounts } = useOffers();
   const { isFetching: isFetchingCollections } = useCollections();
-  const { selectedAccount } = useAccounts();
+  const { selectedAccount, isLoading: isAccountsLoading } = useAccounts();
   const deviceSize = useDeviceSize();
   const { currentChainId, api } = useApi();
 
@@ -175,6 +175,8 @@ export const MarketPage = () => {
     return statusesCount + collectionsCount + attributesCount + numberOfAttributesCount + (prices ? 1 : 0);
   }, [filterState]);
 
+  const isLoading = isAccountsLoading || isFetching || isFetchingCollections;
+
   return (<PagePaper>
     <MarketMainPageStyled>
       <LeftColumn>
@@ -207,7 +209,7 @@ export const MarketPage = () => {
           <Text
             testid={`${testid}-items-count`}
             size='m'
-          >{isFetchingCollections || isFetching ? 'Loading items' : `${offersCount} items`}</Text>
+          >{isLoading ? 'Loading items' : `${offersCount} items`}</Text>
         </div>
         <InfiniteScroll
           hasMore={hasMore}
@@ -217,8 +219,8 @@ export const MarketPage = () => {
           threshold={200}
           useWindow={true}
         >
-          {!isFetching && !isFetchingCollections && !offers?.length && <NoItems isSearchResult={!!searchValue || !!filterCount} />}
-          <OffersList offers={offers || []} isLoading={isFetchingCollections || isFetching} testid={`${testid}-offers`} />
+          {!isLoading && !offers?.length && <NoItems isSearchResult={!!searchValue || !!filterCount} />}
+          <OffersList offers={offers || []} isLoading={isLoading} testid={`${testid}-offers`} />
         </InfiniteScroll>
       </MainContent>
     </MarketMainPageStyled>
