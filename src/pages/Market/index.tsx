@@ -161,9 +161,9 @@ export const MarketPage = () => {
   }, [filterState, isFetching, onFilterChange]);
 
   useEffect(() => {
-    if (!selectedAccount) return;
+    if (!selectedAccount && isAccountsLoading) return;
     onChangeAccount();
-  }, [selectedAccount?.address]);
+  }, [selectedAccount?.address, isAccountsLoading]);
 
   const filterCount = useMemo(() => {
     const { statuses, prices, collections = [], attributes = [], attributeCounts = [] } = filterState || {};
