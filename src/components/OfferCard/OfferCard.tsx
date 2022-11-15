@@ -61,6 +61,11 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
     tokenId: offer?.tokenId.toString()
   }), [currentChainId, offer]);
 
+  const collectionPath = useMemo(() => generatePath('/:currentChainId/collection/:collectionId', {
+    currentChainId,
+    collectionId: offer?.collectionId.toString()
+  }), [currentChainId, offer]);
+
   const tokensCount = useMemo(() => {
     if (!isBundle) return 0;
     return countNestedChildren(nestingChildTokens);
@@ -87,16 +92,14 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
             {`${tokenPrefix || ''} #${offer?.tokenId}`}
           </Text>
         </Link>
-        <UILink
+        <Link
           data-testid={`${testid}-collection-${offer?.collectionId}-link`}
-          href={`${config.blockchains[currentChainId || ''].scanUrl || ''}collections/${offer?.collectionId}`}
-          target={'_blank'}
-          rel='noreferrer'
+          to={collectionPath}
         >
           <Text color='primary-600' size='s'>
             {`${collectionName?.substring(0, 25) || ''} [id ${offer?.collectionId || ''}]`}
           </Text>
-        </UILink>
+        </Link>
         {isBundle && <BundleItemsCount count={tokensCount || 0} testId={testid} />}
         <PriceWrapper>
           <Text

@@ -47,6 +47,23 @@ export class UniqueSDKNFTController implements UniqueController {
     return tokens;
   }
 
+  async getTokensOfCollection(collectionId: number): Promise<TokenByIdResult[]> {
+    if (!this.sdk?.api || !collectionId) {
+      return [];
+    }
+    // @ts-ignore
+    const { unique } = this.sdk?.api.rpc || {};
+
+    const tokensIds: TokenId[] =
+      await unique?.collectionTokens(collectionId) || [];
+
+    const currentAllowedTokens = this.allowedTokens[collectionId];
+    const allowedIds = filterAllowedTokens(tokensIds, currentAllowedTokens);
+    return (await Promise.all(allowedIds
+      .map((tokenId) =>
+        this.getToken(collectionId, tokenId.toNumber())))) as TokenByIdResult[];
+  }
+
   async getToken(collectionId: number, tokenId: number): Promise<TokenByIdResult | null> {
     return await this.sdk?.tokens.get_new({ collectionId, tokenId }) || null;
   }

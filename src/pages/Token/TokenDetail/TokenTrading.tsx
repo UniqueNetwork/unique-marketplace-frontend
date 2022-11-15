@@ -32,6 +32,7 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
 
   const isAllowed = useMemo(() => {
     if (!token && !offer) return;
+    // eslint-disable-next-line
     const { tokenId, collectionId } = offer || token!;
     return checkAllowedTokenInSettings(tokenId, collectionId, allowedTokens);
   }, [allowedTokens, token, offer]);
