@@ -26,6 +26,7 @@ import { countTokenAttributes } from './Filters/utils/attributes';
 import { TOption } from './types';
 import { defaultSortingValue, pageSize, sortingOptions, testid } from './constants';
 import { useParams } from 'react-router-dom';
+import { CollectionDetail } from './CollectionDetail/CollectionDetail';
 
 export const CollectionPage = () => {
   const searchParams = new URLSearchParams(window.location.search);
@@ -190,70 +191,81 @@ export const CollectionPage = () => {
     return statusesCount + collectionsCount + attributesCount + numberOfAttributesCount + (prices ? 1 : 0);
   }, [filterState]);
 
-  return (<PagePaper>
-    <MarketMainPageStyled>
-      <LeftColumn>
-        {deviceSize !== DeviceSize.md &&
-        <Filters
-          value={filterState}
-          onFilterChange={setFilterState}
-          tokens={tokensWithOffers}
-          featuredTokens={featuredTokens}
-          isFetchingTokens={isFetchingTokens}
-          testid={`${testid}-filters`}
-          featuredTokensForAttributeCounts={featuredTokensForAttributeCounts}
-        />
-        }
-      </LeftColumn>
-      <MainContent>
-        <SearchAndSortingWrapper>
-          <SearchField
-            searchValue={searchString}
-            placeholder='Token'
-            onSearch={onSearch}
-            testid={`${testid}-search-field`}
+  return (<>
+    <CollectionPagePaper>
+      <CollectionDetail collection={collection} />
+    </CollectionPagePaper>
+    <CollectionPagePaper>
+      <MarketMainPageStyled>
+        <LeftColumn>
+          {deviceSize !== DeviceSize.md &&
+          <Filters
+            value={filterState}
+            onFilterChange={setFilterState}
+            tokens={tokensWithOffers}
+            featuredTokens={featuredTokens}
+            isFetchingTokens={isFetchingTokens}
+            testid={`${testid}-filters`}
+            featuredTokensForAttributeCounts={featuredTokensForAttributeCounts}
           />
-          <SortSelectWrapper>
-            <Select
-              onChange={onSortingChange}
-              options={sortingOptions}
-              value={sortingValue}
-              testid={`${testid}-sorting-select`}
+          }
+        </LeftColumn>
+        <MainContent>
+          <SearchAndSortingWrapper>
+            <SearchField
+              searchValue={searchString}
+              placeholder='Token'
+              onSearch={onSearch}
+              testid={`${testid}-search-field`}
             />
-          </SortSelectWrapper>
-        </SearchAndSortingWrapper>
-        <div>
-          <Text
-            testid={`${testid}-items-count`}
-            size='m'
-          >{isFetchingTokens || isFetchingOffers || isLoading ? 'Loading items' : `${featuredTokens.length} items`}</Text>
-        </div>
-        <TokensListWrapper >
-          {!isFetchingTokens && !isFetchingOffers && !isLoading && featuredTokens.length === 0 && <NoItems isSearchResult={!!searchString || !!filterCount} />}
-          <TokensList testid={`${testid}-tokens`} tokens={featuredTokens} isLoading={isFetchingTokens || isFetchingOffers || isLoading} />
-        </TokensListWrapper>
-      </MainContent>
-      {deviceSize <= DeviceSize.md && <MobileFilters
-        filterCount={filterCount}
-        defaultSortingValue={defaultSortingValue}
-        sortingValue={sortingValue}
-        sortingOptions={sortingOptions}
-        onFilterChange={setFilterState}
-        onSortingChange={onSortingChange}
-        testid={`${testid}-mobile-filters`}
-        filterComponent={<Filters
-          value={filterState}
+            <SortSelectWrapper>
+              <Select
+                onChange={onSortingChange}
+                options={sortingOptions}
+                value={sortingValue}
+                testid={`${testid}-sorting-select`}
+              />
+            </SortSelectWrapper>
+          </SearchAndSortingWrapper>
+          <div>
+            <Text
+              testid={`${testid}-items-count`}
+              size='m'
+            >{isFetchingTokens || isFetchingOffers || isLoading ? 'Loading items' : `${featuredTokens.length} items`}</Text>
+          </div>
+          <TokensListWrapper >
+            {!isFetchingTokens && !isFetchingOffers && !isLoading && featuredTokens.length === 0 && <NoItems isSearchResult={!!searchString || !!filterCount} />}
+            <TokensList testid={`${testid}-tokens`} tokens={featuredTokens} isLoading={isFetchingTokens || isFetchingOffers || isLoading} />
+          </TokensListWrapper>
+        </MainContent>
+        {deviceSize <= DeviceSize.md && <MobileFilters
+          filterCount={filterCount}
+          defaultSortingValue={defaultSortingValue}
+          sortingValue={sortingValue}
+          sortingOptions={sortingOptions}
           onFilterChange={setFilterState}
-          testid={`${testid}-filters`}
-          tokens={tokensWithOffers}
-          featuredTokens={featuredTokens}
-          isFetchingTokens={isFetchingTokens}
-          featuredTokensForAttributeCounts={featuredTokensForAttributeCounts}
+          onSortingChange={onSortingChange}
+          testid={`${testid}-mobile-filters`}
+          filterComponent={<Filters
+            value={filterState}
+            onFilterChange={setFilterState}
+            testid={`${testid}-filters`}
+            tokens={tokensWithOffers}
+            featuredTokens={featuredTokens}
+            isFetchingTokens={isFetchingTokens}
+            featuredTokensForAttributeCounts={featuredTokensForAttributeCounts}
+          />}
         />}
-      />}
-    </MarketMainPageStyled>
-  </PagePaper>);
+      </MarketMainPageStyled>
+    </CollectionPagePaper>
+  </>);
 };
+
+const CollectionPagePaper = styled(PagePaper)`
+  && {
+    margin-top: calc(var(--gap) / 2);
+  }
+`;
 
 const MarketMainPageStyled = styled.div`
   display: flex;
