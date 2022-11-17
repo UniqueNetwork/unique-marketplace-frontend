@@ -69,29 +69,6 @@ const StatusFilter: FC<StatusFilterProps> = ({ value, onChange, testid }) => {
           />}
         </StatusFilterWrapper>
       </Accordion>
-      {selectedAccount && <Accordion
-        title={'Status'}
-        isOpen={true}
-        onClear={onStatusClear}
-        testid={`${testid}-status-accordion`}
-      >
-        <StatusFilterWrapper>
-          {!hideOnSale && <Checkbox
-            checked={!!onSell}
-            label={'On sale'}
-            size={'m'}
-            onChange={onMyNFTsOnSellChange}
-            testid={`${testid}-myNft-checkbox`}
-          />}
-          {!hideNotOnSale && <Checkbox
-            checked={!!notOnSale}
-            label={'Not on sale'}
-            size={'m'}
-            onChange={onNotOnSaleChange}
-            testid={`${testid}-myBids-checkbox`}
-          />}
-        </StatusFilterWrapper>
-      </Accordion>}
     </>
   );
 };
