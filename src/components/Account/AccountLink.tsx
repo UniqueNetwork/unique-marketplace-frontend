@@ -1,9 +1,10 @@
 import React, { FC, useCallback } from 'react';
 
 import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
+import { Link } from 'components/UI';
 import { useApi } from 'hooks/useApi';
 import { shortcutText } from 'utils/textUtils';
-import config from '../../config';
+import config from 'config';
 
 interface AccountLinkProps {
   accountAddress: string
@@ -20,13 +21,13 @@ const AccountLink: FC<AccountLinkProps> = ({ accountAddress, testid }) => {
   }, [chainData?.SS58Prefix]);
 
   return (
-    <a
+    <Link
       target={'_blank'}
       rel={'noreferrer'}
       href={`${config.blockchains[currentChainId || '']?.scanUrl || ''}account/${formatAddress(accountAddress) || '404'}`}
       className={'unique-link primary'}
       data-testid={testid}
-    >{shortcutText(formatAddress(accountAddress) || '')}</a>
+    >{shortcutText(formatAddress(accountAddress) || '')}</Link>
   );
 };
 

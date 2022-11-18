@@ -37,11 +37,17 @@ export const SignModal: FC<TSignModalProps> = ({ keyringPair, isVisible, onFinis
     setPassword('');
   }, [keyringPair, password]);
 
+  const onCloseClick = useCallback(() => {
+    setPasswordError(undefined);
+    setPassword('');
+    onClose();
+  }, [onClose]);
+
   if (!keyringPair) return null;
 
   return (<Modal isVisible={isVisible}
     isClosable={true}
-    onClose={onClose}
+    onClose={onCloseClick}
     isGlobalBackdrop
   >
     <Content>
