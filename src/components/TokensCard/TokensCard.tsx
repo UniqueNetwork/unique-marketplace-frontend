@@ -18,7 +18,7 @@ import { useCollections } from 'hooks/useCollections';
 import BundleItemsCount from '../BundleItemsCount/BundleItemsCount';
 
 export type TTokensCard = {
-  token?: TokenByIdResult
+  token?: Omit<TokenByIdResult, 'collection'>
   offer?: Partial<Offer>
   tokenId?: number
   collectionId?: number
@@ -27,7 +27,7 @@ export type TTokensCard = {
 };
 
 export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, testid, ...props }) => {
-  const [token, setToken] = useState<TokenByIdResult | undefined>(props.token);
+  const [token, setToken] = useState<Omit<TokenByIdResult, 'collection'> | undefined>(props.token);
   const [collection, setCollection] = useState<(CollectionInfoWithSchema) | undefined>();
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isBundleState, setIsBundleState] = useState<boolean>();

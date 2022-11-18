@@ -2,7 +2,7 @@ import { Consumer, Context, createContext, Provider } from 'react';
 import { BN } from '@polkadot/util';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { TWithdrawBid } from '../api/restApi/auction/types';
-import { Account, SignResult, UnsignedTxPayload } from '@unique-nft/accounts';
+import { SignResult, UnsignedTxPayload, Account } from '@unique-nft/accounts/types';
 
 export type AccountDeposits = {
   bids: {
@@ -12,7 +12,7 @@ export type AccountDeposits = {
   sponsorshipFee?: BN
 }
 
-declare module '@unique-nft/accounts' {
+declare module '@unique-nft/accounts/types' {
   export abstract class Account {
     name: string;
     address: string;

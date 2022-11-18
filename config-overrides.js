@@ -22,7 +22,8 @@ module.exports = function override(config) {
         "@unique-nft/quartz-mainnet-types/definitions": "@unique-nft/quartz-mainnet-types/definitions.ts",
         "@unique-nft/opal-testnet-types/definitions": "@unique-nft/opal-testnet-types/definitions.ts",
         "@unique-nft/unique-mainnet-types/definitions": "@unique-nft/unique-mainnet-types/definitions.ts",
-        "@unique-nft/unique-mainnet-types/augment-api": "@unique-nft/unique-mainnet-types/augment-api.ts"
+        "@unique-nft/unique-mainnet-types/augment-api": "@unique-nft/unique-mainnet-types/augment-api.ts",
+        "@unique-nft/utils/string": "@unique-nft/utils/string.mjs",
     };
     config.ignoreWarnings = [/Failed to parse source map/];
     config.plugins = (config.plugins || []).concat([

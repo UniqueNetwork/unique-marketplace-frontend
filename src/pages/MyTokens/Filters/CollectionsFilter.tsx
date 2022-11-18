@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import { Text } from '@unique-nft/ui-kit';
 import { Checkbox } from 'components/UI';
-import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
+import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
 import styled from 'styled-components';
 
 import Accordion from 'components/Accordion/Accordion';
@@ -12,6 +12,7 @@ import { AttributeItem } from 'components/Filters/types';
 import { CollectionCover } from 'components/CollectionCover/CollectionCover';
 import { Attribute, AttributeCount } from 'api/restApi/offers/types';
 import { getAttributesCountFromTokens, getAttributesFromTokens } from './utils/attributes';
+import { MixedTokenAndOffer } from '../NFTPage';
 
 interface CollectionsFilterProps {
   value?: { collections?: number[], attributes?: { key: string, attribute: string }[], attributeCounts?: number[] } | null
@@ -19,11 +20,11 @@ interface CollectionsFilterProps {
   onAttributesChange?(value: { key: string, attribute: string }[]): void
   onAttributeCountsChange?(value: number[]): void
   testid: string
-  featuredTokens: TokenByIdResult[]
-  tokens: TokenByIdResult[]
+  featuredTokens: MixedTokenAndOffer[]
+  tokens: MixedTokenAndOffer[]
   collections: CollectionInfoWithSchema[]
   isFetchingTokens: boolean
-  featuredTokensForAttributeCounts: TokenByIdResult[]
+  featuredTokensForAttributeCounts: MixedTokenAndOffer[]
 }
 
 const CollectionsFilter: FC<CollectionsFilterProps> = ({

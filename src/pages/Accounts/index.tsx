@@ -4,7 +4,7 @@ import { BN } from '@polkadot/util';
 import { Dropdown, Button } from 'components/UI';
 import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
 import { TWithdrawBid } from 'api/restApi/auction/types';
-import { Account } from '@unique-nft/accounts';
+import { Account } from '@unique-nft/accounts/types';
 import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';

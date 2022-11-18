@@ -99,9 +99,9 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
     return countNestedChildren(bundle[0].nestingChildTokens);
   }, [bundle]);
 
-  const onViewTokenDetails = useCallback((token: TokenByIdResult) => {
+  const onViewTokenDetails = useCallback((token: INestingToken) => {
     navigate(`/token/${token.collectionId}/${token.tokenId}`);
-    onViewTokenDetailsProps(token);
+    onViewTokenDetailsProps(token as unknown as TokenByIdResult);
     if (isMobileViewVisible) closeView();
   }, [onViewTokenDetailsProps, isMobileViewVisible, closeView]);
 

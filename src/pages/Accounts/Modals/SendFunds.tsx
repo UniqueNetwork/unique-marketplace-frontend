@@ -20,7 +20,7 @@ import { AdditionalWarning100, Coral700 } from 'styles/colors';
 import DefaultMarketStages from '../../Token/Modals/StagesModal';
 import { TTransferFunds } from './types';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
-import { Account } from '@unique-nft/accounts';
+import { Account } from '@unique-nft/accounts/types';
 
 const tokenSymbol = 'KSM';
 

@@ -7,10 +7,11 @@ import { BN } from '@polkadot/util';
 import { Codec } from '@polkadot/types/types';
 import { useApi } from 'hooks/useApi';
 import { getWithdrawBids } from 'api/restApi/auction/auction';
-import { Accounts, ProviderClass, Account } from '@unique-nft/accounts';
+import { Accounts, ProviderClass } from '@unique-nft/accounts';
 
 import { PolkadotProvider, PolkadotAccount } from '@unique-nft/accounts/polkadot';
 import { KeyringLocalProvider, KeyringLocalAccount } from '@unique-nft/accounts/keyring-local';
+import { Account } from '@unique-nft/accounts/types';
 
 export const DefaultAccountKey = 'unique_market_account_address';
 
@@ -60,7 +61,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
 
       const allAccounts = (await _accounts?.getAccounts())?.map((account) => {
         account.name = (account instanceof PolkadotAccount
-          ? (account as PolkadotAccount).injectedAccount
+          ? (account).injectedAccount
           : (account as unknown as KeyringLocalAccount).keyringPair).meta.name as string;
         account.address = account.getAddress();
         account.isLocal = account instanceof KeyringLocalAccount;
@@ -134,7 +135,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
     if (!api?.market) return Promise.resolve();
     const allAccounts = (await _accounts?.getAccounts())?.map((account) => {
       account.name = (account instanceof PolkadotAccount
-        ? (account as PolkadotAccount).injectedAccount
+        ? (account).injectedAccount
         : (account as unknown as KeyringLocalAccount).keyringPair).meta.name as string;
       account.address = account.getAddress();
       account.isLocal = account instanceof KeyringLocalAccount;

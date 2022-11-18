@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNotifications } from 'components/UI';
 import { InternalStage, StageStatus, useStagesReturn } from '../types/StagesTypes';
-import { Account } from '@unique-nft/accounts';
+import { Account } from '@unique-nft/accounts/types';
 
 const useStages = <T>(stages: InternalStage<T>[], signer?: Account): useStagesReturn<T> => {
   const [internalStages, setInternalStages] = useState<InternalStage<T>[]>(stages);
