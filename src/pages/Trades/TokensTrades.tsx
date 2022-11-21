@@ -215,11 +215,6 @@ const TradesPageWrapper = styled.div`
 
 const StyledSearchField = styled(SearchField)`
   margin-bottom: calc(var(--gap) * 2);
-  @media (max-width: 567px) {
-    button {
-      display: none;
-    }
-  }
 `;
 
 const StyledTable = styled(Table)`
