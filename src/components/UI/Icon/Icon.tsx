@@ -1,11 +1,14 @@
 import Icons from 'static/icons/icons.svg';
-import { ForwardedRef, forwardRef, isValidElement, ReactNode } from 'react';
+import { ForwardedRef, forwardRef, isValidElement, ReactNode, MouseEvent } from 'react';
 
 export interface IconProps {
   size: number;
   name?: string;
   file?: string;
   color?: string;
+  className?: string;
+  testid?: string;
+  onClick?(event: MouseEvent): void
 }
 
 export type IconType = IconProps | ReactNode;
@@ -20,6 +23,7 @@ export const Icon = forwardRef(
       file,
       size,
       color = 'var(--color-blue-grey-300)',
+      testid,
       ...props
     }: IconProps,
     ref: ForwardedRef<any>
@@ -30,6 +34,7 @@ export const Icon = forwardRef(
     src={file}
     ref={ref}
     alt={'icon'}
+    data-testid={testid}
     {...props}
 />)
 : (
@@ -38,7 +43,7 @@ export const Icon = forwardRef(
     fill={color}
     width={size}
     height={size}
-    data-testid={`icon-${name}`}
+    data-testid={testid}
     ref={ref}
     {...props}
   >

@@ -12,3 +12,4 @@ export { Notifications, useNotifications } from './Notifications';
 export { Button } from './Button/Button';
 export { Modal } from './Modal';
 export { Link } from './Link/Link';
+export { CopyButton } from './CopyButton/CopyButton';

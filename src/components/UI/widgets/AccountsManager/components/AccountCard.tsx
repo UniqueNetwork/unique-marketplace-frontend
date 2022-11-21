@@ -1,10 +1,10 @@
-import React, { ReactNode, useEffect } from 'react';
+import React, { ReactNode } from 'react';
 import { IAccount } from '../AccountsManager';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import useCopyToClipboard from '../hooks/useCopyToClipboard';
-import { Text, Avatar } from '@unique-nft/ui-kit';
+import { Avatar } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
-import { Icon } from 'components/UI/Icon/Icon';
+import { CopyButton, Text } from 'components/UI';
 
 interface AccountCardProps extends IAccount {
   avatarRender?(address: string): ReactNode;
@@ -34,13 +34,12 @@ export const AccountCard = ({
           <Avatar src={DefaultAvatar} type='circle' />
         )}
       <div className='account-card-content'>
-        <Text size='m'>{name}</Text>
+        <Text size='m' title={name}>{name}</Text>
         <div className='account-card-address'>
           <Text size='s' color='grey-500'>
             {shortAddress}
           </Text>
-          <div
-            className='address-copy'
+          <CopyButton
             onClick={(event) => {
               if (!address) return;
               event.stopPropagation();
@@ -48,9 +47,7 @@ export const AccountCard = ({
               onCopyAddressClick?.(address);
             }}
             data-testid={`address-copy-${address}`}
-          >
-            <Icon size={16} name='copy' />
-          </div>
+          />
         </div>
       </div>
     </AccountCardWrapper>
@@ -69,6 +66,11 @@ const AccountCardWrapper = styled.div`
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
+      &[title]:hover::after {
+        content: attr(title);
+        background: var(--color-additional-dark);
+        color: var(--color-additional-light);
+      }
     }
     .account-card-address {
       display: flex;

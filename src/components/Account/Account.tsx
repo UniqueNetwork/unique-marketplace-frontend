@@ -1,7 +1,6 @@
 import React, { FC, useCallback, useMemo } from 'react';
-import { Text, useNotifications } from 'components/UI';
+import { CopyButton, Text, useNotifications } from 'components/UI';
 import styled from 'styled-components';
-import { Icon } from 'components/UI/Icon/Icon';
 import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import { useApi } from 'hooks/useApi';
@@ -57,11 +56,7 @@ const AccountCard: FC<AccountProps> = ({
             hideName={hideName}
             testid={testid}
           />
-          {canCopy && <a onClick={onCopyAddress(formatAddress(accountAddress) || '')} data-testid={`${testid}-copy`}>
-            <CopyIconWrapper>
-              <Icon name={'copy'} size={16} />
-            </CopyIconWrapper>
-          </a>}
+          {canCopy && <CopyButton onClick={onCopyAddress(formatAddress(accountAddress) || '')} data-testid={`${testid}-copy`} />}
         </AddressRow>}
       </AccountInfoWrapper>
     </>
@@ -97,25 +92,6 @@ const AccountInfoWrapper = styled.div`
   span {
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-`;
-
-const CopyIconWrapper = styled.div`
-  && {
-    width: 24px;
-    height: 24px;
-    color: var(--color-grey-400);
-    padding: 0;
-    cursor: pointer;
-    svg {
-      transform: translateX(3px);
-    }
-    
-    &:hover {
-      svg {
-        fill: var(--color-primary-500);
-      }
-    }
   }
 `;
 
