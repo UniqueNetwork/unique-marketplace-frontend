@@ -3,9 +3,8 @@ import { Heading, Loader, SelectOptionProps } from '@unique-nft/ui-kit';
 import { Text, useNotifications, Dropdown, Button, Modal } from 'components/UI';
 import { BN } from '@polkadot/util';
 import styled from 'styled-components';
-import { checkAddress } from '@polkadot/util-crypto';
 
-import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
+import { toChainFormatAddress, validateAddress } from 'api/uniqueSdk/utils/addressUtils';
 import { Account } from 'account/AccountContext';
 import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
@@ -165,7 +164,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     getKusamaFee(value, amount)();
 
     if (typeof value === 'string') {
-      const [isValid] = value ? checkAddress(value, chainData?.SS58Prefix || 255) : [true];
+      const isValid = value ? validateAddress(value, chainData?.SS58Prefix) : true;
       setIsValidRecipientAddress(isValid);
       onFilter(value);
     } else {
