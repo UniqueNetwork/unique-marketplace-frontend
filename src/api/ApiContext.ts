@@ -19,6 +19,7 @@ export type ApiContextProps = {
   chainData?: ChainProperties
   settings?: Settings
   currentChainId?: string
+  prefixes: number[]
   baseURL: string
   onChangeChainId(chainId: string): void
 }

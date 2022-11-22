@@ -84,7 +84,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   const [recipientAddress, setRecipientAddress] = useState<string | Account | undefined>();
   const [isValidRecipientAddress, setIsValidRecipientAddress] = useState(true);
   const [amount, setAmount] = useState<string>('');
-  const { chainData, api } = useApi();
+  const { chainData, api, prefixes } = useApi();
   const [kusamaFee, setKusamaFee] = useState('0');
   const [isFeeLoading, setIsFeeLoading] = useState(false);
   const deviceSize = useDeviceSize();
@@ -164,14 +164,14 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     getKusamaFee(value, amount)();
 
     if (typeof value === 'string') {
-      const isValid = value ? validateAddress(value, chainData?.SS58Prefix) : true;
+      const isValid = value ? validateAddress(value, prefixes) : true;
       setIsValidRecipientAddress(isValid);
       onFilter(value);
     } else {
       setFilteredAccounts(accountsWithQuartzAddresses);
       setIsValidRecipientAddress(true);
     }
-  }, [accountsWithQuartzAddresses, onFilter, amount, getKusamaFee, chainData]);
+  }, [accountsWithQuartzAddresses, onFilter, amount, getKusamaFee, prefixes]);
 
   const onCloseModal = useCallback(() => {
     setRecipientAddress('');

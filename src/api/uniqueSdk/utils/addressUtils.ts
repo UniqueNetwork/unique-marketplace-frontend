@@ -49,10 +49,7 @@ export function collectionIdToAddress (address: number): Address {
   return Web3.utils.toChecksumAddress('0x' + buf.toString('hex'));
 }
 
-const validatePrefixes = [42, 255];
-
-export function validateAddress(address: string, prefix?: number) {
-  const prefixes = new Set(validatePrefixes);
-  prefixes.add(prefix || 255);
-  return [...prefixes.values()].map((prefix) => checkAddress(address, prefix)).some(([valid]) => valid);
+export function validateAddress(address: string, prefixes: number[]) {
+  const normalizedPrefix = 42;
+  return [...prefixes, normalizedPrefix].map((prefix) => checkAddress(address, prefix)).some(([valid]) => valid);
 }
