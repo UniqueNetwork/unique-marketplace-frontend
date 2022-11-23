@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { ForwardedRef, forwardRef, ReactNode } from 'react';
+=======
+import { forwardRef, ReactNode } from 'react';
+>>>>>>> f98f213e (Update collection page layout)
 import classNames from 'classnames';
 import { ComponentProps } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
@@ -15,7 +19,11 @@ export interface ITextBaseProps {
 export type TextProps = ITextBaseProps &
   Pick<ComponentProps, 'className' | 'id' | 'testid'>;
 
+<<<<<<< HEAD
 export const Text = forwardRef(({
+=======
+export const Text = forwardRef<HTMLSpanElement, TextProps>(({
+>>>>>>> f98f213e (Update collection page layout)
   children,
   size = 'm',
   weight = 'regular',
@@ -24,7 +32,11 @@ export const Text = forwardRef(({
   appearance = 'inline',
   testid,
   ...rest
+<<<<<<< HEAD
 }: TextProps, ref: ForwardedRef<any>) => {
+=======
+}: TextProps, ref) => {
+>>>>>>> f98f213e (Update collection page layout)
   return (
     <TextStyled
       className={classNames(
