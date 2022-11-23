@@ -2,7 +2,7 @@ import Skeleton from 'components/Skeleton/Skeleton';
 import styled from 'styled-components';
 
 export const CollectionDetailSkeleton = () => <CollectionDetailSkeletonWrapper>
-  <Skeleton width={160} height={160} type={'circle'}/>
+  <Skeleton width={160} height={160} type={'square'}/>
   <CardSkeletonWrapper>
     <Skeleton width={188} height={48} type={'square'}/>
     <Skeleton width={400} height={24} type={'square'}/>

@@ -6,30 +6,31 @@ import styled from 'styled-components';
 export const CollectionStatisticsBlock = () => {
   return <CollectionStatisticsBlockWrapper>
     <div>
-      <Heading size={'4'}>1 KSM</Heading>
-      <Text size={'m'} color='grey-600'>floor price</Text>
-    </div>
-    <div>
-      <Heading size={'4'}>0.1 KSM</Heading>
-      <Text size={'m'} color='grey-600'>total volume</Text>
-    </div>
-    <div>
-      <Heading size={'4'}>7 582</Heading>
-      <Text size={'m'} color='grey-600'>holders</Text>
+      <Heading size={'4'}>10 000</Heading>
+      <Text size={'m'} color='grey-600'>items</Text>
     </div>
     <div>
       <Heading size={'4'}>77.1%</Heading>
       <Text size={'m'} color='grey-600'>listed NFTs</Text>
     </div>
     <div>
-      <Heading size={'4'}>10 000</Heading>
-      <Text size={'m'} color='grey-600'>items</Text>
+      <Heading size={'4'}>1 KSM</Heading>
+      <Text size={'m'} color='grey-600'>floor price</Text>
+    </div>
+    <div>
+      <Heading size={'4'}>7 582</Heading>
+      <Text size={'m'} color='grey-600'>holders</Text>
+    </div>
+    <div>
+      <Heading size={'4'}>74%</Heading>
+      <Text size={'m'} color='grey-600'>unique holders</Text>
     </div>
   </CollectionStatisticsBlockWrapper>;
 };
 
 const CollectionStatisticsBlockWrapper = styled.div`
   display: flex;
+  margin-top: calc(var(--gap) / 2);
   & > div {
     display: flex;
     flex-direction: column;

@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import BN from 'bn.js';
 import { Text } from '@unique-nft/ui-kit';
-import { Select } from 'components/UI';
+import { Button, Select } from 'components/UI';
 import { BN_MAX_INTEGER } from '@polkadot/util';
 import { BoxedNumberWithDefault, CollectionInfoWithSchema, LocalizedStringWithDefault, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 
@@ -41,6 +41,7 @@ export const CollectionPage = () => {
   const [isFetchingTokens, setIsFetchingTokens] = useState<boolean>(true);
   const deviceSize = useDeviceSize();
   const { getCollection } = useCollections();
+  const [isFiltersVisible, setIsFilterVisible] = useState(true);
 
   const { offers, isFetching: isFetchingOffers, fetch } = useOffers();
   const { api, currentChainId } = useApi();
@@ -51,7 +52,7 @@ export const CollectionPage = () => {
     setIsFetchingTokens(true);
     void (async () => {
       const collection = await getCollection(Number(collectionId));
-      if (!collection) return; // TODO redirect ot 404
+      if (!collection) return; // TODO redirect to 404
       setCollection(collection);
 
       await fetch({ page: 1, pageSize, collectionId: Number(collectionId) });
@@ -191,13 +192,38 @@ export const CollectionPage = () => {
     return statusesCount + collectionsCount + attributesCount + numberOfAttributesCount + (prices ? 1 : 0);
   }, [filterState]);
 
+  const onFiltersVisibleToggle = useCallback(() => setIsFilterVisible(!isFiltersVisible), [isFiltersVisible]);
+
   return (<>
+    <CollectionDetail collection={collection} />
     <CollectionPagePaper>
-      <CollectionDetail collection={collection} />
-    </CollectionPagePaper>
-    <CollectionPagePaper>
+      <SearchAndSortingWrapper>
+        <FiltersToggleWrapper>
+          <Button
+            role={'tertiary'}
+            iconLeft={{ name: isFiltersVisible ? 'arrow-left' : 'filters', size: 24 }}
+            title='Filters'
+            onClick={onFiltersVisibleToggle}
+          />
+          <Text>{featuredTokens.length} results</Text>
+        </FiltersToggleWrapper>
+        <SearchField
+          searchValue={searchString}
+          placeholder='Token'
+          onSearch={onSearch}
+          testid={`${testid}-search-field`}
+        />
+        <SortSelectWrapper>
+          <Select
+            onChange={onSortingChange}
+            options={sortingOptions}
+            value={sortingValue}
+            testid={`${testid}-sorting-select`}
+          />
+        </SortSelectWrapper>
+      </SearchAndSortingWrapper>
       <MarketMainPageStyled>
-        <LeftColumn>
+        <LeftColumn isVisible={isFiltersVisible} >
           {deviceSize !== DeviceSize.md &&
           <Filters
             value={filterState}
@@ -211,22 +237,6 @@ export const CollectionPage = () => {
           }
         </LeftColumn>
         <MainContent>
-          <SearchAndSortingWrapper>
-            <SearchField
-              searchValue={searchString}
-              placeholder='Token'
-              onSearch={onSearch}
-              testid={`${testid}-search-field`}
-            />
-            <SortSelectWrapper>
-              <Select
-                onChange={onSortingChange}
-                options={sortingOptions}
-                value={sortingValue}
-                testid={`${testid}-sorting-select`}
-              />
-            </SortSelectWrapper>
-          </SearchAndSortingWrapper>
           <div>
             <Text
               testid={`${testid}-items-count`}
@@ -272,16 +282,15 @@ const MarketMainPageStyled = styled.div`
   flex: 1;
 `;
 
-const LeftColumn = styled.div`
-  padding-right: 24px;
-  border-right: 1px solid var(--grey-300);
+const LeftColumn = styled.div<{ isVisible?: boolean }>`
+  margin-right: calc(var(--gap) * 2);
+  display: ${({ isVisible }) => isVisible ? 'unset' : 'none'};
   @media (max-width: 1024px) {
     display: none;
   }
 `;
 
 const MainContent = styled.div`
-  padding-left: 32px;
   flex: 1;
 
   > div:nth-of-type(2) {
@@ -305,10 +314,19 @@ const SortSelectWrapper = styled.div`
 `;
 
 const SearchAndSortingWrapper = styled.div`
+  margin-bottom: var(--gap);
   display: flex;
   justify-content: space-between;
 `;
 
 const TokensListWrapper = styled.div`
   min-height: 640px;
+`;
+
+const FiltersToggleWrapper = styled.div`
+  display: flex;
+  width: 235px;
+  margin-right: calc(var(--gap) * 2);
+  gap: var(--gap);
+  align-items: center;
 `;

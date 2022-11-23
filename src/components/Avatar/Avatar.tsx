@@ -13,10 +13,10 @@ export interface IAvatarProps {
 }
 
 export const Avatar: FC<IAvatarProps> = ({
-  size = 38,
   src,
   address,
   type = 'square',
+  size = 38,
   testid,
   video
 }: IAvatarProps) => {
