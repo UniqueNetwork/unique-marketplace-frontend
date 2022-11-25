@@ -84,6 +84,10 @@ const ApiWrapper = ({
     return sdkClient?.networks[currentChainId].sdkSet;
   }, [currentChainId, sdkClient?.isReady]);
 
+  const prefixes = useMemo(() => Object.values(sdkClient?.networks || []).map(({ prefix }) => prefix || 255),
+    [isRpcClientInitialized]
+  );
+
   // get context value for ApiContext
   const value = useMemo<ApiContextProps>(
     () => ({
@@ -99,10 +103,11 @@ const ApiWrapper = ({
       chainData: currentChain?.unique.chainProperties(),
       baseURL: config.blockchains[currentChainId]?.apiEndpoint || '',
       settings,
+      prefixes,
       currentChainId,
       onChangeChainId
     }),
-    [isRpcClientInitialized, currentChain, settings, currentChainId]
+    [isRpcClientInitialized, currentChain, settings, currentChainId, prefixes]
   );
 
   return (

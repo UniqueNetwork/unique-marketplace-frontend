@@ -1,4 +1,4 @@
-import { addressToEvm, encodeAddress } from '@polkadot/util-crypto';
+import { addressToEvm, checkAddress, encodeAddress } from '@polkadot/util-crypto';
 import { keyring } from '@polkadot/ui-keyring';
 import Web3 from 'web3';
 import { Address } from '@unique-nft/substrate-client/types';
@@ -47,4 +47,9 @@ export function collectionIdToAddress (address: number): Address {
   ]);
 
   return Web3.utils.toChecksumAddress('0x' + buf.toString('hex'));
+}
+
+export function validateAddress(address: string, prefixes: number[]) {
+  const normalizedPrefix = 42;
+  return [...prefixes, normalizedPrefix].map((prefix) => checkAddress(address, prefix)).some(([valid]) => valid);
 }

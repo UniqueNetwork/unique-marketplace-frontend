@@ -3,9 +3,8 @@ import { Heading, Loader, SelectOptionProps } from '@unique-nft/ui-kit';
 import { Text, useNotifications, Dropdown, Button, Modal } from 'components/UI';
 import { BN } from '@polkadot/util';
 import styled from 'styled-components';
-import { checkAddress } from '@polkadot/util-crypto';
 
-import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
+import { toChainFormatAddress, validateAddress } from 'api/uniqueSdk/utils/addressUtils';
 import { Account } from 'account/AccountContext';
 import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
@@ -85,7 +84,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   const [recipientAddress, setRecipientAddress] = useState<string | Account | undefined>();
   const [isValidRecipientAddress, setIsValidRecipientAddress] = useState(true);
   const [amount, setAmount] = useState<string>('');
-  const { chainData, api } = useApi();
+  const { chainData, api, prefixes } = useApi();
   const [kusamaFee, setKusamaFee] = useState('0');
   const [isFeeLoading, setIsFeeLoading] = useState(false);
   const deviceSize = useDeviceSize();
@@ -165,14 +164,14 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     getKusamaFee(value, amount)();
 
     if (typeof value === 'string') {
-      const [isValid] = value ? checkAddress(value, chainData?.SS58Prefix || 255) : [true];
+      const isValid = value ? validateAddress(value, prefixes) : true;
       setIsValidRecipientAddress(isValid);
       onFilter(value);
     } else {
       setFilteredAccounts(accountsWithQuartzAddresses);
       setIsValidRecipientAddress(true);
     }
-  }, [accountsWithQuartzAddresses, onFilter, amount, getKusamaFee, chainData]);
+  }, [accountsWithQuartzAddresses, onFilter, amount, getKusamaFee, prefixes]);
 
   const onCloseModal = useCallback(() => {
     setRecipientAddress('');

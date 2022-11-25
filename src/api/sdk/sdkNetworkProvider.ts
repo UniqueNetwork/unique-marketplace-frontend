@@ -21,6 +21,7 @@ export class SdkNetworkProvider {
   public error: Error | undefined;
   public sdkSet: SdkSet | undefined;
   public settings: Settings;
+  public prefix: number | undefined;
 
   constructor(settings: Settings) {
     this.settings = settings;
@@ -52,6 +53,8 @@ export class SdkNetworkProvider {
       unique: await this.createSdkInstance(this.settings.blockchain.unique.wsEndpoint),
       kusama: await this.createSdkInstance(this.settings.blockchain.kusama.wsEndpoint)
     };
+
+    this.prefix = this.sdkSet.unique.chainProperties().SS58Prefix;
 
     this.isReady = true;
   }
