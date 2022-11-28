@@ -3,8 +3,7 @@ import { Settings } from './restApi/settings/types';
 import { UniqueSDKNFTController } from './uniqueSdk/NFTController';
 import { UniqueSDKCollectionController } from './uniqueSdk/collectionController';
 import { UniqueSDKMarketController } from './uniqueSdk/marketController';
-import { Client } from '@unique-nft/substrate-client';
-import { HexString } from '@polkadot/util/types';
+import { ChainPropertiesResponse, Client } from '@unique-nft/sdk';
 
 type Api = {
   nft?: UniqueSDKNFTController
@@ -12,19 +11,11 @@ type Api = {
   market?: UniqueSDKMarketController
 }
 
-export interface ChainProperties {
-  SS58Prefix: number;
-  token: string;
-  decimals: number;
-  wsUrl: string;
-  genesisHash: HexString;
-}
-
 export type ApiContextProps = {
   api: Api | undefined
   uniqueSdk?: Client
   kusamaSdk?: Client
-  chainData?: ChainProperties
+  chainData?: ChainPropertiesResponse
   settings?: Settings
   currentChainId?: string
   baseURL: string

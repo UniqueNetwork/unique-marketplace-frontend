@@ -8,10 +8,10 @@ import Auction from '../Auction/Auction';
 import { isTokenOwner } from 'api/uniqueSdk/utils/addressUtils';
 import { useApi } from '../../../hooks/useApi';
 import { checkAllowedTokenInSettings } from 'api/uniqueSdk/utils/checkTokenIsAllowed';
-import { TokenByIdResult } from '@unique-nft/substrate-client/tokens';
+import { TokenByIdResponse } from '@unique-nft/sdk';
 
 interface TokenTradingProps {
-  token?: TokenByIdResult
+  token?: TokenByIdResponse
   offer?: Offer
   onSellClick(): void
   onBuyClick(): void

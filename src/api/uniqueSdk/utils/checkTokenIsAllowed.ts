@@ -1,4 +1,4 @@
-import { TokenId } from 'api/uniqueSdk/types';
+import { TokenId } from '@unique-nft/sdk';
 
 export const checkAllowedTokenInSettings = (tokenId: number, collectionId: number, allowedTokensList?: { collection: number, tokens: string }[]) => {
   const allowedTokens = allowedTokensList?.find((item) => item.collection === collectionId)?.tokens.split(',') || [];
@@ -13,5 +13,5 @@ export const checkTokenIsAllowed = (tokenId: number, allowedTokens: string[]) =>
 
 export const filterAllowedTokens = (tokens: TokenId[], allowedTokens?: string) => {
   if (!allowedTokens) return tokens;
-  return tokens.filter((id) => checkTokenIsAllowed(id.toNumber(), allowedTokens.split(',')));
+  return tokens.filter(({ tokenId }) => checkTokenIsAllowed(tokenId, allowedTokens.split(',')));
 };

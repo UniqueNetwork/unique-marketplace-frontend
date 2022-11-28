@@ -32,13 +32,15 @@ export const getAttributesFromTokens = (tokens: MixedTokenAndOffer[]) => {
   tokens.forEach(({ attributes }) => {
     if (!attributes) { return; }
     // Calculate filters to show
-    for (const i in attributes) {
-      const { name, value } = attributes[i];
-      const attributeName = name?._.toLocaleLowerCase();
+    for (const attribute of attributes) {
+      const { name, value } = attribute;
+      const attributeName = name?._?.toLocaleLowerCase();
+
+      if (!attributeName) return;
 
       if (Array.isArray(value)) {
         attributesMap[attributeName] = attributesMap[attributeName] ? [...attributesMap[attributeName], ...value.map((attr) => attr._)] : value.map((attr) => attr._);
-      } else if (attributes[i].isEnum) {
+      } else if (attribute.isEnum) {
         attributesMap[attributeName] = attributesMap[attributeName] ? [...attributesMap[attributeName], value._ || value] : [value._ || value];
       }
     }
@@ -74,7 +76,7 @@ export function countTokenAttributes(attributes: DecodedAttributes | undefined):
 }
 
 export const getAttributesCountFromTokens = (tokens: MixedTokenAndOffer[]) => {
-  const countTokensAttributes: number[] = tokens.map(({ attributes }) => countTokenAttributes(attributes));
+  const countTokensAttributes: number[] = tokens.map(({ attributes }) => countTokenAttributes(attributes as DecodedAttributes));
   // count tokens with the same amount of attributes, result be like { 7: 2, 6: 1 }
   const counterMap: { [key: number]: number } = {};
   countTokensAttributes.forEach((count) => {

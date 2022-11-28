@@ -2,7 +2,6 @@ import React, { FC, useCallback, useEffect, useState } from 'react';
 import { Heading } from '@unique-nft/ui-kit';
 import { Button, Text } from 'components/UI';
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
-import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
 import styled from 'styled-components/macro';
 
 import { useApi } from 'hooks/useApi';
@@ -12,6 +11,7 @@ import { useRejectSponsorshipStages } from 'hooks/adminStages/useRejectSponsorsh
 import AccountCard from 'components/Account/Account';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 import StagesModal from '../../Token/Modals/StagesModal';
+import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 
 const tokenSymbol = 'KSM';
 
@@ -35,7 +35,7 @@ export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collecti
 
   const { api } = useApi();
   const collectionApi = api?.collection;
-  const [collectionDetails, setCollectionDetails] = useState<CollectionInfoWithSchema | null>();
+  const [collectionDetails, setCollectionDetails] = useState<CollectionInfoWithSchemaResponse | null>();
   useEffect(() => {
     if (!collection) return;
     (async () => {

@@ -1,6 +1,5 @@
-import { Client } from '@unique-nft/substrate-client';
 import { Settings } from '../restApi/settings/types';
-import '@unique-nft/substrate-client/state-queries';
+import { Sdk, Client, ChainPropertiesResponse } from '@unique-nft/sdk';
 
 type SdkSet = { unique: Client, kusama: Client };
 
@@ -9,38 +8,19 @@ export class SdkNetworkProvider {
   public error: Error | undefined;
   public sdkSet: SdkSet | undefined;
   public settings: Settings;
+  public uniqueProperties?: ChainPropertiesResponse;
+  public kusamaProperties?: ChainPropertiesResponse;
 
-  constructor(settings: Settings) {
+  constructor({ sdkEndpoint, sdkRelayEndpoint, settings }: { sdkEndpoint: string, sdkRelayEndpoint: string, settings: Settings }) {
     this.settings = settings;
-  }
-
-  async disconnect() {
-    await this.sdkSet?.unique.api.disconnect();
-    await this.sdkSet?.kusama.api.disconnect();
-    this.isReady = false;
-  }
-
-  private async createClientInstance(url: string) {
-    const client = await Client.create({ chainWsUrl: url });
-
-    client.api.on('disconnected', () => {
-      this.isReady = false;
-    });
-
-    client.api.on('error', (error: Error) => {
-      this.error = error;
-      this.isReady = false;
-    });
-    return client;
-  }
-
-  async connect() {
-    this.isReady = false;
     this.sdkSet = {
-      unique: await this.createClientInstance(this.settings.blockchain.unique.wsEndpoint),
-      kusama: await this.createClientInstance(this.settings.blockchain.kusama.wsEndpoint)
+      unique: new Sdk({ baseUrl: sdkEndpoint }),
+      kusama: new Sdk({ baseUrl: sdkRelayEndpoint })
     };
+  }
 
-    this.isReady = true;
+  async init() {
+    this.uniqueProperties = await this.sdkSet?.unique.chain.properties();
+    this.kusamaProperties = await this.sdkSet?.kusama.chain.properties();
   }
 }

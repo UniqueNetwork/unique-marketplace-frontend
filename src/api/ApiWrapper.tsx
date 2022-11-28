@@ -5,7 +5,7 @@ import { useNotifications } from 'components/UI';
 import { ApiContextProps, ApiProvider } from './ApiContext';
 import AuctionSocketProvider from './restApi/auction/AuctionSocketProvider';
 import { Settings } from './restApi/settings/types';
-import { SdkClient } from './sdk/sdkClient';
+import { NetworkOptions, SdkClient } from './sdk/sdkClient';
 import config from '../config';
 import { sdkClient as sdk } from '.';
 import { useSettings } from './restApi/settings/settings';
@@ -35,17 +35,17 @@ const ApiWrapper = ({
     (async () => {
       const settings = await fetchSettings(config.blockchains);
 
-      await sdk.initialize(settings);
+      await sdk.initialize(settings.map<NetworkOptions>(({ networkId, sdkEndpoint, sdkRelayEndpoint, settings }) => ({ networkId, sdkEndpoint, sdkRelayEndpoint, settings })));
 
       setSettings(sdkClient?.networks[currentChainId].settings);
       sdkClient?.setNetwork(currentChainId);
 
       setRpcClientInitialized(sdkClient?.isReady);
     })().then(() => {
-      console.log('Rpc connection: success');
+      console.log('SDK connection: success');
     }).catch((e) => {
-      error('Rpc connection: failed', { name: 'warning', size: 16 });
-      console.log('Rpc connection: failed', e);
+      error('SDK connection: failed', { name: 'warning', size: 16 });
+      console.log('SDK connection: failed', e);
     });
   }, []);
 
@@ -81,7 +81,7 @@ const ApiWrapper = ({
   const currentChain = useMemo(() => {
     if (!sdkClient?.isReady || !currentChainId) return undefined;
 
-    return sdkClient?.networks[currentChainId].sdkSet;
+    return sdkClient?.networks[currentChainId];
   }, [currentChainId, sdkClient?.isReady]);
 
   // get context value for ApiContext
@@ -94,9 +94,9 @@ const ApiWrapper = ({
           market: sdkClient.marketController
         }
         : undefined),
-      uniqueSdk: currentChain?.unique,
-      kusamaSdk: currentChain?.kusama,
-      chainData: currentChain?.unique.chainProperties(),
+      uniqueSdk: currentChain?.sdkSet?.unique,
+      kusamaSdk: currentChain?.sdkSet?.kusama,
+      chainData: currentChain?.uniqueProperties,
       baseURL: config.blockchains[currentChainId]?.apiEndpoint || '',
       settings,
       currentChainId,

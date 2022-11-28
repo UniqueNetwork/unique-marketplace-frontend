@@ -58,7 +58,7 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
     ]);
   }, [api, collections]);
 
-  const onChangeSelectedCollection = useCallback((collection: CollectionInfoWithSchema | string) => {
+  const onChangeSelectedCollection = useCallback((collection: CollectionData | string) => {
     if (typeof collection === 'string') {
       if (!/^\d{0,9}$/.test(collection) && collection !== '') return;
 

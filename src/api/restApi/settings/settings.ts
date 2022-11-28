@@ -23,12 +23,12 @@ export const useSettings = () => {
       const settingsSet = await Promise.all(Object.values(blockchains).map(async (blockchain) => {
         const { data: settings, status } = await getSettings(blockchain.apiEndpoint);
         if (status === 200) {
-          return { networkId: blockchain.network.toLowerCase(), settings };
+          return { ...blockchain, networkId: blockchain.network.toLowerCase(), settings };
         }
       }));
 
       setIsFetching(false);
-      return settingsSet.filter((settings) => !!settings) as ({ networkId: string, settings: Settings })[];
+      return settingsSet.filter((settings) => !!settings) as (Chain & { networkId: string, settings: Settings })[];
     } catch (error) {
       setFetchingError(error as AxiosError);
       setIsFetching(false);

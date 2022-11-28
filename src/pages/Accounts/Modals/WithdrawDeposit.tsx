@@ -12,7 +12,7 @@ import { useWithdrawDepositStages } from 'hooks/accountStages/useWithdrawDeposit
 import InlineTokenCard from 'components/TokensCard/InlineTokenCard';
 import { StageStatus } from 'types/StagesTypes';
 import { formatKusamaBalance } from '../../../utils/textUtils';
-import { TokenByIdResult } from '@unique-nft/substrate-client/tokens';
+import { TokenByIdResponse } from '@unique-nft/sdk';
 
 const tokenSymbol = 'KSM';
 
@@ -25,7 +25,7 @@ export type WithdrawDepositModalProps = {
 }
 
 type BidDeposit = TWithdrawBid & {
-  token?: TokenByIdResult
+  token?: TokenByIdResponse
 };
 
 export const WithdrawDepositModal: FC<WithdrawDepositModalProps> = ({ isVisible, address, onFinish, onClose, testid }) => {

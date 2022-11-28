@@ -18,6 +18,7 @@ import styled from 'styled-components';
 import { BlueGrey500 } from 'styles/colors';
 import BundleTreeSection from './BundleTreeSection';
 import { useCollections } from 'hooks/useCollections';
+import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
 
 const testid = 'token-page';
 
@@ -25,8 +26,8 @@ const TokenPage = () => {
   const { api, currentChainId } = useApi();
   const { selectedAccount, updateCurrentAccountDeposit } = useAccounts();
   const { id, collectionId } = useParams<{ id: string, collectionId: string}>();
-  const [token, setToken] = useState<TokenByIdResult>();
-  const [collection, setCollection] = useState<CollectionInfoWithSchema>();
+  const [token, setToken] = useState<TokenByIdResponse>();
+  const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse | null>(null);
   const [isFetchingToken, setIsFetchingToken] = useState<boolean>(true);
   const { offer, fetch: fetchOffer, isFetching: isFetchingOffer } = useOffer(Number(collectionId), Number(id));
   const { getCollection } = useCollections();

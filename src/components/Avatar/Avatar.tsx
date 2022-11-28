@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import Identicon from '@polkadot/react-identicon';
 import styled from 'styled-components';
-import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
+import { DecodedInfixOrUrlOrCidAndHash } from 'api/uniqueSdk/types';
 
 export interface IAvatarProps {
   src?: string | DecodedInfixOrUrlOrCidAndHash;
@@ -20,8 +20,8 @@ export const Avatar: FC<IAvatarProps> = ({
   testid,
   video
 }: IAvatarProps) => {
-  const imgUrl = typeof src === 'string' ? src : (src?.fullUrl || src?.url);
-  const videoUrl = typeof video === 'string' ? video : (video?.fullUrl || video?.url);
+  const imgUrl = typeof src === 'string' ? src : (src?.fullUrl);
+  const videoUrl = typeof video === 'string' ? video : (video?.fullUrl);
 
   if (address) {
     return <Identicon
@@ -45,7 +45,7 @@ export const Avatar: FC<IAvatarProps> = ({
 
   return <AvatarWrapper size={size}>
     <AvatarStyled $type={type}
-      src={imgUrl}
+      src={imgUrl || ''}
       height={size}
       alt={''}
       data-testid={testid}

@@ -1,9 +1,13 @@
-import { Client } from '@unique-nft/substrate-client';
-import { TokenId, TransactionOptions, UniqueController } from './types';
+import { Client, GetBundleResponse, TokenByIdResponse, TokenOwnerResponse } from '@unique-nft/sdk';
+import { TransactionOptions, UniqueController } from './types';
 import { getEthAccount } from './utils/addressUtils';
 import { filterAllowedTokens } from './utils/checkTokenIsAllowed';
-import { getNestingTokenAddress, NestedToken, TokenByIdResult, TokenIdArguments, TokenOwnerResult } from '@unique-nft/substrate-client/tokens';
 import { Address } from '@unique-nft/substrate-client/types';
+import { getNestingTokenAddress, TokenIdArguments } from '@unique-nft/substrate-client/tokens';
+
+declare module '@unique-nft/sdk' {
+  type arrayNumberRecordStringAny = string | number | Record<string, string>
+}
 
 type UniqueSDKNFTControllerOptions = { sdk: Client, collectionIds: number[], allowedTokens: { collection: number, tokens: string }[] };
 
@@ -18,26 +22,24 @@ export class UniqueSDKNFTController implements UniqueController {
     this.allowedTokens = options.allowedTokens.reduce((acc, item) => ({ ...acc, [item.collection]: item.tokens }), {}) || {};
   }
 
-  async getAccountMarketableTokens(address: Address): Promise<TokenByIdResult[]> {
-    if (!this.sdk?.api || !address) {
+  async getAccountMarketableTokens(address: Address): Promise<TokenByIdResponse[]> {
+    if (!this.sdk || !address) {
       return [];
     }
-    const tokens: TokenByIdResult[] = [];
-    // @ts-ignore
-    const { unique } = this.sdk?.api.rpc || {};
+    const tokens: TokenByIdResponse[] = [];
 
     for (const collectionId of this.collectionIds) {
       try {
-        const tokensIds: TokenId[] =
-          await unique?.accountTokens(collectionId, { Substrate: address }) || [];
-        const tokensIdsOnEth: TokenId[] =
-          await unique?.accountTokens(collectionId, { Ethereum: getEthAccount(address) }) || [];
+        const tokensIds =
+          (await this.sdk.tokens.accountTokens({ collectionId, address })).tokens || [];
+        const tokensIdsOnEth =
+          (await this.sdk.tokens.accountTokens({ collectionId, address: getEthAccount(address) })).tokens || [];
 
         const currentAllowedTokens = this.allowedTokens[collectionId];
         const allowedIds = filterAllowedTokens([...tokensIds, ...tokensIdsOnEth], currentAllowedTokens);
         const tokensOfCollection = (await Promise.all(allowedIds
-          .map((tokenId) =>
-            this.getToken(collectionId, tokenId.toNumber())))) as TokenByIdResult[];
+          .map(({ tokenId }) =>
+            this.getToken(collectionId, tokenId)))) as TokenByIdResponse[];
 
         tokens.push(...tokensOfCollection);
       } catch (e) {
@@ -47,7 +49,7 @@ export class UniqueSDKNFTController implements UniqueController {
     return tokens;
   }
 
-  async getToken(collectionId: number, tokenId: number): Promise<TokenByIdResult | null> {
+  async getToken(collectionId: number, tokenId: number): Promise<TokenByIdResponse | null> {
     return await this.sdk?.tokens.get({ collectionId, tokenId }) || null;
   }
 
@@ -55,7 +57,7 @@ export class UniqueSDKNFTController implements UniqueController {
     return !!await this.sdk?.tokens.isBundle({ collectionId, tokenId });
   }
 
-  async getBundle(collectionId: number, tokenId: number): Promise<NestedToken | null> {
+  async getBundle(collectionId: number, tokenId: number): Promise<GetBundleResponse | null> {
     return await this.sdk?.tokens.getBundle({ collectionId, tokenId }) || null;
   }
 
@@ -73,7 +75,7 @@ export class UniqueSDKNFTController implements UniqueController {
     if (!unsignedTxPayload) throw new Error('Transaction build error');
     const { signature } = await this.sdk.tokens.unnest.sign(unsignedTxPayload);
     if (!signature) throw new Error('Signing failed');
-    await this.sdk.extrinsics.submitWaitCompleted({
+    await this.sdk.extrinsics.submit({
       signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });
@@ -91,7 +93,9 @@ export class UniqueSDKNFTController implements UniqueController {
       method: 'transferFrom',
       address: signer?.getAddress() || '',
       args: [
+        // @ts-ignore
         { Ethereum: from },
+        // @ts-ignore
         { Ethereum: to },
         collectionId,
         tokenId,
@@ -101,13 +105,13 @@ export class UniqueSDKNFTController implements UniqueController {
     if (!unsignedTxPayload) throw new Error('Transaction build error');
     const { signature } = await this.sdk.extrinsics.sign(unsignedTxPayload, signer);
     if (!signature) throw new Error('Signing failed');
-    await this.sdk?.extrinsics.submitWaitCompleted({
+    await this.sdk?.extrinsics.submit({
       signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });
   }
 
-  async getOwner(collectionId: number, tokenId: number): Promise<TokenOwnerResult | null> {
+  async getOwner(collectionId: number, tokenId: number): Promise<TokenOwnerResponse | null> {
     return await this.sdk?.tokens.owner({ collectionId, tokenId }) || null;
   }
 }
