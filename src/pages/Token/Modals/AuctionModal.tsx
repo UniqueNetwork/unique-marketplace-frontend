@@ -173,7 +173,7 @@ const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ offer, 
 
   useEffect(() => {
     if (!amount || !accountAddress) return;
-    initiate({ value: amount, accountAddress });
+    initiate({ value: fromStringToBnString(amount), accountAddress });
   }, [amount, accountAddress]);
 
   const { tokenId, collectionId } = offer || {};

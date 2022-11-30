@@ -403,12 +403,12 @@ export class UniqueSDKMarketController implements UniqueController {
     }
   }
 
-  async transferBidBalance(address: Address, amount: string, options: TransactionOptions): Promise<void> {
+  async transferBidBalance(address: Address, amount: BN, options: TransactionOptions): Promise<void> {
     if (!this.kusamaSdk) throw new Error('Controller isn\'t ready');
     const unsignedTxPayload = await this.kusamaSdk.extrinsics.build({
       section: 'balances',
       method: 'transferKeepAlive',
-      args: [this.auctionAddress, Number(amount) * Math.pow(10, this.kusamaDecimals)],
+      args: [this.auctionAddress, amount.toString()],
       address,
       isImmortal: false
     });
