@@ -285,7 +285,7 @@ const MarketMainPageStyled = styled.div`
 const LeftColumn = styled.div<{ isVisible?: boolean }>`
   margin-right: calc(var(--gap) * 2);
   display: ${({ isVisible }) => isVisible ? 'unset' : 'none'};
-  @media (max-width: 1024px) {
+  @media (max-width: 1023px) {
     display: none;
   }
 `;
@@ -317,6 +317,9 @@ const SearchAndSortingWrapper = styled.div`
   margin-bottom: var(--gap);
   display: flex;
   justify-content: space-between;
+  @media (max-width: 1023px) {
+    display: none;
+  }
 `;
 
 const TokensListWrapper = styled.div`

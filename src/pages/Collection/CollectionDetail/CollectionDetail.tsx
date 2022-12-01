@@ -3,7 +3,7 @@ import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
 import { Heading } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
-import { Picture, Avatar } from 'components';
+import { Avatar, Picture } from 'components';
 import { CollapsableText, Icon, Link, Text } from 'components/UI';
 import { isTokenOwner, toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
 import { CollectionStatisticsBlock } from './CollectionStaticticsBlock';
@@ -16,12 +16,14 @@ import { Primary500, Primary600 } from 'styles/colors';
 import CollectionBanner from 'static/images/banner.svg';
 import config from 'config';
 import { PagePaper } from 'components/PagePaper/PagePaper';
+import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';
 
 interface IProps {
   collection?: CollectionInfoWithSchema
 }
 
 export const CollectionDetail: FC<IProps> = ({ collection }) => {
+  const deviceSize = useDeviceSize();
   const { selectedAccount } = useAccounts();
 
   const { chainData, currentChainId } = useApi();
@@ -55,14 +57,13 @@ export const CollectionDetail: FC<IProps> = ({ collection }) => {
     <CollectionDetailWrapper>
       <CollectionCardWrapper >
         <PictureWrapper>
-          <Picture alt={name || ''} src={schema?.coverPicture.fullUrl || ''} size={160} />
+          <Picture alt={name || ''} src={schema?.coverPicture.fullUrl || ''} size={deviceSize <= DeviceSize.md ? 128 : 160} />
         </PictureWrapper>
         <CollectionInfoWrapper>
           <div>
             <Heading size='1' >{name}</Heading>
             <Row>
               <CollapsableText size='l' >{description}</CollapsableText>
-
             </Row>
           </div>
           <Row>
@@ -116,12 +117,26 @@ const CollectionDetailPaper = styled(PagePaper)`
   padding: 0;
   overflow: hidden;
   border-radius: 8px;
-  
+  @media (max-width: 1279px) {
+    flex-direction: column;
+    margin: -32px -24px 0;
+    border-radius: 0;
+  }
 `;
 
 const BannerWrapper = styled.div`
   display: flex;
   justify-content: center;
+  @media (max-width: 1023px) {
+    img {
+      height: 180px;  
+    }
+  }
+  @media (max-width: 567px) {
+    img {
+      height: 120px;  
+    }
+  }
 `;
 
 const CollectionDetailWrapper = styled.div`
@@ -129,11 +144,22 @@ const CollectionDetailWrapper = styled.div`
   justify-content: space-between;
   padding: calc(var(--gap) * 1.5) calc(var(--gap) * 2) calc(var(--gap) * 2);
   position: relative;
+
+  @media (max-width: 1439px) {
+    flex-direction: column;
+  }
+  @media (max-width: 1279px) {
+    padding: calc(var(--gap) * 1.5) calc(var(--gap) * 1.5) calc(var(--gap) * 2);
+  }
+  
 `;
 
 const CollectionCardWrapper = styled.div`
   display: flex;
-  gap: calc(var(--gap) * 2);
+  gap: calc(var(--gap) * 1.5);
+  @media (max-width: 1023px) {
+    flex-direction: column;
+  }
 `;
 
 const PictureWrapper = styled.div`
@@ -143,6 +169,27 @@ const PictureWrapper = styled.div`
   border: 4px solid var(--color-additional-light);
   width: 160px;
   height: 160px;
+  background: var(--color-additional-light);
+  text-align: center;
+
+  @media (max-width: 1023px) {
+    width: 128px;
+    height: 128px;
+    margin-top: -124px;
+    &>div.picture {
+      height: 128px;
+    }
+  }
+
+  @media (max-width: 567px) {
+    width: 96px;
+    height: 96px;
+    margin-top: -80px;
+    &>div.picture {
+      height: 96px;
+    }
+  }
+  
 `;
 
 const CollectionInfoWrapper = styled.div`
@@ -167,6 +214,28 @@ const RightSidebar = styled.div`
   align-items: flex-end;
   gap: calc(var(--gap) / 2);
   padding-top: 68px;
+
+  @media (max-width: 1439px) {
+    padding-top: calc(var(--gap) * 2);
+    align-items: flex-start;
+    margin-left: 192px;
+    &>div:last-child {
+      display: flex;
+      align-items: baseline;
+      gap: var(--gap);
+    }
+  }
+
+  @media (max-width: 1023px) {
+    margin-left: 0;
+  }
+
+  @media (max-width: 567px) {
+    &>div:last-child {
+      flex-direction: column;
+      gap: calc(var(--gap) / 2);
+    }
+  }
 `;
 
 const LinksWrapper = styled.div`
@@ -174,6 +243,9 @@ const LinksWrapper = styled.div`
   gap: var(--gap);
   justify-content: flex-end;
   margin-bottom: calc(var(--gap) * 1.5);
+  @media (max-width: 1439px) {
+    margin-bottom: calc(var(--gap) / 2);
+  }
 `;
 
 const Row = styled.div`

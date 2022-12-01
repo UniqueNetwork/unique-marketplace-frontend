@@ -6,16 +6,20 @@ import styled from 'styled-components';
 export const CollectionStatisticsBlock = () => {
   return <CollectionStatisticsBlockWrapper>
     <div>
-      <Heading size={'4'}>10 000</Heading>
+      <Heading size={'4'}>10K</Heading>
       <Text size={'m'} color='grey-600'>items</Text>
     </div>
     <div>
-      <Heading size={'4'}>77.1%</Heading>
+      <Heading size={'4'}>8483 (77.1%)</Heading>
       <Text size={'m'} color='grey-600'>listed NFTs</Text>
     </div>
     <div>
       <Heading size={'4'}>1 KSM</Heading>
       <Text size={'m'} color='grey-600'>floor price</Text>
+    </div>
+    <div>
+      <Heading size={'4'}>10 KSM</Heading>
+      <Text size={'m'} color='grey-600'>total volume</Text>
     </div>
     <div>
       <Heading size={'4'}>7 582</Heading>
@@ -46,6 +50,19 @@ const CollectionStatisticsBlockWrapper = styled.div`
   }
   & > div:last-child {
     border: none;
+  }
+
+  @media (max-width: 1024px) {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    width: max-content;
+    & > div {
+      border-right: none;
+    }
+  }
+
+  @media (max-width: 567px) {
+    grid-template-columns: 1fr 1fr;
   }
   
 `;

@@ -44,7 +44,7 @@ export const useOfferSubscription = ({ offer, onPlaceBid, onAuctionStopped, onAu
       socket.off('auctionClosed');
       socket.off('bidPlaced');
     };
-  }, [socket, offer]);
+  }, [socket, offer.tokenId]);
 
   return {};
 };

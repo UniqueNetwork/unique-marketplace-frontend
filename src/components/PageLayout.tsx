@@ -67,7 +67,7 @@ const LayoutStyled = styled.div<{hasFooterSpacing: boolean}>`
   .unique-layout {
     background: var(--color-layout-background);
 
-    @media (max-width: 1024px) {
+    @media (max-width: 1279px) {
       background: var(--color-additional-light);
     }
 
