@@ -5,6 +5,7 @@ import { TAuctionBidProps } from '../../pages/Token/Modals/types';
 import { InternalStage, StageStatus } from '../../types/StagesTypes';
 import useStages from '../useStages';
 import { useAccounts } from '../useAccounts';
+import { BN } from '@polkadot/util';
 
 export const useAuctionBidStages = (collectionId: number, tokenId: number) => {
   const { api, baseURL } = useApi();
@@ -18,7 +19,7 @@ export const useAuctionBidStages = (collectionId: number, tokenId: number) => {
       action: (params) =>
         marketApi?.transferBidBalance(
           params.txParams.accountAddress,
-          params.txParams.value,
+          new BN(params.txParams.value),
           { ...params.options, send: ({ signature, signerPayloadJSON }) => placeBidRequest(baseURL, { signerPayloadJSON, signature, collectionId, tokenId }) }
         )
     }

@@ -95,7 +95,7 @@ export class UniqueSDKMarketController implements UniqueController {
     if ((new BN(availableBalance.raw)).lt(needed)) {
       throw new Error(`Your KSM balance is too low: ${availableBalance.formatted} KSM. You need at least: ${formatKsm(needed, this.kusamaDecimals, this.minPrice)} KSM`);
     }
-    await this.transferBalance(address, this.escrowAddress, formatKsm(needed, this.kusamaDecimals, 0), options);
+    await this.transferBalance(address, this.escrowAddress, needed, options);
 
     await repeatCheckForTransactionFinish(async () => {
         return price.lte(await this.getUserDeposit(address));
@@ -378,12 +378,12 @@ export class UniqueSDKMarketController implements UniqueController {
   }
 
   // account
-  async transferBalance(address: Address, destination: string, amount: string, options: TransactionOptions): Promise<void> {
+  async transferBalance(address: Address, destination: string, amount: BN, options: TransactionOptions): Promise<void> {
     if (!this.kusamaSdk) throw new Error('Controller isn\'t ready');
     const unsignedTxPayload = await this.kusamaSdk.extrinsics.build({
       section: 'balances',
       method: 'transfer',
-      args: [destination, Number(amount) * Math.pow(10, this.kusamaDecimals)],
+      args: [destination, amount.toString()],
       address,
       isImmortal: false
     });
@@ -403,12 +403,12 @@ export class UniqueSDKMarketController implements UniqueController {
     }
   }
 
-  async transferBidBalance(address: Address, amount: string, options: TransactionOptions): Promise<void> {
+  async transferBidBalance(address: Address, amount: BN, options: TransactionOptions): Promise<void> {
     if (!this.kusamaSdk) throw new Error('Controller isn\'t ready');
     const unsignedTxPayload = await this.kusamaSdk.extrinsics.build({
       section: 'balances',
       method: 'transferKeepAlive',
-      args: [this.auctionAddress, Number(amount) * Math.pow(10, this.kusamaDecimals)],
+      args: [this.auctionAddress, amount.toString()],
       address,
       isImmortal: false
     });
