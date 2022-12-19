@@ -11,6 +11,7 @@ import { Codec } from '@polkadot/types/types';
 import { useApi } from '../hooks/useApi';
 import { getWithdrawBids } from '../api/restApi/auction/auction';
 import { Unsubcall } from '@polkadot/extension-inject/types';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 export const DefaultAccountKey = 'unique_market_account_address';
 
@@ -73,7 +74,9 @@ const AccountWrapper: FC = ({ children }) => {
       }
     }
 
-    return (await web3Accounts()).map((account) => ({ ...account, signerType: AccountSigner.extension })) as Account[];
+    return (await web3Accounts())
+    .filter((account) => !isEthereumAddress(account.address))
+    .map((account) => ({ ...account, signerType: AccountSigner.extension })) as Account[];
   }, []);
 
   const getLocalAccounts = useCallback(() => {
