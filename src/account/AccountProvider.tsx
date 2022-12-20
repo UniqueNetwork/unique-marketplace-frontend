@@ -74,9 +74,7 @@ const AccountWrapper: FC = ({ children }) => {
       }
     }
 
-    return (await web3Accounts())
-    .filter((account) => !isEthereumAddress(account.address))
-    .map((account) => ({ ...account, signerType: AccountSigner.extension })) as Account[];
+    return (await web3Accounts()).map((account) => ({ ...account, signerType: AccountSigner.extension })) as Account[];
   }, []);
 
   const getLocalAccounts = useCallback(() => {
@@ -93,7 +91,7 @@ const AccountWrapper: FC = ({ children }) => {
 
     const allAccounts: Account[] = [...extensionAccounts, ...localAccounts];
 
-    return allAccounts;
+    return allAccounts.filter((account) => !isEthereumAddress(account.address));
   }, [getExtensionAccounts, getLocalAccounts]);
 
   const getAccountBalance = useCallback(async (account: Account) => {
