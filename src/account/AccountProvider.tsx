@@ -79,9 +79,7 @@ const AccountWrapper: FC = ({ children }) => {
 
   const getLocalAccounts = useCallback(() => {
     const keyringAccounts = keyring.getAccounts();
-    return keyringAccounts
-    .filter((account) => !isEthereumAddress(account.address))
-    .map((account) => ({ address: account.address, meta: account.meta, signerType: AccountSigner.local } as Account));
+    return keyringAccounts.map((account) => ({ address: account.address, meta: account.meta, signerType: AccountSigner.local } as Account));
   }, []);
 
   const getAccounts = useCallback(async () => {
