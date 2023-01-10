@@ -287,7 +287,7 @@ type TransferFundsStagesModalProps = {
 const TransferFundsStagesModal: FC<TransferFundsStagesModalProps & TTransferFunds> = ({ isVisible, onFinish, sender, amount, recipient, testid }) => {
   const { stages, status, initiate } = useTransferFundsStages(sender);
   const { info } = useNotifications();
-  useEffect(() => { initiate({ sender, recipient, amount }); }, [sender, recipient, amount]);
+  useEffect(() => { initiate({ sender, recipient, amount: fromStringToBnString(amount) }); }, [sender, recipient, amount]);
 
   useEffect(() => {
     if (status === StageStatus.success) {

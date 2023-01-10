@@ -5,6 +5,7 @@ import { InternalStage, StageStatus } from '../../types/StagesTypes';
 import useStages from '../useStages';
 import { useAccounts } from '../useAccounts';
 import { UnsignedTxPayload } from '@unique-nft/substrate-client/types';
+import { BN } from '@polkadot/util';
 
 export const useTransferFundsStages = (accountAddress: string) => {
   const { api } = useApi();
@@ -14,7 +15,7 @@ export const useTransferFundsStages = (accountAddress: string) => {
     title: 'Transfer funds',
     description: '',
     status: StageStatus.default,
-    action: (params) => marketApi?.transferBalance(params.txParams.sender, params.txParams?.recipient || '', params.txParams?.amount, params.options)
+    action: (params) => marketApi?.transferBalance(params.txParams.sender, params.txParams?.recipient || '', new BN(params.txParams?.amount), params.options)
   }], [marketApi]) as InternalStage<TTransferFunds>[];
 
   const sign = useCallback(async (unsignedTxPayload: UnsignedTxPayload) => {
