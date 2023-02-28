@@ -12,6 +12,7 @@ import { Accounts, ProviderClass } from '@unique-nft/accounts';
 import { PolkadotProvider, PolkadotAccount } from '@unique-nft/accounts/polkadot';
 import { KeyringLocalProvider, KeyringLocalAccount } from '@unique-nft/accounts/keyring-local';
 import { Account } from '@unique-nft/accounts/types';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 export const DefaultAccountKey = 'unique_market_account_address';
 
@@ -66,7 +67,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
         account.address = account.getAddress();
         account.isLocal = account instanceof KeyringLocalAccount;
         return account;
-      }) || [];
+      }).filter((account) => !isEthereumAddress(account.address)) || [];
 
       const defaultAccountAddress = localStorage.getItem(DefaultAccountKey);
       const defaultAccount = allAccounts.find((item) => item.address === defaultAccountAddress) || allAccounts[0];
