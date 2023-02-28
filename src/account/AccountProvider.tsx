@@ -12,7 +12,6 @@ import { Accounts, ProviderClass } from '@unique-nft/accounts';
 import { PolkadotProvider, PolkadotAccount } from '@unique-nft/accounts/polkadot';
 import { KeyringLocalProvider, KeyringLocalAccount } from '@unique-nft/accounts/keyring-local';
 import { Account } from '@unique-nft/accounts/types';
-import { isEthereumAddress } from '@polkadot/util-crypto';
 
 export const DefaultAccountKey = 'unique_market_account_address';
 
@@ -113,56 +112,6 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
     setIsSignModalVisible(false);
     onSignCallback.current && onSignCallback.current(password);
   }, []);
-
-  const getAccounts = useCallback(async () => {
-    // this call fires up the authorization popup
-    const extensionAccounts = await getExtensionAccounts();
-    const localAccounts = getLocalAccounts();
-
-    const allAccounts: Account[] = [...extensionAccounts, ...localAccounts];
-
-    return allAccounts.filter((account) => !isEthereumAddress(account.address));
-  }, [getExtensionAccounts, getLocalAccounts]);
-
-  const getAccountBalance = useCallback(async (account: Account) => {
-    // const balances = await rpcClient?.rawKusamaRpcApi?.derive.balances?.all(account.address);
-    const balances = await api?.market?.getAccountBalance(account.address);
-    return new BN(balances?.freeBalance?.raw || 0);
-  }, [api?.market]);
-
-  const getAccountsBalances = useCallback(async (accounts: Account[]) => Promise.all(accounts.map(async (account: Account) => ({
-    ...account,
-    balance: {
-      KSM: await getAccountBalance(account) // TODO: it's possible to subscribe on balances via rpc
-    }
-  } as Account))), [getAccountBalance]);
-
-  const getAccountsWhiteListStatus = useCallback((accounts: Account[]) => {
-    if (!api?.market) return accounts;
-    return Promise.all(accounts.map(async (account: Account) => ({
-      ...account,
-      isOnWhiteList: await api?.market?.checkWhiteListed(account.address)
-    })));
-  }, [api?.market]);
-
-  const unsubscribesBalancesChanges = useRef<Record<string, Codec>>({});
-  const subscribeBalancesChanges = useCallback(async (accounts: Account[]) => {
-    if (!kusamaSdk?.api) return;
-
-    const unsubscribes = await Promise.all(accounts.map(async (account) => {
-      const unsubscribe = await kusamaSdk.api.query.system.account(account.address, ({ data: { free } }: TQueryAccountResponse) => {
-        if (!account.balance?.KSM || !free.sub(account.balance.KSM).isZero()) {
-          setAccounts((accounts) => accounts.map((_account: Account) => ({
-            ..._account,
-            balance: account.address === _account.address ? { KSM: free } : _account.balance
-          })));
-        }
-      });
-      return { [account.address]: unsubscribe };
-    }));
-
-    unsubscribesBalancesChanges.current = unsubscribes.reduce<Record<string, Codec>>((acc, item) => ({ ...acc, ...item }), {});
-  }, [kusamaSdk, setAccounts]);
 
   const getAccountDeposit = useCallback(async (account: Account) => {
     return {
