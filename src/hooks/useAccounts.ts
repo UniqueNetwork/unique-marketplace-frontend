@@ -7,7 +7,7 @@ import AccountContext from 'account/AccountContext';
 import { getSuri, PairType } from 'utils/seedUtils';
 
 export const useAccounts = () => {
-  const { api, kusamaSdk } = useApi();
+  const { api, kusamaSdk, chainData } = useApi();
   const {
     accounts,
     selectedAccount,
@@ -27,7 +27,7 @@ export const useAccounts = () => {
   }, [accounts, setSelectedAccount, selectedAccount, api]);
 
   const addLocalAccount = useCallback((seed: string, derivePath: string, name: string, password: string, pairType: PairType) => {
-    const options = { genesisHash: kusamaSdk?.api.genesisHash.toString(), isHardware: false, name: name.trim(), tags: [] };
+    const options = { genesisHash: chainData?.genesisHash, isHardware: false, name: name.trim(), tags: [] };
     keyring.addUri(getSuri(seed, derivePath, pairType), password, options, pairType as KeypairType);
   }, [kusamaSdk]);
 

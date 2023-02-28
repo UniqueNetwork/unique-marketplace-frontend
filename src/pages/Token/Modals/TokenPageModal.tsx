@@ -11,11 +11,12 @@ import { AuctionModal } from './AuctionModal';
 import { WithdrawBidStagesModal } from './WithdrawBidModal';
 import { CancelAuctionStagesModal } from './CancelAuctionModal';
 import { Modal } from 'components/UI';
+import { TokenByIdResponse, CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 
 export type TTokenPageModalProps = {
   offer?: Offer
-  token?: TokenByIdResult
-  collection?: CollectionInfoWithSchema
+  token?: TokenByIdResponse
+  collection?: CollectionInfoWithSchemaResponse | null
   // once button is clicked (sell/bid/etc) -> we will change marketType for modal and therefore this component decides what to show and how
   marketType: MarketType
   onClose(): void
@@ -24,8 +25,8 @@ export type TTokenPageModalProps = {
 }
 
 export type TTokenPageModalBodyProps = {
-  token?: TokenByIdResult
-  collection?: CollectionInfoWithSchema
+  token?: TokenByIdResponse
+  collection?: CollectionInfoWithSchemaResponse | null
   offer?: Offer
   onFinish(): void // TODO: make a type, in future we would definitly wan't to pass smth like success/error/error.message
   setIsClosable(value: boolean): void

@@ -1,7 +1,6 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import { Text } from '@unique-nft/ui-kit';
 import { Checkbox } from 'components/UI';
-import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
 import styled from 'styled-components';
 
 import Accordion from 'components/Accordion/Accordion';
@@ -13,6 +12,7 @@ import { CollectionCover } from 'components/CollectionCover/CollectionCover';
 import { Attribute, AttributeCount } from 'api/restApi/offers/types';
 import { getAttributesCountFromTokens, getAttributesFromTokens } from './utils/attributes';
 import { MixedTokenAndOffer } from '../NFTPage';
+import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 
 interface CollectionsFilterProps {
   value?: { collections?: number[], attributes?: { key: string, attribute: string }[], attributeCounts?: number[] } | null
@@ -22,7 +22,7 @@ interface CollectionsFilterProps {
   testid: string
   featuredTokens: MixedTokenAndOffer[]
   tokens: MixedTokenAndOffer[]
-  collections: CollectionInfoWithSchema[]
+  collections: CollectionInfoWithSchemaResponse[]
   isFetchingTokens: boolean
   featuredTokensForAttributeCounts: MixedTokenAndOffer[]
 }

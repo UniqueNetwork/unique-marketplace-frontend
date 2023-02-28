@@ -1,11 +1,6 @@
 import { BN } from '@polkadot/util';
-import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
-import { SignerPayloadJSON, UnsignedTxPayload } from '@unique-nft/substrate-client/types';
+import { SignerPayloadJSON } from '@unique-nft/substrate-client/types';
 import { Account } from '@unique-nft/accounts/types';
-
-export type TokenId = {
-  toNumber(): number
-};
 
 export interface UniqueController {
   setNetwork(options: unknown): void
@@ -33,6 +28,19 @@ export interface NFTCollectionSponsorship {
 export type AttributesDecoded = {
   [key: string]: string | string[]
 }
+
+export type DecodedInfixOrUrlOrCidAndHash = ({
+  urlInfix?: string;
+  hash?: string | null;
+} | {
+  url?: string;
+  hash?: string | null;
+} | {
+  ipfsCid?: string;
+  hash?: string | null;
+}) & {
+  fullUrl?: string | null;
+};
 
 export type VideoAttribute = DecodedInfixOrUrlOrCidAndHash | undefined;
 

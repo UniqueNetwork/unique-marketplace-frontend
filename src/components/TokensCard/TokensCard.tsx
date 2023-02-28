@@ -1,6 +1,5 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { Loader, Text } from '@unique-nft/ui-kit';
-import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 import { generatePath, Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Icon, Link as UILink } from 'components/UI';
@@ -16,9 +15,10 @@ import { TokensMedia } from './TokensMedia';
 import { countNestedChildren, stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
 import { useCollections } from 'hooks/useCollections';
 import BundleItemsCount from '../BundleItemsCount/BundleItemsCount';
+import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
 
 export type TTokensCard = {
-  token?: Omit<TokenByIdResult, 'collection'>
+  token?: Omit<TokenByIdResponse, 'collection' | 'nestingParentToken'>
   offer?: Partial<Offer>
   tokenId?: number
   collectionId?: number
@@ -27,8 +27,8 @@ export type TTokensCard = {
 };
 
 export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, testid, ...props }) => {
-  const [token, setToken] = useState<Omit<TokenByIdResult, 'collection'> | undefined>(props.token);
-  const [collection, setCollection] = useState<(CollectionInfoWithSchema) | undefined>();
+  const [token, setToken] = useState<Omit<TokenByIdResponse, 'collection' | 'nestingParentToken'> | undefined>(props.token);
+  const [collection, setCollection] = useState<(CollectionInfoWithSchemaResponse) | undefined>();
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isBundleState, setIsBundleState] = useState<boolean>();
   const [tokensCount, setTokensCount] = useState<number>();

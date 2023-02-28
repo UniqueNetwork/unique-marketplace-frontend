@@ -27,21 +27,21 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
 
   const unsubscribesBalancesChanges = useRef<Record<string, Codec>>({});
   const subscribeBalancesChanges = useCallback(async (accounts: Account[]) => {
-    if (!kusamaSdk?.api) return;
-
-    const unsubscribes = await Promise.all(accounts.map(async (account) => {
-      const unsubscribe = await kusamaSdk.api.query.system.account(account.getAddress(), ({ data: { free } }: TQueryAccountResponse) => {
-        if (!account.balance?.KSM || !free.sub(account.balance.KSM).isZero()) {
-          setAccounts((accounts) => accounts.map<Account>((_account) => {
-            _account.balance = account.getAddress() === _account.getAddress() ? { KSM: free } : _account.balance;
-            return _account;
-          }));
-        }
-      });
-      return { [account.getAddress()]: unsubscribe };
-    }));
-
-    unsubscribesBalancesChanges.current = unsubscribes.reduce<Record<string, Codec>>((acc, item) => ({ ...acc, ...item }), {});
+    // if (!kusamaSdk?.api) return;
+    //
+    // const unsubscribes = await Promise.all(accounts.map(async (account) => {
+    //   const unsubscribe = await kusamaSdk.api.query.system.account(account.getAddress(), ({ data: { free } }: TQueryAccountResponse) => {
+    //     if (!account.balance?.KSM || !free.sub(account.balance.KSM).isZero()) {
+    //       setAccounts((accounts) => accounts.map<Account>((_account) => {
+    //         _account.balance = account.getAddress() === _account.getAddress() ? { KSM: free } : _account.balance;
+    //         return _account;
+    //       }));
+    //     }
+    //   });
+    //   return { [account.getAddress()]: unsubscribe };
+    // }));
+    //
+    // unsubscribesBalancesChanges.current = unsubscribes.reduce<Record<string, Codec>>((acc, item) => ({ ...acc, ...item }), {});
   }, [kusamaSdk, setAccounts]);
 
   const getAccountsWhiteListStatus = useCallback((accounts: Account[]) => {
@@ -53,8 +53,8 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
   }, [api?.market]);
 
   useEffect(() => {
+    if (!api?.market) return;
     setIsLoading(true);
-    if (!kusamaSdk?.api || !api?.market) return;
     void (async () => {
       await _accounts.addProvider<ProviderClass<any>>(KeyringLocalProvider, { passwordCallback: showSignDialog });
       await _accounts.addProvider<ProviderClass<any>>(PolkadotProvider);
@@ -76,11 +76,12 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
       changeAccount(defaultAccount);
 
       setAccounts(await getAccountsWhiteListStatus(allAccounts));
+
       setIsLoading(false);
 
-      await subscribeBalancesChanges(allAccounts);
+      // await subscribeBalancesChanges(allAccounts);
     })();
-  }, [api?.market, kusamaSdk?.api, subscribeBalancesChanges, getAccountsWhiteListStatus]);
+  }, [api?.market, subscribeBalancesChanges, getAccountsWhiteListStatus]);
 
   const changeAccount = useCallback((account: Account) => {
     localStorage.setItem(DefaultAccountKey, account.getAddress());
@@ -149,14 +150,16 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
 
   const updateCurrentAccountDeposit = useCallback(async () => {
     if (!selectedAccount) return Promise.resolve();
+    const balance = await api?.market?.getAccountBalance(selectedAccount.getAddress());
     const deposits = await getAccountDeposit(selectedAccount);
     setAccounts((accounts) => accounts.map((account) => {
       if (account.address === selectedAccount.address) {
         account.deposits = deposits;
+        account.balance = { KSM: new BN(balance?.freeBalance?.raw || 0) };
       }
       return account;
     }));
-  }, [selectedAccount]);
+  }, [api?.market, selectedAccount]);
 
   useEffect(() => {
     void updateCurrentAccountDeposit();

@@ -1,9 +1,5 @@
-import { Client } from '@unique-nft/substrate-client';
-// eslint-disable-next-line import/no-duplicates
-import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
+import { Client, CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 import { TransactionOptions, UniqueController } from './types';
-// eslint-disable-next-line import/no-duplicates
-import '@unique-nft/substrate-client/tokens';
 
 export class UniqueSDKCollectionController implements UniqueController {
   private sdk: Client | undefined;
@@ -21,18 +17,18 @@ export class UniqueSDKCollectionController implements UniqueController {
     if (!unsignedTxPayload) throw new Error('Transaction build error');
     const { signature } = await this.sdk.collections.confirmSponsorship.sign(unsignedTxPayload, { signer });
     if (!signature) throw new Error('Signing failed');
-    await this.sdk.extrinsics.submitWaitCompleted({
+    await this.sdk.extrinsics.submit({
       signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });
   }
 
-  async getCollection(collectionId: number): Promise<CollectionInfoWithSchema | null> {
+  async getCollection(collectionId: number): Promise<CollectionInfoWithSchemaResponse | null> {
     return await this.sdk?.collections.get({ collectionId }) || null;
   }
 
-  async getFeaturedCollections(): Promise<CollectionInfoWithSchema[]> {
-    const collections: Array<CollectionInfoWithSchema> = [];
+  async getFeaturedCollections(): Promise<CollectionInfoWithSchemaResponse[]> {
+    const collections: Array<CollectionInfoWithSchemaResponse> = [];
     for (let i = 0; i < this.collectionIds.length; i++) {
       const collectionInf = await this.getCollection(this.collectionIds[i]);
 
@@ -53,7 +49,7 @@ export class UniqueSDKCollectionController implements UniqueController {
     if (!unsignedTxPayload) throw new Error('Transaction build error');
     const { signature } = await this.sdk.collections.removeSponsorship.sign(unsignedTxPayload, { signer });
     if (!signature) throw new Error('Signing failed');
-    await this.sdk.extrinsics.submitWaitCompleted({
+    await this.sdk.extrinsics.submit({
       signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });

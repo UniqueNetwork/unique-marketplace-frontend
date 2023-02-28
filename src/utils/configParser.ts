@@ -6,6 +6,8 @@ export type Chain = {
   apiEndpoint: string;
   walletUrl: string;
   scanUrl: string;
+  sdkEndpoint: string
+  sdkRelayEndpoint: string
 }
 
 const findNetworkParamByName = (
@@ -43,6 +45,8 @@ export const getNetworkParams = (
     name: findNetworkParamByName(config, network, 'NAME'),
     walletUrl: findNetworkParamByName(config, network, 'WALLET_URL'),
     scanUrl: findNetworkParamByName(config, network, 'SCAN_URL'),
+    sdkEndpoint: findNetworkParamByName(config, network, 'SDK_API'),
+    sdkRelayEndpoint: findNetworkParamByName(config, network, 'SDK_RELAY_API'),
     network
   };
 

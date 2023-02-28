@@ -150,8 +150,8 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
 
   const onSend = useCallback(() => {
     if (isConfirmDisabled) return;
-    const recipient = typeof recipientAddress === 'string' ? recipientAddress : recipientAddress?.getAddress();
-    onFinish(sender?.getAddress() || '', recipient || '', amount.toString());
+    const recipient = typeof recipientAddress === 'string' ? recipientAddress : recipientAddress?.address;
+    onFinish(sender?.address || '', recipient || '', amount.toString());
   }, [sender, recipientAddress, amount, onFinish, isConfirmDisabled]);
 
   const onFilter = useCallback((input: string) => {

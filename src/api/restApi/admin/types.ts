@@ -1,4 +1,4 @@
-import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
+import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 
 export type LoginPayload = {
     account: string
@@ -14,7 +14,7 @@ export type SetCollectionTokensPayload = {
   tokens: string
 }
 
-export type CollectionData = CollectionInfoWithSchema & {
+export type CollectionData = CollectionInfoWithSchemaResponse & {
   allowedTokens?: string
   updatedAt?: string
   status?: string

@@ -4,7 +4,7 @@ import BN from 'bn.js';
 import { Text } from '@unique-nft/ui-kit';
 import { Select } from 'components/UI';
 import { BN_MAX_INTEGER } from '@polkadot/util';
-import { BoxedNumberWithDefault, LocalizedStringWithDefault, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
+import { BoxedNumberWithDefault, DecodedAttributes, LocalizedStringWithDefault } from '@unique-nft/substrate-client/tokens';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
 import { useOffers } from 'api/restApi/offers/offers';
@@ -25,15 +25,16 @@ import { MobileFilters } from './Filters/MobileFilter';
 import { Filters } from './Filters/Filters';
 import { MyTokensFilterState } from './Filters/types';
 import { countTokenAttributes } from './Filters/utils/attributes';
+import { DecodedAttributeDto, TokenByIdResponse } from '@unique-nft/sdk';
 
 type TOption = SelectOptionProps & {
   direction: 'asc' | 'desc';
-  field: keyof Pick<Offer & TokenByIdResult, 'price' | 'tokenId' | 'creationDate'>;
+  field: keyof Pick<Offer & TokenByIdResponse, 'price' | 'tokenId' | 'creationDate'>;
   id: string;
   title: string;
 }
 
-export type MixedTokenAndOffer = Omit<TokenByIdResult, 'collection'> & Partial<Offer>;
+export type MixedTokenAndOffer = Omit<TokenByIdResponse, 'collection' | 'nestingParentToken'> & Partial<Offer>;
 
 const sortingOptions: TOption[] = [
   {
@@ -93,7 +94,7 @@ export const NFTPage = () => {
   const [searchString, setSearchString] = useState<string>(searchParams.get('searchValue') || '');
   const [selectOption, setSelectOption] = useState<TOption>();
   const { selectedAccount, isLoading } = useAccounts();
-  const [tokens, setTokens] = useState<TokenByIdResult[]>([]);
+  const [tokens, setTokens] = useState<TokenByIdResponse[]>([]);
   const [isFetchingTokens, setIsFetchingTokens] = useState<boolean>(true);
   const deviceSize = useDeviceSize();
   const { collections } = useCollections();
@@ -193,7 +194,7 @@ export const NFTPage = () => {
       let filteredByAttributes = true;
       if (filterState?.attributes && filterState.attributes.length > 0) {
         filteredByAttributes = filterState?.attributes.every((attributeItem) => {
-          const attribute = Object.values(token.attributes || {}).find((attribute) => attribute.name._.toLowerCase() === attributeItem.key.toLowerCase());
+          const attribute = Object.values(token.attributes || {}).find((attribute) => attribute.name?._?.toLowerCase() === attributeItem.key.toLowerCase());
           return (attribute && attribute.isArray)
             ? (attribute.value as (BoxedNumberWithDefault | LocalizedStringWithDefault)[])
               .some((_attribute) => _attribute._ === attributeItem.attribute)
@@ -221,7 +222,7 @@ export const NFTPage = () => {
     let filteredByAttributeCounts = true;
     if (filterState?.attributeCounts && filterState.attributeCounts.length > 0) {
       filteredByAttributeCounts = filterState?.attributeCounts.some((attributeCount) => {
-        return countTokenAttributes(token.attributes) === attributeCount;
+        return countTokenAttributes(token.attributes as DecodedAttributes) === attributeCount;
       });
     }
     return filteredByAttributeCounts;
@@ -233,7 +234,7 @@ export const NFTPage = () => {
         properties: [],
         id: offer.tokenId,
         image: stringToDecodedInfixOrUrlOrCidAndHash(offer.tokenDescription?.image),
-        attributes: offer.tokenDescription?.attributes,
+        attributes: offer.tokenDescription?.attributes as DecodedAttributeDto[],
         video: stringToDecodedInfixOrUrlOrCidAndHash(offer.tokenDescription?.video),
         owner: offer.seller,
         ...offer

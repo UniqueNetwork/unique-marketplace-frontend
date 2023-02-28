@@ -10,6 +10,7 @@ import { useAccounts } from 'hooks/useAccounts';
 import { shortcutText } from 'utils/textUtils';
 import { Picture } from '..';
 import { AdditionalDark, AdditionalLight } from 'styles/colors';
+import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 
 export type TCollectionCard = {
   collection: CollectionData
@@ -31,7 +32,7 @@ export const CollectionCard: FC<TCollectionCard> = ({
   const { api } = useApi();
   const { selectedAccount } = useAccounts();
   const collectionApi = api?.collection;
-  const [collectionDetails, setCollectionDetails] = useState<CollectionInfoWithSchema | null>();
+  const [collectionDetails, setCollectionDetails] = useState<CollectionInfoWithSchemaResponse | null>();
   useEffect(() => {
     if (!collection?.id) return;
     (async () => {

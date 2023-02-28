@@ -1,12 +1,13 @@
 import React, { FC } from 'react';
 import styled from 'styled-components';
-import { Heading, Text, TooltipAlign } from '@unique-nft/ui-kit';
+import { Heading, Text } from '@unique-nft/ui-kit';
 import { Trait } from './Trait';
 import { DecodedAttributes } from '@unique-nft/substrate-client/tokens';
 import IconWithHint from '../../../components/IconWithHint/IconWithHint';
+import { DecodedAttributeDto } from '@unique-nft/sdk';
 
 interface IProps {
-  attributes: DecodedAttributes;
+  attributes: DecodedAttributeDto[] | DecodedAttributes;
 }
 
 export const AttributesBlock: FC<IProps> = ({ attributes }: IProps) => {
@@ -41,7 +42,7 @@ export const AttributesBlock: FC<IProps> = ({ attributes }: IProps) => {
         return AttributesRow({
           attribute: typeof attribute.name === 'string' ? attribute.name : attribute?.name?._ || '',
           enumeration: Array.isArray(attribute.value)
-            ? attribute.value.map((item) => typeof item === 'string' ? item : item._.toString())
+            ? attribute.value.map((item: { _: string | number }) => item._.toString())
             : typeof attribute.value === 'string' ? attribute.value : attribute.value._.toString()
         });
       })}

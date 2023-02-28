@@ -17,13 +17,13 @@ import { useApi } from 'hooks/useApi';
 import Skeleton from 'components/Skeleton/Skeleton';
 import { TokenSkeleton } from 'components/Skeleton/TokenSkeleton';
 import ShareTokenModal from './ShareTokenModal';
-import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 import { stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
+import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
 
 interface IProps {
   children: ReactChild[]
-  token?: TokenByIdResult
-  collection?: CollectionInfoWithSchema
+  token?: TokenByIdResponse
+  collection: CollectionInfoWithSchemaResponse | null
   offer?: Offer
   isLoading?: boolean
   testid: string
