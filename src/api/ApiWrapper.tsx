@@ -84,7 +84,7 @@ const ApiWrapper = ({
     return sdkClient?.networks[currentChainId];
   }, [currentChainId, sdkClient?.isReady]);
 
-  const prefixes = useMemo(() => Object.values(sdkClient?.networks || []).map(({ prefix }) => prefix || 255),
+  const prefixes = useMemo(() => Object.values(sdkClient?.networks || []).map(({ uniqueProperties }) => uniqueProperties?.SS58Prefix || 255),
     [isRpcClientInitialized]
   );
 

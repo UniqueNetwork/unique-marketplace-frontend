@@ -8,7 +8,8 @@ export class SdkNetworkProvider {
   public error: Error | undefined;
   public sdkSet: SdkSet | undefined;
   public settings: Settings;
-  public prefix: number | undefined;
+  public uniqueProperties?: ChainPropertiesResponse;
+  public kusamaProperties?: ChainPropertiesResponse;
 
   constructor({ sdkEndpoint, sdkRelayEndpoint, settings }: { sdkEndpoint: string, sdkRelayEndpoint: string, settings: Settings }) {
     this.settings = settings;
@@ -18,8 +19,8 @@ export class SdkNetworkProvider {
     };
   }
 
-    this.prefix = this.sdkSet.unique.chainProperties().SS58Prefix;
-
-    this.isReady = true;
+  async init() {
+    this.uniqueProperties = await this.sdkSet?.unique.chain.properties();
+    this.kusamaProperties = await this.sdkSet?.kusama.chain.properties();
   }
 }

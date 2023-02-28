@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
+import { BN } from '@polkadot/util';
 import { useApi } from '../useApi';
 import { placeBidRequest } from '../../api/restApi/auction/auction';
 import { TAuctionBidProps } from '../../pages/Token/Modals/types';
 import { InternalStage, StageStatus } from '../../types/StagesTypes';
 import useStages from '../useStages';
 import { useAccounts } from '../useAccounts';
-import { BN } from '@polkadot/util';
 
 export const useAuctionBidStages = (collectionId: number, tokenId: number) => {
   const { api, baseURL } = useApi();
@@ -18,9 +18,12 @@ export const useAuctionBidStages = (collectionId: number, tokenId: number) => {
       status: StageStatus.default,
       action: ({ txParams, options }) =>
         marketApi?.transferBidBalance(
-          params.txParams.accountAddress,
-          new BN(params.txParams.value),
-          { ...params.options, send: ({ signature, signerPayloadJSON }) => placeBidRequest(baseURL, { signerPayloadJSON, signature, collectionId, tokenId }) }
+          txParams.accountAddress,
+          new BN(txParams.value),
+          { ...options,
+            send: ({ signature, signerPayloadJSON }) => placeBidRequest(baseURL, {
+              signerPayloadJSON, signature, collectionId, tokenId
+            }) }
         )
     }
   ], [baseURL, marketApi, collectionId, tokenId, selectedAccount]);

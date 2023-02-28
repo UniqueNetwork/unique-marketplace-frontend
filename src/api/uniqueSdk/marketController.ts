@@ -388,14 +388,13 @@ export class UniqueSDKMarketController implements UniqueController {
   }
 
   // account
-  async transferBalance(address: Address, destination: string, amount: BN, options: TransactionOptions): Promise<void> {
+  async transferBalance(address: Address, destination: string, amount: BN, { signer, send }: TransactionOptions): Promise<void> {
     if (!this.kusamaSdk) throw new Error('Controller isn\'t ready');
     const unsignedTxPayload = await this.kusamaSdk.extrinsics.build({
       section: 'balances',
       method: 'transfer',
       args: [destination, amount.toString()],
-      address,
-      isImmortal: false
+      address
     });
 
     const { signature } = await this.kusamaSdk.extrinsics.sign(unsignedTxPayload, signer);
@@ -413,14 +412,13 @@ export class UniqueSDKMarketController implements UniqueController {
     }
   }
 
-  async transferBidBalance(address: Address, amount: BN, options: TransactionOptions): Promise<void> {
+  async transferBidBalance(address: Address, amount: BN, { signer, send }: TransactionOptions): Promise<void> {
     if (!this.kusamaSdk) throw new Error('Controller isn\'t ready');
     const unsignedTxPayload = await this.kusamaSdk.extrinsics.build({
       section: 'balances',
       method: 'transferKeepAlive',
       args: [this.auctionAddress, amount.toString()],
-      address,
-      isImmortal: false
+      address
     });
 
     const { signature } = await this.kusamaSdk.extrinsics.sign(unsignedTxPayload, signer);
