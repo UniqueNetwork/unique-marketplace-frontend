@@ -10,6 +10,7 @@ import { useAccounts } from 'hooks/useAccounts';
 import { shortcutText } from 'utils/textUtils';
 import { Picture } from '..';
 import { AdditionalDark, AdditionalLight } from 'styles/colors';
+import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 
 export type TCollectionCard = {
   collection: CollectionData
@@ -31,7 +32,7 @@ export const CollectionCard: FC<TCollectionCard> = ({
   const { api } = useApi();
   const { selectedAccount } = useAccounts();
   const collectionApi = api?.collection;
-  const [collectionDetails, setCollectionDetails] = useState<CollectionInfoWithSchema | null>();
+  const [collectionDetails, setCollectionDetails] = useState<CollectionInfoWithSchemaResponse | null>();
   useEffect(() => {
     if (!collection?.id) return;
     (async () => {
@@ -40,19 +41,19 @@ export const CollectionCard: FC<TCollectionCard> = ({
   }, [collection, collectionApi]);
 
   const canConfirmSponsorships = useMemo(() => {
-    return selectedAccount?.address &&
+    return selectedAccount &&
       collectionDetails?.sponsorship?.address &&
       !collectionDetails?.sponsorship?.isConfirmed &&
-      compareEncodedAddresses(selectedAccount.address, collectionDetails.sponsorship.address);
-  }, [selectedAccount?.address, collectionDetails?.sponsorship?.isConfirmed, collectionDetails?.sponsorship?.address]);
+      compareEncodedAddresses(selectedAccount.getAddress(), collectionDetails.sponsorship.address);
+  }, [selectedAccount?.getAddress(), collectionDetails?.sponsorship?.isConfirmed, collectionDetails?.sponsorship?.address]);
 
   const canRemoveSponsorships = useMemo(() => {
-    return selectedAccount?.address &&
+    return selectedAccount &&
       collectionDetails?.sponsorship?.address &&
       collectionDetails?.sponsorship?.isConfirmed &&
-      (compareEncodedAddresses(selectedAccount.address, collectionDetails.sponsorship.address) ||
-        compareEncodedAddresses(selectedAccount.address, collection?.owner || ''));
-  }, [selectedAccount?.address, collectionDetails?.sponsorship?.isConfirmed, collectionDetails?.sponsorship?.address, collection?.owner]);
+      (compareEncodedAddresses(selectedAccount.getAddress(), collectionDetails.sponsorship.address) ||
+        compareEncodedAddresses(selectedAccount.getAddress(), collection?.owner || ''));
+  }, [selectedAccount?.getAddress(), collectionDetails?.sponsorship?.isConfirmed, collectionDetails?.sponsorship?.address, collection?.owner]);
 
   const hasSponsorship = useMemo(() => collectionDetails?.sponsorship && collectionDetails?.sponsorship?.isConfirmed, [collectionDetails]);
   const hasUnconfirmedSponsorship = useMemo(() => collectionDetails?.sponsorship && !collectionDetails?.sponsorship?.isConfirmed, [collectionDetails]);

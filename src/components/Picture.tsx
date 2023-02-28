@@ -1,9 +1,9 @@
 import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { AdditionalDark, AdditionalLight, BlueGrey100, BlueGrey200 } from '../styles/colors';
 import Skeleton from './Skeleton/Skeleton';
-import { VideoAttribute } from '../api/uniqueSdk/types';
+import { DecodedInfixOrUrlOrCidAndHash, VideoAttribute } from 'api/uniqueSdk/types';
 import styled from 'styled-components';
-import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
+import { DecodedVideoUri } from 'utils/helpers';
 
 interface VideoProps {
   autoplay?: boolean
@@ -17,7 +17,7 @@ interface PictureProps {
   alt: string
   testid?: string
   size?: number
-  video?: VideoAttribute
+  video?: DecodedVideoUri
   videoProps?: VideoProps
   isPlaying?: boolean
   badge?: string
@@ -71,7 +71,7 @@ export const Picture: FC<PictureProps> = ({
 
   const videoUrl = useMemo(() => {
     if (!video) return undefined;
-    const url = video.fullUrl || video.url;
+    const url = video.fullUrl;
     // if video doesn't have poster, we rewind video to 0.001 sec
     // because iphone doesn't render first frame as a poster https://developer.apple.com/forums/thread/129377
     if (!imageSrc) return `${url}#t=0.001`;
@@ -84,7 +84,7 @@ export const Picture: FC<PictureProps> = ({
     {!isLoading && video?.fullUrl &&
       <VideoStyled
         ref={videoRef}
-        src={videoUrl}
+        src={videoUrl || ''}
         poster={imageSrc || undefined}
         controls={controls}
         autoPlay={autoplay}
@@ -92,7 +92,7 @@ export const Picture: FC<PictureProps> = ({
         loop={loop}
         muted={muted}
         data-testid={`${testid}-video`}
-      ></VideoStyled>
+      />
     }
     {!isLoading && imageSrc && !video?.fullUrl &&
       <img

@@ -1,11 +1,6 @@
 import { BN } from '@polkadot/util';
-import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
-import { Account } from '../../account/AccountContext';
-import { SignerPayloadJSON, UnsignedTxPayload, Address } from '@unique-nft/substrate-client/types';
-
-export type TokenId = {
-  toNumber(): number
-};
+import { SignerPayloadJSON } from '@unique-nft/substrate-client/types';
+import { Account } from '@unique-nft/accounts/types';
 
 export interface UniqueController {
   setNetwork(options: unknown): void
@@ -19,10 +14,8 @@ export type TTransaction = {
 export type TSignMessage = { (message: string, account?: string | Account | undefined): Promise<`0x${string}`>; (arg0: string): any; }
 
 export type TransactionOptions = {
-  // this function will be called after transaction is created and awaited before proceeding
-  signer?: string
-  sign: (unsignedTxPayload: UnsignedTxPayload) => Promise<`0x${string}` | null>
-  signMessage?: (message: string) => Promise<`0x${string}` | null>
+  // the account that will sign the transaction
+  signer?: Account
   // if not provided, signed.send() will be called instead
   send?: (tx: TTransaction) => Promise<any | void>
 };
@@ -35,6 +28,19 @@ export interface NFTCollectionSponsorship {
 export type AttributesDecoded = {
   [key: string]: string | string[]
 }
+
+export type DecodedInfixOrUrlOrCidAndHash = ({
+  urlInfix?: string;
+  hash?: string | null;
+} | {
+  url?: string;
+  hash?: string | null;
+} | {
+  ipfsCid?: string;
+  hash?: string | null;
+}) & {
+  fullUrl?: string | null;
+};
 
 export type VideoAttribute = DecodedInfixOrUrlOrCidAndHash | undefined;
 

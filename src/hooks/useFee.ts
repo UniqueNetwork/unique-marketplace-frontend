@@ -19,7 +19,7 @@ export const useFee = (): UseFeeReturn => {
   const getKusamaFee = useCallback(async (recipient: string, value: BN) => {
     if (!selectedAccount || !api?.market) return;
     setFetchingKusamaFee(true);
-    const fee = await api.market.getKusamaFee(selectedAccount.address, recipient, value);
+    const fee = await api.market.getKusamaFee(selectedAccount.getAddress(), recipient, value);
     setKusamaFee(fee || '0');
     setFetchingKusamaFee(false);
     return fee || '0';

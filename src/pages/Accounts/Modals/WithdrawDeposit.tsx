@@ -12,7 +12,7 @@ import { useWithdrawDepositStages } from 'hooks/accountStages/useWithdrawDeposit
 import InlineTokenCard from 'components/TokensCard/InlineTokenCard';
 import { StageStatus } from 'types/StagesTypes';
 import { formatKusamaBalance } from '../../../utils/textUtils';
-import { TokenByIdResult } from '@unique-nft/substrate-client/tokens';
+import { TokenByIdResponse } from '@unique-nft/sdk';
 
 const tokenSymbol = 'KSM';
 
@@ -25,7 +25,7 @@ export type WithdrawDepositModalProps = {
 }
 
 type BidDeposit = TWithdrawBid & {
-  token?: TokenByIdResult
+  token?: TokenByIdResponse
 };
 
 export const WithdrawDepositModal: FC<WithdrawDepositModalProps> = ({ isVisible, address, onFinish, onClose, testid }) => {
@@ -82,7 +82,7 @@ export const WithdrawDepositAskModal: FC<WithdrawDepositAskModalProps> = ({ isVi
   const [isSelectedSponsorshipFee, setIsSelectedSponsorshipFee] = useState<boolean>(false);
 
   const account = useMemo(() =>
-    accounts.find((item) => item.address === address), [accounts, address]);
+    accounts.find((item) => item.getAddress() === address), [accounts, address]);
 
   const { bids, sponsorshipFee } = account?.deposits || { sponsorshipFee: new BN(0) };
   const { withdraw, leader } = bids || { withdraw: [], leader: [] };

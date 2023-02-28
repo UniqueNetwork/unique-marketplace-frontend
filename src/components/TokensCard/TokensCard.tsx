@@ -1,6 +1,5 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { Loader, Text } from '@unique-nft/ui-kit';
-import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 import { generatePath, Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Icon, Link as UILink } from 'components/UI';
@@ -16,9 +15,10 @@ import { TokensMedia } from './TokensMedia';
 import { countNestedChildren, stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
 import { useCollections } from 'hooks/useCollections';
 import BundleItemsCount from '../BundleItemsCount/BundleItemsCount';
+import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
 
 export type TTokensCard = {
-  token?: TokenByIdResult
+  token?: Omit<TokenByIdResponse, 'collection' | 'nestingParentToken'>
   offer?: Partial<Offer>
   tokenId?: number
   collectionId?: number
@@ -27,8 +27,8 @@ export type TTokensCard = {
 };
 
 export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, testid, ...props }) => {
-  const [token, setToken] = useState<TokenByIdResult | undefined>(props.token);
-  const [collection, setCollection] = useState<(CollectionInfoWithSchema) | undefined>();
+  const [token, setToken] = useState<Omit<TokenByIdResponse, 'collection' | 'nestingParentToken'> | undefined>(props.token);
+  const [collection, setCollection] = useState<(CollectionInfoWithSchemaResponse) | undefined>();
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isBundleState, setIsBundleState] = useState<boolean>();
   const [tokensCount, setTokensCount] = useState<number>();
@@ -93,7 +93,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
 
   const isBidder = useMemo(() => {
     if (!selectedAccount) return false;
-    return auction?.bids.some((bid) => compareEncodedAddresses(bid.bidderAddress, selectedAccount.address));
+    return auction?.bids.some((bid) => compareEncodedAddresses(bid.bidderAddress, selectedAccount.getAddress()));
   }, [auction, selectedAccount]);
 
   const topBid = useMemo(() => {
@@ -103,7 +103,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
 
   const isTopBidder = useMemo(() => {
     if (!selectedAccount || !isBidder || !topBid || !auction?.bids?.[0]?.bidderAddress) return false;
-    return compareEncodedAddresses(auction.bids[0].bidderAddress, selectedAccount.address);
+    return compareEncodedAddresses(auction.bids[0].bidderAddress, selectedAccount.getAddress());
   }, [isBidder, topBid, selectedAccount, auction]);
 
   const tokenPath = useMemo(() => generatePath('/:currentChainId/token/:collectionId/:tokenId', {

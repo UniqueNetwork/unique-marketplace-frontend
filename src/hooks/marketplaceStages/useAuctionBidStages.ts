@@ -9,23 +9,23 @@ import { BN } from '@polkadot/util';
 
 export const useAuctionBidStages = (collectionId: number, tokenId: number) => {
   const { api, baseURL } = useApi();
-  const { signPayloadJSON } = useAccounts();
+  const { selectedAccount } = useAccounts();
   const marketApi = api?.market;
   const bidAuctionStages: InternalStage<TAuctionBidProps>[] = useMemo(() => [
     {
       title: 'Registering bid',
       description: '',
       status: StageStatus.default,
-      action: (params) =>
+      action: ({ txParams, options }) =>
         marketApi?.transferBidBalance(
           params.txParams.accountAddress,
           new BN(params.txParams.value),
           { ...params.options, send: ({ signature, signerPayloadJSON }) => placeBidRequest(baseURL, { signerPayloadJSON, signature, collectionId, tokenId }) }
         )
     }
-  ], [baseURL, marketApi, collectionId, tokenId]);
+  ], [baseURL, marketApi, collectionId, tokenId, selectedAccount]);
 
-  const { stages, error, status, initiate } = useStages<TAuctionBidProps>(bidAuctionStages, signPayloadJSON);
+  const { stages, error, status, initiate } = useStages<TAuctionBidProps>(bidAuctionStages, selectedAccount);
 
   return {
     stages,

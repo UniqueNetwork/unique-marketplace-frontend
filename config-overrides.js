@@ -11,7 +11,7 @@ module.exports = function override(config) {
         "http": require.resolve("stream-http"),
         "https": require.resolve("https-browserify"),
         "os": require.resolve("os-browserify"),
-        "url": require.resolve("url")
+        "url": require.resolve("url-parse")
     })
     config.resolve.fallback = fallback;
     config.resolve.alias = {
@@ -22,7 +22,8 @@ module.exports = function override(config) {
         "@unique-nft/quartz-mainnet-types/definitions": "@unique-nft/quartz-mainnet-types/definitions.ts",
         "@unique-nft/opal-testnet-types/definitions": "@unique-nft/opal-testnet-types/definitions.ts",
         "@unique-nft/unique-mainnet-types/definitions": "@unique-nft/unique-mainnet-types/definitions.ts",
-        "@unique-nft/unique-mainnet-types/augment-api": "@unique-nft/unique-mainnet-types/augment-api.ts"
+        "@unique-nft/unique-mainnet-types/augment-api": "@unique-nft/unique-mainnet-types/augment-api.ts",
+        "@unique-nft/utils/string": "@unique-nft/utils/string.mjs",
     };
     config.ignoreWarnings = [/Failed to parse source map/];
     config.plugins = (config.plugins || []).concat([

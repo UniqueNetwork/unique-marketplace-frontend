@@ -18,6 +18,7 @@ import styled from 'styled-components';
 import { BlueGrey500 } from 'styles/colors';
 import BundleTreeSection from './BundleTreeSection';
 import { useCollections } from 'hooks/useCollections';
+import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
 
 const testid = 'token-page';
 
@@ -25,8 +26,8 @@ const TokenPage = () => {
   const { api, currentChainId } = useApi();
   const { selectedAccount, updateCurrentAccountDeposit } = useAccounts();
   const { id, collectionId } = useParams<{ id: string, collectionId: string}>();
-  const [token, setToken] = useState<TokenByIdResult>();
-  const [collection, setCollection] = useState<CollectionInfoWithSchema>();
+  const [token, setToken] = useState<TokenByIdResponse>();
+  const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse | null>(null);
   const [isFetchingToken, setIsFetchingToken] = useState<boolean>(true);
   const { offer, fetch: fetchOffer, isFetching: isFetchingOffer } = useOffer(Number(collectionId), Number(id));
   const { getCollection } = useCollections();
@@ -90,7 +91,7 @@ const TokenPage = () => {
       <div data-testid={`${testid}-success-notification`}>
         {compareEncodedAddresses(
           newOwnerAddress,
-          selectedAccount?.address || ''
+          selectedAccount?.getAddress() || ''
         )
           ? 'You are'
           : `${shortcutText(newOwnerAddress)} is` }  the new owner of <Link href={`/token/${token.collectionId}/${token.tokenId}`} title={`${collection?.tokenPrefix} #${token.tokenId}`}/>
@@ -100,7 +101,7 @@ const TokenPage = () => {
 
     void fetchOffer(Number(collectionId), Number(id));
     void fetchToken();
-  }, [info, fetchOffer, fetchToken, selectedAccount?.address, collectionId, id, token]);
+  }, [info, fetchOffer, fetchToken, selectedAccount?.getAddress(), collectionId, id, token]);
 
   const backClickHandler = useCallback(() => {
     // if user opened token page with a direct link, redirect him to /market, otherwise redirect him back
@@ -117,9 +118,9 @@ const TokenPage = () => {
   const isOwner = useMemo(() => {
     if (!selectedAccount || isFetchingOffer || isFetchingToken) return false;
     if (offer) {
-      return isTokenOwner(selectedAccount.address, offer.seller);
+      return isTokenOwner(selectedAccount.getAddress(), offer.seller);
     }
-    return token?.owner ? isTokenOwner(selectedAccount.address, token.owner) : false;
+    return token?.owner ? isTokenOwner(selectedAccount.getAddress(), token.owner) : false;
   }, [isFetchingOffer, isFetchingToken, selectedAccount, token, offer]);
 
   if (!isFetchingOffer && !isFetchingToken && !token && !offer) return <Error404 />;

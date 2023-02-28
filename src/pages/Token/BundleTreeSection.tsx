@@ -12,10 +12,10 @@ import MobileBundleTreeSection from './MobileBundleTreeSection';
 import { useApi } from 'hooks/useApi';
 import Skeleton from '../../components/Skeleton/Skeleton';
 import { Offer } from '../../api/restApi/offers/types';
-import { TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 import BundleModal from './BundleModals/BundleTrunsferModal';
 import { BundleModalType } from './BundleModals/types';
 import { countNestedChildren } from '../../utils/helpers';
+import { TokenByIdResponse } from '@unique-nft/sdk';
 
 const areNodesEqual = (a: INestingToken, b: INestingToken) => a.collectionId === b.collectionId && a.tokenId === b.tokenId;
 
@@ -30,9 +30,9 @@ const addIsCurrentAccountOwnerToBundleAndSort = (bundle: INestingToken, isOwner:
 };
 
 interface IProps {
-  token?: TokenByIdResult
+  token?: TokenByIdResponse
   offer?: Offer
-  onViewTokenDetails: Dispatch<SetStateAction<TokenByIdResult | undefined>>
+  onViewTokenDetails: Dispatch<SetStateAction<TokenByIdResponse | undefined>>
   testid?: string
   isOwner: boolean
 }
@@ -56,6 +56,7 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
     (async () => {
       if (offer && offer.tokenDescription.nestingChildTokens) {
         const bundle: INestingToken = {
+          properties: [],
           ...offer.tokenDescription,
           tokenId: offer.tokenId,
           collectionId: offer.collectionId,
@@ -98,9 +99,9 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
     return countNestedChildren(bundle[0].nestingChildTokens);
   }, [bundle]);
 
-  const onViewTokenDetails = useCallback((token: TokenByIdResult) => {
+  const onViewTokenDetails = useCallback((token: INestingToken) => {
     navigate(`/token/${token.collectionId}/${token.tokenId}`);
-    onViewTokenDetailsProps(token);
+    onViewTokenDetailsProps(token as unknown as TokenByIdResponse);
     if (isMobileViewVisible) closeView();
   }, [onViewTokenDetailsProps, isMobileViewVisible, closeView]);
 

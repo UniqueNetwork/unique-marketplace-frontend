@@ -1,7 +1,7 @@
 import { Heading, Text } from '@unique-nft/ui-kit';
 import React, { FC, ReactChild, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { Icon, Link } from 'components/UI';
+import { Icon } from 'components/UI';
 import { Picture } from 'components';
 import { CollectionsCard } from './CollectionsCard';
 import { AttributesBlock } from './AttributesBlock';
@@ -17,13 +17,13 @@ import { useApi } from 'hooks/useApi';
 import Skeleton from 'components/Skeleton/Skeleton';
 import { TokenSkeleton } from 'components/Skeleton/TokenSkeleton';
 import ShareTokenModal from './ShareTokenModal';
-import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
-import { stringToDecodedInfixOrUrlOrCidAndHash } from '../../../utils/helpers';
+import { stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
+import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
 
 interface IProps {
   children: ReactChild[]
-  token?: TokenByIdResult
-  collection?: CollectionInfoWithSchema
+  token?: TokenByIdResponse
+  collection: CollectionInfoWithSchemaResponse | null
   offer?: Offer
   isLoading?: boolean
   testid: string

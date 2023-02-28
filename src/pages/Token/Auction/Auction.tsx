@@ -38,10 +38,10 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
     const _calculatedBid = await getCalculatedBid({
       collectionId: offer?.collectionId || 0,
       tokenId: offer?.tokenId || 0,
-      bidderAddress: selectedAccount?.address || ''
+      bidderAddress: selectedAccount?.getAddress() || ''
     });
     setCalculatedBid(_calculatedBid);
-  }, [offer?.collectionId, offer?.tokenId, selectedAccount?.address]);
+  }, [offer?.collectionId, offer?.tokenId, selectedAccount]);
 
   useEffect(() => {
     if (!offer || offer.auction?.status !== 'active' || !selectedAccount) return;
@@ -49,20 +49,20 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
   }, [fetchCalculatedBid]);
 
   const canPlaceABid = useMemo(() => {
-    if (!selectedAccount?.address || !offer?.seller) return false;
-    return !isTokenOwner(selectedAccount.address, offer.seller);
-  }, [offer, selectedAccount?.address]);
+    if (!selectedAccount || !offer?.seller) return false;
+    return !isTokenOwner(selectedAccount.getAddress(), offer.seller);
+  }, [offer, selectedAccount]);
 
   const canDelist = useMemo(() => {
-    if (!selectedAccount?.address || !offer?.seller) return false;
-    return isTokenOwner(selectedAccount.address, offer.seller) && !offer.auction?.bids?.length;
-  }, [offer, selectedAccount?.address]);
+    if (!selectedAccount || !offer?.seller) return false;
+    return isTokenOwner(selectedAccount.getAddress(), offer.seller) && !offer.auction?.bids?.length;
+  }, [offer, selectedAccount]);
 
   const isBidder = useMemo(() => {
     if (!selectedAccount || !calculatedBid) return false;
     return offer.auction?.bids?.some((bid) => compareEncodedAddresses(
       bid.bidderAddress,
-      selectedAccount.address
+      selectedAccount.getAddress()
     )) && calculatedBid.bidderPendingAmount !== '0';
   }, [offer, selectedAccount, calculatedBid]);
 
@@ -75,7 +75,7 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
 
   const isTopBidder = useMemo(() => {
     if (!selectedAccount || !isBidder || !topBid) return false;
-    return compareEncodedAddresses(topBid.bidderAddress, selectedAccount.address);
+    return compareEncodedAddresses(topBid.bidderAddress, selectedAccount.getAddress());
   }, [isBidder, topBid, selectedAccount]);
 
   const canWithdraw = useMemo(() => {

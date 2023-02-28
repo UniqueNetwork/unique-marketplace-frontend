@@ -3,6 +3,16 @@ import { UniqueSDKNFTController } from '../uniqueSdk/NFTController';
 import { UniqueSDKCollectionController } from '../uniqueSdk/collectionController';
 import { UniqueSDKMarketController } from '../uniqueSdk/marketController';
 import { SdkNetworkProvider } from './sdkNetworkProvider';
+import { DecodedInfixOrUrlOrCidAndHash } from '../uniqueSdk/types';
+
+declare module '@unique-nft/sdk' {
+  export interface TokenByIdResponse {
+    image: DecodedInfixOrUrlOrCidAndHash
+    video?: DecodedInfixOrUrlOrCidAndHash
+  }
+}
+
+export interface NetworkOptions { networkId: string, sdkEndpoint: string, sdkRelayEndpoint: string, settings: Settings }
 
 export class SdkClient {
   public isReady = false;
@@ -11,15 +21,15 @@ export class SdkClient {
   public collectionController: UniqueSDKCollectionController = new UniqueSDKCollectionController();
   public marketController: UniqueSDKMarketController = new UniqueSDKMarketController();
 
-  private addNetwork = async ({ networkId, settings }: { networkId: string, settings: Settings }) => {
-    const network = new SdkNetworkProvider(settings);
-    await network.connect();
+  private addNetwork = async ({ networkId, ...networkOptions }: NetworkOptions) => {
+    const network = new SdkNetworkProvider(networkOptions);
+    await network.init();
     this.networks[networkId] = network;
-    this.isReady = network.isReady;
   };
 
-  async initialize(networkSettings: ({ networkId: string, settings: Settings })[]) {
-    await Promise.all(networkSettings.map(this.addNetwork));
+  async initialize(networkOptions: NetworkOptions[]) {
+    await Promise.all(networkOptions.map(this.addNetwork));
+    this.isReady = true;
   }
 
   setNetwork(networkId: string) {

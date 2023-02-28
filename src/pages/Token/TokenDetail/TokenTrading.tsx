@@ -8,10 +8,10 @@ import Auction from '../Auction/Auction';
 import { isTokenOwner } from 'api/uniqueSdk/utils/addressUtils';
 import { useApi } from '../../../hooks/useApi';
 import { checkAllowedTokenInSettings } from 'api/uniqueSdk/utils/checkTokenIsAllowed';
-import { TokenByIdResult } from '@unique-nft/substrate-client/tokens';
+import { TokenByIdResponse } from '@unique-nft/sdk';
 
 interface TokenTradingProps {
-  token?: TokenByIdResult
+  token?: TokenByIdResponse
   offer?: Offer
   onSellClick(): void
   onBuyClick(): void
@@ -39,9 +39,9 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
   const isOwner = useMemo(() => {
     if (!selectedAccount) return false;
     if (offer) {
-      return isTokenOwner(selectedAccount.address, offer.seller);
+      return isTokenOwner(selectedAccount.getAddress(), offer.seller);
     }
-    return token?.owner ? isTokenOwner(selectedAccount.address, token.owner) : false;
+    return token?.owner ? isTokenOwner(selectedAccount.getAddress(), token.owner) : false;
   }, [selectedAccount, token, offer]);
 
   if (offer?.auction) {

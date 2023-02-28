@@ -1,5 +1,6 @@
 import { Attribute, AttributeCount, OfferTokenAttribute } from 'api/restApi/offers/types';
-import { AttributeType, DecodedAttributes, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
+import { AttributeType, DecodedAttributes } from '@unique-nft/substrate-client/tokens';
+import { MixedTokenAndOffer } from '../../NFTPage';
 
 export const sortAttributeCounts = (attributeCountA: AttributeCount, attributeCountB: AttributeCount) => attributeCountA.numberOfAttributes > attributeCountB.numberOfAttributes ? 1 : -1;
 
@@ -22,7 +23,7 @@ export const toTokenAttributes = (offerAttributes: OfferTokenAttribute[]) => {
   return result;
 };
 
-export const getAttributesFromTokens = (tokens: TokenByIdResult[]) => {
+export const getAttributesFromTokens = (tokens: MixedTokenAndOffer[]) => {
   // All attributes from available tokens
   const attributesMap: { [key: string]: any[] } = {};
   // attributes formatted for Filter component
@@ -31,13 +32,15 @@ export const getAttributesFromTokens = (tokens: TokenByIdResult[]) => {
   tokens.forEach(({ attributes }) => {
     if (!attributes) { return; }
     // Calculate filters to show
-    for (const i in attributes) {
-      const { name, value } = attributes[i];
-      const attributeName = name?._.toLocaleLowerCase();
+    for (const attribute of attributes) {
+      const { name, value } = attribute;
+      const attributeName = name?._?.toLocaleLowerCase();
+
+      if (!attributeName) return;
 
       if (Array.isArray(value)) {
         attributesMap[attributeName] = attributesMap[attributeName] ? [...attributesMap[attributeName], ...value.map((attr) => attr._)] : value.map((attr) => attr._);
-      } else if (attributes[i].isEnum) {
+      } else if (attribute.isEnum) {
         attributesMap[attributeName] = attributesMap[attributeName] ? [...attributesMap[attributeName], value._ || value] : [value._ || value];
       }
     }
@@ -72,8 +75,8 @@ export function countTokenAttributes(attributes: DecodedAttributes | undefined):
   return count;
 }
 
-export const getAttributesCountFromTokens = (tokens: TokenByIdResult[]) => {
-  const countTokensAttributes: number[] = tokens.map(({ attributes }) => countTokenAttributes(attributes));
+export const getAttributesCountFromTokens = (tokens: MixedTokenAndOffer[]) => {
+  const countTokensAttributes: number[] = tokens.map(({ attributes }) => countTokenAttributes(attributes as DecodedAttributes));
   // count tokens with the same amount of attributes, result be like { 7: 2, 6: 1 }
   const counterMap: { [key: number]: number } = {};
   countTokensAttributes.forEach((count) => {

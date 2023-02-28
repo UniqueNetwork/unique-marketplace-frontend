@@ -19,9 +19,9 @@ export const AddressComponent = ({ text, testid }: { text: string, testid: strin
   }, [chainData?.SS58Prefix]);
 
   const shortCut = useMemo(() => {
-    if (selectedAccount?.address === text) return 'Me';
+    if (selectedAccount?.getAddress() === text) return 'Me';
     return shortcutText(formatAddress(text));
-  }, [text, selectedAccount?.address, formatAddress]);
+  }, [text, selectedAccount, formatAddress]);
 
   return <LinkWrapper>
     <Avatar size={24} src={DefaultAvatar} address={text} />

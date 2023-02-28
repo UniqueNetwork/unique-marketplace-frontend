@@ -1,5 +1,5 @@
-import { Sdk } from '@unique-nft/substrate-client';
-import { TokenIdArguments, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
+import { Client, TokenByIdResponse } from '@unique-nft/sdk';
+import { TokenIdArguments } from '@unique-nft/substrate-client/tokens';
 import { isEthereumAddress } from '@unique-nft/substrate-client/utils';
 import { BN } from '@polkadot/util';
 import { EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType, TransactionOptions, TSignMessage, UniqueController } from './types';
@@ -8,13 +8,21 @@ import nonFungibleAbi from './abi/nonFungibleAbi.json';
 import { collectionIdToAddress, getEthAccount, compareEncodedAddresses, isTokenOwner } from './utils/addressUtils';
 import { formatKsm, fromStringToBnString } from './utils/textFormat';
 import { repeatCheckForTransactionFinish } from './utils/repeatCheckTransaction';
-import '@unique-nft/substrate-client/balance';
-import { Address, AllBalances } from '@unique-nft/substrate-client/types';
+import { Address } from '@unique-nft/substrate-client/types';
 import Web3 from 'web3';
+import { ApiPromise } from '@polkadot/api';
+import { AllBalances, Balance } from '@unique-nft/substrate-client/balance';
+
+declare module '@unique-nft/substrate-client' {
+  interface Client {
+    api: ApiPromise;
+    readonly balance: Balance;
+  }
+}
 
 export type UniqueSDKMarketControllerOptions = {
-  uniqueSdk: Sdk
-  kusamaSdk: Sdk
+  uniqueSdk: Client
+  kusamaSdk: Client
   escrowAddress: string
   contractAddress: string
   auctionAddress: string
@@ -22,8 +30,8 @@ export type UniqueSDKMarketControllerOptions = {
 };
 
 export class UniqueSDKMarketController implements UniqueController {
-  private uniqueSdk: Sdk | undefined;
-  private kusamaSdk: Sdk | undefined;
+  private uniqueSdk: Client | undefined;
+  private kusamaSdk: Client | undefined;
   private web3Instance: Web3 | undefined;
   private minPrice = 0.000001;
   private defaultGasAmount = 2500000;
@@ -32,10 +40,10 @@ export class UniqueSDKMarketController implements UniqueController {
   private auctionAddress = '';
   kusamaDecimals = 12;
 
-  setNetwork(options: UniqueSDKMarketControllerOptions): void {
+  async setNetwork(options: UniqueSDKMarketControllerOptions) {
     this.uniqueSdk = options.uniqueSdk;
     this.kusamaSdk = options.kusamaSdk;
-    this.kusamaDecimals = this.kusamaSdk?.chainProperties().decimals || 12;
+    this.kusamaDecimals = (await this.kusamaSdk.chain.properties()).decimals || 12;
     this.escrowAddress = options.escrowAddress;
     this.contractAddress = options.contractAddress;
     this.auctionAddress = options.auctionAddress;
@@ -76,7 +84,7 @@ export class UniqueSDKMarketController implements UniqueController {
       collectionId: Number(collectionId), tokenId: Number(tokenId)
     };
 
-    const token = await this.uniqueSdk?.tokens.get_new(tokenIdArguments);
+    const token = await this.uniqueSdk?.tokens.get(tokenIdArguments);
     if (!token) throw new Error('Token not found');
 
     const ask = await matcherContractInstance.methods.getOrder(collectionIdToAddress(Number(collectionId)), tokenId).call();
@@ -130,7 +138,7 @@ export class UniqueSDKMarketController implements UniqueController {
   }
 
   // purchase
-  async buyToken(address: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+  async buyToken(address: Address, collectionId: string, tokenId: string, { signer }: TransactionOptions): Promise<void> {
     if (!this.kusamaSdk || !this.uniqueSdk || !this.web3Instance) throw new Error('Controller isn\'t ready');
     const ethAddress = getEthAccount(address);
     const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
@@ -153,18 +161,18 @@ export class UniqueSDKMarketController implements UniqueController {
         []
       ]
     });
-    const signature = await options.sign?.(unsignedTxPayload);
+    const { signature } = await this.uniqueSdk.extrinsics.sign(unsignedTxPayload, signer);
 
     if (!signature) throw new Error('Signing failed');
 
-    await this.uniqueSdk.extrinsics.submitWaitCompleted({
+    await this.uniqueSdk.extrinsics.submit({
       signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });
   }
 
   // sell
-  async cancelSell(address: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+  async cancelSell(address: Address, collectionId: string, tokenId: string, { signer }: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk || !this.web3Instance) throw new Error('Controller isn\'t ready');
     const ethAddress = getEthAccount(address);
     const matcherContractInstance = this.getMatcherContractInstance(ethAddress);
@@ -195,11 +203,11 @@ export class UniqueSDKMarketController implements UniqueController {
         []
       ]
     });
-    const signature = await options.sign?.(unsignedTxPayload);
+    const { signature } = await this.uniqueSdk.extrinsics.sign(unsignedTxPayload, signer);
 
     if (!signature) throw new Error('Signing failed');
 
-    await this.uniqueSdk.extrinsics.submitWaitCompleted({
+    await this.uniqueSdk.extrinsics.submit({
       signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });
@@ -210,7 +218,9 @@ export class UniqueSDKMarketController implements UniqueController {
     if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
     const ethAddress = getEthAccount(account);
     try {
-      return (await this.uniqueSdk.api.query.evmContractHelpers.allowlist(this.contractAddress, ethAddress)).toJSON() as boolean;
+      // return (await this.uniqueSdk.api.query.evmContractHelpers.allowlist(this.contractAddress, ethAddress)).toJSON() as boolean;
+
+      return (await this.uniqueSdk.stateQuery.execute({ endpoint: 'query', module: 'evmContractHelpers', method: 'allowlist' }, { args: [this.contractAddress, ethAddress] })) as boolean;
     } catch (e) {
       console.error('Check for whitelist failed', e);
       throw e;
@@ -228,7 +238,7 @@ export class UniqueSDKMarketController implements UniqueController {
       method: 'transfer',
       args: [
         recipient || '',
-        value || 0
+        value?.toString() || '0'
       ]
     });
     return transferFee.amount;
@@ -249,7 +259,7 @@ export class UniqueSDKMarketController implements UniqueController {
   }
 
   // sell
-  async lockNftForSale(account: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+  async lockNftForSale(account: Address, collectionId: string, tokenId: string, { signer }: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
     const ethAddress = getEthAccount(account);
 
@@ -257,23 +267,24 @@ export class UniqueSDKMarketController implements UniqueController {
       collectionId: Number(collectionId), tokenId: Number(tokenId)
     };
 
-    const token = await this.uniqueSdk.tokens.get_new(tokenIdArguments);
+    const token = await this.uniqueSdk.tokens.get(tokenIdArguments);
     if (!token) throw new Error('Token not found');
     if (token.owner.toLowerCase() === ethAddress.toLowerCase()) return;
 
     const unsignedTxPayload = await this.uniqueSdk.extrinsics.build({
       section: 'unique',
       method: 'transfer',
+      // @ts-ignore
       args: [{ ethereum: ethAddress }, tokenIdArguments.collectionId, tokenIdArguments.tokenId, 1],
-      address: options.signer || '',
+      address: signer?.getAddress() || '',
       isImmortal: false
     });
 
-    const signature = await options.sign?.(unsignedTxPayload);
+    const { signature } = await this.uniqueSdk.extrinsics.sign(unsignedTxPayload, signer);
 
     if (!signature) throw new Error('Signing failed');
 
-    await this.uniqueSdk.extrinsics.submitWaitCompleted({
+    await this.uniqueSdk.extrinsics.submit({
       signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });
@@ -281,26 +292,25 @@ export class UniqueSDKMarketController implements UniqueController {
 
   // sell
   private async checkIfNftApproved (tokenOwner: Address, collectionId: string, tokenId: string): Promise<boolean> {
-    // @ts-ignore
-    const { unique } = this.uniqueSdk?.api.rpc || {};
-    const approvedCount = (await unique?.allowance(
-      Number(collectionId),
-      isEthereumAddress(tokenOwner) ? { Ethereum: tokenOwner } : { Substrate: tokenOwner },
-      { Ethereum: this.contractAddress },
-      Number(tokenId)
-    ))?.toJSON();
+    if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
+    const { isAllowed } = await this.uniqueSdk.tokens.allowance({
+      collectionId: Number(collectionId),
+      from: tokenOwner,
+      to: this.contractAddress,
+      tokenId: Number(tokenId)
+    });
 
-    return approvedCount === 1;
+    return isAllowed;
   }
 
   // sell
-  async sendNftToSmartContract(address: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+  async sendNftToSmartContract(address: Address, collectionId: string, tokenId: string, { signer }: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk || !this.web3Instance) throw new Error('Controller isn\'t ready');
     const tokenIdArguments: TokenIdArguments = {
       collectionId: Number(collectionId), tokenId: Number(tokenId)
     };
 
-    const token = await this.uniqueSdk.tokens.get_new(tokenIdArguments);
+    const token = await this.uniqueSdk.tokens.get(tokenIdArguments);
     if (!token) throw new Error('Token not found');
 
     const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
@@ -327,18 +337,18 @@ export class UniqueSDKMarketController implements UniqueController {
       ]
     });
 
-    const signature = await options.sign?.(unsignedTxPayload);
+    const { signature } = await this.uniqueSdk.extrinsics.sign(unsignedTxPayload, signer);
 
     if (!signature) throw new Error('Signing failed');
 
-    await this.uniqueSdk.extrinsics.submitWaitCompleted({
+    await this.uniqueSdk.extrinsics.submit({
       signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });
   }
 
   // sell
-  async setForFixPriceSale(address: Address, collectionId: string, tokenId: string, price: string, options: TransactionOptions): Promise<void> {
+  async setForFixPriceSale(address: Address, collectionId: string, tokenId: string, price: string, { signer }: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk || !this.web3Instance) throw new Error('Controller isn\'t ready');
     const ethAddress = getEthAccount(address);
     const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
@@ -367,11 +377,11 @@ export class UniqueSDKMarketController implements UniqueController {
         []
       ]
     });
-    const signature = await options.sign?.(unsignedTxPayload);
+    const { signature } = await this.uniqueSdk.extrinsics.sign(unsignedTxPayload, signer);
 
     if (!signature) throw new Error('Signing failed');
 
-    await this.uniqueSdk.extrinsics.submitWaitCompleted({
+    await this.uniqueSdk.extrinsics.submit({
       signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });
@@ -388,15 +398,15 @@ export class UniqueSDKMarketController implements UniqueController {
       isImmortal: false
     });
 
-    const signature = await options.sign?.(unsignedTxPayload);
+    const { signature } = await this.kusamaSdk.extrinsics.sign(unsignedTxPayload, signer);
 
     if (!signature) throw new Error('Signing failed');
-    if (options.send) {
+    if (send) {
       const { signerPayloadJSON } = unsignedTxPayload;
 
-      await options.send({ signerPayloadJSON, signature });
+      await send({ signerPayloadJSON, signature: signature as `0x${string}` });
     } else {
-      await this.kusamaSdk.extrinsics.submitWaitCompleted({
+      await this.kusamaSdk.extrinsics.submit({
         signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
         signature
       });
@@ -413,15 +423,15 @@ export class UniqueSDKMarketController implements UniqueController {
       isImmortal: false
     });
 
-    const signature = await options.sign?.(unsignedTxPayload);
+    const { signature } = await this.kusamaSdk.extrinsics.sign(unsignedTxPayload, signer);
 
     if (!signature) throw new Error('Signing failed');
-    if (options.send) {
+    if (send) {
       const { signerPayloadJSON } = unsignedTxPayload;
 
-      await options.send({ signerPayloadJSON, signature });
+      await send({ signerPayloadJSON, signature: signature as `0x${string}` });
     } else {
-      await this.kusamaSdk.extrinsics.submitWaitCompleted({
+      await this.kusamaSdk.extrinsics.submit({
         signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
         signature
       });
@@ -433,13 +443,13 @@ export class UniqueSDKMarketController implements UniqueController {
   }
 
   // token
-  async transferToken(from: Address, to: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+  async transferToken(from: Address, to: Address, collectionId: string, tokenId: string, { signer, send }: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
     const tokenIdArguments: TokenIdArguments = {
       collectionId: Number(collectionId), tokenId: Number(tokenId)
     };
 
-    const token = await this.uniqueSdk.tokens.get_new(tokenIdArguments);
+    const token = await this.uniqueSdk.tokens.get(tokenIdArguments);
     if (!token) throw new Error('Token not found');
 
     if (!isTokenOwner(from, token.owner)) throw new Error('You are not owner of this token');
@@ -451,16 +461,16 @@ export class UniqueSDKMarketController implements UniqueController {
       ...tokenIdArguments
     });
 
-    const signature = await options.sign?.(unsignedTxPayload);
+    const { signature } = await this.uniqueSdk.tokens.transfer.sign(unsignedTxPayload, { signer });
 
     if (!signature) throw new Error('Signing failed');
 
-    if (options.send) {
+    if (send) {
       const { signerPayloadJSON } = unsignedTxPayload;
 
-      await options.send({ signerPayloadJSON, signature });
+      await send({ signerPayloadJSON, signature: signature as `0x${string}` });
     } else {
-      await this.uniqueSdk.extrinsics.submitWaitCompleted({
+      await this.uniqueSdk.extrinsics.submit({
         signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
         signature
       });
@@ -468,7 +478,7 @@ export class UniqueSDKMarketController implements UniqueController {
   }
 
   // purchase
-  async unlockNft(address: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+  async unlockNft(address: Address, collectionId: string, tokenId: string, { signer }: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
     const ethAddress = getEthAccount(address);
 
@@ -476,31 +486,35 @@ export class UniqueSDKMarketController implements UniqueController {
       collectionId: Number(collectionId), tokenId: Number(tokenId)
     };
 
-    const token: TokenByIdResult | null = await this.uniqueSdk.tokens.get_new(tokenIdArguments);
+    const token: TokenByIdResponse | null = await this.uniqueSdk.tokens.get(tokenIdArguments);
     if (!token) throw new Error('Token for unlock not found');
     const owner = token.owner;
 
     if (owner && !isEthereumAddress(owner) && compareEncodedAddresses(owner, address)) return;
 
+    const from: Record<string, string> = { ethereum: ethAddress };
+    const to: Record<string, string> = { substrate: address };
+
     const unsignedTxPayload = await this.uniqueSdk.extrinsics.build({
       section: 'unique',
       method: 'transferFrom',
-      args: [{ ethereum: ethAddress }, { substrate: address }, tokenIdArguments.collectionId, tokenIdArguments.tokenId, 1],
+      // @ts-ignore
+      args: [from, to, tokenIdArguments.collectionId, tokenIdArguments.tokenId, 1],
       address: address,
       isImmortal: false
     });
-    const signature = await options.sign?.(unsignedTxPayload);
+    const { signature } = await this.uniqueSdk.extrinsics.sign(unsignedTxPayload, signer);
 
     if (!signature) throw new Error('Signing failed');
 
-    await this.uniqueSdk.extrinsics.submitWaitCompleted({
+    await this.uniqueSdk.extrinsics.submit({
       signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });
   }
 
   // account
-  async withdrawDeposit(address: Address, options: TransactionOptions): Promise<void> {
+  async withdrawDeposit(address: Address, { signer }: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk || !this.web3Instance) throw new Error('Controller isn\'t ready');
     if (!address || address === '') throw new Error('Address not provided');
     const ethAddress = getEthAccount(address);
@@ -527,11 +541,11 @@ export class UniqueSDKMarketController implements UniqueController {
         []
       ]
     });
-    const signature = await options.sign?.(unsignedTxPayload);
+    const { signature } = await this.uniqueSdk.extrinsics.sign(unsignedTxPayload, signer);
 
     if (!signature) throw new Error('Signing failed');
 
-    await this.uniqueSdk.extrinsics.submitWaitCompleted({
+    await this.uniqueSdk.extrinsics.submit({
       signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });

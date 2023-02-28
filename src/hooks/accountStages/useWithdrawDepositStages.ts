@@ -4,10 +4,9 @@ import { InternalStage, StageStatus } from '../../types/StagesTypes';
 import { useAccounts } from '../useAccounts';
 import useStages from '../useStages';
 import { TWithdrawBid } from 'api/restApi/auction/types';
-import { BN } from '@polkadot/util';
+import { BN, stringToHex } from '@polkadot/util';
 import { withdrawChooseBids } from 'api/restApi/auction/auction';
 import { formatKusamaBalance } from '../../utils/textUtils';
-import { UnsignedTxPayload } from '@unique-nft/substrate-client/types';
 
 const tokenSymbol = 'KSM';
 
@@ -17,10 +16,8 @@ export type TWithdrawDeposit = {
 
 export const useWithdrawDepositStages = (accountAddress: string, bids: TWithdrawBid[], withdrawSponsorshipFee?: BN) => {
   const { api, baseURL } = useApi();
-  const { signPayloadJSON, accounts, signMessage } = useAccounts();
+  const { accounts } = useAccounts();
   const marketApi = api?.market;
-
-  const account = useMemo(() => accounts.find((account) => account.address === accountAddress), [accountAddress]);
 
   const bidsAmount = useMemo(() => bids.reduce<BN>((acc, bid) =>
     acc.add(new BN(bid.amount)), new BN(0)), [bids]);
@@ -39,31 +36,31 @@ export const useWithdrawDepositStages = (accountAddress: string, bids: TWithdraw
       title: `Withdraw bids: ${formatKusamaBalance(bidsAmount.toString())} ${tokenSymbol}`,
       description: '',
       status: StageStatus.default,
-      action: async () => {
-        if (!account) throw new Error('Account not selected');
+      action: async ({ options }) => {
+        if (!options.signer) throw new Error('Account not selected');
 
         const timestamp = Date.now();
         const auctionIds = bids.map((bid) => `auctionId=${bid.auctionId}`).join('&');
         const message = `${auctionIds}&timestamp=${timestamp}`;
-        const signature = await signMessage(message, account);
+        const { signature } = await options.signer.sign({ signerPayloadHex: stringToHex(message) });
         await withdrawChooseBids(baseURL,
           { auctionIds: `${auctionIds}`, timestamp },
-          { signature, signer: account.address }
+          { signature, signer: options.signer.getAddress() }
         );
       }
     }]
-    : [], [baseURL, bids, account, bidsAmount]);
+    : [], [baseURL, bids, bidsAmount]);
 
   const withdrawDepositStages: InternalStage<TWithdrawDeposit>[] = useMemo(() => [
     ...withdrawSponsorshipFeeStage,
     ...withdrawBidsStage
   ], [withdrawSponsorshipFeeStage, withdrawBidsStage]);
 
-  const sign = useCallback(async (unsignedTxPayload: UnsignedTxPayload) => {
-    return await signPayloadJSON(unsignedTxPayload, account);
-  }, [signPayloadJSON, account]);
+  const signer = useMemo(() => {
+    return accounts.find(({ address }) => address === accountAddress);
+  }, [accounts, accountAddress]);
 
-  const { stages, error, status, initiate: initiateStages } = useStages<TWithdrawDeposit>(withdrawDepositStages, sign);
+  const { stages, error, status, initiate: initiateStages } = useStages<TWithdrawDeposit>(withdrawDepositStages, signer);
 
   const initiate = useCallback(() => {
     initiateStages({ address: accountAddress });

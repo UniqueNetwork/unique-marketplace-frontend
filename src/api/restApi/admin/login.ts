@@ -7,6 +7,7 @@ import { LoginPayload, LoginResponse } from './types';
 import { JWTDecode } from 'utils/JWTDecode';
 import { post } from '../base';
 import { defaultParams } from '../base/axios';
+import { stringToHex } from '@polkadot/util';
 
 export const JWTokenLocalStorageKey = 'unique_market_jwt';
 
@@ -18,22 +19,21 @@ export const adminLogIn = (baseURL: string, body: LoginPayload, signature: strin
 
 export const useAdminLoggingIn = () => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const { selectedAccount, signMessage } = useAccounts();
+  const { selectedAccount } = useAccounts();
   const { settings, baseURL, currentChainId } = useApi();
 
   const hasAdminPermission: boolean = useMemo(() => {
     if (!selectedAccount) return false;
-    return settings?.administrators.some((address) => compareEncodedAddresses(address, selectedAccount.address)) || false;
-  }, [selectedAccount?.address, settings?.administrators]);
+    return settings?.administrators.some((address) => compareEncodedAddresses(address, selectedAccount.getAddress())) || false;
+  }, [selectedAccount, settings?.administrators]);
 
   const logIn = useCallback(async () => {
-    if (!selectedAccount?.address) return null;
+    if (!selectedAccount) return null;
     setIsLoggingIn(true);
-    let signature;
     try {
-      signature = await signMessage(logInMessage);
+      const { signature } = await selectedAccount.sign({ signerPayloadHex: stringToHex(logInMessage) });
       const response = await adminLogIn(baseURL, {
-        account: selectedAccount.address
+        account: selectedAccount.getAddress()
       }, signature);
 
       setIsLoggingIn(false);
@@ -46,10 +46,10 @@ export const useAdminLoggingIn = () => {
       console.error('Administrator authorization failed', e);
     }
     return null;
-  }, [currentChainId, baseURL, selectedAccount, signMessage]);
+  }, [currentChainId, baseURL, selectedAccount]);
 
   const getJWToken = useCallback(async () => {
-    if (!selectedAccount?.address) return null;
+    if (!selectedAccount) return null;
     const jwToken = localStorage.getItem(`${JWTokenLocalStorageKey}-${currentChainId}`);
 
     if (!jwToken) return await logIn();

@@ -1,12 +1,12 @@
 import { BN } from '@polkadot/util';
-import { AccountSigner } from 'account/AccountContext';
+import { TableRowProps } from '@unique-nft/ui-kit';
 
-export type AccountInfo = {
+export type AccountInfo = TableRowProps & {
   address: string
   name: string
   balance?: {
     KSM?: BN
   }
   deposit?: BN
-  signerType: AccountSigner
+  isLocal?: boolean
 }

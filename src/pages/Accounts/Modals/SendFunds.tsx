@@ -20,6 +20,7 @@ import { AdditionalWarning100, Coral700 } from 'styles/colors';
 import DefaultMarketStages from '../../Token/Modals/StagesModal';
 import { TTransferFunds } from './types';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
+import { Account } from '@unique-nft/accounts/types';
 
 const tokenSymbol = 'KSM';
 
@@ -90,7 +91,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   const deviceSize = useDeviceSize();
 
   useEffect(() => {
-    const account = accounts.find((account) => account.address === senderAddress);
+    const account = accounts.find((account) => account.getAddress() === senderAddress);
     setSender(account);
   }, [senderAddress, accounts]);
 
@@ -99,7 +100,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     return debounce(() => {
       if (!selectedAccount || !api?.market) return;
       const recipient = typeof newRecipientAddress === 'string' ? newRecipientAddress : newRecipientAddress?.address;
-      api?.market?.getKusamaFee(selectedAccount.address, recipient, new BN(fromStringToBnString(amount)))
+      api?.market?.getKusamaFee(selectedAccount.getAddress(), recipient, new BN(fromStringToBnString(amount)))
       .then((fee) => {
         setKusamaFee(fee || '0');
       }).catch((e) => {
@@ -115,7 +116,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   }, [chainData?.SS58Prefix]);
 
   const accountsWithQuartzAddresses = useMemo(() => (
-    accounts.map((account) => ({ ...account, quartzAddress: formatAddress(account.address) }))
+    accounts.map((account) => ({ ...account, quartzAddress: formatAddress(account.getAddress()) }))
   ), [accounts, formatAddress]);
 
   const [filteredAccounts, setFilteredAccounts] = useState(accountsWithQuartzAddresses);
@@ -155,7 +156,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
 
   const onFilter = useCallback((input: string) => {
     setFilteredAccounts(accountsWithQuartzAddresses.filter((account) => {
-      return account.quartzAddress.toLowerCase().includes(input.toLowerCase()) || account.meta.name?.toLowerCase().includes(input.toLowerCase());
+      return account.quartzAddress.toLowerCase().includes(input.toLowerCase()) || account.name?.toLowerCase().includes(input.toLowerCase());
     }));
   }, [accountsWithQuartzAddresses]);
 
@@ -198,7 +199,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
         onChange={onChangeSender}
         optionRender={(option) => (
           <AddressOptionWrapper>
-            <AccountCard accountName={(option as unknown as Account)?.meta.name || ''}
+            <AccountCard accountName={(option as unknown as Account)?.name || ''}
               accountAddress={(option as unknown as Account)?.address || ''}
               canCopy={false}
               isShort={deviceSize < DeviceSize.md}
@@ -208,8 +209,8 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
         iconRight={{ name: 'triangle', size: 8 }}
       >
         <AddressWrapper>
-          <AccountCard accountName={sender?.meta.name || ''}
-            accountAddress={sender?.address || ''}
+          <AccountCard accountName={sender?.name || ''}
+            accountAddress={sender?.getAddress() || ''}
             canCopy={false}
             isShort={deviceSize < DeviceSize.md}
           />
@@ -227,11 +228,11 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     <RecipientSelectWrapper >
       <SelectInput<Account>
         testid={`${testid}-select-address`}
-        options={filteredAccounts}
+        options={filteredAccounts as unknown as Account[]}
         value={recipientAddress}
         onChange={onChangeAddress}
         renderOption={(option) => <AddressOptionWrapper>
-          <AccountCard accountName={option.meta.name || ''}
+          <AccountCard accountName={option.name || ''}
             accountAddress={option.address}
             canCopy={false}
             isShort={deviceSize < DeviceSize.md}
