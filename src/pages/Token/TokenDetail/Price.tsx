@@ -14,7 +14,7 @@ interface PriceProps {
 
 export const Price: FC<PriceProps> = ({ price, testid = '' }) => {
   const { api } = useApi();
-  const decimals = api?.market?.kusamaDecimals;
+  const decimals = api?.market?.decimals;
   return (
     <PriceWrapper>
       <Row>

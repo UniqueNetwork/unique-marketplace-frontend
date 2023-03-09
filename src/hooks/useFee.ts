@@ -7,7 +7,7 @@ interface UseFeeReturn {
   marketCommission: string,
   kusamaFee: string,
   fetchingKusamaFee: boolean,
-  getKusamaFee: (recipient: string, value: BN) => Promise<string | undefined>
+  getFee: (recipient: string, value: BN) => Promise<string | undefined>
 }
 
 export const useFee = (): UseFeeReturn => {
@@ -16,10 +16,10 @@ export const useFee = (): UseFeeReturn => {
   const [kusamaFee, setKusamaFee] = useState<string>('0');
   const [fetchingKusamaFee, setFetchingKusamaFee] = useState<boolean>(false);
 
-  const getKusamaFee = useCallback(async (recipient: string, value: BN) => {
+  const getFee = useCallback(async (recipient: string, value: BN) => {
     if (!selectedAccount || !api?.market) return;
     setFetchingKusamaFee(true);
-    const fee = await api.market.getKusamaFee(selectedAccount.getAddress(), recipient, value);
+    const fee = await api.market.getFee(selectedAccount.getAddress(), recipient, value);
     setKusamaFee(fee || '0');
     setFetchingKusamaFee(false);
     return fee || '0';
@@ -27,5 +27,5 @@ export const useFee = (): UseFeeReturn => {
 
   const marketCommission = useMemo(() => settings ? settings.blockchain.kusama.marketCommission : '0', [settings]);
 
-  return { marketCommission, kusamaFee, fetchingKusamaFee, getKusamaFee };
+  return { marketCommission, kusamaFee, fetchingKusamaFee, getFee };
 };

@@ -47,13 +47,13 @@ const chainOptions = [{ id: 'KSM', title: 'KSM', iconRight: { size: 18, name: 'c
 
 export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceABid): void, testid: string}> = ({ offer, onConfirmPlaceABid, testid }) => {
   const [chain, setChain] = useState<string | undefined>('KSM');
-  const { kusamaFee, getKusamaFee } = useFee();
+  const { kusamaFee, getFee } = useFee();
   const { selectedAccount } = useAccounts();
   const { api, settings } = useApi();
   const [calculatedBid, setCalculatedBid] = useState<TCalculatedBid>();
   const [isFetchingCalculatedbid, setIsFetchingCalculatedBid] = useState<boolean>(true);
   const { getCalculatedBid } = useAuction();
-  const decimals = api?.market?.kusamaDecimals;
+  const decimals = api?.market?.decimals;
 
   const fetchCalculatedBid = useCallback(async () => {
     if (!offer || !selectedAccount || !settings) return;
@@ -63,7 +63,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
       tokenId: offer?.tokenId || 0,
       bidderAddress: selectedAccount?.getAddress() || ''
     });
-    await getKusamaFee(settings.auction.address, new BN(_calculatedBid?.minBidderAmount || 0));
+    await getFee(settings.auction.address, new BN(_calculatedBid?.minBidderAmount || 0));
     setCalculatedBid(_calculatedBid);
     setIsFetchingCalculatedBid(false);
   }, [offer, selectedAccount?.getAddress()]);
@@ -88,32 +88,32 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
 
   const isEnoughBalance = useMemo(() => {
     if (!selectedAccount?.balance?.KSM || selectedAccount?.balance?.KSM.isZero()) return false;
-    const bnAmount = new BN(fromStringToBnString(bidAmount, api?.market?.kusamaDecimals));
+    const bnAmount = new BN(fromStringToBnString(bidAmount, api?.market?.decimals));
     return selectedAccount?.balance?.KSM.gte(bnAmount.sub(new BN(lastBidFromThisAccount || 0)));
-  }, [selectedAccount?.balance?.KSM, bidAmount, api?.market?.kusamaDecimals, lastBidFromThisAccount]);
+  }, [selectedAccount?.balance?.KSM, bidAmount, api?.market?.decimals, lastBidFromThisAccount]);
 
   const onBidAmountChange = useCallback((value: string) => {
     setBidAmount(value);
     if (!settings) return;
-    getKusamaFee(settings.auction.address, new BN(fromStringToBnString(value, api?.market?.kusamaDecimals)));
+    getFee(settings.auction.address, new BN(fromStringToBnString(value, api?.market?.decimals)));
   }, [setBidAmount]);
 
   const isAmountValid = useMemo(() => {
     if (!bidAmount || bidAmount === '0') return false;
-    return new BN(fromStringToBnString(bidAmount, api?.market?.kusamaDecimals)).gte(minimalBid);
-  }, [bidAmount, minimalBid, api?.market?.kusamaDecimals]);
+    return new BN(fromStringToBnString(bidAmount, api?.market?.decimals)).gte(minimalBid);
+  }, [bidAmount, minimalBid, api?.market?.decimals]);
 
   const onConfirmPlaceABidClick = useCallback(
     () => {
       if (!isAmountValid || !isEnoughBalance) return;
-      const bnAmount = new BN(fromStringToBnString(bidAmount, api?.market?.kusamaDecimals));
+      const bnAmount = new BN(fromStringToBnString(bidAmount, api?.market?.decimals));
 
       onConfirmPlaceABid({
         accountAddress: selectedAccount?.getAddress() || '',
         amount: formatKusamaBalance(Number(bnAmount.toString()) - Number(lastBidFromThisAccount))
       });
     },
-    [onConfirmPlaceABid, bidAmount, isEnoughBalance, isAmountValid, chain, api?.market?.kusamaDecimals, lastBidFromThisAccount]
+    [onConfirmPlaceABid, bidAmount, isEnoughBalance, isAmountValid, chain, api?.market?.decimals, lastBidFromThisAccount]
   );
 
   const onChainChange = useCallback(

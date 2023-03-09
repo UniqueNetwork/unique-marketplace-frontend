@@ -23,7 +23,7 @@ export const PriceForAuction: FC<PriceProps> = ({ price, minStep, topBid, testid
 
   const startPrice = !priceBN.isZero() ? priceBN : minStepBN;
 
-  const decimals = api?.market?.kusamaDecimals;
+  const decimals = api?.market?.decimals;
 
   return (
     <PriceWrapper>

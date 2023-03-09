@@ -14,22 +14,12 @@ export type TWithdrawDeposit = {
   address: string
 };
 
-export const useWithdrawDepositStages = (accountAddress: string, bids: TWithdrawBid[], withdrawSponsorshipFee?: BN) => {
-  const { api, baseURL } = useApi();
+export const useWithdrawDepositStages = (accountAddress: string, bids: TWithdrawBid[]) => {
+  const { baseURL } = useApi();
   const { accounts } = useAccounts();
-  const marketApi = api?.market;
 
   const bidsAmount = useMemo(() => bids.reduce<BN>((acc, bid) =>
     acc.add(new BN(bid.amount)), new BN(0)), [bids]);
-
-  const withdrawSponsorshipFeeStage: InternalStage<TWithdrawDeposit>[] = useMemo(() => withdrawSponsorshipFee && !withdrawSponsorshipFee.isZero()
-    ? [{
-      title: `Withdraw sponsorship fee: ${formatKusamaBalance(withdrawSponsorshipFee?.toString())} ${tokenSymbol}`,
-      description: '',
-      status: StageStatus.default,
-      action: (params) => marketApi?.withdrawDeposit(params.txParams.address, params.options)
-    }]
-    : [], [marketApi, withdrawSponsorshipFee]);
 
   const withdrawBidsStage: InternalStage<TWithdrawDeposit>[] = useMemo(() => bids.length > 0
     ? [{
@@ -52,9 +42,8 @@ export const useWithdrawDepositStages = (accountAddress: string, bids: TWithdraw
     : [], [baseURL, bids, bidsAmount]);
 
   const withdrawDepositStages: InternalStage<TWithdrawDeposit>[] = useMemo(() => [
-    ...withdrawSponsorshipFeeStage,
     ...withdrawBidsStage
-  ], [withdrawSponsorshipFeeStage, withdrawBidsStage]);
+  ], [withdrawBidsStage]);
 
   const signer = useMemo(() => {
     return accounts.find(({ address }) => address === accountAddress);

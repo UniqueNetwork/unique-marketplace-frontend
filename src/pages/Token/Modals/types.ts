@@ -3,6 +3,11 @@ export type TTransfer = {
   recipient: string
 }
 
+export type TEnableAllowanceProps = {
+  collectionId: number,
+  tokenId: number
+}
+
 export type TFixPriceProps = {
   accountAddress: string
   price: string // float number

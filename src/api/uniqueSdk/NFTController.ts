@@ -68,7 +68,6 @@ export class UniqueSDKNFTController implements UniqueController {
     if (!parent) return;
 
     const unsignedTxPayload = await this.sdk.tokens.unnest.build({
-      parent,
       nested: { collectionId, tokenId },
       address
     });

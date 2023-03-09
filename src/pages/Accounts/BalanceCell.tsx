@@ -18,7 +18,7 @@ function BalanceCell({ isSmallDevice, accountInfo, tokenSymbol, testid }: IProps
   const KSM = accountInfo.deposit || 0;
   const isDeposit = !!accountInfo.deposit;
   const { api } = useApi();
-  const decimals = api?.market?.kusamaDecimals;
+  const decimals = api?.market?.decimals;
 
   if (!isSmallDevice) {
     return (

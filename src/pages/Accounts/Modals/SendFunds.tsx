@@ -94,12 +94,12 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     setSender(account);
   }, [senderAddress, accounts]);
 
-  const getKusamaFee = useCallback((newRecipientAddress, amount) => {
+  const getFee = useCallback((newRecipientAddress, amount) => {
     setIsFeeLoading(true);
     return debounce(() => {
       if (!selectedAccount || !api?.market) return;
       const recipient = typeof newRecipientAddress === 'string' ? newRecipientAddress : newRecipientAddress?.address;
-      api?.market?.getKusamaFee(selectedAccount.getAddress(), recipient, new BN(fromStringToBnString(amount)))
+      api?.market?.getFee(selectedAccount.getAddress(), recipient, new BN(fromStringToBnString(amount)))
       .then((fee) => {
         setKusamaFee(fee || '0');
       }).catch((e) => {
@@ -130,8 +130,8 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
 
   const onAmountChange = useCallback((value: string) => {
     setAmount(value);
-    getKusamaFee(recipientAddress, value)();
-  }, [setAmount, getKusamaFee, recipientAddress]);
+    getFee(recipientAddress, value)();
+  }, [setAmount, getFee, recipientAddress]);
 
   const isAmountGreaterThanBalance = useMemo(() => {
     const amountBN = new BN(fromStringToBnString(amount));
@@ -161,7 +161,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
 
   const onChangeAddress = useCallback((value: string | Account) => {
     setRecipientAddress(value);
-    getKusamaFee(value, amount)();
+    getFee(value, amount)();
 
     if (typeof value === 'string') {
       const isValid = value ? validateAddress(value, prefixes) : true;
@@ -171,7 +171,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
       setFilteredAccounts(accountsWithQuartzAddresses);
       setIsValidRecipientAddress(true);
     }
-  }, [accountsWithQuartzAddresses, onFilter, amount, getKusamaFee, prefixes]);
+  }, [accountsWithQuartzAddresses, onFilter, amount, getFee, prefixes]);
 
   const onCloseModal = useCallback(() => {
     setRecipientAddress('');

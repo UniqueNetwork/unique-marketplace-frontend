@@ -31,7 +31,7 @@ export const WalletManager: FC = () => {
   const { chainData, settings, currentChainId, onChangeChainId, api } = useApi();
   const { info } = useNotifications();
   const navigate = useNavigate();
-  const decimals = api?.market?.kusamaDecimals;
+  const decimals = api?.market?.decimals;
 
   const networks: INetwork[] = useMemo(() => Object.keys(config?.blockchains || {}).map<INetwork>((id) => ({
     id,

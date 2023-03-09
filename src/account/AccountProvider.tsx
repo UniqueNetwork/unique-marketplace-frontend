@@ -45,14 +45,6 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
     // unsubscribesBalancesChanges.current = unsubscribes.reduce<Record<string, Codec>>((acc, item) => ({ ...acc, ...item }), {});
   }, [kusamaSdk, setAccounts]);
 
-  const getAccountsWhiteListStatus = useCallback((accounts: Account[]) => {
-    if (!api?.market) return accounts;
-    return Promise.all(accounts.map(async (account: Account) => {
-      account.isOnWhiteList = await api?.market?.checkWhiteListed(account.getAddress());
-      return account;
-    }));
-  }, [api?.market]);
-
   useEffect(() => {
     if (!api?.market) return;
     setIsLoading(true);
@@ -76,13 +68,13 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
 
       changeAccount(defaultAccount);
 
-      setAccounts(await getAccountsWhiteListStatus(allAccounts));
+      setAccounts(allAccounts);
 
       setIsLoading(false);
 
       // await subscribeBalancesChanges(allAccounts);
     })();
-  }, [api?.market, subscribeBalancesChanges, getAccountsWhiteListStatus]);
+  }, [api?.market, subscribeBalancesChanges]);
 
   const changeAccount = useCallback((account: Account) => {
     localStorage.setItem(DefaultAccountKey, account.getAddress());
@@ -116,8 +108,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
 
   const getAccountDeposit = useCallback(async (account: Account) => {
     return {
-      bids: (await getWithdrawBids(baseURL, { owner: account.getAddress() })).data || { withdraw: [], leader: [] },
-      sponsorshipFee: await api?.market?.getUserDeposit(account.getAddress())
+      bids: (await getWithdrawBids(baseURL, { owner: account.getAddress() })).data || { withdraw: [], leader: [] }
     };
   }, [baseURL, api?.market]);
 
@@ -144,10 +135,10 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
       return account;
     }) || [];
 
-    setAccounts(await getAccountsWhiteListStatus(allAccounts));
+    setAccounts(allAccounts);
 
     await subscribeBalancesChanges(allAccounts);
-  }, [api?.market, getAccountsWhiteListStatus, getAccountDeposit]);
+  }, [api?.market, getAccountDeposit]);
 
   const updateCurrentAccountDeposit = useCallback(async () => {
     if (!selectedAccount) return Promise.resolve();

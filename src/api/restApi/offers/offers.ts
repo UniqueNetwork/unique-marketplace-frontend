@@ -26,8 +26,8 @@ export const useOffers = () => {
     try {
       const { status, data } = await getOffers(baseURL, {
         ...payload,
-        minPrice: minPrice && fromStringToBnString(minPrice, api?.market?.kusamaDecimals),
-        maxPrice: maxPrice && fromStringToBnString(maxPrice, api?.market?.kusamaDecimals)
+        minPrice: minPrice && fromStringToBnString(minPrice, api?.market?.decimals),
+        maxPrice: maxPrice && fromStringToBnString(maxPrice, api?.market?.decimals)
       });
       if (status === 200) {
         setOffers(data.items);
@@ -45,15 +45,15 @@ export const useOffers = () => {
       });
     }
     return { items: [], attributes: {}, attributesCount: [], itemsCount: 0, page: 1, pageSize: 10 };
-  }, [baseURL, api?.market?.kusamaDecimals]);
+  }, [baseURL, api?.market?.decimals]);
 
   const fetchMore = useCallback(async ({ minPrice, maxPrice, ...payload }: GetOffersRequestPayload) => {
     setIsFetching(true);
     try {
       const { status, data } = await getOffers(baseURL, {
         ...payload,
-        minPrice: minPrice && fromStringToBnString(minPrice, api?.market?.kusamaDecimals),
-        maxPrice: maxPrice && fromStringToBnString(maxPrice, api?.market?.kusamaDecimals)
+        minPrice: minPrice && fromStringToBnString(minPrice, api?.market?.decimals),
+        maxPrice: maxPrice && fromStringToBnString(maxPrice, api?.market?.decimals)
       });
       if (status === 200) {
         setOffers([...offers, ...data.items]);
@@ -66,7 +66,7 @@ export const useOffers = () => {
         message
       });
     }
-  }, [baseURL, offers, api?.market?.kusamaDecimals]);
+  }, [baseURL, offers, api?.market?.decimals]);
 
   return {
     offers,

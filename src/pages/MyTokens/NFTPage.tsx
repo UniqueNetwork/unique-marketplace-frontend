@@ -182,8 +182,8 @@ export const NFTPage = () => {
           filteredByPrice = false;
         } else {
           const tokenPrice = new BN(token.price);
-          const minPrice = new BN(fromStringToBnString(prices.minPrice || '0', api?.market?.kusamaDecimals));
-          const maxPrice = prices.maxPrice ? new BN(fromStringToBnString(prices.maxPrice, api?.market?.kusamaDecimals)) : BN_MAX_INTEGER;
+          const minPrice = new BN(fromStringToBnString(prices.minPrice || '0', api?.market?.decimals));
+          const maxPrice = prices.maxPrice ? new BN(fromStringToBnString(prices.maxPrice, api?.market?.decimals)) : BN_MAX_INTEGER;
           filteredByPrice = (tokenPrice.gte(minPrice) && tokenPrice.lte(maxPrice));
         }
       }
@@ -215,7 +215,7 @@ export const NFTPage = () => {
 
       return filterByStatus(token) && filteredByPrice && filteredByCollections && filteredByAttributes && filteredBySearchValue;
     },
-    [filterState, searchString, collections, api?.market?.kusamaDecimals]
+    [filterState, searchString, collections, api?.market?.decimals]
   );
 
   const filterByAttributeCounts = useCallback((token: MixedTokenAndOffer) => {
