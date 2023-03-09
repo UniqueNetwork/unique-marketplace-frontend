@@ -3,8 +3,7 @@ import { TokenIdArguments } from '@unique-nft/substrate-client/tokens';
 import { isEthereumAddress } from '@unique-nft/substrate-client/utils';
 import { BN } from '@polkadot/util';
 import { EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType, TransactionOptions, TSignMessage, UniqueController } from './types';
-import marketplaceAbi from './abi/marketPlaceAbi.json';
-import nonFungibleAbi from './abi/nonFungibleAbi.json';
+import marketplaceAbi from './contracts/marketplace-0.json';
 import { collectionIdToAddress, getEthAccount, compareEncodedAddresses, isTokenOwner } from './utils/addressUtils';
 import { formatKsm, fromStringToBnString } from './utils/textFormat';
 import { repeatCheckForTransactionFinish } from './utils/repeatCheckTransaction';
@@ -43,7 +42,7 @@ export class UniqueSDKMarketController implements UniqueController {
   async setNetwork(options: UniqueSDKMarketControllerOptions) {
     this.uniqueSdk = options.uniqueSdk;
     this.kusamaSdk = options.kusamaSdk;
-    this.kusamaDecimals = (await this.kusamaSdk.chain.properties()).decimals || 12;
+    this.kusamaDecimals = (await this.kusamaSdk.common.chainProperties()).decimals || 12;
     this.escrowAddress = options.escrowAddress;
     this.contractAddress = options.contractAddress;
     this.auctionAddress = options.auctionAddress;
