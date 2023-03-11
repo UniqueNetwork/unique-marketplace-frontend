@@ -17,6 +17,12 @@ export const useSellFixStages = (collectionId: number, tokenId: number) => {
     description: '',
     status: StageStatus.default,
     action: ({ options }) => marketApi?.changeAllowance(collectionId, tokenId, true, options)
+  },
+  {
+    title: 'Putting token on sale',
+    description: '',
+    status: StageStatus.default,
+    action: ({ txParams, options }) => marketApi?.sellFix(collectionId, tokenId, Number(txParams.price), 1, options) // TODO: price string -> number
   }], [selectedAccount?.isOnWhiteList, marketApi, collectionId, tokenId]);
   const { stages, error, status, initiate } = useStages<TFixPriceProps>(sellFixStages, selectedAccount);
 

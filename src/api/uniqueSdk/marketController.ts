@@ -1,16 +1,15 @@
 import { Client, TokenByIdResponse } from '@unique-nft/sdk';
 import { TokenIdArguments } from '@unique-nft/substrate-client/tokens';
 import { isEthereumAddress } from '@unique-nft/substrate-client/utils';
-import { BN } from '@polkadot/util';
-import { EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType, TransactionOptions, TSignMessage, UniqueController } from './types';
-import marketplaceAbi from './contracts/marketplace-0.json';
-import { collectionIdToAddress, getEthAccount, compareEncodedAddresses, isTokenOwner } from './utils/addressUtils';
-import { formatKsm, fromStringToBnString } from './utils/textFormat';
-import { repeatCheckForTransactionFinish } from './utils/repeatCheckTransaction';
-import { Address } from '@unique-nft/substrate-client/types';
-import Web3 from 'web3';
-import { ApiPromise } from '@polkadot/api';
 import { AllBalances, Balance } from '@unique-nft/substrate-client/balance';
+import { Address } from '@unique-nft/substrate-client/types';
+
+import { ApiPromise } from '@polkadot/api';
+import { BN } from '@polkadot/util';
+
+import { TransactionOptions, UniqueController } from './types';
+import { getEthAccount, compareEncodedAddresses, isTokenOwner } from './utils/addressUtils';
+import marketplaceAbi from './contracts/marketplace-0.json';
 
 declare module '@unique-nft/substrate-client' {
   interface Client {
@@ -30,7 +29,6 @@ export type UniqueSDKMarketControllerOptions = {
 
 export class UniqueSDKMarketController implements UniqueController {
   private uniqueSdk: Client | undefined;
-  private web3Instance: Web3 | undefined;
   private minPrice = 0.000001;
   private defaultGasAmount = 2500000;
   private contractAddress = '';
@@ -39,38 +37,11 @@ export class UniqueSDKMarketController implements UniqueController {
 
   async setNetwork(options: UniqueSDKMarketControllerOptions) {
     this.uniqueSdk = options.uniqueSdk;
-    this.contractAddress = options.contractAddress;
+    // this.contractAddress = options.contractAddress;
+    this.contractAddress = '0xbf198C5168E6BA2ef9E58e3d674d7F7eB2DfC96e';
     this.auctionAddress = options.auctionAddress;
 
-    console.log('HELLO!?');
-    // @ts-ignore
-    window.test = this.uniqueSdk;
-    console.log(await this.uniqueSdk.common.chainProperties());
     this.decimals = (await this.uniqueSdk.common.chainProperties()).decimals || 12;
-    console.log('final decimals', this.decimals);
-    const provider = new Web3.providers.WebsocketProvider(options.wsEndpoint, {
-      reconnect: {
-        auto: true,
-        delay: 5000,
-        maxAttempts: 5,
-        onTimeout: false
-      }
-    });
-
-    const web3 = new Web3(provider);
-    this.web3Instance = web3;
-  }
-
-  private getMatcherContractInstance(ethAddress: string): { methods: MarketplaceAbiMethods } {
-    // @ts-ignore
-    return new this.web3Instance.eth.Contract(marketplaceAbi.abi, this.contractAddress, {
-      from: ethAddress
-    });
-  }
-
-  private getEvmCollectionInstance(collectionId: string): { methods: EvmCollectionAbiMethods, options: any } {
-    // @ts-ignore
-    return new this.web3Instance.eth.Contract(nonFungibleAbi, collectionIdToAddress(parseInt(collectionId, 10)), { from: this.contractOwner });
   }
 
   public async changeAllowance(collectionId: number, tokenId: number, targetAllowance: boolean, { signer, send }: TransactionOptions): Promise<void> {
@@ -80,7 +51,7 @@ export class UniqueSDKMarketController implements UniqueController {
     const to = this.contractAddress;
     const isAlreadyAllowed = await this.uniqueSdk.tokens.allowance({ collectionId, tokenId, from, to });
     if (isAlreadyAllowed.isAllowed === targetAllowance) return;
-    const unsignedTxPayload = await this.uniqueSdk.tokens.approve.build({ collectionId, tokenId, spender: from, address: to, isApprove: targetAllowance });
+    const unsignedTxPayload = await this.uniqueSdk.tokens.approve.build({ collectionId, tokenId, spender: to, address: from, isApprove: targetAllowance });
     const { signature } = await this.uniqueSdk.tokens.approve.sign(unsignedTxPayload, { signer });
 
     if (!signature) throw new Error('Signing failed');
@@ -90,10 +61,40 @@ export class UniqueSDKMarketController implements UniqueController {
 
       await send({ signerPayloadJSON, signature: signature as `0x${string}` });
     } else {
-      await this.uniqueSdk.extrinsics.submit({
+      const res = await this.uniqueSdk.tokens.approve.submitWaitResult({
         signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
         signature
       });
+      console.log('Failed to provide approve', res.error);
+      if (res.error) throw new Error('Approve failed');
+    }
+  }
+
+  // price in SC format
+  // ex. to sell for 1 OPL - price=100000000000000000(18 decimals)
+  // amount - "1" for NFT, and amount of pieces for RFT
+  public async sellFix(collectionId: number, tokenId: number, price: number, amount: number, { signer, send }: TransactionOptions): Promise<void> {
+    if (!signer) throw new Error('Signer not provided');
+    if (!this.uniqueSdk) throw new Error('Sdk not provided');
+    const address = signer.address;
+    // const ethAddress = getEthAccount(address);
+    const from = signer.address;
+    const to = this.contractAddress;
+    const isAllowed = await this.uniqueSdk.tokens.allowance({ collectionId, tokenId, from, to });
+    if (!isAllowed) throw new Error('Token not approved for sale');
+
+    try {
+      const res = await this.uniqueSdk.evm.send.submitWaitResult({
+        abi: marketplaceAbi,
+        address,
+        contractAddress: this.contractAddress,
+        funcName: 'put',
+        args: [collectionId, tokenId, price, amount] as any // TODO: ???
+      }, { signer });
+      console.log('Put on sale');
+      if (res.error) throw new Error('res.error');
+    } catch (e) {
+      console.log('FAILED TO PUT ON SALE', e);
     }
   }
 
