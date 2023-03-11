@@ -98,6 +98,53 @@ export class UniqueSDKMarketController implements UniqueController {
     }
   }
 
+  // TODO: type for order
+  private async getOrder(collectionId: number, tokenId: number): Promise<any> {
+    if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
+    if (!collectionId || !tokenId) throw new Error(`Cant get order for ${collectionId}-${tokenId}`);
+    try {
+      const res = await this.uniqueSdk.evm.call({
+        abi: marketplaceAbi,
+        address: '5EALag5gFWyjbz9kYV5VNUr7tjg9MrAMg2nZhWwSmAHdaiZp', // TODO: this arg makes no senswe
+        contractAddress: this.contractAddress,
+        funcName: 'getOrder',
+        args: [collectionId, tokenId] as any // TODO: ???
+      });
+      console.log('Order found', res);
+      return res; // TODO: works, but result makes no sense
+    } catch (e) {
+      console.error('Failed to get order', e);
+      throw e;
+    }
+  }
+
+  public async cancelFix(collectionId: number, tokenId: number, amount: number, { signer, send }: TransactionOptions): Promise<void> {
+    if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
+    // check if order exist
+    try {
+      await this.getOrder(collectionId, tokenId);
+      // TODO: extra check for allowance = false
+    } catch (e) {
+      console.log('Order not found');
+      return;
+    }
+    // cancel order
+    try {
+      const res = await this.uniqueSdk.evm.send.submitWaitResult({
+        abi: marketplaceAbi,
+        address: '5EALag5gFWyjbz9kYV5VNUr7tjg9MrAMg2nZhWwSmAHdaiZp', // TODO: this arg makes no senswe
+        contractAddress: this.contractAddress,
+        funcName: 'revoke',
+        args: [collectionId, tokenId, amount] as any // TODO: ???
+      }, { signer });
+      console.log('Order found', res);
+      return; // TODO: works, but result makes no sense
+    } catch (e) {
+      console.error('Failed to get order', e);
+      throw e;
+    }
+  }
+
     // #region AUCTION
 
   transferToAuction(owner: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
@@ -106,7 +153,7 @@ export class UniqueSDKMarketController implements UniqueController {
 
   // token
   async transferToken(from: Address, to: Address, collectionId: string, tokenId: string, { signer, send }: TransactionOptions): Promise<void> {
-    if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
+    if (!this.uniqueSdk) throw new Error('Controller isn\'t ready'); // TODO: make this.uniqueSdk mandatory (dont check for it in every function)
     const tokenIdArguments: TokenIdArguments = {
       collectionId: Number(collectionId), tokenId: Number(tokenId)
     };

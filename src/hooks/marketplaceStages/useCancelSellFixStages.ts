@@ -9,7 +9,20 @@ export const useCancelSellFixStages = (collectionId: number, tokenId: number) =>
   const { api } = useApi();
   const { selectedAccount } = useAccounts();
   const marketApi = api?.market;
-  const delistStages: InternalStage<TDelistProps>[] = useMemo(() => [], [marketApi, collectionId, tokenId]);
+  const delistStages: InternalStage<TDelistProps>[] = useMemo(() => [
+    {
+      title: 'Remove allowance from contract',
+      description: '',
+      status: StageStatus.default,
+      action: ({ options }) => marketApi?.changeAllowance(collectionId, tokenId, false, options)
+    },
+    {
+      title: 'Cancel order',
+      description: '',
+      status: StageStatus.default,
+      action: ({ options }) => marketApi?.cancelFix(collectionId, tokenId, 1, options)
+    }
+  ], [marketApi, collectionId, tokenId]);
   const { stages, error, status, initiate } = useStages<TDelistProps>(delistStages, selectedAccount);
 
   return {
