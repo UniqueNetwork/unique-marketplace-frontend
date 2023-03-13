@@ -98,6 +98,34 @@ export class UniqueSDKMarketController implements UniqueController {
     }
   }
 
+  public async buyFix(collectionId: number, tokenId: number, amount: number, { signer, send }: TransactionOptions): Promise<void> {
+    if (!signer) throw new Error('Signer not provided');
+    if (!this.uniqueSdk) throw new Error('Sdk not provided');
+    const address = signer.address;
+    // const ethAddress = getEthAccount(address);
+    const from = signer.address;
+    const to = this.contractAddress;
+    const isAllowed = await this.uniqueSdk.tokens.allowance({ collectionId, tokenId, from, to });
+    if (!isAllowed) throw new Error('Token not approved for sale');
+
+    const value = 0; // order.value
+
+    try {
+      const res = await this.uniqueSdk.evm.send.submitWaitResult({
+        abi: marketplaceAbi,
+        address,
+        contractAddress: this.contractAddress,
+        value, // TODO: price goes here, from order or from SC?
+        funcName: 'buy', // TODO: !!!! HOW TO GET COST FROM ORDER !? !? !? !?
+        args: [collectionId, tokenId, amount] as any // TODO: ???
+      }, { signer });
+      console.log('Put on sale');
+      if (res.error) throw new Error('res.error');
+    } catch (e) {
+      console.log('FAILED TO PUT ON SALE', e);
+    }
+  }
+
   // TODO: type for order
   private async getOrder(collectionId: number, tokenId: number): Promise<any> {
     if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
@@ -105,7 +133,7 @@ export class UniqueSDKMarketController implements UniqueController {
     try {
       const res = await this.uniqueSdk.evm.call({
         abi: marketplaceAbi,
-        address: '5EALag5gFWyjbz9kYV5VNUr7tjg9MrAMg2nZhWwSmAHdaiZp', // TODO: this arg makes no senswe
+        address: '5EALag5gFWyjbz9kYV5VNUr7tjg9MrAMg2nZhWwSmAHdaiZp', // TODO: this arg makes no sense, cant skip
         contractAddress: this.contractAddress,
         funcName: 'getOrder',
         args: [collectionId, tokenId] as any // TODO: ???
