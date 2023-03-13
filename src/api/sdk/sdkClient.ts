@@ -50,11 +50,8 @@ export class SdkClient {
     });
     this.marketController.setNetwork({
       uniqueSdk: sdkSet.unique,
-      kusamaSdk: sdkSet.kusama,
       auctionAddress: settings.auction.address,
-      contractAddress: settings.blockchain.unique.contractAddress,
-      escrowAddress: settings.blockchain.escrowAddress,
-      wsEndpoint: settings.blockchain.unique.wsEndpoint
+      contractAddress: settings.blockchain.unique.contractAddress
     });
   }
 }

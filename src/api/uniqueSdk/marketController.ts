@@ -20,20 +20,20 @@ declare module '@unique-nft/substrate-client' {
 
 export type UniqueSDKMarketControllerOptions = {
   uniqueSdk: Client
-  kusamaSdk: Client
-  escrowAddress: string
   contractAddress: string
   auctionAddress: string
-  wsEndpoint: string
 };
 
 export class UniqueSDKMarketController implements UniqueController {
-  private uniqueSdk: Client | undefined;
-  private minPrice = 0.000001;
-  private defaultGasAmount = 2500000;
+  private uniqueSdk: Client;
   private contractAddress = '';
   private auctionAddress = '';
-  decimals = 12;
+  public decimals = 12;
+
+  constructor() {
+    // just to avoid checking for sdk being initialized everytime everywhere
+    this.uniqueSdk = new Client({ baseUrl: '' });
+  }
 
   async setNetwork(options: UniqueSDKMarketControllerOptions) {
     this.uniqueSdk = options.uniqueSdk;
@@ -108,15 +108,15 @@ export class UniqueSDKMarketController implements UniqueController {
     const isAllowed = await this.uniqueSdk.tokens.allowance({ collectionId, tokenId, from, to });
     if (!isAllowed) throw new Error('Token not approved for sale');
 
-    const value = 0; // order.value
+    const value = (await this.getOrder(collectionId, tokenId))[3]; // order.value
 
     try {
       const res = await this.uniqueSdk.evm.send.submitWaitResult({
         abi: marketplaceAbi,
         address,
         contractAddress: this.contractAddress,
-        value, // TODO: price goes here, from order or from SC?
-        funcName: 'buy', // TODO: !!!! HOW TO GET COST FROM ORDER !? !? !? !?
+        value,
+        funcName: 'buy',
         args: [collectionId, tokenId, amount] as any // TODO: ???
       }, { signer });
       console.log('Put on sale');
@@ -150,7 +150,7 @@ export class UniqueSDKMarketController implements UniqueController {
     if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
     // check if order exist
     try {
-      await this.getOrder(collectionId, tokenId);
+      await this.getOrder(655, 1);
       // TODO: extra check for allowance = false
     } catch (e) {
       console.log('Order not found');
@@ -160,7 +160,7 @@ export class UniqueSDKMarketController implements UniqueController {
     try {
       const res = await this.uniqueSdk.evm.send.submitWaitResult({
         abi: marketplaceAbi,
-        address: '5EALag5gFWyjbz9kYV5VNUr7tjg9MrAMg2nZhWwSmAHdaiZp', // TODO: this arg makes no senswe
+        address: '5EALag5gFWyjbz9kYV5VNUr7tjg9MrAMg2nZhWwSmAHdaiZp',
         contractAddress: this.contractAddress,
         funcName: 'revoke',
         args: [collectionId, tokenId, amount] as any // TODO: ???

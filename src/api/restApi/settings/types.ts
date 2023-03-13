@@ -1,6 +1,6 @@
 export type Settings = {
   blockchain: {
-    escrowAddress: string
+    escrowAddress: string // TODO: can be removed (after it is removed from BE)
     unique: {
       wsEndpoint: string
       collectionIds: number[]

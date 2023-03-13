@@ -4,6 +4,7 @@ import { InternalStage, StageStatus, useStagesReturn } from '../types/StagesType
 import { Account } from '@unique-nft/accounts/types';
 
 const useStages = <T>(stages: InternalStage<T>[], signer?: Account): useStagesReturn<T> => {
+  if (!signer) throw new Error('Can\'t execute stages without signer');
   const [internalStages, setInternalStages] = useState<InternalStage<T>[]>(stages);
   const [stagesStatus, setStagesStatus] = useState<StageStatus>(StageStatus.default);
   const [executionError, setExecutionError] = useState<Error | undefined | null>(null);
