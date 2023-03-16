@@ -13,26 +13,26 @@ export const useAuctionSellStages = (collectionId: number, tokenId: number) => {
   const marketApi = api?.market;
 
   const sellAuctionStages: InternalStage<TAuctionProps>[] = useMemo(() => [
-    {
-      title: 'Starting auction',
-      description: '',
-      status: StageStatus.default,
-      action: (params) =>
-        marketApi?.transferToAuction(
-          params.txParams.accountAddress,
-          collectionId.toString(),
-          tokenId.toString(),
-          {
-            ...params.options,
-            send:
-              ({ signature, signerPayloadJSON }) => {
-                const startPrice = fromStringToBnString(params.txParams.startingPrice.toString(), api?.market?.decimals);
-                const priceStep = fromStringToBnString(params.txParams.minimumStep.toString(), api?.market?.decimals);
-                return startAuctionRequest(baseURL, { signerPayloadJSON, signature, days: params.txParams.duration, startPrice, priceStep });
-              }
-            }
-          )
-    }
+    // {
+    //   title: 'Starting auction',
+    //   description: '',
+    //   status: StageStatus.default,
+    //   action: (params) =>
+    //     marketApi?.transferToAuction(
+    //       params.txParams.accountAddress,
+    //       collectionId.toString(),
+    //       tokenId.toString(),
+    //       {
+    //         ...params.options,
+    //         send:
+    //           ({ signature, signerPayloadJSON }) => {
+    //             const startPrice = fromStringToBnString(params.txParams.startingPrice.toString(), api?.market?.decimals);
+    //             const priceStep = fromStringToBnString(params.txParams.minimumStep.toString(), api?.market?.decimals);
+    //             return startAuctionRequest(baseURL, { signerPayloadJSON, signature, days: params.txParams.duration, startPrice, priceStep });
+    //           }
+    //         }
+    //       )
+    // }
   ], [baseURL, marketApi, api?.market?.decimals, collectionId, tokenId]);
 
   const { stages, error, status, initiate } = useStages<TAuctionProps>(sellAuctionStages, selectedAccount);

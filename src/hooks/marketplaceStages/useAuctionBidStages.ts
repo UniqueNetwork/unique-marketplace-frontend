@@ -12,20 +12,20 @@ export const useAuctionBidStages = (collectionId: number, tokenId: number) => {
   const { selectedAccount } = useAccounts();
   const marketApi = api?.market;
   const bidAuctionStages: InternalStage<TAuctionBidProps>[] = useMemo(() => [
-    {
-      title: 'Registering bid',
-      description: '',
-      status: StageStatus.default,
-      action: ({ txParams, options }) =>
-        marketApi?.transferBidBalance(
-          txParams.accountAddress,
-          new BN(txParams.value),
-          { ...options,
-            send: ({ signature, signerPayloadJSON }) => placeBidRequest(baseURL, {
-              signerPayloadJSON, signature, collectionId, tokenId
-            }) }
-        )
-    }
+    // {
+    //   title: 'Registering bid',
+    //   description: '',
+    //   status: StageStatus.default,
+    //   action: ({ txParams, options }) =>
+    //     marketApi?.transferBidBalance(
+    //       txParams.accountAddress,
+    //       new BN(txParams.value),
+    //       { ...options,
+    //         send: ({ signature, signerPayloadJSON }) => placeBidRequest(baseURL, {
+    //           signerPayloadJSON, signature, collectionId, tokenId
+    //         }) }
+    //     )
+    // }
   ], [baseURL, marketApi, collectionId, tokenId, selectedAccount]);
 
   const { stages, error, status, initiate } = useStages<TAuctionBidProps>(bidAuctionStages, selectedAccount);
