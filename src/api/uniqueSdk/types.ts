@@ -3,10 +3,6 @@ import { SignerPayloadJSON } from '@unique-nft/substrate-client/types';
 import { Account } from '@unique-nft/accounts/types';
 import { Bytes } from '@polkadot/types';
 
-export interface UniqueController {
-  setNetwork(options: unknown): void
-}
-
 export type TTransaction = {
   signerPayloadJSON?: SignerPayloadJSON
   signature: `0x${string}`

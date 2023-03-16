@@ -1,30 +1,38 @@
 import { Client, CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
-import { TransactionOptions, UniqueController } from './types';
+import UniqueController from './controllers/base/UniqueController';
+import { TransactionOptions } from './types';
 
 export class UniqueSDKCollectionController implements UniqueController {
-  private sdk: Client | undefined;
+  public uniqueSdk: Client;
   private collectionIds: number[] = [];
 
-  setNetwork(options: { sdk: Client, collectionIds: number[] }): void {
-    this.sdk = options.sdk;
+  // TODO: proper initialization in Api
+  constructor(sdk: Client = new Client({ baseUrl: '' })) {
+    this.uniqueSdk = sdk;
+  }
+
+  async setNetwork(options: { sdk: Client, collectionIds: number[] }): Promise<void> {
+    this.uniqueSdk = options.sdk;
     this.collectionIds = options.collectionIds;
+    // just a stub
+    return await new Promise(() => {});
   }
 
   async confirmSponsorship(collectionId: number, { signer }: TransactionOptions): Promise<void> {
-    if (!this.sdk) throw new Error('Controller isn\'t ready');
+    if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
     if (!signer) return;
-    const unsignedTxPayload = await this.sdk.collections.confirmSponsorship.build({ collectionId, address: signer.getAddress() });
+    const unsignedTxPayload = await this.uniqueSdk.collections.confirmSponsorship.build({ collectionId, address: signer.getAddress() });
     if (!unsignedTxPayload) throw new Error('Transaction build error');
-    const { signature } = await this.sdk.collections.confirmSponsorship.sign(unsignedTxPayload, { signer });
+    const { signature } = await this.uniqueSdk.collections.confirmSponsorship.sign(unsignedTxPayload, { signer });
     if (!signature) throw new Error('Signing failed');
-    await this.sdk.extrinsics.submit({
+    await this.uniqueSdk.extrinsics.submit({
       signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });
   }
 
   async getCollection(collectionId: number): Promise<CollectionInfoWithSchemaResponse | null> {
-    return await this.sdk?.collections.get({ collectionId }) || null;
+    return await this.uniqueSdk?.collections.get({ collectionId }) || null;
   }
 
   async getFeaturedCollections(): Promise<CollectionInfoWithSchemaResponse[]> {
@@ -43,13 +51,13 @@ export class UniqueSDKCollectionController implements UniqueController {
   }
 
   async removeCollectionSponsor(collectionId: number, { signer }: TransactionOptions): Promise<void> {
-    if (!this.sdk) throw new Error('Controller isn\'t ready');
+    if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
     if (!signer) return;
-    const unsignedTxPayload = await this.sdk.collections.removeSponsorship.build({ collectionId, address: signer.getAddress() });
+    const unsignedTxPayload = await this.uniqueSdk.collections.removeSponsorship.build({ collectionId, address: signer.getAddress() });
     if (!unsignedTxPayload) throw new Error('Transaction build error');
-    const { signature } = await this.sdk.collections.removeSponsorship.sign(unsignedTxPayload, { signer });
+    const { signature } = await this.uniqueSdk.collections.removeSponsorship.sign(unsignedTxPayload, { signer });
     if (!signature) throw new Error('Signing failed');
-    await this.sdk.extrinsics.submit({
+    await this.uniqueSdk.extrinsics.submit({
       signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });

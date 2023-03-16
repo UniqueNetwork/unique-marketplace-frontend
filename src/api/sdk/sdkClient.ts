@@ -1,9 +1,11 @@
 import { Settings } from '../restApi/settings/types';
 import { UniqueSDKNFTController } from '../uniqueSdk/NFTController';
 import { UniqueSDKCollectionController } from '../uniqueSdk/collectionController';
-import { UniqueSDKMarketController } from '../uniqueSdk/marketController';
 import { SdkNetworkProvider } from './sdkNetworkProvider';
 import { DecodedInfixOrUrlOrCidAndHash } from '../uniqueSdk/types';
+import MarketController from 'api/uniqueSdk/marketController';
+import MarketUniqueController from 'api/uniqueSdk/controllers/marketUniqueController';
+import MarketMetamaskController from 'api/uniqueSdk/controllers/marketMetamaskController';
 
 declare module '@unique-nft/sdk' {
   export interface TokenByIdResponse {
@@ -19,7 +21,7 @@ export class SdkClient {
   public networks: Record<string, SdkNetworkProvider> = {};
   public nftController: UniqueSDKNFTController = new UniqueSDKNFTController();
   public collectionController: UniqueSDKCollectionController = new UniqueSDKCollectionController();
-  public marketController: UniqueSDKMarketController = new UniqueSDKMarketController();
+  public marketController: MarketController = new MarketController(new MarketUniqueController(), new MarketMetamaskController());
 
   private addNetwork = async ({ networkId, ...networkOptions }: NetworkOptions) => {
     const network = new SdkNetworkProvider(networkOptions);
