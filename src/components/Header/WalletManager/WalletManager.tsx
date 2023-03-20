@@ -1,20 +1,25 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import config from 'config';
+
 import { BN } from '@polkadot/util';
+import { isEthereumAddress } from '@polkadot/util-crypto';
+
 import { INetwork } from '@unique-nft/ui-kit';
+
+import { formatKusamaBalance } from 'utils/textUtils';
 import { Text, useNotifications, Button } from 'components/UI';
-import { useAccounts } from 'hooks/useAccounts';
+import { AccountsManager, IAccount } from 'components/UI/widgets/AccountsManager';
 import { Avatar } from 'components/Avatar/Avatar';
 import GetKSMModal from 'components/GetKSMModal/GetKSMModal';
-import { BalanceOption } from './types';
+import { useAccounts } from 'hooks/useAccounts';
 import { useApi } from 'hooks/useApi';
+
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import { TWithdrawBid } from 'api/restApi/auction/types';
-import { formatKusamaBalance } from 'utils/textUtils';
+import { BalanceOption } from './types';
 import BalanceSkeleton from '../../Skeleton/BalanceSkeleton';
-import config from 'config';
-import { AccountsManager, IAccount } from 'components/UI/widgets/AccountsManager';
 
 const tokenSymbol = 'KSM';
 
@@ -49,7 +54,7 @@ export const WalletManager: FC = () => {
     setIsOpen(false);
   }, [onChangeChainId]);
 
-  const widgetAccounts = useMemo(() => accounts.map((account) => (
+  const widgetAccounts = useMemo(() => accounts.filter((account) => !isEthereumAddress(account.address)).map((account) => (
     { ...account, address: account.getAddress(chainData?.SS58Prefix), substrateAddress: account?.getAddress() })
   ), [accounts, chainData?.SS58Prefix]);
 
