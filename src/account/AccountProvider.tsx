@@ -11,12 +11,11 @@ import { Accounts, ProviderClass } from '@unique-nft/accounts';
 
 import { PolkadotProvider, PolkadotAccount } from '@unique-nft/accounts/polkadot';
 import { KeyringLocalProvider, KeyringLocalAccount } from '@unique-nft/accounts/keyring-local';
+import { MetamaskProvider, MetamaskAccount } from '@unique-nft/accounts/metamask';
 import { Account } from '@unique-nft/accounts/types';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 export const DefaultAccountKey = 'unique_market_account_address';
-
-type TQueryAccountResponse = { data: { free: BN } };
 
 const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts(), children }) => {
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -26,23 +25,11 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
   const [selectedAccount, setSelectedAccount] = useState<Account>();
   const { api, kusamaSdk, baseURL } = useApi();
 
-  const unsubscribesBalancesChanges = useRef<Record<string, Codec>>({});
+  const unsubscribesBalancesChanges = useRef<Record<string, Codec>>({
+    // TODO: !!!!!!!!!
+  });
   const subscribeBalancesChanges = useCallback(async (accounts: Account[]) => {
-    // if (!kusamaSdk?.api) return;
-    //
-    // const unsubscribes = await Promise.all(accounts.map(async (account) => {
-    //   const unsubscribe = await kusamaSdk.api.query.system.account(account.getAddress(), ({ data: { free } }: TQueryAccountResponse) => {
-    //     if (!account.balance?.KSM || !free.sub(account.balance.KSM).isZero()) {
-    //       setAccounts((accounts) => accounts.map<Account>((_account) => {
-    //         _account.balance = account.getAddress() === _account.getAddress() ? { KSM: free } : _account.balance;
-    //         return _account;
-    //       }));
-    //     }
-    //   });
-    //   return { [account.getAddress()]: unsubscribe };
-    // }));
-    //
-    // unsubscribesBalancesChanges.current = unsubscribes.reduce<Record<string, Codec>>((acc, item) => ({ ...acc, ...item }), {});
+    // TODO: get balance via new rest subscribtions !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   }, [kusamaSdk, setAccounts]);
 
   useEffect(() => {
@@ -51,11 +38,26 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
     void (async () => {
       await _accounts.addProvider<ProviderClass<any>>(KeyringLocalProvider, { passwordCallback: showSignDialog });
       await _accounts.addProvider<ProviderClass<any>>(PolkadotProvider);
+      await _accounts.addProvider<ProviderClass<any>>(MetamaskProvider);
 
       const allAccounts = (await _accounts?.getAccounts())?.map((account) => {
-        account.name = (account instanceof PolkadotAccount
-          ? (account).injectedAccount
-          : (account as unknown as KeyringLocalAccount).keyringPair).meta.name as string;
+        console.log('account', account);
+        let name; // TODO: refactor?
+        switch (account.constructor) {
+          case PolkadotAccount:
+            name = (account as PolkadotAccount).name;
+          break;
+          case KeyringLocalAccount:
+            name = (account as unknown as KeyringLocalAccount).keyringPair.meta.name as string;
+          break;
+          case MetamaskAccount:
+            name = (account as unknown as MetamaskAccount).name || 'Metamask: ' + account.getAddress();
+          break;
+          default:
+            console.error('Corrupted account: ', account);
+            throw new Error('Unknown account type faced');
+        }
+        account.name = name;
         account.address = account.getAddress();
         account.isLocal = account instanceof KeyringLocalAccount;
         return account;

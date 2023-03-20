@@ -29,6 +29,7 @@
     "@unique-nft/ui-kit": "0.0.37",
     "@unique-nft/unique-mainnet-types": "930.31.0",
     "axios": "^0.24.0",
+    "ethers": "^5.7.2",
     "graphql": "^16.0.1",
     "protobufjs": "^6.11.2",
     "rc-table": "^7.21.0",

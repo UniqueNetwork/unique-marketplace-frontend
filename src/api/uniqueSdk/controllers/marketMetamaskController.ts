@@ -1,3 +1,4 @@
+import Web3Provider from 'web3';
 import { Address } from '@unique-nft/substrate-client/types';
 import { BN } from '@polkadot/util';
 import { AllBalances } from '@unique-nft/substrate-client/balance';
@@ -5,7 +6,7 @@ import { TransactionOptions } from '../types';
 import IMarketController from './base/IMarketController';
 import MetamaskController from './base/MetamaskController';
 
-export class MarketMetamaskController implements MetamaskController, IMarketController {
+export class MarketMetamaskController extends MetamaskController implements IMarketController {
   changeAllowance(collectionId: number, tokenId: number, targetAllowance: boolean, options: TransactionOptions): Promise<void> {
     throw new Error('Method not implemented.');
   }
@@ -39,10 +40,6 @@ export class MarketMetamaskController implements MetamaskController, IMarketCont
   }
 
   transferBalance(address: Address, destination: string, amount: BN, { signer, send }: TransactionOptions): Promise<void> {
-    throw new Error('Method not implemented.');
-  }
-
-  setNetwork(options: unknown): Promise<void> {
     throw new Error('Method not implemented.');
   }
 }
