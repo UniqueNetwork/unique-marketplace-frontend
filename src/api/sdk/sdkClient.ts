@@ -42,12 +42,12 @@ export class SdkClient {
     }
     // changing sdk instances and settings for controllers
     this.nftController.setNetwork({
-      sdk: sdkSet.unique,
+      uniqueSdk: sdkSet.unique,
       allowedTokens: settings.blockchain.unique.allowedTokens,
       collectionIds: settings.blockchain.unique.collectionIds
     });
     this.collectionController.setNetwork({
-      sdk: sdkSet.unique,
+      uniqueSdk: sdkSet.unique,
       collectionIds: settings.blockchain.unique.collectionIds
     });
     this.marketController.setNetwork({

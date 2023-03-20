@@ -7,7 +7,7 @@ import { Address } from '@unique-nft/substrate-client/types';
 import { ApiPromise } from '@polkadot/api';
 import { BN } from '@polkadot/util';
 
-import UniqueController from './base/UniqueController';
+import UniqueController, { UniqueControllerOptions } from './base/UniqueController';
 import IMarketController from './base/IMarketController';
 
 import { TransactionOptions } from '../types';
@@ -22,30 +22,22 @@ declare module '@unique-nft/substrate-client' {
   }
 }
 
-export type MarketUniqueControllerOptions = {
-  uniqueSdk: Client
+export interface MarketUniqueControllerOptions extends UniqueControllerOptions {
   contractAddress: string
   auctionAddress: string
-};
+}
 
-export class MarketUniqueController implements UniqueController, IMarketController {
-  public uniqueSdk: Client;
+export class MarketUniqueController extends UniqueController implements IMarketController {
+  public uniqueSdk!: Client; // initialized in UniqueController base class, but TS complains for some reason...
   private contractAddress = '';
   private auctionAddress = '';
-  public decimals = 12;
 
-  constructor() {
-    // just to avoid checking for sdk being initialized everytime everywhere
-    this.uniqueSdk = new Client({ baseUrl: '' });
-  }
-
-  async setNetwork(options: MarketUniqueControllerOptions) {
-    this.uniqueSdk = options.uniqueSdk;
+  async setNetwork(options: MarketUniqueControllerOptions): Promise<void> {
     // this.contractAddress = options.contractAddress;
     this.contractAddress = '0xbf198C5168E6BA2ef9E58e3d674d7F7eB2DfC96e';
     this.auctionAddress = options.auctionAddress;
-
-    this.decimals = (await this.uniqueSdk.common.chainProperties()).decimals || 12;
+    super.setNetwork(options);
+    return new Promise(() => {});
   }
 
   public async changeAllowance(collectionId: number, tokenId: number, targetAllowance: boolean, { signer, send }: TransactionOptions): Promise<void> {

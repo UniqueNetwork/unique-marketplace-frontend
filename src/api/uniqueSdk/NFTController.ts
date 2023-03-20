@@ -4,26 +4,27 @@ import { getNestingTokenAddress, TokenIdArguments } from '@unique-nft/substrate-
 import { TransactionOptions } from './types';
 import { getEthAccount } from './utils/addressUtils';
 import { filterAllowedTokens } from './utils/checkTokenIsAllowed';
-import UniqueController from './controllers/base/UniqueController';
+import UniqueController, { UniqueControllerOptions } from './controllers/base/UniqueController';
 
 declare module '@unique-nft/sdk' {
   type arrayNumberRecordStringAny = string | number | Record<string, string>
 }
 
-type UniqueSDKNFTControllerOptions = { sdk: Client, collectionIds: number[], allowedTokens: { collection: number, tokens: string }[] };
+export interface UniqueSDKNFTControllerOptions extends UniqueControllerOptions { collectionIds: number[], allowedTokens: { collection: number, tokens: string }[] }
 
-export class UniqueSDKNFTController implements UniqueController {
-  public uniqueSdk: Client;
+export class UniqueSDKNFTController extends UniqueController {
+  public uniqueSdk!: Client;
   private collectionIds: number[] = [];
   private allowedTokens: Record<number, string> = {};
 
   // TODO: proper initialization in Api
   constructor(sdk: Client = new Client({ baseUrl: '' })) {
-    this.uniqueSdk = sdk;
+    super(sdk);
+    // this.uniqueSdk = sdk;
   }
 
   async setNetwork(options: UniqueSDKNFTControllerOptions): Promise<void> {
-    this.uniqueSdk = options.sdk;
+    this.uniqueSdk = options.uniqueSdk;
     this.collectionIds = options.collectionIds;
     this.allowedTokens = options.allowedTokens.reduce((acc, item) => ({ ...acc, [item.collection]: item.tokens }), {}) || {};
     // just a stub

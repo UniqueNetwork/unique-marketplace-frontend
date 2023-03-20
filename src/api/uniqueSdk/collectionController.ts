@@ -2,17 +2,18 @@ import { Client, CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 import UniqueController from './controllers/base/UniqueController';
 import { TransactionOptions } from './types';
 
-export class UniqueSDKCollectionController implements UniqueController {
-  public uniqueSdk: Client;
+export class UniqueSDKCollectionController extends UniqueController {
+  public uniqueSdk!: Client;
   private collectionIds: number[] = [];
 
   // TODO: proper initialization in Api
   constructor(sdk: Client = new Client({ baseUrl: '' })) {
-    this.uniqueSdk = sdk;
+    super(sdk);
+    // this.uniqueSdk = sdk;
   }
 
-  async setNetwork(options: { sdk: Client, collectionIds: number[] }): Promise<void> {
-    this.uniqueSdk = options.sdk;
+  async setNetwork(options: { uniqueSdk: Client, collectionIds: number[] }): Promise<void> {
+    super.setNetwork(options);
     this.collectionIds = options.collectionIds;
     // just a stub
     return await new Promise(() => {});

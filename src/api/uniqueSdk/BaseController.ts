@@ -4,17 +4,22 @@ import UniqueController from './controllers/base/UniqueController';
 
 // T is interface of controller (ex. IMarketController)
 class BaseController<T> implements IBaseController {
+  isConnected = false;
   public uniqueController: UniqueController & T;
   public metamaskController: MetamaskController & T;
 
   constructor(uniqueController: UniqueController & T, metamaskController: MetamaskController & T) {
     this.uniqueController = uniqueController;
     this.metamaskController = metamaskController;
+    if (uniqueController && metamaskController) { this.isConnected = true; }
   }
 
-  async setNetwork(options: unknown): Promise<void> {
+  // TODO: type for options pls
+  async setNetwork(options: any): Promise<void> {
+    this.isConnected = false;
     try { await this.uniqueController.setNetwork(options); } catch (e) { console.error('Failed to set network for unique', e); throw e; }
     try { await this.metamaskController.setNetwork(options); } catch (e) { console.error('Failed to set network for metamask', e); throw e; }
+    this.isConnected = true;
   }
 
   // TODO: provide type for signer
