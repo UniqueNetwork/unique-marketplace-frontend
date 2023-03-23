@@ -54,8 +54,10 @@ export const WalletManager: FC = () => {
     setIsOpen(false);
   }, [onChangeChainId]);
 
-  const widgetAccounts = useMemo(() => accounts.filter((account) => !isEthereumAddress(account.address)).map((account) => (
-    { ...account, address: account.getAddress(chainData?.SS58Prefix), substrateAddress: account?.getAddress() })
+  const widgetAccounts = useMemo(() => accounts.map((account) => {
+    if (!isEthereumAddress(account.address)) return { ...account, address: account.getAddress(chainData?.SS58Prefix), substrateAddress: account?.getAddress() };
+    return { account, address: account.getAddress(), substrateAddress: account.getAddress() };
+  }
   ), [accounts, chainData?.SS58Prefix]);
 
   const widgetSelectedAccount = useMemo(() => (

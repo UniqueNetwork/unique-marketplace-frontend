@@ -45,10 +45,10 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
         switch (account.constructor) {
           case PolkadotAccount:
             // TODO: if account is from polka but has ethereum address - either ignore it or figure out how to deal with it
-            name = (account as PolkadotAccount).name;
+            name = (account as PolkadotAccount).injectedAccount.meta.name || `Polkadotjs: ${account.address}`;
           break;
           case KeyringLocalAccount:
-            name = (account as unknown as KeyringLocalAccount).keyringPair.meta.name as string;
+            name = (account as unknown as KeyringLocalAccount).keyringPair.meta.name as string || account.name || `Unknown local account: ${account.address}`;
           break;
           case MetamaskAccount:
             name = (account as unknown as MetamaskAccount).name || 'Metamask Account';

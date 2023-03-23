@@ -1,3 +1,4 @@
+import { MetamaskAccount } from '@unique-nft/accounts/metamask';
 import IBaseController from './controllers/base/IBaseController';
 import MetamaskController from './controllers/base/MetamaskController';
 import UniqueController from './controllers/base/UniqueController';
@@ -22,11 +23,23 @@ class BaseController<T> implements IBaseController {
     this.isConnected = true;
   }
 
-  // TODO: provide type for signer
+  private isMetamaskSigner(account: any): boolean {
+    console.log('isMetamasksigner?', account instanceof MetamaskAccount, 'account.constructor', account.constructor.toString());
+    return account instanceof MetamaskAccount;
+  }
+
+  // TODO: provide type for account
   // TODO: extract connection type from signer to figure out whether we are working with polka or evm
-  protected getController(signer: any): T {
-    if (signer) return this.uniqueController;
-    return this.metamaskController;
+  protected getController(account: any): T {
+    // all non-sign calls can be postponed to default unique sdk
+    if (!account) {
+      return this.uniqueController;
+    }
+    console.log('getting signer', account);
+    if (this.isMetamaskSigner(account)) {
+      return this.metamaskController;
+    }
+    return this.uniqueController;
   }
 
   protected getDefaultController(): T {

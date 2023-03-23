@@ -12,7 +12,7 @@ export type TSignMessage = { (message: string, account?: string | Account | unde
 
 export type TransactionOptions = {
   // the account that will sign the transaction
-  signer: Account
+  signer: Account // TODO: rename to account
   // if not provided, signed.send() will be called instead
   send?: (tx: TTransaction) => Promise<any | void>
 };

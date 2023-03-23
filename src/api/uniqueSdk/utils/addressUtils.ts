@@ -12,6 +12,7 @@ export const subToEthLowercase = (address: Address): string => {
 
 export const compareEncodedAddresses = (subAddress1: string, subAddress2: string): boolean => {
   if (!subAddress1 || !subAddress2) return false;
+  if (isEthereumAddress(subAddress1) || isEthereumAddress(subAddress2)) return false; // TODO: eth admins are not supported. Refactor this part
   return encodeAddress(subAddress1) === encodeAddress(subAddress2);
 };
 
