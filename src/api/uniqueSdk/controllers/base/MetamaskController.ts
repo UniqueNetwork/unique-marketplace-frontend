@@ -1,9 +1,11 @@
 import { ethers } from 'ethers';
 import Web3Provider from 'web3';
 import IBaseController from './IBaseController';
+import UniqueController from './UniqueController';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-class MetamaskController implements IBaseController {
+class MetamaskController extends UniqueController implements IBaseController {
+  protected contractAddress = '';
   public provider: Web3Provider | undefined;
   public isConnected = false;
 
@@ -27,8 +29,10 @@ class MetamaskController implements IBaseController {
   }
 
   async setNetwork(options: any): Promise<void> {
-    // metamask network is stored inside metamask!?
-    // TODO: figure this out
+    console.log('Setting network for metamask', options);
+    this.contractAddress = '0xbf198C5168E6BA2ef9E58e3d674d7F7eB2DfC96e';
+    await super.setNetwork(options);
+    return Promise.resolve();
   }
 }
 

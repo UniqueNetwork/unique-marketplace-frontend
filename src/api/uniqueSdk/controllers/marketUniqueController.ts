@@ -36,8 +36,7 @@ export class MarketUniqueController extends UniqueController implements IMarketC
     // this.contractAddress = options.contractAddress;
     this.contractAddress = '0xbf198C5168E6BA2ef9E58e3d674d7F7eB2DfC96e';
     this.auctionAddress = options.auctionAddress;
-    super.setNetwork(options);
-    return new Promise(() => {});
+    await super.setNetwork(options);
   }
 
   public async changeAllowance(collectionId: number, tokenId: number, targetAllowance: boolean, { signer, send }: TransactionOptions): Promise<void> {
@@ -66,12 +65,7 @@ export class MarketUniqueController extends UniqueController implements IMarketC
     }
   }
 
-  // price in SC format
-  // ex. to sell for 1 OPL - price=100000000000000000(18 decimals)
-  // amount - "1" for NFT, and amount of pieces for RFT
   public async sellFix(collectionId: number, tokenId: number, price: number, amount: number, { signer, send }: TransactionOptions): Promise<void> {
-    if (!signer) throw new Error('Signer not provided');
-    if (!this.uniqueSdk) throw new Error('Sdk not provided');
     const address = signer.address;
     // const ethAddress = getEthAccount(address);
     const from = signer.address;

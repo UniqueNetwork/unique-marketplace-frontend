@@ -24,7 +24,6 @@ class BaseController<T> implements IBaseController {
   }
 
   private isMetamaskSigner(account: any): boolean {
-    console.log('isMetamasksigner?', account instanceof MetamaskAccount, 'account.constructor', account.constructor.toString());
     return account instanceof MetamaskAccount;
   }
 

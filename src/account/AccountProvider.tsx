@@ -40,7 +40,6 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
       await _accounts.addProvider<ProviderClass<any>>(MetamaskProvider);
 
       const allAccounts = (await _accounts?.getAccounts())?.map((account) => {
-        console.log('account', account);
         let name; // TODO: refactor?
         switch (account.constructor) {
           case PolkadotAccount:

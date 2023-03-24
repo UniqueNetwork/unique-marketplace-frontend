@@ -27,8 +27,7 @@ export class UniqueSDKNFTController extends UniqueController {
     this.uniqueSdk = options.uniqueSdk;
     this.collectionIds = options.collectionIds;
     this.allowedTokens = options.allowedTokens.reduce((acc, item) => ({ ...acc, [item.collection]: item.tokens }), {}) || {};
-    // just a stub
-    return await new Promise(() => {});
+    return Promise.resolve();
   }
 
   async getAccountMarketableTokens(address: Address): Promise<TokenByIdResponse[]> {

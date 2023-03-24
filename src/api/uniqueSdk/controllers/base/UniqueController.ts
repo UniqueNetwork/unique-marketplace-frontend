@@ -22,7 +22,7 @@ class UniqueController implements IBaseController {
   async setNetwork(options: UniqueControllerOptions): Promise<void> {
     const sdk = options.uniqueSdk;
     this.isConnected = false;
-    if (!sdk) return;
+    if (!sdk) return Promise.resolve();
     this.uniqueSdk = sdk;
     this.decimals = (await this.uniqueSdk.common.chainProperties()).decimals || 12;
     this.isConnected = true;

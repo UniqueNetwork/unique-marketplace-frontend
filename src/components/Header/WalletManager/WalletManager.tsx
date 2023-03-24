@@ -61,7 +61,7 @@ export const WalletManager: FC = () => {
   ), [accounts, chainData?.SS58Prefix]);
 
   const widgetSelectedAccount = useMemo(() => (
-    { name: selectedAccount?.name, address: selectedAccount ? selectedAccount.getAddress(chainData?.SS58Prefix) : '', substrateAddress: selectedAccount?.getAddress() }
+    { name: selectedAccount?.name, address: selectedAccount ? selectedAccount.address || selectedAccount.getAddress(chainData?.SS58Prefix) : '', substrateAddress: selectedAccount?.getAddress() }
   ), [selectedAccount, chainData?.SS58Prefix]);
 
   const widgetAccountChange = useCallback(({ substrateAddress }: IAccount) => {

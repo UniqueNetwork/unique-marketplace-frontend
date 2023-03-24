@@ -34,23 +34,23 @@ export class SdkClient {
     this.isReady = true;
   }
 
-  setNetwork(networkId: string) {
+  async setNetwork(networkId: string) {
     const { sdkSet, settings } = this.networks[networkId];
 
     if (!sdkSet || !settings) {
       throw new Error(`Network ${networkId} not exists`);
     }
     // changing sdk instances and settings for controllers
-    this.nftController.setNetwork({
+    await this.nftController.setNetwork({
       uniqueSdk: sdkSet.unique,
       allowedTokens: settings.blockchain.unique.allowedTokens,
       collectionIds: settings.blockchain.unique.collectionIds
     });
-    this.collectionController.setNetwork({
+    await this.collectionController.setNetwork({
       uniqueSdk: sdkSet.unique,
       collectionIds: settings.blockchain.unique.collectionIds
     });
-    this.marketController.setNetwork({
+    await this.marketController.setNetwork({
       uniqueSdk: sdkSet.unique,
       auctionAddress: settings.auction.address,
       contractAddress: settings.blockchain.unique.contractAddress

@@ -13,10 +13,10 @@ export class UniqueSDKCollectionController extends UniqueController {
   }
 
   async setNetwork(options: { uniqueSdk: Client, collectionIds: number[] }): Promise<void> {
-    super.setNetwork(options);
+    await super.setNetwork(options);
     this.collectionIds = options.collectionIds;
     // just a stub
-    return await new Promise(() => {});
+    return Promise.resolve();
   }
 
   async confirmSponsorship(collectionId: number, { signer }: TransactionOptions): Promise<void> {

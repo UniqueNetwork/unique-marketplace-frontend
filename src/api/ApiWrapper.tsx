@@ -38,7 +38,7 @@ const ApiWrapper = ({
       await sdk.initialize(settings.map<NetworkOptions>(({ networkId, sdkEndpoint, sdkRelayEndpoint, settings }) => ({ networkId, sdkEndpoint, sdkRelayEndpoint, settings })));
 
       setSettings(sdkClient?.networks[currentChainId].settings);
-      sdkClient?.setNetwork(currentChainId);
+      await sdkClient?.setNetwork(currentChainId);
 
       setRpcClientInitialized(sdkClient?.isReady);
     })().then(() => {
@@ -99,7 +99,6 @@ const ApiWrapper = ({
         }
         : undefined),
       uniqueSdk: currentChain?.sdkSet?.unique,
-      kusamaSdk: currentChain?.sdkSet?.kusama,
       chainData: currentChain?.uniqueProperties,
       baseURL: config.blockchains[currentChainId]?.apiEndpoint || '',
       settings,
