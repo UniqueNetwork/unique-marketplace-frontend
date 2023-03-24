@@ -89,8 +89,6 @@ export class MarketUniqueController extends UniqueController implements IMarketC
   }
 
   public async buyFix(collectionId: number, tokenId: number, amount: number, { signer, send }: TransactionOptions): Promise<void> {
-    if (!signer) throw new Error('Signer not provided');
-    if (!this.uniqueSdk) throw new Error('Sdk not provided');
     const address = signer.address;
     // const ethAddress = getEthAccount(address);
     const from = signer.address;
@@ -135,31 +133,27 @@ export class MarketUniqueController extends UniqueController implements IMarketC
     }
   }
 
-  public async cancelFix(collectionId: number, tokenId: number, amount: number, { signer, send }: TransactionOptions): Promise<void> {
-    if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
-    // check if order exist
-    try {
-      await this.getOrder(655, 1);
-      // TODO: extra check for allowance = false
-    } catch (e) {
-      console.log('Order not found');
-      return;
-    }
-    // cancel order
-    try {
-      const res = await this.uniqueSdk.evm.send.submitWaitResult({
-        abi: marketplaceAbi,
-        address: '5EALag5gFWyjbz9kYV5VNUr7tjg9MrAMg2nZhWwSmAHdaiZp',
-        contractAddress: this.contractAddress,
-        funcName: 'revoke',
-        args: [collectionId, tokenId, amount] as any // TODO: ???
-      }, { signer });
-      console.log('Order found', res);
-      return; // TODO: works, but result makes no sense
-    } catch (e) {
-      console.error('Failed to get order', e);
-      throw e;
-    }
+  public async cancelFix(collectionId: number, tokenId: number, amount: number, options: TransactionOptions): Promise<void> {
+    if (!options.signer) throw new Error('Signer not found');
+    // throws error if not found
+    await this.getOrder(collectionId, tokenId);
+    // TODO: extra check for allowance = false
+
+    // TODO: should be done on BE
+    // try {
+    //   const res = await this.uniqueSdk.evm.send.submitWaitResult({
+    //     abi: marketplaceAbi,
+    //     address: '5EALag5gFWyjbz9kYV5VNUr7tjg9MrAMg2nZhWwSmAHdaiZp',
+    //     contractAddress: this.contractAddress,
+    //     funcName: 'revoke',
+    //     args: [collectionId, tokenId, amount] as any // TODO: ???
+    //   }, { signer: options.signer });
+    //   console.log('Order found', res);
+    // } catch (e) {
+    //   console.error('Failed to get order', e);
+    //   throw e;
+    // }
+    await this.changeAllowance(collectionId, tokenId, false, options);
   }
 
     // #region AUCTION

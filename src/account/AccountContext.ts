@@ -16,6 +16,7 @@ declare module '@unique-nft/accounts/types' {
   export abstract class Account {
     name: string;
     address: string;
+    signer: any; // TODO TYPE // TODO: !!!!!!!!!! validate this
     balance?: {
       KSM?: BN
     };

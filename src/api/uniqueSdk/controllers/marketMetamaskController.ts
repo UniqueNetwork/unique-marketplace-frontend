@@ -1,30 +1,85 @@
-import Web3Provider from 'web3';
-import { Address } from '@unique-nft/substrate-client/types';
 import { BN } from '@polkadot/util';
+
+import { Address } from '@unique-nft/utils';
+import { UniqueNFTFactory } from '@unique-nft/solidity-interfaces';
+import { Address as AccountAddress } from '@unique-nft/substrate-client/types';
 import { AllBalances } from '@unique-nft/substrate-client/balance';
 import { TransactionOptions } from '../types';
 import IMarketController from './base/IMarketController';
 import MetamaskController from './base/MetamaskController';
 
+import marketplaceAbi from '../contracts/marketplace-0.json';
+import { ethers, Signer } from 'ethers';
+
 export class MarketMetamaskController extends MetamaskController implements IMarketController {
-  changeAllowance(collectionId: number, tokenId: number, targetAllowance: boolean, options: TransactionOptions): Promise<void> {
-    throw new Error('Method not implemented.');
+  private getContract(signer: Signer) {
+    return new ethers.Contract(this.contractAddress, marketplaceAbi, signer);
   }
 
-  sellFix(collectionId: number, tokenId: number, price: number, amount: number, options: TransactionOptions): Promise<void> {
-    throw new Error('Method not implemented.');
+  // TODO: take signer from provider or actually demand it in params?
+  async changeAllowance(collectionId: number, tokenId: number, targetAllowance: boolean, options: TransactionOptions): Promise<void> {
+    // @ts-ignore // TODO: fix typing for signer
+    const nftFactory = await UniqueNFTFactory(collectionId, options.signer.signer);
+    const from = options.signer.address;
+    // provide allowance to SC or remove it by sending allowance to null
+    const to = this.contractAddress;
+
+    const isApproved = await this.uniqueSdk.tokens.allowance({ collectionId, tokenId, from, to });
+    if (isApproved.isAllowed === targetAllowance) { return; }
+    await (await nftFactory.approve(to, tokenId)).wait();
   }
 
-  buyFix(collectionId: number, tokenId: number, amount: number, options: TransactionOptions): Promise<void> {
-    throw new Error('Method not implemented.');
+  async sellFix(collectionId: number, tokenId: number, price: number, amount: number, options: TransactionOptions): Promise<void> {
+    const from = options.signer.address;
+    const to = this.contractAddress;
+    const isAllowed = await this.uniqueSdk.tokens.allowance({ collectionId, tokenId, from, to });
+    if (!isAllowed) throw new Error('Token not approved for sale');
+    const contract = this.getContract(options.signer.signer);
+    const res = await contract.put(collectionId, tokenId, price, amount);
+    // TODO: await result
   }
 
-  cancelFix(collectionId: number, tokenId: number, amount: number, options: TransactionOptions): Promise<void> {
-    throw new Error('Method not implemented.');
+  async buyFix(collectionId: number, tokenId: number, amount: number, options: TransactionOptions): Promise<void> {
+    const from = options.signer.address;
+    const to = this.contractAddress;
+    const isAllowed = await this.uniqueSdk.tokens.allowance({ collectionId, tokenId, from, to });
+    if (!isAllowed) throw new Error('Token not approved for sale');
+    const contract = this.getContract(options.signer.signer);
+    const value = (await this.getOrder(collectionId, tokenId))[3]; // order.value
+    const res = await contract.buy(collectionId, tokenId, amount);
+    // TODO: await result
   }
 
-  getOrder(collectionId: number, tokenId: number): Promise<any> {
-    throw new Error('Method not implemented.');
+  async cancelFix(collectionId: number, tokenId: number, amount: number, options: TransactionOptions): Promise<void> {
+    const from = options.signer.address;
+    const to = this.contractAddress;
+    // throws error if not found
+    await this.getOrder(collectionId, tokenId);
+
+    await this.changeAllowance(collectionId, tokenId, false, options);
+
+    // TODO: will be canceled by escrow after allowance rewoke
+    // const contract = this.getContract(options.signer.signer);
+    // const res = await contract.put(collectionId, tokenId, price, amount);
+  }
+
+  async getOrder(collectionId: number, tokenId: number): Promise<any> {
+    if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
+    if (!collectionId || !tokenId) throw new Error(`Cant get order for ${collectionId}-${tokenId}`);
+    try {
+      const res = await this.uniqueSdk.evm.call({
+        abi: marketplaceAbi,
+        address: '5EALag5gFWyjbz9kYV5VNUr7tjg9MrAMg2nZhWwSmAHdaiZp', // TODO: this arg makes no sense, cant skip
+        contractAddress: this.contractAddress,
+        funcName: 'getOrder',
+        args: [collectionId, tokenId] as any // TODO: ???
+      });
+      console.log('Order found', res);
+      return res; // TODO: works, but result makes no sense
+    } catch (e) {
+      console.error('Failed to get order', e);
+      throw e;
+    }
   }
 
   getAccountBalance(address: string): Promise<AllBalances> {
@@ -35,11 +90,11 @@ export class MarketMetamaskController extends MetamaskController implements IMar
     throw new Error('Method not implemented.');
   }
 
-  getFee(sender: Address, recipient?: string, value?: BN): Promise<string | null> {
+  getFee(sender: AccountAddress, recipient?: string, value?: BN): Promise<string | null> {
     throw new Error('Method not implemented.');
   }
 
-  transferBalance(address: Address, destination: string, amount: BN, { signer, send }: TransactionOptions): Promise<void> {
+  transferBalance(address: AccountAddress, destination: string, amount: BN, { signer, send }: TransactionOptions): Promise<void> {
     throw new Error('Method not implemented.');
   }
 }
