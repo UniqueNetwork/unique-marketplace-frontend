@@ -1,7 +1,7 @@
 import { BN } from '@polkadot/util';
 
 import { Address } from '@unique-nft/utils';
-import { UniqueNFTFactory } from '@unique-nft/solidity-interfaces';
+import { UniqueNFTFactory, UniqueFungibleFactory } from '@unique-nft/solidity-interfaces';
 import { Address as AccountAddress } from '@unique-nft/substrate-client/types';
 import { AllBalances } from '@unique-nft/substrate-client/balance';
 import { TransactionOptions } from '../types';
@@ -51,16 +51,9 @@ export class MarketMetamaskController extends MetamaskController implements IMar
   }
 
   async cancelFix(collectionId: number, tokenId: number, amount: number, options: TransactionOptions): Promise<void> {
-    const from = options.signer.address;
-    const to = this.contractAddress;
     // throws error if not found
     await this.getOrder(collectionId, tokenId);
-
     await this.changeAllowance(collectionId, tokenId, false, options);
-
-    // TODO: will be canceled by escrow after allowance rewoke
-    // const contract = this.getContract(options.signer.signer);
-    // const res = await contract.put(collectionId, tokenId, price, amount);
   }
 
   async getOrder(collectionId: number, tokenId: number): Promise<any> {
@@ -82,20 +75,32 @@ export class MarketMetamaskController extends MetamaskController implements IMar
     }
   }
 
-  getAccountBalance(address: string): Promise<AllBalances> {
-    throw new Error('Method not implemented.');
+  async getAccountBalance(address: string): Promise<AllBalances> {
+    return await this.uniqueSdk.balance.get({ address });
   }
 
-  transferToken(from: string, to: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
-    throw new Error('Method not implemented.');
+  async transferToken(from: string, to: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+    // @ts-ignore // TODO: fix typing for signer
+    const nftFactory = await UniqueNFTFactory(collectionId, options.signer.signer);
+
+    const fromCross = Address.extract.ethCrossAccountId(from);
+    const toCross = Address.extract.ethCrossAccountId(to);
+    console.log('collectionId', collectionId, 'metamask account: ', options.signer);
+    console.log('Calling metamask: ', 'from', fromCross, 'to', toCross, 'tokenId', tokenId);
+    await (await nftFactory.transferFromCross(fromCross, toCross, tokenId)).wait();
   }
 
-  getFee(sender: AccountAddress, recipient?: string, value?: BN): Promise<string | null> {
-    throw new Error('Method not implemented.');
+  async getFee(sender: AccountAddress, recipient?: string, value?: BN): Promise<string | null> {
+    await Promise.resolve();
+    return '0';
   }
 
-  transferBalance(address: AccountAddress, destination: string, amount: BN, { signer, send }: TransactionOptions): Promise<void> {
-    throw new Error('Method not implemented.');
+  async transferBalance(from: AccountAddress, to: string, amount: BN, { signer, send }: TransactionOptions): Promise<void> {
+    // @ts-ignore
+    const fungibleFactory = await UniqueFungibleFactory(from, signer.signer);
+    const fromCross = Address.extract.ethCrossAccountId(from);
+    const toCross = Address.extract.ethCrossAccountId(to);
+    await (await fungibleFactory.transferFromCross(fromCross, toCross, amount.toString())).wait();
   }
 }
 

@@ -40,7 +40,6 @@ export class MarketUniqueController extends UniqueController implements IMarketC
   }
 
   public async changeAllowance(collectionId: number, tokenId: number, targetAllowance: boolean, { signer, send }: TransactionOptions): Promise<void> {
-    if (!this.uniqueSdk) throw new Error('SDK isn\'t ready');
     if (!signer) throw new Error('Signer not provided');
     const from = signer.address;
     const to = this.contractAddress;
@@ -115,7 +114,6 @@ export class MarketUniqueController extends UniqueController implements IMarketC
   }
 
   public async getOrder(collectionId: number, tokenId: number): Promise<any> {
-    if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
     if (!collectionId || !tokenId) throw new Error(`Cant get order for ${collectionId}-${tokenId}`);
     try {
       const res = await this.uniqueSdk.evm.call({
@@ -137,34 +135,10 @@ export class MarketUniqueController extends UniqueController implements IMarketC
     if (!options.signer) throw new Error('Signer not found');
     // throws error if not found
     await this.getOrder(collectionId, tokenId);
-    // TODO: extra check for allowance = false
-
-    // TODO: should be done on BE
-    // try {
-    //   const res = await this.uniqueSdk.evm.send.submitWaitResult({
-    //     abi: marketplaceAbi,
-    //     address: '5EALag5gFWyjbz9kYV5VNUr7tjg9MrAMg2nZhWwSmAHdaiZp',
-    //     contractAddress: this.contractAddress,
-    //     funcName: 'revoke',
-    //     args: [collectionId, tokenId, amount] as any // TODO: ???
-    //   }, { signer: options.signer });
-    //   console.log('Order found', res);
-    // } catch (e) {
-    //   console.error('Failed to get order', e);
-    //   throw e;
-    // }
     await this.changeAllowance(collectionId, tokenId, false, options);
   }
 
-    // #region AUCTION
-
-  transferToAuction(owner: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
-    return this.transferToken(owner, this.auctionAddress, collectionId, tokenId, options);
-  }
-
-  // token
   async transferToken(from: Address, to: Address, collectionId: string, tokenId: string, { signer, send }: TransactionOptions): Promise<void> {
-    if (!this.uniqueSdk) throw new Error('Controller isn\'t ready'); // TODO: make this.uniqueSdk mandatory (dont check for it in every function)
     const tokenIdArguments: TokenIdArguments = {
       collectionId: Number(collectionId), tokenId: Number(tokenId)
     };
@@ -197,45 +171,8 @@ export class MarketUniqueController extends UniqueController implements IMarketC
     }
   }
 
-  // purchase
-  async unlockNft(address: Address, collectionId: string, tokenId: string, { signer }: TransactionOptions): Promise<void> {
-    if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
-    const ethAddress = getEthAccount(address);
-
-    const tokenIdArguments: TokenIdArguments = {
-      collectionId: Number(collectionId), tokenId: Number(tokenId)
-    };
-
-    const token: TokenByIdResponse | null = await this.uniqueSdk.tokens.get(tokenIdArguments);
-    if (!token) throw new Error('Token for unlock not found');
-    const owner = token.owner;
-
-    if (owner && !isEthereumAddress(owner) && compareEncodedAddresses(owner, address)) return;
-
-    const from: Record<string, string> = { ethereum: ethAddress };
-    const to: Record<string, string> = { substrate: address };
-
-    const unsignedTxPayload = await this.uniqueSdk.extrinsics.build({
-      section: 'unique',
-      method: 'transferFrom',
-      // @ts-ignore
-      args: [from, to, tokenIdArguments.collectionId, tokenIdArguments.tokenId, 1],
-      address: address,
-      isImmortal: false
-    });
-    const { signature } = await this.uniqueSdk.extrinsics.sign(unsignedTxPayload, signer);
-
-    if (!signature) throw new Error('Signing failed');
-
-    await this.uniqueSdk.extrinsics.submit({
-      signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
-      signature
-    });
-  }
-
     // account
     async transferBalance(address: Address, destination: string, amount: BN, { signer, send }: TransactionOptions): Promise<void> {
-      if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
       const unsignedTxPayload = await this.uniqueSdk.extrinsics.build({
         section: 'balances',
         method: 'transfer',
@@ -258,41 +195,13 @@ export class MarketUniqueController extends UniqueController implements IMarketC
       }
     }
 
-    async transferBidBalance(address: Address, amount: BN, { signer, send }: TransactionOptions): Promise<void> {
-      if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
-      const unsignedTxPayload = await this.uniqueSdk.extrinsics.build({
-        section: 'balances',
-        method: 'transferKeepAlive',
-        args: [this.auctionAddress, amount.toString()],
-        address
-      });
-
-      const { signature } = await this.uniqueSdk.extrinsics.sign(unsignedTxPayload, signer);
-
-      if (!signature) throw new Error('Signing failed');
-      if (send) {
-        const { signerPayloadJSON } = unsignedTxPayload;
-
-        await send({ signerPayloadJSON, signature: signature as `0x${string}` });
-      } else {
-        await this.uniqueSdk.extrinsics.submit({
-          signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
-          signature
-        });
-      }
-    }
-
-    // #endregion auction
-
     // balance
     async getAccountBalance(address: Address): Promise<AllBalances> {
-      if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
       return await this.uniqueSdk.balance.get({ address });
     }
 
     // fee
     async getFee(sender: Address, recipient?: string, value?: BN): Promise<string | null> {
-      if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
       const transferFee = await this.uniqueSdk.extrinsics.getFee({
         address: sender,
         section: 'balances',
