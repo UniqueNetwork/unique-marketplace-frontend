@@ -42,7 +42,6 @@ const TokenPage = () => {
     try {
       const token = await api.nft?.getToken(Number(collectionId), Number(id));
       setIsBundle(await api.nft?.isBundle(Number(collectionId), Number(id)));
-
       const collection = await getCollection(Number(collectionId));
       if (token) setToken(token);
       if (collection) setCollection(collection);

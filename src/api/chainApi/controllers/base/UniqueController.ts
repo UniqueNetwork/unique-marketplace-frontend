@@ -10,11 +10,7 @@ class UniqueController implements IBaseController {
   public isConnected = false;
   public decimals = 12; // TODO: MOVE TO API
 
-  constructor(sdk: Client | undefined = undefined) {
-    if (!sdk) {
-      this.uniqueSdk = new Client({ baseUrl: '' });
-      return;
-    }
+  constructor(sdk: Client) {
     this.uniqueSdk = sdk;
     this.isConnected = true;
   }

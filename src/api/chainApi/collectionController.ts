@@ -3,14 +3,7 @@ import UniqueController from './controllers/base/UniqueController';
 import { TransactionOptions } from './types';
 
 export class UniqueSDKCollectionController extends UniqueController {
-  public uniqueSdk!: Client;
   private collectionIds: number[] = [];
-
-  // TODO: proper initialization in Api
-  constructor(sdk: Client = new Client({ baseUrl: '' })) {
-    super(sdk);
-    // this.uniqueSdk = sdk;
-  }
 
   async setNetwork(options: { uniqueSdk: Client, collectionIds: number[] }): Promise<void> {
     await super.setNetwork(options);

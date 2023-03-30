@@ -17,13 +17,16 @@ export interface NetworkOptions { networkId: string, sdkEndpoint: string, sdkRel
 export class SdkClient {
   public isReady = false;
   // TODO: legacy, refactor into using adapters required
-  public nftController: UniqueSDKNFTController = new UniqueSDKNFTController();
+  public nftController: UniqueSDKNFTController;
   // TODO: legacy, refactor into using adapters required
-  public collectionController: UniqueSDKCollectionController = new UniqueSDKCollectionController();
+  public collectionController: UniqueSDKCollectionController;
   public marketController: MarketController;
 
   constructor(options: NetworkOptions) {
     this.marketController = new MarketController(options);
+    const sdk = new Sdk({ baseUrl: options.sdkEndpoint }); // TODO: remove after rework for other controllers
+    this.collectionController = new UniqueSDKCollectionController(sdk);
+    this.nftController = new UniqueSDKNFTController(sdk);
     this.isReady = true;
   }
 
@@ -40,6 +43,7 @@ export class SdkClient {
       uniqueSdk: sdk,
       collectionIds: options.settings.blockchain.unique.collectionIds
     });
+    // TODO: when metamask updated we must ask in extension to change network too (see wallet implementation for more)
     this.marketController.setNetwork(options);
     this.isReady = true;
   }

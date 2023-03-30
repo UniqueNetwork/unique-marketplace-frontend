@@ -36,10 +36,11 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
       // TODO: save network options here instead of sdkClient and simply call sdkClient.setNetwork(those options)
       const networkOptions = settings.map<NetworkOptions>(({ networkId, sdkEndpoint, sdkRelayEndpoint, settings }) => ({ networkId, sdkEndpoint, sdkRelayEndpoint, settings }));
       setAvailableNetworkOptions(networkOptions);
-      const defaultNetworkOption = networkOptions[0]; // aka currentOption
-      setSettings(defaultNetworkOption.settings);
+      // TODO: setup current chain properly from localStorage or smth (atm it fallsback to second in settings)
+      const currentNetworkOption = networkOptions.find((no) => no.networkId === currentChainId) || networkOptions[0];
+      setSettings(currentNetworkOption.settings);
 
-      setSdkClient(new SdkClient(defaultNetworkOption));
+      setSdkClient(new SdkClient(currentNetworkOption));
 
       setRpcClientInitialized(true);
     })().then(() => {

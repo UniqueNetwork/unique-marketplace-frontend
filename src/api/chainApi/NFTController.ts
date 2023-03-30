@@ -13,15 +13,8 @@ declare module '@unique-nft/sdk' {
 export interface UniqueSDKNFTControllerOptions extends UniqueControllerOptions { collectionIds: number[], allowedTokens: { collection: number, tokens: string }[] }
 
 export class UniqueSDKNFTController extends UniqueController {
-  public uniqueSdk!: Client;
   private collectionIds: number[] = [];
   private allowedTokens: Record<number, string> = {};
-
-  // TODO: proper initialization in Api
-  constructor(sdk: Client = new Client({ baseUrl: '' })) {
-    super(sdk);
-    // this.uniqueSdk = sdk;
-  }
 
   async setNetwork(options: UniqueSDKNFTControllerOptions): Promise<void> {
     this.collectionIds = options.collectionIds;

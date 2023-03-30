@@ -71,7 +71,7 @@ class MarketController implements IMarketController, IBaseController {
     const isAlreadyAllowed = await this.uniqueSdk.tokens.allowance({ collectionId, tokenId, from, to });
     if (isAlreadyAllowed.isAllowed === targetAllowance) return;
     const unsignedTxPayload = await this.uniqueSdk.tokens.approve.build({ collectionId, tokenId, spender: to, address: from, isApprove: targetAllowance });
-    const { signature } = await this.uniqueSdk.tokens.approve.sign(unsignedTxPayload, { signer: account.signer });
+    const { signature } = await this.uniqueSdk.tokens.approve.sign(unsignedTxPayload, { signer: account });
 
     if (!signature) throw new Error('Signing failed');
 

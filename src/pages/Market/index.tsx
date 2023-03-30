@@ -176,7 +176,6 @@ export const MarketPage = () => {
   }, [filterState]);
 
   const isLoading = isAccountsLoading || isFetching || isFetchingCollections;
-  console.log('isLoading', isAccountsLoading, isFetching, isFetchingCollections);
 
   return (<PagePaper>
     <MarketMainPageStyled>
