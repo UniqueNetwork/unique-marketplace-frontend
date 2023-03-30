@@ -13,7 +13,7 @@ import TokenPageModal from './Modals/TokenPageModal';
 import { PagePaper } from 'components/PagePaper/PagePaper';
 import { useAccounts } from 'hooks/useAccounts';
 import { shortcutText } from 'utils/textUtils';
-import { compareEncodedAddresses, isTokenOwner } from 'api/uniqueSdk/utils/addressUtils';
+import { compareEncodedAddresses, isTokenOwner } from 'api/chainApi/utils/addressUtils';
 import styled from 'styled-components';
 import { BlueGrey500 } from 'styles/colors';
 import BundleTreeSection from './BundleTreeSection';

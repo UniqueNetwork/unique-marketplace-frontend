@@ -1,11 +1,11 @@
 import { Settings } from '../restApi/settings/types';
-import { UniqueSDKNFTController } from '../uniqueSdk/NFTController';
-import { UniqueSDKCollectionController } from '../uniqueSdk/collectionController';
+import { UniqueSDKNFTController } from '../chainApi/NFTController';
+import { UniqueSDKCollectionController } from '../chainApi/collectionController';
 import { SdkNetworkProvider } from './sdkNetworkProvider';
-import { DecodedInfixOrUrlOrCidAndHash } from '../uniqueSdk/types';
-import MarketController from 'api/uniqueSdk/marketController';
-import MarketUniqueController from 'api/uniqueSdk/controllers/marketUniqueController';
-import MarketMetamaskController from 'api/uniqueSdk/controllers/marketMetamaskController';
+import { DecodedInfixOrUrlOrCidAndHash } from '../chainApi/types';
+import MarketController from 'api/chainApi/MarketController';
+import MarketUniqueController from 'api/chainApi/controllers/marketUniqueController';
+import MarketMetamaskController from 'api/chainApi/controllers/marketMetamaskController';
 
 declare module '@unique-nft/sdk' {
   export interface TokenByIdResponse {

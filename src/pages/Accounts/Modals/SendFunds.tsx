@@ -4,7 +4,7 @@ import { Text, useNotifications, Dropdown, Button, Modal } from 'components/UI';
 import { BN } from '@polkadot/util';
 import styled from 'styled-components';
 
-import { toChainFormatAddress, validateAddress } from 'api/uniqueSdk/utils/addressUtils';
+import { toChainFormatAddress, validateAddress } from 'api/chainApi/utils/addressUtils';
 import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
 import { useTransferFundsStages } from 'hooks/accountStages/useTransferFundsStages';

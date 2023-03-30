@@ -1,7 +1,7 @@
 import { BN } from '@polkadot/util';
 import { AllBalances } from '@unique-nft/substrate-client/balance';
 import { Address } from '@unique-nft/substrate-client/types';
-import { TransactionOptions } from 'api/uniqueSdk/types';
+import { TransactionOptions } from 'api/chainApi/types';
 interface IMarketController {
   changeAllowance(collectionId: number, tokenId: number, targetAllowance: boolean, options: TransactionOptions): Promise<void>
   // TODO: decimals calculation should be part of controller, methods should accept floats instead
@@ -15,7 +15,6 @@ interface IMarketController {
   // TODO: type for order
   getOrder(collectionId: number, tokenId: number): Promise<any>
 
-  // TODO: we can get rid of those method and just use SDK
   getAccountBalance(address: Address): Promise<AllBalances>
 
   // TODO: split into "getTransferTokenFee" and "getTransferBalanceFee"

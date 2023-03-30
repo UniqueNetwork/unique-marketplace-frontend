@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useMemo } from 'react';
 import { CopyButton, Text, useNotifications } from 'components/UI';
 import styled from 'styled-components';
-import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
+import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import { useApi } from 'hooks/useApi';
 import { shortcutText } from 'utils/textUtils';

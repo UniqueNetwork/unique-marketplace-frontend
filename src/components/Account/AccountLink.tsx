@@ -1,6 +1,6 @@
 import React, { FC, useCallback } from 'react';
 
-import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
+import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import { Link } from 'components/UI';
 import { useApi } from 'hooks/useApi';
 import { shortcutText } from 'utils/textUtils';

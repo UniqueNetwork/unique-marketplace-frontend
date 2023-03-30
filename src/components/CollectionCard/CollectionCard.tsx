@@ -4,7 +4,7 @@ import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
 import styled from 'styled-components/macro';
 import { Icon, Dropdown } from 'components/UI';
 import { CollectionData } from 'api/restApi/admin/types';
-import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
+import { compareEncodedAddresses } from 'api/chainApi/utils/addressUtils';
 import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
 import { shortcutText } from 'utils/textUtils';

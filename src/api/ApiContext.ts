@@ -1,9 +1,9 @@
 import { Context, Consumer, Provider, createContext } from 'react';
 import { Settings } from './restApi/settings/types';
-import { UniqueSDKNFTController } from './uniqueSdk/NFTController';
-import { UniqueSDKCollectionController } from './uniqueSdk/collectionController';
+import { UniqueSDKNFTController } from './chainApi/NFTController';
+import { UniqueSDKCollectionController } from './chainApi/collectionController';
 import { ChainPropertiesResponse, Client } from '@unique-nft/sdk';
-import MarketController from './uniqueSdk/marketController';
+import MarketController from './chainApi/MarketController';
 
 type Api = {
   nft?: UniqueSDKNFTController

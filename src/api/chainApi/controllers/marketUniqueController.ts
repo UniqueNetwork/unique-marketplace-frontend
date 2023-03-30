@@ -28,7 +28,6 @@ export interface MarketUniqueControllerOptions extends UniqueControllerOptions {
 }
 
 export class MarketUniqueController extends UniqueController implements IMarketController {
-  public uniqueSdk!: Client; // initialized in UniqueController base class, but TS complains for some reason...
   private contractAddress = '';
   private auctionAddress = '';
 

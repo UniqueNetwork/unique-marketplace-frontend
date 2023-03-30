@@ -7,7 +7,7 @@ import BN from 'bn.js';
 import { AdditionalPositive100, AdditionalPositive500, Coral100, Coral500, Grey300 } from 'styles/colors';
 import { useOfferSubscription } from 'hooks/useOfferSubscription';
 import { useAccounts } from 'hooks/useAccounts';
-import { compareEncodedAddresses, isTokenOwner } from 'api/uniqueSdk/utils/addressUtils';
+import { compareEncodedAddresses, isTokenOwner } from 'api/chainApi/utils/addressUtils';
 import { Offer } from 'api/restApi/offers/types';
 import { useAuction } from 'api/restApi/auction/auction';
 import { TCalculatedBid } from 'api/restApi/auction/types';
