@@ -24,9 +24,11 @@ export class SdkClient {
 
   constructor(options: NetworkOptions) {
     this.marketController = new MarketController(options);
+    this.isReady = true;
   }
 
   async setNetwork(options: NetworkOptions): Promise<void> {
+    this.isReady = false;
     const sdk = new Sdk({ baseUrl: options.sdkEndpoint });
     // TODO: refactor those controllers, make setNetwork sync operation instead
     await this.nftController.setNetwork({
@@ -39,5 +41,6 @@ export class SdkClient {
       collectionIds: options.settings.blockchain.unique.collectionIds
     });
     this.marketController.setNetwork(options);
+    this.isReady = true;
   }
 }
