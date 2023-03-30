@@ -164,7 +164,7 @@ export class MarketUniqueController extends UniqueController implements IMarketC
 
       await send({ signerPayloadJSON, signature: signature as `0x${string}` });
     } else {
-      await this.uniqueSdk.extrinsics.submit({
+      await this.uniqueSdk.tokens.transfer.submitWaitResult({
         signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
         signature
       });

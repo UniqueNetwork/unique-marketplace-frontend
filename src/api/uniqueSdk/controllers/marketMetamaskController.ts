@@ -80,13 +80,10 @@ export class MarketMetamaskController extends MetamaskController implements IMar
   }
 
   async transferToken(from: string, to: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
-    // @ts-ignore // TODO: fix typing for signer
-    const nftFactory = await UniqueNFTFactory(collectionId, options.signer.signer);
-
+    // TODO: fix typing for signer
+    const nftFactory = await UniqueNFTFactory(Number(collectionId), options.signer.signer);
     const fromCross = Address.extract.ethCrossAccountId(from);
     const toCross = Address.extract.ethCrossAccountId(to);
-    console.log('collectionId', collectionId, 'metamask account: ', options.signer);
-    console.log('Calling metamask: ', 'from', fromCross, 'to', toCross, 'tokenId', tokenId);
     await (await nftFactory.transferFromCross(fromCross, toCross, tokenId)).wait();
   }
 
