@@ -24,10 +24,9 @@ export class UniqueSDKNFTController extends UniqueController {
   }
 
   async setNetwork(options: UniqueSDKNFTControllerOptions): Promise<void> {
-    this.uniqueSdk = options.uniqueSdk;
     this.collectionIds = options.collectionIds;
     this.allowedTokens = options.allowedTokens.reduce((acc, item) => ({ ...acc, [item.collection]: item.tokens }), {}) || {};
-    return Promise.resolve();
+    await super.setNetwork(options);
   }
 
   async getAccountMarketableTokens(address: Address): Promise<TokenByIdResponse[]> {
@@ -69,7 +68,7 @@ export class UniqueSDKNFTController extends UniqueController {
     return await this.uniqueSdk?.tokens.getBundle({ collectionId, tokenId }) || null;
   }
 
-  async unnest(collectionId: number, tokenId: number, address: string, { signer }: TransactionOptions): Promise<void> {
+  async unnest(collectionId: number, tokenId: number, address: string, options: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
     const parent = await this.uniqueSdk?.tokens.parent({ collectionId, tokenId });
 
@@ -88,7 +87,7 @@ export class UniqueSDKNFTController extends UniqueController {
     });
   }
 
-  async transferToBundle(nested: TokenIdArguments, newParent: TokenIdArguments, { signer }: TransactionOptions): Promise<void> {
+  async transferToBundle(nested: TokenIdArguments, newParent: TokenIdArguments, { account }: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
     const parent = await this.uniqueSdk.tokens.parent(nested);
     if (!parent) return;
@@ -98,7 +97,7 @@ export class UniqueSDKNFTController extends UniqueController {
     const unsignedTxPayload = await this.uniqueSdk.extrinsics.build({
       section: 'unique',
       method: 'transferFrom',
-      address: signer?.getAddress() || '',
+      address: account?.getAddress() || '',
       args: [
         // @ts-ignore
         { Ethereum: from },
@@ -110,7 +109,7 @@ export class UniqueSDKNFTController extends UniqueController {
       ]
     });
     if (!unsignedTxPayload) throw new Error('Transaction build error');
-    const { signature } = await this.uniqueSdk.extrinsics.sign(unsignedTxPayload, signer);
+    const { signature } = await this.uniqueSdk.extrinsics.sign(unsignedTxPayload, account);
     if (!signature) throw new Error('Signing failed');
     await this.uniqueSdk?.extrinsics.submit({
       signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,

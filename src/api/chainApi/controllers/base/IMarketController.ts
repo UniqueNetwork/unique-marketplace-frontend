@@ -21,7 +21,7 @@ interface IMarketController {
   getFee(sender: Address, recipient?: string, value?: BN): Promise<string | null>
 
   // TODO: remove "from" param, we can calculate it from signer
-  transferToken(from: Address, to: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void>
+  transferToken(from: Address, to: Address, collectionId: number, tokenId: number, options: TransactionOptions): Promise<void>
   transferBalance(from: Address, to: string, amount: BN, options: TransactionOptions): Promise<void>
 }
 

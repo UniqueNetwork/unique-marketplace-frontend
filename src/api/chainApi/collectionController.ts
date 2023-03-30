@@ -19,12 +19,12 @@ export class UniqueSDKCollectionController extends UniqueController {
     return Promise.resolve();
   }
 
-  async confirmSponsorship(collectionId: number, { signer }: TransactionOptions): Promise<void> {
+  async confirmSponsorship(collectionId: number, { account }: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
-    if (!signer) return;
-    const unsignedTxPayload = await this.uniqueSdk.collections.confirmSponsorship.build({ collectionId, address: signer.getAddress() });
+    if (!account) throw new Error('Account not provided');
+    const unsignedTxPayload = await this.uniqueSdk.collections.confirmSponsorship.build({ collectionId, address: account.getAddress() });
     if (!unsignedTxPayload) throw new Error('Transaction build error');
-    const { signature } = await this.uniqueSdk.collections.confirmSponsorship.sign(unsignedTxPayload, { signer });
+    const { signature } = await this.uniqueSdk.collections.confirmSponsorship.sign(unsignedTxPayload, { signer: account });
     if (!signature) throw new Error('Signing failed');
     await this.uniqueSdk.extrinsics.submit({
       signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
@@ -51,12 +51,12 @@ export class UniqueSDKCollectionController extends UniqueController {
     return collections;
   }
 
-  async removeCollectionSponsor(collectionId: number, { signer }: TransactionOptions): Promise<void> {
+  async removeCollectionSponsor(collectionId: number, { account }: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
-    if (!signer) return;
-    const unsignedTxPayload = await this.uniqueSdk.collections.removeSponsorship.build({ collectionId, address: signer.getAddress() });
+    if (!account) throw new Error('Account not provided');
+    const unsignedTxPayload = await this.uniqueSdk.collections.removeSponsorship.build({ collectionId, address: account.getAddress() });
     if (!unsignedTxPayload) throw new Error('Transaction build error');
-    const { signature } = await this.uniqueSdk.collections.removeSponsorship.sign(unsignedTxPayload, { signer });
+    const { signature } = await this.uniqueSdk.collections.removeSponsorship.sign(unsignedTxPayload, { signer: account });
     if (!signature) throw new Error('Signing failed');
     await this.uniqueSdk.extrinsics.submit({
       signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,

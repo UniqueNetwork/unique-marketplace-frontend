@@ -6,7 +6,7 @@ import IMarketContractAdapter from './IMarketContractAdapter';
 
 import marketplaceAbi from '../contracts/marketplace-0.json';
 
-class MetamaskAdapter implements IBaseAdapter, IMarketContractAdapter {
+class MetamaskAdapter implements IMarketContractAdapter {
   contractAddress: string;
   constructor(contractAddress: string) {
     this.contractAddress = contractAddress;
@@ -37,7 +37,7 @@ class MetamaskAdapter implements IBaseAdapter, IMarketContractAdapter {
     await (await nftFactory.approve(targetTo, tokenId)).wait();
   }
 
-  async sellx(from: string, collectionId: number, tokenId: number, price: number, amount: number, signer: Signer): Promise<void> {
+  async sell(from: string, collectionId: number, tokenId: number, price: number, amount: number, signer: Signer): Promise<void> {
     const contract = this.getContract(signer);
     await contract.put(collectionId, tokenId, price, amount);
   }
