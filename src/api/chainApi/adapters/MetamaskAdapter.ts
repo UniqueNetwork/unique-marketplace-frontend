@@ -39,12 +39,12 @@ class MetamaskAdapter implements IMarketContractAdapter {
 
   async sell(from: string, collectionId: number, tokenId: number, price: number, amount: number, signer: Signer): Promise<void> {
     const contract = this.getContract(signer);
-    await contract.put(collectionId, tokenId, price, amount);
+    await (await contract.put(collectionId, tokenId, price, amount)).wait();
   }
 
   async buy(from: string, collectionId: number, tokenId: number, price: number, amount: number, signer: Signer): Promise<void> {
     const contract = this.getContract(signer);
-    await contract.buy(collectionId, tokenId, amount);
+    await (await contract.buy(collectionId, tokenId, amount)).wait();
   }
 }
 

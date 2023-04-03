@@ -26,7 +26,7 @@ export class SdkClient {
     this.marketController = new MarketController(options);
     const sdk = new Sdk({ baseUrl: options.sdkEndpoint }); // TODO: remove after rework for other controllers
     this.collectionController = new UniqueSDKCollectionController(sdk);
-    this.nftController = new UniqueSDKNFTController(sdk);
+    this.nftController = new UniqueSDKNFTController(sdk, options.settings.blockchain.unique.collectionIds, options.settings.blockchain.unique.allowedTokens);
     this.isReady = true;
   }
 

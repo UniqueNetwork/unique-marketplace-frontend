@@ -38,6 +38,10 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
       setAvailableNetworkOptions(networkOptions);
       // TODO: setup current chain properly from localStorage or smth (atm it fallsback to second in settings)
       const currentNetworkOption = networkOptions.find((no) => no.networkId === currentChainId) || networkOptions[0];
+
+      // TODO: REMOVE THIS LINE: DEBUG PURPOSES ONLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      currentNetworkOption.settings.blockchain.unique.contractAddress = '0xbf198C5168E6BA2ef9E58e3d674d7F7eB2DfC96e';
+
       setSettings(currentNetworkOption.settings);
 
       setSdkClient(new SdkClient(currentNetworkOption));

@@ -16,6 +16,12 @@ export class UniqueSDKNFTController extends UniqueController {
   private collectionIds: number[] = [];
   private allowedTokens: Record<number, string> = {};
 
+  constructor(uniqueSdk: Client, collectionIds: number[], allowedTokens: { collection: number, tokens: string }[]) {
+    super(uniqueSdk);
+    this.collectionIds = collectionIds;
+    this.allowedTokens = allowedTokens.reduce((acc, item) => ({ ...acc, [item.collection]: item.tokens }), {}) || {};
+  }
+
   async setNetwork(options: UniqueSDKNFTControllerOptions): Promise<void> {
     this.collectionIds = options.collectionIds;
     this.allowedTokens = options.allowedTokens.reduce((acc, item) => ({ ...acc, [item.collection]: item.tokens }), {}) || {};
