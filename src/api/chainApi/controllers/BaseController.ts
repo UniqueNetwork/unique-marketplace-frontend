@@ -1,6 +1,7 @@
 import { MetamaskAccount } from '@unique-nft/accounts/metamask';
 import { Client, Sdk } from '@unique-nft/sdk';
 import { NetworkOptions } from 'api/sdk/sdkClient';
+import { Account } from '@unique-nft/accounts/types';
 import IMarketContractAdapter from '../adapters/IMarketContractAdapter';
 import MetamaskAdapter from '../adapters/MetamaskAdapter';
 import UniqueAdapter from '../adapters/UniqueAdapter';
@@ -30,13 +31,11 @@ class BaseController implements IBaseController {
     this.isConnected = true;
   }
 
-  private isMetamaskSigner(account: any): boolean {
+  private isMetamaskSigner(account: Account): boolean {
     return account instanceof MetamaskAccount;
   }
 
-  // TODO: provide type for account
-  // TODO: extract connection type from signer to figure out whether we are working with polka or evm
-  protected getAdapter(account: any): IMarketContractAdapter {
+  protected getAdapter(account: Account): IMarketContractAdapter {
     // all non-sign calls can be postponed to default unique sdk
     if (!account) {
       return this.getDefaultAdapter();

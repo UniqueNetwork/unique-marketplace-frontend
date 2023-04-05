@@ -12,7 +12,7 @@ class UniqueAdapter implements IMarketContractAdapter {
   }
 
   protected contractAddress: string;
-  protected uniqueSdk!: Client; // initialized in UniqueController base class, but TS complains for some reason...
+  protected uniqueSdk: Client;
 
   async transferToken(from: string, to: string, collectionId: number, tokenId: number, signer: Signer): Promise<void> {
     await this.uniqueSdk.tokens.transfer.submitWaitResult({
@@ -42,7 +42,7 @@ class UniqueAdapter implements IMarketContractAdapter {
       address: from,
       contractAddress: this.contractAddress,
       funcName: 'put',
-      args: [collectionId, tokenId, price, amount] as any // TODO: ???
+      args: [collectionId, tokenId, price, amount] as any // TODO: fix after sdk update
     }, { signer });
   }
 
@@ -53,7 +53,7 @@ class UniqueAdapter implements IMarketContractAdapter {
       contractAddress: this.contractAddress,
       value,
       funcName: 'buy',
-      args: [collectionId, tokenId, amount] as any // TODO: ???
+      args: [collectionId, tokenId, amount] as any // TODO: fix after sdk update
     }, { signer });
   }
 }
