@@ -1,15 +1,18 @@
-import { Client, CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
-import UniqueController from './controllers/base/UniqueController';
+import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
+import { NetworkOptions } from 'api/sdk/sdkClient';
+import BaseController from './controllers/BaseController';
 import { TransactionOptions } from './types';
 
-export class UniqueSDKCollectionController extends UniqueController {
+export class UniqueSDKCollectionController extends BaseController {
   private collectionIds: number[] = [];
+  constructor(options: NetworkOptions) {
+    super(options);
+    this.collectionIds = options.settings.blockchain.unique.collectionIds;
+  }
 
-  async setNetwork(options: { uniqueSdk: Client, collectionIds: number[] }): Promise<void> {
-    await super.setNetwork(options);
-    this.collectionIds = options.collectionIds;
-    // just a stub
-    return Promise.resolve();
+  setNetwork(options: NetworkOptions): void {
+    super.setNetwork(options);
+    this.collectionIds = options.settings.blockchain.unique.collectionIds;
   }
 
   async confirmSponsorship(collectionId: number, { account }: TransactionOptions): Promise<void> {

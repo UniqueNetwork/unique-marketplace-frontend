@@ -33,10 +33,9 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
   useEffect(() => {
     (async () => {
       const settings = await fetchSettings(config.blockchains);
-      // TODO: save network options here instead of sdkClient and simply call sdkClient.setNetwork(those options)
       const networkOptions = settings.map<NetworkOptions>(({ networkId, sdkEndpoint, sdkRelayEndpoint, settings }) => ({ networkId, sdkEndpoint, sdkRelayEndpoint, settings }));
       setAvailableNetworkOptions(networkOptions);
-      // TODO: setup current chain properly from localStorage or smth (atm it fallsback to second in settings)
+      // TODO: setup current chain properly from localStorage/url
       const currentNetworkOption = networkOptions.find((no) => no.networkId === currentChainId) || networkOptions[0];
 
       // TODO: REMOVE THIS LINE: DEBUG PURPOSES ONLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

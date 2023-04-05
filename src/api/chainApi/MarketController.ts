@@ -1,68 +1,28 @@
 import { BN } from '@polkadot/util';
-import { MetamaskAccount } from '@unique-nft/accounts/metamask';
-import { Client, Sdk } from '@unique-nft/sdk';
 import { AllBalances } from '@unique-nft/substrate-client/balance';
 import { Address } from '@unique-nft/substrate-client/types';
 import marketplaceAbi from './contracts/marketplace-0.json';
 import { NetworkOptions } from '../sdk/sdkClient';
-import IMarketContractAdapter from './adapters/IMarketContractAdapter';
-import MetamaskAdapter from './adapters/MetamaskAdapter';
-import UniqueAdapter from './adapters/UniqueAdapter';
-import IBaseController from './controllers/base/IBaseController';
+
 import IMarketController from './controllers/base/IMarketController';
 import { TransactionOptions } from './types';
+import BaseController from './controllers/BaseController';
 
-class MarketController implements IMarketController, IBaseController {
-  uniqueSdk: Client;
+class MarketController extends BaseController implements IMarketController {
   contractAddress: string;
-  uniqueAdapter: UniqueAdapter;
-  metamaskAdapter: MetamaskAdapter;
-  isConnected = false;
   public decimals = 12; // TODO: move from controller to API
 
   constructor(options: NetworkOptions) {
+    super(options);
     const contractAddress = options.settings.blockchain.unique.contractAddress;
     this.contractAddress = contractAddress;
-    this.uniqueSdk = new Sdk({ baseUrl: options.sdkEndpoint });
-    this.uniqueAdapter = new UniqueAdapter(contractAddress, this.uniqueSdk);
-    this.metamaskAdapter = new MetamaskAdapter(contractAddress);
-    this.isConnected = true;
   }
 
-  // #region BASE
   public setNetwork(options: NetworkOptions): void {
     const contractAddress = options.settings.blockchain.unique.contractAddress;
     this.contractAddress = contractAddress;
-    const sdk = this.uniqueSdk = new Sdk({ baseUrl: options.sdkEndpoint });
-    this.uniqueSdk = sdk;
-    this.isConnected = false;
-    this.uniqueAdapter = new UniqueAdapter(contractAddress, sdk);
-    this.metamaskAdapter = new MetamaskAdapter(contractAddress);
-    this.isConnected = true;
+    super.setNetwork(options);
   }
-
-  private isMetamaskSigner(account: any): boolean {
-    return account instanceof MetamaskAccount;
-  }
-
-  // TODO: provide type for account
-  // TODO: extract connection type from signer to figure out whether we are working with polka or evm
-  protected getAdapter(account: any): IMarketContractAdapter {
-    // all non-sign calls can be postponed to default unique sdk
-    if (!account) {
-      return this.getDefaultAdapter();
-    }
-    if (this.isMetamaskSigner(account)) {
-      return this.metamaskAdapter;
-    }
-    return this.uniqueAdapter;
-  }
-
-  protected getDefaultAdapter(): IMarketContractAdapter {
-    return this.uniqueAdapter;
-  }
-
-  // #endregion BASE
 
   async changeAllowance(collectionId: number, tokenId: number, targetAllowance: boolean, { account }: TransactionOptions): Promise<void> {
     if (!account) throw new Error('Account not provided');

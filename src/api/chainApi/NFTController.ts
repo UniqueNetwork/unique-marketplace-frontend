@@ -1,31 +1,34 @@
-import { Client, GetBundleResponse, TokenByIdResponse, TokenOwnerResponse } from '@unique-nft/sdk';
+import { GetBundleResponse, TokenByIdResponse, TokenOwnerResponse } from '@unique-nft/sdk';
 import { Address } from '@unique-nft/substrate-client/types';
 import { getNestingTokenAddress, TokenIdArguments } from '@unique-nft/substrate-client/tokens';
 import { TransactionOptions } from './types';
 import { getEthAccount } from './utils/addressUtils';
 import { filterAllowedTokens } from './utils/checkTokenIsAllowed';
-import UniqueController, { UniqueControllerOptions } from './controllers/base/UniqueController';
+import BaseController from './controllers/BaseController';
+import { NetworkOptions } from 'api/sdk/sdkClient';
 
 declare module '@unique-nft/sdk' {
   type arrayNumberRecordStringAny = string | number | Record<string, string>
 }
 
-export interface UniqueSDKNFTControllerOptions extends UniqueControllerOptions { collectionIds: number[], allowedTokens: { collection: number, tokens: string }[] }
-
-export class UniqueSDKNFTController extends UniqueController {
+export class UniqueSDKNFTController extends BaseController {
   private collectionIds: number[] = [];
   private allowedTokens: Record<number, string> = {};
 
-  constructor(uniqueSdk: Client, collectionIds: number[], allowedTokens: { collection: number, tokens: string }[]) {
-    super(uniqueSdk);
+  constructor(options: NetworkOptions) {
+    super(options);
+    const allowedTokens = options.settings.blockchain.unique.allowedTokens;
+    const collectionIds = options.settings.blockchain.unique.collectionIds;
     this.collectionIds = collectionIds;
     this.allowedTokens = allowedTokens.reduce((acc, item) => ({ ...acc, [item.collection]: item.tokens }), {}) || {};
   }
 
-  async setNetwork(options: UniqueSDKNFTControllerOptions): Promise<void> {
-    this.collectionIds = options.collectionIds;
-    this.allowedTokens = options.allowedTokens.reduce((acc, item) => ({ ...acc, [item.collection]: item.tokens }), {}) || {};
-    await super.setNetwork(options);
+  setNetwork(options: NetworkOptions): void {
+    const allowedTokens = options.settings.blockchain.unique.allowedTokens;
+    const collectionIds = options.settings.blockchain.unique.collectionIds;
+    this.collectionIds = collectionIds;
+    this.allowedTokens = allowedTokens.reduce((acc, item) => ({ ...acc, [item.collection]: item.tokens }), {}) || {};
+    super.setNetwork(options);
   }
 
   async getAccountMarketableTokens(address: Address): Promise<TokenByIdResponse[]> {
@@ -67,6 +70,7 @@ export class UniqueSDKNFTController extends UniqueController {
     return await this.uniqueSdk?.tokens.getBundle({ collectionId, tokenId }) || null;
   }
 
+  // TODO: fix
   async unnest(collectionId: number, tokenId: number, address: string, options: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
     const parent = await this.uniqueSdk?.tokens.parent({ collectionId, tokenId });
