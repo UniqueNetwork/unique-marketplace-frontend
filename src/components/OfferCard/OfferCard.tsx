@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { Icon } from 'components/UI/Icon/Icon';
 import { Offer } from 'api/restApi/offers/types';
 import { useAccounts } from 'hooks/useAccounts';
-import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
+import { compareEncodedAddresses } from 'api/chainApi/utils/addressUtils';
 import { formatKusamaBalance } from 'utils/textUtils';
 import { timeDifference } from 'utils/timestampUtils';
 import { countNestedChildren, stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';

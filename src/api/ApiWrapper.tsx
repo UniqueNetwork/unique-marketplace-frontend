@@ -7,9 +7,9 @@ import AuctionSocketProvider from './restApi/auction/AuctionSocketProvider';
 import { Settings } from './restApi/settings/types';
 import { NetworkOptions, SdkClient } from './sdk/sdkClient';
 import config from '../config';
-import { sdkClient as sdk } from '.';
 import { useSettings } from './restApi/settings/settings';
 import { ChainIdLocalStorageKey, getInitialChainId } from '../utils/initialChainId';
+import { Sdk } from '@unique-nft/sdk';
 
 keyring.loadAll({});
 
@@ -20,12 +20,11 @@ interface ChainProviderProps {
 
 const initialChainId = getInitialChainId();
 
-const ApiWrapper = ({
-  children,
-  sdkClient = sdk
-}: ChainProviderProps) => {
+const ApiWrapper = ({ children }: ChainProviderProps) => {
+  const [sdkClient, setSdkClient] = useState<SdkClient>();
   const [isRpcClientInitialized, setRpcClientInitialized] = useState<boolean>(false);
   const navigate = useNavigate();
+  const [availableNetworkOptions, setAvailableNetworkOptions] = useState<NetworkOptions[]>();
   const [settings, setSettings] = useState<Settings>();
   const [currentChainId, setCurrentChainId] = useState<string>(initialChainId);
   const { error } = useNotifications();
@@ -34,13 +33,19 @@ const ApiWrapper = ({
   useEffect(() => {
     (async () => {
       const settings = await fetchSettings(config.blockchains);
+      const networkOptions = settings.map<NetworkOptions>(({ networkId, sdkEndpoint, sdkRelayEndpoint, settings }) => ({ networkId, sdkEndpoint, sdkRelayEndpoint, settings }));
+      setAvailableNetworkOptions(networkOptions);
+      // TODO: setup current chain properly from localStorage/url
+      const currentNetworkOption = networkOptions.find((no) => no.networkId === currentChainId) || networkOptions[0];
 
-      await sdk.initialize(settings.map<NetworkOptions>(({ networkId, sdkEndpoint, sdkRelayEndpoint, settings }) => ({ networkId, sdkEndpoint, sdkRelayEndpoint, settings })));
+      // TODO: REMOVE THIS LINE: DEBUG PURPOSES ONLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      currentNetworkOption.settings.blockchain.unique.contractAddress = '0xbf198C5168E6BA2ef9E58e3d674d7F7eB2DfC96e';
 
-      setSettings(sdkClient?.networks[currentChainId].settings);
-      await sdkClient?.setNetwork(currentChainId);
+      setSettings(currentNetworkOption.settings);
 
-      setRpcClientInitialized(sdkClient?.isReady);
+      setSdkClient(new SdkClient(currentNetworkOption));
+
+      setRpcClientInitialized(true);
     })().then(() => {
       console.log('SDK connection: success');
     }).catch((e) => {
@@ -49,17 +54,18 @@ const ApiWrapper = ({
     });
   }, []);
 
-  const onChangeChainId = useCallback((newChainId: string) => {
+  const onChangeChainId = useCallback(async (newChainId: string) => {
     if (currentChainId === newChainId) return;
     if (!sdkClient) {
       throw new Error('SdkClient is not available');
     }
 
-    const { settings } = sdkClient.networks[newChainId];
+    const option = availableNetworkOptions?.find((no) => no.networkId === newChainId);
+    if (!option) throw new Error('Requested network not found'); // TODO: change to default one or atleast don't crash app
 
-    setSettings(settings);
+    setSettings(option.settings);
 
-    sdkClient?.setNetwork(newChainId);
+    await sdkClient?.setNetwork(option);
     setCurrentChainId(newChainId);
     localStorage.setItem(ChainIdLocalStorageKey, newChainId);
     // redirect to correct URL with chainId
@@ -80,11 +86,12 @@ const ApiWrapper = ({
   // get current chain and current chain settings
   const currentChain = useMemo(() => {
     if (!sdkClient?.isReady || !currentChainId) return undefined;
-
-    return sdkClient?.networks[currentChainId];
+    const option = availableNetworkOptions?.find((no) => no.networkId === currentChainId);
+    return option;
   }, [currentChainId, sdkClient?.isReady]);
 
-  const prefixes = useMemo(() => Object.values(sdkClient?.networks || []).map(({ uniqueProperties }) => uniqueProperties?.SS58Prefix || 255),
+  // TODO: !!! GET CHAIN PREFIXES EITHER FROM BE OR CALCULATE VIA SDK !!! !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  const prefixes = useMemo(() => Object.values(availableNetworkOptions || []).map(() => 255),
     [isRpcClientInitialized]
   );
 
@@ -98,8 +105,7 @@ const ApiWrapper = ({
           market: sdkClient.marketController
         }
         : undefined),
-      uniqueSdk: currentChain?.sdkSet?.unique,
-      chainData: currentChain?.uniqueProperties,
+      // chainData: currentChain?.uniqueProperties, // TODO: chain properties are required
       baseURL: config.blockchains[currentChainId]?.apiEndpoint || '',
       settings,
       prefixes,

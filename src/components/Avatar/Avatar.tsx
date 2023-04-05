@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import Identicon from '@polkadot/react-identicon';
 import styled from 'styled-components';
-import { DecodedInfixOrUrlOrCidAndHash } from 'api/uniqueSdk/types';
+import { DecodedInfixOrUrlOrCidAndHash } from 'api/chainApi/types';
 
 export interface IAvatarProps {
   src?: string | DecodedInfixOrUrlOrCidAndHash;

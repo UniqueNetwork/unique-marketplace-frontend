@@ -11,7 +11,7 @@ import { Grey300, Grey500, Primary600 } from 'styles/colors';
 import { Avatar } from 'components/Avatar/Avatar';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import config from 'config';
-import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
+import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import { Offer } from 'api/restApi/offers/types';
 import { useApi } from 'hooks/useApi';
 import Skeleton from 'components/Skeleton/Skeleton';

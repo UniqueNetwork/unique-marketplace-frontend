@@ -3,7 +3,7 @@ import { Loader, Text } from '@unique-nft/ui-kit';
 import { generatePath, Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Icon, Link as UILink } from 'components/UI';
-import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
+import { compareEncodedAddresses } from 'api/chainApi/utils/addressUtils';
 import { Offer } from 'api/restApi/offers/types';
 import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';

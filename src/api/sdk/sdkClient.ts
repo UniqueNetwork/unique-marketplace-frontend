@@ -1,11 +1,8 @@
 import { Settings } from '../restApi/settings/types';
-import { UniqueSDKNFTController } from '../uniqueSdk/NFTController';
-import { UniqueSDKCollectionController } from '../uniqueSdk/collectionController';
-import { SdkNetworkProvider } from './sdkNetworkProvider';
-import { DecodedInfixOrUrlOrCidAndHash } from '../uniqueSdk/types';
-import MarketController from 'api/uniqueSdk/marketController';
-import MarketUniqueController from 'api/uniqueSdk/controllers/marketUniqueController';
-import MarketMetamaskController from 'api/uniqueSdk/controllers/marketMetamaskController';
+import { UniqueSDKNFTController } from '../chainApi/NFTController';
+import { UniqueSDKCollectionController } from '../chainApi/collectionController';
+import { DecodedInfixOrUrlOrCidAndHash } from '../chainApi/types';
+import MarketController from 'api/chainApi/MarketController';
 
 declare module '@unique-nft/sdk' {
   export interface TokenByIdResponse {
@@ -18,42 +15,23 @@ export interface NetworkOptions { networkId: string, sdkEndpoint: string, sdkRel
 
 export class SdkClient {
   public isReady = false;
-  public networks: Record<string, SdkNetworkProvider> = {};
-  public nftController: UniqueSDKNFTController = new UniqueSDKNFTController();
-  public collectionController: UniqueSDKCollectionController = new UniqueSDKCollectionController();
-  public marketController: MarketController = new MarketController(new MarketUniqueController(), new MarketMetamaskController());
+  public nftController: UniqueSDKNFTController;
+  public collectionController: UniqueSDKCollectionController;
+  public marketController: MarketController;
 
-  private addNetwork = async ({ networkId, ...networkOptions }: NetworkOptions) => {
-    const network = new SdkNetworkProvider(networkOptions);
-    await network.init();
-    this.networks[networkId] = network;
-  };
-
-  async initialize(networkOptions: NetworkOptions[]) {
-    await Promise.all(networkOptions.map(this.addNetwork));
+  constructor(options: NetworkOptions) {
+    this.marketController = new MarketController(options);
+    this.collectionController = new UniqueSDKCollectionController(options);
+    this.nftController = new UniqueSDKNFTController(options);
     this.isReady = true;
   }
 
-  async setNetwork(networkId: string) {
-    const { sdkSet, settings } = this.networks[networkId];
-
-    if (!sdkSet || !settings) {
-      throw new Error(`Network ${networkId} not exists`);
-    }
-    // changing sdk instances and settings for controllers
-    await this.nftController.setNetwork({
-      uniqueSdk: sdkSet.unique,
-      allowedTokens: settings.blockchain.unique.allowedTokens,
-      collectionIds: settings.blockchain.unique.collectionIds
-    });
-    await this.collectionController.setNetwork({
-      uniqueSdk: sdkSet.unique,
-      collectionIds: settings.blockchain.unique.collectionIds
-    });
-    await this.marketController.setNetwork({
-      uniqueSdk: sdkSet.unique,
-      auctionAddress: settings.auction.address,
-      contractAddress: settings.blockchain.unique.contractAddress
-    });
+  setNetwork(options: NetworkOptions): void {
+    this.isReady = false;
+    this.nftController.setNetwork(options);
+    this.collectionController.setNetwork(options);
+    // TODO: when metamask updated we must ask in extension to change network too (see wallet implementation for more)
+    this.marketController.setNetwork(options);
+    this.isReady = true;
   }
 }

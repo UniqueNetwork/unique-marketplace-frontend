@@ -1,5 +1,5 @@
 import { PaginatedResponse, Pagination, Sortable } from '../base/types';
-import { DecodedInfixOrUrlOrCidAndHash, VideoAttribute } from '../../uniqueSdk/types';
+import { DecodedInfixOrUrlOrCidAndHash, VideoAttribute } from '../../chainApi/types';
 import { CollectionMode, DecodedAttributes, UniqueCollectionSchemaDecoded } from '@unique-nft/substrate-client/tokens';
 import { INestingToken } from 'components/BundleTree/types';
 import { Address } from '@unique-nft/substrate-client/types';

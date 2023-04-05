@@ -16,7 +16,7 @@ import { useOffers } from 'api/restApi/offers/offers';
 import { useTransferToBundleStages } from 'hooks/marketplaceStages/useTransferToBundleStages';
 import { INestingToken } from 'components/BundleTree/types';
 import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
-import { DecodedInfixOrUrlOrCidAndHash } from 'api/uniqueSdk/types';
+import { DecodedInfixOrUrlOrCidAndHash } from 'api/chainApi/types';
 
 const pageSize = 1000;
 

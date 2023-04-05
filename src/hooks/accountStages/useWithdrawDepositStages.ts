@@ -27,15 +27,15 @@ export const useWithdrawDepositStages = (accountAddress: string, bids: TWithdraw
       description: '',
       status: StageStatus.default,
       action: async ({ options }) => {
-        if (!options.signer) throw new Error('Account not selected');
+        if (!options.account) throw new Error('Account not selected');
 
         const timestamp = Date.now();
         const auctionIds = bids.map((bid) => `auctionId=${bid.auctionId}`).join('&');
         const message = `${auctionIds}&timestamp=${timestamp}`;
-        const { signature } = await options.signer.sign({ signerPayloadHex: stringToHex(message) });
+        const { signature } = await options.account.sign({ signerPayloadHex: stringToHex(message) });
         await withdrawChooseBids(baseURL,
           { auctionIds: `${auctionIds}`, timestamp },
-          { signature, signer: options.signer.getAddress() }
+          { signature, signer: options.account.getAddress() }
         );
       }
     }]
@@ -45,11 +45,11 @@ export const useWithdrawDepositStages = (accountAddress: string, bids: TWithdraw
     ...withdrawBidsStage
   ], [withdrawBidsStage]);
 
-  const signer = useMemo(() => {
+  const account = useMemo(() => {
     return accounts.find(({ address }) => address === accountAddress);
   }, [accounts, accountAddress]);
 
-  const { stages, error, status, initiate: initiateStages } = useStages<TWithdrawDeposit>(withdrawDepositStages, signer);
+  const { stages, error, status, initiate: initiateStages } = useStages<TWithdrawDeposit>(withdrawDepositStages, account);
 
   const initiate = useCallback(() => {
     initiateStages({ address: accountAddress });

@@ -1,6 +1,7 @@
 import { Consumer, Context, createContext, Provider } from 'react';
 import { BN } from '@polkadot/util';
 import { KeyringPair } from '@polkadot/keyring/types';
+import { Signer } from '../api/chainApi/adapters/IBaseAdapter';
 import { TWithdrawBid } from '../api/restApi/auction/types';
 import { SignResult, UnsignedTxPayload, Account } from '@unique-nft/accounts/types';
 
@@ -12,11 +13,12 @@ export type AccountDeposits = {
   sponsorshipFee?: BN
 }
 
+// TODO: redundant. Consider reworking into local Account type of its own
 declare module '@unique-nft/accounts/types' {
   export abstract class Account {
     name: string;
     address: string;
-    signer: any; // TODO TYPE // TODO: !!!!!!!!!! validate this
+    signer: Signer;
     balance?: {
       KSM?: BN
     };

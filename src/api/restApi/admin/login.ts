@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 
-import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
+import { compareEncodedAddresses } from 'api/chainApi/utils/addressUtils';
 import { useAccounts } from 'hooks/useAccounts';
 import { useApi } from 'hooks/useApi';
 import { LoginPayload, LoginResponse } from './types';

@@ -108,8 +108,7 @@ export const NFTPage = () => {
     setIsFetchingTokens(true);
     void (async () => {
       await fetch({ page: 1, pageSize, seller: selectedAccount?.getAddress() });
-      const _tokens = (await api.nft?.getAccountMarketableTokens(selectedAccount.getAddress())) || [];
-
+      const _tokens = (await api.nft?.getAccountMarketableTokens(selectedAccount.address)) || [];
       setTokens(_tokens);
       setIsFetchingTokens(false);
     })();
