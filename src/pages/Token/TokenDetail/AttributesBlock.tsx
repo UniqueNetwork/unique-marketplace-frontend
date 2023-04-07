@@ -2,12 +2,11 @@ import React, { FC } from 'react';
 import styled from 'styled-components';
 import { Heading, Text } from '@unique-nft/ui-kit';
 import { Trait } from './Trait';
-import { DecodedAttributes } from '@unique-nft/substrate-client/tokens';
 import IconWithHint from '../../../components/IconWithHint/IconWithHint';
 import { DecodedAttributeDto } from '@unique-nft/sdk';
 
 interface IProps {
-  attributes: DecodedAttributeDto[] | DecodedAttributes;
+  attributes: DecodedAttributeDto[];
 }
 
 export const AttributesBlock: FC<IProps> = ({ attributes }: IProps) => {

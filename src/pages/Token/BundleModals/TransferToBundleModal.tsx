@@ -10,12 +10,11 @@ import { StageStatus } from 'types/StagesTypes';
 import { TBundleTrunsferModalBodyProps } from './BundleTrunsferModal';
 import { useCollections } from 'hooks/useCollections';
 import { useApi } from 'hooks/useApi';
-import { TokenIdArguments } from '@unique-nft/substrate-client/tokens';
 import { CollectionCover } from 'components/CollectionCover/CollectionCover';
 import { useOffers } from 'api/restApi/offers/offers';
 import { useTransferToBundleStages } from 'hooks/marketplaceStages/useTransferToBundleStages';
 import { INestingToken } from 'components/BundleTree/types';
-import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
+import { CollectionInfoWithSchemaResponse, TokenByIdResponse, TokenIdQuery } from '@unique-nft/sdk';
 import { DecodedInfixOrUrlOrCidAndHash } from 'api/chainApi/types';
 
 const pageSize = 1000;
@@ -57,7 +56,7 @@ type TokenOption = {
 
 type ITokenOption = TokenOption | null;
 
-const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(newParent: TokenIdArguments): void, testid: string }> = ({ token, onTransferToBundle, testid }) => {
+const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(newParent: TokenIdQuery): void, testid: string }> = ({ token, onTransferToBundle, testid }) => {
   const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse | null>();
   const [selectedToken, setSelectedToken] = useState<ITokenOption | null>();
   const [tokens, setTokens] = useState<TokenByIdResponse[]>([]);
@@ -72,8 +71,8 @@ const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(ne
     if (!selectedAccount) return;
     void (async () => {
       setIsLoading(true);
-      await fetch({ page: 1, pageSize, seller: selectedAccount?.getAddress() });
-      const tokens = await api?.nft?.getAccountMarketableTokens(selectedAccount.getAddress());
+      await fetch({ page: 1, pageSize, seller: selectedAccount?.address });
+      const tokens = await api?.nft?.getAccountMarketableTokens(selectedAccount.address);
       setTokens(tokens || []);
       setIsLoading(false);
     })();
@@ -178,7 +177,7 @@ const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(ne
   );
 };
 
-const TransferToBundleStagesModal: FC<TBundleTrunsferModalBodyProps & { newParent: TokenIdArguments }> = ({ token, newParent, onFinish, testid }) => {
+const TransferToBundleStagesModal: FC<TBundleTrunsferModalBodyProps & { newParent: TokenIdQuery }> = ({ token, newParent, onFinish, testid }) => {
   const { stages, status, initiate } = useTransferToBundleStages(token, newParent);
   const { info } = useNotifications();
   const { selectedAccount } = useAccounts();

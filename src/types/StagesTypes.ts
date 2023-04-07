@@ -1,5 +1,5 @@
+import { UnsignedTxPayload } from '@unique-nft/accounts';
 import { TransactionOptions, TTransaction } from '../api/chainApi/types';
-import { UnsignedTxPayload } from '@unique-nft/substrate-client/types';
 
 export enum StageStatus {
   default = 'Default',

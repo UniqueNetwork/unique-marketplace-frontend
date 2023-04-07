@@ -1,12 +1,11 @@
 import { BN } from '@polkadot/util';
-import { AllBalances } from '@unique-nft/substrate-client/balance';
-import { Address } from '@unique-nft/substrate-client/types';
 import marketplaceAbi from './contracts/marketplace-0.json';
 import { NetworkOptions } from '../sdk/sdkClient';
 
 import IMarketController from './controllers/base/IMarketController';
 import { TransactionOptions } from './types';
 import BaseController from './controllers/BaseController';
+import { AllBalancesResponse } from '@unique-nft/sdk';
 
 class MarketController extends BaseController implements IMarketController {
   contractAddress: string;
@@ -31,7 +30,7 @@ class MarketController extends BaseController implements IMarketController {
     const isAlreadyAllowed = await this.uniqueSdk.tokens.allowance({ collectionId, tokenId, from, to });
     if (isAlreadyAllowed.isAllowed === targetAllowance) return;
 
-    const adapter = this.getAdapter(account);
+    const adapter = this.getAdapter(account.account);
     await adapter.changeAllowance(from, to, collectionId, tokenId, targetAllowance, account.signer);
   }
 
@@ -40,7 +39,9 @@ class MarketController extends BaseController implements IMarketController {
     const to = this.contractAddress;
     const isAllowed = await this.uniqueSdk.tokens.allowance({ collectionId, tokenId, from, to });
     if (!isAllowed) throw new Error('Token not approved for sale');
-    const adapter = this.getAdapter(account);
+    const adapter = this.getAdapter(account.account);
+    console.log('adapter used:', adapter);
+    console.log('account used', account);
     await adapter.sell(from, collectionId, tokenId, price, amount, account.signer);
   }
 
@@ -51,7 +52,7 @@ class MarketController extends BaseController implements IMarketController {
     if (!isAllowed) throw new Error('Token not approved for sale');
 
     const value = (await this.getOrder(collectionId, tokenId))[3]; // order.value
-    const adapter = this.getAdapter(account);
+    const adapter = this.getAdapter(account.account);
     await adapter.buy(from, collectionId, tokenId, value, amount, account.signer);
   }
 
@@ -79,23 +80,23 @@ class MarketController extends BaseController implements IMarketController {
     }
   }
 
-  async getAccountBalance(address: string): Promise<AllBalances> {
+  async getAccountBalance(address: string): Promise<AllBalancesResponse> {
     return await this.uniqueSdk.balance.get({ address });
   }
 
   // TODO: split into multiple "get fee for method X". Put them in adapters
-  async getFee(sender: Address, recipient?: string, value?: BN): Promise<string | null> {
+  async getFee(sender: string, recipient?: string, value?: BN): Promise<string | null> {
     await Promise.resolve();
     return '0';
   }
 
   // ____ EXTRA _____
-  async transferToken(from: Address, to: Address, collectionId: number, tokenId: number, { account }: TransactionOptions): Promise<void> {
-    await this.getAdapter(account).transferToken(from, to, collectionId, tokenId, account.signer);
+  async transferToken(from: string, to: string, collectionId: number, tokenId: number, { account }: TransactionOptions): Promise<void> {
+    await this.getAdapter(account.account).transferToken(from, to, collectionId, tokenId, account.signer);
   }
 
-  async transferBalance(from: Address, to: string, amount: BN, { account }: TransactionOptions): Promise<void> {
-    await this.getAdapter(account).transferBalance(from, to, amount.toNumber(), account.signer);
+  async transferBalance(from: string, to: string, amount: BN, { account }: TransactionOptions): Promise<void> {
+    await this.getAdapter(account.account).transferBalance(from, to, amount.toNumber(), account.signer);
   }
 }
 

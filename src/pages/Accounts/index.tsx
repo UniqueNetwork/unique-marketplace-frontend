@@ -4,7 +4,6 @@ import { BN } from '@polkadot/util';
 import { Dropdown, Button } from 'components/UI';
 import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import { TWithdrawBid } from 'api/restApi/auction/types';
-import { Account } from '@unique-nft/accounts/types';
 import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
@@ -24,6 +23,7 @@ import config from 'config';
 import { AccountInfo } from './types';
 import NoAccountsIcon from 'static/icons/no-accounts.svg';
 import { getAccountsColumns } from './columns';
+import { MarketAccount as Account } from 'account/AccountContext';
 
 const testid = 'accounts-page';
 
@@ -91,7 +91,7 @@ export const AccountsPage = () => {
   const filteredAccounts: AccountInfo[] = useMemo(() => {
     const reduceAccounts = (acc: AccountInfo[], account: Account) => {
       acc.push({
-        address: account.getAddress(),
+        address: account.address,
         name: account.name || '',
         balance: account.balance
       });
@@ -106,7 +106,7 @@ export const AccountsPage = () => {
         // add row with deposit info only on big screens
         if (deviceSize !== DeviceSize.sm) {
           acc.push({
-            address: account.getAddress(),
+            address: account.address,
             name: account.name || '',
             deposit: (sponsorshipFee || new BN(0))
               .add(withdraw.reduce(getTotalAmount, new BN(0)))
@@ -114,7 +114,7 @@ export const AccountsPage = () => {
           });
         } else {
           acc[acc.length - 1] = {
-            address: account.getAddress(),
+            address: account.address,
             name: account.name || '',
             balance: account.balance,
             deposit: (sponsorshipFee || new BN(0))
@@ -132,7 +132,7 @@ export const AccountsPage = () => {
     return accounts
     .filter(
       (account) =>
-        formatAddress(account.getAddress()).toLowerCase().includes(searchString.trim().toLowerCase()) ||
+        formatAddress(account.address).toLowerCase().includes(searchString.trim().toLowerCase()) ||
         account.name?.toLowerCase().includes(searchString.trim().toLowerCase())
     )
     .reduce(reduceAccounts, []);

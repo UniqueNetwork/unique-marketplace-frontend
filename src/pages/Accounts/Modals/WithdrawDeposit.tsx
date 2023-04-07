@@ -79,7 +79,7 @@ export const WithdrawDepositAskModal: FC<WithdrawDepositAskModalProps> = ({ isVi
   const [isSelectedSponsorshipFee, setIsSelectedSponsorshipFee] = useState<boolean>(false);
 
   const account = useMemo(() =>
-    accounts.find((item) => item.getAddress() === address), [accounts, address]);
+    accounts.find((item) => item.address === address), [accounts, address]);
 
   const { bids, sponsorshipFee } = account?.deposits || { sponsorshipFee: new BN(0) };
   const { withdraw, leader } = bids || { withdraw: [], leader: [] };

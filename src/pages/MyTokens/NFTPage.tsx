@@ -4,7 +4,6 @@ import BN from 'bn.js';
 import { Text } from '@unique-nft/ui-kit';
 import { Select } from 'components/UI';
 import { BN_MAX_INTEGER } from '@polkadot/util';
-import { BoxedNumberWithDefault, DecodedAttributes, LocalizedStringWithDefault } from '@unique-nft/substrate-client/tokens';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
 import { useOffers } from 'api/restApi/offers/offers';
@@ -107,7 +106,7 @@ export const NFTPage = () => {
 
     setIsFetchingTokens(true);
     void (async () => {
-      await fetch({ page: 1, pageSize, seller: selectedAccount?.getAddress() });
+      await fetch({ page: 1, pageSize, seller: selectedAccount?.address });
       const _tokens = (await api.nft?.getAccountMarketableTokens(selectedAccount.address)) || [];
       setTokens(_tokens);
       setIsFetchingTokens(false);
@@ -195,9 +194,9 @@ export const NFTPage = () => {
         filteredByAttributes = filterState?.attributes.every((attributeItem) => {
           const attribute = Object.values(token.attributes || {}).find((attribute) => attribute.name?._?.toLowerCase() === attributeItem.key.toLowerCase());
           return (attribute && attribute.isArray)
-            ? (attribute.value as (BoxedNumberWithDefault | LocalizedStringWithDefault)[])
+            ? (attribute.value as ({ _: string | number })[])
               .some((_attribute) => _attribute._ === attributeItem.attribute)
-            : ((attribute?.value as LocalizedStringWithDefault)?._ === attributeItem.attribute);
+            : ((attribute?.value as {_: string })?._ === attributeItem.attribute);
         });
       }
       let filteredBySearchValue = true;
@@ -221,7 +220,7 @@ export const NFTPage = () => {
     let filteredByAttributeCounts = true;
     if (filterState?.attributeCounts && filterState.attributeCounts.length > 0) {
       filteredByAttributeCounts = filterState?.attributeCounts.some((attributeCount) => {
-        return countTokenAttributes(token.attributes as DecodedAttributes) === attributeCount;
+        return countTokenAttributes(token.attributes) === attributeCount;
       });
     }
     return filteredByAttributeCounts;

@@ -1,7 +1,7 @@
 import { MetamaskAccount } from '@unique-nft/accounts/metamask';
-import { Client, Sdk } from '@unique-nft/sdk';
+import { Sdk } from '@unique-nft/sdk';
 import { NetworkOptions } from 'api/sdk/sdkClient';
-import { Account } from '@unique-nft/accounts/types';
+import { Account } from '@unique-nft/accounts';
 import IMarketContractAdapter from '../adapters/IMarketContractAdapter';
 import MetamaskAdapter from '../adapters/MetamaskAdapter';
 import UniqueAdapter from '../adapters/UniqueAdapter';
@@ -9,7 +9,7 @@ import IBaseController from '../controllers/base/IBaseController';
 
 class BaseController implements IBaseController {
   isConnected = false;
-  uniqueSdk: Client;
+  uniqueSdk: Sdk;
   uniqueAdapter: UniqueAdapter;
   metamaskAdapter: MetamaskAdapter;
   constructor(options: NetworkOptions) {

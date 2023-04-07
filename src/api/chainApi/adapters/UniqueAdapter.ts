@@ -1,18 +1,16 @@
-import { Client, Signer } from '@unique-nft/sdk';
-import { Address } from '@unique-nft/substrate-client/types';
-import IBaseAdapter from './IBaseAdapter';
+import { Sdk, Signer } from '@unique-nft/sdk';
 import IMarketContractAdapter from './IMarketContractAdapter';
 
 import marketplaceAbi from '../contracts/marketplace-0.json';
 
 class UniqueAdapter implements IMarketContractAdapter {
-  constructor(contractAddress: string, uniqueSdk: Client) {
+  constructor(contractAddress: string, uniqueSdk: Sdk) {
     this.uniqueSdk = uniqueSdk;
     this.contractAddress = contractAddress;
   }
 
   protected contractAddress: string;
-  protected uniqueSdk: Client;
+  protected uniqueSdk: Sdk;
 
   async transferToken(from: string, to: string, collectionId: number, tokenId: number, signer: Signer): Promise<void> {
     await this.uniqueSdk.tokens.transfer.submitWaitResult({
@@ -24,7 +22,7 @@ class UniqueAdapter implements IMarketContractAdapter {
     }, { signer });
   }
 
-  async transferBalance(from: Address, to: string, amount: number, signer: Signer): Promise<void> {
+  async transferBalance(from: string, to: string, amount: number, signer: Signer): Promise<void> {
     await this.uniqueSdk.balance.transfer.submitWaitResult({
       address: from,
       destination: to,

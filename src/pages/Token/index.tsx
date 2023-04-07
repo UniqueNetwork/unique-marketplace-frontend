@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Link } from '@unique-nft/ui-kit';
-import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 import { Icon, useNotifications } from 'components/UI';
 import { useApi } from 'hooks/useApi';
 import { MarketType } from 'types/MarketTypes';
@@ -90,7 +89,7 @@ const TokenPage = () => {
       <div data-testid={`${testid}-success-notification`}>
         {compareEncodedAddresses(
           newOwnerAddress,
-          selectedAccount?.getAddress() || ''
+          selectedAccount?.address || ''
         )
           ? 'You are'
           : `${shortcutText(newOwnerAddress)} is` }  the new owner of <Link href={`/token/${token.collectionId}/${token.tokenId}`} title={`${collection?.tokenPrefix} #${token.tokenId}`}/>
@@ -100,7 +99,7 @@ const TokenPage = () => {
 
     void fetchOffer(Number(collectionId), Number(id));
     void fetchToken();
-  }, [info, fetchOffer, fetchToken, selectedAccount?.getAddress(), collectionId, id, token]);
+  }, [info, fetchOffer, fetchToken, selectedAccount?.address, collectionId, id, token]);
 
   const backClickHandler = useCallback(() => {
     // if user opened token page with a direct link, redirect him to /market, otherwise redirect him back
@@ -117,9 +116,9 @@ const TokenPage = () => {
   const isOwner = useMemo(() => {
     if (!selectedAccount || isFetchingOffer || isFetchingToken) return false;
     if (offer) {
-      return isTokenOwner(selectedAccount.getAddress(), offer.seller);
+      return isTokenOwner(selectedAccount.address, offer.seller);
     }
-    return token?.owner ? isTokenOwner(selectedAccount.getAddress(), token.owner) : false;
+    return token?.owner ? isTokenOwner(selectedAccount.address, token.owner) : false;
   }, [isFetchingOffer, isFetchingToken, selectedAccount, token, offer]);
 
   if (!isFetchingOffer && !isFetchingToken && !token && !offer) return <Error404 />;

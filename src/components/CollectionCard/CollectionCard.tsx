@@ -1,6 +1,5 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { Text } from '@unique-nft/ui-kit';
-import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
 import styled from 'styled-components/macro';
 import { Icon, Dropdown } from 'components/UI';
 import { CollectionData } from 'api/restApi/admin/types';
@@ -44,16 +43,16 @@ export const CollectionCard: FC<TCollectionCard> = ({
     return selectedAccount &&
       collectionDetails?.sponsorship?.address &&
       !collectionDetails?.sponsorship?.isConfirmed &&
-      compareEncodedAddresses(selectedAccount.getAddress(), collectionDetails.sponsorship.address);
-  }, [selectedAccount?.getAddress(), collectionDetails?.sponsorship?.isConfirmed, collectionDetails?.sponsorship?.address]);
+      compareEncodedAddresses(selectedAccount.address, collectionDetails.sponsorship.address);
+  }, [selectedAccount?.address, collectionDetails?.sponsorship?.isConfirmed, collectionDetails?.sponsorship?.address]);
 
   const canRemoveSponsorships = useMemo(() => {
     return selectedAccount &&
       collectionDetails?.sponsorship?.address &&
       collectionDetails?.sponsorship?.isConfirmed &&
-      (compareEncodedAddresses(selectedAccount.getAddress(), collectionDetails.sponsorship.address) ||
-        compareEncodedAddresses(selectedAccount.getAddress(), collection?.owner || ''));
-  }, [selectedAccount?.getAddress(), collectionDetails?.sponsorship?.isConfirmed, collectionDetails?.sponsorship?.address, collection?.owner]);
+      (compareEncodedAddresses(selectedAccount.address, collectionDetails.sponsorship.address) ||
+        compareEncodedAddresses(selectedAccount.address, collection?.owner || ''));
+  }, [selectedAccount?.address, collectionDetails?.sponsorship?.isConfirmed, collectionDetails?.sponsorship?.address, collection?.owner]);
 
   const hasSponsorship = useMemo(() => collectionDetails?.sponsorship && collectionDetails?.sponsorship?.isConfirmed, [collectionDetails]);
   const hasUnconfirmedSponsorship = useMemo(() => collectionDetails?.sponsorship && !collectionDetails?.sponsorship?.isConfirmed, [collectionDetails]);

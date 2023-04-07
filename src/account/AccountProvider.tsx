@@ -1,18 +1,17 @@
 import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { AccountProvider } from './AccountContext';
+import { AccountProvider, MarketAccount as Account } from './AccountContext';
 import { SignModal } from 'components/SignModal/SignModal';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { BN } from '@polkadot/util';
 import { Codec } from '@polkadot/types/types';
 import { useApi } from 'hooks/useApi';
 import { getWithdrawBids } from 'api/restApi/auction/auction';
-import { Accounts, ProviderClass } from '@unique-nft/accounts';
+import { Accounts, ProviderClass, UnsignedTxPayload } from '@unique-nft/accounts';
 
 import { PolkadotProvider, PolkadotAccount } from '@unique-nft/accounts/polkadot';
 import { KeyringLocalProvider, KeyringLocalAccount } from '@unique-nft/accounts/keyring-local';
 import { MetamaskProvider, MetamaskAccount } from '@unique-nft/accounts/metamask';
-import { Account } from '@unique-nft/accounts/types';
 
 export const DefaultAccountKey = 'unique_market_account_address';
 
@@ -38,49 +37,12 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
       await _accounts.addProvider<ProviderClass<any>>(KeyringLocalProvider, { passwordCallback: showSignDialog });
       await _accounts.addProvider<ProviderClass<any>>(PolkadotProvider);
       await _accounts.addProvider<ProviderClass<any>>(MetamaskProvider);
-
-      const allAccounts = (await _accounts?.getAccounts())?.map((account) => {
-        let name; // TODO: refactor?
-        switch (account.constructor) {
-          case PolkadotAccount:
-            // TODO: if account is from polka but has ethereum address - either ignore it or figure out how to deal with it
-            name = (account as PolkadotAccount).injectedAccount.meta.name || `Polkadotjs: ${account.address}`;
-            // In metamask we provide "signer" object. For polkadotjs we provide keyringpair.account. Both should be provided as OurCustomAccount.signer depending on provider
-            account.signer = { sign: account.sign };
-          break;
-          case KeyringLocalAccount:
-            name = (account as unknown as KeyringLocalAccount).keyringPair.meta.name as string || account.name || `Unknown local account: ${account.address}`;
-          break;
-          case MetamaskAccount:
-            name = (account as unknown as MetamaskAccount).name || 'Metamask Account';
-          break;
-          default:
-            console.error('Corrupted account: ', account);
-            throw new Error('Unknown account type faced');
-        }
-        account.name = name;
-        account.address = account.getAddress();
-        account.isLocal = account instanceof KeyringLocalAccount;
-        return account;
-      }) || [];
-
-      const defaultAccountAddress = localStorage.getItem(DefaultAccountKey);
-      const defaultAccount = allAccounts.find((item) => item.address === defaultAccountAddress) || allAccounts[0];
-
-      defaultAccount.balance = { KSM: new BN((await api.market!.getAccountBalance(defaultAccount.getAddress()))?.freeBalance?.raw || 0) };
-
-      changeAccount(defaultAccount);
-
-      setAccounts(allAccounts);
-
-      setIsLoading(false);
-
-      // await subscribeBalancesChanges(allAccounts);
+      await fetchAccounts();
     })();
   }, [api?.market, subscribeBalancesChanges]);
 
   const changeAccount = useCallback((account: Account) => {
-    localStorage.setItem(DefaultAccountKey, account.getAddress());
+    localStorage.setItem(DefaultAccountKey, account.address);
     setSelectedAccount(account);
   }, []);
 
@@ -111,7 +73,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
 
   const getAccountDeposit = useCallback(async (account: Account) => {
     return {
-      bids: (await getWithdrawBids(baseURL, { owner: account.getAddress() })).data || { withdraw: [], leader: [] }
+      bids: (await getWithdrawBids(baseURL, { owner: account.address })).data || { withdraw: [], leader: [] }
     };
   }, [baseURL, api?.market]);
 
@@ -120,7 +82,9 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
     setIsLoadingDeposits(true);
 
     setAccounts(await Promise.all(accounts.map(async (account) => {
-      account.deposits = await getAccountDeposit(account);
+      // account.deposits = await getAccountDeposit(account);
+      // Will be used when we bring back auctions
+      await Promise.resolve();
       return account;
     })));
 
@@ -128,28 +92,62 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
   }, [accounts.length, api?.market, getAccountDeposit]);
 
   const fetchAccounts = useCallback(async () => {
-    if (!api?.market) return Promise.resolve();
+    if (!api?.market) return;
+    // await _accounts.addProvider<ProviderClass<any>>(KeyringLocalProvider, { passwordCallback: showSignDialog });
+    // await _accounts.addProvider<ProviderClass<any>>(PolkadotProvider);
+    // await _accounts.addProvider<ProviderClass<any>>(MetamaskProvider);
+
     const allAccounts = (await _accounts?.getAccounts())?.map((account) => {
-      account.name = (account instanceof PolkadotAccount
-        ? (account).injectedAccount
-        : (account as unknown as KeyringLocalAccount).keyringPair).meta.name as string;
-      account.address = account.getAddress();
-      account.isLocal = account instanceof KeyringLocalAccount;
-      return account;
+      let name; // TODO: refactor?
+      const marketAccount = { account: account as unknown } as Account;
+      switch (account.constructor) {
+        case PolkadotAccount:
+          // TODO: if account is from polka but has ethereum address - either ignore it or figure out how to deal with it
+          name = (account as PolkadotAccount).injectedAccount.meta.name || `Polkadotjs: ${account.address}`;
+          // In metamask we provide "signer" object. For polkadotjs we provide keyringpair.account. Both should be provided as OurCustomAccount.signer depending on provider
+          marketAccount.signer = account;
+        break;
+        case KeyringLocalAccount:
+          name = (account as unknown as KeyringLocalAccount).keyringPair.meta.name as string || `Unknown local account: ${account.address}`;
+          marketAccount.signer = account;
+        break;
+        case MetamaskAccount:
+          name = 'Metamask Account';
+          // TODO: signer is prive inside metamask account for some reason. We may consider taking it from ethers directly instead...
+          // @ts-ignore
+          marketAccount.signer = account.signer;
+        break;
+        default:
+          console.error('Corrupted account: ', account);
+          throw new Error('Unknown account type faced');
+      }
+      marketAccount.name = name;
+      marketAccount.address = account.address;
+      marketAccount.isLocal = account instanceof KeyringLocalAccount;
+      return marketAccount;
     }) || [];
+
+    const defaultAccountAddress = localStorage.getItem(DefaultAccountKey);
+    const defaultAccount = allAccounts.find((item) => item.address === defaultAccountAddress) || allAccounts[0];
+
+    defaultAccount.balance = { KSM: new BN((await api.market.getAccountBalance(defaultAccount.address))?.freeBalance?.raw || 0) };
+
+    changeAccount(defaultAccount);
 
     setAccounts(allAccounts);
 
-    await subscribeBalancesChanges(allAccounts);
+    setIsLoading(false);
+
+    // await subscribeBalancesChanges(allAccounts);
   }, [api?.market, getAccountDeposit]);
 
   const updateCurrentAccountDeposit = useCallback(async () => {
     if (!selectedAccount) return Promise.resolve();
-    const balance = await api?.market?.getAccountBalance(selectedAccount.getAddress());
-    const deposits = await getAccountDeposit(selectedAccount);
+    const balance = await api?.market?.getAccountBalance(selectedAccount.address);
+    // const deposits = await getAccountDeposit(selectedAccount);
     setAccounts((accounts) => accounts.map((account) => {
       if (account.address === selectedAccount.address) {
-        account.deposits = deposits;
+        // account.deposits = deposits;
         account.balance = { KSM: new BN(balance?.freeBalance?.raw || 0) };
       }
       return account;

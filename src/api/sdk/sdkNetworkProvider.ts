@@ -1,7 +1,7 @@
 import { Settings } from '../restApi/settings/types';
-import { Sdk, Client, ChainPropertiesResponse } from '@unique-nft/sdk';
+import { Sdk, ChainPropertiesResponse } from '@unique-nft/sdk';
 
-type SdkSet = { unique: Client };
+type SdkSet = { unique: Sdk };
 
 export class SdkNetworkProvider {
   public isReady = false;

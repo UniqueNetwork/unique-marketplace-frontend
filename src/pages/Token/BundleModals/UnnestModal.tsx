@@ -67,7 +67,7 @@ const UnnestStagesModal: FC<TBundleTrunsferModalBodyProps> = ({ token, onFinish,
   const { selectedAccount } = useAccounts();
 
   useEffect(() => {
-    if (!selectedAccount?.getAddress()) return;
+    if (!selectedAccount?.address) return;
     initiate(null);
   }, [selectedAccount]);
 
