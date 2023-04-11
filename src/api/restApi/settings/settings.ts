@@ -7,7 +7,7 @@ import { ResponseError } from '../base/types';
 import { AxiosError } from 'axios';
 import { Chain } from 'utils/configParser';
 
-const endpoint = '/api/settings';
+const endpoint = '/settings';
 
 export const getSettings = (baseURL: string) => get<Settings>(`${endpoint}`, { ...defaultParams, baseURL });
 
