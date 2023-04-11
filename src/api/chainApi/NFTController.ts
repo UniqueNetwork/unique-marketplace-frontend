@@ -58,7 +58,7 @@ export class UniqueSDKNFTController extends BaseController {
   }
 
   async isBundle(collectionId: number, tokenId: number): Promise<boolean> {
-    return !!await this.uniqueSdk.tokens.isBundle({ collectionId, tokenId });
+    return (await this.uniqueSdk.tokens.isBundle({ collectionId, tokenId })).isBundle;
   }
 
   async getBundle(collectionId: number, tokenId: number): Promise<GetBundleResponse | null> {
