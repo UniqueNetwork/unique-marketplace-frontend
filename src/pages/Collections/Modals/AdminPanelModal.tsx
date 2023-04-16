@@ -5,7 +5,7 @@ import { RemoveCollectionModal } from './RemoveCollectionModal';
 import { AcceptSponsorshipModal } from './AcceptSponsorshipModal';
 import { AddCollectionModal } from './AddCollectionModal';
 import { SelectNFTsModal } from './SelectNFTsModal';
-import { CollectionData } from 'api/restApi/admin/types';
+import { CollectionData } from 'api/restApi/collections/types';
 import styled from 'styled-components';
 import { Modal } from 'components/UI';
 

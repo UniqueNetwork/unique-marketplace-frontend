@@ -3,25 +3,28 @@ import { Heading } from '@unique-nft/ui-kit';
 import { Text, useNotifications, Button } from 'components/UI';
 import styled from 'styled-components/macro';
 
-import { useAdminCollections } from 'api/restApi/admin/collection';
-import { CollectionData } from 'api/restApi/admin/types';
+import { useCollections as useMyCollections } from 'api/restApi/collections/collection';
+import { CollectionData } from 'api/restApi/collections/types';
 import { useApi } from 'hooks/useApi';
 import { CollectionCover } from 'components/CollectionCover/CollectionCover';
 import { SelectInput } from 'components/SelectInput/SelectInput';
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
 import { BlueGrey100 } from 'styles/colors';
 import { useCollections } from 'hooks/useCollections';
+import { useAccounts } from 'hooks/useAccounts';
 
 export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) => {
+  const { selectedAccount } = useAccounts();
   const [selectedCollection, setSelectedCollection] = useState<CollectionData | string | undefined>();
-  const { appendCollection, collections, fetchCollections } = useAdminCollections();
+  const { appendCollection, collections, fetchCollections } = useMyCollections();
   const [collectionItems, setCollectionItems] = useState<CollectionData[]>([]);
   const { api } = useApi();
   const { getCollection } = useCollections();
   const { info, error } = useNotifications();
 
   useEffect(() => {
-    void fetchCollections();
+    if (!selectedAccount) return;
+    void fetchCollections(selectedAccount);
   }, []);
 
   useEffect(() => {

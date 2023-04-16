@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { SelectOptionProps } from '@unique-nft/ui-kit';
-import { useNotifications, Select, Button } from 'components/UI';
+import { Select, Button } from 'components/UI';
 import styled from 'styled-components/macro';
 import NoItems from 'components/NoItems';
 import { Secondary400 } from 'styles/colors';
@@ -8,13 +8,11 @@ import { CollectionCard } from 'components/CollectionCard/CollectionCard';
 import { AdminPanelModal } from './Modals/AdminPanelModal';
 import { AdminPanelModalType } from './Modals/types';
 import { PagePaper } from 'components/PagePaper/PagePaper';
-import { useNavigate } from 'react-router-dom';
-import { useAdminLoggingIn } from 'api/restApi/admin/login';
-import { useAdminCollections } from 'api/restApi/admin/collection';
+import { useCollections } from 'api/restApi/collections/collection';
 import CardSkeleton from 'components/Skeleton/CardSkeleton';
 import SearchField from 'components/SearchField/SearchField';
 import { useAccounts } from 'hooks/useAccounts';
-import { CollectionData } from 'api/restApi/admin/types';
+import { CollectionData } from 'api/restApi/collections/types';
 import config from 'config';
 import { useApi } from 'hooks/useApi';
 
@@ -61,41 +59,22 @@ const sortingOptions: TOption[] = [
   }
 ];
 
-export const AdminPanelPage: FC = () => {
+export const CollectionsPage: FC = () => {
+  const { selectedAccount } = useAccounts();
   const [sortingValue, setSortingValue] = useState<TOption>(sortingOptions[0]);
   const [searchValue, setSearchValue] = useState<string>();
-  const [hasAccess, setHasAccess] = useState<boolean>(false);
   const [modalType, setModalType] = useState(AdminPanelModalType.default);
   const [selectedCollection, setSelectedCollection] = useState<CollectionData>();
-  const { hasAdminPermission, getJWToken } = useAdminLoggingIn();
-  const { collections, isFetching, fetchCollections } = useAdminCollections();
+  const { collections, isFetching, fetchCollections } = useCollections();
   const { isLoading: isAccountsLoading } = useAccounts();
-  const navigate = useNavigate();
-  const { warning } = useNotifications();
   const { currentChainId } = useApi();
 
   useEffect(() => {
-    if (isAccountsLoading) return;
-    if (!hasAdminPermission) {
-      navigate('/');
-    }
     void (async () => {
-      const jwtoken = await getJWToken();
-      if (!jwtoken) {
-        warning(
-          'Unable to login, please try again!',
-          { name: 'warning', size: 32, color: 'var(--color-additional-light)' }
-        );
-        navigate('/');
-        return;
-      }
-      setHasAccess(true);
-      void await fetchCollections();
-      setSearchValue(undefined);
-      setSortingValue(sortingOptions[0]);
+      void await fetchCollections(selectedAccount);
       setModalType(AdminPanelModalType.default);
     })();
-  }, [hasAdminPermission, isAccountsLoading, currentChainId, fetchCollections]);
+  }, [isAccountsLoading, currentChainId, fetchCollections]);
 
   const onSortingChange = useCallback((value: SelectOptionProps) => {
     setSortingValue(value as TOption);
@@ -111,19 +90,17 @@ export const AdminPanelPage: FC = () => {
 
   const onFinish = useCallback(async () => {
     setModalType(AdminPanelModalType.default);
-    void await fetchCollections();
+    void await fetchCollections(selectedAccount);
   }, []);
 
   const onAddCollectionClick = useCallback(() => {
-    if (!hasAccess) return;
     setModalType(AdminPanelModalType.addCollection);
-  }, [hasAccess]);
+  }, []);
 
   const onCreateCollectionViaWalletClick = useCallback(() => {
     const { walletUrl } = config.blockchains[currentChainId || ''] || {};
-    if (!walletUrl || !hasAccess) return;
     window.open(walletUrl, '_blank')?.focus();
-  }, [hasAccess, currentChainId]);
+  }, [currentChainId]);
 
   const onManageSponsorshipClick = useCallback((collection: CollectionData) => () => {
     setModalType(AdminPanelModalType.acceptSponsorship);
@@ -152,7 +129,7 @@ export const AdminPanelPage: FC = () => {
   }, [currentChainId]);
 
   const filteredCollections = useMemo(() => {
-    if (!collections || !hasAccess) return [];
+    if (!collections) return [];
     const sortCollection = (collectionA: CollectionData, collectionB: CollectionData) => {
       if (!sortingValue) return 0;
       const order = sortingValue.direction === 'asc' ? 1 : -1;
@@ -192,8 +169,8 @@ export const AdminPanelPage: FC = () => {
           </SortSelectWrapper>
         </SearchAndSortingWrapper>
         <ButtonsWrapper>
-          <Button disabled={!hasAccess} title={'Create new via wallet'} onClick={onCreateCollectionViaWalletClick}/>
-          <Button disabled={!hasAccess}
+          <Button title={'Create new via wallet'} onClick={onCreateCollectionViaWalletClick}/>
+          <Button
             role={'primary'}
             title={'Add to the marketplace'}
             onClick={onAddCollectionClick}

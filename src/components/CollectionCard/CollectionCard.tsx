@@ -2,7 +2,7 @@ import React, { FC, useEffect, useMemo, useState } from 'react';
 import { Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 import { Icon, Dropdown } from 'components/UI';
-import { CollectionData } from 'api/restApi/admin/types';
+import { CollectionData } from 'api/restApi/collections/types';
 import { compareEncodedAddresses } from 'api/chainApi/utils/addressUtils';
 import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
