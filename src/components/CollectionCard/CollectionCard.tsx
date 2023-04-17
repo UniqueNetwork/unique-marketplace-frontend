@@ -2,7 +2,7 @@ import React, { FC, useEffect, useMemo, useState } from 'react';
 import { Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 import { Icon, Dropdown } from 'components/UI';
-import { CollectionData } from 'api/restApi/collections/types';
+import { MyCollection } from 'api/restApi/collections/types';
 import { compareEncodedAddresses } from 'api/chainApi/utils/addressUtils';
 import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
@@ -12,7 +12,7 @@ import { AdditionalDark, AdditionalLight } from 'styles/colors';
 import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 
 export type TCollectionCard = {
-  collection: CollectionData
+  collection: MyCollection
   onManageTokensClick(): void
   onManageSponsorshipClick(): void
   onRemoveSponsorshipClick(): void
@@ -60,7 +60,7 @@ export const CollectionCard: FC<TCollectionCard> = ({
   return (
     <CollectionCardStyled>
       <PictureWrapper>
-        <Picture alt={collection?.id?.toString() || ''} src={collection.schema?.coverPicture.fullUrl || collectionDetails?.schema?.coverPicture.fullUrl || ''} />
+        <Picture alt={collection?.id?.toString() || ''} src={collection.cover || ''} />
         <ActionsMenuWrapper>
           <Dropdown placement={'right'}
             dropdownRender={() => (<DropdownMenu>
@@ -90,6 +90,10 @@ export const CollectionCard: FC<TCollectionCard> = ({
           <Row>
             <Text size='s' color={'grey-500'} >Allowed tokens:</Text>
             <Text size='s' >{collection.allowedTokens || 'all'}</Text>
+          </Row>
+          <Row>
+            <Text size='s' color={'grey-500'} >Trading:</Text>
+            <Text size='s' >{collection.isMarketable ? 'yes' : 'no'}</Text>
           </Row>
           {hasSponsorship && <Row>
             <Text size='s' color={'grey-500'} >Sponsor:</Text>

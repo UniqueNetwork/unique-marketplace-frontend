@@ -12,7 +12,7 @@ import { useCollections } from 'api/restApi/collections/collection';
 import CardSkeleton from 'components/Skeleton/CardSkeleton';
 import SearchField from 'components/SearchField/SearchField';
 import { useAccounts } from 'hooks/useAccounts';
-import { CollectionData } from 'api/restApi/collections/types';
+import { MyCollection } from 'api/restApi/collections/types';
 import config from 'config';
 import { useApi } from 'hooks/useApi';
 
@@ -25,24 +25,24 @@ type TOption = {
   id: string
   title: string
   direction: string
-  field: keyof CollectionData
+  field: keyof MyCollection
 }
 
 const sortingOptions: TOption[] = [
-  {
-    iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
-    id: 'asc(Date)',
-    direction: 'asc',
-    field: 'updatedAt',
-    title: 'Date added'
-  },
-  {
-    iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
-    id: 'desc(Price)',
-    direction: 'desc',
-    field: 'updatedAt',
-    title: 'Date added'
-  },
+  // {
+  //   iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
+  //   id: 'asc(Date)',
+  //   direction: 'asc',
+  //   field: 'updatedAt',
+  //   title: 'Date added'
+  // },
+  // {
+  //   iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
+  //   id: 'desc(Price)',
+  //   direction: 'desc',
+  //   field: 'updatedAt',
+  //   title: 'Date added'
+  // },
   {
     iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
     id: 'asc(collectionId)',
@@ -64,7 +64,7 @@ export const CollectionsPage: FC = () => {
   const [sortingValue, setSortingValue] = useState<TOption>(sortingOptions[0]);
   const [searchValue, setSearchValue] = useState<string>();
   const [modalType, setModalType] = useState(AdminPanelModalType.default);
-  const [selectedCollection, setSelectedCollection] = useState<CollectionData>();
+  const [selectedCollection, setSelectedCollection] = useState<MyCollection>();
   const { collections, isFetching, fetchCollections } = useCollections();
   const { isLoading: isAccountsLoading } = useAccounts();
   const { currentChainId } = useApi();
@@ -102,27 +102,27 @@ export const CollectionsPage: FC = () => {
     window.open(walletUrl, '_blank')?.focus();
   }, [currentChainId]);
 
-  const onManageSponsorshipClick = useCallback((collection: CollectionData) => () => {
+  const onManageSponsorshipClick = useCallback((collection: MyCollection) => () => {
     setModalType(AdminPanelModalType.acceptSponsorship);
     setSelectedCollection(collection);
   }, []);
 
-  const onRemoveSponsorshipClick = useCallback((collection: CollectionData) => () => {
+  const onRemoveSponsorshipClick = useCallback((collection: MyCollection) => () => {
     setModalType(AdminPanelModalType.rejectSponsorship);
     setSelectedCollection(collection);
   }, []);
 
-  const onRemoveCollectionClick = useCallback((collection: CollectionData) => () => {
+  const onRemoveCollectionClick = useCallback((collection: MyCollection) => () => {
     setModalType(AdminPanelModalType.removeCollection);
     setSelectedCollection(collection);
   }, []);
 
-  const onManageTokensClick = useCallback((collection: CollectionData) => () => {
+  const onManageTokensClick = useCallback((collection: MyCollection) => () => {
     setModalType(AdminPanelModalType.selectNFTs);
     setSelectedCollection(collection);
   }, []);
 
-  const onViewOnScanClick = useCallback((collection: CollectionData) => () => {
+  const onViewOnScanClick = useCallback((collection: MyCollection) => () => {
     const { scanUrl } = config.blockchains[currentChainId || ''] || {};
     if (!scanUrl) return;
     window.open(`${scanUrl}collections/${collection.id}`, '_blank')?.focus();
@@ -130,15 +130,15 @@ export const CollectionsPage: FC = () => {
 
   const filteredCollections = useMemo(() => {
     if (!collections) return [];
-    const sortCollection = (collectionA: CollectionData, collectionB: CollectionData) => {
+    const sortCollection = (collectionA: MyCollection, collectionB: MyCollection) => {
       if (!sortingValue) return 0;
       const order = sortingValue.direction === 'asc' ? 1 : -1;
       if (sortingValue.field === 'id') return Number(collectionA[sortingValue.field]) > Number(collectionB[sortingValue.field]) ? order : -order;
       return (collectionA[sortingValue.field] || '') > (collectionB[sortingValue.field] || '') ? order : -order;
     };
 
-    const filterCollection = (collection: CollectionData) => {
-      if (collection.status === 'Disabled') return false;
+    const filterCollection = (collection: MyCollection) => {
+      if (!collection) return false;
       if (searchValue) {
         const searchString = searchValue.trim().toLocaleLowerCase();
         return collection.id.toString().includes(searchString) || collection.name?.toLocaleLowerCase().includes(searchString) || collection.tokenPrefix?.toLocaleLowerCase().includes(searchString);

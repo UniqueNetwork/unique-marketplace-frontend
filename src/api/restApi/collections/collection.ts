@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 
 import { post, deleteRequest } from '../base';
 import { defaultParams } from '../base/axios';
-import { CollectionData, SetCollectionTokensPayload } from './types';
+import { MyCollection, MyCollectionBackend, SetCollectionTokensPayload } from './types';
 import { useApi } from 'hooks/useApi';
 import { MarketAccount } from 'account/AccountContext';
 
@@ -15,8 +15,9 @@ export const deleteCollections = (baseURL: string, id: number) => deleteRequest(
 export const setCollectionTokens = (baseURL: string, { collectionId, tokens }: SetCollectionTokensPayload) => post(`${endpoint}/tokens/${collectionId}`, { tokens }, { headers: { ...defaultParams.headers }, ...defaultParams, baseURL });
 
 export const useCollections = () => {
+  const { settings } = useApi();
   const [isFetching, setIsFetching] = useState(false);
-  const [collections, setCollections] = useState<CollectionData[]>([]);
+  const [collections, setCollections] = useState<MyCollection[]>([]);
   const { baseURL, currentChainId } = useApi();
 
   const fetchCollections = useCallback(async (account: MarketAccount | undefined) => {
@@ -33,9 +34,11 @@ export const useCollections = () => {
         ) {
           count
           data {
-            collection_cover
+            owner: owner_normalized
+            cover: collection_cover
             id: collection_id
-            collection_name
+            name: collection_name
+            tokenPrefix: token_prefix
             __typename
           }
           __typename
@@ -48,7 +51,12 @@ export const useCollections = () => {
     const response = await post(getCollectionsEndpoint, gqlQuery);
     if (response.status === 200) {
       // TODO: merge with data from "collections" in settings to highlight already "added" collections
-      setCollections(response.data.data.tokens.data);
+      const backendMyCollections = response?.data?.data?.tokens?.data as MyCollectionBackend[] | [];
+      const myCollections = backendMyCollections.map((bmc) => {
+        const allowedCollection = settings?.blockchain.unique.collections[bmc.id];
+        return { ...bmc, isMarketable: !!allowedCollection, allowedTokens: allowedCollection?.allowedTokens || undefined } as MyCollection;
+      });
+      setCollections(myCollections);
     }
     setIsFetching(false);
   }, [baseURL, currentChainId]);
