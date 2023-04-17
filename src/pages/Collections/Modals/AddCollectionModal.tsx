@@ -30,7 +30,7 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish, co
     const collectionId = typeof selectedCollection === 'string' ? Number(selectedCollection) : selectedCollection.id;
     if (collections.find(({ id, isMarketable }) => id.toString() === collectionId.toString() && isMarketable)) {
       error(
-        `Collection [ID ${collectionId}] has already enabled`,
+        `Collection [ID ${collectionId}] is already enabled`,
         { name: 'warning', size: 16, color: 'var(--color-additional-light)' }
       );
       return;
@@ -44,15 +44,14 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish, co
     onFinish();
   }, [selectedCollection, collections]);
 
-  const findCollection = useCallback(async (collection: string) => {
-    // TOOD: !!! grab all user collections and search over them instead !!!
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // if (!api?.collection) return;
-    // const collectionData = await getCollection(Number(collection));
-
-    // setCollectionItems([
-    //   ...(collectionData && collectionData.tokenPrefix ? [{} as MyCollection] : [])
-    // ]);
+  const findCollection = useCallback((searchString: string) => {
+    const collectionData = collections
+      .filter((myCollection) =>
+        myCollection.id.toString().includes(searchString) ||
+        myCollection.name.includes(searchString) ||
+        myCollection.tokenPrefix.includes(searchString));
+    console.log('collectionData', collectionData);
+    setCollectionItems(collectionData);
   }, [api, collections]);
 
   const onChangeSelectedCollection = useCallback((collection: MyCollection | string) => {

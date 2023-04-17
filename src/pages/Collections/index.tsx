@@ -109,7 +109,7 @@ export const CollectionsPage: FC = () => {
     setSelectedCollection(collection);
   }, []);
 
-  const onAddCollectionClick = useCallback((collection: MyCollection) => () => {
+  const onAddCollectionClick = useCallback((collection: MyCollection | undefined = undefined) => () => {
     setModalType(AdminPanelModalType.addCollection);
     if (collection) setSelectedCollection(collection);
   }, []);
@@ -173,10 +173,9 @@ export const CollectionsPage: FC = () => {
         <ButtonsWrapper>
           <Button title={'Create new via wallet'} onClick={onCreateCollectionViaWalletClick}/>
           <Button
-            disabled
             role={'primary'}
             title={'Add to the marketplace'}
-            onClick={() => {}}
+            onClick={onAddCollectionClick()}
           />
         </ButtonsWrapper>
       </ControlsWrapper>
