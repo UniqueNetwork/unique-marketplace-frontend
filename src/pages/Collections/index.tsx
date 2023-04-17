@@ -60,6 +60,7 @@ const sortingOptions: TOption[] = [
 ];
 
 export const CollectionsPage: FC = () => {
+  const { currentChainId, settings, refetchSettings } = useApi();
   const { selectedAccount } = useAccounts();
   const [sortingValue, setSortingValue] = useState<TOption>(sortingOptions[0]);
   const [searchValue, setSearchValue] = useState<string>();
@@ -67,14 +68,13 @@ export const CollectionsPage: FC = () => {
   const [selectedCollection, setSelectedCollection] = useState<MyCollection>();
   const { collections, isFetching, fetchCollections } = useCollections();
   const { isLoading: isAccountsLoading } = useAccounts();
-  const { currentChainId } = useApi();
 
   useEffect(() => {
     void (async () => {
       void await fetchCollections(selectedAccount);
       setModalType(AdminPanelModalType.default);
     })();
-  }, [isAccountsLoading, currentChainId, fetchCollections]);
+  }, [isAccountsLoading, currentChainId, selectedAccount, settings, fetchCollections]);
 
   const onSortingChange = useCallback((value: SelectOptionProps) => {
     setSortingValue(value as TOption);
@@ -90,11 +90,8 @@ export const CollectionsPage: FC = () => {
 
   const onFinish = useCallback(async () => {
     setModalType(AdminPanelModalType.default);
+    void await refetchSettings();
     void await fetchCollections(selectedAccount);
-  }, []);
-
-  const onAddCollectionClick = useCallback(() => {
-    setModalType(AdminPanelModalType.addCollection);
   }, []);
 
   const onCreateCollectionViaWalletClick = useCallback(() => {
@@ -110,6 +107,11 @@ export const CollectionsPage: FC = () => {
   const onRemoveSponsorshipClick = useCallback((collection: MyCollection) => () => {
     setModalType(AdminPanelModalType.rejectSponsorship);
     setSelectedCollection(collection);
+  }, []);
+
+  const onAddCollectionClick = useCallback((collection: MyCollection) => () => {
+    setModalType(AdminPanelModalType.addCollection);
+    if (collection) setSelectedCollection(collection);
   }, []);
 
   const onRemoveCollectionClick = useCallback((collection: MyCollection) => () => {
@@ -171,9 +173,10 @@ export const CollectionsPage: FC = () => {
         <ButtonsWrapper>
           <Button title={'Create new via wallet'} onClick={onCreateCollectionViaWalletClick}/>
           <Button
+            disabled
             role={'primary'}
             title={'Add to the marketplace'}
-            onClick={onAddCollectionClick}
+            onClick={() => {}}
           />
         </ButtonsWrapper>
       </ControlsWrapper>
@@ -189,6 +192,7 @@ export const CollectionsPage: FC = () => {
             onManageSponsorshipClick={onManageSponsorshipClick(collection)}
             onRemoveSponsorshipClick={onRemoveSponsorshipClick(collection)}
             onManageTokensClick={onManageTokensClick(collection)}
+            onAddCollectionClick={onAddCollectionClick(collection)}
             onRemoveCollectionClick={onRemoveCollectionClick(collection)}
             onViewOnScanClick={onViewOnScanClick(collection)}
           />)}

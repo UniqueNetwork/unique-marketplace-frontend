@@ -12,9 +12,9 @@ import { TAdminPanelModalBodyProps } from './AdminPanelModal';
 import { BlueGrey100 } from 'styles/colors';
 import { useAccounts } from 'hooks/useAccounts';
 
-export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) => {
+export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish, collection }) => {
   const { selectedAccount } = useAccounts();
-  const [selectedCollection, setSelectedCollection] = useState<MyCollection | string | undefined>();
+  const [selectedCollection, setSelectedCollection] = useState<MyCollection | string | undefined>(collection);
   const { appendCollection, collections, fetchCollections } = useMyCollections();
   const [collectionItems, setCollectionItems] = useState<MyCollection[]>([]);
   const { api } = useApi();
@@ -28,7 +28,7 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
   const onConfirmClick = useCallback(async () => {
     if (!selectedCollection) return;
     const collectionId = typeof selectedCollection === 'string' ? Number(selectedCollection) : selectedCollection.id;
-    if (collections.find(({ id }) => id.toString() === collectionId.toString())) {
+    if (collections.find(({ id, isMarketable }) => id.toString() === collectionId.toString() && isMarketable)) {
       error(
         `Collection [ID ${collectionId}] has already enabled`,
         { name: 'warning', size: 16, color: 'var(--color-additional-light)' }

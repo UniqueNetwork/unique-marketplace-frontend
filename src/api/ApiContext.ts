@@ -21,6 +21,7 @@ export type ApiContextProps = {
   prefixes: number[]
   baseURL: string
   onChangeChainId(chainId: string): void
+  refetchSettings(): Promise<void>
 }
 
 const ApiContext: Context<ApiContextProps> = createContext({} as unknown as ApiContextProps);

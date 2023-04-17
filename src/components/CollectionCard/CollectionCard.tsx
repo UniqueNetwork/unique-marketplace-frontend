@@ -13,10 +13,14 @@ import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 
 export type TCollectionCard = {
   collection: MyCollection
-  onManageTokensClick(): void
+
   onManageSponsorshipClick(): void
   onRemoveSponsorshipClick(): void
+
+  onManageTokensClick(): void
+  onAddCollectionClick(): void
   onRemoveCollectionClick(): void
+
   onViewOnScanClick(): void
 };
 
@@ -25,6 +29,7 @@ export const CollectionCard: FC<TCollectionCard> = ({
   onManageSponsorshipClick,
   onRemoveSponsorshipClick,
   onManageTokensClick,
+  onAddCollectionClick,
   onRemoveCollectionClick,
   onViewOnScanClick
 }) => {
@@ -68,6 +73,7 @@ export const CollectionCard: FC<TCollectionCard> = ({
               {/* TODO: wait until the network can grant access to remove sponsorship */}
               {/* canRemoveSponsorships && <DropdownMenuItem onClick={onRemoveSponsorshipClick}>Remove sponsorship</DropdownMenuItem> */}
               <DropdownMenuItem onClick={onManageTokensClick}>Manage tokens</DropdownMenuItem>
+              <DropdownMenuItem onClick={onAddCollectionClick}>Add collection</DropdownMenuItem>
               <DropdownMenuItem onClick={onRemoveCollectionClick}>Remove collection</DropdownMenuItem>
               <DropdownMenuItem onClick={onViewOnScanClick}>View on Scan
                 <IconWrapper>

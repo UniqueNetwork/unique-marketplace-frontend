@@ -53,6 +53,14 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
     });
   }, []);
 
+  const refetchSettings = useCallback(async () => {
+    const settings = await fetchSettings(config.blockchains);
+    const networkOptions = settings.map<NetworkOptions>(({ networkId, settings }) => ({ networkId, settings }));
+    setAvailableNetworkOptions(networkOptions);
+    const currentNetworkOption = networkOptions.find((no) => no.networkId === currentChainId) || networkOptions[0];
+    setSettings(currentNetworkOption.settings);
+  }, [currentChainId, fetchSettings]);
+
   const onChangeChainId = useCallback((newChainId: string) => {
     if (currentChainId === newChainId) return;
     if (!sdkClient) {
@@ -106,12 +114,13 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
         : undefined),
       // chainData: currentChain?.uniqueProperties, // TODO: chain properties are required
       baseURL: config.blockchains[currentChainId]?.apiEndpoint || '',
+      refetchSettings,
       settings,
       prefixes,
       currentChainId,
       onChangeChainId
     }),
-    [isRpcClientInitialized, currentChain, settings, currentChainId, prefixes]
+    [isRpcClientInitialized, currentChain, settings, currentChainId, prefixes, onChangeChainId, refetchSettings, sdkClient]
   );
 
   return (

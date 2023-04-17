@@ -1,17 +1,17 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
-import { post, deleteRequest } from '../base';
+import { post, patch, deleteRequest } from '../base';
 import { defaultParams } from '../base/axios';
 import { MyCollection, MyCollectionBackend, SetCollectionTokensPayload } from './types';
 import { useApi } from 'hooks/useApi';
 import { MarketAccount } from 'account/AccountContext';
 
 const getCollectionsEndpoint = 'https://api-opal.uniquescan.io/v1/graphql';
-const endpoint = '/api/admin';
+const endpoint = '/collections';
 
 // export const getCollections = (baseURL: string, jwToken: string) => get(`${endpoint}/collections`, { headers: { ...defaultParams.headers, Authorization: `Bearer ${jwToken}` }, ...defaultParams, baseURL });
-export const addCollection = (baseURL: string, id: number) => post(`${endpoint}/collections`, { collectionId: id }, { headers: { ...defaultParams.headers }, ...defaultParams, baseURL });
-export const deleteCollections = (baseURL: string, id: number) => deleteRequest(`${endpoint}/collections/${id}`, { headers: { ...defaultParams.headers }, ...defaultParams, baseURL });
+export const addCollection = (baseURL: string, id: number) => patch(`${endpoint}/add?collectionId=${id}`, {}, { headers: { ...defaultParams.headers }, ...defaultParams, baseURL });
+export const deleteCollections = (baseURL: string, id: number) => deleteRequest(`${endpoint}/${id}`, { headers: { ...defaultParams.headers }, ...defaultParams, baseURL });
 export const setCollectionTokens = (baseURL: string, { collectionId, tokens }: SetCollectionTokensPayload) => post(`${endpoint}/tokens/${collectionId}`, { tokens }, { headers: { ...defaultParams.headers }, ...defaultParams, baseURL });
 
 export const useCollections = () => {
@@ -19,6 +19,14 @@ export const useCollections = () => {
   const [isFetching, setIsFetching] = useState(false);
   const [collections, setCollections] = useState<MyCollection[]>([]);
   const { baseURL, currentChainId } = useApi();
+
+  const getMyCollectionsWithMarketable = useCallback((backendMyCollections: MyCollectionBackend[]) => {
+    return backendMyCollections.map((bmc) => {
+      const allowedCollection = settings?.blockchain.unique.collections[bmc.id];
+      // console.log('useEffect in collections: ', { ...bmc, isMarketable: !!allowedCollection, allowedTokens: allowedCollection?.allowedTokens || undefined });
+      return { ...bmc, isMarketable: !!allowedCollection, allowedTokens: allowedCollection?.allowedTokens || undefined } as MyCollection;
+    });
+  }, [settings]);
 
   const fetchCollections = useCallback(async (account: MarketAccount | undefined) => {
     if (!account) return [];
@@ -52,20 +60,18 @@ export const useCollections = () => {
     if (response.status === 200) {
       // TODO: merge with data from "collections" in settings to highlight already "added" collections
       const backendMyCollections = response?.data?.data?.tokens?.data as MyCollectionBackend[] | [];
-      const myCollections = backendMyCollections.map((bmc) => {
-        const allowedCollection = settings?.blockchain.unique.collections[bmc.id];
-        return { ...bmc, isMarketable: !!allowedCollection, allowedTokens: allowedCollection?.allowedTokens || undefined } as MyCollection;
-      });
+      const myCollections = getMyCollectionsWithMarketable(backendMyCollections);
+      console.log('settings in collection fetch', settings);
       setCollections(myCollections);
     }
     setIsFetching(false);
-  }, [baseURL, currentChainId]);
+  }, [settings, getMyCollectionsWithMarketable]);
 
   const appendCollection = useCallback(async (id: number) => {
     setIsFetching(true);
     const response = await addCollection(baseURL, id);
     setIsFetching(false);
-    return response.status === 201;
+    return response.status === 200;
   }, [baseURL]);
 
   const removeCollection = useCallback(async (id: number) => {
