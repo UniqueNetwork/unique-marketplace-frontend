@@ -1,15 +1,15 @@
 import { Settings } from '../restApi/settings/types';
 import { UniqueSDKNFTController } from '../chainApi/NFTController';
 import { UniqueSDKCollectionController } from '../chainApi/collectionController';
-import { DecodedInfixOrUrlOrCidAndHash } from '../chainApi/types';
+// import { DecodedInfixOrUrlOrCidAndHash } from '../chainApi/types';
 import MarketController from 'api/chainApi/MarketController';
 
-declare module '@unique-nft/sdk' {
-  export interface TokenByIdResponse {
-    image: DecodedInfixOrUrlOrCidAndHash
-    video?: DecodedInfixOrUrlOrCidAndHash
-  }
-}
+// declare module '@unique-nft/sdk' {
+//   export interface TokenByIdResponse {
+//     image: DecodedInfixOrUrlOrCidAndHash
+//     video?: DecodedInfixOrUrlOrCidAndHash
+//   }
+// }
 
 export interface NetworkOptions { networkId: string, settings: Settings }
 

@@ -2,6 +2,7 @@ import { PaginatedResponse, Pagination, Sortable } from '../base/types';
 import { DecodedInfixOrUrlOrCidAndHash, VideoAttribute } from '../../chainApi/types';
 import { INestingToken } from 'components/BundleTree/types';
 import { DecodedAttributeDto, UniqueCollectionSchemaDecodedDto } from '@unique-nft/sdk';
+import { TokenByIdResponse } from '@unique-nft/sdk/full';
 
 export type GetOffersRequestPayload = {
   collectionId?: number | number[]
@@ -47,13 +48,7 @@ export type Offer = {
   seller: string
   creationDate: string
   auction: Auction | null
-  tokenDescription: {
-    image: DecodedInfixOrUrlOrCidAndHash
-    attributes: DecodedAttributeDto[]
-    video?: VideoAttribute
-    nestingChildTokens?: INestingToken[]
-    owner: string
-  },
+  tokenDescription: TokenByIdResponse & { nestingChildTokens: INestingToken[] },
   collectionDescription: {
     description: string;
     id: number;
@@ -64,6 +59,8 @@ export type Offer = {
     schema?: UniqueCollectionSchemaDecodedDto;
   }
 }
+
+export type OfferResponse = Offer[]
 
 export type OffersResponse = PaginatedResponse<Offer> & {
   attributes: Record<string, Attribute[]>;

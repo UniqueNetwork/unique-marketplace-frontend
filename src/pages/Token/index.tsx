@@ -48,22 +48,22 @@ const TokenPage = () => {
       console.error('error while fetching token or collection from RPC', e);
     }
     setIsFetchingToken(false);
-  }, [api?.nft, currentChainId, collectionId, id]);
+  }, [api?.nft, currentChainId, collectionId, id, getCollection]);
 
   useEffect(() => {
     if (isFetchingOffer) return;
-    (async () => {
+    void (async () => {
       if (offer) {
         const collection = await getCollection(Number(collectionId));
         if (collection) setCollection(collection);
-        setIsBundle(!!offer.tokenDescription.nestingChildTokens);
+        setIsBundle(!!offer.tokenDescription?.nestingChildTokens);
       }
       if (!token) await fetchToken();
       if (offer || token) {
         setIsFetchingToken(false);
       }
     })();
-  }, [fetchToken, isFetchingOffer, offer, token, collectionId]);
+  }, [fetchToken, isFetchingOffer, offer, token, collectionId, getCollection]);
 
   const onClose = useCallback(() => {
     setMarketType(MarketType.default);
@@ -99,7 +99,7 @@ const TokenPage = () => {
 
     void fetchOffer(Number(collectionId), Number(id));
     void fetchToken();
-  }, [info, fetchOffer, fetchToken, selectedAccount?.address, collectionId, id, token]);
+  }, [info, fetchOffer, fetchToken, selectedAccount?.address, collectionId, id, token, collection]);
 
   const backClickHandler = useCallback(() => {
     // if user opened token page with a direct link, redirect him to /market, otherwise redirect him back
@@ -124,7 +124,6 @@ const TokenPage = () => {
   if (!isFetchingOffer && !isFetchingToken && !token && !offer) return <Error404 />;
 
   // TODO: split into more categories here instead of just "buy/sell" and putting splitting inside them
-
   return (
     <>
       <BackLink onClick={backClickHandler} data-testid={`${testid}-back-link`}>

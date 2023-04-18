@@ -56,7 +56,7 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
     void (async () => {
       if (offer && offer.tokenDescription.nestingChildTokens) {
         const bundle: INestingToken = {
-          properties: [],
+          // properties: [],
           ...offer.tokenDescription,
           tokenId: offer.tokenId,
           collectionId: offer.collectionId,

@@ -9,7 +9,7 @@ import { AllBalancesResponse } from '@unique-nft/sdk';
 
 class MarketController extends BaseController implements IMarketController {
   contractAddress: string;
-  public decimals = 12; // TODO: move from controller to API
+  public decimals = 18; // TODO: move from controller to API
 
   constructor(options: NetworkOptions) {
     super(options);
@@ -27,7 +27,7 @@ class MarketController extends BaseController implements IMarketController {
     if (!account) throw new Error('Account not provided');
     const from = account.address;
     const to = this.contractAddress;
-    const isAlreadyAllowed = await this.uniqueSdk.tokens.allowance({ collectionId, tokenId, from, to });
+    const isAlreadyAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from, to });
     if (isAlreadyAllowed.isAllowed === targetAllowance) return;
 
     const adapter = this.getAdapter(account.account);
@@ -37,7 +37,7 @@ class MarketController extends BaseController implements IMarketController {
   async sellFix(collectionId: number, tokenId: number, price: number, amount: number, { account }: TransactionOptions): Promise<void> {
     const from = account.address;
     const to = this.contractAddress;
-    const isAllowed = await this.uniqueSdk.tokens.allowance({ collectionId, tokenId, from, to });
+    const isAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from, to });
     if (!isAllowed) throw new Error('Token not approved for sale');
     const adapter = this.getAdapter(account.account);
     console.log('adapter used:', adapter);
@@ -48,12 +48,14 @@ class MarketController extends BaseController implements IMarketController {
   async buyFix(collectionId: number, tokenId: number, amount: number, { account }: TransactionOptions): Promise<void> {
     const from = account.address;
     const to = this.contractAddress;
-    const isAllowed = await this.uniqueSdk.tokens.allowance({ collectionId, tokenId, from, to });
+    const isAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from, to });
     if (!isAllowed) throw new Error('Token not approved for sale');
 
-    const value = (await this.getOrder(collectionId, tokenId))[3]; // order.value
+    const value = (await this.getOrder(collectionId, tokenId)).price; // order.value
+    console.log(value.hex);
+    console.log('value', BigInt(value.hex), 'to string', BigInt(value.hex).toString());
     const adapter = this.getAdapter(account.account);
-    await adapter.buy(from, collectionId, tokenId, value, amount, account.signer);
+    await adapter.buy(from, collectionId, tokenId, 5, amount, account.signer);
   }
 
   async cancelFix(collectionId: number, tokenId: number, amount: number, options: TransactionOptions): Promise<void> {
@@ -66,12 +68,12 @@ class MarketController extends BaseController implements IMarketController {
   async getOrder(collectionId: number, tokenId: number): Promise<any> {
     if (!collectionId || !tokenId) throw new Error(`Cant get order for ${collectionId}-${tokenId}`);
     try {
-      const res = await this.uniqueSdk.evm.call({
-        abi: marketplaceAbi,
-        address: '5EALag5gFWyjbz9kYV5VNUr7tjg9MrAMg2nZhWwSmAHdaiZp', // TODO: this arg makes no sense, cant skip
+      const res = await this.uniqueSdk.evm.send.submitWaitResult({
+        abi: marketplaceAbi as any,
+        address: '5CSxpZepJj5dxkSBEDnN23pgg6B5X6VFRJ2kyubhb5Svstuu', // TODO: remove after sdk update
         contractAddress: this.contractAddress,
         funcName: 'getOrder',
-        args: [collectionId, tokenId] as any // TODO: ???
+        args: [collectionId, tokenId]
       });
       return res;
     } catch (e) {

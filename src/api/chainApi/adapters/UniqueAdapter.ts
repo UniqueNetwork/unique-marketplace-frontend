@@ -1,4 +1,4 @@
-import { Sdk, Signer } from '@unique-nft/sdk';
+import { Sdk, Signer } from '@unique-nft/sdk/full';
 import IMarketContractAdapter from './IMarketContractAdapter';
 
 import marketplaceAbi from '../contracts/marketplace-0.json';
@@ -13,7 +13,7 @@ class UniqueAdapter implements IMarketContractAdapter {
   protected uniqueSdk: Sdk;
 
   async transferToken(from: string, to: string, collectionId: number, tokenId: number, signer: Signer): Promise<void> {
-    await this.uniqueSdk.tokens.transfer.submitWaitResult({
+    await this.uniqueSdk.token.transfer.submitWaitResult({
       address: from,
       from,
       to,
@@ -31,25 +31,38 @@ class UniqueAdapter implements IMarketContractAdapter {
   }
 
   async changeAllowance(from: string, to: string, collectionId: number, tokenId: number, targetAllowance: boolean, signer: Signer): Promise<void> {
-    await this.uniqueSdk.tokens.approve.submitWaitResult({ collectionId, tokenId, spender: to, address: from, isApprove: targetAllowance }, { signer });
+    await this.uniqueSdk.token.approve.submitWaitResult({ collectionId, tokenId, spender: to, address: from, isApprove: targetAllowance }, { signer });
   }
 
   async sell(from: string, collectionId: number, tokenId: number, price: number, amount: number, signer: Signer): Promise<void> {
+    // console.log('signer', signer, 'signer.sign', signer.sign);
+    // await (await this.uniqueSdk.evm.contractConnect(this.contractAddress, marketplaceAbi)).send.submitWaitResult({
+    //   address: from,
+    //   funcName: 'put',
+    //   args: [collectionId, tokenId, price, amount] // TODO: fix after sdk update
+    // }, { signer });
+    // return;
     await this.uniqueSdk.evm.send.submitWaitResult({
-      abi: marketplaceAbi,
+      abi: marketplaceAbi as any,
       address: from,
       contractAddress: this.contractAddress,
       funcName: 'put',
-      args: [collectionId, tokenId, price, amount] as any // TODO: fix after sdk update
+      args: {
+        collectionId,
+        tokenId,
+        price,
+        amount
+      }
+      // args: [collectionId, tokenId, price, amount]
     }, { signer });
   }
 
   async buy(from: string, collectionId: number, tokenId: number, value: number, amount: number, signer: Signer): Promise<void> {
     await this.uniqueSdk.evm.send.submitWaitResult({
-      abi: marketplaceAbi,
+      abi: marketplaceAbi as any,
       address: from,
       contractAddress: this.contractAddress,
-      value,
+      value: BigInt('5' + '0'.repeat(18)).toString(16),
       funcName: 'buy',
       args: [collectionId, tokenId, amount] as any // TODO: fix after sdk update
     }, { signer });
