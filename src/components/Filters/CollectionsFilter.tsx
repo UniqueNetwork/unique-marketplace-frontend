@@ -22,7 +22,7 @@ interface CollectionsFilterProps {
 }
 
 const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attributeCounts, onChange, onAttributesChange, onAttributeCountsChange, testid }) => {
-  const { collections, isFetching } = useCollections();
+  const { featuredCollections, isFetching } = useCollections();
   const { collections: selectedCollections = [], attributes: selectedAttributes = [], attributeCounts: selectedAttributeCounts = [] } = value || {};
 
   const onCollectionSelect = useCallback((collectionId: number) => (value: boolean) => {
@@ -48,7 +48,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attr
     >
       <CollectionFilterWrapper>
         {isFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
-        {collections.map((collection) => (
+        {featuredCollections.map((collection) => (
           <CheckboxWrapper
             key={`collection-${collection.id}`}
           >

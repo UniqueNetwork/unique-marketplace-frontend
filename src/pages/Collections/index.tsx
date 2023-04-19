@@ -8,13 +8,13 @@ import { CollectionCard } from 'components/CollectionCard/CollectionCard';
 import { AdminPanelModal } from './Modals/AdminPanelModal';
 import { AdminPanelModalType } from './Modals/types';
 import { PagePaper } from 'components/PagePaper/PagePaper';
-import { useCollections } from 'api/restApi/collections/collection';
 import CardSkeleton from 'components/Skeleton/CardSkeleton';
 import SearchField from 'components/SearchField/SearchField';
 import { useAccounts } from 'hooks/useAccounts';
 import { MyCollection } from 'api/restApi/collections/types';
 import config from 'config';
 import { useApi } from 'hooks/useApi';
+import { useCollections } from 'hooks/useCollections';
 
 type TOption = {
   iconRight: {

@@ -3,7 +3,6 @@ import { Heading } from '@unique-nft/ui-kit';
 import { Text, useNotifications, Button } from 'components/UI';
 import styled from 'styled-components/macro';
 
-import { useCollections as useMyCollections } from 'api/restApi/collections/collection';
 import { MyCollection } from 'api/restApi/collections/types';
 import { useApi } from 'hooks/useApi';
 import { CollectionCover } from 'components/CollectionCover/CollectionCover';
@@ -11,11 +10,12 @@ import { SelectInput } from 'components/SelectInput/SelectInput';
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
 import { BlueGrey100 } from 'styles/colors';
 import { useAccounts } from 'hooks/useAccounts';
+import { useCollections } from 'hooks/useCollections';
 
 export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish, collection }) => {
   const { selectedAccount } = useAccounts();
   const [selectedCollection, setSelectedCollection] = useState<MyCollection | string | undefined>(collection);
-  const { appendCollection, collections, fetchCollections } = useMyCollections();
+  const { appendCollection, collections, fetchCollections } = useCollections();
   const [collectionItems, setCollectionItems] = useState<MyCollection[]>([]);
   const { api } = useApi();
   const { info, error } = useNotifications();
@@ -50,7 +50,6 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish, co
         myCollection.id.toString().includes(searchString) ||
         myCollection.name.includes(searchString) ||
         myCollection.tokenPrefix.includes(searchString));
-    console.log('collectionData', collectionData);
     setCollectionItems(collectionData);
   }, [api, collections]);
 

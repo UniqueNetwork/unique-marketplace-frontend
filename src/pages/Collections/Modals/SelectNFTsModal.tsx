@@ -4,8 +4,8 @@ import { Text, useNotifications, Button } from 'components/UI';
 import styled from 'styled-components/macro';
 
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
-import { useCollections } from 'api/restApi/collections/collection';
 import { TextInput } from 'components/TextInput/TextInput';
+import { useCollections } from 'hooks/useCollections';
 
 const MAX_SAFE_ID = 2147483647;
 
