@@ -87,16 +87,16 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
   const [bidAmount, setBidAmount] = useState<string>(formatKusamaBalance(minimalBid.toString(), { decimals }));
 
   const isEnoughBalance = useMemo(() => {
-    if (!selectedAccount?.balance?.KSM || selectedAccount?.balance?.KSM.isZero()) return false;
+    if (!selectedAccount?.balance?.raw || selectedAccount?.balance?.raw.isZero()) return false;
     const bnAmount = new BN(fromStringToBnString(bidAmount, api?.market?.decimals));
-    return selectedAccount?.balance?.KSM.gte(bnAmount.sub(new BN(lastBidFromThisAccount || 0)));
-  }, [selectedAccount?.balance?.KSM, bidAmount, api?.market?.decimals, lastBidFromThisAccount]);
+    return selectedAccount?.balance?.raw.gte(bnAmount.sub(new BN(lastBidFromThisAccount || 0)));
+  }, [selectedAccount?.balance?.raw, bidAmount, api?.market?.decimals, lastBidFromThisAccount]);
 
   const onBidAmountChange = useCallback((value: string) => {
     setBidAmount(value);
     if (!settings) return;
-    getFee(settings.auction.address, new BN(fromStringToBnString(value, api?.market?.decimals)));
-  }, [setBidAmount]);
+    void (getFee(settings.auction.address, new BN(fromStringToBnString(value, api?.market?.decimals))));
+  }, [setBidAmount, api, getFee, settings]);
 
   const isAmountValid = useMemo(() => {
     if (!bidAmount || bidAmount === '0') return false;

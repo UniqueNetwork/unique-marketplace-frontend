@@ -125,7 +125,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   }, [accountsWithQuartzAddresses]);
 
   const recipientBalance = useMemo(() => {
-    return typeof recipientAddress !== 'string' && recipientAddress?.balance?.KSM;
+    return typeof recipientAddress !== 'string' && recipientAddress?.balance?.raw;
   }, [recipientAddress]);
 
   const onAmountChange = useCallback((value: string) => {
@@ -135,13 +135,13 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
 
   const isAmountGreaterThanBalance = useMemo(() => {
     const amountBN = new BN(fromStringToBnString(amount));
-    return amountBN.gt(sender?.balance?.KSM || new BN(0));
-  }, [amount, sender?.balance?.KSM]);
+    return amountBN.gt(sender?.balance?.raw || new BN(0));
+  }, [amount, sender?.balance?.raw]);
 
   const isAmountPlusFeeGreaterThanBalance = useMemo(() => {
     const amountBN = new BN(fromStringToBnString(amount));
-    return amountBN.add(new BN(fromStringToBnString(kusamaFee))).gt(sender?.balance?.KSM || new BN(0));
-  }, [amount, sender?.balance?.KSM, kusamaFee]);
+    return amountBN.add(new BN(fromStringToBnString(kusamaFee))).gt(sender?.balance?.raw || new BN(0));
+  }, [amount, sender?.balance?.raw, kusamaFee]);
 
   const isConfirmDisabled = useMemo(() => {
     return !isValidRecipientAddress || !sender || !recipientAddress || Number(amount) <= 0 || isAmountGreaterThanBalance || isAmountPlusFeeGreaterThanBalance;
@@ -220,7 +220,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
       <Text
         testid={`${testid}-balance`}
         size={'s'}
-      >{`${formatKusamaBalance(sender?.balance?.KSM?.toString() || 0)} ${tokenSymbol}`}</Text>
+      >{`${sender?.balance?.parsed} ${tokenSymbol}`}</Text>
     </AmountWrapper>
 
     <Text size={'s'} color={'grey-500'}>{'To'}</Text>

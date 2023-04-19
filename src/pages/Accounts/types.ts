@@ -1,12 +1,8 @@
 import { BN } from '@polkadot/util';
+import { MarketAccount } from 'account/AccountContext';
 import { TableRowProps } from '@unique-nft/ui-kit';
 
-export type AccountInfo = TableRowProps & {
-  address: string
-  name: string
-  balance?: {
-    KSM?: BN
-  }
+export type AccountInfo = MarketAccount & TableRowProps & {
   deposit?: BN
   isLocal?: boolean
 }

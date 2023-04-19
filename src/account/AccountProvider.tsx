@@ -30,17 +30,6 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
     // TODO: get balance via new rest subscribtions !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   }, [kusamaSdk, setAccounts]);
 
-  useEffect(() => {
-    if (!api?.market) return;
-    setIsLoading(true);
-    void (async () => {
-      await _accounts.addProvider<ProviderClass<any>>(KeyringLocalProvider, { passwordCallback: showSignDialog });
-      await _accounts.addProvider<ProviderClass<any>>(PolkadotProvider);
-      await _accounts.addProvider<ProviderClass<any>>(MetamaskProvider);
-      await fetchAccounts();
-    })();
-  }, [api?.market, subscribeBalancesChanges]);
-
   const changeAccount = useCallback((account: Account) => {
     localStorage.setItem(DefaultAccountKey, account.address);
     setSelectedAccount(account);
@@ -60,36 +49,6 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
       };
     });
   }, []);
-
-  const onClose = useCallback(() => {
-    setIsSignModalVisible(false);
-    onSignCallback.current && onSignCallback.current(undefined);
-  }, []);
-
-  const onSignFinish = useCallback((password: string | undefined) => {
-    setIsSignModalVisible(false);
-    onSignCallback.current && onSignCallback.current(password);
-  }, []);
-
-  const getAccountDeposit = useCallback(async (account: Account) => {
-    return {
-      bids: (await getWithdrawBids(baseURL, { owner: account.address })).data || { withdraw: [], leader: [] }
-    };
-  }, [baseURL, api?.market]);
-
-  const updateAccountsDeposits = useCallback(async () => {
-    if (!api?.market) return;
-    setIsLoadingDeposits(true);
-
-    setAccounts(await Promise.all(accounts.map(async (account) => {
-      // account.deposits = await getAccountDeposit(account);
-      // Will be used when we bring back auctions
-      await Promise.resolve();
-      return account;
-    })));
-
-    setIsLoadingDeposits(false);
-  }, [accounts.length, api?.market, getAccountDeposit]);
 
   const fetchAccounts = useCallback(async () => {
     if (!api?.market) return;
@@ -130,7 +89,8 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
     const defaultAccountAddress = localStorage.getItem(DefaultAccountKey);
     const defaultAccount = allAccounts.find((item) => item.address === defaultAccountAddress) || allAccounts[0];
 
-    defaultAccount.balance = { KSM: new BN((await api.market.getAccountBalance(defaultAccount.address))?.freeBalance?.raw || 0) };
+    const balance = await api.market.getAccountBalance(defaultAccount.address);
+    defaultAccount.balance = { raw: new BN(balance?.freeBalance?.raw || 0), parsed: balance?.freeBalance?.amount || '0' };
 
     changeAccount(defaultAccount);
 
@@ -139,7 +99,48 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
     setIsLoading(false);
 
     // await subscribeBalancesChanges(allAccounts);
-  }, [api?.market, getAccountDeposit]);
+  }, [api?.market, changeAccount]);
+
+  useEffect(() => {
+    if (!api?.market) return;
+    setIsLoading(true);
+    void (async () => {
+      await _accounts.addProvider<ProviderClass<any>>(KeyringLocalProvider, { passwordCallback: showSignDialog });
+      await _accounts.addProvider<ProviderClass<any>>(PolkadotProvider);
+      await _accounts.addProvider<ProviderClass<any>>(MetamaskProvider);
+      await fetchAccounts();
+    })();
+  }, [api?.market, subscribeBalancesChanges, fetchAccounts, showSignDialog]);
+
+  const onClose = useCallback(() => {
+    setIsSignModalVisible(false);
+    onSignCallback.current && onSignCallback.current(undefined);
+  }, []);
+
+  const onSignFinish = useCallback((password: string | undefined) => {
+    setIsSignModalVisible(false);
+    onSignCallback.current && onSignCallback.current(password);
+  }, []);
+
+  const getAccountDeposit = useCallback(async (account: Account) => {
+    return {
+      bids: (await getWithdrawBids(baseURL, { owner: account.address })).data || { withdraw: [], leader: [] }
+    };
+  }, [baseURL]);
+
+  const updateAccountsDeposits = useCallback(async () => {
+    if (!api?.market) return;
+    setIsLoadingDeposits(true);
+
+    setAccounts(await Promise.all(accounts.map(async (account) => {
+      // account.deposits = await getAccountDeposit(account);
+      // Will be used when we bring back auctions
+      await Promise.resolve();
+      return account;
+    })));
+
+    setIsLoadingDeposits(false);
+  }, [accounts.length, api?.market, getAccountDeposit]);
 
   const updateCurrentAccountDeposit = useCallback(async () => {
     if (!selectedAccount) return Promise.resolve();
@@ -148,7 +149,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
     setAccounts((accounts) => accounts.map((account) => {
       if (account.address === selectedAccount.address) {
         // account.deposits = deposits;
-        account.balance = { KSM: new BN(balance?.freeBalance?.raw || 0) };
+        account.balance = { raw: new BN(balance?.freeBalance?.raw || 0), parsed: balance?.freeBalance?.amount || '0' };
       }
       return account;
     }));
@@ -170,7 +171,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
     fetchAccounts,
     updateAccountsDeposits,
     updateCurrentAccountDeposit
-  }), [isLoading, isLoadingDeposits, accounts, fetchAccounts, updateAccountsDeposits, selectedAccount, fetchAccountsError, changeAccount]);
+  }), [isLoading, isLoadingDeposits, accounts, fetchAccounts, updateAccountsDeposits, selectedAccount, fetchAccountsError, changeAccount, showSignDialog, updateCurrentAccountDeposit]);
 
   return (
     <AccountProvider value={value}>

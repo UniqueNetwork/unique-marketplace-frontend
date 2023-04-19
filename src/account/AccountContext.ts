@@ -20,7 +20,10 @@ export type MarketAccount = {
   address: string,
   isLocal: boolean,
   deposits?: AccountDeposits,
-  balance: { KSM: BN } // TODO: replace with plain BN
+  balance: {
+    parsed: string, // ex. 2006.186351956969336199
+    raw: BN // ex. 2006186351956969336199 (as in chain)
+  }
 }
 
 export type AccountContextProps = {

@@ -21,9 +21,9 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy, testid }) => {
   const { selectedAccount } = useAccounts();
 
   const isEnoughBalance = useMemo(() => {
-    if (!selectedAccount?.balance?.KSM || selectedAccount.balance.KSM.isZero() || !offer?.price) return false;
-    return selectedAccount.balance.KSM.gte(new BN(offer.price).add(new BN(marketCommission)));
-  }, [offer?.price, selectedAccount?.balance?.KSM, marketCommission]);
+    if (!selectedAccount?.balance?.raw || selectedAccount.balance.raw.isZero() || !offer?.price) return false;
+    return selectedAccount.balance.raw.gte(new BN(offer.price).add(new BN(marketCommission)));
+  }, [offer?.price, selectedAccount?.balance?.raw, marketCommission]);
 
   const onBuyClick = useCallback(() => {
     if (!isEnoughBalance) return;

@@ -83,7 +83,7 @@ export const WalletManager: FC = () => {
   }, [navigate]);
 
   const currentBalance: BalanceOption = useMemo(() => {
-    return { value: selectedAccount?.balance?.KSM?.toString() || '0', chain: chainData?.token || '' };
+    return { value: selectedAccount?.balance.parsed || '0', chain: chainData?.token || '' };
   }, [selectedAccount, chainData?.token]);
 
   const closeModal = useCallback(() => {
