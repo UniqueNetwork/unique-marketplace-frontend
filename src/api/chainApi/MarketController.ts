@@ -32,6 +32,8 @@ class MarketController extends BaseController implements IMarketController {
 
     const adapter = this.getAdapter(account.account);
     await adapter.changeAllowance(from, to, collectionId, tokenId, targetAllowance, account.signer);
+    const newAllowance = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from, to });
+    if (newAllowance.isAllowed !== targetAllowance) throw new Error('Allowance change failed');
   }
 
   async sellFix(collectionId: number, tokenId: number, price: number, amount: number, { account }: TransactionOptions): Promise<void> {
@@ -40,8 +42,6 @@ class MarketController extends BaseController implements IMarketController {
     const isAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from, to });
     if (!isAllowed) throw new Error('Token not approved for sale');
     const adapter = this.getAdapter(account.account);
-    console.log('adapter used:', adapter);
-    console.log('account used', account);
     await adapter.sell(from, collectionId, tokenId, price, amount, account.signer);
   }
 
