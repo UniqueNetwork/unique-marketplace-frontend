@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { AccountProvider, MarketAccount as Account } from './AccountContext';
+import { AccountProvider, MarketAccount } from './AccountContext';
 import { SignModal } from 'components/SignModal/SignModal';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { BN } from '@polkadot/util';
@@ -16,24 +16,28 @@ import { MetamaskProvider, MetamaskAccount } from '@unique-nft/accounts/metamask
 export const DefaultAccountKey = 'unique_market_account_address';
 
 const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts(), children }) => {
-  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [accounts, setAccounts] = useState<MarketAccount[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isLoadingDeposits, setIsLoadingDeposits] = useState<boolean>(false);
   const [fetchAccountsError, setFetchAccountsError] = useState<string | undefined>();
-  const [selectedAccount, setSelectedAccount] = useState<Account>();
+  const [selectedAccount, setSelectedAccount] = useState<MarketAccount>();
   const { api, kusamaSdk, baseURL } = useApi();
 
   const unsubscribesBalancesChanges = useRef<Record<string, Codec>>({
     // TODO: !!!!!!!!!
   });
-  const subscribeBalancesChanges = useCallback(async (accounts: Account[]) => {
+  const subscribeBalancesChanges = useCallback(async (accounts: MarketAccount[]) => {
     // TODO: get balance via new rest subscribtions !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   }, [kusamaSdk, setAccounts]);
 
-  const changeAccount = useCallback((account: Account) => {
+  const changeAccount = useCallback(async (account: MarketAccount) => {
+    if (!api?.market) return;
+    const balance = await api.market.getAccountBalance(account.address);
+    const accountWithBalance = { ...account, balance: { raw: new BN(balance?.freeBalance?.raw || 0), parsed: balance?.freeBalance?.amount || '0' } };
     localStorage.setItem(DefaultAccountKey, account.address);
-    setSelectedAccount(account);
-  }, []);
+    console.log('changing account with: ', balance);
+    setSelectedAccount(accountWithBalance);
+  }, [api]);
 
   const [isSignModalVisible, setIsSignModalVisible] = useState<boolean>(false);
   const [localSignerKeyringPair, setLocalSignerKeyringPair] = useState<KeyringPair>();
@@ -58,7 +62,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
 
     const allAccounts = (await _accounts?.getAccounts())?.map((account) => {
       let name; // TODO: refactor?
-      const marketAccount = { account: account as unknown } as Account;
+      const marketAccount = { account: account as unknown } as MarketAccount;
       switch (account.constructor) {
         case PolkadotAccount:
           // TODO: if account is from polka but has ethereum address - either ignore it or figure out how to deal with it
@@ -122,7 +126,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
     onSignCallback.current && onSignCallback.current(password);
   }, []);
 
-  const getAccountDeposit = useCallback(async (account: Account) => {
+  const getAccountDeposit = useCallback(async (account: MarketAccount) => {
     return {
       bids: (await getWithdrawBids(baseURL, { owner: account.address })).data || { withdraw: [], leader: [] }
     };

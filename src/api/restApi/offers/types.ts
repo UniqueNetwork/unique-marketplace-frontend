@@ -43,7 +43,8 @@ export type OfferTokenAttribute = {
 export type Offer = {
   collectionId: number
   tokenId: number
-  price: string
+  priceRaw: string
+  priceParsed: string
   quoteId: number
   seller: string
   creationDate: string

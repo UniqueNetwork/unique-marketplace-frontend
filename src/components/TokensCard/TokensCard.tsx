@@ -41,21 +41,21 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
     tokenTitle,
     collectionTitle,
     imageUrl,
-    price,
+    priceRaw,
     auction,
     video
   } = useMemo(() => {
     if (offer || (token && collection)) {
       const { image, video } = offer?.tokenDescription || token || {};
       const { name: collectionName, tokenPrefix } = offer?.collectionDescription || collection || {};
-      const { auction, price } = offer || {};
+      const { auction, priceRaw } = offer || {};
       return {
         tokenTitle: `${tokenPrefix || ''} #${tokenId || ''}`,
         collectionTitle: `${collectionName?.substring(0, 25) || ''} [id ${collectionId || ''}]`,
         imageUrl: image,
         video: stringToDecodedInfixOrUrlOrCidAndHash(video),
         auction,
-        price
+        priceRaw
       };
     }
 
@@ -143,11 +143,11 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
           </Text>
         </UILink>
         {isBundleState && <BundleItemsCount count={tokensCount || 0} testId={testid} />}
-        {price && <PriceWrapper>
+        {priceRaw && <PriceWrapper>
           <Text
             testid={`${testid}-price`}
             size='s'
-          >{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(price)}` }</Text>
+          >{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(priceRaw)}` }</Text>
           <IconStyled name={'chain-kusama'} size={16} />
           {!auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         </PriceWrapper>}

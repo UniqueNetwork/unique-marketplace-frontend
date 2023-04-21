@@ -82,10 +82,6 @@ export const WalletManager: FC = () => {
     setIsOpen(false);
   }, [navigate]);
 
-  const currentBalance: BalanceOption = useMemo(() => {
-    return { value: selectedAccount?.balance.parsed || '0', chain: chainData?.token || '' };
-  }, [selectedAccount, chainData?.token]);
-
   const closeModal = useCallback(() => {
     setIsGetKsmOpened(false);
   }, [setIsGetKsmOpened]);
@@ -127,7 +123,7 @@ export const WalletManager: FC = () => {
         open={isOpen}
         accounts={widgetAccounts}
         activeNetwork={currentNetwork}
-        balance={formatKusamaBalance(currentBalance.value, { decimals, fractionDigits })}
+        balance={selectedAccount?.balance?.parsed || '0'}
         deposit={formattedAccountDeposit}
         depositDescription={
           <>

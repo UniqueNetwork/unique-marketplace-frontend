@@ -68,7 +68,7 @@ class MarketController extends BaseController implements IMarketController {
   async getOrder(collectionId: number, tokenId: number): Promise<any> {
     if (!collectionId || !tokenId) throw new Error(`Cant get order for ${collectionId}-${tokenId}`);
     try {
-      const res = await this.uniqueSdk.evm.send.submitWaitResult({
+      const res = await this.uniqueSdk.evm.call({
         abi: marketplaceAbi as any,
         address: '5CSxpZepJj5dxkSBEDnN23pgg6B5X6VFRJ2kyubhb5Svstuu', // TODO: remove after sdk update
         contractAddress: this.contractAddress,
@@ -83,7 +83,9 @@ class MarketController extends BaseController implements IMarketController {
   }
 
   async getAccountBalance(address: string): Promise<AllBalancesResponse> {
-    return await this.uniqueSdk.balance.get({ address });
+    const balance = await this.uniqueSdk.balance.get({ address });
+    if (!balance) throw new Error('Failed to fetch balance');
+    return balance;
   }
 
   // TODO: split into multiple "get fee for method X". Put them in adapters
