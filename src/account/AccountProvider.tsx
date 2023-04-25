@@ -36,7 +36,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
     const accountWithBalance = { ...account, balance };
     localStorage.setItem(DefaultAccountKey, account.address);
     setSelectedAccount(accountWithBalance);
-  }, [api]);
+  }, [api?.market]);
 
   const [isSignModalVisible, setIsSignModalVisible] = useState<boolean>(false);
   const [localSignerKeyringPair, setLocalSignerKeyringPair] = useState<KeyringPair>();
