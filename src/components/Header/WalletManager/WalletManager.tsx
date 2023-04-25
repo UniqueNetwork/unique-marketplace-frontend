@@ -1,10 +1,9 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import config from 'config';
 
 import { BN } from '@polkadot/util';
-import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { INetwork } from '@unique-nft/ui-kit';
 
@@ -18,7 +17,6 @@ import { useApi } from 'hooks/useApi';
 
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import { TWithdrawBid } from 'api/restApi/auction/types';
-import { BalanceOption } from './types';
 import BalanceSkeleton from '../../Skeleton/BalanceSkeleton';
 
 const tokenSymbol = 'KSM';
@@ -54,18 +52,12 @@ export const WalletManager: FC = () => {
     setIsOpen(false);
   }, [onChangeChainId]);
 
-  const widgetAccounts = useMemo(() => accounts.map((account) => {
-    if (!isEthereumAddress(account.address)) return { ...account, address: account.account.getAddress(chainData?.SS58Prefix), substrateAddress: account?.address };
-    return { account, address: account.address, substrateAddress: account.address };
-  }
-  ), [accounts, chainData?.SS58Prefix]);
-
   const widgetSelectedAccount = useMemo(() => (
     { name: selectedAccount?.name, address: selectedAccount ? selectedAccount.address || selectedAccount.account.getAddress(chainData?.SS58Prefix) : '', substrateAddress: selectedAccount?.address }
   ), [selectedAccount, chainData?.SS58Prefix]);
 
-  const widgetAccountChange = useCallback(({ substrateAddress }: IAccount) => {
-    const account = accounts.find((account) => account.address === substrateAddress);
+  const widgetAccountChange = useCallback(({ address }: IAccount) => {
+    const account = accounts.find((account) => account.address === address);
     if (!account) return;
     changeAccount(account);
   }, [accounts, changeAccount]);
@@ -121,7 +113,7 @@ export const WalletManager: FC = () => {
     <WalletManagerWrapper>
       <AccountsManager
         open={isOpen}
-        accounts={widgetAccounts}
+        accounts={accounts}
         activeNetwork={currentNetwork}
         balance={selectedAccount?.balance?.parsed || '0'}
         deposit={formattedAccountDeposit}
