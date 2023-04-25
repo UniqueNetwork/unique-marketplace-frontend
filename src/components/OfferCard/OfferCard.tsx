@@ -102,7 +102,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
           <Text
             testid={`${testid}-price`}
             size='l'
-          >{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(offer?.priceRaw)}` }</Text>
+          >{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${offer.price.parsed}` }</Text>
           <IconStyled name={'chain-kusama'} size={16} />
           {!offer?.auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         </PriceWrapper>

@@ -28,7 +28,7 @@ import { DecodedAttributeDto, TokenByIdResponse } from '@unique-nft/sdk';
 
 type TOption = SelectOptionProps & {
   direction: 'asc' | 'desc';
-  field: keyof Pick<Offer & TokenByIdResponse, 'priceRaw' | 'tokenId' | 'creationDate'>;
+  field: keyof Pick<Offer & TokenByIdResponse, 'price' | 'tokenId' | 'creationDate'>;
   id: string;
   title: string;
 }
@@ -52,14 +52,14 @@ const sortingOptions: TOption[] = [
   },
   {
     direction: 'desc',
-    field: 'priceRaw',
+    field: 'price', // TODO: now is object
     iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
     id: 'desc(Price)',
     title: 'Price'
   },
   {
     direction: 'asc',
-    field: 'priceRaw',
+    field: 'price',
     iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
     id: 'asc(Price)',
     title: 'Price'
@@ -176,10 +176,10 @@ export const NFTPage = () => {
 
       let filteredByPrice = true;
       if (prices?.minPrice || prices?.maxPrice) {
-        if (!token.priceRaw) {
+        if (!token.price?.raw) {
           filteredByPrice = false;
         } else {
-          const tokenPrice = new BN(token.priceRaw);
+          const tokenPrice = new BN(token?.price.raw);
           const minPrice = new BN(fromStringToBnString(prices.minPrice || '0', api?.market?.decimals));
           const maxPrice = prices.maxPrice ? new BN(fromStringToBnString(prices.maxPrice, api?.market?.decimals)) : BN_MAX_INTEGER;
           filteredByPrice = (tokenPrice.gte(minPrice) && tokenPrice.lte(maxPrice));

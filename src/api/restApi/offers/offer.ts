@@ -23,10 +23,6 @@ export const useOffer = (collectionId: number, tokenId: number) => {
     try {
       const { status, data } = await getOffer(baseURL, collectionId, tokenId);
       if (status === 200) {
-        const tokenInChain = await api?.nft?.getToken(collectionId, tokenId);
-        if (!tokenInChain) throw new Error('Token doesnt exist');
-        // TODO: remove after added to API
-        data[0].tokenDescription = { ...tokenInChain, nestingChildTokens: [] };
         setOffer(data[0]);
         setIsFetching(false);
         return data[0];

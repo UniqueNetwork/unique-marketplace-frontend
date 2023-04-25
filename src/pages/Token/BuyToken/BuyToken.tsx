@@ -21,9 +21,9 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy, testid }) => {
   const { selectedAccount } = useAccounts();
 
   const isEnoughBalance = useMemo(() => {
-    if (!selectedAccount?.balance?.raw || selectedAccount.balance.raw.isZero() || !offer?.priceRaw) return false;
-    return selectedAccount.balance.raw.gte(new BN(offer.priceRaw).add(new BN(marketCommission)));
-  }, [offer?.priceRaw, selectedAccount?.balance?.raw, marketCommission]);
+    if (!selectedAccount?.balance?.raw || selectedAccount.balance.raw.isZero() || !offer?.price.raw) return false;
+    return selectedAccount.balance.raw.gte(new BN(offer.price.raw).add(new BN(marketCommission)));
+  }, [offer?.price.raw, selectedAccount?.balance?.raw, marketCommission]);
 
   const onBuyClick = useCallback(() => {
     if (!isEnoughBalance) return;
@@ -35,7 +35,7 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy, testid }) => {
 
   return (<>
     <Text size={'l'}>Price</Text>
-    <Price price={offer.priceRaw} />
+    <Price price={offer.price.raw} />
     <ButtonWrapper>
       <Button
         onClick={onBuyClick}

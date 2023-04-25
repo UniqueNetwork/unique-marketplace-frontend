@@ -109,7 +109,7 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
 
   useOfferSubscription({ offer, onPlaceBid, onAuctionStopped, onAuctionClosed });
 
-  const price = offer.priceRaw;
+  const price = offer.price.raw;
 
   return (<>
     <Text size={'l'} testid={`${testid}-bid-title`}>{topBid ? 'Next minimum bid' : 'Starting bid'}</Text>

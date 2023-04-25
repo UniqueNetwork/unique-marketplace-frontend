@@ -1,7 +1,6 @@
 import { PaginatedResponse, Pagination, Sortable } from '../base/types';
-import { DecodedInfixOrUrlOrCidAndHash, VideoAttribute } from '../../chainApi/types';
 import { INestingToken } from 'components/BundleTree/types';
-import { DecodedAttributeDto, UniqueCollectionSchemaDecodedDto } from '@unique-nft/sdk';
+import { UniqueCollectionSchemaDecodedDto } from '@unique-nft/sdk';
 import { TokenByIdResponse } from '@unique-nft/sdk/full';
 
 export type GetOffersRequestPayload = {
@@ -43,7 +42,10 @@ export type OfferTokenAttribute = {
 export type Offer = {
   collectionId: number
   tokenId: number
-  priceRaw: string
+  price: {
+    parsed: number, // 123
+    raw: string // 123000000000000
+  }
   priceParsed: string
   quoteId: number
   seller: string
