@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { keyring } from '@polkadot/ui-keyring';
 import { useNotifications } from 'components/UI';
 import { ApiContextProps, ApiProvider } from './ApiContext';
-import AuctionSocketProvider from './restApi/auction/AuctionSocketProvider';
+// import AuctionSocketProvider from './restApi/auction/AuctionSocketProvider';
 import { Settings } from './restApi/settings/types';
 import { NetworkOptions, SdkClient } from './sdk/sdkClient';
 import config from '../config';
@@ -114,6 +114,7 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
         : undefined),
       // chainData: currentChain?.uniqueProperties, // TODO: chain properties are required
       baseURL: config.blockchains[currentChainId]?.apiEndpoint || '',
+      featuredCollections: settings?.blockchain.unique.collections || {},
       refetchSettings,
       settings,
       prefixes,

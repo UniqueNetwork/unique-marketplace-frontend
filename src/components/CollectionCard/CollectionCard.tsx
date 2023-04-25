@@ -33,16 +33,13 @@ export const CollectionCard: FC<TCollectionCard> = ({
   onRemoveCollectionClick,
   onViewOnScanClick
 }) => {
-  const { api } = useApi();
+  const { featuredCollections } = useApi();
   const { selectedAccount } = useAccounts();
-  const collectionApi = api?.collection;
   const [collectionDetails, setCollectionDetails] = useState<CollectionInfoWithSchemaResponse | null>();
   useEffect(() => {
     if (!collection?.id) return;
-    (async () => {
-      setCollectionDetails(await collectionApi?.getCollection(collection.id));
-    })();
-  }, [collection, collectionApi]);
+    setCollectionDetails(featuredCollections[collection.id].description);
+  }, [collection, featuredCollections]);
 
   const canConfirmSponsorships = useMemo(() => {
     return selectedAccount &&

@@ -1,5 +1,5 @@
 import { Context, Consumer, Provider, createContext } from 'react';
-import { Settings } from './restApi/settings/types';
+import { AllowedCollections, Settings } from './restApi/settings/types';
 import { UniqueSDKNFTController } from './chainApi/NFTController';
 import { UniqueSDKCollectionController } from './chainApi/collectionController';
 import { ChainPropertiesResponse, Sdk } from '@unique-nft/sdk/full';
@@ -17,6 +17,7 @@ export type ApiContextProps = {
   kusamaSdk?: Sdk
   chainData?: ChainPropertiesResponse
   settings?: Settings
+  featuredCollections: AllowedCollections // shortcut from settings
   currentChainId?: string
   prefixes: number[]
   baseURL: string

@@ -39,6 +39,18 @@ export type OfferTokenAttribute = {
   value: string | string[]
 }
 
+export type CollectionDescription = {
+  description: string;
+  id: number;
+  // mode?: CollectionMode | `${CollectionMode}`;
+  name: string;
+  owner: string;
+  tokenPrefix: string;
+  schema?: UniqueCollectionSchemaDecodedDto;
+}
+
+export type TokenDescription = TokenByIdResponse & { nestingChildTokens: INestingToken[] };
+
 export type Offer = {
   collectionId: number
   tokenId: number
@@ -51,16 +63,8 @@ export type Offer = {
   seller: string
   creationDate: string
   auction: Auction | null
-  tokenDescription: TokenByIdResponse & { nestingChildTokens: INestingToken[] },
-  collectionDescription: {
-    description: string;
-    id: number;
-    // mode?: CollectionMode | `${CollectionMode}`;
-    name: string;
-    owner: string;
-    tokenPrefix: string;
-    schema?: UniqueCollectionSchemaDecodedDto;
-  }
+  tokenDescription: TokenDescription,
+  collectionDescription: CollectionDescription
 }
 
 export type OfferResponse = Offer[]
