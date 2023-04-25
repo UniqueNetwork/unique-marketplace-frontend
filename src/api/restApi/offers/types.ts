@@ -1,7 +1,6 @@
 import { PaginatedResponse, Pagination, Sortable } from '../base/types';
 import { INestingToken } from 'components/BundleTree/types';
-import { UniqueCollectionSchemaDecodedDto } from '@unique-nft/sdk';
-import { TokenByIdResponse } from '@unique-nft/sdk/full';
+import { TokenByIdResponse, CollectionInfoWithSchemaResponse } from '@unique-nft/sdk/full';
 
 export type GetOffersRequestPayload = {
   collectionId?: number | number[]
@@ -39,15 +38,7 @@ export type OfferTokenAttribute = {
   value: string | string[]
 }
 
-export type CollectionDescription = {
-  description: string;
-  id: number;
-  // mode?: CollectionMode | `${CollectionMode}`;
-  name: string;
-  owner: string;
-  tokenPrefix: string;
-  schema?: UniqueCollectionSchemaDecodedDto;
-}
+export type CollectionDescription = CollectionInfoWithSchemaResponse
 
 export type TokenDescription = TokenByIdResponse & { nestingChildTokens: INestingToken[] };
 

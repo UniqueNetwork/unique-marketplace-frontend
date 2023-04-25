@@ -33,9 +33,8 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
   const changeAccount = useCallback(async (account: MarketAccount) => {
     if (!api?.market) return;
     const balance = await api.market.getAccountBalance(account.address);
-    const accountWithBalance = { ...account, balance: { raw: new BN(balance?.freeBalance?.raw || 0), parsed: balance?.freeBalance?.amount || '0' } };
+    const accountWithBalance = { ...account, balance };
     localStorage.setItem(DefaultAccountKey, account.address);
-    console.log('changing account with: ', balance);
     setSelectedAccount(accountWithBalance);
   }, [api]);
 
@@ -90,15 +89,17 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
       return marketAccount;
     }) || [];
 
-    const defaultAccountAddress = localStorage.getItem(DefaultAccountKey);
-    const defaultAccount = allAccounts.find((item) => item.address === defaultAccountAddress) || allAccounts[0];
+    const accountsWithBalances = await Promise.all(allAccounts.map(async (account) => {
+      const balance = await api.market!.getAccountBalance(account.address);
+      return { ...account, balance };
+    }));
 
-    const balance = await api.market.getAccountBalance(defaultAccount.address);
-    defaultAccount.balance = { raw: new BN(balance?.freeBalance?.raw || 0), parsed: balance?.freeBalance?.amount || '0' };
+    const defaultAccountAddress = localStorage.getItem(DefaultAccountKey);
+    const defaultAccount = accountsWithBalances.find((item) => item.address === defaultAccountAddress) || allAccounts[0];
 
     changeAccount(defaultAccount);
 
-    setAccounts(allAccounts);
+    setAccounts(accountsWithBalances);
 
     setIsLoading(false);
 
@@ -153,7 +154,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
     setAccounts((accounts) => accounts.map((account) => {
       if (account.address === selectedAccount.address) {
         // account.deposits = deposits;
-        account.balance = { raw: new BN(balance?.freeBalance?.raw || 0), parsed: balance?.freeBalance?.amount || '0' };
+        account.balance = balance || { raw: new BN(0), parsed: '0' };
       }
       return account;
     }));

@@ -119,7 +119,7 @@ export const getAccountsColumns = ({
       return (
         <>
           <ActionsWrapper>
-            <Button title={'Send'} onClick={onShowSendFundsModal(address)} disabled={!balance.parsed} />
+            <Button title={'Send'} onClick={onShowSendFundsModal(address)} disabled={!balance?.parsed} />
             <Button
               title={'Get'}
               onClick={onShowGetKsmModal}

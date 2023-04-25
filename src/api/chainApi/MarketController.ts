@@ -6,6 +6,7 @@ import IMarketController from './controllers/base/IMarketController';
 import { TransactionOptions } from './types';
 import BaseController from './controllers/BaseController';
 import { AllBalancesResponse } from '@unique-nft/sdk';
+import { MarketAccountBalance } from 'account/AccountContext';
 
 class MarketController extends BaseController implements IMarketController {
   contractAddress: string;
@@ -82,10 +83,10 @@ class MarketController extends BaseController implements IMarketController {
     }
   }
 
-  async getAccountBalance(address: string): Promise<AllBalancesResponse> {
+  async getAccountBalance(address: string): Promise<MarketAccountBalance> {
     const balance = await this.uniqueSdk.balance.get({ address });
     if (!balance) throw new Error('Failed to fetch balance');
-    return balance;
+    return { raw: new BN(balance?.freeBalance?.raw || 0), parsed: balance?.freeBalance?.amount || '0' };
   }
 
   // TODO: split into multiple "get fee for method X". Put them in adapters
