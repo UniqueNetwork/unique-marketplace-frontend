@@ -58,7 +58,7 @@ export type Offer = {
   collectionDescription: CollectionDescription
 }
 
-export type OfferResponse = Offer[]
+export type OfferResponse = Offer
 
 export type OffersResponse = PaginatedResponse<Offer> & {
   attributes: Record<string, Attribute[]>;

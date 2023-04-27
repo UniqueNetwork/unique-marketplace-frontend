@@ -46,7 +46,7 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy, testid }) => {
       />
     </ButtonWrapper>
     {!isEnoughBalance && <Text color={'coral-500'} testid={`${testid}-low-balance-warning`}>Your balance is too low to buy</Text>}
-    {offer?.tokenDescription?.nestingChildTokens?.length && <BuyBundleInformation testid={testid}/>}
+    {!!offer?.tokenDescription?.nestingChildTokens?.length && <BuyBundleInformation testid={testid}/>}
     <Divider />
   </>);
 };

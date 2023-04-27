@@ -15,12 +15,6 @@ export const useCancelSellFixStages = (collectionId: number, tokenId: number) =>
       description: '',
       status: StageStatus.default,
       action: ({ options }) => marketApi?.changeAllowance(collectionId, tokenId, false, options)
-    },
-    {
-      title: 'Cancel order',
-      description: '',
-      status: StageStatus.default,
-      action: ({ options }) => marketApi?.cancelFix(collectionId, tokenId, 1, options)
     }
   ], [marketApi, collectionId, tokenId]);
   const { stages, error, status, initiate } = useStages<TDelistProps>(delistStages, selectedAccount);

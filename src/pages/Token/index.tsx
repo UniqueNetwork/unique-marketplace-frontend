@@ -110,8 +110,9 @@ const TokenPage = () => {
     }
   }, [navigate]);
 
+  // TODO: rework this one
   // if we opened child token from bundle which is on sale
-  const isIgnoreOffer = useMemo(() => (!(!token || !offer || (id === offer.tokenId.toString() && collectionId === offer.collectionId.toString()))), [token, offer]);
+  const isIgnoreOffer = false; // useMemo(() => (!(!token || !offer || (id === offer.tokenId.toString() && collectionId === offer.collectionId.toString()))), [token, offer, collectionId, id]);
 
   const isOwner = useMemo(() => {
     if (!selectedAccount || isFetchingOffer || isFetchingToken) return false;
@@ -123,7 +124,6 @@ const TokenPage = () => {
 
   if (!isFetchingOffer && !isFetchingToken && !token && !offer) return <Error404 />;
 
-  // TODO: split into more categories here instead of just "buy/sell" and putting splitting inside them
   return (
     <>
       <BackLink onClick={backClickHandler} data-testid={`${testid}-back-link`}>

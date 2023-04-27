@@ -23,9 +23,9 @@ export const useOffer = (collectionId: number, tokenId: number) => {
     try {
       const { status, data } = await getOffer(baseURL, collectionId, tokenId);
       if (status === 200) {
-        setOffer(data[0]);
+        setOffer(data);
         setIsFetching(false);
-        return data[0];
+        return data;
       }
     } catch (err) {
       const { response, message } = err as AxiosError;
@@ -37,7 +37,7 @@ export const useOffer = (collectionId: number, tokenId: number) => {
       });
     }
     return [];
-  }, [baseURL, api]);
+  }, [baseURL]);
 
   useEffect(() => {
     if (!currentChainId) return;
