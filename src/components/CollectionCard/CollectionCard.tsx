@@ -38,7 +38,7 @@ export const CollectionCard: FC<TCollectionCard> = ({
   const [collectionDetails, setCollectionDetails] = useState<CollectionInfoWithSchemaResponse | null>();
   useEffect(() => {
     if (!collection?.id) return;
-    setCollectionDetails(featuredCollections[collection.id].description);
+    setCollectionDetails(featuredCollections[collection.id]?.description);
   }, [collection, featuredCollections]);
 
   const canConfirmSponsorships = useMemo(() => {

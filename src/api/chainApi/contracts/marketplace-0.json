@@ -28,7 +28,18 @@
         "type": "string"
       }
     ],
-    "name": "FailTransformToken",
+    "name": "FailTransferToken",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "info",
+        "type": "string"
+      }
+    ],
+    "name": "InvalidArgument",
     "type": "error"
   },
   {
@@ -38,7 +49,7 @@
   },
   {
     "inputs": [],
-    "name": "NotEnoughError",
+    "name": "NotEnoughMoneyError",
     "type": "error"
   },
   {
@@ -106,14 +117,14 @@
             "type": "uint32"
           },
           {
-            "internalType": "uint256",
-            "name": "price",
-            "type": "uint256"
-          },
-          {
             "internalType": "uint32",
             "name": "amount",
             "type": "uint32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "price",
+            "type": "uint256"
           },
           {
             "internalType": "address payable",
@@ -157,14 +168,14 @@
             "type": "uint32"
           },
           {
-            "internalType": "uint256",
-            "name": "price",
-            "type": "uint256"
-          },
-          {
             "internalType": "uint32",
             "name": "amount",
             "type": "uint32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "price",
+            "type": "uint256"
           },
           {
             "internalType": "address payable",
@@ -179,9 +190,9 @@
       },
       {
         "indexed": false,
-        "internalType": "uint256",
+        "internalType": "uint32",
         "name": "salesAmount",
-        "type": "uint256"
+        "type": "uint32"
       }
     ],
     "name": "TokenIsPurchased",
@@ -214,14 +225,14 @@
             "type": "uint32"
           },
           {
-            "internalType": "uint256",
-            "name": "price",
-            "type": "uint256"
-          },
-          {
             "internalType": "uint32",
             "name": "amount",
             "type": "uint32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "price",
+            "type": "uint256"
           },
           {
             "internalType": "address payable",
@@ -265,14 +276,14 @@
             "type": "uint32"
           },
           {
-            "internalType": "uint256",
-            "name": "price",
-            "type": "uint256"
-          },
-          {
             "internalType": "uint32",
             "name": "amount",
             "type": "uint32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "price",
+            "type": "uint256"
           },
           {
             "internalType": "address payable",
@@ -287,13 +298,20 @@
       },
       {
         "indexed": false,
-        "internalType": "uint256",
+        "internalType": "uint32",
         "name": "amount",
-        "type": "uint256"
+        "type": "uint32"
       }
     ],
     "name": "TokenRevoke",
     "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "addAdmin",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
     "inputs": [
@@ -311,6 +329,16 @@
         "internalType": "uint32",
         "name": "amount",
         "type": "uint32"
+      },
+      {
+        "internalType": "address",
+        "name": "buyerEth",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "buyerSub",
+        "type": "uint256"
       }
     ],
     "name": "buy",
@@ -369,14 +397,14 @@
             "type": "uint32"
           },
           {
-            "internalType": "uint256",
-            "name": "price",
-            "type": "uint256"
-          },
-          {
             "internalType": "uint32",
             "name": "amount",
             "type": "uint32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "price",
+            "type": "uint256"
           },
           {
             "internalType": "address payable",
@@ -434,6 +462,13 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "removeAdmin",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint32",
@@ -459,19 +494,6 @@
   {
     "inputs": [],
     "name": "setOwner",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bool",
-        "name": "pause",
-        "type": "bool"
-      }
-    ],
-    "name": "setPause",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

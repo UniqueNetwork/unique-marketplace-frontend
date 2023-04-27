@@ -53,10 +53,9 @@ class MarketController extends BaseController implements IMarketController {
     if (!isAllowed) throw new Error('Token not approved for sale');
 
     const value = (await this.getOrder(collectionId, tokenId)).price; // order.value
-    console.log(value.hex);
-    console.log('value', BigInt(value.hex), 'to string', BigInt(value.hex).toString());
     const adapter = this.getAdapter(account.account);
-    await adapter.buy(from, collectionId, tokenId, 5, amount, account.signer);
+    console.log('buying with value', value);
+    await adapter.buy(from, collectionId, tokenId, value, amount, account.signer);
   }
 
   async cancelFix(collectionId: number, tokenId: number, amount: number, options: TransactionOptions): Promise<void> {
