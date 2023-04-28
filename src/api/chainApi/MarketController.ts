@@ -5,7 +5,6 @@ import { NetworkOptions } from '../sdk/sdkClient';
 import IMarketController from './controllers/base/IMarketController';
 import { TransactionOptions } from './types';
 import BaseController from './controllers/BaseController';
-import { AllBalancesResponse } from '@unique-nft/sdk';
 import { MarketAccountBalance } from 'account/AccountContext';
 
 class MarketController extends BaseController implements IMarketController {
@@ -54,8 +53,7 @@ class MarketController extends BaseController implements IMarketController {
 
     const value = (await this.getOrder(collectionId, tokenId)).price; // order.value
     const adapter = this.getAdapter(account.account);
-    console.log('buying with value', value);
-    await adapter.buy(from, collectionId, tokenId, value, amount, account.signer);
+    await adapter.buy(from, collectionId, tokenId, parseInt(value.hex, 16), amount, account.signer);
   }
 
   async cancelFix(collectionId: number, tokenId: number, amount: number, options: TransactionOptions): Promise<void> {
