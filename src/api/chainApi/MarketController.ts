@@ -1,11 +1,12 @@
 import { BN } from '@polkadot/util';
+import { MarketAccountBalance } from 'account/AccountContext';
+import { Address, CrossAccountId } from '@unique-nft/utils';
 import marketplaceAbi from './contracts/marketplace-0.json';
 import { NetworkOptions } from '../sdk/sdkClient';
 
 import IMarketController from './controllers/base/IMarketController';
 import { TransactionOptions } from './types';
 import BaseController from './controllers/BaseController';
-import { MarketAccountBalance } from 'account/AccountContext';
 
 class MarketController extends BaseController implements IMarketController {
   contractAddress: string;
@@ -36,24 +37,36 @@ class MarketController extends BaseController implements IMarketController {
     if (newAllowance.isAllowed !== targetAllowance) throw new Error('Allowance change failed');
   }
 
+  /**
+   *
+   * @param collectionId
+   * @param tokenId
+   * @param price - human format (ex. 1.25, not 125000000000000000)
+   * @param amount - amount of fractions, 1 for NFT
+   * @param param4 - signer and extras
+   */
   async sellFix(collectionId: number, tokenId: number, price: number, amount: number, { account }: TransactionOptions): Promise<void> {
-    const from = account.address;
+    const from = Address.extract.ethCrossAccountId(account.address);
     const to = this.contractAddress;
-    const isAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from, to });
-    if (!isAllowed) throw new Error('Token not approved for sale');
+    const isAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from: account.address, to });
+    if (!isAllowed.isAllowed) throw new Error('Token not approved for sale');
     const adapter = this.getAdapter(account.account);
-    await adapter.sell(from, collectionId, tokenId, price, amount, account.signer);
+    // chain format from human format: 1.25 -> 1250000000000000000
+    const priceWithDecimals = (price * (10 ** this.decimals)).toString();
+    await adapter.sell(from, collectionId, tokenId, priceWithDecimals, amount, account.signer);
   }
 
   async buyFix(collectionId: number, tokenId: number, amount: number, { account }: TransactionOptions): Promise<void> {
-    const from = account.address;
-    const to = this.contractAddress;
-    const isAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from, to });
-    if (!isAllowed) throw new Error('Token not approved for sale');
+    const to = Address.extract.ethCrossAccountId(account.address);
 
-    const value = (await this.getOrder(collectionId, tokenId)).price; // order.value
+    const order = (await this.getOrder(collectionId, tokenId));
+    const value = order.price; // order.value
+    const seller = order.seller as CrossAccountId;
+    console.log('seller', seller); // TODO: recheck allowance? If so - which out of two accounts
+    // const isAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from: seller.eth, to });
+    // if (!isAllowed.isAllowed) throw new Error('Token not approved for sale');
     const adapter = this.getAdapter(account.account);
-    await adapter.buy(from, collectionId, tokenId, parseInt(value.hex, 16), amount, account.signer);
+    await adapter.buy(to, collectionId, tokenId, value, amount, account.signer);
   }
 
   async cancelFix(collectionId: number, tokenId: number, amount: number, options: TransactionOptions): Promise<void> {

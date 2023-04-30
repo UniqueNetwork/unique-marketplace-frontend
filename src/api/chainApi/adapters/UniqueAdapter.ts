@@ -1,4 +1,5 @@
 import { Sdk, Signer } from '@unique-nft/sdk/full';
+import { EthCrossAccountId } from '@unique-nft/utils';
 import IMarketContractAdapter from './IMarketContractAdapter';
 
 import marketplaceAbi from '../contracts/marketplace-0.json';
@@ -34,30 +35,35 @@ class UniqueAdapter implements IMarketContractAdapter {
     await this.uniqueSdk.token.approve.submitWaitResult({ collectionId, tokenId, spender: to, address: from, isApprove: targetAllowance }, { signer });
   }
 
-  async sell(from: string, collectionId: number, tokenId: number, price: number, amount: number, signer: Signer): Promise<void> {
+  async sell(from: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<void> {
     await this.uniqueSdk.evm.send.submitWaitResult({
       abi: marketplaceAbi as any,
-      address: from,
+      address: signer.address,
       contractAddress: this.contractAddress,
       funcName: 'put',
       args: {
         collectionId,
         tokenId,
         price,
-        amount
+        amount,
+        seller: from
       }
-      // args: [collectionId, tokenId, price, amount]
     }, { signer });
   }
 
-  async buy(from: string, collectionId: number, tokenId: number, value: number, amount: number, signer: Signer): Promise<void> {
+  async buy(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<void> {
     await this.uniqueSdk.evm.send.submitWaitResult({
       abi: marketplaceAbi as any,
-      address: from,
+      address: signer.address,
       contractAddress: this.contractAddress,
-      value: value,
+      value: price,
       funcName: 'buy',
-      args: [collectionId, tokenId, amount, undefined, from] as any // TODO: fix after sdk update
+      args: {
+        collectionId,
+        tokenId,
+        amount,
+        buyer: to
+      }
     }, { signer });
   }
 }

@@ -1,5 +1,5 @@
 import { UniqueFungibleFactory, UniqueNFTFactory } from '@unique-nft/solidity-interfaces';
-import { Address } from '@unique-nft/utils';
+import { Address, EthCrossAccountId } from '@unique-nft/utils';
 import { ethers, Signer } from 'ethers';
 import IMarketContractAdapter from './IMarketContractAdapter';
 
@@ -37,14 +37,15 @@ class MetamaskAdapter implements IMarketContractAdapter {
     await (await nftFactory.approve(targetTo, tokenId)).wait();
   }
 
-  async sell(from: string, collectionId: number, tokenId: number, price: number, amount: number, signer: Signer): Promise<void> {
+  async sell(from: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<void> {
     const contract = this.getContract(signer);
-    await (await contract.put(collectionId, tokenId, price, amount, { gasLimit: 10000000 })).wait();
+    await (await contract.put(collectionId, tokenId, price, amount, from, { gasLimit: 10000000 })).wait();
   }
 
-  async buy(from: string, collectionId: number, tokenId: number, price: number, amount: number, signer: Signer): Promise<void> {
+  async buy(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<void> {
+    console.log('buying metamask for: ', price);
     const contract = this.getContract(signer);
-    await (await contract.buy(collectionId, tokenId, amount, from, 0, { gasLimit: 10000000, value: ethers.utils.parseEther(price.toString()) })).wait();
+    await (await contract.buy(collectionId, tokenId, amount, to, { gasLimit: 10000000, value: price }).wait());
   }
 }
 
