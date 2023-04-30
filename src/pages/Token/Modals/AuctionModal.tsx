@@ -43,13 +43,13 @@ export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosabl
   return null;
 };
 
-const chainOptions = [{ id: 'KSM', title: 'KSM', iconRight: { size: 18, name: 'chain-kusama' } }];
+const chainOptions = [{ id: 'KSM', title: '!!!OLD_KSM!!!', iconRight: { size: 18, name: 'chain-kusama' } }];
 
 export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceABid): void, testid: string}> = ({ offer, onConfirmPlaceABid, testid }) => {
+  const { api, settings } = useApi();
   const [chain, setChain] = useState<string | undefined>('KSM');
   const { kusamaFee, getFee } = useFee();
   const { selectedAccount } = useAccounts();
-  const { api, settings } = useApi();
   const [calculatedBid, setCalculatedBid] = useState<TCalculatedBid>();
   const [isFetchingCalculatedbid, setIsFetchingCalculatedBid] = useState<boolean>(true);
   const { getCalculatedBid } = useAuction();

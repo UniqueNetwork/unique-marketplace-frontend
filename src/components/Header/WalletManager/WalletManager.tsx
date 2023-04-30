@@ -19,8 +19,6 @@ import DefaultAvatar from 'static/icons/default-avatar.svg';
 import { TWithdrawBid } from 'api/restApi/auction/types';
 import BalanceSkeleton from '../../Skeleton/BalanceSkeleton';
 
-const tokenSymbol = 'KSM';
-
 const fractionDigits = 4;
 
 function widgetAvatarRender(accountAddress: string) {
@@ -31,7 +29,7 @@ export const WalletManager: FC = () => {
   const { selectedAccount, accounts, isLoading, changeAccount } = useAccounts();
   const [isOpen, setIsOpen] = useState(false);
   const [isGetKsmOpened, setIsGetKsmOpened] = useState(false);
-  const { chainData, settings, currentChainId, onChangeChainId, api } = useApi();
+  const { chainProperties, settings, currentChainId, onChangeChainId, api } = useApi();
   const { info } = useNotifications();
   const navigate = useNavigate();
   const decimals = api?.market?.decimals;
@@ -53,8 +51,8 @@ export const WalletManager: FC = () => {
   }, [onChangeChainId]);
 
   const widgetSelectedAccount = useMemo(() => (
-    { name: selectedAccount?.name, address: selectedAccount ? selectedAccount.address || selectedAccount.account.getAddress(chainData?.SS58Prefix) : '', substrateAddress: selectedAccount?.address }
-  ), [selectedAccount, chainData?.SS58Prefix]);
+    { name: selectedAccount?.name, address: selectedAccount ? selectedAccount.address || selectedAccount.account.getAddress(chainProperties?.SS58Prefix) : '', substrateAddress: selectedAccount?.address }
+  ), [selectedAccount, chainProperties?.SS58Prefix]);
 
   const widgetAccountChange = useCallback(({ address }: IAccount) => {
     const account = accounts.find((account) => account.address === address);
@@ -136,7 +134,7 @@ export const WalletManager: FC = () => {
         onManageBalanceClick={onCreateAccountClick}
         onNetworkChange={onNetworkChange}
         selectedAccount={widgetSelectedAccount}
-        symbol={tokenSymbol}
+        symbol={chainProperties?.token || ''}
         avatarRender={widgetAvatarRender}
         onOpenChange={setIsOpen}
       />

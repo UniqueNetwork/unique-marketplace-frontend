@@ -21,14 +21,14 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
   const [isLoadingDeposits, setIsLoadingDeposits] = useState<boolean>(false);
   const [fetchAccountsError, setFetchAccountsError] = useState<string | undefined>();
   const [selectedAccount, setSelectedAccount] = useState<MarketAccount>();
-  const { api, kusamaSdk, baseURL } = useApi();
+  const { api, baseURL } = useApi();
 
   const unsubscribesBalancesChanges = useRef<Record<string, Codec>>({
     // TODO: !!!!!!!!!
   });
   const subscribeBalancesChanges = useCallback(async (accounts: MarketAccount[]) => {
     // TODO: get balance via new rest subscribtions !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  }, [kusamaSdk, setAccounts]);
+  }, []);
 
   const changeAccount = useCallback(async (account: MarketAccount) => {
     if (!api?.market) return;

@@ -12,13 +12,11 @@ interface AccountLinkProps {
 }
 
 const AccountLink: FC<AccountLinkProps> = ({ accountAddress, testid }) => {
-  const { chainData, currentChainId } = useApi();
-
-  console.log(chainData);
+  const { chainProperties, currentChainId } = useApi();
 
   const formatAddress = useCallback((address: string) => {
-    return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
-  }, [chainData?.SS58Prefix]);
+    return toChainFormatAddress(address, chainProperties?.SS58Prefix || 0);
+  }, [chainProperties?.SS58Prefix]);
 
   return (
     <Link

@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { keyring } from '@polkadot/ui-keyring';
+import { ChainPropertiesResponse } from '@unique-nft/sdk';
 import { useNotifications } from 'components/UI';
+import { keyring } from '@polkadot/ui-keyring';
+
 import { ApiContextProps, ApiProvider } from './ApiContext';
 // import AuctionSocketProvider from './restApi/auction/AuctionSocketProvider';
 import { Settings } from './restApi/settings/types';
@@ -25,6 +27,7 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
   const navigate = useNavigate();
   const [availableNetworkOptions, setAvailableNetworkOptions] = useState<NetworkOptions[]>();
   const [settings, setSettings] = useState<Settings>();
+  const [chainProperties, setChainProperties] = useState<ChainPropertiesResponse>();
   const [currentChainId, setCurrentChainId] = useState<string>(initialChainId);
   const { error } = useNotifications();
   const { fetchSettings } = useSettings();
@@ -33,16 +36,16 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
     (async () => {
       const settings = await fetchSettings(config.blockchains);
       const networkOptions = settings.map<NetworkOptions>(({ networkId, settings }) => ({ networkId, settings }));
+      console.log('networkOptions', networkOptions);
       setAvailableNetworkOptions(networkOptions);
       // TODO: setup current chain properly from localStorage/url
       const currentNetworkOption = networkOptions.find((no) => no.networkId === currentChainId) || networkOptions[0];
 
-      // TODO: REMOVE THIS LINE: DEBUG PURPOSES ONLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      // currentNetworkOption.settings.blockchain.unique.contracts = [{ address: '0xbf198C5168E6BA2ef9E58e3d674d7F7eB2DfC96e' }];
-
       setSettings(currentNetworkOption.settings);
 
-      setSdkClient(new SdkClient(currentNetworkOption));
+      const sdkClient = new SdkClient(currentNetworkOption);
+      setSdkClient(sdkClient);
+      setChainProperties(await sdkClient.sdk.common.chainProperties());
 
       setRpcClientInitialized(true);
     })().then(() => {
@@ -98,8 +101,12 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
   }, [currentChainId, sdkClient?.isReady]);
 
   // TODO: !!! GET CHAIN PREFIXES EITHER FROM BE OR CALCULATE VIA SDK !!! !!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  const prefixes = useMemo(() => Object.values(availableNetworkOptions || []).map(() => 255),
-    [isRpcClientInitialized]
+  const prefixes = useMemo(() => {
+    const prefixes = [255];
+    if (chainProperties?.SS58Prefix) prefixes.push(chainProperties.SS58Prefix);
+    return prefixes;
+  },
+    [chainProperties]
   );
 
   // get context value for ApiContext
@@ -112,7 +119,7 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
           market: sdkClient.marketController
         }
         : undefined),
-      // chainData: currentChain?.uniqueProperties, // TODO: chain properties are required
+      chainProperties,
       baseURL: config.blockchains[currentChainId]?.apiEndpoint || '',
       featuredCollections: settings?.blockchain.unique.collections || {},
       refetchSettings,
@@ -121,7 +128,7 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
       currentChainId,
       onChangeChainId
     }),
-    [isRpcClientInitialized, currentChain, settings, currentChainId, prefixes, onChangeChainId, refetchSettings, sdkClient]
+    [isRpcClientInitialized, currentChain, settings, currentChainId, prefixes, onChangeChainId, refetchSettings, chainProperties, sdkClient]
   );
 
   return (

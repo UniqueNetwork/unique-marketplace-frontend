@@ -7,7 +7,7 @@ import AccountContext from 'account/AccountContext';
 import { getSuri, PairType } from 'utils/seedUtils';
 
 export const useAccounts = () => {
-  const { api, kusamaSdk, chainData } = useApi();
+  const { api, chainProperties } = useApi();
   const {
     accounts,
     selectedAccount,
@@ -27,9 +27,9 @@ export const useAccounts = () => {
   }, [accounts, setSelectedAccount, selectedAccount, api]);
 
   const addLocalAccount = useCallback((seed: string, derivePath: string, name: string, password: string, pairType: PairType) => {
-    const options = { genesisHash: chainData?.genesisHash, isHardware: false, name: name.trim(), tags: [] };
+    const options = { genesisHash: chainProperties?.genesisHash, isHardware: false, name: name.trim(), tags: [] };
     keyring.addUri(getSuri(seed, derivePath, pairType), password, options, pairType as KeypairType);
-  }, [kusamaSdk]);
+  }, [chainProperties]);
 
   const addAccountViaQR = useCallback((scanned: { name: string, isAddress: boolean, content: string, password: string, genesisHash: string}) => {
     const { name, isAddress, content, password, genesisHash } = scanned;
@@ -40,7 +40,7 @@ export const useAccounts = () => {
     };
     if (isAddress) keyring.addExternal(content, meta);
     else keyring.addUri(content, password, meta, 'sr25519');
-  }, [kusamaSdk]);
+  }, []);
 
   const deleteLocalAccount = useCallback((address: string) => {
       keyring.forgetAccount(address);

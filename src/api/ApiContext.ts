@@ -13,9 +13,8 @@ type Api = {
 
 export type ApiContextProps = {
   api: Api | undefined
+  chainProperties?: ChainPropertiesResponse
   uniqueSdk?: Sdk
-  kusamaSdk?: Sdk
-  chainData?: ChainPropertiesResponse
   settings?: Settings
   featuredCollections: AllowedCollections // shortcut from settings
   currentChainId?: string

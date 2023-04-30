@@ -21,8 +21,6 @@ import { TTransferFunds } from './types';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { MarketAccount as Account } from 'account/AccountContext';
 
-const tokenSymbol = 'KSM';
-
 export type TransferFundsModalProps = {
   isVisible: boolean
   senderAddress?: string
@@ -79,12 +77,12 @@ type AskSendFundsModalProps = {
 }
 
 export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, onFinish, senderAddress, onClose, testid }) => {
+  const { chainProperties, api, prefixes } = useApi();
   const { accounts, selectedAccount } = useAccounts();
   const [sender, setSender] = useState<Account>();
   const [recipientAddress, setRecipientAddress] = useState<string | Account | undefined>();
   const [isValidRecipientAddress, setIsValidRecipientAddress] = useState(true);
   const [amount, setAmount] = useState<string>('');
-  const { chainData, api, prefixes } = useApi();
   const [kusamaFee, setKusamaFee] = useState('0');
   const [isFeeLoading, setIsFeeLoading] = useState(false);
   const deviceSize = useDeviceSize();
@@ -111,8 +109,8 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   }, [api?.market, selectedAccount]);
 
   const formatAddress = useCallback((address: string) => {
-    return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
-  }, [chainData?.SS58Prefix]);
+    return toChainFormatAddress(address, chainProperties?.SS58Prefix || 0);
+  }, [chainProperties?.SS58Prefix]);
 
   const accountsWithQuartzAddresses = useMemo(() => (
     accounts.map((account) => ({ ...account, quartzAddress: formatAddress(account.address) }))
@@ -185,6 +183,8 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     setSender(value as unknown as Account);
   }, []);
 
+  const tokenSymbol = useMemo(() => chainProperties?.token || '', [chainProperties]);
+
   return (<Modal isVisible={isVisible} isClosable={true} onClose={onCloseModal}>
     <Content>
       <Heading size='2' testid={`${testid}-heading`}>{'Send funds'}</Heading>
@@ -251,7 +251,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
       <NumberInput
         value={amount}
         onChange={onAmountChange}
-        placeholder={'Amount (KSM)'}
+        placeholder={`Amount (${tokenSymbol})`}
         testid={`${testid}-amount-input`}
       />
     </AmountInputWrapper>
@@ -326,7 +326,7 @@ const KusamaFeeMessage: FC<KusamaFeeMessageProps> = ({ isFeeLoading, kusamaFee, 
       >
         {isFeeLoading
           ? <Loader label='Loading fee...' />
-          : <>A fee of {kusamaFee === '0' ? 'some' : `~ ${kusamaFee}`} KSM can be applied to the transaction, unless the transaction is sponsored</>}
+          : <>A fee of {kusamaFee === '0' ? 'some' : `~ ${kusamaFee}`} !!!OLD_KSM!!! can be applied to the transaction, unless the transaction is sponsored</>}
       </Text>
     </KusamaFeeMessageWrapper>
   );

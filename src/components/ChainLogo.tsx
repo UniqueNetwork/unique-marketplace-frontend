@@ -29,15 +29,15 @@ function ChainLogo({
   withoutHl,
   size = 32
 }: Props): React.ReactElement<Props> {
-  const { chainData } = useApi();
+  const { chainProperties } = useApi();
 
   const [isEmpty, img] = useMemo((): [boolean, string] => {
     const found = logo
       ? namedLogos[logo]
-      : chainLogos[sanitize(nameByPrefix[chainData?.SS58Prefix || 42])];
+      : chainLogos[sanitize(nameByPrefix[chainProperties?.SS58Prefix || 42])];
 
     return [!found || logo === 'empty', (found || emptyLogos.empty) as string];
-  }, [logo, chainData?.SS58Prefix]);
+  }, [logo, chainProperties?.SS58Prefix]);
 
   return (
     <img
