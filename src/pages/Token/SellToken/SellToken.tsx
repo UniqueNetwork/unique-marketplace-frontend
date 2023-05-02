@@ -28,7 +28,7 @@ export const SellToken: FC<SellTokenProps> = ({ offer, isAllowed, onSellClick, o
   if (offer) {
     return (<>
       <Text size={'l'}>{'Price'}</Text>
-      <Price testid={testid} price={offer.price.raw} />
+      <Price testid={testid} price={offer.price.parsed.toString()} />
       <ButtonWrapper>
         <Button
           title={'Delist'}

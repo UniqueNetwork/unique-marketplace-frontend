@@ -35,7 +35,7 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy, testid }) => {
 
   return (<>
     <Text size={'l'}>Price</Text>
-    <Price price={offer?.price?.raw} />
+    <Price price={offer?.price?.parsed.toString()} />
     <ButtonWrapper>
       <Button
         onClick={onBuyClick}

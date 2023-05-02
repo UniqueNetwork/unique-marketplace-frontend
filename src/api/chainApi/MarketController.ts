@@ -61,7 +61,7 @@ class MarketController extends BaseController implements IMarketController {
 
     const order = (await this.getOrder(collectionId, tokenId));
     const value = order.price; // order.value
-    const seller = order.seller as CrossAccountId;
+    const seller = order.seller[0] as CrossAccountId;
     console.log('seller', seller); // TODO: recheck allowance? If so - which out of two accounts
     // const isAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from: seller.eth, to });
     // if (!isAllowed.isAllowed) throw new Error('Token not approved for sale');
