@@ -1,5 +1,5 @@
 import { MetamaskAccount } from '@unique-nft/accounts/metamask';
-import { Sdk } from '@unique-nft/sdk';
+import { Sdk } from '@unique-nft/sdk/full';
 import { NetworkOptions } from 'api/sdk/sdkClient';
 import { Account } from '@unique-nft/accounts';
 import IMarketContractAdapter from '../adapters/IMarketContractAdapter';

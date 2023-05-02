@@ -3,37 +3,34 @@ import { Heading } from '@unique-nft/ui-kit';
 import { Text, useNotifications, Button } from 'components/UI';
 import styled from 'styled-components/macro';
 
-import { useAdminCollections } from 'api/restApi/admin/collection';
-import { CollectionData } from 'api/restApi/admin/types';
+import { MyCollection } from 'api/restApi/collections/types';
 import { useApi } from 'hooks/useApi';
 import { CollectionCover } from 'components/CollectionCover/CollectionCover';
 import { SelectInput } from 'components/SelectInput/SelectInput';
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
 import { BlueGrey100 } from 'styles/colors';
+import { useAccounts } from 'hooks/useAccounts';
 import { useCollections } from 'hooks/useCollections';
 
-export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) => {
-  const [selectedCollection, setSelectedCollection] = useState<CollectionData | string | undefined>();
-  const { appendCollection, collections, fetchCollections } = useAdminCollections();
-  const [collectionItems, setCollectionItems] = useState<CollectionData[]>([]);
+export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish, collection }) => {
+  const { selectedAccount } = useAccounts();
+  const [selectedCollection, setSelectedCollection] = useState<MyCollection | string | undefined>(collection);
+  const { appendCollection, collections, fetchCollections } = useCollections();
+  const [collectionItems, setCollectionItems] = useState<MyCollection[]>([]);
   const { api } = useApi();
-  const { getCollection } = useCollections();
   const { info, error } = useNotifications();
 
   useEffect(() => {
-    void fetchCollections();
+    if (!selectedAccount) return;
+    void fetchCollections(selectedAccount);
   }, []);
-
-  useEffect(() => {
-    setCollectionItems(collections.filter(({ status }) => status === 'Disabled'));
-  }, [collections]);
 
   const onConfirmClick = useCallback(async () => {
     if (!selectedCollection) return;
     const collectionId = typeof selectedCollection === 'string' ? Number(selectedCollection) : selectedCollection.id;
-    if (collections.find(({ id }) => id.toString() === collectionId.toString())?.status === 'Enabled') {
+    if (collections.find(({ id, isMarketable }) => id.toString() === collectionId.toString() && isMarketable)) {
       error(
-        `Collection [ID ${collectionId}] has already enabled`,
+        `Collection [ID ${collectionId}] is already enabled`,
         { name: 'warning', size: 16, color: 'var(--color-additional-light)' }
       );
       return;
@@ -47,23 +44,22 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
     onFinish();
   }, [selectedCollection, collections]);
 
-  const findCollection = useCallback(async (collection: string) => {
-    if (!api?.collection) return;
-    const collectionData = await getCollection(Number(collection));
-
-    setCollectionItems([
-      ...(collectionData && collectionData.tokenPrefix ? [collectionData] : []),
-      ...collections.filter(({ id, status }) => status === 'Disabled' && id.toString().includes(collection) && id !== collectionData?.id)
-    ]);
+  const findCollection = useCallback((searchString: string) => {
+    const collectionData = collections
+      .filter((myCollection) =>
+        myCollection.id.toString().includes(searchString) ||
+        myCollection.name.includes(searchString) ||
+        myCollection.tokenPrefix.includes(searchString));
+    setCollectionItems(collectionData);
   }, [api, collections]);
 
-  const onChangeSelectedCollection = useCallback((collection: CollectionData | string) => {
+  const onChangeSelectedCollection = useCallback((collection: MyCollection | string) => {
     if (typeof collection === 'string') {
       if (!/^\d{0,9}$/.test(collection) && collection !== '') return;
 
       void findCollection(collection);
     }
-    setSelectedCollection(collection as unknown as CollectionData);
+    setSelectedCollection(collection as unknown as MyCollection);
   }, [findCollection]);
 
   return (<>
@@ -71,7 +67,7 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
       <Heading size='2'>Add collection</Heading>
     </Content>
     <SelectWrapper>
-      <SelectInput<CollectionData>
+      <SelectInput<MyCollection>
         isClearable
         placeholder='Search by id'
         options={collectionItems}
@@ -79,7 +75,7 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
         leftIcon={{ name: 'magnify', size: 16 }}
         onChange={onChangeSelectedCollection}
         renderOption={(option) => <CollectionOption>
-          <CollectionCover src={option.schema?.coverPicture.fullUrl || ''} size={24} type={'circle'} />
+          <CollectionCover src={option.cover || ''} size={24} type={'circle'} />
           <Text>{`${option?.name} [ID ${option?.id}]`}</Text>
         </CollectionOption>}
       />
@@ -87,7 +83,7 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
     {selectedCollection && typeof selectedCollection !== 'string' && <>
       <Text size={'m'}>You have selected collection</Text>
       <CollectionNameStyled>
-        <CollectionCover src={selectedCollection.schema?.coverPicture.fullUrl || ''} size={24} type={'circle'} />
+        <CollectionCover src={selectedCollection.cover || ''} size={24} type={'circle'} />
         <Text>{`${selectedCollection?.name} [ID ${selectedCollection?.id}]`}</Text>
       </CollectionNameStyled>
     </>}

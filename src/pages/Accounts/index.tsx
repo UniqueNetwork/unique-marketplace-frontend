@@ -54,7 +54,7 @@ export const AccountsPage = () => {
   const [selectedAddress, setSelectedAddress] = useState<string>();
   const [isDropdownOpened, setIsDropdownOpened] = useState(false);
   const deviceSize = useDeviceSize();
-  const { chainData, currentChainId } = useApi();
+  const { chainProperties, currentChainId } = useApi();
 
   useEffect(() => {
     void updateAccountsDeposits();
@@ -67,8 +67,8 @@ export const AccountsPage = () => {
   }, [currentChainId]);
 
   const formatAddress = useCallback((address: string) => {
-    return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
-  }, [chainData?.SS58Prefix]);
+    return toChainFormatAddress(address, chainProperties?.SS58Prefix || 0);
+  }, [chainProperties?.SS58Prefix]);
 
   const onActionClick = useCallback((modal: AccountModal) => () => {
     setCurrentModal(modal);
@@ -90,11 +90,7 @@ export const AccountsPage = () => {
 
   const filteredAccounts: AccountInfo[] = useMemo(() => {
     const reduceAccounts = (acc: AccountInfo[], account: Account) => {
-      acc.push({
-        address: account.address,
-        name: account.name || '',
-        balance: account.balance
-      });
+      acc.push(account);
       if (!account.deposits) return acc;
 
       const { sponsorshipFee, bids } = account.deposits;
@@ -106,17 +102,14 @@ export const AccountsPage = () => {
         // add row with deposit info only on big screens
         if (deviceSize !== DeviceSize.sm) {
           acc.push({
-            address: account.address,
-            name: account.name || '',
+            ...account,
             deposit: (sponsorshipFee || new BN(0))
               .add(withdraw.reduce(getTotalAmount, new BN(0)))
               .add(leader.reduce(getTotalAmount, new BN(0)))
           });
         } else {
           acc[acc.length - 1] = {
-            address: account.address,
-            name: account.name || '',
-            balance: account.balance,
+            ...account,
             deposit: (sponsorshipFee || new BN(0))
               .add(withdraw.reduce(getTotalAmount, new BN(0)))
               .add(leader.reduce(getTotalAmount, new BN(0)))

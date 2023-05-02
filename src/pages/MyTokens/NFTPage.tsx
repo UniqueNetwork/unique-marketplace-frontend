@@ -52,7 +52,7 @@ const sortingOptions: TOption[] = [
   },
   {
     direction: 'desc',
-    field: 'price',
+    field: 'price', // TODO: now is object
     iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
     id: 'desc(Price)',
     title: 'Price'
@@ -96,7 +96,7 @@ export const NFTPage = () => {
   const [tokens, setTokens] = useState<TokenByIdResponse[]>([]);
   const [isFetchingTokens, setIsFetchingTokens] = useState<boolean>(true);
   const deviceSize = useDeviceSize();
-  const { collections } = useCollections();
+  const { featuredCollections } = useCollections();
 
   const { offers, isFetching: isFetchingOffers, fetch } = useOffers();
   const { api, currentChainId } = useApi();
@@ -123,8 +123,8 @@ export const NFTPage = () => {
 
   const myCollections = useMemo(() => {
     const myTokensCollectionIds = [...tokens, ...offers].map((token) => token.collectionId);
-    return collections.filter((collection) => myTokensCollectionIds.includes(collection.id));
-  }, [collections, tokens, offers]);
+    return featuredCollections.filter((collection) => myTokensCollectionIds.includes(collection.id));
+  }, [featuredCollections, tokens, offers]);
 
   useEffect(() => {
     if (isFetchingTokens) return;
@@ -176,10 +176,10 @@ export const NFTPage = () => {
 
       let filteredByPrice = true;
       if (prices?.minPrice || prices?.maxPrice) {
-        if (!token.price) {
+        if (!token.price?.raw) {
           filteredByPrice = false;
         } else {
-          const tokenPrice = new BN(token.price);
+          const tokenPrice = new BN(token?.price.raw);
           const minPrice = new BN(fromStringToBnString(prices.minPrice || '0', api?.market?.decimals));
           const maxPrice = prices.maxPrice ? new BN(fromStringToBnString(prices.maxPrice, api?.market?.decimals)) : BN_MAX_INTEGER;
           filteredByPrice = (tokenPrice.gte(minPrice) && tokenPrice.lte(maxPrice));
@@ -206,14 +206,14 @@ export const NFTPage = () => {
         filteredBySearchValue = token.tokenId === Number(searchString) ||
           tokenPrefix?.includes(searchString.toLowerCase()) || // offer
           collectionName?.includes(searchString.toLowerCase()) || // offer
-          collections.some(({ id, name, tokenPrefix }) => { // token
+          featuredCollections.some(({ id, name, tokenPrefix }) => { // token
             return id === token.collectionId && `${name || ''} ${tokenPrefix || ''}`.toLowerCase().includes(searchString.toLowerCase());
           });
       }
 
       return filterByStatus(token) && filteredByPrice && filteredByCollections && filteredByAttributes && filteredBySearchValue;
     },
-    [filterState, searchString, collections, api?.market?.decimals]
+    [filterState, searchString, featuredCollections, api?.market?.decimals]
   );
 
   const filterByAttributeCounts = useCallback((token: MixedTokenAndOffer) => {

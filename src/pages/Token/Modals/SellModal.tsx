@@ -1,8 +1,12 @@
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+
 import { Heading, Link } from '@unique-nft/ui-kit';
-import { Tabs, Select, useNotifications, Button } from 'components/UI';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import { Tabs, Select, useNotifications, Button } from 'components/UI';
+import { NumberInput } from 'components/NumberInput/NumberInput';
 import styled from 'styled-components';
+
+import { useApi } from 'hooks/useApi';
 
 import DefaultMarketStages from './StagesModal';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
@@ -10,9 +14,6 @@ import { TAuctionProps, TFixPriceProps } from './types';
 import { useAuctionSellStages, useSellFixStages } from '../../../hooks/marketplaceStages';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { StageStatus } from '../../../types/StagesTypes';
-import { NumberInput } from 'components/NumberInput/NumberInput';
-
-const tokenSymbol = 'KSM';
 
 export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, collection, onFinish, setIsClosable, testid }) => {
   const { collectionId, tokenId } = token || {};
@@ -67,6 +68,7 @@ type TAskSellModalProps = {
 }
 
 export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixPrice, testid }) => {
+  const { chainProperties } = useApi();
   const { selectedAccount } = useAccounts();
   const [activeTab, setActiveTab] = useState<number>(0);
   const [priceInputValue, setPriceInputValue] = useState<string>();
@@ -120,6 +122,8 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
       setDurationSelectValue(Number(value.id));
     }, [setDurationSelectValue]
   );
+
+  const tokenSymbol = useMemo(() => chainProperties?.token || '', [chainProperties]);
 
   const durationOptions: SelectOptionProps[] = [
     {

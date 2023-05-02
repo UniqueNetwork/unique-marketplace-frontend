@@ -1,25 +1,28 @@
+import MarketController from 'api/chainApi/MarketController';
+import { Sdk } from '@unique-nft/sdk/full';
+
 import { Settings } from '../restApi/settings/types';
 import { UniqueSDKNFTController } from '../chainApi/NFTController';
 import { UniqueSDKCollectionController } from '../chainApi/collectionController';
-import { DecodedInfixOrUrlOrCidAndHash } from '../chainApi/types';
-import MarketController from 'api/chainApi/MarketController';
 
-declare module '@unique-nft/sdk' {
-  export interface TokenByIdResponse {
-    image: DecodedInfixOrUrlOrCidAndHash
-    video?: DecodedInfixOrUrlOrCidAndHash
-  }
-}
+// declare module '@unique-nft/sdk' {
+//   export interface TokenByIdResponse {
+//     image: DecodedInfixOrUrlOrCidAndHash
+//     video?: DecodedInfixOrUrlOrCidAndHash
+//   }
+// }
 
 export interface NetworkOptions { networkId: string, settings: Settings }
 
 export class SdkClient {
   public isReady = false;
+  public sdk: Sdk;
   public nftController: UniqueSDKNFTController;
   public collectionController: UniqueSDKCollectionController;
   public marketController: MarketController;
 
   constructor(options: NetworkOptions) {
+    this.sdk = new Sdk({ baseUrl: options.settings.blockchain.unique.restUrl });
     this.marketController = new MarketController(options);
     this.collectionController = new UniqueSDKCollectionController(options);
     this.nftController = new UniqueSDKNFTController(options);

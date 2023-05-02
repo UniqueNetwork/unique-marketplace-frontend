@@ -1,4 +1,5 @@
-import { Sdk, Signer } from '@unique-nft/sdk';
+import { Sdk, Signer } from '@unique-nft/sdk/full';
+import { EthCrossAccountId } from '@unique-nft/utils';
 import IMarketContractAdapter from './IMarketContractAdapter';
 
 import marketplaceAbi from '../contracts/marketplace-0.json';
@@ -13,7 +14,7 @@ class UniqueAdapter implements IMarketContractAdapter {
   protected uniqueSdk: Sdk;
 
   async transferToken(from: string, to: string, collectionId: number, tokenId: number, signer: Signer): Promise<void> {
-    await this.uniqueSdk.tokens.transfer.submitWaitResult({
+    await this.uniqueSdk.token.transfer.submitWaitResult({
       address: from,
       from,
       to,
@@ -31,27 +32,38 @@ class UniqueAdapter implements IMarketContractAdapter {
   }
 
   async changeAllowance(from: string, to: string, collectionId: number, tokenId: number, targetAllowance: boolean, signer: Signer): Promise<void> {
-    await this.uniqueSdk.tokens.approve.submitWaitResult({ collectionId, tokenId, spender: to, address: from, isApprove: targetAllowance }, { signer });
+    await this.uniqueSdk.token.approve.submitWaitResult({ collectionId, tokenId, spender: to, address: from, isApprove: targetAllowance }, { signer });
   }
 
-  async sell(from: string, collectionId: number, tokenId: number, price: number, amount: number, signer: Signer): Promise<void> {
+  async sell(from: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<void> {
     await this.uniqueSdk.evm.send.submitWaitResult({
-      abi: marketplaceAbi,
-      address: from,
+      abi: marketplaceAbi as any,
+      address: signer.address,
       contractAddress: this.contractAddress,
       funcName: 'put',
-      args: [collectionId, tokenId, price, amount] as any // TODO: fix after sdk update
+      args: {
+        collectionId,
+        tokenId,
+        price,
+        amount,
+        seller: from
+      }
     }, { signer });
   }
 
-  async buy(from: string, collectionId: number, tokenId: number, value: number, amount: number, signer: Signer): Promise<void> {
+  async buy(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<void> {
     await this.uniqueSdk.evm.send.submitWaitResult({
-      abi: marketplaceAbi,
-      address: from,
+      abi: marketplaceAbi as any,
+      address: signer.address,
       contractAddress: this.contractAddress,
-      value,
+      value: price,
       funcName: 'buy',
-      args: [collectionId, tokenId, amount] as any // TODO: fix after sdk update
+      args: {
+        collectionId,
+        tokenId,
+        amount,
+        buyer: to
+      }
     }, { signer });
   }
 }

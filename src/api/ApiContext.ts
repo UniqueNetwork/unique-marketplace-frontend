@@ -1,8 +1,8 @@
 import { Context, Consumer, Provider, createContext } from 'react';
-import { Settings } from './restApi/settings/types';
+import { AllowedCollections, Settings } from './restApi/settings/types';
 import { UniqueSDKNFTController } from './chainApi/NFTController';
 import { UniqueSDKCollectionController } from './chainApi/collectionController';
-import { ChainPropertiesResponse, Sdk } from '@unique-nft/sdk';
+import { ChainPropertiesResponse, Sdk } from '@unique-nft/sdk/full';
 import MarketController from './chainApi/MarketController';
 
 type Api = {
@@ -13,14 +13,15 @@ type Api = {
 
 export type ApiContextProps = {
   api: Api | undefined
+  chainProperties?: ChainPropertiesResponse
   uniqueSdk?: Sdk
-  kusamaSdk?: Sdk
-  chainData?: ChainPropertiesResponse
   settings?: Settings
+  featuredCollections: AllowedCollections // shortcut from settings
   currentChainId?: string
   prefixes: number[]
   baseURL: string
   onChangeChainId(chainId: string): void
+  refetchSettings(): Promise<void>
 }
 
 const ApiContext: Context<ApiContextProps> = createContext({} as unknown as ApiContextProps);

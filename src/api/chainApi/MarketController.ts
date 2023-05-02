@@ -1,15 +1,16 @@
 import { BN } from '@polkadot/util';
+import { MarketAccountBalance } from 'account/AccountContext';
+import { Address, CrossAccountId } from '@unique-nft/utils';
 import marketplaceAbi from './contracts/marketplace-0.json';
 import { NetworkOptions } from '../sdk/sdkClient';
 
 import IMarketController from './controllers/base/IMarketController';
 import { TransactionOptions } from './types';
 import BaseController from './controllers/BaseController';
-import { AllBalancesResponse } from '@unique-nft/sdk';
 
 class MarketController extends BaseController implements IMarketController {
   contractAddress: string;
-  public decimals = 12; // TODO: move from controller to API
+  public decimals = 18; // TODO: move from controller to API
 
   constructor(options: NetworkOptions) {
     super(options);
@@ -27,33 +28,48 @@ class MarketController extends BaseController implements IMarketController {
     if (!account) throw new Error('Account not provided');
     const from = account.address;
     const to = this.contractAddress;
-    const isAlreadyAllowed = await this.uniqueSdk.tokens.allowance({ collectionId, tokenId, from, to });
+    const isAlreadyAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from, to });
     if (isAlreadyAllowed.isAllowed === targetAllowance) return;
 
     const adapter = this.getAdapter(account.account);
     await adapter.changeAllowance(from, to, collectionId, tokenId, targetAllowance, account.signer);
+    const newAllowance = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from, to });
+    if (newAllowance.isAllowed !== targetAllowance) throw new Error('Allowance change failed');
   }
 
+  /**
+   *
+   * @param collectionId
+   * @param tokenId
+   * @param price - human format (ex. 1.25, not 125000000000000000)
+   * @param amount - amount of fractions, 1 for NFT
+   * @param param4 - signer and extras
+   */
   async sellFix(collectionId: number, tokenId: number, price: number, amount: number, { account }: TransactionOptions): Promise<void> {
-    const from = account.address;
+    const from = Address.extract.ethCrossAccountId(account.address);
     const to = this.contractAddress;
-    const isAllowed = await this.uniqueSdk.tokens.allowance({ collectionId, tokenId, from, to });
-    if (!isAllowed) throw new Error('Token not approved for sale');
+    const isAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from: account.address, to });
+    if (!isAllowed.isAllowed) throw new Error('Token not approved for sale');
     const adapter = this.getAdapter(account.account);
-    console.log('adapter used:', adapter);
-    console.log('account used', account);
-    await adapter.sell(from, collectionId, tokenId, price, amount, account.signer);
+    // chain format from human format: 1.25 -> 1250000000000000000
+    const priceWithDecimals = (price * (10 ** this.decimals)).toString();
+    await adapter.sell(from, collectionId, tokenId, priceWithDecimals, amount, account.signer);
   }
 
   async buyFix(collectionId: number, tokenId: number, amount: number, { account }: TransactionOptions): Promise<void> {
-    const from = account.address;
-    const to = this.contractAddress;
-    const isAllowed = await this.uniqueSdk.tokens.allowance({ collectionId, tokenId, from, to });
-    if (!isAllowed) throw new Error('Token not approved for sale');
+    const to = Address.extract.ethCrossAccountId(account.address);
 
-    const value = (await this.getOrder(collectionId, tokenId))[3]; // order.value
+    const order = (await this.getOrder(collectionId, tokenId));
+    const value = order.price as { type: string, hex: string }; // { type: BigNumber, hex: '0x000001}
+    const seller = order.seller[0] as CrossAccountId;
+    // console.log('seller', seller); // TODO: recheck allowance? If so - which out of two accounts
+    // const isAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from: seller.eth, to });
+    // if (!isAllowed.isAllowed) throw new Error('Token not approved for sale');
+    if (!value || !value.hex) throw new Error('Order price incorrect');
     const adapter = this.getAdapter(account.account);
-    await adapter.buy(from, collectionId, tokenId, value, amount, account.signer);
+
+    const parsedPrice = BigInt(value.hex).toString();
+    await adapter.buy(to, collectionId, tokenId, parsedPrice, amount, account.signer);
   }
 
   async cancelFix(collectionId: number, tokenId: number, amount: number, options: TransactionOptions): Promise<void> {
@@ -67,11 +83,11 @@ class MarketController extends BaseController implements IMarketController {
     if (!collectionId || !tokenId) throw new Error(`Cant get order for ${collectionId}-${tokenId}`);
     try {
       const res = await this.uniqueSdk.evm.call({
-        abi: marketplaceAbi,
-        address: '5EALag5gFWyjbz9kYV5VNUr7tjg9MrAMg2nZhWwSmAHdaiZp', // TODO: this arg makes no sense, cant skip
+        abi: marketplaceAbi as any,
+        address: '5CSxpZepJj5dxkSBEDnN23pgg6B5X6VFRJ2kyubhb5Svstuu', // TODO: remove after sdk update
         contractAddress: this.contractAddress,
         funcName: 'getOrder',
-        args: [collectionId, tokenId] as any // TODO: ???
+        args: [collectionId, tokenId]
       });
       return res;
     } catch (e) {
@@ -80,8 +96,10 @@ class MarketController extends BaseController implements IMarketController {
     }
   }
 
-  async getAccountBalance(address: string): Promise<AllBalancesResponse> {
-    return await this.uniqueSdk.balance.get({ address });
+  async getAccountBalance(address: string): Promise<MarketAccountBalance> {
+    const balance = await this.uniqueSdk.balance.get({ address });
+    if (!balance) throw new Error('Failed to fetch balance');
+    return { raw: new BN(balance?.freeBalance?.raw || 0), parsed: balance?.freeBalance?.amount || '0' };
   }
 
   // TODO: split into multiple "get fee for method X". Put them in adapters

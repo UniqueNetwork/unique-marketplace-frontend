@@ -53,10 +53,10 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
 
   useEffect(() => {
     if (bundle && bundle[0].isCurrentAccountOwner === isOwner) return;
-    (async () => {
+    void (async () => {
       if (offer && offer.tokenDescription.nestingChildTokens) {
         const bundle: INestingToken = {
-          properties: [],
+          // properties: [],
           ...offer.tokenDescription,
           tokenId: offer.tokenId,
           collectionId: offer.collectionId,

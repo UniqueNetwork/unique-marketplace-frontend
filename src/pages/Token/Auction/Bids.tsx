@@ -35,7 +35,7 @@ const getColumns = (tokenSymbol: string, timeRender: 'Age' | 'Time', onTimeRende
   }
 ]);
 
-const tokenSymbol = 'KSM';
+const tokenSymbol = '!!!OLD_KSM!!!';
 
 interface IBid extends TableRowProps {
   bidValue: string,

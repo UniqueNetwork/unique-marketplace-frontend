@@ -21,9 +21,9 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy, testid }) => {
   const { selectedAccount } = useAccounts();
 
   const isEnoughBalance = useMemo(() => {
-    if (!selectedAccount?.balance?.KSM || selectedAccount.balance.KSM.isZero() || !offer?.price) return false;
-    return selectedAccount.balance.KSM.gte(new BN(offer.price).add(new BN(marketCommission)));
-  }, [offer?.price, selectedAccount?.balance?.KSM, marketCommission]);
+    if (!selectedAccount?.balance?.raw || selectedAccount.balance?.raw.isZero() || !offer?.price?.raw) return false;
+    return selectedAccount.balance?.raw.gte(new BN(offer?.price?.raw).add(new BN(marketCommission)));
+  }, [offer?.price?.raw, selectedAccount?.balance?.raw, marketCommission]);
 
   const onBuyClick = useCallback(() => {
     if (!isEnoughBalance) return;
@@ -35,7 +35,7 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy, testid }) => {
 
   return (<>
     <Text size={'l'}>Price</Text>
-    <Price price={offer.price} />
+    <Price price={offer?.price?.parsed.toString()} />
     <ButtonWrapper>
       <Button
         onClick={onBuyClick}
@@ -46,7 +46,7 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy, testid }) => {
       />
     </ButtonWrapper>
     {!isEnoughBalance && <Text color={'coral-500'} testid={`${testid}-low-balance-warning`}>Your balance is too low to buy</Text>}
-    {offer.tokenDescription.nestingChildTokens?.length && <BuyBundleInformation testid={testid}/>}
+    {!!offer?.tokenDescription?.nestingChildTokens?.length && <BuyBundleInformation testid={testid}/>}
     <Divider />
   </>);
 };

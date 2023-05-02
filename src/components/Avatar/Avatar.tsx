@@ -2,6 +2,7 @@ import { FC } from 'react';
 import Identicon from '@polkadot/react-identicon';
 import styled from 'styled-components';
 import { DecodedInfixOrUrlOrCidAndHash } from 'api/chainApi/types';
+import { Address } from '@unique-nft/utils';
 
 export interface IAvatarProps {
   src?: string | DecodedInfixOrUrlOrCidAndHash;
@@ -24,8 +25,10 @@ export const Avatar: FC<IAvatarProps> = ({
   const videoUrl = typeof video === 'string' ? video : (video?.fullUrl);
 
   if (address) {
+    // Polkadot doesn't degenerate images for ETH address. Therefore - for metamask we will use substrate mirror instead
+    const IdentIconAddress = Address.is.ethereumAddress(address) ? Address.mirror.ethereumToSubstrate(address) : address;
     return <Identicon
-      value={address}
+      value={IdentIconAddress}
       size={size}
     />;
   }

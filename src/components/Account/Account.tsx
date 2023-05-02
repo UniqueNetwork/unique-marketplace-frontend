@@ -26,13 +26,13 @@ const AccountCard: FC<AccountProps> = ({
   hideName = false,
   testid
 }) => {
-  const { chainData } = useApi();
+  const { chainProperties } = useApi();
   const { info } = useNotifications();
 
   const formatAddress = useCallback((address: string) => {
     if (!address) return '';
-    return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
-  }, [chainData?.SS58Prefix]);
+    return toChainFormatAddress(address, chainProperties?.SS58Prefix || 0);
+  }, [chainProperties?.SS58Prefix]);
 
   const onCopyAddress = (account: string) => () => {
     navigator.clipboard.writeText(account).then(() => {

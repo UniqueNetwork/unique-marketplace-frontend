@@ -7,7 +7,7 @@ import { MarketType } from 'types/MarketTypes';
 import { CommonTokenDetail } from './TokenDetail/CommonTokenDetail';
 import { useOffer } from 'api/restApi/offers/offer';
 import { TokenTrading } from './TokenDetail/TokenTrading';
-import { Error404 } from '../errors/404';
+import { Error404 } from '../Errors/404';
 import TokenPageModal from './Modals/TokenPageModal';
 import { PagePaper } from 'components/PagePaper/PagePaper';
 import { useAccounts } from 'hooks/useAccounts';
@@ -48,22 +48,22 @@ const TokenPage = () => {
       console.error('error while fetching token or collection from RPC', e);
     }
     setIsFetchingToken(false);
-  }, [api?.nft, currentChainId, collectionId, id]);
+  }, [api?.nft, currentChainId, collectionId, id, getCollection]);
 
   useEffect(() => {
     if (isFetchingOffer) return;
-    (async () => {
+    void (async () => {
       if (offer) {
         const collection = await getCollection(Number(collectionId));
         if (collection) setCollection(collection);
-        setIsBundle(!!offer.tokenDescription.nestingChildTokens);
+        setIsBundle(!!offer.tokenDescription?.nestingChildTokens);
       }
       if (!token) await fetchToken();
       if (offer || token) {
         setIsFetchingToken(false);
       }
     })();
-  }, [fetchToken, isFetchingOffer, offer, token, collectionId]);
+  }, [fetchToken, isFetchingOffer, offer, token, collectionId, getCollection]);
 
   const onClose = useCallback(() => {
     setMarketType(MarketType.default);
@@ -99,7 +99,7 @@ const TokenPage = () => {
 
     void fetchOffer(Number(collectionId), Number(id));
     void fetchToken();
-  }, [info, fetchOffer, fetchToken, selectedAccount?.address, collectionId, id, token]);
+  }, [info, fetchOffer, fetchToken, selectedAccount?.address, collectionId, id, token, collection]);
 
   const backClickHandler = useCallback(() => {
     // if user opened token page with a direct link, redirect him to /market, otherwise redirect him back
@@ -110,8 +110,9 @@ const TokenPage = () => {
     }
   }, [navigate]);
 
+  // TODO: rework this one
   // if we opened child token from bundle which is on sale
-  const isIgnoreOffer = useMemo(() => (!(!token || !offer || (id === offer.tokenId.toString() && collectionId === offer.collectionId.toString()))), [token, offer]);
+  const isIgnoreOffer = false; // useMemo(() => (!(!token || !offer || (id === offer.tokenId.toString() && collectionId === offer.collectionId.toString()))), [token, offer, collectionId, id]);
 
   const isOwner = useMemo(() => {
     if (!selectedAccount || isFetchingOffer || isFetchingToken) return false;
@@ -122,8 +123,6 @@ const TokenPage = () => {
   }, [isFetchingOffer, isFetchingToken, selectedAccount, token, offer]);
 
   if (!isFetchingOffer && !isFetchingToken && !token && !offer) return <Error404 />;
-
-  // TODO: split into more categories here instead of just "buy/sell" and putting splitting inside them
 
   return (
     <>

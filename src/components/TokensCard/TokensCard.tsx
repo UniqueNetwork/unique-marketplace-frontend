@@ -143,12 +143,12 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
           </Text>
         </UILink>
         {isBundleState && <BundleItemsCount count={tokensCount || 0} testId={testid} />}
-        {price && <PriceWrapper>
+        {price?.parsed && <PriceWrapper>
           <Text
             testid={`${testid}-price`}
             size='s'
-          >{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(price)}` }</Text>
-          <IconStyled name={'chain-kusama'} size={16} />
+          >{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${price.parsed}}` }</Text>
+          <IconStyled name={`chain-${currentChainId}`} size={16} />
           {!auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         </PriceWrapper>}
         {auction && <AuctionInfoWrapper>

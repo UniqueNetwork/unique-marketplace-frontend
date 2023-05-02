@@ -35,9 +35,9 @@ export class UniqueSDKNFTController extends BaseController {
       const collectionId = Number(id);
       try {
         const tokensIds =
-          (await this.uniqueSdk.tokens.accountTokens({ collectionId, address })).tokens || [];
+          (await this.uniqueSdk.token.accountTokens({ collectionId, address })).tokens || [];
         const tokensIdsOnEth =
-          (await this.uniqueSdk.tokens.accountTokens({ collectionId, address: getEthAccount(address) })).tokens || [];
+          (await this.uniqueSdk.token.accountTokens({ collectionId, address: getEthAccount(address) })).tokens || [];
 
         const currentAllowedTokens = this.allowedTokens[collectionId];
         const allowedIds = filterAllowedTokens([...tokensIds, ...tokensIdsOnEth], currentAllowedTokens);
@@ -54,44 +54,44 @@ export class UniqueSDKNFTController extends BaseController {
   }
 
   async getToken(collectionId: number, tokenId: number): Promise<TokenByIdResponse | null> {
-    return await this.uniqueSdk.tokens.get({ collectionId, tokenId }) || null;
+    return await this.uniqueSdk.token.get({ collectionId, tokenId }) || null;
   }
 
   async isBundle(collectionId: number, tokenId: number): Promise<boolean> {
-    return (await this.uniqueSdk.tokens.isBundle({ collectionId, tokenId })).isBundle;
+    return (await this.uniqueSdk.token.isBundle({ collectionId, tokenId })).isBundle;
   }
 
   async getBundle(collectionId: number, tokenId: number): Promise<GetBundleResponse | null> {
-    return await this.uniqueSdk.tokens.getBundle({ collectionId, tokenId }) || null;
+    return await this.uniqueSdk.token.getBundle({ collectionId, tokenId }) || null;
   }
 
   // TODO: fix
   async unnest(collectionId: number, tokenId: number, address: string, options: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
-    const parent = await this.uniqueSdk.tokens.parent({ collectionId, tokenId });
+    const parent = await this.uniqueSdk.token.parent({ collectionId, tokenId });
 
     if (!parent) return;
 
-    const unsignedTxPayload = await this.uniqueSdk.tokens.unnest.build({
+    const unsignedTxPayload = await this.uniqueSdk.token.unnest.build({
       nested: { collectionId, tokenId },
       address
     });
     if (!unsignedTxPayload) throw new Error('Transaction build error');
-    const { signature } = await this.uniqueSdk.tokens.unnest.sign(unsignedTxPayload);
+    const { signature } = await this.uniqueSdk.token.unnest.sign(unsignedTxPayload);
     if (!signature) throw new Error('Signing failed');
-    await this.uniqueSdk.extrinsics.submit({
+    await this.uniqueSdk.extrinsic.submit({
       signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });
   }
 
   async transferToBundle(nested: TokenIdQuery, newParent: TokenIdQuery, { account }: TransactionOptions): Promise<void> {
-    const parent = await this.uniqueSdk.tokens.parent(nested);
+    const parent = await this.uniqueSdk.token.parent(nested);
     if (!parent) return;
     const { collectionId, tokenId } = nested;
     const from = Address.nesting.idsToAddress(parent.collectionId, parent.tokenId);
     const to = Address.nesting.idsToAddress(Number(newParent.collectionId), newParent.tokenId);
-    const unsignedTxPayload = await this.uniqueSdk.extrinsics.build({
+    const unsignedTxPayload = await this.uniqueSdk.extrinsic.build({
       section: 'unique',
       method: 'transferFrom',
       address: account?.address || '',
@@ -106,15 +106,15 @@ export class UniqueSDKNFTController extends BaseController {
       ]
     });
     if (!unsignedTxPayload) throw new Error('Transaction build error');
-    const { signature } = await this.uniqueSdk.extrinsics.sign(unsignedTxPayload, account.account);
+    const { signature } = await this.uniqueSdk.extrinsic.sign(unsignedTxPayload, account.account);
     if (!signature) throw new Error('Signing failed');
-    await this.uniqueSdk.extrinsics.submit({
+    await this.uniqueSdk.extrinsic.submit({
       signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });
   }
 
   async getOwner(collectionId: number, tokenId: number): Promise<TokenOwnerResponse | null> {
-    return await this.uniqueSdk.tokens.owner({ collectionId, tokenId }) || null;
+    return await this.uniqueSdk.token.owner({ collectionId, tokenId }) || null;
   }
 }

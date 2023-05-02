@@ -65,7 +65,7 @@ const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(ne
   const { api } = useApi();
 
   const { offers, fetch } = useOffers();
-  const { collections } = useCollections();
+  const { featuredCollections } = useCollections();
 
   useEffect(() => {
     if (!selectedAccount) return;
@@ -80,8 +80,8 @@ const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(ne
 
   const collectionItems = useMemo(() => {
     const myTokensCollectionIds = [...tokens, ...offers].map((token) => token.collectionId);
-    return collections.filter((collection) => myTokensCollectionIds.includes(collection.id));
-  }, [tokens, offers, collections]);
+    return featuredCollections.filter((collection) => myTokensCollectionIds.includes(collection.id));
+  }, [tokens, offers, featuredCollections]);
 
   const tokenItems: ITokenOption[] = useMemo(() => {
     if (!collection) return [];

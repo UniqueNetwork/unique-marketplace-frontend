@@ -1,5 +1,5 @@
 import { Settings } from '../restApi/settings/types';
-import { Sdk, ChainPropertiesResponse } from '@unique-nft/sdk';
+import Sdk, { ChainPropertiesResponse } from '@unique-nft/sdk';
 
 type SdkSet = { unique: Sdk };
 
@@ -18,6 +18,7 @@ export class SdkNetworkProvider {
   }
 
   async init() {
-    this.uniqueProperties = await this.sdkSet?.unique.chain.properties();
+    this.uniqueProperties = await this.sdkSet?.unique.common.chainProperties()
+    ;
   }
 }

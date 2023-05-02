@@ -4,18 +4,15 @@ import { InternalStage, StageStatus } from '../../types/StagesTypes';
 import { useAccounts } from '../useAccounts';
 import useStages from '../useStages';
 import { TWithdrawBid } from 'api/restApi/auction/types';
-import { BN, stringToHex } from '@polkadot/util';
-import { withdrawChooseBids } from 'api/restApi/auction/auction';
+import { BN } from '@polkadot/util';
 import { formatKusamaBalance } from '../../utils/textUtils';
-
-const tokenSymbol = 'KSM';
 
 export type TWithdrawDeposit = {
   address: string
 };
 
 export const useWithdrawDepositStages = (accountAddress: string, bids: TWithdrawBid[]) => {
-  const { baseURL } = useApi();
+  const { baseURL, chainProperties } = useApi();
   const { accounts } = useAccounts();
 
   const bidsAmount = useMemo(() => bids.reduce<BN>((acc, bid) =>
@@ -23,7 +20,7 @@ export const useWithdrawDepositStages = (accountAddress: string, bids: TWithdraw
 
   const withdrawBidsStage: InternalStage<TWithdrawDeposit>[] = useMemo(() => bids.length > 0
     ? [{
-      title: `Withdraw bids: ${formatKusamaBalance(bidsAmount.toString())} ${tokenSymbol}`,
+      title: `Withdraw bids: ${formatKusamaBalance(bidsAmount.toString())} ${chainProperties?.token}`,
       description: '',
       status: StageStatus.default,
       action: async ({ options }) => {

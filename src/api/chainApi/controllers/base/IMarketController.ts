@@ -1,5 +1,5 @@
 import { BN } from '@polkadot/util';
-import { AllBalancesResponse } from '@unique-nft/sdk';
+import { MarketAccountBalance } from 'account/AccountContext';
 import { TransactionOptions } from 'api/chainApi/types';
 interface IMarketController {
   changeAllowance(collectionId: number, tokenId: number, targetAllowance: boolean, options: TransactionOptions): Promise<void>
@@ -14,7 +14,7 @@ interface IMarketController {
   // TODO: type for order
   getOrder(collectionId: number, tokenId: number): Promise<any>
 
-  getAccountBalance(address: string): Promise<AllBalancesResponse>
+  getAccountBalance(address: string): Promise<MarketAccountBalance>
 
   // TODO: split into "getTransferTokenFee" and "getTransferBalanceFee"
   getFee(sender: string, recipient?: string, value?: BN): Promise<string | null>

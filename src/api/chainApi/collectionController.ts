@@ -33,22 +33,6 @@ export class UniqueSDKCollectionController extends BaseController {
     return await this.uniqueSdk?.collections.get({ collectionId }) || null;
   }
 
-  async getFeaturedCollections(): Promise<CollectionInfoWithSchemaResponse[]> {
-    const collections: Array<CollectionInfoWithSchemaResponse> = [];
-    for (const id in this.allowedCollections) {
-      const collectionId = Number(id);
-      const collectionInf = await this.getCollection(collectionId);
-
-      if (collectionInf &&
-        collectionInf.owner &&
-        collectionInf.owner.toString() !== '5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM' &&
-        !collections.find((collection) => collection.id === collectionId)) {
-        collections.push({ ...collectionInf, id: collectionId });
-      }
-    }
-    return collections;
-  }
-
   async removeCollectionSponsor(collectionId: number, { account }: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
     if (!account) throw new Error('Account not provided');

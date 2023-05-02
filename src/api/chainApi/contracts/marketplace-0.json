@@ -11,12 +11,16 @@
     "type": "constructor"
   },
   {
-    "inputs": [],
+    "inputs": [
+      
+    ],
     "name": "CollectionNotFound",
     "type": "error"
   },
   {
-    "inputs": [],
+    "inputs": [
+      
+    ],
     "name": "CollectionNotSupportedERC721",
     "type": "error"
   },
@@ -28,41 +32,66 @@
         "type": "string"
       }
     ],
-    "name": "FailTransformToken",
+    "name": "FailTransferToken",
     "type": "error"
   },
   {
-    "inputs": [],
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "info",
+        "type": "string"
+      }
+    ],
+    "name": "InvalidArgument",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      
+    ],
     "name": "InvalidMarketFee",
     "type": "error"
   },
   {
-    "inputs": [],
-    "name": "NotEnoughError",
+    "inputs": [
+      
+    ],
+    "name": "NotEnoughMoneyError",
     "type": "error"
   },
   {
-    "inputs": [],
+    "inputs": [
+      
+    ],
     "name": "OrderNotFound",
     "type": "error"
   },
   {
-    "inputs": [],
+    "inputs": [
+      
+    ],
     "name": "SellerIsNotOwner",
     "type": "error"
   },
   {
-    "inputs": [],
+    "inputs": [
+      
+    ],
     "name": "TokenIsAlreadyOnSale",
     "type": "error"
   },
   {
-    "inputs": [],
+    "inputs": [
+      
+    ],
     "name": "TokenIsNotApproved",
     "type": "error"
   },
   {
-    "inputs": [],
+    "inputs": [
+      
+    ],
     "name": "TooManyAmountRequested",
     "type": "error"
   },
@@ -92,6 +121,11 @@
         "components": [
           {
             "internalType": "uint32",
+            "name": "id",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
             "name": "collectionId",
             "type": "uint32"
           },
@@ -101,19 +135,31 @@
             "type": "uint32"
           },
           {
-            "internalType": "uint256",
-            "name": "price",
-            "type": "uint256"
-          },
-          {
             "internalType": "uint32",
             "name": "amount",
             "type": "uint32"
           },
           {
-            "internalType": "address payable",
+            "internalType": "uint256",
+            "name": "price",
+            "type": "uint256"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "eth",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "sub",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct CrossAddress",
             "name": "seller",
-            "type": "address"
+            "type": "tuple"
           }
         ],
         "indexed": false,
@@ -138,6 +184,11 @@
         "components": [
           {
             "internalType": "uint32",
+            "name": "id",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
             "name": "collectionId",
             "type": "uint32"
           },
@@ -147,19 +198,31 @@
             "type": "uint32"
           },
           {
-            "internalType": "uint256",
-            "name": "price",
-            "type": "uint256"
-          },
-          {
             "internalType": "uint32",
             "name": "amount",
             "type": "uint32"
           },
           {
-            "internalType": "address payable",
+            "internalType": "uint256",
+            "name": "price",
+            "type": "uint256"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "eth",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "sub",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct CrossAddress",
             "name": "seller",
-            "type": "address"
+            "type": "tuple"
           }
         ],
         "indexed": false,
@@ -169,9 +232,9 @@
       },
       {
         "indexed": false,
-        "internalType": "uint256",
+        "internalType": "uint32",
         "name": "salesAmount",
-        "type": "uint256"
+        "type": "uint32"
       }
     ],
     "name": "TokenIsPurchased",
@@ -190,6 +253,11 @@
         "components": [
           {
             "internalType": "uint32",
+            "name": "id",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
             "name": "collectionId",
             "type": "uint32"
           },
@@ -199,19 +267,31 @@
             "type": "uint32"
           },
           {
-            "internalType": "uint256",
-            "name": "price",
-            "type": "uint256"
-          },
-          {
             "internalType": "uint32",
             "name": "amount",
             "type": "uint32"
           },
           {
-            "internalType": "address payable",
+            "internalType": "uint256",
+            "name": "price",
+            "type": "uint256"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "eth",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "sub",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct CrossAddress",
             "name": "seller",
-            "type": "address"
+            "type": "tuple"
           }
         ],
         "indexed": false,
@@ -236,6 +316,11 @@
         "components": [
           {
             "internalType": "uint32",
+            "name": "id",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
             "name": "collectionId",
             "type": "uint32"
           },
@@ -245,29 +330,58 @@
             "type": "uint32"
           },
           {
-            "internalType": "uint256",
-            "name": "price",
-            "type": "uint256"
-          },
-          {
             "internalType": "uint32",
             "name": "amount",
             "type": "uint32"
           },
           {
-            "internalType": "address payable",
+            "internalType": "uint256",
+            "name": "price",
+            "type": "uint256"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "eth",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "sub",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct CrossAddress",
             "name": "seller",
-            "type": "address"
+            "type": "tuple"
           }
         ],
         "indexed": false,
         "internalType": "struct Market.Order",
         "name": "item",
         "type": "tuple"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint32",
+        "name": "amount",
+        "type": "uint32"
       }
     ],
     "name": "TokenRevoke",
     "type": "event"
+  },
+  {
+    "inputs": [
+      
+    ],
+    "name": "addAdmin",
+    "outputs": [
+      
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
     "inputs": [
@@ -285,10 +399,29 @@
         "internalType": "uint32",
         "name": "amount",
         "type": "uint32"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "eth",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "sub",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct CrossAddress",
+        "name": "buyer",
+        "type": "tuple"
       }
     ],
     "name": "buy",
-    "outputs": [],
+    "outputs": [
+      
+    ],
     "stateMutability": "payable",
     "type": "function"
   },
@@ -306,7 +439,9 @@
       }
     ],
     "name": "checkApproved",
-    "outputs": [],
+    "outputs": [
+      
+    ],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -329,6 +464,11 @@
         "components": [
           {
             "internalType": "uint32",
+            "name": "id",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
             "name": "collectionId",
             "type": "uint32"
           },
@@ -338,19 +478,31 @@
             "type": "uint32"
           },
           {
-            "internalType": "uint256",
-            "name": "price",
-            "type": "uint256"
-          },
-          {
             "internalType": "uint32",
             "name": "amount",
             "type": "uint32"
           },
           {
-            "internalType": "address payable",
+            "internalType": "uint256",
+            "name": "price",
+            "type": "uint256"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "eth",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "sub",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct CrossAddress",
             "name": "seller",
-            "type": "address"
+            "type": "tuple"
           }
         ],
         "internalType": "struct Market.Order",
@@ -362,7 +514,9 @@
     "type": "function"
   },
   {
-    "inputs": [],
+    "inputs": [
+      
+    ],
     "name": "marketFee",
     "outputs": [
       {
@@ -395,10 +549,40 @@
         "internalType": "uint32",
         "name": "amount",
         "type": "uint32"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "eth",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "sub",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct CrossAddress",
+        "name": "seller",
+        "type": "tuple"
       }
     ],
     "name": "put",
-    "outputs": [],
+    "outputs": [
+      
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      
+    ],
+    "name": "removeAdmin",
+    "outputs": [
+      
+    ],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -421,32 +605,27 @@
       }
     ],
     "name": "revoke",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "setOwner",
-    "outputs": [],
+    "outputs": [
+      
+    ],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [
-      {
-        "internalType": "bool",
-        "name": "pause",
-        "type": "bool"
-      }
+      
     ],
-    "name": "setPause",
-    "outputs": [],
+    "name": "setOwner",
+    "outputs": [
+      
+    ],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "inputs": [],
+    "inputs": [
+      
+    ],
     "name": "version",
     "outputs": [
       {
@@ -467,7 +646,9 @@
       }
     ],
     "name": "withdraw",
-    "outputs": [],
+    "outputs": [
+      
+    ],
     "stateMutability": "nonpayable",
     "type": "function"
   }

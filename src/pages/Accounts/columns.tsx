@@ -6,11 +6,10 @@ import AccountCard from 'components/Account/Account';
 import BalanceCell from './BalanceCell';
 import { Button, Icon, Link, Text } from 'components/UI';
 import { AdditionalLight, Grey500, Primary500 } from 'styles/colors';
-import { formatKusamaBalance } from 'utils/textUtils';
 import config from 'config';
 import styled from 'styled-components';
 
-const tokenSymbol = 'KSM';
+const tokenSymbol = '!!!OLD_KSM!!!';
 
 const testid = 'accounts-page';
 
@@ -119,7 +118,7 @@ export const getAccountsColumns = ({
       return (
         <>
           <ActionsWrapper>
-            <Button title={'Send'} onClick={onShowSendFundsModal(address)} disabled={formatKusamaBalance(balance?.KSM?.toString() || 0) === '0'} />
+            <Button title={'Send'} onClick={onShowSendFundsModal(address)} disabled={!balance?.parsed} />
             <Button
               title={'Get'}
               onClick={onShowGetKsmModal}

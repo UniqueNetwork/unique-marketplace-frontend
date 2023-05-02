@@ -13,7 +13,7 @@ interface PriceProps {
   testid?: string
 }
 
-const tokenSymbol = 'KSM';
+const tokenSymbol = '!!!OLDK_SM!!!';
 
 export const PriceForAuction: FC<PriceProps> = ({ price, minStep, topBid, testid }) => {
   const { api } = useApi();

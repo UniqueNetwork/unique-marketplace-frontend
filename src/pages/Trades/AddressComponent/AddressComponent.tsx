@@ -11,12 +11,12 @@ import { Link } from 'components/UI';
 import { useAccounts } from '../../../hooks/useAccounts';
 
 export const AddressComponent = ({ text, testid }: { text: string, testid: string }) => {
-  const { chainData, currentChainId } = useApi();
+  const { chainProperties, currentChainId } = useApi();
   const { selectedAccount } = useAccounts();
 
   const formatAddress = useCallback((address: string) => {
-    return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
-  }, [chainData?.SS58Prefix]);
+    return toChainFormatAddress(address, chainProperties?.SS58Prefix || 0);
+  }, [chainProperties?.SS58Prefix]);
 
   const shortCut = useMemo(() => {
     if (selectedAccount?.address === text) return 'Me';

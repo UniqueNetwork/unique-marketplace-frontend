@@ -1,5 +1,8 @@
+import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
+
 export type AllowedCollection = {
   allowedTokens: string
+  description: CollectionInfoWithSchemaResponse
 }
 
 export type AllowedCollections = {

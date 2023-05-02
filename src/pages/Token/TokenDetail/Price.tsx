@@ -13,16 +13,15 @@ interface PriceProps {
 }
 
 export const Price: FC<PriceProps> = ({ price, testid = '' }) => {
-  const { api } = useApi();
-  const decimals = api?.market?.decimals;
+  const { currentChainId } = useApi();
   return (
     <PriceWrapper>
       <Row>
         <Heading
           testid={`${testid}-price`}
           size={'1'}
-        >{`${formatKusamaBalance(new BN(price).toString(), { decimals })}`}</Heading>
-        <Icon name={'chain-kusama'} size={32} />
+        >{price}</Heading>
+        <Icon name={`chain-${currentChainId}`} size={32} />
       </Row>
     </PriceWrapper>
   );
