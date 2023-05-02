@@ -48,17 +48,15 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
             <DesktopMenuLink to={`/${currentChainId || ''}/myTokens`} active={activeItem === 'My tokens'} disabled={!selectedAccount || isLoading}>
               My tokens
             </DesktopMenuLink>
+            <DesktopMenuLink to={`/${currentChainId || ''}/collections`} active={activeItem === 'Collections'} disabled={!selectedAccount || isLoading}>
+              My collections
+            </DesktopMenuLink>
             <DesktopMenuLink to={`/${currentChainId || ''}/trades`} active={activeItem === 'Trades'}>
               Trades
             </DesktopMenuLink>
             <DesktopMenuLink to='/faq' active={activeItem === 'FAQ'}>
               FAQ
             </DesktopMenuLink>
-            {
-              <DesktopMenuLink to={`/${currentChainId || ''}/collections`} active={activeItem === 'Collections'}>
-                My collections
-              </DesktopMenuLink>
-            }
           </nav>
         )}
       </LeftSideColumn>
@@ -78,6 +76,13 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
           >
             My tokens
           </MobileMenuLink>
+          <MobileMenuLink to={`/${currentChainId || ''}/collections`}
+            active={activeItem === 'Collections'}
+            onClick={mobileMenuToggler}
+            disabled={!selectedAccount && !isLoading}
+          >
+            My collections
+          </MobileMenuLink>
           <MobileMenuLink to={`/${currentChainId || ''}/trades`} active={activeItem === 'Trades'} onClick={mobileMenuToggler}>
             Trades
           </MobileMenuLink>
@@ -87,11 +92,6 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
           {deviceSize !== DeviceSize.lg &&
             <MobileMenuLink to={`/${currentChainId || ''}/accounts`} active={activeItem === 'Manage accounts'} onClick={mobileMenuToggler}>
               Manage accounts
-            </MobileMenuLink>
-          }
-          {
-            <MobileMenuLink to={`/${currentChainId || ''}/collections`} active={activeItem === 'Collections'} onClick={mobileMenuToggler}>
-              My collections
             </MobileMenuLink>
           }
         </MobileMenu>
