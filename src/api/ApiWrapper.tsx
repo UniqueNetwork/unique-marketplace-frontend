@@ -36,7 +36,6 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
     (async () => {
       const settings = await fetchSettings(config.blockchains);
       const networkOptions = settings.map<NetworkOptions>(({ networkId, settings }) => ({ networkId, settings }));
-      console.log('networkOptions', networkOptions);
       setAvailableNetworkOptions(networkOptions);
       // TODO: setup current chain properly from localStorage/url
       const currentNetworkOption = networkOptions.find((no) => no.networkId === currentChainId) || networkOptions[0];

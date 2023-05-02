@@ -13,7 +13,7 @@ interface PriceProps {
 }
 
 export const Price: FC<PriceProps> = ({ price, testid = '' }) => {
-  const { api } = useApi();
+  const { currentChainId } = useApi();
   return (
     <PriceWrapper>
       <Row>
@@ -21,7 +21,7 @@ export const Price: FC<PriceProps> = ({ price, testid = '' }) => {
           testid={`${testid}-price`}
           size={'1'}
         >{price}</Heading>
-        <Icon name={'chain-kusama'} size={32} />
+        <Icon name={`chain-${currentChainId}`} size={32} />
       </Row>
     </PriceWrapper>
   );

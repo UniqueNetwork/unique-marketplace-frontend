@@ -23,7 +23,7 @@ export type TTokensCard = {
 
 export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
   const { selectedAccount } = useAccounts();
-  const { currentChainId } = useApi();
+  const { currentChainId, chainProperties } = useApi();
 
   const {
     image,
@@ -103,7 +103,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
             testid={`${testid}-price`}
             size='l'
           >{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${offer.price.parsed}` }</Text>
-          <IconStyled name={'chain-kusama'} size={16} />
+          <IconStyled name={`chain-${chainProperties?.token}`} size={16} />
           {!offer?.auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         </PriceWrapper>
         {offer?.auction && <AuctionInfoWrapper>

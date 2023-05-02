@@ -45,7 +45,7 @@ class MetamaskAdapter implements IMarketContractAdapter {
   async buy(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<void> {
     console.log('buying metamask for: ', price);
     const contract = this.getContract(signer);
-    await (await contract.buy(collectionId, tokenId, amount, to, { gasLimit: 10000000, value: price }).wait());
+    await (await contract.buy(collectionId, tokenId, amount, to, { gasLimit: 10000000, value: price })).wait();
   }
 }
 
