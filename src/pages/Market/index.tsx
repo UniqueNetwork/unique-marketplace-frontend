@@ -104,7 +104,7 @@ export const MarketPage = () => {
       attributes: attributes?.map(({ attribute }) => attribute),
       ...otherFilter
     };
-  }, [selectedAccount?.address]);
+  }, [selectedAccount]);
 
   const onClickSeeMore = useCallback(() => {
     if (!isFetching) {

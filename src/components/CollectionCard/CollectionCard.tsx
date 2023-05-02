@@ -1,22 +1,26 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { Text } from '@unique-nft/ui-kit';
-import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
 import styled from 'styled-components/macro';
 import { Icon, Dropdown } from 'components/UI';
-import { CollectionData } from 'api/restApi/admin/types';
-import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
+import { MyCollection } from 'api/restApi/collections/types';
+import { compareEncodedAddresses } from 'api/chainApi/utils/addressUtils';
 import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
 import { shortcutText } from 'utils/textUtils';
 import { Picture } from '..';
 import { AdditionalDark, AdditionalLight } from 'styles/colors';
+import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 
 export type TCollectionCard = {
-  collection: CollectionData
-  onManageTokensClick(): void
+  collection: MyCollection
+
   onManageSponsorshipClick(): void
   onRemoveSponsorshipClick(): void
+
+  onManageTokensClick(): void
+  onAddCollectionClick(): void
   onRemoveCollectionClick(): void
+
   onViewOnScanClick(): void
 };
 
@@ -25,29 +29,27 @@ export const CollectionCard: FC<TCollectionCard> = ({
   onManageSponsorshipClick,
   onRemoveSponsorshipClick,
   onManageTokensClick,
+  onAddCollectionClick,
   onRemoveCollectionClick,
   onViewOnScanClick
 }) => {
-  const { api } = useApi();
+  const { featuredCollections } = useApi();
   const { selectedAccount } = useAccounts();
-  const collectionApi = api?.collection;
-  const [collectionDetails, setCollectionDetails] = useState<CollectionInfoWithSchema | null>();
+  const [collectionDetails, setCollectionDetails] = useState<CollectionInfoWithSchemaResponse | null>();
   useEffect(() => {
     if (!collection?.id) return;
-    (async () => {
-      setCollectionDetails(await collectionApi?.getCollection(collection.id));
-    })();
-  }, [collection, collectionApi]);
+    setCollectionDetails(featuredCollections[collection.id]?.description);
+  }, [collection, featuredCollections]);
 
   const canConfirmSponsorships = useMemo(() => {
-    return selectedAccount?.address &&
+    return selectedAccount &&
       collectionDetails?.sponsorship?.address &&
       !collectionDetails?.sponsorship?.isConfirmed &&
       compareEncodedAddresses(selectedAccount.address, collectionDetails.sponsorship.address);
   }, [selectedAccount?.address, collectionDetails?.sponsorship?.isConfirmed, collectionDetails?.sponsorship?.address]);
 
   const canRemoveSponsorships = useMemo(() => {
-    return selectedAccount?.address &&
+    return selectedAccount &&
       collectionDetails?.sponsorship?.address &&
       collectionDetails?.sponsorship?.isConfirmed &&
       (compareEncodedAddresses(selectedAccount.address, collectionDetails.sponsorship.address) ||
@@ -60,7 +62,7 @@ export const CollectionCard: FC<TCollectionCard> = ({
   return (
     <CollectionCardStyled>
       <PictureWrapper>
-        <Picture alt={collection?.id?.toString() || ''} src={collection.schema?.coverPicture.fullUrl || collectionDetails?.schema?.coverPicture.fullUrl || ''} />
+        <Picture alt={collection?.id?.toString() || ''} src={collection.cover || ''} />
         <ActionsMenuWrapper>
           <Dropdown placement={'right'}
             dropdownRender={() => (<DropdownMenu>
@@ -68,6 +70,7 @@ export const CollectionCard: FC<TCollectionCard> = ({
               {/* TODO: wait until the network can grant access to remove sponsorship */}
               {/* canRemoveSponsorships && <DropdownMenuItem onClick={onRemoveSponsorshipClick}>Remove sponsorship</DropdownMenuItem> */}
               <DropdownMenuItem onClick={onManageTokensClick}>Manage tokens</DropdownMenuItem>
+              <DropdownMenuItem onClick={onAddCollectionClick}>Add collection</DropdownMenuItem>
               <DropdownMenuItem onClick={onRemoveCollectionClick}>Remove collection</DropdownMenuItem>
               <DropdownMenuItem onClick={onViewOnScanClick}>View on Scan
                 <IconWrapper>
@@ -90,6 +93,10 @@ export const CollectionCard: FC<TCollectionCard> = ({
           <Row>
             <Text size='s' color={'grey-500'} >Allowed tokens:</Text>
             <Text size='s' >{collection.allowedTokens || 'all'}</Text>
+          </Row>
+          <Row>
+            <Text size='s' color={'grey-500'} >Trading:</Text>
+            <Text size='s' >{collection.isMarketable ? 'yes' : 'no'}</Text>
           </Row>
           {hasSponsorship && <Row>
             <Text size='s' color={'grey-500'} >Sponsor:</Text>

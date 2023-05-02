@@ -1,6 +1,6 @@
 import React, { FC, useCallback } from 'react';
 
-import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
+import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import { Link } from 'components/UI';
 import { useApi } from 'hooks/useApi';
 import { shortcutText } from 'utils/textUtils';
@@ -12,11 +12,11 @@ interface AccountLinkProps {
 }
 
 const AccountLink: FC<AccountLinkProps> = ({ accountAddress, testid }) => {
-  const { chainData, currentChainId } = useApi();
+  const { chainProperties, currentChainId } = useApi();
 
   const formatAddress = useCallback((address: string) => {
-    return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
-  }, [chainData?.SS58Prefix]);
+    return toChainFormatAddress(address, chainProperties?.SS58Prefix || 0);
+  }, [chainProperties?.SS58Prefix]);
 
   return (
     <Link

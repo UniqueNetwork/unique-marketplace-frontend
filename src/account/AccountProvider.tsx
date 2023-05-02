@@ -1,216 +1,168 @@
 import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { Account, AccountProvider, AccountSigner } from './AccountContext';
-import { SignModal } from '../components/SignModal/SignModal';
+import { AccountProvider, MarketAccount } from './AccountContext';
+import { SignModal } from 'components/SignModal/SignModal';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { web3Accounts, web3Enable, web3AccountsSubscribe, web3EnablePromise } from '@polkadot/extension-dapp';
-import { sleep } from '../utils/helpers';
-import keyring from '@polkadot/ui-keyring';
 import { BN } from '@polkadot/util';
 import { Codec } from '@polkadot/types/types';
-import { useApi } from '../hooks/useApi';
-import { getWithdrawBids } from '../api/restApi/auction/auction';
-import { Unsubcall } from '@polkadot/extension-inject/types';
-import { isEthereumAddress } from '@polkadot/util-crypto';
+import { useApi } from 'hooks/useApi';
+import { getWithdrawBids } from 'api/restApi/auction/auction';
+import { Accounts, ProviderClass, UnsignedTxPayload } from '@unique-nft/accounts';
+
+import { PolkadotProvider, PolkadotAccount } from '@unique-nft/accounts/polkadot';
+import { KeyringLocalProvider, KeyringLocalAccount } from '@unique-nft/accounts/keyring-local';
+import { MetamaskProvider, MetamaskAccount } from '@unique-nft/accounts/metamask';
 
 export const DefaultAccountKey = 'unique_market_account_address';
 
-type TQueryAccountResponse = { data: { free: BN } };
-
-const AccountWrapper: FC = ({ children }) => {
-  const [accounts, setAccounts] = useState<Account[]>([]);
+const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts(), children }) => {
+  const [accounts, setAccounts] = useState<MarketAccount[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isLoadingDeposits, setIsLoadingDeposits] = useState<boolean>(false);
   const [fetchAccountsError, setFetchAccountsError] = useState<string | undefined>();
-  const [selectedAccount, setSelectedAccount] = useState<Account>();
-  const { api, kusamaSdk, baseURL } = useApi();
+  const [selectedAccount, setSelectedAccount] = useState<MarketAccount>();
+  const { api, baseURL } = useApi();
 
-  const changeAccount = useCallback((account: Account) => {
+  const unsubscribesBalancesChanges = useRef<Record<string, Codec>>({
+    // TODO: !!!!!!!!!
+  });
+  const subscribeBalancesChanges = useCallback(async (accounts: MarketAccount[]) => {
+    // TODO: get balance via new rest subscribtions !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  }, []);
+
+  const changeAccount = useCallback(async (account: MarketAccount) => {
+    if (!api?.market) return;
+    const balance = await api.market.getAccountBalance(account.address);
+    const accountWithBalance = { ...account, balance };
     localStorage.setItem(DefaultAccountKey, account.address);
-    setSelectedAccount(account);
-  }, []);
-
-  const clearAllAccounts = useCallback(() => {
-    localStorage.removeItem(DefaultAccountKey);
-    setSelectedAccount(undefined);
-    setAccounts([]);
-  }, []);
+    setSelectedAccount(accountWithBalance);
+  }, [api?.market]);
 
   const [isSignModalVisible, setIsSignModalVisible] = useState<boolean>(false);
-  const [signerAccount, setSignerAccount] = useState<Account>();
-  const onSignCallback = useRef<(signature?: KeyringPair) => void | undefined>();
-  const showSignDialog = useCallback((account: Account) => {
-    setSignerAccount(account);
+  const [localSignerKeyringPair, setLocalSignerKeyringPair] = useState<KeyringPair>();
+  const onSignCallback = useRef<(password?: string) => void>();
+  const showSignDialog = useCallback((KeyringPair: KeyringPair) => {
+    setLocalSignerKeyringPair(KeyringPair);
     setIsSignModalVisible(true);
-    return new Promise<KeyringPair>((resolve, reject) => {
-      onSignCallback.current = (signature?: KeyringPair) => {
-        if (signature) resolve(signature);
-        else reject(new Error('Signing failed'));
+    return new Promise<string>((resolve, reject) => {
+      onSignCallback.current = (password) => {
+        if (password) {
+          resolve(password);
+        } else reject(new Error('Signing failed'));
       };
     });
   }, []);
+
+  const fetchAccounts = useCallback(async () => {
+    if (!api?.market) return;
+    // await _accounts.addProvider<ProviderClass<any>>(KeyringLocalProvider, { passwordCallback: showSignDialog });
+    // await _accounts.addProvider<ProviderClass<any>>(PolkadotProvider);
+    // await _accounts.addProvider<ProviderClass<any>>(MetamaskProvider);
+
+    const allAccounts = (await _accounts?.getAccounts())?.map((account) => {
+      let name; // TODO: refactor?
+      const marketAccount = { account: account as unknown } as MarketAccount;
+      switch (account.constructor) {
+        case PolkadotAccount:
+          // TODO: if account is from polka but has ethereum address - either ignore it or figure out how to deal with it
+          name = (account as PolkadotAccount).injectedAccount.meta.name || `Polkadotjs: ${account.address}`;
+          // In metamask we provide "signer" object. For polkadotjs we provide keyringpair.account. Both should be provided as OurCustomAccount.signer depending on provider
+          marketAccount.signer = account;
+        break;
+        case KeyringLocalAccount:
+          name = (account as unknown as KeyringLocalAccount).keyringPair.meta.name as string || `Unknown local account: ${account.address}`;
+          marketAccount.signer = account;
+        break;
+        case MetamaskAccount:
+          name = 'Metamask Account';
+          // TODO: signer is prive inside metamask account for some reason. We may consider taking it from ethers directly instead...
+          // @ts-ignore
+          marketAccount.signer = account.signer;
+        break;
+        default:
+          console.error('Corrupted account: ', account);
+          throw new Error('Unknown account type faced');
+      }
+      marketAccount.name = name;
+      marketAccount.address = account.address;
+      marketAccount.isLocal = account instanceof KeyringLocalAccount;
+      return marketAccount;
+    }) || [];
+
+    const accountsWithBalances = await Promise.all(allAccounts.map(async (account) => {
+      const balance = await api.market!.getAccountBalance(account.address);
+      return { ...account, balance };
+    }));
+
+    const defaultAccountAddress = localStorage.getItem(DefaultAccountKey);
+    const defaultAccount = accountsWithBalances.find((item) => item.address === defaultAccountAddress) || allAccounts[0];
+
+    changeAccount(defaultAccount);
+
+    setAccounts(accountsWithBalances);
+
+    setIsLoading(false);
+
+    // await subscribeBalancesChanges(allAccounts);
+  }, [api?.market, changeAccount]);
+
+  useEffect(() => {
+    if (!api?.market) return;
+    setIsLoading(true);
+    void (async () => {
+      await _accounts.addProvider<ProviderClass<any>>(KeyringLocalProvider, { passwordCallback: showSignDialog });
+      await _accounts.addProvider<ProviderClass<any>>(PolkadotProvider);
+      await _accounts.addProvider<ProviderClass<any>>(MetamaskProvider);
+      await fetchAccounts();
+    })();
+  }, [api?.market, subscribeBalancesChanges, fetchAccounts, showSignDialog]);
 
   const onClose = useCallback(() => {
     setIsSignModalVisible(false);
     onSignCallback.current && onSignCallback.current(undefined);
   }, []);
 
-  const onSignFinish = useCallback((signature: KeyringPair) => {
+  const onSignFinish = useCallback((password: string | undefined) => {
     setIsSignModalVisible(false);
-    onSignCallback.current && onSignCallback.current(signature);
+    onSignCallback.current && onSignCallback.current(password);
   }, []);
 
-  const getExtensionAccounts = useCallback(async () => {
-    if (!web3EnablePromise) {
-      // this call fires up the authorization popup
-      let extensions = await web3Enable('my cool dapp');
-      if (extensions.length === 0) {
-        console.log('Extension not found, retry in 1s');
-        await sleep(1000);
-        extensions = await web3Enable('my cool dapp');
-        if (extensions.length === 0) {
-          return [];
-        }
-      }
-    }
+  const getAccountDeposit = useCallback(async (account: MarketAccount) => {
+    return {
+      bids: (await getWithdrawBids(baseURL, { owner: account.address })).data || { withdraw: [], leader: [] }
+    };
+  }, [baseURL]);
 
-    return (await web3Accounts()).map((account) => ({ ...account, signerType: AccountSigner.extension })) as Account[];
-  }, []);
-
-  const getLocalAccounts = useCallback(() => {
-    const keyringAccounts = keyring.getAccounts();
-    return keyringAccounts.map((account) => ({ address: account.address, meta: account.meta, signerType: AccountSigner.local } as Account));
-  }, []);
-
-  const getAccounts = useCallback(async () => {
-    // this call fires up the authorization popup
-    const extensionAccounts = await getExtensionAccounts();
-    const localAccounts = getLocalAccounts();
-
-    const allAccounts: Account[] = [...extensionAccounts, ...localAccounts];
-
-    return allAccounts.filter((account) => !isEthereumAddress(account.address));
-  }, [getExtensionAccounts, getLocalAccounts]);
-
-  const getAccountBalance = useCallback(async (account: Account) => {
-    // const balances = await rpcClient?.rawKusamaRpcApi?.derive.balances?.all(account.address);
-    const balances = await api?.market?.getAccountBalance(account.address);
-    return new BN(balances?.freeBalance?.raw || 0);
-  }, [api?.market]);
-
-  const getAccountsBalances = useCallback(async (accounts: Account[]) => Promise.all(accounts.map(async (account: Account) => ({
-    ...account,
-    balance: {
-      KSM: await getAccountBalance(account) // TODO: it's possible to subscribe on balances via rpc
-    }
-  } as Account))), [getAccountBalance]);
-
-  const getAccountsWhiteListStatus = useCallback((accounts: Account[]) => {
-    if (!api?.market) return accounts;
-    return Promise.all(accounts.map(async (account: Account) => ({
-      ...account,
-      isOnWhiteList: await api?.market?.checkWhiteListed(account.address)
-    })));
-  }, [api?.market]);
-
-  const unsubscribesBalancesChanges = useRef<Record<string, Codec>>({});
-  const subscribeBalancesChanges = useCallback(async (accounts: Account[]) => {
-    if (!kusamaSdk?.api) return;
-
-    const unsubscribes = await Promise.all(accounts.map(async (account) => {
-      const unsubscribe = await kusamaSdk.api.query.system.account(account.address, ({ data: { free } }: TQueryAccountResponse) => {
-        if (!account.balance?.KSM || !free.sub(account.balance.KSM).isZero()) {
-          setAccounts((accounts) => accounts.map((_account: Account) => ({
-            ..._account,
-            balance: account.address === _account.address ? { KSM: free } : _account.balance
-          })));
-        }
-      });
-      return { [account.address]: unsubscribe };
-    }));
-
-    unsubscribesBalancesChanges.current = unsubscribes.reduce<Record<string, Codec>>((acc, item) => ({ ...acc, ...item }), {});
-  }, [kusamaSdk, setAccounts]);
-
-  const getAccountDeposit = useCallback(async (account: Account) => {
-      return {
-        ...account,
-        deposits: {
-          bids: (await getWithdrawBids(baseURL, { owner: account.address })).data || { withdraw: [], leader: [] },
-          sponsorshipFee: await api?.market?.getUserDeposit(account.address)
-        }
-      };
-  }, [baseURL, api?.market]);
-
-  const fetchAccountsWithDeposits = useCallback(async (fetchedAccounts: Account[]) => {
-    setIsLoadingDeposits(true);
-    const _accounts = await Promise.all(fetchedAccounts.map(getAccountDeposit));
-    setAccounts(_accounts);
-    setIsLoadingDeposits(false);
-    return _accounts;
-  }, [getAccountDeposit]);
-
-  const fetchAccounts = useCallback(async () => {
+  const updateAccountsDeposits = useCallback(async () => {
     if (!api?.market) return;
-    setIsLoading(true);
+    setIsLoadingDeposits(true);
 
-    const allAccounts = await getAccounts();
+    setAccounts(await Promise.all(accounts.map(async (account) => {
+      // account.deposits = await getAccountDeposit(account);
+      // Will be used when we bring back auctions
+      await Promise.resolve();
+      return account;
+    })));
 
-    if (allAccounts?.length) {
-      const accountsWithBalance = await getAccountsBalances(allAccounts);
-      const accountsWithWhiteListStatus = await getAccountsWhiteListStatus(accountsWithBalance);
-      setAccounts(accountsWithWhiteListStatus);
-
-      await subscribeBalancesChanges(accountsWithWhiteListStatus);
-
-      const defaultAccountAddress = localStorage.getItem(DefaultAccountKey);
-      const defaultAccount = allAccounts.find((item) => item.address === defaultAccountAddress);
-
-      if (defaultAccount) {
-        changeAccount(defaultAccount);
-      } else {
-        changeAccount(allAccounts[0]);
-      }
-      await fetchAccountsWithDeposits(accountsWithWhiteListStatus);
-    } else {
-      clearAllAccounts();
-      setFetchAccountsError('No accounts in extension');
-    }
-    setIsLoading(false);
-  }, [api?.market, getAccountsBalances, getAccountsWhiteListStatus, fetchAccountsWithDeposits]);
-
-  useEffect(() => {
-    let unsubscribe: Unsubcall;
-    if (web3EnablePromise) { // if polkadot extension is enabled
-      const listenExtensionChanges = async () => {
-        unsubscribe = await web3AccountsSubscribe(() => {
-          setIsLoading((_isLoading) => {
-            if (_isLoading) return true;
-            void fetchAccounts();
-            return true;
-          });
-        });
-      };
-
-      void listenExtensionChanges();
-      return () => {
-        unsubscribe && unsubscribe();
-      };
-    }
-    void fetchAccounts();
-  }, [web3EnablePromise, fetchAccounts]);
+    setIsLoadingDeposits(false);
+  }, [accounts.length, api?.market, getAccountDeposit]);
 
   const updateCurrentAccountDeposit = useCallback(async () => {
-    if (!selectedAccount) return;
-    const _account = await getAccountDeposit(selectedAccount);
+    if (!selectedAccount) return Promise.resolve();
+    const balance = await api?.market?.getAccountBalance(selectedAccount.address);
+    // const deposits = await getAccountDeposit(selectedAccount);
     setAccounts((accounts) => accounts.map((account) => {
-      if (account.address === _account.address) {
-        return { ...account, deposits: _account.deposits };
+      if (account.address === selectedAccount.address) {
+        // account.deposits = deposits;
+        account.balance = balance || { raw: new BN(0), parsed: '0' };
       }
       return account;
     }));
-    setSelectedAccount(_account);
-  }, [selectedAccount]);
+  }, [api?.market, selectedAccount]);
+
+  useEffect(() => {
+    void updateCurrentAccountDeposit();
+  }, [updateCurrentAccountDeposit]);
 
   const value = useMemo(() => ({
     isLoading,
@@ -222,15 +174,15 @@ const AccountWrapper: FC = ({ children }) => {
     setSelectedAccount,
     showSignDialog,
     fetchAccounts,
-    fetchAccountsWithDeposits,
+    updateAccountsDeposits,
     updateCurrentAccountDeposit
-  }), [isLoading, isLoadingDeposits, accounts, fetchAccounts, fetchAccountsWithDeposits, selectedAccount, fetchAccountsError, changeAccount]);
+  }), [isLoading, isLoadingDeposits, accounts, fetchAccounts, updateAccountsDeposits, selectedAccount, fetchAccountsError, changeAccount, showSignDialog, updateCurrentAccountDeposit]);
 
   return (
     <AccountProvider value={value}>
       {children}
       <SignModal
-        account={signerAccount}
+        keyringPair={localSignerKeyringPair}
         isVisible={isSignModalVisible}
         onClose={onClose}
         onFinish={onSignFinish}

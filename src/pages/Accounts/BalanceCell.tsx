@@ -18,14 +18,14 @@ function BalanceCell({ isSmallDevice, accountInfo, tokenSymbol, testid }: IProps
   const KSM = accountInfo.deposit || 0;
   const isDeposit = !!accountInfo.deposit;
   const { api } = useApi();
-  const decimals = api?.market?.kusamaDecimals;
+  const decimals = api?.market?.decimals;
 
   if (!isSmallDevice) {
     return (
       <BalancesWrapper>
-        {!isDeposit && <Text testid={`${testid}-balance`}>{`${formatKusamaBalance(accountInfo.balance?.KSM?.toString() || 0, { decimals, fractionDigits })} ${tokenSymbol}`}</Text>}
+        {!isDeposit && <Text testid={`${testid}-balance`}>{`${accountInfo.balance?.parsed} ${tokenSymbol}`}</Text>}
         {isDeposit && (<>
-          <Text color={'grey-500'} size={'s'} testid={`${testid}-deposit`}>{`${formatKusamaBalance(KSM?.toString() || 0, { decimals, fractionDigits })} ${tokenSymbol}`}</Text>
+          <Text color={'grey-500'} size={'s'} testid={`${testid}-deposit`}>{`${accountInfo.balance.parsed}}`}</Text>
           <Text color={'grey-500'} size={'s'}>market deposit</Text>
         </>)}
       </BalancesWrapper>
@@ -33,7 +33,7 @@ function BalanceCell({ isSmallDevice, accountInfo, tokenSymbol, testid }: IProps
   } else {
     return (
       <BalancesWrapper>
-        <Text testid={`${testid}-balance`}>{`${formatKusamaBalance(accountInfo.balance?.KSM?.toString() || 0)} ${tokenSymbol}`}</Text>
+        <Text testid={`${testid}-balance`}>{`${accountInfo.balance.parsed} ${tokenSymbol}`}</Text>
         {isDeposit && (<>
           <Text color={'grey-500'} size={'s'} testid={`${testid}-deposit`}>{`${formatKusamaBalance(KSM?.toString() || 0)} ${tokenSymbol}`}</Text>
           <Text color={'grey-500'} size={'s'}>market deposit</Text>

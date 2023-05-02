@@ -1,39 +1,44 @@
 import { Consumer, Context, createContext, Provider } from 'react';
-import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
 import { BN } from '@polkadot/util';
 import { KeyringPair } from '@polkadot/keyring/types';
+import { Account } from '@unique-nft/accounts';
+import { Signer } from '../api/chainApi/adapters/IBaseAdapter';
 import { TWithdrawBid } from '../api/restApi/auction/types';
 
-export enum AccountSigner {
-  extension = 'Extension',
-  local = 'Local'
-}
-export interface Account extends InjectedAccountWithMeta {
-  signerType: AccountSigner,
-  balance?: {
-    KSM?: BN
-  },
-  deposits?: {
-    bids: {
-      leader: TWithdrawBid[]
-      withdraw: TWithdrawBid[]
-    }
-    sponsorshipFee?: BN
+export type AccountDeposits = {
+  bids: {
+    leader: TWithdrawBid[]
+    withdraw: TWithdrawBid[]
   }
-  isOnWhiteList?: boolean
+  sponsorshipFee?: BN
+}
+
+export type MarketAccountBalance = {
+  parsed: string, // ex. 2006.186351956969336199
+  raw: BN // ex. 2006186351956969336199 (as in chain)
+}
+
+export type MarketAccount = {
+  account: Account,
+  signer: Signer,
+  name: string,
+  address: string,
+  isLocal: boolean,
+  deposits?: AccountDeposits,
+  balance: MarketAccountBalance
 }
 
 export type AccountContextProps = {
   isLoading: boolean
   isLoadingDeposits: boolean
-  accounts: Account[]
-  selectedAccount: Account | undefined
+  accounts: MarketAccount[]
+  selectedAccount: MarketAccount | undefined
   fetchAccountsError: string | undefined
-  changeAccount(account: Account): void
-  setSelectedAccount(account: Account): void
-  showSignDialog(account: Account): Promise<KeyringPair>
+  changeAccount(account: MarketAccount): void
+  setSelectedAccount(account: MarketAccount): void
+  showSignDialog(keyringPair: KeyringPair): Promise<string>
   fetchAccounts(): Promise<void>
-  fetchAccountsWithDeposits(accounts: Account[]): Promise<Account[]>
+  updateAccountsDeposits(): Promise<void>
   updateCurrentAccountDeposit(): Promise<void>
 }
 

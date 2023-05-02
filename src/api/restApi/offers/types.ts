@@ -1,8 +1,6 @@
 import { PaginatedResponse, Pagination, Sortable } from '../base/types';
-import { VideoAttribute } from '../../uniqueSdk/types';
-import { CollectionMode, DecodedAttributes, DecodedInfixOrUrlOrCidAndHash, UniqueCollectionSchemaDecoded } from '@unique-nft/substrate-client/tokens';
 import { INestingToken } from 'components/BundleTree/types';
-import { Address } from '@unique-nft/substrate-client/types';
+import { TokenByIdResponse, CollectionInfoWithSchemaResponse } from '@unique-nft/sdk/full';
 
 export type GetOffersRequestPayload = {
   collectionId?: number | number[]
@@ -40,31 +38,27 @@ export type OfferTokenAttribute = {
   value: string | string[]
 }
 
+export type CollectionDescription = CollectionInfoWithSchemaResponse
+
+export type TokenDescription = TokenByIdResponse & { nestingChildTokens: INestingToken[] };
+
 export type Offer = {
   collectionId: number
   tokenId: number
-  price: string
+  price: {
+    parsed: number, // 123
+    raw: string // 123000000000000
+  }
+  priceParsed: string
   quoteId: number
   seller: string
   creationDate: string
   auction: Auction | null
-  tokenDescription: {
-    image: DecodedInfixOrUrlOrCidAndHash
-    attributes: DecodedAttributes
-    video?: VideoAttribute
-    nestingChildTokens?: INestingToken[]
-    owner: Address
-  },
-  collectionDescription: {
-    description: string;
-    id: number;
-    mode?: CollectionMode | `${CollectionMode}`;
-    name: string;
-    owner: string;
-    tokenPrefix: string;
-    schema?: UniqueCollectionSchemaDecoded;
-  }
+  tokenDescription: TokenDescription,
+  collectionDescription: CollectionDescription
 }
+
+export type OfferResponse = Offer
 
 export type OffersResponse = PaginatedResponse<Offer> & {
   attributes: Record<string, Attribute[]>;

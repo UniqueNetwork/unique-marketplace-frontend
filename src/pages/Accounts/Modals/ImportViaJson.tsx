@@ -13,7 +13,7 @@ import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 import { Upload } from 'components/UI/Upload/Upload';
 
 export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish, testid }) => {
-  const { uniqueSdk } = useApi();
+  const { chainProperties } = useApi();
   const [pair, setPair] = useState<KeyringPair | null>(null);
   const [password, setPassword] = useState<string>('');
   const [passwordIncorrect, setPasswordIncorrect] = useState<boolean>(false);
@@ -22,15 +22,15 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
   const onUploadChange = useCallback((url: string, file: Blob) => {
     const reader = new FileReader();
     reader.onload = ({ target }: ProgressEvent<FileReader>): void => {
-      if (target && target.result && uniqueSdk) {
+      if (target && target.result && chainProperties) {
         const data = convertToU8a(target.result as ArrayBuffer);
-
-        setPair(keyringFromFile(data, uniqueSdk.api.genesisHash.toHex()));
+        const { genesisHash } = chainProperties;
+        setPair(keyringFromFile(data, genesisHash));
       }
     };
 
     reader.readAsArrayBuffer(file);
-  }, [setPair, uniqueSdk?.api]);
+  }, [setPair, chainProperties]);
 
   const onRestoreClick = useCallback(() => {
     if (!pair || !password) return;

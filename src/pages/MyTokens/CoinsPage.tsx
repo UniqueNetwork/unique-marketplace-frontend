@@ -6,7 +6,7 @@ import { formatKusamaBalance } from '../../utils/textUtils';
 import ChainLogo from '../../components/ChainLogo';
 import { TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/components';
 
-const tokenSymbol = 'KSM';
+const tokenSymbol = '!!!OLD_KSM!!!';
 
 type AccountsColumnsProps = {
   onShowSendFundsModal(): () => void

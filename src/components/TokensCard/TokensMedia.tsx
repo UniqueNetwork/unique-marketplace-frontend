@@ -1,12 +1,11 @@
 import React, { FC, useCallback, useState } from 'react';
 import { BlueGrey200, BlueGrey500, BlueGrey100, BlueGrey300 } from 'styles/colors';
-import { VideoAttribute } from 'api/uniqueSdk/types';
+import { DecodedInfixOrUrlOrCidAndHash, VideoAttribute } from 'api/chainApi/types';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import playIcon from 'static/icons/play.svg';
 import pauseIcon from 'static/icons/pause.svg';
 import { Picture } from '../Picture';
-import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
 
 interface ITokensMedia {
   to: string

@@ -3,21 +3,21 @@ import { useApi } from '../useApi';
 import { InternalStage, StageStatus } from '../../types/StagesTypes';
 import { useAccounts } from '../useAccounts';
 import useStages from '../useStages';
-import { TokenIdArguments } from '@unique-nft/substrate-client/tokens';
+import { TokenIdQuery } from '@unique-nft/sdk';
 
-export const useTransferToBundleStages = (token: TokenIdArguments, parent: TokenIdArguments) => {
+export const useTransferToBundleStages = (token: TokenIdQuery, parent: TokenIdQuery) => {
   const { api } = useApi();
-  const { signPayloadJSON, selectedAccount } = useAccounts();
+  const { selectedAccount } = useAccounts();
   const nftApi = api?.nft;
   const transferStages: InternalStage<null>[] = useMemo(() => [
     {
       title: 'Transfer in progress',
       description: '',
       status: StageStatus.default,
-      action: (params) => nftApi?.transferToBundle(token, parent, { ...params.options, signer: selectedAccount?.address })
+      action: (params) => nftApi?.transferToBundle(token, parent, params.options)
     }
-  ], [nftApi, token, parent, selectedAccount]);
-  const { stages, error, status, initiate } = useStages<null>(transferStages, signPayloadJSON);
+  ], [nftApi, token, parent]);
+  const { stages, error, status, initiate } = useStages<null>(transferStages, selectedAccount);
 
   return {
     stages,

@@ -1,10 +1,9 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { Loader, Text } from '@unique-nft/ui-kit';
-import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 import { generatePath, Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Icon, Link as UILink } from 'components/UI';
-import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
+import { compareEncodedAddresses } from 'api/chainApi/utils/addressUtils';
 import { Offer } from 'api/restApi/offers/types';
 import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
@@ -16,9 +15,10 @@ import { TokensMedia } from './TokensMedia';
 import { countNestedChildren, stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
 import { useCollections } from 'hooks/useCollections';
 import BundleItemsCount from '../BundleItemsCount/BundleItemsCount';
+import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
 
 export type TTokensCard = {
-  token?: TokenByIdResult
+  token?: Omit<TokenByIdResponse, 'collection' | 'nestingParentToken'>
   offer?: Partial<Offer>
   tokenId?: number
   collectionId?: number
@@ -27,8 +27,8 @@ export type TTokensCard = {
 };
 
 export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, testid, ...props }) => {
-  const [token, setToken] = useState<TokenByIdResult | undefined>(props.token);
-  const [collection, setCollection] = useState<(CollectionInfoWithSchema) | undefined>();
+  const [token, setToken] = useState<Omit<TokenByIdResponse, 'collection' | 'nestingParentToken'> | undefined>(props.token);
+  const [collection, setCollection] = useState<(CollectionInfoWithSchemaResponse) | undefined>();
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isBundleState, setIsBundleState] = useState<boolean>();
   const [tokensCount, setTokensCount] = useState<number>();
@@ -143,12 +143,12 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
           </Text>
         </UILink>
         {isBundleState && <BundleItemsCount count={tokensCount || 0} testId={testid} />}
-        {price && <PriceWrapper>
+        {price?.parsed && <PriceWrapper>
           <Text
             testid={`${testid}-price`}
             size='s'
-          >{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(price)}` }</Text>
-          <IconStyled name={'chain-kusama'} size={16} />
+          >{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${price.parsed}}` }</Text>
+          <IconStyled name={`chain-${currentChainId}`} size={16} />
           {!auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         </PriceWrapper>}
         {auction && <AuctionInfoWrapper>

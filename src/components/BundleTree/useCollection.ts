@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
 import { useApi } from 'hooks/useApi';
 import { useCollections } from 'hooks/useCollections';
+import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 
 export const useCollection = (collectionId: number | undefined) => {
   const [isCollectionLoading, setIsCollectionLoading] = useState(false);
-  const [collection, setCollection] = useState<CollectionInfoWithSchema>();
+  const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse>();
   const { getCollection } = useCollections();
   const { api } = useApi();
 

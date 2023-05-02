@@ -19,7 +19,7 @@ export interface IConfirmModalProps {
   testid: string
 }
 
-const tokenSymbol = 'KSM';
+const tokenSymbol = '!!!OLD_KSM!!!';
 
 const getColumns = (testid: string) => [
   {

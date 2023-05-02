@@ -1,4 +1,4 @@
-import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
+import { DecodedInfixOrUrlOrCidAndHash } from 'api/chainApi/types';
 import { INestingToken } from '../components/BundleTree/types';
 
 export const sleep = (ms: number) => {
@@ -35,7 +35,20 @@ export const debounce = (fn: () => any, ms = 300) => {
   };
 };
 
-export const stringToDecodedInfixOrUrlOrCidAndHash = (value: DecodedInfixOrUrlOrCidAndHash | string | undefined) => {
+export type DecodedVideoUri = ({
+  urlInfix?: string;
+  hash?: string | null;
+} | {
+  url?: string;
+  hash?: string | null;
+} | {
+  ipfsCid?: string;
+  hash?: string | null;
+}) & {
+  fullUrl?: string | null;
+} | DecodedInfixOrUrlOrCidAndHash;
+
+export const stringToDecodedInfixOrUrlOrCidAndHash = (value: DecodedVideoUri | string | undefined) => {
   return typeof value === 'string' ? { fullUrl: value, ipfsCid: '' } : value || { fullUrl: '', ipfsCid: '' };
 };
 

@@ -1,21 +1,21 @@
+// TODO: this provider is OBSOLETE, consider removing it entirely
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useApi } from '../hooks/useApi';
 import { CollectionsProvider } from './CollectionsContext';
-import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
+import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 
 const CollectionsWrapper: FC = ({ children }) => {
-  const [collections, setCollections] = useState<CollectionInfoWithSchema[]>([]);
+  const [collections, setCollections] = useState<CollectionInfoWithSchemaResponse[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(true);
 
-  const { api, currentChainId } = useApi();
+  const { currentChainId, featuredCollections } = useApi();
 
-  const fetchCollections = useCallback(async () => {
-    if (!api) return;
+  const fetchCollections = useCallback(() => {
     setIsFetching(true);
-    const collections = await api?.collection?.getFeaturedCollections() as CollectionInfoWithSchema[];
-    setCollections(collections);
+    const featuredCollectionsAsArray = Object.keys(featuredCollections).map((key) => featuredCollections[key].description);
+    setCollections(featuredCollectionsAsArray || []);
     setIsFetching(false);
-  }, [api?.collection?.getFeaturedCollections]);
+  }, [featuredCollections]);
 
   useEffect(() => {
     void fetchCollections();

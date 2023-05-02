@@ -1,10 +1,12 @@
-import { NestedToken } from '@unique-nft/substrate-client/tokens';
+import { NestedToken } from '@unique-nft/sdk';
+import { DecodedInfixOrUrlOrCidAndHash } from 'api/chainApi/types';
 
 export interface INestingToken extends NestedToken {
   opened?: boolean
   disabled?: boolean
   selected?: boolean
   isCurrentAccountOwner?: boolean
+  image: DecodedInfixOrUrlOrCidAndHash
 }
 
 export interface ITokenCard {

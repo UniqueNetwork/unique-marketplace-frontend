@@ -5,16 +5,17 @@ import { Text, useNotifications, Button } from 'components/UI';
 import styled from 'styled-components';
 
 import DefaultMarketStages from '../Modals/StagesModal';
-import { useAccounts } from '../../../hooks/useAccounts';
-import { StageStatus } from '../../../types/StagesTypes';
+import { useAccounts } from 'hooks/useAccounts';
+import { StageStatus } from 'types/StagesTypes';
 import { TBundleTrunsferModalBodyProps } from './BundleTrunsferModal';
 import { useCollections } from 'hooks/useCollections';
 import { useApi } from 'hooks/useApi';
-import { CollectionInfoWithSchema, DecodedInfixOrUrlOrCidAndHash, TokenByIdResult, TokenIdArguments } from '@unique-nft/substrate-client/tokens';
 import { CollectionCover } from 'components/CollectionCover/CollectionCover';
 import { useOffers } from 'api/restApi/offers/offers';
 import { useTransferToBundleStages } from 'hooks/marketplaceStages/useTransferToBundleStages';
 import { INestingToken } from 'components/BundleTree/types';
+import { CollectionInfoWithSchemaResponse, TokenByIdResponse, TokenIdQuery } from '@unique-nft/sdk';
+import { DecodedInfixOrUrlOrCidAndHash } from 'api/chainApi/types';
 
 const pageSize = 1000;
 
@@ -55,19 +56,19 @@ type TokenOption = {
 
 type ITokenOption = TokenOption | null;
 
-const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(newParent: TokenIdArguments): void, testid: string }> = ({ token, onTransferToBundle, testid }) => {
-  const [collection, setCollection] = useState<CollectionInfoWithSchema | null>();
+const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(newParent: TokenIdQuery): void, testid: string }> = ({ token, onTransferToBundle, testid }) => {
+  const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse | null>();
   const [selectedToken, setSelectedToken] = useState<ITokenOption | null>();
-  const [tokens, setTokens] = useState<TokenByIdResult[]>([]);
+  const [tokens, setTokens] = useState<TokenByIdResponse[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { selectedAccount } = useAccounts();
   const { api } = useApi();
 
   const { offers, fetch } = useOffers();
-  const { collections } = useCollections();
+  const { featuredCollections } = useCollections();
 
   useEffect(() => {
-    if (!selectedAccount?.address) return;
+    if (!selectedAccount) return;
     void (async () => {
       setIsLoading(true);
       await fetch({ page: 1, pageSize, seller: selectedAccount?.address });
@@ -79,8 +80,8 @@ const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(ne
 
   const collectionItems = useMemo(() => {
     const myTokensCollectionIds = [...tokens, ...offers].map((token) => token.collectionId);
-    return collections.filter((collection) => myTokensCollectionIds.includes(collection.id));
-  }, [tokens, offers, collections]);
+    return featuredCollections.filter((collection) => myTokensCollectionIds.includes(collection.id));
+  }, [tokens, offers, featuredCollections]);
 
   const tokenItems: ITokenOption[] = useMemo(() => {
     if (!collection) return [];
@@ -93,7 +94,7 @@ const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(ne
       ...tokens.filter(({ collectionId }) => collectionId === collection?.id).map(({ collectionId, tokenId, image }) => ({
         collectionId,
         tokenId,
-        image
+        image: image as DecodedInfixOrUrlOrCidAndHash
       }))
     ].filter(({ tokenId }) => tokenId !== token.tokenId);
   }, [tokens, offers, collection, token]);
@@ -106,7 +107,7 @@ const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(ne
     [onTransferToBundle, selectedToken]
   );
 
-  const onChangeSelectedCollection = useCallback((collection: CollectionInfoWithSchema | null) => {
+  const onChangeSelectedCollection = useCallback((collection: CollectionInfoWithSchemaResponse | null) => {
     setCollection(collection);
     setSelectedToken(null);
   }, []);
@@ -176,15 +177,15 @@ const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(ne
   );
 };
 
-const TransferToBundleStagesModal: FC<TBundleTrunsferModalBodyProps & { newParent: TokenIdArguments }> = ({ token, newParent, onFinish, testid }) => {
+const TransferToBundleStagesModal: FC<TBundleTrunsferModalBodyProps & { newParent: TokenIdQuery }> = ({ token, newParent, onFinish, testid }) => {
   const { stages, status, initiate } = useTransferToBundleStages(token, newParent);
   const { info } = useNotifications();
   const { selectedAccount } = useAccounts();
 
   useEffect(() => {
-    if (!selectedAccount?.address) return;
+    if (!selectedAccount) return;
     initiate(null);
-  }, [selectedAccount?.address]);
+  }, [selectedAccount]);
 
   useEffect(() => {
     if (status === StageStatus.success) {
@@ -244,7 +245,7 @@ const ItemOption = styled.div`
   padding: calc(var(--gap) / 2) calc(var(--gap) / 4);
 `;
 
-const CollectionsSuggest = (props: SuggestProps<CollectionInfoWithSchema>) => <Suggest<CollectionInfoWithSchema> {...props} />;
+const CollectionsSuggest = (props: SuggestProps<CollectionInfoWithSchemaResponse>) => <Suggest<CollectionInfoWithSchemaResponse> {...props} />;
 const CollectionsSuggestStyled = styled(CollectionsSuggest)`
   width: 100%;
   & .unique-input-text {

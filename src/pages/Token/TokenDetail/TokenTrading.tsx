@@ -5,13 +5,13 @@ import accountContext from '../../../account/AccountContext';
 import { SellToken } from '../SellToken/SellToken';
 import { BuyToken } from '../BuyToken/BuyToken';
 import Auction from '../Auction/Auction';
-import { isTokenOwner } from 'api/uniqueSdk/utils/addressUtils';
+import { isTokenOwner } from 'api/chainApi/utils/addressUtils';
 import { useApi } from '../../../hooks/useApi';
-import { checkAllowedTokenInSettings } from 'api/uniqueSdk/utils/checkTokenIsAllowed';
-import { TokenByIdResult } from '@unique-nft/substrate-client/tokens';
+import { checkAllowedTokenInSettings } from 'api/chainApi/utils/checkTokenIsAllowed';
+import { TokenByIdResponse } from '@unique-nft/sdk';
 
 interface TokenTradingProps {
-  token?: TokenByIdResult
+  token?: TokenByIdResponse
   offer?: Offer
   onSellClick(): void
   onBuyClick(): void
@@ -28,13 +28,11 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
   const { selectedAccount } = useContext(accountContext);
   const { settings, currentChainId } = useApi();
 
-  const allowedTokens = useMemo(() => settings && currentChainId ? settings.blockchain.unique.allowedTokens : undefined, [settings]);
-
   const isAllowed = useMemo(() => {
     if (!token && !offer) return;
     const { tokenId, collectionId } = offer || token!;
-    return checkAllowedTokenInSettings(tokenId, collectionId, allowedTokens);
-  }, [allowedTokens, token, offer]);
+    return checkAllowedTokenInSettings(tokenId, collectionId, settings?.blockchain.unique.collections);
+  }, [settings, token, offer]);
 
   const isOwner = useMemo(() => {
     if (!selectedAccount) return false;
@@ -54,7 +52,6 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
       testid={`${testid}-auction`}
     />);
   }
-
   if (isOwner) {
     return (<SellToken
       offer={offer}

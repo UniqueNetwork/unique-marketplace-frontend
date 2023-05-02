@@ -22,13 +22,13 @@ export const SellToken: FC<SellTokenProps> = ({ offer, isAllowed, onSellClick, o
   const { settings } = useApi();
 
   const hideSellBtn = useMemo(() => {
-    return settings?.marketType === 'primary' && !settings?.administrators.includes(selectedAccount?.address || '');
+    return false;
   }, [settings, selectedAccount]);
 
   if (offer) {
     return (<>
       <Text size={'l'}>{'Price'}</Text>
-      <Price testid={testid} price={offer.price} />
+      <Price testid={testid} price={offer.price.parsed.toString()} />
       <ButtonWrapper>
         <Button
           title={'Delist'}

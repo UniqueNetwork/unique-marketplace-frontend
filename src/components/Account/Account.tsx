@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useMemo } from 'react';
 import { CopyButton, Text, useNotifications } from 'components/UI';
 import styled from 'styled-components';
-import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
+import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import { useApi } from 'hooks/useApi';
 import { shortcutText } from 'utils/textUtils';
@@ -26,13 +26,13 @@ const AccountCard: FC<AccountProps> = ({
   hideName = false,
   testid
 }) => {
-  const { chainData } = useApi();
+  const { chainProperties } = useApi();
   const { info } = useNotifications();
 
   const formatAddress = useCallback((address: string) => {
     if (!address) return '';
-    return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
-  }, [chainData?.SS58Prefix]);
+    return toChainFormatAddress(address, chainProperties?.SS58Prefix || 0);
+  }, [chainProperties?.SS58Prefix]);
 
   const onCopyAddress = (account: string) => () => {
     navigator.clipboard.writeText(account).then(() => {
