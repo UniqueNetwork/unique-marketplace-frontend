@@ -60,13 +60,16 @@ class MarketController extends BaseController implements IMarketController {
     const to = Address.extract.ethCrossAccountId(account.address);
 
     const order = (await this.getOrder(collectionId, tokenId));
-    const value = order.price; // order.value
+    const value = order.price as { type: string, hex: string }; // { type: BigNumber, hex: '0x000001}
     const seller = order.seller[0] as CrossAccountId;
-    console.log('seller', seller); // TODO: recheck allowance? If so - which out of two accounts
+    // console.log('seller', seller); // TODO: recheck allowance? If so - which out of two accounts
     // const isAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from: seller.eth, to });
     // if (!isAllowed.isAllowed) throw new Error('Token not approved for sale');
+    if (!value || !value.hex) throw new Error('Order price incorrect');
     const adapter = this.getAdapter(account.account);
-    await adapter.buy(to, collectionId, tokenId, value, amount, account.signer);
+
+    const parsedPrice = BigInt(value.hex).toString();
+    await adapter.buy(to, collectionId, tokenId, parsedPrice, amount, account.signer);
   }
 
   async cancelFix(collectionId: number, tokenId: number, amount: number, options: TransactionOptions): Promise<void> {
