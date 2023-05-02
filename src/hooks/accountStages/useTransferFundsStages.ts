@@ -4,7 +4,6 @@ import { TTransferFunds } from '../../pages/Accounts/Modals/types';
 import { InternalStage, StageStatus } from '../../types/StagesTypes';
 import useStages from '../useStages';
 import { useAccounts } from '../useAccounts';
-import { UnsignedTxPayload } from '@unique-nft/substrate-client/types';
 import { BN } from '@polkadot/util';
 
 export const useTransferFundsStages = (accountAddress: string) => {

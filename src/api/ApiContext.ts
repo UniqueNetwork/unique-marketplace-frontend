@@ -2,7 +2,7 @@ import { Context, Consumer, Provider, createContext } from 'react';
 import { Settings } from './restApi/settings/types';
 import { UniqueSDKNFTController } from './chainApi/NFTController';
 import { UniqueSDKCollectionController } from './chainApi/collectionController';
-import { ChainPropertiesResponse, Client } from '@unique-nft/sdk';
+import { ChainPropertiesResponse, Sdk } from '@unique-nft/sdk';
 import MarketController from './chainApi/MarketController';
 
 type Api = {
@@ -13,8 +13,8 @@ type Api = {
 
 export type ApiContextProps = {
   api: Api | undefined
-  uniqueSdk?: Client
-  kusamaSdk?: Client
+  uniqueSdk?: Sdk
+  kusamaSdk?: Sdk
   chainData?: ChainPropertiesResponse
   settings?: Settings
   currentChainId?: string

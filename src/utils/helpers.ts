@@ -1,4 +1,4 @@
-import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
+import { DecodedInfixOrUrlOrCidAndHash } from 'api/chainApi/types';
 import { INestingToken } from '../components/BundleTree/types';
 
 export const sleep = (ms: number) => {

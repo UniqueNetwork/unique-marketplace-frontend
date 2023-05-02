@@ -1,26 +1,27 @@
 import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
+import { AllowedCollections } from 'api/restApi/settings/types';
 import { NetworkOptions } from 'api/sdk/sdkClient';
 import BaseController from './controllers/BaseController';
 import { TransactionOptions } from './types';
 
 export class UniqueSDKCollectionController extends BaseController {
-  private collectionIds: number[] = [];
+  private allowedCollections: AllowedCollections;
   constructor(options: NetworkOptions) {
     super(options);
-    this.collectionIds = options.settings.blockchain.unique.collectionIds;
+    this.allowedCollections = options.settings.blockchain.unique.collections;
   }
 
   setNetwork(options: NetworkOptions): void {
     super.setNetwork(options);
-    this.collectionIds = options.settings.blockchain.unique.collectionIds;
+    this.allowedCollections = options.settings.blockchain.unique.collections;
   }
 
   async confirmSponsorship(collectionId: number, { account }: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
     if (!account) throw new Error('Account not provided');
-    const unsignedTxPayload = await this.uniqueSdk.collections.confirmSponsorship.build({ collectionId, address: account.getAddress() });
+    const unsignedTxPayload = await this.uniqueSdk.collections.confirmSponsorship.build({ collectionId, address: account.address });
     if (!unsignedTxPayload) throw new Error('Transaction build error');
-    const { signature } = await this.uniqueSdk.collections.confirmSponsorship.sign(unsignedTxPayload, { signer: account });
+    const { signature } = await this.uniqueSdk.collections.confirmSponsorship.sign(unsignedTxPayload, { signer: account.account });
     if (!signature) throw new Error('Signing failed');
     await this.uniqueSdk.extrinsics.submit({
       signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
@@ -34,14 +35,15 @@ export class UniqueSDKCollectionController extends BaseController {
 
   async getFeaturedCollections(): Promise<CollectionInfoWithSchemaResponse[]> {
     const collections: Array<CollectionInfoWithSchemaResponse> = [];
-    for (let i = 0; i < this.collectionIds.length; i++) {
-      const collectionInf = await this.getCollection(this.collectionIds[i]);
+    for (const id in this.allowedCollections) {
+      const collectionId = Number(id);
+      const collectionInf = await this.getCollection(collectionId);
 
       if (collectionInf &&
         collectionInf.owner &&
         collectionInf.owner.toString() !== '5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM' &&
-        !collections.find((collection) => collection.id === this.collectionIds[i])) {
-        collections.push({ ...collectionInf, id: this.collectionIds[i] });
+        !collections.find((collection) => collection.id === collectionId)) {
+        collections.push({ ...collectionInf, id: collectionId });
       }
     }
     return collections;
@@ -50,9 +52,9 @@ export class UniqueSDKCollectionController extends BaseController {
   async removeCollectionSponsor(collectionId: number, { account }: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
     if (!account) throw new Error('Account not provided');
-    const unsignedTxPayload = await this.uniqueSdk.collections.removeSponsorship.build({ collectionId, address: account.getAddress() });
+    const unsignedTxPayload = await this.uniqueSdk.collections.removeSponsorship.build({ collectionId, address: account.address });
     if (!unsignedTxPayload) throw new Error('Transaction build error');
-    const { signature } = await this.uniqueSdk.collections.removeSponsorship.sign(unsignedTxPayload, { signer: account });
+    const { signature } = await this.uniqueSdk.collections.removeSponsorship.sign(unsignedTxPayload, { signer: account.account });
     if (!signature) throw new Error('Signing failed');
     await this.uniqueSdk.extrinsics.submit({
       signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,

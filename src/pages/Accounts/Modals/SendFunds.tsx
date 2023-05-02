@@ -19,7 +19,7 @@ import { AdditionalWarning100, Coral700 } from 'styles/colors';
 import DefaultMarketStages from '../../Token/Modals/StagesModal';
 import { TTransferFunds } from './types';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
-import { Account } from '@unique-nft/accounts/types';
+import { MarketAccount as Account } from 'account/AccountContext';
 
 const tokenSymbol = 'KSM';
 
@@ -90,7 +90,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   const deviceSize = useDeviceSize();
 
   useEffect(() => {
-    const account = accounts.find((account) => account.getAddress() === senderAddress);
+    const account = accounts.find((account) => account.address === senderAddress);
     setSender(account);
   }, [senderAddress, accounts]);
 
@@ -99,7 +99,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     return debounce(() => {
       if (!selectedAccount || !api?.market) return;
       const recipient = typeof newRecipientAddress === 'string' ? newRecipientAddress : newRecipientAddress?.address;
-      api?.market?.getFee(selectedAccount.getAddress(), recipient, new BN(fromStringToBnString(amount)))
+      api?.market?.getFee(selectedAccount.address, recipient, new BN(fromStringToBnString(amount)))
       .then((fee) => {
         setKusamaFee(fee || '0');
       }).catch((e) => {
@@ -115,7 +115,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   }, [chainData?.SS58Prefix]);
 
   const accountsWithQuartzAddresses = useMemo(() => (
-    accounts.map((account) => ({ ...account, quartzAddress: formatAddress(account.getAddress()) }))
+    accounts.map((account) => ({ ...account, quartzAddress: formatAddress(account.address) }))
   ), [accounts, formatAddress]);
 
   const [filteredAccounts, setFilteredAccounts] = useState(accountsWithQuartzAddresses);
@@ -209,7 +209,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
       >
         <AddressWrapper>
           <AccountCard accountName={sender?.name || ''}
-            accountAddress={sender?.getAddress() || ''}
+            accountAddress={sender?.address || ''}
             canCopy={false}
             isShort={deviceSize < DeviceSize.md}
           />

@@ -32,7 +32,7 @@ export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosab
       onFinish={onFinish}
       token={token}
       setIsClosable={setIsClosable}
-      sender={selectedAccount.getAddress()}
+      sender={selectedAccount.address}
       testid={testid}
       collection={collection}
     />);

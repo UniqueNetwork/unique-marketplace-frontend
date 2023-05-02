@@ -3,9 +3,9 @@ import { useApi } from '../useApi';
 import { InternalStage, StageStatus } from '../../types/StagesTypes';
 import { useAccounts } from '../useAccounts';
 import useStages from '../useStages';
-import { TokenIdArguments } from '@unique-nft/substrate-client/tokens';
+import { TokenIdQuery } from '@unique-nft/sdk';
 
-export const useTransferToBundleStages = (token: TokenIdArguments, parent: TokenIdArguments) => {
+export const useTransferToBundleStages = (token: TokenIdQuery, parent: TokenIdQuery) => {
   const { api } = useApi();
   const { selectedAccount } = useAccounts();
   const nftApi = api?.nft;

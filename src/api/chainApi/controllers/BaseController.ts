@@ -1,7 +1,7 @@
 import { MetamaskAccount } from '@unique-nft/accounts/metamask';
-import { Client, Sdk } from '@unique-nft/sdk';
+import { Sdk } from '@unique-nft/sdk';
 import { NetworkOptions } from 'api/sdk/sdkClient';
-import { Account } from '@unique-nft/accounts/types';
+import { Account } from '@unique-nft/accounts';
 import IMarketContractAdapter from '../adapters/IMarketContractAdapter';
 import MetamaskAdapter from '../adapters/MetamaskAdapter';
 import UniqueAdapter from '../adapters/UniqueAdapter';
@@ -9,23 +9,23 @@ import IBaseController from '../controllers/base/IBaseController';
 
 class BaseController implements IBaseController {
   isConnected = false;
-  uniqueSdk: Client;
+  uniqueSdk: Sdk;
   uniqueAdapter: UniqueAdapter;
   metamaskAdapter: MetamaskAdapter;
   constructor(options: NetworkOptions) {
-    const contractAddress = options.settings.blockchain.unique.contractAddress;
-    this.uniqueSdk = new Sdk({ baseUrl: options.sdkEndpoint });
+    const contractAddress = options.settings.blockchain.unique.contracts[0].address;
+    this.uniqueSdk = new Sdk({ baseUrl: options.settings.blockchain.unique.restUrl });
     this.uniqueAdapter = new UniqueAdapter(contractAddress, this.uniqueSdk);
     this.metamaskAdapter = new MetamaskAdapter(contractAddress);
     this.isConnected = true;
   }
 
   public setNetwork(options: NetworkOptions): void {
-    const sdk = this.uniqueSdk = new Sdk({ baseUrl: options.sdkEndpoint });
+    const sdk = this.uniqueSdk = new Sdk({ baseUrl: options.settings.blockchain.unique.restUrl });
     this.uniqueSdk = sdk;
     this.isConnected = false;
     // TODO: base adapter doesn't need contract address (split adapters into BaseAdapter and MarketAdapter for clarity)
-    const contractAddress = options.settings.blockchain.unique.contractAddress;
+    const contractAddress = options.settings.blockchain.unique.contracts[0].address;
     this.uniqueAdapter = new UniqueAdapter(contractAddress, sdk);
     this.metamaskAdapter = new MetamaskAdapter(contractAddress);
     this.isConnected = true;

@@ -19,13 +19,14 @@ export const useFee = (): UseFeeReturn => {
   const getFee = useCallback(async (recipient: string, value: BN) => {
     if (!selectedAccount || !api?.market) return;
     setFetchingKusamaFee(true);
-    const fee = await api.market.getFee(selectedAccount.getAddress(), recipient, value);
+    const fee = await api.market.getFee(selectedAccount.address, recipient, value);
     setKusamaFee(fee || '0');
     setFetchingKusamaFee(false);
     return fee || '0';
   }, [api, selectedAccount]);
 
-  const marketCommission = useMemo(() => settings ? settings.blockchain.kusama.marketCommission : '0', [settings]);
+  // TODO: fill it correctly
+  const marketCommission = '0'; // useMemo(() => settings ? settings.blockchain.kusama.marketCommission : '0', [settings]);
 
   return { marketCommission, kusamaFee, fetchingKusamaFee, getFee };
 };

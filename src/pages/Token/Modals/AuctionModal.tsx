@@ -61,12 +61,12 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
     const _calculatedBid = await getCalculatedBid({
       collectionId: offer?.collectionId || 0,
       tokenId: offer?.tokenId || 0,
-      bidderAddress: selectedAccount?.getAddress() || ''
+      bidderAddress: selectedAccount?.address || ''
     });
     await getFee(settings.auction.address, new BN(_calculatedBid?.minBidderAmount || 0));
     setCalculatedBid(_calculatedBid);
     setIsFetchingCalculatedBid(false);
-  }, [offer, selectedAccount?.getAddress()]);
+  }, [offer, selectedAccount?.address]);
 
   useEffect(() => {
     void fetchCalculatedBid();
@@ -109,7 +109,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
       const bnAmount = new BN(fromStringToBnString(bidAmount, api?.market?.decimals));
 
       onConfirmPlaceABid({
-        accountAddress: selectedAccount?.getAddress() || '',
+        accountAddress: selectedAccount?.address || '',
         amount: formatKusamaBalance(Number(bnAmount.toString()) - Number(lastBidFromThisAccount))
       });
     },

@@ -15,7 +15,7 @@ export const CancelSellFixStagesModal: FC<TTokenPageModalBodyProps> = ({ offer, 
   useEffect(() => {
     if (!selectedAccount) throw new Error('Account not selected');
     setIsClosable(false);
-    void initiate({ accountAddress: selectedAccount?.getAddress() });
+    void initiate({ accountAddress: selectedAccount?.address });
   }, [selectedAccount]);
 
   useEffect(() => {

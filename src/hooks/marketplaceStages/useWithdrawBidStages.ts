@@ -20,11 +20,12 @@ export const useWithdrawBidStages = (collectionId: number, tokenId: number) => {
 
         const timestamp = Date.now();
         const message = `collectionId=${collectionId}&tokenId=${tokenId}&timestamp=${timestamp}`;
-        const { signature } = await options.account.sign({ signerPayloadHex: stringToHex(message) });
-        await withdrawBid(baseURL,
-          { collectionId, tokenId, timestamp },
-          { signature, signer: options.account.getAddress() }
-        );
+        await Promise.resolve();
+        // const { signature } = await options.account.account.sign({ signerPayloadHex: stringToHex(message) });
+        // await withdrawBid(baseURL,
+        //   { collectionId, tokenId, timestamp },
+        //   { signature, signer: options.account.address }
+        // );
       }
     }
   ], [baseURL, collectionId, tokenId]);

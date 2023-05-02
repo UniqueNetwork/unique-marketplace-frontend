@@ -1,43 +1,38 @@
-import { GetBundleResponse, TokenByIdResponse, TokenOwnerResponse } from '@unique-nft/sdk';
-import { Address } from '@unique-nft/substrate-client/types';
-import { getNestingTokenAddress, TokenIdArguments } from '@unique-nft/substrate-client/tokens';
+import { GetBundleResponse, TokenByIdResponse, TokenOwnerResponse, TokenIdQuery } from '@unique-nft/sdk';
+import { Address } from '@unique-nft/utils';
 import { TransactionOptions } from './types';
 import { getEthAccount } from './utils/addressUtils';
 import { filterAllowedTokens } from './utils/checkTokenIsAllowed';
 import BaseController from './controllers/BaseController';
 import { NetworkOptions } from 'api/sdk/sdkClient';
+import { AllowedCollections } from 'api/restApi/settings/types';
 
 declare module '@unique-nft/sdk' {
   type arrayNumberRecordStringAny = string | number | Record<string, string>
 }
 
 export class UniqueSDKNFTController extends BaseController {
-  private collectionIds: number[] = [];
+  private allowedCollections: AllowedCollections;
   private allowedTokens: Record<number, string> = {};
 
   constructor(options: NetworkOptions) {
     super(options);
-    const allowedTokens = options.settings.blockchain.unique.allowedTokens;
-    const collectionIds = options.settings.blockchain.unique.collectionIds;
-    this.collectionIds = collectionIds;
-    this.allowedTokens = allowedTokens.reduce((acc, item) => ({ ...acc, [item.collection]: item.tokens }), {}) || {};
+    this.allowedCollections = options.settings.blockchain.unique.collections;
   }
 
   setNetwork(options: NetworkOptions): void {
-    const allowedTokens = options.settings.blockchain.unique.allowedTokens;
-    const collectionIds = options.settings.blockchain.unique.collectionIds;
-    this.collectionIds = collectionIds;
-    this.allowedTokens = allowedTokens.reduce((acc, item) => ({ ...acc, [item.collection]: item.tokens }), {}) || {};
+    this.allowedCollections = options.settings.blockchain.unique.collections;
     super.setNetwork(options);
   }
 
-  async getAccountMarketableTokens(address: Address): Promise<TokenByIdResponse[]> {
+  async getAccountMarketableTokens(address: string): Promise<TokenByIdResponse[]> {
     if (!this.uniqueSdk || !address) {
       return [];
     }
     const tokens: TokenByIdResponse[] = [];
 
-    for (const collectionId of this.collectionIds) {
+    for (const id in this.allowedCollections) {
+      const collectionId = Number(id);
       try {
         const tokensIds =
           (await this.uniqueSdk.tokens.accountTokens({ collectionId, address })).tokens || [];
@@ -59,21 +54,21 @@ export class UniqueSDKNFTController extends BaseController {
   }
 
   async getToken(collectionId: number, tokenId: number): Promise<TokenByIdResponse | null> {
-    return await this.uniqueSdk?.tokens.get({ collectionId, tokenId }) || null;
+    return await this.uniqueSdk.tokens.get({ collectionId, tokenId }) || null;
   }
 
   async isBundle(collectionId: number, tokenId: number): Promise<boolean> {
-    return !!await this.uniqueSdk?.tokens.isBundle({ collectionId, tokenId });
+    return (await this.uniqueSdk.tokens.isBundle({ collectionId, tokenId })).isBundle;
   }
 
   async getBundle(collectionId: number, tokenId: number): Promise<GetBundleResponse | null> {
-    return await this.uniqueSdk?.tokens.getBundle({ collectionId, tokenId }) || null;
+    return await this.uniqueSdk.tokens.getBundle({ collectionId, tokenId }) || null;
   }
 
   // TODO: fix
   async unnest(collectionId: number, tokenId: number, address: string, options: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
-    const parent = await this.uniqueSdk?.tokens.parent({ collectionId, tokenId });
+    const parent = await this.uniqueSdk.tokens.parent({ collectionId, tokenId });
 
     if (!parent) return;
 
@@ -90,17 +85,16 @@ export class UniqueSDKNFTController extends BaseController {
     });
   }
 
-  async transferToBundle(nested: TokenIdArguments, newParent: TokenIdArguments, { account }: TransactionOptions): Promise<void> {
-    if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
+  async transferToBundle(nested: TokenIdQuery, newParent: TokenIdQuery, { account }: TransactionOptions): Promise<void> {
     const parent = await this.uniqueSdk.tokens.parent(nested);
     if (!parent) return;
     const { collectionId, tokenId } = nested;
-    const from = getNestingTokenAddress(parent.collectionId, parent.tokenId);
-    const to = getNestingTokenAddress(newParent.collectionId, newParent.tokenId);
+    const from = Address.nesting.idsToAddress(parent.collectionId, parent.tokenId);
+    const to = Address.nesting.idsToAddress(Number(newParent.collectionId), newParent.tokenId);
     const unsignedTxPayload = await this.uniqueSdk.extrinsics.build({
       section: 'unique',
       method: 'transferFrom',
-      address: account?.getAddress() || '',
+      address: account?.address || '',
       args: [
         // @ts-ignore
         { Ethereum: from },
@@ -112,15 +106,15 @@ export class UniqueSDKNFTController extends BaseController {
       ]
     });
     if (!unsignedTxPayload) throw new Error('Transaction build error');
-    const { signature } = await this.uniqueSdk.extrinsics.sign(unsignedTxPayload, account);
+    const { signature } = await this.uniqueSdk.extrinsics.sign(unsignedTxPayload, account.account);
     if (!signature) throw new Error('Signing failed');
-    await this.uniqueSdk?.extrinsics.submit({
+    await this.uniqueSdk.extrinsics.submit({
       signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });
   }
 
   async getOwner(collectionId: number, tokenId: number): Promise<TokenOwnerResponse | null> {
-    return await this.uniqueSdk?.tokens.owner({ collectionId, tokenId }) || null;
+    return await this.uniqueSdk.tokens.owner({ collectionId, tokenId }) || null;
   }
 }

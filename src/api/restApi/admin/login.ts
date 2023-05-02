@@ -24,23 +24,25 @@ export const useAdminLoggingIn = () => {
 
   const hasAdminPermission: boolean = useMemo(() => {
     if (!selectedAccount) return false;
-    return settings?.administrators.some((address) => compareEncodedAddresses(address, selectedAccount.getAddress())) || false;
+    return settings?.administrators.some((address) => compareEncodedAddresses(address, selectedAccount.address)) || false;
   }, [selectedAccount, settings?.administrators]);
 
   const logIn = useCallback(async () => {
     if (!selectedAccount) return null;
     setIsLoggingIn(true);
     try {
-      const { signature } = await selectedAccount.sign({ signerPayloadHex: stringToHex(logInMessage) });
-      const response = await adminLogIn(baseURL, {
-        account: selectedAccount.getAddress()
-      }, signature);
+      // TODO: sdisabled since message subscription logic changed
+      await Promise.resolve();
+      // const { signature } = await selectedAccount.sign({ signerPayloadHex: stringToHex(logInMessage) });
+      // const response = await adminLogIn(baseURL, {
+      //   account: selectedAccount.address
+      // }, signature);
 
-      setIsLoggingIn(false);
-      if (response.status === 200) {
-        localStorage.setItem(`${JWTokenLocalStorageKey}-${currentChainId}`, response.data.accessToken);
-        return response.data.accessToken;
-      }
+      // setIsLoggingIn(false);
+      // if (response.status === 200) {
+      //   localStorage.setItem(`${JWTokenLocalStorageKey}-${currentChainId}`, response.data.accessToken);
+      //   return response.data.accessToken;
+      // }
     } catch (e) {
       setIsLoggingIn(false);
       console.error('Administrator authorization failed', e);

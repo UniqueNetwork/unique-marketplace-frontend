@@ -1,9 +1,9 @@
 import { Consumer, Context, createContext, Provider } from 'react';
 import { BN } from '@polkadot/util';
 import { KeyringPair } from '@polkadot/keyring/types';
+import { Account } from '@unique-nft/accounts';
 import { Signer } from '../api/chainApi/adapters/IBaseAdapter';
 import { TWithdrawBid } from '../api/restApi/auction/types';
-import { SignResult, UnsignedTxPayload, Account } from '@unique-nft/accounts/types';
 
 export type AccountDeposits = {
   bids: {
@@ -13,31 +13,24 @@ export type AccountDeposits = {
   sponsorshipFee?: BN
 }
 
-// TODO: redundant. Consider reworking into local Account type of its own
-declare module '@unique-nft/accounts/types' {
-  export abstract class Account {
-    name: string;
-    address: string;
-    signer: Signer;
-    balance?: {
-      KSM?: BN
-    };
-
-    deposits?: AccountDeposits;
-    isOnWhiteList?: boolean;
-    isLocal?: boolean;
-    abstract sign(unsignedTxPayload: Pick<UnsignedTxPayload, 'signerPayloadHex'> & Partial<UnsignedTxPayload>): Promise<SignResult>
-  }
+export type MarketAccount = {
+  account: Account,
+  signer: Signer,
+  name: string,
+  address: string,
+  isLocal: boolean,
+  deposits?: AccountDeposits,
+  balance: { KSM: BN } // TODO: replace with plain BN
 }
 
 export type AccountContextProps = {
   isLoading: boolean
   isLoadingDeposits: boolean
-  accounts: Account[]
-  selectedAccount: Account | undefined
+  accounts: MarketAccount[]
+  selectedAccount: MarketAccount | undefined
   fetchAccountsError: string | undefined
-  changeAccount(account: Account): void
-  setSelectedAccount(account: Account): void
+  changeAccount(account: MarketAccount): void
+  setSelectedAccount(account: MarketAccount): void
   showSignDialog(keyringPair: KeyringPair): Promise<string>
   fetchAccounts(): Promise<void>
   updateAccountsDeposits(): Promise<void>

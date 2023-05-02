@@ -55,17 +55,17 @@ export const WalletManager: FC = () => {
   }, [onChangeChainId]);
 
   const widgetAccounts = useMemo(() => accounts.map((account) => {
-    if (!isEthereumAddress(account.address)) return { ...account, address: account.getAddress(chainData?.SS58Prefix), substrateAddress: account?.getAddress() };
-    return { account, address: account.getAddress(), substrateAddress: account.getAddress() };
+    if (!isEthereumAddress(account.address)) return { ...account, address: account.account.getAddress(chainData?.SS58Prefix), substrateAddress: account?.address };
+    return { account, address: account.address, substrateAddress: account.address };
   }
   ), [accounts, chainData?.SS58Prefix]);
 
   const widgetSelectedAccount = useMemo(() => (
-    { name: selectedAccount?.name, address: selectedAccount ? selectedAccount.address || selectedAccount.getAddress(chainData?.SS58Prefix) : '', substrateAddress: selectedAccount?.getAddress() }
+    { name: selectedAccount?.name, address: selectedAccount ? selectedAccount.address || selectedAccount.account.getAddress(chainData?.SS58Prefix) : '', substrateAddress: selectedAccount?.address }
   ), [selectedAccount, chainData?.SS58Prefix]);
 
   const widgetAccountChange = useCallback(({ substrateAddress }: IAccount) => {
-    const account = accounts.find((account) => account.getAddress() === substrateAddress);
+    const account = accounts.find((account) => account.address === substrateAddress);
     if (!account) return;
     changeAccount(account);
   }, [accounts, changeAccount]);

@@ -1,7 +1,7 @@
 import { BN } from '@polkadot/util';
-import { SignerPayloadJSON } from '@unique-nft/substrate-client/types';
-import { Account } from '@unique-nft/accounts/types';
 import { Bytes } from '@polkadot/types';
+import { SignerPayloadJSON } from '@polkadot/types/types';
+import { MarketAccount as Account } from 'account/AccountContext';
 
 export type TTransaction = {
   signerPayloadJSON?: SignerPayloadJSON

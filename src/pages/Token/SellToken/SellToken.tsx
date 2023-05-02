@@ -22,7 +22,7 @@ export const SellToken: FC<SellTokenProps> = ({ offer, isAllowed, onSellClick, o
   const { settings } = useApi();
 
   const hideSellBtn = useMemo(() => {
-    return settings?.marketType === 'primary' && !settings?.administrators.includes(selectedAccount?.getAddress() || '');
+    return false;
   }, [settings, selectedAccount]);
 
   if (offer) {

@@ -1,13 +1,13 @@
 import { Attribute, AttributeCount, OfferTokenAttribute } from 'api/restApi/offers/types';
-import { AttributeType, DecodedAttributes } from '@unique-nft/substrate-client/tokens';
 import { MixedTokenAndOffer } from '../../NFTPage';
+import { DecodedAttributeDto } from '@unique-nft/sdk';
 
 export const sortAttributeCounts = (attributeCountA: AttributeCount, attributeCountB: AttributeCount) => attributeCountA.numberOfAttributes > attributeCountB.numberOfAttributes ? 1 : -1;
 
 export const attributes = (attributeA: Attribute, attributeB: Attribute) => attributeA.key.localeCompare(attributeB.key);
 
 export const toTokenAttributes = (offerAttributes: OfferTokenAttribute[]) => {
-  const result: DecodedAttributes = { };
+  const result: DecodedAttributeDto[] = [];
   offerAttributes.map(({ key, value, type }, index) => {
     const convertedValue = Array.isArray(value) ? value.map((v) => ({ _: v })) : { _: value };
     result[index] = {
@@ -16,7 +16,7 @@ export const toTokenAttributes = (offerAttributes: OfferTokenAttribute[]) => {
       value: convertedValue,
       name: { _: key },
       rawValue: convertedValue,
-      type: type as AttributeType
+      type: type as any
     };
     return result;
   });
@@ -61,11 +61,23 @@ export const getAttributesFromTokens = (tokens: MixedTokenAndOffer[]) => {
   return attributesForFilter;
 };
 
-export function countTokenAttributes(attributes: DecodedAttributes | undefined): number {
+export function countTokenAttributes(attributes: DecodedAttributeDto[] | undefined): number {
   if (!attributes) return 0;
   let count = 0;
-  for (const i in attributes) {
-    const { value } = attributes[i];
+  // TODO: Backed offer has different type here
+  if (!attributes.length) {
+    for (const i in attributes as any as { [key: number]: DecodedAttributeDto }) {
+      const { value } = attributes[i];
+      if (Array.isArray(value)) {
+        count += value.length;
+      } else {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  for (const value of attributes) {
     if (Array.isArray(value)) {
       count += value.length;
     } else {
@@ -76,7 +88,7 @@ export function countTokenAttributes(attributes: DecodedAttributes | undefined):
 }
 
 export const getAttributesCountFromTokens = (tokens: MixedTokenAndOffer[]) => {
-  const countTokensAttributes: number[] = tokens.map(({ attributes }) => countTokenAttributes(attributes as DecodedAttributes));
+  const countTokensAttributes: number[] = tokens.map(({ attributes }) => countTokenAttributes(attributes));
   // count tokens with the same amount of attributes, result be like { 7: 2, 6: 1 }
   const counterMap: { [key: number]: number } = {};
   countTokensAttributes.forEach((count) => {

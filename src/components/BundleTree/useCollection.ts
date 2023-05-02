@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
 import { useApi } from 'hooks/useApi';
 import { useCollections } from 'hooks/useCollections';
 import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';

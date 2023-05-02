@@ -38,7 +38,7 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
     const _calculatedBid = await getCalculatedBid({
       collectionId: offer?.collectionId || 0,
       tokenId: offer?.tokenId || 0,
-      bidderAddress: selectedAccount?.getAddress() || ''
+      bidderAddress: selectedAccount?.address || ''
     });
     setCalculatedBid(_calculatedBid);
   }, [offer?.collectionId, offer?.tokenId, selectedAccount]);
@@ -50,19 +50,19 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
 
   const canPlaceABid = useMemo(() => {
     if (!selectedAccount || !offer?.seller) return false;
-    return !isTokenOwner(selectedAccount.getAddress(), offer.seller);
+    return !isTokenOwner(selectedAccount.address, offer.seller);
   }, [offer, selectedAccount]);
 
   const canDelist = useMemo(() => {
     if (!selectedAccount || !offer?.seller) return false;
-    return isTokenOwner(selectedAccount.getAddress(), offer.seller) && !offer.auction?.bids?.length;
+    return isTokenOwner(selectedAccount.address, offer.seller) && !offer.auction?.bids?.length;
   }, [offer, selectedAccount]);
 
   const isBidder = useMemo(() => {
     if (!selectedAccount || !calculatedBid) return false;
     return offer.auction?.bids?.some((bid) => compareEncodedAddresses(
       bid.bidderAddress,
-      selectedAccount.getAddress()
+      selectedAccount.address
     )) && calculatedBid.bidderPendingAmount !== '0';
   }, [offer, selectedAccount, calculatedBid]);
 
@@ -75,7 +75,7 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
 
   const isTopBidder = useMemo(() => {
     if (!selectedAccount || !isBidder || !topBid) return false;
-    return compareEncodedAddresses(topBid.bidderAddress, selectedAccount.getAddress());
+    return compareEncodedAddresses(topBid.bidderAddress, selectedAccount.address);
   }, [isBidder, topBid, selectedAccount]);
 
   const canWithdraw = useMemo(() => {

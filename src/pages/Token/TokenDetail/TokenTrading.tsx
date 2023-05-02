@@ -28,20 +28,18 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
   const { selectedAccount } = useContext(accountContext);
   const { settings, currentChainId } = useApi();
 
-  const allowedTokens = useMemo(() => settings && currentChainId ? settings.blockchain.unique.allowedTokens : undefined, [settings]);
-
   const isAllowed = useMemo(() => {
     if (!token && !offer) return;
     const { tokenId, collectionId } = offer || token!;
-    return checkAllowedTokenInSettings(tokenId, collectionId, allowedTokens);
-  }, [allowedTokens, token, offer]);
+    return checkAllowedTokenInSettings(tokenId, collectionId, settings?.blockchain.unique.collections);
+  }, [settings, token, offer]);
 
   const isOwner = useMemo(() => {
     if (!selectedAccount) return false;
     if (offer) {
-      return isTokenOwner(selectedAccount.getAddress(), offer.seller);
+      return isTokenOwner(selectedAccount.address, offer.seller);
     }
-    return token?.owner ? isTokenOwner(selectedAccount.getAddress(), token.owner) : false;
+    return token?.owner ? isTokenOwner(selectedAccount.address, token.owner) : false;
   }, [selectedAccount, token, offer]);
 
   if (offer?.auction) {

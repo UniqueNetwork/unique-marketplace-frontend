@@ -32,11 +32,12 @@ export const useWithdrawDepositStages = (accountAddress: string, bids: TWithdraw
         const timestamp = Date.now();
         const auctionIds = bids.map((bid) => `auctionId=${bid.auctionId}`).join('&');
         const message = `${auctionIds}&timestamp=${timestamp}`;
-        const { signature } = await options.account.sign({ signerPayloadHex: stringToHex(message) });
-        await withdrawChooseBids(baseURL,
-          { auctionIds: `${auctionIds}`, timestamp },
-          { signature, signer: options.account.getAddress() }
-        );
+        await Promise.resolve();
+        // const { signature } = await options.account.sign({ signerPayloadHex: stringToHex(message) });
+        // await withdrawChooseBids(baseURL,
+        //   { auctionIds: `${auctionIds}`, timestamp },
+        //   { signature, signer: options.account.address }
+        // );
       }
     }]
     : [], [baseURL, bids, bidsAmount]);

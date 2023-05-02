@@ -19,7 +19,7 @@ export const AddressComponent = ({ text, testid }: { text: string, testid: strin
   }, [chainData?.SS58Prefix]);
 
   const shortCut = useMemo(() => {
-    if (selectedAccount?.getAddress() === text) return 'Me';
+    if (selectedAccount?.address === text) return 'Me';
     return shortcutText(formatAddress(text));
   }, [text, selectedAccount, formatAddress]);
 
