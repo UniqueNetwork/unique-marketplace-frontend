@@ -43,17 +43,17 @@ export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosabl
   return null;
 };
 
-const chainOptions = [{ id: 'KSM', title: 'KSM', iconRight: { size: 18, name: 'chain-kusama' } }];
+const chainOptions = [{ id: 'KSM', title: '!!!OLD_KSM!!!', iconRight: { size: 18, name: 'chain-kusama' } }];
 
 export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceABid): void, testid: string}> = ({ offer, onConfirmPlaceABid, testid }) => {
-  const [chain, setChain] = useState<string | undefined>('KSM');
-  const { kusamaFee, getKusamaFee } = useFee();
-  const { selectedAccount } = useAccounts();
   const { api, settings } = useApi();
+  const [chain, setChain] = useState<string | undefined>('KSM');
+  const { kusamaFee, getFee } = useFee();
+  const { selectedAccount } = useAccounts();
   const [calculatedBid, setCalculatedBid] = useState<TCalculatedBid>();
   const [isFetchingCalculatedbid, setIsFetchingCalculatedBid] = useState<boolean>(true);
   const { getCalculatedBid } = useAuction();
-  const decimals = api?.market?.kusamaDecimals;
+  const decimals = api?.market?.decimals;
 
   const fetchCalculatedBid = useCallback(async () => {
     if (!offer || !selectedAccount || !settings) return;
@@ -61,12 +61,12 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
     const _calculatedBid = await getCalculatedBid({
       collectionId: offer?.collectionId || 0,
       tokenId: offer?.tokenId || 0,
-      bidderAddress: selectedAccount?.getAddress() || ''
+      bidderAddress: selectedAccount?.address || ''
     });
-    await getKusamaFee(settings.auction.address, new BN(_calculatedBid?.minBidderAmount || 0));
+    await getFee(settings.auction.address, new BN(_calculatedBid?.minBidderAmount || 0));
     setCalculatedBid(_calculatedBid);
     setIsFetchingCalculatedBid(false);
-  }, [offer, selectedAccount?.getAddress()]);
+  }, [offer, selectedAccount?.address]);
 
   useEffect(() => {
     void fetchCalculatedBid();
@@ -87,33 +87,33 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
   const [bidAmount, setBidAmount] = useState<string>(formatKusamaBalance(minimalBid.toString(), { decimals }));
 
   const isEnoughBalance = useMemo(() => {
-    if (!selectedAccount?.balance?.KSM || selectedAccount?.balance?.KSM.isZero()) return false;
-    const bnAmount = new BN(fromStringToBnString(bidAmount, api?.market?.kusamaDecimals));
-    return selectedAccount?.balance?.KSM.gte(bnAmount.sub(new BN(lastBidFromThisAccount || 0)));
-  }, [selectedAccount?.balance?.KSM, bidAmount, api?.market?.kusamaDecimals, lastBidFromThisAccount]);
+    if (!selectedAccount?.balance?.raw || selectedAccount?.balance?.raw.isZero()) return false;
+    const bnAmount = new BN(fromStringToBnString(bidAmount, api?.market?.decimals));
+    return selectedAccount?.balance?.raw.gte(bnAmount.sub(new BN(lastBidFromThisAccount || 0)));
+  }, [selectedAccount?.balance?.raw, bidAmount, api?.market?.decimals, lastBidFromThisAccount]);
 
   const onBidAmountChange = useCallback((value: string) => {
     setBidAmount(value);
     if (!settings) return;
-    getKusamaFee(settings.auction.address, new BN(fromStringToBnString(value, api?.market?.kusamaDecimals)));
-  }, [setBidAmount]);
+    void (getFee(settings.auction.address, new BN(fromStringToBnString(value, api?.market?.decimals))));
+  }, [setBidAmount, api, getFee, settings]);
 
   const isAmountValid = useMemo(() => {
     if (!bidAmount || bidAmount === '0') return false;
-    return new BN(fromStringToBnString(bidAmount, api?.market?.kusamaDecimals)).gte(minimalBid);
-  }, [bidAmount, minimalBid, api?.market?.kusamaDecimals]);
+    return new BN(fromStringToBnString(bidAmount, api?.market?.decimals)).gte(minimalBid);
+  }, [bidAmount, minimalBid, api?.market?.decimals]);
 
   const onConfirmPlaceABidClick = useCallback(
     () => {
       if (!isAmountValid || !isEnoughBalance) return;
-      const bnAmount = new BN(fromStringToBnString(bidAmount, api?.market?.kusamaDecimals));
+      const bnAmount = new BN(fromStringToBnString(bidAmount, api?.market?.decimals));
 
       onConfirmPlaceABid({
-        accountAddress: selectedAccount?.getAddress() || '',
+        accountAddress: selectedAccount?.address || '',
         amount: formatKusamaBalance(Number(bnAmount.toString()) - Number(lastBidFromThisAccount))
       });
     },
-    [onConfirmPlaceABid, bidAmount, isEnoughBalance, isAmountValid, chain, api?.market?.kusamaDecimals, lastBidFromThisAccount]
+    [onConfirmPlaceABid, bidAmount, isEnoughBalance, isAmountValid, chain, api?.market?.decimals, lastBidFromThisAccount]
   );
 
   const onChainChange = useCallback(

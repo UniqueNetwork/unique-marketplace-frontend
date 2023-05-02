@@ -23,7 +23,7 @@ export const PageLayout: FC = () => {
     }
     if (pathname.includes('/market')) return { heading: 'Market' };
 
-    if (pathname.includes('/administration')) {
+    if (pathname.includes('/collections')) {
       return { heading: 'Collections' };
     }
 

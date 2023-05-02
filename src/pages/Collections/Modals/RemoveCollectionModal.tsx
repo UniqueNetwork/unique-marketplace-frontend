@@ -3,10 +3,10 @@ import { Heading } from '@unique-nft/ui-kit';
 import { Text, useNotifications, Button } from 'components/UI';
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
 import styled from 'styled-components/macro';
-import { useAdminCollections } from '../../../api/restApi/admin/collection';
+import { useCollections } from 'hooks/useCollections';
 
 export const RemoveCollectionModal: FC<TAdminPanelModalBodyProps> = ({ collection, onFinish }) => {
-  const { removeCollection } = useAdminCollections();
+  const { removeCollection } = useCollections();
   const { info } = useNotifications();
 
   const onConfirmClick = useCallback(async () => {

@@ -39,7 +39,7 @@ interface IProps {
 
 function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token, offer, testid, isOwner }: IProps) {
   const navigate = useNavigate();
-  const { uniqueSdk } = useApi();
+  const { api } = useApi();
   const [isMobileViewVisible, setIsMobileViewVisible] = useState(false);
   const [bundle, setBundle] = useState<INestingToken[]>();
   const [isBundleLoading, setIsBundleLoading] = useState(true);
@@ -53,10 +53,10 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
 
   useEffect(() => {
     if (bundle && bundle[0].isCurrentAccountOwner === isOwner) return;
-    (async () => {
+    void (async () => {
       if (offer && offer.tokenDescription.nestingChildTokens) {
         const bundle: INestingToken = {
-          properties: [],
+          // properties: [],
           ...offer.tokenDescription,
           tokenId: offer.tokenId,
           collectionId: offer.collectionId,
@@ -65,14 +65,14 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
         setBundle([addIsCurrentAccountOwnerToBundleAndSort(bundle, isOwner)]);
       } else if (token) {
         setIsBundleLoading(true);
-        const response = await uniqueSdk?.tokens.getBundle({ collectionId: token.collectionId, tokenId: token.tokenId });
+        const response = await api?.nft?.getBundle(token.collectionId, token.tokenId);
         if (response) {
           setBundle([addIsCurrentAccountOwnerToBundleAndSort(response, isOwner)]);
         }
       }
       setIsBundleLoading(false);
     })();
-  }, [uniqueSdk, token, offer, bundle, isOwner]);
+  }, [api, token, offer, bundle, isOwner]);
 
   const closeView = useCallback(() => {
     setIsMobileViewVisible(false);

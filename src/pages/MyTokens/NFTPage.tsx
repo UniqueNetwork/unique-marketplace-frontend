@@ -4,7 +4,6 @@ import BN from 'bn.js';
 import { Text } from '@unique-nft/ui-kit';
 import { Select } from 'components/UI';
 import { BN_MAX_INTEGER } from '@polkadot/util';
-import { BoxedNumberWithDefault, DecodedAttributes, LocalizedStringWithDefault } from '@unique-nft/substrate-client/tokens';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
 import { useOffers } from 'api/restApi/offers/offers';
@@ -53,7 +52,7 @@ const sortingOptions: TOption[] = [
   },
   {
     direction: 'desc',
-    field: 'price',
+    field: 'price', // TODO: now is object
     iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
     id: 'desc(Price)',
     title: 'Price'
@@ -97,7 +96,7 @@ export const NFTPage = () => {
   const [tokens, setTokens] = useState<TokenByIdResponse[]>([]);
   const [isFetchingTokens, setIsFetchingTokens] = useState<boolean>(true);
   const deviceSize = useDeviceSize();
-  const { collections } = useCollections();
+  const { featuredCollections } = useCollections();
 
   const { offers, isFetching: isFetchingOffers, fetch } = useOffers();
   const { api, currentChainId } = useApi();
@@ -107,9 +106,8 @@ export const NFTPage = () => {
 
     setIsFetchingTokens(true);
     void (async () => {
-      await fetch({ page: 1, pageSize, seller: selectedAccount?.getAddress() });
-      const _tokens = (await api.nft?.getAccountMarketableTokens(selectedAccount.getAddress())) || [];
-
+      await fetch({ page: 1, pageSize, seller: selectedAccount?.address });
+      const _tokens = (await api.nft?.getAccountMarketableTokens(selectedAccount.address)) || [];
       setTokens(_tokens);
       setIsFetchingTokens(false);
     })();
@@ -125,8 +123,8 @@ export const NFTPage = () => {
 
   const myCollections = useMemo(() => {
     const myTokensCollectionIds = [...tokens, ...offers].map((token) => token.collectionId);
-    return collections.filter((collection) => myTokensCollectionIds.includes(collection.id));
-  }, [collections, tokens, offers]);
+    return featuredCollections.filter((collection) => myTokensCollectionIds.includes(collection.id));
+  }, [featuredCollections, tokens, offers]);
 
   useEffect(() => {
     if (isFetchingTokens) return;
@@ -178,12 +176,12 @@ export const NFTPage = () => {
 
       let filteredByPrice = true;
       if (prices?.minPrice || prices?.maxPrice) {
-        if (!token.price) {
+        if (!token.price?.raw) {
           filteredByPrice = false;
         } else {
-          const tokenPrice = new BN(token.price);
-          const minPrice = new BN(fromStringToBnString(prices.minPrice || '0', api?.market?.kusamaDecimals));
-          const maxPrice = prices.maxPrice ? new BN(fromStringToBnString(prices.maxPrice, api?.market?.kusamaDecimals)) : BN_MAX_INTEGER;
+          const tokenPrice = new BN(token?.price.raw);
+          const minPrice = new BN(fromStringToBnString(prices.minPrice || '0', api?.market?.decimals));
+          const maxPrice = prices.maxPrice ? new BN(fromStringToBnString(prices.maxPrice, api?.market?.decimals)) : BN_MAX_INTEGER;
           filteredByPrice = (tokenPrice.gte(minPrice) && tokenPrice.lte(maxPrice));
         }
       }
@@ -196,9 +194,9 @@ export const NFTPage = () => {
         filteredByAttributes = filterState?.attributes.every((attributeItem) => {
           const attribute = Object.values(token.attributes || {}).find((attribute) => attribute.name?._?.toLowerCase() === attributeItem.key.toLowerCase());
           return (attribute && attribute.isArray)
-            ? (attribute.value as (BoxedNumberWithDefault | LocalizedStringWithDefault)[])
+            ? (attribute.value as ({ _: string | number })[])
               .some((_attribute) => _attribute._ === attributeItem.attribute)
-            : ((attribute?.value as LocalizedStringWithDefault)?._ === attributeItem.attribute);
+            : ((attribute?.value as {_: string })?._ === attributeItem.attribute);
         });
       }
       let filteredBySearchValue = true;
@@ -208,21 +206,21 @@ export const NFTPage = () => {
         filteredBySearchValue = token.tokenId === Number(searchString) ||
           tokenPrefix?.includes(searchString.toLowerCase()) || // offer
           collectionName?.includes(searchString.toLowerCase()) || // offer
-          collections.some(({ id, name, tokenPrefix }) => { // token
+          featuredCollections.some(({ id, name, tokenPrefix }) => { // token
             return id === token.collectionId && `${name || ''} ${tokenPrefix || ''}`.toLowerCase().includes(searchString.toLowerCase());
           });
       }
 
       return filterByStatus(token) && filteredByPrice && filteredByCollections && filteredByAttributes && filteredBySearchValue;
     },
-    [filterState, searchString, collections, api?.market?.kusamaDecimals]
+    [filterState, searchString, featuredCollections, api?.market?.decimals]
   );
 
   const filterByAttributeCounts = useCallback((token: MixedTokenAndOffer) => {
     let filteredByAttributeCounts = true;
     if (filterState?.attributeCounts && filterState.attributeCounts.length > 0) {
       filteredByAttributeCounts = filterState?.attributeCounts.some((attributeCount) => {
-        return countTokenAttributes(token.attributes as DecodedAttributes) === attributeCount;
+        return countTokenAttributes(token.attributes) === attributeCount;
       });
     }
     return filteredByAttributeCounts;

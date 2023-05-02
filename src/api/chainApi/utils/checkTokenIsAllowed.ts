@@ -1,7 +1,9 @@
 import { TokenId } from '@unique-nft/sdk';
+import { AllowedCollections } from 'api/restApi/settings/types';
 
-export const checkAllowedTokenInSettings = (tokenId: number, collectionId: number, allowedTokensList?: { collection: number, tokens: string }[]) => {
-  const allowedTokens = allowedTokensList?.find((item) => item.collection === collectionId)?.tokens.split(',') || [];
+export const checkAllowedTokenInSettings = (tokenId: number, collectionId: number, allowedCollections: AllowedCollections | undefined) => {
+  if (!allowedCollections) return false;
+  const allowedTokens = allowedCollections[collectionId]?.allowedTokens.split(',').filter((at) => !!at.trim()) || [];
   return checkTokenIsAllowed(tokenId, allowedTokens);
 };
 

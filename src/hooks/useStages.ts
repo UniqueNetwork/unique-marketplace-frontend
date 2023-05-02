@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNotifications } from 'components/UI';
 import { InternalStage, StageStatus, useStagesReturn } from '../types/StagesTypes';
-import { Account } from '@unique-nft/accounts/types';
+import { MarketAccount as Account } from 'account/AccountContext';
 
-const useStages = <T>(stages: InternalStage<T>[], signer?: Account): useStagesReturn<T> => {
+const useStages = <T>(stages: InternalStage<T>[], account?: Account): useStagesReturn<T> => {
+  if (!account) throw new Error('Can\'t execute stages without account');
   const [internalStages, setInternalStages] = useState<InternalStage<T>[]>(stages);
   const [stagesStatus, setStagesStatus] = useState<StageStatus>(StageStatus.default);
   const [executionError, setExecutionError] = useState<Error | undefined | null>(null);
@@ -31,15 +32,15 @@ const useStages = <T>(stages: InternalStage<T>[], signer?: Account): useStagesRe
     updateStage(index, { ...stage, status: StageStatus.inProgress });
     try {
       // if sign is required by action -> promise wouldn't be resolved until transaction is signed
-      // transaction sign could be triggered in the component that uses current stage (you can track it by using stage.signer)
-      await stage.action({ txParams, options: { signer } });
+      // transaction sign could be triggered in the component that uses current stage (you can track it by using stage.account)
+      await stage.action({ txParams, options: { account } });
       updateStage(index, { ...stage, status: StageStatus.success });
     } catch (e) {
       updateStage(index, { ...stage, status: StageStatus.error });
       console.error('Execute stage failed', stage, e);
       throw new Error(`Execute stage "${stage.title}" failed`);
     }
-  }, [updateStage, signer]);
+  }, [updateStage, account]);
 
   const initiate = useCallback(async (params: T) => {
     setStagesStatus(StageStatus.inProgress);

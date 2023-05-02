@@ -4,15 +4,15 @@ import { Text, useNotifications, Button } from 'components/UI';
 import styled from 'styled-components/macro';
 
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
-import { useAdminCollections } from 'api/restApi/admin/collection';
 import { TextInput } from 'components/TextInput/TextInput';
+import { useCollections } from 'hooks/useCollections';
 
 const MAX_SAFE_ID = 2147483647;
 
 const NOT_VALID_TOKEN_MESSAGE = 'List of token IDs is incorrect. It must be like "1-10,20" and maximum value of ID is 2147483647';
 
 export const SelectNFTsModal: FC<TAdminPanelModalBodyProps> = ({ collection, onFinish }) => {
-  const { setAllowedTokens } = useAdminCollections();
+  const { setAllowedTokens } = useCollections();
   const [tokens, setTokens] = useState<string>(collection?.allowedTokens || '');
   const { info } = useNotifications();
 

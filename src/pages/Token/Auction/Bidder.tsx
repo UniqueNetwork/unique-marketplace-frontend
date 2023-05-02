@@ -4,7 +4,7 @@ import styled from 'styled-components';
 
 import AccountLink from '../../../components/Account/AccountLink';
 import { useAccounts } from '../../../hooks/useAccounts';
-import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
+import { compareEncodedAddresses } from 'api/chainApi/utils/addressUtils';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import { Avatar } from '../../../components/Avatar/Avatar';
 
@@ -16,7 +16,7 @@ interface BidderProps {
 const Bidder: FC<BidderProps> = ({ accountAddress, testid }) => {
   const { selectedAccount } = useAccounts();
 
-  if (compareEncodedAddresses(accountAddress, selectedAccount?.getAddress() || '')) {
+  if (compareEncodedAddresses(accountAddress, selectedAccount?.address || '')) {
     return <Text size={'m'} color={'grey-600'} testid={`${testid}-you`}>You</Text>;
   }
 

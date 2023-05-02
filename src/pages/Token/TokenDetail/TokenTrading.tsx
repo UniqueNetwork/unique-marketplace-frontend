@@ -5,9 +5,9 @@ import accountContext from '../../../account/AccountContext';
 import { SellToken } from '../SellToken/SellToken';
 import { BuyToken } from '../BuyToken/BuyToken';
 import Auction from '../Auction/Auction';
-import { isTokenOwner } from 'api/uniqueSdk/utils/addressUtils';
+import { isTokenOwner } from 'api/chainApi/utils/addressUtils';
 import { useApi } from '../../../hooks/useApi';
-import { checkAllowedTokenInSettings } from 'api/uniqueSdk/utils/checkTokenIsAllowed';
+import { checkAllowedTokenInSettings } from 'api/chainApi/utils/checkTokenIsAllowed';
 import { TokenByIdResponse } from '@unique-nft/sdk';
 
 interface TokenTradingProps {
@@ -28,20 +28,18 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
   const { selectedAccount } = useContext(accountContext);
   const { settings, currentChainId } = useApi();
 
-  const allowedTokens = useMemo(() => settings && currentChainId ? settings.blockchain.unique.allowedTokens : undefined, [settings]);
-
   const isAllowed = useMemo(() => {
     if (!token && !offer) return;
     const { tokenId, collectionId } = offer || token!;
-    return checkAllowedTokenInSettings(tokenId, collectionId, allowedTokens);
-  }, [allowedTokens, token, offer]);
+    return checkAllowedTokenInSettings(tokenId, collectionId, settings?.blockchain.unique.collections);
+  }, [settings, token, offer]);
 
   const isOwner = useMemo(() => {
     if (!selectedAccount) return false;
     if (offer) {
-      return isTokenOwner(selectedAccount.getAddress(), offer.seller);
+      return isTokenOwner(selectedAccount.address, offer.seller);
     }
-    return token?.owner ? isTokenOwner(selectedAccount.getAddress(), token.owner) : false;
+    return token?.owner ? isTokenOwner(selectedAccount.address, token.owner) : false;
   }, [selectedAccount, token, offer]);
 
   if (offer?.auction) {
@@ -54,7 +52,6 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
       testid={`${testid}-auction`}
     />);
   }
-
   if (isOwner) {
     return (<SellToken
       offer={offer}

@@ -1,5 +1,4 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
-import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 
 import { Offer } from 'api/restApi/offers/types';
 import { MarketType } from '../../../types/MarketTypes';

@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { Icon } from 'components/UI/Icon/Icon';
 import { Offer } from 'api/restApi/offers/types';
 import { useAccounts } from 'hooks/useAccounts';
-import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
+import { compareEncodedAddresses } from 'api/chainApi/utils/addressUtils';
 import { formatKusamaBalance } from 'utils/textUtils';
 import { timeDifference } from 'utils/timestampUtils';
 import { countNestedChildren, stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
@@ -23,7 +23,7 @@ export type TTokensCard = {
 
 export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
   const { selectedAccount } = useAccounts();
-  const { currentChainId } = useApi();
+  const { currentChainId, chainProperties } = useApi();
 
   const {
     image,
@@ -42,7 +42,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
 
   const isBidder = useMemo(() => {
     if (!selectedAccount) return false;
-    return offer?.auction?.bids.some((bid) => compareEncodedAddresses(bid.bidderAddress, selectedAccount.getAddress()));
+    return offer?.auction?.bids.some((bid) => compareEncodedAddresses(bid.bidderAddress, selectedAccount.address));
   }, [offer, selectedAccount]);
 
   const topBid = useMemo(() => {
@@ -52,7 +52,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
 
   const isTopBidder = useMemo(() => {
     if (!selectedAccount || !isBidder || !topBid) return false;
-    return compareEncodedAddresses(offer?.auction!.bids[0].bidderAddress, selectedAccount.getAddress());
+    return compareEncodedAddresses(offer?.auction!.bids[0].bidderAddress, selectedAccount.address);
   }, [isBidder, topBid, selectedAccount]);
 
   const tokenPath = useMemo(() => generatePath('/:currentChainId/token/:collectionId/:tokenId', {
@@ -102,8 +102,8 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
           <Text
             testid={`${testid}-price`}
             size='l'
-          >{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(offer?.price)}` }</Text>
-          <IconStyled name={'chain-kusama'} size={16} />
+          >{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${offer.price.parsed}` }</Text>
+          <IconStyled name={`chain-${chainProperties?.token}`} size={16} />
           {!offer?.auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         </PriceWrapper>
         {offer?.auction && <AuctionInfoWrapper>

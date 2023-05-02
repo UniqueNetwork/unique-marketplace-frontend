@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { SelectOptionProps } from '@unique-nft/ui-kit';
-import { useNotifications, Select, Button } from 'components/UI';
+import { Select, Button } from 'components/UI';
 import styled from 'styled-components/macro';
 import NoItems from 'components/NoItems';
 import { Secondary400 } from 'styles/colors';
@@ -8,15 +8,13 @@ import { CollectionCard } from 'components/CollectionCard/CollectionCard';
 import { AdminPanelModal } from './Modals/AdminPanelModal';
 import { AdminPanelModalType } from './Modals/types';
 import { PagePaper } from 'components/PagePaper/PagePaper';
-import { useNavigate } from 'react-router-dom';
-import { useAdminLoggingIn } from 'api/restApi/admin/login';
-import { useAdminCollections } from 'api/restApi/admin/collection';
 import CardSkeleton from 'components/Skeleton/CardSkeleton';
 import SearchField from 'components/SearchField/SearchField';
 import { useAccounts } from 'hooks/useAccounts';
-import { CollectionData } from 'api/restApi/admin/types';
+import { MyCollection } from 'api/restApi/collections/types';
 import config from 'config';
 import { useApi } from 'hooks/useApi';
+import { useCollections } from 'hooks/useCollections';
 
 type TOption = {
   iconRight: {
@@ -27,24 +25,24 @@ type TOption = {
   id: string
   title: string
   direction: string
-  field: keyof CollectionData
+  field: keyof MyCollection
 }
 
 const sortingOptions: TOption[] = [
-  {
-    iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
-    id: 'asc(Date)',
-    direction: 'asc',
-    field: 'updatedAt',
-    title: 'Date added'
-  },
-  {
-    iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
-    id: 'desc(Price)',
-    direction: 'desc',
-    field: 'updatedAt',
-    title: 'Date added'
-  },
+  // {
+  //   iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
+  //   id: 'asc(Date)',
+  //   direction: 'asc',
+  //   field: 'updatedAt',
+  //   title: 'Date added'
+  // },
+  // {
+  //   iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
+  //   id: 'desc(Price)',
+  //   direction: 'desc',
+  //   field: 'updatedAt',
+  //   title: 'Date added'
+  // },
   {
     iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
     id: 'asc(collectionId)',
@@ -61,41 +59,22 @@ const sortingOptions: TOption[] = [
   }
 ];
 
-export const AdminPanelPage: FC = () => {
+export const CollectionsPage: FC = () => {
+  const { currentChainId, settings, refetchSettings } = useApi();
+  const { selectedAccount } = useAccounts();
   const [sortingValue, setSortingValue] = useState<TOption>(sortingOptions[0]);
   const [searchValue, setSearchValue] = useState<string>();
-  const [hasAccess, setHasAccess] = useState<boolean>(false);
   const [modalType, setModalType] = useState(AdminPanelModalType.default);
-  const [selectedCollection, setSelectedCollection] = useState<CollectionData>();
-  const { hasAdminPermission, getJWToken } = useAdminLoggingIn();
-  const { collections, isFetching, fetchCollections } = useAdminCollections();
+  const [selectedCollection, setSelectedCollection] = useState<MyCollection>();
+  const { collections, isFetching, fetchCollections } = useCollections();
   const { isLoading: isAccountsLoading } = useAccounts();
-  const navigate = useNavigate();
-  const { warning } = useNotifications();
-  const { currentChainId } = useApi();
 
   useEffect(() => {
-    if (isAccountsLoading) return;
-    if (!hasAdminPermission) {
-      navigate('/');
-    }
     void (async () => {
-      const jwtoken = await getJWToken();
-      if (!jwtoken) {
-        warning(
-          'Unable to login, please try again!',
-          { name: 'warning', size: 32, color: 'var(--color-additional-light)' }
-        );
-        navigate('/');
-        return;
-      }
-      setHasAccess(true);
-      void await fetchCollections();
-      setSearchValue(undefined);
-      setSortingValue(sortingOptions[0]);
+      void await fetchCollections(selectedAccount);
       setModalType(AdminPanelModalType.default);
     })();
-  }, [hasAdminPermission, isAccountsLoading, currentChainId, fetchCollections]);
+  }, [isAccountsLoading, currentChainId, selectedAccount, settings, fetchCollections]);
 
   const onSortingChange = useCallback((value: SelectOptionProps) => {
     setSortingValue(value as TOption);
@@ -111,57 +90,57 @@ export const AdminPanelPage: FC = () => {
 
   const onFinish = useCallback(async () => {
     setModalType(AdminPanelModalType.default);
-    void await fetchCollections();
+    void await refetchSettings();
+    void await fetchCollections(selectedAccount);
   }, []);
-
-  const onAddCollectionClick = useCallback(() => {
-    if (!hasAccess) return;
-    setModalType(AdminPanelModalType.addCollection);
-  }, [hasAccess]);
 
   const onCreateCollectionViaWalletClick = useCallback(() => {
     const { walletUrl } = config.blockchains[currentChainId || ''] || {};
-    if (!walletUrl || !hasAccess) return;
     window.open(walletUrl, '_blank')?.focus();
-  }, [hasAccess, currentChainId]);
+  }, [currentChainId]);
 
-  const onManageSponsorshipClick = useCallback((collection: CollectionData) => () => {
+  const onManageSponsorshipClick = useCallback((collection: MyCollection) => () => {
     setModalType(AdminPanelModalType.acceptSponsorship);
     setSelectedCollection(collection);
   }, []);
 
-  const onRemoveSponsorshipClick = useCallback((collection: CollectionData) => () => {
+  const onRemoveSponsorshipClick = useCallback((collection: MyCollection) => () => {
     setModalType(AdminPanelModalType.rejectSponsorship);
     setSelectedCollection(collection);
   }, []);
 
-  const onRemoveCollectionClick = useCallback((collection: CollectionData) => () => {
+  const onAddCollectionClick = useCallback((collection: MyCollection | undefined = undefined) => () => {
+    setModalType(AdminPanelModalType.addCollection);
+    if (collection) setSelectedCollection(collection);
+  }, []);
+
+  const onRemoveCollectionClick = useCallback((collection: MyCollection) => () => {
     setModalType(AdminPanelModalType.removeCollection);
     setSelectedCollection(collection);
   }, []);
 
-  const onManageTokensClick = useCallback((collection: CollectionData) => () => {
+  const onManageTokensClick = useCallback((collection: MyCollection) => () => {
     setModalType(AdminPanelModalType.selectNFTs);
     setSelectedCollection(collection);
   }, []);
 
-  const onViewOnScanClick = useCallback((collection: CollectionData) => () => {
+  const onViewOnScanClick = useCallback((collection: MyCollection) => () => {
     const { scanUrl } = config.blockchains[currentChainId || ''] || {};
     if (!scanUrl) return;
     window.open(`${scanUrl}collections/${collection.id}`, '_blank')?.focus();
   }, [currentChainId]);
 
   const filteredCollections = useMemo(() => {
-    if (!collections || !hasAccess) return [];
-    const sortCollection = (collectionA: CollectionData, collectionB: CollectionData) => {
+    if (!collections) return [];
+    const sortCollection = (collectionA: MyCollection, collectionB: MyCollection) => {
       if (!sortingValue) return 0;
       const order = sortingValue.direction === 'asc' ? 1 : -1;
       if (sortingValue.field === 'id') return Number(collectionA[sortingValue.field]) > Number(collectionB[sortingValue.field]) ? order : -order;
       return (collectionA[sortingValue.field] || '') > (collectionB[sortingValue.field] || '') ? order : -order;
     };
 
-    const filterCollection = (collection: CollectionData) => {
-      if (collection.status === 'Disabled') return false;
+    const filterCollection = (collection: MyCollection) => {
+      if (!collection) return false;
       if (searchValue) {
         const searchString = searchValue.trim().toLocaleLowerCase();
         return collection.id.toString().includes(searchString) || collection.name?.toLocaleLowerCase().includes(searchString) || collection.tokenPrefix?.toLocaleLowerCase().includes(searchString);
@@ -192,11 +171,11 @@ export const AdminPanelPage: FC = () => {
           </SortSelectWrapper>
         </SearchAndSortingWrapper>
         <ButtonsWrapper>
-          <Button disabled={!hasAccess} title={'Create new via wallet'} onClick={onCreateCollectionViaWalletClick}/>
-          <Button disabled={!hasAccess}
+          <Button title={'Create new via wallet'} onClick={onCreateCollectionViaWalletClick}/>
+          <Button
             role={'primary'}
             title={'Add to the marketplace'}
-            onClick={onAddCollectionClick}
+            onClick={onAddCollectionClick()}
           />
         </ButtonsWrapper>
       </ControlsWrapper>
@@ -212,6 +191,7 @@ export const AdminPanelPage: FC = () => {
             onManageSponsorshipClick={onManageSponsorshipClick(collection)}
             onRemoveSponsorshipClick={onRemoveSponsorshipClick(collection)}
             onManageTokensClick={onManageTokensClick(collection)}
+            onAddCollectionClick={onAddCollectionClick(collection)}
             onRemoveCollectionClick={onRemoveCollectionClick(collection)}
             onViewOnScanClick={onViewOnScanClick(collection)}
           />)}

@@ -16,8 +16,8 @@ export const useTransferStages = (collectionId: number, tokenId: number) => {
     action: (params) => marketApi?.transferToken(
       params.txParams.sender,
       params.txParams?.recipient || '',
-      collectionId.toString(),
-      tokenId.toString(),
+      collectionId,
+      tokenId,
       params.options
     )
   }], [marketApi, collectionId, tokenId]);

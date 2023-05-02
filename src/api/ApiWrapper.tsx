@@ -1,13 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { keyring } from '@polkadot/ui-keyring';
+import { ChainPropertiesResponse } from '@unique-nft/sdk';
 import { useNotifications } from 'components/UI';
+import { keyring } from '@polkadot/ui-keyring';
+
 import { ApiContextProps, ApiProvider } from './ApiContext';
-import AuctionSocketProvider from './restApi/auction/AuctionSocketProvider';
+// import AuctionSocketProvider from './restApi/auction/AuctionSocketProvider';
 import { Settings } from './restApi/settings/types';
 import { NetworkOptions, SdkClient } from './sdk/sdkClient';
 import config from '../config';
-import { sdkClient as sdk } from '.';
 import { useSettings } from './restApi/settings/settings';
 import { ChainIdLocalStorageKey, getInitialChainId } from '../utils/initialChainId';
 
@@ -20,13 +21,13 @@ interface ChainProviderProps {
 
 const initialChainId = getInitialChainId();
 
-const ApiWrapper = ({
-  children,
-  sdkClient = sdk
-}: ChainProviderProps) => {
+const ApiWrapper = ({ children }: ChainProviderProps) => {
+  const [sdkClient, setSdkClient] = useState<SdkClient>();
   const [isRpcClientInitialized, setRpcClientInitialized] = useState<boolean>(false);
   const navigate = useNavigate();
+  const [availableNetworkOptions, setAvailableNetworkOptions] = useState<NetworkOptions[]>();
   const [settings, setSettings] = useState<Settings>();
+  const [chainProperties, setChainProperties] = useState<ChainPropertiesResponse>();
   const [currentChainId, setCurrentChainId] = useState<string>(initialChainId);
   const { error } = useNotifications();
   const { fetchSettings } = useSettings();
@@ -34,13 +35,18 @@ const ApiWrapper = ({
   useEffect(() => {
     (async () => {
       const settings = await fetchSettings(config.blockchains);
+      const networkOptions = settings.map<NetworkOptions>(({ networkId, settings }) => ({ networkId, settings }));
+      setAvailableNetworkOptions(networkOptions);
+      // TODO: setup current chain properly from localStorage/url
+      const currentNetworkOption = networkOptions.find((no) => no.networkId === currentChainId) || networkOptions[0];
 
-      await sdk.initialize(settings.map<NetworkOptions>(({ networkId, sdkEndpoint, sdkRelayEndpoint, settings }) => ({ networkId, sdkEndpoint, sdkRelayEndpoint, settings })));
+      setSettings(currentNetworkOption.settings);
 
-      setSettings(sdkClient?.networks[currentChainId].settings);
-      sdkClient?.setNetwork(currentChainId);
+      const sdkClient = new SdkClient(currentNetworkOption);
+      setSdkClient(sdkClient);
+      setChainProperties(await sdkClient.sdk.common.chainProperties());
 
-      setRpcClientInitialized(sdkClient?.isReady);
+      setRpcClientInitialized(true);
     })().then(() => {
       console.log('SDK connection: success');
     }).catch((e) => {
@@ -49,17 +55,26 @@ const ApiWrapper = ({
     });
   }, []);
 
+  const refetchSettings = useCallback(async () => {
+    const settings = await fetchSettings(config.blockchains);
+    const networkOptions = settings.map<NetworkOptions>(({ networkId, settings }) => ({ networkId, settings }));
+    setAvailableNetworkOptions(networkOptions);
+    const currentNetworkOption = networkOptions.find((no) => no.networkId === currentChainId) || networkOptions[0];
+    setSettings(currentNetworkOption.settings);
+  }, [currentChainId, fetchSettings]);
+
   const onChangeChainId = useCallback((newChainId: string) => {
     if (currentChainId === newChainId) return;
     if (!sdkClient) {
       throw new Error('SdkClient is not available');
     }
 
-    const { settings } = sdkClient.networks[newChainId];
+    const option = availableNetworkOptions?.find((no) => no.networkId === newChainId);
+    if (!option) throw new Error('Requested network not found'); // TODO: change to default one or atleast don't crash app
 
-    setSettings(settings);
+    setSettings(option.settings);
 
-    sdkClient?.setNetwork(newChainId);
+    sdkClient?.setNetwork(option);
     setCurrentChainId(newChainId);
     localStorage.setItem(ChainIdLocalStorageKey, newChainId);
     // redirect to correct URL with chainId
@@ -75,17 +90,22 @@ const ApiWrapper = ({
     } else {
       navigate(`/${newChainId}${pathname}`);
     }
-  }, [currentChainId, sdkClient, settings]);
+  }, [currentChainId, sdkClient, availableNetworkOptions, navigate]);
 
   // get current chain and current chain settings
   const currentChain = useMemo(() => {
     if (!sdkClient?.isReady || !currentChainId) return undefined;
-
-    return sdkClient?.networks[currentChainId];
+    const option = availableNetworkOptions?.find((no) => no.networkId === currentChainId);
+    return option;
   }, [currentChainId, sdkClient?.isReady]);
 
-  const prefixes = useMemo(() => Object.values(sdkClient?.networks || []).map(({ uniqueProperties }) => uniqueProperties?.SS58Prefix || 255),
-    [isRpcClientInitialized]
+  // TODO: !!! GET CHAIN PREFIXES EITHER FROM BE OR CALCULATE VIA SDK !!! !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  const prefixes = useMemo(() => {
+    const prefixes = [255];
+    if (chainProperties?.SS58Prefix) prefixes.push(chainProperties.SS58Prefix);
+    return prefixes;
+  },
+    [chainProperties]
   );
 
   // get context value for ApiContext
@@ -98,23 +118,23 @@ const ApiWrapper = ({
           market: sdkClient.marketController
         }
         : undefined),
-      uniqueSdk: currentChain?.sdkSet?.unique,
-      kusamaSdk: currentChain?.sdkSet?.kusama,
-      chainData: currentChain?.uniqueProperties,
+      chainProperties,
       baseURL: config.blockchains[currentChainId]?.apiEndpoint || '',
+      featuredCollections: settings?.blockchain.unique.collections || {},
+      refetchSettings,
       settings,
       prefixes,
       currentChainId,
       onChangeChainId
     }),
-    [isRpcClientInitialized, currentChain, settings, currentChainId, prefixes]
+    [isRpcClientInitialized, currentChain, settings, currentChainId, prefixes, onChangeChainId, refetchSettings, chainProperties, sdkClient]
   );
 
   return (
     <ApiProvider value={value}>
-      <AuctionSocketProvider url={config.blockchains[currentChainId]?.apiEndpoint}>
-        {children}
-      </AuctionSocketProvider>
+      {/* <AuctionSocketProvider url={config.blockchains[currentChainId]?.apiEndpoint}> */}
+      {children}
+      {/* </AuctionSocketProvider> */}
     </ApiProvider>
   );
 };

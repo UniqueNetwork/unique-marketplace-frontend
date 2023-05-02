@@ -4,7 +4,7 @@ import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 export type CollectionsContextProps = {
   isFetching: boolean
   collections: CollectionInfoWithSchemaResponse[]
-  fetchCollections(): Promise<void>
+  fetchCollections(): void
 }
 
 const CollectionsContext: Context<CollectionsContextProps> = createContext({} as unknown as CollectionsContextProps);

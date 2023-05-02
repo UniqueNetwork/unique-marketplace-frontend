@@ -1,19 +1,18 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Link } from '@unique-nft/ui-kit';
-import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 import { Icon, useNotifications } from 'components/UI';
 import { useApi } from 'hooks/useApi';
 import { MarketType } from 'types/MarketTypes';
 import { CommonTokenDetail } from './TokenDetail/CommonTokenDetail';
 import { useOffer } from 'api/restApi/offers/offer';
 import { TokenTrading } from './TokenDetail/TokenTrading';
-import { Error404 } from '../errors/404';
+import { Error404 } from '../Errors/404';
 import TokenPageModal from './Modals/TokenPageModal';
 import { PagePaper } from 'components/PagePaper/PagePaper';
 import { useAccounts } from 'hooks/useAccounts';
 import { shortcutText } from 'utils/textUtils';
-import { compareEncodedAddresses, isTokenOwner } from 'api/uniqueSdk/utils/addressUtils';
+import { compareEncodedAddresses, isTokenOwner } from 'api/chainApi/utils/addressUtils';
 import styled from 'styled-components';
 import { BlueGrey500 } from 'styles/colors';
 import BundleTreeSection from './BundleTreeSection';
@@ -42,7 +41,6 @@ const TokenPage = () => {
     try {
       const token = await api.nft?.getToken(Number(collectionId), Number(id));
       setIsBundle(await api.nft?.isBundle(Number(collectionId), Number(id)));
-
       const collection = await getCollection(Number(collectionId));
       if (token) setToken(token);
       if (collection) setCollection(collection);
@@ -50,22 +48,22 @@ const TokenPage = () => {
       console.error('error while fetching token or collection from RPC', e);
     }
     setIsFetchingToken(false);
-  }, [api?.nft, currentChainId, collectionId, id]);
+  }, [api?.nft, currentChainId, collectionId, id, getCollection]);
 
   useEffect(() => {
     if (isFetchingOffer) return;
-    (async () => {
+    void (async () => {
       if (offer) {
         const collection = await getCollection(Number(collectionId));
         if (collection) setCollection(collection);
-        setIsBundle(!!offer.tokenDescription.nestingChildTokens);
+        setIsBundle(!!offer.tokenDescription?.nestingChildTokens);
       }
       if (!token) await fetchToken();
       if (offer || token) {
         setIsFetchingToken(false);
       }
     })();
-  }, [fetchToken, isFetchingOffer, offer, token, collectionId]);
+  }, [fetchToken, isFetchingOffer, offer, token, collectionId, getCollection]);
 
   const onClose = useCallback(() => {
     setMarketType(MarketType.default);
@@ -91,7 +89,7 @@ const TokenPage = () => {
       <div data-testid={`${testid}-success-notification`}>
         {compareEncodedAddresses(
           newOwnerAddress,
-          selectedAccount?.getAddress() || ''
+          selectedAccount?.address || ''
         )
           ? 'You are'
           : `${shortcutText(newOwnerAddress)} is` }  the new owner of <Link href={`/token/${token.collectionId}/${token.tokenId}`} title={`${collection?.tokenPrefix} #${token.tokenId}`}/>
@@ -101,7 +99,7 @@ const TokenPage = () => {
 
     void fetchOffer(Number(collectionId), Number(id));
     void fetchToken();
-  }, [info, fetchOffer, fetchToken, selectedAccount?.getAddress(), collectionId, id, token]);
+  }, [info, fetchOffer, fetchToken, selectedAccount?.address, collectionId, id, token, collection]);
 
   const backClickHandler = useCallback(() => {
     // if user opened token page with a direct link, redirect him to /market, otherwise redirect him back
@@ -112,20 +110,19 @@ const TokenPage = () => {
     }
   }, [navigate]);
 
+  // TODO: rework this one
   // if we opened child token from bundle which is on sale
-  const isIgnoreOffer = useMemo(() => (!(!token || !offer || (id === offer.tokenId.toString() && collectionId === offer.collectionId.toString()))), [token, offer]);
+  const isIgnoreOffer = false; // useMemo(() => (!(!token || !offer || (id === offer.tokenId.toString() && collectionId === offer.collectionId.toString()))), [token, offer, collectionId, id]);
 
   const isOwner = useMemo(() => {
     if (!selectedAccount || isFetchingOffer || isFetchingToken) return false;
     if (offer) {
-      return isTokenOwner(selectedAccount.getAddress(), offer.seller);
+      return isTokenOwner(selectedAccount.address, offer.seller);
     }
-    return token?.owner ? isTokenOwner(selectedAccount.getAddress(), token.owner) : false;
+    return token?.owner ? isTokenOwner(selectedAccount.address, token.owner) : false;
   }, [isFetchingOffer, isFetchingToken, selectedAccount, token, offer]);
 
   if (!isFetchingOffer && !isFetchingToken && !token && !offer) return <Error404 />;
-
-  // TODO: split into more categories here instead of just "buy/sell" and putting splitting inside them
 
   return (
     <>

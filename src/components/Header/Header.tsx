@@ -5,7 +5,6 @@ import { Icon } from '../UI';
 
 import { useScreenWidthFromThreshold } from 'hooks/useScreenWidthFromThreshold';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
-import { useAdminLoggingIn } from 'api/restApi/admin/login';
 import { useAccounts } from 'hooks/useAccounts';
 import { useApi } from 'hooks/useApi';
 import { TMenuItems } from '../PageLayout';
@@ -21,7 +20,6 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
     useScreenWidthFromThreshold(1279);
   const [mobileMenuIsOpen, toggleMobileMenu] = useState(false);
   const { selectedAccount, isLoading } = useAccounts();
-  const { hasAdminPermission } = useAdminLoggingIn();
   const { currentChainId } = useApi();
 
   const mobileMenuToggler = useCallback(() => {
@@ -56,9 +54,9 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
             <DesktopMenuLink to='/faq' active={activeItem === 'FAQ'}>
               FAQ
             </DesktopMenuLink>
-            {hasAdminPermission &&
-              <DesktopMenuLink to={`/${currentChainId || ''}/administration`} active={activeItem === 'Collections'}>
-                Admin panel
+            {
+              <DesktopMenuLink to={`/${currentChainId || ''}/collections`} active={activeItem === 'Collections'}>
+                My collections
               </DesktopMenuLink>
             }
           </nav>
@@ -91,9 +89,9 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
               Manage accounts
             </MobileMenuLink>
           }
-          {hasAdminPermission &&
-            <MobileMenuLink to={`/${currentChainId || ''}/administration`} active={activeItem === 'Collections'} onClick={mobileMenuToggler}>
-              Admin panel
+          {
+            <MobileMenuLink to={`/${currentChainId || ''}/collections`} active={activeItem === 'Collections'} onClick={mobileMenuToggler}>
+              My collections
             </MobileMenuLink>
           }
         </MobileMenu>

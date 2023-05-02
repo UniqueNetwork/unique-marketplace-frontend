@@ -95,8 +95,8 @@ export const MarketPage = () => {
     const { myNFTs, myBets, timedAuction, fixedPrice } = statuses || {};
 
     return {
-      seller: myNFTs ? selectedAccount?.getAddress() : undefined,
-      bidderAddress: myBets ? selectedAccount?.getAddress() : undefined,
+      seller: myNFTs ? selectedAccount?.address : undefined,
+      bidderAddress: myBets ? selectedAccount?.address : undefined,
       isAuction: (timedAuction && fixedPrice) || (!timedAuction && !fixedPrice) ? undefined : !!timedAuction && !fixedPrice,
       ...prices,
       collectionId: collections,

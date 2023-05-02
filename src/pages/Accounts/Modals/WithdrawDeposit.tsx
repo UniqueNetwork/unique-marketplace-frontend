@@ -30,11 +30,9 @@ type BidDeposit = TWithdrawBid & {
 
 export const WithdrawDepositModal: FC<WithdrawDepositModalProps> = ({ isVisible, address, onFinish, onClose, testid }) => {
   const [status, setStatus] = useState<'ask' | 'stage'>('ask');
-  const [withdrawSponsorshipFee, setWithdrawSponsorshipFee] = useState<BN>();
   const [withdrawBids, setWithdrawBids] = useState<BidDeposit[]>([]);
 
-  const onWithdraw = useCallback((withdrawBids: BidDeposit[], withdrawSponsorshipFee?: BN) => {
-    setWithdrawSponsorshipFee(withdrawSponsorshipFee);
+  const onWithdraw = useCallback((withdrawBids: BidDeposit[]) => {
     setWithdrawBids(withdrawBids);
     setStatus('stage');
   }, [setStatus]);
@@ -58,7 +56,6 @@ export const WithdrawDepositModal: FC<WithdrawDepositModalProps> = ({ isVisible,
       isVisible={isVisible}
       address={address}
       bids={withdrawBids}
-      withdrawSponsorshipFee={withdrawSponsorshipFee}
       onFinish={onFinishStages}
       onClose={onClose}
       testid={`${testid}-stages`}
@@ -82,7 +79,7 @@ export const WithdrawDepositAskModal: FC<WithdrawDepositAskModalProps> = ({ isVi
   const [isSelectedSponsorshipFee, setIsSelectedSponsorshipFee] = useState<boolean>(false);
 
   const account = useMemo(() =>
-    accounts.find((item) => item.getAddress() === address), [accounts, address]);
+    accounts.find((item) => item.address === address), [accounts, address]);
 
   const { bids, sponsorshipFee } = account?.deposits || { sponsorshipFee: new BN(0) };
   const { withdraw, leader } = bids || { withdraw: [], leader: [] };
@@ -243,14 +240,13 @@ export type WithdrawDepositStagesModalProps = {
   isVisible: boolean
   address?: string
   bids: BidDeposit[]
-  withdrawSponsorshipFee?: BN
   onFinish(): void
   onClose(): void
   testid: string
 }
 
-export const WithdrawDepositStagesModal: FC<WithdrawDepositStagesModalProps> = ({ bids, withdrawSponsorshipFee, isVisible, address, onFinish, testid }) => {
-  const { stages, status, initiate } = useWithdrawDepositStages(address || '', bids, withdrawSponsorshipFee);
+export const WithdrawDepositStagesModal: FC<WithdrawDepositStagesModalProps> = ({ bids, isVisible, address, onFinish, testid }) => {
+  const { stages, status, initiate } = useWithdrawDepositStages(address || '', bids);
   const { api } = useApi();
   const { info } = useNotifications();
 

@@ -45,7 +45,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
       page: 1,
       pageSize,
       sort: sortString,
-      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.getAddress() : undefined
+      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
     });
   }, [currentTab, currentChainId, selectedAccount, isLoadingAccounts]);
 
@@ -72,7 +72,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
         pageSize,
         sort: sortString,
         searchText: args[0],
-        seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.getAddress() : undefined
+        seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
       });
       setSearched(true);
     }, 300);
@@ -86,7 +86,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
       pageSize,
       sort: sortString,
       searchText: searchValue,
-      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.getAddress() : undefined
+      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
     });
   }, [selectedAccount, currentTab, page, sortString, searchValue, pageSize]);
 
@@ -99,7 +99,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
       pageSize: newPageSize,
       sort: sortString,
       searchText: searchValue,
-      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.getAddress() : undefined
+      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
     });
   }, [selectedAccount, currentTab, page, sortString, searchValue]);
 
@@ -132,7 +132,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
       pageSize,
       sort: sortString,
       searchText: searchValue,
-      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.getAddress() : undefined
+      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
     });
   }, [selectedAccount, currentTab, setSortString, pageSize, searchValue]);
 

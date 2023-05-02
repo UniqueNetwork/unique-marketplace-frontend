@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { AdditionalDark, AdditionalLight, BlueGrey100, BlueGrey200 } from '../styles/colors';
 import Skeleton from './Skeleton/Skeleton';
-import { DecodedInfixOrUrlOrCidAndHash, VideoAttribute } from 'api/uniqueSdk/types';
+import { DecodedInfixOrUrlOrCidAndHash, VideoAttribute } from 'api/chainApi/types';
 import styled from 'styled-components';
 import { DecodedVideoUri } from 'utils/helpers';
 

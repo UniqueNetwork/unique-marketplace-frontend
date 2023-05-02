@@ -24,6 +24,8 @@ export const formatBlockNumber = (blockNumber: number | undefined) => {
 };
 
 export const formatKusamaBalance = (balance: string | number, options?: { decimals?: number, fractionDigits?: number }) => {
+  // TODO: refactoring it out
+  return balance as string;
   const { decimals, fractionDigits } = options || {};
   const balanceValue = Number(balance);
   return (balanceValue / Math.pow(10, decimals || 12)).toLocaleString('en-US', {

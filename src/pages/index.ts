@@ -4,7 +4,6 @@ import { TradesPage as Trades } from './Trades';
 import FAQ from './FAQ';
 import { AccountsPage as Accounts } from './Accounts';
 import TokenPage from './Token'; // temporary page for debugging
-import { AdminPanelPage as AdminPanel } from './Admin';
-import { AdminLoginPage as AdminLogin } from './Admin/login';
+import { CollectionsPage as Collections } from './Collections';
 
-export { Market, MyTokens, Accounts, Trades, FAQ, TokenPage, AdminPanel, AdminLogin };
+export { Market, MyTokens, Accounts, Trades, FAQ, TokenPage, Collections };

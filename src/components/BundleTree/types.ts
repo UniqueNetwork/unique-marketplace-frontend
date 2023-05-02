@@ -1,5 +1,5 @@
 import { NestedToken } from '@unique-nft/sdk';
-import { DecodedInfixOrUrlOrCidAndHash } from 'api/uniqueSdk/types';
+import { DecodedInfixOrUrlOrCidAndHash } from 'api/chainApi/types';
 
 export interface INestingToken extends NestedToken {
   opened?: boolean

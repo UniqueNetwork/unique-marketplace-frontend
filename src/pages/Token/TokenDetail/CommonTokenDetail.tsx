@@ -11,7 +11,7 @@ import { Grey300, Grey500, Primary600 } from 'styles/colors';
 import { Avatar } from 'components/Avatar/Avatar';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import config from 'config';
-import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
+import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import { Offer } from 'api/restApi/offers/types';
 import { useApi } from 'hooks/useApi';
 import Skeleton from 'components/Skeleton/Skeleton';
@@ -72,11 +72,11 @@ export const CommonTokenDetail: FC<IProps> = ({
 
   const deviceSize = useDeviceSize();
 
-  const { chainData, currentChainId } = useApi();
+  const { chainProperties, currentChainId } = useApi();
 
   const formatAddress = useCallback((address: string) => {
-    return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
-  }, [chainData?.SS58Prefix]);
+    return toChainFormatAddress(address, chainProperties?.SS58Prefix || 0);
+  }, [chainProperties?.SS58Prefix]);
 
   const owner = useMemo(() => {
     if (offer) {

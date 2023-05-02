@@ -1,22 +1,23 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import config from 'config';
+
 import { BN } from '@polkadot/util';
+
 import { INetwork } from '@unique-nft/ui-kit';
+
+import { formatKusamaBalance } from 'utils/textUtils';
 import { Text, useNotifications, Button } from 'components/UI';
-import { useAccounts } from 'hooks/useAccounts';
+import { AccountsManager, IAccount } from 'components/UI/widgets/AccountsManager';
 import { Avatar } from 'components/Avatar/Avatar';
 import GetKSMModal from 'components/GetKSMModal/GetKSMModal';
-import { BalanceOption } from './types';
+import { useAccounts } from 'hooks/useAccounts';
 import { useApi } from 'hooks/useApi';
+
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import { TWithdrawBid } from 'api/restApi/auction/types';
-import { formatKusamaBalance } from 'utils/textUtils';
 import BalanceSkeleton from '../../Skeleton/BalanceSkeleton';
-import config from 'config';
-import { AccountsManager, IAccount } from 'components/UI/widgets/AccountsManager';
-
-const tokenSymbol = 'KSM';
 
 const fractionDigits = 4;
 
@@ -28,10 +29,10 @@ export const WalletManager: FC = () => {
   const { selectedAccount, accounts, isLoading, changeAccount } = useAccounts();
   const [isOpen, setIsOpen] = useState(false);
   const [isGetKsmOpened, setIsGetKsmOpened] = useState(false);
-  const { chainData, settings, currentChainId, onChangeChainId, api } = useApi();
+  const { chainProperties, settings, currentChainId, onChangeChainId, api } = useApi();
   const { info } = useNotifications();
   const navigate = useNavigate();
-  const decimals = api?.market?.kusamaDecimals;
+  const decimals = api?.market?.decimals;
 
   const networks: INetwork[] = useMemo(() => Object.keys(config?.blockchains || {}).map<INetwork>((id) => ({
     id,
@@ -49,16 +50,12 @@ export const WalletManager: FC = () => {
     setIsOpen(false);
   }, [onChangeChainId]);
 
-  const widgetAccounts = useMemo(() => accounts.map((account) => (
-    { ...account, address: account.getAddress(chainData?.SS58Prefix), substrateAddress: account?.getAddress() })
-  ), [accounts, chainData?.SS58Prefix]);
-
   const widgetSelectedAccount = useMemo(() => (
-    { name: selectedAccount?.name, address: selectedAccount ? selectedAccount.getAddress(chainData?.SS58Prefix) : '', substrateAddress: selectedAccount?.getAddress() }
-  ), [selectedAccount, chainData?.SS58Prefix]);
+    { name: selectedAccount?.name, address: selectedAccount ? selectedAccount.address || selectedAccount.account.getAddress(chainProperties?.SS58Prefix) : '', substrateAddress: selectedAccount?.address }
+  ), [selectedAccount, chainProperties?.SS58Prefix]);
 
-  const widgetAccountChange = useCallback(({ substrateAddress }: IAccount) => {
-    const account = accounts.find((account) => account.getAddress() === substrateAddress);
+  const widgetAccountChange = useCallback(({ address }: IAccount) => {
+    const account = accounts.find((account) => account.address === address);
     if (!account) return;
     changeAccount(account);
   }, [accounts, changeAccount]);
@@ -74,10 +71,6 @@ export const WalletManager: FC = () => {
     navigate('/accounts');
     setIsOpen(false);
   }, [navigate]);
-
-  const currentBalance: BalanceOption = useMemo(() => {
-    return { value: selectedAccount?.balance?.KSM?.toString() || '0', chain: chainData?.token || '' };
-  }, [selectedAccount, chainData?.token]);
 
   const closeModal = useCallback(() => {
     setIsGetKsmOpened(false);
@@ -118,9 +111,9 @@ export const WalletManager: FC = () => {
     <WalletManagerWrapper>
       <AccountsManager
         open={isOpen}
-        accounts={widgetAccounts}
+        accounts={accounts}
         activeNetwork={currentNetwork}
-        balance={formatKusamaBalance(currentBalance.value, { decimals, fractionDigits })}
+        balance={selectedAccount?.balance?.parsed || '0'}
         deposit={formattedAccountDeposit}
         depositDescription={
           <>
@@ -141,7 +134,7 @@ export const WalletManager: FC = () => {
         onManageBalanceClick={onCreateAccountClick}
         onNetworkChange={onNetworkChange}
         selectedAccount={widgetSelectedAccount}
-        symbol={tokenSymbol}
+        symbol={chainProperties?.token || ''}
         avatarRender={widgetAvatarRender}
         onOpenChange={setIsOpen}
       />

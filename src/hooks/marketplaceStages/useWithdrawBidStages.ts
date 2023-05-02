@@ -16,15 +16,16 @@ export const useWithdrawBidStages = (collectionId: number, tokenId: number) => {
       description: '',
       status: StageStatus.default,
       action: async ({ options }) => {
-        if (!options.signer) throw new Error('Account not selected');
+        if (!options.account) throw new Error('Account not selected');
 
         const timestamp = Date.now();
         const message = `collectionId=${collectionId}&tokenId=${tokenId}&timestamp=${timestamp}`;
-        const { signature } = await options.signer.sign({ signerPayloadHex: stringToHex(message) });
-        await withdrawBid(baseURL,
-          { collectionId, tokenId, timestamp },
-          { signature, signer: options.signer.getAddress() }
-        );
+        await Promise.resolve();
+        // const { signature } = await options.account.account.sign({ signerPayloadHex: stringToHex(message) });
+        // await withdrawBid(baseURL,
+        //   { collectionId, tokenId, timestamp },
+        //   { signature, signer: options.account.address }
+        // );
       }
     }
   ], [baseURL, collectionId, tokenId]);

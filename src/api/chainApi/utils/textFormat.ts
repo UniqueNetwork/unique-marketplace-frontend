@@ -1,16 +1,16 @@
 import { BN } from '@polkadot/util';
 
-export const formatKsm = (value: BN, kusamaDecimals: number, minPrice: number) => {
+export const formatKsm = (value: BN, decimals: number, minPrice: number) => {
     if (!value || value.toString() === '0') {
         return '0';
     }
 
-    if (value.lte(new BN(minPrice * Math.pow(10, kusamaDecimals)))) {
+    if (value.lte(new BN(minPrice * Math.pow(10, decimals)))) {
         return ` ${minPrice}`;
     }
 
     // calculate number after decimal point
-    const decNum = value?.toString().length - kusamaDecimals;
+    const decNum = value?.toString().length - decimals;
     let balanceStr = '';
 
     if (decNum < 0) {
@@ -18,16 +18,16 @@ export const formatKsm = (value: BN, kusamaDecimals: number, minPrice: number) =
     }
 
     if (decNum > 0) {
-        balanceStr = [value.toString().substr(0, decNum), '.', value.toString().substr(decNum, kusamaDecimals - decNum)].join('');
+        balanceStr = [value.toString().substr(0, decNum), '.', value.toString().substr(decNum, decimals - decNum)].join('');
     }
 
     if (decNum === 0) {
-        balanceStr = ['0', '.', value.toString().substr(decNum, kusamaDecimals - decNum)].join('');
+        balanceStr = ['0', '.', value.toString().substr(decNum, decimals - decNum)].join('');
     }
 
     const arr = balanceStr.toString().split('.');
 
-    return `${arr[0]}${arr[1] ? `.${arr[1].substr(0, kusamaDecimals)}` : ''}`;
+    return `${arr[0]}${arr[1] ? `.${arr[1].substr(0, decimals)}` : ''}`;
 };
 
 export const fromStringToBnString = (value: string, decimals: number): string => {
