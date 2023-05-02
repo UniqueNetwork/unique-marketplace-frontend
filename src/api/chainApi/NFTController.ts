@@ -5,28 +5,23 @@ import { getEthAccount } from './utils/addressUtils';
 import { filterAllowedTokens } from './utils/checkTokenIsAllowed';
 import BaseController from './controllers/BaseController';
 import { NetworkOptions } from 'api/sdk/sdkClient';
+import { AllowedCollections } from 'api/restApi/settings/types';
 
 declare module '@unique-nft/sdk' {
   type arrayNumberRecordStringAny = string | number | Record<string, string>
 }
 
 export class UniqueSDKNFTController extends BaseController {
-  private collectionIds: number[] = [];
+  private allowedCollections: AllowedCollections;
   private allowedTokens: Record<number, string> = {};
 
   constructor(options: NetworkOptions) {
     super(options);
-    const allowedTokens = options.settings.blockchain.unique.allowedTokens;
-    const collectionIds = options.settings.blockchain.unique.collectionIds;
-    this.collectionIds = collectionIds;
-    this.allowedTokens = allowedTokens.reduce((acc, item) => ({ ...acc, [item.collection]: item.tokens }), {}) || {};
+    this.allowedCollections = options.settings.blockchain.unique.collections;
   }
 
   setNetwork(options: NetworkOptions): void {
-    const allowedTokens = options.settings.blockchain.unique.allowedTokens;
-    const collectionIds = options.settings.blockchain.unique.collectionIds;
-    this.collectionIds = collectionIds;
-    this.allowedTokens = allowedTokens.reduce((acc, item) => ({ ...acc, [item.collection]: item.tokens }), {}) || {};
+    this.allowedCollections = options.settings.blockchain.unique.collections;
     super.setNetwork(options);
   }
 
@@ -36,7 +31,8 @@ export class UniqueSDKNFTController extends BaseController {
     }
     const tokens: TokenByIdResponse[] = [];
 
-    for (const collectionId of this.collectionIds) {
+    for (const id in this.allowedCollections) {
+      const collectionId = Number(id);
       try {
         const tokensIds =
           (await this.uniqueSdk.tokens.accountTokens({ collectionId, address })).tokens || [];
@@ -62,7 +58,7 @@ export class UniqueSDKNFTController extends BaseController {
   }
 
   async isBundle(collectionId: number, tokenId: number): Promise<boolean> {
-    return !!await this.uniqueSdk.tokens.isBundle({ collectionId, tokenId });
+    return (await this.uniqueSdk.tokens.isBundle({ collectionId, tokenId })).isBundle;
   }
 
   async getBundle(collectionId: number, tokenId: number): Promise<GetBundleResponse | null> {

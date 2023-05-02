@@ -25,7 +25,8 @@ export const useFee = (): UseFeeReturn => {
     return fee || '0';
   }, [api, selectedAccount]);
 
-  const marketCommission = useMemo(() => settings ? settings.blockchain.kusama.marketCommission : '0', [settings]);
+  // TODO: fill it correctly
+  const marketCommission = '0'; // useMemo(() => settings ? settings.blockchain.kusama.marketCommission : '0', [settings]);
 
   return { marketCommission, kusamaFee, fetchingKusamaFee, getFee };
 };

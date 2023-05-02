@@ -13,12 +13,12 @@ class MarketController extends BaseController implements IMarketController {
 
   constructor(options: NetworkOptions) {
     super(options);
-    const contractAddress = options.settings.blockchain.unique.contractAddress;
+    const contractAddress = options.settings.blockchain.unique.contracts[0].address;
     this.contractAddress = contractAddress;
   }
 
   public setNetwork(options: NetworkOptions): void {
-    const contractAddress = options.settings.blockchain.unique.contractAddress;
+    const contractAddress = options.settings.blockchain.unique.contracts[0].address;
     this.contractAddress = contractAddress;
     super.setNetwork(options);
   }

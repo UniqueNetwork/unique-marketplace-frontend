@@ -13,19 +13,19 @@ class BaseController implements IBaseController {
   uniqueAdapter: UniqueAdapter;
   metamaskAdapter: MetamaskAdapter;
   constructor(options: NetworkOptions) {
-    const contractAddress = options.settings.blockchain.unique.contractAddress;
-    this.uniqueSdk = new Sdk({ baseUrl: options.sdkEndpoint });
+    const contractAddress = options.settings.blockchain.unique.contracts[0].address;
+    this.uniqueSdk = new Sdk({ baseUrl: options.settings.blockchain.unique.restUrl });
     this.uniqueAdapter = new UniqueAdapter(contractAddress, this.uniqueSdk);
     this.metamaskAdapter = new MetamaskAdapter(contractAddress);
     this.isConnected = true;
   }
 
   public setNetwork(options: NetworkOptions): void {
-    const sdk = this.uniqueSdk = new Sdk({ baseUrl: options.sdkEndpoint });
+    const sdk = this.uniqueSdk = new Sdk({ baseUrl: options.settings.blockchain.unique.restUrl });
     this.uniqueSdk = sdk;
     this.isConnected = false;
     // TODO: base adapter doesn't need contract address (split adapters into BaseAdapter and MarketAdapter for clarity)
-    const contractAddress = options.settings.blockchain.unique.contractAddress;
+    const contractAddress = options.settings.blockchain.unique.contracts[0].address;
     this.uniqueAdapter = new UniqueAdapter(contractAddress, sdk);
     this.metamaskAdapter = new MetamaskAdapter(contractAddress);
     this.isConnected = true;

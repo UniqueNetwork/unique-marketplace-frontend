@@ -9,7 +9,6 @@ import { NetworkOptions, SdkClient } from './sdk/sdkClient';
 import config from '../config';
 import { useSettings } from './restApi/settings/settings';
 import { ChainIdLocalStorageKey, getInitialChainId } from '../utils/initialChainId';
-import { Sdk } from '@unique-nft/sdk';
 
 keyring.loadAll({});
 
@@ -33,13 +32,13 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
   useEffect(() => {
     (async () => {
       const settings = await fetchSettings(config.blockchains);
-      const networkOptions = settings.map<NetworkOptions>(({ networkId, sdkEndpoint, sdkRelayEndpoint, settings }) => ({ networkId, sdkEndpoint, sdkRelayEndpoint, settings }));
+      const networkOptions = settings.map<NetworkOptions>(({ networkId, settings }) => ({ networkId, settings }));
       setAvailableNetworkOptions(networkOptions);
       // TODO: setup current chain properly from localStorage/url
       const currentNetworkOption = networkOptions.find((no) => no.networkId === currentChainId) || networkOptions[0];
 
       // TODO: REMOVE THIS LINE: DEBUG PURPOSES ONLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      currentNetworkOption.settings.blockchain.unique.contractAddress = '0xbf198C5168E6BA2ef9E58e3d674d7F7eB2DfC96e';
+      // currentNetworkOption.settings.blockchain.unique.contracts = [{ address: '0xbf198C5168E6BA2ef9E58e3d674d7F7eB2DfC96e' }];
 
       setSettings(currentNetworkOption.settings);
 
@@ -54,7 +53,7 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
     });
   }, []);
 
-  const onChangeChainId = useCallback(async (newChainId: string) => {
+  const onChangeChainId = useCallback((newChainId: string) => {
     if (currentChainId === newChainId) return;
     if (!sdkClient) {
       throw new Error('SdkClient is not available');
@@ -65,7 +64,7 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
 
     setSettings(option.settings);
 
-    await sdkClient?.setNetwork(option);
+    sdkClient?.setNetwork(option);
     setCurrentChainId(newChainId);
     localStorage.setItem(ChainIdLocalStorageKey, newChainId);
     // redirect to correct URL with chainId
@@ -81,7 +80,7 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
     } else {
       navigate(`/${newChainId}${pathname}`);
     }
-  }, [currentChainId, sdkClient, settings]);
+  }, [currentChainId, sdkClient, availableNetworkOptions, navigate]);
 
   // get current chain and current chain settings
   const currentChain = useMemo(() => {

@@ -11,7 +11,7 @@ declare module '@unique-nft/sdk' {
   }
 }
 
-export interface NetworkOptions { networkId: string, sdkEndpoint: string, sdkRelayEndpoint: string, settings: Settings }
+export interface NetworkOptions { networkId: string, settings: Settings }
 
 export class SdkClient {
   public isReady = false;
