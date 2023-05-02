@@ -3,8 +3,16 @@ import { Signer as UniqueSigner } from '@unique-nft/sdk';
 
 export type Signer = EthersSigner | UniqueSigner;
 
+export type NestTokenParam = {
+  collectionId: number,
+  tokenId: number
+}
 interface IBaseAdapter {
-  transferToken(from: string, to: string, collectionId: number, tokenId: number, signer: Signer): Promise<void>
+  transferToken(from: string, to: string, collectionId: number, tokenId: number, amount: number, signer: Signer): Promise<void>
+
+  nestToken(from: NestTokenParam, to: NestTokenParam, amount: number, signer: Signer): Promise<void>
+  unnestToken(from: NestTokenParam, amount: number, signer: Signer): Promise<void>
+
   transferBalance(from: string, to: string, amount: number, signer: Signer): Promise<void>
 }
 

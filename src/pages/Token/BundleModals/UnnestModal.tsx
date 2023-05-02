@@ -68,7 +68,7 @@ const UnnestStagesModal: FC<TBundleTrunsferModalBodyProps> = ({ token, onFinish,
 
   useEffect(() => {
     if (!selectedAccount?.address) return;
-    initiate(null);
+    void initiate(null);
   }, [selectedAccount]);
 
   useEffect(() => {
@@ -78,7 +78,7 @@ const UnnestStagesModal: FC<TBundleTrunsferModalBodyProps> = ({ token, onFinish,
         { name: 'success', size: 32, color: 'var(--color-additional-light)' }
       );
     }
-  }, [status]);
+  }, [status, info, testid, token]);
 
   return (
     <div>

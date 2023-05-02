@@ -3,6 +3,7 @@ import { EthCrossAccountId } from '@unique-nft/utils';
 import IMarketContractAdapter from './IMarketContractAdapter';
 
 import marketplaceAbi from '../contracts/marketplace-0.json';
+import { NestTokenParam } from './IBaseAdapter';
 
 class UniqueAdapter implements IMarketContractAdapter {
   constructor(contractAddress: string, uniqueSdk: Sdk) {
@@ -13,7 +14,8 @@ class UniqueAdapter implements IMarketContractAdapter {
   protected contractAddress: string;
   protected uniqueSdk: Sdk;
 
-  async transferToken(from: string, to: string, collectionId: number, tokenId: number, signer: Signer): Promise<void> {
+  async transferToken(from: string, to: string, collectionId: number, tokenId: number, amount: number, signer: Signer): Promise<void> {
+    if (amount !== 1) throw new Error('RFT support not implemented');
     await this.uniqueSdk.token.transfer.submitWaitResult({
       address: from,
       from,
@@ -21,6 +23,31 @@ class UniqueAdapter implements IMarketContractAdapter {
       collectionId,
       tokenId
     }, { signer });
+  }
+
+  async nestToken(from: NestTokenParam, to: NestTokenParam, amount: number, signer: Signer): Promise<void> {
+    if (amount !== 1) throw new Error('RFT support not implemented');
+    const res = await this.uniqueSdk.token.nest({
+      address: signer.address,
+      nested: from,
+      parent: to
+    }, { signer });
+    if (res.error) {
+      console.error('Nest failed: ', res.error);
+      throw new Error(res.error.toString());
+    }
+  }
+
+  async unnestToken(from: NestTokenParam, amount: number, signer: Signer): Promise<void> {
+    if (amount !== 1) throw new Error('RFT support not implemented');
+    const res = await this.uniqueSdk.token.unnest({
+      address: signer.address,
+      nested: from
+    }, { signer });
+    if (res.error) {
+      console.error('Unnest failed: ', res.error);
+      throw new Error(res.error.toString());
+    }
   }
 
   async transferBalance(from: string, to: string, amount: number, signer: Signer): Promise<void> {

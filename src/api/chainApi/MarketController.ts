@@ -110,7 +110,7 @@ class MarketController extends BaseController implements IMarketController {
 
   // ____ EXTRA _____
   async transferToken(from: string, to: string, collectionId: number, tokenId: number, { account }: TransactionOptions): Promise<void> {
-    await this.getAdapter(account.account).transferToken(from, to, collectionId, tokenId, account.signer);
+    await this.getAdapter(account.account).transferToken(from, to, collectionId, tokenId, 1, account.signer);
   }
 
   async transferBalance(from: string, to: string, amount: BN, { account }: TransactionOptions): Promise<void> {
