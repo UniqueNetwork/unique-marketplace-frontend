@@ -12,7 +12,7 @@ import { SelectInput } from 'components/SelectInput/SelectInput';
 import { NumberInput } from 'components/NumberInput/NumberInput';
 import AccountCard from 'components/Account/Account';
 import { StageStatus } from 'types/StagesTypes';
-import { formatKusamaBalance } from 'utils/textUtils';
+import { formatBalance } from 'utils/textUtils';
 import { fromStringToBnString } from 'utils/bigNum';
 import { debounce } from 'utils/helpers';
 import { AdditionalWarning100, Coral700 } from 'styles/colors';
@@ -220,7 +220,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
       <Text
         testid={`${testid}-balance`}
         size={'s'}
-      >{`${sender?.balance?.parsed} ${tokenSymbol}`}</Text>
+      >{`${formatBalance(sender?.balance?.parsed || 0)} ${tokenSymbol}`}</Text>
     </AmountWrapper>
 
     <Text size={'s'} color={'grey-500'}>{'To'}</Text>
@@ -244,7 +244,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
       {recipientBalance && <Text
         testid={`${testid}-recipient-balance`}
         size={'s'}
-      >{`${recipientBalance || 0} ${tokenSymbol}`}</Text> }
+      >{`${formatBalance(recipientBalance || 0)} ${tokenSymbol}`}</Text> }
     </AmountWrapper>
     {!isValidRecipientAddress && <ErrorWrapper size={'s'} color={'var(--color-coral-500)'} >Address is not valid</ErrorWrapper>}
     <AmountInputWrapper>

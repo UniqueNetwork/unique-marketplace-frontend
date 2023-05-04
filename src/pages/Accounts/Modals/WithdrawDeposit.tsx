@@ -11,7 +11,7 @@ import { useAccounts } from 'hooks/useAccounts';
 import { useWithdrawDepositStages } from 'hooks/accountStages/useWithdrawDepositStages';
 import InlineTokenCard from 'components/TokensCard/InlineTokenCard';
 import { StageStatus } from 'types/StagesTypes';
-import { formatKusamaBalance } from '../../../utils/textUtils';
+import { formatBalance } from '../../../utils/textUtils';
 import { TokenByIdResponse } from '@unique-nft/sdk';
 
 const tokenSymbol = 'KSM';
@@ -145,7 +145,7 @@ export const WithdrawDepositAskModal: FC<WithdrawDepositAskModalProps> = ({ isVi
       <Checkbox
         testid={`${testid}-all-checkbox`}
         checked={isSelectedAll}
-        label={`${formatKusamaBalance(totalAmount.toString())} ${tokenSymbol}`}
+        label={`${formatBalance(totalAmount.toString())} ${tokenSymbol}`}
         onChange={onSelectAll}
       />
     </Content>}
@@ -167,7 +167,7 @@ export const WithdrawDepositAskModal: FC<WithdrawDepositAskModalProps> = ({ isVi
           <Text
             testid={`${testid}-bid-${bid.auctionId}-amount`}
             size={'m'}
-          >{`${formatKusamaBalance(bid.amount)} ${tokenSymbol}`}</Text>
+          >{`${formatBalance(bid.amount)} ${tokenSymbol}`}</Text>
           {index < leader.length && <Text size={'s'} color={'additional-positive-500'}>Leading bid</Text>}
         </InlineTokenCard>
       </Row>))}
@@ -177,7 +177,7 @@ export const WithdrawDepositAskModal: FC<WithdrawDepositAskModalProps> = ({ isVi
       <Checkbox
         testid={`${testid}-sponsorship-fee-checkbox`}
         checked={isSelectedSponsorshipFee}
-        label={`${formatKusamaBalance(sponsorshipFee?.toString() || '0')} ${tokenSymbol}`}
+        label={`${formatBalance(sponsorshipFee?.toString() || '0')} ${tokenSymbol}`}
         onChange={onSelectSponsorshipFee}
       />
     </Content>}
@@ -185,7 +185,7 @@ export const WithdrawDepositAskModal: FC<WithdrawDepositAskModalProps> = ({ isVi
       <Text color='grey-500' testid={`${testid}-withdraw-amount-label`}>Amount to withdraw:&nbsp;</Text>
       <Text
         testid={`${testid}-withdraw-amount`}
-      >{`${formatKusamaBalance(amountToWithdraw.toString())} ${tokenSymbol}`}</Text>
+      >{`${formatBalance(amountToWithdraw.toString())} ${tokenSymbol}`}</Text>
     </Row>
     <ButtonWrapper>
       <Button

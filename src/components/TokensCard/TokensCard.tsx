@@ -7,7 +7,7 @@ import { compareEncodedAddresses } from 'api/chainApi/utils/addressUtils';
 import { Offer } from 'api/restApi/offers/types';
 import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
-import { formatKusamaBalance } from 'utils/textUtils';
+import { formatBalance } from 'utils/textUtils';
 import { timeDifference } from 'utils/timestampUtils';
 import { Primary600 } from 'styles/colors';
 import config from 'config';
@@ -147,7 +147,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
           <Text
             testid={`${testid}-price`}
             size='s'
-          >{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${price.parsed}}` }</Text>
+          >{topBid ? `${formatBalance(Number(topBid))}` : `${price.parsed}}` }</Text>
           <IconStyled name={`chain-${currentChainId}`} size={16} />
           {!auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         </PriceWrapper>}

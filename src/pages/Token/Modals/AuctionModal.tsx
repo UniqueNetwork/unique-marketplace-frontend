@@ -11,7 +11,7 @@ import { useAuctionBidStages } from 'hooks/marketplaceStages';
 import { useAccounts } from 'hooks/useAccounts';
 import { useFee } from 'hooks/useFee';
 import { useApi } from 'hooks/useApi';
-import { formatKusamaBalance } from 'utils/textUtils';
+import { formatBalance } from 'utils/textUtils';
 import { fromStringToBnString } from 'utils/bigNum';
 import { NumberInput } from 'components/NumberInput/NumberInput';
 import { StageStatus } from 'types/StagesTypes';
@@ -84,7 +84,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
     return new BN(Number(leadingBid) + Number(offer?.auction?.priceStep || '0'));
   }, [offer?.auction, leadingBid]);
 
-  const [bidAmount, setBidAmount] = useState<string>(formatKusamaBalance(minimalBid.toString(), { decimals }));
+  const [bidAmount, setBidAmount] = useState<string>(formatBalance(minimalBid.toString()));
 
   const isEnoughBalance = useMemo(() => {
     if (!selectedAccount?.balance?.raw || selectedAccount?.balance?.raw.isZero()) return false;
@@ -110,7 +110,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
 
       onConfirmPlaceABid({
         accountAddress: selectedAccount?.address || '',
-        amount: formatKusamaBalance(Number(bnAmount.toString()) - Number(lastBidFromThisAccount))
+        amount: formatBalance(Number(bnAmount.toString()) - Number(lastBidFromThisAccount))
       });
     },
     [onConfirmPlaceABid, bidAmount, isEnoughBalance, isAmountValid, chain, api?.market?.decimals, lastBidFromThisAccount]
@@ -142,7 +142,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
         />
       </InputWrapper>
       <Text size={'s'} color={'grey-500'} testid={`${testid}-minimum-bid-text`}>
-        {`Minimum bid ${formatKusamaBalance(minimalBid.toString(), { decimals })} ${chain || ''}`}
+        {`Minimum bid ${formatBalance(minimalBid.toString())} ${chain || ''}`}
       </Text>
       <CautionTextWrapper>
         {(!isEnoughBalance || !isAmountValid) && <WarningStyled color={'coral-500'} testid={`${testid}-low-balance-warning`}>Check the bid. You may haven’t enough funds or the entered value is less than the minimum or previous bid.</WarningStyled>}

@@ -7,7 +7,7 @@ import { BN } from '@polkadot/util';
 
 import { INetwork } from '@unique-nft/ui-kit';
 
-import { formatKusamaBalance } from 'utils/textUtils';
+import { formatBalance } from 'utils/textUtils';
 import { Text, useNotifications, Button } from 'components/UI';
 import { AccountsManager, IAccount } from 'components/UI/widgets/AccountsManager';
 import { Avatar } from 'components/Avatar/Avatar';
@@ -96,7 +96,7 @@ export const WalletManager: FC = () => {
     const deposit = (sponsorshipFee || new BN(0))
     .add(withdraw.reduce(getTotalAmount, new BN(0)))
     .add(leader.reduce(getTotalAmount, new BN(0)));
-    return formatKusamaBalance(deposit.toString(), { decimals, fractionDigits });
+    return formatBalance(deposit.toString(), fractionDigits);
   }, [selectedAccount?.deposits]);
 
   if (!isLoading && !selectedAccount) {
@@ -113,14 +113,14 @@ export const WalletManager: FC = () => {
         open={isOpen}
         accounts={accounts}
         activeNetwork={currentNetwork}
-        balance={selectedAccount?.balance?.parsed || '0'}
+        balance={formatBalance(selectedAccount?.balance?.parsed || '0', fractionDigits)}
         deposit={formattedAccountDeposit}
         depositDescription={
           <>
             {formattedAccountDeposit && <Text color='grey-500' weight={'light'} size='xs'>The total market deposit for participation in auctions and
               sponsorship. <br/> Use the “Manage accounts” section to withdraw.</Text>}
             {config.rampApiKey && <GetKsmButton
-              title={'Get KSM'}
+              title={`Get ${chainProperties?.token || 'tokens'}`}
               size={'small'}
               role={'outlined'}
               wide

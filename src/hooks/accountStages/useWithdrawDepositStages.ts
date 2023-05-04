@@ -5,7 +5,7 @@ import { useAccounts } from '../useAccounts';
 import useStages from '../useStages';
 import { TWithdrawBid } from 'api/restApi/auction/types';
 import { BN } from '@polkadot/util';
-import { formatKusamaBalance } from '../../utils/textUtils';
+import { formatBalance } from '../../utils/textUtils';
 
 export type TWithdrawDeposit = {
   address: string
@@ -20,7 +20,7 @@ export const useWithdrawDepositStages = (accountAddress: string, bids: TWithdraw
 
   const withdrawBidsStage: InternalStage<TWithdrawDeposit>[] = useMemo(() => bids.length > 0
     ? [{
-      title: `Withdraw bids: ${formatKusamaBalance(bidsAmount.toString())} ${chainProperties?.token}`,
+      title: `Withdraw bids: ${formatBalance(bidsAmount.toString())} ${chainProperties?.token}`,
       description: '',
       status: StageStatus.default,
       action: async ({ options }) => {

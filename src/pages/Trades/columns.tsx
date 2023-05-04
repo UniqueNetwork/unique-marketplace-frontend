@@ -5,7 +5,7 @@ import { Icon, Link } from 'components/UI';
 import { AddressComponent } from './AddressComponent/AddressComponent';
 import { timestampTableFormat } from '../../utils/timestampUtils';
 import { TokenComponent } from './TokenComponent/TokenComponent';
-import { formatKusamaBalance } from '../../utils/textUtils';
+import { formatBalance } from '../../utils/textUtils';
 import { BlueGrey600, Grey300, Grey500, Secondary400 } from '../../styles/colors';
 import { TokenDescription, Trade } from '../../api/restApi/trades/types';
 import { DeviceSize } from '../../hooks/useDeviceSize';
@@ -58,7 +58,7 @@ const getTradesColumns = ({ deviceSize, onShowTradesDetailsModal, scanUrl, testi
     title: (<Header data-testid={`${testid}-header-price`}>Price</Header>),
     width: deviceSize !== DeviceSize.md ? '14.3%' : '11.84%',
     isSortable: true,
-    render: (value: string, { offerId }: Trade) => <Text testid={`${testid}-${offerId}-price`} color={BlueGrey600}>{`${formatKusamaBalance(value)} ${tokenSymbol}`}</Text>,
+    render: (value: string, { offerId }: Trade) => <Text testid={`${testid}-${offerId}-price`} color={BlueGrey600}>{`${formatBalance(value)} ${tokenSymbol}`}</Text>,
     field: 'price'
   },
   {
