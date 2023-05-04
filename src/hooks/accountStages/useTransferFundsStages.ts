@@ -14,7 +14,7 @@ export const useTransferFundsStages = (accountAddress: string) => {
     title: 'Transfer funds',
     description: '',
     status: StageStatus.default,
-    action: (params) => marketApi?.transferBalance(params.txParams.sender, params.txParams?.recipient || '', new BN(params.txParams?.amount), params.options)
+    action: (params) => marketApi?.transferBalance(params.txParams.sender, params.txParams?.recipient || '', params.txParams?.amount, params.options)
   }], [marketApi]) as InternalStage<TTransferFunds>[];
 
   const signer = useMemo(() => {

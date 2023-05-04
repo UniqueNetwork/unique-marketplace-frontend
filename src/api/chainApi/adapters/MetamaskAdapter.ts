@@ -1,10 +1,11 @@
-import { UniqueFungibleFactory, UniqueNFTFactory } from '@unique-nft/solidity-interfaces';
+import { UniqueNFTFactory } from '@unique-nft/solidity-interfaces';
 import { Address, EthCrossAccountId } from '@unique-nft/utils';
 import { ethers, Signer } from 'ethers';
 import IMarketContractAdapter from './IMarketContractAdapter';
 
 import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
+import { ChainValue } from '../controllers/BaseController';
 
 class MetamaskAdapter implements IMarketContractAdapter {
   contractAddress: string;
@@ -13,7 +14,6 @@ class MetamaskAdapter implements IMarketContractAdapter {
   }
 
   private getContract(signer: Signer) {
-    console.log(this.contractAddress, marketplaceAbi, signer);
     return new ethers.Contract(this.contractAddress, marketplaceAbi, signer);
   }
 
@@ -45,11 +45,10 @@ class MetamaskAdapter implements IMarketContractAdapter {
     await (await nftFactory.transferFrom(parentTokenAddress, ownerAddress, target.tokenId)).wait();
   }
 
-  async transferBalance(from: string, to: string, amount: number, signer: Signer): Promise<void> {
-    const fungibleFactory = await UniqueFungibleFactory(from, signer);
-    const fromCross = Address.extract.ethCrossAccountId(from);
+  async transferBalance(from: string, to: string, amount: ChainValue, signer: Signer): Promise<void> {
+    // const fromCross = Address.extract.ethCrossAccountId(from);
     const toCross = Address.extract.ethCrossAccountId(to);
-    await (await fungibleFactory.transferFromCross(fromCross, toCross, amount.toString())).wait();
+    await (await signer.sendTransaction({ to: toCross.eth, value: amount.raw })).wait();
   }
 
   async changeAllowance(from: string, to: string, collectionId: number, tokenId: number, targetAllowance: boolean, signer: Signer): Promise<void> {
@@ -65,7 +64,6 @@ class MetamaskAdapter implements IMarketContractAdapter {
   }
 
   async buy(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<void> {
-    console.log('buying metamask for: ', price);
     const contract = this.getContract(signer);
     await (await contract.buy(collectionId, tokenId, amount, to, { gasLimit: 10000000, value: price })).wait();
   }

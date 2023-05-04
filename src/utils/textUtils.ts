@@ -23,6 +23,7 @@ export const formatBlockNumber = (blockNumber: number | undefined) => {
   return blockNumber.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 };
 
+// TODO: rename to "formatBalance" / "formatRaw" (first for balances to shorten fractionDigits, lattest for decimals)
 export const formatKusamaBalance = (balance: string | number, options?: { decimals?: number, fractionDigits?: number }) => {
   // TODO: refactoring it out
   return balance as string;

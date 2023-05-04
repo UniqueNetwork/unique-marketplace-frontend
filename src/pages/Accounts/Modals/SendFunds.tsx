@@ -32,12 +32,12 @@ export const TransferFundsModal: FC<TransferFundsModalProps> = ({ isVisible, sen
   const [status, setStatus] = useState<'ask' | 'transfer-stage'>('ask');
   const [sender, setSender] = useState<string>('');
   const [recipient, setRecipient] = useState<string>('');
-  const [amount, setAmount] = useState<string>('');
+  const [amount, setAmount] = useState<number>(0);
 
   const onTransfer = useCallback((_sender: string, _recipient: string, _amount: string) => {
     setRecipient(_recipient);
     setSender(_sender);
-    setAmount(_amount);
+    setAmount(Number(_amount));
     setStatus('transfer-stage');
   }, [setStatus, setRecipient, setAmount]);
 
@@ -123,7 +123,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   }, [accountsWithQuartzAddresses]);
 
   const recipientBalance = useMemo(() => {
-    return typeof recipientAddress !== 'string' && recipientAddress?.balance?.raw;
+    return typeof recipientAddress !== 'string' && recipientAddress?.balance?.parsed;
   }, [recipientAddress]);
 
   const onAmountChange = useCallback((value: string) => {
@@ -244,7 +244,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
       {recipientBalance && <Text
         testid={`${testid}-recipient-balance`}
         size={'s'}
-      >{`${formatKusamaBalance(recipientBalance?.toString() || 0)} ${tokenSymbol}`}</Text> }
+      >{`${recipientBalance || 0} ${tokenSymbol}`}</Text> }
     </AmountWrapper>
     {!isValidRecipientAddress && <ErrorWrapper size={'s'} color={'var(--color-coral-500)'} >Address is not valid</ErrorWrapper>}
     <AmountInputWrapper>
@@ -287,7 +287,7 @@ type TransferFundsStagesModalProps = {
 const TransferFundsStagesModal: FC<TransferFundsStagesModalProps & TTransferFunds> = ({ isVisible, onFinish, sender, amount, recipient, testid }) => {
   const { stages, status, initiate } = useTransferFundsStages(sender);
   const { info } = useNotifications();
-  useEffect(() => { initiate({ sender, recipient, amount: fromStringToBnString(amount) }); }, [sender, recipient, amount]);
+  useEffect(() => { void initiate({ sender, recipient, amount }); }, [sender, recipient, amount]);
 
   useEffect(() => {
     if (status === StageStatus.success) {

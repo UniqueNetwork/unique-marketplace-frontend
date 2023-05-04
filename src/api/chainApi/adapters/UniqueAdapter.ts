@@ -1,9 +1,10 @@
-import { Sdk, Signer } from '@unique-nft/sdk/full';
+import { ExtrinsicResultResponse, Sdk, Signer } from '@unique-nft/sdk/full';
 import { EthCrossAccountId } from '@unique-nft/utils';
 import IMarketContractAdapter from './IMarketContractAdapter';
 
 import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
+import { ChainValue } from '../controllers/BaseController';
 
 class UniqueAdapter implements IMarketContractAdapter {
   constructor(contractAddress: string, uniqueSdk: Sdk) {
@@ -14,15 +15,19 @@ class UniqueAdapter implements IMarketContractAdapter {
   protected contractAddress: string;
   protected uniqueSdk: Sdk;
 
+  private validateSdkResponse(result: ExtrinsicResultResponse<any>) {
+    if (result.error) throw new Error((result.error as any)?.message || 'Transaction failed');
+  }
+
   async transferToken(from: string, to: string, collectionId: number, tokenId: number, amount: number, signer: Signer): Promise<void> {
     if (amount !== 1) throw new Error('RFT support not implemented');
-    await this.uniqueSdk.token.transfer.submitWaitResult({
+    this.validateSdkResponse(await this.uniqueSdk.token.transfer.submitWaitResult({
       address: from,
       from,
       to,
       collectionId,
       tokenId
-    }, { signer });
+    }, { signer }));
   }
 
   async nestToken(from: NestTokenParam, to: NestTokenParam, amount: number, signer: Signer): Promise<void> {
@@ -50,11 +55,11 @@ class UniqueAdapter implements IMarketContractAdapter {
     }
   }
 
-  async transferBalance(from: string, to: string, amount: number, signer: Signer): Promise<void> {
+  async transferBalance(from: string, to: string, amount: ChainValue, signer: Signer): Promise<void> {
     await this.uniqueSdk.balance.transfer.submitWaitResult({
       address: from,
       destination: to,
-      amount
+      amount: amount.parsed
     }, { signer });
   }
 

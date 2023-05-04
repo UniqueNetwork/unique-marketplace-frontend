@@ -21,7 +21,7 @@ interface IMarketController {
 
   // TODO: remove "from" param, we can calculate it from signer
   transferToken(from: string, to: string, collectionId: number, tokenId: number, options: TransactionOptions): Promise<void>
-  transferBalance(from: string, to: string, amount: BN, options: TransactionOptions): Promise<void>
+  transferBalance(from: string, to: string, amount: BN | number, options: TransactionOptions): Promise<void>
 }
 
 export default IMarketController;

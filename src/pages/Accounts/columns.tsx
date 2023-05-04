@@ -9,8 +9,6 @@ import { AdditionalLight, Grey500, Primary500 } from 'styles/colors';
 import config from 'config';
 import styled from 'styled-components';
 
-const tokenSymbol = '!!!OLD_KSM!!!';
-
 const testid = 'accounts-page';
 
 type AccountsColumnsProps = {
@@ -20,6 +18,7 @@ type AccountsColumnsProps = {
   onShowWithdrawDepositModal(address: string): () => void
   onShowDeleteLocalAccountModal(address: string): () => void
   onShowGetKsmModal: () => void
+  tokenSymbol: string
   scanUrl: string
 };
 
@@ -30,6 +29,7 @@ export const getAccountsColumns = ({
                               isSmallDevice,
                               onShowDeleteLocalAccountModal,
                               onShowGetKsmModal,
+                              tokenSymbol,
                               scanUrl
                             }: AccountsColumnsProps): TableColumnProps[] => [
   {

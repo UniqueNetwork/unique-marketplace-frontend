@@ -6,6 +6,12 @@ import IMarketContractAdapter from '../adapters/IMarketContractAdapter';
 import MetamaskAdapter from '../adapters/MetamaskAdapter';
 import UniqueAdapter from '../adapters/UniqueAdapter';
 import IBaseController from '../controllers/base/IBaseController';
+import { BN } from '@polkadot/util';
+
+export type ChainValue = {
+  raw: string;
+  parsed: number;
+}
 
 class BaseController implements IBaseController {
   isConnected = false;
@@ -18,6 +24,28 @@ class BaseController implements IBaseController {
     this.uniqueAdapter = new UniqueAdapter(contractAddress, this.uniqueSdk);
     this.metamaskAdapter = new MetamaskAdapter(contractAddress);
     this.isConnected = true;
+  }
+
+  protected getChainValue(value: BN | number | string, decimals: number): ChainValue {
+    switch (value.constructor) {
+      case BN:
+        return {
+          raw: value.toString(),
+          parsed: (value as BN).div(new BN(10).pow(new BN(decimals))).toNumber()
+        };
+      case Number:
+        return {
+          raw: (new BN(value).mul(new BN(10).pow(new BN(decimals)))).toString(),
+          parsed: value as number
+        };
+      case String:
+        return {
+          raw: value as string,
+          parsed: (new BN(value)).div(new BN(10).pow(new BN(decimals))).toNumber()
+        };
+      default:
+        throw new Error('Invalid amount format for transfer balance');
+    }
   }
 
   public setNetwork(options: NetworkOptions): void {
