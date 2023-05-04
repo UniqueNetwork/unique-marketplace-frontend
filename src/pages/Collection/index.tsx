@@ -4,7 +4,7 @@ import BN from 'bn.js';
 import { Text } from '@unique-nft/ui-kit';
 import { Button, Select } from 'components/UI';
 import { BN_MAX_INTEGER } from '@polkadot/util';
-import { BoxedNumberWithDefault, CollectionInfoWithSchema, LocalizedStringWithDefault, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
+import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
 
 import { useOffers } from 'api/restApi/offers/offers';
 import { Offer } from 'api/restApi/offers/types';
@@ -27,6 +27,7 @@ import { TOption } from './types';
 import { defaultSortingValue, pageSize, sortingOptions, testid } from './constants';
 import { useParams } from 'react-router-dom';
 import { CollectionDetail } from './CollectionDetail/CollectionDetail';
+import { MixedTokenAndOffer } from 'pages/MyTokens/NFTPage';
 
 export const CollectionPage = () => {
   const searchParams = new URLSearchParams(window.location.search);
@@ -36,8 +37,8 @@ export const CollectionPage = () => {
   const [searchString, setSearchString] = useState<string>(searchParams.get('searchValue') || '');
   const [selectOption, setSelectOption] = useState<TOption>();
   const { selectedAccount, isLoading } = useAccounts();
-  const [collection, setCollection] = useState<CollectionInfoWithSchema>();
-  const [tokens, setTokens] = useState<TokenByIdResult[]>([]);
+  const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse>();
+  const [tokens, setTokens] = useState<TokenByIdResponse[]>([]);
   const [isFetchingTokens, setIsFetchingTokens] = useState<boolean>(true);
   const deviceSize = useDeviceSize();
   const { getCollection } = useCollections();
@@ -56,7 +57,7 @@ export const CollectionPage = () => {
       setCollection(collection);
 
       await fetch({ page: 1, pageSize, collectionId: Number(collectionId) });
-      const _tokens = (await api.nft?.getTokensOfCollection(Number(collectionId))) || [];
+      const _tokens = (await api.nft?.getTokensOfCollection(Number(collectionId), selectedAccount.address)) || [];
 
       setTokens(_tokens);
       setIsFetchingTokens(false);
@@ -99,10 +100,10 @@ export const CollectionPage = () => {
   }, [setSearchString]);
 
   // attribute counts calculated based on tokens filtered by all filters except attribute count filter
-  const filterForAttributeCounts = useCallback((token: TokenByIdResult & Partial<Offer>) => {
+  const filterForAttributeCounts = useCallback((token: MixedTokenAndOffer) => {
       const { statuses, prices } = filterState || {};
       setUrlParameter('filterState', filterState ? JSON.stringify(filterState) : '');
-      const filterByStatus = (token: TokenByIdResult & Partial<Offer>) => {
+      const filterByStatus = (token: MixedTokenAndOffer) => {
         const { onSell, fixedPrice, timedAuction, notOnSale } = statuses || {};
         if (!onSell && !fixedPrice && !timedAuction && !notOnSale) return true;
         return (onSell && !fixedPrice && !timedAuction && !!token.seller) ||
@@ -116,22 +117,22 @@ export const CollectionPage = () => {
         if (!token.price) {
           filteredByPrice = false;
         } else {
-          const tokenPrice = new BN(token.price);
-          const minPrice = new BN(fromStringToBnString(prices.minPrice || '0', api?.market?.kusamaDecimals));
-          const maxPrice = prices.maxPrice ? new BN(fromStringToBnString(prices.maxPrice, api?.market?.kusamaDecimals)) : BN_MAX_INTEGER;
+          const tokenPrice = new BN(token.price.raw);
+          const minPrice = new BN(fromStringToBnString(prices.minPrice || '0', api?.market?.decimals));
+          const maxPrice = prices.maxPrice ? new BN(fromStringToBnString(prices.maxPrice, api?.market?.decimals)) : BN_MAX_INTEGER;
           filteredByPrice = (tokenPrice.gte(minPrice) && tokenPrice.lte(maxPrice));
         }
       }
-      let filteredByAttributes = true;
-      if (filterState?.attributes && filterState.attributes.length > 0) {
-        filteredByAttributes = filterState?.attributes.every((attributeItem) => {
-          const attribute = Object.values(token.attributes || {}).find((attribute) => attribute.name._.toLowerCase() === attributeItem.key.toLowerCase());
-          return (attribute && attribute.isArray)
-            ? (attribute.value as (BoxedNumberWithDefault | LocalizedStringWithDefault)[])
-              .some((_attribute) => _attribute._ === attributeItem.attribute)
-            : ((attribute?.value as LocalizedStringWithDefault)?._ === attributeItem.attribute);
-        });
-      }
+      const filteredByAttributes = true;
+      // if (filterState?.attributes && filterState.attributes.length > 0) {
+      //   filteredByAttributes = filterState?.attributes.every((attributeItem) => {
+      //     const attribute = Object.values(token.attributes || {}).find((attribute) => attribute.name._.toLowerCase() === attributeItem.key.toLowerCase());
+      //     return (attribute && attribute.isArray)
+      //       ? (attribute.value as (BoxedNumberWithDefault | LocalizedStringWithDefault)[])
+      //         .some((_attribute) => _attribute._ === attributeItem.attribute)
+      //       : ((attribute?.value as LocalizedStringWithDefault)?._ === attributeItem.attribute);
+      //   });
+      // }
       let filteredBySearchValue = true;
       if (searchString) {
         filteredBySearchValue = token.tokenId === Number(searchString);
@@ -139,10 +140,10 @@ export const CollectionPage = () => {
 
       return filterByStatus(token) && filteredByPrice && filteredByAttributes && filteredBySearchValue;
     },
-    [filterState, searchString, api?.market?.kusamaDecimals]
+    [filterState, searchString, api?.market?.decimals]
   );
 
-  const filterByAttributeCounts = useCallback((token: TokenByIdResult & Partial<Offer>) => {
+  const filterByAttributeCounts = useCallback((token: MixedTokenAndOffer) => {
     let filteredByAttributeCounts = true;
     if (filterState?.attributeCounts && filterState.attributeCounts.length > 0) {
       filteredByAttributeCounts = filterState?.attributeCounts.some((attributeCount) => {
@@ -152,9 +153,9 @@ export const CollectionPage = () => {
     return filteredByAttributeCounts;
   }, [filterState]);
 
-  const tokensWithOffers: (TokenByIdResult & Partial<Offer>)[] = useMemo(() => {
+  const tokensWithOffers: MixedTokenAndOffer[] = useMemo(() => {
     return [
-      ...(offers?.map<TokenByIdResult & Partial<Offer>>((offer) => ({
+      ...(offers?.map<MixedTokenAndOffer>((offer) => ({
         id: offer.tokenId,
         image: stringToDecodedInfixOrUrlOrCidAndHash(offer.tokenDescription?.image),
         attributes: offer.tokenDescription?.attributes,
@@ -166,12 +167,12 @@ export const CollectionPage = () => {
     ];
   }, [tokens, offers]);
 
-  const featuredTokensForAttributeCounts: (TokenByIdResult & Partial<Offer>)[] = useMemo(() => {
+  const featuredTokensForAttributeCounts: MixedTokenAndOffer[] = useMemo(() => {
     return tokensWithOffers.filter(filterForAttributeCounts);
   }, [tokensWithOffers, filterForAttributeCounts]);
 
-  const featuredTokens: (TokenByIdResult & Partial<Offer>)[] = useMemo(() => {
-    const filteredTokens: (TokenByIdResult & Partial<Offer>)[] = featuredTokensForAttributeCounts.filter(filterByAttributeCounts);
+  const featuredTokens: MixedTokenAndOffer[] = useMemo(() => {
+    const filteredTokens: MixedTokenAndOffer[] = featuredTokensForAttributeCounts.filter(filterByAttributeCounts);
 
     if (selectOption) {
       return filteredTokens.sort((tokenA, tokenB) => {

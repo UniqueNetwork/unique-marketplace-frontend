@@ -1,6 +1,5 @@
 import { FilterState, FiltersProps as CommonFiltersProps } from 'components/Filters/types';
-import { TokenByIdResult } from '@unique-nft/substrate-client/tokens';
-import { Offer } from '../../../api/restApi/offers/types';
+import { MixedTokenAndOffer } from 'pages/MyTokens/NFTPage';
 
 export type TokensStatuses = Record<'onSell' | 'fixedPrice' | 'timedAuction' | 'notOnSale', boolean | undefined>;
 
@@ -14,9 +13,9 @@ export type CollectionFilterState = Omit<FilterState, 'statuses'> & {
 };
 
 export type FiltersProps = CommonFiltersProps<CollectionFilterState> & {
-  tokens: (TokenByIdResult & Partial<Offer>)[]
-  featuredTokens: (TokenByIdResult & Partial<Offer>)[]
-  featuredTokensForAttributeCounts: (TokenByIdResult & Partial<Offer>)[]
+  tokens: MixedTokenAndOffer[]
+  featuredTokens: MixedTokenAndOffer[]
+  featuredTokensForAttributeCounts: MixedTokenAndOffer[]
   isFetchingTokens: boolean
 }
 

@@ -1,11 +1,11 @@
 import React, { FC, useEffect, useState } from 'react';
-import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 
 import AttributeCountsFilter from 'components/Filters/AttributeCountsFilter';
 import AttributesFilter from 'components/Filters/AttributesFilter';
 import { AttributeItem } from 'components/Filters/types';
 import { Attribute, AttributeCount } from 'api/restApi/offers/types';
 import { getAttributesCountFromTokens, getAttributesFromTokens } from './utils/attributes';
+import { MixedTokenAndOffer } from 'pages/MyTokens/NFTPage';
 
 interface AttributesFilterSectionProps {
   value?: { collections?: number[], attributes?: { key: string, attribute: string }[], attributeCounts?: number[] } | null
@@ -13,10 +13,10 @@ interface AttributesFilterSectionProps {
   onAttributesChange?(value: { key: string, attribute: string }[]): void
   onAttributeCountsChange?(value: number[]): void
   testid: string
-  featuredTokens: TokenByIdResult[]
-  tokens: TokenByIdResult[]
+  featuredTokens: MixedTokenAndOffer[]
+  tokens: MixedTokenAndOffer[]
   isFetchingTokens: boolean
-  featuredTokensForAttributeCounts: TokenByIdResult[]
+  featuredTokensForAttributeCounts: MixedTokenAndOffer[]
 }
 
 const AttributesFilterSection: FC<AttributesFilterSectionProps> = ({

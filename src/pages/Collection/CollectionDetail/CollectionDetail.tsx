@@ -1,13 +1,13 @@
 import React, { FC, useMemo } from 'react';
-import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
 import { Heading } from '@unique-nft/ui-kit';
+import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 import styled from 'styled-components';
 
 import { Picture, Avatar } from 'components';
 import { CollapsableText, Icon, Link, Text } from 'components/UI';
-import { isTokenOwner, toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
+import { isTokenOwner, toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import { CollectionStatisticsBlock } from './CollectionStaticticsBlock';
-import { CollectionDetailSkeleton } from './CollectionDeteilSkeleton';
+import { CollectionDetailSkeleton } from './CollectionDetailSkeleton';
 import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
 import { shortcutText } from 'utils/textUtils';
@@ -16,22 +16,21 @@ import { Primary500, Primary600 } from 'styles/colors';
 import CollectionBanner from 'static/images/banner.svg';
 import config from 'config';
 import { PagePaper } from 'components/PagePaper/PagePaper';
-
 interface IProps {
-  collection?: CollectionInfoWithSchema
+  collection?: CollectionInfoWithSchemaResponse
 }
 
 export const CollectionDetail: FC<IProps> = ({ collection }) => {
   const { selectedAccount } = useAccounts();
 
-  const { chainData, currentChainId } = useApi();
+  const { currentChainId, chainProperties } = useApi();
 
   const { name, description, schema, owner } = collection || {};
 
   const formatedAddressOwner = useMemo(() => {
     if (!owner) return '';
-    return toChainFormatAddress(owner, chainData?.SS58Prefix || 0);
-  }, [owner, chainData?.SS58Prefix]);
+    return toChainFormatAddress(owner, chainProperties?.SS58Prefix || 0);
+  }, [owner, chainProperties?.SS58Prefix]);
 
   const isOwner = useMemo(() => {
     if (!selectedAccount) return false;
