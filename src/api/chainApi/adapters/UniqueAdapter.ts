@@ -55,6 +55,15 @@ class UniqueAdapter implements IMarketContractAdapter {
     }
   }
 
+  async getTransferBalanceFee(from: string, to: string, amount: ChainValue): Promise<string> {
+    const res = (await this.uniqueSdk.balance.transfer.getFee({
+      address: from,
+      destination: to,
+      amount: amount.parsed
+    }));
+    return res.fee.raw;
+  }
+
   async transferBalance(from: string, to: string, amount: ChainValue, signer: Signer): Promise<void> {
     await this.uniqueSdk.balance.transfer.submitWaitResult({
       address: from,

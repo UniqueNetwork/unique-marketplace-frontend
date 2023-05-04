@@ -7,6 +7,7 @@ import MetamaskAdapter from '../adapters/MetamaskAdapter';
 import UniqueAdapter from '../adapters/UniqueAdapter';
 import IBaseController from '../controllers/base/IBaseController';
 import { BN } from '@polkadot/util';
+import { ethers } from 'ethers';
 
 export type ChainValue = {
   raw: string;
@@ -31,7 +32,7 @@ class BaseController implements IBaseController {
       case BN:
         return {
           raw: value.toString(),
-          parsed: (value as BN).div(new BN(10).pow(new BN(decimals))).toNumber()
+          parsed: Number(ethers.utils.formatUnits(value.toString(), decimals).toString())
         };
       case Number:
         return {
@@ -41,7 +42,7 @@ class BaseController implements IBaseController {
       case String:
         return {
           raw: value as string,
-          parsed: (new BN(value)).div(new BN(10).pow(new BN(decimals))).toNumber()
+          parsed: Number(ethers.utils.formatUnits(value.toString(), decimals).toString())
         };
       default:
         throw new Error('Invalid amount format for transfer balance');
