@@ -95,7 +95,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   const getFee = useCallback((newRecipientAddress, amount: number) => {
     setIsFeeLoading(true);
     return debounce(() => {
-      if (!sender || !api?.market || !newRecipientAddress) return;
+      if (!sender || !api?.market || !newRecipientAddress) return setIsFeeLoading(false);
       if (!amount) {
         setKusamaFee('0');
         setIsFeeLoading(false);
