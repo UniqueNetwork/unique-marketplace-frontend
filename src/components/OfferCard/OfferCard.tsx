@@ -6,7 +6,7 @@ import { Icon } from 'components/UI/Icon/Icon';
 import { Offer } from 'api/restApi/offers/types';
 import { useAccounts } from 'hooks/useAccounts';
 import { compareEncodedAddresses } from 'api/chainApi/utils/addressUtils';
-import { formatKusamaBalance } from 'utils/textUtils';
+import { formatBalance } from 'utils/textUtils';
 import { timeDifference } from 'utils/timestampUtils';
 import { countNestedChildren, stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
 import { Primary600 } from 'styles/colors';
@@ -102,7 +102,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
           <Text
             testid={`${testid}-price`}
             size='l'
-          >{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${offer.price.parsed}` }</Text>
+          >{topBid ? `${formatBalance(Number(topBid))}` : `${offer.price.parsed}` }</Text>
           <IconStyled name={`chain-${chainProperties?.token}`} size={16} />
           {!offer?.auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         </PriceWrapper>

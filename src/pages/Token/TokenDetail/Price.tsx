@@ -4,7 +4,7 @@ import BN from 'bn.js';
 import styled from 'styled-components';
 import { Icon } from 'components/UI/Icon/Icon';
 
-import { formatKusamaBalance } from '../../../utils/textUtils';
+import { formatBalance } from '../../../utils/textUtils';
 import { useApi } from '../../../hooks/useApi';
 
 interface PriceProps {

@@ -1,3 +1,5 @@
+import { BN } from '@polkadot/util';
+
 export enum CreateAccountModalStages {
   AskSeed,
   AskCredentials,
@@ -35,5 +37,5 @@ export type Scanned = {
 export type TTransferFunds = {
   sender: string
   recipient: string
-  amount: string
+  amount: BN | number | string
 }

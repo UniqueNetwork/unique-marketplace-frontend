@@ -11,7 +11,7 @@ import { useAuctionBidStages } from 'hooks/marketplaceStages';
 import { useAccounts } from 'hooks/useAccounts';
 import { useFee } from 'hooks/useFee';
 import { useApi } from 'hooks/useApi';
-import { formatKusamaBalance } from 'utils/textUtils';
+import { formatBalance } from 'utils/textUtils';
 import { fromStringToBnString } from 'utils/bigNum';
 import { NumberInput } from 'components/NumberInput/NumberInput';
 import { StageStatus } from 'types/StagesTypes';
@@ -48,12 +48,11 @@ const chainOptions = [{ id: 'KSM', title: '!!!OLD_KSM!!!', iconRight: { size: 18
 export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceABid): void, testid: string}> = ({ offer, onConfirmPlaceABid, testid }) => {
   const { api, settings } = useApi();
   const [chain, setChain] = useState<string | undefined>('KSM');
-  const { kusamaFee, getFee } = useFee();
+  const { transferBalanceFee, getTransferBalanceFee } = useFee();
   const { selectedAccount } = useAccounts();
   const [calculatedBid, setCalculatedBid] = useState<TCalculatedBid>();
   const [isFetchingCalculatedbid, setIsFetchingCalculatedBid] = useState<boolean>(true);
   const { getCalculatedBid } = useAuction();
-  const decimals = api?.market?.decimals;
 
   const fetchCalculatedBid = useCallback(async () => {
     if (!offer || !selectedAccount || !settings) return;
@@ -63,7 +62,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
       tokenId: offer?.tokenId || 0,
       bidderAddress: selectedAccount?.address || ''
     });
-    await getFee(settings.auction.address, new BN(_calculatedBid?.minBidderAmount || 0));
+    await getTransferBalanceFee(settings.auction.address, _calculatedBid?.minBidderAmount || 0);
     setCalculatedBid(_calculatedBid);
     setIsFetchingCalculatedBid(false);
   }, [offer, selectedAccount?.address]);
@@ -84,7 +83,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
     return new BN(Number(leadingBid) + Number(offer?.auction?.priceStep || '0'));
   }, [offer?.auction, leadingBid]);
 
-  const [bidAmount, setBidAmount] = useState<string>(formatKusamaBalance(minimalBid.toString(), { decimals }));
+  const [bidAmount, setBidAmount] = useState<string>(formatBalance(minimalBid.toString()));
 
   const isEnoughBalance = useMemo(() => {
     if (!selectedAccount?.balance?.raw || selectedAccount?.balance?.raw.isZero()) return false;
@@ -95,8 +94,8 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
   const onBidAmountChange = useCallback((value: string) => {
     setBidAmount(value);
     if (!settings) return;
-    void (getFee(settings.auction.address, new BN(fromStringToBnString(value, api?.market?.decimals))));
-  }, [setBidAmount, api, getFee, settings]);
+    void (getTransferBalanceFee(settings.auction.address, value));
+  }, [setBidAmount, api, getTransferBalanceFee, settings]);
 
   const isAmountValid = useMemo(() => {
     if (!bidAmount || bidAmount === '0') return false;
@@ -110,7 +109,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
 
       onConfirmPlaceABid({
         accountAddress: selectedAccount?.address || '',
-        amount: formatKusamaBalance(Number(bnAmount.toString()) - Number(lastBidFromThisAccount))
+        amount: formatBalance(Number(bnAmount.toString()) - Number(lastBidFromThisAccount))
       });
     },
     [onConfirmPlaceABid, bidAmount, isEnoughBalance, isAmountValid, chain, api?.market?.decimals, lastBidFromThisAccount]
@@ -142,7 +141,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
         />
       </InputWrapper>
       <Text size={'s'} color={'grey-500'} testid={`${testid}-minimum-bid-text`}>
-        {`Minimum bid ${formatKusamaBalance(minimalBid.toString(), { decimals })} ${chain || ''}`}
+        {`Minimum bid ${formatBalance(minimalBid.toString())} ${chain || ''}`}
       </Text>
       <CautionTextWrapper>
         {(!isEnoughBalance || !isAmountValid) && <WarningStyled color={'coral-500'} testid={`${testid}-low-balance-warning`}>Check the bid. You may haven’t enough funds or the entered value is less than the minimum or previous bid.</WarningStyled>}
@@ -151,7 +150,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
           size='s'
           testid={`${testid}-fee-warning`}
         >
-          {`A fee of ~ ${kusamaFee} ${chain || ''} can be applied to the transaction`}
+          {`A fee of ~ ${transferBalanceFee} ${chain || ''} can be applied to the transaction`}
         </TextStyled>}
       </CautionTextWrapper>
       <ButtonWrapper>

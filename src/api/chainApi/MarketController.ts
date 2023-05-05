@@ -102,19 +102,31 @@ class MarketController extends BaseController implements IMarketController {
     return { raw: new BN(balance?.freeBalance?.raw || 0), parsed: balance?.freeBalance?.amount || '0' };
   }
 
-  // TODO: split into multiple "get fee for method X". Put them in adapters
-  async getFee(sender: string, recipient?: string, value?: BN): Promise<string | null> {
+  async getTransferTokenFee(sender: string, recipient: string, collectionId: number, tokenId: number, amount: number, { account }: TransactionOptions): Promise<string | null> {
     await Promise.resolve();
     return '0';
   }
 
   // ____ EXTRA _____
   async transferToken(from: string, to: string, collectionId: number, tokenId: number, { account }: TransactionOptions): Promise<void> {
-    await this.getAdapter(account.account).transferToken(from, to, collectionId, tokenId, account.signer);
+    await this.getAdapter(account.account).transferToken(from, to, collectionId, tokenId, 1, account.signer);
   }
 
-  async transferBalance(from: string, to: string, amount: BN, { account }: TransactionOptions): Promise<void> {
-    await this.getAdapter(account.account).transferBalance(from, to, amount.toNumber(), account.signer);
+  async getTransferBalanceFee(sender: string, recipient: string, value: number, { account }: TransactionOptions): Promise<string> {
+    const adapter = this.getAdapter(account.account);
+    const rawFee = await adapter.getTransferBalanceFee(sender, recipient, this.getChainValue(value, this.decimals), account.signer);
+    return this.getChainValue(rawFee, this.decimals).parsed.toString();
+  }
+
+  /**
+   *
+   * @param from Sender
+   * @param to Receiver
+   * @param amount amount to send. Send as number if in human format, BN/string for chain formats.
+   * @param param3
+   */
+  async transferBalance(from: string, to: string, amount: BN | number | string, { account }: TransactionOptions): Promise<void> {
+    await this.getAdapter(account.account).transferBalance(from, to, this.getChainValue(amount, this.decimals), account.signer);
   }
 }
 

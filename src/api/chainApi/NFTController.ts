@@ -65,53 +65,23 @@ export class UniqueSDKNFTController extends BaseController {
     return await this.uniqueSdk.token.getBundle({ collectionId, tokenId }) || null;
   }
 
-  // TODO: fix
-  async unnest(collectionId: number, tokenId: number, address: string, options: TransactionOptions): Promise<void> {
-    if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
+  async transferToBundle(nested: TokenIdQuery, newParent: TokenIdQuery, amount: number, { account }: TransactionOptions): Promise<void> {
+    const adapter = this.getAdapter(account.account);
+    await adapter.nestToken(
+        { collectionId: Number(nested.collectionId), tokenId: nested.tokenId },
+        { collectionId: Number(newParent.collectionId), tokenId: newParent.tokenId },
+        amount,
+        account.signer
+      );
+  }
+
+  async unnest(collectionId: number, tokenId: number, amount: number, { account }: TransactionOptions): Promise<void> {
     const parent = await this.uniqueSdk.token.parent({ collectionId, tokenId });
 
     if (!parent) return;
 
-    const unsignedTxPayload = await this.uniqueSdk.token.unnest.build({
-      nested: { collectionId, tokenId },
-      address
-    });
-    if (!unsignedTxPayload) throw new Error('Transaction build error');
-    const { signature } = await this.uniqueSdk.token.unnest.sign(unsignedTxPayload);
-    if (!signature) throw new Error('Signing failed');
-    await this.uniqueSdk.extrinsic.submit({
-      signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
-      signature
-    });
-  }
-
-  async transferToBundle(nested: TokenIdQuery, newParent: TokenIdQuery, { account }: TransactionOptions): Promise<void> {
-    const parent = await this.uniqueSdk.token.parent(nested);
-    if (!parent) return;
-    const { collectionId, tokenId } = nested;
-    const from = Address.nesting.idsToAddress(parent.collectionId, parent.tokenId);
-    const to = Address.nesting.idsToAddress(Number(newParent.collectionId), newParent.tokenId);
-    const unsignedTxPayload = await this.uniqueSdk.extrinsic.build({
-      section: 'unique',
-      method: 'transferFrom',
-      address: account?.address || '',
-      args: [
-        // @ts-ignore
-        { Ethereum: from },
-        // @ts-ignore
-        { Ethereum: to },
-        collectionId,
-        tokenId,
-        1
-      ]
-    });
-    if (!unsignedTxPayload) throw new Error('Transaction build error');
-    const { signature } = await this.uniqueSdk.extrinsic.sign(unsignedTxPayload, account.account);
-    if (!signature) throw new Error('Signing failed');
-    await this.uniqueSdk.extrinsic.submit({
-      signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
-      signature
-    });
+    const adapter = this.getAdapter(account.account);
+    await adapter.unnestToken({ collectionId, tokenId }, amount, account.signer);
   }
 
   async getOwner(collectionId: number, tokenId: number): Promise<TokenOwnerResponse | null> {

@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { Button, Text } from 'components/UI';
 
-import { formatKusamaBalance } from '../../utils/textUtils';
+import { formatBalance } from '../../utils/textUtils';
 import ChainLogo from '../../components/ChainLogo';
 import { TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/components';
 
@@ -39,7 +39,7 @@ const getAccountsColumns = ({ onShowSendFundsModal }: AccountsColumnsProps): Tab
     field: 'balance',
     render(balance: string) {
       return <BalancesWrapper>
-        <Text>{`${formatKusamaBalance(balance || 0)} ${tokenSymbol}`}</Text>
+        <Text>{`${formatBalance(balance || 0)} ${tokenSymbol}`}</Text>
       </BalancesWrapper>;
     }
   },

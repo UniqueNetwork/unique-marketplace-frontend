@@ -35,10 +35,10 @@ const useStages = <T>(stages: InternalStage<T>[], account?: Account): useStagesR
       // transaction sign could be triggered in the component that uses current stage (you can track it by using stage.account)
       await stage.action({ txParams, options: { account } });
       updateStage(index, { ...stage, status: StageStatus.success });
-    } catch (e) {
+    } catch (e: any) {
       updateStage(index, { ...stage, status: StageStatus.error });
       console.error('Execute stage failed', stage, e);
-      throw new Error(`Execute stage "${stage.title}" failed`);
+      throw new Error(`Execute step "${stage.title}" failed: ${e?.message}`);
     }
   }, [updateStage, account]);
 

@@ -12,7 +12,7 @@ import { SelectInput } from 'components/SelectInput/SelectInput';
 import { NumberInput } from 'components/NumberInput/NumberInput';
 import AccountCard from 'components/Account/Account';
 import { StageStatus } from 'types/StagesTypes';
-import { formatKusamaBalance } from 'utils/textUtils';
+import { formatBalance } from 'utils/textUtils';
 import { fromStringToBnString } from 'utils/bigNum';
 import { debounce } from 'utils/helpers';
 import { AdditionalWarning100, Coral700 } from 'styles/colors';
@@ -32,12 +32,12 @@ export const TransferFundsModal: FC<TransferFundsModalProps> = ({ isVisible, sen
   const [status, setStatus] = useState<'ask' | 'transfer-stage'>('ask');
   const [sender, setSender] = useState<string>('');
   const [recipient, setRecipient] = useState<string>('');
-  const [amount, setAmount] = useState<string>('');
+  const [amount, setAmount] = useState<number>(0);
 
   const onTransfer = useCallback((_sender: string, _recipient: string, _amount: string) => {
     setRecipient(_recipient);
     setSender(_sender);
-    setAmount(_amount);
+    setAmount(Number(_amount));
     setStatus('transfer-stage');
   }, [setStatus, setRecipient, setAmount]);
 
@@ -78,7 +78,7 @@ type AskSendFundsModalProps = {
 
 export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, onFinish, senderAddress, onClose, testid }) => {
   const { chainProperties, api, prefixes } = useApi();
-  const { accounts, selectedAccount } = useAccounts();
+  const { accounts } = useAccounts();
   const [sender, setSender] = useState<Account>();
   const [recipientAddress, setRecipientAddress] = useState<string | Account | undefined>();
   const [isValidRecipientAddress, setIsValidRecipientAddress] = useState(true);
@@ -92,21 +92,26 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     setSender(account);
   }, [senderAddress, accounts]);
 
-  const getFee = useCallback((newRecipientAddress, amount) => {
+  const getFee = useCallback((newRecipientAddress, amount: number) => {
     setIsFeeLoading(true);
     return debounce(() => {
-      if (!selectedAccount || !api?.market) return;
+      if (!sender || !api?.market || !newRecipientAddress) return setIsFeeLoading(false);
+      if (!amount) {
+        setKusamaFee('0');
+        setIsFeeLoading(false);
+        return;
+      }
       const recipient = typeof newRecipientAddress === 'string' ? newRecipientAddress : newRecipientAddress?.address;
-      api?.market?.getFee(selectedAccount.address, recipient, new BN(fromStringToBnString(amount)))
+      api?.market?.getTransferBalanceFee(sender.address, recipient, amount, { account: sender })
       .then((fee) => {
         setKusamaFee(fee || '0');
       }).catch((e) => {
-        console.log(e);
+        console.error('Failed to get fee: ', e);
       }).finally(() => {
         setIsFeeLoading(false);
       });
     }, 300);
-  }, [api?.market, selectedAccount]);
+  }, [api?.market, sender]);
 
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainProperties?.SS58Prefix || 0);
@@ -123,12 +128,12 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   }, [accountsWithQuartzAddresses]);
 
   const recipientBalance = useMemo(() => {
-    return typeof recipientAddress !== 'string' && recipientAddress?.balance?.raw;
+    return typeof recipientAddress !== 'string' && recipientAddress?.balance?.parsed;
   }, [recipientAddress]);
 
   const onAmountChange = useCallback((value: string) => {
     setAmount(value);
-    getFee(recipientAddress, value)();
+    getFee(recipientAddress, Number(value))();
   }, [setAmount, getFee, recipientAddress]);
 
   const isAmountGreaterThanBalance = useMemo(() => {
@@ -159,7 +164,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
 
   const onChangeAddress = useCallback((value: string | Account) => {
     setRecipientAddress(value);
-    getFee(value, amount)();
+    getFee(value, Number(amount))();
 
     if (typeof value === 'string') {
       const isValid = value ? validateAddress(value, prefixes) : true;
@@ -181,7 +186,8 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
 
   const onChangeSender = useCallback((value: SelectOptionProps) => {
     setSender(value as unknown as Account);
-  }, []);
+    getFee(recipientAddress, Number(amount))();
+  }, [getFee, recipientAddress, amount]);
 
   const tokenSymbol = useMemo(() => chainProperties?.token || '', [chainProperties]);
 
@@ -220,7 +226,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
       <Text
         testid={`${testid}-balance`}
         size={'s'}
-      >{`${sender?.balance?.parsed} ${tokenSymbol}`}</Text>
+      >{`${formatBalance(sender?.balance?.parsed || 0)} ${tokenSymbol}`}</Text>
     </AmountWrapper>
 
     <Text size={'s'} color={'grey-500'}>{'To'}</Text>
@@ -244,7 +250,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
       {recipientBalance && <Text
         testid={`${testid}-recipient-balance`}
         size={'s'}
-      >{`${formatKusamaBalance(recipientBalance?.toString() || 0)} ${tokenSymbol}`}</Text> }
+      >{`${formatBalance(recipientBalance || 0)} ${tokenSymbol}`}</Text> }
     </AmountWrapper>
     {!isValidRecipientAddress && <ErrorWrapper size={'s'} color={'var(--color-coral-500)'} >Address is not valid</ErrorWrapper>}
     <AmountInputWrapper>
@@ -287,7 +293,7 @@ type TransferFundsStagesModalProps = {
 const TransferFundsStagesModal: FC<TransferFundsStagesModalProps & TTransferFunds> = ({ isVisible, onFinish, sender, amount, recipient, testid }) => {
   const { stages, status, initiate } = useTransferFundsStages(sender);
   const { info } = useNotifications();
-  useEffect(() => { initiate({ sender, recipient, amount: fromStringToBnString(amount) }); }, [sender, recipient, amount]);
+  useEffect(() => { void initiate({ sender, recipient, amount }); }, [sender, recipient, amount]);
 
   useEffect(() => {
     if (status === StageStatus.success) {
@@ -317,6 +323,7 @@ type KusamaFeeMessageProps = {
 }
 
 const KusamaFeeMessage: FC<KusamaFeeMessageProps> = ({ isFeeLoading, kusamaFee, testid }) => {
+  const { chainProperties, api } = useApi();
   return (
     <KusamaFeeMessageWrapper>
       <Text
@@ -326,7 +333,7 @@ const KusamaFeeMessage: FC<KusamaFeeMessageProps> = ({ isFeeLoading, kusamaFee, 
       >
         {isFeeLoading
           ? <Loader label='Loading fee...' />
-          : <>A fee of {kusamaFee === '0' ? 'some' : `~ ${kusamaFee}`} !!!OLD_KSM!!! can be applied to the transaction, unless the transaction is sponsored</>}
+          : <>A fee of {kusamaFee === '0' ? 'some' : `~ ${Number(kusamaFee).toFixed(api?.market?.decimals || 18).replace(/(?<=\.\d*[1-9])0+$|\.0*$/, '')}`} {chainProperties?.token} can be applied to the transaction, unless the transaction is sponsored</>}
       </Text>
     </KusamaFeeMessageWrapper>
   );

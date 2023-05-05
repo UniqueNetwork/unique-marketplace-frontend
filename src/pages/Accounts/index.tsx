@@ -188,6 +188,7 @@ export const AccountsPage = () => {
             onShowWithdrawDepositModal: onAccountActionClick(AccountModal.withdrawDeposit),
             onShowDeleteLocalAccountModal: onAccountActionClick(AccountModal.deleteLocalAccount),
             onShowGetKsmModal,
+            tokenSymbol: chainProperties?.token || '',
             scanUrl: currentChainId ? config.blockchains[currentChainId]?.scanUrl : ''
           })}
           data={filteredAccounts}

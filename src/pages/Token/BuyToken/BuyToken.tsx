@@ -17,13 +17,13 @@ interface BuyTokenProps {
 }
 
 export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy, testid }) => {
-  const { marketCommission } = useFee();
+  // const {  } = useFee();
   const { selectedAccount } = useAccounts();
 
   const isEnoughBalance = useMemo(() => {
     if (!selectedAccount?.balance?.raw || selectedAccount.balance?.raw.isZero() || !offer?.price?.raw) return false;
-    return selectedAccount.balance?.raw.gte(new BN(offer?.price?.raw).add(new BN(marketCommission)));
-  }, [offer?.price?.raw, selectedAccount?.balance?.raw, marketCommission]);
+    // TODO: check contractCall fee
+  }, [offer?.price?.raw, selectedAccount?.balance?.raw]);
 
   const onBuyClick = useCallback(() => {
     if (!isEnoughBalance) return;

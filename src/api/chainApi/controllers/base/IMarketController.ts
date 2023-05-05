@@ -16,12 +16,12 @@ interface IMarketController {
 
   getAccountBalance(address: string): Promise<MarketAccountBalance>
 
-  // TODO: split into "getTransferTokenFee" and "getTransferBalanceFee"
-  getFee(sender: string, recipient?: string, value?: BN): Promise<string | null>
-
+  getTransferTokenFee(sender: string, recipient: string, collectionId: number, tokenId: number, amount: number, options: TransactionOptions): Promise<string | null>;
   // TODO: remove "from" param, we can calculate it from signer
   transferToken(from: string, to: string, collectionId: number, tokenId: number, options: TransactionOptions): Promise<void>
-  transferBalance(from: string, to: string, amount: BN, options: TransactionOptions): Promise<void>
+
+  getTransferBalanceFee(sender: string, recipient: string, value: number, options: TransactionOptions): Promise<string | null>;
+  transferBalance(from: string, to: string, amount: BN | number, options: TransactionOptions): Promise<void>
 }
 
 export default IMarketController;

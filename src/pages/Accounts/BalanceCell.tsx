@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Text } from '@unique-nft/ui-kit';
-import { formatKusamaBalance } from 'utils/textUtils';
+import { formatBalance } from 'utils/textUtils';
 import styled from 'styled-components';
 import { AccountInfo } from './types';
-import { useApi } from 'hooks/useApi';
 
 interface IProps {
   isSmallDevice: boolean
@@ -16,16 +15,18 @@ const fractionDigits = 4;
 
 function BalanceCell({ isSmallDevice, accountInfo, tokenSymbol, testid }: IProps) {
   const KSM = accountInfo.deposit || 0;
-  const isDeposit = !!accountInfo.deposit;
-  const { api } = useApi();
-  const decimals = api?.market?.decimals;
+  const isDeposit = !!accountInfo.deposit; // TODO: irrelevant
+
+  const balance = useMemo(() => {
+    return formatBalance(accountInfo.balance?.parsed, fractionDigits);
+  }, [accountInfo.balance]);
 
   if (!isSmallDevice) {
     return (
       <BalancesWrapper>
-        {!isDeposit && <Text testid={`${testid}-balance`}>{`${accountInfo.balance?.parsed} ${tokenSymbol}`}</Text>}
+        {!isDeposit && <Text testid={`${testid}-balance`}>{`${balance} ${tokenSymbol}`}</Text>}
         {isDeposit && (<>
-          <Text color={'grey-500'} size={'s'} testid={`${testid}-deposit`}>{`${accountInfo.balance.parsed}}`}</Text>
+          <Text color={'grey-500'} size={'s'} testid={`${testid}-deposit`}>{`${balance}}`}</Text>
           <Text color={'grey-500'} size={'s'}>market deposit</Text>
         </>)}
       </BalancesWrapper>
@@ -33,9 +34,9 @@ function BalanceCell({ isSmallDevice, accountInfo, tokenSymbol, testid }: IProps
   } else {
     return (
       <BalancesWrapper>
-        <Text testid={`${testid}-balance`}>{`${accountInfo.balance.parsed} ${tokenSymbol}`}</Text>
+        <Text testid={`${testid}-balance`}>{`${balance} ${tokenSymbol}`}</Text>
         {isDeposit && (<>
-          <Text color={'grey-500'} size={'s'} testid={`${testid}-deposit`}>{`${formatKusamaBalance(KSM?.toString() || 0)} ${tokenSymbol}`}</Text>
+          <Text color={'grey-500'} size={'s'} testid={`${testid}-deposit`}>{`${formatBalance(KSM?.toString() || 0)} ${tokenSymbol}`}</Text>
           <Text color={'grey-500'} size={'s'}>market deposit</Text>
         </>)}
       </BalancesWrapper>

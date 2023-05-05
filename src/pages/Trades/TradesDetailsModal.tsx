@@ -9,7 +9,7 @@ import { AddressComponent } from './AddressComponent/AddressComponent';
 import { Table } from 'components/Table';
 import { useTradeDetails } from 'api/restApi/trades/tradeDetails';
 import { Bid, Trade } from 'api/restApi/trades/types';
-import { formatKusamaBalance } from 'utils/textUtils';
+import { formatBalance } from 'utils/textUtils';
 import Winner from 'static/icons/winner.svg';
 import { Modal } from 'components/UI';
 
@@ -25,7 +25,7 @@ const getColumns = (testid: string) => [
   {
     title: (<Header data-testid={`${testid}-header-bid`}>Bid</Header>),
     width: '32%',
-    render: (value: string, bid: Bid) => <Text testid={`${testid}-bid-${bid.id}`} color={AdditionalDark}>{`${formatKusamaBalance(value)} ${tokenSymbol}`}</Text>,
+    render: (value: string, bid: Bid) => <Text testid={`${testid}-bid-${bid.id}`} color={AdditionalDark}>{`${formatBalance(value)} ${tokenSymbol}`}</Text>,
     field: 'balance'
   },
   {

@@ -16,7 +16,8 @@ import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 const tokenSymbol = 'KSM';
 
 export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collection, setIsClosable, onFinish }) => {
-  const { kusamaFee } = useFee();
+  // TODO: calculate contract call fee
+  // const { transferBalanceFee } = useFee();
   const [step, setStep] = useState<'ask' | 'accept-stages' | 'reject-stages'>('ask');
   const { initiate: initiateAccept, status: acceptStatus, stages: acceptStages } = useAcceptSponsorshipStages(collection?.id || 0);
   const { initiate: initiateReject, status: rejectStatus, stages: rejectStages } = useRejectSponsorshipStages(collection?.id || 0);
@@ -64,7 +65,7 @@ export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collecti
         />
       </AddressWrapper>}
       <WarningBlock>
-        {`A fee of ~ ${kusamaFee} ${tokenSymbol} can be applied to the transaction if you accept this sponsor`}
+        {`A fee ${''} can be applied to the transaction if you accept this sponsor`}
       </WarningBlock>
       <ButtonWrapper>
         <Button
