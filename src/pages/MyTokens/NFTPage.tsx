@@ -25,6 +25,8 @@ import { Filters } from './Filters/Filters';
 import { MyTokensFilterState } from './Filters/types';
 import { countTokenAttributes } from './Filters/utils/attributes';
 import { DecodedAttributeDto, TokenByIdResponse } from '@unique-nft/sdk';
+import { useGqlGetTokens } from 'api/graphQL';
+import { MixedTokenAndOffer } from './types';
 
 type TOption = SelectOptionProps & {
   direction: 'asc' | 'desc';
@@ -32,8 +34,6 @@ type TOption = SelectOptionProps & {
   id: string;
   title: string;
 }
-
-export type MixedTokenAndOffer = Omit<TokenByIdResponse, 'collection' | 'nestingParentToken'> & Partial<Offer>;
 
 const sortingOptions: TOption[] = [
   {
@@ -93,7 +93,7 @@ export const NFTPage = () => {
   const [searchString, setSearchString] = useState<string>(searchParams.get('searchValue') || '');
   const [selectOption, setSelectOption] = useState<TOption>();
   const { selectedAccount, isLoading } = useAccounts();
-  const [tokens, setTokens] = useState<TokenByIdResponse[]>([]);
+  // const [tokens, setTokens] = useState<TokenByIdResponse[]>([]);
   const [isFetchingTokens, setIsFetchingTokens] = useState<boolean>(true);
   const deviceSize = useDeviceSize();
   const { featuredCollections } = useCollections();
@@ -101,14 +101,21 @@ export const NFTPage = () => {
   const { offers, isFetching: isFetchingOffers, fetch } = useOffers();
   const { api, currentChainId } = useApi();
 
+  const { data } = useGqlGetTokens({});
+
+  console.log(data);
+
+  const { tokens, count } = data || { tokens: [], count: 0 };
+
   useEffect(() => {
     if (!api?.nft || !selectedAccount) return;
 
     setIsFetchingTokens(true);
     void (async () => {
       await fetch({ page: 1, pageSize, seller: selectedAccount?.address });
-      const _tokens = (await api.nft?.getAccountMarketableTokens(selectedAccount.address)) || [];
-      setTokens(_tokens);
+      // const _tokens = (await api.nft?.getAccountMarketableTokens(selectedAccount.address)) || [];
+
+      // setTokens(_tokens);
       setIsFetchingTokens(false);
     })();
   }, [api?.nft, currentChainId, selectedAccount, setIsFetchingTokens, fetch]);
@@ -122,7 +129,7 @@ export const NFTPage = () => {
   }, [currentChainId]);
 
   const myCollections = useMemo(() => {
-    const myTokensCollectionIds = [...tokens, ...offers].map((token) => token.collectionId);
+    const myTokensCollectionIds = [...([]), ...offers].map((token) => token.collectionId);
     return featuredCollections.filter((collection) => myTokensCollectionIds.includes(collection.id));
   }, [featuredCollections, tokens, offers]);
 
@@ -228,16 +235,16 @@ export const NFTPage = () => {
 
   const tokensWithOffers: MixedTokenAndOffer[] = useMemo(() => {
     return [
-      ...(offers?.map<MixedTokenAndOffer>((offer) => ({
-        properties: [],
-        id: offer.tokenId,
-        image: stringToDecodedInfixOrUrlOrCidAndHash(offer.tokenDescription?.image),
-        attributes: offer.tokenDescription?.attributes as DecodedAttributeDto[],
-        video: stringToDecodedInfixOrUrlOrCidAndHash(offer.tokenDescription?.video),
-        owner: offer.seller,
-        ...offer
-      })) || []),
-      ...tokens
+      // ...(offers?.map<MixedTokenAndOffer>((offer) => ({
+      //   properties: [],
+      //   id: offer.tokenId,
+      //   // image: stringToDecodedInfixOrUrlOrCidAndHash(offer.tokenDescription?.image),
+      //   // attributes: offer.tokenDescription?.attributes as DecodedAttributeDto[],
+      //   video: stringToDecodedInfixOrUrlOrCidAndHash(offer.tokenDescription?.video),
+      //   owner: offer.seller,
+      //   ...offer
+      // })) || []),
+      // ...tokens
     ];
   }, [tokens, offers]);
 

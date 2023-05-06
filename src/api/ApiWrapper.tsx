@@ -11,17 +11,23 @@ import { NetworkOptions, SdkClient } from './sdk/sdkClient';
 import config from '../config';
 import { useSettings } from './restApi/settings/settings';
 import { ChainIdLocalStorageKey, getInitialChainId } from '../utils/initialChainId';
+import { GqlClient } from './graphQL/gqlClient';
+import { ApolloProvider } from '@apollo/client';
 
 keyring.loadAll({});
 
 interface ChainProviderProps {
   children: React.ReactNode
   sdkClient?: SdkClient
+  gqlClient?: GqlClient
 }
 
 const initialChainId = getInitialChainId();
+console.log(initialChainId);
 
-const ApiWrapper = ({ children }: ChainProviderProps) => {
+const gqlClientInstance = new GqlClient(initialChainId);
+
+const ApiWrapper = ({ children, gqlClient = gqlClientInstance }: ChainProviderProps) => {
   const [sdkClient, setSdkClient] = useState<SdkClient>();
   const [isRpcClientInitialized, setRpcClientInitialized] = useState<boolean>(false);
   const navigate = useNavigate();
@@ -37,7 +43,7 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
       const settings = await fetchSettings(config.blockchains);
       const networkOptions = settings.map<NetworkOptions>(({ networkId, settings }) => ({ networkId, settings }));
       setAvailableNetworkOptions(networkOptions);
-      // TODO: setup current chain properly from localStorage/url
+      // TODO: setup current chain properly from localStorage/url - this happens inside getInitialChainId
       const currentNetworkOption = networkOptions.find((no) => no.networkId === currentChainId) || networkOptions[0];
 
       setSettings(currentNetworkOption.settings);
@@ -74,6 +80,9 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
 
     setSettings(option.settings);
 
+    // change Scan Api endpoint
+    gqlClient?.changeEndpoint(config.blockchains[newChainId].scanApi);
+
     sdkClient?.setNetwork(option);
     setCurrentChainId(newChainId);
     localStorage.setItem(ChainIdLocalStorageKey, newChainId);
@@ -90,7 +99,7 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
     } else {
       navigate(`/${newChainId}${pathname}`);
     }
-  }, [currentChainId, sdkClient, availableNetworkOptions, navigate]);
+  }, [currentChainId, sdkClient, gqlClient, availableNetworkOptions, navigate]);
 
   // get current chain and current chain settings
   const currentChain = useMemo(() => {
@@ -132,9 +141,11 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
 
   return (
     <ApiProvider value={value}>
-      {/* <AuctionSocketProvider url={config.blockchains[currentChainId]?.apiEndpoint}> */}
-      {children}
-      {/* </AuctionSocketProvider> */}
+      <ApolloProvider client={gqlClient.client}>
+        {/* <AuctionSocketProvider url={config.blockchains[currentChainId]?.apiEndpoint}> */}
+        {children}
+        {/* </AuctionSocketProvider> */}
+      </ApolloProvider>
     </ApiProvider>
   );
 };

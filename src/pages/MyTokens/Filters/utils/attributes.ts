@@ -1,6 +1,8 @@
 import { Attribute, AttributeCount, OfferTokenAttribute } from 'api/restApi/offers/types';
-import { MixedTokenAndOffer } from '../../NFTPage';
+import { MixedTokenAndOffer } from '../../types';
 import { DecodedAttributeDto } from '@unique-nft/sdk';
+
+import { Attribute as GqlAttribute } from 'api/graphQL/tokens/types';
 
 export const sortAttributeCounts = (attributeCountA: AttributeCount, attributeCountB: AttributeCount) => attributeCountA.numberOfAttributes > attributeCountB.numberOfAttributes ? 1 : -1;
 
@@ -32,7 +34,7 @@ export const getAttributesFromTokens = (tokens: MixedTokenAndOffer[]) => {
   tokens.forEach(({ attributes }) => {
     if (!attributes) { return; }
     // Calculate filters to show
-    for (const attribute of attributes) {
+    for (const attribute of Object.values(attributes)) {
       const { name, value } = attribute;
       const attributeName = name?._?.toLocaleLowerCase();
 
@@ -61,13 +63,15 @@ export const getAttributesFromTokens = (tokens: MixedTokenAndOffer[]) => {
   return attributesForFilter;
 };
 
-export function countTokenAttributes(attributes: DecodedAttributeDto[] | undefined): number {
+export function countTokenAttributes(attributes: Record<string, GqlAttribute> | undefined): number {
   if (!attributes) return 0;
   let count = 0;
+  const attributesArray = Object.values(attributes);
+
   // TODO: Backed offer has different type here
-  if (!attributes.length) {
-    for (const i in attributes as any as { [key: number]: DecodedAttributeDto }) {
-      const { value } = attributes[i];
+  if (!attributesArray.length) {
+    for (const i in attributesArray as any as { [key: number]: DecodedAttributeDto }) {
+      const { value } = attributesArray[i];
       if (Array.isArray(value)) {
         count += value.length;
       } else {
@@ -77,7 +81,7 @@ export function countTokenAttributes(attributes: DecodedAttributeDto[] | undefin
     return count;
   }
 
-  for (const value of attributes) {
+  for (const value of attributesArray) {
     if (Array.isArray(value)) {
       count += value.length;
     } else {

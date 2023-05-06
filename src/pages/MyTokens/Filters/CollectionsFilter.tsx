@@ -11,7 +11,7 @@ import { AttributeItem } from 'components/Filters/types';
 import { CollectionCover } from 'components/CollectionCover/CollectionCover';
 import { Attribute, AttributeCount } from 'api/restApi/offers/types';
 import { getAttributesCountFromTokens, getAttributesFromTokens } from './utils/attributes';
-import { MixedTokenAndOffer } from '../NFTPage';
+import { MixedTokenAndOffer } from '../types';
 import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 
 interface CollectionsFilterProps {

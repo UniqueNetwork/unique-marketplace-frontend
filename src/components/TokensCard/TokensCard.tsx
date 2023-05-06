@@ -12,13 +12,15 @@ import { timeDifference } from 'utils/timestampUtils';
 import { Primary600 } from 'styles/colors';
 import config from 'config';
 import { TokensMedia } from './TokensMedia';
-import { countNestedChildren, stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
+import { countNestedChildren } from 'utils/helpers';
 import { useCollections } from 'hooks/useCollections';
 import BundleItemsCount from '../BundleItemsCount/BundleItemsCount';
-import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
+import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
+import { Token } from 'api/graphQL/tokens/types';
+import { useGqlGetToken } from 'api/graphQL';
 
 export type TTokensCard = {
-  token?: Omit<TokenByIdResponse, 'collection' | 'nestingParentToken'>
+  token?: Omit<Token, 'collection' | 'nestingParentToken'>
   offer?: Partial<Offer>
   tokenId?: number
   collectionId?: number
@@ -27,7 +29,7 @@ export type TTokensCard = {
 };
 
 export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, testid, ...props }) => {
-  const [token, setToken] = useState<Omit<TokenByIdResponse, 'collection' | 'nestingParentToken'> | undefined>(props.token);
+  const [token, setToken] = useState<Omit<Token, 'collection' | 'nestingParentToken'> | undefined>(props.token);
   const [collection, setCollection] = useState<(CollectionInfoWithSchemaResponse) | undefined>();
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isBundleState, setIsBundleState] = useState<boolean>();
@@ -35,47 +37,39 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
 
   const { api, currentChainId } = useApi();
   const { selectedAccount } = useAccounts();
-  const { getCollection } = useCollections();
+
+  const fetchedToken = useGqlGetToken(collectionId, tokenId);
 
   const {
     tokenTitle,
     collectionTitle,
     imageUrl,
     price,
-    auction,
-    video
+    auction
   } = useMemo(() => {
     if (offer || (token && collection)) {
-      const { image, video } = offer?.tokenDescription || token || {};
+      const { image } = offer?.tokenDescription || token || {};
       const { name: collectionName, tokenPrefix } = offer?.collectionDescription || collection || {};
       const { auction, price } = offer || {};
       return {
         tokenTitle: `${tokenPrefix || ''} #${tokenId || ''}`,
         collectionTitle: `${collectionName?.substring(0, 25) || ''} [id ${collectionId || ''}]`,
         imageUrl: image,
-        video: stringToDecodedInfixOrUrlOrCidAndHash(video),
+        // video: stringToDecodedInfixOrUrlOrCidAndHash(video),
         auction,
         price
       };
     }
 
-    if (tokenId && collectionId) {
-      setIsFetching(true);
-      (async () => {
-        if (!token) {
-          const token = await api?.nft?.getToken(collectionId, tokenId);
-          if (token) setToken(token);
-        }
-
-        if (!collection) {
-          const collection = await getCollection(collectionId);
-          if (collection) setCollection(collection);
-        }
-        setIsFetching(false);
-      })();
+    if (fetchedToken) {
+      const { collection_name, token_prefix } = fetchedToken;
+      return {
+        tokenTitle: `${token_prefix} #${tokenId || ''}`,
+        collectionTitle: `${collection_name?.substring(0, 25) || ''} [id ${collectionId || ''}]`
+      };
     }
     return {};
-  }, [collectionId, tokenId, collection, token, api]);
+  }, [collectionId, tokenId, collection, token, fetchedToken]);
 
   useEffect(() => {
     (async () => {
@@ -118,7 +112,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
         to={tokenPath}
         tokenId={tokenId}
         imageUrl={imageUrl}
-        video={video}
+        // video={video}
         testid={`${testid}-token-media`}
         badge={isBundleState ? 'Bundle' : ''}
       />

@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction } from 'react';
 import { Statuses } from 'components/Filters/types';
-import { MixedTokenAndOffer } from '../NFTPage';
+import { MixedTokenAndOffer } from '../types';
 import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 
 export type MyTokensStatuses = Record<'onSell' | 'fixedPrice' | 'timedAuction' | 'notOnSale', boolean | undefined>;

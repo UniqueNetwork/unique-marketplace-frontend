@@ -1,9 +1,9 @@
+import { MixedTokenAndOffer } from 'pages/MyTokens/types';
 import { FC } from 'react';
 import styled from 'styled-components';
 
 import { TokensCard } from '..';
 import CardSkeleton from '../Skeleton/CardSkeleton';
-import { MixedTokenAndOffer } from '../../pages/MyTokens/NFTPage';
 
 type TTokensList = {
   tokens: MixedTokenAndOffer[]
