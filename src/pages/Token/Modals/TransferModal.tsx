@@ -1,6 +1,8 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Heading, Link } from '@unique-nft/ui-kit';
+import { TokenByIdResponse } from '@unique-nft/sdk';
 import { useNotifications, Button, Text } from 'components/UI';
+import { BN } from '@polkadot/util';
 import styled from 'styled-components';
 
 import { TTransfer } from './types';
@@ -15,9 +17,7 @@ import { FeeMessage } from 'components';
 import { Coral700 } from 'styles/colors';
 import { debounce } from 'utils/helpers';
 import { useApi } from 'hooks/useApi';
-import { TokenByIdResponse } from '@unique-nft/sdk';
 import { fromStringToBnString } from 'utils/bigNum';
-import { BN } from '@polkadot/util';
 
 export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosable, onFinish, testid, collection }) => {
   const { selectedAccount } = useAccounts();
@@ -73,12 +73,11 @@ const AskTransferModal: FC<AskTransferModalProps> = ({ token, onTransfer, testid
     [address, onTransfer]
   );
 
-  const getFee = useCallback((newRecipientAddress) => {
+  const getFee = useCallback((recipient: string) => {
     setIsFeeLoading(true);
     return debounce(() => {
-      if (!api?.market || !token || !selectedAccount || !newRecipientAddress) return setIsFeeLoading(false);
+      if (!api?.market || !token || !selectedAccount || !recipient) return setIsFeeLoading(false);
 
-      const recipient = typeof newRecipientAddress === 'string' ? newRecipientAddress : newRecipientAddress?.address;
       api?.market?.getTransferTokenFee(
         selectedAccount.address,
         recipient,
@@ -129,7 +128,7 @@ const AskTransferModal: FC<AskTransferModalProps> = ({ token, onTransfer, testid
       />
       <ButtonWrapper>
         <Button
-          disabled={!address}
+          disabled={!address || isFeeGreaterThanBalance}
           onClick={onConfirmTransferClick}
           role='primary'
           title='Confirm'
