@@ -19,6 +19,18 @@ class UniqueAdapter implements IMarketContractAdapter {
     if (result.error) throw new Error((result.error as any)?.message || 'Transaction failed');
   }
 
+  async getTransferTokenFee(from: string, to: string, collectionId: number, tokenId: number, amount: number): Promise<string> {
+    if (amount !== 1) throw new Error('RFT support not implemented');
+    const res = await this.uniqueSdk.token.transfer.getFee({
+      address: from,
+      from,
+      to,
+      collectionId,
+      tokenId
+    });
+    return res.fee.raw;
+  }
+
   async transferToken(from: string, to: string, collectionId: number, tokenId: number, amount: number, signer: Signer): Promise<void> {
     if (amount !== 1) throw new Error('RFT support not implemented');
     this.validateSdkResponse(await this.uniqueSdk.token.transfer.submitWaitResult({

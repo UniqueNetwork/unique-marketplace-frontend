@@ -1,6 +1,6 @@
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Heading, Link } from '@unique-nft/ui-kit';
-import { useNotifications, Button } from 'components/UI';
+import { useNotifications, Button, Text } from 'components/UI';
 import styled from 'styled-components';
 
 import { TTransfer } from './types';
@@ -11,6 +11,13 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import { StageStatus } from '../../../types/StagesTypes';
 import { TextInput } from 'components/TextInput/TextInput';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
+import { FeeMessage } from 'components';
+import { Coral700 } from 'styles/colors';
+import { debounce } from 'utils/helpers';
+import { useApi } from 'hooks/useApi';
+import { TokenByIdResponse } from '@unique-nft/sdk';
+import { fromStringToBnString } from 'utils/bigNum';
+import { BN } from '@polkadot/util';
 
 export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosable, onFinish, testid, collection }) => {
   const { selectedAccount } = useAccounts();
@@ -25,7 +32,7 @@ export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosab
 
   if (!selectedAccount) return null;
 
-  if (status === 'ask') return (<AskTransferModal onTransfer={onTransfer} testid={`${testid}-ask-transfer`} />);
+  if (status === 'ask') return (<AskTransferModal token={token} onTransfer={onTransfer} testid={`${testid}-ask-transfer`} />);
   if (status === 'transfer-stage') {
     return (<TransferStagesModal
       recipient={recipient}
@@ -40,10 +47,22 @@ export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosab
   return null;
 };
 
-const AskTransferModal: FC<{ onTransfer(receiver: string): void, testid: string }> = ({ onTransfer, testid }) => {
+type AskTransferModalProps = {
+  token?: TokenByIdResponse
+  onTransfer(receiver: string): void
+  testid: string
+}
+
+const AskTransferModal: FC<AskTransferModalProps> = ({ token, onTransfer, testid }) => {
+  const { api } = useApi();
+  const { selectedAccount } = useAccounts();
   const [address, setAddress] = useState<string>('');
+  const [isFeeLoading, setIsFeeLoading] = useState(false);
+  const [fee, setFee] = useState<string>('0');
+
   const onAddressInputChange = useCallback((value: string) => {
     setAddress(value);
+    getFee(value);
   }, []);
 
   const onConfirmTransferClick = useCallback(
@@ -53,6 +72,35 @@ const AskTransferModal: FC<{ onTransfer(receiver: string): void, testid: string 
     },
     [address, onTransfer]
   );
+
+  const getFee = useCallback((newRecipientAddress) => {
+    setIsFeeLoading(true);
+    return debounce(() => {
+      if (!api?.market || !token || !selectedAccount || !newRecipientAddress) return setIsFeeLoading(false);
+
+      const recipient = typeof newRecipientAddress === 'string' ? newRecipientAddress : newRecipientAddress?.address;
+      api?.market?.getTransferTokenFee(
+        selectedAccount.address,
+        recipient,
+        token.collectionId,
+        token.tokenId,
+        1,
+        { account: selectedAccount })
+      .then((fee) => {
+        setFee(fee || '0');
+      }).catch((e) => {
+        console.error('Failed to get fee: ', e);
+      }).finally(() => {
+        setIsFeeLoading(false);
+      });
+    }, 300);
+  }, [api?.market, token, selectedAccount?.account]);
+
+  const isFeeGreaterThanBalance = useMemo(() => {
+    if (!fee) return false;
+    const feeBN = new BN(fromStringToBnString(fee));
+    return feeBN.gt(selectedAccount?.balance?.raw || new BN(0));
+  }, [fee, selectedAccount?.balance?.raw]);
 
   return (
     <>
@@ -71,6 +119,14 @@ const AskTransferModal: FC<{ onTransfer(receiver: string): void, testid: string 
       <WarningBlock>
         Make sure to use a Substrate address created with a Polkadot.&#123;js&#125; wallet. There is no guarantee that third-party wallets, exchanges or hardware wallets can successfully sign and process your transfer which will result in a possible loss of the NFT.
       </WarningBlock>
+      {(!isFeeGreaterThanBalance) && <LowBalanceWrapper>
+        <Text size={'s'}>Your balance is insufficient due to transaction fee</Text>
+      </LowBalanceWrapper>}
+      <FeeMessage
+        isFeeLoading={isFeeLoading}
+        fee={fee || '0'}
+        testid={`${testid}-fee-message`}
+      />
       <ButtonWrapper>
         <Button
           disabled={!address}
@@ -133,5 +189,15 @@ const ButtonWrapper = styled.div`
 const Content = styled.div`
   && h2 {
     margin-bottom: 32px;
+  }
+`;
+
+const LowBalanceWrapper = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  position: absolute;
+  right: calc(var(--gap) * 1.5);
+  span {
+    color: ${Coral700} !important;
   }
 `;

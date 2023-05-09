@@ -17,6 +17,19 @@ class MetamaskAdapter implements IMarketContractAdapter {
     return new ethers.Contract(this.contractAddress, marketplaceAbi, signer);
   }
 
+  async getTransferTokenFee(from: string, to: string, collectionId: number, tokenId: number, amount: number, signer: Signer): Promise<string> {
+    if (amount !== 1) throw new Error('RFT not supported');
+    const nftFactory = await UniqueNFTFactory(collectionId, signer);
+    const fromCross = Address.extract.ethCrossAccountId(from);
+    const toCross = Address.extract.ethCrossAccountId(to);
+    const fee = await nftFactory.estimateGas.transferFromCross(
+      fromCross,
+      toCross,
+      tokenId
+    );
+    return fee.toString();
+  }
+
   async transferToken(from: string, to: string, collectionId: number, tokenId: number, amount: number, signer: Signer): Promise<void> {
     if (amount !== 1) throw new Error('RFT not supported');
     const nftFactory = await UniqueNFTFactory(Number(collectionId), signer);
