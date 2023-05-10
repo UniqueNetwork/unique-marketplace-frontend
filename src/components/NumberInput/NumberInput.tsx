@@ -7,13 +7,14 @@ interface AmountInputProps {
   value: string | undefined
   onChange(value: string): void
   placeholder?: string
+  additionalText?: string
   decimals?: number
   label?: string
   className?: string
   testid?: string
 }
 
-export const NumberInput: FC<AmountInputProps> = ({ value, onChange, placeholder, decimals = 6, label, className, testid = '' }) => {
+export const NumberInput: FC<AmountInputProps> = ({ value, onChange, additionalText, placeholder, decimals = 6, label, className, testid = '' }) => {
   const onChangeInput = useCallback((_value: string) => {
     if (_value === '') onChange(_value);
     // regExp to check value according to valid number format
@@ -31,6 +32,7 @@ export const NumberInput: FC<AmountInputProps> = ({ value, onChange, placeholder
 
   return <InputWrapper className={className}>
     <InputText
+      additionalText={additionalText}
       placeholder={placeholder}
       onChange={onChangeInput}
       value={value}

@@ -18,7 +18,7 @@ import BundleItemsCount from '../BundleItemsCount/BundleItemsCount';
 import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
 
 export type TTokensCard = {
-  token?: Omit<TokenByIdResponse, 'collection' | 'nestingParentToken'>
+  token?: Omit<TokenByIdResponse, 'collection' | 'nestingParentToken' | 'properties'>
   offer?: Partial<Offer>
   tokenId?: number
   collectionId?: number
@@ -27,7 +27,7 @@ export type TTokensCard = {
 };
 
 export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, testid, ...props }) => {
-  const [token, setToken] = useState<Omit<TokenByIdResponse, 'collection' | 'nestingParentToken'> | undefined>(props.token);
+  const [token, setToken] = useState<Omit<TokenByIdResponse, 'collection' | 'nestingParentToken' | 'properties'> | undefined>(props.token);
   const [collection, setCollection] = useState<(CollectionInfoWithSchemaResponse) | undefined>();
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isBundleState, setIsBundleState] = useState<boolean>();

@@ -1,6 +1,11 @@
 import React, { FC, useCallback, useEffect, useMemo } from 'react';
 import { Button, Text } from 'components/UI';
 import styled from 'styled-components';
+import { FeeMessage } from 'components';
+import { useApi } from 'hooks/useApi';
+import MarketController from 'api/chainApi/MarketController';
+import { debounce } from 'utils/helpers';
+import { BN } from '@polkadot/util';
 
 import { useGetFee } from '../../../hooks/useGetFee';
 import { Price } from '../TokenDetail/Price';
@@ -8,10 +13,6 @@ import { Grey300 } from '../../../styles/colors';
 import { Offer } from '../../../api/restApi/offers/types';
 import { useAccounts } from '../../../hooks/useAccounts';
 import BuyBundleInformation from '../TokenDetail/BuyBundleInformation';
-import { FeeMessage } from 'components';
-import { useApi } from 'hooks/useApi';
-import MarketController from 'api/chainApi/MarketController';
-import { debounce } from 'utils/helpers';
 
 interface BuyTokenProps {
   offer?: Offer;
@@ -22,12 +23,13 @@ interface BuyTokenProps {
 export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy, testid }) => {
   const { api } = useApi();
 
-  const { fee, fetchingFee, getFee } = useGetFee<Parameters<MarketController['getBuyFixFee']>>(api?.market?.getBuyFixFee);
+  const { fee, fetchingFee, getFee } = useGetFee<Parameters<MarketController['getBuyFixFee']>>(api?.market?.getBuyFixFee.bind(api?.market));
   const { selectedAccount } = useAccounts();
 
   const isEnoughBalance = useMemo(() => {
     if (!selectedAccount?.balance?.raw || selectedAccount.balance?.raw.isZero() || !offer?.price?.raw) return false;
     // TODO: check contractCall fee
+    return selectedAccount.balance?.raw.gte(new BN(offer?.price?.raw));
   }, [offer?.price?.raw, selectedAccount?.balance?.raw]);
 
   const onBuyClick = useCallback(() => {
@@ -45,8 +47,8 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy, testid }) => {
         1,
         { account: selectedAccount }
       );
-    }, 300);
-  }, [offer, api, selectedAccount?.address, getFee]);
+    }, 300)();
+  }, [offer, api?.market, selectedAccount?.address]);
 
   if (!offer) return null;
 

@@ -39,10 +39,10 @@ export const useCollections = () => {
     setIsFetching(true);
     const address = account.address;
     const gqlQuery = {
-      operationName: 'collections_by_tokens_owner_query',
-      query: `query collections_by_tokens_owner_query($owner: String) {
-        tokens(
-          where: {_or: [{tokens_owner: {_eq: $owner}}, {owner_normalized: {_eq: $owner}}], burned: {_eq: "false"}}
+      operationName: 'collections_by_account_query',
+      query: `query collections_by_account_query($owner: String) {
+        collections(
+          where: {_or: [{owner: {_eq: $owner}}, {owner_normalized: {_eq: $owner}}], burned: {_eq: "false"}}
           distinct_on: collection_id
           limit: 1000
         ) {
@@ -51,7 +51,7 @@ export const useCollections = () => {
             owner: owner_normalized
             cover: collection_cover
             id: collection_id
-            name: collection_name
+            name: name
             tokenPrefix: token_prefix
             __typename
           }
@@ -62,10 +62,11 @@ export const useCollections = () => {
         owner: address
       }
     };
+
     const response = await post(getCollectionsEndpoint, gqlQuery);
     if (response.status === 200) {
       // TODO: merge with data from "collections" in settings to highlight already "added" collections
-      const backendMyCollections = response?.data?.data?.tokens?.data as MyCollectionBackend[] | [];
+      const backendMyCollections = response?.data?.data?.collections?.data as MyCollectionBackend[] | [];
       const myCollections = getMyCollectionsWithMarketable(backendMyCollections);
       console.log('settings in collection fetch', settings);
       setCollections(myCollections);
