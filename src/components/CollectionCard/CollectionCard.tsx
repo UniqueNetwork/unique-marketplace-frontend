@@ -1,4 +1,5 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 import { Icon, Dropdown } from 'components/UI';
@@ -62,7 +63,9 @@ export const CollectionCard: FC<TCollectionCard> = ({
   return (
     <CollectionCardStyled>
       <PictureWrapper>
-        <Picture alt={collection?.id?.toString() || ''} src={collection.cover || ''} />
+        <Link to={`/collection/${collection?.id}`}>
+          <Picture alt={collection?.id?.toString() || ''} src={collection.cover || ''} />
+        </Link>
         <ActionsMenuWrapper>
           <Dropdown placement={'right'}
             dropdownRender={() => (<DropdownMenu>

@@ -86,6 +86,11 @@ export const CollectionDetail: FC<IProps> = ({ collection }) => {
         </CollectionInfoWrapper>
       </CollectionCardWrapper>
       <RightSidebar>
+        <EditCollectionLink href={`/collection/${collection.id}/edit`}>
+          {/* TODO: use link from react-router-dom instead of href to avoid page refresh */}
+          <span>Edit collection</span>
+          <Icon size={24} name={'gear'} />
+        </EditCollectionLink>
         <LinksWrapper>
           <Icon size={24} name={'discord'} />
           <Icon size={24} name={'instagram'} />
@@ -93,7 +98,7 @@ export const CollectionDetail: FC<IProps> = ({ collection }) => {
           <Icon size={24} name={'globe-simple'} />
           <Icon size={24} name={'shared'} />
         </LinksWrapper>
-        <div>
+        <CreationInfoWrapper>
           <Text color={'grey-500'} >Created on {'15 February 2021'}</Text>
           <LinkStyled
             target={'_blank'}
@@ -105,7 +110,7 @@ export const CollectionDetail: FC<IProps> = ({ collection }) => {
               <Icon name={'arrow-up-right'} size={16} color={Primary500} />
             </IconWrapper>
           </LinkStyled>
-        </div>
+        </CreationInfoWrapper>
       </RightSidebar>
     </CollectionDetailWrapper>
   </CollectionDetailPaper>;
@@ -162,10 +167,16 @@ const OwnerWrapper = styled.div`
 const RightSidebar = styled.div`
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   align-items: flex-end;
   gap: calc(var(--gap) / 2);
-  padding-top: 68px;
+`;
+
+const EditCollectionLink = styled(Link)`
+  display: flex;
+  gap: var(--gap);
+  align-items: center;
+  text-align: center;
+  margin-bottom: calc(var(--gap) * 1.5);
 `;
 
 const LinksWrapper = styled.div`
@@ -173,6 +184,10 @@ const LinksWrapper = styled.div`
   gap: var(--gap);
   justify-content: flex-end;
   margin-bottom: calc(var(--gap) * 1.5);
+`;
+
+const CreationInfoWrapper = styled.div`
+  margin-top: auto;
 `;
 
 const Row = styled.div`

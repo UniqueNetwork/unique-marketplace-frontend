@@ -20,8 +20,6 @@ export const CollapsableText = (props: CollapsableTextProps) => {
     const lineHeight = parseInt(window.getComputedStyle(textRef.current).lineHeight);
 
     setIsCollapsable(textRef.current.offsetHeight > lineHeight);
-
-    console.log(textRef.current.offsetHeight);
   }, [props.children]);
 
   return <CollapsableTextWrapper isCollapsed={isCollapsable && isCollapsed}>

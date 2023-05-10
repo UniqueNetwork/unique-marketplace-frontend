@@ -62,7 +62,7 @@ export const CollectionPage = () => {
       setTokens(_tokens);
       setIsFetchingTokens(false);
     })();
-  }, [api?.nft, currentChainId, collectionId, setIsFetchingTokens, fetch]);
+  }, [api?.nft, currentChainId, collectionId, setIsFetchingTokens, fetch, selectedAccount, getCollection]);
 
   useEffect(() => {
     if (!api) return;
