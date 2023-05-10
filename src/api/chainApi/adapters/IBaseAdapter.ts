@@ -9,6 +9,7 @@ export type NestTokenParam = {
   tokenId: number
 }
 interface IBaseAdapter {
+  getTransferTokenFee(from: string, to: string, collectionId: number, tokenId: number, amount: number, signer: Signer): Promise<string>
   transferToken(from: string, to: string, collectionId: number, tokenId: number, amount: number, signer: Signer): Promise<void>
 
   nestToken(from: NestTokenParam, to: NestTokenParam, amount: number, signer: Signer): Promise<void>

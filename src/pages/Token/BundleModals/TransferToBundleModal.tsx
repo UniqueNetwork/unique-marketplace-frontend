@@ -2,6 +2,8 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Heading, Link, Suggest, SuggestProps } from '@unique-nft/ui-kit';
 import { Text, useNotifications, Button } from 'components/UI';
+import { BN } from '@polkadot/util';
+import { Address } from '@unique-nft/utils';
 import styled from 'styled-components';
 
 import DefaultMarketStages from '../Modals/StagesModal';
@@ -11,11 +13,15 @@ import { TBundleTrunsferModalBodyProps } from './BundleTrunsferModal';
 import { useCollections } from 'hooks/useCollections';
 import { useApi } from 'hooks/useApi';
 import { CollectionCover } from 'components/CollectionCover/CollectionCover';
+import { FeeMessage } from 'components';
 import { useOffers } from 'api/restApi/offers/offers';
 import { useTransferToBundleStages } from 'hooks/marketplaceStages/useTransferToBundleStages';
 import { INestingToken } from 'components/BundleTree/types';
 import { CollectionInfoWithSchemaResponse, TokenByIdResponse, TokenIdQuery } from '@unique-nft/sdk';
 import { DecodedInfixOrUrlOrCidAndHash } from 'api/chainApi/types';
+import { debounce } from 'utils/helpers';
+import { fromStringToBnString } from 'utils/bigNum';
+import { Coral700 } from 'styles/colors';
 
 const pageSize = 1000;
 
@@ -61,6 +67,9 @@ const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(ne
   const [selectedToken, setSelectedToken] = useState<ITokenOption | null>();
   const [tokens, setTokens] = useState<TokenByIdResponse[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isFeeLoading, setIsFeeLoading] = useState(false);
+  const [fee, setFee] = useState<string>('0');
+
   const { selectedAccount } = useAccounts();
   const { api } = useApi();
 
@@ -99,6 +108,29 @@ const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(ne
     ].filter(({ tokenId }) => tokenId !== token.tokenId);
   }, [tokens, offers, collection, token]);
 
+  const getFee = useCallback((newParentToken: ITokenOption) => {
+    setIsFeeLoading(true);
+    return debounce(() => {
+      if (!api?.market || !token || !selectedAccount || !newParentToken) return setIsFeeLoading(false);
+
+      const recipient = Address.nesting.idsToAddress(newParentToken.collectionId, newParentToken.tokenId);
+      api?.market?.getTransferTokenFee(
+        token.owner,
+        recipient,
+        token.collectionId,
+        token.tokenId,
+        1,
+        { account: selectedAccount })
+      .then((fee) => {
+        setFee(fee || '0');
+      }).catch((e) => {
+        console.error('Failed to get fee: ', e);
+      }).finally(() => {
+        setIsFeeLoading(false);
+      });
+    }, 300);
+  }, [api?.market, token, selectedAccount?.account]);
+
   const onConfirmTransferToBundleClick = useCallback(
     () => {
       if (!selectedToken) return;
@@ -110,11 +142,19 @@ const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(ne
   const onChangeSelectedCollection = useCallback((collection: CollectionInfoWithSchemaResponse | null) => {
     setCollection(collection);
     setSelectedToken(null);
+    setFee('0');
   }, []);
 
   const onChangeSelectedToken = useCallback((token: ITokenOption) => {
     setSelectedToken(token);
+    getFee(token);
   }, []);
+
+  const isFeeGreaterThanBalance = useMemo(() => {
+    if (!fee) return false;
+    const feeBN = new BN(fromStringToBnString(fee));
+    return feeBN.gt(selectedAccount?.balance?.raw || new BN(0));
+  }, [fee, selectedAccount?.balance?.raw]);
 
   return (
     <>
@@ -164,9 +204,19 @@ const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(ne
           }}
         />
       </Row>
+      <Row>
+        {(!isFeeGreaterThanBalance) && <LowBalanceWrapper>
+          <Text size={'s'}>Your balance is insufficient due to transaction fee</Text>
+        </LowBalanceWrapper>}
+        <FeeMessage
+          isFeeLoading={isFeeLoading}
+          fee={fee || '0'}
+          testid={`${testid}-fee-message`}
+        />
+      </Row>
       <ButtonWrapper>
         <Button
-          disabled={!selectedToken}
+          disabled={!selectedToken || isFeeGreaterThanBalance}
           onClick={onConfirmTransferToBundleClick}
           role='primary'
           title='Confirm'
@@ -258,5 +308,15 @@ const TokensSuggestStyled = styled(TokensSuggest)`
   width: 100%;
   & .unique-input-text {
     width: 100%;
+  }
+`;
+
+const LowBalanceWrapper = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  position: absolute;
+  right: calc(var(--gap) * 1.5);
+  span {
+    color: ${Coral700} !important;
   }
 `;

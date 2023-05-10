@@ -37,6 +37,27 @@ class MarketController extends BaseController implements IMarketController {
     if (newAllowance.isAllowed !== targetAllowance) throw new Error('Allowance change failed');
   }
 
+  public async getSellFixFee(collectionId: number, tokenId: number, price: number, amount: number, { account }: TransactionOptions): Promise<string> {
+    const from = Address.extract.ethCrossAccountId(account.address);
+    const to = this.contractAddress;
+    const isAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from: account.address, to });
+    if (!isAllowed.isAllowed) throw new Error('Token not approved for sale');
+    const adapter = this.getAdapter(account.account);
+    const priceWithDecimals = (price * (10 ** this.decimals)).toString();
+    const rawFee = await adapter.getSellFee(from, collectionId, tokenId, priceWithDecimals, amount, account.signer);
+    return this.getChainValue(rawFee, this.decimals).parsed.toString();
+  }
+
+  public async getBuyFixFee(collectionId: number, tokenId: number, amount: number, { account }: TransactionOptions): Promise<string> {
+    const to = Address.extract.ethCrossAccountId(account.address);
+    const order = (await this.getOrder(collectionId, tokenId));
+    const value = order.price as { type: string, hex: string };
+    const adapter = this.getAdapter(account.account);
+    const parsedPrice = BigInt(value.hex).toString();
+    const rawFee = await adapter.getBuyFee(to, collectionId, tokenId, parsedPrice, amount, account.signer);
+    return this.getChainValue(rawFee, this.decimals).parsed.toString();
+  }
+
   /**
    *
    * @param collectionId
@@ -103,8 +124,9 @@ class MarketController extends BaseController implements IMarketController {
   }
 
   async getTransferTokenFee(sender: string, recipient: string, collectionId: number, tokenId: number, amount: number, { account }: TransactionOptions): Promise<string | null> {
-    await Promise.resolve();
-    return '0';
+    const adapter = this.getAdapter(account.account);
+    const rawFee = await adapter.getTransferTokenFee(sender, recipient, collectionId, tokenId, amount, account.signer);
+    return this.getChainValue(rawFee, this.decimals).parsed.toString();
   }
 
   // ____ EXTRA _____
