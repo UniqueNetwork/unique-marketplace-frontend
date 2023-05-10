@@ -5,5 +5,6 @@ import FAQ from './FAQ';
 import { AccountsPage as Accounts } from './Accounts';
 import TokenPage from './Token'; // temporary page for debugging
 import { CollectionsPage as Collections } from './Collections';
-
-export { Market, MyTokens, Accounts, Trades, FAQ, TokenPage, Collections };
+import { CollectionPage as Collection } from './Collection';
+import { CollectionEditPage as CollectionEdit } from './CollectionEdit';
+export { Market, MyTokens, Accounts, Trades, FAQ, TokenPage, Collections, Collection, CollectionEdit };

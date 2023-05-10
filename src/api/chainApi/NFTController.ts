@@ -87,4 +87,22 @@ export class UniqueSDKNFTController extends BaseController {
   async getOwner(collectionId: number, tokenId: number): Promise<TokenOwnerResponse | null> {
     return await this.uniqueSdk.token.owner({ collectionId, tokenId }) || null;
   }
+
+  async getTokensOfCollection(collectionId: number, address: string): Promise<TokenByIdResponse[]> {
+    try {
+      const tokensIds =
+        (await this.uniqueSdk.token.accountTokens({ collectionId, address })).tokens || [];
+      const tokensIdsOnEth =
+        (await this.uniqueSdk.token.accountTokens({ collectionId, address: getEthAccount(address) })).tokens || [];
+
+      const currentAllowedTokens = this.allowedTokens[collectionId];
+      const allowedIds = filterAllowedTokens([...tokensIds, ...tokensIdsOnEth], currentAllowedTokens);
+      return (await Promise.all(allowedIds
+        .map(({ tokenId }) =>
+          this.getToken(collectionId, tokenId)))) as TokenByIdResponse[];
+    } catch (e) {
+      console.log(`Wrong ID of collection ${collectionId}`, e);
+    }
+    return [];
+  }
 }

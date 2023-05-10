@@ -26,11 +26,11 @@ interface TokenTradingProps {
 
 export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick, onTransferClick, onDelistClick, onDelistAuctionClick, onPlaceABidClick, onWithdrawClick, onBuyClick, onAuctionClose, testid }) => {
   const { selectedAccount } = useContext(accountContext);
-  const { settings, currentChainId } = useApi();
+  const { settings } = useApi();
 
   const isAllowed = useMemo(() => {
-    if (!token && !offer) return;
-    const { tokenId, collectionId } = offer || token!;
+    const { tokenId, collectionId } = offer || token || {};
+    if (!tokenId || !collectionId) return;
     return checkAllowedTokenInSettings(tokenId, collectionId, settings?.blockchain.unique.collections);
   }, [settings, token, offer]);
 

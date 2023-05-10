@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
-import { Market, MyTokens, Accounts, Trades, FAQ, TokenPage, Collections } from './pages';
+import { Market, MyTokens, Collection, Accounts, Trades, FAQ, TokenPage, Collections, CollectionEdit } from './pages';
 import { GlobalStyle } from './styles';
 import { Error404 } from './pages/Errors/404';
 
@@ -11,6 +11,18 @@ const commonRoutes = (<>
     element={<TokenPage />}
     path={'token/:collectionId/:id'}
   />
+  <Route
+    path={'collection/:collectionId'}
+  >
+    <Route
+      element={<Collection />}
+      index
+    />
+    <Route
+      path={'edit'}
+      element={<CollectionEdit />}
+    />
+  </Route>
   <Route
     element={<Market />}
     path={'market'}

@@ -33,7 +33,7 @@ type TOption = SelectOptionProps & {
   title: string;
 }
 
-export type MixedTokenAndOffer = Omit<TokenByIdResponse, 'collection' | 'nestingParentToken'> & Partial<Offer>;
+export type MixedTokenAndOffer = Omit<TokenByIdResponse, 'collection' | 'nestingParentToken' | 'properties'> & Partial<Offer>;
 
 const sortingOptions: TOption[] = [
   {
