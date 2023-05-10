@@ -77,9 +77,21 @@ class MetamaskAdapter implements IMarketContractAdapter {
     await (await nftFactory.approve(targetTo, tokenId)).wait();
   }
 
+  async getSellFee(from: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<string> {
+    const contract = this.getContract(signer);
+    const fee = await contract.estimateGas.put(collectionId, tokenId, price, amount, from, { gasLimit: 10000000 });
+    return fee.toString();
+  }
+
   async sell(from: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<void> {
     const contract = this.getContract(signer);
     await (await contract.put(collectionId, tokenId, price, amount, from, { gasLimit: 10000000 })).wait();
+  }
+
+  async getBuyFee(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<string> {
+    const contract = this.getContract(signer);
+    const fee = await contract.estimateGas.buy(collectionId, tokenId, amount, to, { gasLimit: 10000000, value: price });
+    return fee.toString();
   }
 
   async buy(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<void> {

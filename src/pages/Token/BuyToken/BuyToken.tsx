@@ -1,14 +1,17 @@
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FC, useCallback, useEffect, useMemo } from 'react';
 import { Button, Text } from 'components/UI';
 import styled from 'styled-components';
-import { BN } from '@polkadot/util';
 
-import { useFee } from '../../../hooks/useFee';
+import { useGetFee } from '../../../hooks/useGetFee';
 import { Price } from '../TokenDetail/Price';
 import { Grey300 } from '../../../styles/colors';
 import { Offer } from '../../../api/restApi/offers/types';
 import { useAccounts } from '../../../hooks/useAccounts';
 import BuyBundleInformation from '../TokenDetail/BuyBundleInformation';
+import { FeeMessage } from 'components';
+import { useApi } from 'hooks/useApi';
+import MarketController from 'api/chainApi/MarketController';
+import { debounce } from 'utils/helpers';
 
 interface BuyTokenProps {
   offer?: Offer;
@@ -17,7 +20,9 @@ interface BuyTokenProps {
 }
 
 export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy, testid }) => {
-  // const {  } = useFee();
+  const { api } = useApi();
+
+  const { fee, fetchingFee, getFee } = useGetFee<Parameters<MarketController['getBuyFixFee']>>(api?.market?.getBuyFixFee);
   const { selectedAccount } = useAccounts();
 
   const isEnoughBalance = useMemo(() => {
@@ -30,6 +35,18 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy, testid }) => {
 
     onBuy();
   }, [onBuy, isEnoughBalance]);
+
+  useEffect(() => {
+    if (!offer || !api || !selectedAccount) return;
+    debounce(async () => {
+      await getFee(
+        offer.collectionId,
+        offer.tokenId,
+        1,
+        { account: selectedAccount }
+      );
+    }, 300);
+  }, [offer, api, selectedAccount?.address, getFee]);
 
   if (!offer) return null;
 
@@ -45,6 +62,11 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy, testid }) => {
         disabled={!isEnoughBalance}
       />
     </ButtonWrapper>
+    <FeeMessage
+      isFeeLoading={fetchingFee}
+      fee={fee || '0'}
+      testid={`${testid}-fee-message`}
+    />
     {!isEnoughBalance && <Text color={'coral-500'} testid={`${testid}-low-balance-warning`}>Your balance is too low to buy</Text>}
     {!!offer?.tokenDescription?.nestingChildTokens?.length && <BuyBundleInformation testid={testid}/>}
     <Divider />

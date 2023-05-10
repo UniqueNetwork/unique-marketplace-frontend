@@ -88,6 +88,23 @@ class UniqueAdapter implements IMarketContractAdapter {
     await this.uniqueSdk.token.approve.submitWaitResult({ collectionId, tokenId, spender: to, address: from, isApprove: targetAllowance }, { signer });
   }
 
+  async getSellFee(from: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<string> {
+    const res = await this.uniqueSdk.evm.send.getFee({
+      abi: marketplaceAbi as any,
+      address: signer.address,
+      contractAddress: this.contractAddress,
+      funcName: 'put',
+      args: {
+        collectionId,
+        tokenId,
+        price,
+        amount,
+        seller: from
+      }
+    });
+    return res.fee.raw;
+  }
+
   async sell(from: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<void> {
     await this.uniqueSdk.evm.send.submitWaitResult({
       abi: marketplaceAbi as any,
@@ -102,6 +119,23 @@ class UniqueAdapter implements IMarketContractAdapter {
         seller: from
       }
     }, { signer });
+  }
+
+  async getBuyFee(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<string> {
+    const res = await this.uniqueSdk.evm.send.getFee({
+      abi: marketplaceAbi as any,
+      address: signer.address,
+      contractAddress: this.contractAddress,
+      value: price,
+      funcName: 'buy',
+      args: {
+        collectionId,
+        tokenId,
+        amount,
+        buyer: to
+      }
+    });
+    return res.fee.raw;
   }
 
   async buy(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<void> {
