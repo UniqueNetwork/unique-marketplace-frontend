@@ -23,6 +23,7 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy, testid }) => {
   const isEnoughBalance = useMemo(() => {
     if (!selectedAccount?.balance?.raw || selectedAccount.balance?.raw.isZero() || !offer?.price?.raw) return false;
     // TODO: check contractCall fee
+    return selectedAccount.balance?.raw.gte(new BN(offer?.price?.raw));
   }, [offer?.price?.raw, selectedAccount?.balance?.raw]);
 
   const onBuyClick = useCallback(() => {
