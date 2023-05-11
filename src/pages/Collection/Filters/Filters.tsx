@@ -2,8 +2,7 @@ import React, { FC, useCallback } from 'react';
 import styled from 'styled-components';
 
 import PricesFilter from 'components/Filters/PricesFilter';
-import { FiltersProps, PriceRange, CollectionFilterState, TokensStatuses } from './types';
-import StatusFilter from './StatusFilter';
+import { FiltersProps, PriceRange } from './types';
 import AttributesFilterSection from './AttributesFilterSection';
 import { AttributeItem } from 'components/Filters/types';
 
@@ -17,10 +16,6 @@ export const Filters: FC<FiltersProps> = ({
   isFetchingTokens
 
 }) => {
-  const onStatusFilterChange = useCallback((statuses: TokensStatuses) => {
-    onFilterChange({ ...(value || {}), statuses });
-  }, [value, onFilterChange]);
-
   const onPricesFilterChange = useCallback((prices: PriceRange | undefined) => {
     onFilterChange({ ...(value || {}), prices });
   }, [value, onFilterChange]);
@@ -38,7 +33,6 @@ export const Filters: FC<FiltersProps> = ({
   }, [value, onFilterChange]);
 
   return <FiltersStyled>
-    <StatusFilter value={value?.statuses} onChange={onStatusFilterChange} testid={`${testid}-status`} />
     <PricesFilter value={value?.prices} onChange={onPricesFilterChange} testid={`${testid}-prices`} />
     <AttributesFilterSection
       value={value}

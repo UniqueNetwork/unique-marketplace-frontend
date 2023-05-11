@@ -62,13 +62,6 @@ const getTradesColumns = ({ deviceSize, onShowTradesDetailsModal, scanUrl, testi
     field: 'price'
   },
   {
-    title: (<HeaderCutted><span data-testid={`${testid}-header-method`}>Selling method</span></HeaderCutted>),
-    width: deviceSize !== DeviceSize.md ? '14.3%' : '11.84%',
-    render: (data: string, { offerId }: Trade) => <Text testid={`${testid}-${offerId}-price`} color={BlueGrey600}>{data === 'FixedPrice' ? 'Fixed price' : data}</Text>,
-    isSortable: true,
-    field: 'status'
-  },
-  {
     title: (<Header data-testid={`${testid}-header-seller`}>Seller</Header>),
     width: deviceSize !== DeviceSize.md ? '14.3%' : '17.52%',
     render: (data: string) => <AddressComponent testid={`${testid}-seller`} text={data} />,

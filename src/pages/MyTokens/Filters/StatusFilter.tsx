@@ -46,29 +46,6 @@ const StatusFilter: FC<StatusFilterProps> = ({ value, onChange, testid }) => {
 
   return (
     <>
-      <Accordion
-        title={'Selling method'}
-        isOpen={true}
-        onClear={onMethodClear}
-        testid={`${testid}-selling-method-accordion`}
-      >
-        <StatusFilterWrapper>
-          {!hideFixedPrice && <Checkbox
-            checked={!!fixedPrice}
-            label={'Fixed price'}
-            size={'m'}
-            onChange={onFixedPriceChange}
-            testid={`${testid}-fixedPrice-checkbox`}
-          />}
-          {!hideTimedAuction && <Checkbox
-            checked={!!timedAuction}
-            label={'Timed auction'}
-            size={'m'}
-            onChange={onTimedAuctionChange}
-            testid={`${testid}-timedAuction-checkbox`}
-          />}
-        </StatusFilterWrapper>
-      </Accordion>
       {selectedAccount && <Accordion
         title={'Status'}
         isOpen={true}

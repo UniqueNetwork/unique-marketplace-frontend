@@ -203,9 +203,10 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
   return (
     <SellModalStyled data-testid={testid}>
       <Content>
-        <Heading size='2' testid={`${testid}-heading`}>Selling method</Heading>
+        <Heading size='2' testid={`${testid}-heading`}>Selling token</Heading>
       </Content>
-      <Tabs
+      {FixedPriceTab}
+      {/* <Tabs
         activeIndex={activeTab}
         labels={['Fixed price', 'Auction']}
         onClick={handleClick}
@@ -214,7 +215,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
       <Tabs activeIndex={activeTab}>
         {FixedPriceTab}
         {AuctionTab}
-      </Tabs>
+      </Tabs> */}
     </SellModalStyled>
   );
 };
