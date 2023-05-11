@@ -15,7 +15,6 @@ import GetKSMModal from 'components/GetKSMModal/GetKSMModal';
 import { CreateAccountModal } from './Modals/CreateAccount';
 import { ImportViaSeedAccountModal } from './Modals/ImportViaSeed';
 import { ImportViaJSONAccountModal } from './Modals/ImportViaJson';
-import { ImportViaQRCodeAccountModal } from './Modals/ImportViaQRCode';
 import { WithdrawDepositModal } from './Modals/WithdrawDeposit';
 import { TransferFundsModal } from './Modals/SendFunds';
 import { AdditionalLight, BlueGrey300, Primary100 } from 'styles/colors';
@@ -157,7 +156,6 @@ export const AccountsPage = () => {
           dropdownRender={() => <DropdownMenu>
             <DropdownMenuItem onClick={onActionClick(AccountModal.importViaSeed)} data-testid={`${testid}-seed-button`}>Seed phrase</DropdownMenuItem>
             <DropdownMenuItem onClick={onActionClick(AccountModal.importViaJSON)} data-testid={`${testid}-json-file-button`}>Backup JSON file</DropdownMenuItem>
-            <DropdownMenuItem onClick={onActionClick(AccountModal.importViaQRCode)} data-testid={`${testid}-qr-button`}>QR-code</DropdownMenuItem>
           </DropdownMenu>}
           onOpenChange={setIsDropdownOpened}
         >
@@ -214,12 +212,6 @@ export const AccountsPage = () => {
         onFinish={onChangeAccountsFinish}
         onClose={onModalClose}
         testid={`${testid}-import-via-json-modal`}
-      />
-      <ImportViaQRCodeAccountModal
-        isVisible={currentModal === AccountModal.importViaQRCode}
-        onFinish={onChangeAccountsFinish}
-        onClose={onModalClose}
-        testid={`${testid}-import-via-qr-modal`}
       />
       <TransferFundsModal
         isVisible={currentModal === AccountModal.sendFunds}

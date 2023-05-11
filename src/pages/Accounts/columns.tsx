@@ -45,7 +45,7 @@ export const getAccountsColumns = ({
         }
       </>
     ),
-    width: '25%',
+    width: '35%',
     field: 'accountInfo',
     render(_, row: AccountInfo) {
       if (row.deposit && !isSmallDevice) return <></>;
@@ -63,7 +63,7 @@ export const getAccountsColumns = ({
   },
   {
     title: (<Title data-testid={`${testid}-balance-column`}>Balance</Title>),
-    width: '25%',
+    width: '20%',
     field: 'balance',
     render(_, row: AccountInfo) {
       return (<BalanceCell accountInfo={row}
@@ -75,7 +75,7 @@ export const getAccountsColumns = ({
   },
   {
     title: (<Title data-testid={`${testid}-blockexpolorer-column`}>Block explorer</Title>),
-    width: '25%',
+    width: '17%',
     field: 'blockExplorer',
     render(_, { address, deposit }: AccountInfo) {
       if (deposit && !isSmallDevice) return <></>;
@@ -98,7 +98,7 @@ export const getAccountsColumns = ({
   },
   {
     title: isSmallDevice ? '' : (<Title data-testid={`${testid}-actions-column`}>Actions</Title>),
-    width: '25%',
+    width: '28%',
     field: 'actions',
     render(_, { address, deposit, balance, isLocal }: AccountInfo) {
       if (deposit && !isSmallDevice) {
