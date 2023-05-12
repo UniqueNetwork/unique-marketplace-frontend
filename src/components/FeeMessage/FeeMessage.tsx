@@ -10,10 +10,17 @@ type FeeMessageProps = {
   isFeeLoading: boolean,
   fee: string
   testid: string
+  placeholder?: string
 }
 
-export const FeeMessage: FC<FeeMessageProps> = ({ isFeeLoading, fee, testid }) => {
-  const { chainProperties, api } = useApi();
+export const FeeMessage: FC<FeeMessageProps> = ({
+  isFeeLoading,
+  fee,
+  testid,
+  placeholder
+}) => {
+  const { chainProperties } = useApi();
+  placeholder = placeholder || `A fee of some ${chainProperties?.token} can be applied to the transaction, unless the transaction is sponsored`;
   return (
     <FeeMessageWrapper>
       <Text
@@ -21,9 +28,9 @@ export const FeeMessage: FC<FeeMessageProps> = ({ isFeeLoading, fee, testid }) =
         color='additional-warning-500'
         size='s'
       >
-        {isFeeLoading
-          ? <Loader label='Loading fee...' />
-          : <>A fee of {fee === '0' ? 'some' : `~ ${Number(fee).toFixed(api?.market?.decimals || 18).replace(/(?<=\.\d*[1-9])0+$|\.0*$/, '')}`} {chainProperties?.token} can be applied to the transaction, unless the transaction is sponsored</>}
+        {isFeeLoading && <Loader label='Loading fee...' />}
+        {!isFeeLoading && fee === '0' && placeholder}
+        {!isFeeLoading && fee !== '0' && <>A fee of ~ {Number(fee).toFixed(4).replace(/(?<=\.\d*[1-9])0+$|\.0*$/, '')} {chainProperties?.token} can be applied to the transaction, unless the transaction is sponsored</>}
       </Text>
     </FeeMessageWrapper>
   );

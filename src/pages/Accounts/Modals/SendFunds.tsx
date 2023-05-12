@@ -19,7 +19,7 @@ import { Coral700 } from 'styles/colors';
 import DefaultMarketStages from '../../Token/Modals/StagesModal';
 import { TTransferFunds } from './types';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
-import { MarketAccount as Account } from 'account/AccountContext';
+import { MarketAccount as Account, MarketAccount } from 'account/AccountContext';
 import { FeeMessage } from 'components';
 
 export type TransferFundsModalProps = {
@@ -86,11 +86,13 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   const [amount, setAmount] = useState<string>('');
   const [fee, setFee] = useState('0');
   const [isFeeLoading, setIsFeeLoading] = useState(false);
+  const [isSetMaxLoading, setIsSetMaxLoading] = useState(false);
   const deviceSize = useDeviceSize();
 
   useEffect(() => {
     const account = accounts.find((account) => account.address === senderAddress);
     setSender(account);
+    setFilteredAccounts(accounts.filter(({ address }) => address !== senderAddress));
   }, [senderAddress, accounts]);
 
   const getFee = useCallback((newRecipientAddress, amount: number) => {
@@ -114,19 +116,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     }, 300);
   }, [api?.market, sender]);
 
-  const formatAddress = useCallback((address: string) => {
-    return toChainFormatAddress(address, chainProperties?.SS58Prefix || 0);
-  }, [chainProperties?.SS58Prefix]);
-
-  const accountsWithQuartzAddresses = useMemo(() => (
-    accounts.map((account) => ({ ...account, quartzAddress: formatAddress(account.address) }))
-  ), [accounts, formatAddress]);
-
-  const [filteredAccounts, setFilteredAccounts] = useState(accountsWithQuartzAddresses);
-
-  useEffect(() => {
-    setFilteredAccounts(accountsWithQuartzAddresses);
-  }, [accountsWithQuartzAddresses]);
+  const [filteredAccounts, setFilteredAccounts] = useState(accounts);
 
   const recipientBalance = useMemo(() => {
     return typeof recipientAddress !== 'string' && recipientAddress?.balance?.parsed;
@@ -157,11 +147,21 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     onFinish(sender?.address || '', recipient || '', amount.toString());
   }, [sender, recipientAddress, amount, onFinish, isConfirmDisabled]);
 
+  const senders = useMemo(
+    () => accounts.filter(({ address }) => address !== ((recipientAddress as MarketAccount)?.address || recipientAddress)),
+    [recipientAddress]
+  );
+
+  const recipients = useMemo(
+    () => accounts.filter(({ address }) => address !== sender?.address),
+    [sender]
+  );
+
   const onFilter = useCallback((input: string) => {
-    setFilteredAccounts(accountsWithQuartzAddresses.filter((account) => {
-      return account.quartzAddress.toLowerCase().includes(input.toLowerCase()) || account.name?.toLowerCase().includes(input.toLowerCase());
+    setFilteredAccounts(recipients.filter((account) => {
+      return account.address.toLowerCase().includes(input.toLowerCase()) || account.name?.toLowerCase().includes(input.toLowerCase());
     }));
-  }, [accountsWithQuartzAddresses]);
+  }, [recipients]);
 
   const onChangeAddress = useCallback((value: string | Account) => {
     setRecipientAddress(value);
@@ -172,25 +172,49 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
       setIsValidRecipientAddress(isValid);
       onFilter(value);
     } else {
-      setFilteredAccounts(accountsWithQuartzAddresses);
+      setFilteredAccounts(recipients);
       setIsValidRecipientAddress(true);
     }
-  }, [accountsWithQuartzAddresses, onFilter, amount, getFee, prefixes]);
+  }, [recipients, onFilter, amount, getFee, prefixes]);
 
   const onCloseModal = useCallback(() => {
     setRecipientAddress('');
     setAmount('');
-    setFilteredAccounts(accountsWithQuartzAddresses);
+    setFilteredAccounts(accounts);
+    setIsValidRecipientAddress(true);
     setFee('0');
     onClose();
-  }, [accountsWithQuartzAddresses, onClose]);
+  }, [accounts, onClose]);
 
   const onChangeSender = useCallback((value: SelectOptionProps) => {
-    setSender(value as unknown as Account);
+    const newSender = value as unknown as Account;
+    setSender(newSender);
     getFee(recipientAddress, Number(amount))();
+    setFilteredAccounts(accounts.filter(({ address }) => address !== newSender.address));
   }, [getFee, recipientAddress, amount]);
 
   const tokenSymbol = useMemo(() => chainProperties?.token || '', [chainProperties]);
+
+  const onSetMax = useCallback(async () => {
+    if (!sender || !api?.market || !recipientAddress) return;
+    setIsSetMaxLoading(true);
+    try {
+      const recipient = typeof recipientAddress === 'string' ? recipientAddress : recipientAddress?.address;
+      const fee = await api?.market?.getTransferBalanceFee(sender.address, recipient, Number(sender.balance.parsed), { account: sender });
+      const amount = Number(sender.balance.parsed) - Math.ceil(Number(fee) * 1000) / 1000;
+      setFee(fee);
+      setAmount(amount > 0 ? amount.toFixed(4) : sender.balance.parsed);
+    } catch (e) {
+      console.error('Failed to get max value: ', e);
+    } finally {
+      setIsSetMaxLoading(false);
+    }
+  }, [api, sender, recipientAddress]);
+
+  const total = useMemo(() => {
+    if (!amount || !fee || fee === '0') return null;
+    return (Number(amount) + Number(fee)).toFixed(4);
+  }, [amount, fee]);
 
   return (<Modal isVisible={isVisible} isClosable={true} onClose={onCloseModal}>
     <Content>
@@ -201,13 +225,13 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     <SenderSelectWrapper>
       <Dropdown
         optionKey={'address'}
-        options={accounts as unknown as SelectOptionProps[]}
+        options={senders as unknown as SelectOptionProps[]}
         onChange={onChangeSender}
         optionRender={(option) => (
           <AddressOptionWrapper>
             <AccountCard accountName={(option as unknown as Account)?.name || ''}
               accountAddress={(option as unknown as Account)?.address || ''}
-              canCopy={false}
+              canCopy
               isShort={deviceSize < DeviceSize.md}
             />
           </AddressOptionWrapper>
@@ -217,7 +241,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
         <AddressWrapper>
           <AccountCard accountName={sender?.name || ''}
             accountAddress={sender?.address || ''}
-            canCopy={false}
+            canCopy
             isShort={deviceSize < DeviceSize.md}
           />
         </AddressWrapper>
@@ -234,13 +258,13 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     <RecipientSelectWrapper >
       <SelectInput<Account>
         testid={`${testid}-select-address`}
-        options={filteredAccounts as unknown as Account[]}
+        options={(filteredAccounts as unknown as Account[])}
         value={recipientAddress}
         onChange={onChangeAddress}
         renderOption={(option) => <AddressOptionWrapper>
           <AccountCard accountName={option.name || ''}
             accountAddress={option.address}
-            canCopy={false}
+            canCopy
             isShort={deviceSize < DeviceSize.md}
             testid={`${testid}-selected`}
           />
@@ -256,10 +280,13 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     {!isValidRecipientAddress && <ErrorWrapper size={'s'} color={'var(--color-coral-500)'} >Address is not valid</ErrorWrapper>}
     <AmountInputWrapper>
       <NumberInput
+        disabled={!recipientAddress || !sender}
+        loading={isSetMaxLoading}
         value={amount}
-        onChange={onAmountChange}
         placeholder={`Amount (${tokenSymbol})`}
         testid={`${testid}-amount-input`}
+        onChange={onAmountChange}
+        onSetMax={onSetMax}
       />
     </AmountInputWrapper>
     {isAmountGreaterThanBalance && <LowBalanceWrapper>
@@ -271,8 +298,10 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     <FeeMessage
       isFeeLoading={isFeeLoading}
       fee={fee}
+      placeholder={'A fee will be calculated after entering the recipient and amount'}
       testid={`${testid}-fee-message`}
     />
+    {total && <TotalWrapper><Text size='m'>Total ~ {total} {tokenSymbol}</Text></TotalWrapper>}
     <ButtonWrapper>
       <Button
         testid={`${testid}-confirm-button`}
@@ -364,6 +393,13 @@ const AddressOptionWrapper = styled.div`
   display: flex;
   align-items: center;
   column-gap: calc(var(--gap) / 2);
+`;
+
+const TotalWrapper = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  column-gap: var(--gap);
+  margin-top: calc(var(--gap) * 1.5);
 `;
 
 const ButtonWrapper = styled.div`

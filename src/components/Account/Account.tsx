@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FC, useCallback, useMemo, MouseEvent } from 'react';
 import { CopyButton, Text, useNotifications } from 'components/UI';
 import styled from 'styled-components';
 import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
@@ -34,7 +34,8 @@ const AccountCard: FC<AccountProps> = ({
     return toChainFormatAddress(address, chainProperties?.SS58Prefix || 0);
   }, [chainProperties?.SS58Prefix]);
 
-  const onCopyAddress = (account: string) => () => {
+  const onCopyAddress = (account: string) => (event: MouseEvent) => {
+    event.stopPropagation();
     navigator.clipboard.writeText(account).then(() => {
       info(
         'Address copied',
@@ -48,7 +49,7 @@ const AccountCard: FC<AccountProps> = ({
       <Avatar size={24} src={DefaultAvatar} address={accountAddress} />
       <AccountInfoWrapper>
         {!hideName && <Text testid={`${testid}-account-name`}>{accountName}</Text>}
-        {!hideAddress && <AddressRow>
+        {!hideAddress && <Row>
           <FormattedAddress
             formatAddress={formatAddress}
             accountAddress={accountAddress}
@@ -57,7 +58,7 @@ const AccountCard: FC<AccountProps> = ({
             testid={testid}
           />
           {canCopy && <CopyButton onClick={onCopyAddress(formatAddress(accountAddress) || '')} data-testid={`${testid}-copy`} />}
-        </AddressRow>}
+        </Row>}
       </AccountInfoWrapper>
     </>
   );
@@ -95,10 +96,12 @@ const AccountInfoWrapper = styled.div`
   }
 `;
 
-const AddressRow = styled.div`
+const Row = styled.div`
   && {
     display: flex;
     padding: 0;
+    align-items: center;
+    gap: calc(var(--gap) / 2);
   }
 `;
 

@@ -72,8 +72,8 @@ export const Dropdown = ({
   };
 
   const handleMouseClick = (event: MouseEvent<HTMLDivElement>) => {
-    event.stopPropagation();
     if (disabled) return;
+    event.stopPropagation();
     setDropped(!dropped);
     onOpenChange?.(!dropped);
   };
@@ -197,7 +197,7 @@ const DropDownWrapper = styled.div`
     min-width: calc(100% - 16px);
     left: 0;
     top: calc(100% + 4px);
-    z-index: 1;
+    z-index: 100;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
 
     &.right {

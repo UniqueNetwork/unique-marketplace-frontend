@@ -6,10 +6,10 @@ import { Icon } from 'components/UI/Icon/Icon';
 interface IconButtonProps extends IconProps {
   onClick(): void;
   className?: string;
-  testid: string
+  testid?: string
 }
 
-export const IconButton: FC<IconButtonProps> = ({ onClick, className, testid, ...iconProps }) => {
+export const IconButton: FC<IconButtonProps> = ({ onClick, className, testid = '', ...iconProps }) => {
   return (
     <StyledButton onClick={onClick} className={className} data-testid={`${testid}`}>
       <Icon {...iconProps} />
