@@ -45,7 +45,7 @@ class UniqueAdapter implements IMarketContractAdapter {
   async nestToken(from: NestTokenParam, to: NestTokenParam, amount: number, signer: Signer): Promise<void> {
     if (amount !== 1) throw new Error('RFT support not implemented');
     const res = await this.uniqueSdk.token.nest({
-      address: signer.address,
+      address: signer.address || '',
       nested: from,
       parent: to
     }, { signer });
@@ -58,7 +58,7 @@ class UniqueAdapter implements IMarketContractAdapter {
   async unnestToken(from: NestTokenParam, amount: number, signer: Signer): Promise<void> {
     if (amount !== 1) throw new Error('RFT support not implemented');
     const res = await this.uniqueSdk.token.unnest({
-      address: signer.address,
+      address: signer.address || '',
       nested: from
     }, { signer });
     if (res.error) {
@@ -91,7 +91,7 @@ class UniqueAdapter implements IMarketContractAdapter {
   async getSellFee(from: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<string> {
     const res = await this.uniqueSdk.evm.send.getFee({
       abi: marketplaceAbi as any,
-      address: signer.address,
+      address: signer.address || '',
       contractAddress: this.contractAddress,
       funcName: 'put',
       args: {
@@ -108,7 +108,7 @@ class UniqueAdapter implements IMarketContractAdapter {
   async sell(from: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<void> {
     await this.uniqueSdk.evm.send.submitWaitResult({
       abi: marketplaceAbi as any,
-      address: signer.address,
+      address: signer.address || '',
       contractAddress: this.contractAddress,
       funcName: 'put',
       args: {
@@ -124,7 +124,7 @@ class UniqueAdapter implements IMarketContractAdapter {
   async getBuyFee(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<string> {
     const res = await this.uniqueSdk.evm.send.getFee({
       abi: marketplaceAbi as any,
-      address: signer.address,
+      address: signer.address || '',
       contractAddress: this.contractAddress,
       value: price,
       funcName: 'buy',
@@ -141,7 +141,7 @@ class UniqueAdapter implements IMarketContractAdapter {
   async buy(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<void> {
     await this.uniqueSdk.evm.send.submitWaitResult({
       abi: marketplaceAbi as any,
-      address: signer.address,
+      address: signer.address || '',
       contractAddress: this.contractAddress,
       value: price,
       funcName: 'buy',
