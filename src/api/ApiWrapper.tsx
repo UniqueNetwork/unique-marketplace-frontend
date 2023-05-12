@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChainPropertiesResponse } from '@unique-nft/sdk';
 import { useNotifications } from 'components/UI';
 import { keyring } from '@polkadot/ui-keyring';
+import { cryptoWaitReady } from '@polkadot/util-crypto';
 
 import { ApiContextProps, ApiProvider } from './ApiContext';
 // import AuctionSocketProvider from './restApi/auction/AuctionSocketProvider';
@@ -34,7 +35,10 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
 
   useEffect(() => {
     (async () => {
+      await cryptoWaitReady();
       const settings = await fetchSettings(config.blockchains);
+      // TODO: #########DEBUG#########
+      // (settings as any)[0].settings.blockchain.unique.restUrl = 'https://rest.unique.network/opal/v1';
       const networkOptions = settings.map<NetworkOptions>(({ networkId, settings }) => ({ networkId, settings }));
       setAvailableNetworkOptions(networkOptions);
       // TODO: setup current chain properly from localStorage/url
