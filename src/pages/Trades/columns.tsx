@@ -59,7 +59,7 @@ const getTradesColumns = ({ deviceSize, onShowTradesDetailsModal, scanUrl, testi
     width: deviceSize !== DeviceSize.md ? '14.3%' : '11.84%',
     isSortable: true,
     render: (value: string, { offerId }: Trade) => <Text testid={`${testid}-${offerId}-price`} color={BlueGrey600}>{`${formatBalance(value)} ${tokenSymbol}`}</Text>,
-    field: 'price'
+    field: 'price.parsed'
   },
   {
     title: (<Header data-testid={`${testid}-header-seller`}>Seller</Header>),

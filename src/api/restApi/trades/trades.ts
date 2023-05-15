@@ -7,7 +7,7 @@ import { ResponseError } from '../base/types';
 import { GetTradesRequestPayload, Trade, TradesResponse } from './types';
 import { useApi } from '../../../hooks/useApi';
 
-const endpoint = '/api/Trades';
+const endpoint = '/trades';
 
 export const getTrades = (baseURL: string, { seller, ...payload }: GetTradesRequestPayload) => get<TradesResponse>(`${endpoint}${seller ? '/' + seller : ''}`, { ...defaultParams, baseURL, params: payload });
 
