@@ -17,7 +17,7 @@ class MetamaskAdapter implements IMarketContractAdapter {
     return new ethers.Contract(this.contractAddress, marketplaceAbi, signer);
   }
 
-  private async validateCall(method: (args: any[]) => Promise<void>, ...args: any[]) {
+  private async validateCall(method: (methodArgs: any[]) => Promise<void>, ...args: any[]) {
     try {
       await method(args);
     } catch (e) {
