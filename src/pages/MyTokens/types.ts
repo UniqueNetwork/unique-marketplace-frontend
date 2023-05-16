@@ -41,6 +41,3 @@ export type MyToken = {
 export type GqlToken = Omit<MyToken, 'attributes'> & { attributes: Record<string, DecodedAttributeDto> };
 
 export type MixedMyTokenAndOffer = Omit<MyToken, 'collection' | 'nestingParentToken' | 'properties'> & Partial<Offer>;
-
-// TODO: remove it after switching the collection page to receive tokens from the market backend
-export type MixedTokenAndOffer = Omit<TokenByIdResponse, 'collection' | 'nestingParentToken' | 'properties'> & Partial<Offer>;

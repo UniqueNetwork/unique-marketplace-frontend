@@ -1,49 +1,48 @@
 import React, { FC, useCallback } from 'react';
 import styled from 'styled-components';
 
+import AttributeCountsFilter from 'components/Filters/AttributeCountsFilter';
+import AttributesFilter from 'components/Filters/AttributesFilter';
+import { AttributeItem, FiltersProps, PriceRange, Statuses } from 'components/Filters/types';
+import { useAccounts } from 'hooks/useAccounts';
+import StatusFilter from 'components/Filters/StatusFilter';
 import PricesFilter from 'components/Filters/PricesFilter';
-import { FiltersProps, PriceRange } from './types';
-import AttributesFilterSection from './AttributesFilterSection';
-import { AttributeItem } from 'components/Filters/types';
 
-export const Filters: FC<FiltersProps> = ({
-  value,
-  onFilterChange,
-  testid,
-  featuredTokens,
-  tokens,
-  featuredTokensForAttributeCounts,
-  isFetchingTokens
+export const Filters: FC<FiltersProps> = ({ value, attributes, attributeCounts, onFilterChange, testid }) => {
+  const { selectedAccount } = useAccounts();
 
-}) => {
+  const onStatusFilterChange = useCallback((statuses: Statuses) => {
+    onFilterChange({ ...value, statuses });
+  }, [value, onFilterChange, selectedAccount]);
+
   const onPricesFilterChange = useCallback((prices: PriceRange | undefined) => {
-    onFilterChange({ ...(value || {}), prices });
-  }, [value, onFilterChange]);
-
-  const onCollectionsFilterChange = useCallback((collections: number[], attributes?: AttributeItem[], attributeCounts?: number[]) => {
-    onFilterChange(({ ...(value || {}), collections, attributes, attributeCounts }));
+    onFilterChange({ ...value, prices });
   }, [value, onFilterChange]);
 
   const onCollectionAttributesFilterChange = useCallback((attributes: AttributeItem[]) => {
-    onFilterChange({ ...(value || {}), attributes });
+    onFilterChange({ ...value, attributes });
   }, [value, onFilterChange]);
 
   const onCollectionAttributeCountsFilterChange = useCallback((attributeCounts: number[]) => {
-    onFilterChange({ ...(value || {}), attributeCounts });
+    onFilterChange({ ...value, attributeCounts });
   }, [value, onFilterChange]);
 
+  const { attributes: selectedAttributes = [], attributeCounts: selectedAttributeCounts = [] } = value || {};
+
   return <FiltersStyled>
+    <StatusFilter value={value?.statuses} onChange={onStatusFilterChange} testid={`${testid}-status`} />
     <PricesFilter value={value?.prices} onChange={onPricesFilterChange} testid={`${testid}-prices`} />
-    <AttributesFilterSection
-      value={value}
-      onChange={onCollectionsFilterChange}
-      onAttributesChange={onCollectionAttributesFilterChange}
+    {!!attributeCounts?.length && <AttributeCountsFilter
+      attributeCounts={attributeCounts}
+      selectedAttributeCounts={selectedAttributeCounts}
       onAttributeCountsChange={onCollectionAttributeCountsFilterChange}
-      testid={`${testid}-collections`}
-      featuredTokens={featuredTokens}
-      tokens={tokens}
-      isFetchingTokens={isFetchingTokens}
-      featuredTokensForAttributeCounts={featuredTokensForAttributeCounts}
+      testid={`${testid}-attribute-count`}
+    />}
+    <AttributesFilter
+      attributes={attributes || {}}
+      selectedAttributes={selectedAttributes}
+      onAttributesChange={onCollectionAttributesFilterChange}
+      testid={`${testid}-attributes`}
     />
   </FiltersStyled>;
 };
@@ -53,6 +52,7 @@ const FiltersStyled = styled.div`
   display: flex;
   flex-direction: column;
   row-gap: calc(var(--gap) * 2);
+
   @media (max-width: 1024px) {
     width: 100%;
   }

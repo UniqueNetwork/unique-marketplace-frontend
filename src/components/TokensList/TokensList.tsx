@@ -6,9 +6,10 @@ import CardSkeleton from '../Skeleton/CardSkeleton';
 import { MyToken } from '../../pages/MyTokens/types';
 import { TokenByIdResponse } from '@unique-nft/sdk';
 import { Offer } from 'api/restApi/offers/types';
+import { Token } from 'api/restApi/tokens/types';
 
 type TTokensList = {
-  tokens: (Omit<TokenByIdResponse | MyToken, 'collection' | 'nestingParentToken' | 'properties'> | Offer)[]
+  tokens: (Omit<TokenByIdResponse | MyToken, 'collection' | 'nestingParentToken' | 'properties'> | Offer | Token)[]
   isLoading?: boolean
   testid: string
 };
