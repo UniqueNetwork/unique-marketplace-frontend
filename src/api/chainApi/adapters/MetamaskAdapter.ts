@@ -1,6 +1,6 @@
 import { UniqueNFTFactory } from '@unique-nft/solidity-interfaces';
 import { Address, EthCrossAccountId } from '@unique-nft/utils';
-import { ethers, Signer } from 'ethers';
+import { Contract, ethers, Signer } from 'ethers';
 import IMarketContractAdapter from './IMarketContractAdapter';
 
 import marketplaceAbi from '../contracts/marketplace-0.json';
@@ -15,6 +15,20 @@ class MetamaskAdapter implements IMarketContractAdapter {
 
   private getContract(signer: Signer) {
     return new ethers.Contract(this.contractAddress, marketplaceAbi, signer);
+  }
+
+  private async validateCall(method: (args: any[]) => Promise<void>, ...args: any[]) {
+    try {
+      await method(args);
+    } catch (e) {
+      console.error('Call static failed: ', e);
+      throw new Error('Calling contract method will fail, aborting');
+    }
+  }
+
+  protected async callContract(contract: Contract, methodName: string, ...args: any[]) {
+    await this.validateCall(contract.callStatic[methodName], args);
+    await (await contract[methodName](args)).wait();
   }
 
   async getTransferTokenFee(from: string, to: string, collectionId: number, tokenId: number, amount: number, signer: Signer): Promise<string> {
@@ -85,7 +99,7 @@ class MetamaskAdapter implements IMarketContractAdapter {
 
   async sell(from: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<void> {
     const contract = this.getContract(signer);
-    await (await contract.put(collectionId, tokenId, price, amount, from, { gasLimit: 10000000 })).wait();
+    await this.callContract(contract, 'put', collectionId, tokenId, price, amount, from, { gasLimit: 10000000 });
   }
 
   async getBuyFee(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<string> {
@@ -96,7 +110,7 @@ class MetamaskAdapter implements IMarketContractAdapter {
 
   async buy(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<void> {
     const contract = this.getContract(signer);
-    await (await contract.buy(collectionId, tokenId, amount, to, { gasLimit: 10000000, value: price })).wait();
+    await this.callContract(contract, 'buy', collectionId, tokenId, amount, to, { gasLimit: 10000000, value: price });
   }
 }
 
