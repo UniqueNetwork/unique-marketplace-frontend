@@ -1,4 +1,4 @@
-import React, { ChangeEvent, ReactNode, useCallback, useEffect, useState } from 'react';
+import React, { ChangeEvent, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { IconProps } from '@unique-nft/ui-kit';
 import { Icon } from 'components/UI/Icon/Icon';
@@ -29,6 +29,7 @@ export function SelectInput<T = SelectInputOption>({ className, placeholder, opt
   const [inputValue, setInputValue] = useState<string>('');
   const [isDropdownVisible, setIsDropdownVisible] = useState<boolean>(false);
   const [isCursorInside, setIsCursorInside] = useState<boolean>(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const onInputChange = useCallback(({ target }: ChangeEvent<HTMLInputElement>) => {
     onChange(target.value);
@@ -36,8 +37,14 @@ export function SelectInput<T = SelectInputOption>({ className, placeholder, opt
 
   const onInputFocus = useCallback(() => {
     if (disabled) return;
+    inputRef.current?.focus();
     setIsDropdownVisible(true);
   }, [setIsDropdownVisible, disabled]);
+
+  const onInputBlur = useCallback(() => {
+    if (isCursorInside) return;
+    setIsDropdownVisible(false);
+  }, [setIsDropdownVisible, isCursorInside]);
 
   const onOptionClick = useCallback((option: T) => () => {
     setIsDropdownVisible(false);
@@ -62,9 +69,9 @@ export function SelectInput<T = SelectInputOption>({ className, placeholder, opt
         setIsDropdownVisible(false);
       }
     };
-    document.addEventListener('click', onClickOutside);
+    window.addEventListener('click', onClickOutside);
     return () => {
-      document.removeEventListener('click', onClickOutside);
+      window.removeEventListener('click', onClickOutside);
     };
   }, [isCursorInside]);
 
@@ -101,16 +108,18 @@ export function SelectInput<T = SelectInputOption>({ className, placeholder, opt
     <InputWrapper className={classNames({ className, 'left-icon': !!leftIcon, dropped: isDropdownVisible, disabled })} >
       {leftIcon && <Icon {...leftIcon}/>}
       {!selectedValue && !inputValue && placeholder && !isDropdownVisible && <Placeholder>{placeholder}</Placeholder>}
-      {selectedValue && <div>
+      {selectedValue && <SelectedOptionWrapper onClick={onInputFocus}>
         {showOption(selectedValue)}
-      </div>}
+      </SelectedOptionWrapper>}
       <input
+        ref={inputRef}
         data-testid={`${testid}-input`}
         type={'text'}
         value={inputValue}
         onChange={onInputChange}
         onFocus={onInputFocus}
         onKeyUp={onKeyUp}
+        onBlur={onInputBlur}
       />
       {(inputValue || (isClearable && value)) &&
         <ClearButton
@@ -139,6 +148,12 @@ export const SelectInputWrapper = styled.div`
   position: relative;
 `;
 
+const SelectedOptionWrapper = styled.div`
+  z-index: 2;
+  position: inherit;
+  cursor: text;
+`;
+
 const InputWrapper = styled.div`
   border: 1px solid ${Grey300};
   box-sizing: border-box;
@@ -153,13 +168,14 @@ const InputWrapper = styled.div`
     position: absolute;
     top: 0;
     left: 0;
-    right: calc(var(--gap) * 2);
+    right: calc(var(--gap) * 3.5);
     bottom: 0;
     border: none;
     background: transparent;
     outline: none;
-    padding: calc(var(--gap) / 2) var(--gap);
+    padding: calc(var(--gap) / 2) 0 calc(var(--gap) / 2) var(--gap);
     width: -moz-available;
+    z-index: 1;
   }
 
   &.left-icon {
@@ -219,7 +235,7 @@ const Placeholder = styled.div`
 
 const ClearButton = styled(IconButton)`
   position: absolute;
-  left: calc(100% - calc(var(--gap) * 2.5));
+  left: calc(100% - calc(var(--gap) * 3));
   top: 50%;
   margin-top: -8px;
   width: auto !important;
@@ -229,6 +245,6 @@ const TriangleButton = styled(IconButton)`
   position: absolute;
   top: calc(50% - 4px);
   margin-top: -4px;
-  right: calc(var(--gap) / 2);
+  right: var(--gap);
   cursor: pointer;
 `;

@@ -33,6 +33,7 @@ export const formatBalance = (balance: string | number, fractionDigits = 4) => {
   const balanceValue = Number(balance);
   return balanceValue.toLocaleString('en-US', {
     minimumFractionDigits: 0,
-    maximumFractionDigits: fractionDigits
+    maximumFractionDigits: fractionDigits,
+    useGrouping: false
   });
 };
