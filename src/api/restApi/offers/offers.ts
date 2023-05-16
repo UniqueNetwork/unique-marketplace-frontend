@@ -26,8 +26,8 @@ export const useOffers = () => {
     try {
       const { status, data } = await getOffers(baseURL, {
         ...payload,
-        minPrice: minPrice && fromStringToBnString(minPrice, api?.market?.decimals),
-        maxPrice: maxPrice && fromStringToBnString(maxPrice, api?.market?.decimals)
+        minPrice: minPrice, // && fromStringToBnString(minPrice, api?.market?.decimals),
+        maxPrice: maxPrice // && fromStringToBnString(maxPrice, api?.market?.decimals)
       });
       if (status === 200) {
         setOffers(data.items);

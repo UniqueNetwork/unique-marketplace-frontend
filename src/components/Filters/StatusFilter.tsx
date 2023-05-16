@@ -19,16 +19,15 @@ const StatusFilter: FC<StatusFilterProps> = ({ value, onChange, testid }) => {
     onChange({ myNFTs: value, fixedPrice, timedAuction, myBets });
   }, [fixedPrice, timedAuction, myBets, onChange]);
 
-  const onMyBetsChange = useCallback((value: boolean) => {
-    onChange({ myNFTs, fixedPrice, timedAuction: value || timedAuction, myBets: value });
-  }, [myNFTs, fixedPrice, timedAuction, onChange]);
+  // const onMyBetsChange = useCallback((value: boolean) => {
+  //   onChange({ myNFTs, fixedPrice, timedAuction: value || timedAuction, myBets: value });
+  // }, [myNFTs, fixedPrice, timedAuction, onChange]);
 
   const onStatusClear = useCallback(() => {
     onChange({ myNFTs: false, fixedPrice, timedAuction, myBets: false });
   }, [onChange, fixedPrice, timedAuction]);
 
   const hideMyNFTs = useMemo(() => (timedAuction && myBets), [timedAuction, myBets]);
-  const hideMyBets = useMemo(() => (fixedPrice || myNFTs), [fixedPrice, myNFTs]);
 
   return (
     <>
@@ -45,13 +44,6 @@ const StatusFilter: FC<StatusFilterProps> = ({ value, onChange, testid }) => {
             size={'m'}
             onChange={onMyNFTsChange}
             testid={`${testid}-myNft-checkbox`}
-          />}
-          {!hideMyBets && <Checkbox
-            checked={!!myBets}
-            label={'My bids'}
-            size={'m'}
-            onChange={onMyBetsChange}
-            testid={`${testid}-myBids-checkbox`}
           />}
         </StatusFilterWrapper>
       </Accordion>}

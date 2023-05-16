@@ -4,19 +4,19 @@ import styled from 'styled-components';
 
 import config from '../../../config';
 import { useApi } from '../../../hooks/useApi';
-import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import { Avatar } from '../../../components/Avatar/Avatar';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import { Link } from 'components/UI';
 import { useAccounts } from '../../../hooks/useAccounts';
 
 export const AddressComponent = ({ text, testid }: { text: string, testid: string }) => {
-  const { chainProperties, currentChainId } = useApi();
+  const { currentChainId } = useApi();
   const { selectedAccount } = useAccounts();
 
   const formatAddress = useCallback((address: string) => {
-    return toChainFormatAddress(address, chainProperties?.SS58Prefix || 0);
-  }, [chainProperties?.SS58Prefix]);
+    return address;
+    // return toChainFormatAddress(address, chainProperties?.SS58Prefix || 0);
+  }, []);
 
   const shortCut = useMemo(() => {
     if (selectedAccount?.address === text) return 'Me';
