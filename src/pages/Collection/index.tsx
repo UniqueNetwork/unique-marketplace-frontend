@@ -27,11 +27,12 @@ import { TOption } from './types';
 import { defaultSortingValue, pageSize, sortingOptions, testid } from './constants';
 import { useParams } from 'react-router-dom';
 import { CollectionDetail } from './CollectionDetail/CollectionDetail';
-import { MixedTokenAndOffer } from 'pages/MyTokens/NFTPage';
+import { MixedTokenAndOffer } from 'pages/MyTokens/types';
 
 export const CollectionPage = () => {
   const searchParams = new URLSearchParams(window.location.search);
   const { collectionId } = useParams<{ collectionId: string }>();
+
   const [filterState, setFilterState] = useState<CollectionFilterState | null>(parseFilterState(searchParams.get('filterState')));
   const [sortingValue, setSortingValue] = useState<string>(searchParams.get('sortingValue') || defaultSortingValue.id);
   const [searchString, setSearchString] = useState<string>(searchParams.get('searchValue') || '');

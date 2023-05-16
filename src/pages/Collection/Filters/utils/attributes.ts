@@ -1,6 +1,6 @@
 import { Attribute, AttributeCount, OfferTokenAttribute } from 'api/restApi/offers/types';
 import { DecodedAttributeDto } from '@unique-nft/sdk';
-import { MixedTokenAndOffer } from 'pages/MyTokens/NFTPage';
+import { MixedTokenAndOffer } from 'pages/MyTokens/types';
 
 export const sortAttributeCounts = (attributeCountA: AttributeCount, attributeCountB: AttributeCount) => attributeCountA.numberOfAttributes > attributeCountB.numberOfAttributes ? 1 : -1;
 

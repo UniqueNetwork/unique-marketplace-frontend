@@ -1,5 +1,5 @@
 import { FilterState, FiltersProps as CommonFiltersProps } from 'components/Filters/types';
-import { MixedTokenAndOffer } from 'pages/MyTokens/NFTPage';
+import { MixedTokenAndOffer } from 'pages/MyTokens/types';
 
 export type TokensStatuses = Record<'onSell' | 'fixedPrice' | 'timedAuction' | 'notOnSale', boolean | undefined>;
 

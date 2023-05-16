@@ -11,7 +11,7 @@ import { AttributeItem } from 'components/Filters/types';
 import { CollectionCover } from 'components/CollectionCover/CollectionCover';
 import { Attribute, AttributeCount } from 'api/restApi/offers/types';
 import { getAttributesCountFromTokens, getAttributesFromTokens } from './utils/attributes';
-import { MixedTokenAndOffer } from '../NFTPage';
+import { MixedMyTokenAndOffer } from '../types';
 import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 
 interface CollectionsFilterProps {
@@ -20,11 +20,11 @@ interface CollectionsFilterProps {
   onAttributesChange?(value: { key: string, attribute: string }[]): void
   onAttributeCountsChange?(value: number[]): void
   testid: string
-  featuredTokens: MixedTokenAndOffer[]
-  tokens: MixedTokenAndOffer[]
+  featuredTokens: MixedMyTokenAndOffer[]
+  tokens: MixedMyTokenAndOffer[]
   collections: CollectionInfoWithSchemaResponse[]
   isFetchingTokens: boolean
-  featuredTokensForAttributeCounts: MixedTokenAndOffer[]
+  featuredTokensForAttributeCounts: MixedMyTokenAndOffer[]
 }
 
 const CollectionsFilter: FC<CollectionsFilterProps> = ({

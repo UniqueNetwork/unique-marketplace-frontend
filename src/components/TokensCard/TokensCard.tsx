@@ -16,9 +16,10 @@ import { countNestedChildren, stringToDecodedInfixOrUrlOrCidAndHash } from 'util
 import { useCollections } from 'hooks/useCollections';
 import BundleItemsCount from '../BundleItemsCount/BundleItemsCount';
 import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
+import { MyToken } from 'pages/MyTokens/types';
 
 export type TTokensCard = {
-  token?: Omit<TokenByIdResponse, 'collection' | 'nestingParentToken' | 'properties'>
+  token?: Omit<TokenByIdResponse | MyToken, 'collection' | 'nestingParentToken' | 'properties'>
   offer?: Partial<Offer>
   tokenId?: number
   collectionId?: number
@@ -27,7 +28,7 @@ export type TTokensCard = {
 };
 
 export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, testid, ...props }) => {
-  const [token, setToken] = useState<Omit<TokenByIdResponse, 'collection' | 'nestingParentToken' | 'properties'> | undefined>(props.token);
+  const [token, setToken] = useState<Omit<TokenByIdResponse | MyToken, 'collection' | 'nestingParentToken' | 'properties'> | undefined>(props.token);
   const [collection, setCollection] = useState<(CollectionInfoWithSchemaResponse) | undefined>();
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isBundleState, setIsBundleState] = useState<boolean>();

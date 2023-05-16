@@ -5,7 +5,7 @@ import AttributesFilter from 'components/Filters/AttributesFilter';
 import { AttributeItem } from 'components/Filters/types';
 import { Attribute, AttributeCount } from 'api/restApi/offers/types';
 import { getAttributesCountFromTokens, getAttributesFromTokens } from './utils/attributes';
-import { MixedTokenAndOffer } from 'pages/MyTokens/NFTPage';
+import { MixedTokenAndOffer } from 'pages/MyTokens/types';
 
 interface AttributesFilterSectionProps {
   value?: { collections?: number[], attributes?: { key: string, attribute: string }[], attributeCounts?: number[] } | null
