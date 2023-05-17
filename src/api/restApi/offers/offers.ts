@@ -12,6 +12,17 @@ const endpoint = '/Offers';
 
 export const getOffers = (baseURL: string, payload: GetOffersRequestPayload) => get<OffersResponse>(endpoint, { ...defaultParams, baseURL, params: payload });
 
+export const emptyResponse: OffersResponse = {
+  items: [],
+  currentPage: 1,
+  itemsPerPage: 20,
+  itemCount: 0,
+  totalItems: 0,
+  totalPages: 0,
+  attributes: {},
+  attributesCount: []
+};
+
 export const useOffers = () => {
   const [offers, setOffers] = useState<Offer[]>([]);
   const [offersCount, setOffersCount] = useState<number>(0);
@@ -31,7 +42,7 @@ export const useOffers = () => {
       });
       if (status === 200) {
         setOffers(data.items);
-        setOffersCount(data.itemsCount);
+        setOffersCount(data.totalItems);
         setAttributes(data.attributes);
         setAttributeCounts(data.attributesCount);
         setIsFetching(false);
@@ -44,7 +55,7 @@ export const useOffers = () => {
         message
       });
     }
-    return { items: [], attributes: {}, attributesCount: [], itemsCount: 0, page: 1, pageSize: 10 };
+    return emptyResponse;
   }, [baseURL, api?.market?.decimals]);
 
   const fetchMore = useCallback(async ({ minPrice, maxPrice, ...payload }: GetOffersRequestPayload) => {

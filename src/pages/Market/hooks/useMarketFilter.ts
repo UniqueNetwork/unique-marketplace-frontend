@@ -78,7 +78,7 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
   }, [filterState, isFetching, onFilterChange]);
 
   useEffect(() => {
-    if (!selectedAccount && isAccountsLoading) return;
+    if (!selectedAccount || isAccountsLoading) return;
     onChangeAccount();
   }, [selectedAccount?.address, isAccountsLoading]);
 

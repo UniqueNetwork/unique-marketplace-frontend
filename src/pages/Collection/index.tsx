@@ -1,6 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import BN from 'bn.js';
 import { Text } from '@unique-nft/ui-kit';
 import { Select } from 'components/UI';
 import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
@@ -25,7 +24,7 @@ import InfiniteScroll from 'react-infinite-scroller';
 
 export const CollectionPage = () => {
   const { collectionId } = useParams<{ collectionId: string }>();
-  const { selectedAccount, isLoading } = useAccounts();
+  const { selectedAccount, isLoading: isAccountsLoading } = useAccounts();
   const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse>();
   const deviceSize = useDeviceSize();
   const { getCollection, isFetching: isFetchingCollection } = useCollections();
@@ -47,14 +46,14 @@ export const CollectionPage = () => {
    } = useMarketFilter({ isFetching, fetch });
 
   useEffect(() => {
-    if (!selectedAccount?.address) return;
+    if (!selectedAccount?.address || isAccountsLoading) return;
 
     void (async () => {
       const collection = await getCollection(Number(collectionId));
       if (!collection) return; // TODO redirect to 404
       setCollection(collection);
     })();
-  }, [currentChainId, collectionId, fetch, selectedAccount, getCollection]);
+  }, [currentChainId, collectionId, fetch, selectedAccount?.address, getCollection]);
 
   const hasMore = tokens && tokens.length < tokensCount;
 
@@ -104,7 +103,7 @@ export const CollectionPage = () => {
             <Text
               testid={`${testid}-items-count`}
               size='m'
-            >{isLoading ? 'Loading items' : `${tokensCount} items`}</Text>
+            >{isAccountsLoading ? 'Loading items' : `${tokensCount} items`}</Text>
           </div>
           <InfiniteScroll
             hasMore={hasMore}
@@ -114,8 +113,8 @@ export const CollectionPage = () => {
             threshold={200}
             useWindow={true}
           >
-            {!isLoading && !tokens?.length && <NoItems isSearchResult={!!searchValue || !!filterCount} />}
-            <TokensList tokens={tokens || []} isLoading={isLoading} testid={`${testid}-tokens`} />
+            {!isAccountsLoading && !tokens?.length && <NoItems isSearchResult={!!searchValue || !!filterCount} />}
+            <TokensList tokens={tokens || []} isLoading={isAccountsLoading} testid={`${testid}-tokens`} />
           </InfiniteScroll>
         </MainContent>
       </MarketMainPageStyled>

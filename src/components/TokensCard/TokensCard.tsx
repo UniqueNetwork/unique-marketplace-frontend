@@ -46,9 +46,10 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
     auction,
     video
   } = useMemo(() => {
-    if (offer || (token && collection)) {
+    if (offer || (token && collection) || ((token as MyToken).collectionName && (token as MyToken).tokenPrefix)) {
       const { image, video } = offer?.tokenDescription || token || {};
-      const { name: collectionName, tokenPrefix } = offer?.collectionDescription || collection || {};
+      const collectionName = offer?.collectionDescription?.name || collection?.name || (token as MyToken).collectionName || '';
+      const tokenPrefix = offer?.collectionDescription?.tokenPrefix || collection?.tokenPrefix || (token as MyToken).tokenPrefix;
       const { auction, price } = offer || {};
       return {
         tokenTitle: `${tokenPrefix || ''} #${tokenId || ''}`,
@@ -67,7 +68,6 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
           const token = await api?.nft?.getToken(collectionId, tokenId);
           if (token) setToken(token);
         }
-
         if (!collection) {
           const collection = await getCollection(collectionId);
           if (collection) setCollection(collection);
@@ -83,6 +83,8 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
       let count;
       if (offer) {
         count = countNestedChildren(offer?.tokenDescription?.nestingChildTokens || []);
+      } else if ((token as MyToken).nested !== undefined) {
+        count = (token as MyToken).childrenCount;
       } else if (tokenId && collectionId) {
         const bundle = await api?.nft?.getBundle(collectionId, tokenId);
         count = countNestedChildren(bundle?.nestingChildTokens || []);

@@ -30,6 +30,7 @@ const gqlQuery = {
         parent_id
         nested
         owner: tokens_owner
+        childrenCount: children_count
         __typename
       }
       __typename
