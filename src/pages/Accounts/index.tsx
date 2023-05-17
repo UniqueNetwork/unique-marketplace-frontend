@@ -230,13 +230,12 @@ export const AccountsPage = () => {
         senderAddress={selectedAddress}
         testid={`${testid}-transfer-funds-modal`}
       />
-      { selectedAddress && <WithdrawDepositModal
+      <WithdrawDepositModal
         isVisible={currentModal === AccountModal.withdrawDeposit}
         onFinish={onChangeAccountsFinish}
-        onClose={onModalClose}
         address={selectedAddress}
         testid={`${testid}-withdraw-modal`}
-      />}
+      />
       <ConfirmModal
         isVisible={currentModal === AccountModal.deleteLocalAccount}
         onCancel={onModalClose}

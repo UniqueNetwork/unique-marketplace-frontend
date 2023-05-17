@@ -10,11 +10,21 @@ export type WithdrawDepositModalProps = {
   isVisible: boolean
   address?: string
   onFinish(): void
-  onClose(): void
   testid: string
 }
 
-export const WithdrawDepositModal: FC<WithdrawDepositModalProps> = ({ isVisible, address, onFinish, onClose, testid }) => {
+export const WithdrawDepositModal: FC<WithdrawDepositModalProps> = ({ isVisible, address, onFinish, testid }) => {
+  if (isVisible && address) {
+    return <WithdrawDepositStagesModal address={address}
+      onFinish={onFinish}
+      testid={testid}
+      isVisible={isVisible}
+    />;
+  }
+  return <></>;
+};
+
+export const WithdrawDepositStagesModal: FC<WithdrawDepositModalProps> = ({ address, onFinish, testid }) => {
   const { stages, status, initiate } = useWithdrawStages(address || '');
   const { info } = useNotifications();
   useEffect(() => {
@@ -29,10 +39,11 @@ export const WithdrawDepositModal: FC<WithdrawDepositModalProps> = ({ isVisible,
         'Withdraw completed',
         { name: 'success', size: 32, color: 'var(--color-additional-light)' }
       );
+      onFinish();
     }
-  }, [info, status]);
+  }, [info, status, onFinish]);
 
-  return (<Modal isVisible={isVisible} isClosable={false}>
+  return (<Modal isVisible={true} isClosable={false}>
     <div>
       <DefaultMarketStages
         stages={stages}
