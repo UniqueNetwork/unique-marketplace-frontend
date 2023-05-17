@@ -1,5 +1,6 @@
 import { BN, BN_MAX_INTEGER } from '@polkadot/util';
 import { DecodedAttributeDto } from '@unique-nft/sdk';
+import { MyCollection } from 'api/restApi/collections/types';
 
 import { Offer } from 'api/restApi/offers/types';
 import { useAccounts } from 'hooks/useAccounts';
@@ -165,9 +166,35 @@ export const useMyTokensFilter = ({ tokens, offers, isFetchingTokens }: UseMyTok
     return statusesCount + collectionsCount + attributesCount + numberOfAttributesCount + (prices ? 1 : 0);
   }, [filterState]);
 
-  const myCollections = useMemo(() => {
-    const myTokensCollectionIds = [...tokens, ...offers].map((token) => token.collectionId);
-    return featuredCollections.filter((collection) => myTokensCollectionIds.includes(collection.id));
+  const myCollections: MyCollection[] = useMemo(() => {
+    const collections: Map<number, MyCollection> = new Map();
+
+    offers.forEach(({ collectionDescription: { id, owner, schema, name, tokenPrefix } }) => {
+      if (collections.has(id)) return;
+      collections.set(id, {
+        id,
+        cover: schema?.coverPicture.fullUrl || '',
+        name,
+        owner,
+        tokenPrefix,
+        isMarketable: true,
+        allowedTokens: ''
+      });
+    });
+    tokens.forEach(({ collectionId, collectionCover, collectionName, collectionOwner, tokenPrefix }) => {
+      if (collections.has(collectionId)) return;
+      collections.set(collectionId, {
+        id: collectionId,
+        cover: collectionCover || '',
+        name: collectionName || '',
+        owner: collectionOwner || '',
+        tokenPrefix: tokenPrefix || '',
+        isMarketable: featuredCollections.findIndex(({ id }) => id === collectionId) !== -1,
+        allowedTokens: ''
+      });
+    });
+
+    return [...collections.values()];
   }, [featuredCollections, tokens, offers]);
 
   const onSearch = useCallback((value: string) => {

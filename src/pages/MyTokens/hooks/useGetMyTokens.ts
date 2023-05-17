@@ -18,9 +18,13 @@ const gqlQuery = {
       data {
         tokenId: token_id
         token_name
-        collection_name
+        tokenPrefix: token_prefix
+        collectionName: collection_name
+        collectionDescription: collection_name
+        collectionCover: collection_cover
+        collectionOwner: collection_owner
         collectionId: collection_id
-        creationDate:date_of_creation
+        creationDate: date_of_creation
         image
         type
         parent_id

@@ -14,14 +14,6 @@ export type SetCollectionTokensPayload = {
   tokens: string
 }
 
-// export type CollectionData = CollectionInfoWithSchemaResponse & {
-//   allowedTokens?: string
-//   updatedAt?: string
-//   status?: string
-//   name?: string
-//   owner?: string
-// }
-
 export interface MyCollectionBackend {
   id: number,
   tokenPrefix: string,

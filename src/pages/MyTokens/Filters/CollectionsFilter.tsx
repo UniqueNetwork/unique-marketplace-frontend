@@ -12,7 +12,7 @@ import { CollectionCover } from 'components/CollectionCover/CollectionCover';
 import { Attribute, AttributeCount } from 'api/restApi/offers/types';
 import { getAttributesCountFromTokens, getAttributesFromTokens } from './utils/attributes';
 import { MixedMyTokenAndOffer } from '../types';
-import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
+import { MyCollection } from 'api/restApi/collections/types';
 
 interface CollectionsFilterProps {
   value?: { collections?: number[], attributes?: { key: string, attribute: string }[], attributeCounts?: number[] } | null
@@ -22,7 +22,7 @@ interface CollectionsFilterProps {
   testid: string
   featuredTokens: MixedMyTokenAndOffer[]
   tokens: MixedMyTokenAndOffer[]
-  collections: CollectionInfoWithSchemaResponse[]
+  collections: MyCollection[]
   isFetchingTokens: boolean
   featuredTokensForAttributeCounts: MixedMyTokenAndOffer[]
 }
@@ -98,7 +98,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({
               onChange={onCollectionSelect(collection.id)}
               testid={`${testid}-checkbox-${collection.id}`}
             />
-            <CollectionCover src={collection.schema?.coverPicture.fullUrl || ''} size={22} type={'circle'}/>
+            <CollectionCover src={collection.cover || ''} size={22} type={'circle'}/>
             <Text
               testid={`${testid}-name-${collection.id}`}
             >{collection.name || ''}</Text>

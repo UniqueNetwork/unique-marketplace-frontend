@@ -17,7 +17,7 @@ export enum TokenTypeEnum {
 export type MyToken = {
   tokenId: number;
   token_name?: string;
-  token_prefix?: string;
+  tokenPrefix?: string;
   owner: string;
   attributes: DecodedAttributeDto[];
   creationDate?: string;
@@ -30,9 +30,9 @@ export type MyToken = {
     ipfsCid?: string | null;
   };
   collectionId: number;
-  collection_name?: string;
-  collection_cover?: string;
-  collection_description?: string;
+  collectionName?: string;
+  collectionCover?: string;
+  collectionOwner?: string;
   type?: TokenTypeEnum;
   parent_id?: string | null;
   nested?: boolean;
