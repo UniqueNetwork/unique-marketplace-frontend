@@ -56,7 +56,7 @@ export const AccountsPage = () => {
   const { chainProperties, currentChainId } = useApi();
 
   useEffect(() => {
-    void updateAccountsDeposits();
+    // void updateAccountsDeposits();
   }, [updateAccountsDeposits]);
 
   useEffect(() => {
@@ -219,13 +219,13 @@ export const AccountsPage = () => {
         senderAddress={selectedAddress}
         testid={`${testid}-transfer-funds-modal`}
       />
-      <WithdrawDepositModal
+      { selectedAddress && <WithdrawDepositModal
         isVisible={currentModal === AccountModal.withdrawDeposit}
         onFinish={onChangeAccountsFinish}
         onClose={onModalClose}
         address={selectedAddress}
         testid={`${testid}-withdraw-modal`}
-      />
+      />}
       <ConfirmModal
         isVisible={currentModal === AccountModal.deleteLocalAccount}
         onCancel={onModalClose}
