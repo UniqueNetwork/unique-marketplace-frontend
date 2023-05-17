@@ -17,7 +17,7 @@ type AccountsColumnsProps = {
   onShowSendFundsModal(address: string): () => void
   onShowWithdrawDepositModal(address: string): () => void
   onShowDeleteLocalAccountModal(address: string): () => void
-  onShowGetKsmModal: () => void
+  onGetClick: () => void
   tokenSymbol: string
   scanUrl: string
 };
@@ -28,7 +28,7 @@ export const getAccountsColumns = ({
                               onShowWithdrawDepositModal,
                               isSmallDevice,
                               onShowDeleteLocalAccountModal,
-                              onShowGetKsmModal,
+                              onGetClick,
                               tokenSymbol,
                               scanUrl
                             }: AccountsColumnsProps): TableColumnProps[] => [
@@ -122,8 +122,7 @@ export const getAccountsColumns = ({
             <Button title={'Send'} onClick={onShowSendFundsModal(address)} disabled={!balance?.parsed} />
             <Button
               title={'Get'}
-              onClick={onShowGetKsmModal}
-              disabled={!config.rampApiKey}
+              onClick={onGetClick}
               testid={`${testid}-${address}-get-button`}
             />
             {isLocal && <Button title={'Delete'} onClick={onShowDeleteLocalAccountModal(address)} testid={`${testid}-${address}-delete-button`} />}
