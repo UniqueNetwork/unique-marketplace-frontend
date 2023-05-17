@@ -1,12 +1,9 @@
 import React, { ReactElement, useCallback, useState } from 'react';
-import styled from 'styled-components/macro';
-import { IconProps } from '@unique-nft/ui-kit';
+import styled from 'styled-components';
+import { IconProps, SelectOptionProps } from '@unique-nft/ui-kit';
 import { Tabs, Select, Button } from 'components/UI';
-import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
-
+import { FilterChangeHandler, FilterState } from 'components/Filters/types';
 import { AdditionalLight } from 'styles/colors';
-import { TokensStatuses } from './types';
-import { FilterChangeHandler } from 'components/Filters/types';
 
 type MobileFiltersProps<T> = {
   filterCount: number
@@ -25,7 +22,7 @@ type MobileFiltersProps<T> = {
 
 const tabs = ['Filter', 'Sort'];
 
-export function MobileFilters<T = TokensStatuses>({ filterCount, filterComponent, defaultSortingValue, sortingValue, sortingOptions, onFilterChange, onSortingChange, testid }: MobileFiltersProps<T>) {
+export function MobileFilters<T = FilterState>({ filterCount, filterComponent, defaultSortingValue, sortingValue, sortingOptions, onFilterChange, onSortingChange, testid }: MobileFiltersProps<T>) {
   const [isVisible, setIsVisible] = useState(false);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
 
@@ -45,10 +42,24 @@ export function MobileFilters<T = TokensStatuses>({ filterCount, filterComponent
 
   return <>
     <MobileFilterActionsWrapper>
-      {!isVisible && <Button role={'primary'} onClick={onVisibleButtonClick} title={`Filter and sort ${filterCount ? `(${filterCount})` : ''} `} />}
+      {!isVisible && <Button
+        role={'primary'}
+        onClick={onVisibleButtonClick}
+        title={`Filter and sort ${filterCount ? `(${filterCount})` : ''} `}
+        testid={`${testid}-filter-sort-button`}
+      />}
       {isVisible && <>
-        <Button onClick={onShowButtonClick} title={'Show'} />
-        <Button role={'danger'} onClick={onResetButtonClick} title={'Reset'} />
+        <Button
+          onClick={onShowButtonClick}
+          title={'Show'}
+          testid={`${testid}-show-button`}
+        />
+        <Button
+          role={'danger'}
+          onClick={onResetButtonClick}
+          title={'Reset'}
+          testid={`${testid}-reset-button`}
+        />
       </>
       }
     </MobileFilterActionsWrapper>
@@ -57,11 +68,10 @@ export function MobileFilters<T = TokensStatuses>({ filterCount, filterComponent
         activeIndex={activeTabIndex}
         labels={tabs}
         onClick={setActiveTabIndex}
-        testid={testid}
+        testid={`${testid}-tabs`}
       />
       <Tabs
         activeIndex={activeTabIndex}
-        testid={testid}
       >
         {filterComponent || <></>}
         <SortStyled>
@@ -69,6 +79,7 @@ export function MobileFilters<T = TokensStatuses>({ filterCount, filterComponent
             onChange={onSortingChange}
             options={sortingOptions}
             value={sortingValue}
+            testid={`${testid}-sorting-select`}
           />
         </SortStyled>
       </Tabs>
@@ -79,7 +90,7 @@ export function MobileFilters<T = TokensStatuses>({ filterCount, filterComponent
 const MobileFilterActionsWrapper = styled.div`
   display: none;
   position: fixed;
-  top: calc(100vh - 60px);    
+  top: calc(100% - 60px);    
   right: 0;
   left: 0;
   padding: 10px calc(var(--gap) * 1.5);
@@ -104,11 +115,12 @@ const MobileFilterModal = styled.div<{ isVisible: boolean }>`
   position: fixed;
   background-color: ${AdditionalLight};
   padding: calc(var(--gap) * 1.5);
-  height: calc(100vh - 140px);
+  height: calc(100% - 184px);
   top: 80px;
   right: 0;
   left: 0;
-  overflow-y: auto;
+  overflow-y: scroll;
+  z-index: 2;
 
   & div[class^=Filters] {
     width: 100%;

@@ -19,7 +19,7 @@ export const useCollections = () => {
   const { isFetching: isFetchingFeaturedCollections, collections: featuredCollections, fetchCollections: fetchFeaturedCollections } = useContext(CollectionsContext);
   const [isFetching, setIsFetching] = useState(false);
   const [collections, setCollections] = useState<MyCollection[]>([]);
-  const { baseURL, currentChainId } = useApi();
+  const { baseURL } = useApi();
 
   const getCollection = useCallback(async (collectionId: number) => {
     const collection = featuredCollections.find(({ id }) => collectionId === id);
@@ -29,7 +29,6 @@ export const useCollections = () => {
   const getMyCollectionsWithMarketable = useCallback((backendMyCollections: MyCollectionBackend[]) => {
     return backendMyCollections.map((bmc) => {
       const allowedCollection = settings?.blockchain.unique.collections[bmc.id];
-      // console.log('useEffect in collections: ', { ...bmc, isMarketable: !!allowedCollection, allowedTokens: allowedCollection?.allowedTokens || undefined });
       return { ...bmc, isMarketable: !!allowedCollection, allowedTokens: allowedCollection?.allowedTokens || undefined } as MyCollection;
     });
   }, [settings]);
@@ -68,7 +67,6 @@ export const useCollections = () => {
       // TODO: merge with data from "collections" in settings to highlight already "added" collections
       const backendMyCollections = response?.data?.data?.collections?.data as MyCollectionBackend[] | [];
       const myCollections = getMyCollectionsWithMarketable(backendMyCollections);
-      console.log('settings in collection fetch', settings);
       setCollections(myCollections);
     }
     setIsFetching(false);

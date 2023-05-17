@@ -2,11 +2,24 @@ import React, { FC, useCallback } from 'react';
 import styled from 'styled-components';
 
 import PricesFilter from 'components/Filters/PricesFilter';
-import { AttributeItem, FiltersProps, PriceRange, MyTokensFilterState, MyTokensStatuses } from './types';
+import { AttributeItem, PriceRange, MyTokensFilterState, MyTokensStatuses, FilterChangeHandler } from './types';
 import StatusFilter from './StatusFilter';
 import CollectionsFilter from './CollectionsFilter';
+import { MixedMyTokenAndOffer } from '../types';
+import { MyCollection } from 'api/restApi/collections/types';
 
-export const Filters: FC<FiltersProps<MyTokensFilterState>> = ({ value, onFilterChange, featuredTokens, collections, isFetchingTokens, testid, tokens, featuredTokensForAttributeCounts }) => {
+type FilterProps = {
+  value: MyTokensFilterState | null
+  onFilterChange: FilterChangeHandler<MyTokensFilterState>
+  tokens: MixedMyTokenAndOffer[]
+  featuredTokens: MixedMyTokenAndOffer[]
+  collections: MyCollection[]
+  isFetchingTokens: boolean
+  testid: string
+  featuredTokensForAttributeCounts: MixedMyTokenAndOffer[]
+}
+
+export const Filters: FC<FilterProps> = ({ value, onFilterChange, featuredTokens, collections, isFetchingTokens, testid, tokens, featuredTokensForAttributeCounts }) => {
   const onStatusFilterChange = useCallback((statuses: MyTokensStatuses) => {
     onFilterChange({ ...(value || {}), statuses });
   }, [value, onFilterChange]);

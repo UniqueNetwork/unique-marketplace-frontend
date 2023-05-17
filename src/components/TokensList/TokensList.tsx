@@ -3,10 +3,13 @@ import styled from 'styled-components';
 
 import { TokensCard } from '..';
 import CardSkeleton from '../Skeleton/CardSkeleton';
-import { MixedTokenAndOffer } from '../../pages/MyTokens/NFTPage';
+import { MyToken } from '../../pages/MyTokens/types';
+import { TokenByIdResponse } from '@unique-nft/sdk';
+import { Offer } from 'api/restApi/offers/types';
+import { Token } from 'api/restApi/tokens/types';
 
 type TTokensList = {
-  tokens: MixedTokenAndOffer[]
+  tokens: (Omit<TokenByIdResponse | MyToken, 'collection' | 'nestingParentToken' | 'properties'> | Offer | Token)[]
   isLoading?: boolean
   testid: string
 };

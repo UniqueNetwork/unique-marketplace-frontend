@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction } from 'react';
 import { Statuses } from 'components/Filters/types';
-import { MixedTokenAndOffer } from '../NFTPage';
+import { MixedMyTokenAndOffer } from '../types';
 import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 
 export type MyTokensStatuses = Record<'onSell' | 'fixedPrice' | 'timedAuction' | 'notOnSale', boolean | undefined>;
@@ -29,12 +29,12 @@ export type FilterChangeHandler<T> = Dispatch<SetStateAction<T | null>> | ((valu
 export type FiltersProps<T = FilterState> = {
     value: T | null
     onFilterChange: FilterChangeHandler<T>
-    tokens: MixedTokenAndOffer[]
-    featuredTokens: MixedTokenAndOffer[]
+    tokens: MixedMyTokenAndOffer[]
+    featuredTokens: MixedMyTokenAndOffer[]
     collections: CollectionInfoWithSchemaResponse[]
     isFetchingTokens: boolean
     testid: string
-    featuredTokensForAttributeCounts: MixedTokenAndOffer[]
+    featuredTokensForAttributeCounts: MixedMyTokenAndOffer[]
 }
 
 export type TFilterAttribute = {

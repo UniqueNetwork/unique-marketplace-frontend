@@ -1,5 +1,5 @@
 import { Attribute, AttributeCount, OfferTokenAttribute } from 'api/restApi/offers/types';
-import { MixedTokenAndOffer } from '../../NFTPage';
+import { MixedMyTokenAndOffer } from '../../types';
 import { DecodedAttributeDto } from '@unique-nft/sdk';
 
 export const sortAttributeCounts = (attributeCountA: AttributeCount, attributeCountB: AttributeCount) => attributeCountA.numberOfAttributes > attributeCountB.numberOfAttributes ? 1 : -1;
@@ -23,7 +23,7 @@ export const toTokenAttributes = (offerAttributes: OfferTokenAttribute[]) => {
   return result;
 };
 
-export const getAttributesFromTokens = (tokens: MixedTokenAndOffer[]) => {
+export const getAttributesFromTokens = (tokens: MixedMyTokenAndOffer[]) => {
   // All attributes from available tokens
   const attributesMap: { [key: string]: any[] } = {};
   // attributes formatted for Filter component
@@ -87,7 +87,7 @@ export function countTokenAttributes(attributes: DecodedAttributeDto[] | undefin
   return count;
 }
 
-export const getAttributesCountFromTokens = (tokens: MixedTokenAndOffer[]) => {
+export const getAttributesCountFromTokens = (tokens: MixedMyTokenAndOffer[]) => {
   const countTokensAttributes: number[] = tokens.map(({ attributes }) => countTokenAttributes(attributes));
   // count tokens with the same amount of attributes, result be like { 7: 2, 6: 1 }
   const counterMap: { [key: number]: number } = {};
