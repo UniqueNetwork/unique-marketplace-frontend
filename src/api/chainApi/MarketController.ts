@@ -125,13 +125,13 @@ class MarketController extends BaseController implements IMarketController {
         address: Address.mirror.substrateToEthereum(address)
       });
       withdraw = {
-        raw: new BN(withdrawBalance?.freeBalance?.raw || 0),
-        parsed: withdrawBalance?.freeBalance?.amount
+        raw: new BN(withdrawBalance?.availableBalance?.raw || 0),
+        parsed: withdrawBalance?.availableBalance?.amount
       };
     }
     if (!balance) throw new Error('Failed to fetch balance');
-    return { raw: new BN(balance?.freeBalance?.raw || 0),
-      parsed: balance?.freeBalance?.amount || '0',
+    return { raw: new BN(balance?.availableBalance?.raw || 0),
+      parsed: balance?.availableBalance?.amount || '0',
       withdraw
     };
   }
