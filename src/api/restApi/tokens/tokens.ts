@@ -8,6 +8,7 @@ import { ResponseError } from '../base/types';
 import { useApi } from '../../../hooks/useApi';
 import { fromStringToBnString } from '../../../utils/bigNum';
 import { Token, TokensResponse } from './types';
+import { emptyResponse } from '../offers/offers';
 
 const endpoint = '/tokens';
 
@@ -33,7 +34,7 @@ export const useTokens = ({ collectionId }: { collectionId: number }) => {
       });
       if (status === 200) {
         setTokens(data.items);
-        setTokensCount(data.itemsCount);
+        setTokensCount(data.totalItems);
         setAttributes(data.attributes);
         setAttributeCounts(data.attributesCount);
         setIsFetching(false);
@@ -46,7 +47,7 @@ export const useTokens = ({ collectionId }: { collectionId: number }) => {
         message
       });
     }
-    return { items: [], attributes: {}, attributesCount: [], itemsCount: 0, page: 1, pageSize: 10 };
+    return emptyResponse;
   }, [baseURL, api?.market?.decimals, collectionId]);
 
   const fetchMore = useCallback(async ({ minPrice, maxPrice, ...payload }: GetOffersRequestPayload) => {

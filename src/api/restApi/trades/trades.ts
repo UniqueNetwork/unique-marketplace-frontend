@@ -24,7 +24,7 @@ export const useTrades = () => {
       const response = await getTrades(baseURL, payload);
       if (response.status === 200) {
         setTrades(response.data.items);
-        setTradesCount(response.data.itemsCount);
+        setTradesCount(response.data.totalItems);
         setIsFetching(false);
       }
     } catch (err) {

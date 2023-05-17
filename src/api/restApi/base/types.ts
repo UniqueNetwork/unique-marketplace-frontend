@@ -12,7 +12,7 @@ export type Sortable = {
 export type PaginatedResponse<T> = {
   currentPage: number
   itemsPerPage: number
-  itemsCount: number
+  itemCount: number
   items: T[]
   totalItems: number
   totalPages: number
