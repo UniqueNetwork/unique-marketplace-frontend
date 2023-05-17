@@ -36,6 +36,7 @@ export type MyToken = {
   type?: TokenTypeEnum;
   parent_id?: string | null;
   nested?: boolean;
+  childrenCount?: number
 }
 
 export type GqlToken = Omit<MyToken, 'attributes'> & { attributes: Record<string, DecodedAttributeDto> };

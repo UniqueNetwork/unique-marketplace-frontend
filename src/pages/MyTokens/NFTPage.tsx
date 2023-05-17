@@ -19,7 +19,7 @@ import { useGetMyTokens } from './hooks/useGetMyTokens';
 import { TokensList } from 'components';
 
 export const NFTPage = () => {
-  const { selectedAccount, isLoading } = useAccounts();
+  const { selectedAccount, isLoading: isAccountsLoading } = useAccounts();
   const deviceSize = useDeviceSize();
 
   const { offers, isFetching: isFetchingOffers, fetch } = useOffers();
@@ -27,13 +27,13 @@ export const NFTPage = () => {
   const { tokens, fetchMyTokens, isFetching: isFetchingTokens } = useGetMyTokens();
 
   useEffect(() => {
-    if (!api?.nft || !selectedAccount) return;
+    if (!api?.nft || !selectedAccount || isAccountsLoading) return;
 
     void (async () => {
       await fetch({ page: 1, pageSize, seller: selectedAccount?.address });
       await fetchMyTokens(selectedAccount);
     })();
-  }, [api?.nft, currentChainId, selectedAccount, fetch, fetchMyTokens]);
+  }, [api?.nft, currentChainId, selectedAccount?.address]);
 
   const {
     filterState,
@@ -91,11 +91,11 @@ export const NFTPage = () => {
           <Text
             testid={`${testid}-items-count`}
             size='m'
-          >{isFetchingTokens || isFetchingOffers || isLoading ? 'Loading items' : `${featuredTokens.length} items`}</Text>
+          >{isFetchingTokens || isFetchingOffers || isAccountsLoading ? 'Loading items' : `${featuredTokens.length} items`}</Text>
         </div>
         <TokensListWrapper >
-          {!isFetchingTokens && !isFetchingOffers && !isLoading && featuredTokens.length === 0 && <NoItems isSearchResult={!!searchString || !!filterCount} />}
-          <TokensList testid={`${testid}-tokens`} tokens={featuredTokens} isLoading={isFetchingTokens || isFetchingOffers || isLoading} />
+          {!isFetchingTokens && !isFetchingOffers && !isAccountsLoading && featuredTokens.length === 0 && <NoItems isSearchResult={!!searchString || !!filterCount} />}
+          <TokensList testid={`${testid}-tokens`} tokens={featuredTokens} isLoading={isFetchingTokens || isFetchingOffers || isAccountsLoading} />
         </TokensListWrapper>
       </MainContent>
       {deviceSize <= DeviceSize.md && <MobileFilters

@@ -28,7 +28,7 @@ export const useMyTokensFilter = ({ tokens, offers, isFetchingTokens }: UseMyTok
   const [selectOption, setSelectOption] = useState<TOption>();
   const { featuredCollections } = useCollections();
   const { api, currentChainId } = useApi();
-  const { selectedAccount } = useAccounts();
+  const { selectedAccount, isLoading: isAccountsLoading } = useAccounts();
 
   useEffect(() => {
     if (!api) return;
@@ -39,7 +39,7 @@ export const useMyTokensFilter = ({ tokens, offers, isFetchingTokens }: UseMyTok
   }, [currentChainId]);
 
   useEffect(() => {
-    if (isFetchingTokens) return;
+    if (!selectedAccount || isAccountsLoading) return;
     setFilterState((filter) => filter
       ? {
         ...filter,
@@ -48,7 +48,7 @@ export const useMyTokensFilter = ({ tokens, offers, isFetchingTokens }: UseMyTok
       }
       : null
     );
-  }, [selectedAccount]);
+  }, [selectedAccount?.address]);
 
   useEffect(() => {
     const option = sortingOptions.find((option) => { return option.id === sortingValue; });
