@@ -1,5 +1,5 @@
 import { useApi } from 'hooks/useApi';
-import { MarketAccount } from 'account/AccountContext';
+import { MarketAccount } from 'account/types';
 import { defaultParams } from 'api/restApi/base/axios';
 import { deleteRequest, patch, post } from 'api/restApi/base';
 import { MyCollection, MyCollectionBackend, SetCollectionTokensPayload } from 'api/restApi/collections/types';

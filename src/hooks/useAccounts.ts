@@ -31,17 +31,6 @@ export const useAccounts = () => {
     keyring.addUri(getSuri(seed, derivePath, pairType), password, options, pairType as KeypairType);
   }, [chainProperties]);
 
-  const addAccountViaQR = useCallback((scanned: { name: string, isAddress: boolean, content: string, password: string, genesisHash: string}) => {
-    const { name, isAddress, content, password, genesisHash } = scanned;
-
-    const meta = {
-      genesisHash,
-      name: name?.trim()
-    };
-    if (isAddress) keyring.addExternal(content, meta);
-    else keyring.addUri(content, password, meta, 'sr25519');
-  }, []);
-
   const deleteLocalAccount = useCallback((address: string) => {
       keyring.forgetAccount(address);
     }, []);
@@ -53,7 +42,6 @@ export const useAccounts = () => {
     isLoadingDeposits,
     fetchAccountsError,
     addLocalAccount,
-    addAccountViaQR,
     fetchAccounts,
     updateAccountsDeposits,
     updateCurrentAccountDeposit,

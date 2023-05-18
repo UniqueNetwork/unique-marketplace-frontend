@@ -1,5 +1,5 @@
 import { BN } from '@polkadot/util';
-import { MarketAccountBalance } from 'account/AccountContext';
+import { MarketAccountBalance } from 'account/types';
 import { Address, CrossAccountId } from '@unique-nft/utils';
 import marketplaceAbi from './contracts/marketplace-0.json';
 import { NetworkOptions } from '../sdk/sdkClient';

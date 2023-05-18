@@ -19,7 +19,7 @@ import { Coral700 } from 'styles/colors';
 import DefaultMarketStages from '../../Token/Modals/StagesModal';
 import { TTransferFunds } from './types';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
-import { MarketAccount as Account, MarketAccount } from 'account/AccountContext';
+import { MarketAccount as Account, MarketAccount } from 'account/types';
 import { FeeMessage } from 'components';
 
 export type TransferFundsModalProps = {

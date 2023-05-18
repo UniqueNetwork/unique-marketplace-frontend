@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { BN } from '@polkadot/util';
 import { Dropdown, Button } from 'components/UI';
@@ -22,7 +22,8 @@ import config from 'config';
 import { AccountInfo } from './types';
 import NoAccountsIcon from 'static/icons/no-accounts.svg';
 import { getAccountsColumns } from './columns';
-import { MarketAccount as Account } from 'account/AccountContext';
+import AccountContext from 'account/AccountContext';
+import { MarketAccount as Account } from 'account/types';
 
 const testid = 'accounts-page';
 
@@ -40,6 +41,9 @@ enum AccountModal {
 }
 
 export const AccountsPage = () => {
+  const { setIsOpenConnectWalletModal } = useContext(
+    AccountContext
+  );
   const {
     accounts,
     fetchAccounts,
@@ -51,7 +55,7 @@ export const AccountsPage = () => {
   const [searchString, setSearchString] = useState<string>('');
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
   const [selectedAddress, setSelectedAddress] = useState<string>();
-  const [isDropdownOpened, setIsDropdownOpened] = useState(false);
+  // const [isDropdownOpened, setIsDropdownOpened] = useState(false);
   const deviceSize = useDeviceSize();
   const { chainProperties, currentChainId } = useApi();
 
@@ -150,9 +154,9 @@ export const AccountsPage = () => {
         <CreateAccountButton
           testid={`${testid}-create-substrate-button`}
           title={'Create substrate account'}
-          onClick={onActionClick(AccountModal.create)}
+          onClick={() => setIsOpenConnectWalletModal(true)}
         />
-        <DropdownStyled
+        {/* <DropdownStyled
           dropdownRender={() => <DropdownMenu>
             <DropdownMenuItem onClick={onActionClick(AccountModal.importViaSeed)} data-testid={`${testid}-seed-button`}>Seed phrase</DropdownMenuItem>
             <DropdownMenuItem onClick={onActionClick(AccountModal.importViaJSON)} data-testid={`${testid}-json-file-button`}>Backup JSON file</DropdownMenuItem>
@@ -166,7 +170,7 @@ export const AccountsPage = () => {
             iconRight={caretDown}
             isDropdownOpened={isDropdownOpened}
           />
-        </DropdownStyled>
+        </DropdownStyled> */}
         <SearchInputWrapper>
           <SearchInputStyled
             testid={`${testid}-search`}
