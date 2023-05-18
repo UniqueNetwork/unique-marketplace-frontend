@@ -56,7 +56,7 @@ export const AccountsPage = () => {
   const { chainProperties, currentChainId } = useApi();
 
   useEffect(() => {
-    void updateAccountsDeposits();
+    // void updateAccountsDeposits();
   }, [updateAccountsDeposits]);
 
   useEffect(() => {
@@ -78,9 +78,20 @@ export const AccountsPage = () => {
     setSelectedAddress(address);
   }, []);
 
-  const onShowGetKsmModal = useCallback(() => {
-    if (!config.rampApiKey) return;
-    setCurrentModal(AccountModal.getKsmModal);
+  const onGetClick = useCallback(() => {
+    switch (chainProperties?.token) {
+      case 'OPL':
+        window.open('https://t.me/unique2faucet_opal_bot', '_blank', 'noopener');
+        break;
+      case 'QUARTZ':
+        window.open('https://www.mexc.com/exchange/QTZ_USDT', '_blank', 'noopener');
+        break;
+      case 'UNIQUE':
+        window.open('https://www.huobi.com/en-us/exchange/unq_usdt', '_blank', 'noopener');
+        break;
+      default:
+        break;
+    }
   }, []);
 
   const onSearchStringChange = useCallback((value: string) => {
@@ -185,7 +196,7 @@ export const AccountsPage = () => {
             onShowSendFundsModal: onAccountActionClick(AccountModal.sendFunds),
             onShowWithdrawDepositModal: onAccountActionClick(AccountModal.withdrawDeposit),
             onShowDeleteLocalAccountModal: onAccountActionClick(AccountModal.deleteLocalAccount),
-            onShowGetKsmModal,
+            onGetClick,
             tokenSymbol: chainProperties?.token || '',
             scanUrl: currentChainId ? config.blockchains[currentChainId]?.scanUrl : ''
           })}
@@ -222,7 +233,6 @@ export const AccountsPage = () => {
       <WithdrawDepositModal
         isVisible={currentModal === AccountModal.withdrawDeposit}
         onFinish={onChangeAccountsFinish}
-        onClose={onModalClose}
         address={selectedAddress}
         testid={`${testid}-withdraw-modal`}
       />

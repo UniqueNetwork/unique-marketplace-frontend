@@ -119,8 +119,21 @@ class MarketController extends BaseController implements IMarketController {
 
   async getAccountBalance(address: string): Promise<MarketAccountBalance> {
     const balance = await this.uniqueSdk.balance.get({ address });
+    let withdraw = { parsed: '0', raw: new BN(0) };
+    if (Address.is.substrateAddress(address)) {
+      const withdrawBalance = await this.uniqueSdk.balance.get({
+        address: Address.mirror.substrateToEthereum(address)
+      });
+      withdraw = {
+        raw: new BN(withdrawBalance?.availableBalance?.raw || 0),
+        parsed: withdrawBalance?.availableBalance?.amount
+      };
+    }
     if (!balance) throw new Error('Failed to fetch balance');
-    return { raw: new BN(balance?.freeBalance?.raw || 0), parsed: balance?.freeBalance?.amount || '0' };
+    return { raw: new BN(balance?.availableBalance?.raw || 0),
+      parsed: balance?.availableBalance?.amount || '0',
+      withdraw
+    };
   }
 
   async getTransferTokenFee(sender: string, recipient: string, collectionId: number, tokenId: number, amount: number, { account }: TransactionOptions): Promise<string | null> {

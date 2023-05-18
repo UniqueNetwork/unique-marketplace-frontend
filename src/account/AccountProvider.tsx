@@ -154,7 +154,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
     setAccounts((accounts) => accounts.map((account) => {
       if (account.address === selectedAccount.address) {
         // account.deposits = deposits;
-        account.balance = balance || { raw: new BN(0), parsed: '0' };
+        account.balance = balance || { raw: new BN(0), parsed: '0', withdraw: { raw: new BN(0), parsed: '0' } };
       }
       return account;
     }));
