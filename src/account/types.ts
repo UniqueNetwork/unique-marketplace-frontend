@@ -42,6 +42,7 @@ export type AccountContextProps = {
   updateCurrentAccountDeposit(): Promise<void>
   setIsOpenConnectWalletModal(isOpen: boolean): void
   connectProvider(type: ProviderTypesName): Promise<void>
+  forgetAccount(address: string): void
 }
 
 export type ProviderTypesName = 'polkadot' | 'keyring' | 'metamask';

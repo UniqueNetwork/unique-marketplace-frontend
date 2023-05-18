@@ -52,7 +52,6 @@ export const NFTPage = () => {
     tokens,
     isFetchingTokens
   });
-  console.log(myCollections);
 
   return (<PagePaper>
     <MarketMainPageStyled>

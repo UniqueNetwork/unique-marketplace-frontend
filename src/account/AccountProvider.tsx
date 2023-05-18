@@ -1,4 +1,4 @@
-import React, { ClassType, FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { AccountProvider } from './AccountContext';
 import { SignModal } from 'components/SignModal/SignModal';
@@ -7,7 +7,7 @@ import { BN } from '@polkadot/util';
 import { Codec } from '@polkadot/types/types';
 import { useApi } from 'hooks/useApi';
 import { getWithdrawBids } from 'api/restApi/auction/auction';
-import { Accounts, Provider, ProviderClass } from '@unique-nft/accounts';
+import { Accounts, ProviderClass } from '@unique-nft/accounts';
 
 import { PolkadotProvider, PolkadotAccount } from '@unique-nft/accounts/polkadot';
 import { KeyringLocalProvider, KeyringLocalAccount } from '@unique-nft/accounts/keyring-local';
@@ -190,6 +190,10 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
     void updateCurrentAccountDeposit();
   }, [updateCurrentAccountDeposit]);
 
+  const forgetAccount = useCallback((address: string) => {
+    _accounts.getProvider(KeyringLocalProvider)?.forgetAccount(address);
+  }, []);
+
   const value = useMemo(() => ({
     isLoading,
     isLoadingDeposits,
@@ -204,7 +208,8 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
     updateAccountsDeposits,
     updateCurrentAccountDeposit,
     setIsOpenConnectWalletModal,
-    connectProvider
+    connectProvider,
+    forgetAccount
   }), [
     isLoading,
     isLoadingDeposits,
@@ -218,7 +223,8 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
     showSignDialog,
     updateCurrentAccountDeposit,
     setIsOpenConnectWalletModal,
-    connectProvider
+    connectProvider,
+    forgetAccount
   ]);
 
   return (

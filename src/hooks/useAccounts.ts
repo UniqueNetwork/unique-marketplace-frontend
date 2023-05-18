@@ -18,7 +18,8 @@ export const useAccounts = () => {
     setSelectedAccount,
     fetchAccounts,
     updateAccountsDeposits,
-    updateCurrentAccountDeposit
+    updateCurrentAccountDeposit,
+    forgetAccount
   } = useContext(AccountContext);
 
   useEffect(() => {
@@ -32,8 +33,8 @@ export const useAccounts = () => {
   }, [chainProperties]);
 
   const deleteLocalAccount = useCallback((address: string) => {
-      keyring.forgetAccount(address);
-    }, []);
+    forgetAccount(address);
+  }, [forgetAccount]);
 
   return {
     accounts,

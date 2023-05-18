@@ -34,10 +34,11 @@ export const ConnectAccounts = () => {
     setCurrentModal(undefined);
     setIsOpenConnectWalletModal(false);
     void fetchAccounts();
-  }, []);
+  }, [fetchAccounts]);
 
   const handleOpenModal = (modalType: AccountModal) => () => {
     setCurrentModal(modalType);
+    void fetchAccounts();
   };
 
   const handleConnectToMetamask = async () => {

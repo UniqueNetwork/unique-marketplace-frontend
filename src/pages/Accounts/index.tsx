@@ -1,7 +1,7 @@
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { BN } from '@polkadot/util';
-import { Dropdown, Button } from 'components/UI';
+import { Button } from 'components/UI';
 import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import { TWithdrawBid } from 'api/restApi/auction/types';
 import { useApi } from 'hooks/useApi';
@@ -9,25 +9,19 @@ import { useAccounts } from 'hooks/useAccounts';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { Table } from 'components/Table';
 import { PagePaper } from 'components/PagePaper/PagePaper';
-import { TextInput } from 'components/TextInput/TextInput';
 import ConfirmModal from 'components/ConfirmModal';
 import GetKSMModal from 'components/GetKSMModal/GetKSMModal';
-import { CreateAccountModal } from './Modals/CreateAccount';
-import { ImportViaSeedAccountModal } from './Modals/ImportViaSeed';
-import { ImportViaJSONAccountModal } from './Modals/ImportViaJson';
 import { WithdrawDepositModal } from './Modals/WithdrawDeposit';
 import { TransferFundsModal } from './Modals/SendFunds';
-import { AdditionalLight, BlueGrey300, Primary100 } from 'styles/colors';
 import config from 'config';
 import { AccountInfo } from './types';
 import NoAccountsIcon from 'static/icons/no-accounts.svg';
 import { getAccountsColumns } from './columns';
 import AccountContext from 'account/AccountContext';
 import { MarketAccount as Account } from 'account/types';
+import { useNavigate } from 'react-router-dom';
 
 const testid = 'accounts-page';
-
-const caretDown = { name: 'carret-down', size: 16, color: AdditionalLight };
 
 enum AccountModal {
   create,
@@ -52,19 +46,23 @@ export const AccountsPage = () => {
     deleteLocalAccount,
     updateAccountsDeposits
   } = useAccounts();
-  const [searchString, setSearchString] = useState<string>('');
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
   const [selectedAddress, setSelectedAddress] = useState<string>();
-  // const [isDropdownOpened, setIsDropdownOpened] = useState(false);
+  const navigate = useNavigate();
   const deviceSize = useDeviceSize();
   const { chainProperties, currentChainId } = useApi();
+
+  useEffect(() => {
+    if (!isLoading && !accounts.length) {
+      navigate(`/${currentChainId}/market`);
+    }
+  }, [accounts, isLoading]);
 
   useEffect(() => {
     void updateAccountsDeposits();
   }, [updateAccountsDeposits]);
 
   useEffect(() => {
-    setSearchString('');
     setCurrentModal(undefined);
     void updateAccountsDeposits();
   }, [currentChainId]);
@@ -72,10 +70,6 @@ export const AccountsPage = () => {
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainProperties?.SS58Prefix || 0);
   }, [chainProperties?.SS58Prefix]);
-
-  const onActionClick = useCallback((modal: AccountModal) => () => {
-    setCurrentModal(modal);
-  }, []);
 
   const onAccountActionClick = useCallback((modal: AccountModal) => (address: string) => () => {
     setCurrentModal(modal);
@@ -85,10 +79,6 @@ export const AccountsPage = () => {
   const onShowGetKsmModal = useCallback(() => {
     if (!config.rampApiKey) return;
     setCurrentModal(AccountModal.getKsmModal);
-  }, []);
-
-  const onSearchStringChange = useCallback((value: string) => {
-    setSearchString(value);
   }, []);
 
   const filteredAccounts: AccountInfo[] = useMemo(() => {
@@ -122,17 +112,8 @@ export const AccountsPage = () => {
       return acc;
     };
 
-    if (!searchString) {
-      return accounts.reduce(reduceAccounts, []);
-    }
-    return accounts
-    .filter(
-      (account) =>
-        formatAddress(account.address).toLowerCase().includes(searchString.trim().toLowerCase()) ||
-        account.name?.toLowerCase().includes(searchString.trim().toLowerCase())
-    )
-    .reduce(reduceAccounts, []);
-  }, [accounts, searchString, formatAddress, deviceSize]);
+    return accounts.reduce(reduceAccounts, []);
+  }, [accounts, deviceSize]);
 
   const onChangeAccountsFinish = useCallback(async () => {
     setCurrentModal(undefined);
@@ -156,30 +137,6 @@ export const AccountsPage = () => {
           title={'Create substrate account'}
           onClick={() => setIsOpenConnectWalletModal(true)}
         />
-        {/* <DropdownStyled
-          dropdownRender={() => <DropdownMenu>
-            <DropdownMenuItem onClick={onActionClick(AccountModal.importViaSeed)} data-testid={`${testid}-seed-button`}>Seed phrase</DropdownMenuItem>
-            <DropdownMenuItem onClick={onActionClick(AccountModal.importViaJSON)} data-testid={`${testid}-json-file-button`}>Backup JSON file</DropdownMenuItem>
-          </DropdownMenu>}
-          onOpenChange={setIsDropdownOpened}
-        >
-          <AddAccountButton
-            testid={`${testid}-add-via-button`}
-            title={'Add account via'}
-            role={'primary'}
-            iconRight={caretDown}
-            isDropdownOpened={isDropdownOpened}
-          />
-        </DropdownStyled> */}
-        <SearchInputWrapper>
-          <SearchInputStyled
-            testid={`${testid}-search`}
-            placeholder={'Account'}
-            iconLeft={{ name: 'magnify', size: 18 }}
-            value={searchString}
-            onChange={onSearchStringChange}
-          />
-        </SearchInputWrapper>
       </Row>
       <TableWrapper>
         <Table<AccountInfo>
@@ -195,28 +152,10 @@ export const AccountsPage = () => {
           })}
           data={filteredAccounts}
           loading={isLoading || isLoadingDeposits}
-          emptyIconProps={searchString ? { name: 'magnifier-found' } : { file: NoAccountsIcon }}
+          emptyIconProps={{ file: NoAccountsIcon }}
           idColumnName={'address'}
         />
       </TableWrapper>
-      <CreateAccountModal
-        isVisible={currentModal === AccountModal.create}
-        onFinish={onChangeAccountsFinish}
-        onClose={onModalClose}
-        testid={`${testid}-create-modal`}
-      />
-      <ImportViaSeedAccountModal
-        isVisible={currentModal === AccountModal.importViaSeed}
-        onFinish={onChangeAccountsFinish}
-        onClose={onModalClose}
-        testid={`${testid}-import-via-seed-modal`}
-      />
-      <ImportViaJSONAccountModal
-        isVisible={currentModal === AccountModal.importViaJSON}
-        onFinish={onChangeAccountsFinish}
-        onClose={onModalClose}
-        testid={`${testid}-import-via-json-modal`}
-      />
       <TransferFundsModal
         isVisible={currentModal === AccountModal.sendFunds}
         onFinish={onModalClose}
@@ -286,24 +225,6 @@ const Row = styled.div`
   
 `;
 
-const SearchInputWrapper = styled.div`
-  flex-grow: 1;
-  display: flex;
-  justify-content: flex-end;
-  
-  @media (max-width: 1024px) {
-    justify-content: space-between;
-    .unique-input-text {
-      width: 100%;
-      flex-grow: 1;
-    }
-  }
-`;
-
-const SearchInputStyled = styled(TextInput)`
-  flex-basis: 720px;
-`;
-
 const CreateAccountButton = styled(Button)`
   width: 243px;
   @media (max-width: 1024px) {
@@ -311,46 +232,6 @@ const CreateAccountButton = styled(Button)`
   }
 `;
 
-const DropdownStyled = styled(Dropdown)`
-  .dropdown-options {
-    padding: 0;
-    width: 100%;
-  }
-  @media (max-width: 1024px) {
-    width: 100%;
-  }
-`;
-
-const AddAccountButton = styled(Button)<{ isDropdownOpened: boolean }>`
-  width: 196px;
-  @media (max-width: 1024px) {
-    width: 100%;
-  }
-  svg {
-    transform: ${({ isDropdownOpened }) => isDropdownOpened ? 'rotate(180deg);' : 'rotate(0deg);'};
-    transition: transform 0.3s;
-  }
-`;
-
 const TableWrapper = styled.div`
   position: relative;
-`;
-
-const DropdownMenu = styled.div`
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-`;
-
-const DropdownMenuItem = styled.div`
-  padding: var(--gap);
-  cursor: pointer;
-  &:hover {
-    background: var(--color-primary-100);
-    color: var(--color-primary-500);
-  }
-  &:active {
-    background: ${BlueGrey300};
-    color: ${Primary100};
-  }
 `;

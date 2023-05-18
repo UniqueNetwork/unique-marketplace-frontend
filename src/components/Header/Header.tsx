@@ -19,7 +19,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
   const { lessThanThreshold: showMobileMenu } =
     useScreenWidthFromThreshold(1279);
   const [mobileMenuIsOpen, toggleMobileMenu] = useState(false);
-  const { selectedAccount, isLoading } = useAccounts();
+  const { selectedAccount, isLoading, accounts } = useAccounts();
   const { currentChainId } = useApi();
 
   const mobileMenuToggler = useCallback(() => {
@@ -89,7 +89,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
           <MobileMenuLink to='/faq' active={activeItem === 'FAQ'} onClick={mobileMenuToggler}>
             FAQ
           </MobileMenuLink>
-          {deviceSize !== DeviceSize.lg &&
+          {deviceSize !== DeviceSize.lg && !!accounts.length &&
             <MobileMenuLink to={`/${currentChainId || ''}/accounts`} active={activeItem === 'Manage accounts'} onClick={mobileMenuToggler}>
               Manage accounts
             </MobileMenuLink>

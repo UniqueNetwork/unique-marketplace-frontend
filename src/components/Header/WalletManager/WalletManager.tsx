@@ -34,7 +34,6 @@ export const WalletManager: FC = () => {
   const { chainProperties, settings, currentChainId, onChangeChainId, api } = useApi();
   const { info } = useNotifications();
   const navigate = useNavigate();
-  const decimals = api?.market?.decimals;
 
   const networks: INetwork[] = useMemo(() => Object.keys(config?.blockchains || {}).map<INetwork>((id) => ({
     id,
@@ -149,9 +148,6 @@ export const WalletManager: FC = () => {
     </WalletManagerWrapper>
   );
 };
-
-const DescriptionText = styled(Text)`
-`;
 
 const GetKsmButton = styled(Button)`
   margin-top: 12px;
