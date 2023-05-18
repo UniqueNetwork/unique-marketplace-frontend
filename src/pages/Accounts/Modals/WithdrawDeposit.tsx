@@ -1,272 +1,49 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Heading } from '@unique-nft/ui-kit';
-import { Checkbox, Modal, Text, useNotifications, Button } from 'components/UI';
-import { BN } from '@polkadot/util';
-import styled from 'styled-components';
+import React, { FC, useEffect } from 'react';
+import { Modal, useNotifications } from 'components/UI';
 
-import { TWithdrawBid } from 'api/restApi/auction/types';
 import DefaultMarketStages from '../../Token/Modals/StagesModal';
-import { useApi } from 'hooks/useApi';
-import { useAccounts } from 'hooks/useAccounts';
-import { useWithdrawDepositStages } from 'hooks/accountStages/useWithdrawDepositStages';
-import InlineTokenCard from 'components/TokensCard/InlineTokenCard';
 import { StageStatus } from 'types/StagesTypes';
-import { formatBalance } from '../../../utils/textUtils';
-import { TokenByIdResponse } from '@unique-nft/sdk';
-
-const tokenSymbol = 'KSM';
+import { useWithdrawStages } from 'hooks/accountStages/useWithdrawStages';
+import { Address } from '@unique-nft/utils';
 
 export type WithdrawDepositModalProps = {
   isVisible: boolean
   address?: string
   onFinish(): void
-  onClose(): void
   testid: string
 }
 
-type BidDeposit = TWithdrawBid & {
-  token?: TokenByIdResponse
-};
-
-export const WithdrawDepositModal: FC<WithdrawDepositModalProps> = ({ isVisible, address, onFinish, onClose, testid }) => {
-  const [status, setStatus] = useState<'ask' | 'stage'>('ask');
-  const [withdrawBids, setWithdrawBids] = useState<BidDeposit[]>([]);
-
-  const onWithdraw = useCallback((withdrawBids: BidDeposit[]) => {
-    setWithdrawBids(withdrawBids);
-    setStatus('stage');
-  }, [setStatus]);
-
-  const onFinishStages = useCallback(() => {
-    setStatus('ask');
-    onFinish();
-  }, [onFinish]);
-
-  if (status === 'ask') {
-    return (<WithdrawDepositAskModal
-      address={address}
+export const WithdrawDepositModal: FC<WithdrawDepositModalProps> = ({ isVisible, address, onFinish, testid }) => {
+  if (isVisible && address) {
+    return <WithdrawDepositStagesModal address={address}
+      onFinish={onFinish}
+      testid={testid}
       isVisible={isVisible}
-      onFinish={onWithdraw}
-      onClose={onClose}
-      testid={`${testid}-ask`}
-    />);
+    />;
   }
-  if (status === 'stage') {
-    return (<WithdrawDepositStagesModal
-      isVisible={isVisible}
-      address={address}
-      bids={withdrawBids}
-      onFinish={onFinishStages}
-      onClose={onClose}
-      testid={`${testid}-stages`}
-    />);
-  }
-  return null;
+  return <></>;
 };
 
-export type WithdrawDepositAskModalProps = {
-  isVisible: boolean
-  address?: string
-  onFinish(withdrawBids: BidDeposit[], amountToWithdraw?: BN): void
-  onClose(): void
-  testid: string
-}
-
-export const WithdrawDepositAskModal: FC<WithdrawDepositAskModalProps> = ({ isVisible, address, onClose, onFinish, testid }) => {
-  const { accounts } = useAccounts();
-  const [isSelectedAll, setIsSelectedAll] = useState<boolean>(true);
-  const [selectedBids, setSelectedBids] = useState<BidDeposit[]>([]);
-  const [isSelectedSponsorshipFee, setIsSelectedSponsorshipFee] = useState<boolean>(false);
-
-  const account = useMemo(() =>
-    accounts.find((item) => item.address === address), [accounts, address]);
-
-  const { bids, sponsorshipFee } = account?.deposits || { sponsorshipFee: new BN(0) };
-  const { withdraw, leader } = bids || { withdraw: [], leader: [] };
-
-  const totalAmount = useMemo(() => {
-    return (account?.deposits?.sponsorshipFee || new BN(0)).add(withdraw.reduce<BN>((acc, bid) =>
-      acc.add(new BN(bid.amount)), new BN(0)));
-  }, [account]);
-
-  const onSelectAll = useCallback((value: boolean) => {
-    setIsSelectedAll(value);
-    if (value) {
-      setSelectedBids([]);
-      setIsSelectedSponsorshipFee(false);
-    }
-  }, [totalAmount]);
-
-  const onSelectSponsorshipFee = useCallback((value: boolean) => {
-    setIsSelectedAll(false);
-    setIsSelectedSponsorshipFee(value);
-  }, []);
-
-  const onSelectBid = useCallback((bid: BidDeposit) => (value: boolean) => {
-    if (value) {
-      setIsSelectedAll(false);
-      setSelectedBids([...selectedBids, bid]);
-    } else {
-      setSelectedBids(selectedBids.filter((item) => item.auctionId !== bid.auctionId));
-    }
-  }, [selectedBids]);
-
-  const amountToWithdraw = useMemo(() => {
-    if (isSelectedAll) return totalAmount;
-    const amountToWithdraw: BN = isSelectedSponsorshipFee && sponsorshipFee ? sponsorshipFee : new BN(0);
-    return amountToWithdraw.add(selectedBids.reduce<BN>((acc, bid) =>
-      acc.add(new BN(bid.amount)), new BN(0)));
-  }, [isSelectedAll, totalAmount, isSelectedSponsorshipFee, sponsorshipFee, selectedBids]);
-
-  useEffect(() => {
-    if (isVisible) {
-      setSelectedBids([]);
-      setIsSelectedAll(withdraw.length > 0); // if there are some bids to withdraw
-      setIsSelectedSponsorshipFee(withdraw.length === 0); // else
-    }
-  }, [isVisible, account?.deposits?.bids]);
-
-  const onSubmit = useCallback(() => {
-    if (amountToWithdraw.eq(new BN(0))) return;
-
-    if (isSelectedAll) {
-      onFinish(withdraw, sponsorshipFee);
-      return;
-    }
-    onFinish(selectedBids, isSelectedSponsorshipFee ? sponsorshipFee : undefined);
-  }, [onFinish, totalAmount, isSelectedSponsorshipFee, selectedBids, sponsorshipFee, amountToWithdraw]);
-
-  return (<Modal isVisible={isVisible} isClosable={true} onClose={onClose}>
-    <Content>
-      <Heading size='2' testid={`${testid}-heading`}>Withdraw deposit</Heading>
-    </Content>
-    {(withdraw.length > 0) && <Content>
-      <Text size={'m'} color={'grey-500'} testid={`${testid}-all-deposit-label`}>All deposit</Text>
-      <Checkbox
-        testid={`${testid}-all-checkbox`}
-        checked={isSelectedAll}
-        label={`${formatBalance(totalAmount.toString())} ${tokenSymbol}`}
-        onChange={onSelectAll}
-      />
-    </Content>}
-    {(leader.length > 0 || withdraw.length > 0) && <Content>
-      <Text size={'m'} color={'grey-500'} testid={`${testid}-bids-label`}>Bids</Text>
-      {[...leader, ...withdraw].map((bid, index) => (<Row>
-        <Checkbox
-          testid={`${testid}-bid-${bid.auctionId}-checkbox`}
-          disabled={index < leader.length}
-          label={''}
-          checked={selectedBids.some((item) => item.auctionId === bid.auctionId)}
-          onChange={onSelectBid(bid)}
-        />
-        <InlineTokenCard
-          tokenId={Number(bid.tokenId)}
-          collectionId={Number(bid.collectionId)}
-          testid={`${testid}-bid-${bid.auctionId}`}
-        >
-          <Text
-            testid={`${testid}-bid-${bid.auctionId}-amount`}
-            size={'m'}
-          >{`${formatBalance(bid.amount)} ${tokenSymbol}`}</Text>
-          {index < leader.length && <Text size={'s'} color={'additional-positive-500'}>Leading bid</Text>}
-        </InlineTokenCard>
-      </Row>))}
-    </Content>}
-    {sponsorshipFee && !sponsorshipFee?.isZero() && <Content>
-      <Text size={'m'} color={'grey-500'} testid={`${testid}-sponsorship-fee-label`}>Sponsorship fee</Text>
-      <Checkbox
-        testid={`${testid}-sponsorship-fee-checkbox`}
-        checked={isSelectedSponsorshipFee}
-        label={`${formatBalance(sponsorshipFee?.toString() || '0')} ${tokenSymbol}`}
-        onChange={onSelectSponsorshipFee}
-      />
-    </Content>}
-    <Row>
-      <Text color='grey-500' testid={`${testid}-withdraw-amount-label`}>Amount to withdraw:&nbsp;</Text>
-      <Text
-        testid={`${testid}-withdraw-amount`}
-      >{`${formatBalance(amountToWithdraw.toString())} ${tokenSymbol}`}</Text>
-    </Row>
-    <ButtonWrapper>
-      <Button
-        testid={`${testid}-confirm-button`}
-        disabled={amountToWithdraw.eq(new BN(0))}
-        onClick={onSubmit}
-        role='primary'
-        title='Confirm'
-      />
-    </ButtonWrapper>
-  </Modal>);
-};
-
-const Content = styled.div`
-  && {
-    border-bottom: 1px dashed #D2D3D6;
-    padding-bottom: calc(var(--gap) * 1.5);
-    margin-bottom: calc(var(--gap) * 1.5);
-    display: flex;
-    flex-direction: column;
-    row-gap: var(--gap);
-    h2 {
-      margin-bottom: 0;
-    }
-  }
-`;
-
-const Row = styled.div`
-  display: flex;
-  align-items: center;
-  .unique-checkbox-wrapper {
-    margin-top: -10px;
-  }
-`;
-
-const ButtonWrapper = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  column-gap: var(--gap);
-
-  @media (max-width: 568px) {
-    flex-direction: column;
-    align-items: flex-start;
-    row-gap: calc(var(--gap) /2);
-    button {
-      width: 100%;
-    }
-  }
-`;
-
-export type WithdrawDepositStagesModalProps = {
-  isVisible: boolean
-  address?: string
-  bids: BidDeposit[]
-  onFinish(): void
-  onClose(): void
-  testid: string
-}
-
-export const WithdrawDepositStagesModal: FC<WithdrawDepositStagesModalProps> = ({ bids, isVisible, address, onFinish, testid }) => {
-  const { stages, status, initiate } = useWithdrawDepositStages(address || '', bids);
-  const { api } = useApi();
+export const WithdrawDepositStagesModal: FC<WithdrawDepositModalProps> = ({ address, onFinish, testid }) => {
+  const { stages, status, initiate } = useWithdrawStages(address || '');
   const { info } = useNotifications();
-
   useEffect(() => {
-    if (!isVisible) return;
-    initiate();
-  }, [isVisible]);
+    if (!address) throw new Error('Failed to provide address');
+    const sender = Address.is.substrateAddress(address) ? Address.mirror.substrateToEthereum(address) : Address.mirror.ethereumToSubstrate(address);
+    void initiate({ sender, recipient: address });
+  }, [address]);
 
   useEffect(() => {
     if (status === StageStatus.success) {
       info(
-        'Deposit withdrawn',
+        'Withdraw completed',
         { name: 'success', size: 32, color: 'var(--color-additional-light)' }
       );
+      onFinish();
     }
-  }, [status]);
+  }, [info, status, onFinish]);
 
-  if (!isVisible || !api?.market) return null;
-
-  return (<Modal isVisible={isVisible} isClosable={false}>
+  return (<Modal isVisible={true} isClosable={false}>
     <div>
       <DefaultMarketStages
         stages={stages}

@@ -1,5 +1,5 @@
 import { ExtrinsicResultResponse, Sdk, Signer } from '@unique-nft/sdk/full';
-import { EthCrossAccountId } from '@unique-nft/utils';
+import { Address, EthCrossAccountId } from '@unique-nft/utils';
 import IMarketContractAdapter from './IMarketContractAdapter';
 
 import marketplaceAbi from '../contracts/marketplace-0.json';
@@ -77,6 +77,16 @@ class UniqueAdapter implements IMarketContractAdapter {
   }
 
   async transferBalance(from: string, to: string, amount: ChainValue, signer: Signer): Promise<void> {
+    // withdraw
+    if (Address.is.ethereumAddress(from)) {
+      await this.uniqueSdk.extrinsic.submitWaitResult({
+        section: 'evm',
+        method: 'withdraw',
+        address: signer.address || '',
+        args: [from, amount.raw]
+      }, signer);
+      return;
+    }
     await this.uniqueSdk.balance.transfer.submitWaitResult({
       address: from,
       destination: to,

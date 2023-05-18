@@ -11,7 +11,6 @@ const gqlQuery = {
   query: `query tokens_by_account_query($owner: String) {
     tokens(
       where: {tokens_owner: {_eq: $owner}, burned: {_eq: "false"}}
-      distinct_on: collection_id
       limit: 1000
     ) {
       count
