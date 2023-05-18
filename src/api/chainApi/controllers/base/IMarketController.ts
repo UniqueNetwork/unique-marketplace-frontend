@@ -1,5 +1,5 @@
 import { BN } from '@polkadot/util';
-import { MarketAccountBalance } from 'account/AccountContext';
+import { MarketAccountBalance } from 'account/types';
 import { TransactionOptions } from 'api/chainApi/types';
 interface IMarketController {
   changeAllowance(collectionId: number, tokenId: number, targetAllowance: boolean, options: TransactionOptions): Promise<void>

@@ -1,4 +1,4 @@
-import { MarketAccount } from 'account/AccountContext';
+import { MarketAccount } from 'account/types';
 import { post } from 'api/restApi/base';
 import { useApi } from 'hooks/useApi';
 import { useCallback, useState } from 'react';

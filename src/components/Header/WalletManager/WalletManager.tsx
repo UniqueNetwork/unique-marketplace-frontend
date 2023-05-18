@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import config from 'config';
@@ -18,6 +18,7 @@ import { useApi } from 'hooks/useApi';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import { TWithdrawBid } from 'api/restApi/auction/types';
 import BalanceSkeleton from '../../Skeleton/BalanceSkeleton';
+import AccountContext from 'account/AccountContext';
 
 const fractionDigits = 4;
 
@@ -26,13 +27,13 @@ function widgetAvatarRender(accountAddress: string) {
 }
 
 export const WalletManager: FC = () => {
+  const { setIsOpenConnectWalletModal } = useContext(AccountContext);
   const { selectedAccount, accounts, isLoading, changeAccount } = useAccounts();
   const [isOpen, setIsOpen] = useState(false);
   const [isGetKsmOpened, setIsGetKsmOpened] = useState(false);
   const { chainProperties, settings, currentChainId, onChangeChainId, api } = useApi();
   const { info } = useNotifications();
   const navigate = useNavigate();
-  const decimals = api?.market?.decimals;
 
   const networks: INetwork[] = useMemo(() => Object.keys(config?.blockchains || {}).map<INetwork>((id) => ({
     id,
@@ -67,8 +68,13 @@ export const WalletManager: FC = () => {
     );
   }, []);
 
-  const onCreateAccountClick = useCallback(() => {
+  const onManageAccountsClick = useCallback(() => {
     navigate('/accounts');
+    setIsOpen(false);
+  }, [navigate]);
+
+  const onCreateAccountClick = useCallback(() => {
+    setIsOpenConnectWalletModal(true);
     setIsOpen(false);
   }, [navigate]);
 
@@ -131,7 +137,7 @@ export const WalletManager: FC = () => {
         networks={networks}
         onAccountChange={widgetAccountChange}
         onCopyAddressClick={onCopyAddress}
-        onManageBalanceClick={onCreateAccountClick}
+        onManageBalanceClick={onManageAccountsClick}
         onNetworkChange={onNetworkChange}
         selectedAccount={widgetSelectedAccount}
         symbol={chainProperties?.token || ''}
@@ -142,9 +148,6 @@ export const WalletManager: FC = () => {
     </WalletManagerWrapper>
   );
 };
-
-const DescriptionText = styled(Text)`
-`;
 
 const GetKsmButton = styled(Button)`
   margin-top: 12px;
