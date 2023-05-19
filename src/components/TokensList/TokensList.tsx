@@ -15,8 +15,6 @@ type TTokensList = {
 };
 
 export const TokensList: FC<TTokensList> = ({ tokens, isLoading, testid }) => {
-  console.log(tokens);
-
   return (
     <TokensListStyled>
       {(!isLoading && tokens?.map) &&
