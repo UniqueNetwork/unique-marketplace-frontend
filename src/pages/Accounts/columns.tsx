@@ -1,13 +1,13 @@
 import React from 'react';
+import styled from 'styled-components';
 import { TableColumnProps } from '@unique-nft/ui-kit';
 import IconWithHint from 'components/IconWithHint/IconWithHint';
-import { AccountInfo } from './types';
 import AccountCard from 'components/Account/Account';
-import BalanceCell from './BalanceCell';
 import { Button, Icon, Link, Text } from 'components/UI';
 import { AdditionalLight, Grey500, Primary500 } from 'styles/colors';
-import config from 'config';
-import styled from 'styled-components';
+import { formatBalance } from 'utils/textUtils';
+import { AccountInfo } from './types';
+import BalanceCell from './BalanceCell';
 
 const testid = 'accounts-page';
 
@@ -105,7 +105,7 @@ export const getAccountsColumns = ({
       if (!deposit.isZero() && !isSmallDevice) {
         return (
           <DepositActionsWrapper>
-            <Button title={`Withdraw ${balance.withdraw.parsed} ${tokenSymbol}`}
+            <Button title={`Withdraw ${formatBalance(balance.withdraw.parsed, 4)} ${tokenSymbol}`}
               onClick={onShowWithdrawDepositModal(address)}
               role={'primary'}
               testid={`${testid}-${address}-withdraw-button`}
