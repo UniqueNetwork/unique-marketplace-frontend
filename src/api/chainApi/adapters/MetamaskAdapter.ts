@@ -17,9 +17,9 @@ class MetamaskAdapter implements IMarketContractAdapter {
     return new ethers.Contract(this.contractAddress, marketplaceAbi, signer);
   }
 
-  private async validateCall(method: (methodArgs: any[]) => Promise<void>, ...args: any[]) {
+  private async validateCall(method: (...methodArgs: any[]) => Promise<void>, args: any[]) {
     try {
-      await method(args);
+      await method(...args);
     } catch (e) {
       console.error('Call static failed: ', e);
       throw new Error('Calling contract method will fail, aborting');
@@ -27,8 +27,9 @@ class MetamaskAdapter implements IMarketContractAdapter {
   }
 
   protected async callContract(contract: Contract, methodName: string, ...args: any[]) {
+    console.log('args', args, '...args', ...args);
     await this.validateCall(contract.callStatic[methodName], args);
-    await (await contract[methodName](args)).wait();
+    await (await contract[methodName](...args)).wait();
   }
 
   async getTransferTokenFee(from: string, to: string, collectionId: number, tokenId: number, amount: number, signer: Signer): Promise<string> {
