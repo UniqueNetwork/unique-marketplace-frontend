@@ -1,4 +1,4 @@
-const configKeyRegexp = /NET_(?<network>[A-Z]+)_NAME$/gm;
+const configKeyRegexp = /NET_(?<network>[A-Z, 0-9, -]+)_NAME$/gm;
 
 export type Chain = {
   network: string;
