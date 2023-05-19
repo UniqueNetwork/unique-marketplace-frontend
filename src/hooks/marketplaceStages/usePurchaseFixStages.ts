@@ -16,7 +16,6 @@ export const usePurchaseFixStages = (collectionId: number, tokenId: number) => {
   const purchaseStages: InternalStage<TPurchaseProps>[] = useMemo(() => {
     const account = selectedAccount?.account;
     if (!account) return [];
-    const mirrorAddress = Address.mirror.substrateToEthereum(account.address);
     return [
     // for polkadot accounts transfer money to mirror
     ...(selectedAccount?.account.constructor === MetamaskAccount
@@ -27,6 +26,7 @@ export const usePurchaseFixStages = (collectionId: number, tokenId: number) => {
       description: '',
       status: StageStatus.default,
       action: async ({ options, txParams }) => {
+        const mirrorAddress = Address.mirror.substrateToEthereum(account.address);
         const mirrorBalance = await marketApi?.getAccountBalance(mirrorAddress);
         const fee = Number(await marketApi?.getBuyFixFee(collectionId, tokenId, txParams.amount, options));
         const toTransfer = Number(txParams.price) + fee - Number(mirrorBalance?.parsed);
