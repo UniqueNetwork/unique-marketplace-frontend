@@ -12,7 +12,7 @@ import keyring from '@polkadot/ui-keyring';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 import { Upload } from 'components/UI/Upload/Upload';
 
-export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish, testid }) => {
+export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish, onClose: onCloseProp, testid }) => {
   const { chainProperties } = useApi();
   const [pair, setPair] = useState<KeyringPair | null>(null);
   const [password, setPassword] = useState<string>('');
@@ -57,8 +57,8 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
     setPassword('');
     setPair(null);
     setPasswordIncorrect(false);
-    onFinish();
-  }, [onFinish]);
+    onCloseProp();
+  }, [onCloseProp]);
 
   return (<Modal isVisible={isVisible} isClosable={true} onClose={onClose}>
     <Content>

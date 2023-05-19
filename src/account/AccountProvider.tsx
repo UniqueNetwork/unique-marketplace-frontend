@@ -1,19 +1,28 @@
 import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { AccountProvider, MarketAccount } from './AccountContext';
+import { AccountProvider } from './AccountContext';
 import { SignModal } from 'components/SignModal/SignModal';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { BN } from '@polkadot/util';
 import { Codec } from '@polkadot/types/types';
 import { useApi } from 'hooks/useApi';
 import { getWithdrawBids } from 'api/restApi/auction/auction';
-import { Accounts, ProviderClass, UnsignedTxPayload } from '@unique-nft/accounts';
+import { Accounts, ProviderClass } from '@unique-nft/accounts';
 
 import { PolkadotProvider, PolkadotAccount } from '@unique-nft/accounts/polkadot';
 import { KeyringLocalProvider, KeyringLocalAccount } from '@unique-nft/accounts/keyring-local';
 import { MetamaskProvider, MetamaskAccount } from '@unique-nft/accounts/metamask';
+import { ConnectAccounts } from 'components/ConnectAccounts';
+import { MarketAccount, ProviderTypesName } from './types';
 
 export const DefaultAccountKey = 'unique_market_account_address';
+export const ConnectedAccountTypesKey = 'unique_market_account_types';
+
+const ProviderTypes: Record<ProviderTypesName, typeof PolkadotProvider | typeof KeyringLocalProvider | typeof MetamaskProvider> = {
+  polkadot: PolkadotProvider,
+  keyring: KeyringLocalProvider,
+  metamask: MetamaskProvider
+};
 
 const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts(), children }) => {
   const [accounts, setAccounts] = useState<MarketAccount[]>([]);
@@ -21,6 +30,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
   const [isLoadingDeposits, setIsLoadingDeposits] = useState<boolean>(false);
   const [fetchAccountsError, setFetchAccountsError] = useState<string | undefined>();
   const [selectedAccount, setSelectedAccount] = useState<MarketAccount>();
+  const [isOpenConnectWalletModal, setIsOpenConnectWalletModal] = useState<boolean>(false);
   const { api, baseURL } = useApi();
 
   const unsubscribesBalancesChanges = useRef<Record<string, Codec>>({
@@ -55,10 +65,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
 
   const fetchAccounts = useCallback(async () => {
     if (!api?.market) return;
-    // await _accounts.addProvider<ProviderClass<any>>(KeyringLocalProvider, { passwordCallback: showSignDialog });
-    // await _accounts.addProvider<ProviderClass<any>>(PolkadotProvider);
-    // await _accounts.addProvider<ProviderClass<any>>(MetamaskProvider);
-
+    setIsLoading(true);
     const allAccounts = (await _accounts?.getAccounts())?.map((account) => {
       let name; // TODO: refactor?
       const marketAccount = { account: account as unknown } as MarketAccount;
@@ -110,12 +117,31 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
     if (!api?.market) return;
     setIsLoading(true);
     void (async () => {
-      await _accounts.addProvider<ProviderClass<any>>(KeyringLocalProvider, { passwordCallback: showSignDialog });
-      await _accounts.addProvider<ProviderClass<any>>(PolkadotProvider);
-      await _accounts.addProvider<ProviderClass<any>>(MetamaskProvider);
+      const connectedProviders = (localStorage.getItem(ConnectedAccountTypesKey)?.split(';') || ['keyring']) as ProviderTypesName[];
+      await Promise.all(connectedProviders.map(async (type) => {
+        if (!type) return;
+        await _accounts.addProvider<ProviderClass<any>>(
+          ProviderTypes[type],
+          type === 'keyring' ? { passwordCallback: showSignDialog } : undefined
+        );
+      }));
       await fetchAccounts();
+      localStorage.setItem(ConnectedAccountTypesKey, connectedProviders.join(';'));
     })();
   }, [api?.market, subscribeBalancesChanges, fetchAccounts, showSignDialog]);
+
+  const connectProvider = useCallback(async (type: ProviderTypesName) => {
+    const connectedProviders = (localStorage.getItem(ConnectedAccountTypesKey)?.split(';') || ['keyring']) as ProviderTypesName[];
+    if (!connectedProviders.includes(type)) {
+      connectedProviders.push(type);
+      localStorage.setItem(ConnectedAccountTypesKey, connectedProviders.join(';'));
+      await _accounts.addProvider<ProviderClass<any>>(
+        ProviderTypes[type],
+        type === 'keyring' ? { passwordCallback: showSignDialog } : undefined
+      );
+      await fetchAccounts();
+    }
+  }, [fetchAccounts]);
 
   const onClose = useCallback(() => {
     setIsSignModalVisible(false);
@@ -164,19 +190,42 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
     void updateCurrentAccountDeposit();
   }, [updateCurrentAccountDeposit]);
 
+  const forgetAccount = useCallback((address: string) => {
+    _accounts.getProvider(KeyringLocalProvider)?.forgetAccount(address);
+  }, []);
+
   const value = useMemo(() => ({
     isLoading,
     isLoadingDeposits,
     accounts,
     selectedAccount,
     fetchAccountsError,
+    isOpenConnectWalletModal,
     changeAccount,
     setSelectedAccount,
     showSignDialog,
     fetchAccounts,
     updateAccountsDeposits,
-    updateCurrentAccountDeposit
-  }), [isLoading, isLoadingDeposits, accounts, fetchAccounts, updateAccountsDeposits, selectedAccount, fetchAccountsError, changeAccount, showSignDialog, updateCurrentAccountDeposit]);
+    updateCurrentAccountDeposit,
+    setIsOpenConnectWalletModal,
+    connectProvider,
+    forgetAccount
+  }), [
+    isLoading,
+    isLoadingDeposits,
+    isOpenConnectWalletModal,
+    accounts,
+    fetchAccounts,
+    updateAccountsDeposits,
+    selectedAccount,
+    fetchAccountsError,
+    changeAccount,
+    showSignDialog,
+    updateCurrentAccountDeposit,
+    setIsOpenConnectWalletModal,
+    connectProvider,
+    forgetAccount
+  ]);
 
   return (
     <AccountProvider value={value}>
@@ -187,6 +236,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
         onClose={onClose}
         onFinish={onSignFinish}
       />
+      <ConnectAccounts />
     </AccountProvider>
   );
 };
