@@ -12,7 +12,7 @@ const endpoint = '/collections';
 // export const getCollections = (baseURL: string, jwToken: string) => get(`${endpoint}/collections`, { headers: { ...defaultParams.headers, Authorization: `Bearer ${jwToken}` }, ...defaultParams, baseURL });
 export const addCollection = (baseURL: string, id: number) => patch(`${endpoint}/add?collectionId=${id}`, {}, { headers: { ...defaultParams.headers }, ...defaultParams, baseURL });
 export const deleteCollections = (baseURL: string, id: number) => deleteRequest(`${endpoint}/${id}`, { headers: { ...defaultParams.headers }, ...defaultParams, baseURL });
-export const setCollectionTokens = (baseURL: string, { collectionId, tokens }: SetCollectionTokensPayload) => post(`${endpoint}/tokens/${collectionId}`, { tokens }, { headers: { ...defaultParams.headers }, ...defaultParams, baseURL });
+export const setCollectionTokens = (baseURL: string, { collectionId, tokens }: SetCollectionTokensPayload) => patch(`${endpoint}/allowed/tokens/${collectionId}`, { tokens }, { headers: { ...defaultParams.headers }, ...defaultParams, baseURL });
 
 export const useCollections = () => {
   const { api, settings } = useApi();
