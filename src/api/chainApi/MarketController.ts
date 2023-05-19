@@ -1,6 +1,8 @@
 import { BN } from '@polkadot/util';
 import { MarketAccountBalance } from 'account/types';
 import { Address, CrossAccountId } from '@unique-nft/utils';
+import { sleep } from 'utils/helpers';
+
 import marketplaceAbi from './contracts/marketplace-0.json';
 import { NetworkOptions } from '../sdk/sdkClient';
 
@@ -75,6 +77,7 @@ class MarketController extends BaseController implements IMarketController {
     // chain format from human format: 1.25 -> 1250000000000000000
     const priceWithDecimals = (price * (10 ** this.decimals)).toString();
     await adapter.sell(from, collectionId, tokenId, priceWithDecimals, amount, account.signer);
+    await sleep(1000); // little lag to make sure offer is added to db
   }
 
   async buyFix(collectionId: number, tokenId: number, amount: number, { account }: TransactionOptions): Promise<void> {

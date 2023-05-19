@@ -16,7 +16,7 @@ const PurchaseModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, setIsClo
   useEffect(() => {
     if (!selectedAccount) throw new Error('Account not selected');
     setIsClosable(false);
-    initiate({ accountAddress: selectedAccount.address, amount: 1 });
+    void initiate({ accountAddress: selectedAccount.address, amount: 1, price: offer?.price.parsed || 0 });
   }, [selectedAccount]);
 
   const { tokenId, collectionId } = offer || {};

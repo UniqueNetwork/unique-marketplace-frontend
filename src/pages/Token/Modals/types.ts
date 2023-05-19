@@ -15,6 +15,7 @@ export type TFixPriceProps = {
 
 export type TPurchaseProps = {
   accountAddress: string
+  price: number
   amount: number
 }
 
