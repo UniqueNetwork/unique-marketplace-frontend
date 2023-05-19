@@ -17,6 +17,7 @@ import { defaultSortingValue, pageSize, sortingOptions, testid } from './constan
 import { useMyTokensFilter } from './hooks/useMyTokensFilter';
 import { useGetMyTokens } from './hooks/useGetMyTokens';
 import { TokensList } from 'components';
+import { Address } from '@unique-nft/utils';
 
 export const NFTPage = () => {
   const { selectedAccount, isLoading: isAccountsLoading } = useAccounts();
@@ -30,7 +31,9 @@ export const NFTPage = () => {
     if (!api?.nft || !selectedAccount || isAccountsLoading) return;
 
     void (async () => {
-      await fetch({ page: 1, pageSize, seller: selectedAccount?.address });
+      const seller = Address.substrate.decode(selectedAccount.address)?.hex || '';
+
+      await fetch({ page: 1, pageSize, seller });
       await fetchMyTokens(selectedAccount);
     })();
   }, [api?.nft, currentChainId, selectedAccount?.address]);
@@ -52,7 +55,6 @@ export const NFTPage = () => {
     tokens,
     isFetchingTokens
   });
-  console.log(myCollections);
 
   return (<PagePaper>
     <MarketMainPageStyled>
@@ -95,7 +97,11 @@ export const NFTPage = () => {
         </div>
         <TokensListWrapper >
           {!isFetchingTokens && !isFetchingOffers && !isAccountsLoading && featuredTokens.length === 0 && <NoItems isSearchResult={!!searchString || !!filterCount} />}
-          <TokensList testid={`${testid}-tokens`} tokens={featuredTokens} isLoading={isFetchingTokens || isFetchingOffers || isAccountsLoading} />
+          <TokensList
+            testid={`${testid}-tokens`}
+            tokens={featuredTokens}
+            isLoading={isFetchingTokens || isFetchingOffers || isAccountsLoading}
+          />
         </TokensListWrapper>
       </MainContent>
       {deviceSize <= DeviceSize.md && <MobileFilters

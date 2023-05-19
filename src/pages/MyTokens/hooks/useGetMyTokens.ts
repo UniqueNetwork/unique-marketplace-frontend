@@ -1,3 +1,4 @@
+import { Address } from '@unique-nft/utils';
 import { MarketAccount } from 'account/AccountContext';
 import { post } from 'api/restApi/base';
 import { useApi } from 'hooks/useApi';

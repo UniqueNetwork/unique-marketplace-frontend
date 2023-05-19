@@ -127,16 +127,17 @@ export const useMyTokensFilter = ({ tokens, offers, isFetchingTokens }: UseMyTok
 
   const tokensWithOffers: MixedMyTokenAndOffer[] = useMemo(() => {
     return [
-      ...(offers?.map<MixedMyTokenAndOffer>((offer) => ({
-        properties: [],
-        id: offer.tokenId,
-        image: stringToDecodedInfixOrUrlOrCidAndHash(offer.tokenDescription?.image),
-        attributes: offer.tokenDescription?.attributes as DecodedAttributeDto[],
-        video: stringToDecodedInfixOrUrlOrCidAndHash(offer.tokenDescription?.video),
-        owner: offer.seller,
-        ...offer
-      })) || []),
-      ...tokens
+      ...tokens.map((token) => {
+        const offer = offers.find(({ tokenId, collectionId }) => token.tokenId === tokenId && token.collectionId === collectionId);
+        if (offer) {
+          return {
+            ...offer,
+            owner: offer.seller,
+            attributes: Object.values(offer.tokenDescription?.attributes) as DecodedAttributeDto[]
+          };
+        }
+        return token;
+      })
     ];
   }, [tokens, offers]);
 
