@@ -185,7 +185,7 @@ export const CollectionsPage: FC = () => {
           {(isAccountsLoading || isFetching) && <>
             {Array.from({ length: 4 }).map((_, index) => <CardSkeleton key={`card-skeleton-${index}`} />)}
           </>}
-          {filteredCollections?.map((collection) => <CollectionCard
+          {!isAccountsLoading && !isFetching && filteredCollections?.map((collection) => <CollectionCard
             key={`collection-${collection.id}`}
             collection={collection}
             onManageSponsorshipClick={onManageSponsorshipClick(collection)}

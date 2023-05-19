@@ -18,9 +18,9 @@ export const TokensList: FC<TTokensList> = ({ tokens, isLoading, testid }) => {
   return (
     <TokensListStyled>
       {(!isLoading && tokens?.map) &&
-        tokens.map((token) => (
+        tokens.map((token, index) => (
           <TokensCard
-            key={`token-${token?.collectionId || ''}-${token?.tokenId}`}
+            key={`token-${token?.collectionId || ''}-${token?.tokenId}-${index}`}
             tokenId={token?.tokenId}
             collectionId={token?.collectionId}
             {...('seller' in token ? { offer: token } : { token })}

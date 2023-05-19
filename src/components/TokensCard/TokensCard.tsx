@@ -63,7 +63,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
 
     if (tokenId && collectionId) {
       setIsFetching(true);
-      (async () => {
+      void (async () => {
         if (!token) {
           const token = await api?.nft?.getToken(collectionId, tokenId);
           if (token) setToken(token);
@@ -79,11 +79,11 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
   }, [collectionId, tokenId, collection, token, api]);
 
   useEffect(() => {
-    (async () => {
+    void (async () => {
       let count;
       if (offer) {
         count = countNestedChildren(offer?.tokenDescription?.nestingChildTokens || []);
-      } else if ((token as MyToken).nested !== undefined) {
+      } else if ((token as MyToken)?.nested !== undefined) {
         count = (token as MyToken).childrenCount;
       } else if (tokenId && collectionId) {
         const bundle = await api?.nft?.getBundle(collectionId, tokenId);
@@ -150,7 +150,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
           <Text
             testid={`${testid}-price`}
             size='s'
-          >{topBid ? `${formatBalance(Number(topBid))}` : `${price.parsed}}` }</Text>
+          >{topBid ? `${formatBalance(Number(topBid))}` : `${price.parsed}` }</Text>
           <IconStyled name={`chain-${currentChainId}`} size={16} />
           {!auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         </PriceWrapper>}

@@ -11,6 +11,7 @@ import { shortcutText } from 'utils/textUtils';
 import { Picture } from '..';
 import { AdditionalDark, AdditionalLight } from 'styles/colors';
 import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
+import { getIpfsUriByImagePath } from 'utils/urlUtils';
 
 export type TCollectionCard = {
   collection: MyCollection
@@ -64,7 +65,7 @@ export const CollectionCard: FC<TCollectionCard> = ({
     <CollectionCardStyled>
       <PictureWrapper>
         <Link to={`/collection/${collection?.id}`}>
-          <Picture alt={collection?.id?.toString() || ''} src={collection.cover || ''} />
+          <Picture alt={collection?.id?.toString() || ''} src={getIpfsUriByImagePath(collection.cover || '')} />
         </Link>
         <ActionsMenuWrapper>
           <Dropdown placement={'right'}
