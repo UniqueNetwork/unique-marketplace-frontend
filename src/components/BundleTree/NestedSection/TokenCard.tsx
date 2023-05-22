@@ -95,6 +95,7 @@ const TokenCardWrapper = styled.div`
   .picture {
     width: 128px;
     height: 128px;
+    text-align: center;
     img {
       border-radius: 4px;
       max-width: 100%;

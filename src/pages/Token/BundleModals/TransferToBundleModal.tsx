@@ -3,27 +3,25 @@ import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Heading, Link, Suggest, SuggestProps } from '@unique-nft/ui-kit';
 import { Text, useNotifications, Button } from 'components/UI';
 import { BN } from '@polkadot/util';
-import { Address } from '@unique-nft/utils';
 import styled from 'styled-components';
 
 import DefaultMarketStages from '../Modals/StagesModal';
 import { useAccounts } from 'hooks/useAccounts';
 import { StageStatus } from 'types/StagesTypes';
 import { TBundleTrunsferModalBodyProps } from './BundleTrunsferModal';
-import { useCollections } from 'hooks/useCollections';
 import { useApi } from 'hooks/useApi';
 import { CollectionCover } from 'components/CollectionCover/CollectionCover';
 import { FeeMessage } from 'components';
-import { useOffers } from 'api/restApi/offers/offers';
 import { useTransferToBundleStages } from 'hooks/marketplaceStages/useTransferToBundleStages';
 import { INestingToken } from 'components/BundleTree/types';
-import { CollectionInfoWithSchemaResponse, TokenByIdResponse, TokenIdQuery } from '@unique-nft/sdk';
-import { DecodedInfixOrUrlOrCidAndHash } from 'api/chainApi/types';
+import { TokenByIdResponse, TokenIdQuery } from '@unique-nft/sdk';
 import { debounce } from 'utils/helpers';
 import { fromStringToBnString } from 'utils/bigNum';
 import { Coral700 } from 'styles/colors';
-
-const pageSize = 1000;
+import { useGetCollectionsForNesting } from '../hooks/useGetCollectionsForNesting';
+import { CollectionItem, TokenItem } from '../types';
+import { getIpfsUriByImagePath } from 'utils/urlUtils';
+import { useGetAllOwnedTokensByCollection } from '../hooks/useGetAllOwnedTokensByCollection';
 
 export const TransferToBundleModal: FC<TBundleTrunsferModalBodyProps> = ({ token, setIsClosable, onFinish, testid }) => {
   const { selectedAccount } = useAccounts();
@@ -54,71 +52,38 @@ export const TransferToBundleModal: FC<TBundleTrunsferModalBodyProps> = ({ token
   return null;
 };
 
-type TokenOption = {
-  tokenId: number
-  collectionId: number
-  image: DecodedInfixOrUrlOrCidAndHash
-};
-
-type ITokenOption = TokenOption | null;
-
-const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(newParent: TokenIdQuery): void, testid: string }> = ({ token, onTransferToBundle, testid }) => {
-  const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse | null>();
-  const [selectedToken, setSelectedToken] = useState<ITokenOption | null>();
-  const [tokens, setTokens] = useState<TokenByIdResponse[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+const AskTransferToBundleModal: FC<{ token: INestingToken | TokenByIdResponse, onTransferToBundle(newParent: TokenIdQuery): void, testid: string }> = ({ token, onTransferToBundle, testid }) => {
+  const [collection, setCollection] = useState<CollectionItem | null>(null);
+  const [selectedToken, setSelectedToken] = useState<TokenItem | null>(null);
   const [isFeeLoading, setIsFeeLoading] = useState(false);
   const [fee, setFee] = useState<string>('0');
 
   const { selectedAccount } = useAccounts();
   const { api } = useApi();
 
-  const { offers, fetch } = useOffers();
-  const { featuredCollections } = useCollections();
+  const { collections: collectionItems, fetchCollections, isFetching: isFetchingCollections } = useGetCollectionsForNesting();
+  const { tokens, isFetchingTokens } = useGetAllOwnedTokensByCollection(collection?.collectionId, useMemo(() => ({
+    excludeTokenId: {
+      collectionId: token.collectionId,
+      tokenId: token.tokenId
+    }
+  }), [token]));
 
   useEffect(() => {
     if (!selectedAccount) return;
     void (async () => {
-      setIsLoading(true);
-      await fetch({ page: 1, pageSize, seller: selectedAccount?.address });
-      const tokens = await api?.nft?.getAccountMarketableTokens(selectedAccount.address);
-      setTokens(tokens || []);
-      setIsLoading(false);
+      await fetchCollections(selectedAccount);
     })();
   }, [selectedAccount, api?.nft]);
 
-  const collectionItems = useMemo(() => {
-    const myTokensCollectionIds = [...tokens, ...offers].map((token) => token.collectionId);
-    return featuredCollections.filter((collection) => myTokensCollectionIds.includes(collection.id));
-  }, [tokens, offers, featuredCollections]);
-
-  const tokenItems: ITokenOption[] = useMemo(() => {
-    if (!collection) return [];
-    return [
-      ...offers.filter(({ collectionId }) => collectionId === collection?.id).map(({ collectionId, tokenId, tokenDescription }) => ({
-        collectionId,
-        tokenId,
-        image: tokenDescription.image
-      })),
-      ...tokens.filter(({ collectionId }) => collectionId === collection?.id).map(({ collectionId, tokenId, image }) => ({
-        collectionId,
-        tokenId,
-        image: image as DecodedInfixOrUrlOrCidAndHash
-      }))
-    ].filter(({ tokenId }) => tokenId !== token.tokenId);
-  }, [tokens, offers, collection, token]);
-
-  const getFee = useCallback((newParentToken: ITokenOption) => {
+  const getFee = useCallback((newParentToken: TokenItem) => {
     setIsFeeLoading(true);
     return debounce(() => {
       if (!api?.market || !token || !selectedAccount || !newParentToken) return setIsFeeLoading(false);
 
-      const recipient = Address.nesting.idsToAddress(newParentToken.collectionId, newParentToken.tokenId);
-      api?.market?.getTransferTokenFee(
-        token.owner,
-        recipient,
-        token.collectionId,
-        token.tokenId,
+      api?.nft?.getTransferToBundleFee(
+        { collectionId: token.collectionId, tokenId: token.tokenId },
+        { collectionId: newParentToken.collectionId, tokenId: newParentToken.tokenId },
         1,
         { account: selectedAccount })
       .then((fee) => {
@@ -128,7 +93,7 @@ const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(ne
       }).finally(() => {
         setIsFeeLoading(false);
       });
-    }, 300);
+    }, 300)();
   }, [api?.market, token, selectedAccount?.account]);
 
   const onConfirmTransferToBundleClick = useCallback(
@@ -139,13 +104,13 @@ const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(ne
     [onTransferToBundle, selectedToken]
   );
 
-  const onChangeSelectedCollection = useCallback((collection: CollectionInfoWithSchemaResponse | null) => {
+  const onChangeSelectedCollection = useCallback((collection: CollectionItem | null) => {
     setCollection(collection);
     setSelectedToken(null);
     setFee('0');
   }, []);
 
-  const onChangeSelectedToken = useCallback((token: ITokenOption) => {
+  const onChangeSelectedToken = useCallback((token: TokenItem) => {
     setSelectedToken(token);
     getFee(token);
   }, []);
@@ -167,14 +132,14 @@ const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(ne
           <Text size='s' color='grey-500'>A list of collections that can be nested.</Text>
         </RowLabel>
         <CollectionsSuggestStyled
-          isLoading={isLoading}
+          isLoading={isFetchingCollections}
           suggestions={collectionItems}
-          getSuggestionValue={(suggestion) => `${suggestion.name} ${suggestion.id}`}
-          getActiveSuggestOption={(suggest, activeValue) => suggest.id === activeValue.id}
+          getSuggestionValue={(suggestion) => `${suggestion.collectionName} ${suggestion.collectionId}`}
+          getActiveSuggestOption={(suggest, activeValue) => suggest.collectionId === activeValue.collectionId}
           components={{
             SuggestItem: ({ suggestion }) => <ItemOption>
-              <CollectionCover src={suggestion.schema?.coverPicture.fullUrl || ''} size={24} type={'circle'} />
-              <Text>{`${suggestion?.name} [ID ${suggestion?.id}]`}</Text>
+              <CollectionCover src={getIpfsUriByImagePath(suggestion.collectionCover || '')} size={24} type={'circle'} />
+              <Text>{`${suggestion?.collectionName} [ID ${suggestion?.collectionId}]`}</Text>
             </ItemOption>
           }}
           onChange={onChangeSelectedCollection}
@@ -186,26 +151,26 @@ const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(ne
           <Text size='s' color='grey-500'>A token that will become the bundle owner and the root of the nested structure. You can provide only a token that you own.</Text>
         </RowLabel>
         <TokensSuggestStyled
-          key={collection?.id}
-          isLoading={isLoading}
-          suggestions={collection ? tokenItems : []}
+          key={collection?.collectionId}
+          isLoading={isFetchingTokens}
+          suggestions={collection ? tokens : []}
           getSuggestionValue={(suggestion) => suggestion?.tokenId?.toString() || ''}
           getActiveSuggestOption={(suggest, activeValue) => suggest?.tokenId === activeValue?.tokenId}
           components={{
             SuggestItem: ({ suggestion }) => <ItemOption>
               <CollectionCover src={suggestion?.image?.fullUrl || ''} size={24} type={'square'} />
-              <Text>{`${collection?.tokenPrefix || ''} #${suggestion?.tokenId}`}</Text>
+              <Text>{`${suggestion?.tokenPrefix || ''} #${suggestion?.tokenId}`}</Text>
             </ItemOption>
           }}
           onChange={onChangeSelectedToken}
-          value={selectedToken}
+          value={selectedToken || undefined}
           inputProps={{
             disabled: !collection
           }}
         />
       </Row>
       <Row>
-        {(!isFeeGreaterThanBalance) && <LowBalanceWrapper>
+        {(!isFeeLoading && isFeeGreaterThanBalance) && <LowBalanceWrapper>
           <Text size={'s'}>Your balance is insufficient due to transaction fee</Text>
         </LowBalanceWrapper>}
         <FeeMessage
@@ -295,7 +260,7 @@ const ItemOption = styled.div`
   padding: calc(var(--gap) / 2) calc(var(--gap) / 4);
 `;
 
-const CollectionsSuggest = (props: SuggestProps<CollectionInfoWithSchemaResponse>) => <Suggest<CollectionInfoWithSchemaResponse> {...props} />;
+const CollectionsSuggest = (props: SuggestProps<CollectionItem>) => <Suggest<CollectionItem> {...props} />;
 const CollectionsSuggestStyled = styled(CollectionsSuggest)`
   width: 100%;
   & .unique-input-text {
@@ -303,7 +268,7 @@ const CollectionsSuggestStyled = styled(CollectionsSuggest)`
   }
 `;
 
-const TokensSuggest = (props: SuggestProps<ITokenOption>) => <Suggest<ITokenOption> {...props} />;
+const TokensSuggest = (props: SuggestProps<TokenItem>) => <Suggest<TokenItem> {...props} />;
 const TokensSuggestStyled = styled(TokensSuggest)`
   width: 100%;
   & .unique-input-text {
