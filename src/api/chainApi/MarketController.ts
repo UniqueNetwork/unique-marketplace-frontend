@@ -75,7 +75,7 @@ class MarketController extends BaseController implements IMarketController {
     if (!isAllowed.isAllowed) throw new Error('Token not approved for sale');
     const adapter = this.getAdapter(account.account);
     // chain format from human format: 1.25 -> 1250000000000000000
-    const priceWithDecimals = (price * (10 ** this.decimals)).toString();
+    const priceWithDecimals = (price * (10 ** this.decimals)).toLocaleString('fullwide', { useGrouping: false });
     await adapter.sell(from, collectionId, tokenId, priceWithDecimals, amount, account.signer);
     await sleep(1000); // little lag to make sure offer is added to db
   }
