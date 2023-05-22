@@ -21,13 +21,13 @@ import { stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
 import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
 
 interface IProps {
-  children: ReactChild[]
   token?: TokenByIdResponse
   collection: CollectionInfoWithSchemaResponse | null
   offer?: Offer
   isLoading?: boolean
   testid: string
   isBundle: boolean
+  isNested: boolean
   isOwner: boolean
 }
 
@@ -39,6 +39,7 @@ export const CommonTokenDetail: FC<IProps> = ({
   isLoading,
   testid,
   isBundle,
+  isNested,
   isOwner
 }) => {
   const {
@@ -98,6 +99,8 @@ export const CommonTokenDetail: FC<IProps> = ({
 
   const videoProp = useMemo(() => stringToDecodedInfixOrUrlOrCidAndHash(video), [video]);
 
+  const badge = isNested ? 'Nested' : isBundle ? 'Bundle' : '';
+
   return (
     <CommonTokenDetailStyled>
       <PictureWrapper>
@@ -108,7 +111,7 @@ export const CommonTokenDetail: FC<IProps> = ({
             src={image}
             video={videoProp}
             testid={`${testid}-token-picture`}
-            badge={(isBundle && deviceSize > DeviceSize.md) ? 'Bundle' : ''}
+            badge={deviceSize > DeviceSize.md ? badge : ''}
           />
         }
       </PictureWrapper>

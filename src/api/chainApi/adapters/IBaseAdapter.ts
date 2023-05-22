@@ -12,7 +12,10 @@ interface IBaseAdapter {
   getTransferTokenFee(from: string, to: string, collectionId: number, tokenId: number, amount: number, signer: Signer): Promise<string>
   transferToken(from: string, to: string, collectionId: number, tokenId: number, amount: number, signer: Signer): Promise<void>
 
+  getNestTokenFee(from: NestTokenParam, to: NestTokenParam, amount: number, signer: Signer): Promise<string>
   nestToken(from: NestTokenParam, to: NestTokenParam, amount: number, signer: Signer): Promise<void>
+
+  getUnnestTokenFee(from: NestTokenParam, amount: number, signer: Signer): Promise<string>
   unnestToken(from: NestTokenParam, amount: number, signer: Signer): Promise<void>
 
   getTransferBalanceFee(from: string, to: string, amount: ChainValue, signer: Signer): Promise<string>

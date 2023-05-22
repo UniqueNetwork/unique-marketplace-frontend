@@ -63,16 +63,16 @@ const NodeView: FC<INodeView<INestingToken>> = ({
   const tokenMenuActions = useMemo(() => {
     return (
       <>
-        <TransferMenuItem onClick={onTransfer}>Transfer
+        <TransferMenuItem onClick={onTransfer} withBorder={level > 1}>Transfer
           <IconWrapper>
             <Icon name={'sorting-initial'} size={16} color={'var(--color-primary-500)'} />
           </IconWrapper>
         </TransferMenuItem>
-        <UnnestMenuItem onClick={onUnnest}>Unnest token
+        {level > 1 && <UnnestMenuItem onClick={onUnnest}>Unnest token
           <IconWrapper>
             <Icon name={'logout'} size={16} color={'var(--color-coral-500)'} />
           </IconWrapper>
-        </UnnestMenuItem>
+        </UnnestMenuItem>}
       </>
     );
   }, [onTransfer, onUnnest]);
@@ -294,7 +294,8 @@ const DropdownMenu = styled.div`
   min-width: 138px;
 `;
 
-const DropdownMenuItem = styled.div`
+const DropdownMenuItem = styled.div<{ withBorder?: boolean }>`
+  border-bottom: ${({ withBorder }) => withBorder ? `1px dashed ${Grey300}` : 'none'};
   display: flex;
   align-items: center;
   padding: 4px 8px;
@@ -307,7 +308,6 @@ const DropdownMenuItem = styled.div`
 `;
 
 const TransferMenuItem = styled(DropdownMenuItem)`
-  border-bottom: 1px dashed ${Grey300};
   color: ${Primary500};
   &:hover {
     color: ${Primary600};

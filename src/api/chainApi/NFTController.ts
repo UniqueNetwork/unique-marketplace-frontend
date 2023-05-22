@@ -1,4 +1,4 @@
-import { GetBundleResponse, TokenByIdResponse, TokenOwnerResponse, TokenIdQuery } from '@unique-nft/sdk';
+import { GetBundleResponse, TokenByIdResponse, TokenOwnerResponse, TokenIdQuery, TopmostTokenOwnerResponse } from '@unique-nft/sdk';
 import { Address } from '@unique-nft/utils';
 import { TransactionOptions } from './types';
 import { getEthAccount } from './utils/addressUtils';
@@ -14,6 +14,7 @@ declare module '@unique-nft/sdk' {
 export class UniqueSDKNFTController extends BaseController {
   private allowedCollections: AllowedCollections;
   private allowedTokens: Record<number, string> = {};
+  public decimals = 18; // TODO: move from controller to API
 
   constructor(options: NetworkOptions) {
     super(options);
@@ -65,6 +66,21 @@ export class UniqueSDKNFTController extends BaseController {
     return await this.uniqueSdk.token.getBundle({ collectionId, tokenId }) || null;
   }
 
+  async getTopmostOwner(collectionId: number, tokenId: number): Promise<TopmostTokenOwnerResponse | null> {
+    return await this.uniqueSdk.token.topmostOwner({ collectionId, tokenId }) || null;
+  }
+
+  async getTransferToBundleFee(nested: TokenIdQuery, newParent: TokenIdQuery, amount: number, { account }: TransactionOptions): Promise<string> {
+    const adapter = this.getAdapter(account.account);
+    const rawFee = await adapter.getNestTokenFee(
+        { collectionId: Number(nested.collectionId), tokenId: nested.tokenId },
+        { collectionId: Number(newParent.collectionId), tokenId: newParent.tokenId },
+        amount,
+        account.signer
+      );
+    return this.getChainValue(rawFee, this.decimals).parsed.toString();
+  }
+
   async transferToBundle(nested: TokenIdQuery, newParent: TokenIdQuery, amount: number, { account }: TransactionOptions): Promise<void> {
     const adapter = this.getAdapter(account.account);
     await adapter.nestToken(
@@ -73,6 +89,16 @@ export class UniqueSDKNFTController extends BaseController {
         amount,
         account.signer
       );
+  }
+
+  async getUnnestFee(collectionId: number, tokenId: number, amount: number, { account }: TransactionOptions): Promise<string> {
+    const parent = await this.uniqueSdk.token.parent({ collectionId, tokenId });
+
+    if (!parent) return '0';
+
+    const adapter = this.getAdapter(account.account);
+    const rawFee = await adapter.getUnnestTokenFee({ collectionId, tokenId }, amount, account.signer);
+    return this.getChainValue(rawFee, this.decimals).parsed.toString();
   }
 
   async unnest(collectionId: number, tokenId: number, amount: number, { account }: TransactionOptions): Promise<void> {

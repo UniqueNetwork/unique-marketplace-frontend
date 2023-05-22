@@ -18,6 +18,9 @@ import { BlueGrey500 } from 'styles/colors';
 import BundleTreeSection from './BundleTreeSection';
 import { useCollections } from 'hooks/useCollections';
 import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
+import { NestedTokenBlock } from './TokenDetail/NestedTokenBlock';
+import BundleModal from './BundleModals/BundleTrunsferModal';
+import { BundleModalType } from './BundleModals/types';
 
 const testid = 'token-page';
 
@@ -32,6 +35,8 @@ const TokenPage = () => {
   const { getCollection } = useCollections();
   const [marketType, setMarketType] = useState<MarketType>(MarketType.default);
   const [isBundle, setIsBundle] = useState(false);
+  const [isNested, setIsNested] = useState(false);
+  const [topmostOwner, setTopmostOwner] = useState<string | null>(null);
   const navigate = useNavigate();
   const { info } = useNotifications();
 
@@ -41,6 +46,10 @@ const TokenPage = () => {
     try {
       const token = await api.nft?.getToken(Number(collectionId), Number(id));
       setIsBundle(await api.nft?.isBundle(Number(collectionId), Number(id)));
+      if (token?.nestingParentToken) {
+        setIsNested(true);
+        setTopmostOwner((await api.nft.getTopmostOwner(Number(collectionId), Number(id)))?.topmostOwner || null);
+      }
       const collection = await getCollection(Number(collectionId));
       if (token) setToken(token);
       if (collection) setCollection(collection);
@@ -119,8 +128,10 @@ const TokenPage = () => {
     if (offer) {
       return isTokenOwner(selectedAccount.address, offer.seller);
     }
+    if (topmostOwner) return isTokenOwner(selectedAccount.address, topmostOwner);
+
     return token?.owner ? isTokenOwner(selectedAccount.address, token.owner) : false;
-  }, [isFetchingOffer, isFetchingToken, selectedAccount, token, offer]);
+  }, [isFetchingOffer, isFetchingToken, selectedAccount, token, offer, topmostOwner]);
 
   if (!isFetchingOffer && !isFetchingToken && !token && !offer) return <Error404 />;
 
@@ -138,8 +149,15 @@ const TokenPage = () => {
           isLoading={isFetchingOffer || isFetchingToken}
           testid={`${testid}`}
           isBundle={isBundle}
+          isNested={isNested}
           isOwner={isOwner}
         >
+          {isNested && <NestedTokenBlock
+            token={token}
+            onTransferClick={onActionClick(MarketType.nestedTransfer)}
+            onUnnestClick={onActionClick(MarketType.unnest)}
+            testid={`${testid}`}
+          />}
           <TokenTrading
             token={token}
             offer={!isIgnoreOffer ? offer : undefined}
@@ -164,13 +182,26 @@ const TokenPage = () => {
           />
         </CommonTokenDetail>
       </TokenPagePaper>
-      {isBundle && <BundleTreeSection
-        onViewTokenDetails={setToken}
-        token={token}
-        offer={offer}
-        testid={`${testid}-bundle`}
-        isOwner={isOwner}
-      />}
+      {isBundle && <>
+        <BundleTreeSection
+          onViewTokenDetails={setToken}
+          token={token}
+          offer={offer}
+          testid={`${testid}-bundle`}
+          isOwner={isOwner}
+        />
+        <BundleModal
+          token={token}
+          bundleModalType={
+            marketType === MarketType.nestedTransfer ||
+            marketType === MarketType.unnest
+              ? marketType as unknown as BundleModalType
+              : BundleModalType.default }
+          onFinish={onFinish}
+          testid={`${testid}-modal`}
+          onClose={onClose}
+        />
+      </>}
     </>
   );
 };

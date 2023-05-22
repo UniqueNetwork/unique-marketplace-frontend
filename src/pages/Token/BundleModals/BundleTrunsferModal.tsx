@@ -5,9 +5,10 @@ import { UnnestModal } from './UnnestModal';
 import { TransferToBundleModal } from './TransferToBundleModal';
 import { INestingToken } from 'components/BundleTree/types';
 import { Modal } from 'components/UI';
+import { TokenByIdResponse } from '@unique-nft/sdk';
 
 export type TBundleTrunsferModalProps = {
-  token?: INestingToken
+  token?: INestingToken | TokenByIdResponse
   bundleModalType: BundleModalType
   onClose(): void
   onFinish(): void
@@ -15,7 +16,7 @@ export type TBundleTrunsferModalProps = {
 }
 
 export type TBundleTrunsferModalBodyProps = {
-  token: INestingToken
+  token: INestingToken | TokenByIdResponse
   onFinish(): void
   setIsClosable(value: boolean): void
   testid: string

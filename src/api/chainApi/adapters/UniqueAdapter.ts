@@ -42,6 +42,16 @@ class UniqueAdapter implements IMarketContractAdapter {
     }, { signer }));
   }
 
+  async getNestTokenFee(from: NestTokenParam, to: NestTokenParam, amount: number, signer: Signer): Promise<string> {
+    if (amount !== 1) throw new Error('RFT support not implemented');
+    const res = await this.uniqueSdk.token.nest.getFee({
+      address: signer.address || '',
+      nested: from,
+      parent: to
+    });
+    return res.fee.raw;
+  }
+
   async nestToken(from: NestTokenParam, to: NestTokenParam, amount: number, signer: Signer): Promise<void> {
     if (amount !== 1) throw new Error('RFT support not implemented');
     const res = await this.uniqueSdk.token.nest({
@@ -53,6 +63,15 @@ class UniqueAdapter implements IMarketContractAdapter {
       console.error('Nest failed: ', res.error);
       throw new Error(res.error.toString());
     }
+  }
+
+  async getUnnestTokenFee(from: NestTokenParam, amount: number, signer: Signer): Promise<string> {
+    if (amount !== 1) throw new Error('RFT support not implemented');
+    const res = await this.uniqueSdk.token.unnest.getFee({
+      address: signer.address || '',
+      nested: from
+    });
+    return res.fee.raw;
   }
 
   async unnestToken(from: NestTokenParam, amount: number, signer: Signer): Promise<void> {

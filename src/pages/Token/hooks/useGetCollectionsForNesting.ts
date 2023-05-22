@@ -1,0 +1,62 @@
+import { MarketAccount } from 'account/types';
+import { post } from 'api/restApi/base';
+import { useApi } from 'hooks/useApi';
+import { useCallback, useState } from 'react';
+import { CollectionItem } from '../types';
+
+const getTokensEndpoint = 'https://api-opal.uniquescan.io/v1/graphql';
+
+const gqlQuery = {
+  operationName: 'collections_by_account_nesting_query',
+  query: `query collections_by_account_nesting_query(
+    $owner: String
+  ) {
+    tokens(
+      limit: 1000
+      offset: 0
+      where: {tokens_owner: {_eq: $owner}, burned: {_eq: "false"}}
+      distinct_on: collection_id
+    ) {
+      count
+      data {        
+        collectionName: collection_name
+        collectionCover: collection_cover
+        collectionOwner: collection_owner
+        collectionId: collection_id
+      }
+    }
+  }`
+};
+
+export const useGetCollectionsForNesting = () => {
+  const { settings } = useApi();
+  const [isFetching, setIsFetching] = useState(false);
+  const [collections, setCollections] = useState<CollectionItem[]>([]);
+
+  const fetchCollections = useCallback(async (account: MarketAccount | undefined) => {
+    if (!account) return [];
+    setIsFetching(true);
+    const address = account.address;
+
+    const response = await post(getTokensEndpoint, {
+      ...gqlQuery,
+      variables: {
+        owner: address
+      }
+    });
+    if (response.status === 200) {
+      const collections = response?.data?.data?.tokens?.data as CollectionItem[] | [];
+      setCollections(collections);
+      setIsFetching(false);
+      return collections;
+    }
+    setIsFetching(false);
+    return [];
+  }, [settings]);
+
+  return {
+    isFetching,
+    collections,
+    fetchCollections
+  };
+};

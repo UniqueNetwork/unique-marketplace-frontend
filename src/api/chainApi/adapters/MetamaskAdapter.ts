@@ -41,33 +41,59 @@ class MetamaskAdapter implements IMarketContractAdapter {
       fromCross,
       toCross,
       tokenId
-    );
-    return fee.toString();
-  }
+      );
+      return fee.toString();
+    }
 
-  async transferToken(from: string, to: string, collectionId: number, tokenId: number, amount: number, signer: Signer): Promise<void> {
-    if (amount !== 1) throw new Error('RFT not supported');
-    const nftFactory = await UniqueNFTFactory(Number(collectionId), signer);
-    const fromCross = Address.extract.ethCrossAccountId(from);
-    const toCross = Address.extract.ethCrossAccountId(to);
-    await (await nftFactory.transferFromCross(fromCross, toCross, tokenId)).wait();
-  }
+    async transferToken(from: string, to: string, collectionId: number, tokenId: number, amount: number, signer: Signer): Promise<void> {
+      if (amount !== 1) throw new Error('RFT not supported');
+      const nftFactory = await UniqueNFTFactory(Number(collectionId), signer);
+      const fromCross = Address.extract.ethCrossAccountId(from);
+      const toCross = Address.extract.ethCrossAccountId(to);
+      await (await nftFactory.transferFromCross(fromCross, toCross, tokenId)).wait();
+    }
 
-  async nestToken(from: NestTokenParam, to: NestTokenParam, amount: number, signer: Signer): Promise<void> {
-    if (amount !== 1) throw new Error('RFT not supported');
-    const nftFactoryFrom = await UniqueNFTFactory(Number(from.collectionId), signer);
+    async getNestTokenFee(from: NestTokenParam, to: NestTokenParam, amount: number, signer: Signer): Promise<string> {
+      if (amount !== 1) throw new Error('RFT not supported');
+      const nftFactory = await UniqueNFTFactory(Number(from.collectionId), signer);
+      const originalParentTokenAddress = await nftFactory.ownerOf(from.tokenId);
+      const newParentTokenAddress = Address.nesting.idsToAddress(to.collectionId, to.tokenId);
+      const fee = await nftFactory.estimateGas.transferFrom(
+        originalParentTokenAddress,
+        newParentTokenAddress,
+        from.tokenId
+      );
+      return fee.toString();
+    }
 
-    const originalParentTokenAddress = await nftFactoryFrom.ownerOf(from.tokenId);
-    const newParentTokenAddress = Address.nesting.idsToAddress(to.collectionId, to.tokenId);
+    async nestToken(from: NestTokenParam, to: NestTokenParam, amount: number, signer: Signer): Promise<void> {
+      if (amount !== 1) throw new Error('RFT not supported');
+      const nftFactory = await UniqueNFTFactory(Number(from.collectionId), signer);
 
-    await (await nftFactoryFrom.transferFrom(originalParentTokenAddress, newParentTokenAddress, from.tokenId)).wait();
-  }
+      const originalParentTokenAddress = await nftFactory.ownerOf(from.tokenId);
+      const newParentTokenAddress = Address.nesting.idsToAddress(to.collectionId, to.tokenId);
 
-  async unnestToken(target: NestTokenParam, amount: number, signer: Signer): Promise<void> {
-    if (amount !== 1) throw new Error('RFT not supported');
-    const nftFactory = await UniqueNFTFactory(Number(target.collectionId), signer);
+      await (await nftFactory.transferFrom(originalParentTokenAddress, newParentTokenAddress, from.tokenId)).wait();
+    }
 
-    const parentTokenAddress = await nftFactory.ownerOf(target.tokenId);
+    async getUnnestTokenFee(target: NestTokenParam, amount: number, signer: Signer): Promise<string> {
+      if (amount !== 1) throw new Error('RFT not supported');
+      const nftFactory = await UniqueNFTFactory(Number(target.collectionId), signer);
+      const parentTokenAddress = await nftFactory.ownerOf(target.tokenId);
+      const ownerAddress = await signer.getAddress();
+      const fee = await nftFactory.estimateGas.transferFrom(
+        parentTokenAddress,
+        ownerAddress,
+        target.tokenId
+      );
+      return fee.toString();
+    }
+
+    async unnestToken(target: NestTokenParam, amount: number, signer: Signer): Promise<void> {
+      if (amount !== 1) throw new Error('RFT not supported');
+      const nftFactory = await UniqueNFTFactory(Number(target.collectionId), signer);
+
+      const parentTokenAddress = await nftFactory.ownerOf(target.tokenId);
     const ownerAddress = await signer.getAddress();
 
     await (await nftFactory.transferFrom(parentTokenAddress, ownerAddress, target.tokenId)).wait();

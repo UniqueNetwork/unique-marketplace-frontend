@@ -15,6 +15,7 @@ import { useApi } from 'hooks/useApi';
 import { debounce } from 'utils/helpers';
 import { fromStringToBnString } from 'utils/bigNum';
 import { Coral700 } from 'styles/colors';
+import { TokenByIdResponse } from '@unique-nft/sdk';
 
 export const UnnestModal: FC<TBundleTrunsferModalBodyProps> = ({ token, setIsClosable, onFinish, testid }) => {
   const { selectedAccount } = useAccounts();
@@ -39,20 +40,17 @@ export const UnnestModal: FC<TBundleTrunsferModalBodyProps> = ({ token, setIsClo
   return null;
 };
 
-const AskUnnestModal: FC<{ token: INestingToken, onUnnest(): void, testid: string }> = ({ token, onUnnest, testid }) => {
+const AskUnnestModal: FC<{ token: INestingToken | TokenByIdResponse, onUnnest(): void, testid: string }> = ({ token, onUnnest, testid }) => {
   const { api } = useApi();
   const { selectedAccount } = useAccounts();
   const [isFeeLoading, setIsFeeLoading] = useState(false);
   const [fee, setFee] = useState<string>('0');
 
   useEffect(() => {
+    if (!api?.nft || !token || !selectedAccount) return;
     setIsFeeLoading(true);
     debounce(() => {
-      if (!api?.market || !token || !selectedAccount) return setIsFeeLoading(false);
-
-      api?.market?.getTransferTokenFee(
-        token.owner,
-        selectedAccount.address,
+      api.nft?.getUnnestFee(
         token.collectionId,
         token.tokenId,
         1,
@@ -64,7 +62,7 @@ const AskUnnestModal: FC<{ token: INestingToken, onUnnest(): void, testid: strin
       }).finally(() => {
         setIsFeeLoading(false);
       });
-    }, 300);
+    }, 300)();
   }, [token, api, selectedAccount?.address]);
 
   const onConfirmUnnestClick = useCallback(
@@ -89,7 +87,7 @@ const AskUnnestModal: FC<{ token: INestingToken, onUnnest(): void, testid: strin
         <Text size={'m'}>{'This will disconnect your token from the parent NFT. All other nesting connections will remain intact.'}</Text>
       </Row>
       <Row>
-        {(!isFeeGreaterThanBalance) && <LowBalanceWrapper>
+        {(!isFeeLoading && isFeeGreaterThanBalance) && <LowBalanceWrapper>
           <Text size={'s'}>Your balance is insufficient due to transaction fee</Text>
         </LowBalanceWrapper>}
         <FeeMessage
@@ -160,8 +158,6 @@ const Content = styled.div`
 const LowBalanceWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
-  position: absolute;
-  right: calc(var(--gap) * 1.5);
   span {
     color: ${Coral700} !important;
   }
