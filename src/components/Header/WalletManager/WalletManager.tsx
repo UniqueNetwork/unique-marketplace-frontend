@@ -31,7 +31,7 @@ export const WalletManager: FC = () => {
   const { selectedAccount, accounts, isLoading, changeAccount } = useAccounts();
   const [isOpen, setIsOpen] = useState(false);
   const [isGetKsmOpened, setIsGetKsmOpened] = useState(false);
-  const { chainProperties, settings, currentChainId, onChangeChainId, api } = useApi();
+  const { chainProperties, currentChainId, onChangeChainId, api } = useApi();
   const { info } = useNotifications();
   const navigate = useNavigate();
 
@@ -42,7 +42,7 @@ export const WalletManager: FC = () => {
       name: `chain-${id.toLowerCase()}`,
       size: 40
     }
-  })), [settings]);
+  })), []);
 
   const currentNetwork = useMemo(() => networks.find(({ id }) => id === currentChainId), [networks, currentChainId]);
 
