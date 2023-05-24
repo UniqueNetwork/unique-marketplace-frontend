@@ -11,6 +11,7 @@ import { WithdrawBidStagesModal } from './WithdrawBidModal';
 import { CancelAuctionStagesModal } from './CancelAuctionModal';
 import { Modal } from 'components/UI';
 import { TokenByIdResponse, CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
+import { ReportModal } from '../TokenDetail/ReportModal';
 
 export type TTokenPageModalProps = {
   offer?: Offer
