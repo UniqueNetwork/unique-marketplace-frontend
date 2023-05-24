@@ -3,8 +3,7 @@ import { post } from 'api/restApi/base';
 import { useApi } from 'hooks/useApi';
 import { useCallback, useState } from 'react';
 import { GqlToken, MyToken } from '../types';
-
-const getTokensEndpoint = 'https://api-opal.uniquescan.io/v1/graphql';
+import config from '../../../config';
 
 const gqlQuery = {
   operationName: 'tokens_by_account_query',
@@ -38,7 +37,7 @@ const gqlQuery = {
 };
 
 export const useGetMyTokens = () => {
-  const { settings } = useApi();
+  const { settings, currentChainId } = useApi();
   const [isFetching, setIsFetching] = useState(false);
   const [tokens, setTokens] = useState<MyToken[]>([]);
 
@@ -46,8 +45,8 @@ export const useGetMyTokens = () => {
     if (!account) return [];
     setIsFetching(true);
     const address = account.address;
-
-    const response = await post(getTokensEndpoint, {
+    const { scanApi } = config.blockchains[currentChainId || ''] || {};
+    const response = await post(scanApi, {
       ...gqlQuery,
       variables: {
         owner: address
