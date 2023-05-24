@@ -3,8 +3,7 @@ import { post } from 'api/restApi/base';
 import { useApi } from 'hooks/useApi';
 import { useCallback, useState } from 'react';
 import { CollectionItem } from '../types';
-
-const getTokensEndpoint = 'https://api-opal.uniquescan.io/v1/graphql';
+import config from '../../../config';
 
 const gqlQuery = {
   operationName: 'collections_by_account_nesting_query',
@@ -29,7 +28,7 @@ const gqlQuery = {
 };
 
 export const useGetCollectionsForNesting = () => {
-  const { settings } = useApi();
+  const { settings, currentChainId } = useApi();
   const [isFetching, setIsFetching] = useState(false);
   const [collections, setCollections] = useState<CollectionItem[]>([]);
 
@@ -38,7 +37,8 @@ export const useGetCollectionsForNesting = () => {
     setIsFetching(true);
     const address = account.address;
 
-    const response = await post(getTokensEndpoint, {
+    const { scanApi } = config.blockchains[currentChainId || ''] || {};
+    const response = await post(scanApi, {
       ...gqlQuery,
       variables: {
         owner: address

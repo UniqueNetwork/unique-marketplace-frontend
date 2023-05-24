@@ -67,7 +67,7 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
     setSettings(currentNetworkOption.settings);
   }, [currentChainId, fetchSettings]);
 
-  const onChangeChainId = useCallback((newChainId: string) => {
+  const onChangeChainId = useCallback(async (newChainId: string) => {
     if (currentChainId === newChainId) return;
     if (!sdkClient) {
       throw new Error('SdkClient is not available');
@@ -78,8 +78,9 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
 
     setSettings(option.settings);
 
-    sdkClient?.setNetwork(option);
+    sdkClient.setNetwork(option);
     setCurrentChainId(newChainId);
+    setChainProperties(await sdkClient.sdk.common.chainProperties());
     localStorage.setItem(ChainIdLocalStorageKey, newChainId);
     // redirect to correct URL with chainId
     const { pathname } = window.location;

@@ -1,10 +1,8 @@
-import { MarketAccount } from 'account/types';
 import { post } from 'api/restApi/base';
 import { useApi } from 'hooks/useApi';
 import { useCallback, useState } from 'react';
 import { NestedTokenItem } from '../types';
-
-const getTokensEndpoint = 'https://api-opal.uniquescan.io/v1/graphql';
+import config from '../../../config';
 
 const gqlQuery = {
   operationName: 'getBundleTree',
@@ -42,13 +40,14 @@ const gqlQuery = {
 };
 
 export const useGetBundleTree = () => {
-  const { settings } = useApi();
+  const { settings, currentChainId } = useApi();
   const [isFetching, setIsFetching] = useState(false);
 
   const fetchBundle = useCallback(async ({ collectionId, tokenId }: { collectionId: number, tokenId: number }) => {
     setIsFetching(true);
 
-    const response = await post(getTokensEndpoint, {
+    const { scanApi } = config.blockchains[currentChainId || ''] || {};
+    const response = await post(scanApi, {
       ...gqlQuery,
       variables: {
         collectionId, tokenId

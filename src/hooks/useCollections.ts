@@ -1,12 +1,12 @@
+import { useCallback, useContext, useState } from 'react';
 import { useApi } from 'hooks/useApi';
 import { MarketAccount } from 'account/types';
 import { defaultParams } from 'api/restApi/base/axios';
 import { deleteRequest, patch, post } from 'api/restApi/base';
 import { MyCollection, MyCollectionBackend, SetCollectionTokensPayload } from 'api/restApi/collections/types';
-import { useCallback, useContext, useState } from 'react';
 import CollectionsContext from 'collections/CollectionsContext';
+import config from '../config';
 
-const getCollectionsEndpoint = 'https://api-opal.uniquescan.io/v1/graphql';
 const endpoint = '/collections';
 
 // export const getCollections = (baseURL: string, jwToken: string) => get(`${endpoint}/collections`, { headers: { ...defaultParams.headers, Authorization: `Bearer ${jwToken}` }, ...defaultParams, baseURL });
@@ -15,11 +15,10 @@ export const deleteCollections = (baseURL: string, id: number) => deleteRequest(
 export const setCollectionTokens = (baseURL: string, { collectionId, tokens }: SetCollectionTokensPayload) => patch(`${endpoint}/allowed/tokens/${collectionId}`, { tokens }, { headers: { ...defaultParams.headers }, ...defaultParams, baseURL });
 
 export const useCollections = () => {
-  const { api, settings } = useApi();
+  const { api, baseURL, settings, currentChainId } = useApi();
   const { isFetching: isFetchingFeaturedCollections, collections: featuredCollections, fetchCollections: fetchFeaturedCollections } = useContext(CollectionsContext);
   const [isFetching, setIsFetching] = useState(false);
   const [collections, setCollections] = useState<MyCollection[]>([]);
-  const { baseURL } = useApi();
 
   const getCollection = useCallback(async (collectionId: number) => {
     const collection = featuredCollections.find(({ id }) => collectionId === id);
@@ -62,7 +61,8 @@ export const useCollections = () => {
       }
     };
 
-    const response = await post(getCollectionsEndpoint, gqlQuery);
+    const { scanApi } = config.blockchains[currentChainId || ''] || {};
+    const response = await post(scanApi, gqlQuery);
     if (response.status === 200) {
       // TODO: merge with data from "collections" in settings to highlight already "added" collections
       const backendMyCollections = response?.data?.data?.collections?.data as MyCollectionBackend[] | [];

@@ -31,7 +31,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
   const [fetchAccountsError, setFetchAccountsError] = useState<string | undefined>();
   const [selectedAccount, setSelectedAccount] = useState<MarketAccount>();
   const [isOpenConnectWalletModal, setIsOpenConnectWalletModal] = useState<boolean>(false);
-  const { api, baseURL } = useApi();
+  const { api, baseURL, currentChainId } = useApi();
 
   const unsubscribesBalancesChanges = useRef<Record<string, Codec>>({
     // TODO: !!!!!!!!!
@@ -128,7 +128,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
       await fetchAccounts();
       localStorage.setItem(ConnectedAccountTypesKey, connectedProviders.join(';'));
     })();
-  }, [api?.market, subscribeBalancesChanges, fetchAccounts, showSignDialog]);
+  }, [api?.market, subscribeBalancesChanges, fetchAccounts, showSignDialog, currentChainId]);
 
   const connectProvider = useCallback(async (type: ProviderTypesName) => {
     const connectedProviders = (localStorage.getItem(ConnectedAccountTypesKey)?.split(';') || ['keyring']) as ProviderTypesName[];
