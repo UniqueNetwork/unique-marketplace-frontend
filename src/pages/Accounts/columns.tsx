@@ -102,23 +102,9 @@ export const getAccountsColumns = ({
     field: 'actions',
     render(_, { address, balance, isLocal }: AccountInfo) {
       const deposit = balance.withdraw.raw;
-      if (!deposit.isZero() && !isSmallDevice) {
-        return (
-          <DepositActionsWrapper>
-            <Button title={`Withdraw ${formatBalance(balance.withdraw.parsed, 4)} ${tokenSymbol}`}
-              onClick={onShowWithdrawDepositModal(address)}
-              role={'primary'}
-              testid={`${testid}-${address}-withdraw-button`}
-            />
-            <IconWithHint align={{ appearance: 'vertical', vertical: 'bottom', horizontal: 'right' }}>
-              <span>Learn more in <StyledLink href='/FAQ' target='_blank' rel='noreferrer'>FAQ</StyledLink></span>
-            </IconWithHint>
-          </DepositActionsWrapper>
-        );
-      }
       return (
-        <>
-          <ActionsWrapper>
+        <ActionsWrapper>
+          <TransferActionsWrapper>
             <Button title={'Send'} onClick={onShowSendFundsModal(address)} disabled={!balance?.parsed} />
             <Button
               title={'Get'}
@@ -126,9 +112,9 @@ export const getAccountsColumns = ({
               testid={`${testid}-${address}-get-button`}
             />
             {isLocal && <Button title={'Delete'} onClick={onShowDeleteLocalAccountModal(address)} testid={`${testid}-${address}-delete-button`} />}
-          </ActionsWrapper>
-          {(deposit && isSmallDevice) && <DepositActionsWrapper>
-            <Button title={'Withdraw'}
+          </TransferActionsWrapper>
+          {(!deposit.isZero()) && <DepositActionsWrapper>
+            <Button title={`Withdraw ${formatBalance(balance.withdraw.parsed, 4)} ${tokenSymbol}`}
               onClick={onShowWithdrawDepositModal(address)}
               role={'primary'}
               testid={`${testid}-${address}-get-button`}
@@ -137,7 +123,7 @@ export const getAccountsColumns = ({
               <span>Learn more in <StyledLink href='/FAQ' target='_blank' rel='noreferrer'>FAQ</StyledLink></span>
             </IconWithHint>
           </DepositActionsWrapper>}
-        </>
+        </ActionsWrapper>
       );
     }
   }
@@ -169,15 +155,16 @@ const LinkStyled = styled(Link)`
   width: fit-content;
 `;
 
-const ActionsWrapper = styled.div`
+const TransferActionsWrapper = styled.div`
   && {
     display: flex;
     align-items: center;
-    column-gap: var(--gap);
-    padding: var(--gap) 0;
-    flex-wrap: wrap;
-    gap: 16px;
-    margin: var(--gap) 0;
+    gap: var(--prop-gap);
+    flex-wrap: nowrap;
+    button,
+    a {
+      flex: 1;
+    }
     @media (max-width: 768px) {
       flex-direction: row;
       row-gap: var(--gap);
@@ -190,13 +177,12 @@ const ActionsWrapper = styled.div`
   }
 `;
 
-const DepositActionsWrapper = styled(ActionsWrapper)`
+const DepositActionsWrapper = styled(TransferActionsWrapper)`
   && {
     column-gap: calc(var(--gap) / 2);
     padding: 0;
     button {
       width: calc(100% - 32px);
-      max-width: 148px;
     }
     @media (max-width: 768px) {
       button {
@@ -232,4 +218,12 @@ const StyledLink = styled.a`
   &&:hover {
     text-decoration: none;
   }
+`;
+
+const ActionsWrapper = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-gap: var(--prop-gap);
+  width: -webkit-fill-available;
+  margin: var(--prop-gap) 0;
 `;

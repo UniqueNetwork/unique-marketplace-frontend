@@ -145,7 +145,7 @@ export const AccountsPage = () => {
       <Row>
         <CreateAccountButton
           testid={`${testid}-create-substrate-button`}
-          title={'Create substrate account'}
+          title={'Сonnect or create wallet'}
           onClick={() => setIsOpenConnectWalletModal(true)}
         />
       </Row>
