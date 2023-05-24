@@ -1,13 +1,13 @@
 import { Heading, Text } from '@unique-nft/ui-kit';
 import React, { FC, ReactChild, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { Icon } from 'components/UI';
+import { Dropdown, Icon } from 'components/UI';
 import { Picture } from 'components';
 import { CollectionsCard } from './CollectionsCard';
 import { AttributesBlock } from './AttributesBlock';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { shortcutText } from 'utils/textUtils';
-import { Grey300, Grey500, Primary600 } from 'styles/colors';
+import { BlueGrey100, BlueGrey300, Coral100, Coral500, Grey300, Grey500, Primary500, Primary600, Secondary400, Secondary500 } from 'styles/colors';
 import { Avatar } from 'components/Avatar/Avatar';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import config from 'config';
@@ -19,6 +19,7 @@ import { TokenSkeleton } from 'components/Skeleton/TokenSkeleton';
 import ShareTokenModal from './ShareTokenModal';
 import { stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
 import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
+import { ReportModal } from './ReportModal';
 
 interface IProps {
   token?: TokenByIdResponse
@@ -73,7 +74,7 @@ export const CommonTokenDetail: FC<IProps> = ({
 
   const deviceSize = useDeviceSize();
 
-  const { chainProperties, currentChainId } = useApi();
+  const { chainProperties, currentChainId, settings } = useApi();
 
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainProperties?.SS58Prefix || 0);
@@ -88,6 +89,8 @@ export const CommonTokenDetail: FC<IProps> = ({
   }, [token, offer, formatAddress]);
 
   const [shareModalVisible, setShareModalVisible] = useState(false);
+  const [reportModalVisible, setReportModalVisible] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const openShareModal = useCallback(() => {
     setShareModalVisible(true);
@@ -95,6 +98,21 @@ export const CommonTokenDetail: FC<IProps> = ({
 
   const closeShareModal = useCallback(() => {
     setShareModalVisible(false);
+  }, []);
+
+  const onScanLinkClick = useCallback(() => {
+    if (!currentChainId) return;
+    setDropdownOpen(false);
+    window.open(`${config.blockchains[currentChainId].scanUrl}tokens/${collectionId}/${tokenId}`, '_blank', 'noopener');
+  }, [tokenId, collectionId]);
+
+  const onReportClick = useCallback(() => {
+    setDropdownOpen(false);
+    setReportModalVisible(true);
+  }, []);
+
+  const closeReportModal = useCallback(() => {
+    setReportModalVisible(false);
   }, []);
 
   const videoProp = useMemo(() => stringToDecodedInfixOrUrlOrCidAndHash(video), [video]);
@@ -154,7 +172,42 @@ export const CommonTokenDetail: FC<IProps> = ({
           />
         </>}
       </Description>
+      <DropdownStyled
+        placement={'right'}
+        open={dropdownOpen}
+        onOpenChange={setDropdownOpen}
+        dropdownRender={() => (
+          <DropdownMenu>
+            <ScanMenuItem onClick={onScanLinkClick}>View on UniqueScan
+              <MenuIconWrapper>
+                <Icon name={'arrow-up-right'} size={16} color={'var(--color-primary-500)'} />
+              </MenuIconWrapper>
+            </ScanMenuItem>
+            <ReportMenuItem onClick={onReportClick}>Report
+              <MenuIconWrapper>
+                <Icon name={'warning'} size={16} color={'var(--color-coral-500)'} />
+              </MenuIconWrapper>
+            </ReportMenuItem>
+          </DropdownMenu>
+          )}
+      >
+        <DropdownWrapper>
+          <Icon
+            size={32}
+            name={'meatball-menu'}
+            color={'transparent'}
+          />
+        </DropdownWrapper>
+      </DropdownStyled>
       <ShareTokenModal isVisible={shareModalVisible} onClose={closeShareModal} testid={`${testid}-share-modal`} />
+      <ReportModal
+        collectionId={collectionId || 0}
+        tokenId={tokenId || 0}
+        tokenPrefix={offer?.collectionDescription.tokenPrefix || token?.collection.tokenPrefix || ''}
+        isVisible={reportModalVisible}
+        onClose={closeReportModal}
+        testid={`${testid}-report-modal`}
+      />
     </CommonTokenDetailStyled>
   );
 };
@@ -162,6 +215,7 @@ export const CommonTokenDetail: FC<IProps> = ({
 const CommonTokenDetailStyled = styled.div`
   display: flex;
   width: 100%;
+  position: relative;
 
   @media (max-width: 767px) {
     flex-direction: column;
@@ -176,15 +230,6 @@ const CommonTokenDetailStyled = styled.div`
       padding: 24px 16px;
       width: calc(304px - (var(--gap) * 3));
     }
-  }
-`;
-
-const IconWrapper = styled.div`
-  margin-left: 4px;
-  margin-right: 16px;
-
-  svg {
-    fill: ${Grey500};
   }
 `;
 
@@ -289,4 +334,91 @@ const Account = styled.a`
 const Divider = styled.div`
   margin: 24px 0;
   border-top: 1px dashed ${Grey300};
+`;
+
+const DropdownStyled = styled(Dropdown)`
+  position: absolute;
+  right: 0;
+`;
+
+const DropdownMenu = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+`;
+
+const DropdownMenuItem = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 24px;
+  &:hover {
+    background: var(--color-primary-100);
+  }
+`;
+
+const ScanMenuItem = styled(DropdownMenuItem)`
+  border-bottom: 1px dashed ${Grey300};
+  color: ${Primary500};
+  &:hover {
+    color: ${Primary600};
+  }
+`;
+
+const ReportMenuItem = styled(DropdownMenuItem)`
+  color: ${Coral500};
+  &:hover {
+    background-color: ${Coral100};
+  }
+`;
+
+const DropdownWrapper = styled.div`
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid ${BlueGrey300};
+  background: ${BlueGrey100};
+  border-radius: 8px;
+  & svg {
+    fill: ${BlueGrey300};
+    &:hover {
+      fill: ${Secondary400};
+    }
+  }
+`;
+
+const MenuIconWrapper = styled.div`
+  && {
+    width: 16px;
+    height: 16px;
+    margin-left: 4px;
+
+    path {
+      stroke: currentColor;
+    }
+  }
+`;
+
+const IconWrapper = styled.div`
+  margin-left: 4px;
+  margin-right: 16px;
+
+  svg {
+    fill: ${Grey500};
+  }
+`;
+
+const DropdownIconWrapper = styled.div`
+  margin-left: 4px;
+  margin-right: 16px;
+
+  svg {
+    fill: ${Grey500};
+  }
 `;
