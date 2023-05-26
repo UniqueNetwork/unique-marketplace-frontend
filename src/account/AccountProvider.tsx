@@ -43,7 +43,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
   }, []);
 
   const changeAccount = useCallback(async (account: MarketAccount) => {
-    if (!api?.market) return;
+    if (!api?.market || !account?.address) return;
     const balance = await api.market.getAccountBalance(account.address);
     const accountWithBalance = { ...account, balance };
     localStorage.setItem(DefaultAccountKey, account.address);
