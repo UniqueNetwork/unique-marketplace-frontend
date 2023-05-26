@@ -105,24 +105,34 @@ export const getAccountsColumns = ({
       return (
         <ActionsWrapper>
           <TransferActionsWrapper>
-            <Button title={'Send'} onClick={onShowSendFundsModal(address)} disabled={!balance?.parsed} />
-            <Button
-              title={'Get'}
-              onClick={onGetClick}
-              testid={`${testid}-${address}-get-button`}
-            />
-            {isLocal && <Button title={'Delete'} onClick={onShowDeleteLocalAccountModal(address)} testid={`${testid}-${address}-delete-button`} />}
+            <SendGetWrapper>
+              <Button title={'Send'} onClick={onShowSendFundsModal(address)} disabled={!balance?.parsed} />
+              <Button
+                title={'Get'}
+                onClick={onGetClick}
+                testid={`${testid}-${address}-get-button`}
+              />
+            </SendGetWrapper>
+            {(!deposit.isZero()) && <DepositActionsWrapper>
+              <Button title={`Withdraw ${formatBalance(balance.withdraw.parsed, 4)} ${tokenSymbol}`}
+                onClick={onShowWithdrawDepositModal(address)}
+                role={'primary'}
+                testid={`${testid}-${address}-get-button`}
+              />
+              <IconWithHint align={{ appearance: 'vertical', vertical: 'bottom', horizontal: 'right' }}>
+                <span>Learn more in <StyledLink href='/FAQ' target='_blank' rel='noreferrer'>FAQ</StyledLink></span>
+              </IconWithHint>
+            </DepositActionsWrapper>}
           </TransferActionsWrapper>
-          {(!deposit.isZero()) && <DepositActionsWrapper>
-            <Button title={`Withdraw ${formatBalance(balance.withdraw.parsed, 4)} ${tokenSymbol}`}
-              onClick={onShowWithdrawDepositModal(address)}
-              role={'primary'}
-              testid={`${testid}-${address}-get-button`}
-            />
-            <IconWithHint align={{ appearance: 'vertical', vertical: 'bottom', horizontal: 'right' }}>
-              <span>Learn more in <StyledLink href='/FAQ' target='_blank' rel='noreferrer'>FAQ</StyledLink></span>
-            </IconWithHint>
-          </DepositActionsWrapper>}
+          <div>
+            {isLocal && <Button
+              title=''
+              role='ghost'
+              iconLeft={{ name: 'trash', size: 24 }}
+              onClick={onShowDeleteLocalAccountModal(address)}
+              testid={`${testid}-${address}-delete-button`}
+            />}
+          </div>
         </ActionsWrapper>
       );
     }
@@ -156,29 +166,15 @@ const LinkStyled = styled(Link)`
 `;
 
 const TransferActionsWrapper = styled.div`
-  && {
-    display: flex;
-    align-items: center;
-    gap: var(--prop-gap);
-    flex-wrap: nowrap;
-    button,
-    a {
-      flex: 1;
-    }
-    @media (max-width: 768px) {
-      flex-direction: row;
-      row-gap: var(--gap);
-      width: 100%;
-      margin: 0;
-      button {
-        width: calc((100% - var(--gap)) / 2);
-      }
-    }
-  }
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-gap: var(--prop-gap);
+  width: -webkit-fill-available;
 `;
 
 const DepositActionsWrapper = styled(TransferActionsWrapper)`
   && {
+    display: flex;
     column-gap: calc(var(--gap) / 2);
     padding: 0;
     button {
@@ -221,9 +217,27 @@ const StyledLink = styled.a`
 `;
 
 const ActionsWrapper = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  grid-gap: var(--prop-gap);
-  width: -webkit-fill-available;
-  margin: var(--prop-gap) 0;
+  display: flex;
+  align-items: center;
+  margin: 8px 0;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  gap: var(--prop-gap);
+  div:last-child {
+    min-width: 24px;
+  }
+  button.unique-button.ghost {
+    padding: 8px 0;
+  }
+`;
+
+const SendGetWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: var(--prop-gap);
+  flex-wrap: nowrap;
+  button,
+  a {
+    flex: 1;
+  }
 `;
