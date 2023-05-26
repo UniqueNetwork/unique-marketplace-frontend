@@ -9,7 +9,7 @@ const gqlQuery = {
   operationName: 'tokens_by_account_query',
   query: `query tokens_by_account_query($owner: String) {
     tokens(
-      where: {tokens_owner: {_eq: $owner}, burned: {_eq: "false"}}
+      where: {tokens_owner: {_eq: $owner}, type: {_eq: NFT}, burned: {_eq: "false"}}
       limit: 1000
     ) {
       count

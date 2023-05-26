@@ -65,7 +65,7 @@ const TokenPage = () => {
       if (offer) {
         const collection = await getCollection(Number(collectionId));
         if (collection) setCollection(collection);
-        setIsBundle(!!offer.tokenDescription?.nestingChildTokens);
+        setIsBundle(!!offer.tokenDescription?.nestingChildTokens?.length);
       }
       if (!token) await fetchToken();
       if (offer || token) {

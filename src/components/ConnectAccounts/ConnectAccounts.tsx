@@ -24,7 +24,6 @@ export const ConnectAccounts = () => {
   );
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
   const [missingExtension, setMissingExtension] = useState<'Polkadot' | 'Metamask'>();
-  // const {} = useAccounts();
 
   const onCreateAccountClick = useCallback(() => {
     setCurrentModal(AccountModal.CREATE);
@@ -43,7 +42,6 @@ export const ConnectAccounts = () => {
 
   const handleConnectToMetamask = async () => {
     try {
-      // await Ethereum.requestAccounts();
       await connectProvider('metamask');
       setIsOpenConnectWalletModal(false);
     } catch (e: any) {

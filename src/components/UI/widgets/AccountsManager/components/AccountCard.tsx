@@ -1,8 +1,8 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useRef } from 'react';
 import { IAccount } from '../AccountsManager';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import useCopyToClipboard from '../hooks/useCopyToClipboard';
-import { Avatar } from '@unique-nft/ui-kit';
+import { Avatar, Tooltip } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { CopyButton, Text } from 'components/UI';
 
@@ -23,6 +23,8 @@ export const AccountCard = ({
       : address;
 
   const [_, copy] = useCopyToClipboard();
+  const nameTextRef = useRef<HTMLDivElement>(null);
+  const addressTextRef = useRef<HTMLDivElement>(null);
 
   return (
     <AccountCardWrapper>
@@ -34,9 +36,21 @@ export const AccountCard = ({
           <Avatar src={DefaultAvatar} type='circle' />
         )}
       <div className='account-card-content'>
-        <Text size='m' title={name}>{name}</Text>
+        <TooltipStyled
+          align={{ vertical: 'top', horizontal: 'middle', appearance: 'vertical' }}
+          targetRef={nameTextRef}
+        >
+          {name}
+        </TooltipStyled>
+        <Text size='m' ref={nameTextRef} >{name}</Text>
         <div className='account-card-address'>
-          <Text size='s' color='grey-500'>
+          <TooltipStyled
+            align={{ vertical: 'top', horizontal: 'middle', appearance: 'vertical' }}
+            targetRef={addressTextRef}
+          >
+            {address}
+          </TooltipStyled>
+          <Text size='s' color='grey-500' ref={addressTextRef}>
             {shortAddress}
           </Text>
           <CopyButton
@@ -66,11 +80,7 @@ const AccountCardWrapper = styled.div`
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
-      &[title]:hover::after {
-        content: attr(title);
-        background: var(--color-additional-dark);
-        color: var(--color-additional-light);
-      }
+      position: relative;
     }
     .account-card-address {
       display: flex;
@@ -78,4 +88,8 @@ const AccountCardWrapper = styled.div`
       column-gap: calc(var(--prop-gap) / 4);
     }
   }
+`;
+
+const TooltipStyled = styled(Tooltip)`
+  z-index: 9999;
 `;
