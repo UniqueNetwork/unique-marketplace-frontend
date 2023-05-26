@@ -10,10 +10,12 @@ import { getWithdrawBids } from 'api/restApi/auction/auction';
 import { Accounts, ProviderClass } from '@unique-nft/accounts';
 
 import { PolkadotProvider, PolkadotAccount } from '@unique-nft/accounts/polkadot';
-import { KeyringLocalProvider, KeyringLocalAccount } from '@unique-nft/accounts/keyring-local';
+import { KeyringLocalAccount } from '@unique-nft/accounts/keyring-local';
 import { MetamaskProvider, MetamaskAccount } from '@unique-nft/accounts/metamask';
 import { ConnectAccounts } from 'components/ConnectAccounts';
 import { MarketAccount, ProviderTypesName } from './types';
+import keyring from '@polkadot/ui-keyring';
+import { KeyringLocalProvider } from './providers/KeyringProvider';
 
 export const DefaultAccountKey = 'unique_market_account_address';
 export const ConnectedAccountTypesKey = 'unique_market_account_types';
@@ -66,6 +68,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
   const fetchAccounts = useCallback(async () => {
     if (!api?.market) return;
     setIsLoading(true);
+
     const allAccounts = (await _accounts?.getAccounts())?.map((account) => {
       let name; // TODO: refactor?
       const marketAccount = { account: account as unknown } as MarketAccount;
@@ -190,9 +193,9 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
     void updateCurrentAccountDeposit();
   }, [updateCurrentAccountDeposit]);
 
-  const forgetAccount = useCallback((address: string) => {
-    _accounts.getProvider(KeyringLocalProvider)?.forgetAccount(address);
-  }, []);
+  const forgetAccount = useCallback((_address: string) => {
+    keyring.forgetAccount(_address);
+  }, [_accounts, accounts]);
 
   const value = useMemo(() => ({
     isLoading,
