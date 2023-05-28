@@ -1,9 +1,17 @@
-import { KeyringPair, KeyringPair$Meta, KeyringPair$Json } from '@polkadot/keyring/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 import keyring from '@polkadot/ui-keyring';
 import { accounts as accounts$ } from '@polkadot/ui-keyring/observable/accounts';
-import { Account, Provider } from '@unique-nft/accounts/types';
-import { KeyringLocalAccount, KeyringLocalOptions } from '@unique-nft/accounts/keyring-local';
+import { Account, Provider, SignResult, UnsignedTxPayload } from '@unique-nft/accounts/types';
+import { KeyringLocalAccount, KeyringLocalOptions, PasswordCallback } from '@unique-nft/accounts/keyring-local';
+import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
+
+declare module '@unique-nft/accounts/keyring-local' {
+  class KeyringLocalAccount extends KeyringLocalAccount {
+    private readonly passwordCallback?;
+    constructor(keyringPair: KeyringPair, passwordCallback?: PasswordCallback | undefined);
+    sign(unsignedTxPayload: UnsignedTxPayload): Promise<SignResult>;
+  }
+}
 
 export class KeyringLocalProvider extends Provider<KeyringPair> {
   private static initializedOptions: KeyringLocalOptions;
