@@ -101,7 +101,7 @@ const LayoutStyled = styled.div<{hasFooterSpacing: boolean}>`
     flex-direction: column;
     row-gap: calc(var(--gap) * 1.5);
     @media (min-width: 1920px) {
-      width: 1374px;
+        width: var(--prop-container-width);
     }
   }
 
@@ -125,7 +125,7 @@ const LayoutStyled = styled.div<{hasFooterSpacing: boolean}>`
     @media (min-width: 1920px) {
       align-items: center;
       &>h1 {
-        width: 1374px;
+        width: var(--prop-container-width);
       }
     }
   }
@@ -160,7 +160,7 @@ const LayoutStyled = styled.div<{hasFooterSpacing: boolean}>`
         align-items: flex-start;
       }
       @media (min-width: 1920px) {
-        width: 1374px;
+        width: var(--prop-container-width);
       }
     }
   }
