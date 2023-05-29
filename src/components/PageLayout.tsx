@@ -72,7 +72,7 @@ const LayoutStyled = styled.div<{hasFooterSpacing: boolean}>`
     }
 
     .unique-font-heading.size-1 {
-      font-family: var(--font-heading);
+      font-family: var(--prop-font-family-heading);
     }
 
     footer {

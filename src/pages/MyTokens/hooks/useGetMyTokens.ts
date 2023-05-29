@@ -4,6 +4,7 @@ import { useApi } from 'hooks/useApi';
 import { useCallback, useState } from 'react';
 import { GqlToken, MyToken } from '../types';
 import config from '../../../config';
+import { Address } from '@unique-nft/utils';
 
 const gqlQuery = {
   operationName: 'tokens_by_account_query',
@@ -37,14 +38,16 @@ const gqlQuery = {
 };
 
 export const useGetMyTokens = () => {
-  const { settings, currentChainId } = useApi();
+  const { settings, currentChainId, chainProperties } = useApi();
   const [isFetching, setIsFetching] = useState(false);
   const [tokens, setTokens] = useState<MyToken[]>([]);
 
   const fetchMyTokens = useCallback(async (account: MarketAccount | undefined) => {
     if (!account) return [];
     setIsFetching(true);
-    const address = account.address;
+    const address = Address.is.ethereumAddressInAnyForm(account.address)
+      ? account.address
+      : Address.normalize.substrateAddress(account.address, chainProperties?.SS58Prefix);
     const { scanApi } = config.blockchains[currentChainId || ''] || {};
     const response = await post(scanApi, {
       ...gqlQuery,
@@ -63,7 +66,7 @@ export const useGetMyTokens = () => {
     }
     setIsFetching(false);
     return [];
-  }, [settings]);
+  }, [settings, chainProperties]);
 
   return {
     isFetching,

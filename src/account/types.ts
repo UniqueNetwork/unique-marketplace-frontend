@@ -1,5 +1,5 @@
-import { BN } from '@polkadot/util';
 import { KeyringPair } from '@polkadot/keyring/types';
+import { BN } from '@polkadot/util';
 import { Account } from '@unique-nft/accounts/types';
 import { Signer } from '../api/chainApi/adapters/IBaseAdapter';
 import { TWithdrawBid } from '../api/restApi/auction/types';
