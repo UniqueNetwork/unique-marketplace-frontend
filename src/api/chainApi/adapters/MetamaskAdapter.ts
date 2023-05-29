@@ -106,9 +106,8 @@ class MetamaskAdapter implements IMarketContractAdapter {
   }
 
   async transferBalance(from: string, to: string, amount: ChainValue, signer: Signer): Promise<void> {
-    // const fromCross = Address.extract.ethCrossAccountId(from);
-    const toCross = Address.extract.ethCrossAccountId(to);
-    await (await signer.sendTransaction({ to: toCross.eth, value: amount.raw })).wait();
+    const toEth = Address.is.ethereumAddress(to) ? to : Address.mirror.substrateToEthereum(to);
+    await (await signer.sendTransaction({ to: toEth, value: amount.raw })).wait();
   }
 
   async changeAllowance(from: string, to: string, collectionId: number, tokenId: number, targetAllowance: boolean, signer: Signer): Promise<void> {
