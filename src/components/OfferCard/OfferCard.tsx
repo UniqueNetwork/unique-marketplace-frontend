@@ -106,7 +106,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
             testid={`${testid}-price`}
             size='l'
           >{topBid ? `${formatBalance(Number(topBid))}` : `${offer.price.parsed}` }</Text>
-          <IconStyled name={`chain-${chainProperties?.token}`} size={16} />
+          <IconStyled name={`chain-${currentChainId?.toLowerCase()}`} size={16} />
           {!offer?.auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         </PriceWrapper>
         {offer?.auction && <AuctionInfoWrapper>
