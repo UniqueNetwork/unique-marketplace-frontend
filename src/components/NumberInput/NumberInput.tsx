@@ -25,7 +25,7 @@ export const NumberInput: FC<AmountInputProps> = ({
   onSetMax,
   additionalText,
   placeholder,
-  decimals = 6,
+  decimals = 4,
   label,
   className,
   loading,
@@ -34,7 +34,7 @@ export const NumberInput: FC<AmountInputProps> = ({
   const onChangeInput = useCallback((_value: string) => {
     if (_value === '') onChange(_value);
     // regExp to check value according to valid number format
-    const regExp = new RegExp(`^([1-9]\\d{0,15}|0)(\\.\\d{0,${decimals}})?$`);
+    const regExp = new RegExp(`^([1-9]\\d{0,9}|0)(\\.\\d{0,${decimals}})?$`);
     // check value is correct
     if (_value.length > 1 && _value.startsWith('0') && !_value.startsWith('0.')) _value = _value.replace('0', '');
     if (regExp.test(_value.trim())) {
