@@ -13,6 +13,7 @@ import { Attribute, AttributeCount } from 'api/restApi/offers/types';
 import { getAttributesCountFromTokens, getAttributesFromTokens } from './utils/attributes';
 import { MixedMyTokenAndOffer } from '../types';
 import { MyCollection } from 'api/restApi/collections/types';
+import { getIpfsUriByImagePath } from 'utils/urlUtils';
 
 interface CollectionsFilterProps {
   value?: { collections?: number[], attributes?: { key: string, attribute: string }[], attributeCounts?: number[] } | null
@@ -98,7 +99,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({
               onChange={onCollectionSelect(collection.id)}
               testid={`${testid}-checkbox-${collection.id}`}
             />
-            <CollectionCover src={collection.cover || ''} size={22} type={'circle'}/>
+            <CollectionCover src={getIpfsUriByImagePath(collection.cover || '')} size={22} type={'circle'}/>
             <Text
               testid={`${testid}-name-${collection.id}`}
             >{collection.name || ''}</Text>
