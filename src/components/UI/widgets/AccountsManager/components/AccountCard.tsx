@@ -92,4 +92,5 @@ const AccountCardWrapper = styled.div`
 
 const TooltipStyled = styled(Tooltip)`
   z-index: 9999;
+  max-width: unset;
 `;
