@@ -4,7 +4,7 @@ import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 import styled from 'styled-components';
 
 import { Picture, Avatar } from 'components';
-import { CollapsableText, Icon, Link, Text } from 'components/UI';
+import { CollapsableText, Icon, Text, Link as UILink } from 'components/UI';
 import { isTokenOwner, toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import { CollectionStatisticsBlock } from './CollectionStaticticsBlock';
 import { CollectionDetailSkeleton } from './CollectionDetailSkeleton';
@@ -16,12 +16,15 @@ import { Primary500, Primary600 } from 'styles/colors';
 import CollectionBanner from 'static/images/banner.svg';
 import config from 'config';
 import { PagePaper } from 'components/PagePaper/PagePaper';
+import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
+import { Link } from 'react-router-dom';
 interface IProps {
   collection?: CollectionInfoWithSchemaResponse
 }
 
 export const CollectionDetail: FC<IProps> = ({ collection }) => {
   const { selectedAccount } = useAccounts();
+  const deviceSize = useDeviceSize();
 
   const { currentChainId, chainProperties } = useApi();
 
@@ -61,9 +64,25 @@ export const CollectionDetail: FC<IProps> = ({ collection }) => {
             <Heading size='1' >{name}</Heading>
             <Row>
               <CollapsableText size='l' >{description}</CollapsableText>
-
             </Row>
           </div>
+          {deviceSize < DeviceSize.lg && <>
+            <Row>
+              <EditCollectionLink to={`/collection/${collection.id}/edit`}>
+                <span>Edit collection</span>
+                <Icon size={24} name={'gear'} />
+              </EditCollectionLink>
+            </Row>
+            <Row>
+              <LinksWrapper>
+                <Icon size={24} name={'discord'} />
+                <Icon size={24} name={'instagram'} />
+                <Icon size={24} name={'twitter'} />
+                <Icon size={24} name={'globe-simple'} />
+                <Icon size={24} name={'shared'} />
+              </LinksWrapper>
+            </Row>
+          </>}
           <Row>
             <Text color='grey-500' size='m'>ID:</Text>
             <Text size='m'>{collection.id}</Text>
@@ -83,10 +102,23 @@ export const CollectionDetail: FC<IProps> = ({ collection }) => {
             </OwnerWrapper>
           </Row>
           <CollectionStatisticsBlock />
+          {deviceSize < DeviceSize.lg && <CreationInfoWrapper>
+            <Text color={'grey-500'} >Created on {'15 February 2021'}</Text>
+            <LinkStyled
+              target={'_blank'}
+              rel={'noreferrer'}
+              href={`${scanUrl}collection/${collection.id}`}
+            >
+              <TextStyled>View on UniqueScan</TextStyled>
+              <IconWrapper>
+                <Icon name={'arrow-up-right'} size={16} color={Primary500} />
+              </IconWrapper>
+            </LinkStyled>
+          </CreationInfoWrapper>}
         </CollectionInfoWrapper>
       </CollectionCardWrapper>
-      <RightSidebar>
-        <EditCollectionLink href={`/collection/${collection.id}/edit`}>
+      {deviceSize >= DeviceSize.lg && <RightSidebar>
+        <EditCollectionLink to={`/collection/${collection.id}/edit`}>
           {/* TODO: use link from react-router-dom instead of href to avoid page refresh */}
           <span>Edit collection</span>
           <Icon size={24} name={'gear'} />
@@ -111,7 +143,7 @@ export const CollectionDetail: FC<IProps> = ({ collection }) => {
             </IconWrapper>
           </LinkStyled>
         </CreationInfoWrapper>
-      </RightSidebar>
+      </RightSidebar>}
     </CollectionDetailWrapper>
   </CollectionDetailPaper>;
 };
@@ -133,11 +165,18 @@ const CollectionDetailWrapper = styled.div`
   justify-content: space-between;
   padding: calc(var(--gap) * 1.5) calc(var(--gap) * 2) calc(var(--gap) * 2);
   position: relative;
+  @media (max-width: 768px) {
+    padding: calc(var(--gap) * 1.5) 0 calc(var(--gap) * 2);
+  }
 `;
 
 const CollectionCardWrapper = styled.div`
   display: flex;
   gap: calc(var(--gap) * 2);
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 `;
 
 const PictureWrapper = styled.div`
@@ -145,8 +184,12 @@ const PictureWrapper = styled.div`
   overflow: hidden;
   border-radius: 24px;
   border: 4px solid var(--color-additional-light);
+  background: var(--color-additional-light);
   width: 160px;
-  height: 160px;
+  height: 160px;  
+  @media (max-width: 768px) {
+    margin-left: calc(var(--gap) * 2);
+  }
 `;
 
 const CollectionInfoWrapper = styled.div`
@@ -177,6 +220,8 @@ const EditCollectionLink = styled(Link)`
   align-items: center;
   text-align: center;
   margin-bottom: calc(var(--gap) * 1.5);
+  color: ${Primary500};
+  font-size: 16px;
 `;
 
 const LinksWrapper = styled.div`
@@ -211,7 +256,7 @@ const AccountLink = styled.a`
   }
 `;
 
-const LinkStyled = styled(Link)`
+const LinkStyled = styled(UILink)`
   display: flex;
   align-items: center;
   column-gap: calc(var(--gap) / 4);

@@ -7,6 +7,7 @@ export const GlobalStyle = createGlobalStyle`
     
     /* colors */
     --grey-300: #D2D3D6;
+    font-feature-settings: 'pnum' on, 'lnum' on;
   }
 /* reset default browser css */
 a{

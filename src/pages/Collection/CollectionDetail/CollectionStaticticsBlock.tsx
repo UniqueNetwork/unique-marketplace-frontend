@@ -6,23 +6,23 @@ import styled from 'styled-components';
 export const CollectionStatisticsBlock = () => {
   return <CollectionStatisticsBlockWrapper>
     <div>
-      <Heading size={'4'}>10 000</Heading>
+      <Heading size='3'>10 000</Heading>
       <Text size={'m'} color='grey-600'>items</Text>
     </div>
     <div>
-      <Heading size={'4'}>77.1%</Heading>
+      <Heading size='3'>77.1%</Heading>
       <Text size={'m'} color='grey-600'>listed NFTs</Text>
     </div>
     <div>
-      <Heading size={'4'}>1 KSM</Heading>
+      <Heading size='3'>1 KSM</Heading>
       <Text size={'m'} color='grey-600'>floor price</Text>
     </div>
     <div>
-      <Heading size={'4'}>7 582</Heading>
+      <Heading size='3'>7 582</Heading>
       <Text size={'m'} color='grey-600'>holders</Text>
     </div>
     <div>
-      <Heading size={'4'}>74%</Heading>
+      <Heading size='3'>74%</Heading>
       <Text size={'m'} color='grey-600'>unique holders</Text>
     </div>
   </CollectionStatisticsBlockWrapper>;
@@ -44,8 +44,23 @@ const CollectionStatisticsBlockWrapper = styled.div`
       color: var(--color-grey-600);
     }
   }
+  @media (max-width: 1024px) {
+    & > div {
+      padding-right: calc(var(--gap) * 1);
+      margin-right: calc(var(--gap) * 1);
+    }
+  }
+  @media (max-width: 576px) {
+    flex-direction: column;
+    & > div {
+      flex-direction: row;
+      gap: calc(var(--gap) / 2);
+      align-items: baseline;
+    }
+  }
   & > div:last-child {
     border: none;
+    padding-right: 0;
+    margin-right: 0;
   }
-  
 `;
