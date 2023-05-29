@@ -16,11 +16,12 @@ import BuyBundleInformation from '../TokenDetail/BuyBundleInformation';
 
 interface BuyTokenProps {
   offer?: Offer;
+  royalty?: number;
   onBuy(): void
   testid?: string
 }
 
-export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy, testid }) => {
+export const BuyToken: FC<BuyTokenProps> = ({ offer, royalty, onBuy, testid }) => {
   const { api } = useApi();
 
   const { fee, fetchingFee, getFee } = useGetFee<Parameters<MarketController['getBuyFixFee']>>(api?.market?.getBuyFixFee.bind(api?.market));
@@ -55,6 +56,7 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy, testid }) => {
   return (<>
     <Text size={'l'}>Price</Text>
     <Price price={offer?.price?.parsed.toString()} />
+    {royalty && <Text size='m' color='grey-500'>{`Flexible Royalties: ${royalty}%`}</Text>}
     <ButtonWrapper>
       <Button
         onClick={onBuyClick}

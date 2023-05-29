@@ -10,6 +10,7 @@ import { useApi } from 'hooks/useApi';
 
 interface SellTokenProps {
   offer?: Offer
+  royalty?: number;
   isAllowed?: boolean
   onSellClick(): void
   onTransferClick(): void
@@ -17,7 +18,7 @@ interface SellTokenProps {
   testid: string
 }
 
-export const SellToken: FC<SellTokenProps> = ({ offer, isAllowed, onSellClick, onTransferClick, onDelistClick, testid }) => {
+export const SellToken: FC<SellTokenProps> = ({ offer, royalty, isAllowed, onSellClick, onTransferClick, onDelistClick, testid }) => {
   const { selectedAccount } = useAccounts();
   const { settings } = useApi();
 
@@ -29,6 +30,7 @@ export const SellToken: FC<SellTokenProps> = ({ offer, isAllowed, onSellClick, o
     return (<>
       <Text size={'l'}>{'Price'}</Text>
       <Price testid={testid} price={offer.price.parsed.toString()} />
+      {royalty && <Text size='m' color='grey-500'>{`Flexible Royalties: ${royalty}%`}</Text>}
       <ButtonWrapper>
         <Button
           title={'Delist'}
@@ -45,6 +47,7 @@ export const SellToken: FC<SellTokenProps> = ({ offer, isAllowed, onSellClick, o
 
   return (
     <>
+      {royalty && <Text size='m' color='grey-500'>{`Flexible Royalties: ${royalty}%`}</Text>}
       <ActionsWrapper>
         {!hideSellBtn && <Button
           title={'Sell'}
