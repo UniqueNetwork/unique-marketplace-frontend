@@ -111,7 +111,7 @@ const HeaderStyled = styled.div`
     }
   }
   @media (min-width: 1920px) {
-    width: 1374px;
+    width: var(--prop-container-width);
   }
 `;
 

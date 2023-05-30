@@ -116,7 +116,7 @@ const AccountsManagerWrapper = styled.div`
   padding: calc(var(--prop-gap) * 1.5 / 4) calc(var(--prop-gap) * 2)
   calc(var(--prop-gap) * 1.5 / 4) var(--prop-gap);
   cursor: pointer;
-  max-width: 200px;
+  max-width: 230px;
   &:hover {
     border: 1px solid var(--color-blue-grey-400);
   }
