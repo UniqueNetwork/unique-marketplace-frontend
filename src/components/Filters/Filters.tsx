@@ -19,7 +19,7 @@ export const Filters: FC<FiltersProps> = ({ value, attributes, attributeCounts, 
   }, [value, onFilterChange]);
 
   const onCollectionsFilterChange = useCallback((collections: number[]) => {
-    onFilterChange({ ...value, collections, attributes: [] });
+    onFilterChange({ ...value, collections, attributes: [], attributeCounts: [] });
   }, [value, onFilterChange]);
 
   const onCollectionAttributesFilterChange = useCallback((attributes: AttributeItem[]) => {

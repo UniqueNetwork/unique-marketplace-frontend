@@ -61,15 +61,14 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
 
   const onFilterChange = useCallback(async (filterState: FilterState | null) => {
     setUrlParameter('filterState', filterState ? JSON.stringify(filterState) : '');
-    const { attributesCount } = await fetch({
+    await fetch({
       page: 1,
       pageSize,
       ...(getFilterByState(filterState)),
       searchText: searchValue || undefined,
       sort: [sortingValue]
     });
-    const _selectedAttributeCounts = filterState?.attributeCounts?.filter((item) => attributesCount.findIndex(({ numberOfAttributes }) => numberOfAttributes === item) > -1);
-    setFilterState({ ...filterState, attributeCounts: _selectedAttributeCounts });
+    setFilterState(filterState);
   }, [fetch, sortingValue, getFilterByState, searchValue]);
 
   const onChangeAccount = useCallback(() => {
