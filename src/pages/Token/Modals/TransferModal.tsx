@@ -55,7 +55,7 @@ type AskTransferModalProps = {
 }
 
 const AskTransferModal: FC<AskTransferModalProps> = ({ token, onTransfer, testid }) => {
-  const { api } = useApi();
+  const { api, chainProperties } = useApi();
   const { selectedAccount } = useAccounts();
   const [address, setAddress] = useState<string>('');
   const [isAddressValid, setIsAddressValid] = useState(false);
@@ -66,9 +66,12 @@ const AskTransferModal: FC<AskTransferModalProps> = ({ token, onTransfer, testid
     setIsFeeLoading(true);
     return debounce(() => {
       if (!api?.market || !token || !selectedAccount || !recipient) return setIsFeeLoading(false);
+      const sender = Address.is.ethereumAddress(selectedAccount.address)
+        ? selectedAccount.address
+        : Address.normalize.substrateAddress(selectedAccount.address, chainProperties?.SS58Prefix);
 
       api?.market?.getTransferTokenFee(
-        selectedAccount.address,
+        sender,
         recipient,
         token.collectionId,
         token.tokenId,
