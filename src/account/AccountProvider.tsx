@@ -16,6 +16,7 @@ import { ConnectAccounts } from 'components/ConnectAccounts';
 import { MarketAccount, ProviderTypesName } from './types';
 import keyring from '@polkadot/ui-keyring';
 import { KeyringLocalProvider } from './providers/KeyringProvider';
+import { Signer } from 'ethers';
 
 export const DefaultAccountKey = 'unique_market_account_address';
 export const ConnectedAccountTypesKey = 'unique_market_account_types';
@@ -24,6 +25,13 @@ const ProviderTypes: Record<ProviderTypesName, typeof PolkadotProvider | typeof 
   polkadot: PolkadotProvider,
   keyring: KeyringLocalProvider,
   metamask: MetamaskProvider
+};
+
+const EthereumChainIds: Record<string, string> = {
+  unique: '0x22b0',
+  quartz: '0x22b1',
+  opal: '0x22b2',
+  sapphire: '0x22b3'
 };
 
 const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts(), children }) => {
@@ -120,13 +128,23 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
     if (!api?.market) return;
     setIsLoading(true);
     void (async () => {
+      if (!currentChainId) return;
       const connectedProviders = (localStorage.getItem(ConnectedAccountTypesKey)?.split(';') || ['keyring']) as ProviderTypesName[];
       await Promise.all(connectedProviders.map(async (type) => {
         if (!type) return;
-        await _accounts.addProvider<ProviderClass<any>>(
+
+        const provider = await _accounts.addProvider<ProviderClass<any>>(
           ProviderTypes[type],
           type === 'keyring' ? { passwordCallback: showSignDialog } : undefined
         );
+        if (type === 'metamask') {
+          const account = await provider.first() as MetamaskAccount;
+          // @ts-ignore
+          await (account?.signer as Signer).provider?.provider?.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: EthereumChainIds[currentChainId] }]
+          });
+        }
       }));
       await fetchAccounts();
       localStorage.setItem(ConnectedAccountTypesKey, connectedProviders.join(';'));
