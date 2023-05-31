@@ -100,9 +100,11 @@ class MetamaskAdapter implements IMarketContractAdapter {
   }
 
   async getTransferBalanceFee(from: string, to: string, amount: ChainValue, signer: Signer): Promise<string> {
-    const toCross = Address.extract.ethCrossAccountId(to);
-    const fee = await signer.estimateGas({ to: toCross.eth, value: amount.raw });
-    return fee.toString();
+    const toEth = Address.is.ethereumAddress(to) ? to : Address.mirror.substrateToEthereum(to);
+    const gasPrice = await signer.getGasPrice();
+    const estimateGas = await signer.estimateGas({ to: toEth, value: amount.raw });
+
+    return estimateGas.mul(gasPrice).toString();
   }
 
   async transferBalance(from: string, to: string, amount: ChainValue, signer: Signer): Promise<void> {
