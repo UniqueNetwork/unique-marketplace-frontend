@@ -65,7 +65,7 @@ const AskTransferModal: FC<AskTransferModalProps> = ({ token, onTransfer, testid
   const getFee = useCallback((recipient: string) => {
     setIsFeeLoading(true);
     return debounce(() => {
-      if (!api?.market || !token || !selectedAccount || !recipient) return setIsFeeLoading(false);
+      if (!api?.market || !token || !selectedAccount || !recipient || recipient === selectedAccount.address) return setIsFeeLoading(false);
       const sender = Address.is.ethereumAddress(selectedAccount.address)
         ? selectedAccount.address
         : Address.normalize.substrateAddress(selectedAccount.address, chainProperties?.SS58Prefix);
@@ -89,13 +89,13 @@ const AskTransferModal: FC<AskTransferModalProps> = ({ token, onTransfer, testid
 
   const onAddressInputChange = useCallback((value: string) => {
     setAddress(value);
-      if (Address.is.ethereumAddress(value) || Address.is.substrateAddress(value)) {
+      if ((Address.is.ethereumAddress(value) || Address.is.substrateAddress(value)) && value !== selectedAccount?.address) {
         getFee(value)();
         setIsAddressValid(true);
       } else {
         setIsAddressValid(false);
       }
-  }, []);
+  }, [selectedAccount]);
 
   const onConfirmTransferClick = useCallback(
     () => {

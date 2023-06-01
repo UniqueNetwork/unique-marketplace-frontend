@@ -58,6 +58,7 @@ export const ReportModal = ({ isVisible, collectionId, tokenId, tokenPrefix, tes
         <Text>Tell us why you reckon this NFT should be taken off the marketplace</Text>
       </LabelWrapper>
       <InputWrapper
+        allowSpaces
         placeholder='Details'
         onChange={setReportText}
         value={reportText}

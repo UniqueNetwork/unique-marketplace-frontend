@@ -174,7 +174,7 @@ export const useMyTokensFilter = ({ tokens, offers, isFetchingTokens }: UseMyTok
       if (collections.has(id)) return;
       collections.set(id, {
         id,
-        cover: schema?.coverPicture.fullUrl || '',
+        cover: schema?.coverPicture?.fullUrl || '',
         name,
         owner,
         tokenPrefix,
