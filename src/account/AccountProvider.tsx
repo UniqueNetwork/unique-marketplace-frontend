@@ -35,23 +35,16 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
   const [isOpenConnectWalletModal, setIsOpenConnectWalletModal] = useState<boolean>(false);
   const { api, baseURL, currentChainId } = useApi();
 
-  const unsubscribesBalancesChanges = useRef<SocketClient>();
+  const sdkSocketClient = useRef<SocketClient>();
   const subscribeBalancesChanges = useCallback((accountsWithBalances: MarketAccount[]) => {
     const sdk = api?.market?.uniqueSdk;
     if (!sdk) return;
-    let client: SocketClient;
-    if (!unsubscribesBalancesChanges.current) {
-      client = sdk.subscription.connect({
-        transports: ['websocket']
-      });
-      unsubscribesBalancesChanges.current = client;
-    } else {
-      unsubscribesBalancesChanges.current.socket.removeAllListeners();
-      // recreate client just in case (ex. network changed)
-      client = sdk.subscription.connect({
-        transports: ['websocket']
-      });
-      unsubscribesBalancesChanges.current = client;
+      // always recreate client just in case (ex. network changed) whenever accounts refetched
+    const client: SocketClient = sdk.subscription.connect({
+      transports: ['websocket']
+    });
+    if (sdkSocketClient.current) {
+      sdkSocketClient.current.socket.removeAllListeners();
     }
     accountsWithBalances.forEach((account) => {
       client.subscribeAccountCurrentBalance({ address: account.address });
@@ -63,6 +56,10 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
         const accountIndex = accountsWithBalances.findIndex((acc) => acc.address.toLowerCase() === address.toLowerCase());
         const accountsCopy = [...accountsWithBalances];
         const targetAccount = accountsCopy[accountIndex];
+        if (!targetAccount) {
+          console.error('Account for data: ', data, ' not found in list of accounts');
+          throw new Error('Event fired for non-existing account');
+        }
         targetAccount.balance = {
           withdraw: targetAccount.balance.withdraw,
           parsed: newBalance.formatted,
@@ -73,7 +70,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
         console.error('Falied to get balance update: ', e);
       }
     });
-    unsubscribesBalancesChanges.current = client;
+    sdkSocketClient.current = client;
   }, [api, accounts]);
 
   const changeAccount = useCallback(async (account: MarketAccount) => {
