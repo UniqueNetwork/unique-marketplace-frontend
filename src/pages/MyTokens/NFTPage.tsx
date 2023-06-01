@@ -31,11 +31,7 @@ export const NFTPage = () => {
     if (!api?.nft || !selectedAccount || isAccountsLoading) return;
 
     void (async () => {
-      const seller = Address.is.substrateAddressInAnyForm(selectedAccount.address)
-        ? Address.substrate.decode(selectedAccount.address)?.hex || ''
-        : Address.normalize.ethereumAddress(selectedAccount.address);
-
-      await fetch({ page: 1, pageSize, seller });
+      await fetch({ page: 1, pageSize, seller: selectedAccount.address });
       await fetchMyTokens(selectedAccount);
     })();
   }, [api?.nft, currentChainId, selectedAccount?.address]);
