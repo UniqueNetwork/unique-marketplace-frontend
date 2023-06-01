@@ -77,21 +77,21 @@ export const AccountsPage = () => {
     setSelectedAddress(address);
   }, []);
 
-  const onGetClick = useCallback(() => {
+  const onGetClick = useCallback((address: string) => () => {
     switch (chainProperties?.token) {
       case 'OPL':
         window.open('https://t.me/unique2faucet_opal_bot', '_blank', 'noopener');
         break;
-      case 'QUARTZ':
+      case 'QTZ':
         window.open('https://www.mexc.com/exchange/QTZ_USDT', '_blank', 'noopener');
         break;
-      case 'UNIQUE':
+      case 'UNQ':
         window.open('https://www.huobi.com/en-us/exchange/unq_usdt', '_blank', 'noopener');
         break;
       default:
         break;
     }
-  }, []);
+  }, [chainProperties]);
 
   const filteredAccounts: AccountInfo[] = useMemo(() => {
     const reduceAccounts = (acc: AccountInfo[], account: Account) => {

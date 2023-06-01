@@ -125,13 +125,6 @@ export const WalletManager: FC = () => {
           <>
             {formattedAccountDeposit && <Text color='grey-500' weight={'light'} size='xs'>The total market deposit for participation in auctions and
               sponsorship. <br/> Use the “Manage accounts” section to withdraw.</Text>}
-            {config.rampApiKey && <GetKsmButton
-              title={`Get ${chainProperties?.token || 'tokens'}`}
-              size={'small'}
-              role={'outlined'}
-              wide
-              onClick={openModal}
-            />}
           </>
         }
         networks={networks}

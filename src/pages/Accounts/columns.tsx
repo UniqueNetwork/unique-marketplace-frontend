@@ -17,7 +17,7 @@ type AccountsColumnsProps = {
   onShowSendFundsModal(address: string): () => void
   onShowWithdrawDepositModal(address: string): () => void
   onShowDeleteLocalAccountModal(address: string): () => void
-  onGetClick: () => void
+  onGetClick: (address: string) => () => void
   tokenSymbol: string
   scanUrl: string
 };
@@ -109,7 +109,7 @@ export const getAccountsColumns = ({
               <Button title={'Send'} onClick={onShowSendFundsModal(address)} disabled={!balance?.parsed} />
               <Button
                 title={'Get'}
-                onClick={onGetClick}
+                onClick={onGetClick(address)}
                 testid={`${testid}-${address}-get-button`}
               />
             </SendGetWrapper>
