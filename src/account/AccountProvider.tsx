@@ -4,11 +4,11 @@ import { AccountProvider } from './AccountContext';
 import { SignModal } from 'components/SignModal/SignModal';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { BN } from '@polkadot/util';
-import { Codec } from '@polkadot/types/types';
 import { useApi } from 'hooks/useApi';
 import { getWithdrawBids } from 'api/restApi/auction/auction';
 import { Accounts, ProviderClass } from '@unique-nft/accounts';
 
+import { SocketClient, SubscriptionEvents } from '@unique-nft/sdk/full';
 import { PolkadotProvider, PolkadotAccount } from '@unique-nft/accounts/polkadot';
 import { KeyringLocalAccount } from '@unique-nft/accounts/keyring-local';
 import { MetamaskProvider, MetamaskAccount } from '@unique-nft/accounts/metamask';
@@ -35,12 +35,46 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
   const [isOpenConnectWalletModal, setIsOpenConnectWalletModal] = useState<boolean>(false);
   const { api, baseURL, currentChainId } = useApi();
 
-  const unsubscribesBalancesChanges = useRef<Record<string, Codec>>({
-    // TODO: !!!!!!!!!
-  });
-  const subscribeBalancesChanges = useCallback(async (accounts: MarketAccount[]) => {
-    // TODO: get balance via new rest subscribtions !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  }, []);
+  const unsubscribesBalancesChanges = useRef<SocketClient>();
+  const subscribeBalancesChanges = useCallback((accountsWithBalances: MarketAccount[]) => {
+    const sdk = api?.market?.uniqueSdk;
+    if (!sdk) return;
+    let client: SocketClient;
+    if (!unsubscribesBalancesChanges.current) {
+      client = sdk.subscription.connect({
+        transports: ['websocket']
+      });
+      unsubscribesBalancesChanges.current = client;
+    } else {
+      unsubscribesBalancesChanges.current.socket.removeAllListeners();
+      // recreate client just in case (ex. network changed)
+      client = sdk.subscription.connect({
+        transports: ['websocket']
+      });
+      unsubscribesBalancesChanges.current = client;
+    }
+    accountsWithBalances.forEach((account) => {
+      client.subscribeAccountCurrentBalance({ address: account.address });
+    });
+    client.on(SubscriptionEvents.ACCOUNT_CURRENT_BALANCE, (room, data) => {
+      try {
+        const address = data.balance.address;
+        const newBalance = data.balance.availableBalance;
+        const accountIndex = accountsWithBalances.findIndex((acc) => acc.address.toLowerCase() === address.toLowerCase());
+        const accountsCopy = [...accountsWithBalances];
+        const targetAccount = accountsCopy[accountIndex];
+        targetAccount.balance = {
+          withdraw: targetAccount.balance.withdraw,
+          parsed: newBalance.formatted,
+          raw: new BN(newBalance.raw)
+        };
+        setAccounts(accountsCopy);
+      } catch (e) {
+        console.error('Falied to get balance update: ', e);
+      }
+    });
+    unsubscribesBalancesChanges.current = client;
+  }, [api, accounts]);
 
   const changeAccount = useCallback(async (account: MarketAccount) => {
     if (!api?.market || !account?.address) return;
@@ -113,7 +147,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
 
     setIsLoading(false);
 
-    // await subscribeBalancesChanges(allAccounts);
+    subscribeBalancesChanges(accountsWithBalances);
   }, [api?.market, changeAccount]);
 
   useEffect(() => {
@@ -131,7 +165,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
       await fetchAccounts();
       localStorage.setItem(ConnectedAccountTypesKey, connectedProviders.join(';'));
     })();
-  }, [api?.market, subscribeBalancesChanges, fetchAccounts, showSignDialog, currentChainId]);
+  }, [api?.market, fetchAccounts, showSignDialog, currentChainId]);
 
   const connectProvider = useCallback(async (type: ProviderTypesName) => {
     const connectedProviders = (localStorage.getItem(ConnectedAccountTypesKey)?.split(';') || ['keyring']) as ProviderTypesName[];
