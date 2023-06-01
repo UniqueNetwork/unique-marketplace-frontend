@@ -194,7 +194,6 @@ export const useMyTokensFilter = ({ tokens, offers, isFetchingTokens }: UseMyTok
         allowedTokens: ''
       });
     });
-    console.log(collections);
     return [...collections.values()];
   }, [featuredCollections, tokens, offers]);
 
