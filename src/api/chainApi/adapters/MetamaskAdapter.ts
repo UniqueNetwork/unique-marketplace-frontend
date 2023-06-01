@@ -113,8 +113,7 @@ class MetamaskAdapter implements IMarketContractAdapter {
   }
 
   async changeAllowance(from: string, to: string, collectionId: number, tokenId: number, targetAllowance: boolean, signer: Signer): Promise<void> {
-    // in order to remove allowance - we just set approve to void
-    const targetTo = targetAllowance ? to : '0x00';
+    const targetTo = targetAllowance ? to : from;
     const nftFactory = await UniqueNFTFactory(collectionId, signer);
     await (await nftFactory.approve(targetTo, tokenId)).wait();
   }
