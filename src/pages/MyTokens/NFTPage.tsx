@@ -29,9 +29,13 @@ export const NFTPage = () => {
 
   useEffect(() => {
     if (!api?.nft || !selectedAccount || isAccountsLoading) return;
-
     void (async () => {
-      await fetch({ page: 1, pageSize, seller: selectedAccount.address });
+      await fetch({ page: 1,
+        pageSize,
+        seller: Address.is.ethereumAddressInAnyForm(selectedAccount.address)
+        ? Address.normalize.ethereumAddress(selectedAccount.address)
+        : selectedAccount.address
+      });
       await fetchMyTokens(selectedAccount);
     })();
   }, [api?.nft, currentChainId, selectedAccount?.address]);

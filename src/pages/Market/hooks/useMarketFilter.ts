@@ -8,6 +8,7 @@ import { defaultSortingValue, pageSize } from '../constants';
 import { TOption } from '../types';
 import { TokensResponse } from 'api/restApi/tokens/types';
 import { useApi } from 'hooks/useApi';
+import { Address } from '@unique-nft/utils';
 
 export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fetch(payload: GetOffersRequestPayload): Promise<OffersResponse | TokensResponse> }) => {
   const { currentChainId, api } = useApi();
@@ -22,9 +23,12 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
     if (!filterState) return {};
     const { statuses, prices, collections, attributeCounts, attributes, ...otherFilter } = filterState;
     const { myNFTs, myBets, timedAuction, fixedPrice } = statuses || {};
+    const seller = myNFTs && selectedAccount?.address
+      ? (Address.is.ethereumAddressInAnyForm(selectedAccount?.address) ? Address.normalize.ethereumAddress(selectedAccount?.address) : selectedAccount?.address)
+      : undefined;
 
     return {
-      seller: myNFTs ? selectedAccount?.address : undefined,
+      seller,
       bidderAddress: myBets ? selectedAccount?.address : undefined,
       isAuction: (timedAuction && fixedPrice) || (!timedAuction && !fixedPrice) ? undefined : !!timedAuction && !fixedPrice,
       ...prices,
@@ -61,6 +65,7 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
 
   const onFilterChange = useCallback(async (filterState: FilterState | null) => {
     setUrlParameter('filterState', filterState ? JSON.stringify(filterState) : '');
+    console.log('fetch');
     await fetch({
       page: 1,
       pageSize,
