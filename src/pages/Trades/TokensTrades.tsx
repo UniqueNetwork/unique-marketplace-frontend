@@ -26,7 +26,7 @@ type TokensTradesPage = {
 
 export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) => {
   const { selectedAccount, isLoading: isLoadingAccounts } = useAccounts();
-  const { currentChainId } = useApi();
+  const { currentChainId, chainProperties } = useApi();
   const [page, setPage] = useState<number>(0);
   const [sortString, setSortString] = useState<string>();
   const [pageSize, setPageSize] = useState<number>(10);
@@ -172,7 +172,8 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
           deviceSize,
           onShowTradesDetailsModal,
           scanUrl: config.blockchains[currentChainId || '']?.scanUrl,
-          testid: `${testid}-table`
+          testid: `${testid}-table`,
+          tokenSymbol: chainProperties?.token || ''
         })}
         loading={(isLoadingAccounts || isFetching) && showSkeleton}
         emptyIconProps={searchValue ? { name: 'magnifier-found' } : { file: NoTradesIcon }}
