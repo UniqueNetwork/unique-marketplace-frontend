@@ -89,12 +89,13 @@ const AskTransferModal: FC<AskTransferModalProps> = ({ token, onTransfer, testid
 
   const onAddressInputChange = useCallback((value: string) => {
     setAddress(value);
-      if ((Address.is.ethereumAddress(value) || Address.is.substrateAddress(value)) && value !== selectedAccount?.address) {
-        getFee(value)();
-        setIsAddressValid(true);
-      } else {
-        setIsAddressValid(false);
-      }
+    const isOwnerAddress = selectedAccount?.address && (Address.compare.substrateAddresses(value, selectedAccount?.address) || Address.compare.ethereumAddresses(value, selectedAccount?.address));
+    if ((Address.is.ethereumAddress(value) || Address.is.substrateAddress(value)) && !isOwnerAddress) {
+      getFee(value)();
+      setIsAddressValid(true);
+    } else {
+      setIsAddressValid(false);
+    }
   }, [selectedAccount]);
 
   const onConfirmTransferClick = useCallback(
