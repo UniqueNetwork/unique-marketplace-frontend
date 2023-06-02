@@ -10,16 +10,15 @@ import { BlueGrey600, Grey300, Grey500, Secondary400 } from '../../styles/colors
 import { TokenDescription, Trade } from '../../api/restApi/trades/types';
 import { DeviceSize } from '../../hooks/useDeviceSize';
 
-const tokenSymbol = 'KSM';
-
 type ColumnProps = {
   deviceSize: DeviceSize,
   onShowTradesDetailsModal: (trade: Trade) => void,
   scanUrl: string,
-  testid: string
+  testid: string,
+  tokenSymbol: string
 }
 
-const getTradesColumns = ({ deviceSize, onShowTradesDetailsModal, scanUrl, testid }: ColumnProps): TableColumnProps[] => [
+const getTradesColumns = ({ deviceSize, onShowTradesDetailsModal, scanUrl, testid, tokenSymbol }: ColumnProps): TableColumnProps[] => [
   {
     title: deviceSize !== DeviceSize.sm ? (<Header data-testid={`${testid}-header-nft`}>NFT</Header>) : null,
     width: deviceSize !== DeviceSize.md ? '14.3%' : '11.84%',
