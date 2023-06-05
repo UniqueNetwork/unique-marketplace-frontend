@@ -30,7 +30,7 @@ export const SellToken: FC<SellTokenProps> = ({ offer, royalty, isAllowed, onSel
     return (<>
       <Text size={'l'}>{'Price'}</Text>
       <Price testid={testid} price={offer.price.parsed.toString()} />
-      {royalty && <Text size='m' color='grey-500'>{`Flexible Royalties: ${royalty}%`}</Text>}
+      {!!royalty && <Text size='m' color='grey-500'>{`Flexible Royalties: ${royalty}%`}</Text>}
       <ButtonWrapper>
         <Button
           title={'Delist'}
