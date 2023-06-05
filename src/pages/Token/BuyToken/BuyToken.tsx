@@ -29,7 +29,6 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, royalty, onBuy, testid }) =
 
   const isEnoughBalance = useMemo(() => {
     if (!selectedAccount?.balance?.raw || selectedAccount.balance?.raw.isZero() || !offer?.price?.raw) return false;
-    // TODO: check contractCall fee
     return selectedAccount.balance?.raw.gte(new BN(offer?.price?.raw));
   }, [offer?.price?.raw, selectedAccount?.balance?.raw]);
 
@@ -66,11 +65,6 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, royalty, onBuy, testid }) =
         disabled={!isEnoughBalance}
       />
     </ButtonWrapper>
-    <FeeMessage
-      isFeeLoading={fetchingFee}
-      fee={fee || '0'}
-      testid={`${testid}-fee-message`}
-    />
     {!isEnoughBalance && <Text color={'coral-500'} testid={`${testid}-low-balance-warning`}>Your balance is too low to buy</Text>}
     {!!offer?.tokenDescription?.nestingChildTokens?.length && <BuyBundleInformation testid={testid}/>}
     <Divider />

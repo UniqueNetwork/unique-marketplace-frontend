@@ -42,10 +42,10 @@ class MarketController extends BaseController implements IMarketController {
   public async getSellFixFee(collectionId: number, tokenId: number, price: number, amount: number, { account }: TransactionOptions): Promise<string> {
     const from = Address.extract.ethCrossAccountId(account.address);
     const to = this.contractAddress;
-    const isAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from: account.address, to });
-    if (!isAllowed.isAllowed) throw new Error('Token not approved for sale');
+    // const isAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from: account.address, to });
+    // if (!isAllowed.isAllowed) throw new Error('Token not approved for sale');
     const adapter = this.getAdapter(account.account);
-    const priceWithDecimals = (price * (10 ** this.decimals)).toString();
+    const priceWithDecimals = (price * (10 ** this.decimals)).toLocaleString('fullwide', { useGrouping: false });
     const rawFee = await adapter.getSellFee(from, collectionId, tokenId, priceWithDecimals, amount, account.signer);
     return this.getChainValue(rawFee, this.decimals).parsed.toString();
   }

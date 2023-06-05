@@ -25,7 +25,7 @@ export const FeeMessage: FC<FeeMessageProps> = ({
     <FeeMessageWrapper>
       <Text
         testid={`${testid}-text`}
-        color='additional-warning-500'
+        color='primary-500'
         size='s'
       >
         {isFeeLoading && <Loader label='Loading fee...' />}
@@ -42,7 +42,7 @@ const FeeMessageWrapper = styled.div`
   padding: 8px 16px;
   margin: calc(var(--gap) * 1.5) 0;
   border-radius: 4px;
-  background-color: ${AdditionalWarning100};
+  background-color: var(--color-primary-100);
   width: 100%;
 
   .unique-loader {
