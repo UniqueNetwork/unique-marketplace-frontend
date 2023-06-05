@@ -55,7 +55,7 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, royalty, onBuy, testid }) =
   return (<>
     <Text size={'l'}>Price</Text>
     <Price price={offer?.price?.parsed.toString()} />
-    {royalty && <Text size='m' color='grey-500'>{`Flexible Royalties: ${royalty}%`}</Text>}
+    {!!royalty && <Text size='m' color='grey-500'>{`Flexible Royalties: ${royalty}%`}</Text>}
     <ButtonWrapper>
       <Button
         onClick={onBuyClick}
