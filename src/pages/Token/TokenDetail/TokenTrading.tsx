@@ -44,10 +44,14 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
   }, [selectedAccount, token, offer]);
 
   const royalty = useMemo(() => {
-    return token?.royalties?.reduce((acc, { value, decimals }) => {
+    const tokenRoyalties = token?.royalties?.reduce((acc, { value, decimals }) => {
       acc += Number(ethers.utils.formatUnits(value.toString(), decimals));
       return acc;
-    }, 0);
+    }, 0) || 0;
+    return tokenRoyalties + (token?.collection.schema?.royalties?.reduce((acc, { value, decimals }) => {
+      acc += Number(ethers.utils.formatUnits(value.toString(), decimals));
+      return acc;
+    }, 0) || 0);
   }, [token]);
 
   if (offer?.auction) {
