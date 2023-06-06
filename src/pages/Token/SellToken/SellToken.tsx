@@ -47,7 +47,7 @@ export const SellToken: FC<SellTokenProps> = ({ offer, royalty, isAllowed, onSel
 
   return (
     <>
-      {royalty && <Text size='m' color='grey-500'>{`Flexible Royalties: ${royalty}%`}</Text>}
+      {!!royalty && <Text size='m' color='grey-500'>{`Flexible Royalties: ${royalty}%`}</Text>}
       <ActionsWrapper>
         {!hideSellBtn && <Button
           title={'Sell'}
