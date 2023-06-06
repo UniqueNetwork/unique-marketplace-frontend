@@ -115,7 +115,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
     const defaultAccountAddress = localStorage.getItem(DefaultAccountKey);
     const defaultAccount = accountsWithBalances.find((item) => item.address === defaultAccountAddress) || allAccounts[0];
 
-    changeAccount(defaultAccount);
+    await changeAccount(defaultAccount);
 
     setAccounts(accountsWithBalances);
 
