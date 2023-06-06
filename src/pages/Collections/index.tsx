@@ -99,31 +99,6 @@ export const CollectionsPage: FC = () => {
     window.open(walletUrl, '_blank')?.focus();
   }, [currentChainId]);
 
-  const onManageSponsorshipClick = useCallback((collection: MyCollection) => () => {
-    setModalType(AdminPanelModalType.acceptSponsorship);
-    setSelectedCollection(collection);
-  }, []);
-
-  const onRemoveSponsorshipClick = useCallback((collection: MyCollection) => () => {
-    setModalType(AdminPanelModalType.rejectSponsorship);
-    setSelectedCollection(collection);
-  }, []);
-
-  const onAddCollectionClick = useCallback((collection: MyCollection | undefined = undefined) => () => {
-    setModalType(AdminPanelModalType.addCollection);
-    if (collection) setSelectedCollection(collection);
-  }, []);
-
-  const onRemoveCollectionClick = useCallback((collection: MyCollection) => () => {
-    setModalType(AdminPanelModalType.removeCollection);
-    setSelectedCollection(collection);
-  }, []);
-
-  const onManageTokensClick = useCallback((collection: MyCollection) => () => {
-    setModalType(AdminPanelModalType.selectNFTs);
-    setSelectedCollection(collection);
-  }, []);
-
   const onViewOnScanClick = useCallback((collection: MyCollection) => () => {
     const { scanUrl } = config.blockchains[currentChainId || ''] || {};
     if (!scanUrl) return;
@@ -172,11 +147,6 @@ export const CollectionsPage: FC = () => {
         </SearchAndSortingWrapper>
         <ButtonsWrapper>
           <Button title={'Create new via wallet'} onClick={onCreateCollectionViaWalletClick}/>
-          <Button
-            role={'primary'}
-            title={'Add to the marketplace'}
-            onClick={onAddCollectionClick()}
-          />
         </ButtonsWrapper>
       </ControlsWrapper>
       <CollectionListWrapper>
@@ -188,11 +158,6 @@ export const CollectionsPage: FC = () => {
           {!isAccountsLoading && !isFetching && filteredCollections?.map((collection) => <CollectionCard
             key={`collection-${collection.id}`}
             collection={collection}
-            onManageSponsorshipClick={onManageSponsorshipClick(collection)}
-            onRemoveSponsorshipClick={onRemoveSponsorshipClick(collection)}
-            onManageTokensClick={onManageTokensClick(collection)}
-            onAddCollectionClick={onAddCollectionClick(collection)}
-            onRemoveCollectionClick={onRemoveCollectionClick(collection)}
             onViewOnScanClick={onViewOnScanClick(collection)}
           />)}
         </CollectionListStyled>
@@ -222,7 +187,7 @@ const ControlsWrapper = styled.div`
   display: flex;
   justify-content: space-between;
 
-  @media (max-width: 1279px) {
+  @media (max-width: 1110px) {
     flex-direction: column;
     gap: calc(var(--gap) * 1.5);
   }

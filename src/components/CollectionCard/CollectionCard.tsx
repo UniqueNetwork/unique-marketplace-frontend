@@ -2,7 +2,7 @@ import React, { FC, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
-import { Icon, Dropdown } from 'components/UI';
+import { Icon, Dropdown, Link as UILink, ExternalLink } from 'components/UI';
 import { MyCollection } from 'api/restApi/collections/types';
 import { compareEncodedAddresses } from 'api/chainApi/utils/addressUtils';
 import { useApi } from 'hooks/useApi';
@@ -16,47 +16,19 @@ import { getIpfsUriByImagePath } from 'utils/urlUtils';
 export type TCollectionCard = {
   collection: MyCollection
 
-  onManageSponsorshipClick(): void
-  onRemoveSponsorshipClick(): void
-
-  onManageTokensClick(): void
-  onAddCollectionClick(): void
-  onRemoveCollectionClick(): void
-
   onViewOnScanClick(): void
 };
 
 export const CollectionCard: FC<TCollectionCard> = ({
   collection,
-  onManageSponsorshipClick,
-  onRemoveSponsorshipClick,
-  onManageTokensClick,
-  onAddCollectionClick,
-  onRemoveCollectionClick,
   onViewOnScanClick
 }) => {
   const { featuredCollections } = useApi();
-  const { selectedAccount } = useAccounts();
   const [collectionDetails, setCollectionDetails] = useState<CollectionInfoWithSchemaResponse | null>();
   useEffect(() => {
     if (!collection?.id) return;
     setCollectionDetails(featuredCollections[collection.id]?.description);
   }, [collection, featuredCollections]);
-
-  const canConfirmSponsorships = useMemo(() => {
-    return selectedAccount &&
-      collectionDetails?.sponsorship?.address &&
-      !collectionDetails?.sponsorship?.isConfirmed &&
-      compareEncodedAddresses(selectedAccount.address, collectionDetails.sponsorship.address);
-  }, [selectedAccount?.address, collectionDetails?.sponsorship?.isConfirmed, collectionDetails?.sponsorship?.address]);
-
-  const canRemoveSponsorships = useMemo(() => {
-    return selectedAccount &&
-      collectionDetails?.sponsorship?.address &&
-      collectionDetails?.sponsorship?.isConfirmed &&
-      (compareEncodedAddresses(selectedAccount.address, collectionDetails.sponsorship.address) ||
-        compareEncodedAddresses(selectedAccount.address, collection?.owner || ''));
-  }, [selectedAccount?.address, collectionDetails?.sponsorship?.isConfirmed, collectionDetails?.sponsorship?.address, collection?.owner]);
 
   const hasSponsorship = useMemo(() => collectionDetails?.sponsorship && collectionDetails?.sponsorship?.isConfirmed, [collectionDetails]);
   const hasUnconfirmedSponsorship = useMemo(() => collectionDetails?.sponsorship && !collectionDetails?.sponsorship?.isConfirmed, [collectionDetails]);
@@ -67,31 +39,13 @@ export const CollectionCard: FC<TCollectionCard> = ({
         <Link to={`/collection/${collection?.id}`}>
           <Picture alt={collection?.id?.toString() || ''} src={getIpfsUriByImagePath(collection.cover || '')} />
         </Link>
-        <ActionsMenuWrapper>
-          <Dropdown placement={'right'}
-            dropdownRender={() => (<DropdownMenu>
-              {canConfirmSponsorships && <DropdownMenuItem onClick={onManageSponsorshipClick}>Manage sponsorship</DropdownMenuItem>}
-              {/* TODO: wait until the network can grant access to remove sponsorship */}
-              {/* canRemoveSponsorships && <DropdownMenuItem onClick={onRemoveSponsorshipClick}>Remove sponsorship</DropdownMenuItem> */}
-              <DropdownMenuItem onClick={onManageTokensClick}>Manage tokens</DropdownMenuItem>
-              <DropdownMenuItem onClick={onAddCollectionClick}>Add collection</DropdownMenuItem>
-              <DropdownMenuItem onClick={onRemoveCollectionClick}>Remove collection</DropdownMenuItem>
-              <DropdownMenuItem onClick={onViewOnScanClick}>View on Scan
-                <IconWrapper>
-                  <Icon name={'arrow-up-right'} size={16} color={'var(--color-primary-500)'} />
-                </IconWrapper>
-              </DropdownMenuItem>
-            </DropdownMenu>)}
-          >
-            <DropdownWrapper>
-              <Icon name='more-horiz' size={24} color='var(--color-additional-light)' />
-            </DropdownWrapper>
-          </Dropdown>
-        </ActionsMenuWrapper>
       </PictureWrapper>
       <Description>
-        <Text size='l' weight='regular' color={'secondary-500'}>
-          {`${collection.name || ''} [id ${collection?.id}]`}
+        <Text size='l' weight='regular'>
+          <ExternalLink onClick={onViewOnScanClick}>
+            {`${collection.name || ''} [id ${collection?.id}]`}
+
+          </ExternalLink>
         </Text>
         <AttributesWrapper>
           <Row>
@@ -110,7 +64,6 @@ export const CollectionCard: FC<TCollectionCard> = ({
             <Text size='s' color={'coral-500'} >Waiting for sponsorship approval</Text>
           </Row>}
         </AttributesWrapper>
-
       </Description>
     </CollectionCardStyled>
   );

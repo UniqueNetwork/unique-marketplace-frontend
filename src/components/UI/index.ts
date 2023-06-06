@@ -3,6 +3,7 @@ export { Checkbox } from './Checkbox/Checkbox';
 export { CollapsableText } from './CollapsableText/CollapsableText';
 export { CopyButton } from './CopyButton/CopyButton';
 export { Dropdown } from './Dropdown/Dropdown';
+export { ExternalLink } from './ExternalLink';
 export { Icon } from './Icon/Icon';
 export { InputText } from './InputText/InputText';
 export { Link } from './Link/Link';
