@@ -5,7 +5,7 @@ import { useAccounts } from '../useAccounts';
 import useStages from '../useStages';
 import { TokenIdQuery } from '@unique-nft/sdk';
 
-export const useTransferToBundleStages = (token: TokenIdQuery, parent: TokenIdQuery) => {
+export const useTransferToBundleStages = (owner: string, token: TokenIdQuery, parent: TokenIdQuery) => {
   const { api } = useApi();
   const { selectedAccount } = useAccounts();
   const nftApi = api?.nft;
@@ -14,9 +14,9 @@ export const useTransferToBundleStages = (token: TokenIdQuery, parent: TokenIdQu
       title: 'Transfer in progress',
       description: '',
       status: StageStatus.default,
-      action: (params) => nftApi?.transferToBundle(token, parent, 1, params.options)
+      action: (params) => nftApi?.transferToBundle(owner, token, parent, 1, params.options)
     }
-  ], [nftApi, token, parent]);
+  ], [nftApi, token, parent, owner]);
   const { stages, error, status, initiate } = useStages<null>(transferStages, selectedAccount);
 
   return {
