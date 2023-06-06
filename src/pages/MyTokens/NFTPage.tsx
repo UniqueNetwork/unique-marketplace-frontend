@@ -38,7 +38,7 @@ export const NFTPage = () => {
       });
       await fetchMyTokens(selectedAccount);
     })();
-  }, [api?.nft, currentChainId, selectedAccount?.address]);
+  }, [api?.nft, currentChainId, selectedAccount?.address, isAccountsLoading]);
 
   const {
     filterState,
