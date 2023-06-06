@@ -81,14 +81,15 @@ export class UniqueSDKNFTController extends BaseController {
     return this.getChainValue(rawFee, this.decimals).parsed.toString();
   }
 
-  async transferToBundle(nested: TokenIdQuery, newParent: TokenIdQuery, amount: number, { account }: TransactionOptions): Promise<void> {
+  async transferToBundle(address: string, nested: TokenIdQuery, newParent: TokenIdQuery, amount: number, { account }: TransactionOptions): Promise<void> {
     const adapter = this.getAdapter(account.account);
     await adapter.nestToken(
-        { collectionId: Number(nested.collectionId), tokenId: nested.tokenId },
-        { collectionId: Number(newParent.collectionId), tokenId: newParent.tokenId },
-        amount,
-        account.signer
-      );
+      address,
+      { collectionId: Number(nested.collectionId), tokenId: nested.tokenId },
+      { collectionId: Number(newParent.collectionId), tokenId: newParent.tokenId },
+      amount,
+      account.signer
+    );
   }
 
   async getUnnestFee(collectionId: number, tokenId: number, amount: number, { account }: TransactionOptions): Promise<string> {

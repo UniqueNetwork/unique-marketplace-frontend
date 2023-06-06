@@ -52,13 +52,26 @@ class UniqueAdapter implements IMarketContractAdapter {
     return res.fee.raw;
   }
 
-  async nestToken(from: NestTokenParam, to: NestTokenParam, amount: number, signer: Signer): Promise<void> {
+  async nestToken(address: string, nested: NestTokenParam, parent: NestTokenParam, amount: number, signer: Signer): Promise<void> {
     if (amount !== 1) throw new Error('RFT support not implemented');
-    const res = await this.uniqueSdk.token.nest({
-      address: signer.address || '',
-      nested: from,
-      parent: to
-    }, { signer });
+    let res;
+    if (address !== signer.address) {
+      // token is already nested
+      const to = Address.nesting.idsToAddress(parent.collectionId, parent.tokenId);
+      res = await this.uniqueSdk.token.transfer({
+        address: signer.address,
+        from: address,
+        to,
+        collectionId: nested.collectionId,
+        tokenId: nested.tokenId
+      }, { signer });
+    } else {
+      res = await this.uniqueSdk.token.nest({
+        address: signer.address || '',
+        nested: nested,
+        parent: parent
+      }, { signer });
+    }
     if (res.error) {
       console.error('Nest failed: ', res.error);
       throw new Error(res.error.toString());

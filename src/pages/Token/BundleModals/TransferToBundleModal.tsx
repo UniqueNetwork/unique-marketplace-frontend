@@ -193,7 +193,7 @@ const AskTransferToBundleModal: FC<{ token: INestingToken | TokenByIdResponse, o
 };
 
 const TransferToBundleStagesModal: FC<TBundleTrunsferModalBodyProps & { newParent: TokenIdQuery }> = ({ token, newParent, onFinish, testid }) => {
-  const { stages, status, initiate } = useTransferToBundleStages(token, newParent);
+  const { stages, status, initiate } = useTransferToBundleStages(token.owner, token, newParent);
   const { info } = useNotifications();
   const { selectedAccount } = useAccounts();
 

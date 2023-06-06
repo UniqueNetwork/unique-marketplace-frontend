@@ -67,7 +67,7 @@ class MetamaskAdapter implements IMarketContractAdapter {
     return estimateGas.mul(gasPrice).toString();
   }
 
-  async nestToken(from: NestTokenParam, to: NestTokenParam, amount: number, signer: Signer): Promise<void> {
+  async nestToken(address: string, from: NestTokenParam, to: NestTokenParam, amount: number, signer: Signer): Promise<void> {
     if (amount !== 1) throw new Error('RFT not supported');
     const nftFactory = await UniqueNFTFactory(Number(from.collectionId), signer);
 
