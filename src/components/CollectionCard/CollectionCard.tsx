@@ -46,10 +46,6 @@ export const CollectionCard: FC<TCollectionCard> = ({
           </ExternalLink>
         </Text>
         <AttributesWrapper>
-          <Row>
-            <Text size='s' color={'grey-500'} >Allowed tokens:</Text>
-            <Text size='s' >{collection.allowedTokens || 'all'}</Text>
-          </Row>
           {hasSponsorship && <Row>
             <Text size='s' color={'grey-500'} >Sponsor:</Text>
             <Text size='s' >{collectionDetails?.sponsorship?.isConfirmed ? shortcutText(collectionDetails?.sponsorship?.address || '') : 'not assigned'}</Text>
