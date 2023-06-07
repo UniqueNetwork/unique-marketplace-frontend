@@ -43,7 +43,7 @@ const BundleTrunsferModal = ({ token, onClose, onFinish, bundleModalType, testid
     }
   }, [bundleModalType]);
 
-  if (!ModalBodyComponent || !token || !parent) return null;
+  if (!ModalBodyComponent || !token) return null;
 
   return (
     <Modal isVisible={isVisible}
