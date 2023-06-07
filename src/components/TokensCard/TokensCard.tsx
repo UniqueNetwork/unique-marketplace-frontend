@@ -126,35 +126,39 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
         badge={isBundleState ? 'Bundle' : ''}
       />
       <Description>
-        <Link to={tokenPath} title={tokenTitle}>
-          <Text
-            size='l'
-            weight='regular'
-            testid={`${testid}-tokenId`}
+        <BasicDataWrapper>
+          <Link to={tokenPath} title={tokenTitle}>
+            <Text
+              size='l'
+              weight='regular'
+              testid={`${testid}-tokenId`}
+            >
+              {tokenTitle}
+            </Text>
+          </Link>
+          <UILink
+            data-testid={`${testid}-collection-${collectionId}-link`}
+            href={`${config.blockchains[currentChainId || '']?.scanUrl || ''}collections/${collectionId || ''}`}
+            target={'_blank'}
+            rel='noreferrer'
           >
-            {tokenTitle}
-          </Text>
-        </Link>
-        <UILink
-          data-testid={`${testid}-collection-${collectionId}-link`}
-          href={`${config.blockchains[currentChainId || '']?.scanUrl || ''}collections/${collectionId || ''}`}
-          target={'_blank'}
-          rel='noreferrer'
-        >
-          <Text color='primary-600' size='s'>
-            {collectionTitle}
-          </Text>
-        </UILink>
-        {isBundleState && <BundleItemsCount count={tokensCount || 0} testId={testid} />}
-        {price?.parsed && <PriceWrapper>
-          <Text
-            testid={`${testid}-price`}
-            size='s'
-          >{topBid ? `${formatBalance(Number(topBid))}` : `${price.parsed}` }</Text>
-          <IconStyled name={`chain-${currentChainId}`} size={16} />
-          {!auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
-        </PriceWrapper>}
-        {auction && <AuctionInfoWrapper>
+            <Text color='primary-600' size='s'>
+              {collectionTitle}
+            </Text>
+          </UILink>
+          {isBundleState && <BundleItemsCount count={tokensCount || 0} testId={testid} />}
+        </BasicDataWrapper>
+        {price?.parsed && <TradingInfoWrapper>
+          <Text size={'xs'} color={'grey-500'} >Price</Text>
+          <PriceWrapper length={price.parsed.toFixed(5).length}>
+            <Text
+              testid={`${testid}-price`}
+              size='l'
+            >{topBid ? `${formatBalance(Number(topBid))}` : `${price.parsed}` }</Text>
+            <IconStyled name={`chain-${currentChainId?.toLowerCase()}`} size={16} />
+          </PriceWrapper>
+        </TradingInfoWrapper>}
+        {/* {auction && <AuctionInfoWrapper>
           {isTopBidder && <Text
             testid={`${testid}-leading-bid`}
             size={'xs'}
@@ -173,7 +177,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
             auction.bids.length > 0 ? 'Last bid' : 'Minimum bid'
           }</Text>}
           <StyledText color={'dark'} size={'xs'}>{`${timeDifference(new Date(auction?.stopAt || '').getTime() / 1000)} left`}</StyledText>
-        </AuctionInfoWrapper>}
+        </AuctionInfoWrapper>} */}
       </Description>
 
       {isFetching && <Loader isFullPage />}
@@ -190,20 +194,37 @@ const TokensCardStyled = styled.div`
   cursor: pointer;
 `;
 
+const BasicDataWrapper = styled.div`
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  justify-content: flex-start;
+  flex-grow: 1;
+`;
+
 const Description = styled.div`
   display: flex;
   flex-direction: column;
-
+  width: 100%;
   span {
     color: ${Primary600};
   }
 `;
 
-const PriceWrapper = styled.div` 
+const PriceWrapper = styled.div<{ length: number }>` 
   display: flex;
   align-items: center;
-  column-gap: calc(var(--gap) / 4);
+  span:first-child {
+    font-size: ${({ length }) => `${length > 11 ? 18 - (length - 11) : 18}px !important`}
+  }
+`;
+
+const TradingInfoWrapper = styled.div` 
+  display: flex;
   margin-top: calc(var(--gap) / 2);
+  column-gap: calc(var(--gap) / 4);
+  align-items: center;
+  justify-content: space-between;
 `;
 
 const StyledText = styled(Text)` 
