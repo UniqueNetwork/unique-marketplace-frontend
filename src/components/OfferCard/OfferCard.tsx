@@ -82,25 +82,27 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
         badge={isBundle ? 'Bundle' : ''}
       />
       <Description>
-        <Link to={tokenPath} title={`${tokenPrefix || ''} #${offer?.tokenId}`}>
-          <Text
-            size='l'
-            weight='regular'
-            color={'secondary-500'}
-            testid={`${testid}-tokenId`}
+        <BasicDataWrapper>
+          <Link to={tokenPath} title={`${tokenPrefix || ''} #${offer?.tokenId}`}>
+            <Text
+              size='l'
+              weight='regular'
+              color={'secondary-500'}
+              testid={`${testid}-tokenId`}
+            >
+              {`${tokenPrefix || ''} #${offer?.tokenId}`}
+            </Text>
+          </Link>
+          <Link
+            data-testid={`${testid}-collection-${offer?.collectionId}-link`}
+            to={collectionPath}
           >
-            {`${tokenPrefix || ''} #${offer?.tokenId}`}
-          </Text>
-        </Link>
-        <Link
-          data-testid={`${testid}-collection-${offer?.collectionId}-link`}
-          to={collectionPath}
-        >
-          <Text color='primary-600' size='s'>
-            {`${collectionName?.substring(0, 25) || ''} [id ${offer?.collectionId || ''}]`}
-          </Text>
-        </Link>
-        {isBundle && <BundleItemsCount count={tokensCount || 0} testId={testid} />}
+            <Text color='primary-600' size='s'>
+              {`${collectionName?.substring(0, 25) || ''} [id ${offer?.collectionId || ''}]`}
+            </Text>
+          </Link>
+          {isBundle && <BundleItemsCount count={tokensCount || 0} testId={testid} />}
+        </BasicDataWrapper>
         <PriceWrapper length={offer.price.parsed.toFixed(5).length}>
           <Text
             testid={`${testid}-price`}
@@ -109,7 +111,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
           <IconStyled name={`chain-${currentChainId?.toLowerCase()}`} size={16} />
           {!offer?.auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         </PriceWrapper>
-        {offer?.auction && <AuctionInfoWrapper>
+        {/* {offer?.auction && <AuctionInfoWrapper>
           {isTopBidder && <Text
             testid={`${testid}-leading-bid`}
             size={'xs'}
@@ -128,7 +130,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
             offer.auction.bids.length > 0 ? 'Last bid' : 'Minimum bid'
           }</Text>}
           <StyledText color={'dark'} size={'xs'} testid={`${testid}-auction-close-time`}>{`${timeDifference(new Date(offer.auction?.stopAt || '').getTime() / 1000)} left`}</StyledText>
-        </AuctionInfoWrapper>}
+        </AuctionInfoWrapper>} */}
       </Description>
     </TokensCardStyled>
   );
@@ -141,6 +143,14 @@ const TokensCardStyled = styled.div`
   justify-content: flex-start;
   position: relative;
   cursor: pointer;
+`;
+
+const BasicDataWrapper = styled.div`
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  justify-content: flex-start;
+  flex-grow: 1;
 `;
 
 const PriceWrapper = styled.div<{ length: number }>` 
@@ -162,7 +172,7 @@ const StyledText = styled(Text)`
 const Description = styled.div`
   display: flex;
   flex-direction: column;
-
+  flex-grow: 1;
   span {
     color: ${Primary600};
   }
