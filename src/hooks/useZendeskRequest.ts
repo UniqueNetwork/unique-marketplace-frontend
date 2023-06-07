@@ -15,7 +15,7 @@ export const useZendeskRequest = () => {
   const report = useCallback(async ({ collectionId, tokenId, tokenPrefix, message }: TokenReport) => {
     if (!config.zendeskApi || !config.zenDeskToken) return;
     setIsLoading(true);
-    const response = await post(config.zendeskApi,
+    const response = await post(`${config.zendeskApi}/tickets`,
       {
         ticket: {
           comment: {
