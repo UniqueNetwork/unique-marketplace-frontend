@@ -15,6 +15,7 @@ const gqlQuery = {
     ) {
       count
       data {
+        attributes
         tokenId: token_id
         token_name
         tokenPrefix: token_prefix
