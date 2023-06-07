@@ -101,7 +101,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
           </Text>
         </Link>
         {isBundle && <BundleItemsCount count={tokensCount || 0} testId={testid} />}
-        <PriceWrapper>
+        <PriceWrapper length={offer.price.parsed.toFixed(5).length}>
           <Text
             testid={`${testid}-price`}
             size='l'
@@ -138,16 +138,19 @@ const TokensCardStyled = styled.div`
   display: flex;
   align-items: flex-start;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   position: relative;
   cursor: pointer;
 `;
 
-const PriceWrapper = styled.div` 
+const PriceWrapper = styled.div<{ length: number }>` 
   display: flex;
   align-items: center;
   column-gap: calc(var(--gap) / 4);
   margin-top: calc(var(--gap) / 2);
+  span {
+    font-size: ${({ length }) => `${length > 11 ? 18 - (length - 11) : 18}px !important`}
+  }
 `;
 
 const StyledText = styled(Text)` 
