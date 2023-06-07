@@ -30,14 +30,18 @@ export const OffersList: FC<TTokensList> = ({ offers, isLoading, testid }) => {
 
 const OffersListStyled = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
   gap: 32px;
 
   @media (max-width: 1919px) {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+  }
+
+  @media (max-width: 1439px) {
     grid-template-columns: 1fr 1fr 1fr;
   }
 
-  @media (max-width: 1599px) {
+  @media (max-width: 1023px) {
     grid-template-columns: 1fr 1fr;
   }
 
