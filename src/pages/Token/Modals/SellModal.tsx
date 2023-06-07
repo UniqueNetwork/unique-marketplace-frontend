@@ -20,6 +20,7 @@ import { debounce } from 'utils/helpers';
 import { FeeMessage } from 'components';
 import { BN } from '@polkadot/util';
 import { fromStringToBnString } from 'utils/bigNum';
+import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 
 export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, collection, onFinish, setIsClosable, testid }) => {
   const { collectionId, tokenId } = token || {};
@@ -192,15 +193,18 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, is
         value={priceInputValue?.toString()}
         testid={`${testid}-price-input`}
       />
-      <FeeMessage
+      {!isSponsored && <FeeMessage
         isFeeLoading={fetchingFee}
         fee={fee || '0'}
         testid={`${testid}-fee-message`}
-      />
+      />}
+      {isSponsored && <WarningBlock>
+        Collection ID {collectionId} sponsored
+      </WarningBlock>}
       {!isEnoughBalance && <Text color={'coral-500'} testid={`${testid}-low-balance-warning`}>Your balance is too low to buy</Text>}
       <ButtonWrapper>
         <Button
-          disabled={fetchingFee || !isEnoughBalance || !priceInputValue || !Number(priceInputValue)}
+          disabled={!isSponsored && (fetchingFee || !isEnoughBalance || !priceInputValue || !Number(priceInputValue))}
           onClick={onConfirmFixPriceClick}
           role='primary'
           title='Confirm'
