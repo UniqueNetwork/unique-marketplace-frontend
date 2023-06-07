@@ -72,8 +72,10 @@ const PictureWrapper = styled(Link)<{ isPlaying: boolean }>`
     overflow: hidden;
 
     img {
-      max-width: 100%;
-      max-height: 100%;
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+      min-height: 100%;
     }
 
     svg {
