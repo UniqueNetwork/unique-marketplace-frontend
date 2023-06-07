@@ -103,14 +103,16 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
           </Link>
           {isBundle && <BundleItemsCount count={tokensCount || 0} testId={testid} />}
         </BasicDataWrapper>
-        <PriceWrapper length={offer.price.parsed.toFixed(5).length}>
-          <Text
-            testid={`${testid}-price`}
-            size='l'
-          >{topBid ? `${formatBalance(Number(topBid))}` : `${offer.price.parsed}` }</Text>
-          <IconStyled name={`chain-${currentChainId?.toLowerCase()}`} size={16} />
-          {!offer?.auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
-        </PriceWrapper>
+        <TradingInfoWrapper>
+          <Text size={'xs'} color={'grey-500'} >Price</Text>
+          <PriceWrapper length={offer.price.parsed.toFixed(5).length}>
+            <Text
+              testid={`${testid}-price`}
+              size='l'
+            >{topBid ? `${formatBalance(Number(topBid))}` : `${offer.price.parsed}` }</Text>
+            <IconStyled name={`chain-${currentChainId?.toLowerCase()}`} size={16} />
+          </PriceWrapper>
+        </TradingInfoWrapper>
         {/* {offer?.auction && <AuctionInfoWrapper>
           {isTopBidder && <Text
             testid={`${testid}-leading-bid`}
@@ -156,23 +158,24 @@ const BasicDataWrapper = styled.div`
 const PriceWrapper = styled.div<{ length: number }>` 
   display: flex;
   align-items: center;
-  column-gap: calc(var(--gap) / 4);
-  margin-top: calc(var(--gap) / 2);
   span:first-child {
     font-size: ${({ length }) => `${length > 11 ? 18 - (length - 11) : 18}px !important`}
   }
 `;
 
-const StyledText = styled(Text)` 
-  && {
-    color: var(--color-additional-dark);
-  }
+const TradingInfoWrapper = styled.div` 
+  display: flex;
+  margin-top: calc(var(--gap) / 2);
+  column-gap: calc(var(--gap) / 4);
+  align-items: center;
+  justify-content: space-between;
 `;
 
 const Description = styled.div`
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  width: 100%;
   span {
     color: ${Primary600};
   }

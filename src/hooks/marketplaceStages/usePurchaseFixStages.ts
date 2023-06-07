@@ -30,8 +30,8 @@ export const usePurchaseFixStages = (collectionId: number, tokenId: number) => {
         const mirrorBalance = await marketApi?.getAccountBalance(mirrorAddress);
         const fee = Number(await marketApi?.getBuyFixFee(collectionId, tokenId, txParams.amount, options));
         const toTransfer = Number(txParams.price) + fee - Number(mirrorBalance?.parsed);
-        if (toTransfer <= 0) return;
-        //                                           just to be safe and makeup for potential rounding issues
+        if (toTransfer <= 0) return Promise.resolve();
+        // just to be safe and makeup for potential rounding issues
         return marketApi?.transferBalance(account.address, mirrorAddress, toTransfer + 1, options);
       }
 }]) as InternalStage<TPurchaseProps>[],

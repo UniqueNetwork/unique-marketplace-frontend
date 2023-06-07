@@ -31,15 +31,13 @@ const PurchaseModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, setIsClo
         { account: selectedAccount }
       );
     }, 300)();
-    setIsClosable(false);
-    void initiate({ accountAddress: selectedAccount.address, amount: 1, price: offer?.price.parsed || 0 });
   }, [offer, selectedAccount]);
 
   useEffect(() => {
     if (!selectedAccount) throw new Error('Account not selected');
     setIsClosable(false);
     void initiate({ accountAddress: selectedAccount.address, amount: 1, price: offer?.price.parsed || 0 });
-  }, [offer, selectedAccount]);
+  }, [selectedAccount, offer]);
 
   const { tokenId, collectionId } = offer || {};
   const { tokenPrefix } = offer?.collectionDescription || {};
