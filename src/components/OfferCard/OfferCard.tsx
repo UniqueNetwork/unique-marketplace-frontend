@@ -148,7 +148,7 @@ const PriceWrapper = styled.div<{ length: number }>`
   align-items: center;
   column-gap: calc(var(--gap) / 4);
   margin-top: calc(var(--gap) / 2);
-  span {
+  span:first-child {
     font-size: ${({ length }) => `${length > 11 ? 18 - (length - 11) : 18}px !important`}
   }
 `;
