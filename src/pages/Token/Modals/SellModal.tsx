@@ -201,7 +201,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, is
       {isSponsored && <WarningBlock>
         Collection ID {collectionId} sponsored
       </WarningBlock>}
-      {!isEnoughBalance && <Text color={'coral-500'} testid={`${testid}-low-balance-warning`}>Your balance is too low to buy</Text>}
+      {!isEnoughBalance && <Text color={'coral-500'} testid={`${testid}-low-balance-warning`}>Your balance is too low to sell</Text>}
       <ButtonWrapper>
         <Button
           disabled={!isSponsored && (fetchingFee || !isEnoughBalance || !priceInputValue || !Number(priceInputValue))}

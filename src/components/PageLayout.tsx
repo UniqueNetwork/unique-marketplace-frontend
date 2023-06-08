@@ -6,7 +6,7 @@ import { Header } from '.';
 import { useFooter } from '../hooks/useFooter';
 import useBackground from '../hooks/useBackground';
 
-export type TMenuItems = 'Market' | 'My tokens' | 'Trades' | 'FAQ' | 'Manage accounts' | 'My Collections';
+export type TMenuItems = 'Market' | 'My tokens' | 'Trades' | 'FAQ' | 'Manage accounts' | 'My collections';
 
 export const PageLayout: FC = () => {
   const { pathname } = useLocation();
