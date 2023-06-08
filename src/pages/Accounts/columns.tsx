@@ -8,6 +8,7 @@ import { AdditionalLight, Grey500, Primary500 } from 'styles/colors';
 import { formatBalance } from 'utils/textUtils';
 import { AccountInfo } from './types';
 import BalanceCell from './BalanceCell';
+import { WithdrawButton } from './WithdrawButton';
 
 const testid = 'accounts-page';
 
@@ -114,9 +115,9 @@ export const getAccountsColumns = ({
               />
             </SendGetWrapper>
             {(!deposit.isZero()) && <DepositActionsWrapper>
-              <Button title={`Withdraw ${formatBalance(balance.withdraw.parsed, 4)} ${tokenSymbol}`}
-                onClick={onShowWithdrawDepositModal(address)}
-                role={'primary'}
+              <WithdrawButton
+                amount={`${formatBalance(balance.withdraw.parsed, 4)} ${tokenSymbol}`}
+                onWithdraw={onShowWithdrawDepositModal(address)}
                 testid={`${testid}-${address}-get-button`}
               />
               <IconWithHint align={{ appearance: 'vertical', vertical: 'bottom', horizontal: 'right' }}>

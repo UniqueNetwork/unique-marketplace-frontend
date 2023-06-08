@@ -2,10 +2,10 @@ import classNames from 'classnames';
 import { ComponentProps, DimentionType, IconProps } from '@unique-nft/ui-kit';
 import { Icon } from '..';
 import styled from 'styled-components';
-import React from 'react';
+import React, { ReactNode } from 'react';
 
 export interface ButtonBaseProps {
-  title: string;
+  title: ReactNode;
   size?: DimentionType;
   role?:
     | 'primary'
