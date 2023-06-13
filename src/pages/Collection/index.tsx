@@ -1,33 +1,39 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { Text } from '@unique-nft/ui-kit';
 import { Select } from 'components/UI';
-import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 
-import { TokensList } from 'components';
+import { TokensList } from './TokensList/TokensList';
 import { PagePaper } from 'components/PagePaper/PagePaper';
 import NoItems from 'components/NoItems';
 import SearchField from 'components/SearchField/SearchField';
 import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
-import { useCollections } from 'hooks/useCollections';
 
 import { MobileFilters } from './Filters/MobileFilter';
 import { Filters } from './Filters/Filters';
 import { defaultSortingValue, pageSize, sortingOptions, testid } from './constants';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { CollectionDetail } from './CollectionDetail/CollectionDetail';
 import { useTokens } from 'api/restApi/tokens/tokens';
 import { useMarketFilter } from 'pages/Market/hooks/useMarketFilter';
 import InfiniteScroll from 'react-infinite-scroller';
+import { useMarketableCollection } from 'api/restApi/collections/collection';
+import { MarketableCollection } from 'api/restApi/collections/types';
+import { useCollections } from 'hooks/useCollections';
+import { compareEncodedAddresses } from 'api/chainApi/utils/addressUtils';
 
 export const CollectionPage = () => {
   const { collectionId } = useParams<{ collectionId: string }>();
   const { selectedAccount, isLoading: isAccountsLoading } = useAccounts();
-  const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse>();
+  const [collection, setCollection] = useState<MarketableCollection>();
   const deviceSize = useDeviceSize();
-  const { getCollection, isFetching: isFetchingCollection } = useCollections();
+  const { getCollection, getCollectionTokensCount } = useCollections();
+  const { fetchCollection, addCollection } = useMarketableCollection();
+  const [scanning, setScanning] = useState(false);
+  const [tokensCountOnScan, setTokensCountOnScan] = useState(0);
+  const navigate = useNavigate();
 
   const { tokens, tokensCount, isFetching, fetchMore, fetch, attributes, attributeCounts } = useTokens({
     collectionId: Number(collectionId)
@@ -46,14 +52,69 @@ export const CollectionPage = () => {
    } = useMarketFilter({ isFetching, fetch });
 
   useEffect(() => {
-    if (!selectedAccount?.address || isAccountsLoading) return;
-
+    if (!selectedAccount?.address) return;
+    const id = Number(collectionId);
     void (async () => {
-      const collection = await getCollection(Number(collectionId));
-      if (!collection) return; // TODO redirect to 404
-      setCollection(collection);
+      const tokensCountOnScan = await getCollectionTokensCount(id);
+      setTokensCountOnScan(tokensCountOnScan);
+
+      const collectionData = await fetchCollection(id);
+
+      if (!collectionData || (tokensCountOnScan > 0 && collectionData.tokensCount !== tokensCountOnScan)) {
+        const collection = await getCollection(id);
+        if (!collection) return navigate('/404');
+        addCollection(id);
+        setScanning(tokensCountOnScan > 0);
+        setCollection({
+          id: '-',
+          data: collection,
+          allowedTokens: '',
+          isMarketable: false,
+          active: true,
+          collectionId: collection.id,
+          createdAt: '',
+          decimalPoints: 0,
+          description: collection.description,
+          mintMode: false,
+          mode: collection.mode,
+          name: collection.name,
+          network: '',
+          owner: collection.owner,
+          status: '',
+          tokenPrefix: collection.tokenPrefix,
+          tokensCount: 0,
+          tokensCountOnScan: tokensCount,
+          tokensOnMarket: 0,
+          updatedAt: ''
+        });
+        return;
+      }
+      setCollection({ ...collectionData, tokensCountOnScan });
     })();
-  }, [currentChainId, collectionId, fetch, selectedAccount?.address, getCollection]);
+  }, [currentChainId, collectionId, fetch, selectedAccount?.address]);
+
+  useEffect(() => {
+    if (!scanning) return;
+    const refetchCollection = async () => {
+      const collectionData = await fetchCollection(Number(collectionId));
+      if (!collectionData) return;
+      setCollection({ ...collectionData, tokensCountOnScan });
+      if (collectionData?.tokensCount === tokensCountOnScan) {
+        setScanning(false);
+
+        void fetch({
+          page: 1,
+          pageSize,
+          ...(getFilterByState(filterState)),
+          searchText: searchValue || undefined,
+          sort: [sortingValue]
+        });
+      }
+    };
+
+    const intervalId = setInterval(() => void refetchCollection(), 1000);
+    return () => clearInterval(intervalId);
+  }, [scanning, collectionId, tokensCountOnScan, filterState, sortingValue, searchValue]);
 
   const hasMore = tokens && tokens.length < tokensCount;
 
@@ -74,13 +135,14 @@ export const CollectionPage = () => {
     <CollectionPagePaper>
       <MarketMainPageStyled>
         <LeftColumn>
-          {deviceSize !== DeviceSize.md && <Filters
+          <Filters
             value={filterState}
             attributes={attributes}
             attributeCounts={attributeCounts}
             onFilterChange={onFilterChange}
             testid={`${testid}-filters`}
-          />}
+            disabled={scanning}
+          />
         </LeftColumn>
         <MainContent>
           <SearchAndSortingWrapper>
@@ -152,7 +214,6 @@ const MarketMainPageStyled = styled.div`
 
 const LeftColumn = styled.div<{ isVisible?: boolean }>`
   margin-right: calc(var(--gap) * 2);
-  display: ${({ isVisible }) => isVisible ? 'unset' : 'none'};
   @media (max-width: 1024px) {
     display: none;
   }

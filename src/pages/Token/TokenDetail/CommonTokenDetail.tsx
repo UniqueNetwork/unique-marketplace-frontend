@@ -203,7 +203,7 @@ export const CommonTokenDetail: FC<IProps> = ({
       <ReportModal
         collectionId={collectionId || 0}
         tokenId={tokenId || 0}
-        tokenPrefix={offer?.collectionDescription.tokenPrefix || token?.collection.tokenPrefix || ''}
+        tokenPrefix={offer?.collectionDescription.tokenPrefix || token?.collection?.tokenPrefix || ''}
         isVisible={reportModalVisible}
         onClose={closeReportModal}
         testid={`${testid}-report-modal`}

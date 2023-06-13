@@ -8,7 +8,7 @@ import { useAccounts } from 'hooks/useAccounts';
 import StatusFilter from 'components/Filters/StatusFilter';
 import PricesFilter from 'components/Filters/PricesFilter';
 
-export const Filters: FC<FiltersProps> = ({ value, attributes, attributeCounts, onFilterChange, testid }) => {
+export const Filters: FC<FiltersProps> = ({ value, attributes, attributeCounts, onFilterChange, testid, disabled }) => {
   const { selectedAccount } = useAccounts();
 
   const onStatusFilterChange = useCallback((statuses: Statuses) => {
@@ -30,19 +30,31 @@ export const Filters: FC<FiltersProps> = ({ value, attributes, attributeCounts, 
   const { attributes: selectedAttributes = [], attributeCounts: selectedAttributeCounts = [] } = value || {};
 
   return <FiltersStyled>
-    <StatusFilter value={value?.statuses} onChange={onStatusFilterChange} testid={`${testid}-status`} />
-    <PricesFilter value={value?.prices} onChange={onPricesFilterChange} testid={`${testid}-prices`} />
+    <StatusFilter
+      value={value?.statuses}
+      onChange={onStatusFilterChange}
+      testid={`${testid}-status`}
+      disabled={disabled}
+    />
+    <PricesFilter
+      value={value?.prices}
+      onChange={onPricesFilterChange}
+      testid={`${testid}-prices`}
+      disabled={disabled}
+    />
     {!!attributeCounts?.length && <AttributeCountsFilter
       attributeCounts={attributeCounts}
       selectedAttributeCounts={selectedAttributeCounts}
       onAttributeCountsChange={onCollectionAttributeCountsFilterChange}
       testid={`${testid}-attribute-count`}
+      disabled={disabled}
     />}
     <AttributesFilter
       attributes={attributes || {}}
       selectedAttributes={selectedAttributes}
       onAttributesChange={onCollectionAttributesFilterChange}
       testid={`${testid}-attributes`}
+      disabled={disabled}
     />
   </FiltersStyled>;
 };

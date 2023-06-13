@@ -48,7 +48,7 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
       acc += Number(ethers.utils.formatUnits(value.toString(), decimals));
       return acc;
     }, 0) || 0;
-    return tokenRoyalties + (token?.collection.schema?.royalties?.reduce((acc, { value, decimals }) => {
+    return tokenRoyalties + (token?.collection?.schema?.royalties?.reduce((acc, { value, decimals }) => {
       acc += Number(ethers.utils.formatUnits(value.toString(), decimals));
       return acc;
     }, 0) || 0);

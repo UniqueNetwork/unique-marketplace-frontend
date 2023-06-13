@@ -18,8 +18,9 @@ import config from 'config';
 import { PagePaper } from 'components/PagePaper/PagePaper';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { Link } from 'react-router-dom';
+import { MarketableCollection } from 'api/restApi/collections/types';
 interface IProps {
-  collection?: CollectionInfoWithSchemaResponse
+  collection?: MarketableCollection
 }
 
 export const CollectionDetail: FC<IProps> = ({ collection }) => {
@@ -28,7 +29,8 @@ export const CollectionDetail: FC<IProps> = ({ collection }) => {
 
   const { currentChainId, chainProperties } = useApi();
 
-  const { name, description, schema, owner } = collection || {};
+  const { name, description, data, owner, collectionId } = collection || {};
+  const { schema } = data || {};
 
   const formatedAddressOwner = useMemo(() => {
     if (!owner) return '';
@@ -67,12 +69,12 @@ export const CollectionDetail: FC<IProps> = ({ collection }) => {
             </Row>
           </div>
           {deviceSize < DeviceSize.lg && <>
-            <Row>
-              <EditCollectionLink to={`/collection/${collection.id}/edit`}>
+            {isOwner && <Row>
+              <EditCollectionLink to={`/collection/${collectionId}/edit`}>
                 <span>Edit collection</span>
                 <Icon size={24} name={'gear'} />
               </EditCollectionLink>
-            </Row>
+            </Row>}
             <Row>
               <LinksWrapper>
                 <Icon size={24} name={'discord'} />
@@ -85,7 +87,7 @@ export const CollectionDetail: FC<IProps> = ({ collection }) => {
           </>}
           <Row>
             <Text color='grey-500' size='m'>ID:</Text>
-            <Text size='m'>{collection.id}</Text>
+            <Text size='m'>{collectionId}</Text>
             <OwnerWrapper>
               {isOwner && <Text color='grey-500' size='m'>You own it</Text>}
               {!isOwner && <>
@@ -101,7 +103,7 @@ export const CollectionDetail: FC<IProps> = ({ collection }) => {
               </>}
             </OwnerWrapper>
           </Row>
-          <CollectionStatisticsBlock />
+          <CollectionStatisticsBlock collection={collection} />
           {deviceSize < DeviceSize.lg && <CreationInfoWrapper>
             <Text color={'grey-500'} >Created on {'15 February 2021'}</Text>
             <LinkStyled
@@ -118,11 +120,11 @@ export const CollectionDetail: FC<IProps> = ({ collection }) => {
         </CollectionInfoWrapper>
       </CollectionCardWrapper>
       {deviceSize >= DeviceSize.lg && <RightSidebar>
-        <EditCollectionLink to={`/collection/${collection.id}/edit`}>
+        {isOwner && <EditCollectionLink to={`/collection/${collection.id}/edit`}>
           {/* TODO: use link from react-router-dom instead of href to avoid page refresh */}
           <span>Edit collection</span>
           <Icon size={24} name={'gear'} />
-        </EditCollectionLink>
+        </EditCollectionLink>}
         <LinksWrapper>
           <Icon size={24} name={'discord'} />
           <Icon size={24} name={'instagram'} />
@@ -135,7 +137,7 @@ export const CollectionDetail: FC<IProps> = ({ collection }) => {
           <LinkStyled
             target={'_blank'}
             rel={'noreferrer'}
-            href={`${scanUrl}collection/${collection.id}`}
+            href={`${scanUrl}collections/${collection.id}`}
           >
             <TextStyled>View on UniqueScan</TextStyled>
             <IconWrapper>
@@ -187,6 +189,14 @@ const PictureWrapper = styled.div`
   background: var(--color-additional-light);
   width: 160px;
   height: 160px;  
+  .picture {
+    display: inline;
+  }
+  img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+  }
   @media (max-width: 768px) {
     margin-left: calc(var(--gap) * 2);
   }
@@ -229,6 +239,7 @@ const LinksWrapper = styled.div`
   gap: var(--gap);
   justify-content: flex-end;
   margin-bottom: calc(var(--gap) * 1.5);
+  flex-wrap: wrap;
 `;
 
 const CreationInfoWrapper = styled.div`

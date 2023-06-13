@@ -156,7 +156,7 @@ const TokenPage = () => {
           isNested={isNested}
           isOwner={isOwner}
         >
-          {isNested && <NestedTokenBlock
+          {isOwner && isNested && <NestedTokenBlock
             token={token}
             onTransferClick={onActionClick(MarketType.nestedTransfer)}
             onUnnestClick={onActionClick(MarketType.unnest)}

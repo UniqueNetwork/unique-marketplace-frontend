@@ -9,9 +9,10 @@ interface StatusFilterProps {
   value: Statuses | undefined
   onChange(value: Statuses): void
   testid: string
+  disabled?: boolean
 }
 
-const StatusFilter: FC<StatusFilterProps> = ({ value, onChange, testid }) => {
+const StatusFilter: FC<StatusFilterProps> = ({ value, onChange, testid, disabled }) => {
   const { myNFTs, myBets, fixedPrice, timedAuction } = value || {};
   const { selectedAccount } = useAccounts();
 
@@ -44,6 +45,7 @@ const StatusFilter: FC<StatusFilterProps> = ({ value, onChange, testid }) => {
             size={'m'}
             onChange={onMyNFTsChange}
             testid={`${testid}-myNft-checkbox`}
+            disabled={disabled}
           />}
         </StatusFilterWrapper>
       </Accordion>}
