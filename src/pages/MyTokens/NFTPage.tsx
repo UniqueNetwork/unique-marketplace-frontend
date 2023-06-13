@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { Text } from '@unique-nft/ui-kit';
-import { Select } from 'components/UI';
+import { Pagination, Select } from 'components/UI';
 
 import { useOffers } from 'api/restApi/offers/offers';
 import { PagePaper } from 'components/PagePaper/PagePaper';
@@ -13,7 +13,7 @@ import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 
 import { MobileFilters } from './Filters/MobileFilter';
 import { Filters } from './Filters/Filters';
-import { defaultSortingValue, pageSize, sortingOptions, testid } from './constants';
+import { defaultSortingValue, sortingOptions, testid } from './constants';
 import { useMyTokensFilter } from './hooks/useMyTokensFilter';
 import { useGetMyTokens } from './hooks/useGetMyTokens';
 import { TokensList } from 'components';
@@ -26,16 +26,17 @@ export const NFTPage = () => {
   const { offers, isFetching: isFetchingOffers, fetch } = useOffers();
   const { api, currentChainId } = useApi();
   const { tokens, fetchMyTokens, isFetching: isFetchingTokens } = useGetMyTokens();
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
     if (!api?.nft || !selectedAccount || isAccountsLoading) return;
     void (async () => {
       await fetch({ page: 1,
-        pageSize,
+        pageSize: 1000000,
         seller: Address.is.ethereumAddressInAnyForm(selectedAccount.address)
         ? Address.normalize.ethereumAddress(selectedAccount.address)
-        : selectedAccount.address
-      });
+        : selectedAccount.address });
       await fetchMyTokens(selectedAccount);
     })();
   }, [api?.nft, currentChainId, selectedAccount?.address, isAccountsLoading]);
@@ -92,19 +93,39 @@ export const NFTPage = () => {
           </SortSelectWrapper>
         </SearchAndSortingWrapper>
         <div>
-          <Text
-            testid={`${testid}-items-count`}
-            size='m'
-          >{isFetchingTokens || isFetchingOffers || isAccountsLoading ? 'Loading items' : `${featuredTokens.length} items`}</Text>
+          {isFetchingTokens || isFetchingOffers || isAccountsLoading
+            ? <Text
+                testid={`${testid}-items-count`}
+                size='m'
+            >Loading items</Text>
+            : <Pagination
+                size={featuredTokens.length}
+                perPage={pageSize}
+                current={currentPage}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={setPageSize}
+                withPerPageSelector
+            />
+          }
         </div>
         <TokensListWrapper >
           {!isFetchingTokens && !isFetchingOffers && !isAccountsLoading && featuredTokens.length === 0 && <NoItems isSearchResult={!!searchString || !!filterCount} />}
           <TokensList
             testid={`${testid}-tokens`}
-            tokens={featuredTokens}
+            tokens={useMemo(() => featuredTokens.slice(currentPage * pageSize, (currentPage + 1) * pageSize), [currentPage, pageSize, featuredTokens])}
             isLoading={isFetchingTokens || isFetchingOffers || isAccountsLoading}
           />
         </TokensListWrapper>
+        <div>
+          {!(isFetchingTokens || isFetchingOffers || isAccountsLoading) && <Pagination
+            size={featuredTokens.length}
+            perPage={pageSize}
+            current={currentPage}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={setPageSize}
+            withPerPageSelector
+          />}
+        </div>
       </MainContent>
       {deviceSize <= DeviceSize.md && <MobileFilters
         filterCount={filterCount}
@@ -154,6 +175,10 @@ const MainContent = styled.div`
   @media (max-width: 1024px) {
     padding-left: 0;
   }
+
+  .unique-pagination-wrapper {
+    justify-content: space-between;
+  }
 `;
 
 const SortSelectWrapper = styled.div`
@@ -173,4 +198,5 @@ const SearchAndSortingWrapper = styled.div`
 
 const TokensListWrapper = styled.div`
   min-height: 640px;
+  margin-bottom: calc(var(--gap) * 2);
 `;
