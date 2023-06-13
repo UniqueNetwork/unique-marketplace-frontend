@@ -3,7 +3,7 @@ import { useApi } from 'hooks/useApi';
 import { MarketAccount } from 'account/types';
 import { defaultParams } from 'api/restApi/base/axios';
 import { deleteRequest, patch, post } from 'api/restApi/base';
-import { MyCollection, MyCollectionBackend, SetCollectionTokensPayload } from 'api/restApi/collections/types';
+import { MyCollection, SetCollectionTokensPayload } from 'api/restApi/collections/types';
 import CollectionsContext from 'collections/CollectionsContext';
 import config from '../config';
 
@@ -25,7 +25,37 @@ export const useCollections = () => {
     return collection || await api?.collection?.getCollection(Number(collectionId));
   }, [api?.collection, featuredCollections]);
 
-  const getMyCollectionsWithMarketable = useCallback((backendMyCollections: MyCollectionBackend[]) => {
+  const getCollectionTokensCount = useCallback(async (collectionId: number) => {
+    const gqlQuery = {
+      operationName: 'collections_by_account_query',
+      query: `query collections_by_account_query($id: Float) {
+        collections(
+          where: {collection_id: {_eq: $id}, burned: {_eq: "false"}}
+          limit: 1
+        ) {
+          count
+          data {
+            id: collection_id
+            tokensCount: tokens_count
+            __typename
+          }
+          __typename
+        }
+      }`,
+      variables: {
+        id: collectionId
+      }
+    };
+    const { scanApi } = config.blockchains[currentChainId || ''] || {};
+    const response = await post(scanApi, gqlQuery);
+    if (response.status === 200) {
+      const backendMyCollections = response?.data?.data?.collections?.data as { tokensCount: number }[] | [];
+      return backendMyCollections[0].tokensCount || 0;
+    }
+    return 0;
+  }, [settings]);
+
+  const getMyCollectionsWithMarketable = useCallback((backendMyCollections: MyCollection[]) => {
     return backendMyCollections.map((bmc) => {
       const allowedCollection = settings?.blockchain.unique.collections[bmc.id];
       return { ...bmc, isMarketable: !!allowedCollection, allowedTokens: allowedCollection?.allowedTokens || undefined } as MyCollection;
@@ -65,7 +95,7 @@ export const useCollections = () => {
     const response = await post(scanApi, gqlQuery);
     if (response.status === 200) {
       // TODO: merge with data from "collections" in settings to highlight already "added" collections
-      const backendMyCollections = response?.data?.data?.collections?.data as MyCollectionBackend[] | [];
+      const backendMyCollections = response?.data?.data?.collections?.data as MyCollection[] | [];
       const myCollections = getMyCollectionsWithMarketable(backendMyCollections);
       setCollections(myCollections);
     }
@@ -101,6 +131,7 @@ export const useCollections = () => {
     fetchCollections,
     appendCollection,
     removeCollection,
-    setAllowedTokens
+    setAllowedTokens,
+    getCollectionTokensCount
   };
 };

@@ -15,9 +15,10 @@ interface AttributesFilterProps {
   isAttributesFetching?: boolean
   onAttributesChange?(value: { key: string, attribute: string }[]): void
   testid: string
+  disabled?: boolean
 }
 
-const AttributesFilter: FC<AttributesFilterProps> = ({ selectedAttributes = [], attributes, isAttributesFetching, onAttributesChange, testid }) => {
+const AttributesFilter: FC<AttributesFilterProps> = ({ selectedAttributes = [], attributes, isAttributesFetching, onAttributesChange, testid, disabled }) => {
   const onAttributeSelect = useCallback((attributeItem: AttributeItem) => (value: boolean) => {
     let _selectedAttributes;
     if (value) {
@@ -50,6 +51,7 @@ const AttributesFilter: FC<AttributesFilterProps> = ({ selectedAttributes = [], 
                 size={'m'}
                 onChange={onAttributeSelect({ key: attributeName, attribute: attribute.key })}
                 testid={`${testid}-checkbox-${attribute.key}`}
+                disabled={disabled}
               />
               <Text
                 testid={`${testid}-count-${attribute.key}`}

@@ -1,4 +1,4 @@
-// import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
+import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 
 export type LoginPayload = {
     account: string
@@ -14,15 +14,35 @@ export type SetCollectionTokensPayload = {
   tokens: string
 }
 
-export interface MyCollectionBackend {
-  id: number,
-  tokenPrefix: string,
-  owner: string,
-  cover: string,
+export interface MarketableCollection {
+  allowedTokens: string
+  isMarketable: boolean
+  active: boolean
+  collectionId: number
+  createdAt: string
+  data: CollectionInfoWithSchemaResponse
+  decimalPoints: number
+  description: string
+  id: string
+  mintMode: boolean
+  mode: 'NFT' | 'Fungible' | 'ReFungible' | undefined,
   name: string
+  network: string
+  owner: string
+  status: string
+  tokenPrefix: string
+  tokensCount: number
+  tokensCountOnScan?: number
+  tokensOnMarket: number
+  updatedAt: string
 }
 
-export interface MyCollection extends MyCollectionBackend {
-  allowedTokens: string, // TODO: type
+export interface MyCollection {
+  allowedTokens: string
   isMarketable: boolean
+  id: number
+  tokenPrefix: string
+  owner: string
+  cover: string
+  name: string
 }

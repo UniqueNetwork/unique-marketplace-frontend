@@ -1,36 +1,48 @@
-import { Heading } from '@unique-nft/ui-kit';
+import { Heading, Skeleton } from '@unique-nft/ui-kit';
+import { MarketableCollection } from 'api/restApi/collections/types';
 import { Text } from 'components/UI';
 
 import styled from 'styled-components';
 
-export const CollectionStatisticsBlock = () => {
+export const CollectionStatisticsBlock = ({ collection }: { collection: MarketableCollection }) => {
   return <CollectionStatisticsBlockWrapper>
     <div>
-      <Heading size='3'>10 000</Heading>
+      <Heading size='3'>{Math.max(collection.tokensCount, collection.tokensCountOnScan || 0)}</Heading>
       <Text size={'m'} color='grey-600'>items</Text>
     </div>
-    <div>
-      <Heading size='3'>77.1%</Heading>
-      <Text size={'m'} color='grey-600'>listed NFTs</Text>
-    </div>
-    <div>
-      <Heading size='3'>1 KSM</Heading>
-      <Text size={'m'} color='grey-600'>floor price</Text>
-    </div>
-    <div>
-      <Heading size='3'>7 582</Heading>
-      <Text size={'m'} color='grey-600'>holders</Text>
-    </div>
-    <div>
-      <Heading size='3'>74%</Heading>
-      <Text size={'m'} color='grey-600'>unique holders</Text>
-    </div>
+    {collection.tokensCount >= (collection.tokensCountOnScan || 0) && <>
+      <div>
+        <Heading size='3'>{ (collection.tokensCount ? collection.tokensOnMarket / collection.tokensCount * 100 : 0).toFixed(0) }%</Heading>
+        <Text size={'m'} color='grey-600'>listed NFTs</Text>
+      </div>
+      <div>
+        <Heading size='3'>0 KSM</Heading>
+        <Text size={'m'} color='grey-600'>floor price</Text>
+      </div>
+      <div>
+        <Heading size='3'>0</Heading>
+        <Text size={'m'} color='grey-600'>holders</Text>
+      </div>
+      <div>
+        <Heading size='3'>0%</Heading>
+        <Text size={'m'} color='grey-600'>unique holders</Text>
+      </div>
+    </>}
+    {collection.tokensCountOnScan && collection.tokensCount < collection.tokensCountOnScan && <ProgressWrapper>
+      <Heading size='3'>Scanning...</Heading>
+      <Text size='m' color='grey-600'>Scanned {collection.tokensCount} of {collection.tokensCountOnScan} tokens</Text>
+      <ProgressBarWrapper>
+        <Skeleton />
+        <ProgressBar value={collection.tokensCount / collection.tokensCountOnScan} />
+      </ProgressBarWrapper>
+    </ProgressWrapper>}
   </CollectionStatisticsBlockWrapper>;
 };
 
 const CollectionStatisticsBlockWrapper = styled.div`
   display: flex;
   margin-top: calc(var(--gap) / 2);
+  margin-right: calc(var(--gap) / 2);
   & > div {
     display: flex;
     flex-direction: column;
@@ -45,6 +57,7 @@ const CollectionStatisticsBlockWrapper = styled.div`
     }
   }
   @media (max-width: 1024px) {
+    margin-right: 0;
     & > div {
       padding-right: calc(var(--gap) * 1);
       margin-right: calc(var(--gap) * 1);
@@ -63,4 +76,32 @@ const CollectionStatisticsBlockWrapper = styled.div`
     padding-right: 0;
     margin-right: 0;
   }
+`;
+
+const ProgressWrapper = styled.div`
+  &&{
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    @media (max-width: 576px) {
+      flex-direction: column;
+      gap: 0;
+    }
+  }
+
+`;
+
+const ProgressBarWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  height: 8px;
+  gap: calc(var(--gap) / 2);
+`;
+
+const ProgressBar = styled.div<{ value: number }>`
+  margin-top: -8px;
+  height: 8px;
+  width: ${({ value }) => (value * 100).toString() + '%'};
+  background-color: var(--color-primary-500);
 `;

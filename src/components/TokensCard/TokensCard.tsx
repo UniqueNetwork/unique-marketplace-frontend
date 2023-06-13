@@ -3,11 +3,11 @@ import { Loader, Text } from '@unique-nft/ui-kit';
 import { generatePath, Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Icon, Link as UILink } from 'components/UI';
-import { compareEncodedAddresses } from 'api/chainApi/utils/addressUtils';
+import { compareEncodedAddresses, isTokenOwner } from 'api/chainApi/utils/addressUtils';
 import { Offer } from 'api/restApi/offers/types';
 import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
-import { formatBalance } from 'utils/textUtils';
+import { formatBalance, shortcutText } from 'utils/textUtils';
 import { timeDifference } from 'utils/timestampUtils';
 import { Primary600 } from 'styles/colors';
 import config from 'config';
@@ -25,9 +25,10 @@ export type TTokensCard = {
   collectionId?: number
   tokenImageUrl?: string
   testid: string
+  showOwner?: boolean
 };
 
-export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, testid, ...props }) => {
+export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, testid, showOwner, ...props }) => {
   const [token, setToken] = useState<Omit<TokenByIdResponse | MyToken, 'collection' | 'nestingParentToken' | 'properties'> | undefined>(props.token);
   const [collection, setCollection] = useState<(CollectionInfoWithSchemaResponse) | undefined>();
   const [isFetching, setIsFetching] = useState<boolean>(false);
@@ -44,20 +45,22 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
     imageUrl,
     price,
     auction,
-    video
+    video,
+    owner
   } = useMemo(() => {
     if (offer || (token && collection) || ((token as MyToken).collectionName && (token as MyToken).tokenPrefix)) {
-      const { image, video } = offer?.tokenDescription || token || {};
-      const collectionName = offer?.collectionDescription?.name || collection?.name || (token as MyToken).collectionName || '';
-      const tokenPrefix = offer?.collectionDescription?.tokenPrefix || collection?.tokenPrefix || (token as MyToken).tokenPrefix;
-      const { auction, price } = offer || {};
+      const { image, video, owner } = offer?.tokenDescription || token || {};
+      const collectionName = offer?.collectionDescription?.name || collection?.name || (token as MyToken)?.collectionName || '';
+      const tokenPrefix = offer?.collectionDescription?.tokenPrefix || collection?.tokenPrefix || (token as MyToken)?.tokenPrefix || '';
+      const { auction, price, seller } = offer || {};
       return {
         tokenTitle: `${tokenPrefix || ''} #${tokenId || ''}`,
         collectionTitle: `${collectionName?.substring(0, 25) || ''} [id ${collectionId || ''}]`,
         imageUrl: image,
         video: stringToDecodedInfixOrUrlOrCidAndHash(video),
         auction,
-        price
+        price,
+        owner: seller || owner
       };
     }
 
@@ -115,6 +118,11 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
     tokenId: tokenId?.toString()
   }), [currentChainId, collectionId, tokenId]);
 
+  const isOwner = useMemo(() => {
+    if (!selectedAccount?.address || !owner) return false;
+    return isTokenOwner(selectedAccount.address, owner);
+  }, [selectedAccount?.address, owner]);
+
   return (
     <TokensCardStyled>
       <TokensMedia
@@ -146,9 +154,10 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
               {collectionTitle}
             </Text>
           </UILink>
+          {showOwner && <Text size={'s'} color={'grey-500'}>{isOwner ? 'You own it' : `Owned by: ${shortcutText(owner || '')}`}</Text>}
           {isBundleState && <BundleItemsCount count={tokensCount || 0} testId={testid} />}
         </BasicDataWrapper>
-        {price?.parsed && <TradingInfoWrapper>
+        {!!price?.parsed && <TradingInfoWrapper>
           <Text size={'xs'} color={'grey-500'} >Price</Text>
           <PriceWrapper length={price.parsed.toFixed(5).length}>
             <Text
@@ -180,7 +189,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
         </AuctionInfoWrapper>} */}
       </Description>
 
-      {isFetching && <Loader isFullPage />}
+      {!!isFetching && <Loader isFullPage />}
     </TokensCardStyled>
   );
 };

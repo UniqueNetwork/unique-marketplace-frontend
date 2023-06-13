@@ -13,9 +13,10 @@ interface AttributeCountsFilterProps {
   isAttributeCountsFetching?: boolean
   onAttributeCountsChange?(value: number[]): void
   testid: string
+  disabled?: boolean
 }
 
-const AttributeCountsFilter: FC<AttributeCountsFilterProps> = ({ attributeCounts = [], selectedAttributeCounts = [], isAttributeCountsFetching, onAttributeCountsChange, testid }) => {
+const AttributeCountsFilter: FC<AttributeCountsFilterProps> = ({ attributeCounts = [], selectedAttributeCounts = [], isAttributeCountsFetching, onAttributeCountsChange, testid, disabled }) => {
   const onAttributeCountSelect = useCallback((attributeCount: number) => (value: boolean) => {
     let _selectedAttributeCounts;
     if (value) {
@@ -47,6 +48,7 @@ const AttributeCountsFilter: FC<AttributeCountsFilterProps> = ({ attributeCounts
               size={'m'}
               onChange={onAttributeCountSelect(attributeCount.numberOfAttributes)}
               testid={`${testid}-checkbox`}
+              disabled={disabled}
             />
             <Text
               testid={`${testid}-amount-${attributeCount.amount}`}
