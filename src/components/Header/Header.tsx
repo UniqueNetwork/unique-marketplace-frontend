@@ -1,7 +1,7 @@
 import { FC, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { Icon } from '../UI';
+import { Dropdown, Icon, Text } from '../UI';
 
 import { useScreenWidthFromThreshold } from 'hooks/useScreenWidthFromThreshold';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
@@ -9,7 +9,8 @@ import { useAccounts } from 'hooks/useAccounts';
 import { useApi } from 'hooks/useApi';
 import { TMenuItems } from '../PageLayout';
 import { WalletManager } from './WalletManager/WalletManager';
-import { DesktopMenuLink, MobileMenuLink } from './MenuLink';
+import { DesktopMenuItem, DesktopMenuLink, MobileMenuItem, MobileMenuLink } from './MenuLink';
+import config from 'config';
 
 interface HeaderProps {
   activeItem: TMenuItems;
@@ -45,8 +46,30 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
             <DesktopMenuLink to={`/${currentChainId || ''}/market`} active={activeItem === 'Market'}>
               Market
             </DesktopMenuLink>
-            <DesktopMenuLink to={`/${currentChainId || ''}/myTokens`} active={activeItem === 'My tokens'} disabled={!selectedAccount || isLoading}>
-              My tokens
+            <MenuDropdown
+              options={[
+                {
+                  title: 'NFT',
+                  url: `${config.blockchains[currentChainId || ''].walletUrl}create-nft`
+                },
+                {
+                  title: 'Collection',
+                  url: `${config.blockchains[currentChainId || ''].walletUrl}create-collection/main-information`
+                }
+              ]}
+              optionKey='title'
+              optionValue='title'
+              onChange={({ url }) => {
+                window.open(url as string, '_blank', 'noopener');
+              }}
+              optionRender={(option) => {
+                return <DesktopMenuItem>{option.title as string}</DesktopMenuItem>;
+              }}
+            >
+              <DesktopMenuItem>Create</DesktopMenuItem>
+            </MenuDropdown>
+            <DesktopMenuLink to={`/${currentChainId || ''}/sellTokens`} active={activeItem === 'Sell tokens'} disabled={!selectedAccount || isLoading}>
+              Sell tokens
             </DesktopMenuLink>
             <DesktopMenuLink to={`/${currentChainId || ''}/collections`} active={activeItem === 'My collections'} disabled={!selectedAccount || isLoading}>
               My collections
@@ -68,13 +91,32 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
           <MobileMenuLink to={`/${currentChainId || ''}/market`} active={activeItem === 'Market'} onClick={mobileMenuToggler}>
             Market
           </MobileMenuLink>
+          <MobileMenuDropdown
+            options={[
+                {
+                  title: 'NFT',
+                  url: `${config.blockchains[currentChainId || ''].walletUrl}create-nft`
+                },
+                {
+                  title: 'Collection',
+                  url: `${config.blockchains[currentChainId || ''].walletUrl}create-collection/main-information`
+                }
+              ]}
+            optionValue='title'
+            optionKey='title'
+            onChange={({ url }) => {
+                window.open(url as string, '_blank', 'noopener');
+              }}
+          >
+            <Text color = 'additional-dark'>Create</Text>
+          </MobileMenuDropdown>
           <MobileMenuLink
-            to={`/${currentChainId || ''}/myTokens`}
-            active={activeItem === 'My tokens'}
+            to={`/${currentChainId || ''}/sellTokens`}
+            active={activeItem === 'Sell tokens'}
             onClick={mobileMenuToggler}
             disabled={!selectedAccount && !isLoading}
           >
-            My tokens
+            Sell tokens
           </MobileMenuLink>
           <MobileMenuLink to={`/${currentChainId || ''}/collections`}
             active={activeItem === 'My collections'}
@@ -153,4 +195,24 @@ const MobileMenu = styled.div`
   flex-direction: column;
   padding: 16px;
   z-index: 9;
+`;
+
+const MenuDropdown = styled(Dropdown)`
+  display: inline-grid;
+  .dropdown-wrapper {
+    width: auto;
+  }
+`;
+
+const MobileMenuDropdown = styled(Dropdown)`
+  display: inline-grid;
+  padding: 8px 16px;
+  .dropdown-wrapper {
+    width: auto;
+    .unique-text:hover {
+      color: var(--color-primary-500);
+      cursor: pointer;
+    }
+  }
+  .
 `;

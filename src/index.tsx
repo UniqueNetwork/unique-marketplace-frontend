@@ -29,7 +29,7 @@ const commonRoutes = (<>
   />
   <Route
     element={<MyTokens />}
-    path={'myTokens'}
+    path={'sellTokens'}
   />
   <Route
     element={<Accounts />}

@@ -53,7 +53,7 @@ export const DesktopMenuLink: FC<IMenuLink> = ({
   );
 };
 
-const DesktopMenuItem = styled(Text) <{ $active?: boolean, $disabled?: boolean }>`
+export const DesktopMenuItem = styled(Text) <{ $active?: boolean, $disabled?: boolean }>`
   && {
     margin-right: 24px;
     color: ${(props) => props.$disabled ? 'var(--color-blue-grey-500)' : (props.$active ? 'var(--color-additional-dark)' : 'var(--color-primary-500)')};
@@ -107,7 +107,7 @@ export const MobileMenuLink: FC<IMobileMenuLink> = ({
   );
 };
 
-const MobileMenuItem = styled(Text) <{ $active?: boolean, $disabled?: boolean }>`
+export const MobileMenuItem = styled(Text) <{ $active?: boolean, $disabled?: boolean }>`
   && {
     margin-right: 24px;
     color: ${(props) => props.$disabled ? 'var(--color-blue-grey-500)' : (props.$active ? 'var(--color-additional-dark)' : 'var(--color-primary-500)')};
