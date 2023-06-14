@@ -13,10 +13,10 @@ export const TradesPage = () => {
     <Tabs
       testid={`${testid}-tabs`}
       activeIndex={activeTab}
-      labels={['All tokens', 'My tokens']}
+      labels={['All tokens', 'Sell tokens']}
       onClick={setActiveTab}
       disabledIndexes={!selectedAccount ? [1] : []}
     />
-    <TokensTradesPage currentTab={activeTab} testid={`${testid}-${activeTab ? 'myTokens' : 'allTokens'}`} />
+    <TokensTradesPage currentTab={activeTab} testid={`${testid}-${activeTab ? 'sellTokens' : 'allTokens'}`} />
   </>);
 };
