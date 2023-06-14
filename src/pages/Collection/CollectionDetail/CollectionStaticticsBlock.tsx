@@ -1,39 +1,41 @@
 import { Heading, Skeleton } from '@unique-nft/ui-kit';
 import { MarketableCollection } from 'api/restApi/collections/types';
 import { Text } from 'components/UI';
+import { useApi } from 'hooks/useApi';
 
 import styled from 'styled-components';
 
 export const CollectionStatisticsBlock = ({ collection }: { collection: MarketableCollection }) => {
+  const { chainProperties } = useApi();
   return <CollectionStatisticsBlockWrapper>
     <div>
-      <Heading size='3'>{Math.max(collection.tokensCount, collection.tokensCountOnScan || 0)}</Heading>
+      <Heading size='3'>{Math.max(collection.tokensCount, collection.tokensTotal || 0)}</Heading>
       <Text size={'m'} color='grey-600'>items</Text>
     </div>
-    {collection.tokensCount >= (collection.tokensCountOnScan || 0) && <>
+    {collection.tokensCount >= (collection.tokensTotal || 0) && <>
       <div>
         <Heading size='3'>{ (collection.tokensCount ? collection.tokensOnMarket / collection.tokensCount * 100 : 0).toFixed(0) }%</Heading>
         <Text size={'m'} color='grey-600'>listed NFTs</Text>
       </div>
       <div>
-        <Heading size='3'>0 KSM</Heading>
+        <Heading size='3'>{collection.minPrice || 0} {chainProperties?.token || ''}</Heading>
         <Text size={'m'} color='grey-600'>floor price</Text>
       </div>
       <div>
-        <Heading size='3'>0</Heading>
+        <Heading size='3'>{collection.holders}</Heading>
         <Text size={'m'} color='grey-600'>holders</Text>
       </div>
       <div>
-        <Heading size='3'>0%</Heading>
+        <Heading size='3'>{Number(collection.uniqueHolders || '0').toFixed(0)}%</Heading>
         <Text size={'m'} color='grey-600'>unique holders</Text>
       </div>
     </>}
-    {collection.tokensCountOnScan && collection.tokensCount < collection.tokensCountOnScan && <ProgressWrapper>
+    {collection.tokensTotal && collection.tokensCount < collection.tokensTotal && <ProgressWrapper>
       <Heading size='3'>Scanning...</Heading>
-      <Text size='m' color='grey-600'>Scanned {collection.tokensCount} of {collection.tokensCountOnScan} tokens</Text>
+      <Text size='m' color='grey-600'>Scanned {collection.tokensCount} of {collection.tokensTotal} tokens</Text>
       <ProgressBarWrapper>
         <Skeleton />
-        <ProgressBar value={collection.tokensCount / collection.tokensCountOnScan} />
+        <ProgressBar value={collection.tokensCount / collection.tokensTotal} />
       </ProgressBarWrapper>
     </ProgressWrapper>}
   </CollectionStatisticsBlockWrapper>;
