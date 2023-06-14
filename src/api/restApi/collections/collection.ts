@@ -11,7 +11,7 @@ import { useAccounts } from 'hooks/useAccounts';
 
 const endpoint = '/collections';
 
-export const getCollection = (baseURL: string, collectionId: number) => get<MarketableCollection>(`${endpoint}/{collectionId}?collectionId=${collectionId}`, { ...defaultParams, baseURL });
+export const getCollection = (baseURL: string, collectionId: number) => get<MarketableCollection>(`${endpoint}/${collectionId}`, { ...defaultParams, baseURL });
 export const addCollectionToMarket = (baseURL: string, collectionId: number, account?: string) => patch(`${endpoint}/add`, {}, { ...defaultParams, baseURL, params: { force: true, collectionId, account } });
 
 export const useMarketableCollection = () => {

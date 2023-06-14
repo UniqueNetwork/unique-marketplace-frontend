@@ -63,7 +63,7 @@ export const CollectionPage = () => {
       if (!collectionData || (tokensCountOnScan > 0 && collectionData.tokensCount !== tokensCountOnScan)) {
         const collection = await getCollection(id);
         if (!collection) return navigate('/404');
-        addCollection(id);
+        void addCollection(id);
         setScanning(tokensCountOnScan > 0);
         setCollection({
           id: '-',
@@ -83,13 +83,18 @@ export const CollectionPage = () => {
           status: '',
           tokenPrefix: collection.tokenPrefix,
           tokensCount: 0,
-          tokensCountOnScan: tokensCount,
+          tokensTotal: tokensCountOnScan,
           tokensOnMarket: 0,
-          updatedAt: ''
+          updatedAt: '',
+          minPrice: 0,
+          maxPrice: 0,
+          holders: 0,
+          uniqueHolders: '0',
+          metadata: null
         });
         return;
       }
-      setCollection({ ...collectionData, tokensCountOnScan });
+      setCollection(collectionData);
     })();
   }, [currentChainId, collectionId, fetch, selectedAccount?.address]);
 
@@ -98,8 +103,8 @@ export const CollectionPage = () => {
     const refetchCollection = async () => {
       const collectionData = await fetchCollection(Number(collectionId));
       if (!collectionData) return;
-      setCollection({ ...collectionData, tokensCountOnScan });
-      if (collectionData?.tokensCount === tokensCountOnScan) {
+      setCollection(collectionData);
+      if (collectionData?.tokensCount === collectionData?.tokensTotal) {
         setScanning(false);
 
         void fetch({

@@ -31,10 +31,15 @@ export interface MarketableCollection {
   owner: string
   status: string
   tokenPrefix: string
+  tokensTotal: number
   tokensCount: number
-  tokensCountOnScan?: number
   tokensOnMarket: number
   updatedAt: string
+  maxPrice: number | null
+  minPrice: number | null
+  holders: number
+  uniqueHolders: string | null
+  metadata: null
 }
 
 export interface MyCollection {
