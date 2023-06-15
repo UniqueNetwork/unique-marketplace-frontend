@@ -54,6 +54,9 @@ const BelongingFilterWrapper = styled.div`
   display: flex;
   flex-direction: column;
   row-gap: var(--gap);
+  .label {
+    font-size: 16px;
+  }
 `;
 
 export default BelongingFilter;
