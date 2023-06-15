@@ -63,7 +63,7 @@ export const CommonTokenDetail: FC<IProps> = ({
       collectionId,
       collectionName,
       prefix,
-      coverImageUrl: schema?.coverPicture.fullUrl || '',
+      coverImageUrl: schema?.coverPicture?.fullUrl || '',
       description,
       attributes,
       image: typeof image === 'string' ? image : image?.fullUrl || '',
