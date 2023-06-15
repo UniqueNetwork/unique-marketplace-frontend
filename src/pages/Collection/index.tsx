@@ -23,6 +23,8 @@ import { useMarketableCollection } from 'api/restApi/collections/collection';
 import { MarketableCollection } from 'api/restApi/collections/types';
 import { useCollections } from 'hooks/useCollections';
 import { compareEncodedAddresses } from 'api/chainApi/utils/addressUtils';
+import { useCollectionTokensFilter } from './hooks/useCollectionTokensFilter';
+import { TokensFilter } from './Filters/types';
 
 export const CollectionPage = () => {
   const { collectionId } = useParams<{ collectionId: string }>();
@@ -49,7 +51,7 @@ export const CollectionPage = () => {
     onSearch,
     onSortingChange,
     getFilterByState
-   } = useMarketFilter({ isFetching, fetch });
+   } = useCollectionTokensFilter({ isFetching, fetch });
 
   useEffect(() => {
     if (!selectedAccount?.address) return;
@@ -127,7 +129,7 @@ export const CollectionPage = () => {
     if (!isFetching) {
       void fetchMore({
         page: Math.ceil(tokens.length / pageSize) + 1,
-        pageSize,
+        pageSize: 20,
         ...(getFilterByState(filterState)),
         searchText: searchValue || undefined,
         sort: [sortingValue]
@@ -185,7 +187,7 @@ export const CollectionPage = () => {
           </InfiniteScroll>
         </MainContent>
       </MarketMainPageStyled>
-      {deviceSize <= DeviceSize.md && <MobileFilters
+      {deviceSize <= DeviceSize.md && <MobileFilters<TokensFilter>
         filterCount={filterCount}
         defaultSortingValue={defaultSortingValue}
         sortingValue={sortingValue}

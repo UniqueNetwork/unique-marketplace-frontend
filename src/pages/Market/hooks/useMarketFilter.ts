@@ -44,7 +44,7 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
     setUrlParameter('sortingValue', value.id);
     void fetch({
       page: 1,
-      pageSize,
+      pageSize: 20,
       ...(getFilterByState(filterState)),
       searchText: searchValue || undefined,
       sort: [value.id]
@@ -56,7 +56,7 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
     setUrlParameter('searchValue', value || '');
     void fetch({
       page: 1,
-      pageSize,
+      pageSize: 20,
       ...(getFilterByState(filterState)),
       searchText: value || undefined,
       sort: [sortingValue]
@@ -68,7 +68,7 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
     console.log('fetch');
     await fetch({
       page: 1,
-      pageSize,
+      pageSize: 20,
       ...(getFilterByState(filterState)),
       searchText: searchValue || undefined,
       sort: [sortingValue]
@@ -103,7 +103,7 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
     setSortingValue(defaultSortingValue.id);
     void fetch({
       page: 1,
-      pageSize,
+      pageSize: 20,
       sort: [defaultSortingValue.id]
     });
   }, [currentChainId]);
