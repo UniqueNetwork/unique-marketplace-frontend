@@ -120,7 +120,7 @@ export const CollectionDetail: FC<IProps> = ({ collection }) => {
         </CollectionInfoWrapper>
       </CollectionCardWrapper>
       {deviceSize >= DeviceSize.lg && <RightSidebar>
-        {isOwner && <EditCollectionLink to={`/collection/${collection.id}/edit`}>
+        {isOwner && <EditCollectionLink to={`/collection/${collectionId}/edit`}>
           {/* TODO: use link from react-router-dom instead of href to avoid page refresh */}
           <span>Edit collection</span>
           <Icon size={24} name={'gear'} />
@@ -208,6 +208,9 @@ const CollectionInfoWrapper = styled.div`
   gap: var(--gap);
   h1.unique-font-heading.size-1 {
     margin-bottom: var(--gap);
+  }
+  @media (min-width: 1920px){
+    max-width: 900px;
   }
 `;
 
