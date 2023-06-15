@@ -7,9 +7,15 @@ import { AttributeItem, FiltersProps, PriceRange, Statuses } from 'components/Fi
 import { useAccounts } from 'hooks/useAccounts';
 import StatusFilter from 'components/Filters/StatusFilter';
 import PricesFilter from 'components/Filters/PricesFilter';
+import { BelongingValue, TokensFilter } from './types';
+import BelongingFilter from './BelongingFilter';
 
-export const Filters: FC<FiltersProps> = ({ value, attributes, attributeCounts, onFilterChange, testid, disabled }) => {
+export const Filters: FC<FiltersProps<TokensFilter>> = ({ value, attributes, attributeCounts, onFilterChange, testid, disabled }) => {
   const { selectedAccount } = useAccounts();
+
+  const onBelongingFilterChange = useCallback((belongingValue: BelongingValue) => {
+    onFilterChange({ ...value, belongingValue });
+  }, [value, onFilterChange, selectedAccount]);
 
   const onStatusFilterChange = useCallback((statuses: Statuses) => {
     onFilterChange({ ...value, statuses });
@@ -30,6 +36,12 @@ export const Filters: FC<FiltersProps> = ({ value, attributes, attributeCounts, 
   const { attributes: selectedAttributes = [], attributeCounts: selectedAttributeCounts = [] } = value || {};
 
   return <FiltersStyled>
+
+    <BelongingFilter
+      value={value?.belongingValue}
+      onChange={onBelongingFilterChange}
+      disabled={disabled}
+    />
     <StatusFilter
       value={value?.statuses}
       onChange={onStatusFilterChange}
