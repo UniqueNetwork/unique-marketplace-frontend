@@ -45,4 +45,14 @@ export class UniqueSDKCollectionController extends BaseController {
       signature
     });
   }
+
+  async uploadFile(file: Blob): Promise<string | undefined> {
+    if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
+    return (await this.uniqueSdk.ipfs.uploadFile({ file }))?.fullUrl;
+  }
+
+  // async addFile(cid: string, file: Blob): Promise<string | undefined> {
+  //   if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
+  //   return (await this.uniqueSdk.ipfs.addFiles({ cid, files: [file] }))?.fullUrl;
+  // }
 }

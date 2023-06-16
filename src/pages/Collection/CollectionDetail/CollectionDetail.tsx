@@ -1,4 +1,4 @@
-import React, { FC, useMemo } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 import { Heading } from '@unique-nft/ui-kit';
 import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 import styled from 'styled-components';
@@ -19,6 +19,7 @@ import { PagePaper } from 'components/PagePaper/PagePaper';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { Link } from 'react-router-dom';
 import { MarketableCollection } from 'api/restApi/collections/types';
+import ShareTokenModal from 'pages/Token/TokenDetail/ShareTokenModal';
 interface IProps {
   collection?: MarketableCollection
 }
@@ -29,8 +30,10 @@ export const CollectionDetail: FC<IProps> = ({ collection }) => {
 
   const { currentChainId, chainProperties } = useApi();
 
-  const { name, description, data, owner, collectionId } = collection || {};
+  const { name, description, data, owner, collectionId, metadata } = collection || {};
   const { schema } = data || {};
+
+  const [isShareModalVisible, setIsShareModalVisible] = useState(false);
 
   const formatedAddressOwner = useMemo(() => {
     if (!owner) return '';
@@ -41,6 +44,26 @@ export const CollectionDetail: FC<IProps> = ({ collection }) => {
     if (!selectedAccount) return false;
     return isTokenOwner(selectedAccount?.address, owner || '');
   }, [owner, selectedAccount]);
+
+  const externalLinks = useMemo(() => {
+    const { metadata } = collection || {};
+    const hasAnyLink = !!metadata?.discord ||
+      !!metadata?.instagram ||
+      !!metadata?.twitter ||
+      !!metadata?.telegram ||
+      !!metadata?.reddit ||
+      !!metadata?.website;
+    return (<>
+      {metadata?.discord && <UILink href={metadata?.discord} ><Icon size={24} name={'discord'}/></UILink>}
+      {metadata?.instagram && <UILink href={metadata?.instagram} ><Icon size={24} name={'instagram'}/></UILink>}
+      {metadata?.twitter && <UILink href={metadata?.twitter} ><Icon size={24} name={'twitter'}/></UILink>}
+      {metadata?.telegram && <UILink href={metadata?.telegram} ><Icon size={24} name={'telegram'}/></UILink>}
+      {metadata?.reddit && <UILink href={metadata?.reddit} ><Icon size={24} name={'reddit'}/></UILink>}
+      {metadata?.website && <UILink href={metadata?.website} ><Icon size={24} name={'globe-simple'}/></UILink>}
+      {hasAnyLink && <Separator/>}
+      <ShareLink><Icon size={24} name={'shared'} onClick={() => setIsShareModalVisible(true)}/></ShareLink>
+    </>);
+  }, [collection]);
 
   if (!collection) {
     return <CollectionDetailPaper>
@@ -54,18 +77,18 @@ export const CollectionDetail: FC<IProps> = ({ collection }) => {
 
   return <CollectionDetailPaper>
     <BannerWrapper >
-      <img src={CollectionBanner} />
+      <img src={collection.metadata?.banner || CollectionBanner} />
     </BannerWrapper>
     <CollectionDetailWrapper>
       <CollectionCardWrapper >
         <PictureWrapper>
-          <Picture alt={name || ''} src={schema?.coverPicture.fullUrl || ''} size={160} />
+          <Picture alt={name || ''} src={collection.metadata?.cover || schema?.coverPicture.fullUrl || ''} size={160} />
         </PictureWrapper>
         <CollectionInfoWrapper>
           <div>
             <Heading size='1' >{name}</Heading>
             <Row>
-              <CollapsableText size='l' >{description}</CollapsableText>
+              <CollapsableText size='l' >{metadata?.description || description}</CollapsableText>
             </Row>
           </div>
           {deviceSize < DeviceSize.lg && <>
@@ -77,11 +100,7 @@ export const CollectionDetail: FC<IProps> = ({ collection }) => {
             </Row>}
             <Row>
               <LinksWrapper>
-                <Icon size={24} name={'discord'} />
-                <Icon size={24} name={'instagram'} />
-                <Icon size={24} name={'twitter'} />
-                <Icon size={24} name={'globe-simple'} />
-                <Icon size={24} name={'shared'} />
+                {externalLinks}
               </LinksWrapper>
             </Row>
           </>}
@@ -126,11 +145,7 @@ export const CollectionDetail: FC<IProps> = ({ collection }) => {
           <Icon size={24} name={'gear'} />
         </EditCollectionLink>}
         <LinksWrapper>
-          <Icon size={24} name={'discord'} />
-          <Icon size={24} name={'instagram'} />
-          <Icon size={24} name={'twitter'} />
-          <Icon size={24} name={'globe-simple'} />
-          <Icon size={24} name={'shared'} />
+          {externalLinks}
         </LinksWrapper>
         <CreationInfoWrapper>
           <Text color={'grey-500'} >Created on {'15 February 2021'}</Text>
@@ -147,6 +162,7 @@ export const CollectionDetail: FC<IProps> = ({ collection }) => {
         </CreationInfoWrapper>
       </RightSidebar>}
     </CollectionDetailWrapper>
+    <ShareTokenModal isVisible={isShareModalVisible} onClose={() => setIsShareModalVisible(false)} testid='share' />
   </CollectionDetailPaper>;
 };
 
@@ -294,5 +310,16 @@ const IconWrapper = styled.div`
     path {
       stroke: currentColor;
     }
+  }
+`;
+const ShareLink = styled.div`
+  && {
+    cursor: pointer;
+  }
+`;
+const Separator = styled.div`
+  && {
+    width:1px;
+    border-left: 1px solid #D2D3D6;
   }
 `;

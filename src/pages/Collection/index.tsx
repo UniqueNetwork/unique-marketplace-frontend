@@ -17,12 +17,10 @@ import { defaultSortingValue, pageSize, sortingOptions, testid } from './constan
 import { useNavigate, useParams } from 'react-router-dom';
 import { CollectionDetail } from './CollectionDetail/CollectionDetail';
 import { useTokens } from 'api/restApi/tokens/tokens';
-import { useMarketFilter } from 'pages/Market/hooks/useMarketFilter';
 import InfiniteScroll from 'react-infinite-scroller';
 import { useMarketableCollection } from 'api/restApi/collections/collection';
 import { MarketableCollection } from 'api/restApi/collections/types';
 import { useCollections } from 'hooks/useCollections';
-import { compareEncodedAddresses } from 'api/chainApi/utils/addressUtils';
 import { useCollectionTokensFilter } from './hooks/useCollectionTokensFilter';
 import { TokensFilter } from './Filters/types';
 
@@ -203,7 +201,6 @@ export const CollectionPage = () => {
           testid={`${testid}-filters`}
         />}
       />}
-
     </CollectionPagePaper>
   </>);
 };

@@ -1,21 +1,19 @@
-import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 import { Heading } from '@unique-nft/ui-kit';
-import styled from 'styled-components';
 
 import { Button, Textarea } from 'components/UI';
 import { TextInput } from 'components/TextInput/TextInput';
-import { CollectionFormData } from '../types';
-import { Reducer, useCallback, useReducer, useState } from 'react';
+import { Reducer, useCallback, useMemo, useReducer, useState } from 'react';
 import { ButtonsRow, FormRow, FormWrapper } from './FormComponents';
+import { MarketableCollectionMetadata } from 'api/restApi/collections/types';
 
 interface CollectionEditFormProps {
-  initialFormData: Partial<CollectionFormData>;
-  onSubmit(formData: Partial<CollectionFormData>): void;
+  initialFormData: Partial<MarketableCollectionMetadata>;
+  onSubmit(formData: Partial<MarketableCollectionMetadata>): void;
 }
 
 type FormReducer = Reducer<
-    Partial<CollectionFormData>,
-    { field: keyof CollectionFormData, value: string }
+    Partial<MarketableCollectionMetadata>,
+    { field: keyof MarketableCollectionMetadata, value: string }
   >;
 
 export const CollectionEditForm = ({ initialFormData, onSubmit }: CollectionEditFormProps) => {
@@ -25,13 +23,27 @@ export const CollectionEditForm = ({ initialFormData, onSubmit }: CollectionEdit
   }, initialFormData);
   const { description, website, discord, twitter, telegram, instagram, reddit } = formValues;
 
-  const onChangeValue = useCallback((field: keyof CollectionFormData) => (value: string) => {
+  const [errors, setErrors] = useState<Partial<Record<keyof MarketableCollectionMetadata, string>>>({});
+
+  const onChangeValue = useCallback((field: keyof MarketableCollectionMetadata) => (value: string) => {
+    if (field === 'description') {
+      setErrors((errors) => ({
+        ...errors,
+        description: value && /^[!@#$%^&*()_+~<>{}?]+$/.test(value) ? 'Invalid description' : undefined }));
+    } else {
+      setErrors((errors) => ({
+        ...errors,
+        // eslint-disable-next-line no-useless-escape
+        [field]: value && !/^(http(s):\/\/.)[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)$/.test(value) ? 'Invalid URL' : undefined }));
+    }
     onChange({ field, value });
   }, [onChange]);
 
   const onSubmitForm = useCallback(() => {
     onSubmit(formValues);
   }, [onSubmit, formValues]);
+
+  const isValid: boolean = useMemo(() => Object.values(errors).filter((value) => !!value).length === 0, [errors]);
 
   return <>
     <FormWrapper>
@@ -44,6 +56,8 @@ export const CollectionEditForm = ({ initialFormData, onSubmit }: CollectionEdit
           onChange={onChangeValue('description')}
           rows={3}
           maxLength={256}
+          error={!!errors.description}
+          statusText={errors.description}
         />
       </FormRow>
       <FormRow>
@@ -52,6 +66,7 @@ export const CollectionEditForm = ({ initialFormData, onSubmit }: CollectionEdit
           placeholder='http://'
           value={website}
           onChange={onChangeValue('website')}
+          errorText={errors.website}
         />
       </FormRow>
     </FormWrapper>
@@ -63,6 +78,7 @@ export const CollectionEditForm = ({ initialFormData, onSubmit }: CollectionEdit
           placeholder='http://'
           value={discord}
           onChange={onChangeValue('discord')}
+          errorText={errors.discord}
         />
       </FormRow>
       <FormRow>
@@ -71,6 +87,7 @@ export const CollectionEditForm = ({ initialFormData, onSubmit }: CollectionEdit
           placeholder='http://'
           value={twitter}
           onChange={onChangeValue('twitter')}
+          errorText={errors.twitter}
         />
       </FormRow>
       <FormRow>
@@ -79,6 +96,7 @@ export const CollectionEditForm = ({ initialFormData, onSubmit }: CollectionEdit
           placeholder='http://'
           value={instagram}
           onChange={onChangeValue('instagram')}
+          errorText={errors.instagram}
         />
       </FormRow>
       <FormRow>
@@ -87,6 +105,7 @@ export const CollectionEditForm = ({ initialFormData, onSubmit }: CollectionEdit
           placeholder='http://'
           value={telegram}
           onChange={onChangeValue('telegram')}
+          errorText={errors.telegram}
         />
       </FormRow>
       <FormRow>
@@ -95,10 +114,11 @@ export const CollectionEditForm = ({ initialFormData, onSubmit }: CollectionEdit
           placeholder='http://'
           value={reddit}
           onChange={onChangeValue('reddit')}
+          errorText={errors.reddit}
         />
       </FormRow>
       <ButtonsRow>
-        <Button title='Save changes' onClick={onSubmitForm}/>
+        <Button title='Save changes' onClick={onSubmitForm} disabled={!isValid}/>
       </ButtonsRow>
     </FormWrapper>
   </>;

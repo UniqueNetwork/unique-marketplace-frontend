@@ -4,6 +4,7 @@ import { Text } from 'components/UI';
 import { useApi } from 'hooks/useApi';
 
 import styled from 'styled-components';
+import { formatBalance } from 'utils/textUtils';
 
 export const CollectionStatisticsBlock = ({ collection }: { collection: MarketableCollection }) => {
   const { chainProperties } = useApi();
@@ -18,7 +19,7 @@ export const CollectionStatisticsBlock = ({ collection }: { collection: Marketab
         <Text size={'m'} color='grey-600'>listed NFTs</Text>
       </div>
       <div>
-        <Heading size='3'>{collection.minPrice || 0} {chainProperties?.token || ''}</Heading>
+        <Heading size='3'>{formatBalance(collection.minPrice || 0)} {chainProperties?.token || ''}</Heading>
         <Text size={'m'} color='grey-600'>floor price</Text>
       </div>
       <div>
@@ -30,7 +31,7 @@ export const CollectionStatisticsBlock = ({ collection }: { collection: Marketab
         <Text size={'m'} color='grey-600'>unique holders</Text>
       </div>
     </>}
-    {collection.tokensTotal && collection.tokensCount < collection.tokensTotal && <ProgressWrapper>
+    {!!collection.tokensTotal && collection.tokensCount < collection.tokensTotal && <ProgressWrapper>
       <Heading size='3'>Scanning...</Heading>
       <Text size='m' color='grey-600'>Scanned {collection.tokensCount} of {collection.tokensTotal} tokens</Text>
       <ProgressBarWrapper>

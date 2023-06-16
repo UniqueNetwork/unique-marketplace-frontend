@@ -1,22 +1,46 @@
 import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
 import { web3FromSource } from '@polkadot/extension-dapp';
-import { stringToHex } from '@polkadot/util';
+import { stringToHex, u8aToHex } from '@polkadot/util';
+import { MarketAccount } from 'account/types';
+import { Signer as EthersSigner } from 'ethers';
+import { Signer as UniqueSigner } from '@unique-nft/sdk';
+import { serializeToQuery } from 'api/restApi/base/helper';
+import Web3 from 'web3';
 
-export const getSignature = async (collectionId: number, tokenId: number, account: InjectedAccountWithMeta) => {
-  const injector = await web3FromSource(account.meta.source);
-  if (!injector.signer.signRaw) throw new Error('Web3 not available');
+export const isEthersSigner = (signer: any): signer is EthersSigner =>
+  (signer instanceof EthersSigner);
 
-  const timestamp = Date.now();
-  const payload = `timestamp=${timestamp}&collectionId=${collectionId}&tokenId=${tokenId}`;
+export const isUniqueSigner = (signer: any): signer is UniqueSigner =>
+  !!(signer as UniqueSigner).sign;
 
-  const { signature } = await injector.signer.signRaw({ address: account.address, type: 'bytes', data: stringToHex(payload) });
+export const getSignature = async (account: MarketAccount): Promise<{
+  signature: string | null,
+  message: string,
+  type: 'keyring' | 'metamask' | null
+}> => {
+  if (isEthersSigner(account.signer)) {
+    const timestamp = Date.now();
+    const hashedMessage = Web3.utils.sha3(timestamp.toString());
 
-  return {
-    signature,
-    params: {
-      collectionId,
-      tokenId,
-      timestamp
-    }
-  };
+    const signature = await account.signer.signMessage(hashedMessage || '');
+    return {
+      signature,
+      message: hashedMessage || '',
+      type: 'metamask'
+    };
+  }
+
+  if (isUniqueSigner(account.signer)) {
+    // @ts-ignore
+    const injector = await web3FromSource(account.signer.injectedAccount.meta.source);
+    if (!injector.signer.signRaw) throw new Error('Web3 not available');
+    const { signature } = await injector.signer.signRaw({ address: account.address, type: 'bytes', data: '' });
+    return {
+      signature,
+      message: '',
+      type: 'keyring'
+    };
+  }
+
+  return Promise.resolve({ signature: null, type: null, message: '' });
 };

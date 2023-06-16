@@ -67,7 +67,6 @@ export const useCollectionTokensFilter = ({ isFetching, fetch }: { isFetching: b
 
   const onFilterChange = useCallback(async (filterState: TokensFilter | null) => {
     setUrlParameter('filterState', filterState ? JSON.stringify(filterState) : '');
-    console.log('fetch');
     await fetch({
       page: 1,
       pageSize: 20,

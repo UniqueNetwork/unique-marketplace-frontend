@@ -109,7 +109,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
             <Text
               testid={`${testid}-price`}
               size='l'
-            >{topBid ? `${formatBalance(Number(topBid))}` : `${offer.price.parsed}` }</Text>
+            >{topBid ? `${formatBalance(Number(topBid))}` : `${formatBalance(offer.price.parsed)}` }</Text>
             <IconStyled name={`chain-${currentChainId?.toLowerCase()}`} size={16} />
           </PriceWrapper>
         </TradingInfoWrapper>

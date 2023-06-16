@@ -14,6 +14,18 @@ export type SetCollectionTokensPayload = {
   tokens: string
 }
 
+export interface MarketableCollectionMetadata {
+  cover?: string
+  banner?: string
+  description?: string
+  website?: string
+  discord?: string
+  twitter?: string
+  instagram?: string
+  telegram?: string
+  reddit?: string
+}
+
 export interface MarketableCollection {
   allowedTokens: string
   isMarketable: boolean
@@ -39,7 +51,7 @@ export interface MarketableCollection {
   minPrice: number | null
   holders: number
   uniqueHolders: string | null
-  metadata: null
+  metadata: MarketableCollectionMetadata | null
 }
 
 export interface MyCollection {

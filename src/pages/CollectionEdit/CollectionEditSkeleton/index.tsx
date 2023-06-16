@@ -12,6 +12,7 @@ export const CollectionEditSkeleton = () => <CollectionDetailSkeletonWrapper>
 
 const CollectionDetailSkeletonWrapper = styled.div`
   display: flex;
+  padding: calc(var(--gap) * 2);
 `;
 
 const CardSkeletonWrapper = styled.div`
