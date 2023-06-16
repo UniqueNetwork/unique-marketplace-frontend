@@ -28,8 +28,8 @@ export const useTokens = ({ collectionId }: { collectionId: number }) => {
     try {
       const { status, data } = await getTokens(baseURL, {
         ...payload,
-        minPrice: minPrice && fromStringToBnString(minPrice, api?.market?.decimals),
-        maxPrice: maxPrice && fromStringToBnString(maxPrice, api?.market?.decimals),
+        minPrice: minPrice,
+        maxPrice: maxPrice,
         collectionId
       });
       if (status === 200) {
