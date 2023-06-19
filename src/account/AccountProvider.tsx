@@ -70,7 +70,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
         }
         targetAccount.balance = {
           withdraw: targetAccount.balance.withdraw,
-          parsed: newBalance.formatted,
+          parsed: newBalance.amount,
           raw: new BN(newBalance.raw)
         };
         setAccounts(accountsCopy);
