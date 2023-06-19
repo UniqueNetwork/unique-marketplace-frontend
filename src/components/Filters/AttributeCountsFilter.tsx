@@ -2,7 +2,7 @@ import React, { FC, useCallback } from 'react';
 import styled from 'styled-components';
 import { Text } from '@unique-nft/ui-kit';
 import { Checkbox } from 'components/UI';
-import Accordion from '../Accordion/Accordion';
+import { Accordion } from '../Accordion/Accordion';
 import CheckboxSkeleton from '../Skeleton/CheckboxSkeleton';
 import { AttributeCount } from '../../api/restApi/offers/types';
 import { sortAttributeCounts } from './utils/sortAttributes';
@@ -36,7 +36,6 @@ const AttributeCountsFilter: FC<AttributeCountsFilterProps> = ({ attributeCounts
       isOpen={true}
       onClear={onClear}
       isClearShow={selectedAttributeCounts.length > 0}
-      testid={`${testid}-accordion`}
     >
       <CollectionFilterWrapper>
         {isAttributeCountsFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
