@@ -82,8 +82,9 @@ const PictureWrapper = styled.div`
   height: 160px;
   background-color: var(--color-primary-100);
 
-  .picture {
-    display: inline;
+  div {
+    padding: 0 !important;
+    position: relative;
   }
   img {
     object-fit: cover;

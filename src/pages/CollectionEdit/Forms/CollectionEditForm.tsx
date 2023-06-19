@@ -9,6 +9,7 @@ import { MarketableCollectionMetadata } from 'api/restApi/collections/types';
 interface CollectionEditFormProps {
   initialFormData: Partial<MarketableCollectionMetadata>;
   onSubmit(formData: Partial<MarketableCollectionMetadata>): void;
+  isCoverChanged?: boolean
 }
 
 type FormReducer = Reducer<
@@ -16,7 +17,7 @@ type FormReducer = Reducer<
     { field: keyof MarketableCollectionMetadata, value: string }
   >;
 
-export const CollectionEditForm = ({ initialFormData, onSubmit }: CollectionEditFormProps) => {
+export const CollectionEditForm = ({ initialFormData, onSubmit, isCoverChanged }: CollectionEditFormProps) => {
   const [formValues, onChange] = useReducer<FormReducer>(
     (state, { field, value }) => {
     return { ...state, [field]: value };
@@ -44,6 +45,11 @@ export const CollectionEditForm = ({ initialFormData, onSubmit }: CollectionEdit
   }, [onSubmit, formValues]);
 
   const isValid: boolean = useMemo(() => Object.values(errors).filter((value) => !!value).length === 0, [errors]);
+
+  const isChanged = useMemo(() => {
+    return Object.keys(formValues).some((field: string) =>
+      formValues[field as keyof MarketableCollectionMetadata] !== initialFormData[field as keyof MarketableCollectionMetadata]);
+  }, [initialFormData, formValues]);
 
   return <>
     <FormWrapper>
@@ -118,7 +124,7 @@ export const CollectionEditForm = ({ initialFormData, onSubmit }: CollectionEdit
         />
       </FormRow>
       <ButtonsRow>
-        <Button title='Save changes' onClick={onSubmitForm} disabled={!isValid}/>
+        <Button title='Save changes' onClick={onSubmitForm} disabled={!(isValid && (isCoverChanged || isChanged))}/>
       </ButtonsRow>
     </FormWrapper>
   </>;
