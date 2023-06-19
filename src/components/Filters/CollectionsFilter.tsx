@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { Text } from '@unique-nft/ui-kit';
 import { Checkbox } from 'components/UI';
 import { useCollections } from '../../hooks/useCollections';
-import Accordion from '../Accordion/Accordion';
+import { Accordion } from '../Accordion/Accordion';
 import CheckboxSkeleton from '../Skeleton/CheckboxSkeleton';
 import { AttributeItem } from './types';
 import AttributesFilter from './AttributesFilter';
@@ -44,7 +44,6 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attr
       isOpen={true}
       onClear={onCollectionsClear}
       isClearShow={selectedCollections.length > 0}
-      testid={`${testid}-accordion`}
     >
       <CollectionFilterWrapper>
         {isFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}

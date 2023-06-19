@@ -2,7 +2,7 @@ import React, { FC, useCallback } from 'react';
 import styled from 'styled-components';
 import { Text } from '@unique-nft/ui-kit';
 import { Checkbox } from 'components/UI';
-import Accordion from '../Accordion/Accordion';
+import { Accordion } from '../Accordion/Accordion';
 import CheckboxSkeleton from '../Skeleton/CheckboxSkeleton';
 import { AttributeItem } from './types';
 import { Attribute } from '../../api/restApi/offers/types';
@@ -40,7 +40,7 @@ const AttributesFilter: FC<AttributesFilterProps> = ({ selectedAttributes = [], 
         isOpen={true}
         onClear={onClear(attributeName)}
         isClearShow={selectedAttributes?.some((attribute) => attributeName === attribute.key)}
-        testid={`${testid}-accordion`}
+        key={attributeName}
       >
         <CollectionFilterWrapper>
           {attributes[attributeName].sort(sortAttributes).map((attribute) => (

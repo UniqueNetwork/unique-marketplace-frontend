@@ -2,7 +2,7 @@ import React, { FC, useCallback, useMemo } from 'react';
 import { Checkbox } from 'components/UI';
 import styled from 'styled-components';
 import { Statuses } from './types';
-import Accordion from '../Accordion/Accordion';
+import { Accordion } from '../Accordion/Accordion';
 import { useAccounts } from '../../hooks/useAccounts';
 
 interface StatusFilterProps {
@@ -36,7 +36,6 @@ const StatusFilter: FC<StatusFilterProps> = ({ value, onChange, testid, disabled
         title={'Status'}
         isOpen={true}
         onClear={onStatusClear}
-        testid={`${testid}-status-accordion`}
       >
         <StatusFilterWrapper>
           {!hideMyNFTs && <Checkbox

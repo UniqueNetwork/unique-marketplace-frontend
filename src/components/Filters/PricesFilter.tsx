@@ -2,7 +2,7 @@ import React, { FC, useCallback, useEffect, useState } from 'react';
 import { Button, Text } from 'components/UI';
 import styled from 'styled-components';
 import { PriceRange } from './types';
-import Accordion from '../Accordion/Accordion';
+import { Accordion } from '../Accordion/Accordion';
 import { NumberInput } from '../NumberInput/NumberInput';
 
 interface PricesFilterProps {
@@ -62,7 +62,6 @@ const PricesFilter: FC<PricesFilterProps> = ({ value, onChange, testid, disabled
       isOpen={true}
       onClear={onPricesClear}
       isClearShow={!!minPrice || !!maxPrice}
-      testid={`${testid}-accordion`}
     >
       <PriceFilterWrapper>
         <PricesRangeWrapper>
