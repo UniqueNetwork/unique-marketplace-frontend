@@ -1,6 +1,5 @@
 import React, { FC, useMemo, useState } from 'react';
 import { Heading } from '@unique-nft/ui-kit';
-import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 import styled from 'styled-components';
 
 import { Picture, Avatar } from 'components';
@@ -128,7 +127,7 @@ export const CollectionDetail: FC<IProps> = ({ collection }) => {
             <LinkStyled
               target={'_blank'}
               rel={'noreferrer'}
-              href={`${scanUrl}collection/${collection.id}`}
+              href={`${scanUrl}collection/${collectionId}`}
             >
               <TextStyled>View on UniqueScan</TextStyled>
               <IconWrapper>
@@ -152,7 +151,7 @@ export const CollectionDetail: FC<IProps> = ({ collection }) => {
           <LinkStyled
             target={'_blank'}
             rel={'noreferrer'}
-            href={`${scanUrl}collections/${collection.id}`}
+            href={`${scanUrl}collections/${collectionId}`}
           >
             <TextStyled>View on UniqueScan</TextStyled>
             <IconWrapper>

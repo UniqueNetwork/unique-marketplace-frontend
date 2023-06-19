@@ -1,10 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
+import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { PagePaper } from 'components/PagePaper/PagePaper';
-import { useCollections } from 'hooks/useCollections';
 import { CollectionBannerComponent } from './CollectionBanner';
 import { Heading } from '@unique-nft/ui-kit';
 import { CollectionEditForm } from './Forms/CollectionEditForm';
@@ -15,19 +13,21 @@ import { RoyaltiesForm } from './Forms/RoyaltiesForm';
 import { CollectionCover } from './CollectionCover';
 import { useMarketableCollection } from 'api/restApi/collections/collection';
 import { MarketableCollection, MarketableCollectionMetadata } from 'api/restApi/collections/types';
-import { Modal } from 'components/UI';
+import { Icon, Modal } from 'components/UI';
 import { SaveCollectionStagesModal } from './Modals/SaveCollectionModal';
+import { BlueGrey500 } from 'styles/colors';
 
 export const CollectionEditPage = () => {
   const { collectionId } = useParams<{ collectionId: string }>();
   const [collection, setCollection] = useState<MarketableCollection | null>(null);
   const [isFetchingCollection, setIsFetchingCollection] = useState<boolean>(true);
   const { fetchCollection } = useMarketableCollection();
-  const { api } = useApi();
+  const { api, currentChainId } = useApi();
   const [banner, setBanner] = useState<{src: string, file?: Blob}>();
   const [cover, setCover] = useState<{src: string, file?: Blob}>();
   const [metadata, setMetadata] = useState<MarketableCollectionMetadata>({});
   const [saveCollectionModalIsVisible, setSaveCollectionModalIsVisible] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!api?.collection) return;
@@ -66,9 +66,9 @@ export const CollectionEditPage = () => {
   }, []);
 
   const onCollectionEditFormSubmit = useCallback((metadata: MarketableCollectionMetadata) => {
-    setMetadata(metadata);
+    setMetadata({ ...metadata, banner: banner?.src, cover: cover?.src });
     setSaveCollectionModalIsVisible(true);
-  }, []);
+  }, [banner, cover]);
 
   const onRoyaltiesFormSubmit = useCallback(() => {
     throw new Error('Not implemented');
@@ -87,6 +87,19 @@ export const CollectionEditPage = () => {
       });
   }, []);
 
+  const isCollectionChanged = useMemo(() => {
+    const coverNotChanged = (cover?.src === collection?.data?.schema?.coverPicture.fullUrl && !collection?.metadata?.cover) || collection?.metadata?.cover === cover?.src;
+    return collection?.metadata?.banner !== banner?.src || !coverNotChanged;
+  }, [collection, banner, cover]);
+
+  const backClickHandler = useCallback(() => {
+    if (history.length > 2) {
+      history.back();
+    } else {
+      navigate(`/${currentChainId || ''}/collection/${collectionId || ''}`);
+    }
+  }, [navigate, currentChainId, collectionId]);
+
   if (isFetchingCollection) {
     return <CollectionEditPaper>
       <CollectionEditSkeleton />
@@ -95,41 +108,48 @@ export const CollectionEditPage = () => {
 
   if (!collection) return <Error404 />;
 
-  return (<CollectionEditPaper>
-    <CollectionBannerComponent
-      src={banner?.src}
-      onChange={onUploadBanner}
-      onRemove={onRemoveBanner}
-    />
-    <CollectionEditContentWrapper>
-      <CollectionCover
-        name={name || ''}
-        src={cover?.src}
-        onChange={onUploadCover}
-        onRemove={onRemoveCover}
+  return (<>
+    <BackLink onClick={backClickHandler}>
+      <Icon name='arrow-left' color={BlueGrey500} size={16}/>
+      <p>back</p>
+    </BackLink>
+    <CollectionEditPaper>
+      <CollectionBannerComponent
+        src={banner?.src}
+        onChange={onUploadBanner}
+        onRemove={onRemoveBanner}
       />
-      <CollectionEditFormWrapper>
-        <Heading size='1' >{name}</Heading>
-        <CollectionEditForm
-          initialFormData={metadata}
-          onSubmit={onCollectionEditFormSubmit}
+      <CollectionEditContentWrapper>
+        <CollectionCover
+          name={name || ''}
+          src={cover?.src}
+          onChange={onUploadCover}
+          onRemove={onRemoveCover}
         />
-        {/* <RoyaltiesForm
-          initialFormData={{}}
-          onSubmit={onRoyaltiesFormSubmit}
-        /> */}
-      </CollectionEditFormWrapper>
-    </CollectionEditContentWrapper>
-    <Modal isVisible={saveCollectionModalIsVisible}>
-      <SaveCollectionStagesModal
-        metadata={metadata}
-        bannerFile={banner?.file}
-        coverFile={cover?.file}
-        onFinish={onUpdateFinish}
-        collectionId={collection.collectionId}
-      />
-    </Modal>
-  </CollectionEditPaper>);
+        <CollectionEditFormWrapper>
+          <Heading size='1' >{name}</Heading>
+          <CollectionEditForm
+            initialFormData={metadata}
+            onSubmit={onCollectionEditFormSubmit}
+            isCoverChanged={isCollectionChanged}
+          />
+          {/* <RoyaltiesForm
+            initialFormData={{}}
+            onSubmit={onRoyaltiesFormSubmit}
+          /> */}
+        </CollectionEditFormWrapper>
+      </CollectionEditContentWrapper>
+      <Modal isVisible={saveCollectionModalIsVisible}>
+        <SaveCollectionStagesModal
+          metadata={metadata}
+          bannerFile={banner?.file}
+          coverFile={cover?.file}
+          onFinish={onUpdateFinish}
+          collectionId={collection.collectionId}
+        />
+      </Modal>
+    </CollectionEditPaper>
+  </>);
 };
 
 const CollectionEditPaper = styled(PagePaper)`
@@ -152,5 +172,27 @@ const CollectionEditFormWrapper = styled.div`
   flex: 1;
   @media (max-width: 1024px) {
     flex: 1;
+  }
+`;
+
+const BackLink = styled.button`
+  text-decoration: none;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  font-family: var(--font-inter);
+  line-height: 24px;
+  color: ${BlueGrey500};
+  display: flex;
+  gap: 6px;
+  width: 60px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  p {
+    transform: translateY(-3px);
+  }
+  svg {
+    width: 14px;
   }
 `;
