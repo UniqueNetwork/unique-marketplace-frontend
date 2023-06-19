@@ -28,7 +28,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
   const { selectedAccount, isLoading: isLoadingAccounts } = useAccounts();
   const { currentChainId, chainProperties } = useApi();
   const [page, setPage] = useState<number>(0);
-  const [sortString, setSortString] = useState<string>();
+  const [sortString, setSortString] = useState<string | undefined>('desc(TradeDate)');
   const [pageSize, setPageSize] = useState<number>(10);
   const [searchValue, setSearchValue] = useState<string>();
   const [selectedOfferDetails, setSelectedOfferDetails] = useState<Trade | null>(null);
@@ -118,7 +118,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
         break;
     }
     const associatedSortValues: Record<string, string> = {
-      price: 'Price',
+      'price.parsed': 'Price',
       tokenId: 'TokenId',
       tokenDescription: 'CollectionId',
       tradeDate: 'TradeDate',
