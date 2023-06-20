@@ -10,5 +10,5 @@ export type CollectionFormData = {
 
 export type RoyaltiesFormData = {
   royaltiesType: 'immutable' | 'flexible';
-  royaltiesPercentage: number;
+  royaltiesPercentage: string;
 };

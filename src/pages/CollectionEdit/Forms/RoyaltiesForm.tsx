@@ -1,4 +1,4 @@
-import { Reducer, useCallback, useReducer } from 'react';
+import { Reducer, useCallback, useEffect, useReducer } from 'react';
 import { Heading } from '@unique-nft/ui-kit';
 
 import { Button, RadioGroup } from 'components/UI';
@@ -9,7 +9,7 @@ import { RadioOptionValueType } from 'components/UI/RadioGroup/RadioGroup';
 import IconWithHint from 'components/IconWithHint/IconWithHint';
 
 interface RoyaltiesFormProps {
-  initialFormData: Partial<RoyaltiesFormData>;
+  initialFormData?: Partial<RoyaltiesFormData>;
   onSubmit(formData: Partial<RoyaltiesFormData>): void;
 }
 
@@ -33,8 +33,13 @@ export const RoyaltiesForm = ({ initialFormData, onSubmit }: RoyaltiesFormProps)
   const [formValues, onChange] = useReducer<FormReducer>(
     (state, { field, value }) => {
     return { ...state, [field]: value };
-  }, initialFormData);
+  }, {});
   const { royaltiesType, royaltiesPercentage } = formValues;
+
+  useEffect(() => {
+    onChange({ field: 'royaltiesPercentage', value: initialFormData?.royaltiesPercentage || '' });
+    onChange({ field: 'royaltiesType', value: initialFormData?.royaltiesType || 'immutable' });
+  }, [initialFormData]);
 
   const onChangeValue = useCallback((field: keyof RoyaltiesFormData) => (value: string) => {
     onChange({ field, value });
@@ -60,7 +65,7 @@ export const RoyaltiesForm = ({ initialFormData, onSubmit }: RoyaltiesFormProps)
         label='Royalties percentage'
         additionalText='Token name as displayed in Wallet (max 4 symbols).'
         placeholder='%'
-        value={royaltiesPercentage?.toFixed(4)}
+        value={royaltiesPercentage}
         onChange={onChangeValue('royaltiesPercentage')}
       />
     </FormRow>

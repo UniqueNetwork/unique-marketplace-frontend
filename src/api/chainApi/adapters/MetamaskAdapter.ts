@@ -1,4 +1,4 @@
-import { UniqueNFTFactory } from '@unique-nft/solidity-interfaces';
+import { UniqueFungibleFactory, UniqueNFTFactory } from '@unique-nft/solidity-interfaces';
 import { Address, EthCrossAccountId } from '@unique-nft/utils';
 import { Contract, ethers, Signer } from 'ethers';
 import IMarketContractAdapter from './IMarketContractAdapter';
@@ -109,9 +109,15 @@ class MetamaskAdapter implements IMarketContractAdapter {
     return estimateGas.mul(gasPrice).toString();
   }
 
-  async transferBalance(from: string, to: string, amount: ChainValue, signer: Signer): Promise<void> {
-    const toEth = Address.is.ethereumAddress(to) ? to : Address.mirror.substrateToEthereum(to);
-    await (await signer.sendTransaction({ to: toEth, value: amount.raw })).wait();
+  async transferBalance(addressFrom: string, addressTo: string, amount: ChainValue, signer: Signer): Promise<void> {
+    const from = Address.extract.ethCrossAccountId(addressFrom);
+    const to = Address.extract.ethCrossAccountId(addressTo);
+    const collectionAddress = Address.collection.idToAddress(0);
+
+    const uniqueFungible = await UniqueFungibleFactory(collectionAddress, signer);
+    console.log(amount);
+
+    await uniqueFungible.transferFromCross(from, to, amount.raw, { from: addressFrom });
   }
 
   async changeAllowance(from: string, to: string, collectionId: number, tokenId: number, targetAllowance: boolean, signer: Signer): Promise<void> {

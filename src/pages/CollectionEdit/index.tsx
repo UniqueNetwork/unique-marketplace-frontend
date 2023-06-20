@@ -16,17 +16,24 @@ import { MarketableCollection, MarketableCollectionMetadata } from 'api/restApi/
 import { Icon, Modal } from 'components/UI';
 import { SaveCollectionStagesModal } from './Modals/SaveCollectionModal';
 import { BlueGrey500 } from 'styles/colors';
+import { SetRoyaltiesStagesModal } from './Modals/SetRoyaltiesModal';
+import { RoyaltiesFormData } from './types';
+import { useCollections } from 'hooks/useCollections';
+import { formatKsm } from 'api/chainApi/utils/textFormat';
+import { BN } from '@polkadot/util';
 
 export const CollectionEditPage = () => {
   const { collectionId } = useParams<{ collectionId: string }>();
   const [collection, setCollection] = useState<MarketableCollection | null>(null);
   const [isFetchingCollection, setIsFetchingCollection] = useState<boolean>(true);
   const { fetchCollection } = useMarketableCollection();
+  const { getCollection } = useCollections();
   const { api, currentChainId } = useApi();
   const [banner, setBanner] = useState<{src: string, file?: Blob}>();
   const [cover, setCover] = useState<{src: string, file?: Blob}>();
   const [metadata, setMetadata] = useState<MarketableCollectionMetadata>({});
-  const [saveCollectionModalIsVisible, setSaveCollectionModalIsVisible] = useState(false);
+  const [royalty, setRoyalty] = useState<RoyaltiesFormData>();
+  const [modalType, setModalType] = useState<'metadata' | 'royalty'>();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,6 +42,7 @@ export const CollectionEditPage = () => {
     setIsFetchingCollection(true);
     void (async () => {
       const collection = await fetchCollection(Number(collectionId));
+      const collectionOnChain = await getCollection(Number(collectionId));
       setCollection(collection || null);
       collection?.metadata?.banner && setBanner({ src: collection?.metadata?.banner });
       setCover({ src: collection?.metadata?.cover || collection?.data?.schema?.coverPicture.fullUrl || '' });
@@ -43,6 +51,19 @@ export const CollectionEditPage = () => {
         ...(collection?.metadata || {}),
         description: collection?.metadata?.description || collection?.description
       });
+
+      if (collectionOnChain?.schema?.royalties?.length) {
+        const decimals = collectionOnChain.schema.royalties[0]?.decimals || 18;
+        const value = collectionOnChain.schema.royalties[0]?.value
+          ? formatKsm(new BN(collectionOnChain.schema.royalties[0]?.value), decimals, 0)
+          : '0';
+        const type = collectionOnChain.schema.royalties[0]?.royaltyType === 'DEFAULT' ? 'flexible' : 'immutable';
+        setRoyalty({
+          royaltiesPercentage: value,
+          royaltiesType: type
+        });
+      }
+
       setIsFetchingCollection(false);
     })();
   }, [api, collectionId, setIsFetchingCollection, fetchCollection]);
@@ -67,15 +88,16 @@ export const CollectionEditPage = () => {
 
   const onCollectionEditFormSubmit = useCallback((metadata: MarketableCollectionMetadata) => {
     setMetadata({ ...metadata, banner: banner?.src, cover: cover?.src });
-    setSaveCollectionModalIsVisible(true);
+    setModalType('metadata');
   }, [banner, cover]);
 
-  const onRoyaltiesFormSubmit = useCallback(() => {
-    throw new Error('Not implemented');
+  const onRoyaltiesFormSubmit = useCallback((royalty: RoyaltiesFormData) => {
+    setRoyalty(royalty);
+    setModalType('royalty');
   }, []);
 
   const onUpdateFinish = useCallback(async () => {
-    setSaveCollectionModalIsVisible(false);
+    setModalType(undefined);
     const collection = await fetchCollection(Number(collectionId));
       setCollection(collection || null);
       collection?.metadata?.banner && setBanner({ src: collection?.metadata?.banner });
@@ -133,17 +155,24 @@ export const CollectionEditPage = () => {
             onSubmit={onCollectionEditFormSubmit}
             isCoverChanged={isCollectionChanged}
           />
-          {/* <RoyaltiesForm
-            initialFormData={{}}
+          <RoyaltiesForm
+            initialFormData={royalty}
             onSubmit={onRoyaltiesFormSubmit}
-          /> */}
+          />
         </CollectionEditFormWrapper>
       </CollectionEditContentWrapper>
-      <Modal isVisible={saveCollectionModalIsVisible}>
+      <Modal isVisible={modalType === 'metadata'}>
         <SaveCollectionStagesModal
           metadata={metadata}
           bannerFile={banner?.file}
           coverFile={cover?.file}
+          onFinish={onUpdateFinish}
+          collectionId={collection.collectionId}
+        />
+      </Modal>
+      <Modal isVisible={modalType === 'royalty'}>
+        <SetRoyaltiesStagesModal
+          royalty={royalty}
           onFinish={onUpdateFinish}
           collectionId={collection.collectionId}
         />
