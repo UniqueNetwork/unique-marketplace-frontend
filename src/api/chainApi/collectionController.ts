@@ -1,4 +1,4 @@
-import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
+import { CollectionInfoWithSchemaResponse, CollectionProperty } from '@unique-nft/sdk';
 import { AllowedCollections } from 'api/restApi/settings/types';
 import { NetworkOptions } from 'api/sdk/sdkClient';
 import BaseController from './controllers/BaseController';
@@ -51,8 +51,18 @@ export class UniqueSDKCollectionController extends BaseController {
     return (await this.uniqueSdk.ipfs.uploadFile({ file }))?.fullUrl;
   }
 
-  // async addFile(cid: string, file: Blob): Promise<string | undefined> {
-  //   if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
-  //   return (await this.uniqueSdk.ipfs.addFiles({ cid, files: [file] }))?.fullUrl;
-  // }
+  async setProperties(collectionId: number, properties: CollectionProperty[], { account }: TransactionOptions): Promise<void> {
+    const unsignedTxPayload = await this.uniqueSdk.collection.setProperties.build({
+      address: account.address,
+      collectionId,
+      properties
+    });
+    if (!unsignedTxPayload) throw new Error('Transaction build error');
+    const { signature } = await this.uniqueSdk.collection.setProperties.sign(unsignedTxPayload, { signer: account.account });
+    if (!signature) throw new Error('Signing failed');
+    await this.uniqueSdk.collection.setProperties.submit({
+      signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
+      signature
+    });
+  }
 }
