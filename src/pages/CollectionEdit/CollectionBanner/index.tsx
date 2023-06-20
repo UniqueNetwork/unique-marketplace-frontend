@@ -9,6 +9,8 @@ interface CollectionBannerProps {
   onRemove(): void
 }
 
+const optimalImageSizeDescription = 'Optimal image size 1824×240 px';
+
 export const CollectionBannerComponent = ({ src, onChange, onRemove }: CollectionBannerProps) => {
   const onReplaceClick = useCallback(() => {
     const input = document.createElement('input');
@@ -36,7 +38,7 @@ export const CollectionBannerComponent = ({ src, onChange, onRemove }: Collectio
         <Heading size='3'>
           Upload or drag the image here
         </Heading>
-        <Text size='s'>Optimal image size 3648×480 px</Text>
+        <Text size='s'>{optimalImageSizeDescription}</Text>
         {src && <ButtonsWrapper>
           <Button title='Replace image' role='primary' />
           <Button title='Delete' role='danger' />
@@ -48,7 +50,7 @@ export const CollectionBannerComponent = ({ src, onChange, onRemove }: Collectio
       <Heading size='3'>
         Upload or drag the image here
       </Heading>
-      <Text size='s'>Optimal image size 3648×480 px</Text>
+      <Text size='s'>{optimalImageSizeDescription}</Text>
       <ButtonsWrapper>
         <Button title='Replace image' role='primary' onClick={onReplaceClick} />
         <Button title='Delete' role='danger' onClick={onRemove} />

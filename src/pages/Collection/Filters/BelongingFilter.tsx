@@ -56,6 +56,7 @@ const BelongingFilterWrapper = styled.div`
   row-gap: var(--gap);
   .label {
     font-size: 16px;
+    font-weight: 400;
   }
 `;
 
