@@ -1,5 +1,5 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { SelectOptionProps } from '@unique-nft/ui-kit';
+import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { SelectOptionProps, Tooltip } from '@unique-nft/ui-kit';
 import { Select, Button } from 'components/UI';
 import styled from 'styled-components/macro';
 import NoItems from 'components/NoItems';
@@ -15,6 +15,8 @@ import { MyCollection } from 'api/restApi/collections/types';
 import config from 'config';
 import { useApi } from 'hooks/useApi';
 import { useCollections } from 'hooks/useCollections';
+import { MetamaskAccount } from '@unique-nft/accounts/metamask';
+import { Address } from '@unique-nft/utils';
 
 type TOption = {
   iconRight: {
@@ -126,6 +128,8 @@ export const CollectionsPage: FC = () => {
     return collections.filter(filterCollection).sort(sortCollection);
   }, [sortingValue, searchValue, collections]);
 
+  const CreateCollectionButtonRef = useRef<HTMLDivElement>(null);
+
   return (<PagePaper>
     <MainContent>
       <ControlsWrapper>
@@ -146,7 +150,14 @@ export const CollectionsPage: FC = () => {
           </SortSelectWrapper>
         </SearchAndSortingWrapper>
         <ButtonsWrapper>
-          <Button title={'Create new via wallet'} onClick={onCreateCollectionViaWalletClick}/>
+          {Address.is.ethereumAddressInAnyForm(selectedAccount?.address)
+          ? <>
+            <Tooltip targetRef={CreateCollectionButtonRef}>{'We are sorry but you cannot create a collection by Metamask account yet. Coming soon...'}</Tooltip>
+            <div ref={CreateCollectionButtonRef}>
+              <Button title={'Create new via wallet'} disabled/>
+            </div>
+          </>
+          : <Button title={'Create new via wallet'} onClick={onCreateCollectionViaWalletClick}/>}
         </ButtonsWrapper>
       </ControlsWrapper>
       <CollectionListWrapper>
