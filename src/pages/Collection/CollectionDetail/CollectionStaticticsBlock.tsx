@@ -28,7 +28,7 @@ export const CollectionStatisticsBlock = ({ collection, royalty }: { collection:
         <Text size={'m'} color='grey-600'>holders</Text>
       </div>
       <div>
-        <Heading size='3'>{Number(collection.uniqueHolders || '0').toFixed(0)}%</Heading>
+        <Heading size='3'>{Number(collection.uniqueHolders !== 'NaN' ? collection.uniqueHolders : '0' || '0').toFixed(0)}%</Heading>
         <Text size={'m'} color='grey-600'>unique holders</Text>
       </div>
       {!!royalty?.value && <div>
