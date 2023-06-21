@@ -3,7 +3,7 @@ import { Notifications } from 'components/UI';
 import config from './config';
 // contains gql and rpc with contexts and providers
 import ApiWrapper from './api/ApiWrapper';
-import { PageLayout } from './components';
+import { PageLayout, IntroSlider } from './components';
 import AccountWrapper from './account/AccountProvider';
 import CollectionsWrapper from './collections/CollectionsProvider';
 
@@ -15,6 +15,7 @@ export default function App() {
       <ApiWrapper>
         <AccountWrapper>
           <CollectionsWrapper>
+            <IntroSlider />
             <PageLayout>
               <Outlet />
             </PageLayout>
