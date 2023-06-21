@@ -112,12 +112,9 @@ class MetamaskAdapter implements IMarketContractAdapter {
   async transferBalance(addressFrom: string, addressTo: string, amount: ChainValue, signer: Signer): Promise<void> {
     const from = Address.extract.ethCrossAccountId(addressFrom);
     const to = Address.extract.ethCrossAccountId(addressTo);
-    const collectionAddress = Address.collection.idToAddress(0);
 
-    const uniqueFungible = await UniqueFungibleFactory(collectionAddress, signer);
-    console.log(amount);
-
-    await uniqueFungible.transferFromCross(from, to, amount.raw, { from: addressFrom });
+    const uniqueFungible = await UniqueFungibleFactory(0, signer);
+    await (await uniqueFungible.transferFromCross(from, to, amount.raw, { from: addressFrom })).wait();
   }
 
   async changeAllowance(from: string, to: string, collectionId: number, tokenId: number, targetAllowance: boolean, signer: Signer): Promise<void> {

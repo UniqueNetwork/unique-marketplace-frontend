@@ -233,6 +233,7 @@ const CollectionPagePaper = styled(PagePaper)`
 const MarketMainPageStyled = styled.div`
   display: flex;
   flex: 1;
+
 `;
 
 const LeftColumn = styled.div<{ isVisible?: boolean }>`
