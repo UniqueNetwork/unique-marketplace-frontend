@@ -26,10 +26,10 @@ export const SetRoyaltiesStagesModal: FC<SetRoyaltiesStagesModalProps> = ({
     void initiate({
       royalty: {
         address: selectedAccount.address,
-        value: Number(royalty.royaltiesPercentage),
+        value: Number(royalty.value),
         decimals: 4,
         version: 1,
-        royaltyType: royalty.royaltiesType === 'flexible' ? 'DEFAULT' : 'PRIMARY_ONLY'
+        royaltyType: 'DEFAULT'
       }
     });
   }, [selectedAccount, royalty]);

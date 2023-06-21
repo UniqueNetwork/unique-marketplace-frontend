@@ -23,6 +23,10 @@ import { MarketableCollection } from 'api/restApi/collections/types';
 import { useCollections } from 'hooks/useCollections';
 import { useCollectionTokensFilter } from './hooks/useCollectionTokensFilter';
 import { TokensFilter } from './Filters/types';
+import { RoyaltiesFormData } from 'pages/CollectionEdit/types';
+import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
+import { formatKsm } from 'api/chainApi/utils/textFormat';
+import { BN } from '@polkadot/util';
 
 export const CollectionPage = () => {
   const { collectionId } = useParams<{ collectionId: string }>();
@@ -51,6 +55,21 @@ export const CollectionPage = () => {
     getFilterByState
    } = useCollectionTokensFilter({ isFetching, fetch });
 
+  const [royalty, setRoyalty] = useState<RoyaltiesFormData>();
+  const setRoyalties = useCallback((collectionOnChain: CollectionInfoWithSchemaResponse | null | undefined) => {
+    if (collectionOnChain?.schema?.royalties?.length) {
+      const decimals = collectionOnChain.schema.royalties[0]?.decimals || 4;
+      const value = collectionOnChain.schema.royalties[0]?.value
+        ? formatKsm(new BN(collectionOnChain.schema.royalties[0]?.value), decimals - 2, 0)
+        : '0';
+      const address = collectionOnChain.schema.royalties[0]?.address;
+      setRoyalty({
+        value,
+        address
+      });
+    }
+  }, []);
+
   useEffect(() => {
     if (!selectedAccount?.address) return;
     const id = Number(collectionId);
@@ -59,9 +78,9 @@ export const CollectionPage = () => {
       setTokensCountOnScan(tokensCountOnScan);
 
       const collectionData = await fetchCollection(id);
-
+      const collection = await getCollection(id);
+      setRoyalties(collection);
       if (!collectionData || (tokensCountOnScan > 0 && collectionData.tokensCount !== tokensCountOnScan)) {
-        const collection = await getCollection(id);
         if (!collection) return navigate('/404');
         void addCollection(id);
         setScanning(tokensCountOnScan > 0);
@@ -136,7 +155,7 @@ export const CollectionPage = () => {
   }, [fetchMore, tokens, pageSize, isFetching, searchValue, filterState]);
 
   return (<>
-    <CollectionDetail collection={collection} />
+    <CollectionDetail collection={collection} royalty={royalty} />
     <CollectionPagePaper>
       <MarketMainPageStyled>
         <LeftColumn>

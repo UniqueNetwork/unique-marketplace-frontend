@@ -93,10 +93,11 @@ const PictureWrapper = styled.div`
     max-height: 100%;
     border-radius: 8px;
     transition: 50ms;
-
-    img {
-      max-width: 100%;
-      max-height: 100%;
+    overflow: hidden;
+    
+    img {    
+      object-fit: cover;
+      height: 100%;
     }
 
     svg {

@@ -2,11 +2,12 @@ import { Heading, Skeleton } from '@unique-nft/ui-kit';
 import { MarketableCollection } from 'api/restApi/collections/types';
 import { Text } from 'components/UI';
 import { useApi } from 'hooks/useApi';
+import { RoyaltiesFormData } from 'pages/CollectionEdit/types';
 
 import styled from 'styled-components';
-import { formatBalance } from 'utils/textUtils';
+import { formatAmount, formatBalance } from 'utils/textUtils';
 
-export const CollectionStatisticsBlock = ({ collection }: { collection: MarketableCollection }) => {
+export const CollectionStatisticsBlock = ({ collection, royalty }: { collection: MarketableCollection, royalty?: RoyaltiesFormData }) => {
   const { chainProperties } = useApi();
   return <CollectionStatisticsBlockWrapper>
     <div>
@@ -23,13 +24,17 @@ export const CollectionStatisticsBlock = ({ collection }: { collection: Marketab
         <Text size={'m'} color='grey-600'>floor price</Text>
       </div>
       <div>
-        <Heading size='3'>{collection.holders}</Heading>
+        <Heading size='3'>{collection.holders || 0}</Heading>
         <Text size={'m'} color='grey-600'>holders</Text>
       </div>
       <div>
-        <Heading size='3'>{Number(collection.uniqueHolders || '0').toFixed(0)}%</Heading>
+        <Heading size='3'>{Number(collection.uniqueHolders !== 'NaN' ? collection.uniqueHolders : '0' || '0').toFixed(0)}%</Heading>
         <Text size={'m'} color='grey-600'>unique holders</Text>
       </div>
+      {!!royalty?.value && <div>
+        <Heading size='3'>{formatAmount(Number(royalty.value))}%</Heading>
+        <Text size={'m'} color='grey-600'>flexible royalties</Text>
+      </div>}
     </>}
     {!!collection.tokensTotal && collection.tokensCount < collection.tokensTotal && <ProgressWrapper>
       <Heading size='3'>Scanning...</Heading>
