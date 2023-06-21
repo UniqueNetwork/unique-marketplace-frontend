@@ -105,9 +105,9 @@ export const CollectionEditPage = () => {
 
       setMetadata({
         ...(collection?.metadata || {}),
-        description: collection?.description
+        description: collection?.metadata?.description || collection?.description
       });
-  }, []);
+  }, [collectionId, fetchCollection]);
 
   const isCollectionChanged = useMemo(() => {
     const coverNotChanged = (cover?.src === collection?.data?.schema?.coverPicture.fullUrl && !collection?.metadata?.cover) || collection?.metadata?.cover === cover?.src;

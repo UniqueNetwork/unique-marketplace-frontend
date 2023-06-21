@@ -48,7 +48,7 @@ export const CollectionEditForm = ({ initialFormData, onSubmit, isCoverChanged }
 
   const isChanged = useMemo(() => {
     return Object.keys(formValues).some((field: string) =>
-      formValues[field as keyof MarketableCollectionMetadata] !== initialFormData[field as keyof MarketableCollectionMetadata]);
+      (formValues[field as keyof MarketableCollectionMetadata] || '') !== (initialFormData[field as keyof MarketableCollectionMetadata] || ''));
   }, [initialFormData, formValues]);
 
   return <>
