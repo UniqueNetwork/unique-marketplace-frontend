@@ -12,6 +12,10 @@ export const FormRow = styled.div`
   & > div {
     width: 100%;
   }
+  
+  @media (max-width: 576px) {
+    padding-bottom: calc(var(--gap));
+  }
 `;
 
 export const ButtonsRow = styled.div`

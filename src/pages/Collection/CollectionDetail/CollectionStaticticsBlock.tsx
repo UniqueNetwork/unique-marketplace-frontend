@@ -57,7 +57,7 @@ const CollectionStatisticsBlockWrapper = styled.div`
     padding-right: calc(var(--gap) * 1.5);
     margin-right: calc(var(--gap) * 1.5);
     border-right: 1px solid var(--color-blue-grey-200);
-    & > h4.unique-font-heading.size-4 {
+    & > h3.unique-font-heading {
       margin-bottom: calc(var(--gap) / 4) ;
     }
     span.color-grey-600 {
@@ -77,6 +77,7 @@ const CollectionStatisticsBlockWrapper = styled.div`
       flex-direction: row;
       gap: calc(var(--gap) / 2);
       align-items: baseline;
+      border-right: none;
     }
   }
   & > div:last-child {

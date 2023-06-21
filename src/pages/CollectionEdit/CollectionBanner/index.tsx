@@ -68,10 +68,20 @@ const BannerWrapper = styled.div`
   border: 1px dashed var(--color-primary-500);
   border-radius: 8px 8px 0px 0px;
   overflow: hidden;
+  &>img {
+    object-fit: cover;
+    min-width: 100%;
+  }
 
   @media (max-width: 1024px) {
     border-radius: 0px;
     margin: 0 -24px;
+  }
+  &>div {
+    @media (max-width: 768px) {
+      justify-content: flex-start;
+      padding-top: 16px;
+    }
   }
 `;
 
@@ -108,10 +118,15 @@ const BannerOverlayWrapper = styled.div`
   &:hover {
     opacity: 1;
   }
+  @media (max-width: 768px) {
+    padding-top: 8px;
+    justify-content: flex-start;
+  }
 `;
 
 const ButtonsWrapper = styled.div`
   margin-top: var(--gap);
   display: flex;
   gap: var(--gap);
+  
 `;

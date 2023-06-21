@@ -79,7 +79,7 @@ export const CollectionDetail: FC<IProps> = ({ collection, royalty }) => {
 
   return <CollectionDetailPaper>
     <BannerWrapper >
-      <img src={collection.metadata?.banner || CollectionBanner} />
+      {!!collection.metadata?.banner && <img src={collection.metadata.banner} />}
     </BannerWrapper>
     <CollectionDetailWrapper>
       <CollectionCardWrapper >
@@ -172,12 +172,25 @@ const CollectionDetailPaper = styled(PagePaper)`
   padding: 0;
   overflow: hidden;
   border-radius: 8px;
-  
+  @media (max-width: 1024px) {
+    overflow: visible;
+  }
 `;
 
 const BannerWrapper = styled.div`
   display: flex;
   justify-content: center;
+  height: 240px;
+  background-color: var(--color-blue-grey-100);
+  overflow: hidden;
+  img {
+    object-fit: cover;
+    min-width: 100%;
+  }
+  @media (max-width: 1024px) {
+    margin-left: calc(var(--gap) * -2);
+    margin-right: calc(var(--gap) * -2);
+  }
 `;
 
 const CollectionDetailWrapper = styled.div`
@@ -207,6 +220,7 @@ const PictureWrapper = styled.div`
   background: var(--color-additional-light);
   width: 160px;
   height: 160px;  
+  min-width: 160px;
   .picture {
     display: inline;
   }
