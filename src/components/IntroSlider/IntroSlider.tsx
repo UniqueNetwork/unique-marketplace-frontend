@@ -69,10 +69,10 @@ export const IntroSlider = () => {
           onCloseModal={onClose}
         />
         <IntroCard
-          title='Metamask support'
+          title='MetaMask support'
           description={
             <>
-              Sell, buy and list tokens with your Metamask wallet
+              Sell, buy and list tokens with your MetaMask wallet
             </>
           }
           imgPath={fox}
