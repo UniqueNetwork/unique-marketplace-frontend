@@ -74,6 +74,7 @@ const TokenPage = () => {
       if (!token) await fetchToken();
       if (offer || token) {
         setIsFetchingToken(false);
+        setIsNested(!!token?.nestingParentToken);
       }
     })();
   }, [fetchToken, isFetchingOffer, offer, token, collectionId, getCollection]);

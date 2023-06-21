@@ -68,8 +68,6 @@ export const RoyaltiesForm = ({ initialFormData, onSubmit }: RoyaltiesFormProps)
   const isValid = !!percentage && !!recipient && isValidRecipientAddress;
   const isChanged = percentage !== (initialFormData?.value || '0') || (recipient !== initialFormData?.address);
 
-  console.log(isValid, isChanged);
-
   return <FormWrapper>
     <Heading size='2' >Royalties</Heading>
     <FormRow>

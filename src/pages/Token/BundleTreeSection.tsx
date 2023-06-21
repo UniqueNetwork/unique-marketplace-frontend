@@ -72,7 +72,7 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
       }
       setIsBundleLoading(false);
     })();
-  }, [api, token, offer, bundle, isOwner]);
+  }, [api, token, offer, isOwner, bundle]);
 
   const closeView = useCallback(() => {
     setIsMobileViewVisible(false);

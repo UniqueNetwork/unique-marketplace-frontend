@@ -201,6 +201,7 @@ const InputWrapper = styled.div`
 `;
 
 const Dropdown = styled.div<{ isOpen: boolean }>`
+  box-sizing: border-box;
   display: ${({ isOpen }) => isOpen ? 'flex' : 'none'};
   position: absolute;
   width: 100%;
