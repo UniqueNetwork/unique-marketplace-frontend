@@ -6,3 +6,4 @@ export { TokensCard } from './TokensCard/TokensCard';
 export { TokensList } from './TokensList/TokensList';
 export { Avatar } from './Avatar/Avatar';
 export { FeeMessage } from './FeeMessage/FeeMessage';
+export { IntroSlider } from './IntroSlider/IntroSlider';
