@@ -42,7 +42,6 @@ export const CollectionEditPage = () => {
     setIsFetchingCollection(true);
     void (async () => {
       const collection = await fetchCollection(Number(collectionId));
-      const collectionOnChain = await getCollection(Number(collectionId));
       setCollection(collection || null);
       collection?.metadata?.banner && setBanner({ src: collection?.metadata?.banner });
       setCover({ src: collection?.metadata?.cover || collection?.data?.schema?.coverPicture.fullUrl || '' });
@@ -52,15 +51,16 @@ export const CollectionEditPage = () => {
         description: collection?.metadata?.description || collection?.description
       });
 
+      const collectionOnChain = await getCollection(Number(collectionId));
       if (collectionOnChain?.schema?.royalties?.length) {
-        const decimals = collectionOnChain.schema.royalties[0]?.decimals || 18;
+        const decimals = collectionOnChain.schema.royalties[0]?.decimals || 4;
         const value = collectionOnChain.schema.royalties[0]?.value
-          ? formatKsm(new BN(collectionOnChain.schema.royalties[0]?.value), decimals, 0)
+          ? formatKsm(new BN(collectionOnChain.schema.royalties[0]?.value), decimals - 2, 0)
           : '0';
-        const type = collectionOnChain.schema.royalties[0]?.royaltyType === 'DEFAULT' ? 'flexible' : 'immutable';
+        const address = collectionOnChain.schema.royalties[0]?.address;
         setRoyalty({
-          royaltiesPercentage: value,
-          royaltiesType: type
+          value,
+          address
         });
       }
 

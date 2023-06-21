@@ -45,4 +45,10 @@ const timestampTableFormat = (timestamp: number) => new Date(timestamp).toLocale
   hour12: false
 }).replaceAll('/', '-');
 
-export { timeDifference, timestampTableFormat };
+const dateFormat = (date: string) => new Date(date).toLocaleString('en-GB', {
+  day: '2-digit',
+  month: 'long',
+  year: 'numeric'
+});
+
+export { timeDifference, timestampTableFormat, dateFormat };

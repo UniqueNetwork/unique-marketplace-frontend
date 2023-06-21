@@ -19,11 +19,14 @@ import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { Link } from 'react-router-dom';
 import { MarketableCollection } from 'api/restApi/collections/types';
 import ShareTokenModal from 'pages/Token/TokenDetail/ShareTokenModal';
+import { RoyaltiesFormData } from 'pages/CollectionEdit/types';
+import { dateFormat } from 'utils/timestampUtils';
 interface IProps {
   collection?: MarketableCollection
+  royalty?: RoyaltiesFormData
 }
 
-export const CollectionDetail: FC<IProps> = ({ collection }) => {
+export const CollectionDetail: FC<IProps> = ({ collection, royalty }) => {
   const { selectedAccount } = useAccounts();
   const deviceSize = useDeviceSize();
 
@@ -121,9 +124,9 @@ export const CollectionDetail: FC<IProps> = ({ collection }) => {
               </>}
             </OwnerWrapper>
           </Row>
-          <CollectionStatisticsBlock collection={collection} />
+          <CollectionStatisticsBlock collection={collection} royalty={royalty} />
           {deviceSize < DeviceSize.lg && <CreationInfoWrapper>
-            <Text color={'grey-500'} >Created on {'15 February 2021'}</Text>
+            <Text color={'grey-500'} >Created on {collection.createdAt}</Text>
             <LinkStyled
               target={'_blank'}
               rel={'noreferrer'}
@@ -147,7 +150,7 @@ export const CollectionDetail: FC<IProps> = ({ collection }) => {
           {externalLinks}
         </LinksWrapper>
         <CreationInfoWrapper>
-          <Text color={'grey-500'} >Created on {'15 February 2021'}</Text>
+          <Text color={'grey-500'} >Created on {dateFormat(collection.createdAt)}</Text>
           <LinkStyled
             target={'_blank'}
             rel={'noreferrer'}

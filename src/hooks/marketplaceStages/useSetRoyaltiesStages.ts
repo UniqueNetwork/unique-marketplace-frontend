@@ -11,6 +11,8 @@ export type TSetRoyaltiesProps = {
   royalty: UniqueRoyaltyPartDto
 }
 
+const defaultDecimals = 4;
+
 export const useSetRoyaltiesStages = (collectionId: number) => {
   const { api, chainProperties } = useApi();
   const { selectedAccount } = useAccounts();
@@ -32,15 +34,17 @@ export const useSetRoyaltiesStages = (collectionId: number) => {
         image: {
           urlTemplate: '{infix}'
         },
-        royalties: [
+        royalties: txParams.royalty.value > 0
+        ? [
           {
-            value: BigInt(txParams.royalty.value * (10 ** (chainProperties?.decimals || 18))),
+            value: BigInt(txParams.royalty.value * (10 ** (defaultDecimals - 2))),
             address: txParams.royalty.address,
-            decimals: chainProperties?.decimals,
+            decimals: defaultDecimals,
             version: 1,
-            royaltyType: txParams.royalty.royaltyType
+            royaltyType: 'DEFAULT'
           }
         ]
+        : []
       });
       const royalties = encodedSchema.find(({ key }) => key === 'royalties');
       if (!royalties) throw new Error('Schema encoding error');
