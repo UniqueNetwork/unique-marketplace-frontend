@@ -5,9 +5,9 @@ import { IntroCard } from './IntroCard';
 import { Slider } from './Slider';
 import confetti from 'static/images/confetti.svg';
 import sparkles from 'static/images/sparkles.svg';
-import puzzle from 'static/images/puzzle.svg';
 import fox from 'static/images/fox.svg';
 import wallet from 'static/images/wallet.svg';
+import bundle from 'static/images/bundle.svg';
 
 const BUNDLE_SHOW_MODAL = 'new-market-bundle-show-modal';
 
@@ -58,13 +58,13 @@ export const IntroSlider = () => {
           setActiveSlide={setActiveSlide}
         />
         <IntroCard
-          title='Customizable NFTs'
+          title='Nested NFTs'
           description={
             <>
-              Buy your first customizable NFTs and upgrade using unique wearables
+              Create on-chain connections between tokens and start selling your first NFT bundles
             </>
           }
-          imgPath={puzzle}
+          imgPath={bundle}
           setActiveSlide={setActiveSlide}
           onCloseModal={onClose}
         />
