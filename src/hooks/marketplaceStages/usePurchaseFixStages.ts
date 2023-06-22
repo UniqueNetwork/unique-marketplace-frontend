@@ -4,7 +4,7 @@ import { Address } from '@unique-nft/utils';
 
 import { useApi } from '../useApi';
 import { TPurchaseProps } from '../../pages/Token/Modals/types';
-import { InternalStage, StageStatus } from '../../types/StagesTypes';
+import { InternalStage, StageStatus, TInternalStageActionParams } from '../../types/StagesTypes';
 import useStages from '../useStages';
 import { useAccounts } from '../useAccounts';
 
@@ -41,7 +41,9 @@ export const usePurchaseFixStages = (collectionId: number, tokenId: number) => {
       status: StageStatus.default,
       action: ({ options, txParams }) => marketApi?.buyFix(collectionId, tokenId, txParams.amount, options)
     },
-    {
+    ...(selectedAccount?.account.constructor === MetamaskAccount
+      ? []
+      : [{
       title: 'Withdraw',
       description: '',
       status: StageStatus.default,
@@ -52,7 +54,7 @@ export const usePurchaseFixStages = (collectionId: number, tokenId: number) => {
           return marketApi?.transferBalance(mirrorAddress, txParams.accountAddress, mirrorBalance.raw, options);
         }
       }
-    }
+    }]) as InternalStage<TPurchaseProps>[]
   ];
 }, [marketApi, collectionId, tokenId]);
   const { stages, error, status, initiate } = useStages<TPurchaseProps>(purchaseStages, selectedAccount);

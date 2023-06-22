@@ -30,7 +30,7 @@ export const SellToken: FC<SellTokenProps> = ({ offer, royalty, isAllowed, onSel
     return (<>
       <Text size={'l'}>{'Price'}</Text>
       <Price testid={testid} price={offer.price.parsed.toString()} />
-      {!!royalty && <Text size='m' color='grey-500'>{`Flexible Royalties: ${royalty}%`}</Text>}
+      {!!royalty && <RoyaltyText size='m' color='grey-500'>{`Flexible Royalties: ${royalty * 100}%`}</RoyaltyText>}
       <ButtonWrapper>
         <Button
           title={'Delist'}
@@ -47,7 +47,7 @@ export const SellToken: FC<SellTokenProps> = ({ offer, royalty, isAllowed, onSel
 
   return (
     <>
-      {!!royalty && <Text size='m' color='grey-500'>{`Flexible Royalties: ${royalty}%`}</Text>}
+      {!!royalty && <RoyaltyText size='m' color='grey-500'>{`Flexible Royalties: ${royalty * 100}%`}</RoyaltyText>}
       <ActionsWrapper>
         {!hideSellBtn && <Button
           title={'Sell'}
@@ -79,4 +79,8 @@ const ButtonWrapper = styled.div`
 const Divider = styled.div`
   margin: calc(var(--gap) * 1.5) 0;
   border-top: 1px dashed ${Grey300};
+`;
+
+const RoyaltyText = styled(Text)`
+  margin-bottomL: calc(var(--gap) / 4);
 `;

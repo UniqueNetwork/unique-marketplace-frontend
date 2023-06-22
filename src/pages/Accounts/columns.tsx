@@ -103,11 +103,12 @@ export const getAccountsColumns = ({
     field: 'actions',
     render(_, { address, balance, isLocal }: AccountInfo) {
       const deposit = balance.withdraw.raw;
+      const canSend = formatBalance(balance?.parsed) !== '0';
       return (
         <ActionsWrapper>
           <TransferActionsWrapper>
             <SendGetWrapper>
-              <Button title={'Send'} onClick={onShowSendFundsModal(address)} disabled={!balance?.parsed} />
+              <Button title={'Send'} onClick={onShowSendFundsModal(address)} disabled={!canSend} />
               <Button
                 title={'Get'}
                 onClick={onGetClick(address)}
@@ -225,7 +226,7 @@ const ActionsWrapper = styled.div`
   flex-wrap: nowrap;
   gap: var(--prop-gap);
   div:last-child {
-    min-width: 24px;
+    min-width: 28px;
   }
   button.unique-button.ghost {
     padding: 8px 0;

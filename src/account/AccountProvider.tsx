@@ -8,6 +8,7 @@ import { useApi } from 'hooks/useApi';
 import { getWithdrawBids } from 'api/restApi/auction/auction';
 import { Accounts, ProviderClass } from '@unique-nft/accounts';
 
+import { AddEthereumChainParameter, Ethereum, IEthereumExtensionResultSafe } from '@unique-nft/utils/extension';
 import { SocketClient, SubscriptionEvents } from '@unique-nft/sdk/full';
 import { PolkadotProvider, PolkadotAccount } from '@unique-nft/accounts/polkadot';
 import { KeyringLocalAccount } from '@unique-nft/accounts/keyring-local';
@@ -18,6 +19,7 @@ import keyring from '@polkadot/ui-keyring';
 import { KeyringLocalProvider } from './providers/KeyringProvider';
 import { Signer } from 'ethers';
 import { Address } from '@unique-nft/utils';
+import { changeMetamaskChain } from 'utils/metamask';
 
 export const DefaultAccountKey = 'unique_market_account_address';
 export const ConnectedAccountTypesKey = 'unique_market_account_types';
@@ -33,6 +35,12 @@ const EthereumChainIds: Record<string, string> = {
   quartz: '0x22b1',
   opal: '0x22b2',
   sapphire: '0x22b3'
+};
+const EthereumChainParams: Record<string, AddEthereumChainParameter> = {
+  unique: Ethereum.UNIQUE_CHAINS_DATA_FOR_EXTENSIONS.unique,
+  quartz: Ethereum.UNIQUE_CHAINS_DATA_FOR_EXTENSIONS.quartz,
+  opal: Ethereum.UNIQUE_CHAINS_DATA_FOR_EXTENSIONS.opal,
+  sapphire: Ethereum.UNIQUE_CHAINS_DATA_FOR_EXTENSIONS.sapphire
 };
 
 const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts(), children }) => {
@@ -165,8 +173,15 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
     setIsLoading(true);
     void (async () => {
       if (!currentChainId) return;
-      const connectedProviders = (localStorage.getItem(ConnectedAccountTypesKey)?.split(';') || ['keyring']) as ProviderTypesName[];
-      await Promise.all(connectedProviders.map(async (type) => {
+      const connectedProviders: Set<ProviderTypesName> = new Set((localStorage.getItem(ConnectedAccountTypesKey)?.split(';') || ['keyring']) as ProviderTypesName[]);
+
+      // @ts-ignore
+      const metamaskIsUnlocked = await window.ethereum?.isConnected();
+      if (!metamaskIsUnlocked) {
+        connectedProviders.delete('metamask');
+      }
+
+      await Promise.all([...connectedProviders.values()].map(async (type) => {
         if (!type) return;
 
         const provider = await _accounts.addProvider<ProviderClass<any>>(
@@ -174,16 +189,23 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
           type === 'keyring' ? { passwordCallback: showSignDialog } : undefined
         );
         if (type === 'metamask') {
-          const account = await provider.first() as MetamaskAccount;
-          // @ts-ignore
-          await (account?.signer as Signer).provider?.provider?.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: EthereumChainIds[currentChainId] }]
-          });
+          try {
+            // @ts-ignore
+            window.ethereum?.on('accountsChanged', async () => {
+              fetchAccounts();
+              await changeMetamaskChain(EthereumChainParams[currentChainId]);
+            });
+            // @ts-ignore
+            window.ethereum?.on('disconnect', () => {
+              fetchAccounts();
+            });
+          } catch (e) {
+            connectedProviders.delete('metamask');
+          }
         }
       }));
       await fetchAccounts();
-      localStorage.setItem(ConnectedAccountTypesKey, connectedProviders.join(';'));
+      localStorage.setItem(ConnectedAccountTypesKey, [...connectedProviders.values()].join(';'));
     })();
   }, [api?.market, fetchAccounts, showSignDialog, currentChainId]);
 
@@ -196,9 +218,19 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
         ProviderTypes[type],
         type === 'keyring' ? { passwordCallback: showSignDialog } : undefined
       );
+      if (type === 'metamask' && currentChainId) {
+        await changeMetamaskChain(EthereumChainParams[currentChainId]);
+      }
       await fetchAccounts();
     }
   }, [fetchAccounts]);
+
+  useEffect(() => {
+    if (!currentChainId) return;
+    void (async () => {
+        await changeMetamaskChain(EthereumChainParams[currentChainId]);
+    })();
+  }, [currentChainId]);
 
   const onClose = useCallback(() => {
     setIsSignModalVisible(false);
