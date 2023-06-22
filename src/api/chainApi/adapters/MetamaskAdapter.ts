@@ -101,11 +101,15 @@ class MetamaskAdapter implements IMarketContractAdapter {
     await (await nftFactory.transferFrom(parentTokenAddress, ownerAddress, target.tokenId)).wait();
   }
 
-  async getTransferBalanceFee(from: string, to: string, amount: ChainValue, signer: Signer): Promise<string> {
-    const toEth = Address.is.ethereumAddress(to) ? to : Address.mirror.substrateToEthereum(to);
-    const gasPrice = await signer.getGasPrice();
-    const estimateGas = await signer.estimateGas({ to: toEth, value: amount.raw });
+  async getTransferBalanceFee(addressFrom: string, addressTo: string, amount: ChainValue, signer: Signer): Promise<string> {
+    const from = Address.extract.ethCrossAccountId(addressFrom);
+    const to = Address.extract.ethCrossAccountId(addressTo);
 
+    const uniqueFungible = await UniqueFungibleFactory(0, signer);
+    const estimateGas = await uniqueFungible.estimateGas.transferFromCross(
+      from, to, amount.raw, { from: addressFrom }
+    );
+    const gasPrice = await uniqueFungible.provider.getGasPrice();
     return estimateGas.mul(gasPrice).toString();
   }
 
