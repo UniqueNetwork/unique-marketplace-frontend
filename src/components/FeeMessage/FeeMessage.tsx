@@ -30,7 +30,7 @@ export const FeeMessage: FC<FeeMessageProps> = ({
       >
         {isFeeLoading && <Loader label='Loading fee...' />}
         {!isFeeLoading && fee === '0' && placeholder}
-        {!isFeeLoading && fee !== '0' && <>A fee of ~ {Number(fee).toFixed(4).replace(/(?<=\.\d*[1-9])0+$|\.0*$/, '')} {chainProperties?.token} can be applied to the transaction, unless the transaction is sponsored</>}
+        {!isFeeLoading && fee !== '0' && <>A fee of ~ {Number(fee).toFixed(4).replace(/(\.\d*[1-9])(0+$|\.0*)$/, '$1')} {chainProperties?.token} can be applied to the transaction, unless the transaction is sponsored</>}
       </Text>
     </FeeMessageWrapper>
   );

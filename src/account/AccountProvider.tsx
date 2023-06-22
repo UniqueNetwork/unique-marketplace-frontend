@@ -17,6 +17,7 @@ import { MarketAccount, ProviderTypesName } from './types';
 import keyring from '@polkadot/ui-keyring';
 import { KeyringLocalProvider } from './providers/KeyringProvider';
 import { Signer } from 'ethers';
+import { Address } from '@unique-nft/utils';
 
 export const DefaultAccountKey = 'unique_market_account_address';
 export const ConnectedAccountTypesKey = 'unique_market_account_types';
@@ -41,7 +42,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
   const [fetchAccountsError, setFetchAccountsError] = useState<string | undefined>();
   const [selectedAccount, setSelectedAccount] = useState<MarketAccount>();
   const [isOpenConnectWalletModal, setIsOpenConnectWalletModal] = useState<boolean>(false);
-  const { api, baseURL, currentChainId } = useApi();
+  const { api, baseURL, currentChainId, chainProperties } = useApi();
 
   const sdkSocketClient = useRef<SocketClient>();
   const subscribeBalancesChanges = useCallback((accountsWithBalances: MarketAccount[]) => {
@@ -55,13 +56,17 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
       sdkSocketClient.current.socket.removeAllListeners();
     }
     accountsWithBalances.forEach((account) => {
-      client.subscribeAccountCurrentBalance({ address: account.address });
+      client.subscribeAccountCurrentBalance({ address: Address.is.substrateAddress(account.address)
+        ? Address.normalize.substrateAddress(account.address, chainProperties?.SS58Prefix)
+        : account.address });
     });
     client.on(SubscriptionEvents.ACCOUNT_CURRENT_BALANCE, (room, data) => {
       try {
         const address = data.balance.address;
         const newBalance = data.balance.availableBalance;
-        const accountIndex = accountsWithBalances.findIndex((acc) => acc.address.toLowerCase() === address.toLowerCase());
+        const accountIndex = accountsWithBalances.findIndex((acc) => Address.is.substrateAddressInAnyForm(acc.address)
+          ? Address.compare.substrateAddresses(acc.address, address)
+          : address?.toLocaleLowerCase() === acc.account.address.toLocaleLowerCase());
         const accountsCopy = [...accountsWithBalances];
         const targetAccount = accountsCopy[accountIndex];
         if (!targetAccount) {

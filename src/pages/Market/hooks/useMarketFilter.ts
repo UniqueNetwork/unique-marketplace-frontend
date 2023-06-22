@@ -81,9 +81,15 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
   }, [filterState, isFetching, onFilterChange]);
 
   useEffect(() => {
-    if (!selectedAccount || isAccountsLoading) return;
+    if (isAccountsLoading) return;
     onChangeAccount();
-  }, [selectedAccount?.address, isAccountsLoading]);
+  }, [isAccountsLoading]);
+
+  useEffect(() => {
+    if (selectedAccount?.address && filterState?.statuses?.myNFTs) {
+      onChangeAccount();
+    }
+  }, [selectedAccount?.address]);
 
   const filterCount = useMemo(() => {
     const { statuses, prices, collections = [], attributes = [], attributeCounts = [] } = filterState || {};

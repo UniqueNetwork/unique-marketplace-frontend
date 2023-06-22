@@ -11,6 +11,7 @@ import { TMenuItems } from '../PageLayout';
 import { WalletManager } from './WalletManager/WalletManager';
 import { DesktopMenuItem, DesktopMenuLink, MobileMenuItem, MobileMenuLink } from './MenuLink';
 import config from 'config';
+import { GetButton } from './GetButton';
 
 interface HeaderProps {
   activeItem: TMenuItems;
@@ -84,6 +85,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
         )}
       </LeftSideColumn>
       <RightSide>
+        <GetButton />
         <WalletManager />
       </RightSide>
       {showMobileMenu && mobileMenuIsOpen && (
@@ -181,6 +183,7 @@ const LogoIcon = styled.img`
 const RightSide = styled.div`
   display: flex;
   align-items: center;
+  gap: var(--gap);
 `;
 
 const MobileMenu = styled.div`
