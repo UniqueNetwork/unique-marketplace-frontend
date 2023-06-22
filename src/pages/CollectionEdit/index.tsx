@@ -27,7 +27,6 @@ export const CollectionEditPage = () => {
   const [collection, setCollection] = useState<MarketableCollection | null>(null);
   const [isFetchingCollection, setIsFetchingCollection] = useState<boolean>(true);
   const { fetchCollection } = useMarketableCollection();
-  const { getCollection } = useCollections();
   const { api, currentChainId } = useApi();
   const [banner, setBanner] = useState<{src: string, file?: Blob}>();
   const [cover, setCover] = useState<{src: string, file?: Blob}>();
@@ -51,7 +50,7 @@ export const CollectionEditPage = () => {
         description: collection?.metadata?.description || collection?.description
       });
 
-      const collectionOnChain = await getCollection(Number(collectionId));
+      const collectionOnChain = await api?.collection?.getCollection(Number(collectionId));
       if (collectionOnChain?.schema?.royalties?.length) {
         const decimals = collectionOnChain.schema.royalties[0]?.decimals || 4;
         const value = collectionOnChain.schema.royalties[0]?.value

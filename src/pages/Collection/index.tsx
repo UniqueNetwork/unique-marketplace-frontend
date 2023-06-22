@@ -33,7 +33,7 @@ export const CollectionPage = () => {
   const { selectedAccount, isLoading: isAccountsLoading } = useAccounts();
   const [collection, setCollection] = useState<MarketableCollection>();
   const deviceSize = useDeviceSize();
-  const { getCollection, getCollectionTokensCount } = useCollections();
+  const { getCollectionTokensCount } = useCollections();
   const { fetchCollection, addCollection } = useMarketableCollection();
   const [scanning, setScanning] = useState(false);
   const [tokensCountOnScan, setTokensCountOnScan] = useState(0);
@@ -42,7 +42,8 @@ export const CollectionPage = () => {
   const { tokens, tokensCount, isFetching, fetchMore, fetch, attributes, attributeCounts } = useTokens({
     collectionId: Number(collectionId)
   });
-  const { currentChainId } = useApi();
+
+  const { currentChainId, api } = useApi();
 
   const {
     filterState,
@@ -78,7 +79,7 @@ export const CollectionPage = () => {
       setTokensCountOnScan(tokensCountOnScan);
 
       const collectionData = await fetchCollection(id);
-      const collection = await getCollection(id);
+      const collection = await api?.collection?.getCollection(Number(collectionId));
       setRoyalties(collection);
       if (!collectionData || (tokensCountOnScan > 0 && collectionData.tokensCount !== tokensCountOnScan)) {
         if (!collection) return navigate('/404');

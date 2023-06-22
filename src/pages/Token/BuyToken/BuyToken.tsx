@@ -55,7 +55,7 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, royalty, onBuy, testid }) =
   return (<>
     <Text size={'l'}>Price</Text>
     <Price price={offer?.price?.parsed.toString()} />
-    {!!royalty && <Text size='m' color='grey-500'>{`Flexible Royalties: ${royalty}%`}</Text>}
+    {!!royalty && <RoyaltyText size='m' color='grey-500'>{`Flexible Royalties: ${royalty * 100}%`}</RoyaltyText>}
     <ButtonWrapper>
       <Button
         onClick={onBuyClick}
@@ -79,4 +79,8 @@ const ButtonWrapper = styled.div`
 const Divider = styled.div`
   margin: calc(var(--gap) * 1.5) 0;
   border-top: 1px dashed ${Grey300};
+`;
+
+const RoyaltyText = styled(Text)`
+  margin-bottomL: calc(var(--gap) / 4);
 `;
