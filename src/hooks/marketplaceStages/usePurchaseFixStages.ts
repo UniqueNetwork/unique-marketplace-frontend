@@ -40,6 +40,18 @@ export const usePurchaseFixStages = (collectionId: number, tokenId: number) => {
       description: '',
       status: StageStatus.default,
       action: ({ options, txParams }) => marketApi?.buyFix(collectionId, tokenId, txParams.amount, options)
+    },
+    {
+      title: 'Withdraw',
+      description: '',
+      status: StageStatus.default,
+      action: async ({ options, txParams }) => {
+        const mirrorAddress = Address.mirror.substrateToEthereum(account.address);
+        const mirrorBalance = await marketApi?.getAccountBalance(mirrorAddress);
+        if (mirrorBalance && Number(mirrorBalance.parsed) !== 0) {
+          return marketApi?.transferBalance(mirrorAddress, txParams.accountAddress, mirrorBalance.raw, options);
+        }
+      }
     }
   ];
 }, [marketApi, collectionId, tokenId]);
