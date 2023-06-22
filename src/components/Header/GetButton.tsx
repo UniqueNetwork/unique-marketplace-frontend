@@ -29,4 +29,5 @@ export const GetButton = () => {
 const StyledButton = styled(Button)`
   color: var(--color-additional-light) !important;
   background-color: #2DBF15 !important;
+  border-color: #2DBF15 !important;
 `;
