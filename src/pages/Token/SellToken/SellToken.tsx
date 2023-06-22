@@ -82,5 +82,5 @@ const Divider = styled.div`
 `;
 
 const RoyaltyText = styled(Text)`
-  margin-bottomL: calc(var(--gap) / 4);
+  margin-bottom: calc(var(--gap) / 4);
 `;

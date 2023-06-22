@@ -228,7 +228,9 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
   useEffect(() => {
     if (!currentChainId) return;
     void (async () => {
-        await changeMetamaskChain(EthereumChainParams[currentChainId]);
+      const walletTypes = localStorage.getItem(ConnectedAccountTypesKey)?.split(';');
+      if (!walletTypes?.includes('metamask')) return;
+      await changeMetamaskChain(EthereumChainParams[currentChainId]);
     })();
   }, [currentChainId]);
 
