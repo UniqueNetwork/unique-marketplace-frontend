@@ -7,6 +7,8 @@ import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
 import { ChainValue } from '../controllers/BaseController';
 
+const buyGasLimit = 360_000;
+const sellGasLimit = 200_000;
 class MetamaskAdapter implements IMarketContractAdapter {
   contractAddress: string;
   constructor(contractAddress: string) {
@@ -132,7 +134,7 @@ class MetamaskAdapter implements IMarketContractAdapter {
     const gasPrice = await contract.provider.getGasPrice();
     const estimateGas = await contract.provider.estimateGas({
       from: from.eth,
-      gasLimit: 10000000,
+      gasLimit: sellGasLimit,
       gasPrice
     });
     return estimateGas.mul(gasPrice).toString();
@@ -140,12 +142,12 @@ class MetamaskAdapter implements IMarketContractAdapter {
 
   async sell(from: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<void> {
     const contract = this.getContract(signer);
-    await this.callContract(contract, 'put', collectionId, tokenId, price, amount, from, { gasLimit: 10000000 });
+    await this.callContract(contract, 'put', collectionId, tokenId, price, amount, from, { gasLimit: sellGasLimit });
   }
 
   async getBuyFee(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<string> {
     const contract = this.getContract(signer);
-    const estimateGas = await contract.estimateGas.buy(collectionId, tokenId, amount, to, { value: price, gasLimit: 10000000 });
+    const estimateGas = await contract.estimateGas.buy(collectionId, tokenId, amount, to, { value: price, gasLimit: buyGasLimit });
     const gasPrice = await contract.provider.getGasPrice();
     return estimateGas.mul(gasPrice).toString();
   }
@@ -153,7 +155,7 @@ class MetamaskAdapter implements IMarketContractAdapter {
   async buy(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<void> {
     const contract = this.getContract(signer);
 
-    const estimateGas = await contract.estimateGas.buy(collectionId, tokenId, amount, to, { value: price, gasLimit: 10000000 });
+    const estimateGas = await contract.estimateGas.buy(collectionId, tokenId, amount, to, { value: price, gasLimit: buyGasLimit });
     await this.callContract(contract, 'buy', collectionId, tokenId, amount, to, { value: price, gasLimit: estimateGas.add(1000) });
   }
 }
