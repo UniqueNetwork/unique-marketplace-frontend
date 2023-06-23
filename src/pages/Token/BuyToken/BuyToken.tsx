@@ -63,10 +63,11 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, royalty, onBuy, testid }) =
         role='primary'
         title='Buy'
         wide={true}
-        disabled={!isEnoughBalance}
+        disabled={!isEnoughBalance || (royalty || 0) >= 1}
       />
     </ButtonWrapper>
     {!isEnoughBalance && <Text color={'coral-500'} testid={`${testid}-low-balance-warning`}>Your balance is too low to buy</Text>}
+    {(royalty || 0) >= 1 && <Text color={'coral-500'} testid={`${testid}-low-balance-warning`}>The royalty is too big. Maximum royalty - 99%</Text>}
     {!!offer?.tokenDescription?.nestingChildTokens?.length && <BuyBundleInformation testid={testid}/>}
     <Divider />
   </>);
@@ -74,7 +75,7 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, royalty, onBuy, testid }) =
 
 const ButtonWrapper = styled.div`
   width: 200px;
-  margin-top: calc(var(--gap) * 1.5);
+  margin-bottom: calc(var(--gap) / 2);
 `;
 
 const Divider = styled.div`

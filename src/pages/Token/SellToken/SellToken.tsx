@@ -55,6 +55,7 @@ export const SellToken: FC<SellTokenProps> = ({ offer, royalty, isAllowed, onSel
           role={'primary'}
           onClick={onSellClick}
           testid={`${testid}-sell-button`}
+          disabled={(royalty || 0) >= 1}
         />}
         <Button
           title={'Transfer'}
@@ -62,6 +63,7 @@ export const SellToken: FC<SellTokenProps> = ({ offer, royalty, isAllowed, onSel
           testid={`${testid}-transfer-button`}
         />
       </ActionsWrapper>
+      {(royalty || 0) >= 1 && <Text color={'coral-500'} testid={`${testid}-low-balance-warning`}>The royalty is too big. Maximum royalty - 99%</Text>}
       <Divider />
     </>
   );
@@ -70,11 +72,11 @@ export const SellToken: FC<SellTokenProps> = ({ offer, royalty, isAllowed, onSel
 const ActionsWrapper = styled.div`
   display: flex;
   column-gap: var(--gap);
+  margin-bottom: calc(var(--gap) / 2);
 `;
 
 const ButtonWrapper = styled.div`
   width: 200px;
-  margin-top: calc(var(--gap) * 1.5);
 `;
 
 const Divider = styled.div`
