@@ -61,7 +61,7 @@ export const CollectionPage = () => {
     if (collectionOnChain?.schema?.royalties?.length) {
       const decimals = collectionOnChain.schema.royalties[0]?.decimals || 4;
       const value = collectionOnChain.schema.royalties[0]?.value
-        ? formatKsm(new BN(collectionOnChain.schema.royalties[0]?.value), decimals - 2, 0)
+        ? (Number(collectionOnChain.schema.royalties[0]?.value) / 100).toFixed(2)
         : '0';
       const address = collectionOnChain.schema.royalties[0]?.address;
       setRoyalty({
