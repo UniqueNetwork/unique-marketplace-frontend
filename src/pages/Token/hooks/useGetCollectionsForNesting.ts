@@ -23,6 +23,9 @@ const gqlQuery = {
         collectionCover: collection_cover
         collectionOwner: collection_owner
         collectionId: collection_id
+        collection {
+          nestingEnabled: nesting_enabled
+        }
       }
     }
   }`
@@ -48,8 +51,8 @@ export const useGetCollectionsForNesting = () => {
       }
     });
     if (response.status === 200) {
-      const collections = response?.data?.data?.tokens?.data as CollectionItem[] | [];
-      setCollections(collections);
+      const collections = response?.data?.data?.tokens?.data as (CollectionItem & { collection: { nestingEnabled: boolean } })[] | [];
+      setCollections(collections.filter((collection) => collection.collection?.nestingEnabled));
       setIsFetching(false);
       return collections;
     }

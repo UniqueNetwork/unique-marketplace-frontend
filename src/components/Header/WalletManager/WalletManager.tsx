@@ -35,7 +35,7 @@ export const WalletManager: FC = () => {
   const { info } = useNotifications();
   const navigate = useNavigate();
 
-  const networks: INetwork[] = useMemo(() => Object.keys(config?.blockchains || {}).map<INetwork>((id) => ({
+  const networks: INetwork[] = useMemo(() => Object.keys(config?.blockchains || {}).reverse().map<INetwork>((id) => ({
     id,
     name: config?.blockchains[id]?.name || '',
     icon: {
