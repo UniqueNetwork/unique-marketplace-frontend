@@ -7,6 +7,7 @@ import { Offer } from 'api/restApi/offers/types';
 import { Price } from '../TokenDetail/Price';
 import { useAccounts } from 'hooks/useAccounts';
 import { useApi } from 'hooks/useApi';
+import { RoyaltyValue } from '../TokenDetail/Royalty';
 
 interface SellTokenProps {
   offer?: Offer
@@ -30,7 +31,7 @@ export const SellToken: FC<SellTokenProps> = ({ offer, royalty, isAllowed, onSel
     return (<>
       <Text size={'l'}>{'Price'}</Text>
       <Price testid={testid} price={offer.price.parsed.toString()} />
-      {!!royalty && <RoyaltyText size='m' color='grey-500'>{`Flexible Royalties: ${royalty * 100}%`}</RoyaltyText>}
+      <RoyaltyValue value={royalty} />
       <ButtonWrapper>
         <Button
           title={'Delist'}
@@ -47,7 +48,7 @@ export const SellToken: FC<SellTokenProps> = ({ offer, royalty, isAllowed, onSel
 
   return (
     <>
-      {!!royalty && <RoyaltyText size='m' color='grey-500'>{`Flexible Royalties: ${royalty * 100}%`}</RoyaltyText>}
+      <RoyaltyValue value={royalty} />
       <ActionsWrapper>
         {!hideSellBtn && <Button
           title={'Sell'}
@@ -79,8 +80,4 @@ const ButtonWrapper = styled.div`
 const Divider = styled.div`
   margin: calc(var(--gap) * 1.5) 0;
   border-top: 1px dashed ${Grey300};
-`;
-
-const RoyaltyText = styled(Text)`
-  margin-bottom: calc(var(--gap) / 4);
 `;

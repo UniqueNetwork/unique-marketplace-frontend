@@ -35,9 +35,10 @@ interface IProps {
   onViewTokenDetails: Dispatch<SetStateAction<TokenByIdResponse | undefined>>
   testid?: string
   isOwner: boolean
+  onFinish(): void
 }
 
-function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token, offer, testid, isOwner }: IProps) {
+function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token, offer, testid, onFinish, isOwner }: IProps) {
   const navigate = useNavigate();
   const { api } = useApi();
   const [isMobileViewVisible, setIsMobileViewVisible] = useState(false);
@@ -85,10 +86,11 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
   const onNodeClicked = useCallback((data: INestingToken) => {
   }, []);
 
-  const onFinish = useCallback(() => {
+  const onFinishAction = useCallback(() => {
     setModalType(BundleModalType.default);
     setBundle(undefined);
-  }, []);
+    onFinish();
+  }, [onFinish]);
 
   const onClose = useCallback(() => {
     setModalType(BundleModalType.default);
@@ -153,7 +155,7 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
       <BundleModal
         token={selectedToken}
         bundleModalType={modalType}
-        onFinish={onFinish}
+        onFinish={onFinishAction}
         testid={`${testid}-modal`}
         onClose={onClose}
       />

@@ -104,13 +104,12 @@ const ProgressBarWrapper = styled.div`
   display: flex;
   flex-direction: column;
   min-width: 200px;
-  height: 8px;
-  gap: calc(var(--gap) / 2);
+  height: 4px;
 `;
 
 const ProgressBar = styled.div<{ value: number }>`
-  margin-top: -8px;
-  height: 8px;
+  margin-top: -4px;
+  height: 4px;
   width: ${({ value }) => (value * 100).toString() + '%'};
   background-color: var(--color-primary-500);
 `;
