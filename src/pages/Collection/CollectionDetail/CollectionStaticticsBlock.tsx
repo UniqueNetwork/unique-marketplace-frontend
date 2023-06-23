@@ -37,7 +37,7 @@ export const CollectionStatisticsBlock = ({ collection, royalty }: { collection:
       </div>}
     </>}
     {!!collection.tokensTotal && collection.tokensCount < collection.tokensTotal && <ProgressWrapper>
-      <Heading size='3'>Scanning...</Heading>
+      <Heading size='4'>We are adding this collection to the marketplace right now, it may take a few minutes</Heading>
       <Text size='m' color='grey-600'>Scanned {collection.tokensCount} of {collection.tokensTotal} tokens</Text>
       <ProgressBarWrapper>
         <Skeleton />
