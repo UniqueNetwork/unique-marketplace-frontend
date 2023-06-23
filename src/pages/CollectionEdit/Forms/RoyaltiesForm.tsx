@@ -4,7 +4,7 @@ import { Heading } from '@unique-nft/ui-kit';
 import { Button, Text } from 'components/UI';
 import { RoyaltiesFormData } from '../types';
 import { NumberInput } from 'components/NumberInput/NumberInput';
-import { ButtonsRow, FormRow, FormWrapper, RadioLabel } from './FormComponents';
+import { ButtonsRow, FormRow, FormWrapper } from './FormComponents';
 import styled from 'styled-components';
 import { SelectInput } from 'components/SelectInput/SelectInput';
 import { useAccounts } from 'hooks/useAccounts';
@@ -94,6 +94,7 @@ export const RoyaltiesForm = ({ initialFormData, onSubmit }: RoyaltiesFormProps)
         placeholder='%'
         value={percentage}
         onChange={onChangePercentage}
+        decimals={2}
       />
     </FormRow>
     <ButtonsRow>
