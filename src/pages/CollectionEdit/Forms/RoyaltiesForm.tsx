@@ -33,7 +33,7 @@ export const RoyaltiesForm = ({ initialFormData, onSubmit }: RoyaltiesFormProps)
   }, [initialFormData]);
 
   const onChangePercentage = useCallback((value: string) => {
-    if (Number(value) > 100) return;
+    if (Number(value) > 99) return;
     setPercentage(value);
   }, [setPercentage]);
 
