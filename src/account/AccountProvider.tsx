@@ -130,10 +130,12 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
           name = (account as PolkadotAccount).injectedAccount.meta.name || `Polkadotjs: ${account.address}`;
           // In metamask we provide "signer" object. For polkadotjs we provide keyringpair.account. Both should be provided as OurCustomAccount.signer depending on provider
           marketAccount.signer = account;
+          marketAccount.signer.address = Address.normalize.substrateAddress(account.address, chainProperties?.SS58Prefix);
         break;
         case KeyringLocalAccount:
           name = (account as unknown as KeyringLocalAccount).keyringPair.meta.name as string || `Unknown local account: ${account.address}`;
           marketAccount.signer = account;
+          marketAccount.signer.address = Address.normalize.substrateAddress(account.address, chainProperties?.SS58Prefix);
         break;
         case MetamaskAccount:
           name = 'Metamask Account';
@@ -166,7 +168,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
     setIsLoading(false);
 
     subscribeBalancesChanges(accountsWithBalances);
-  }, [api?.market, changeAccount]);
+  }, [api?.market, changeAccount, chainProperties]);
 
   useEffect(() => {
     if (!api?.market) return;

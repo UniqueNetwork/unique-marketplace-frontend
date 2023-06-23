@@ -4,6 +4,7 @@ import { useApi } from 'hooks/useApi';
 import { useCallback, useState } from 'react';
 import { CollectionItem } from '../types';
 import config from '../../../config';
+import { Address } from '@unique-nft/utils';
 
 const gqlQuery = {
   operationName: 'collections_by_account_nesting_query',
@@ -28,7 +29,7 @@ const gqlQuery = {
 };
 
 export const useGetCollectionsForNesting = () => {
-  const { settings, currentChainId } = useApi();
+  const { settings, currentChainId, chainProperties } = useApi();
   const [isFetching, setIsFetching] = useState(false);
   const [collections, setCollections] = useState<CollectionItem[]>([]);
 
@@ -41,7 +42,9 @@ export const useGetCollectionsForNesting = () => {
     const response = await post(scanApi, {
       ...gqlQuery,
       variables: {
-        owner: address
+        owner: Address.is.substrateAddressInAnyForm(address)
+          ? Address.normalize.substrateAddress(address, chainProperties?.SS58Prefix)
+          : address
       }
     });
     if (response.status === 200) {
@@ -52,7 +55,7 @@ export const useGetCollectionsForNesting = () => {
     }
     setIsFetching(false);
     return [];
-  }, [settings]);
+  }, [settings, chainProperties?.SS58Prefix]);
 
   return {
     isFetching,
