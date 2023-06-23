@@ -13,6 +13,7 @@ import { Grey300 } from '../../../styles/colors';
 import { Offer } from '../../../api/restApi/offers/types';
 import { useAccounts } from '../../../hooks/useAccounts';
 import BuyBundleInformation from '../TokenDetail/BuyBundleInformation';
+import { RoyaltyValue } from '../TokenDetail/Royalty';
 
 interface BuyTokenProps {
   offer?: Offer;
@@ -55,7 +56,7 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, royalty, onBuy, testid }) =
   return (<>
     <Text size={'l'}>Price</Text>
     <Price price={offer?.price?.parsed.toString()} />
-    {!!royalty && <RoyaltyText size='m' color='grey-500'>{`Flexible Royalties: ${royalty * 100}%`}</RoyaltyText>}
+    <RoyaltyValue value={royalty} />
     <ButtonWrapper>
       <Button
         onClick={onBuyClick}
@@ -79,8 +80,4 @@ const ButtonWrapper = styled.div`
 const Divider = styled.div`
   margin: calc(var(--gap) * 1.5) 0;
   border-top: 1px dashed ${Grey300};
-`;
-
-const RoyaltyText = styled(Text)`
-  margin-bottom: calc(var(--gap) / 4);
 `;
