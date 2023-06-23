@@ -144,16 +144,14 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
               {tokenTitle}
             </Text>
           </Link>
-          <UILink
+          <Link
             data-testid={`${testid}-collection-${collectionId}-link`}
-            href={`${config.blockchains[currentChainId || '']?.scanUrl || ''}collections/${collectionId || ''}`}
-            target={'_blank'}
-            rel='noreferrer'
+            to={`/${currentChainId?.toLowerCase()}/collection/${collectionId || ''}`}
           >
             <Text color='primary-600' size='s'>
               {collectionTitle}
             </Text>
-          </UILink>
+          </Link>
           {showOwner && <Text size={'s'} color={'grey-500'}>{isOwner ? 'You own it' : `Owned by: ${shortcutText(owner || '')}`}</Text>}
           {isBundleState && <BundleItemsCount count={tokensCount || 0} testId={testid} />}
         </BasicDataWrapper>

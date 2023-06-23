@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import { Heading, Text } from '@unique-nft/ui-kit';
 import noCollections from '../../../static/icons/no-collections.svg';
 import { CollectionCover } from 'components/CollectionCover/CollectionCover';
+import { Link } from 'react-router-dom';
+import { useApi } from 'hooks/useApi';
 
 interface ICollectionsCardProps {
   id: number;
@@ -20,8 +22,9 @@ export const CollectionsCard: FC<ICollectionsCardProps> = ({
   testid
 }: ICollectionsCardProps) => {
   const avatarImg = avatarSrc || noCollections;
+  const { currentChainId } = useApi();
   return (
-    <CollectionsCardStyled>
+    <CollectionsCardStyled to={`/${currentChainId?.toLowerCase()}/collection/${id}`}><>
       <AvatarStyled>
         <CollectionCover size={40} src={avatarImg} type='circle' />
       </AvatarStyled>
@@ -40,11 +43,11 @@ export const CollectionsCard: FC<ICollectionsCardProps> = ({
           </Text>
         )}
       </Content>
-    </CollectionsCardStyled>
+    </></CollectionsCardStyled>
   );
 };
 
-const CollectionsCardStyled = styled.div`
+const CollectionsCardStyled = styled(Link)`
   display: flex;
   position: relative;
   border-radius: 4px;
@@ -62,6 +65,9 @@ const CollectionsCardStyled = styled.div`
 
 const AvatarStyled = styled.div`
   margin-right: 16px;
+  display: flex;
+  align-items: center;
+  max-height: 60px;
 `;
 
 const Content = styled.div`
