@@ -59,7 +59,6 @@ export const CollectionPage = () => {
   const [royalty, setRoyalty] = useState<RoyaltiesFormData>();
   const setRoyalties = useCallback((collectionOnChain: CollectionInfoWithSchemaResponse | null | undefined) => {
     if (collectionOnChain?.schema?.royalties?.length) {
-      const decimals = collectionOnChain.schema.royalties[0]?.decimals || 4;
       const value = collectionOnChain.schema.royalties[0]?.value
         ? (Number(collectionOnChain.schema.royalties[0]?.value) / 100).toFixed(2)
         : '0';
