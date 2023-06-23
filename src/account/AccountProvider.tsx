@@ -115,12 +115,13 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
     if (!api?.market) return;
     setIsLoading(true);
 
-    const allAccounts = (await _accounts?.getAccounts())?.map((account) => {
+    const allAccounts = (await _accounts?.getAccounts())?.filter((account) =>
+      !(account.constructor === PolkadotAccount && Address.is.ethereumAddressInAnyForm((account as PolkadotAccount).address))
+    ).map((account) => {
       let name; // TODO: refactor?
       const marketAccount = { account: account as unknown } as MarketAccount;
       switch (account.constructor) {
         case PolkadotAccount:
-          // TODO: if account is from polka but has ethereum address - either ignore it or figure out how to deal with it
           name = (account as PolkadotAccount).injectedAccount.meta.name || `Polkadotjs: ${account.address}`;
           // In metamask we provide "signer" object. For polkadotjs we provide keyringpair.account. Both should be provided as OurCustomAccount.signer depending on provider
           marketAccount.signer = account;
