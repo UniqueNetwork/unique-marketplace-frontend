@@ -30,12 +30,6 @@ const ProviderTypes: Record<ProviderTypesName, typeof PolkadotProvider | typeof 
   metamask: MetamaskProvider
 };
 
-const EthereumChainIds: Record<string, string> = {
-  unique: '0x22b0',
-  quartz: '0x22b1',
-  opal: '0x22b2',
-  sapphire: '0x22b3'
-};
 const EthereumChainParams: Record<string, AddEthereumChainParameter> = {
   unique: Ethereum.UNIQUE_CHAINS_DATA_FOR_EXTENSIONS.unique,
   quartz: Ethereum.UNIQUE_CHAINS_DATA_FOR_EXTENSIONS.quartz,
@@ -68,24 +62,24 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
         ? Address.normalize.substrateAddress(account.address, chainProperties?.SS58Prefix)
         : account.address });
     });
-    client.on(SubscriptionEvents.ACCOUNT_CURRENT_BALANCE, (room, data) => {
+    client.on(SubscriptionEvents.ACCOUNT_CURRENT_BALANCE, (_, data) => {
       try {
         const address = data.balance.address;
         const newBalance = data.balance.availableBalance;
-        const accountIndex = accountsWithBalances.findIndex((acc) => Address.is.substrateAddressInAnyForm(acc.address)
+
+        const accountsCopy = accountsWithBalances.map((acc) => {
+          if (Address.is.substrateAddressInAnyForm(acc.address)
           ? Address.compare.substrateAddresses(acc.address, address)
-          : address?.toLocaleLowerCase() === acc.account.address.toLocaleLowerCase());
-        const accountsCopy = [...accountsWithBalances];
-        const targetAccount = accountsCopy[accountIndex];
-        if (!targetAccount) {
-          console.error('Account for data: ', data, ' not found in list of accounts');
-          throw new Error('Event fired for non-existing account');
-        }
-        targetAccount.balance = {
-          withdraw: targetAccount.balance.withdraw,
-          parsed: newBalance.amount,
-          raw: new BN(newBalance.raw)
-        };
+          : address?.toLocaleLowerCase() === acc.account.address.toLocaleLowerCase()) {
+            acc.balance = {
+              withdraw: acc.balance.withdraw,
+              parsed: newBalance.amount,
+              raw: new BN(newBalance.raw)
+            };
+          }
+          return acc;
+        });
+
         setAccounts(accountsCopy);
       } catch (e) {
         console.error('Falied to get balance update: ', e);
@@ -186,7 +180,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
       await Promise.all([...connectedProviders.values()].map(async (type) => {
         if (!type) return;
 
-        const provider = await _accounts.addProvider<ProviderClass<any>>(
+        await _accounts.addProvider<ProviderClass<any>>(
           ProviderTypes[type],
           type === 'keyring' ? { passwordCallback: showSignDialog } : undefined
         );
