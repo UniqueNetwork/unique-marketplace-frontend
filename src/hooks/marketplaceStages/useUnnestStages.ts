@@ -14,7 +14,8 @@ export const useUnnestStages = (token: TokenIdQuery) => {
     description: '',
     status: StageStatus.inProgress,
     action: (params) => nftApi?.unnest(Number(token.collectionId), token.tokenId, 1, params.options)
-  }], [nftApi, token]);
+  }], [nftApi, token.collectionId, token.tokenId]);
+
   const { stages, error, status, initiate } = useStages<null>(unnestStages, selectedAccount);
 
   return {

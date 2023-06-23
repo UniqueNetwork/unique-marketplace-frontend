@@ -199,6 +199,7 @@ const TokenPage = () => {
           offer={offer}
           testid={`${testid}-bundle`}
           isOwner={isOwner}
+          onFinish={onFinish}
         />
       }
       <BundleModal
