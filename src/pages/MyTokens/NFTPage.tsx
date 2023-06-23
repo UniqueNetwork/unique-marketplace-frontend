@@ -36,7 +36,7 @@ export const NFTPage = () => {
         pageSize: 1000000,
         seller: Address.is.ethereumAddressInAnyForm(selectedAccount.address)
         ? Address.normalize.ethereumAddress(selectedAccount.address)
-        : selectedAccount.address });
+        : Address.normalize.substrateAddress(selectedAccount.address) });
       await fetchMyTokens(selectedAccount);
     })();
   }, [api?.nft, currentChainId, selectedAccount?.address, isAccountsLoading]);

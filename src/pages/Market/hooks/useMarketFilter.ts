@@ -24,7 +24,9 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
     const { statuses, prices, collections, attributeCounts, attributes, ...otherFilter } = filterState;
     const { myNFTs, myBets, timedAuction, fixedPrice } = statuses || {};
     const seller = myNFTs && selectedAccount?.address
-      ? (Address.is.ethereumAddressInAnyForm(selectedAccount?.address) ? Address.normalize.ethereumAddress(selectedAccount?.address) : selectedAccount?.address)
+      ? (Address.is.ethereumAddressInAnyForm(selectedAccount?.address)
+        ? Address.normalize.ethereumAddress(selectedAccount?.address)
+        : Address.normalize.substrateAddress(selectedAccount.address))
       : undefined;
 
     return {
