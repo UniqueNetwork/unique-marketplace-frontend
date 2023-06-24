@@ -31,6 +31,10 @@ export const CollectionEditForm = ({ initialFormData, onSubmit, isCoverChanged }
       setErrors((errors) => ({
         ...errors,
         description: value && /^[!@#$%^&*()_+~<>{}?]+$/.test(value) ? 'Invalid description' : undefined }));
+    } else if (field === 'telegram') {
+      setErrors((errors) => ({
+        ...errors,
+        telegram: value && !/(https?:\/\/)?(www[.])?(telegram|t)\.me\/([a-zA-Z0-9_-]*)\/?$/.test(value) ? 'Invalid telegram link' : undefined }));
     } else {
       setErrors((errors) => ({
         ...errors,
@@ -69,7 +73,7 @@ export const CollectionEditForm = ({ initialFormData, onSubmit, isCoverChanged }
       <FormRow>
         <TextInput
           label='Website'
-          placeholder='http://'
+          placeholder='https://'
           value={website}
           onChange={onChangeValue('website')}
           errorText={errors.website}
@@ -81,7 +85,7 @@ export const CollectionEditForm = ({ initialFormData, onSubmit, isCoverChanged }
       <FormRow>
         <TextInput
           label='Discord'
-          placeholder='http://'
+          placeholder='https://'
           value={discord}
           onChange={onChangeValue('discord')}
           errorText={errors.discord}
@@ -90,7 +94,7 @@ export const CollectionEditForm = ({ initialFormData, onSubmit, isCoverChanged }
       <FormRow>
         <TextInput
           label='Twitter'
-          placeholder='http://'
+          placeholder='https://'
           value={twitter}
           onChange={onChangeValue('twitter')}
           errorText={errors.twitter}
@@ -99,7 +103,7 @@ export const CollectionEditForm = ({ initialFormData, onSubmit, isCoverChanged }
       <FormRow>
         <TextInput
           label='Instagram'
-          placeholder='http://'
+          placeholder='https://'
           value={instagram}
           onChange={onChangeValue('instagram')}
           errorText={errors.instagram}
@@ -108,7 +112,7 @@ export const CollectionEditForm = ({ initialFormData, onSubmit, isCoverChanged }
       <FormRow>
         <TextInput
           label='Telegram'
-          placeholder='http://'
+          placeholder='https://'
           value={telegram}
           onChange={onChangeValue('telegram')}
           errorText={errors.telegram}
@@ -117,7 +121,7 @@ export const CollectionEditForm = ({ initialFormData, onSubmit, isCoverChanged }
       <FormRow>
         <TextInput
           label='Reddit'
-          placeholder='http://'
+          placeholder='https://'
           value={reddit}
           onChange={onChangeValue('reddit')}
           errorText={errors.reddit}
