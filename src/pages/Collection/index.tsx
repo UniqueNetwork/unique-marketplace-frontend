@@ -71,7 +71,6 @@ export const CollectionPage = () => {
   }, []);
 
   useEffect(() => {
-    if (!selectedAccount?.address) return;
     const id = Number(collectionId);
     void (async () => {
       const tokensCountOnScan = await getCollectionTokensCount(id);
