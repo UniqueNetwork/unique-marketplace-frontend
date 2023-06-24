@@ -115,8 +115,11 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
     if (!api?.market) return;
     setIsLoading(true);
 
-    const allAccounts = (await _accounts?.getAccounts())?.filter((account) =>
-      !(account.constructor === PolkadotAccount && Address.is.ethereumAddressInAnyForm((account as PolkadotAccount).address))
+    const connectedProviders: Set<ProviderTypesName> = new Set((localStorage.getItem(ConnectedAccountTypesKey)?.split(';') || ['keyring']) as ProviderTypesName[]);
+    const allAccounts = (await _accounts?.getAccounts())?.filter((account) => {
+        if (account.constructor === MetamaskAccount && !connectedProviders.has('metamask')) return false;
+        return !(account.constructor === PolkadotAccount && Address.is.ethereumAddressInAnyForm((account as PolkadotAccount).address));
+      }
     ).map((account) => {
       let name; // TODO: refactor?
       const marketAccount = { account: account as unknown } as MarketAccount;
@@ -176,6 +179,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
       const metamaskIsUnlocked = await window.ethereum?.isConnected();
       if (!metamaskIsUnlocked) {
         connectedProviders.delete('metamask');
+        localStorage.setItem(ConnectedAccountTypesKey, [...connectedProviders.values()].join(';'));
       }
 
       await Promise.all([...connectedProviders.values()].map(async (type) => {
@@ -188,21 +192,28 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
         if (type === 'metamask') {
           try {
             // @ts-ignore
-            window.ethereum?.on('accountsChanged', async () => {
-              fetchAccounts();
+            window.ethereum?.on('accountsChanged', async (accounts: string[]) => {
+              if (accounts.length === 0) {
+                connectedProviders.delete('metamask');
+                localStorage.setItem(ConnectedAccountTypesKey, [...connectedProviders.values()].join(';'));
+              }
+              void fetchAccounts();
               await changeMetamaskChain(EthereumChainParams[currentChainId]);
             });
             // @ts-ignore
             window.ethereum?.on('disconnect', () => {
-              fetchAccounts();
+              connectedProviders.delete('metamask');
+              localStorage.setItem(ConnectedAccountTypesKey, [...connectedProviders.values()].join(';'));
+
+              void fetchAccounts();
             });
           } catch (e) {
             connectedProviders.delete('metamask');
+            localStorage.setItem(ConnectedAccountTypesKey, [...connectedProviders.values()].join(';'));
           }
         }
       }));
       await fetchAccounts();
-      localStorage.setItem(ConnectedAccountTypesKey, [...connectedProviders.values()].join(';'));
     })();
   }, [api?.market, fetchAccounts, showSignDialog, currentChainId]);
 
