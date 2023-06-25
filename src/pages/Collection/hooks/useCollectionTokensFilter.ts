@@ -85,7 +85,7 @@ export const useCollectionTokensFilter = ({ isFetching, fetch }: { isFetching: b
   }, [filterState, isFetching, onFilterChange]);
 
   useEffect(() => {
-    if (!selectedAccount || isAccountsLoading) return;
+    if (isAccountsLoading) return;
     onChangeAccount();
   }, [selectedAccount?.address, isAccountsLoading]);
 
