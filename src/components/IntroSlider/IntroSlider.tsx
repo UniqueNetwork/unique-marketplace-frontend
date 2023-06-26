@@ -1,5 +1,4 @@
 import { ConnectedAccountTypesKey } from 'account/AccountProvider';
-import { useAccounts } from 'hooks/useAccounts';
 import { useEffect, useState } from 'react';
 import { IntroCard } from './IntroCard';
 import { Slider } from './Slider';
@@ -9,12 +8,11 @@ import fox from 'static/images/fox.svg';
 import wallet from 'static/images/wallet.svg';
 import bundle from 'static/images/bundle.svg';
 
-const BUNDLE_SHOW_MODAL = 'new-market-bundle-show-modal';
+const BUNDLE_SHOW_MODAL = 'new-market-intro-show-modal';
 
 const getConnectedWallets = localStorage.getItem(ConnectedAccountTypesKey);
 
 export const IntroSlider = () => {
-  const { selectedAccount } = useAccounts();
   const [open, setOpen] = useState(() => {
     if (!getConnectedWallets || getConnectedWallets.split(';').length === 0) {
       return false;
@@ -33,11 +31,11 @@ export const IntroSlider = () => {
 
   useEffect(() => {
     const status = localStorage.getItem(BUNDLE_SHOW_MODAL);
-    if (!selectedAccount || (status !== null && !JSON.parse(status))) {
+    if ((status !== null && !JSON.parse(status))) {
       return;
     }
     setOpen(true);
-  }, [selectedAccount]);
+  }, []);
 
   return <Slider open={open} onClose={() => setOpen(false)}>
     {({ setActiveSlide, onClose }) => {
