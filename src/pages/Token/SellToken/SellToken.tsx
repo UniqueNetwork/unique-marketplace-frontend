@@ -72,11 +72,13 @@ export const SellToken: FC<SellTokenProps> = ({ offer, royalty, isAllowed, onSel
 const ActionsWrapper = styled.div`
   display: flex;
   column-gap: var(--gap);
+  margin-top: calc(var(--gap) / 2);
   margin-bottom: calc(var(--gap) / 2);
 `;
 
 const ButtonWrapper = styled.div`
   width: 200px;
+  margin-top: calc(var(--gap) / 2);
 `;
 
 const Divider = styled.div`

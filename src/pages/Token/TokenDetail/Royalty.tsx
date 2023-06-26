@@ -24,7 +24,7 @@ const RoyaltyWrapper = styled.div`
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  margin-bottom: var(--gap);  
+  margin-bottom: calc(var(--gap) / 2);  
   gap: calc(var(--gap) / 2); 
 `;
 

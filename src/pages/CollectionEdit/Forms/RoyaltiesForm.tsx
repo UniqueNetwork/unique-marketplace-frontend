@@ -91,6 +91,7 @@ export const RoyaltiesForm = ({ initialFormData, onSubmit }: RoyaltiesFormProps)
     <FormRow>
       <NumberInput
         label='Royalty percentage'
+        additionalText='Maximum royalty - 99%'
         placeholder='%'
         value={percentage}
         onChange={onChangePercentage}

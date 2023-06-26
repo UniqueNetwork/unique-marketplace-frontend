@@ -75,6 +75,7 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, royalty, onBuy, testid }) =
 
 const ButtonWrapper = styled.div`
   width: 200px;
+  margin-top: calc(var(--gap) / 2);
   margin-bottom: calc(var(--gap) / 2);
 `;
 
