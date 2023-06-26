@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Heading, Link } from '@unique-nft/ui-kit';
-import { TokenByIdResponse } from '@unique-nft/sdk';
+import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
 import { Address } from '@unique-nft/utils';
 import { useNotifications, Button, Text } from 'components/UI';
 import { BN } from '@polkadot/util';
@@ -33,7 +33,14 @@ export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosab
 
   if (!selectedAccount) return null;
 
-  if (status === 'ask') return (<AskTransferModal token={token} onTransfer={onTransfer} testid={`${testid}-ask-transfer`} />);
+  if (status === 'ask') {
+ return (<AskTransferModal
+   token={token}
+   collection={collection}
+   onTransfer={onTransfer}
+   testid={`${testid}-ask-transfer`}
+ />);
+}
   if (status === 'transfer-stage') {
     return (<TransferStagesModal
       recipient={recipient}
@@ -50,11 +57,12 @@ export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosab
 
 type AskTransferModalProps = {
   token?: TokenByIdResponse
+  collection?: CollectionInfoWithSchemaResponse | null
   onTransfer(receiver: string): void
   testid: string
 }
 
-const AskTransferModal: FC<AskTransferModalProps> = ({ token, onTransfer, testid }) => {
+const AskTransferModal: FC<AskTransferModalProps> = ({ token, collection, onTransfer, testid }) => {
   const { api, chainProperties } = useApi();
   const { selectedAccount } = useAccounts();
   const [address, setAddress] = useState<string>('');
@@ -62,7 +70,7 @@ const AskTransferModal: FC<AskTransferModalProps> = ({ token, onTransfer, testid
   const [isFeeLoading, setIsFeeLoading] = useState(false);
   const [fee, setFee] = useState<string>('0');
 
-  const isSponsored = token?.collection.sponsorship?.isConfirmed;
+  const isSponsored = collection?.sponsorship?.isConfirmed;
 
   const getFee = useCallback((recipient: string) => {
     setIsFeeLoading(true);
@@ -143,7 +151,7 @@ const AskTransferModal: FC<AskTransferModalProps> = ({ token, onTransfer, testid
         isFeeLoading={isFeeLoading}
         fee={fee || '0'}
         testid={`${testid}-fee-message`}
-        placeholder={isSponsored ? `Collection ID ${token.collectionId} sponsored` : undefined}
+        placeholder={isSponsored ? `Collection ID ${collection?.id} sponsored` : undefined}
       />
       <ButtonWrapper>
         <Button

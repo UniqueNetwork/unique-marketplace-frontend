@@ -46,7 +46,7 @@ export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, collection, onF
     return (<AskSellModal
       collectionId={token.collectionId}
       tokenId={token.tokenId}
-      isSponsored={!!token.collection.sponsorship?.isConfirmed}
+      isSponsored={!!collection?.sponsorship?.isConfirmed}
       onSellAuction={onSellAuction}
       onSellFixPrice={onSellFixPrice}
       testid={`${testid}-sell-ask`}
