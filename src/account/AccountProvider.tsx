@@ -44,7 +44,9 @@ const EthereumChainParams: Record<string, AddEthereumChainParameter> = {
   sapphire: Ethereum.UNIQUE_CHAINS_DATA_FOR_EXTENSIONS.sapphire
 };
 
-const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts(), children }) => {
+const _accounts = new Accounts();
+
+const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ children }) => {
   const [accounts, setAccounts] = useState<MarketAccount[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isLoadingDeposits, setIsLoadingDeposits] = useState<boolean>(false);
@@ -272,6 +274,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
         await changeMetamaskChain(EthereumChainParams[currentChainId]);
         subscribeMetamask();
       }
+
       await fetchAccounts();
     }
   }, [_accounts, showSignDialog, currentChainId, fetchAccounts, subscribeMetamask]);
