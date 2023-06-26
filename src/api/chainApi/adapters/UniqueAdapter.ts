@@ -138,6 +138,7 @@ class UniqueAdapter implements IMarketContractAdapter {
       address: signer.address || '',
       contractAddress: this.contractAddress,
       funcName: 'put',
+      gasLimit: sellGasLimit,
       args: {
         collectionId,
         tokenId,
@@ -155,6 +156,7 @@ class UniqueAdapter implements IMarketContractAdapter {
       address: signer.address || '',
       contractAddress: this.contractAddress,
       funcName: 'put',
+      gasLimit: sellGasLimit,
       args: {
         collectionId,
         tokenId,
@@ -172,7 +174,7 @@ class UniqueAdapter implements IMarketContractAdapter {
       contractAddress: this.contractAddress,
       value: price,
       funcName: 'buy',
-      gasLimit: sellGasLimit,
+      gasLimit: buyGasLimit,
       args: {
         collectionId,
         tokenId,
