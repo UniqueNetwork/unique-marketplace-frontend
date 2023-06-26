@@ -62,10 +62,17 @@ const AskTransferModal: FC<AskTransferModalProps> = ({ token, onTransfer, testid
   const [isFeeLoading, setIsFeeLoading] = useState(false);
   const [fee, setFee] = useState<string>('0');
 
+  const isSponsored = token?.collection.sponsorship?.isConfirmed;
+
   const getFee = useCallback((recipient: string) => {
     setIsFeeLoading(true);
     return debounce(() => {
-      if (!api?.market || !token || !selectedAccount || !recipient || recipient === selectedAccount.address) return setIsFeeLoading(false);
+      if (!api?.market ||
+          !token ||
+          !selectedAccount ||
+          !recipient ||
+          recipient === selectedAccount.address ||
+          isSponsored) return setIsFeeLoading(false);
       const sender = Address.is.ethereumAddress(selectedAccount.address)
         ? selectedAccount.address
         : Address.normalize.substrateAddress(selectedAccount.address, chainProperties?.SS58Prefix);
@@ -85,7 +92,7 @@ const AskTransferModal: FC<AskTransferModalProps> = ({ token, onTransfer, testid
         setIsFeeLoading(false);
       });
     }, 300);
-  }, [api?.market, token, selectedAccount]);
+  }, [api?.market, token, selectedAccount, isSponsored]);
 
   const onAddressInputChange = useCallback((value: string) => {
     setAddress(value);
@@ -107,10 +114,10 @@ const AskTransferModal: FC<AskTransferModalProps> = ({ token, onTransfer, testid
   );
 
   const isFeeGreaterThanBalance = useMemo(() => {
-    if (!fee) return false;
+    if (!fee || !isSponsored) return false;
     const feeBN = new BN(fromStringToBnString(fee));
     return feeBN.gt(selectedAccount?.balance?.raw || new BN(0));
-  }, [fee, selectedAccount?.balance]);
+  }, [fee, selectedAccount?.balance, isSponsored]);
 
   return (
     <>
@@ -136,6 +143,7 @@ const AskTransferModal: FC<AskTransferModalProps> = ({ token, onTransfer, testid
         isFeeLoading={isFeeLoading}
         fee={fee || '0'}
         testid={`${testid}-fee-message`}
+        placeholder={isSponsored ? `Collection ID ${token.collectionId} sponsored` : undefined}
       />
       <ButtonWrapper>
         <Button
