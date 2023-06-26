@@ -311,6 +311,20 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
     setIsLoadingDeposits(false);
   }, [accounts, api?.market, getAccountDeposit]);
 
+  const updateAccountBalance = useCallback(async (address: string) => {
+    if (isLoading) return Promise.resolve({ raw: new BN(0), parsed: '0', withdraw: { raw: new BN(0), parsed: '0' } });
+    const balance = await api?.market?.getAccountBalance(address);
+    // const deposits = await getAccountDeposit(selectedAccount);
+    setAccounts((accounts) => accounts.map((account) => {
+      if (account.address === address) {
+        // account.deposits = deposits;
+        account.balance = balance || { raw: new BN(0), parsed: '0', withdraw: { raw: new BN(0), parsed: '0' } };
+      }
+      return account;
+    }));
+    return balance || { raw: new BN(0), parsed: '0', withdraw: { raw: new BN(0), parsed: '0' } };
+  }, [api?.market, isLoading]);
+
   const updateCurrentAccountDeposit = useCallback(async () => {
     if (!selectedAccount || isLoading) return Promise.resolve();
     const balance = await api?.market?.getAccountBalance(selectedAccount.address);
@@ -344,6 +358,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
     showSignDialog,
     fetchAccounts,
     updateAccountsDeposits,
+    updateAccountBalance,
     updateCurrentAccountDeposit,
     setIsOpenConnectWalletModal,
     connectProvider,
@@ -355,6 +370,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ _accounts = new Accounts
     accounts,
     fetchAccounts,
     updateAccountsDeposits,
+    updateAccountBalance,
     selectedAccount,
     fetchAccountsError,
     changeAccount,
