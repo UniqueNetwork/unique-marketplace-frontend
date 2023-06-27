@@ -1,6 +1,6 @@
 
 export const blockedSellingCollections: Record<string, number[]> = {
-  quartz: [1, 2, 794],
+  quartz: [1, 2, 796],
   unique: [126]
 };
 
