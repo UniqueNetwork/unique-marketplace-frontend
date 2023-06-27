@@ -46,7 +46,6 @@ export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, collection, onF
     return (<AskSellModal
       collectionId={token.collectionId}
       tokenId={token.tokenId}
-      isSponsored={!!collection?.sponsorship?.isConfirmed}
       onSellAuction={onSellAuction}
       onSellFixPrice={onSellFixPrice}
       testid={`${testid}-sell-ask`}
@@ -83,10 +82,9 @@ type TAskSellModalProps = {
   onSellAuction: TOnSellAuction,
   onSellFixPrice: TOnSellFix,
   testid: string
-  isSponsored: boolean
 }
 
-export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, isSponsored, onSellAuction, onSellFixPrice, testid }) => {
+export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, onSellAuction, onSellFixPrice, testid }) => {
   const { chainProperties, api } = useApi();
   const { selectedAccount } = useAccounts();
   const [activeTab, setActiveTab] = useState<number>(0);
@@ -95,6 +93,14 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, is
   const [minStepInputValueAuction, setMinStepInputValueAuction] = useState<string>();
   const [inputStartingPriceValue, setInputStartingPriceValue] = useState<string>();
   const [durationSelectValue, setDurationSelectValue] = useState<number>();
+  const [isSponsored, setIsSponsored] = useState(false);
+
+  useEffect(() => {
+    void (async () => {
+      const collection = await api?.collection?.getCollection(collectionId);
+      setIsSponsored(!!collection?.sponsorship?.isConfirmed);
+    })();
+  }, [collectionId]);
 
   const handleClick = useCallback(
     (tabIndex: number) => {

@@ -69,8 +69,17 @@ const AskTransferModal: FC<AskTransferModalProps> = ({ token, collection, onTran
   const [isAddressValid, setIsAddressValid] = useState(false);
   const [isFeeLoading, setIsFeeLoading] = useState(false);
   const [fee, setFee] = useState<string>('0');
+  const [isSponsored, setIsSponsored] = useState(false);
 
-  const isSponsored = collection?.sponsorship?.isConfirmed;
+  useEffect(() => {
+    if (!token?.collectionId) return;
+    void (async () => {
+      setIsFeeLoading(true);
+      const collection = await api?.collection?.getCollection(token?.collectionId);
+      setIsSponsored(!!collection?.sponsorship?.isConfirmed);
+      setIsFeeLoading(false);
+    })();
+  }, [token?.collectionId]);
 
   const getFee = useCallback((recipient: string) => {
     setIsFeeLoading(true);
