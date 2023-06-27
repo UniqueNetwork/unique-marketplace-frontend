@@ -38,8 +38,9 @@ export const RoyaltiesForm = ({ initialFormData, onSubmit }: RoyaltiesFormProps)
   }, [setPercentage]);
 
   const onSubmitForm = useCallback(() => {
+    if (!recipient) return;
     onSubmit({
-      address: (recipient as MarketAccount)?.address || recipient,
+      address: (recipient as MarketAccount)?.address || recipient as string,
       value: percentage || '0'
     });
   }, [onSubmit, percentage, recipient]);
