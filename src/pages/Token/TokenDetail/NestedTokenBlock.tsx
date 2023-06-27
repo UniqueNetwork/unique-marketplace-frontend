@@ -4,6 +4,8 @@ import { Button } from 'components/UI';
 
 import { Grey300 } from 'styles/colors';
 import { TokenByIdResponse } from '@unique-nft/sdk';
+import { useApi } from 'hooks/useApi';
+import { blockedNestingCollections } from '../SellToken/constants';
 
 interface NestedTokenBlockProps {
   token?: TokenByIdResponse
@@ -14,8 +16,9 @@ interface NestedTokenBlockProps {
 
 export const NestedTokenBlock: FC<NestedTokenBlockProps> = ({ token, testid, onTransferClick, onUnnestClick }) => {
   const { tokenOwner } = token?.collection?.permissions?.nesting || {};
+  const { currentChainId } = useApi();
 
-  if (!tokenOwner) return null;
+  if (!tokenOwner || blockedNestingCollections[currentChainId || '']?.includes(token?.collectionId || 0)) return null;
 
   return (
     <>
