@@ -224,6 +224,9 @@ const PriceWrapper = styled.div<{ length: number }>`
   span:first-child {
     font-size: ${({ length }) => `${length > 11 ? 18 - (length - 11) : 18}px !important`}
   }
+  span {
+    white-space: nowrap;
+  }
 `;
 
 const TradingInfoWrapper = styled.div` 
