@@ -161,7 +161,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
             <Text
               testid={`${testid}-price`}
               size='l'
-            >{topBid ? `${formatBalance(Number(topBid))}` : `${formatBalance(price.parsed)}` }</Text>
+            >{topBid ? `${formatBalance(Number(topBid))}` : `${formatBalance(price.parsed, 4, true)}` }</Text>
             <IconStyled name={`chain-${currentChainId?.toLowerCase()}`} size={16} />
           </PriceWrapper>
         </TradingInfoWrapper>}

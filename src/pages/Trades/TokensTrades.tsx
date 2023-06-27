@@ -18,6 +18,7 @@ import { useApi } from 'hooks/useApi';
 import { debounce } from 'utils/helpers';
 import { useInfinityScroll } from 'hooks/useInfinityScroll';
 import config from '../../config';
+import { Address } from '@unique-nft/utils';
 
 type TokensTradesPage = {
   currentTab: TradesTabs
@@ -45,7 +46,11 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
       page: 1,
       pageSize,
       sort: sortString,
-      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
+      seller: currentTab === TradesTabs.MyTokensTrades && selectedAccount
+        ? (Address.is.ethereumAddressInAnyForm(selectedAccount.address)
+          ? Address.normalize.ethereumAddress(selectedAccount.address)
+          : Address.normalize.substrateAddress(selectedAccount.address))
+        : undefined
     });
   }, [currentTab, currentChainId, selectedAccount, isLoadingAccounts]);
 
