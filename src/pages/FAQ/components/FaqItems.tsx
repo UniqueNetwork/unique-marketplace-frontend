@@ -212,10 +212,9 @@ export const faqItems = <T extends Record<string, unknown>>(
       content: (
         <>
           <ol>
-            <li>Go to <Link to={`/${activeNetwork}/${ROUTE.MY_COLLECTIONS}`}>My collections</Link> page.</li>
+            <li>Go to <Link to={`/${activeNetwork}/collections`}>My collections</Link> page.</li>
             <li>Open your collection and click on “Edit collection”.</li>
             <li>Scroll down, at the end you can end Royalty percentage and address.</li>
-          
           </ol>
         </>
       ),
