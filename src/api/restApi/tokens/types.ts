@@ -1,5 +1,19 @@
-import { PaginatedResponse } from '../base/types';
+import { PaginatedResponse, Pagination } from '../base/types';
 import { Attribute, AttributeCount, CollectionDescription, GetOffersRequestPayload, TokenDescription } from '../offers/types';
+
+export type GetTokensRequestPayload = {
+  collectionId?: number | number[]
+  minPrice?: string
+  maxPrice?: string
+  seller?: string
+  isAuction?: boolean
+  bidderAddress?: string
+  attributes?: string[]
+  numberOfAttributes?: number[]
+  searchText?: string
+  searchLocale?: string
+  'sort[0]'?: string[]
+} & Pagination;
 
 export type Token = {
   collectionId: number
