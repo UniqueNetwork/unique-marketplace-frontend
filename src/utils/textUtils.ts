@@ -29,7 +29,7 @@ export const formatBlockNumber = (blockNumber: number | undefined) => {
  * @param fractionDigits Amount of digits after the dot
  * @returns
  */
-export const formatBalance = (balance: string | number, fractionDigits = 4, useGrouping = false) => {
+export const formatBalance = (balance: string | number, fractionDigits = 4, useGrouping = true) => {
   const balanceValue = Number(balance);
   return balanceValue.toLocaleString('en-US', {
     minimumFractionDigits: 0,
