@@ -5,13 +5,14 @@ import { Icon } from 'components/UI/Icon/Icon';
 
 interface NoItemsProps {
   isSearchResult?: boolean
+  noItemsText?: string
 }
 
-const NoItems: VFC<NoItemsProps> = ({ isSearchResult }) => {
+const NoItems: VFC<NoItemsProps> = ({ isSearchResult, noItemsText = 'Nothing found' }) => {
   return (
     <NoItemsWrapper>
       <Icon name={isSearchResult ? 'magnifier-found' : 'not-found'} size={80} />
-      <Text size={'l'} color={'blue-grey-500'}>Nothing found</Text>
+      <Text size={'l'} color={'blue-grey-500'}>{noItemsText}</Text>
     </NoItemsWrapper>
   );
 };
@@ -26,6 +27,9 @@ const NoItemsWrapper = styled.div`
   justify-content: center;
   @media (max-width: 567px) {
     height: 340px;
+  }
+  span {
+    text-align: center;
   }
 `;
 

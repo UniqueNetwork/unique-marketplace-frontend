@@ -154,14 +154,16 @@ export const CollectionsPage: FC = () => {
           ? <>
             <Tooltip targetRef={CreateCollectionButtonRef}>{'We are sorry but you cannot create a collection by Metamask account yet. Coming soon...'}</Tooltip>
             <div ref={CreateCollectionButtonRef}>
-              <Button title={'Create new via wallet'} disabled/>
+              <Button role='primary' title={'Create new via wallet'} disabled/>
             </div>
           </>
-          : <Button title={'Create new via wallet'} onClick={onCreateCollectionViaWalletClick}/>}
+          : <Button role='primary' title={'Create new via wallet'} onClick={onCreateCollectionViaWalletClick}/>}
         </ButtonsWrapper>
       </ControlsWrapper>
       <CollectionListWrapper>
-        {!(isAccountsLoading || isFetching) && filteredCollections.length === 0 && <NoItems />}
+        {!(isAccountsLoading || isFetching) && filteredCollections.length === 0 && <NoItems
+          noItemsText='You don`t have any personal collections yet, but you can create one right now!'
+        />}
         <CollectionListStyled >
           {(isAccountsLoading || isFetching) && <>
             {Array.from({ length: 4 }).map((_, index) => <CardSkeleton key={`card-skeleton-${index}`} />)}
