@@ -176,7 +176,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
         columns={getTradesColumns({
           deviceSize,
           onShowTradesDetailsModal,
-          scanUrl: config.blockchains[currentChainId || '']?.scanUrl,
+          currentChainId: currentChainId || '',
           testid: `${testid}-table`,
           tokenSymbol: chainProperties?.token || ''
         })}
