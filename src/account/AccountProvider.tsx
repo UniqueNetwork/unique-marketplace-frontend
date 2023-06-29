@@ -91,7 +91,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ children }) => {
 
         setAccounts(accountsCopy);
       } catch (e) {
-        console.error('Falied to get balance update: ', e);
+        console.error('Failed to get balance update: ', e);
       }
     });
     sdkSocketClient.current = client;
