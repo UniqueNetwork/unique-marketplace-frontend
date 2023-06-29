@@ -84,7 +84,7 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, royalty, onBuy, testid }) =
     {!isEnoughBalance && !isNotEnoughBalanceOnPolkadot && <Text color={'coral-500'} testid={`${testid}-low-balance-warning`}>Your balance is too low to buy</Text>}
     {isNotEnoughBalanceOnPolkadot && <MessageWrapper>
       <p>Oops, looks like you&apos;re lucky to discover that we have an issue working with Polkadot wallets. Please transfer the required amount to your MetaMask address and purchase the token using MetaMask. We apologize for the inconvenience, and we&apos;ll have this problem fixed very soon!</p>
-      <p>For the ones who are curious: we need Polkadot wallet to have 2x amount of NFT price, otherwise the buy transaction will fail. Nonetheless, buying with MetaMask works</p>
+      <p>For the ones who are curious: we need Polkadot wallet to have 2x amount of NFT price + fee, otherwise the buy transaction will fail. Nonetheless, buying with MetaMask works</p>
     </MessageWrapper>}
     {(royalty || 0) >= 1 && <Text color={'coral-500'} testid={`${testid}-low-balance-warning`}>The royalty is too big. Maximum royalty - 99%</Text>}
     {!!offer?.tokenDescription?.nestingChildTokens?.length && <BuyBundleInformation testid={testid}/>}
