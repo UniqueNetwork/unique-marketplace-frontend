@@ -208,6 +208,19 @@ export const faqItems = <T extends Record<string, unknown>>(
       isNew: false
     },
     {
+      title: <>How do I add Royalties to my NFT Collection?</>,
+      content: (
+        <>
+          <ol>
+            <li>Go to <Link to={`/${activeNetwork}/collections`} target='_blank' rel='noopener noreferrer'>My collections</Link> page.</li>
+            <li>Open your collection and click on “Edit collection”.</li>
+            <li>Scroll down, at the end you can end Royalty percentage and address.</li>
+          </ol>
+        </>
+      ),
+      isNew: true
+    },
+    {
       title: <>Where can I&nbsp;get coins?</>,
       content: (
         <p>
