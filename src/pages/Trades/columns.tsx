@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { TableColumnProps, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
-import { Icon, Link } from 'components/UI';
+import { Icon } from 'components/UI';
 import { AddressComponent } from './AddressComponent/AddressComponent';
 import { timestampTableFormat } from '../../utils/timestampUtils';
 import { TokenComponent } from './TokenComponent/TokenComponent';
@@ -9,16 +9,17 @@ import { formatBalance } from '../../utils/textUtils';
 import { BlueGrey600, Grey300, Grey500, Secondary400 } from '../../styles/colors';
 import { TokenDescription, Trade } from '../../api/restApi/trades/types';
 import { DeviceSize } from '../../hooks/useDeviceSize';
+import { Link } from 'react-router-dom';
 
 type ColumnProps = {
   deviceSize: DeviceSize,
   onShowTradesDetailsModal: (trade: Trade) => void,
-  scanUrl: string,
+  currentChainId: string,
   testid: string,
   tokenSymbol: string
 }
 
-const getTradesColumns = ({ deviceSize, onShowTradesDetailsModal, scanUrl, testid, tokenSymbol }: ColumnProps): TableColumnProps[] => [
+const getTradesColumns = ({ deviceSize, onShowTradesDetailsModal, currentChainId, testid, tokenSymbol }: ColumnProps): TableColumnProps[] => [
   {
     title: deviceSize !== DeviceSize.sm ? (<Header data-testid={`${testid}-header-nft`}>NFT</Header>) : null,
     width: deviceSize !== DeviceSize.md ? '14.3%' : '11.84%',
@@ -36,9 +37,7 @@ const getTradesColumns = ({ deviceSize, onShowTradesDetailsModal, scanUrl, testi
       const collectionName = tokenDescription.collectionName || '';
       return <LinkWrapper>
         <Link
-          target={'_blank'}
-          rel={'noreferrer'}
-          href={`${scanUrl}collections/${collectionId || ''}`}
+          to={`/${currentChainId}/collection/${collectionId || ''}`}
           className={'unique-link primary'}
           data-testid={`${testid}-${offerId}-collection`}
         >{`${deviceSize === DeviceSize.lg ? collectionName : `${collectionName.slice(0, 6)}...`} [ID\xa0${collectionId || ''}]`}</Link>
@@ -102,8 +101,9 @@ const ShowTradesDetailsButton = ({ status, trade, onShowTradesDetailsModal, test
 const LinkWrapper = styled.span`
   .unique-link {
     font-size: 16px;
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
     white-space: pre-wrap;
+    margin: 8px 0;
   }
 `;
 

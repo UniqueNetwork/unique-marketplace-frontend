@@ -11,6 +11,6 @@ export type CollectionFormData = {
 };
 
 export type RoyaltiesFormData = {
-  address: string | MarketAccount;
+  address: string;
   value: string;
 };

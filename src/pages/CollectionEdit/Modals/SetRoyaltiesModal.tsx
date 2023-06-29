@@ -25,7 +25,7 @@ export const SetRoyaltiesStagesModal: FC<SetRoyaltiesStagesModalProps> = ({
     if (!selectedAccount || !royalty) throw new Error('Account not selected');
     void initiate({
       royalty: {
-        address: selectedAccount.address,
+        address: royalty?.address || selectedAccount.address,
         value: Number(royalty.value),
         decimals: 4,
         version: 1,

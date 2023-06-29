@@ -54,7 +54,7 @@ const AskUnnestModal: FC<{ token: INestingToken | TokenByIdResponse, onUnnest():
     if (!api?.nft || !token || !selectedAccount) return;
     setIsFeeLoading(true);
     debounce(async () => {
-      const collection = await getCollection(token?.collectionId);
+      const collection = await api?.collection?.getCollection(token?.collectionId);
       const isSponsored = !!collection?.sponsorship?.isConfirmed;
       setIsSponsored(isSponsored);
 

@@ -54,6 +54,8 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
     }, 0) || 0);
   }, [token]);
 
+  console.log(token);
+
   if (offer?.auction) {
     return (<Auction
       offer={offer}
@@ -66,6 +68,7 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
   }
   if (isOwner) {
     return (<SellToken
+      collectionId={token?.collectionId}
       offer={offer}
       royalty={royalty}
       isAllowed={isAllowed}

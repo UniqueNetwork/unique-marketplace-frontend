@@ -22,7 +22,6 @@ import { useGetCollectionsForNesting } from '../hooks/useGetCollectionsForNestin
 import { CollectionItem, TokenItem } from '../types';
 import { getIpfsUriByImagePath } from 'utils/urlUtils';
 import { useGetAllOwnedTokensByCollection } from '../hooks/useGetAllOwnedTokensByCollection';
-import { useCollections } from 'hooks/useCollections';
 
 export const TransferToBundleModal: FC<TBundleTrunsferModalBodyProps> = ({ token, setIsClosable, onFinish, testid }) => {
   const { selectedAccount } = useAccounts();
@@ -61,13 +60,12 @@ const AskTransferToBundleModal: FC<{ token: INestingToken | TokenByIdResponse, o
 
   const { selectedAccount } = useAccounts();
   const { api } = useApi();
-  const { getCollection } = useCollections();
   const [isSponsored, setIsSponsored] = useState(false);
 
   useEffect(() => {
     void (async () => {
       setIsFeeLoading(true);
-      const collection = await getCollection(token?.collectionId);
+      const collection = await api?.collection?.getCollection(token?.collectionId);
       setIsSponsored(!!collection?.sponsorship?.isConfirmed);
       setIsFeeLoading(false);
     })();

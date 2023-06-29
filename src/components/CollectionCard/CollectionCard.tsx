@@ -21,7 +21,7 @@ export const CollectionCard: FC<TCollectionCard> = ({
   collection,
   onViewOnScanClick
 }) => {
-  const { featuredCollections } = useApi();
+  const { featuredCollections, currentChainId } = useApi();
   const [collectionDetails, setCollectionDetails] = useState<CollectionInfoWithSchemaResponse | null>();
   useEffect(() => {
     if (!collection?.id) return;
@@ -34,17 +34,16 @@ export const CollectionCard: FC<TCollectionCard> = ({
   return (
     <CollectionCardStyled>
       <PictureWrapper>
-        <Link to={`/collection/${collection?.id}`}>
+        <Link to={`/${currentChainId}/collection/${collection?.id}`}>
           <Picture alt={collection?.id?.toString() || ''} src={getIpfsUriByImagePath(collection.cover || '')} />
         </Link>
       </PictureWrapper>
       <Description>
-        <Text size='l' weight='regular'>
-          <ExternalLink onClick={onViewOnScanClick}>
+        <Link to={`/${currentChainId}/collection/${collection?.id}`}>
+          <Text size='l' weight='regular'>
             {`${collection.name || ''} [id ${collection?.id}]`}
-
-          </ExternalLink>
-        </Text>
+          </Text>
+        </Link>
         <AttributesWrapper>
           {hasSponsorship && <Row>
             <Text size='s' color={'grey-500'} >Sponsor:</Text>
@@ -96,8 +95,11 @@ const PictureWrapper = styled.div`
     overflow: hidden;
     
     img {    
-      object-fit: cover;
+      // changed it according to the task DAP-290
+      object-fit: contain;
       height: 100%;
+      width: 100%;
+      min-height: 100%;
     }
 
     svg {

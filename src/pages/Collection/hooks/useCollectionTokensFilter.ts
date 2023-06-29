@@ -26,7 +26,7 @@ export const useCollectionTokensFilter = ({ isFetching, fetch }: { isFetching: b
     const seller = (myNFTs || (!!belongingValue && belongingValue !== 'All')) && selectedAccount?.address
       ? (Address.is.ethereumAddressInAnyForm(selectedAccount?.address)
         ? Address.normalize.ethereumAddress(selectedAccount?.address)
-        : Address.normalize.substrateAddress(selectedAccount?.address))
+        : selectedAccount?.address)
       : undefined;
     const isOwner = belongingValue !== 'Disowned';
 

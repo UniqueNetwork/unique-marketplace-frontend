@@ -4,6 +4,7 @@ import { IconProps, TableColumnProps, TableRowProps, Text } from '@unique-nft/ui
 import { MobileTableRow } from './MobileTableRow';
 import MobileTableSkeleton from '../Skeleton/MobileTableSkeleton';
 import EmptyTable from '../EmptyTable';
+import { getDeepValue } from 'utils/uiUtils';
 
 interface MobileTableProps<T> {
   className?: string
@@ -31,8 +32,8 @@ function MobileTable<T>({
         {columns?.map((column, columnIndex) => (
           <div key={`column-${column.field || ''}`}>
             {typeof column?.title === 'object' ? <>{column.title}</> : <Text color={'grey-500'}>{`${column?.title || ''}`}</Text>}
-            {column.render && <>{column.render(item[column.field as keyof TableRowProps], item, { rowIndex, columnIndex })}</>}
-            {!column.render && <Text>{item[column.field as keyof TableRowProps]?.toString() || ''}</Text>}
+            {column.render && <>{column.render(getDeepValue(item, column.field), item, { rowIndex, columnIndex })}</>}
+            {!column.render && <Text>{getDeepValue(item, column.field)?.toString() || ''}</Text>}
           </div>
         ))}
       </MobileTableRow>
