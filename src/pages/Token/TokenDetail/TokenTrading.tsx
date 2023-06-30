@@ -54,8 +54,6 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
     }, 0) || 0);
   }, [token]);
 
-  console.log(token);
-
   if (offer?.auction) {
     return (<Auction
       offer={offer}
