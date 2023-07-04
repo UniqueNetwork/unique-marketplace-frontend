@@ -6,6 +6,15 @@ export const shortcutText = (text: string) => {
   return start && end ? `${start}...${end}` : text;
 };
 
+export const ellipsisText = (text: string, allowSymbols = 30) => {
+  if (text.length > allowSymbols) {
+    const nextSpacePosition = text.indexOf(' ', allowSymbols);
+    if (!nextSpacePosition) return text;
+    return text.slice(0, nextSpacePosition) + '…';
+  }
+  return text;
+};
+
 export const capitalize = (text: string) => `${text[0].toUpperCase()}${text.slice(1)}`;
 
 export const formatAmount = (amount: number | string) => {

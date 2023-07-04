@@ -6,7 +6,7 @@ import { Accordion } from '../Accordion/Accordion';
 import CheckboxSkeleton from '../Skeleton/CheckboxSkeleton';
 import { AttributeItem } from './types';
 import { Attribute } from '../../api/restApi/offers/types';
-import { capitalize } from '../../utils/textUtils';
+import { capitalize, ellipsisText } from '../../utils/textUtils';
 import { sortAttributes } from './utils/sortAttributes';
 
 interface AttributesFilterProps {
@@ -47,7 +47,7 @@ const AttributesFilter: FC<AttributesFilterProps> = ({ selectedAttributes = [], 
             <AttributeWrapper key={`attribute-${attribute.key}`}>
               <Checkbox
                 checked={selectedAttributes.findIndex((item) => item.key === attributeName && item.attribute === attribute.key) !== -1}
-                label={attribute.key}
+                label={ellipsisText(attribute.key)}
                 size={'m'}
                 onChange={onAttributeSelect({ key: attributeName, attribute: attribute.key })}
                 testid={`${testid}-checkbox-${attribute.key}`}
