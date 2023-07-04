@@ -23,12 +23,11 @@ export const useTokens = ({ collectionId }: { collectionId: number }) => {
   const [fetchingError, setFetchingError] = useState<ResponseError | undefined>();
   const { api, baseURL } = useApi();
 
-  const fetch = useCallback(async ({ minPrice, maxPrice, sort, ...payload }: GetOffersRequestPayload) => {
+  const fetch = useCallback(async ({ minPrice, maxPrice, ...payload }: GetTokensRequestPayload) => {
     setIsFetching(true);
     try {
       const { status, data } = await getTokens(baseURL, {
         ...payload,
-        'sort[0]': sort,
         minPrice: minPrice,
         maxPrice: maxPrice,
         collectionId
@@ -51,12 +50,11 @@ export const useTokens = ({ collectionId }: { collectionId: number }) => {
     return emptyResponse;
   }, [baseURL, api?.market?.decimals, collectionId]);
 
-  const fetchMore = useCallback(async ({ minPrice, maxPrice, sort, ...payload }: GetOffersRequestPayload) => {
+  const fetchMore = useCallback(async ({ minPrice, maxPrice, ...payload }: GetTokensRequestPayload) => {
     setIsFetching(true);
     try {
       const { status, data } = await getTokens(baseURL, {
         ...payload,
-        'sort[0]': sort,
         minPrice: minPrice && fromStringToBnString(minPrice, api?.market?.decimals),
         maxPrice: maxPrice && fromStringToBnString(maxPrice, api?.market?.decimals),
         collectionId

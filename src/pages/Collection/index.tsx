@@ -130,7 +130,7 @@ export const CollectionPage = () => {
           pageSize,
           ...(getFilterByState(filterState)),
           searchText: searchValue || undefined,
-          sort: [sortingValue]
+          'sort[0]': [sortingValue]
         });
       }
     };
@@ -148,7 +148,7 @@ export const CollectionPage = () => {
         pageSize: 20,
         ...(getFilterByState(filterState)),
         searchText: searchValue || undefined,
-        sort: [sortingValue]
+        'sort[0]': [sortingValue]
       });
     }
   }, [fetchMore, tokens, pageSize, isFetching, searchValue, filterState]);
