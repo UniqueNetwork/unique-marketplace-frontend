@@ -3,7 +3,8 @@ import { useEffect, useMemo, useState } from 'react';
 export enum DeviceSize {
   sm,
   md,
-  lg
+  lg,
+  xl
 }
 
 const useDeviceSize = (): DeviceSize => {
@@ -28,8 +29,8 @@ const useDeviceSize = (): DeviceSize => {
   return useMemo(() => {
     if (windowWidth && windowWidth < 769) return DeviceSize.sm;
     if (windowWidth && windowWidth < 1025) return DeviceSize.md;
-
-    return DeviceSize.lg;
+    if (windowWidth && windowWidth < 1440) return DeviceSize.lg;
+    return DeviceSize.xl;
   }, [windowWidth]);
 };
 

@@ -1,3 +1,4 @@
+import { DeviceSize } from 'hooks/useDeviceSize';
 import { Secondary400 } from 'styles/colors';
 import { TOption } from './types';
 

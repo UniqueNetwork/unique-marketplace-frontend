@@ -107,8 +107,8 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
             optionValue='title'
             optionKey='title'
             onChange={({ url }) => {
-                window.open(url as string, '_blank', 'noopener');
-              }}
+              window.open(url as string, '_blank', 'noopener');
+            }}
           >
             <Text color = 'additional-dark'>Create</Text>
           </MobileMenuDropdown>
@@ -133,7 +133,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
           <MobileMenuLink to='/faq' active={activeItem === 'FAQ'} onClick={mobileMenuToggler}>
             FAQ
           </MobileMenuLink>
-          {deviceSize !== DeviceSize.lg && !!accounts.length &&
+          {deviceSize < DeviceSize.lg && !!accounts.length &&
             <MobileMenuLink to={`/${currentChainId || ''}/accounts`} active={activeItem === 'Manage accounts'} onClick={mobileMenuToggler}>
               Manage accounts
             </MobileMenuLink>
