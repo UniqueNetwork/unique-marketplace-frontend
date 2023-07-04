@@ -9,6 +9,7 @@ import { TOption } from '../types';
 import { TokensResponse } from 'api/restApi/tokens/types';
 import { useApi } from 'hooks/useApi';
 import { Address } from '@unique-nft/utils';
+import { useIsFirstRender } from 'hooks/useIsFirstRender';
 
 export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fetch(payload: GetOffersRequestPayload): Promise<OffersResponse | TokensResponse> }) => {
   const { currentChainId, api } = useApi();
@@ -103,8 +104,12 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
     return statusesCount + collectionsCount + attributesCount + numberOfAttributesCount + (prices ? 1 : 0);
   }, [filterState]);
 
+  const isFirstRender = useIsFirstRender();
+
   useEffect(() => {
-    if (!currentChainId || !api) return;
+    console.log(currentChainId);
+
+    if (!currentChainId || !api || isFirstRender) return;
     setFilterState(null);
     setSearchValue(undefined);
     setSortingValue(defaultSortingValue.id);
@@ -114,6 +119,7 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
       sort: [defaultSortingValue.id]
     });
   }, [currentChainId]);
+  console.log(currentChainId);
 
   return {
     filterState,
