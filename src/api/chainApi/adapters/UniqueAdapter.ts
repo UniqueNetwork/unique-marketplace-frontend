@@ -6,6 +6,8 @@ import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
 import { ChainValue } from '../controllers/BaseController';
 
+const buyGasLimit = 1_000_000;
+const sellGasLimit = 200_000;
 class UniqueAdapter implements IMarketContractAdapter {
   constructor(contractAddress: string, uniqueSdk: Sdk) {
     this.uniqueSdk = uniqueSdk;
@@ -136,6 +138,7 @@ class UniqueAdapter implements IMarketContractAdapter {
       address: signer.address || '',
       contractAddress: this.contractAddress,
       funcName: 'put',
+      gasLimit: sellGasLimit,
       args: {
         collectionId,
         tokenId,
@@ -153,6 +156,7 @@ class UniqueAdapter implements IMarketContractAdapter {
       address: signer.address || '',
       contractAddress: this.contractAddress,
       funcName: 'put',
+      gasLimit: sellGasLimit,
       args: {
         collectionId,
         tokenId,
@@ -170,6 +174,7 @@ class UniqueAdapter implements IMarketContractAdapter {
       contractAddress: this.contractAddress,
       value: price,
       funcName: 'buy',
+      gasLimit: buyGasLimit,
       args: {
         collectionId,
         tokenId,
@@ -187,6 +192,7 @@ class UniqueAdapter implements IMarketContractAdapter {
       contractAddress: this.contractAddress,
       value: price,
       funcName: 'buy',
+      gasLimit: buyGasLimit,
       args: {
         collectionId,
         tokenId,
