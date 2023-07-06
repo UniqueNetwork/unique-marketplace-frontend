@@ -6,7 +6,7 @@ import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
 import { ChainValue } from '../controllers/BaseController';
 
-const buyGasLimit = 360_000;
+const buyGasLimit = 1_000_000;
 const sellGasLimit = 200_000;
 class UniqueAdapter implements IMarketContractAdapter {
   constructor(contractAddress: string, uniqueSdk: Sdk) {
