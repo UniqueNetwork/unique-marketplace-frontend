@@ -26,7 +26,7 @@ export const useCollectionTokensFilter = ({ isFetching, fetch }: { isFetching: b
     const address = (fixedPrice || (!!belongingValue && belongingValue !== 'All')) && selectedAccount?.address
       ? (Address.is.ethereumAddressInAnyForm(selectedAccount?.address)
         ? Address.normalize.ethereumAddress(selectedAccount?.address)
-        : selectedAccount?.address)
+        : Address.normalize.substrateAddress(selectedAccount?.address))
       : undefined;
 
     return {
