@@ -201,9 +201,10 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     try {
       const recipient = typeof recipientAddress === 'string' ? recipientAddress : recipientAddress?.address;
       const fee = await api?.market?.getTransferBalanceFee(sender.address, recipient, Number(sender.balance.parsed), { account: sender });
-      const amount = Number(sender.balance.parsed) - Math.ceil(Number(fee) * 1000) / 1000;
+
+      const amount = Number(sender.balance.parsed) - Number(fee);
       setFee(fee);
-      setAmount(amount > 0 ? amount.toFixed(4) : sender.balance.parsed);
+      setAmount(amount > 0 ? ((amount * 10000 | 0) / 10000).toString() : sender.balance.parsed);
     } catch (e) {
       console.error('Failed to get max value: ', e);
     } finally {

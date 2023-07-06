@@ -2,7 +2,7 @@ import React, { FC, useCallback, useMemo } from 'react';
 import { Checkbox } from 'components/UI';
 import styled from 'styled-components';
 import { MyTokensStatuses } from './types';
-import Accordion from '../../../components/Accordion/Accordion';
+import { Accordion } from '../../../components/Accordion/Accordion';
 import { useAccounts } from '../../../hooks/useAccounts';
 
 interface StatusFilterProps {
@@ -50,7 +50,6 @@ const StatusFilter: FC<StatusFilterProps> = ({ value, onChange, testid }) => {
         title={'Status'}
         isOpen={true}
         onClear={onStatusClear}
-        testid={`${testid}-status-accordion`}
       >
         <StatusFilterWrapper>
           {!hideOnSale && <Checkbox

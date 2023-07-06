@@ -5,11 +5,17 @@ import AttributeCountsFilter from 'components/Filters/AttributeCountsFilter';
 import AttributesFilter from 'components/Filters/AttributesFilter';
 import { AttributeItem, FiltersProps, PriceRange, Statuses } from 'components/Filters/types';
 import { useAccounts } from 'hooks/useAccounts';
-import StatusFilter from 'components/Filters/StatusFilter';
 import PricesFilter from 'components/Filters/PricesFilter';
+import { BelongingValue, TokensFilter } from './types';
+import BelongingFilter from './BelongingFilter';
+import StatusFilter from './StatusFilter';
 
-export const Filters: FC<FiltersProps> = ({ value, attributes, attributeCounts, onFilterChange, testid }) => {
+export const Filters: FC<FiltersProps<TokensFilter>> = ({ value, attributes, attributeCounts, onFilterChange, testid, disabled }) => {
   const { selectedAccount } = useAccounts();
+
+  const onBelongingFilterChange = useCallback((belongingValue: BelongingValue) => {
+    onFilterChange({ ...value, belongingValue });
+  }, [value, onFilterChange, selectedAccount]);
 
   const onStatusFilterChange = useCallback((statuses: Statuses) => {
     onFilterChange({ ...value, statuses });
@@ -30,19 +36,37 @@ export const Filters: FC<FiltersProps> = ({ value, attributes, attributeCounts, 
   const { attributes: selectedAttributes = [], attributeCounts: selectedAttributeCounts = [] } = value || {};
 
   return <FiltersStyled>
-    <StatusFilter value={value?.statuses} onChange={onStatusFilterChange} testid={`${testid}-status`} />
-    <PricesFilter value={value?.prices} onChange={onPricesFilterChange} testid={`${testid}-prices`} />
+
+    <BelongingFilter
+      value={value?.belongingValue}
+      onChange={onBelongingFilterChange}
+      disabled={disabled}
+    />
+    <StatusFilter
+      value={value?.statuses}
+      onChange={onStatusFilterChange}
+      testid={`${testid}-status`}
+      disabled={disabled}
+    />
+    <PricesFilter
+      value={value?.prices}
+      onChange={onPricesFilterChange}
+      testid={`${testid}-prices`}
+      disabled={disabled}
+    />
     {!!attributeCounts?.length && <AttributeCountsFilter
       attributeCounts={attributeCounts}
       selectedAttributeCounts={selectedAttributeCounts}
       onAttributeCountsChange={onCollectionAttributeCountsFilterChange}
       testid={`${testid}-attribute-count`}
+      disabled={disabled}
     />}
     <AttributesFilter
       attributes={attributes || {}}
       selectedAttributes={selectedAttributes}
       onAttributesChange={onCollectionAttributesFilterChange}
       testid={`${testid}-attributes`}
+      disabled={disabled}
     />
   </FiltersStyled>;
 };

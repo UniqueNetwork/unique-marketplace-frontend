@@ -1,10 +1,9 @@
-import React, { FC, useMemo } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 import { Heading } from '@unique-nft/ui-kit';
-import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 import styled from 'styled-components';
 
 import { Picture, Avatar } from 'components';
-import { CollapsableText, Icon, Link, Text } from 'components/UI';
+import { CollapsableText, Icon, Text, Link as UILink } from 'components/UI';
 import { isTokenOwner, toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import { CollectionStatisticsBlock } from './CollectionStaticticsBlock';
 import { CollectionDetailSkeleton } from './CollectionDetailSkeleton';
@@ -16,16 +15,27 @@ import { Primary500, Primary600 } from 'styles/colors';
 import CollectionBanner from 'static/images/banner.svg';
 import config from 'config';
 import { PagePaper } from 'components/PagePaper/PagePaper';
+import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
+import { Link } from 'react-router-dom';
+import { MarketableCollection } from 'api/restApi/collections/types';
+import ShareTokenModal from 'pages/Token/TokenDetail/ShareTokenModal';
+import { RoyaltiesFormData } from 'pages/CollectionEdit/types';
+import { dateFormat } from 'utils/timestampUtils';
 interface IProps {
-  collection?: CollectionInfoWithSchemaResponse
+  collection?: MarketableCollection
+  royalty?: RoyaltiesFormData
 }
 
-export const CollectionDetail: FC<IProps> = ({ collection }) => {
+export const CollectionDetail: FC<IProps> = ({ collection, royalty }) => {
   const { selectedAccount } = useAccounts();
+  const deviceSize = useDeviceSize();
 
   const { currentChainId, chainProperties } = useApi();
 
-  const { name, description, schema, owner } = collection || {};
+  const { name, description, data, owner, collectionId, metadata } = collection || {};
+  const { schema } = data || {};
+
+  const [isShareModalVisible, setIsShareModalVisible] = useState(false);
 
   const formatedAddressOwner = useMemo(() => {
     if (!owner) return '';
@@ -36,6 +46,26 @@ export const CollectionDetail: FC<IProps> = ({ collection }) => {
     if (!selectedAccount) return false;
     return isTokenOwner(selectedAccount?.address, owner || '');
   }, [owner, selectedAccount]);
+
+  const externalLinks = useMemo(() => {
+    const { metadata } = collection || {};
+    const hasAnyLink = !!metadata?.discord ||
+      !!metadata?.instagram ||
+      !!metadata?.twitter ||
+      !!metadata?.telegram ||
+      !!metadata?.reddit ||
+      !!metadata?.website;
+    return (<>
+      {metadata?.discord && <UILink href={metadata?.discord} ><Icon size={24} name={'discord'}/></UILink>}
+      {metadata?.instagram && <UILink href={metadata?.instagram} ><Icon size={24} name={'instagram'}/></UILink>}
+      {metadata?.twitter && <UILink href={metadata?.twitter} ><Icon size={24} name={'twitter'}/></UILink>}
+      {metadata?.telegram && <UILink href={metadata?.telegram} ><Icon size={24} name={'telegram'}/></UILink>}
+      {metadata?.reddit && <UILink href={metadata?.reddit} ><Icon size={24} name={'reddit'}/></UILink>}
+      {metadata?.website && <UILink href={metadata?.website} ><Icon size={24} name={'globe-simple'}/></UILink>}
+      {hasAnyLink && <Separator/>}
+      <ShareLink><Icon size={24} name={'shared'} onClick={() => setIsShareModalVisible(true)}/></ShareLink>
+    </>);
+  }, [collection]);
 
   if (!collection) {
     return <CollectionDetailPaper>
@@ -49,24 +79,36 @@ export const CollectionDetail: FC<IProps> = ({ collection }) => {
 
   return <CollectionDetailPaper>
     <BannerWrapper >
-      <img src={CollectionBanner} />
+      {!!collection.metadata?.banner && <img src={collection.metadata.banner} />}
     </BannerWrapper>
     <CollectionDetailWrapper>
       <CollectionCardWrapper >
         <PictureWrapper>
-          <Picture alt={name || ''} src={schema?.coverPicture.fullUrl || ''} size={160} />
+          <Picture alt={name || ''} src={collection.metadata?.cover || schema?.coverPicture.fullUrl || ''} size={160} />
         </PictureWrapper>
         <CollectionInfoWrapper>
           <div>
             <Heading size='1' >{name}</Heading>
             <Row>
-              <CollapsableText size='l' >{description}</CollapsableText>
-
+              <CollapsableText size='l' >{metadata?.description || description}</CollapsableText>
             </Row>
           </div>
+          {deviceSize < DeviceSize.lg && <>
+            {isOwner && <Row>
+              <EditCollectionLink to={`/collection/${collectionId}/edit`}>
+                <span>Edit collection</span>
+                <Icon size={24} name={'gear'} />
+              </EditCollectionLink>
+            </Row>}
+            <Row>
+              <LinksWrapper>
+                {externalLinks}
+              </LinksWrapper>
+            </Row>
+          </>}
           <Row>
             <Text color='grey-500' size='m'>ID:</Text>
-            <Text size='m'>{collection.id}</Text>
+            <Text size='m'>{collectionId}</Text>
             <OwnerWrapper>
               {isOwner && <Text color='grey-500' size='m'>You own it</Text>}
               {!isOwner && <>
@@ -82,28 +124,37 @@ export const CollectionDetail: FC<IProps> = ({ collection }) => {
               </>}
             </OwnerWrapper>
           </Row>
-          <CollectionStatisticsBlock />
+          <CollectionStatisticsBlock collection={collection} royalty={royalty} />
+          {deviceSize < DeviceSize.lg && <CreationInfoWrapper>
+            <Text color={'grey-500'} >Created on {collection.createdAt}</Text>
+            <LinkStyled
+              target={'_blank'}
+              rel={'noreferrer'}
+              href={`${scanUrl}collection/${collectionId}`}
+            >
+              <TextStyled>View on UniqueScan</TextStyled>
+              <IconWrapper>
+                <Icon name={'arrow-up-right'} size={16} color={Primary500} />
+              </IconWrapper>
+            </LinkStyled>
+          </CreationInfoWrapper>}
         </CollectionInfoWrapper>
       </CollectionCardWrapper>
-      <RightSidebar>
-        <EditCollectionLink href={`/collection/${collection.id}/edit`}>
+      {deviceSize >= DeviceSize.lg && <RightSidebar>
+        {isOwner && <EditCollectionLink to={`/collection/${collectionId}/edit`}>
           {/* TODO: use link from react-router-dom instead of href to avoid page refresh */}
           <span>Edit collection</span>
           <Icon size={24} name={'gear'} />
-        </EditCollectionLink>
+        </EditCollectionLink>}
         <LinksWrapper>
-          <Icon size={24} name={'discord'} />
-          <Icon size={24} name={'instagram'} />
-          <Icon size={24} name={'twitter'} />
-          <Icon size={24} name={'globe-simple'} />
-          <Icon size={24} name={'shared'} />
+          {externalLinks}
         </LinksWrapper>
         <CreationInfoWrapper>
-          <Text color={'grey-500'} >Created on {'15 February 2021'}</Text>
+          <Text color={'grey-500'} >Created on {dateFormat(collection.createdAt)}</Text>
           <LinkStyled
             target={'_blank'}
             rel={'noreferrer'}
-            href={`${scanUrl}collection/${collection.id}`}
+            href={`${scanUrl}collections/${collectionId}`}
           >
             <TextStyled>View on UniqueScan</TextStyled>
             <IconWrapper>
@@ -111,8 +162,9 @@ export const CollectionDetail: FC<IProps> = ({ collection }) => {
             </IconWrapper>
           </LinkStyled>
         </CreationInfoWrapper>
-      </RightSidebar>
+      </RightSidebar>}
     </CollectionDetailWrapper>
+    <ShareTokenModal isVisible={isShareModalVisible} onClose={() => setIsShareModalVisible(false)} testid='share' />
   </CollectionDetailPaper>;
 };
 
@@ -120,12 +172,25 @@ const CollectionDetailPaper = styled(PagePaper)`
   padding: 0;
   overflow: hidden;
   border-radius: 8px;
-  
+  @media (max-width: 1024px) {
+    overflow: visible;
+  }
 `;
 
 const BannerWrapper = styled.div`
   display: flex;
   justify-content: center;
+  height: 240px;
+  background-color: var(--color-blue-grey-100);
+  overflow: hidden;
+  img {
+    object-fit: cover;
+    min-width: 100%;
+  }
+  @media (max-width: 1024px) {
+    margin-left: calc(var(--gap) * -2);
+    margin-right: calc(var(--gap) * -2);
+  }
 `;
 
 const CollectionDetailWrapper = styled.div`
@@ -133,11 +198,18 @@ const CollectionDetailWrapper = styled.div`
   justify-content: space-between;
   padding: calc(var(--gap) * 1.5) calc(var(--gap) * 2) calc(var(--gap) * 2);
   position: relative;
+  @media (max-width: 768px) {
+    padding: calc(var(--gap) * 1.5) 0 calc(var(--gap) * 2);
+  }
 `;
 
 const CollectionCardWrapper = styled.div`
   display: flex;
   gap: calc(var(--gap) * 2);
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 `;
 
 const PictureWrapper = styled.div`
@@ -145,8 +217,21 @@ const PictureWrapper = styled.div`
   overflow: hidden;
   border-radius: 24px;
   border: 4px solid var(--color-additional-light);
+  background: var(--color-additional-light);
   width: 160px;
-  height: 160px;
+  height: 160px;  
+  min-width: 160px;
+  .picture {
+    display: inline;
+  }
+  img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+  }
+  @media (max-width: 768px) {
+    margin-left: calc(var(--gap) * 2);
+  }
 `;
 
 const CollectionInfoWrapper = styled.div`
@@ -155,6 +240,9 @@ const CollectionInfoWrapper = styled.div`
   gap: var(--gap);
   h1.unique-font-heading.size-1 {
     margin-bottom: var(--gap);
+  }
+  @media (min-width: 1920px){
+    max-width: 900px;
   }
 `;
 
@@ -177,6 +265,8 @@ const EditCollectionLink = styled(Link)`
   align-items: center;
   text-align: center;
   margin-bottom: calc(var(--gap) * 1.5);
+  color: ${Primary500};
+  font-size: 16px;
 `;
 
 const LinksWrapper = styled.div`
@@ -184,6 +274,7 @@ const LinksWrapper = styled.div`
   gap: var(--gap);
   justify-content: flex-end;
   margin-bottom: calc(var(--gap) * 1.5);
+  flex-wrap: wrap;
 `;
 
 const CreationInfoWrapper = styled.div`
@@ -211,7 +302,7 @@ const AccountLink = styled.a`
   }
 `;
 
-const LinkStyled = styled(Link)`
+const LinkStyled = styled(UILink)`
   display: flex;
   align-items: center;
   column-gap: calc(var(--gap) / 4);
@@ -235,5 +326,16 @@ const IconWrapper = styled.div`
     path {
       stroke: currentColor;
     }
+  }
+`;
+const ShareLink = styled.div`
+  && {
+    cursor: pointer;
+  }
+`;
+const Separator = styled.div`
+  && {
+    width:1px;
+    border-left: 1px solid #D2D3D6;
   }
 `;

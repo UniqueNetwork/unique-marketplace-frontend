@@ -4,7 +4,7 @@ import { Address } from '@unique-nft/utils';
 
 import { useApi } from '../useApi';
 import { TPurchaseProps } from '../../pages/Token/Modals/types';
-import { InternalStage, StageStatus } from '../../types/StagesTypes';
+import { InternalStage, StageStatus, TInternalStageActionParams } from '../../types/StagesTypes';
 import useStages from '../useStages';
 import { useAccounts } from '../useAccounts';
 
@@ -30,8 +30,8 @@ export const usePurchaseFixStages = (collectionId: number, tokenId: number) => {
         const mirrorBalance = await marketApi?.getAccountBalance(mirrorAddress);
         const fee = Number(await marketApi?.getBuyFixFee(collectionId, tokenId, txParams.amount, options));
         const toTransfer = Number(txParams.price) + fee - Number(mirrorBalance?.parsed);
-        if (toTransfer <= 0) return;
-        //                                           just to be safe and makeup for potential rounding issues
+        if (toTransfer <= 0) return Promise.resolve();
+        // just to be safe and makeup for potential rounding issues
         return marketApi?.transferBalance(account.address, mirrorAddress, toTransfer + 1, options);
       }
 }]) as InternalStage<TPurchaseProps>[],
@@ -40,7 +40,21 @@ export const usePurchaseFixStages = (collectionId: number, tokenId: number) => {
       description: '',
       status: StageStatus.default,
       action: ({ options, txParams }) => marketApi?.buyFix(collectionId, tokenId, txParams.amount, options)
-    }
+    },
+    ...(selectedAccount?.account.constructor === MetamaskAccount
+      ? []
+      : [{
+      title: 'Withdraw',
+      description: '',
+      status: StageStatus.default,
+      action: async ({ options, txParams }) => {
+        const mirrorAddress = Address.mirror.substrateToEthereum(account.address);
+        const mirrorBalance = await marketApi?.getAccountBalance(mirrorAddress);
+        if (mirrorBalance && Number(mirrorBalance.parsed) !== 0) {
+          return marketApi?.transferBalance(mirrorAddress, txParams.accountAddress, mirrorBalance.raw, options);
+        }
+      }
+    }]) as InternalStage<TPurchaseProps>[]
   ];
 }, [marketApi, collectionId, tokenId]);
   const { stages, error, status, initiate } = useStages<TPurchaseProps>(purchaseStages, selectedAccount);

@@ -63,7 +63,7 @@ export const CommonTokenDetail: FC<IProps> = ({
       collectionId,
       collectionName,
       prefix,
-      coverImageUrl: schema?.coverPicture.fullUrl || '',
+      coverImageUrl: schema?.coverPicture?.fullUrl || '',
       description,
       attributes,
       image: typeof image === 'string' ? image : image?.fullUrl || '',
@@ -154,7 +154,7 @@ export const CommonTokenDetail: FC<IProps> = ({
               <Account href={`${config.blockchains[currentChainId || '']?.scanUrl}account/${owner || '404'}`}>
                 <Avatar size={24} src={DefaultAvatar} address={owner}/>
                 <Text color='primary-600' size='m' data-testid={`${testid}-owner-address`}>
-                  {deviceSize === DeviceSize.lg ? owner || '' : shortcutText(owner || '') }
+                  {deviceSize >= DeviceSize.lg ? owner || '' : shortcutText(owner || '') }
                 </Text>
               </Account>
             </>}
@@ -203,7 +203,7 @@ export const CommonTokenDetail: FC<IProps> = ({
       <ReportModal
         collectionId={collectionId || 0}
         tokenId={tokenId || 0}
-        tokenPrefix={offer?.collectionDescription.tokenPrefix || token?.collection.tokenPrefix || ''}
+        tokenPrefix={offer?.collectionDescription.tokenPrefix || token?.collection?.tokenPrefix || ''}
         isVisible={reportModalVisible}
         onClose={closeReportModal}
         testid={`${testid}-report-modal`}

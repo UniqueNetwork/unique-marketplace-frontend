@@ -3,11 +3,12 @@ import styled from 'styled-components';
 import { Icon } from '../Icon/Icon';
 
 export interface ModalProps {
-    children: ReactNode;
-    isVisible: boolean;
-    isClosable?: boolean;
-    isGlobalBackdrop?: boolean
-    onClose?(): void;
+  align?: 'top' | 'middle';
+  children: ReactNode;
+  isVisible: boolean;
+  isClosable?: boolean;
+  isGlobalBackdrop?: boolean
+  onClose?(): void;
 }
 
 export const Modal = ({
@@ -15,12 +16,14 @@ export const Modal = ({
     isVisible,
     isClosable,
     isGlobalBackdrop,
+    align = 'middle',
     onClose
 }: ModalProps) => {
     const [clickCoords, setClickCoords] = useState({ pageX: -1, pageY: -1 });
     return isVisible
 ? (
   <ModalWrapper
+    align={align}
     isGlobalBackdrop={isGlobalBackdrop}
     onMouseDown={(event) => {
                 const { pageX, pageY } = event;
@@ -51,7 +54,7 @@ export const Modal = ({
 : null;
 };
 
-const ModalWrapper = styled.div<{ isGlobalBackdrop?: boolean }>`
+const ModalWrapper = styled.div<{ isGlobalBackdrop?: boolean, align: 'top' | 'middle' }>`
   font-family: var(--prop-font-family);
   font-size: var(--prop-font-size);
   font-weight: var(--prop-font-weight);
@@ -66,9 +69,9 @@ const ModalWrapper = styled.div<{ isGlobalBackdrop?: boolean }>`
   display: flex;
   justify-content: center;
   overflow-y: auto;
-  align-items: center;
+  align-items: ${({ align }) => align === 'top' ? 'flex-start' : 'center'};
   flex-flow: wrap;
-  padding: calc(var(--prop-gap) * 5) 0;
+  padding: calc(var(--prop-gap) * 6) 0;
 
   .unique-modal {
     position: relative;

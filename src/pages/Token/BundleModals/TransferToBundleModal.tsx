@@ -60,6 +60,16 @@ const AskTransferToBundleModal: FC<{ token: INestingToken | TokenByIdResponse, o
 
   const { selectedAccount } = useAccounts();
   const { api } = useApi();
+  const [isSponsored, setIsSponsored] = useState(false);
+
+  useEffect(() => {
+    void (async () => {
+      setIsFeeLoading(true);
+      const collection = await api?.collection?.getCollection(token?.collectionId);
+      setIsSponsored(!!collection?.sponsorship?.isConfirmed);
+      setIsFeeLoading(false);
+    })();
+  }, [token?.collectionId]);
 
   const { collections: collectionItems, fetchCollections, isFetching: isFetchingCollections } = useGetCollectionsForNesting();
   const { tokens, isFetchingTokens } = useGetAllOwnedTokensByCollection(collection?.collectionId, useMemo(() => ({
@@ -79,7 +89,7 @@ const AskTransferToBundleModal: FC<{ token: INestingToken | TokenByIdResponse, o
   const getFee = useCallback((newParentToken: TokenItem) => {
     setIsFeeLoading(true);
     return debounce(() => {
-      if (!api?.market || !token || !selectedAccount || !newParentToken) return setIsFeeLoading(false);
+      if (!api?.market || !token || !selectedAccount || !newParentToken || isSponsored) return setIsFeeLoading(false);
 
       api?.nft?.getTransferToBundleFee(
         { collectionId: token.collectionId, tokenId: token.tokenId },
@@ -94,7 +104,7 @@ const AskTransferToBundleModal: FC<{ token: INestingToken | TokenByIdResponse, o
         setIsFeeLoading(false);
       });
     }, 300)();
-  }, [api?.market, token, selectedAccount?.account]);
+  }, [api?.market, token, selectedAccount?.account, isSponsored]);
 
   const onConfirmTransferToBundleClick = useCallback(
     () => {
@@ -113,13 +123,13 @@ const AskTransferToBundleModal: FC<{ token: INestingToken | TokenByIdResponse, o
   const onChangeSelectedToken = useCallback((token: TokenItem) => {
     setSelectedToken(token);
     getFee(token);
-  }, []);
+  }, [getFee]);
 
   const isFeeGreaterThanBalance = useMemo(() => {
-    if (!fee) return false;
+    if (!fee || isSponsored) return false;
     const feeBN = new BN(fromStringToBnString(fee));
     return feeBN.gt(selectedAccount?.balance?.raw || new BN(0));
-  }, [fee, selectedAccount?.balance?.raw]);
+  }, [fee, selectedAccount?.balance?.raw, isSponsored]);
 
   return (
     <>
@@ -177,6 +187,7 @@ const AskTransferToBundleModal: FC<{ token: INestingToken | TokenByIdResponse, o
           isFeeLoading={isFeeLoading}
           fee={fee || '0'}
           testid={`${testid}-fee-message`}
+          placeholder={isSponsored ? `Collection ID ${token.collectionId} sponsored` : undefined}
         />
       </Row>
       <ButtonWrapper>
@@ -193,7 +204,7 @@ const AskTransferToBundleModal: FC<{ token: INestingToken | TokenByIdResponse, o
 };
 
 const TransferToBundleStagesModal: FC<TBundleTrunsferModalBodyProps & { newParent: TokenIdQuery }> = ({ token, newParent, onFinish, testid }) => {
-  const { stages, status, initiate } = useTransferToBundleStages(token, newParent);
+  const { stages, status, initiate } = useTransferToBundleStages(token.owner, token, newParent);
   const { info } = useNotifications();
   const { selectedAccount } = useAccounts();
 

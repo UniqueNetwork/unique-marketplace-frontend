@@ -108,6 +108,7 @@ const MobileFilterModal = styled.div<{ isVisible: boolean }>`
   right: 0;
   left: 0;
   overflow-y: auto;
+  z-index: 2;
 
   & div[class^=Filters] {
     width: 100%;

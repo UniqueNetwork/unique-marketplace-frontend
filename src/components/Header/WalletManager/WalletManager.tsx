@@ -31,18 +31,18 @@ export const WalletManager: FC = () => {
   const { selectedAccount, accounts, isLoading, changeAccount } = useAccounts();
   const [isOpen, setIsOpen] = useState(false);
   const [isGetKsmOpened, setIsGetKsmOpened] = useState(false);
-  const { chainProperties, settings, currentChainId, onChangeChainId, api } = useApi();
+  const { chainProperties, currentChainId, onChangeChainId, api } = useApi();
   const { info } = useNotifications();
   const navigate = useNavigate();
 
-  const networks: INetwork[] = useMemo(() => Object.keys(config?.blockchains || {}).map<INetwork>((id) => ({
+  const networks: INetwork[] = useMemo(() => Object.keys(config?.blockchains || {}).reverse().map<INetwork>((id) => ({
     id,
     name: config?.blockchains[id]?.name || '',
     icon: {
       name: `chain-${id.toLowerCase()}`,
       size: 40
     }
-  })), [settings]);
+  })), []);
 
   const currentNetwork = useMemo(() => networks.find(({ id }) => id === currentChainId), [networks, currentChainId]);
 
@@ -107,7 +107,7 @@ export const WalletManager: FC = () => {
 
   if (!isLoading && !selectedAccount) {
     return (
-      <Button title={'Connect or create account'} onClick={onCreateAccountClick} />
+      <Button title={'Connect'} onClick={onCreateAccountClick} />
     );
   }
 
@@ -125,13 +125,6 @@ export const WalletManager: FC = () => {
           <>
             {formattedAccountDeposit && <Text color='grey-500' weight={'light'} size='xs'>The total market deposit for participation in auctions and
               sponsorship. <br/> Use the “Manage accounts” section to withdraw.</Text>}
-            {config.rampApiKey && <GetKsmButton
-              title={`Get ${chainProperties?.token || 'tokens'}`}
-              size={'small'}
-              role={'outlined'}
-              wide
-              onClick={openModal}
-            />}
           </>
         }
         networks={networks}

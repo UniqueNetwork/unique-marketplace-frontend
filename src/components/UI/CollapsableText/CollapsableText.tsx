@@ -42,11 +42,29 @@ const CollapsableTextWrapper = styled.div<{ isCollapsed: boolean }>`
   @media (max-width: 1320px) {
     width: 576px;
   }
+  @media (max-width: 1168px) {
+    width: 476px;
+  }
   @media (max-width: 1024px) {
     width: 576px;
   }
+  @media (max-width: 928px) {
+    width: 476px;
+  }
+  @media (max-width: 840px) {
+    width: 376px;
+  }
   @media (max-width: 768px) {
-    width: 576px;
+    width: 476px;
+  }
+  @media (max-width: 576px) {
+    width: 476px;
+  }
+  @media (max-width: 540px) {
+    width: 376px;
+  }
+  @media (max-width: 480px) {
+    width: 276px;
   }
   
   & > span {

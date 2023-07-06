@@ -1,11 +1,10 @@
 import React, { FC } from 'react';
 import { Heading } from '@unique-nft/ui-kit';
-import BN from 'bn.js';
 import styled from 'styled-components';
 import { Icon } from 'components/UI/Icon/Icon';
 
-import { formatBalance } from '../../../utils/textUtils';
 import { useApi } from '../../../hooks/useApi';
+import { formatBalance } from 'utils/textUtils';
 
 interface PriceProps {
   price: string;
@@ -20,7 +19,7 @@ export const Price: FC<PriceProps> = ({ price, testid = '' }) => {
         <Heading
           testid={`${testid}-price`}
           size={'1'}
-        >{price}</Heading>
+        >{formatBalance(price)}</Heading>
         <Icon name={`chain-${currentChainId}`} size={32} />
       </Row>
     </PriceWrapper>

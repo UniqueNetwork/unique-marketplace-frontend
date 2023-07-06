@@ -1,7 +1,7 @@
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { BN } from '@polkadot/util';
-import { Button } from 'components/UI';
+import { Button, useNotifications } from 'components/UI';
 import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import { TWithdrawBid } from 'api/restApi/auction/types';
 import { useApi } from 'hooks/useApi';
@@ -51,6 +51,7 @@ export const AccountsPage = () => {
   const navigate = useNavigate();
   const deviceSize = useDeviceSize();
   const { chainProperties, currentChainId } = useApi();
+  const { info } = useNotifications();
 
   useEffect(() => {
     if (!isLoading && !accounts.length) {
@@ -76,21 +77,21 @@ export const AccountsPage = () => {
     setSelectedAddress(address);
   }, []);
 
-  const onGetClick = useCallback(() => {
+  const onGetClick = useCallback((address: string) => () => {
     switch (chainProperties?.token) {
       case 'OPL':
         window.open('https://t.me/unique2faucet_opal_bot', '_blank', 'noopener');
         break;
-      case 'QUARTZ':
+      case 'QTZ':
         window.open('https://www.mexc.com/exchange/QTZ_USDT', '_blank', 'noopener');
         break;
-      case 'UNIQUE':
+      case 'UNQ':
         window.open('https://www.huobi.com/en-us/exchange/unq_usdt', '_blank', 'noopener');
         break;
       default:
         break;
     }
-  }, []);
+  }, [chainProperties]);
 
   const filteredAccounts: AccountInfo[] = useMemo(() => {
     const reduceAccounts = (acc: AccountInfo[], account: Account) => {
@@ -137,6 +138,7 @@ export const AccountsPage = () => {
 
   const deleteLocalAccountConfirmed = useCallback(() => {
     deleteLocalAccount(selectedAddress || '');
+    info('Account successfully deleted');
     void onChangeAccountsFinish();
   }, [selectedAddress, deleteLocalAccount, onChangeAccountsFinish]);
 

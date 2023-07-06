@@ -170,11 +170,11 @@ export const useMyTokensFilter = ({ tokens, offers, isFetchingTokens }: UseMyTok
   const myCollections: MyCollection[] = useMemo(() => {
     const collections: Map<number, MyCollection> = new Map();
 
-    offers.forEach(({ collectionDescription: { id, owner, schema, name, tokenPrefix } }) => {
-      if (collections.has(id)) return;
-      collections.set(id, {
-        id,
-        cover: schema?.coverPicture.fullUrl || '',
+    offers.forEach(({ collectionId, collectionDescription: { owner, schema, name, tokenPrefix } }) => {
+      if (collections.has(collectionId)) return;
+      collections.set(collectionId, {
+        id: collectionId,
+        cover: schema?.coverPicture?.fullUrl || '',
         name,
         owner,
         tokenPrefix,
@@ -194,7 +194,6 @@ export const useMyTokensFilter = ({ tokens, offers, isFetchingTokens }: UseMyTok
         allowedTokens: ''
       });
     });
-
     return [...collections.values()];
   }, [featuredCollections, tokens, offers]);
 

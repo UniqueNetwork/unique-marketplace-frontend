@@ -18,6 +18,7 @@ import { useApi } from 'hooks/useApi';
 import { debounce } from 'utils/helpers';
 import { useInfinityScroll } from 'hooks/useInfinityScroll';
 import config from '../../config';
+import { Address } from '@unique-nft/utils';
 
 type TokensTradesPage = {
   currentTab: TradesTabs
@@ -26,9 +27,9 @@ type TokensTradesPage = {
 
 export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) => {
   const { selectedAccount, isLoading: isLoadingAccounts } = useAccounts();
-  const { currentChainId } = useApi();
+  const { currentChainId, chainProperties } = useApi();
   const [page, setPage] = useState<number>(0);
-  const [sortString, setSortString] = useState<string>();
+  const [sortString, setSortString] = useState<string | undefined>('desc(TradeDate)');
   const [pageSize, setPageSize] = useState<number>(10);
   const [searchValue, setSearchValue] = useState<string>();
   const [selectedOfferDetails, setSelectedOfferDetails] = useState<Trade | null>(null);
@@ -45,19 +46,23 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
       page: 1,
       pageSize,
       sort: sortString,
-      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
+      seller: currentTab === TradesTabs.MyTokensTrades && selectedAccount
+        ? (Address.is.ethereumAddressInAnyForm(selectedAccount.address)
+          ? Address.normalize.ethereumAddress(selectedAccount.address)
+          : Address.normalize.substrateAddress(selectedAccount.address))
+        : undefined
     });
   }, [currentTab, currentChainId, selectedAccount, isLoadingAccounts]);
 
   useEffect(() => {
-    if (deviceSize !== DeviceSize.lg && !searched) {
+    if (deviceSize < DeviceSize.lg && !searched) {
       setLoadedTrades([]);
     }
   }, [currentTab]);
 
   useEffect(() => {
     // append loaded trades to the existing list if screen is with infinity scroll
-    if (deviceSize !== DeviceSize.lg && !searched) setLoadedTrades((currentTrades) => { return [...currentTrades, ...trades]; });
+    if (deviceSize < DeviceSize.lg && !searched) setLoadedTrades((currentTrades) => { return [...currentTrades, ...trades]; });
     else {
       setLoadedTrades(trades);
       setSearched(false);
@@ -118,7 +123,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
         break;
     }
     const associatedSortValues: Record<string, string> = {
-      price: 'Price',
+      'price.parsed': 'Price',
       tokenId: 'TokenId',
       tokenDescription: 'CollectionId',
       tradeDate: 'TradeDate',
@@ -153,7 +158,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
   }, [setSelectedOfferDetails]);
 
   // do not show skeleton when next page is loading with infinity scroll
-  const showSkeleton = useMemo(() => (deviceSize === DeviceSize.lg || !loadedTrades.length),
+  const showSkeleton = useMemo(() => (deviceSize >= DeviceSize.lg || !loadedTrades.length),
     [deviceSize, loadedTrades.length]);
 
   return (<PagePaper>
@@ -171,14 +176,15 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
         columns={getTradesColumns({
           deviceSize,
           onShowTradesDetailsModal,
-          scanUrl: config.blockchains[currentChainId || '']?.scanUrl,
-          testid: `${testid}-table`
+          currentChainId: currentChainId || '',
+          testid: `${testid}-table`,
+          tokenSymbol: chainProperties?.token || ''
         })}
         loading={(isLoadingAccounts || isFetching) && showSkeleton}
         emptyIconProps={searchValue ? { name: 'magnifier-found' } : { file: NoTradesIcon }}
         idColumnName={'offerId'}
       />
-      {(!!tradesCount && deviceSize === DeviceSize.lg) && <PaginationWrapper>
+      {(!!tradesCount && deviceSize >= DeviceSize.lg) && <PaginationWrapper>
         <Pagination
           current={page}
           size={tradesCount}

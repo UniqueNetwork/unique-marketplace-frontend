@@ -31,6 +31,7 @@ export class SdkClient {
 
   setNetwork(options: NetworkOptions): void {
     this.isReady = false;
+    this.sdk = new Sdk({ baseUrl: options.settings.blockchain.unique.restUrl });
     this.nftController.setNetwork(options);
     this.collectionController.setNetwork(options);
     // TODO: when metamask updated we must ask in extension to change network too (see wallet implementation for more)

@@ -21,6 +21,7 @@ import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft
 import { NestedTokenBlock } from './TokenDetail/NestedTokenBlock';
 import BundleModal from './BundleModals/BundleTrunsferModal';
 import { BundleModalType } from './BundleModals/types';
+import { NestingTokenBlock } from './TokenDetail/NestingBlock';
 
 const testid = 'token-page';
 
@@ -49,6 +50,9 @@ const TokenPage = () => {
       if (token?.nestingParentToken) {
         setIsNested(true);
         setTopmostOwner((await api.nft.getTopmostOwner(Number(collectionId), Number(id)))?.topmostOwner || null);
+      } else {
+        setIsNested(false);
+        setTopmostOwner(null);
       }
       const collection = await getCollection(Number(collectionId));
       if (token) setToken(token);
@@ -65,11 +69,12 @@ const TokenPage = () => {
       if (offer) {
         const collection = await getCollection(Number(collectionId));
         if (collection) setCollection(collection);
-        setIsBundle(!!offer.tokenDescription?.nestingChildTokens);
+        setIsBundle(!!offer.tokenDescription?.nestingChildTokens?.length);
       }
       if (!token) await fetchToken();
       if (offer || token) {
         setIsFetchingToken(false);
+        setIsNested(!!token?.nestingParentToken);
       }
     })();
   }, [fetchToken, isFetchingOffer, offer, token, collectionId, getCollection]);
@@ -152,7 +157,7 @@ const TokenPage = () => {
           isNested={isNested}
           isOwner={isOwner}
         >
-          {isNested && <NestedTokenBlock
+          {isOwner && isNested && <NestedTokenBlock
             token={token}
             onTransferClick={onActionClick(MarketType.nestedTransfer)}
             onUnnestClick={onActionClick(MarketType.unnest)}
@@ -171,6 +176,11 @@ const TokenPage = () => {
             onAuctionClose={onAuctionClose}
             testid={`${testid}`}
           />
+          {isOwner && !offer && !isNested && <NestingTokenBlock
+            token={token}
+            onNestClick={onActionClick(MarketType.nestedTransfer)}
+            testid={`${testid}`}
+          />}
           <TokenPageModal
             token={token}
             collection={collection}
@@ -182,26 +192,27 @@ const TokenPage = () => {
           />
         </CommonTokenDetail>
       </TokenPagePaper>
-      {isBundle && <>
+      {isBundle &&
         <BundleTreeSection
           onViewTokenDetails={setToken}
           token={token}
           offer={offer}
           testid={`${testid}-bundle`}
           isOwner={isOwner}
-        />
-        <BundleModal
-          token={token}
-          bundleModalType={
-            marketType === MarketType.nestedTransfer ||
-            marketType === MarketType.unnest
-              ? marketType as unknown as BundleModalType
-              : BundleModalType.default }
           onFinish={onFinish}
-          testid={`${testid}-modal`}
-          onClose={onClose}
         />
-      </>}
+      }
+      <BundleModal
+        token={token}
+        bundleModalType={
+          marketType === MarketType.nestedTransfer ||
+          marketType === MarketType.unnest
+            ? marketType as unknown as BundleModalType
+            : BundleModalType.default }
+        onFinish={onFinish}
+        testid={`${testid}-modal`}
+        onClose={onClose}
+      />
     </>
   );
 };

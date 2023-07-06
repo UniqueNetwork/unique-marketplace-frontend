@@ -1,6 +1,7 @@
-import { BN } from '@polkadot/util';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { Account } from '@unique-nft/accounts';
+import { BN } from '@polkadot/util';
+import { Account } from '@unique-nft/accounts/types';
+import { BalanceResponse } from '@unique-nft/sdk';
 import { Signer } from '../api/chainApi/adapters/IBaseAdapter';
 import { TWithdrawBid } from '../api/restApi/auction/types';
 
@@ -43,6 +44,7 @@ export type AccountContextProps = {
   showSignDialog(keyringPair: KeyringPair): Promise<string>
   fetchAccounts(): Promise<void>
   updateAccountsDeposits(): Promise<void>
+  updateAccountBalance(account: string): Promise<MarketAccountBalance>
   updateCurrentAccountDeposit(): Promise<void>
   setIsOpenConnectWalletModal(isOpen: boolean): void
   connectProvider(type: ProviderTypesName): Promise<void>

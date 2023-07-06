@@ -18,6 +18,7 @@ export const useAccounts = () => {
     setSelectedAccount,
     fetchAccounts,
     updateAccountsDeposits,
+    updateAccountBalance,
     updateCurrentAccountDeposit,
     forgetAccount
   } = useContext(AccountContext);
@@ -45,6 +46,7 @@ export const useAccounts = () => {
     addLocalAccount,
     fetchAccounts,
     updateAccountsDeposits,
+    updateAccountBalance,
     updateCurrentAccountDeposit,
     changeAccount,
     deleteLocalAccount

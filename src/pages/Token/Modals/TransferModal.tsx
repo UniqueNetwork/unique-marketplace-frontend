@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Heading, Link } from '@unique-nft/ui-kit';
-import { TokenByIdResponse } from '@unique-nft/sdk';
+import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
 import { Address } from '@unique-nft/utils';
 import { useNotifications, Button, Text } from 'components/UI';
 import { BN } from '@polkadot/util';
@@ -33,7 +33,14 @@ export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosab
 
   if (!selectedAccount) return null;
 
-  if (status === 'ask') return (<AskTransferModal token={token} onTransfer={onTransfer} testid={`${testid}-ask-transfer`} />);
+  if (status === 'ask') {
+ return (<AskTransferModal
+   token={token}
+   collection={collection}
+   onTransfer={onTransfer}
+   testid={`${testid}-ask-transfer`}
+ />);
+}
   if (status === 'transfer-stage') {
     return (<TransferStagesModal
       recipient={recipient}
@@ -50,25 +57,45 @@ export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosab
 
 type AskTransferModalProps = {
   token?: TokenByIdResponse
+  collection?: CollectionInfoWithSchemaResponse | null
   onTransfer(receiver: string): void
   testid: string
 }
 
-const AskTransferModal: FC<AskTransferModalProps> = ({ token, onTransfer, testid }) => {
-  const { api } = useApi();
+const AskTransferModal: FC<AskTransferModalProps> = ({ token, collection, onTransfer, testid }) => {
+  const { api, chainProperties } = useApi();
   const { selectedAccount } = useAccounts();
   const [address, setAddress] = useState<string>('');
   const [isAddressValid, setIsAddressValid] = useState(false);
   const [isFeeLoading, setIsFeeLoading] = useState(false);
   const [fee, setFee] = useState<string>('0');
+  const [isSponsored, setIsSponsored] = useState(false);
+
+  useEffect(() => {
+    if (!token?.collectionId) return;
+    void (async () => {
+      setIsFeeLoading(true);
+      const collection = await api?.collection?.getCollection(token?.collectionId);
+      setIsSponsored(!!collection?.sponsorship?.isConfirmed);
+      setIsFeeLoading(false);
+    })();
+  }, [token?.collectionId]);
 
   const getFee = useCallback((recipient: string) => {
     setIsFeeLoading(true);
     return debounce(() => {
-      if (!api?.market || !token || !selectedAccount || !recipient) return setIsFeeLoading(false);
+      if (!api?.market ||
+          !token ||
+          !selectedAccount ||
+          !recipient ||
+          recipient === selectedAccount.address ||
+          isSponsored) return setIsFeeLoading(false);
+      const sender = Address.is.ethereumAddress(selectedAccount.address)
+        ? selectedAccount.address
+        : Address.normalize.substrateAddress(selectedAccount.address, chainProperties?.SS58Prefix);
 
       api?.market?.getTransferTokenFee(
-        selectedAccount.address,
+        sender,
         recipient,
         token.collectionId,
         token.tokenId,
@@ -82,17 +109,18 @@ const AskTransferModal: FC<AskTransferModalProps> = ({ token, onTransfer, testid
         setIsFeeLoading(false);
       });
     }, 300);
-  }, [api?.market, token, selectedAccount]);
+  }, [api?.market, token, selectedAccount, isSponsored]);
 
   const onAddressInputChange = useCallback((value: string) => {
     setAddress(value);
-      if (Address.is.ethereumAddress(value) || Address.is.substrateAddress(value)) {
-        getFee(value)();
-        setIsAddressValid(true);
-      } else {
-        setIsAddressValid(false);
-      }
-  }, []);
+    const isOwnerAddress = selectedAccount?.address && (Address.compare.substrateAddresses(value, selectedAccount?.address) || Address.compare.ethereumAddresses(value, selectedAccount?.address));
+    if ((Address.is.ethereumAddress(value) || Address.is.substrateAddress(value)) && !isOwnerAddress) {
+      getFee(value)();
+      setIsAddressValid(true);
+    } else {
+      setIsAddressValid(false);
+    }
+  }, [selectedAccount]);
 
   const onConfirmTransferClick = useCallback(
     () => {
@@ -103,10 +131,10 @@ const AskTransferModal: FC<AskTransferModalProps> = ({ token, onTransfer, testid
   );
 
   const isFeeGreaterThanBalance = useMemo(() => {
-    if (!fee) return false;
+    if (!fee || !isSponsored) return false;
     const feeBN = new BN(fromStringToBnString(fee));
     return feeBN.gt(selectedAccount?.balance?.raw || new BN(0));
-  }, [fee, selectedAccount?.balance]);
+  }, [fee, selectedAccount?.balance, isSponsored]);
 
   return (
     <>
@@ -132,6 +160,7 @@ const AskTransferModal: FC<AskTransferModalProps> = ({ token, onTransfer, testid
         isFeeLoading={isFeeLoading}
         fee={fee || '0'}
         testid={`${testid}-fee-message`}
+        placeholder={isSponsored ? `Collection ID ${collection?.id} sponsored` : undefined}
       />
       <ButtonWrapper>
         <Button

@@ -25,12 +25,12 @@ export const FeeMessage: FC<FeeMessageProps> = ({
     <FeeMessageWrapper>
       <Text
         testid={`${testid}-text`}
-        color='additional-warning-500'
+        color='primary-500'
         size='s'
       >
         {isFeeLoading && <Loader label='Loading fee...' />}
         {!isFeeLoading && fee === '0' && placeholder}
-        {!isFeeLoading && fee !== '0' && <>A fee of ~ {Number(fee).toFixed(4).replace(/(?<=\.\d*[1-9])0+$|\.0*$/, '')} {chainProperties?.token} can be applied to the transaction, unless the transaction is sponsored</>}
+        {!isFeeLoading && fee !== '0' && <>A fee of ~ {Number(fee).toFixed(4).replace(/(\.\d*[1-9])(0+$|\.0*)$/, '$1')} {chainProperties?.token} can be applied to the transaction, unless the transaction is sponsored</>}
       </Text>
     </FeeMessageWrapper>
   );
@@ -42,7 +42,7 @@ const FeeMessageWrapper = styled.div`
   padding: 8px 16px;
   margin: calc(var(--gap) * 1.5) 0;
   border-radius: 4px;
-  background-color: ${AdditionalWarning100};
+  background-color: var(--color-primary-100);
   width: 100%;
 
   .unique-loader {

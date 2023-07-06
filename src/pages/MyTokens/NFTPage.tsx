@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { Text } from '@unique-nft/ui-kit';
-import { Select } from 'components/UI';
+import { Pagination, Select } from 'components/UI';
 
 import { useOffers } from 'api/restApi/offers/offers';
 import { PagePaper } from 'components/PagePaper/PagePaper';
@@ -13,7 +13,7 @@ import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 
 import { MobileFilters } from './Filters/MobileFilter';
 import { Filters } from './Filters/Filters';
-import { defaultSortingValue, pageSize, sortingOptions, testid } from './constants';
+import { defaultSortingValue, sortingOptions, testid } from './constants';
 import { useMyTokensFilter } from './hooks/useMyTokensFilter';
 import { useGetMyTokens } from './hooks/useGetMyTokens';
 import { TokensList } from 'components';
@@ -26,19 +26,20 @@ export const NFTPage = () => {
   const { offers, isFetching: isFetchingOffers, fetch } = useOffers();
   const { api, currentChainId } = useApi();
   const { tokens, fetchMyTokens, isFetching: isFetchingTokens } = useGetMyTokens();
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(20);
 
   useEffect(() => {
     if (!api?.nft || !selectedAccount || isAccountsLoading) return;
-
     void (async () => {
-      const seller = Address.is.substrateAddressInAnyForm(selectedAccount.address)
-        ? Address.substrate.decode(selectedAccount.address)?.hex || ''
-        : Address.normalize.ethereumAddress(selectedAccount.address);
-
-      await fetch({ page: 1, pageSize, seller });
+      await fetch({ page: 1,
+        pageSize: 1000000,
+        seller: Address.is.ethereumAddressInAnyForm(selectedAccount.address)
+        ? Address.normalize.ethereumAddress(selectedAccount.address)
+        : Address.normalize.substrateAddress(selectedAccount.address) });
       await fetchMyTokens(selectedAccount);
     })();
-  }, [api?.nft, currentChainId, selectedAccount?.address]);
+  }, [api?.nft, currentChainId, selectedAccount?.address, isAccountsLoading]);
 
   const {
     filterState,
@@ -57,6 +58,10 @@ export const NFTPage = () => {
     tokens,
     isFetchingTokens
   });
+
+  useEffect(() => {
+    setPageSize(deviceSize === DeviceSize.lg ? 21 : 20);
+  }, [deviceSize]);
 
   return (<PagePaper>
     <MarketMainPageStyled>
@@ -91,20 +96,56 @@ export const NFTPage = () => {
             />
           </SortSelectWrapper>
         </SearchAndSortingWrapper>
-        <div>
-          <Text
-            testid={`${testid}-items-count`}
-            size='m'
-          >{isFetchingTokens || isFetchingOffers || isAccountsLoading ? 'Loading items' : `${featuredTokens.length} items`}</Text>
-        </div>
+        <PaginationWrapper>
+          {isFetchingTokens || isFetchingOffers || isAccountsLoading
+            ? <Text
+                testid={`${testid}-items-count`}
+                size='m'
+            >Loading items</Text>
+            : <>
+              <Text
+                testid={`${testid}-items-count`}
+                size='m'
+              >
+                {featuredTokens.length} items
+              </Text>
+              {pageSize < featuredTokens.length && <Pagination
+                size={featuredTokens.length}
+                perPage={pageSize}
+                pageSizes={[20, 21]}
+                current={currentPage}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={setPageSize}
+              />}
+            </>
+          }
+        </PaginationWrapper>
         <TokensListWrapper >
           {!isFetchingTokens && !isFetchingOffers && !isAccountsLoading && featuredTokens.length === 0 && <NoItems isSearchResult={!!searchString || !!filterCount} />}
           <TokensList
             testid={`${testid}-tokens`}
-            tokens={featuredTokens}
+            tokens={useMemo(() => featuredTokens.slice(currentPage * pageSize, (currentPage + 1) * pageSize), [currentPage, pageSize, featuredTokens])}
             isLoading={isFetchingTokens || isFetchingOffers || isAccountsLoading}
           />
         </TokensListWrapper>
+        <PaginationWrapper>
+          {!(isFetchingTokens || isFetchingOffers || isAccountsLoading) && <>
+            <Text
+              testid={`${testid}-items-count`}
+              size='m'
+            >
+              {featuredTokens.length} items
+            </Text>
+            {pageSize < featuredTokens.length && <Pagination
+              size={featuredTokens.length}
+              perPage={pageSize}
+              current={currentPage}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+              pageSizes={[20, 21]}
+            />}
+          </>}
+        </PaginationWrapper>
       </MainContent>
       {deviceSize <= DeviceSize.md && <MobileFilters
         filterCount={filterCount}
@@ -154,6 +195,10 @@ const MainContent = styled.div`
   @media (max-width: 1024px) {
     padding-left: 0;
   }
+
+  .unique-pagination-wrapper {
+    justify-content: space-between;
+  }
 `;
 
 const SortSelectWrapper = styled.div`
@@ -173,4 +218,10 @@ const SearchAndSortingWrapper = styled.div`
 
 const TokensListWrapper = styled.div`
   min-height: 640px;
+  margin-bottom: calc(var(--gap) * 2);
+`;
+
+const PaginationWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
 `;

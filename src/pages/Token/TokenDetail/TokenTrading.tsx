@@ -9,6 +9,7 @@ import { isTokenOwner } from 'api/chainApi/utils/addressUtils';
 import { useApi } from '../../../hooks/useApi';
 import { checkAllowedTokenInSettings } from 'api/chainApi/utils/checkTokenIsAllowed';
 import { TokenByIdResponse } from '@unique-nft/sdk';
+import { ethers } from 'ethers';
 
 interface TokenTradingProps {
   token?: TokenByIdResponse
@@ -42,6 +43,17 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
     return token?.owner ? isTokenOwner(selectedAccount.address, token.owner) : false;
   }, [selectedAccount, token, offer]);
 
+  const royalty = useMemo(() => {
+    const tokenRoyalties = token?.royalties?.reduce((acc, { value, decimals }) => {
+      acc += Number(ethers.utils.formatUnits(value.toString(), decimals));
+      return acc;
+    }, 0) || 0;
+    return tokenRoyalties + (token?.collection?.schema?.royalties?.reduce((acc, { value, decimals }) => {
+      acc += Number(ethers.utils.formatUnits(value.toString(), decimals));
+      return acc;
+    }, 0) || 0);
+  }, [token]);
+
   if (offer?.auction) {
     return (<Auction
       offer={offer}
@@ -54,7 +66,9 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
   }
   if (isOwner) {
     return (<SellToken
+      collectionId={token?.collectionId}
       offer={offer}
+      royalty={royalty}
       isAllowed={isAllowed}
       onSellClick={onSellClick}
       onTransferClick={onTransferClick}
@@ -66,6 +80,11 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
   if (!isAllowed) return null;
 
   return (
-    <BuyToken offer={offer} onBuy={onBuyClick} testid={`${testid}-buy`}/>
+    <BuyToken
+      offer={offer}
+      royalty={royalty}
+      onBuy={onBuyClick}
+      testid={`${testid}-buy`}
+    />
   );
 };

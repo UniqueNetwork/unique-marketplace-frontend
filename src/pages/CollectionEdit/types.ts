@@ -1,3 +1,5 @@
+import { MarketAccount } from 'account/types';
+
 export type CollectionFormData = {
   description: string;
   website: string;
@@ -9,6 +11,6 @@ export type CollectionFormData = {
 };
 
 export type RoyaltiesFormData = {
-  royaltiesType: 'immutable' | 'flexible';
-  royaltiesPercentage: number;
+  address: string;
+  value: string;
 };

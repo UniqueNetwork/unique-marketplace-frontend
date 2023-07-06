@@ -3,8 +3,8 @@ import { post } from 'api/restApi/base';
 import { useApi } from 'hooks/useApi';
 import { useCallback, useState } from 'react';
 import { CollectionItem } from '../types';
-
-const getTokensEndpoint = 'https://api-opal.uniquescan.io/v1/graphql';
+import config from '../../../config';
+import { Address } from '@unique-nft/utils';
 
 const gqlQuery = {
   operationName: 'collections_by_account_nesting_query',
@@ -23,13 +23,16 @@ const gqlQuery = {
         collectionCover: collection_cover
         collectionOwner: collection_owner
         collectionId: collection_id
+        collection {
+          nestingEnabled: nesting_enabled
+        }
       }
     }
   }`
 };
 
 export const useGetCollectionsForNesting = () => {
-  const { settings } = useApi();
+  const { settings, currentChainId, chainProperties } = useApi();
   const [isFetching, setIsFetching] = useState(false);
   const [collections, setCollections] = useState<CollectionItem[]>([]);
 
@@ -38,21 +41,24 @@ export const useGetCollectionsForNesting = () => {
     setIsFetching(true);
     const address = account.address;
 
-    const response = await post(getTokensEndpoint, {
+    const { scanApi } = config.blockchains[currentChainId || ''] || {};
+    const response = await post(scanApi, {
       ...gqlQuery,
       variables: {
-        owner: address
+        owner: Address.is.substrateAddressInAnyForm(address)
+          ? Address.normalize.substrateAddress(address, chainProperties?.SS58Prefix)
+          : address
       }
     });
     if (response.status === 200) {
-      const collections = response?.data?.data?.tokens?.data as CollectionItem[] | [];
-      setCollections(collections);
+      const collections = response?.data?.data?.tokens?.data as (CollectionItem & { collection: { nestingEnabled: boolean } })[] | [];
+      setCollections(collections.filter((collection) => collection.collection?.nestingEnabled));
       setIsFetching(false);
       return collections;
     }
     setIsFetching(false);
     return [];
-  }, [settings]);
+  }, [settings, chainProperties?.SS58Prefix]);
 
   return {
     isFetching,

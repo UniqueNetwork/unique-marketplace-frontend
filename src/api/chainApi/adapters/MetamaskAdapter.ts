@@ -1,4 +1,4 @@
-import { UniqueNFTFactory } from '@unique-nft/solidity-interfaces';
+import { UniqueFungibleFactory, UniqueNFTFactory } from '@unique-nft/solidity-interfaces';
 import { Address, EthCrossAccountId } from '@unique-nft/utils';
 import { Contract, ethers, Signer } from 'ethers';
 import IMarketContractAdapter from './IMarketContractAdapter';
@@ -7,6 +7,8 @@ import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
 import { ChainValue } from '../controllers/BaseController';
 
+const buyGasLimit = 1_000_000;
+const sellGasLimit = 200_000;
 class MetamaskAdapter implements IMarketContractAdapter {
   contractAddress: string;
   constructor(contractAddress: string) {
@@ -27,7 +29,6 @@ class MetamaskAdapter implements IMarketContractAdapter {
   }
 
   protected async callContract(contract: Contract, methodName: string, ...args: any[]) {
-    console.log('args', args, '...args', ...args);
     await this.validateCall(contract.callStatic[methodName], args);
     await (await contract[methodName](...args)).wait();
   }
@@ -37,107 +38,125 @@ class MetamaskAdapter implements IMarketContractAdapter {
     const nftFactory = await UniqueNFTFactory(collectionId, signer);
     const fromCross = Address.extract.ethCrossAccountId(from);
     const toCross = Address.extract.ethCrossAccountId(to);
-    const fee = await nftFactory.estimateGas.transferFromCross(
+    const estimateGas = await nftFactory.estimateGas.transferFromCross(
       fromCross,
       toCross,
       tokenId
-      );
-      return fee.toString();
-    }
+    );
+    const gasPrice = await nftFactory.provider.getGasPrice();
+    return estimateGas.mul(gasPrice).toString();
+  }
 
-    async transferToken(from: string, to: string, collectionId: number, tokenId: number, amount: number, signer: Signer): Promise<void> {
-      if (amount !== 1) throw new Error('RFT not supported');
-      const nftFactory = await UniqueNFTFactory(Number(collectionId), signer);
-      const fromCross = Address.extract.ethCrossAccountId(from);
-      const toCross = Address.extract.ethCrossAccountId(to);
-      await (await nftFactory.transferFromCross(fromCross, toCross, tokenId)).wait();
-    }
+  async transferToken(from: string, to: string, collectionId: number, tokenId: number, amount: number, signer: Signer): Promise<void> {
+    if (amount !== 1) throw new Error('RFT not supported');
+    const nftFactory = await UniqueNFTFactory(Number(collectionId), signer);
+    const fromCross = Address.extract.ethCrossAccountId(from);
+    const toCross = Address.extract.ethCrossAccountId(to);
+    await (await nftFactory.transferFromCross(fromCross, toCross, tokenId)).wait();
+  }
 
-    async getNestTokenFee(from: NestTokenParam, to: NestTokenParam, amount: number, signer: Signer): Promise<string> {
-      if (amount !== 1) throw new Error('RFT not supported');
-      const nftFactory = await UniqueNFTFactory(Number(from.collectionId), signer);
-      const originalParentTokenAddress = await nftFactory.ownerOf(from.tokenId);
-      const newParentTokenAddress = Address.nesting.idsToAddress(to.collectionId, to.tokenId);
-      const fee = await nftFactory.estimateGas.transferFrom(
-        originalParentTokenAddress,
-        newParentTokenAddress,
-        from.tokenId
-      );
-      return fee.toString();
-    }
+  async getNestTokenFee(from: NestTokenParam, to: NestTokenParam, amount: number, signer: Signer): Promise<string> {
+    if (amount !== 1) throw new Error('RFT not supported');
+    const nftFactory = await UniqueNFTFactory(Number(from.collectionId), signer);
+    const originalParentTokenAddress = await nftFactory.ownerOf(from.tokenId);
+    const newParentTokenAddress = Address.nesting.idsToAddress(to.collectionId, to.tokenId);
+    const estimateGas = await nftFactory.estimateGas.transferFrom(
+      originalParentTokenAddress,
+      newParentTokenAddress,
+      from.tokenId
+    );
+    const gasPrice = await nftFactory.provider.getGasPrice();
+    return estimateGas.mul(gasPrice).toString();
+  }
 
-    async nestToken(from: NestTokenParam, to: NestTokenParam, amount: number, signer: Signer): Promise<void> {
-      if (amount !== 1) throw new Error('RFT not supported');
-      const nftFactory = await UniqueNFTFactory(Number(from.collectionId), signer);
+  async nestToken(address: string, from: NestTokenParam, to: NestTokenParam, amount: number, signer: Signer): Promise<void> {
+    if (amount !== 1) throw new Error('RFT not supported');
+    const nftFactory = await UniqueNFTFactory(Number(from.collectionId), signer);
 
-      const originalParentTokenAddress = await nftFactory.ownerOf(from.tokenId);
-      const newParentTokenAddress = Address.nesting.idsToAddress(to.collectionId, to.tokenId);
+    const originalParentTokenAddress = await nftFactory.ownerOf(from.tokenId);
+    const newParentTokenAddress = Address.nesting.idsToAddress(to.collectionId, to.tokenId);
 
-      await (await nftFactory.transferFrom(originalParentTokenAddress, newParentTokenAddress, from.tokenId)).wait();
-    }
+    await (await nftFactory.transferFrom(originalParentTokenAddress, newParentTokenAddress, from.tokenId)).wait();
+  }
 
-    async getUnnestTokenFee(target: NestTokenParam, amount: number, signer: Signer): Promise<string> {
-      if (amount !== 1) throw new Error('RFT not supported');
-      const nftFactory = await UniqueNFTFactory(Number(target.collectionId), signer);
-      const parentTokenAddress = await nftFactory.ownerOf(target.tokenId);
-      const ownerAddress = await signer.getAddress();
-      const fee = await nftFactory.estimateGas.transferFrom(
-        parentTokenAddress,
-        ownerAddress,
-        target.tokenId
-      );
-      return fee.toString();
-    }
+  async getUnnestTokenFee(target: NestTokenParam, amount: number, signer: Signer): Promise<string> {
+    if (amount !== 1) throw new Error('RFT not supported');
+    const nftFactory = await UniqueNFTFactory(Number(target.collectionId), signer);
+    const parentTokenAddress = await nftFactory.ownerOf(target.tokenId);
+    const ownerAddress = await signer.getAddress();
+    const estimateGas = await nftFactory.estimateGas.transferFrom(
+      parentTokenAddress,
+      ownerAddress,
+      target.tokenId
+    );
+    const gasPrice = await nftFactory.provider.getGasPrice();
+    return estimateGas.mul(gasPrice).toString();
+  }
 
-    async unnestToken(target: NestTokenParam, amount: number, signer: Signer): Promise<void> {
-      if (amount !== 1) throw new Error('RFT not supported');
-      const nftFactory = await UniqueNFTFactory(Number(target.collectionId), signer);
+  async unnestToken(target: NestTokenParam, amount: number, signer: Signer): Promise<void> {
+    if (amount !== 1) throw new Error('RFT not supported');
+    const nftFactory = await UniqueNFTFactory(Number(target.collectionId), signer);
 
-      const parentTokenAddress = await nftFactory.ownerOf(target.tokenId);
+    const parentTokenAddress = await nftFactory.ownerOf(target.tokenId);
     const ownerAddress = await signer.getAddress();
 
     await (await nftFactory.transferFrom(parentTokenAddress, ownerAddress, target.tokenId)).wait();
   }
 
-  async getTransferBalanceFee(from: string, to: string, amount: ChainValue, signer: Signer): Promise<string> {
-    const toCross = Address.extract.ethCrossAccountId(to);
-    const fee = await signer.estimateGas({ to: toCross.eth, value: amount.raw });
-    return fee.toString();
+  async getTransferBalanceFee(addressFrom: string, addressTo: string, amount: ChainValue, signer: Signer): Promise<string> {
+    const from = Address.extract.ethCrossAccountId(addressFrom);
+    const to = Address.extract.ethCrossAccountId(addressTo);
+
+    const uniqueFungible = await UniqueFungibleFactory(0, signer);
+    const estimateGas = await uniqueFungible.estimateGas.transferFromCross(
+      from, to, amount.raw, { from: addressFrom }
+    );
+    const gasPrice = await uniqueFungible.provider.getGasPrice();
+    return estimateGas.mul(gasPrice).toString();
   }
 
-  async transferBalance(from: string, to: string, amount: ChainValue, signer: Signer): Promise<void> {
-    // const fromCross = Address.extract.ethCrossAccountId(from);
-    const toCross = Address.extract.ethCrossAccountId(to);
-    await (await signer.sendTransaction({ to: toCross.eth, value: amount.raw })).wait();
+  async transferBalance(addressFrom: string, addressTo: string, amount: ChainValue, signer: Signer): Promise<void> {
+    await signer.checkNetwork?.();
+    const from = Address.extract.ethCrossAccountId(addressFrom);
+    const to = Address.extract.ethCrossAccountId(addressTo);
+    const uniqueFungible = await UniqueFungibleFactory(0, signer);
+    await (await uniqueFungible.transferFromCross(from, to, amount.raw, { from: addressFrom })).wait();
   }
 
   async changeAllowance(from: string, to: string, collectionId: number, tokenId: number, targetAllowance: boolean, signer: Signer): Promise<void> {
-    // in order to remove allowance - we just set approve to void
-    const targetTo = targetAllowance ? to : '0x00';
+    const targetTo = targetAllowance ? to : from;
     const nftFactory = await UniqueNFTFactory(collectionId, signer);
     await (await nftFactory.approve(targetTo, tokenId)).wait();
   }
 
   async getSellFee(from: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<string> {
     const contract = this.getContract(signer);
-    const fee = await contract.estimateGas.put(collectionId, tokenId, price, amount, from, { gasLimit: 10000000 });
-    return fee.toString();
+    const gasPrice = await contract.provider.getGasPrice();
+    const estimateGas = await contract.provider.estimateGas({
+      from: from.eth,
+      gasLimit: sellGasLimit,
+      gasPrice
+    });
+    return estimateGas.mul(gasPrice).toString();
   }
 
   async sell(from: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<void> {
     const contract = this.getContract(signer);
-    await this.callContract(contract, 'put', collectionId, tokenId, price, amount, from, { gasLimit: 10000000 });
+    await this.callContract(contract, 'put', collectionId, tokenId, price, amount, from, { gasLimit: sellGasLimit });
   }
 
   async getBuyFee(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<string> {
     const contract = this.getContract(signer);
-    const fee = await contract.estimateGas.buy(collectionId, tokenId, amount, to, { gasLimit: 10000000, value: price });
-    return fee.toString();
+    const estimateGas = await contract.estimateGas.buy(collectionId, tokenId, amount, to, { value: price, gasLimit: buyGasLimit });
+    const gasPrice = await contract.provider.getGasPrice();
+    return estimateGas.mul(gasPrice).toString();
   }
 
   async buy(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<void> {
     const contract = this.getContract(signer);
-    await this.callContract(contract, 'buy', collectionId, tokenId, amount, to, { gasLimit: 10000000, value: price });
+
+    const estimateGas = await contract.estimateGas.buy(collectionId, tokenId, amount, to, { value: price, gasLimit: buyGasLimit });
+    await this.callContract(contract, 'buy', collectionId, tokenId, amount, to, { value: price, gasLimit: estimateGas.add(1000) });
   }
 }
 

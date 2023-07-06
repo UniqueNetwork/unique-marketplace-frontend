@@ -2,15 +2,13 @@ import React, { FC, useEffect, useMemo, useState } from 'react';
 import { Loader, Text } from '@unique-nft/ui-kit';
 import { generatePath, Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { Icon, Link as UILink } from 'components/UI';
-import { compareEncodedAddresses } from 'api/chainApi/utils/addressUtils';
+import { Icon } from 'components/UI';
+import { compareEncodedAddresses, isTokenOwner } from 'api/chainApi/utils/addressUtils';
 import { Offer } from 'api/restApi/offers/types';
 import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
-import { formatBalance } from 'utils/textUtils';
-import { timeDifference } from 'utils/timestampUtils';
+import { formatBalance, shortcutText } from 'utils/textUtils';
 import { Primary600 } from 'styles/colors';
-import config from 'config';
 import { TokensMedia } from './TokensMedia';
 import { countNestedChildren, stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
 import { useCollections } from 'hooks/useCollections';
@@ -25,13 +23,15 @@ export type TTokensCard = {
   collectionId?: number
   tokenImageUrl?: string
   testid: string
+  showOwner?: boolean
 };
 
-export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, testid, ...props }) => {
+export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, testid, showOwner, ...props }) => {
   const [token, setToken] = useState<Omit<TokenByIdResponse | MyToken, 'collection' | 'nestingParentToken' | 'properties'> | undefined>(props.token);
   const [collection, setCollection] = useState<(CollectionInfoWithSchemaResponse) | undefined>();
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isBundleState, setIsBundleState] = useState<boolean>();
+  const [isNestedState, setIsNestedState] = useState<boolean>();
   const [tokensCount, setTokensCount] = useState<number>();
 
   const { api, currentChainId } = useApi();
@@ -44,20 +44,22 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
     imageUrl,
     price,
     auction,
-    video
+    video,
+    owner
   } = useMemo(() => {
     if (offer || (token && collection) || ((token as MyToken).collectionName && (token as MyToken).tokenPrefix)) {
-      const { image, video } = offer?.tokenDescription || token || {};
-      const collectionName = offer?.collectionDescription?.name || collection?.name || (token as MyToken).collectionName || '';
-      const tokenPrefix = offer?.collectionDescription?.tokenPrefix || collection?.tokenPrefix || (token as MyToken).tokenPrefix;
-      const { auction, price } = offer || {};
+      const { image, video, owner } = offer?.tokenDescription || token || {};
+      const collectionName = offer?.collectionDescription?.name || collection?.name || (token as MyToken)?.collectionName || '';
+      const tokenPrefix = offer?.collectionDescription?.tokenPrefix || collection?.tokenPrefix || (token as MyToken)?.tokenPrefix || '';
+      const { auction, price, seller } = offer || {};
       return {
         tokenTitle: `${tokenPrefix || ''} #${tokenId || ''}`,
         collectionTitle: `${collectionName?.substring(0, 25) || ''} [id ${collectionId || ''}]`,
         imageUrl: image,
         video: stringToDecodedInfixOrUrlOrCidAndHash(video),
         auction,
-        price
+        price,
+        owner: seller || owner
       };
     }
 
@@ -91,6 +93,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
       }
       setIsBundleState(!!count);
       setTokensCount(count);
+      setIsNestedState(!!offer?.tokenDescription?.nestingParentToken);
     })();
   }, [offer, tokenId, collectionId, api?.nft]);
 
@@ -115,6 +118,11 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
     tokenId: tokenId?.toString()
   }), [currentChainId, collectionId, tokenId]);
 
+  const isOwner = useMemo(() => {
+    if (!selectedAccount?.address || !owner) return false;
+    return isTokenOwner(selectedAccount.address, owner);
+  }, [selectedAccount?.address, owner]);
+
   return (
     <TokensCardStyled>
       <TokensMedia
@@ -123,38 +131,41 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
         imageUrl={imageUrl}
         video={video}
         testid={`${testid}-token-media`}
-        badge={isBundleState ? 'Bundle' : ''}
+        badge={isNestedState ? 'Nested' : isBundleState ? 'Bundle' : ''}
       />
       <Description>
-        <Link to={tokenPath} title={tokenTitle}>
-          <Text
-            size='l'
-            weight='regular'
-            testid={`${testid}-tokenId`}
+        <BasicDataWrapper>
+          <Link to={tokenPath} title={tokenTitle}>
+            <Text
+              size='l'
+              weight='regular'
+              testid={`${testid}-tokenId`}
+            >
+              {tokenTitle}
+            </Text>
+          </Link>
+          <Link
+            data-testid={`${testid}-collection-${collectionId}-link`}
+            to={`/${currentChainId?.toLowerCase()}/collection/${collectionId || ''}`}
           >
-            {tokenTitle}
-          </Text>
-        </Link>
-        <UILink
-          data-testid={`${testid}-collection-${collectionId}-link`}
-          href={`${config.blockchains[currentChainId || '']?.scanUrl || ''}collections/${collectionId || ''}`}
-          target={'_blank'}
-          rel='noreferrer'
-        >
-          <Text color='primary-600' size='s'>
-            {collectionTitle}
-          </Text>
-        </UILink>
-        {isBundleState && <BundleItemsCount count={tokensCount || 0} testId={testid} />}
-        {price?.parsed && <PriceWrapper>
-          <Text
-            testid={`${testid}-price`}
-            size='s'
-          >{topBid ? `${formatBalance(Number(topBid))}` : `${price.parsed}` }</Text>
-          <IconStyled name={`chain-${currentChainId}`} size={16} />
-          {!auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
-        </PriceWrapper>}
-        {auction && <AuctionInfoWrapper>
+            <Text color='primary-600' size='s'>
+              {collectionTitle}
+            </Text>
+          </Link>
+          {showOwner && <Text size={'s'} color={'grey-500'}>{isOwner ? 'You own it' : `Owned by: ${shortcutText(owner || '')}`}</Text>}
+          {isBundleState && <BundleItemsCount count={tokensCount || 0} testId={testid} />}
+        </BasicDataWrapper>
+        {!!price?.parsed && <TradingInfoWrapper>
+          <Text size={'xs'} color={'grey-500'} >Price</Text>
+          <PriceWrapper length={price.parsed.toFixed(5).length}>
+            <Text
+              testid={`${testid}-price`}
+              size='l'
+            >{topBid ? `${formatBalance(Number(topBid))}` : `${formatBalance(price.parsed, 4, true)}` }</Text>
+            <IconStyled name={`chain-${currentChainId?.toLowerCase()}`} size={16} />
+          </PriceWrapper>
+        </TradingInfoWrapper>}
+        {/* {auction && <AuctionInfoWrapper>
           {isTopBidder && <Text
             testid={`${testid}-leading-bid`}
             size={'xs'}
@@ -173,10 +184,10 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
             auction.bids.length > 0 ? 'Last bid' : 'Minimum bid'
           }</Text>}
           <StyledText color={'dark'} size={'xs'}>{`${timeDifference(new Date(auction?.stopAt || '').getTime() / 1000)} left`}</StyledText>
-        </AuctionInfoWrapper>}
+        </AuctionInfoWrapper>} */}
       </Description>
 
-      {isFetching && <Loader isFullPage />}
+      {!!isFetching && <Loader isFullPage />}
     </TokensCardStyled>
   );
 };
@@ -190,20 +201,40 @@ const TokensCardStyled = styled.div`
   cursor: pointer;
 `;
 
+const BasicDataWrapper = styled.div`
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  justify-content: flex-start;
+  flex-grow: 1;
+`;
+
 const Description = styled.div`
   display: flex;
   flex-direction: column;
-
+  width: 100%;
   span {
     color: ${Primary600};
   }
 `;
 
-const PriceWrapper = styled.div` 
+const PriceWrapper = styled.div<{ length: number }>` 
   display: flex;
   align-items: center;
-  column-gap: calc(var(--gap) / 4);
+  span:first-child {
+    font-size: ${({ length }) => `${length > 11 ? 18 - (length - 11) : 18}px !important`}
+  }
+  span {
+    white-space: nowrap;
+  }
+`;
+
+const TradingInfoWrapper = styled.div` 
+  display: flex;
   margin-top: calc(var(--gap) / 2);
+  column-gap: calc(var(--gap) / 4);
+  align-items: center;
+  justify-content: space-between;
 `;
 
 const StyledText = styled(Text)` 

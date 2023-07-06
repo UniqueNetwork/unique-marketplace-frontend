@@ -5,22 +5,23 @@
         "internalType": "uint32",
         "name": "fee",
         "type": "uint32"
+      },
+      {
+        "internalType": "uint64",
+        "name": "timestamp",
+        "type": "uint64"
       }
     ],
     "stateMutability": "nonpayable",
     "type": "constructor"
   },
   {
-    "inputs": [
-      
-    ],
+    "inputs": [],
     "name": "CollectionNotFound",
     "type": "error"
   },
   {
-    "inputs": [
-      
-    ],
+    "inputs": [],
     "name": "CollectionNotSupportedERC721",
     "type": "error"
   },
@@ -47,51 +48,48 @@
     "type": "error"
   },
   {
-    "inputs": [
-      
-    ],
+    "inputs": [],
     "name": "InvalidMarketFee",
     "type": "error"
   },
   {
     "inputs": [
-      
+      {
+        "internalType": "uint256",
+        "name": "totalRoyalty",
+        "type": "uint256"
+      }
     ],
+    "name": "InvalidRoyaltiesError",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "NotEnoughMoneyError",
     "type": "error"
   },
   {
-    "inputs": [
-      
-    ],
+    "inputs": [],
     "name": "OrderNotFound",
     "type": "error"
   },
   {
-    "inputs": [
-      
-    ],
+    "inputs": [],
     "name": "SellerIsNotOwner",
     "type": "error"
   },
   {
-    "inputs": [
-      
-    ],
+    "inputs": [],
     "name": "TokenIsAlreadyOnSale",
     "type": "error"
   },
   {
-    "inputs": [
-      
-    ],
+    "inputs": [],
     "name": "TokenIsNotApproved",
     "type": "error"
   },
   {
-    "inputs": [
-      
-    ],
+    "inputs": [],
     "name": "TooManyAmountRequested",
     "type": "error"
   },
@@ -106,6 +104,25 @@
       }
     ],
     "name": "Log",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
     "type": "event"
   },
   {
@@ -235,6 +252,54 @@
         "internalType": "uint32",
         "name": "salesAmount",
         "type": "uint32"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "eth",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "sub",
+            "type": "uint256"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct CrossAddress",
+        "name": "buyer",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "eth",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "sub",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct CrossAddress",
+            "name": "crossAddress",
+            "type": "tuple"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct RoyaltyAmount[]",
+        "name": "royalties",
+        "type": "tuple[]"
       }
     ],
     "name": "TokenIsPurchased",
@@ -374,13 +439,47 @@
   },
   {
     "inputs": [
-      
+      {
+        "internalType": "address",
+        "name": "admin",
+        "type": "address"
+      }
     ],
     "name": "addAdmin",
-    "outputs": [
-      
-    ],
+    "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "admins",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "buildVersion",
+    "outputs": [
+      {
+        "internalType": "uint32",
+        "name": "",
+        "type": "uint32"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -419,9 +518,7 @@
       }
     ],
     "name": "buy",
-    "outputs": [
-      
-    ],
+    "outputs": [],
     "stateMutability": "payable",
     "type": "function"
   },
@@ -439,10 +536,21 @@
       }
     ],
     "name": "checkApproved",
-    "outputs": [
-      
-    ],
+    "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "ctime",
+    "outputs": [
+      {
+        "internalType": "uint64",
+        "name": "",
+        "type": "uint64"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -514,15 +622,39 @@
     "type": "function"
   },
   {
-    "inputs": [
-      
-    ],
+    "inputs": [],
     "name": "marketFee",
     "outputs": [
       {
         "internalType": "uint32",
         "name": "",
         "type": "uint32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "ownerAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
       }
     ],
     "stateMutability": "view",
@@ -569,20 +701,27 @@
       }
     ],
     "name": "put",
-    "outputs": [
-      
-    ],
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [
-      
+      {
+        "internalType": "address",
+        "name": "admin",
+        "type": "address"
+      }
     ],
     "name": "removeAdmin",
-    "outputs": [
-      
-    ],
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -605,27 +744,43 @@
       }
     ],
     "name": "revoke",
-    "outputs": [
-      
-    ],
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [
-      
+      {
+        "internalType": "uint32",
+        "name": "collectionId",
+        "type": "uint32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "tokenId",
+        "type": "uint32"
+      }
     ],
-    "name": "setOwner",
-    "outputs": [
-      
-    ],
+    "name": "revokeAdmin",
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [
-      
+      {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
     ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "version",
     "outputs": [
       {
@@ -646,9 +801,7 @@
       }
     ],
     "name": "withdraw",
-    "outputs": [
-      
-    ],
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   }

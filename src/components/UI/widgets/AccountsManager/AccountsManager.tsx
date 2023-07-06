@@ -80,10 +80,10 @@ export const AccountsManager = (props: AccountsManagerProps) => {
               onClick={(event) => {
                 if (!selectedAccount?.address) return;
                 event.stopPropagation();
-                copy(selectedAccount.address);
+                void copy(selectedAccount.address);
                 onCopyAddressClick?.(selectedAccount.address);
               }}
-              testid={`selected-address-copy-${selectedAccount?.address}`}
+              testid={`selected-address-copy-${selectedAccount?.address || ''}`}
             />
           </div>
           <Text size='s'>{`${balance} ${symbol}`}</Text>
@@ -116,7 +116,7 @@ const AccountsManagerWrapper = styled.div`
   padding: calc(var(--prop-gap) * 1.5 / 4) calc(var(--prop-gap) * 2)
   calc(var(--prop-gap) * 1.5 / 4) var(--prop-gap);
   cursor: pointer;
-  max-width: 200px;
+  max-width: 230px;
   &:hover {
     border: 1px solid var(--color-blue-grey-400);
   }

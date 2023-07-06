@@ -8,6 +8,8 @@ import { defaultSortingValue, pageSize } from '../constants';
 import { TOption } from '../types';
 import { TokensResponse } from 'api/restApi/tokens/types';
 import { useApi } from 'hooks/useApi';
+import { Address } from '@unique-nft/utils';
+import { useIsFirstRender } from 'hooks/useIsFirstRender';
 
 export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fetch(payload: GetOffersRequestPayload): Promise<OffersResponse | TokensResponse> }) => {
   const { currentChainId, api } = useApi();
@@ -22,9 +24,14 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
     if (!filterState) return {};
     const { statuses, prices, collections, attributeCounts, attributes, ...otherFilter } = filterState;
     const { myNFTs, myBets, timedAuction, fixedPrice } = statuses || {};
+    const seller = myNFTs && selectedAccount?.address
+      ? (Address.is.ethereumAddressInAnyForm(selectedAccount?.address)
+        ? Address.normalize.ethereumAddress(selectedAccount?.address)
+        : Address.normalize.substrateAddress(selectedAccount.address))
+      : undefined;
 
     return {
-      seller: myNFTs ? selectedAccount?.address : undefined,
+      seller,
       bidderAddress: myBets ? selectedAccount?.address : undefined,
       isAuction: (timedAuction && fixedPrice) || (!timedAuction && !fixedPrice) ? undefined : !!timedAuction && !fixedPrice,
       ...prices,
@@ -40,7 +47,7 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
     setUrlParameter('sortingValue', value.id);
     void fetch({
       page: 1,
-      pageSize,
+      pageSize: 20,
       ...(getFilterByState(filterState)),
       searchText: searchValue || undefined,
       sort: [value.id]
@@ -52,7 +59,7 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
     setUrlParameter('searchValue', value || '');
     void fetch({
       page: 1,
-      pageSize,
+      pageSize: 20,
       ...(getFilterByState(filterState)),
       searchText: value || undefined,
       sort: [sortingValue]
@@ -61,15 +68,14 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
 
   const onFilterChange = useCallback(async (filterState: FilterState | null) => {
     setUrlParameter('filterState', filterState ? JSON.stringify(filterState) : '');
-    const { attributesCount } = await fetch({
+    await fetch({
       page: 1,
-      pageSize,
+      pageSize: 20,
       ...(getFilterByState(filterState)),
       searchText: searchValue || undefined,
       sort: [sortingValue]
     });
-    const _selectedAttributeCounts = filterState?.attributeCounts?.filter((item) => attributesCount.findIndex(({ numberOfAttributes }) => numberOfAttributes === item) > -1);
-    setFilterState({ ...filterState, attributeCounts: _selectedAttributeCounts });
+    setFilterState(filterState);
   }, [fetch, sortingValue, getFilterByState, searchValue]);
 
   const onChangeAccount = useCallback(() => {
@@ -78,9 +84,15 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
   }, [filterState, isFetching, onFilterChange]);
 
   useEffect(() => {
-    if (!selectedAccount || isAccountsLoading) return;
+    if (isAccountsLoading) return;
     onChangeAccount();
-  }, [selectedAccount?.address, isAccountsLoading]);
+  }, [isAccountsLoading]);
+
+  useEffect(() => {
+    if (selectedAccount?.address && filterState?.statuses?.myNFTs) {
+      onChangeAccount();
+    }
+  }, [selectedAccount?.address]);
 
   const filterCount = useMemo(() => {
     const { statuses, prices, collections = [], attributes = [], attributeCounts = [] } = filterState || {};
@@ -92,17 +104,22 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
     return statusesCount + collectionsCount + attributesCount + numberOfAttributesCount + (prices ? 1 : 0);
   }, [filterState]);
 
+  const isFirstRender = useIsFirstRender();
+
   useEffect(() => {
-    if (!currentChainId || !api) return;
+    console.log(currentChainId);
+
+    if (!currentChainId || !api || isFirstRender) return;
     setFilterState(null);
     setSearchValue(undefined);
     setSortingValue(defaultSortingValue.id);
     void fetch({
       page: 1,
-      pageSize,
+      pageSize: 20,
       sort: [defaultSortingValue.id]
     });
   }, [currentChainId]);
+  console.log(currentChainId);
 
   return {
     filterState,

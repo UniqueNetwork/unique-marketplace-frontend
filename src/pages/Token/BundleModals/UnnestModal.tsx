@@ -15,7 +15,8 @@ import { useApi } from 'hooks/useApi';
 import { debounce } from 'utils/helpers';
 import { fromStringToBnString } from 'utils/bigNum';
 import { Coral700 } from 'styles/colors';
-import { TokenByIdResponse } from '@unique-nft/sdk';
+import { TokenByIdResponse, TokenIdQuery } from '@unique-nft/sdk';
+import { useCollections } from 'hooks/useCollections';
 
 export const UnnestModal: FC<TBundleTrunsferModalBodyProps> = ({ token, setIsClosable, onFinish, testid }) => {
   const { selectedAccount } = useAccounts();
@@ -32,7 +33,8 @@ export const UnnestModal: FC<TBundleTrunsferModalBodyProps> = ({ token, setIsClo
   if (status === 'unnest-stage') {
     return (<UnnestStagesModal
       onFinish={onFinish}
-      token={token}
+      tokenId={token.tokenId}
+      collectionId={token.collectionId}
       setIsClosable={setIsClosable}
       testid={testid}
     />);
@@ -45,17 +47,24 @@ const AskUnnestModal: FC<{ token: INestingToken | TokenByIdResponse, onUnnest():
   const { selectedAccount } = useAccounts();
   const [isFeeLoading, setIsFeeLoading] = useState(false);
   const [fee, setFee] = useState<string>('0');
+  const { getCollection } = useCollections();
+  const [isSponsored, setIsSponsored] = useState(false);
 
   useEffect(() => {
     if (!api?.nft || !token || !selectedAccount) return;
     setIsFeeLoading(true);
-    debounce(() => {
+    debounce(async () => {
+      const collection = await api?.collection?.getCollection(token?.collectionId);
+      const isSponsored = !!collection?.sponsorship?.isConfirmed;
+      setIsSponsored(isSponsored);
+
+      if (isSponsored) return setIsFeeLoading(false);
       api.nft?.getUnnestFee(
         token.collectionId,
         token.tokenId,
         1,
-        { account: selectedAccount })
-      .then((fee) => {
+        { account: selectedAccount }
+      ).then((fee) => {
         setFee(fee || '0');
       }).catch((e) => {
         console.error('Failed to get fee: ', e);
@@ -63,7 +72,7 @@ const AskUnnestModal: FC<{ token: INestingToken | TokenByIdResponse, onUnnest():
         setIsFeeLoading(false);
       });
     }, 300)();
-  }, [token, api, selectedAccount?.address]);
+  }, [token.tokenId, token.collectionId, api?.nft, selectedAccount?.address]);
 
   const onConfirmUnnestClick = useCallback(
     () => {
@@ -73,10 +82,10 @@ const AskUnnestModal: FC<{ token: INestingToken | TokenByIdResponse, onUnnest():
   );
 
   const isFeeGreaterThanBalance = useMemo(() => {
-    if (!fee) return false;
+    if (!fee || isSponsored) return false;
     const feeBN = new BN(fromStringToBnString(fee));
     return feeBN.gt(selectedAccount?.balance?.raw || new BN(0));
-  }, [fee, selectedAccount?.balance?.raw]);
+  }, [fee, selectedAccount?.balance?.raw, isSponsored]);
 
   return (
     <>
@@ -94,6 +103,7 @@ const AskUnnestModal: FC<{ token: INestingToken | TokenByIdResponse, onUnnest():
           isFeeLoading={isFeeLoading}
           fee={fee || '0'}
           testid={`${testid}-fee-message`}
+          placeholder={isSponsored ? `Collection ID ${token.collectionId} sponsored` : undefined}
         />
       </Row>
       <ButtonWrapper>
@@ -108,8 +118,7 @@ const AskUnnestModal: FC<{ token: INestingToken | TokenByIdResponse, onUnnest():
   );
 };
 
-const UnnestStagesModal: FC<TBundleTrunsferModalBodyProps> = ({ token, onFinish, testid }) => {
-  const { collectionId, tokenId } = token;
+const UnnestStagesModal: FC<Omit<TBundleTrunsferModalBodyProps, 'token'> & TokenIdQuery> = ({ tokenId, collectionId, onFinish, testid }) => {
   const { stages, status, initiate } = useUnnestStages({ tokenId, collectionId });
   const { info } = useNotifications();
   const { selectedAccount } = useAccounts();
@@ -117,16 +126,16 @@ const UnnestStagesModal: FC<TBundleTrunsferModalBodyProps> = ({ token, onFinish,
   useEffect(() => {
     if (!selectedAccount?.address) return;
     void initiate(null);
-  }, [selectedAccount]);
+  }, [selectedAccount?.address]);
 
   useEffect(() => {
     if (status === StageStatus.success) {
       info(
-        <div data-testid={`${testid}-success-notification`}><Link href={`/token/${token?.collectionId}/${token?.tokenId}`} title={`${''} #${token?.tokenId}`}/> unnested</div>,
+        <div data-testid={`${testid}-success-notification`}><Link href={`/token/${collectionId}/${tokenId}`} title={`${''} #${tokenId}`}/> unnested</div>,
         { name: 'success', size: 32, color: 'var(--color-additional-light)' }
       );
     }
-  }, [status, info, testid, token]);
+  }, [status]);
 
   return (
     <div>

@@ -13,14 +13,16 @@ import { Grey300 } from '../../../styles/colors';
 import { Offer } from '../../../api/restApi/offers/types';
 import { useAccounts } from '../../../hooks/useAccounts';
 import BuyBundleInformation from '../TokenDetail/BuyBundleInformation';
+import { RoyaltyValue } from '../TokenDetail/Royalty';
 
 interface BuyTokenProps {
   offer?: Offer;
+  royalty?: number;
   onBuy(): void
   testid?: string
 }
 
-export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy, testid }) => {
+export const BuyToken: FC<BuyTokenProps> = ({ offer, royalty, onBuy, testid }) => {
   const { api } = useApi();
 
   const { fee, fetchingFee, getFee } = useGetFee<Parameters<MarketController['getBuyFixFee']>>(api?.market?.getBuyFixFee.bind(api?.market));
@@ -28,7 +30,6 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy, testid }) => {
 
   const isEnoughBalance = useMemo(() => {
     if (!selectedAccount?.balance?.raw || selectedAccount.balance?.raw.isZero() || !offer?.price?.raw) return false;
-    // TODO: check contractCall fee
     return selectedAccount.balance?.raw.gte(new BN(offer?.price?.raw));
   }, [offer?.price?.raw, selectedAccount?.balance?.raw]);
 
@@ -55,21 +56,18 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy, testid }) => {
   return (<>
     <Text size={'l'}>Price</Text>
     <Price price={offer?.price?.parsed.toString()} />
+    <RoyaltyValue value={royalty} />
     <ButtonWrapper>
       <Button
         onClick={onBuyClick}
         role='primary'
         title='Buy'
         wide={true}
-        disabled={!isEnoughBalance}
+        disabled={!isEnoughBalance || (royalty || 0) >= 1}
       />
     </ButtonWrapper>
-    <FeeMessage
-      isFeeLoading={fetchingFee}
-      fee={fee || '0'}
-      testid={`${testid}-fee-message`}
-    />
     {!isEnoughBalance && <Text color={'coral-500'} testid={`${testid}-low-balance-warning`}>Your balance is too low to buy</Text>}
+    {(royalty || 0) >= 1 && <Text color={'coral-500'} testid={`${testid}-low-balance-warning`}>The royalty is too big. Maximum royalty - 99%</Text>}
     {!!offer?.tokenDescription?.nestingChildTokens?.length && <BuyBundleInformation testid={testid}/>}
     <Divider />
   </>);
@@ -77,7 +75,8 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy, testid }) => {
 
 const ButtonWrapper = styled.div`
   width: 200px;
-  margin-top: calc(var(--gap) * 1.5);
+  margin-top: calc(var(--gap) / 2);
+  margin-bottom: calc(var(--gap) / 2);
 `;
 
 const Divider = styled.div`

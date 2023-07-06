@@ -3,7 +3,7 @@ import { Text } from '@unique-nft/ui-kit';
 import { Checkbox } from 'components/UI';
 import styled from 'styled-components';
 
-import Accordion from 'components/Accordion/Accordion';
+import { Accordion } from 'components/Accordion/Accordion';
 import AttributeCountsFilter from 'components/Filters/AttributeCountsFilter';
 import AttributesFilter from 'components/Filters/AttributesFilter';
 import CheckboxSkeleton from 'components/Skeleton/CheckboxSkeleton';
@@ -13,6 +13,7 @@ import { Attribute, AttributeCount } from 'api/restApi/offers/types';
 import { getAttributesCountFromTokens, getAttributesFromTokens } from './utils/attributes';
 import { MixedMyTokenAndOffer } from '../types';
 import { MyCollection } from 'api/restApi/collections/types';
+import { getIpfsUriByImagePath } from 'utils/urlUtils';
 
 interface CollectionsFilterProps {
   value?: { collections?: number[], attributes?: { key: string, attribute: string }[], attributeCounts?: number[] } | null
@@ -83,7 +84,6 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({
       isOpen={true}
       onClear={onCollectionsClear}
       isClearShow={selectedCollections.length > 0}
-      testid={`${testid}-accordion`}
     >
       <CollectionFilterWrapper>
         {isFetchingTokens && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
@@ -98,7 +98,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({
               onChange={onCollectionSelect(collection.id)}
               testid={`${testid}-checkbox-${collection.id}`}
             />
-            <CollectionCover src={collection.cover || ''} size={22} type={'circle'}/>
+            <CollectionCover src={getIpfsUriByImagePath(collection.cover || '')} size={22} type={'circle'}/>
             <Text
               testid={`${testid}-name-${collection.id}`}
             >{collection.name || ''}</Text>

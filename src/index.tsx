@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
-import { Market, MyTokens, Collection, Accounts, Trades, FAQ, TokenPage, Collections, CollectionEdit } from './pages';
+import { Market, MyTokens, Collection, Accounts, Trades, Faq, TokenPage, Collections, CollectionEdit } from './pages';
 import { GlobalStyle } from './styles';
 import { Error404 } from './pages/Errors/404';
 
@@ -29,7 +29,7 @@ const commonRoutes = (<>
   />
   <Route
     element={<MyTokens />}
-    path={'myTokens'}
+    path={'sellTokens'}
   />
   <Route
     element={<Accounts />}
@@ -40,7 +40,7 @@ const commonRoutes = (<>
     path={'trades'}
   />
   <Route
-    element={<FAQ />}
+    element={<Faq />}
     path={'faq'}
   />
   <Route

@@ -3,7 +3,7 @@ import config from '../config';
 export const ChainIdLocalStorageKey = 'unique_market_chain_id';
 
 export const getInitialChainId = (): string => {
-  const defaultChainId = Object.keys(config?.blockchains || {})[0];
+  const defaultChainId = Object.keys(config?.blockchains || {}).reverse()[0];
 
   const getStoredChainId = () => {
     const chainId = localStorage.getItem(ChainIdLocalStorageKey);

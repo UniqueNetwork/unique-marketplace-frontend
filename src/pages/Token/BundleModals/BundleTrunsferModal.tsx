@@ -27,8 +27,10 @@ const BundleTrunsferModal = ({ token, onClose, onFinish, bundleModalType, testid
   const [isClosable, setIsClosable] = useState<boolean>(true);
 
   useEffect(() => {
-    if (bundleModalType === BundleModalType.default) setIsVisible(false);
-    else setIsVisible(true);
+    if (bundleModalType === BundleModalType.default) {
+      setIsVisible(false);
+      setIsClosable(true);
+    } else setIsVisible(true);
   }, [bundleModalType]);
 
   const ModalBodyComponent = useMemo<FC<TBundleTrunsferModalBodyProps> | null>(() => {
@@ -43,7 +45,7 @@ const BundleTrunsferModal = ({ token, onClose, onFinish, bundleModalType, testid
     }
   }, [bundleModalType]);
 
-  if (!ModalBodyComponent || !token || !parent) return null;
+  if (!ModalBodyComponent || !token) return null;
 
   return (
     <Modal isVisible={isVisible}

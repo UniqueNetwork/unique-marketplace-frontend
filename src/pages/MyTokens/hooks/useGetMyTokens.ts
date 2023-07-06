@@ -3,18 +3,19 @@ import { post } from 'api/restApi/base';
 import { useApi } from 'hooks/useApi';
 import { useCallback, useState } from 'react';
 import { GqlToken, MyToken } from '../types';
-
-const getTokensEndpoint = 'https://api-opal.uniquescan.io/v1/graphql';
+import config from '../../../config';
+import { Address } from '@unique-nft/utils';
 
 const gqlQuery = {
   operationName: 'tokens_by_account_query',
   query: `query tokens_by_account_query($owner: String) {
     tokens(
-      where: {tokens_owner: {_eq: $owner}, burned: {_eq: "false"}}
-      limit: 1000
+      where: {tokens_owner: {_eq: $owner}, type: {_eq: NFT}, burned: {_eq: "false"}}
+      limit: 100000
     ) {
       count
       data {
+        attributes
         tokenId: token_id
         token_name
         tokenPrefix: token_prefix
@@ -38,16 +39,18 @@ const gqlQuery = {
 };
 
 export const useGetMyTokens = () => {
-  const { settings } = useApi();
+  const { settings, currentChainId, chainProperties } = useApi();
   const [isFetching, setIsFetching] = useState(false);
   const [tokens, setTokens] = useState<MyToken[]>([]);
 
   const fetchMyTokens = useCallback(async (account: MarketAccount | undefined) => {
     if (!account) return [];
     setIsFetching(true);
-    const address = account.address;
-
-    const response = await post(getTokensEndpoint, {
+    const address = Address.is.ethereumAddressInAnyForm(account.address)
+      ? account.address
+      : Address.normalize.substrateAddress(account.address, chainProperties?.SS58Prefix);
+    const { scanApi } = config.blockchains[currentChainId || ''] || {};
+    const response = await post(scanApi, {
       ...gqlQuery,
       variables: {
         owner: address
@@ -64,7 +67,7 @@ export const useGetMyTokens = () => {
     }
     setIsFetching(false);
     return [];
-  }, [settings]);
+  }, [settings, chainProperties]);
 
   return {
     isFetching,

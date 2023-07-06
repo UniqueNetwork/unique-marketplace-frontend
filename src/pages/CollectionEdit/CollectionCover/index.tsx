@@ -13,15 +13,30 @@ interface CollectionCoverProps {
 
 export const CollectionCover = ({ name, src, onChange, onRemove }: CollectionCoverProps) => {
   const onReplaceClick = useCallback(() => {
-    throw new Error('Not imlemented');
-  }, []);
+    const input = document.createElement('input');
+    input.type = 'file';
+
+    input.onchange = (e: Event) => {
+      if (!e.target) return;
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      const src = URL.createObjectURL(file);
+      onChange(
+        src,
+        file
+      );
+      input.remove();
+    };
+
+    input.click();
+  }, [onChange]);
 
   return <CollectionCoverWrapper>
     <PictureWrapper>
       {src && <Picture alt={name || ''} src={src} size={160} />}
-      {!src && <UploadCover onChange={onChange} />}
+      {/* {!src && <UploadCover onChange={onChange} />} */}
     </PictureWrapper>
-    {src && <ButtonsWrapper>
+    {/* {src && <ButtonsWrapper>
       <Button title='Replace image' role='primary' onClick={onReplaceClick}/>
       <Button title='Delete' role='danger' onClick={onRemove} />
       <Text size='xs'>Optimal image size<br/>320×320 px</Text>
@@ -29,7 +44,7 @@ export const CollectionCover = ({ name, src, onChange, onRemove }: CollectionCov
     {!src && <ButtonsWrapper>
       <Text size='s'>Upload or drag the image</Text>
       <Text size='xs'>Optimal image size<br/>320×320 px</Text>
-    </ButtonsWrapper>}
+    </ButtonsWrapper>} */}
   </CollectionCoverWrapper>;
 };
 
@@ -37,6 +52,7 @@ const CollectionCoverWrapper = styled.div`
   margin-top: -80px;
   width: 160px;
   min-width: 160px;
+  z-index: 1;
 `;
 
 const UploadCover = styled(Upload)`
@@ -65,4 +81,16 @@ const PictureWrapper = styled.div`
   min-width: 160px;
   height: 160px;
   background-color: var(--color-primary-100);
+
+  div {
+    padding: 0 !important;
+    position: relative;
+  }
+  img {
+    object-fit: cover;
+    width: 100%;
+  }
+  /* @media (max-width: 768px) {
+    margin-left: calc(var(--gap) * 2);
+  } */
 `;

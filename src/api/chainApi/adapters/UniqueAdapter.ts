@@ -6,6 +6,8 @@ import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
 import { ChainValue } from '../controllers/BaseController';
 
+const buyGasLimit = 1_000_000;
+const sellGasLimit = 200_000;
 class UniqueAdapter implements IMarketContractAdapter {
   constructor(contractAddress: string, uniqueSdk: Sdk) {
     this.uniqueSdk = uniqueSdk;
@@ -52,13 +54,26 @@ class UniqueAdapter implements IMarketContractAdapter {
     return res.fee.raw;
   }
 
-  async nestToken(from: NestTokenParam, to: NestTokenParam, amount: number, signer: Signer): Promise<void> {
+  async nestToken(address: string, nested: NestTokenParam, parent: NestTokenParam, amount: number, signer: Signer): Promise<void> {
     if (amount !== 1) throw new Error('RFT support not implemented');
-    const res = await this.uniqueSdk.token.nest({
-      address: signer.address || '',
-      nested: from,
-      parent: to
-    }, { signer });
+    let res;
+    if (address !== signer.address) {
+      // token is already nested
+      const to = Address.nesting.idsToAddress(parent.collectionId, parent.tokenId);
+      res = await this.uniqueSdk.token.transfer({
+        address: signer.address,
+        from: address,
+        to,
+        collectionId: nested.collectionId,
+        tokenId: nested.tokenId
+      }, { signer });
+    } else {
+      res = await this.uniqueSdk.token.nest({
+        address: signer.address || '',
+        nested: nested,
+        parent: parent
+      }, { signer });
+    }
     if (res.error) {
       console.error('Nest failed: ', res.error);
       throw new Error(res.error.toString());
@@ -123,6 +138,7 @@ class UniqueAdapter implements IMarketContractAdapter {
       address: signer.address || '',
       contractAddress: this.contractAddress,
       funcName: 'put',
+      gasLimit: sellGasLimit,
       args: {
         collectionId,
         tokenId,
@@ -140,6 +156,7 @@ class UniqueAdapter implements IMarketContractAdapter {
       address: signer.address || '',
       contractAddress: this.contractAddress,
       funcName: 'put',
+      gasLimit: sellGasLimit,
       args: {
         collectionId,
         tokenId,
@@ -157,6 +174,7 @@ class UniqueAdapter implements IMarketContractAdapter {
       contractAddress: this.contractAddress,
       value: price,
       funcName: 'buy',
+      gasLimit: buyGasLimit,
       args: {
         collectionId,
         tokenId,
@@ -174,6 +192,7 @@ class UniqueAdapter implements IMarketContractAdapter {
       contractAddress: this.contractAddress,
       value: price,
       funcName: 'buy',
+      gasLimit: buyGasLimit,
       args: {
         collectionId,
         tokenId,

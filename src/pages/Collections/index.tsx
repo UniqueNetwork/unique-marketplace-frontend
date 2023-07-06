@@ -1,5 +1,5 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { SelectOptionProps } from '@unique-nft/ui-kit';
+import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { SelectOptionProps, Tooltip } from '@unique-nft/ui-kit';
 import { Select, Button } from 'components/UI';
 import styled from 'styled-components/macro';
 import NoItems from 'components/NoItems';
@@ -15,6 +15,8 @@ import { MyCollection } from 'api/restApi/collections/types';
 import config from 'config';
 import { useApi } from 'hooks/useApi';
 import { useCollections } from 'hooks/useCollections';
+import { MetamaskAccount } from '@unique-nft/accounts/metamask';
+import { Address } from '@unique-nft/utils';
 
 type TOption = {
   iconRight: {
@@ -99,31 +101,6 @@ export const CollectionsPage: FC = () => {
     window.open(walletUrl, '_blank')?.focus();
   }, [currentChainId]);
 
-  const onManageSponsorshipClick = useCallback((collection: MyCollection) => () => {
-    setModalType(AdminPanelModalType.acceptSponsorship);
-    setSelectedCollection(collection);
-  }, []);
-
-  const onRemoveSponsorshipClick = useCallback((collection: MyCollection) => () => {
-    setModalType(AdminPanelModalType.rejectSponsorship);
-    setSelectedCollection(collection);
-  }, []);
-
-  const onAddCollectionClick = useCallback((collection: MyCollection | undefined = undefined) => () => {
-    setModalType(AdminPanelModalType.addCollection);
-    if (collection) setSelectedCollection(collection);
-  }, []);
-
-  const onRemoveCollectionClick = useCallback((collection: MyCollection) => () => {
-    setModalType(AdminPanelModalType.removeCollection);
-    setSelectedCollection(collection);
-  }, []);
-
-  const onManageTokensClick = useCallback((collection: MyCollection) => () => {
-    setModalType(AdminPanelModalType.selectNFTs);
-    setSelectedCollection(collection);
-  }, []);
-
   const onViewOnScanClick = useCallback((collection: MyCollection) => () => {
     const { scanUrl } = config.blockchains[currentChainId || ''] || {};
     if (!scanUrl) return;
@@ -151,6 +128,8 @@ export const CollectionsPage: FC = () => {
     return collections.filter(filterCollection).sort(sortCollection);
   }, [sortingValue, searchValue, collections]);
 
+  const CreateCollectionButtonRef = useRef<HTMLDivElement>(null);
+
   return (<PagePaper>
     <MainContent>
       <ControlsWrapper>
@@ -171,16 +150,20 @@ export const CollectionsPage: FC = () => {
           </SortSelectWrapper>
         </SearchAndSortingWrapper>
         <ButtonsWrapper>
-          <Button title={'Create new via wallet'} onClick={onCreateCollectionViaWalletClick}/>
-          <Button
-            role={'primary'}
-            title={'Add to the marketplace'}
-            onClick={onAddCollectionClick()}
-          />
+          {Address.is.ethereumAddressInAnyForm(selectedAccount?.address)
+          ? <>
+            <Tooltip targetRef={CreateCollectionButtonRef}>{'We are sorry but you cannot create a collection by Metamask account yet. Coming soon...'}</Tooltip>
+            <div ref={CreateCollectionButtonRef}>
+              <Button role='primary' title={'Create new via wallet'} disabled/>
+            </div>
+          </>
+          : <Button role='primary' title={'Create new via wallet'} onClick={onCreateCollectionViaWalletClick}/>}
         </ButtonsWrapper>
       </ControlsWrapper>
       <CollectionListWrapper>
-        {!(isAccountsLoading || isFetching) && filteredCollections.length === 0 && <NoItems />}
+        {!(isAccountsLoading || isFetching) && filteredCollections.length === 0 && <NoItems
+          noItemsText='You don`t have any personal collections yet, but you can create one right now!'
+        />}
         <CollectionListStyled >
           {(isAccountsLoading || isFetching) && <>
             {Array.from({ length: 4 }).map((_, index) => <CardSkeleton key={`card-skeleton-${index}`} />)}
@@ -188,11 +171,6 @@ export const CollectionsPage: FC = () => {
           {!isAccountsLoading && !isFetching && filteredCollections?.map((collection) => <CollectionCard
             key={`collection-${collection.id}`}
             collection={collection}
-            onManageSponsorshipClick={onManageSponsorshipClick(collection)}
-            onRemoveSponsorshipClick={onRemoveSponsorshipClick(collection)}
-            onManageTokensClick={onManageTokensClick(collection)}
-            onAddCollectionClick={onAddCollectionClick(collection)}
-            onRemoveCollectionClick={onRemoveCollectionClick(collection)}
             onViewOnScanClick={onViewOnScanClick(collection)}
           />)}
         </CollectionListStyled>
@@ -222,7 +200,7 @@ const ControlsWrapper = styled.div`
   display: flex;
   justify-content: space-between;
 
-  @media (max-width: 1279px) {
+  @media (max-width: 1110px) {
     flex-direction: column;
     gap: calc(var(--gap) * 1.5);
   }

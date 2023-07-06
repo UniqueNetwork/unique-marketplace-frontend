@@ -1,6 +1,7 @@
-import { addressToEvm, checkAddress, encodeAddress, isEthereumAddress } from '@polkadot/util-crypto';
-import { keyring } from '@polkadot/ui-keyring';
 import Web3 from 'web3';
+import { addressToEvm, checkAddress, encodeAddress, isEthereumAddress } from '@polkadot/util-crypto';
+import { Address } from '@unique-nft/utils';
+import { keyring } from '@polkadot/ui-keyring';
 
 export const subToEthLowercase = (address: string): string => {
   const bytes = addressToEvm(address);
@@ -49,6 +50,5 @@ export function collectionIdToAddress (address: number): string {
 }
 
 export function validateAddress(address: string, prefixes: number[]) {
-  const normalizedPrefix = 42;
-  return [...prefixes, normalizedPrefix].map((prefix) => checkAddress(address, prefix)).some(([valid]) => valid);
+  return Address.is.ethereumAddress(address) || Address.is.substrateAddressInAnyForm(address);
 }

@@ -7,12 +7,12 @@ import { Attribute, AttributeCount, GetOffersRequestPayload } from '../offers/ty
 import { ResponseError } from '../base/types';
 import { useApi } from '../../../hooks/useApi';
 import { fromStringToBnString } from '../../../utils/bigNum';
-import { Token, TokensResponse } from './types';
+import { GetTokensRequestPayload, Token, TokensResponse } from './types';
 import { emptyResponse } from '../offers/offers';
 
 const endpoint = '/tokens';
 
-export const getTokens = (baseURL: string, payload: GetOffersRequestPayload) => get<TokensResponse>(`${endpoint}/${payload.collectionId}`, { ...defaultParams, baseURL, params: payload });
+export const getTokens = (baseURL: string, payload: GetTokensRequestPayload) => get<TokensResponse>(`${endpoint}/${payload.collectionId}`, { ...defaultParams, baseURL, params: payload });
 
 export const useTokens = ({ collectionId }: { collectionId: number }) => {
   const [tokens, setTokens] = useState<Token[]>([]);
@@ -23,13 +23,13 @@ export const useTokens = ({ collectionId }: { collectionId: number }) => {
   const [fetchingError, setFetchingError] = useState<ResponseError | undefined>();
   const { api, baseURL } = useApi();
 
-  const fetch = useCallback(async ({ minPrice, maxPrice, ...payload }: GetOffersRequestPayload) => {
+  const fetch = useCallback(async ({ minPrice, maxPrice, ...payload }: GetTokensRequestPayload) => {
     setIsFetching(true);
     try {
       const { status, data } = await getTokens(baseURL, {
         ...payload,
-        minPrice: minPrice && fromStringToBnString(minPrice, api?.market?.decimals),
-        maxPrice: maxPrice && fromStringToBnString(maxPrice, api?.market?.decimals),
+        minPrice: minPrice,
+        maxPrice: maxPrice,
         collectionId
       });
       if (status === 200) {
@@ -50,7 +50,7 @@ export const useTokens = ({ collectionId }: { collectionId: number }) => {
     return emptyResponse;
   }, [baseURL, api?.market?.decimals, collectionId]);
 
-  const fetchMore = useCallback(async ({ minPrice, maxPrice, ...payload }: GetOffersRequestPayload) => {
+  const fetchMore = useCallback(async ({ minPrice, maxPrice, ...payload }: GetTokensRequestPayload) => {
     setIsFetching(true);
     try {
       const { status, data } = await getTokens(baseURL, {

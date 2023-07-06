@@ -2,16 +2,17 @@ import React, { FC, useCallback, useEffect, useState } from 'react';
 import { Button, Text } from 'components/UI';
 import styled from 'styled-components';
 import { PriceRange } from './types';
-import Accordion from '../Accordion/Accordion';
+import { Accordion } from '../Accordion/Accordion';
 import { NumberInput } from '../NumberInput/NumberInput';
 
 interface PricesFilterProps {
   value: PriceRange | undefined
   onChange(value: PriceRange | undefined): void
   testid: string
+  disabled?: boolean
 }
 
-const PricesFilter: FC<PricesFilterProps> = ({ value, onChange, testid }) => {
+const PricesFilter: FC<PricesFilterProps> = ({ value, onChange, testid, disabled }) => {
   const { minPrice, maxPrice } = value || {};
   const [minPriceValue, setMinPriceValue] = useState<string>();
   const [maxPriceValue, setMaxPriceValue] = useState<string>();
@@ -61,7 +62,6 @@ const PricesFilter: FC<PricesFilterProps> = ({ value, onChange, testid }) => {
       isOpen={true}
       onClear={onPricesClear}
       isClearShow={!!minPrice || !!maxPrice}
-      testid={`${testid}-accordion`}
     >
       <PriceFilterWrapper>
         <PricesRangeWrapper>
@@ -70,6 +70,7 @@ const PricesFilter: FC<PricesFilterProps> = ({ value, onChange, testid }) => {
             onChange={onChangeMinPrice}
             placeholder={'Min'}
             testid={`${testid}-minPrice`}
+            disabled={disabled}
           />
           <Text>to</Text>
           <NumberInput
@@ -77,13 +78,14 @@ const PricesFilter: FC<PricesFilterProps> = ({ value, onChange, testid }) => {
             onChange={onChangeMaxPrice}
             placeholder={'Max'}
             testid={`${testid}-maxPrice`}
+            disabled={disabled}
           />
         </PricesRangeWrapper>
         <Button
           title={'Apply'}
           onClick={onApply}
           testid={`${testid}-apply-button`}
-          disabled={!minPriceValue && !maxPriceValue}
+          disabled={disabled || (!minPriceValue && !maxPriceValue)}
         />
       </PriceFilterWrapper>
     </Accordion>

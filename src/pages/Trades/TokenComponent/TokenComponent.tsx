@@ -13,7 +13,7 @@ export const TokenComponent = ({ collectionId, tokenId, tokenDescription, testid
   const { currentChainId } = useApi();
   const tokenUrl = useMemo(() => generatePath('/:currentChainId/token/:collectionId/:tokenId', {
     currentChainId,
-    collectionId: collectionId?.toString(),
+    collectionId: collectionId?.toString() || '',
     tokenId: tokenId?.toString()
   }), [currentChainId, collectionId, tokenId]);
 
