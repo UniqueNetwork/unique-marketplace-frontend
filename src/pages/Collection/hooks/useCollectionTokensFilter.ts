@@ -5,12 +5,12 @@ import { useAccounts } from 'hooks/useAccounts';
 import { parseFilterState, setUrlParameter } from 'utils/helpers';
 import { defaultSortingValue } from '../constants';
 import { TOption } from '../types';
-import { TokensResponse } from 'api/restApi/tokens/types';
+import { GetTokensRequestPayload, TokensResponse } from 'api/restApi/tokens/types';
 import { useApi } from 'hooks/useApi';
 import { Address } from '@unique-nft/utils';
 import { TokensFilter } from '../Filters/types';
 
-export const useCollectionTokensFilter = ({ isFetching, fetch }: { isFetching: boolean, fetch(payload: GetOffersRequestPayload): Promise<OffersResponse | TokensResponse> }) => {
+export const useCollectionTokensFilter = ({ isFetching, fetch }: { isFetching: boolean, fetch(payload: GetTokensRequestPayload): Promise<OffersResponse | TokensResponse> }) => {
   const { currentChainId, api } = useApi();
   const { selectedAccount, isLoading: isAccountsLoading } = useAccounts();
   const searchParams = new URLSearchParams(window.location.search);
@@ -22,19 +22,17 @@ export const useCollectionTokensFilter = ({ isFetching, fetch }: { isFetching: b
   const getFilterByState = useCallback((filterState: TokensFilter | null) => {
     if (!filterState) return {};
     const { statuses, prices, collections, attributeCounts, attributes, belongingValue, ...otherFilter } = filterState;
-    const { myNFTs, myBets, timedAuction, fixedPrice } = statuses || {};
-    const seller = (myNFTs || (!!belongingValue && belongingValue !== 'All')) && selectedAccount?.address
+    const { fixedPrice } = statuses || {};
+    const address = (fixedPrice || (!!belongingValue && belongingValue !== 'All')) && selectedAccount?.address
       ? (Address.is.ethereumAddressInAnyForm(selectedAccount?.address)
         ? Address.normalize.ethereumAddress(selectedAccount?.address)
         : selectedAccount?.address)
       : undefined;
-    const isOwner = belongingValue !== 'Disowned';
 
     return {
-      seller,
-      isOwner,
-      bidderAddress: myBets ? selectedAccount?.address : undefined,
-      isAuction: (timedAuction && fixedPrice) || (!timedAuction && !fixedPrice) ? undefined : !!timedAuction && !fixedPrice,
+      address,
+      accessoryType: belongingValue || 'All',
+      saleType: fixedPrice ? 'OnSale' : 'All',
       ...prices,
       collectionId: collections,
       numberOfAttributes: attributeCounts,
@@ -51,7 +49,7 @@ export const useCollectionTokensFilter = ({ isFetching, fetch }: { isFetching: b
       pageSize: 20,
       ...(getFilterByState(filterState)),
       searchText: searchValue || undefined,
-      sort: [value.id]
+      'sort[0]': [value.id]
     });
   }, [fetch, filterState, getFilterByState, searchValue]);
 
@@ -63,20 +61,20 @@ export const useCollectionTokensFilter = ({ isFetching, fetch }: { isFetching: b
       pageSize: 20,
       ...(getFilterByState(filterState)),
       searchText: value || undefined,
-      sort: [sortingValue]
+      'sort[0]': [sortingValue]
     });
   }, [fetch, sortingValue, searchValue, filterState, getFilterByState]);
 
   const onFilterChange = useCallback(async (filterState: TokensFilter | null) => {
     setUrlParameter('filterState', filterState ? JSON.stringify(filterState) : '');
+    setFilterState(filterState);
     await fetch({
       page: 1,
       pageSize: 20,
       ...(getFilterByState(filterState)),
       searchText: searchValue || undefined,
-      sort: [sortingValue]
+      'sort[0]': [sortingValue]
     });
-    setFilterState(filterState);
   }, [fetch, sortingValue, getFilterByState, searchValue]);
 
   const onChangeAccount = useCallback(() => {
@@ -107,7 +105,7 @@ export const useCollectionTokensFilter = ({ isFetching, fetch }: { isFetching: b
     void fetch({
       page: 1,
       pageSize: 20,
-      sort: [defaultSortingValue.id]
+      'sort[0]': [defaultSortingValue.id]
     });
   }, [currentChainId]);
 

@@ -5,7 +5,9 @@ export type GetTokensRequestPayload = {
   collectionId?: number | number[]
   minPrice?: string
   maxPrice?: string
-  seller?: string
+  address?: string
+  accessoryType?: 'All' | 'Owned' | 'Disowned'
+  saleType?: 'All' | 'OnSale' | 'NotForSale'
   isAuction?: boolean
   bidderAddress?: string
   attributes?: string[]

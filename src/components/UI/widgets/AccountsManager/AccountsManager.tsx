@@ -80,10 +80,10 @@ export const AccountsManager = (props: AccountsManagerProps) => {
               onClick={(event) => {
                 if (!selectedAccount?.address) return;
                 event.stopPropagation();
-                copy(selectedAccount.address);
+                void copy(selectedAccount.address);
                 onCopyAddressClick?.(selectedAccount.address);
               }}
-              testid={`selected-address-copy-${selectedAccount?.address}`}
+              testid={`selected-address-copy-${selectedAccount?.address || ''}`}
             />
           </div>
           <Text size='s'>{`${balance} ${symbol}`}</Text>

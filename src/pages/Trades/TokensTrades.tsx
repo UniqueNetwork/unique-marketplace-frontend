@@ -55,14 +55,14 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
   }, [currentTab, currentChainId, selectedAccount, isLoadingAccounts]);
 
   useEffect(() => {
-    if (deviceSize !== DeviceSize.lg && !searched) {
+    if (deviceSize < DeviceSize.lg && !searched) {
       setLoadedTrades([]);
     }
   }, [currentTab]);
 
   useEffect(() => {
     // append loaded trades to the existing list if screen is with infinity scroll
-    if (deviceSize !== DeviceSize.lg && !searched) setLoadedTrades((currentTrades) => { return [...currentTrades, ...trades]; });
+    if (deviceSize < DeviceSize.lg && !searched) setLoadedTrades((currentTrades) => { return [...currentTrades, ...trades]; });
     else {
       setLoadedTrades(trades);
       setSearched(false);
@@ -158,7 +158,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
   }, [setSelectedOfferDetails]);
 
   // do not show skeleton when next page is loading with infinity scroll
-  const showSkeleton = useMemo(() => (deviceSize === DeviceSize.lg || !loadedTrades.length),
+  const showSkeleton = useMemo(() => (deviceSize >= DeviceSize.lg || !loadedTrades.length),
     [deviceSize, loadedTrades.length]);
 
   return (<PagePaper>
@@ -184,7 +184,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
         emptyIconProps={searchValue ? { name: 'magnifier-found' } : { file: NoTradesIcon }}
         idColumnName={'offerId'}
       />
-      {(!!tradesCount && deviceSize === DeviceSize.lg) && <PaginationWrapper>
+      {(!!tradesCount && deviceSize >= DeviceSize.lg) && <PaginationWrapper>
         <Pagination
           current={page}
           size={tradesCount}

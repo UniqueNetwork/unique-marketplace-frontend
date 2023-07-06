@@ -37,6 +37,7 @@ export const Pagination = ({
   size,
   current = 0,
   visible = 5,
+  perPage,
   pageSizes = [10, 20, 50, 100],
   withIcons,
   withPageSelector,
@@ -52,6 +53,11 @@ export const Pagination = ({
   const [currentSelector, setCurrentSelector] = useState<string>('');
   const prevIndex: number = usePrevious<number>(currentIndex);
   const totalCount = Math.ceil(size / perPageCount);
+
+  useEffect(() => {
+    setPerPageCount(perPage || pageSizes[0]);
+  }, [perPage]);
+
   const isOffsetable = totalCount > 3 && visible < totalCount;
   const hasLeftOffset =
     isOffsetable && currentIndex > (isMobile ? 1 : (visible - 1) / 2);

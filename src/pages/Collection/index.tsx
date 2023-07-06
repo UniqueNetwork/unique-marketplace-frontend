@@ -71,6 +71,7 @@ export const CollectionPage = () => {
   }, []);
 
   useEffect(() => {
+    if (!api?.collection) return;
     const id = Number(collectionId);
     void (async () => {
       const tokensCountOnScan = await getCollectionTokensCount(id);
@@ -130,7 +131,7 @@ export const CollectionPage = () => {
           pageSize,
           ...(getFilterByState(filterState)),
           searchText: searchValue || undefined,
-          sort: [sortingValue]
+          'sort[0]': [sortingValue]
         });
       }
     };
@@ -148,7 +149,7 @@ export const CollectionPage = () => {
         pageSize: 20,
         ...(getFilterByState(filterState)),
         searchText: searchValue || undefined,
-        sort: [sortingValue]
+        'sort[0]': [sortingValue]
       });
     }
   }, [fetchMore, tokens, pageSize, isFetching, searchValue, filterState]);
