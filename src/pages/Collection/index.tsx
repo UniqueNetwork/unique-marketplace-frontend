@@ -152,7 +152,7 @@ export const CollectionPage = () => {
         'sort[0]': [sortingValue]
       });
     }
-  }, [fetchMore, tokens, pageSize, isFetching, searchValue, filterState]);
+  }, [isFetching, fetchMore, tokens.length, getFilterByState, filterState, searchValue, sortingValue]);
 
   return (<>
     <CollectionDetail collection={collection} royalty={royalty} />
