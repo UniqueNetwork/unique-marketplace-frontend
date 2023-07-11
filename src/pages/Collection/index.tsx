@@ -140,10 +140,10 @@ export const CollectionPage = () => {
     return () => clearInterval(intervalId);
   }, [scanning, collectionId, tokensCountOnScan, filterState, sortingValue, searchValue]);
 
-  const hasMore = tokens && tokens.length < tokensCount;
+  const hasMore = tokens && tokens.length < tokensCount && !isFetching;
 
   const onClickSeeMore = useCallback(() => {
-    if (!isFetching) {
+    if (!isFetching && hasMore) {
       void fetchMore({
         page: Math.ceil(tokens.length / pageSize) + 1,
         pageSize: 20,
@@ -152,7 +152,7 @@ export const CollectionPage = () => {
         'sort[0]': [sortingValue]
       });
     }
-  }, [isFetching, fetchMore, tokens.length, getFilterByState, filterState, searchValue, sortingValue]);
+  }, [isFetching, tokens.length, getFilterByState, filterState, searchValue, sortingValue]);
 
   return (<>
     <CollectionDetail collection={collection} royalty={royalty} />
