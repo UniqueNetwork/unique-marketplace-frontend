@@ -46,7 +46,7 @@ export const sortingOptions: TOption[] = [
   }
 ];
 
-export const pageSize = 1000;
+export const pageSize = 20;
 
 export const defaultSortingValue = sortingOptions[0];
 
