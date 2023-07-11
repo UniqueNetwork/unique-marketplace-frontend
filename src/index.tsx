@@ -9,6 +9,10 @@ import { Error404 } from './pages/Errors/404';
 const commonRoutes = (<>
   <Route
     element={<TokenPage />}
+    path={'token/:address/:collectionId/:id'}
+  />
+  <Route
+    element={<TokenPage />}
     path={'token/:collectionId/:id'}
   />
   <Route

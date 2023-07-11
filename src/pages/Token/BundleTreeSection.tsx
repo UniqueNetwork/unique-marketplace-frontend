@@ -7,7 +7,7 @@ import NodeView from 'components/BundleTree/Node/NodeView';
 import { INestingToken } from 'components/BundleTree/types';
 import { NestedSection } from 'components/BundleTree/NestedSection/NestedSection';
 import BundleTree from 'components/TreeView/BundleTree';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import MobileBundleTreeSection from './MobileBundleTreeSection';
 import { useApi } from 'hooks/useApi';
 import Skeleton from '../../components/Skeleton/Skeleton';
@@ -16,15 +16,18 @@ import BundleModal from './BundleModals/BundleTrunsferModal';
 import { BundleModalType } from './BundleModals/types';
 import { countNestedChildren } from '../../utils/helpers';
 import { TokenByIdResponse } from '@unique-nft/sdk';
+import { CollectionMode } from 'api/chainApi/types';
+import { Address } from '@unique-nft/utils';
 
 const areNodesEqual = (a: INestingToken, b: INestingToken) => a.collectionId === b.collectionId && a.tokenId === b.tokenId;
 
 const getKey = (a: INestingToken) => `T${a.tokenId}C${a.collectionId}`;
 
-const addIsCurrentAccountOwnerToBundleAndSort = (bundle: INestingToken, isOwner: boolean) => {
+const addIsCurrentAccountOwnerToBundleAndSort = (bundle: INestingToken, isOwner: boolean, parent?: INestingToken) => {
   bundle.isCurrentAccountOwner = isOwner;
+  bundle.nestingParentToken = parent;
   if (bundle.nestingChildTokens?.length === 0) return bundle;
-  bundle.nestingChildTokens = bundle.nestingChildTokens?.sort((a, b) => a.tokenId > b.tokenId ? 1 : -1).map((token) => addIsCurrentAccountOwnerToBundleAndSort(token, isOwner));
+  bundle.nestingChildTokens = bundle.nestingChildTokens?.sort((a, b) => a.tokenId > b.tokenId ? 1 : -1).map((token) => addIsCurrentAccountOwnerToBundleAndSort(token, isOwner, bundle));
   bundle.opened = true;
   return bundle;
 };
@@ -41,6 +44,7 @@ interface IProps {
 function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token, offer, testid, onFinish, isOwner }: IProps) {
   const navigate = useNavigate();
   const { api } = useApi();
+  const { address } = useParams<{ address: string }>();
   const [isMobileViewVisible, setIsMobileViewVisible] = useState(false);
   const [bundle, setBundle] = useState<INestingToken[]>();
   const [isBundleLoading, setIsBundleLoading] = useState(true);
@@ -66,14 +70,21 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
         setBundle([addIsCurrentAccountOwnerToBundleAndSort(bundle, isOwner)]);
       } else if (token) {
         setIsBundleLoading(true);
-        const response = await api?.nft?.getBundle(token.collectionId, token.tokenId);
+        let response;
+        if (address) {
+          const parent = Address.nesting.addressToIds(address);
+          response = await api?.nft?.getBundle(parent.collectionId, parent.tokenId);
+        } else {
+          response = await api?.nft?.getBundle(token.collectionId, token.tokenId);
+        }
+
         if (response) {
           setBundle([addIsCurrentAccountOwnerToBundleAndSort(response, isOwner)]);
         }
       }
       setIsBundleLoading(false);
     })();
-  }, [api, token, offer, isOwner, bundle]);
+  }, [api, token, offer, isOwner, bundle, address]);
 
   const closeView = useCallback(() => {
     setIsMobileViewVisible(false);
@@ -101,8 +112,13 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
     return countNestedChildren(bundle[0].nestingChildTokens);
   }, [bundle]);
 
-  const onViewTokenDetails = useCallback((token: INestingToken) => {
-    navigate(`/token/${token.collectionId}/${token.tokenId}`);
+  const onViewTokenDetails = useCallback((token: INestingToken, mode: string) => {
+    if (mode === 'ReFungible' && token.nestingParentToken) {
+      const parentOwner = Address.nesting.idsToAddress(token.nestingParentToken.collectionId, token.nestingParentToken.tokenId);
+      navigate(`/token/${parentOwner}/${token.collectionId}/${token.tokenId}`);
+    } else {
+      navigate(`/token/${token.collectionId}/${token.tokenId}`);
+    }
     onViewTokenDetailsProps(token as unknown as TokenByIdResponse);
     if (isMobileViewVisible) closeView();
   }, [onViewTokenDetailsProps, isMobileViewVisible, closeView]);

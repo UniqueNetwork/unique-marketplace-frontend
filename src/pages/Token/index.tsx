@@ -22,13 +22,14 @@ import { NestedTokenBlock } from './TokenDetail/NestedTokenBlock';
 import BundleModal from './BundleModals/BundleTrunsferModal';
 import { BundleModalType } from './BundleModals/types';
 import { NestingTokenBlock } from './TokenDetail/NestingBlock';
+import { Address } from '@unique-nft/utils';
 
 const testid = 'token-page';
 
 const TokenPage = () => {
   const { api, currentChainId } = useApi();
   const { selectedAccount, updateCurrentAccountDeposit } = useAccounts();
-  const { id, collectionId } = useParams<{ id: string, collectionId: string}>();
+  const { address, id, collectionId } = useParams<{ address: string, id: string, collectionId: string}>();
   const [token, setToken] = useState<TokenByIdResponse>();
   const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse | null>(null);
   const [isFetchingToken, setIsFetchingToken] = useState<boolean>(true);
@@ -54,14 +55,20 @@ const TokenPage = () => {
         setIsNested(false);
         setTopmostOwner(null);
       }
-      const collection = await getCollection(Number(collectionId));
+      const _collection = await getCollection(Number(collectionId));
+      if (_collection?.mode === 'ReFungible' && address) {
+        const isNested = Address.is.nestingAddress(address);
+        setIsNested(isNested);
+        setIsBundle(isNested);
+      }
+
       if (token) setToken(token);
-      if (collection) setCollection(collection);
+      if (_collection) setCollection(_collection);
     } catch (e) {
       console.error('error while fetching token or collection from RPC', e);
     }
     setIsFetchingToken(false);
-  }, [api?.nft, currentChainId, collectionId, id, getCollection]);
+  }, [api?.nft, currentChainId, collectionId, id, getCollection, address]);
 
   useEffect(() => {
     if (isFetchingOffer) return;
@@ -71,13 +78,13 @@ const TokenPage = () => {
         if (collection) setCollection(collection);
         setIsBundle(!!offer.tokenDescription?.nestingChildTokens?.length);
       }
-      if (!token) await fetchToken();
+      if (!token || (Number(collectionId) !== token?.collectionId || Number(id) !== token?.tokenId)) await fetchToken();
       if (offer || token) {
         setIsFetchingToken(false);
         setIsNested(!!token?.nestingParentToken);
       }
     })();
-  }, [fetchToken, isFetchingOffer, offer, token, collectionId, getCollection]);
+  }, [fetchToken, offer, token, id, collectionId, getCollection]);
 
   const onClose = useCallback(() => {
     setMarketType(MarketType.default);
@@ -130,13 +137,17 @@ const TokenPage = () => {
 
   const isOwner = useMemo(() => {
     if (!selectedAccount || isFetchingOffer || isFetchingToken) return false;
+    if (collection?.mode === 'ReFungible' && address) {
+      return isTokenOwner(selectedAccount.address, address);
+    }
+
     if (offer) {
       return isTokenOwner(selectedAccount.address, offer.seller);
     }
     if (topmostOwner) return isTokenOwner(selectedAccount.address, topmostOwner);
 
     return token?.owner ? isTokenOwner(selectedAccount.address, token.owner) : false;
-  }, [isFetchingOffer, isFetchingToken, selectedAccount, token, offer, topmostOwner]);
+  }, [isFetchingOffer, isFetchingToken, selectedAccount, token, offer, topmostOwner, collection, address]);
 
   if (!isFetchingOffer && !isFetchingToken && !token && !offer) return <Error404 />;
 
@@ -165,6 +176,7 @@ const TokenPage = () => {
           />}
           <TokenTrading
             token={token}
+            collection={collection}
             offer={!isIgnoreOffer ? offer : undefined}
             onSellClick={onActionClick(MarketType.sellFix)}
             onBuyClick={onActionClick(MarketType.purchase)}

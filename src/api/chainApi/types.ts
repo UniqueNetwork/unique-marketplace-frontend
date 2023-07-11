@@ -165,3 +165,5 @@ export type OldMarketplaceAbiMethods = {
     encodeABI: () => any;
   };
 }
+
+export type CollectionMode = 'NFT' | 'Fungible' | 'ReFungible';

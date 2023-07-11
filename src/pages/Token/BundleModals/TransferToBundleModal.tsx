@@ -14,7 +14,7 @@ import { CollectionCover } from 'components/CollectionCover/CollectionCover';
 import { FeeMessage } from 'components';
 import { useTransferToBundleStages } from 'hooks/marketplaceStages/useTransferToBundleStages';
 import { INestingToken } from 'components/BundleTree/types';
-import { TokenByIdResponse, TokenIdQuery } from '@unique-nft/sdk';
+import { CollectionInfoWithSchemaResponse, TokenByIdResponse, TokenIdQuery } from '@unique-nft/sdk';
 import { debounce } from 'utils/helpers';
 import { fromStringToBnString } from 'utils/bigNum';
 import { Coral700 } from 'styles/colors';
@@ -22,13 +22,29 @@ import { useGetCollectionsForNesting } from '../hooks/useGetCollectionsForNestin
 import { CollectionItem, TokenItem } from '../types';
 import { getIpfsUriByImagePath } from 'utils/urlUtils';
 import { useGetAllOwnedTokensByCollection } from '../hooks/useGetAllOwnedTokensByCollection';
+import { FractionalAmountInput } from '../Modals/FractionalAmountInput';
+import { CollectionMode } from 'api/chainApi/types';
 
 export const TransferToBundleModal: FC<TBundleTrunsferModalBodyProps> = ({ token, setIsClosable, onFinish, testid }) => {
   const { selectedAccount } = useAccounts();
+  const { api } = useApi();
   const [status, setStatus] = useState<'ask' | 'transfer-stage'>('ask'); // TODO: naming
   const [newParent, setNewParent] = useState<{ collectionId: number, tokenId: number }>();
+  const [isFetching, setIsFetching] = useState(false);
+  const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse | null>(null);
+  const [amount, setAmount] = useState(1);
 
-  const onTransferToBundle = useCallback((newParent: { collectionId: number, tokenId: number }) => {
+  useEffect(() => {
+    void (async () => {
+      if (!api?.collection) return;
+      setIsFetching(true);
+      const collection = await api.collection.getCollection(token?.collectionId);
+      setCollection(collection);
+      setIsFetching(false);
+    })();
+  }, [api?.collection, token?.collectionId]);
+
+  const onTransferToBundle = useCallback((newParent: { collectionId: number, tokenId: number }, amount: number) => {
     setNewParent(newParent);
     setStatus('transfer-stage');
     setIsClosable(false);
@@ -36,15 +52,25 @@ export const TransferToBundleModal: FC<TBundleTrunsferModalBodyProps> = ({ token
 
   if (!selectedAccount || !token) return null;
 
+  const owner = token.owner || selectedAccount.address;
+
   if (status === 'ask') {
-    return (<AskTransferToBundleModal token={token} onTransferToBundle={onTransferToBundle} testid={`${testid}-ask-transfer`} />);
+    return (<AskTransferToBundleModal
+      token={token}
+      collection={collection}
+      onTransferToBundle={onTransferToBundle}
+      testid={`${testid}-ask-transfer`}
+    />);
   }
   if (status === 'transfer-stage') {
     if (!newParent) return null;
     return (<TransferToBundleStagesModal
+      owner={owner}
       onFinish={onFinish}
       token={token}
       newParent={newParent}
+      mode={collection?.mode || 'NFT'}
+      amount={amount}
       setIsClosable={setIsClosable}
       testid={testid}
     />);
@@ -52,24 +78,24 @@ export const TransferToBundleModal: FC<TBundleTrunsferModalBodyProps> = ({ token
   return null;
 };
 
-const AskTransferToBundleModal: FC<{ token: INestingToken | TokenByIdResponse, onTransferToBundle(newParent: TokenIdQuery): void, testid: string }> = ({ token, onTransferToBundle, testid }) => {
+type AskTransferToBundleModalProps = {
+  token: INestingToken | TokenByIdResponse,
+  collection: CollectionInfoWithSchemaResponse | null
+  onTransferToBundle(newParent: TokenIdQuery, amount: number): void
+  testid: string
+};
+
+const AskTransferToBundleModal: FC<AskTransferToBundleModalProps> = ({ token, collection: collectionProp, onTransferToBundle, testid }) => {
   const [collection, setCollection] = useState<CollectionItem | null>(null);
   const [selectedToken, setSelectedToken] = useState<TokenItem | null>(null);
   const [isFeeLoading, setIsFeeLoading] = useState(false);
   const [fee, setFee] = useState<string>('0');
+  const [amount, setAmount] = useState(1);
+  const [isAmountValid, setIsAmountValid] = useState(true);
 
   const { selectedAccount } = useAccounts();
   const { api } = useApi();
   const [isSponsored, setIsSponsored] = useState(false);
-
-  useEffect(() => {
-    void (async () => {
-      setIsFeeLoading(true);
-      const collection = await api?.collection?.getCollection(token?.collectionId);
-      setIsSponsored(!!collection?.sponsorship?.isConfirmed);
-      setIsFeeLoading(false);
-    })();
-  }, [token?.collectionId]);
 
   const { collections: collectionItems, fetchCollections, isFetching: isFetchingCollections } = useGetCollectionsForNesting();
   const { tokens, isFetchingTokens } = useGetAllOwnedTokensByCollection(collection?.collectionId, useMemo(() => ({
@@ -81,10 +107,12 @@ const AskTransferToBundleModal: FC<{ token: INestingToken | TokenByIdResponse, o
 
   useEffect(() => {
     if (!selectedAccount) return;
+    const isSponsored = !!collectionProp?.sponsorship?.isConfirmed;
+    setIsSponsored(isSponsored);
     void (async () => {
       await fetchCollections(selectedAccount);
     })();
-  }, [selectedAccount, api?.nft]);
+  }, [selectedAccount, api?.nft, collectionProp]);
 
   const getFee = useCallback((newParentToken: TokenItem) => {
     setIsFeeLoading(true);
@@ -92,9 +120,11 @@ const AskTransferToBundleModal: FC<{ token: INestingToken | TokenByIdResponse, o
       if (!api?.market || !token || !selectedAccount || !newParentToken || isSponsored) return setIsFeeLoading(false);
 
       api?.nft?.getTransferToBundleFee(
+        selectedAccount.address,
         { collectionId: token.collectionId, tokenId: token.tokenId },
         { collectionId: newParentToken.collectionId, tokenId: newParentToken.tokenId },
-        1,
+        collectionProp?.mode || 'NFT',
+        amount,
         { account: selectedAccount })
       .then((fee) => {
         setFee(fee || '0');
@@ -104,14 +134,14 @@ const AskTransferToBundleModal: FC<{ token: INestingToken | TokenByIdResponse, o
         setIsFeeLoading(false);
       });
     }, 300)();
-  }, [api?.market, token, selectedAccount?.account, isSponsored]);
+  }, [api?.market, token, selectedAccount?.account, collectionProp, isSponsored]);
 
   const onConfirmTransferToBundleClick = useCallback(
     () => {
       if (!selectedToken) return;
-      onTransferToBundle({ collectionId: selectedToken?.collectionId, tokenId: selectedToken?.tokenId });
+      onTransferToBundle({ collectionId: selectedToken?.collectionId, tokenId: selectedToken?.tokenId }, amount);
     },
-    [onTransferToBundle, selectedToken]
+    [onTransferToBundle, selectedToken, amount]
   );
 
   const onChangeSelectedCollection = useCallback((collection: CollectionItem | null) => {
@@ -134,8 +164,17 @@ const AskTransferToBundleModal: FC<{ token: INestingToken | TokenByIdResponse, o
   return (
     <>
       <Content>
-        <Heading size='2'>Transfer NFT to bundle</Heading>
+        <Heading size='2'>Transfer token to bundle</Heading>
       </Content>
+      {collectionProp?.mode === 'ReFungible' && <Row>
+        <FractionalAmountInput
+          amount={amount}
+          collectionId={token?.collectionId}
+          tokenId={token?.tokenId}
+          onChangeAmount={setAmount}
+          onChangeIsAmountValid={setIsAmountValid}
+        />
+      </Row>}
       <Row>
         <RowLabel>
           <Text size='m'>Collections</Text>
@@ -192,7 +231,7 @@ const AskTransferToBundleModal: FC<{ token: INestingToken | TokenByIdResponse, o
       </Row>
       <ButtonWrapper>
         <Button
-          disabled={!selectedToken || isFeeGreaterThanBalance}
+          disabled={!selectedToken || isFeeGreaterThanBalance || !isAmountValid}
           onClick={onConfirmTransferToBundleClick}
           role='primary'
           title='Confirm'
@@ -203,15 +242,21 @@ const AskTransferToBundleModal: FC<{ token: INestingToken | TokenByIdResponse, o
   );
 };
 
-const TransferToBundleStagesModal: FC<TBundleTrunsferModalBodyProps & { newParent: TokenIdQuery }> = ({ token, newParent, onFinish, testid }) => {
-  const { stages, status, initiate } = useTransferToBundleStages(token.owner, token, newParent);
+type TransferToBundleStagesModalProps = TBundleTrunsferModalBodyProps & { newParent: TokenIdQuery } & {
+  mode: CollectionMode
+  amount: number
+  owner: string
+}
+
+const TransferToBundleStagesModal: FC<TransferToBundleStagesModalProps> = ({ token, owner, newParent, mode, amount, onFinish, testid }) => {
   const { info } = useNotifications();
   const { selectedAccount } = useAccounts();
+  const { stages, status, initiate } = useTransferToBundleStages(owner, token, newParent, mode);
 
   useEffect(() => {
     if (!selectedAccount) return;
-    initiate(null);
-  }, [selectedAccount]);
+    initiate({ amount });
+  }, [selectedAccount, amount]);
 
   useEffect(() => {
     if (status === StageStatus.success) {

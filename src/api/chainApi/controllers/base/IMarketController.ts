@@ -1,6 +1,6 @@
 import { BN } from '@polkadot/util';
 import { MarketAccountBalance } from 'account/types';
-import { TransactionOptions } from 'api/chainApi/types';
+import { CollectionMode, TransactionOptions } from 'api/chainApi/types';
 interface IMarketController {
   changeAllowance(collectionId: number, tokenId: number, targetAllowance: boolean, options: TransactionOptions): Promise<void>
   // TODO: decimals calculation should be part of controller, methods should accept floats instead
@@ -16,9 +16,9 @@ interface IMarketController {
 
   getAccountBalance(address: string): Promise<MarketAccountBalance>
 
-  getTransferTokenFee(sender: string, recipient: string, collectionId: number, tokenId: number, amount: number, options: TransactionOptions): Promise<string | null>;
+  getTransferTokenFee(sender: string, recipient: string, collectionId: number, tokenId: number, mode: CollectionMode, amount: number, options: TransactionOptions): Promise<string | null>;
   // TODO: remove "from" param, we can calculate it from signer
-  transferToken(from: string, to: string, collectionId: number, tokenId: number, options: TransactionOptions): Promise<void>
+  transferToken(from: string, to: string, collectionId: number, tokenId: number, mode: CollectionMode, amount: number, options: TransactionOptions): Promise<void>
 
   getTransferBalanceFee(sender: string, recipient: string, value: number, options: TransactionOptions): Promise<string | null>;
   transferBalance(from: string, to: string, amount: BN | number, options: TransactionOptions): Promise<void>

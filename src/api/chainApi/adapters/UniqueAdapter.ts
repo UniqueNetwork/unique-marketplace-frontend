@@ -5,6 +5,7 @@ import IMarketContractAdapter from './IMarketContractAdapter';
 import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
 import { ChainValue } from '../controllers/BaseController';
+import { CollectionMode } from '../types';
 
 const buyGasLimit = 1_000_000;
 const sellGasLimit = 200_000;
@@ -21,46 +22,61 @@ class UniqueAdapter implements IMarketContractAdapter {
     if (result.error) throw new Error((result.error as any)?.message || 'Transaction failed');
   }
 
-  async getTransferTokenFee(from: string, to: string, collectionId: number, tokenId: number, amount: number): Promise<string> {
-    if (amount !== 1) throw new Error('RFT support not implemented');
-    const res = await this.uniqueSdk.token.transfer.getFee({
+  async getTransferTokenFee(from: string, to: string, collectionId: number, tokenId: number, mode: CollectionMode, amount: number): Promise<string> {
+    const method = mode === 'ReFungible' ? this.uniqueSdk.refungible.transferToken : this.uniqueSdk.token.transfer;
+    const res = await method.getFee({
       address: from,
       from,
       to,
+      amount,
       collectionId,
       tokenId
     });
     return res.fee.raw;
   }
 
-  async transferToken(from: string, to: string, collectionId: number, tokenId: number, amount: number, signer: Signer): Promise<void> {
-    if (amount !== 1) throw new Error('RFT support not implemented');
-    this.validateSdkResponse(await this.uniqueSdk.token.transfer.submitWaitResult({
+  async transferToken(from: string, to: string, collectionId: number, tokenId: number, mode: CollectionMode, amount: number, signer: Signer): Promise<void> {
+    const method = mode === 'ReFungible' ? this.uniqueSdk.refungible.transferToken : this.uniqueSdk.token.transfer;
+    this.validateSdkResponse(await method.submitWaitResult({
       address: from,
       from,
       to,
+      amount,
       collectionId,
       tokenId
     }, { signer }));
   }
 
-  async getNestTokenFee(from: NestTokenParam, to: NestTokenParam, amount: number, signer: Signer): Promise<string> {
-    if (amount !== 1) throw new Error('RFT support not implemented');
+  async getNestTokenFee(address: string, nested: NestTokenParam, parent: NestTokenParam, mode: CollectionMode, amount: number, signer: Signer): Promise<string> {
+    if (mode === 'ReFungible') {
+      const to = Address.nesting.idsToAddress(parent.collectionId, parent.tokenId);
+      const res = await this.uniqueSdk.refungible.transferToken.getFee({
+        address: signer.address,
+        from: address,
+        to,
+        amount,
+        collectionId: nested.collectionId,
+        tokenId: nested.tokenId
+      });
+      return res.fee.raw;
+    }
     const res = await this.uniqueSdk.token.nest.getFee({
       address: signer.address || '',
-      nested: from,
-      parent: to
+      nested,
+      parent
     });
     return res.fee.raw;
   }
 
-  async nestToken(address: string, nested: NestTokenParam, parent: NestTokenParam, amount: number, signer: Signer): Promise<void> {
-    if (amount !== 1) throw new Error('RFT support not implemented');
+  async nestToken(address: string, nested: NestTokenParam, parent: NestTokenParam, mode: CollectionMode, amount: number, signer: Signer): Promise<void> {
     let res;
     if (address !== signer.address) {
       // token is already nested
       const to = Address.nesting.idsToAddress(parent.collectionId, parent.tokenId);
-      res = await this.uniqueSdk.token.transfer({
+
+      const method = mode === 'ReFungible' ? this.uniqueSdk.refungible.transferToken : this.uniqueSdk.token.transfer;
+
+      res = await method({
         address: signer.address,
         from: address,
         to,
@@ -68,11 +84,23 @@ class UniqueAdapter implements IMarketContractAdapter {
         tokenId: nested.tokenId
       }, { signer });
     } else {
-      res = await this.uniqueSdk.token.nest({
-        address: signer.address || '',
-        nested: nested,
-        parent: parent
-      }, { signer });
+      if (mode === 'ReFungible') {
+        const to = Address.nesting.idsToAddress(parent.collectionId, parent.tokenId);
+        res = await this.uniqueSdk.refungible.transferToken({
+          address: signer.address,
+          from: signer.address,
+          to,
+          amount,
+          collectionId: nested.collectionId,
+          tokenId: nested.tokenId
+        }, { signer });
+      } else {
+        res = await this.uniqueSdk.token.nest({
+          address: signer.address || '',
+          nested: nested,
+          parent: parent
+        }, { signer });
+      }
     }
     if (res.error) {
       console.error('Nest failed: ', res.error);
@@ -80,21 +108,47 @@ class UniqueAdapter implements IMarketContractAdapter {
     }
   }
 
-  async getUnnestTokenFee(from: NestTokenParam, amount: number, signer: Signer): Promise<string> {
-    if (amount !== 1) throw new Error('RFT support not implemented');
+  async getUnnestTokenFee(nested: NestTokenParam, parent: NestTokenParam, mode: CollectionMode, amount: number, signer: Signer): Promise<string> {
+    if (!signer.address) throw new Error('Signer unavailable');
+    if (mode === 'ReFungible') {
+      const from = Address.nesting.idsToAddress(parent.collectionId, parent.tokenId);
+      const res = await this.uniqueSdk.refungible.transferToken.getFee({
+        address: signer.address,
+        from,
+        to: signer.address,
+        amount,
+        collectionId: nested.collectionId,
+        tokenId: nested.tokenId
+      });
+      return res.fee.raw;
+    }
+
     const res = await this.uniqueSdk.token.unnest.getFee({
       address: signer.address || '',
-      nested: from
+      nested
     });
     return res.fee.raw;
   }
 
-  async unnestToken(from: NestTokenParam, amount: number, signer: Signer): Promise<void> {
-    if (amount !== 1) throw new Error('RFT support not implemented');
-    const res = await this.uniqueSdk.token.unnest({
-      address: signer.address || '',
-      nested: from
-    }, { signer });
+  async unnestToken(nested: NestTokenParam, parent: NestTokenParam, mode: CollectionMode, amount: number, signer: Signer): Promise<void> {
+    if (!signer.address) throw new Error('Signer unavailable');
+    let res;
+    if (mode === 'ReFungible') {
+      const from = Address.nesting.idsToAddress(parent.collectionId, parent.tokenId);
+      res = await this.uniqueSdk.refungible.transferToken({
+        address: signer.address,
+        from,
+        to: signer.address,
+        amount,
+        collectionId: nested.collectionId,
+        tokenId: nested.tokenId
+      });
+    } else {
+      res = await this.uniqueSdk.token.unnest({
+        address: signer.address || '',
+        nested
+      }, { signer });
+    }
     if (res.error) {
       console.error('Unnest failed: ', res.error);
       throw new Error(res.error.toString());

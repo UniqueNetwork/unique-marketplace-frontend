@@ -20,6 +20,9 @@ import ShareTokenModal from './ShareTokenModal';
 import { stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
 import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
 import { ReportModal } from './ReportModal';
+import { useParams } from 'react-router-dom';
+import { Address } from '@unique-nft/utils';
+import { FractionalDetail } from './FractionalDetail';
 
 interface IProps {
   token?: TokenByIdResponse
@@ -43,6 +46,7 @@ export const CommonTokenDetail: FC<IProps> = ({
   isNested,
   isOwner
 }) => {
+  const { address } = useParams<{ address: string }>();
   const {
     collectionId,
     collectionName,
@@ -81,12 +85,15 @@ export const CommonTokenDetail: FC<IProps> = ({
   }, [chainProperties?.SS58Prefix]);
 
   const owner = useMemo(() => {
+    if (collection?.mode === 'ReFungible' && address) {
+      return formatAddress(address);
+    }
     if (offer) {
       return formatAddress(offer?.seller);
     }
     if (!token?.owner) return undefined;
     return (token.owner ? formatAddress(token.owner) : token.owner);
-  }, [token, offer, formatAddress]);
+  }, [token, collection?.mode, offer, formatAddress, address]);
 
   const [shareModalVisible, setShareModalVisible] = useState(false);
   const [reportModalVisible, setReportModalVisible] = useState(false);
@@ -117,7 +124,7 @@ export const CommonTokenDetail: FC<IProps> = ({
 
   const videoProp = useMemo(() => stringToDecodedInfixOrUrlOrCidAndHash(video), [video]);
 
-  const badge = isNested ? 'Nested' : isBundle ? 'Bundle' : '';
+  const badge = collection?.mode === 'ReFungible' ? 'Fractional' : isNested ? 'Nested' : isBundle ? 'Bundle' : '';
 
   return (
     <CommonTokenDetailStyled>
@@ -161,6 +168,10 @@ export const CommonTokenDetail: FC<IProps> = ({
           </Row>
           <Divider />
           {children}
+          {collection?.mode === 'ReFungible' && !!address && <>
+            <FractionalDetail testid={`${testid}-fractional`} />
+            <Divider />
+          </>}
           {attributes && <AttributesBlock attributes={attributes} />}
           <Divider />
           <CollectionsCard
@@ -168,6 +179,7 @@ export const CommonTokenDetail: FC<IProps> = ({
             description={description || ''}
             id={collectionId || -1}
             title={collectionName || ''}
+            isRFT={collection?.mode === 'ReFungible'}
             testid={`${testid}-collection`}
           />
         </>}

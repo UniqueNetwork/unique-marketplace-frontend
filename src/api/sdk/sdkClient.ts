@@ -4,13 +4,7 @@ import { Sdk } from '@unique-nft/sdk/full';
 import { Settings } from '../restApi/settings/types';
 import { UniqueSDKNFTController } from '../chainApi/NFTController';
 import { UniqueSDKCollectionController } from '../chainApi/collectionController';
-
-// declare module '@unique-nft/sdk' {
-//   export interface TokenByIdResponse {
-//     image: DecodedInfixOrUrlOrCidAndHash
-//     video?: DecodedInfixOrUrlOrCidAndHash
-//   }
-// }
+import { UniqueSDKRFTController } from 'api/chainApi/RFTController';
 
 export interface NetworkOptions { networkId: string, settings: Settings }
 
@@ -18,6 +12,7 @@ export class SdkClient {
   public isReady = false;
   public sdk: Sdk;
   public nftController: UniqueSDKNFTController;
+  public rftController: UniqueSDKRFTController;
   public collectionController: UniqueSDKCollectionController;
   public marketController: MarketController;
 
@@ -26,6 +21,7 @@ export class SdkClient {
     this.marketController = new MarketController(options);
     this.collectionController = new UniqueSDKCollectionController(options);
     this.nftController = new UniqueSDKNFTController(options);
+    this.rftController = new UniqueSDKRFTController(options);
     this.isReady = true;
   }
 

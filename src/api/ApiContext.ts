@@ -2,11 +2,13 @@ import { Context, Consumer, Provider, createContext } from 'react';
 import { AllowedCollections, Settings } from './restApi/settings/types';
 import { UniqueSDKNFTController } from './chainApi/NFTController';
 import { UniqueSDKCollectionController } from './chainApi/collectionController';
+import { UniqueSDKRFTController } from './chainApi/RFTController';
 import { ChainPropertiesResponse, Sdk } from '@unique-nft/sdk/full';
 import MarketController from './chainApi/MarketController';
 
 type Api = {
   nft?: UniqueSDKNFTController
+  rft?: UniqueSDKRFTController
   collection?: UniqueSDKCollectionController
   market?: MarketController
 }
