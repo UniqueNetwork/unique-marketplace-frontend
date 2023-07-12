@@ -84,7 +84,6 @@ export class UniqueSDKNFTController extends BaseController {
   }
 
   async transferToBundle(address: string, nested: TokenIdQuery, newParent: TokenIdQuery, mode: CollectionMode, amount: number, { account }: TransactionOptions): Promise<void> {
-    console.log(address, account);
     const adapter = this.getAdapter(account.account);
     await adapter.nestToken(
       address,

@@ -93,27 +93,34 @@ class MetamaskAdapter implements IMarketContractAdapter {
   }
 
   async getUnnestTokenFee(target: NestTokenParam, parent: NestTokenParam, mode: CollectionMode, amount: number, signer: Signer): Promise<string> {
-    if (amount !== 1) throw new Error('RFT not supported');
-    const nftFactory = await UniqueNFTFactory(Number(target.collectionId), signer);
-    const parentTokenAddress = await nftFactory.ownerOf(target.tokenId);
+    const parentTokenAddress = Address.nesting.idsToAddress(parent.collectionId, parent.tokenId);
+    const tokenHelper = await (mode === 'ReFungible'
+      ? UniqueRefungibleTokenFactory({ collectionId: target.collectionId, tokenId: target.tokenId }, signer)
+      : UniqueNFTFactory(target.collectionId, signer));
+
     const ownerAddress = await signer.getAddress();
-    const estimateGas = await nftFactory.estimateGas.transferFrom(
+
+    const estimateGas = await tokenHelper.estimateGas.transferFrom(
       parentTokenAddress,
       ownerAddress,
-      target.tokenId
+      mode === 'ReFungible' ? amount : target.tokenId
     );
-    const gasPrice = await nftFactory.provider.getGasPrice();
+    const gasPrice = await tokenHelper.provider.getGasPrice();
     return estimateGas.mul(gasPrice).toString();
   }
 
   async unnestToken(target: NestTokenParam, parent: NestTokenParam, mode: CollectionMode, amount: number, signer: Signer): Promise<void> {
-    if (amount !== 1) throw new Error('RFT not supported');
-    const nftFactory = await UniqueNFTFactory(Number(target.collectionId), signer);
+    const parentTokenAddress = Address.nesting.idsToAddress(parent.collectionId, parent.tokenId);
+    const tokenHelper = await (mode === 'ReFungible'
+      ? UniqueRefungibleTokenFactory({ collectionId: target.collectionId, tokenId: target.tokenId }, signer)
+      : UniqueNFTFactory(target.collectionId, signer));
 
-    const parentTokenAddress = await nftFactory.ownerOf(target.tokenId);
     const ownerAddress = await signer.getAddress();
-
-    await (await nftFactory.transferFrom(parentTokenAddress, ownerAddress, target.tokenId)).wait();
+    await (await tokenHelper.transferFrom(
+      parentTokenAddress,
+      ownerAddress,
+      mode === 'ReFungible' ? amount : target.tokenId
+    )).wait();
   }
 
   async getTransferBalanceFee(addressFrom: string, addressTo: string, amount: ChainValue, signer: Signer): Promise<string> {

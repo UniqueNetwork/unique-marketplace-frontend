@@ -84,8 +84,6 @@ function BundleTreeSection({ token, offer, testid, onFinish, isOwner }: IProps) 
   }, [bundle]);
 
   const onViewTokenDetails = useCallback((token: INestingToken, mode: string) => {
-    console.log(mode);
-
     if (mode === 'ReFungible' && token.nestingParentToken) {
       const parentOwner = Address.nesting.idsToAddress(token.nestingParentToken.collectionId, token.nestingParentToken.tokenId);
       navigate(`/${currentChainId}/token/${parentOwner}/${token.collectionId}/${token.tokenId}`);

@@ -79,7 +79,7 @@ export const OwnerCard: FC<OwnerCardProps> = ({
             testid={testid}
             hideName={false}
           />}
-          {!isOwned && isParentToken && <Text >Nested to {parentToken?.collection.tokenPrefix} #{parentToken?.tokenId}</Text>}
+          {!isOwned && isParentToken && <Text >Nested into {parentToken?.collection.tokenPrefix} #{parentToken?.tokenId}</Text>}
           {canCopy && !isParentToken && <CopyButton onClick={onCopyAddress(formatAddress(address) || '')} data-testid={`${testid}-copy`} />}
         </Row>
       </AccountInfoWrapper>
