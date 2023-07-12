@@ -12,7 +12,6 @@ interface ICollectionsCardProps {
   title: string;
   avatarSrc: string;
   description: string;
-  isRFT: boolean;
   testid?: string;
 }
 
@@ -21,15 +20,12 @@ export const CollectionsCard: FC<ICollectionsCardProps> = ({
   description,
   id,
   title,
-  isRFT,
   testid
 }: ICollectionsCardProps) => {
   const avatarImg = avatarSrc || noCollections;
   const { currentChainId } = useApi();
 
-  const collectionLink = isRFT && currentChainId
-    ? `${config.blockchains[currentChainId].scanUrl}/collections/${id}`
-    : `/${currentChainId?.toLowerCase()}/collection/${id}`;
+  const collectionLink = `/${currentChainId?.toLowerCase()}/collection/${id}`;
 
   return (
     <CollectionsCardStyled to={collectionLink}><>

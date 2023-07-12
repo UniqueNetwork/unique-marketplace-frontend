@@ -189,7 +189,6 @@ export const CommonTokenDetail: FC<IProps> = ({
             description={description || ''}
             id={collectionId || -1}
             title={collectionName || ''}
-            isRFT={collection?.mode === 'ReFungible'}
             testid={`${testid}-collection`}
           />
         </>}
