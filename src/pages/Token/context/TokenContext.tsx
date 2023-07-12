@@ -83,9 +83,9 @@ export const TokenContextProvider: FC = ({ children }) => {
     }
 
     setIsFetchingToken(false);
+    setIsNested(!!isNested);
     if (isBundle || isNested) {
       setIsFetchingBundle(true);
-      setIsNested(!!isNested);
 
       if (isNested) {
         const parent = address ? Address.nesting.addressToIds(address) : token.nestingParentToken;
@@ -99,7 +99,7 @@ export const TokenContextProvider: FC = ({ children }) => {
     } else {
       setBundle(undefined);
     }
-  }, [api, address, collectionId, tokenId]);
+  }, [api?.nft, api?.rft, api?.collection, collectionId, tokenId, address, currentChainId]);
 
   useEffect(() => {
     void fetchToken();
