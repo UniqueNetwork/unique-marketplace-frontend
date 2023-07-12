@@ -139,7 +139,10 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
     return isTokenOwner(selectedAccount.address, owner);
   }, [selectedAccount?.address, owner]);
 
-  const badge = type === TokenTypeEnum.RFT ? 'Fractional' : isNestedState ? 'Nested' : isBundleState ? 'Bundle' : '';
+  const badges = [
+    ...(collection?.mode === 'ReFungible' ? ['Fractional'] : []),
+    ...(isNestedState ? ['Nested'] : isBundleState ? ['Bundle'] : [])
+  ];
 
   return (
     <TokensCardStyled>
@@ -149,7 +152,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
         imageUrl={imageUrl}
         video={video}
         testid={`${testid}-token-media`}
-        badge={badge}
+        badges={badges}
       />
       <Description>
         <BasicDataWrapper>

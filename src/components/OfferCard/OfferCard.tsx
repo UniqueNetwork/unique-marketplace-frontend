@@ -79,7 +79,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
         imageUrl={image}
         video={videoProp}
         testid={`${testid}-token-media`}
-        badge={isBundle ? 'Bundle' : ''}
+        badges={isBundle ? ['Bundle'] : []}
       />
       <Description>
         <BasicDataWrapper>

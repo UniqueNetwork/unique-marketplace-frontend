@@ -6,7 +6,7 @@ import { useAccounts } from '../useAccounts';
 import useStages from '../useStages';
 import { CollectionMode } from 'api/chainApi/types';
 
-export const useUnnestStages = (token: TokenIdQuery, mode: CollectionMode) => {
+export const useUnnestStages = (token: TokenIdQuery, parentAddress: string, mode: CollectionMode) => {
   const { api } = useApi();
   const { selectedAccount } = useAccounts();
   const nftApi = api?.nft;
@@ -14,8 +14,8 @@ export const useUnnestStages = (token: TokenIdQuery, mode: CollectionMode) => {
     title: 'Unnest in progress',
     description: '',
     status: StageStatus.inProgress,
-    action: (params) => nftApi?.unnest(Number(token.collectionId), token.tokenId, mode, params.txParams.amount, params.options)
-  }], [nftApi, token.collectionId, token.tokenId, mode]);
+    action: (params) => nftApi?.unnest(Number(token.collectionId), token.tokenId, parentAddress, mode, params.txParams.amount, params.options)
+  }], [nftApi, token.collectionId, token.tokenId, parentAddress, mode]);
 
   const { stages, error, status, initiate } = useStages<{ amount: number }>(unnestStages, selectedAccount);
 

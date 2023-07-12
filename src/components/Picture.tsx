@@ -20,7 +20,7 @@ interface PictureProps {
   video?: DecodedVideoUri
   videoProps?: VideoProps
   isPlaying?: boolean
-  badge?: string
+  badges?: string[]
 }
 
 export const Picture: FC<PictureProps> = ({
@@ -31,7 +31,7 @@ export const Picture: FC<PictureProps> = ({
   video,
   videoProps,
   isPlaying,
-  badge
+  badges
 }) => {
   const [imageSrc, setImageSrc] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -80,7 +80,9 @@ export const Picture: FC<PictureProps> = ({
 
   return (<div className={'picture'}>
     {isLoading && <Skeleton width={'100%'} height={'100%'} />}
-    {badge && <Badge className={'badge'}>{badge}</Badge>}
+    {badges && <BadgesWrapper>
+      {badges.map((badge) => <Badge className={'badge'}>{badge}</Badge>)}
+    </BadgesWrapper>}
     {!isLoading && video?.fullUrl &&
       <VideoStyled
         ref={videoRef}
@@ -144,10 +146,17 @@ const VideoStyled = styled.video`
   }
 `;
 
-const Badge = styled.div`
+const BadgesWrapper = styled.div`
   position: absolute;
   top: 8px;
   right: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--gap);
+  z-index: 2;
+`;
+const Badge = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -159,5 +168,4 @@ const Badge = styled.div`
   font-size: 16px;
   line-height: 24px;
   color: ${AdditionalDark};
-  z-index: 2;
 `;

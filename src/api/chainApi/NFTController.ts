@@ -6,7 +6,6 @@ import { filterAllowedTokens } from './utils/checkTokenIsAllowed';
 import BaseController from './controllers/BaseController';
 import { NetworkOptions } from 'api/sdk/sdkClient';
 import { AllowedCollections } from 'api/restApi/settings/types';
-import { NestTokenParam } from './adapters/IBaseAdapter';
 
 declare module '@unique-nft/sdk' {
   type arrayNumberRecordStringAny = string | number | Record<string, string>
@@ -97,8 +96,8 @@ export class UniqueSDKNFTController extends BaseController {
     );
   }
 
-  async getUnnestFee(collectionId: number, tokenId: number, mode: CollectionMode, amount: number, { account }: TransactionOptions): Promise<string> {
-    const parent = await this.uniqueSdk.token.parent({ collectionId, tokenId });
+  async getUnnestFee(collectionId: number, tokenId: number, parentAddress: string, mode: CollectionMode, amount: number, { account }: TransactionOptions): Promise<string> {
+    const parent = Address.nesting.addressToIds(parentAddress);
 
     if (!parent) return '0';
 
@@ -107,8 +106,8 @@ export class UniqueSDKNFTController extends BaseController {
     return this.getChainValue(rawFee, this.decimals).parsed.toString();
   }
 
-  async unnest(collectionId: number, tokenId: number, mode: CollectionMode, amount: number, { account }: TransactionOptions): Promise<void> {
-    const parent = await this.uniqueSdk.token.parent({ collectionId, tokenId });
+  async unnest(collectionId: number, tokenId: number, parentAddress: string, mode: CollectionMode, amount: number, { account }: TransactionOptions): Promise<void> {
+    const parent = Address.nesting.addressToIds(parentAddress); // await this.uniqueSdk.token.parent({ collectionId, tokenId });
 
     if (!parent) return;
 

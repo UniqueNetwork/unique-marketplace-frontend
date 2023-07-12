@@ -3,7 +3,7 @@ import { Heading, Skeleton, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
 import { useApi } from '../../../hooks/useApi';
-import { formatLongNumber } from 'utils/textUtils';
+import { formatLongNumber, percentText } from 'utils/textUtils';
 import { useParams } from 'react-router-dom';
 import { ProgressBar } from 'components';
 
@@ -33,16 +33,6 @@ export const FractionalDetail: FC<FractionalDetailProps> = ({ testid = '' }) => 
   const percent = useMemo(() => {
     return ((balance || 0) / (pieces || 1)) * 100;
   }, [balance, pieces]);
-
-  const percentText = useMemo(() => {
-    if (percent < 0.01) {
-      return '<0.01 %';
-    }
-    if (percent > 99.99 && percent < 100) {
-      return '>99.99 %';
-    }
-    return `${percent.toFixed(2)} %`;
-  }, [percent]);
 
   if (!address || !collectionId || !id) return null;
 
@@ -79,7 +69,7 @@ export const FractionalDetail: FC<FractionalDetailProps> = ({ testid = '' }) => 
         <Text size='m' weight='light' color='grey-500'>
           Ownership percentage:
         </Text>
-        <Text>{percentText}</Text>
+        <Text>{percentText(percent)}</Text>
       </Row>
       <Row>
         <ProgressBar filledPercent={percent} height={14} />

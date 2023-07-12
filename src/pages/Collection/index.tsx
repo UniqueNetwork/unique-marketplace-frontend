@@ -43,6 +43,8 @@ export const CollectionPage = () => {
     collectionId: Number(collectionId)
   });
 
+  const isRFTCollection = collection?.mode === 'ReFungible';
+
   const { currentChainId, api } = useApi();
 
   const {
@@ -53,7 +55,8 @@ export const CollectionPage = () => {
     onFilterChange,
     onSearch,
     onSortingChange,
-    getFilterByState
+    getFilterByState,
+    setSortingValue
    } = useCollectionTokensFilter({ isFetching, fetch });
 
   const [royalty, setRoyalty] = useState<RoyaltiesFormData>();
@@ -114,6 +117,9 @@ export const CollectionPage = () => {
         return;
       }
       setCollection(collectionData);
+      if (collectionData.mode === 'ReFungible') {
+        setSortingValue(sortingOptions[4].id);
+      }
     })();
   }, [currentChainId, collectionId, fetch, selectedAccount?.address]);
 
@@ -158,7 +164,7 @@ export const CollectionPage = () => {
     <CollectionDetail collection={collection} royalty={royalty} />
     <CollectionPagePaper>
       <MarketMainPageStyled>
-        <LeftColumn>
+        {!isRFTCollection && <LeftColumn>
           <Filters
             value={filterState}
             attributes={attributes}
@@ -167,7 +173,7 @@ export const CollectionPage = () => {
             testid={`${testid}-filters`}
             disabled={scanning}
           />
-        </LeftColumn>
+        </LeftColumn>}
         <MainContent>
           <SearchAndSortingWrapper>
             <SearchField
@@ -179,7 +185,7 @@ export const CollectionPage = () => {
             <SortSelectWrapper>
               <Select
                 onChange={onSortingChange}
-                options={sortingOptions}
+                options={isRFTCollection ? sortingOptions.slice(-2) : sortingOptions}
                 value={sortingValue}
                 testid={`${testid}-sorting-select`}
               />
@@ -200,7 +206,12 @@ export const CollectionPage = () => {
             useWindow={true}
           >
             {!isAccountsLoading && !tokens?.length && <NoItems isSearchResult={!!searchValue || !!filterCount} />}
-            <TokensList tokens={tokens || []} isLoading={isAccountsLoading} testid={`${testid}-tokens`} />
+            <TokensList
+              showOwner={!isRFTCollection}
+              tokens={tokens || []}
+              isLoading={isAccountsLoading}
+              testid={`${testid}-tokens`}
+            />
           </InfiniteScroll>
         </MainContent>
       </MarketMainPageStyled>

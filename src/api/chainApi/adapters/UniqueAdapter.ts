@@ -135,16 +135,16 @@ class UniqueAdapter implements IMarketContractAdapter {
     let res;
     if (mode === 'ReFungible') {
       const from = Address.nesting.idsToAddress(parent.collectionId, parent.tokenId);
-      res = await this.uniqueSdk.refungible.transferToken({
+      res = await this.uniqueSdk.refungible.transferToken.submitWaitResult({
         address: signer.address,
         from,
         to: signer.address,
         amount,
         collectionId: nested.collectionId,
         tokenId: nested.tokenId
-      });
+      }, { signer });
     } else {
-      res = await this.uniqueSdk.token.unnest({
+      res = await this.uniqueSdk.token.unnest.submitWaitResult({
         address: signer.address || '',
         nested
       }, { signer });

@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Dispatch, SetStateAction, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Heading, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { PagePaper } from 'components/PagePaper/PagePaper';
@@ -18,6 +18,7 @@ import { countNestedChildren } from '../../utils/helpers';
 import { TokenByIdResponse } from '@unique-nft/sdk';
 import { CollectionMode } from 'api/chainApi/types';
 import { Address } from '@unique-nft/utils';
+import { TokenContext } from './context/TokenContext';
 
 const areNodesEqual = (a: INestingToken, b: INestingToken) => a.collectionId === b.collectionId && a.tokenId === b.tokenId;
 
@@ -35,19 +36,17 @@ const addIsCurrentAccountOwnerToBundleAndSort = (bundle: INestingToken, isOwner:
 interface IProps {
   token?: TokenByIdResponse
   offer?: Offer
-  onViewTokenDetails: Dispatch<SetStateAction<TokenByIdResponse | undefined>>
   testid?: string
   isOwner: boolean
   onFinish(): void
 }
 
-function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token, offer, testid, onFinish, isOwner }: IProps) {
+function BundleTreeSection({ token, offer, testid, onFinish, isOwner }: IProps) {
   const navigate = useNavigate();
-  const { api } = useApi();
+  const { api, currentChainId } = useApi();
   const { address } = useParams<{ address: string }>();
   const [isMobileViewVisible, setIsMobileViewVisible] = useState(false);
-  const [bundle, setBundle] = useState<INestingToken[]>();
-  const [isBundleLoading, setIsBundleLoading] = useState(true);
+  const { bundle, isFetching, fetchToken } = useContext(TokenContext);
   const [modalType, setModalType] = useState(BundleModalType.default);
   const [selectedToken, setSelectedToken] = useState<INestingToken>();
 
@@ -55,36 +54,6 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
     setSelectedToken(token);
     setModalType(action);
   }, []);
-
-  useEffect(() => {
-    if (bundle && bundle[0].isCurrentAccountOwner === isOwner) return;
-    void (async () => {
-      if (offer && offer.tokenDescription.nestingChildTokens) {
-        const bundle: INestingToken = {
-          // properties: [],
-          ...offer.tokenDescription,
-          tokenId: offer.tokenId,
-          collectionId: offer.collectionId,
-          nestingChildTokens: offer.tokenDescription.nestingChildTokens
-        };
-        setBundle([addIsCurrentAccountOwnerToBundleAndSort(bundle, isOwner)]);
-      } else if (token) {
-        setIsBundleLoading(true);
-        let response;
-        if (address) {
-          const parent = Address.nesting.addressToIds(address);
-          response = await api?.nft?.getBundle(parent.collectionId, parent.tokenId);
-        } else {
-          response = await api?.nft?.getBundle(token.collectionId, token.tokenId);
-        }
-
-        if (response) {
-          setBundle([addIsCurrentAccountOwnerToBundleAndSort(response, isOwner)]);
-        }
-      }
-      setIsBundleLoading(false);
-    })();
-  }, [api, token, offer, isOwner, bundle, address]);
 
   const closeView = useCallback(() => {
     setIsMobileViewVisible(false);
@@ -99,31 +68,36 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
 
   const onFinishAction = useCallback(() => {
     setModalType(BundleModalType.default);
-    setBundle(undefined);
+    // setBundle(undefined);
+    void fetchToken();
+
     onFinish();
-  }, [onFinish]);
+  }, [onFinish, fetchToken]);
 
   const onClose = useCallback(() => {
     setModalType(BundleModalType.default);
   }, []);
 
   const tokensCount = useMemo(() => {
-    if (!bundle || !bundle[0]?.nestingChildTokens) return 0;
-    return countNestedChildren(bundle[0].nestingChildTokens);
+    if (!bundle || !bundle.nestingChildTokens) return 0;
+    return countNestedChildren(bundle.nestingChildTokens);
   }, [bundle]);
 
   const onViewTokenDetails = useCallback((token: INestingToken, mode: string) => {
+    console.log(mode);
+
     if (mode === 'ReFungible' && token.nestingParentToken) {
       const parentOwner = Address.nesting.idsToAddress(token.nestingParentToken.collectionId, token.nestingParentToken.tokenId);
-      navigate(`/token/${parentOwner}/${token.collectionId}/${token.tokenId}`);
+      navigate(`/${currentChainId}/token/${parentOwner}/${token.collectionId}/${token.tokenId}`);
     } else {
-      navigate(`/token/${token.collectionId}/${token.tokenId}`);
+      navigate(`/${currentChainId}/token/${token.collectionId}/${token.tokenId}`);
     }
-    onViewTokenDetailsProps(token as unknown as TokenByIdResponse);
     if (isMobileViewVisible) closeView();
-  }, [onViewTokenDetailsProps, isMobileViewVisible, closeView]);
+  }, [isMobileViewVisible, closeView, currentChainId]);
 
-  if (isBundleLoading) return (<BundleIsLoading />);
+  if (!bundle) return null;
+
+  if (isFetching) return (<BundleIsLoading />);
 
   return (
     <>
@@ -133,7 +107,7 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
         openView={openView}
         bundleTreeComponent={
           <BundleTree<INestingToken>
-            dataSource={bundle || []}
+            dataSource={[bundle] || []}
             nodeView={NodeView}
             onNodeClicked={onNodeClicked}
             nestedSectionView={NestedSection}
@@ -154,7 +128,7 @@ function BundleTreeSection({ onViewTokenDetails: onViewTokenDetailsProps, token,
         </HeaderStyled>
         <Content>
           <BundleTree<INestingToken>
-            dataSource={bundle || []}
+            dataSource={[bundle] || []}
             nodeView={NodeView}
             onNodeClicked={onNodeClicked}
             nestedSectionView={NestedSection}

@@ -66,3 +66,13 @@ export const formatLongNumber = (number = 0): string => {
 
   return formatBlockNumber(Math.floor(number / 100000000) / 10) + 'B';
 };
+
+export const percentText = (percent: number) => {
+  if (percent < 0.01) {
+    return '<0.01 %';
+  }
+  if (percent > 99.99 && percent < 100) {
+    return '>99.99 %';
+  }
+  return `${percent.toFixed(2)} %`;
+};

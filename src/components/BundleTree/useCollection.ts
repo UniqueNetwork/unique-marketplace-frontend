@@ -10,8 +10,8 @@ export const useCollection = (collectionId: number | undefined) => {
   const { api } = useApi();
 
   useEffect(() => {
-    if (!collectionId) return;
-    (async () => {
+    if (!collectionId || !api) return;
+    void (async () => {
       setIsCollectionLoading(true);
       const collection = await getCollection(collectionId);
       if (collection) {
@@ -19,7 +19,7 @@ export const useCollection = (collectionId: number | undefined) => {
         setIsCollectionLoading(false);
       }
     })();
-  }, [collectionId, api]);
+  }, [collectionId, api, getCollection]);
 
   return {
     collection,

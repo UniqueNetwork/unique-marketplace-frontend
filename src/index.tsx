@@ -5,14 +5,15 @@ import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-d
 import { Market, MyTokens, Collection, Accounts, Trades, Faq, TokenPage, Collections, CollectionEdit } from './pages';
 import { GlobalStyle } from './styles';
 import { Error404 } from './pages/Errors/404';
+import { TokenContextProvider } from 'pages/Token/context/TokenContext';
 
 const commonRoutes = (<>
   <Route
-    element={<TokenPage />}
+    element={<TokenContextProvider><TokenPage /></TokenContextProvider>}
     path={'token/:address/:collectionId/:id'}
   />
   <Route
-    element={<TokenPage />}
+    element={<TokenContextProvider><TokenPage /></TokenContextProvider>}
     path={'token/:collectionId/:id'}
   />
   <Route

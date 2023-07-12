@@ -1,5 +1,5 @@
 import { Heading, Text } from '@unique-nft/ui-kit';
-import React, { FC, ReactChild, useCallback, useMemo, useState } from 'react';
+import React, { FC, ReactChild, useCallback, useContext, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { Dropdown, Icon } from 'components/UI';
 import { Picture } from 'components';
@@ -23,10 +23,12 @@ import { ReportModal } from './ReportModal';
 import { useParams } from 'react-router-dom';
 import { Address } from '@unique-nft/utils';
 import { FractionalDetail } from './FractionalDetail';
+import { TokenContext } from '../context/TokenContext';
+import { FractionalOwnersList } from './FractionalOwnersList';
 
 interface IProps {
   token?: TokenByIdResponse
-  collection: CollectionInfoWithSchemaResponse | null
+  collection?: CollectionInfoWithSchemaResponse
   offer?: Offer
   isLoading?: boolean
   testid: string
@@ -47,6 +49,7 @@ export const CommonTokenDetail: FC<IProps> = ({
   isOwner
 }) => {
   const { address } = useParams<{ address: string }>();
+  const { isRft, isRftFracton } = useContext(TokenContext);
   const {
     collectionId,
     collectionName,
@@ -124,7 +127,10 @@ export const CommonTokenDetail: FC<IProps> = ({
 
   const videoProp = useMemo(() => stringToDecodedInfixOrUrlOrCidAndHash(video), [video]);
 
-  const badge = collection?.mode === 'ReFungible' ? 'Fractional' : isNested ? 'Nested' : isBundle ? 'Bundle' : '';
+  const badges = [
+    ...(collection?.mode === 'ReFungible' ? ['Fractional'] : []),
+    ...(isNested ? ['Nested'] : isBundle ? ['Bundle'] : [])
+  ];
 
   return (
     <CommonTokenDetailStyled>
@@ -136,7 +142,7 @@ export const CommonTokenDetail: FC<IProps> = ({
             src={image}
             video={videoProp}
             testid={`${testid}-token-picture`}
-            badge={deviceSize > DeviceSize.md ? badge : ''}
+            badges={badges}
           />
         }
       </PictureWrapper>
@@ -154,7 +160,7 @@ export const CommonTokenDetail: FC<IProps> = ({
           </ShareLink>
           <Row data-testid={`${testid}-owner-section`}>
             {isOwner && <Text color='grey-500' size='m'>You own it</Text>}
-            {!isOwner && <>
+            {!isOwner && !(isRft && !isRftFracton) && <>
               <Text color='grey-500' size='m'>
                 Owned&nbsp;by
               </Text>
@@ -167,6 +173,10 @@ export const CommonTokenDetail: FC<IProps> = ({
             </>}
           </Row>
           <Divider />
+          {isRft && !isRftFracton && <>
+            <FractionalOwnersList />
+            <Divider />
+          </>}
           {children}
           {collection?.mode === 'ReFungible' && !!address && <>
             <FractionalDetail testid={`${testid}-fractional`} />

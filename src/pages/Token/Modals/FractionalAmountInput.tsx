@@ -10,13 +10,14 @@ import { Skeleton, Text } from '@unique-nft/ui-kit';
 type FractionalAmountInputProps = {
   tokenId: number
   collectionId: number
+  ownerAddress?: string
   amount: number
   className?: string
   onChangeAmount(amount: number): void
   onChangeIsAmountValid(valid: boolean): void
 };
 
-export const FractionalAmountInput = ({ tokenId, collectionId, amount, className, onChangeAmount, onChangeIsAmountValid }: FractionalAmountInputProps) => {
+export const FractionalAmountInput = ({ tokenId, collectionId, ownerAddress, amount, className, onChangeAmount, onChangeIsAmountValid }: FractionalAmountInputProps) => {
   const { api } = useApi();
   const { selectedAccount } = useAccounts();
   const [amountString, setAmountString] = useState('1');
@@ -27,11 +28,11 @@ export const FractionalAmountInput = ({ tokenId, collectionId, amount, className
     if (!collectionId || !selectedAccount?.address) return;
     void (async () => {
       setIsFetchingAmount(true);
-      const totalAmount = await api?.rft?.getTokenBalance(collectionId, tokenId, selectedAccount?.address);
+      const totalAmount = await api?.rft?.getTokenBalance(collectionId, tokenId, ownerAddress || selectedAccount?.address);
       setTotalAmount(totalAmount?.amount || 0);
       setIsFetchingAmount(false);
     })();
-  }, [collectionId, tokenId, selectedAccount?.address]);
+  }, [collectionId, tokenId, selectedAccount?.address, ownerAddress]);
 
   const onSetMaxAmount = useCallback(() => {
     setAmountString(totalAmount.toString());

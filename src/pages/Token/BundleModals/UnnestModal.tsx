@@ -17,6 +17,7 @@ import { Coral700 } from 'styles/colors';
 import { CollectionInfoWithSchemaResponse, TokenByIdResponse, TokenIdQuery } from '@unique-nft/sdk';
 import { FractionalAmountInput } from '../Modals/FractionalAmountInput';
 import { CollectionMode } from 'api/chainApi/types';
+import { Address } from '@unique-nft/utils';
 
 export const UnnestModal: FC<TBundleTrunsferModalBodyProps> = ({ token, setIsClosable, onFinish, testid }) => {
   const { selectedAccount } = useAccounts();
@@ -25,6 +26,7 @@ export const UnnestModal: FC<TBundleTrunsferModalBodyProps> = ({ token, setIsClo
   const [isFetching, setIsFetching] = useState(false);
   const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse | null>(null);
   const [amount, setAmount] = useState(1);
+  const [parentAddress, setParentAddress] = useState<string>('');
 
   useEffect(() => {
     void (async () => {
@@ -33,6 +35,12 @@ export const UnnestModal: FC<TBundleTrunsferModalBodyProps> = ({ token, setIsClo
       const collection = await api.collection.getCollection(token?.collectionId);
       setCollection(collection);
       setIsFetching(false);
+      if (collection?.mode === 'ReFungible' && token.nestingParentToken) {
+        setParentAddress(Address.nesting.idsToAddress(
+          token.nestingParentToken.collectionId,
+          token.nestingParentToken.tokenId
+        ));
+      }
     })();
   }, [api?.collection, token?.collectionId]);
 
@@ -49,6 +57,7 @@ export const UnnestModal: FC<TBundleTrunsferModalBodyProps> = ({ token, setIsClo
   if (status === 'ask') {
     return (<AskUnnestModal
       token={token}
+      parentAddress={token.owner || parentAddress}
       collection={collection}
       onUnnest={onUnnest}
       testid={`${testid}-ask-transfer`}
@@ -57,6 +66,7 @@ export const UnnestModal: FC<TBundleTrunsferModalBodyProps> = ({ token, setIsClo
   if (status === 'unnest-stage') {
     return (<UnnestStagesModal
       onFinish={onFinish}
+      parentAddress={token.owner || parentAddress}
       mode={collection?.mode || 'NFT'}
       amount={amount}
       tokenId={token.tokenId}
@@ -68,9 +78,9 @@ export const UnnestModal: FC<TBundleTrunsferModalBodyProps> = ({ token, setIsClo
   return null;
 };
 
-type AskUnnestModalProps = { token: INestingToken | TokenByIdResponse, collection: CollectionInfoWithSchemaResponse | null, onUnnest(amount: number): void, testid: string };
+type AskUnnestModalProps = { token: INestingToken | TokenByIdResponse, parentAddress: string, collection: CollectionInfoWithSchemaResponse | null, onUnnest(amount: number): void, testid: string };
 
-const AskUnnestModal: FC<AskUnnestModalProps> = ({ token, collection, onUnnest, testid }) => {
+const AskUnnestModal: FC<AskUnnestModalProps> = ({ token, parentAddress, collection, onUnnest, testid }) => {
   const { api } = useApi();
   const { selectedAccount } = useAccounts();
   const [isFeeLoading, setIsFeeLoading] = useState(false);
@@ -80,7 +90,7 @@ const AskUnnestModal: FC<AskUnnestModalProps> = ({ token, collection, onUnnest, 
   const [isAmountValid, setIsAmountValid] = useState(true);
 
   useEffect(() => {
-    if (!api?.nft || !token?.tokenId || !selectedAccount) return;
+    if (!api?.nft || !token?.tokenId || !selectedAccount || !collection) return;
     setIsFeeLoading(true);
     const isSponsored = !!collection?.sponsorship?.isConfirmed;
     setIsSponsored(isSponsored);
@@ -89,6 +99,7 @@ const AskUnnestModal: FC<AskUnnestModalProps> = ({ token, collection, onUnnest, 
     api.nft?.getUnnestFee(
       token.collectionId,
       token.tokenId,
+      parentAddress,
       collection?.mode || 'NFT',
       amount,
       { account: selectedAccount }
@@ -99,7 +110,7 @@ const AskUnnestModal: FC<AskUnnestModalProps> = ({ token, collection, onUnnest, 
     }).finally(() => {
       setIsFeeLoading(false);
     });
-  }, [token.tokenId, amount, collection, token.collectionId, api?.nft, selectedAccount?.address]);
+  }, [token.tokenId, amount, collection, token.collectionId, api?.nft, selectedAccount?.address, selectedAccount, parentAddress]);
 
   const onConfirmUnnestClick = useCallback(
     () => {
@@ -125,6 +136,7 @@ const AskUnnestModal: FC<AskUnnestModalProps> = ({ token, collection, onUnnest, 
       {collection?.mode === 'ReFungible' && <FractionalAmountInput
         collectionId={token.collectionId}
         tokenId={token.tokenId}
+        ownerAddress={parentAddress}
         amount={amount}
         onChangeAmount={setAmount}
         onChangeIsAmountValid={setIsAmountValid}
@@ -155,11 +167,12 @@ const AskUnnestModal: FC<AskUnnestModalProps> = ({ token, collection, onUnnest, 
 
 type UnnestStagesModalProps = Omit<TBundleTrunsferModalBodyProps, 'token'> & TokenIdQuery & {
   amount: number
+  parentAddress: string
   mode: CollectionMode
 };
 
-const UnnestStagesModal: FC<UnnestStagesModalProps> = ({ tokenId, collectionId, mode, amount, onFinish, testid }) => {
-  const { stages, status, initiate } = useUnnestStages({ tokenId, collectionId }, mode);
+const UnnestStagesModal: FC<UnnestStagesModalProps> = ({ tokenId, collectionId, parentAddress, mode, amount, onFinish, testid }) => {
+  const { stages, status, initiate } = useUnnestStages({ tokenId, collectionId }, parentAddress, mode);
   const { info } = useNotifications();
   const { selectedAccount } = useAccounts();
 
