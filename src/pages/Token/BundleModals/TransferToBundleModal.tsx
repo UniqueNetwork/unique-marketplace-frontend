@@ -169,6 +169,7 @@ const AskTransferToBundleModal: FC<AskTransferToBundleModalProps> = ({ token, co
       </Content>
       {collectionProp?.mode === 'ReFungible' && <Row>
         <FractionalAmountInput
+          ownerAddress={token?.owner}
           amount={amount}
           collectionId={token?.collectionId}
           tokenId={token?.tokenId}
