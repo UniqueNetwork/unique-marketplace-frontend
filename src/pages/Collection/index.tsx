@@ -25,8 +25,6 @@ import { useCollectionTokensFilter } from './hooks/useCollectionTokensFilter';
 import { TokensFilter } from './Filters/types';
 import { RoyaltiesFormData } from 'pages/CollectionEdit/types';
 import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
-import { formatKsm } from 'api/chainApi/utils/textFormat';
-import { BN } from '@polkadot/util';
 
 export const CollectionPage = () => {
   const { collectionId } = useParams<{ collectionId: string }>();
@@ -140,19 +138,19 @@ export const CollectionPage = () => {
     return () => clearInterval(intervalId);
   }, [scanning, collectionId, tokensCountOnScan, filterState, sortingValue, searchValue]);
 
-  const hasMore = tokens && tokens.length < tokensCount;
+  const hasMore = tokens && tokens.length < tokensCount && !isFetching;
 
   const onClickSeeMore = useCallback(() => {
-    if (!isFetching) {
+    if (!isFetching && hasMore) {
       void fetchMore({
-        page: Math.ceil(tokens.length / pageSize) + 1,
-        pageSize: 20,
+        page: Math.ceil(tokens.length / 20) + 1,
+        pageSize,
         ...(getFilterByState(filterState)),
         searchText: searchValue || undefined,
         'sort[0]': [sortingValue]
       });
     }
-  }, [isFetching, fetchMore, tokens.length, getFilterByState, filterState, searchValue, sortingValue]);
+  }, [isFetching, tokens.length, getFilterByState, filterState, searchValue, sortingValue]);
 
   return (<>
     <CollectionDetail collection={collection} royalty={royalty} />

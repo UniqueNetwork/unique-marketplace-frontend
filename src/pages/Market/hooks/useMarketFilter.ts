@@ -107,8 +107,6 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
   const isFirstRender = useIsFirstRender();
 
   useEffect(() => {
-    console.log(currentChainId);
-
     if (!currentChainId || !api || isFirstRender) return;
     setFilterState(null);
     setSearchValue(undefined);
@@ -119,7 +117,6 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
       sort: [defaultSortingValue.id]
     });
   }, [currentChainId]);
-  console.log(currentChainId);
 
   return {
     filterState,
