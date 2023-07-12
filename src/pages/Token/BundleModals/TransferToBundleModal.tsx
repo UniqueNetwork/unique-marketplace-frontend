@@ -45,6 +45,7 @@ export const TransferToBundleModal: FC<TBundleTrunsferModalBodyProps> = ({ token
   }, [api?.collection, token?.collectionId]);
 
   const onTransferToBundle = useCallback((newParent: { collectionId: number, tokenId: number }, amount: number) => {
+    setAmount(amount);
     setNewParent(newParent);
     setStatus('transfer-stage');
     setIsClosable(false);
@@ -134,7 +135,7 @@ const AskTransferToBundleModal: FC<AskTransferToBundleModalProps> = ({ token, co
         setIsFeeLoading(false);
       });
     }, 300)();
-  }, [api?.market, token, selectedAccount?.account, collectionProp, isSponsored]);
+  }, [api?.market, token, selectedAccount?.account, collectionProp, isSponsored, amount]);
 
   const onConfirmTransferToBundleClick = useCallback(
     () => {

@@ -140,7 +140,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
   }, [selectedAccount?.address, owner]);
 
   const badges = [
-    ...(collection?.mode === 'ReFungible' ? ['Fractional'] : []),
+    ...(collection?.mode === 'ReFungible' || (token as MyToken).type === TokenTypeEnum.RFT ? ['Fractional'] : []),
     ...(isNestedState ? ['Nested'] : isBundleState ? ['Bundle'] : [])
   ];
 

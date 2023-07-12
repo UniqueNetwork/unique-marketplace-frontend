@@ -28,7 +28,6 @@ import { TokenContext } from './context/TokenContext';
 const testid = 'token-page';
 
 const TokenPage = () => {
-  const { api, currentChainId } = useApi();
   const { selectedAccount, updateCurrentAccountDeposit } = useAccounts();
   const { id, collectionId } = useParams<{ address: string, id: string, collectionId: string}>();
   const [marketType, setMarketType] = useState<MarketType>(MarketType.default);
