@@ -20,6 +20,7 @@ import keyring from '@polkadot/ui-keyring';
 import { KeyringLocalProvider } from './providers/KeyringProvider';
 import { Address } from '@unique-nft/utils';
 import { changeMetamaskChain } from 'utils/metamask';
+import { EthereumChainParams } from './constants';
 
 declare module 'ethers' {
 
@@ -35,13 +36,6 @@ const ProviderTypes: Record<ProviderTypesName, typeof PolkadotProvider | typeof 
   polkadot: PolkadotProvider,
   keyring: KeyringLocalProvider,
   metamask: MetamaskProvider
-};
-
-const EthereumChainParams: Record<string, AddEthereumChainParameter> = {
-  unique: Ethereum.UNIQUE_CHAINS_DATA_FOR_EXTENSIONS.unique,
-  quartz: Ethereum.UNIQUE_CHAINS_DATA_FOR_EXTENSIONS.quartz,
-  opal: Ethereum.UNIQUE_CHAINS_DATA_FOR_EXTENSIONS.opal,
-  sapphire: Ethereum.UNIQUE_CHAINS_DATA_FOR_EXTENSIONS.sapphire
 };
 
 const _accounts = new Accounts();
