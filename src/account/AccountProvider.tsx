@@ -64,6 +64,9 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ children }) => {
       client.subscribeAccountCurrentBalance({ address: Address.is.substrateAddress(account.address)
         ? Address.normalize.substrateAddress(account.address, chainProperties?.SS58Prefix)
         : account.address });
+      if (Address.is.substrateAddress(account.address)) {
+        client.subscribeAccountCurrentBalance({ address: Address.mirror.substrateToEthereum(account.address) });
+      }
     });
     client.on(SubscriptionEvents.ACCOUNT_CURRENT_BALANCE, (_, data) => {
       try {
@@ -78,6 +81,13 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ children }) => {
               withdraw: acc.balance.withdraw,
               parsed: newBalance.amount,
               raw: new BN(newBalance.raw)
+            };
+          }
+          if (Address.is.ethereumAddressInAnyForm(address) &&
+          Address.mirror.substrateToEthereum(acc.address).toLocaleLowerCase() === address?.toLocaleLowerCase()) {
+            acc.balance = {
+              ...acc.balance,
+              withdraw: { parsed: newBalance.formatted, raw: new BN(newBalance.raw) }
             };
           }
           return acc;
