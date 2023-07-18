@@ -6,6 +6,7 @@ import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
 import { ChainValue } from '../controllers/BaseController';
 import { CollectionMode } from '../types';
+import { CollectionProperty } from '@unique-nft/sdk';
 
 const buyGasLimit = 1_000_000;
 const sellGasLimit = 200_000;
@@ -20,6 +21,21 @@ class UniqueAdapter implements IMarketContractAdapter {
 
   private validateSdkResponse(result: ExtrinsicResultResponse<any>) {
     if (result.error) throw new Error((result.error as any)?.message || 'Transaction failed');
+  }
+
+  async setCollectionProperties(collectionId: number, properties: CollectionProperty[], signer: Signer): Promise<void> {
+    const unsignedTxPayload = await this.uniqueSdk.collection.setProperties.build({
+      address: signer.address,
+      collectionId,
+      properties
+    });
+    if (!unsignedTxPayload) throw new Error('Transaction build error');
+    const { signature } = await this.uniqueSdk.collection.setProperties.sign(unsignedTxPayload, { signer });
+    if (!signature) throw new Error('Signing failed');
+    await this.uniqueSdk.collection.setProperties.submit({
+      signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
+      signature
+    });
   }
 
   async getTransferTokenFee(from: string, to: string, collectionId: number, tokenId: number, mode: CollectionMode, amount: number): Promise<string> {

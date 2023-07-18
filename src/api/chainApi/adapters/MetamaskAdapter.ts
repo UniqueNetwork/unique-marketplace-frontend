@@ -7,6 +7,8 @@ import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
 import { ChainValue } from '../controllers/BaseController';
 import { CollectionMode } from '../types';
+import { CollectionProperty } from '@unique-nft/sdk';
+import { Utf16 } from 'utf-helpers';
 
 const buyGasLimit = 1_000_000;
 const sellGasLimit = 200_000;
@@ -32,6 +34,15 @@ class MetamaskAdapter implements IMarketContractAdapter {
   protected async callContract(contract: Contract, methodName: string, ...args: any[]) {
     await this.validateCall(contract.callStatic[methodName], args);
     await (await contract[methodName](...args)).wait();
+  }
+
+  async setCollectionProperties(collectionId: number, properties: CollectionProperty[], signer: Signer): Promise<void> {
+    const nftFactory = await UniqueNFTFactory(collectionId, signer);
+    const encodedProperties = properties.map(({ key, value }) => ({
+      key,
+      value: Utf16.stringToNumberArray(value || '')
+    }));
+    await (await nftFactory.setCollectionProperties(encodedProperties, { from: await signer.getAddress() })).wait();
   }
 
   async getTransferTokenFee(from: string, to: string, collectionId: number, tokenId: number, mode: CollectionMode, amount: number, signer: Signer): Promise<string> {

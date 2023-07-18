@@ -1,10 +1,7 @@
-import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
 import { web3FromSource } from '@polkadot/extension-dapp';
-import { stringToHex, u8aToHex } from '@polkadot/util';
 import { MarketAccount } from 'account/types';
 import { Signer as EthersSigner } from 'ethers';
 import { Signer as UniqueSigner } from '@unique-nft/sdk';
-import { serializeToQuery } from 'api/restApi/base/helper';
 import Web3 from 'web3';
 
 export const isEthersSigner = (signer: any): signer is EthersSigner =>
@@ -19,13 +16,10 @@ export const getSignature = async (account: MarketAccount): Promise<{
   type: 'keyring' | 'metamask' | null
 }> => {
   if (isEthersSigner(account.signer)) {
-    const timestamp = Date.now();
-    const hashedMessage = Web3.utils.sha3(timestamp.toString());
-
-    const signature = await account.signer.signMessage(hashedMessage || '');
+    const signature = await account.signer.signMessage('');
     return {
       signature,
-      message: hashedMessage || '',
+      message: '',
       type: 'metamask'
     };
   }

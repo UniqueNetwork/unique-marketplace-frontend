@@ -8,6 +8,7 @@ import { AxiosError } from 'axios';
 import { useApi } from 'hooks/useApi';
 import config from 'config';
 import { useAccounts } from 'hooks/useAccounts';
+import { Address } from '@unique-nft/utils';
 
 const endpoint = '/collections';
 
@@ -79,10 +80,14 @@ export const useMarketableCollection = () => {
               }))
         : signedData.signature;
 
+      const address = selectedAccount?.address && Address.is.ethereumAddressInAnyForm(selectedAccount.address)
+        ? Address.mirror.ethereumToSubstrate(selectedAccount.address)
+        : selectedAccount?.address || '';
+
       const { status } = await updateCollectionMetadata(
         config.blockchains[currentChainId].apiEndpoint,
         collectionId,
-        selectedAccount?.address || '',
+        address,
         type,
         metadata,
         signature
