@@ -33,6 +33,7 @@ const getColumns = ({ currentChainId, collectionId, tokenId, totalPieces, device
         canCopy={false}
         to={`/${currentChainId}/token/${address}/${collectionId}/${tokenId}`}
         isShort={deviceSize <= DeviceSize.lg}
+        prefixNested={'Nested in'}
       />;
     },
     field: 'owner'

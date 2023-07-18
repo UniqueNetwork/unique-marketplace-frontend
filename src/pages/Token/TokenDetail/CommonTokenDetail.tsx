@@ -25,6 +25,7 @@ import { Address } from '@unique-nft/utils';
 import { FractionalDetail } from './FractionalDetail';
 import { TokenContext } from '../context/TokenContext';
 import { FractionalOwnersList } from './FractionalOwnersList';
+import { OwnerCard } from 'components/OwnerCard/OwnerCard';
 
 interface IProps {
   token?: TokenByIdResponse
@@ -159,7 +160,15 @@ export const CommonTokenDetail: FC<IProps> = ({
             </IconWrapper>
           </ShareLink>
           <Row data-testid={`${testid}-owner-section`}>
-            {isOwner && <Text color='grey-500' size='m'>You own it</Text>}
+            {!(isRft && !isRftFracton) && <OwnerCard
+              address={owner || ''}
+              // to={`${config.blockchains[currentChainId || '']?.scanUrl}account/${owner || '404'}`}
+              isShort={deviceSize < DeviceSize.lg}
+              canCopy={false}
+              prefixOwned='Owned by'
+              prefixNested='Nested in bundle'
+            />}
+            {/* {isOwner && <Text color='grey-500' size='m'>You own it</Text>}
             {!isOwner && !(isRft && !isRftFracton) && <>
               <Text color='grey-500' size='m'>
                 Owned&nbsp;by
@@ -170,7 +179,7 @@ export const CommonTokenDetail: FC<IProps> = ({
                   {deviceSize >= DeviceSize.lg ? owner || '' : shortcutText(owner || '') }
                 </Text>
               </Account>
-            </>}
+            </>} */}
           </Row>
           <Divider />
           {isRft && !isRftFracton && <>

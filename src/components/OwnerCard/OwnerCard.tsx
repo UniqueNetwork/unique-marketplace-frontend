@@ -1,22 +1,25 @@
 import React, { FC, useCallback, useMemo, MouseEvent, useEffect, useState } from 'react';
-import { CopyButton, Text, useNotifications } from 'components/UI';
+import { CopyButton, Text, useNotifications, Link as UILink } from 'components/UI';
 import styled from 'styled-components';
 import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import { useApi } from 'hooks/useApi';
 import { shortcutText } from 'utils/textUtils';
 import { Avatar } from '../Avatar/Avatar';
-import { Link } from 'react-router-dom';
+import { Link, generatePath } from 'react-router-dom';
 import { Address } from '@unique-nft/utils';
 import { TokenByIdResponse } from '@unique-nft/sdk';
-import { Primary500 } from 'styles/colors';
+import { Grey500, Primary500 } from 'styles/colors';
 import { useAccounts } from 'hooks/useAccounts';
+import config from 'config';
 
 interface OwnerCardProps {
   address: string
-  to: string
+  to?: string
   isShort?: boolean
   canCopy?: boolean
+  prefixOwned?: string
+  prefixNested?: string
   testid?: string
 }
 
@@ -25,9 +28,11 @@ export const OwnerCard: FC<OwnerCardProps> = ({
   to,
   isShort = false,
   canCopy = true,
+  prefixOwned,
+  prefixNested,
   testid
 }) => {
-  const { chainProperties, api } = useApi();
+  const { chainProperties, api, currentChainId } = useApi();
   const { selectedAccount } = useAccounts();
   const { info } = useNotifications();
   const [parentToken, setParentToken] = useState<TokenByIdResponse>();
@@ -61,17 +66,27 @@ export const OwnerCard: FC<OwnerCardProps> = ({
       );
     });
   };
+  const linkTo = useMemo(() => to || (isParentToken
+    ? generatePath('/:currentChainId/token/:collectionId/:tokenId', {
+      currentChainId,
+      collectionId: parentToken?.collectionId.toString() || '',
+      tokenId: parentToken?.tokenId.toString() || ''
+    })
+    : `${config.blockchains[currentChainId || '']?.scanUrl}account/${address || '404'}`),
+  [currentChainId, parentToken, address]);
 
   return (
-    <StyledLink to={to}>
-      <Avatar
+    <LinkComponent linkTo={linkTo} isOwned={!to && !!isOwned}>
+      {!isOwned && !isParentToken && !!prefixOwned && <Text color='grey-500'>{prefixOwned}</Text>}
+      {!isOwned && isParentToken && !!prefixNested && <Text color='grey-500'>{prefixNested}</Text>}
+      {!isOwned && <Avatar
         size={24}
         src={parentToken?.image.fullUrl || DefaultAvatar}
         address={!isParentToken ? address : undefined}
-      />
+      />}
       <AccountInfoWrapper>
         <Row>
-          {isOwned && <Text >You own it</Text>}
+          {isOwned && <Text color='grey-500' >You own it</Text>}
           {!isOwned && !isParentToken && <FormattedAddress
             formatAddress={formatAddress}
             accountAddress={address}
@@ -79,11 +94,11 @@ export const OwnerCard: FC<OwnerCardProps> = ({
             testid={testid}
             hideName={false}
           />}
-          {!isOwned && isParentToken && <Text >Nested into {parentToken?.collection.tokenPrefix} #{parentToken?.tokenId}</Text>}
+          {!isOwned && isParentToken && <Text >{parentToken?.collection.tokenPrefix} #{parentToken?.tokenId}</Text>}
           {canCopy && !isParentToken && <CopyButton onClick={onCopyAddress(formatAddress(address) || '')} data-testid={`${testid}-copy`} />}
         </Row>
       </AccountInfoWrapper>
-    </StyledLink>
+    </LinkComponent>
   );
 };
 
@@ -113,14 +128,7 @@ const StyledLink = styled(Link)`
   flex-wrap: nowrap;
   align-items: center;
   gap: calc(var(--gap) / 2);
-`;
-
-const AccountInfoWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-
-  span {
+  &>div>div>span {
     overflow: hidden;
     text-overflow: ellipsis;
     color: ${Primary500} !important;
@@ -128,6 +136,48 @@ const AccountInfoWrapper = styled.div`
       text-decoration: underline;
     }
   }
+`;
+
+const StyledExternalLink = styled(UILink)`
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: calc(var(--gap) / 2);
+  &>span:hover {
+    text-decoration: none;
+  }
+  &>div>div>span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: ${Primary500} !important;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+`;
+
+const StyledContainer = styled.div`
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: calc(var(--gap) / 2);
+  &>span:hover {
+    text-decoration: none;
+  }
+  &>div>div>span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: ${Grey500} !important;
+    &:hover {
+      text-decoration: none  !important;
+    }
+  }
+`;
+
+const AccountInfoWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 `;
 
 const Row = styled.div`
@@ -139,3 +189,10 @@ const Row = styled.div`
 
   }
 `;
+
+const LinkComponent: FC<{ linkTo: string, isOwned: boolean }> = ({ children, linkTo, isOwned }) => {
+  if (isOwned) return <StyledContainer>{children}</StyledContainer>;
+  return linkTo.startsWith('https://')
+    ? <StyledExternalLink href={linkTo}>{children}</StyledExternalLink>
+    : <StyledLink to={linkTo}>{children}</StyledLink>;
+};

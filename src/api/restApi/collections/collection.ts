@@ -81,7 +81,7 @@ export const useMarketableCollection = () => {
         : signedData.signature;
 
       const address = selectedAccount?.address && Address.is.ethereumAddressInAnyForm(selectedAccount.address)
-        ? Address.mirror.ethereumToSubstrate(selectedAccount.address)
+        ? selectedAccount.address
         : selectedAccount?.address || '';
 
       const { status } = await updateCollectionMetadata(
