@@ -21,6 +21,8 @@ import { MarketableCollection } from 'api/restApi/collections/types';
 import ShareTokenModal from 'pages/Token/TokenDetail/ShareTokenModal';
 import { RoyaltiesFormData } from 'pages/CollectionEdit/types';
 import { dateFormat } from 'utils/timestampUtils';
+import { MetamaskAccount } from '@unique-nft/accounts/metamask';
+import { Address } from '@unique-nft/utils';
 interface IProps {
   collection?: MarketableCollection
   royalty?: RoyaltiesFormData
@@ -44,6 +46,9 @@ export const CollectionDetail: FC<IProps> = ({ collection, royalty }) => {
 
   const isOwner = useMemo(() => {
     if (!selectedAccount) return false;
+    if (selectedAccount.name === 'Metamask Account') {
+      return isTokenOwner(Address.mirror.ethereumToSubstrate(selectedAccount.address, chainProperties?.SS58Prefix), owner || '');
+    }
     return isTokenOwner(selectedAccount?.address, owner || '');
   }, [owner, selectedAccount]);
 
