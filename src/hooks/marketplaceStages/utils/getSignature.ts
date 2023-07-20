@@ -2,7 +2,6 @@ import { web3FromSource } from '@polkadot/extension-dapp';
 import { MarketAccount } from 'account/types';
 import { Signer as EthersSigner } from 'ethers';
 import { Signer as UniqueSigner } from '@unique-nft/sdk';
-import Web3 from 'web3';
 
 export const isEthersSigner = (signer: any): signer is EthersSigner =>
   (signer instanceof EthersSigner);
@@ -16,10 +15,11 @@ export const getSignature = async (account: MarketAccount): Promise<{
   type: 'keyring' | 'metamask' | null
 }> => {
   if (isEthersSigner(account.signer)) {
-    const signature = await account.signer.signMessage('');
+    const message = `${Date.now()}`;
+    const signature = await account.signer.signMessage(message);
     return {
       signature,
-      message: '',
+      message,
       type: 'metamask'
     };
   }
