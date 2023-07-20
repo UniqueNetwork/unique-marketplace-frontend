@@ -3,13 +3,12 @@ import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 're
 import { AccountProvider } from './AccountContext';
 import { SignModal } from 'components/SignModal/SignModal';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { BN, loggerFormat } from '@polkadot/util';
+import { BN } from '@polkadot/util';
 import { useApi } from 'hooks/useApi';
 import { getWithdrawBids } from 'api/restApi/auction/auction';
 import { Accounts, ProviderClass } from '@unique-nft/accounts';
-import { Signer as EthersSigner } from 'ethers';
+import { ethers } from 'ethers';
 
-import { AddEthereumChainParameter, Ethereum } from '@unique-nft/utils/extension';
 import { SocketClient, SubscriptionEvents } from '@unique-nft/sdk/full';
 import { PolkadotProvider, PolkadotAccount } from '@unique-nft/accounts/polkadot';
 import { KeyringLocalAccount } from '@unique-nft/accounts/keyring-local';
@@ -172,7 +171,7 @@ const AccountWrapper: FC<{ _accounts?: Accounts }> = ({ children }) => {
             name = 'Metamask Account';
             // TODO: signer is prive inside metamask account for some reason. We may consider taking it from ethers directly instead...
             // @ts-ignore
-            marketAccount.signer = account.signer as EthersSigner;
+            marketAccount.signer = (new ethers.providers.Web3Provider(window.ethereum, 'any')).getSigner(account.address);
             marketAccount.signer.checkNetwork = async () => {
               if (!currentChainId) return;
               await changeMetamaskChain(EthereumChainParams[currentChainId]);
