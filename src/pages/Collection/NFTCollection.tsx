@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { Text } from '@unique-nft/ui-kit';
 import { Select } from 'components/UI';
@@ -14,7 +14,6 @@ import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { MobileFilters } from './Filters/MobileFilter';
 import { Filters } from './Filters/Filters';
 import { defaultSortingValue, pageSize, sortingOptions, testid } from './constants';
-import { useNavigate, useParams } from 'react-router-dom';
 import { CollectionDetail } from './CollectionDetail/CollectionDetail';
 import { useTokens } from 'api/restApi/tokens/tokens';
 import InfiniteScroll from 'react-infinite-scroller';
@@ -35,8 +34,6 @@ export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
   const { fetchCollection, addCollection } = useMarketableCollection();
   const [scanning, setScanning] = useState(false);
   const [tokensCountOnScan, setTokensCountOnScan] = useState(0);
-  const navigate = useNavigate();
-
   const collectionId = collectionOnChain.id;
 
   const { tokens, tokensCount, isFetching, fetchMore, fetch, attributes, attributeCounts } = useTokens({
@@ -55,8 +52,7 @@ export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
     onFilterChange,
     onSearch,
     onSortingChange,
-    getFilterByState,
-    setSortingValue
+    getFilterByState
    } = useCollectionTokensFilter({ isFetching, fetch });
 
   const [royalty, setRoyalty] = useState<RoyaltiesFormData>();
@@ -83,7 +79,6 @@ export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
       setRoyalties(collectionOnChain);
 
       if (!collectionData || (tokensCountOnScan > 0 && collectionData.tokensCount !== tokensCountOnScan)) {
-        if (!collection) return navigate('/404');
         void addCollection(collectionId);
         setScanning(tokensCountOnScan > 0);
         setCollection(mapCollectionToMarketable(collectionOnChain, tokensCountOnScan));
