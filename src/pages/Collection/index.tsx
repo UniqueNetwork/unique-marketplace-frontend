@@ -1,282 +1,36 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components';
-import { Text } from '@unique-nft/ui-kit';
-import { Select } from 'components/UI';
-
-import { TokensList } from './TokensList/TokensList';
-import { PagePaper } from 'components/PagePaper/PagePaper';
-import NoItems from 'components/NoItems';
-import SearchField from 'components/SearchField/SearchField';
+import React, { useEffect, useState } from 'react';
 import { useApi } from 'hooks/useApi';
-import { useAccounts } from 'hooks/useAccounts';
-import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 
-import { MobileFilters } from './Filters/MobileFilter';
-import { Filters } from './Filters/Filters';
-import { defaultSortingValue, pageSize, sortingOptions, testid } from './constants';
 import { useNavigate, useParams } from 'react-router-dom';
 import { CollectionDetail } from './CollectionDetail/CollectionDetail';
-import { useTokens } from 'api/restApi/tokens/tokens';
-import InfiniteScroll from 'react-infinite-scroller';
-import { useMarketableCollection } from 'api/restApi/collections/collection';
-import { MarketableCollection } from 'api/restApi/collections/types';
-import { useCollections } from 'hooks/useCollections';
-import { useCollectionTokensFilter } from './hooks/useCollectionTokensFilter';
-import { TokensFilter } from './Filters/types';
-import { RoyaltiesFormData } from 'pages/CollectionEdit/types';
 import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
+import { Error404 } from 'pages/Errors/404';
+import { RFTCollectionPage } from './RFTCollection';
+import { NFTCollectionPage } from './NFTCollection';
 
 export const CollectionPage = () => {
   const { collectionId } = useParams<{ collectionId: string }>();
-  const { selectedAccount, isLoading: isAccountsLoading } = useAccounts();
-  const [collection, setCollection] = useState<MarketableCollection>();
-  const deviceSize = useDeviceSize();
-  const { getCollectionTokensCount } = useCollections();
-  const { fetchCollection, addCollection } = useMarketableCollection();
-  const [scanning, setScanning] = useState(false);
-  const [tokensCountOnScan, setTokensCountOnScan] = useState(0);
-  const navigate = useNavigate();
-
-  const { tokens, tokensCount, isFetching, fetchMore, fetch, attributes, attributeCounts } = useTokens({
-    collectionId: Number(collectionId)
-  });
-
-  const isRFTCollection = collection?.mode === 'ReFungible';
-
+  const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse | null>();
+  const [isFetching, setIsFetching] = useState<boolean>(true);
   const { currentChainId, api } = useApi();
 
-  const {
-    filterState,
-    searchValue,
-    sortingValue,
-    filterCount,
-    onFilterChange,
-    onSearch,
-    onSortingChange,
-    getFilterByState,
-    setSortingValue
-   } = useCollectionTokensFilter({ isFetching, fetch });
-
-  const [royalty, setRoyalty] = useState<RoyaltiesFormData>();
-  const setRoyalties = useCallback((collectionOnChain: CollectionInfoWithSchemaResponse | null | undefined) => {
-    if (collectionOnChain?.schema?.royalties?.length) {
-      const value = collectionOnChain.schema.royalties[0]?.value
-        ? (Number(collectionOnChain.schema.royalties[0]?.value) / 100).toFixed(2)
-        : '0';
-      const address = collectionOnChain.schema.royalties[0]?.address;
-      setRoyalty({
-        value,
-        address
-      });
-    }
-  }, []);
+  const isRFTCollection = collection?.mode === 'ReFungible';
 
   useEffect(() => {
     if (!api?.collection) return;
     const id = Number(collectionId);
     void (async () => {
-      const tokensCountOnScan = await getCollectionTokensCount(id);
-      setTokensCountOnScan(tokensCountOnScan);
-
-      const collectionData = await fetchCollection(id);
-      const collection = await api?.collection?.getCollection(Number(collectionId));
-      setRoyalties(collection);
-      if (!collectionData || (tokensCountOnScan > 0 && collectionData.tokensCount !== tokensCountOnScan)) {
-        if (!collection) return navigate('/404');
-        void addCollection(id);
-        setScanning(tokensCountOnScan > 0);
-        setCollection({
-          id: '-',
-          data: collection,
-          allowedTokens: '',
-          isMarketable: false,
-          active: true,
-          collectionId: collection.id,
-          createdAt: '',
-          decimalPoints: 0,
-          description: collection.description,
-          mintMode: false,
-          mode: collection.mode,
-          name: collection.name,
-          network: '',
-          owner: collection.owner,
-          status: '',
-          tokenPrefix: collection.tokenPrefix,
-          tokensCount: 0,
-          tokensTotal: tokensCountOnScan,
-          tokensOnMarket: 0,
-          updatedAt: '',
-          minPrice: 0,
-          maxPrice: 0,
-          holders: 0,
-          uniqueHolders: '0',
-          metadata: null
-        });
-        return;
-      }
-      setCollection(collectionData);
-      if (collectionData.mode === 'ReFungible') {
-        setSortingValue(sortingOptions[4].id);
-      }
+      const collection = await api?.collection?.getCollection(id);
+      setCollection(collection);
+      setIsFetching(false);
     })();
-  }, [currentChainId, collectionId, fetch, selectedAccount?.address]);
+  }, [currentChainId, collectionId, api?.collection]);
 
-  useEffect(() => {
-    if (!scanning) return;
-    const refetchCollection = async () => {
-      const collectionData = await fetchCollection(Number(collectionId));
-      if (!collectionData) return;
-      setCollection(collectionData);
-      if (collectionData?.tokensCount === collectionData?.tokensTotal) {
-        setScanning(false);
+  if (isFetching) return <CollectionDetail />;
 
-        void fetch({
-          page: 1,
-          pageSize,
-          ...(getFilterByState(filterState)),
-          searchText: searchValue || undefined,
-          'sort[0]': [sortingValue]
-        });
-      }
-    };
+  if (!collection) return <Error404 />;
 
-    const intervalId = setInterval(() => void refetchCollection(), 1000);
-    return () => clearInterval(intervalId);
-  }, [scanning, collectionId, tokensCountOnScan, filterState, sortingValue, searchValue]);
+  if (isRFTCollection) return <RFTCollectionPage collection={collection} />;
 
-  const hasMore = tokens && tokens.length < tokensCount && !isFetching;
-
-  const onClickSeeMore = useCallback(() => {
-    if (!isFetching && hasMore) {
-      void fetchMore({
-        page: Math.ceil(tokens.length / 20) + 1,
-        pageSize,
-        ...(getFilterByState(filterState)),
-        searchText: searchValue || undefined,
-        'sort[0]': [sortingValue]
-      });
-    }
-  }, [isFetching, tokens.length, getFilterByState, filterState, searchValue, sortingValue]);
-
-  return (<>
-    <CollectionDetail collection={collection} royalty={royalty} />
-    <CollectionPagePaper>
-      <MarketMainPageStyled>
-        {!isRFTCollection && <LeftColumn>
-          <Filters
-            value={filterState}
-            attributes={attributes}
-            attributeCounts={attributeCounts}
-            onFilterChange={onFilterChange}
-            testid={`${testid}-filters`}
-            disabled={scanning}
-          />
-        </LeftColumn>}
-        <MainContent>
-          <SearchAndSortingWrapper>
-            <SearchField
-              searchValue={searchValue}
-              placeholder='Token / attribute'
-              onSearch={onSearch}
-              testid={`${testid}-search-field`}
-            />
-            <SortSelectWrapper>
-              <Select
-                onChange={onSortingChange}
-                options={isRFTCollection ? sortingOptions.slice(-2) : sortingOptions}
-                value={sortingValue}
-                testid={`${testid}-sorting-select`}
-              />
-            </SortSelectWrapper>
-          </SearchAndSortingWrapper>
-          <div>
-            <Text
-              testid={`${testid}-items-count`}
-              size='m'
-            >{isAccountsLoading ? 'Loading items' : `${tokensCount} items`}</Text>
-          </div>
-          <InfiniteScroll
-            hasMore={hasMore}
-            initialLoad={false}
-            loadMore={onClickSeeMore}
-            pageStart={1}
-            threshold={200}
-            useWindow={true}
-          >
-            {!isAccountsLoading && !tokens?.length && <NoItems isSearchResult={!!searchValue || !!filterCount} />}
-            <TokensList
-              showOwner={!isRFTCollection}
-              tokens={tokens || []}
-              isLoading={isAccountsLoading}
-              testid={`${testid}-tokens`}
-            />
-          </InfiniteScroll>
-        </MainContent>
-      </MarketMainPageStyled>
-      {deviceSize <= DeviceSize.md && <MobileFilters<TokensFilter>
-        filterCount={filterCount}
-        defaultSortingValue={defaultSortingValue}
-        sortingValue={sortingValue}
-        sortingOptions={sortingOptions}
-        onFilterChange={onFilterChange}
-        onSortingChange={onSortingChange}
-        testid={`${testid}-mobile-filters`}
-        filterComponent={<Filters
-          value={filterState}
-          attributes={attributes}
-          attributeCounts={attributeCounts}
-          onFilterChange={onFilterChange}
-          testid={`${testid}-filters`}
-        />}
-      />}
-    </CollectionPagePaper>
-  </>);
+  return <NFTCollectionPage collection={collection} />;
 };
-
-const CollectionPagePaper = styled(PagePaper)`
-  && {
-    margin-top: calc(var(--gap) / 2);
-  }
-`;
-
-const MarketMainPageStyled = styled.div`
-  display: flex;
-  flex: 1;
-
-`;
-
-const LeftColumn = styled.div<{ isVisible?: boolean }>`
-  margin-right: calc(var(--gap) * 2);
-  @media (max-width: 1024px) {
-    display: none;
-  }
-`;
-
-const MainContent = styled.div`
-  flex: 1;
-
-  > div:nth-of-type(2) {
-    margin-top: 16px;
-    margin-bottom: 32px;
-  }
-
-  @media (max-width: 1024px) {
-    padding-left: 0;
-  }
-`;
-
-const SortSelectWrapper = styled.div`
-  .unique-select svg {
-    z-index: 0;
-  }
-
-  @media (max-width: 1024px) {
-    display: none;
-  }
-`;
-
-const SearchAndSortingWrapper = styled.div`
-  margin-bottom: var(--gap);
-  display: flex;
-  justify-content: space-between;
-`;

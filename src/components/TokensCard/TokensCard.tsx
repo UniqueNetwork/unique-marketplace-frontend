@@ -119,7 +119,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
   }, [isBidder, topBid, selectedAccount, auction]);
 
   const tokenPath = useMemo(() => {
-    if (type === TokenTypeEnum.RFT) {
+    if (owner && type === TokenTypeEnum.RFT) {
       return generatePath('/:currentChainId/token/:address/:collectionId/:tokenId', {
         currentChainId,
         address: owner,
@@ -206,7 +206,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
           }</Text>}
           <StyledText color={'dark'} size={'xs'}>{`${timeDifference(new Date(auction?.stopAt || '').getTime() / 1000)} left`}</StyledText>
         </AuctionInfoWrapper>} */}
-        {type === TokenTypeEnum.RFT && <Text size={'xs'} color={'grey-500'} >
+        {type === TokenTypeEnum.RFT && !!amount && !!totalPieces && <Text size={'xs'} color={'grey-500'} >
           Owned fractions: {amount}/{totalPieces}
         </Text>}
       </Description>
