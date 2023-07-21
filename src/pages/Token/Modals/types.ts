@@ -1,6 +1,7 @@
 export type TTransfer = {
   sender: string
   recipient: string
+  amount: number
 }
 
 export type TEnableAllowanceProps = {

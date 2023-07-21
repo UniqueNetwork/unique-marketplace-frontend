@@ -14,7 +14,7 @@ export const CollectionStatisticsBlock = ({ collection, royalty }: { collection:
       <Heading size='3'>{Math.max(collection.tokensCount, collection.tokensTotal || 0)}</Heading>
       <Text size={'m'} color='grey-600'>items</Text>
     </div>
-    {collection.tokensCount >= (collection.tokensTotal || 0) && <>
+    {collection.mode === 'NFT' && collection.tokensCount >= (collection.tokensTotal || 0) && <>
       <div>
         <Heading size='3'>{ (collection.tokensCount ? collection.tokensOnMarket / collection.tokensCount * 100 : 0).toFixed(0) }%</Heading>
         <Text size={'m'} color='grey-600'>listed NFTs</Text>

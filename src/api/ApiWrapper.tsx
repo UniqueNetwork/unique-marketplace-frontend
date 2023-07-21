@@ -120,6 +120,7 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
         ? {
           collection: sdkClient.collectionController,
           nft: sdkClient.nftController,
+          rft: sdkClient.rftController,
           market: sdkClient.marketController
         }
         : undefined),

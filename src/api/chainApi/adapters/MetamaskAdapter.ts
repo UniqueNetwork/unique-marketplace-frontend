@@ -1,4 +1,4 @@
-import { UniqueFungibleFactory, UniqueNFTFactory } from '@unique-nft/solidity-interfaces';
+import { UniqueNFTFactory, UniqueFungibleFactory, UniqueRefungibleTokenFactory } from '@unique-nft/solidity-interfaces';
 import { Address, EthCrossAccountId } from '@unique-nft/utils';
 import { Contract, ethers, Signer } from 'ethers';
 import IMarketContractAdapter from './IMarketContractAdapter';
@@ -6,6 +6,9 @@ import IMarketContractAdapter from './IMarketContractAdapter';
 import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
 import { ChainValue } from '../controllers/BaseController';
+import { CollectionMode } from '../types';
+import { CollectionProperty } from '@unique-nft/sdk';
+import { Utf16 } from 'utf-helpers';
 
 const buyGasLimit = 1_000_000;
 const sellGasLimit = 200_000;
@@ -33,74 +36,102 @@ class MetamaskAdapter implements IMarketContractAdapter {
     await (await contract[methodName](...args)).wait();
   }
 
-  async getTransferTokenFee(from: string, to: string, collectionId: number, tokenId: number, amount: number, signer: Signer): Promise<string> {
-    if (amount !== 1) throw new Error('RFT not supported');
+  async setCollectionProperties(collectionId: number, properties: CollectionProperty[], signer: Signer): Promise<void> {
     const nftFactory = await UniqueNFTFactory(collectionId, signer);
+    const encodedProperties = properties.map(({ key, value }) => ({
+      key,
+      value: Utf16.stringToNumberArray(value || '')
+    }));
+    await (await nftFactory.setCollectionProperties(encodedProperties, { from: await signer.getAddress() })).wait();
+  }
+
+  async getTransferTokenFee(from: string, to: string, collectionId: number, tokenId: number, mode: CollectionMode, amount: number, signer: Signer): Promise<string> {
     const fromCross = Address.extract.ethCrossAccountId(from);
     const toCross = Address.extract.ethCrossAccountId(to);
-    const estimateGas = await nftFactory.estimateGas.transferFromCross(
+    const tokenHelper = await (mode === 'ReFungible'
+      ? UniqueRefungibleTokenFactory({ collectionId, tokenId }, signer)
+      : UniqueNFTFactory(collectionId, signer));
+    const estimateGas = await tokenHelper.estimateGas.transferFromCross(
       fromCross,
       toCross,
-      tokenId
+      mode === 'ReFungible' ? amount : tokenId
     );
-    const gasPrice = await nftFactory.provider.getGasPrice();
+    const gasPrice = await tokenHelper.provider.getGasPrice();
     return estimateGas.mul(gasPrice).toString();
   }
 
-  async transferToken(from: string, to: string, collectionId: number, tokenId: number, amount: number, signer: Signer): Promise<void> {
-    if (amount !== 1) throw new Error('RFT not supported');
-    const nftFactory = await UniqueNFTFactory(Number(collectionId), signer);
+  async transferToken(from: string, to: string, collectionId: number, tokenId: number, mode: CollectionMode, amount: number, signer: Signer): Promise<void> {
     const fromCross = Address.extract.ethCrossAccountId(from);
     const toCross = Address.extract.ethCrossAccountId(to);
-    await (await nftFactory.transferFromCross(fromCross, toCross, tokenId)).wait();
+    const tokenHelper = await (mode === 'ReFungible'
+      ? UniqueRefungibleTokenFactory({ collectionId, tokenId }, signer)
+      : UniqueNFTFactory(collectionId, signer));
+    await (await tokenHelper.transferFromCross(
+      fromCross,
+      toCross,
+      mode === 'ReFungible' ? amount : tokenId
+    )).wait();
   }
 
-  async getNestTokenFee(from: NestTokenParam, to: NestTokenParam, amount: number, signer: Signer): Promise<string> {
-    if (amount !== 1) throw new Error('RFT not supported');
-    const nftFactory = await UniqueNFTFactory(Number(from.collectionId), signer);
-    const originalParentTokenAddress = await nftFactory.ownerOf(from.tokenId);
-    const newParentTokenAddress = Address.nesting.idsToAddress(to.collectionId, to.tokenId);
-    const estimateGas = await nftFactory.estimateGas.transferFrom(
-      originalParentTokenAddress,
+  async getNestTokenFee(address: string, nested: NestTokenParam, parent: NestTokenParam, mode: CollectionMode, amount: number, signer: Signer): Promise<string> {
+    const newParentTokenAddress = Address.nesting.idsToAddress(parent.collectionId, parent.tokenId);
+    const tokenHelper = await (mode === 'ReFungible'
+      ? UniqueRefungibleTokenFactory({ collectionId: nested.collectionId, tokenId: nested.tokenId }, signer)
+      : UniqueNFTFactory(nested.collectionId, signer));
+
+    // const originalParentTokenAddress = await tokenHelper.ownerOf(nested.tokenId);
+
+    const estimateGas = await tokenHelper.estimateGas.transferFrom(
+      address,
       newParentTokenAddress,
-      from.tokenId
+      mode === 'ReFungible' ? amount : nested.tokenId
     );
-    const gasPrice = await nftFactory.provider.getGasPrice();
+    const gasPrice = await tokenHelper.provider.getGasPrice();
     return estimateGas.mul(gasPrice).toString();
   }
 
-  async nestToken(address: string, from: NestTokenParam, to: NestTokenParam, amount: number, signer: Signer): Promise<void> {
-    if (amount !== 1) throw new Error('RFT not supported');
-    const nftFactory = await UniqueNFTFactory(Number(from.collectionId), signer);
+  async nestToken(address: string, nested: NestTokenParam, parent: NestTokenParam, mode: CollectionMode, amount: number, signer: Signer): Promise<void> {
+    const newParentTokenAddress = Address.nesting.idsToAddress(parent.collectionId, parent.tokenId);
+    const tokenHelper = await (mode === 'ReFungible'
+      ? UniqueRefungibleTokenFactory({ collectionId: nested.collectionId, tokenId: nested.tokenId }, signer)
+      : UniqueNFTFactory(nested.collectionId, signer));
 
-    const originalParentTokenAddress = await nftFactory.ownerOf(from.tokenId);
-    const newParentTokenAddress = Address.nesting.idsToAddress(to.collectionId, to.tokenId);
-
-    await (await nftFactory.transferFrom(originalParentTokenAddress, newParentTokenAddress, from.tokenId)).wait();
+    await (await tokenHelper.transferFrom(
+      address,
+      newParentTokenAddress,
+      mode === 'ReFungible' ? amount : nested.tokenId
+    )).wait();
   }
 
-  async getUnnestTokenFee(target: NestTokenParam, amount: number, signer: Signer): Promise<string> {
-    if (amount !== 1) throw new Error('RFT not supported');
-    const nftFactory = await UniqueNFTFactory(Number(target.collectionId), signer);
-    const parentTokenAddress = await nftFactory.ownerOf(target.tokenId);
+  async getUnnestTokenFee(target: NestTokenParam, parent: NestTokenParam, mode: CollectionMode, amount: number, signer: Signer): Promise<string> {
+    const parentTokenAddress = Address.nesting.idsToAddress(parent.collectionId, parent.tokenId);
+    const tokenHelper = await (mode === 'ReFungible'
+      ? UniqueRefungibleTokenFactory({ collectionId: target.collectionId, tokenId: target.tokenId }, signer)
+      : UniqueNFTFactory(target.collectionId, signer));
+
     const ownerAddress = await signer.getAddress();
-    const estimateGas = await nftFactory.estimateGas.transferFrom(
+
+    const estimateGas = await tokenHelper.estimateGas.transferFrom(
       parentTokenAddress,
       ownerAddress,
-      target.tokenId
+      mode === 'ReFungible' ? amount : target.tokenId
     );
-    const gasPrice = await nftFactory.provider.getGasPrice();
+    const gasPrice = await tokenHelper.provider.getGasPrice();
     return estimateGas.mul(gasPrice).toString();
   }
 
-  async unnestToken(target: NestTokenParam, amount: number, signer: Signer): Promise<void> {
-    if (amount !== 1) throw new Error('RFT not supported');
-    const nftFactory = await UniqueNFTFactory(Number(target.collectionId), signer);
+  async unnestToken(target: NestTokenParam, parent: NestTokenParam, mode: CollectionMode, amount: number, signer: Signer): Promise<void> {
+    const parentTokenAddress = Address.nesting.idsToAddress(parent.collectionId, parent.tokenId);
+    const tokenHelper = await (mode === 'ReFungible'
+      ? UniqueRefungibleTokenFactory({ collectionId: target.collectionId, tokenId: target.tokenId }, signer)
+      : UniqueNFTFactory(target.collectionId, signer));
 
-    const parentTokenAddress = await nftFactory.ownerOf(target.tokenId);
     const ownerAddress = await signer.getAddress();
-
-    await (await nftFactory.transferFrom(parentTokenAddress, ownerAddress, target.tokenId)).wait();
+    await (await tokenHelper.transferFrom(
+      parentTokenAddress,
+      ownerAddress,
+      mode === 'ReFungible' ? amount : target.tokenId
+    )).wait();
   }
 
   async getTransferBalanceFee(addressFrom: string, addressTo: string, amount: ChainValue, signer: Signer): Promise<string> {

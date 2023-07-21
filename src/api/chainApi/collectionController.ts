@@ -52,17 +52,20 @@ export class UniqueSDKCollectionController extends BaseController {
   }
 
   async setProperties(collectionId: number, properties: CollectionProperty[], { account }: TransactionOptions): Promise<void> {
-    const unsignedTxPayload = await this.uniqueSdk.collection.setProperties.build({
-      address: account.address,
-      collectionId,
-      properties
-    });
-    if (!unsignedTxPayload) throw new Error('Transaction build error');
-    const { signature } = await this.uniqueSdk.collection.setProperties.sign(unsignedTxPayload, { signer: account.account });
-    if (!signature) throw new Error('Signing failed');
-    await this.uniqueSdk.collection.setProperties.submit({
-      signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
-      signature
-    });
+    // const unsignedTxPayload = await this.uniqueSdk.collection.setProperties.build({
+    //   address: account.address,
+    //   collectionId,
+    //   properties
+    // });
+    // if (!unsignedTxPayload) throw new Error('Transaction build error');
+    // const { signature } = await this.uniqueSdk.collection.setProperties.sign(unsignedTxPayload, { signer: account.account });
+    // if (!signature) throw new Error('Signing failed');
+    const adapter = this.getAdapter(account.account);
+    await adapter.setCollectionProperties(collectionId, properties, account.signer);
+
+    // await this.uniqueSdk.collection.setProperties.submit({
+    //   signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
+    //   signature
+    // });
   }
 }

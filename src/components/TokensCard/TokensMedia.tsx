@@ -13,10 +13,10 @@ interface ITokensMedia {
   imageUrl?: string | DecodedInfixOrUrlOrCidAndHash
   video?: VideoAttribute
   testid: string
-  badge?: string
+  badges?: string[]
 }
 
-export const TokensMedia: FC<ITokensMedia> = ({ to, imageUrl, tokenId, video, testid, badge }) => {
+export const TokensMedia: FC<ITokensMedia> = ({ to, imageUrl, tokenId, video, testid, badges }) => {
   const [isPlaying, setIsPlaying] = useState(false);
 
   const togglePlay = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -33,7 +33,7 @@ export const TokensMedia: FC<ITokensMedia> = ({ to, imageUrl, tokenId, video, te
         testid={`${testid}-token-picture`}
         videoProps={{ autoplay: false, controls: false }}
         isPlaying={isPlaying}
-        badge={badge}
+        badges={badges}
       />
       {video?.fullUrl &&
         <div className={'play-button'} onClick={togglePlay}>

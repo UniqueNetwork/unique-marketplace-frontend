@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Link } from '@unique-nft/ui-kit';
 import { Icon, useNotifications } from 'components/UI';
@@ -22,62 +22,30 @@ import { NestedTokenBlock } from './TokenDetail/NestedTokenBlock';
 import BundleModal from './BundleModals/BundleTrunsferModal';
 import { BundleModalType } from './BundleModals/types';
 import { NestingTokenBlock } from './TokenDetail/NestingBlock';
+import { Address } from '@unique-nft/utils';
+import { TokenContext } from './context/TokenContext';
 
 const testid = 'token-page';
 
 const TokenPage = () => {
-  const { api, currentChainId } = useApi();
   const { selectedAccount, updateCurrentAccountDeposit } = useAccounts();
-  const { id, collectionId } = useParams<{ id: string, collectionId: string}>();
-  const [token, setToken] = useState<TokenByIdResponse>();
-  const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse | null>(null);
-  const [isFetchingToken, setIsFetchingToken] = useState<boolean>(true);
-  const { offer, fetch: fetchOffer, isFetching: isFetchingOffer } = useOffer(Number(collectionId), Number(id));
-  const { getCollection } = useCollections();
+  const { id, collectionId } = useParams<{ address: string, id: string, collectionId: string}>();
   const [marketType, setMarketType] = useState<MarketType>(MarketType.default);
-  const [isBundle, setIsBundle] = useState(false);
-  const [isNested, setIsNested] = useState(false);
-  const [topmostOwner, setTopmostOwner] = useState<string | null>(null);
   const navigate = useNavigate();
   const { info } = useNotifications();
-
-  const fetchToken = useCallback(async () => {
-    if (!api?.nft || !currentChainId) return;
-    setIsFetchingToken(true);
-    try {
-      const token = await api.nft?.getToken(Number(collectionId), Number(id));
-      setIsBundle(await api.nft?.isBundle(Number(collectionId), Number(id)));
-      if (token?.nestingParentToken) {
-        setIsNested(true);
-        setTopmostOwner((await api.nft.getTopmostOwner(Number(collectionId), Number(id)))?.topmostOwner || null);
-      } else {
-        setIsNested(false);
-        setTopmostOwner(null);
-      }
-      const collection = await getCollection(Number(collectionId));
-      if (token) setToken(token);
-      if (collection) setCollection(collection);
-    } catch (e) {
-      console.error('error while fetching token or collection from RPC', e);
-    }
-    setIsFetchingToken(false);
-  }, [api?.nft, currentChainId, collectionId, id, getCollection]);
-
-  useEffect(() => {
-    if (isFetchingOffer) return;
-    void (async () => {
-      if (offer) {
-        const collection = await getCollection(Number(collectionId));
-        if (collection) setCollection(collection);
-        setIsBundle(!!offer.tokenDescription?.nestingChildTokens?.length);
-      }
-      if (!token) await fetchToken();
-      if (offer || token) {
-        setIsFetchingToken(false);
-        setIsNested(!!token?.nestingParentToken);
-      }
-    })();
-  }, [fetchToken, isFetchingOffer, offer, token, collectionId, getCollection]);
+  const {
+    token,
+    collection,
+    offer,
+    fetchOffer,
+    fetchToken,
+    isRftFracton,
+    fraction,
+    isBundle,
+    isNested,
+    isFetching,
+    isOwner
+  } = useContext(TokenContext);
 
   const onClose = useCallback(() => {
     setMarketType(MarketType.default);
@@ -90,7 +58,7 @@ const TokenPage = () => {
 
     setMarketType(MarketType.default);
     void fetchToken();
-    void fetchOffer(Number(collectionId), Number(id));
+    void fetchOffer();
   }, [fetchOffer, fetchToken, collectionId, id, marketType, updateCurrentAccountDeposit]);
 
   const onActionClick = useCallback((action: MarketType) => () => {
@@ -111,9 +79,9 @@ const TokenPage = () => {
       { name: 'success', size: 32, color: 'var(--color-additional-light)' }
     );
 
-    void fetchOffer(Number(collectionId), Number(id));
+    void fetchOffer();
     void fetchToken();
-  }, [info, fetchOffer, fetchToken, selectedAccount?.address, collectionId, id, token, collection]);
+  }, [info, fetchOffer, fetchToken, selectedAccount?.address, token, collection]);
 
   const backClickHandler = useCallback(() => {
     // if user opened token page with a direct link, redirect him to /market, otherwise redirect him back
@@ -124,21 +92,7 @@ const TokenPage = () => {
     }
   }, [navigate]);
 
-  // TODO: rework this one
-  // if we opened child token from bundle which is on sale
-  const isIgnoreOffer = false; // useMemo(() => (!(!token || !offer || (id === offer.tokenId.toString() && collectionId === offer.collectionId.toString()))), [token, offer, collectionId, id]);
-
-  const isOwner = useMemo(() => {
-    if (!selectedAccount || isFetchingOffer || isFetchingToken) return false;
-    if (offer) {
-      return isTokenOwner(selectedAccount.address, offer.seller);
-    }
-    if (topmostOwner) return isTokenOwner(selectedAccount.address, topmostOwner);
-
-    return token?.owner ? isTokenOwner(selectedAccount.address, token.owner) : false;
-  }, [isFetchingOffer, isFetchingToken, selectedAccount, token, offer, topmostOwner]);
-
-  if (!isFetchingOffer && !isFetchingToken && !token && !offer) return <Error404 />;
+  if (!isFetching && !token && !offer && !collection) return <Error404 />;
 
   return (
     <>
@@ -150,8 +104,8 @@ const TokenPage = () => {
         <CommonTokenDetail
           token={token}
           collection={collection}
-          offer={!isIgnoreOffer ? offer : undefined}
-          isLoading={isFetchingOffer || isFetchingToken}
+          offer={offer}
+          isLoading={isFetching}
           testid={`${testid}`}
           isBundle={isBundle}
           isNested={isNested}
@@ -165,7 +119,8 @@ const TokenPage = () => {
           />}
           <TokenTrading
             token={token}
-            offer={!isIgnoreOffer ? offer : undefined}
+            collection={collection}
+            offer={offer}
             onSellClick={onActionClick(MarketType.sellFix)}
             onBuyClick={onActionClick(MarketType.purchase)}
             onTransferClick={onActionClick(MarketType.transfer)}
@@ -184,7 +139,7 @@ const TokenPage = () => {
           <TokenPageModal
             token={token}
             collection={collection}
-            offer={!isIgnoreOffer ? offer : undefined}
+            offer={offer}
             marketType={marketType}
             onFinish={onFinish}
             onClose={onClose}
@@ -194,7 +149,6 @@ const TokenPage = () => {
       </TokenPagePaper>
       {isBundle &&
         <BundleTreeSection
-          onViewTokenDetails={setToken}
           token={token}
           offer={offer}
           testid={`${testid}-bundle`}

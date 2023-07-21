@@ -27,6 +27,7 @@
     "react-router-dom": "^6.0.2",
     "react-scripts": "5.0.0",
     "socket.io-client": "^4.4.1",
+    "utf-helpers": "^0.0.3",
     "web-vitals": "^1.0.1",
     "web3": "^1.7.0"
   },

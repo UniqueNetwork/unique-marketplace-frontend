@@ -30,4 +30,7 @@ const StyledButton = styled(Button)`
   color: var(--color-additional-light) !important;
   background-color: #2DBF15 !important;
   border-color: #2DBF15 !important;
+  @media (max-width: 420px) {
+    display: none;
+  }
 `;

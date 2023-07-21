@@ -8,6 +8,8 @@ import UniqueAdapter from '../adapters/UniqueAdapter';
 import IBaseController from '../controllers/base/IBaseController';
 import { BN } from '@polkadot/util';
 import { ethers } from 'ethers';
+import { changeMetamaskChain } from 'utils/metamask';
+import { EthereumChainParams } from 'account/constants';
 
 export type ChainValue = {
   raw: string;
@@ -19,12 +21,15 @@ class BaseController implements IBaseController {
   uniqueSdk: Sdk;
   uniqueAdapter: UniqueAdapter;
   metamaskAdapter: MetamaskAdapter;
+  networkId: string;
+
   constructor(options: NetworkOptions) {
     const contractAddress = options.settings.blockchain.unique.contracts[0].address;
     this.uniqueSdk = new Sdk({ baseUrl: options.settings.blockchain.unique.restUrl });
     this.uniqueAdapter = new UniqueAdapter(contractAddress, this.uniqueSdk);
     this.metamaskAdapter = new MetamaskAdapter(contractAddress);
     this.isConnected = true;
+    this.networkId = options.networkId;
   }
 
   protected getChainValue(value: BN | number | string, decimals: number): ChainValue {
@@ -58,6 +63,7 @@ class BaseController implements IBaseController {
     this.uniqueAdapter = new UniqueAdapter(contractAddress, sdk);
     this.metamaskAdapter = new MetamaskAdapter(contractAddress);
     this.isConnected = true;
+    this.networkId = options.networkId;
   }
 
   private isMetamaskSigner(account: Account): boolean {
@@ -70,6 +76,7 @@ class BaseController implements IBaseController {
       return this.getDefaultAdapter();
     }
     if (this.isMetamaskSigner(account)) {
+      changeMetamaskChain(EthereumChainParams[this.networkId]);
       return this.metamaskAdapter;
     }
     return this.uniqueAdapter;

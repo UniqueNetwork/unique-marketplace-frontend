@@ -10,7 +10,19 @@ const gqlQuery = {
   operationName: 'tokens_by_account_query',
   query: `query tokens_by_account_query($owner: String) {
     tokens(
-      where: {tokens_owner: {_eq: $owner}, type: {_eq: NFT}, burned: {_eq: "false"}}
+      where: { 
+        tokens_owner: {_eq: $owner},
+        burned: { _eq: "false" },
+        tokens_amount: { _neq: "0" },
+        _or: [
+          { 
+            type: {_eq: NFT} 
+          }, 
+          { 
+            type: {_eq: RFT},
+          },
+        ],
+      },
       limit: 100000
     ) {
       count
@@ -31,6 +43,8 @@ const gqlQuery = {
         nested
         owner: tokens_owner
         childrenCount: children_count
+        tokens_amount
+        total_pieces
         __typename
       }
       __typename

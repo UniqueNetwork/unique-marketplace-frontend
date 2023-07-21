@@ -19,6 +19,7 @@ import DefaultAvatar from 'static/icons/default-avatar.svg';
 import { TWithdrawBid } from 'api/restApi/auction/types';
 import BalanceSkeleton from '../../Skeleton/BalanceSkeleton';
 import AccountContext from 'account/AccountContext';
+import { ChainSwitcher } from './ChainSwitcher/ChainSwithcher';
 
 const fractionDigits = 4;
 
@@ -106,9 +107,14 @@ export const WalletManager: FC = () => {
   }, [selectedAccount?.deposits]);
 
   if (!isLoading && !selectedAccount) {
-    return (
+    return (<>
       <Button title={'Connect'} onClick={onCreateAccountClick} />
-    );
+      <ChainSwitcher
+        activeChain={currentNetwork}
+        chains={networks}
+        onChainChange={onNetworkChange}
+      />
+    </>);
   }
 
   if (isLoading || !api) return <BalanceSkeleton />;

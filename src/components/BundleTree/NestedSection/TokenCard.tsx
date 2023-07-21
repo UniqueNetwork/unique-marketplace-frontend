@@ -33,8 +33,8 @@ function TokenCard({ token, onViewNodeDetails, onUnnestClick, onTransferClick }:
   }, []);
 
   const viewTokenDetails = useCallback(() => {
-    if (onViewNodeDetails) onViewNodeDetails(token);
-  }, [onViewNodeDetails, token]);
+    if (onViewNodeDetails) onViewNodeDetails(token, collection?.mode || 'NFT');
+  }, [onViewNodeDetails, token, collection]);
 
   return (
     <TokenCardWrapper onMouseEnter={showMenu} onMouseLeave={hideMenu} onClick={viewTokenDetails}>

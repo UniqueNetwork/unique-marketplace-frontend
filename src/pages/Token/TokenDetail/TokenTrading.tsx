@@ -8,11 +8,13 @@ import Auction from '../Auction/Auction';
 import { isTokenOwner } from 'api/chainApi/utils/addressUtils';
 import { useApi } from '../../../hooks/useApi';
 import { checkAllowedTokenInSettings } from 'api/chainApi/utils/checkTokenIsAllowed';
-import { TokenByIdResponse } from '@unique-nft/sdk';
+import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
 import { ethers } from 'ethers';
+import { useParams } from 'react-router-dom';
 
 interface TokenTradingProps {
   token?: TokenByIdResponse
+  collection?: CollectionInfoWithSchemaResponse | null
   offer?: Offer
   onSellClick(): void
   onBuyClick(): void
@@ -25,23 +27,28 @@ interface TokenTradingProps {
   testid: string
 }
 
-export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick, onTransferClick, onDelistClick, onDelistAuctionClick, onPlaceABidClick, onWithdrawClick, onBuyClick, onAuctionClose, testid }) => {
+export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, collection, onSellClick, onTransferClick, onDelistClick, onDelistAuctionClick, onPlaceABidClick, onWithdrawClick, onBuyClick, onAuctionClose, testid }) => {
   const { selectedAccount } = useContext(accountContext);
   const { settings } = useApi();
+  const { address } = useParams<{ address: string }>();
 
   const isAllowed = useMemo(() => {
     const { tokenId, collectionId } = offer || token || {};
-    if (!tokenId || !collectionId) return;
+    if (!tokenId || !collectionId) return false;
     return checkAllowedTokenInSettings(tokenId, collectionId, settings?.blockchain.unique.collections);
   }, [settings, token, offer]);
 
   const isOwner = useMemo(() => {
     if (!selectedAccount) return false;
+    if (collection?.mode === 'ReFungible' && address) {
+      return isTokenOwner(selectedAccount.address, address);
+    }
+
     if (offer) {
       return isTokenOwner(selectedAccount.address, offer.seller);
     }
     return token?.owner ? isTokenOwner(selectedAccount.address, token.owner) : false;
-  }, [selectedAccount, token, offer]);
+  }, [selectedAccount, token, offer, address]);
 
   const royalty = useMemo(() => {
     const tokenRoyalties = token?.royalties?.reduce((acc, { value, decimals }) => {
@@ -70,6 +77,7 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
       offer={offer}
       royalty={royalty}
       isAllowed={isAllowed}
+      isRFT={collection?.mode === 'ReFungible'}
       onSellClick={onSellClick}
       onTransferClick={onTransferClick}
       onDelistClick={onDelistClick}
