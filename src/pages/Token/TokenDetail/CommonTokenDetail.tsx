@@ -26,6 +26,7 @@ import { FractionalDetail } from './FractionalDetail';
 import { TokenContext } from '../context/TokenContext';
 import { FractionalOwnersList } from './FractionalOwnersList';
 import { OwnerCard } from 'components/OwnerCard/OwnerCard';
+import { BadgeEnum } from 'components/Picture';
 
 interface IProps {
   token?: TokenByIdResponse
@@ -128,9 +129,9 @@ export const CommonTokenDetail: FC<IProps> = ({
 
   const videoProp = useMemo(() => stringToDecodedInfixOrUrlOrCidAndHash(video), [video]);
 
-  const badges = [
-    ...(collection?.mode === 'ReFungible' ? ['Fractional'] : []),
-    ...(isNested ? ['Nested'] : isBundle ? ['Bundle'] : [])
+  const badges: BadgeEnum[] = [
+    ...(collection?.mode === 'ReFungible' ? [BadgeEnum.Fractional] : []),
+    ...(isNested ? [BadgeEnum.Nested] : isBundle ? [BadgeEnum.Bundle] : [])
   ];
 
   return (

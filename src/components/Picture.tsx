@@ -4,6 +4,7 @@ import Skeleton from './Skeleton/Skeleton';
 import { DecodedInfixOrUrlOrCidAndHash, VideoAttribute } from 'api/chainApi/types';
 import styled from 'styled-components';
 import { DecodedVideoUri } from 'utils/helpers';
+import { Tooltip } from '@unique-nft/ui-kit';
 
 interface VideoProps {
   autoplay?: boolean
@@ -12,6 +13,11 @@ interface VideoProps {
   muted?: boolean
 }
 
+export enum BadgeEnum {
+  Fractional = 'Fractional',
+  Bundle = 'Bundle',
+  Nested = 'Nested'
+}
 interface PictureProps {
   src?: string | DecodedInfixOrUrlOrCidAndHash
   alt: string
@@ -20,8 +26,14 @@ interface PictureProps {
   video?: DecodedVideoUri
   videoProps?: VideoProps
   isPlaying?: boolean
-  badges?: string[]
+  badges?: BadgeEnum[]
 }
+
+const badgesTooltips = {
+  Fractional: 'A fractional token provides a way for many users to own a part of an NFT',
+  Bundle: 'A group of tokens nested in an NFT and having a nested, ordered, tree-like structure',
+  Nested: 'A group of tokens nested in an NFT and having a nested, ordered, tree-like structure'
+};
 
 export const Picture: FC<PictureProps> = ({
   alt,
@@ -81,7 +93,7 @@ export const Picture: FC<PictureProps> = ({
   return (<div className={'picture'}>
     {isLoading && <Skeleton width={'100%'} height={'100%'} />}
     {badges && <BadgesWrapper>
-      {badges.map((badge) => <Badge className={'badge'}>{badge}</Badge>)}
+      {badges.map((badge) => <Badge className={'badge'} tooltip={badgesTooltips[badge]} >{badge}</Badge>)}
     </BadgesWrapper>}
     {!isLoading && video?.fullUrl &&
       <VideoStyled
@@ -156,7 +168,16 @@ const BadgesWrapper = styled.div`
   gap: var(--gap);
   z-index: 2;
 `;
-const Badge = styled.div`
+
+const Badge: FC<{ tooltip: string, className?: string }> = ({ tooltip, children, className }) => {
+  const badgeRef = useRef<HTMLDivElement>(null);
+  return <>
+    <Tooltip targetRef={badgeRef} >{tooltip}</Tooltip>
+    <BadgeWrapper ref={badgeRef} className={className} >{children}</BadgeWrapper>
+  </>;
+};
+
+const BadgeWrapper = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;

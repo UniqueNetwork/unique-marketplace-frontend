@@ -15,6 +15,7 @@ import { useCollections } from 'hooks/useCollections';
 import BundleItemsCount from '../BundleItemsCount/BundleItemsCount';
 import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
 import { MyToken, TokenTypeEnum } from 'pages/MyTokens/types';
+import { BadgeEnum } from 'components/Picture';
 
 export type TTokensCard = {
   token?: Omit<TokenByIdResponse | MyToken, 'collection' | 'nestingParentToken' | 'properties'>
@@ -139,9 +140,9 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
     return isTokenOwner(selectedAccount.address, owner);
   }, [selectedAccount?.address, owner]);
 
-  const badges = [
-    ...(collection?.mode === 'ReFungible' || (token as MyToken)?.type === TokenTypeEnum.RFT ? ['Fractional'] : []),
-    ...(isNestedState ? ['Nested'] : isBundleState ? ['Bundle'] : [])
+  const badges: BadgeEnum[] = [
+    ...(collection?.mode === 'ReFungible' || (token as MyToken)?.type === TokenTypeEnum.RFT ? [BadgeEnum.Fractional] : []),
+    ...(isNestedState ? [BadgeEnum.Nested] : isBundleState ? [BadgeEnum.Bundle] : [])
   ];
 
   return (
