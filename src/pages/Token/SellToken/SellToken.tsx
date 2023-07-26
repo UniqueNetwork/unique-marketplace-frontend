@@ -13,24 +13,25 @@ interface SellTokenProps {
   collectionId?: number;
   offer?: Offer
   royalty?: number;
-  isAllowed?: boolean
+  isAllowed?: boolean;
+  isRFT: boolean;
   onSellClick(): void
   onTransferClick(): void
   onDelistClick(): void
   testid: string
 }
 
-export const SellToken: FC<SellTokenProps> = ({ offer, collectionId, royalty, isAllowed, onSellClick, onTransferClick, onDelistClick, testid }) => {
+export const SellToken: FC<SellTokenProps> = ({ offer, collectionId, royalty, isAllowed, isRFT, onSellClick, onTransferClick, onDelistClick, testid }) => {
   const { currentChainId } = useApi();
 
   const [hideSellBtn, hideTransferBtn] = useMemo(() => {
     if (!currentChainId || !collectionId) return [false, false];
 
     return [
-      blockedSellingCollections[currentChainId]?.includes(collectionId),
+      blockedSellingCollections[currentChainId]?.includes(collectionId) || isRFT,
       blockedTransferringCollections[currentChainId]?.includes(collectionId)
     ];
-  }, [currentChainId, collectionId]);
+  }, [currentChainId, collectionId, isRFT]);
 
   if (offer) {
     return (<>

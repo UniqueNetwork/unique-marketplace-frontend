@@ -6,6 +6,7 @@ import { deleteRequest, patch, post } from 'api/restApi/base';
 import { MyCollection, SetCollectionTokensPayload } from 'api/restApi/collections/types';
 import CollectionsContext from 'collections/CollectionsContext';
 import config from '../config';
+import { Address } from '@unique-nft/utils';
 
 const endpoint = '/collections';
 
@@ -68,9 +69,9 @@ export const useCollections = () => {
     const address = account.address;
     const gqlQuery = {
       operationName: 'collections_by_account_query',
-      query: `query collections_by_account_query($owner: String) {
+      query: `query collections_by_account_query($owner: String, $owner_normalized: String) {
         collections(
-          where: {_or: [{owner: {_eq: $owner}}, {owner_normalized: {_eq: $owner}}], burned: {_eq: "false"}}
+          where: {_or: [{owner: {_eq: $owner}}, {owner_normalized: {_eq: $owner_normalized}}], burned: {_eq: "false"}}
           distinct_on: collection_id
           limit: 1000
         ) {
@@ -87,7 +88,10 @@ export const useCollections = () => {
         }
       }`,
       variables: {
-        owner: address
+        owner: address,
+        owner_normalized: Address.is.ethereumAddressInAnyForm(address)
+          ? Address.mirror.ethereumToSubstrate(address)
+          : Address.normalize.substrateAddress(address)
       }
     };
 

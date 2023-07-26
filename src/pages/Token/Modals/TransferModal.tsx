@@ -19,14 +19,18 @@ import { Coral700 } from 'styles/colors';
 import { debounce } from 'utils/helpers';
 import { useApi } from 'hooks/useApi';
 import { fromStringToBnString } from 'utils/bigNum';
+import { NumberInput } from 'components/NumberInput/NumberInput';
+import { formatBlockNumber } from 'utils/textUtils';
 
 export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosable, onFinish, testid, collection }) => {
   const { selectedAccount } = useAccounts();
   const [status, setStatus] = useState<'ask' | 'transfer-stage'>('ask'); // TODO: naming
   const [recipient, setRecipient] = useState<string>('');
+  const [amount, setAmount] = useState<number>(1);
 
-  const onTransfer = useCallback((_recipient: string) => {
+  const onTransfer = useCallback((_recipient: string, amount: number) => {
     setRecipient(_recipient);
+    setAmount(amount);
     setStatus('transfer-stage');
     setIsClosable(false);
   }, [setStatus, setRecipient, setIsClosable]);
@@ -44,6 +48,7 @@ export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosab
   if (status === 'transfer-stage') {
     return (<TransferStagesModal
       recipient={recipient}
+      amount={amount}
       onFinish={onFinish}
       token={token}
       setIsClosable={setIsClosable}
@@ -58,7 +63,7 @@ export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosab
 type AskTransferModalProps = {
   token?: TokenByIdResponse
   collection?: CollectionInfoWithSchemaResponse | null
-  onTransfer(receiver: string): void
+  onTransfer(receiver: string, amount: number): void
   testid: string
 }
 
@@ -70,16 +75,25 @@ const AskTransferModal: FC<AskTransferModalProps> = ({ token, collection, onTran
   const [isFeeLoading, setIsFeeLoading] = useState(false);
   const [fee, setFee] = useState<string>('0');
   const [isSponsored, setIsSponsored] = useState(false);
+  const [amount, setAmount] = useState('1');
+  const [totalAmount, setTotalAmount] = useState(0);
+  const [isFetchingAmount, setIsFetchingAmount] = useState(false);
 
   useEffect(() => {
-    if (!token?.collectionId) return;
+    if (!token?.collectionId || !selectedAccount?.address) return;
     void (async () => {
       setIsFeeLoading(true);
       const collection = await api?.collection?.getCollection(token?.collectionId);
       setIsSponsored(!!collection?.sponsorship?.isConfirmed);
       setIsFeeLoading(false);
+      if (collection?.mode === 'ReFungible') {
+        setIsFetchingAmount(true);
+        const totalAmount = await api?.rft?.getTokenBalance(token.collectionId, token.tokenId, selectedAccount?.address);
+        setTotalAmount(totalAmount?.amount || 0);
+        setIsFetchingAmount(false);
+      }
     })();
-  }, [token?.collectionId]);
+  }, [token?.collectionId, selectedAccount?.address]);
 
   const getFee = useCallback((recipient: string) => {
     setIsFeeLoading(true);
@@ -99,7 +113,8 @@ const AskTransferModal: FC<AskTransferModalProps> = ({ token, collection, onTran
         recipient,
         token.collectionId,
         token.tokenId,
-        1,
+        collection?.mode || 'NFT',
+        Number(amount),
         { account: selectedAccount })
       .then((fee) => {
         setFee(fee || '0');
@@ -109,7 +124,7 @@ const AskTransferModal: FC<AskTransferModalProps> = ({ token, collection, onTran
         setIsFeeLoading(false);
       });
     }, 300);
-  }, [api?.market, token, selectedAccount, isSponsored]);
+  }, [api?.market, amount, token, selectedAccount, isSponsored, collection?.mode, chainProperties?.SS58Prefix]);
 
   const onAddressInputChange = useCallback((value: string) => {
     setAddress(value);
@@ -125,9 +140,9 @@ const AskTransferModal: FC<AskTransferModalProps> = ({ token, collection, onTran
   const onConfirmTransferClick = useCallback(
     () => {
       if (!address) return;
-      onTransfer(address);
+      onTransfer(address, Number(amount));
     },
-    [address, onTransfer]
+    [address, onTransfer, amount]
   );
 
   const isFeeGreaterThanBalance = useMemo(() => {
@@ -136,12 +151,30 @@ const AskTransferModal: FC<AskTransferModalProps> = ({ token, collection, onTran
     return feeBN.gt(selectedAccount?.balance?.raw || new BN(0));
   }, [fee, selectedAccount?.balance, isSponsored]);
 
+  const onSetMaxAmount = useCallback(() => setAmount(totalAmount.toString()), [totalAmount]);
+  const isAmountValid = useMemo(() => {
+    if (collection?.mode !== 'ReFungible') return true;
+    return amount && amount !== '0' && Number(amount) <= totalAmount;
+  }, [amount, totalAmount, collection]);
   return (
     <>
       <Content>
         <Heading size='2'>Transfer token</Heading>
       </Content>
-      <InputWrapper
+      {collection?.mode === 'ReFungible' && <AmountInputWrapper>
+        <AmountInputStyled
+          loading={isFetchingAmount}
+          label='Number of fractions to be sent'
+          additionalText={isFetchingAmount ? 'Loading...' : `You own: ${formatBlockNumber(totalAmount)}`}
+          value={amount.toString()}
+          onChange={setAmount}
+          onSetMax={onSetMaxAmount}
+        />
+        {!isAmountValid && <InvalidAddressWrapper>
+          <Text size={'s'}>Invalid number of fractions</Text>
+        </InvalidAddressWrapper>}
+      </AmountInputWrapper>}
+      <InputStyled
         label='Please enter the address you wish to send the token to'
         onChange={onAddressInputChange}
         value={address}
@@ -164,7 +197,7 @@ const AskTransferModal: FC<AskTransferModalProps> = ({ token, collection, onTran
       />
       <ButtonWrapper>
         <Button
-          disabled={!address || isFeeGreaterThanBalance || !isAddressValid}
+          disabled={!address || isFeeGreaterThanBalance || !isAddressValid || !isAmountValid}
           onClick={onConfirmTransferClick}
           role='primary'
           title='Confirm'
@@ -175,12 +208,12 @@ const AskTransferModal: FC<AskTransferModalProps> = ({ token, collection, onTran
   );
 };
 
-const TransferStagesModal: FC<TTokenPageModalBodyProps & TTransfer> = ({ token, collection, onFinish, sender, recipient, testid }) => {
-  const { stages, status, initiate } = useTransferStages(token?.collectionId || 0, token?.tokenId || 0);
+const TransferStagesModal: FC<TTokenPageModalBodyProps & TTransfer> = ({ token, collection, onFinish, sender, amount, recipient, testid }) => {
+  const { stages, status, initiate } = useTransferStages(token?.collectionId || 0, token?.tokenId || 0, collection?.mode || 'NFT');
   const { info } = useNotifications();
 
   useEffect(() => {
-    initiate({ sender, recipient });
+    initiate({ sender, recipient, amount });
   }, [sender, recipient]);
 
   useEffect(() => {
@@ -204,7 +237,7 @@ const TransferStagesModal: FC<TTokenPageModalBodyProps & TTransfer> = ({ token, 
   );
 };
 
-const InputWrapper = styled(TextInput)`
+const InputStyled = styled(TextInput)`
   margin-bottom: 8px;
   width: 100%;
 
@@ -213,6 +246,15 @@ const InputWrapper = styled(TextInput)`
     white-space: break-spaces;
     height: auto;
   }
+`;
+
+const AmountInputWrapper = styled.div`
+  width: 100%;
+  margin-bottom: calc(var(--gap) * 2);
+`;
+
+const AmountInputStyled = styled(NumberInput)`
+  width: 100%;
 `;
 
 const ButtonWrapper = styled.div`
@@ -231,6 +273,7 @@ const InvalidAddressWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
   right: calc(var(--gap) * 1.5);
+  height: 0;
   span {
     color: ${Coral700} !important;
   }

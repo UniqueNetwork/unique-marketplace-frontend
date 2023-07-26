@@ -150,14 +150,7 @@ export const CollectionsPage: FC = () => {
           </SortSelectWrapper>
         </SearchAndSortingWrapper>
         <ButtonsWrapper>
-          {Address.is.ethereumAddressInAnyForm(selectedAccount?.address)
-          ? <>
-            <Tooltip targetRef={CreateCollectionButtonRef}>{'We are sorry but you cannot create a collection by Metamask account yet. Coming soon...'}</Tooltip>
-            <div ref={CreateCollectionButtonRef}>
-              <Button role='primary' title={'Create new via wallet'} disabled/>
-            </div>
-          </>
-          : <Button role='primary' title={'Create new via wallet'} onClick={onCreateCollectionViaWalletClick}/>}
+          <Button role='primary' title={'Create new via wallet'} onClick={onCreateCollectionViaWalletClick}/>
         </ButtonsWrapper>
       </ControlsWrapper>
       <CollectionListWrapper>

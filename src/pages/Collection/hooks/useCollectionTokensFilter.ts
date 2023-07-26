@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { GetOffersRequestPayload, OffersResponse } from 'api/restApi/offers/types';
 import { useAccounts } from 'hooks/useAccounts';
 import { parseFilterState, setUrlParameter } from 'utils/helpers';
-import { defaultSortingValue } from '../constants';
+import { defaultSortingValue, pageSize } from '../constants';
 import { TOption } from '../types';
 import { GetTokensRequestPayload, TokensResponse } from 'api/restApi/tokens/types';
 import { useApi } from 'hooks/useApi';
@@ -26,7 +26,7 @@ export const useCollectionTokensFilter = ({ isFetching, fetch }: { isFetching: b
     const address = (fixedPrice || (!!belongingValue && belongingValue !== 'All')) && selectedAccount?.address
       ? (Address.is.ethereumAddressInAnyForm(selectedAccount?.address)
         ? Address.normalize.ethereumAddress(selectedAccount?.address)
-        : Address.normalize.substrateAddress(selectedAccount?.address))
+        : selectedAccount?.address)
       : undefined;
 
     return {
@@ -44,9 +44,10 @@ export const useCollectionTokensFilter = ({ isFetching, fetch }: { isFetching: b
   const onSortingChange = useCallback((value: TOption) => {
     setSortingValue(value.id);
     setUrlParameter('sortingValue', value.id);
+    window.scrollTo({ top: 0 });
     void fetch({
       page: 1,
-      pageSize: 20,
+      pageSize,
       ...(getFilterByState(filterState)),
       searchText: searchValue || undefined,
       'sort[0]': [value.id]
@@ -58,7 +59,7 @@ export const useCollectionTokensFilter = ({ isFetching, fetch }: { isFetching: b
     setUrlParameter('searchValue', value || '');
     void fetch({
       page: 1,
-      pageSize: 20,
+      pageSize,
       ...(getFilterByState(filterState)),
       searchText: value || undefined,
       'sort[0]': [sortingValue]
@@ -70,7 +71,7 @@ export const useCollectionTokensFilter = ({ isFetching, fetch }: { isFetching: b
     setFilterState(filterState);
     await fetch({
       page: 1,
-      pageSize: 20,
+      pageSize,
       ...(getFilterByState(filterState)),
       searchText: searchValue || undefined,
       'sort[0]': [sortingValue]
@@ -104,7 +105,7 @@ export const useCollectionTokensFilter = ({ isFetching, fetch }: { isFetching: b
     setSortingValue(defaultSortingValue.id);
     void fetch({
       page: 1,
-      pageSize: 20,
+      pageSize,
       'sort[0]': [defaultSortingValue.id]
     });
   }, [currentChainId]);

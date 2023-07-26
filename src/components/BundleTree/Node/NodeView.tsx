@@ -78,9 +78,9 @@ const NodeView: FC<INodeView<INestingToken>> = ({
   }, [onTransfer, onUnnest]);
 
   const viewTokenDetails = useCallback(() => {
-    if (onViewNodeDetails) onViewNodeDetails(data);
+    if (onViewNodeDetails) onViewNodeDetails(data, collection?.mode || 'NFT');
     setModalVisible(false);
-  }, [onViewNodeDetails, data]);
+  }, [onViewNodeDetails, data, collection]);
 
   const closeModal = useCallback(() => {
     setModalVisible(false);

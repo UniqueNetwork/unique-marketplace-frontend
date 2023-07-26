@@ -14,7 +14,7 @@ import { countNestedChildren, stringToDecodedInfixOrUrlOrCidAndHash } from 'util
 import { useCollections } from 'hooks/useCollections';
 import BundleItemsCount from '../BundleItemsCount/BundleItemsCount';
 import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
-import { MyToken } from 'pages/MyTokens/types';
+import { MyToken, TokenTypeEnum } from 'pages/MyTokens/types';
 
 export type TTokensCard = {
   token?: Omit<TokenByIdResponse | MyToken, 'collection' | 'nestingParentToken' | 'properties'>
@@ -45,7 +45,10 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
     price,
     auction,
     video,
-    owner
+    owner,
+    type,
+    amount,
+    totalPieces
   } = useMemo(() => {
     if (offer || (token && collection) || ((token as MyToken).collectionName && (token as MyToken).tokenPrefix)) {
       const { image, video, owner } = offer?.tokenDescription || token || {};
@@ -59,7 +62,10 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
         video: stringToDecodedInfixOrUrlOrCidAndHash(video),
         auction,
         price,
-        owner: seller || owner
+        owner: seller || owner,
+        type: (token as MyToken)?.type || TokenTypeEnum.NFT,
+        amount: (token as MyToken)?.tokens_amount,
+        totalPieces: (token as MyToken)?.total_pieces
       };
     }
 
@@ -112,16 +118,31 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
     return compareEncodedAddresses(auction.bids[0].bidderAddress, selectedAccount.address);
   }, [isBidder, topBid, selectedAccount, auction]);
 
-  const tokenPath = useMemo(() => generatePath('/:currentChainId/token/:collectionId/:tokenId', {
-    currentChainId,
-    collectionId: collectionId?.toString(),
-    tokenId: tokenId?.toString()
-  }), [currentChainId, collectionId, tokenId]);
+  const tokenPath = useMemo(() => {
+    if (owner && type === TokenTypeEnum.RFT) {
+      return generatePath('/:currentChainId/token/:address/:collectionId/:tokenId', {
+        currentChainId,
+        address: owner,
+        collectionId: collectionId?.toString(),
+        tokenId: tokenId?.toString()
+      });
+    }
+    return generatePath('/:currentChainId/token/:collectionId/:tokenId', {
+      currentChainId,
+      collectionId: collectionId?.toString(),
+      tokenId: tokenId?.toString()
+    });
+  }, [currentChainId, collectionId, tokenId, type, owner]);
 
   const isOwner = useMemo(() => {
     if (!selectedAccount?.address || !owner) return false;
     return isTokenOwner(selectedAccount.address, owner);
   }, [selectedAccount?.address, owner]);
+
+  const badges = [
+    ...(collection?.mode === 'ReFungible' || (token as MyToken)?.type === TokenTypeEnum.RFT ? ['Fractional'] : []),
+    ...(isNestedState ? ['Nested'] : isBundleState ? ['Bundle'] : [])
+  ];
 
   return (
     <TokensCardStyled>
@@ -131,7 +152,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
         imageUrl={imageUrl}
         video={video}
         testid={`${testid}-token-media`}
-        badge={isNestedState ? 'Nested' : isBundleState ? 'Bundle' : ''}
+        badges={badges}
       />
       <Description>
         <BasicDataWrapper>
@@ -185,6 +206,9 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
           }</Text>}
           <StyledText color={'dark'} size={'xs'}>{`${timeDifference(new Date(auction?.stopAt || '').getTime() / 1000)} left`}</StyledText>
         </AuctionInfoWrapper>} */}
+        {type === TokenTypeEnum.RFT && !!amount && !!totalPieces && <Text size={'xs'} color={'grey-500'} >
+          Owned fractions: {amount}/{totalPieces}
+        </Text>}
       </Description>
 
       {!!isFetching && <Loader isFullPage />}

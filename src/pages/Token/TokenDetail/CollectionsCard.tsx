@@ -1,10 +1,11 @@
 import { FC } from 'react';
 import styled from 'styled-components';
-import { Heading, Text } from '@unique-nft/ui-kit';
+import { Heading, Text, Link as UILink } from '@unique-nft/ui-kit';
 import noCollections from '../../../static/icons/no-collections.svg';
 import { CollectionCover } from 'components/CollectionCover/CollectionCover';
 import { Link } from 'react-router-dom';
 import { useApi } from 'hooks/useApi';
+import config from 'config';
 
 interface ICollectionsCardProps {
   id: number;
@@ -23,8 +24,11 @@ export const CollectionsCard: FC<ICollectionsCardProps> = ({
 }: ICollectionsCardProps) => {
   const avatarImg = avatarSrc || noCollections;
   const { currentChainId } = useApi();
+
+  const collectionLink = `/${currentChainId?.toLowerCase()}/collection/${id}`;
+
   return (
-    <CollectionsCardStyled to={`/${currentChainId?.toLowerCase()}/collection/${id}`}><>
+    <CollectionsCardStyled to={collectionLink}><>
       <AvatarStyled>
         <CollectionCover size={40} src={avatarImg} type='circle' />
       </AvatarStyled>

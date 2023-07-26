@@ -7,7 +7,7 @@ import marketplaceAbi from './contracts/marketplace-0.json';
 import { NetworkOptions } from '../sdk/sdkClient';
 
 import IMarketController from './controllers/base/IMarketController';
-import { TransactionOptions } from './types';
+import { CollectionMode, TransactionOptions } from './types';
 import BaseController from './controllers/BaseController';
 
 class MarketController extends BaseController implements IMarketController {
@@ -139,15 +139,15 @@ class MarketController extends BaseController implements IMarketController {
     };
   }
 
-  async getTransferTokenFee(sender: string, recipient: string, collectionId: number, tokenId: number, amount: number, { account }: TransactionOptions): Promise<string | null> {
+  async getTransferTokenFee(sender: string, recipient: string, collectionId: number, tokenId: number, mode: CollectionMode, amount: number, { account }: TransactionOptions): Promise<string | null> {
     const adapter = this.getAdapter(account.account);
-    const rawFee = await adapter.getTransferTokenFee(sender, recipient, collectionId, tokenId, amount, account.signer);
+    const rawFee = await adapter.getTransferTokenFee(sender, recipient, collectionId, tokenId, mode, amount, account.signer);
     return this.getChainValue(rawFee, this.decimals).parsed.toString();
   }
 
   // ____ EXTRA _____
-  async transferToken(from: string, to: string, collectionId: number, tokenId: number, { account }: TransactionOptions): Promise<void> {
-    await this.getAdapter(account.account).transferToken(from, to, collectionId, tokenId, 1, account.signer);
+  async transferToken(from: string, to: string, collectionId: number, tokenId: number, mode: CollectionMode, amount: number, { account }: TransactionOptions): Promise<void> {
+    await this.getAdapter(account.account).transferToken(from, to, collectionId, tokenId, mode, amount, account.signer);
   }
 
   async getTransferBalanceFee(sender: string, recipient: string, value: number, { account }: TransactionOptions): Promise<string> {

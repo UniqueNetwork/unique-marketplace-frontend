@@ -5,8 +5,9 @@ import { InternalStage, StageStatus } from '../../types/StagesTypes';
 import { useAccounts } from '../useAccounts';
 import useStages from '../useStages';
 import { Address } from '@unique-nft/utils';
+import { CollectionMode } from 'api/chainApi/types';
 
-export const useTransferStages = (collectionId: number, tokenId: number) => {
+export const useTransferStages = (collectionId: number, tokenId: number, mode: CollectionMode) => {
   const { api, chainProperties } = useApi();
   const { selectedAccount } = useAccounts();
   const marketApi = api?.market;
@@ -23,10 +24,12 @@ export const useTransferStages = (collectionId: number, tokenId: number) => {
         params.txParams?.recipient || '',
         collectionId,
         tokenId,
+        mode,
+        params.txParams.amount,
         params.options
       );
     }
-  }], [marketApi, collectionId, tokenId]);
+  }], [marketApi, collectionId, tokenId, mode]);
   const { stages, error, status, initiate } = useStages<TTransfer>(transferStages, selectedAccount);
 
   return {

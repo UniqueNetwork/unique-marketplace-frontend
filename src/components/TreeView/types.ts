@@ -9,7 +9,7 @@ export interface INodeView<T> {
   textClicked: (event: React.MouseEvent) => void
   isFirst?: boolean
   level: number
-  onViewNodeDetails?: (node: T) => void
+  onViewNodeDetails?: (node: T, mode: string) => void
   onUnnestClick?: (node: T) => void
   onTransferClick?: (node: T) => void
 }
@@ -32,7 +32,7 @@ export interface INodeContainer<T> {
   isFirst?: boolean
   level: number
   children?: React.ReactNode
-  onViewNodeDetails?: (node: T) => void
+  onViewNodeDetails?: (node: T, mode: string) => void
   onUnnestClick?: (node: T) => void
   onTransferClick?: (node: T) => void
 }
@@ -45,7 +45,7 @@ export interface ITree<T> {
   compareNodes: (a: T, b: T) => boolean
   getKey: (a: T) => string
   childrenProperty: keyof T
-  onViewNodeDetails?: (node: T) => void
+  onViewNodeDetails?: (node: T, mode: string) => void
   onUnnestClick?: (node: T) => void
   onTransferClick?: (node: T) => void
 }
@@ -56,7 +56,7 @@ export interface IBundleTree<T> extends ITree<T>{
 
 export interface INestedSectionView<T> {
   selectedToken: T | null
-  onViewNodeDetails?: (node: T) => void
+  onViewNodeDetails?: (node: T, mode: string) => void
   onUnnestClick?: (node: T) => void
   onTransferClick?: (node: T) => void
 }
