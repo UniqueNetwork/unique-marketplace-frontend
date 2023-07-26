@@ -15,6 +15,7 @@ import { TokensMedia } from '../TokensCard/TokensMedia';
 import { useApi } from '../../hooks/useApi';
 import BundleItemsCount from '../BundleItemsCount/BundleItemsCount';
 import { Link as UILink } from 'components/UI';
+import { BadgeEnum } from 'components/Picture';
 
 export type TTokensCard = {
   offer: Offer
@@ -79,7 +80,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
         imageUrl={image}
         video={videoProp}
         testid={`${testid}-token-media`}
-        badges={isBundle ? ['Bundle'] : []}
+        badges={isBundle ? [BadgeEnum.Bundle] : []}
       />
       <Description>
         <BasicDataWrapper>
