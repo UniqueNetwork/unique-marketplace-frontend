@@ -5,13 +5,15 @@ import styled from 'styled-components';
 type SlideProps = {
   title: string
   description: string
-  image: string
+  mediaUrl: string
   link: string
   buttonTitle: string
   className?: string
 }
 
-export const Slide = ({ title, description, buttonTitle, image, link, className }: SlideProps) => {
+export const Slide = ({ title, description, buttonTitle, mediaUrl, link, className }: SlideProps) => {
+  const isVideo = /(\.mp4|\.webm|\.ogv)$/.test(mediaUrl.toLowerCase());
+
   return <SlideWrapper className={className}>
     <LeftSide>
       <HeadingStyled >{title}</HeadingStyled>
@@ -21,7 +23,8 @@ export const Slide = ({ title, description, buttonTitle, image, link, className 
       </Link>
     </LeftSide>
     <RightSide>
-      <Picture src={image} />
+      {!isVideo && <Picture src={mediaUrl} />}
+      {isVideo && <Video src={mediaUrl} autoPlay loop />}
     </RightSide>
   </SlideWrapper>;
 };
@@ -72,7 +75,7 @@ const SlideWrapper = styled.div`
           transition: opacity 0.6s ease, transform 1s ease-in;
           transition-delay: 0.5s;
         }
-        img {
+        img, video {
           opacity: 1;
           transition: opacity 0.8s ease;
         }
@@ -96,7 +99,7 @@ const SlideWrapper = styled.div`
           transition: opacity 1s ease;
           transform: translate(0, 0) !important;
         }
-        img {
+        img, video {
           opacity: 0;
           transition: opacity 0.5s ease;
         }
@@ -117,7 +120,7 @@ const SlideWrapper = styled.div`
           transition: opacity 1s ease;
           transform: translate(0, 0) !important;
         }
-        img {
+        img, video {
           opacity: 0;
           transition: opacity 0.5s ease;
         }
@@ -129,7 +132,8 @@ const RightSide = styled.div`
   display: flex;
   min-width: 50%;
   @media (max-width: 768px) {
-    width: 100%
+    width: 100%;
+    flex: auto;
   }
 `;
 
@@ -188,6 +192,13 @@ const Description = styled.div`
   }
 `;
 const Picture = styled.img`
+  display: flex;
+  width: 100%;
+  object-fit: cover;
+  @media (max-width: 768px) {
+  }
+`;
+const Video = styled.video`
   display: flex;
   width: 100%;
   object-fit: cover;
