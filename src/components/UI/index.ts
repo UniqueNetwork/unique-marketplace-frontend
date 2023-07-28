@@ -17,4 +17,5 @@ export { Table } from './Table/Table';
 export { Tabs } from './Tabs/Tabs';
 export { Text } from './Text/Text';
 export { Textarea } from './Textarea/Textarea';
+export { Tooltip } from './Tooltip/Tooltip';
 export { Upload } from './Upload/Upload';
