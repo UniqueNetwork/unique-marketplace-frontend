@@ -15,6 +15,7 @@ interface AmountInputProps {
   testid?: string
   loading?: boolean
   onChange(value: string): void
+  onClear?(): void
   onSetMax?(): void
 }
 
@@ -23,6 +24,7 @@ export const NumberInput: FC<AmountInputProps> = ({
   value,
   onChange,
   onSetMax,
+  onClear,
   additionalText,
   placeholder,
   decimals = 4,
@@ -42,9 +44,10 @@ export const NumberInput: FC<AmountInputProps> = ({
     }
   }, [onChange, decimals]);
 
-  const onClear = useCallback(() => {
+  const onClearClick = useCallback(() => {
     onChange('');
-  }, [onChange]);
+    onClear?.();
+  }, [onChange, onClear]);
 
   return <InputWrapper className={className}>
     <InputText
@@ -60,7 +63,7 @@ export const NumberInput: FC<AmountInputProps> = ({
         <ClearButton
           name={'circle-close'}
           size={16}
-          onClick={onClear}
+          onClick={onClearClick}
           testid={`${testid}-clear-button`}
         />}
       {loading && <Loader size='small' />}
