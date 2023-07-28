@@ -182,6 +182,8 @@ const HeadingStyled = styled(Heading)`
   display: flex;
   font-size: 64px !important;
   font-weight: 700;
+  line-height: 64px !important;
+
   margin-bottom: 0 !important;
   opacity: 1;
 
@@ -230,6 +232,7 @@ const Video = styled.video`
 `;
 const IFrame = styled.iframe`
   display: flex;
+  border: none;
   width: 100%;
   object-fit: cover;
   @media (max-width: 768px) {
