@@ -66,6 +66,7 @@ export const TransferToBundleModal: FC<TBundleTrunsferModalBodyProps> = ({ token
   if (status === 'transfer-stage') {
     if (!newParent) return null;
     return (<TransferToBundleStagesModal
+      tokenPrefix={collection?.tokenPrefix || ''}
       owner={owner}
       onFinish={onFinish}
       token={token}
@@ -248,9 +249,10 @@ type TransferToBundleStagesModalProps = TBundleTrunsferModalBodyProps & { newPar
   mode: CollectionMode
   amount: number
   owner: string
+  tokenPrefix: string
 }
 
-const TransferToBundleStagesModal: FC<TransferToBundleStagesModalProps> = ({ token, owner, newParent, mode, amount, onFinish, testid }) => {
+const TransferToBundleStagesModal: FC<TransferToBundleStagesModalProps> = ({ token, owner, newParent, mode, amount, tokenPrefix, onFinish, testid }) => {
   const { info } = useNotifications();
   const { selectedAccount } = useAccounts();
   const { stages, status, initiate } = useTransferToBundleStages(owner, token, newParent, mode);
@@ -263,7 +265,7 @@ const TransferToBundleStagesModal: FC<TransferToBundleStagesModalProps> = ({ tok
   useEffect(() => {
     if (status === StageStatus.success) {
       info(
-        <div data-testid={`${testid}-success-notification`}><Link href={`/token/${token?.collectionId}/${token?.tokenId}`} title={`${''} #${token?.tokenId}`}/> transfered</div>,
+        <div data-testid={`${testid}-success-notification`}><Link href={`/token/${token?.collectionId}/${token?.tokenId}`} title={`${tokenPrefix} #${token?.tokenId}`}/> nested</div>,
         { name: 'success', size: 32, color: 'var(--color-additional-light)' }
       );
     }
