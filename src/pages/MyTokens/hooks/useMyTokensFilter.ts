@@ -103,6 +103,7 @@ export const useMyTokensFilter = ({ tokens, offers, isFetchingTokens }: UseMyTok
       const { tokenPrefix, name: collectionName } = token.collectionDescription || {};
 
       filteredBySearchValue = token.tokenId === Number(searchString) ||
+        token.collectionId === Number(searchString) ||
         tokenPrefix?.includes(searchString.toLowerCase()) || // offer
         collectionName?.includes(searchString.toLowerCase()) || // offer
         featuredCollections.some(({ id, name, tokenPrefix }) => { // token
