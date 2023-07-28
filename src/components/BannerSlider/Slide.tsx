@@ -1,5 +1,7 @@
 import { Heading, Link } from '@unique-nft/ui-kit';
+import { get } from 'api/restApi/base';
 import { Button, Text } from 'components/UI';
+import { useEffect, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 
 type SlideProps = {
@@ -12,7 +14,27 @@ type SlideProps = {
 }
 
 export const Slide = ({ title, description, buttonTitle, mediaUrl, link, className }: SlideProps) => {
-  const isVideo = /(\.mp4|\.webm|\.ogv)$/.test(mediaUrl.toLowerCase());
+  const mediaType = useMemo(() => /(\.mp4|\.webm|\.ogv)$/.test(mediaUrl.toLowerCase())
+    ? 'video'
+    : /\.html$/.test(mediaUrl.toLowerCase()) ? 'html' : 'image', [mediaUrl]);
+
+  const iFrameRef = useRef<HTMLIFrameElement>(null);
+
+  useEffect(() => {
+    if (mediaType !== 'html' || !iFrameRef) return;
+
+    const doc = iFrameRef.current?.contentWindow?.document;
+    if (!doc) return;
+
+    void (async () => {
+      const { data } = await get(mediaUrl);
+      if (data) {
+        doc.open();
+        doc.write(data);
+        doc.close();
+      }
+    })();
+  }, [mediaType, mediaUrl]);
 
   return <SlideWrapper className={className}>
     <LeftSide>
@@ -23,8 +45,9 @@ export const Slide = ({ title, description, buttonTitle, mediaUrl, link, classNa
       </Link>
     </LeftSide>
     <RightSide>
-      {!isVideo && <Picture src={mediaUrl} />}
-      {isVideo && <Video src={mediaUrl} autoPlay loop />}
+      {mediaType === 'html' && <IFrame ref={iFrameRef} src='about:blank' />}
+      {mediaType === 'image' && <Picture src={mediaUrl} />}
+      {mediaType === 'video' && <Video src={mediaUrl} autoPlay loop />}
     </RightSide>
   </SlideWrapper>;
 };
@@ -75,7 +98,7 @@ const SlideWrapper = styled.div`
           transition: opacity 0.6s ease, transform 1s ease-in;
           transition-delay: 0.5s;
         }
-        img, video {
+        img, video, iframe {
           opacity: 1;
           transition: opacity 0.8s ease;
         }
@@ -99,7 +122,7 @@ const SlideWrapper = styled.div`
           transition: opacity 1s ease;
           transform: translate(0, 0) !important;
         }
-        img, video {
+        img, video, iframe {
           opacity: 0;
           transition: opacity 0.5s ease;
         }
@@ -120,7 +143,7 @@ const SlideWrapper = styled.div`
           transition: opacity 1s ease;
           transform: translate(0, 0) !important;
         }
-        img, video {
+        img, video, iframe {
           opacity: 0;
           transition: opacity 0.5s ease;
         }
@@ -199,6 +222,13 @@ const Picture = styled.img`
   }
 `;
 const Video = styled.video`
+  display: flex;
+  width: 100%;
+  object-fit: cover;
+  @media (max-width: 768px) {
+  }
+`;
+const IFrame = styled.iframe`
   display: flex;
   width: 100%;
   object-fit: cover;
