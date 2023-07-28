@@ -58,7 +58,7 @@ export const MarketPage = () => {
     {!isFetchingBanners && banners.length > 0 && <BannerSlider >
       {banners.map(({ mediaUrl, title, description, buttonTitle, buttonUrl }, index) => (
         <Slide key={index}
-          image={mediaUrl}
+          mediaUrl={mediaUrl}
           title={title}
           description={description}
           buttonTitle={buttonTitle}
