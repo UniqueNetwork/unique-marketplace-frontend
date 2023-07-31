@@ -37,7 +37,6 @@ export function MobileFilters<T = FilterState>({ filterCount, filterComponent, d
 
   const onShowButtonClick = useCallback(() => {
     setIsVisible(false);
-    console.log('onShowButtonClick');
     onFilterApply(filterState, sortingState);
   }, [filterState, sortingState, setIsVisible, onFilterApply]);
 

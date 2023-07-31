@@ -14,8 +14,6 @@ export const Filters: FC<FiltersProps<TokensFilter>> = ({ value, attributes, att
   const { selectedAccount } = useAccounts();
 
   const onBelongingFilterChange = useCallback((belongingValue: BelongingValue) => {
-    console.log('onBelongingFilterChange');
-
     onFilterChange({ ...value, belongingValue });
   }, [value, onFilterChange, selectedAccount]);
 

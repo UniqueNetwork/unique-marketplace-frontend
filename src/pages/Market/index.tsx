@@ -34,7 +34,8 @@ export const MarketPage = () => {
     onSearch,
     onSortingChange,
     onFilterChange,
-    getFilterByState
+    getFilterByState,
+    onMobileFilterApply
   } = useMarketFilter({ isFetching, fetch });
 
   const hasMore = offers && offers.length < offersCount;
@@ -118,10 +119,9 @@ export const MarketPage = () => {
         defaultSortingValue={defaultSortingValue}
         sortingValue={sortingValue}
         sortingOptions={sortingOptions}
-        onFilterChange={onFilterChange}
-        onSortingChange={onSortingChange}
+        onFilterApply={onMobileFilterApply}
         testid={`${testid}-mobile-filters`}
-        filterComponent={<Filters
+        filterComponent={({ filterState, onFilterChange }) => <Filters
           value={filterState}
           attributes={attributes}
           attributeCounts={attributeCounts}
