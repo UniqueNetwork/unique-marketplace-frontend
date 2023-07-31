@@ -11,13 +11,14 @@ import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 
-import { MobileFilters } from './Filters/MobileFilter';
 import { Filters } from './Filters/Filters';
 import { defaultSortingValue, sortingOptions, testid } from './constants';
 import { useMyTokensFilter } from './hooks/useMyTokensFilter';
 import { useGetMyTokens } from './hooks/useGetMyTokens';
 import { TokensList } from 'components';
 import { Address } from '@unique-nft/utils';
+import { MobileFilters } from 'components/Filters/MobileFilter';
+import { MyTokensFilterState } from './Filters/types';
 
 export const NFTPage = () => {
   const { selectedAccount, isLoading: isAccountsLoading } = useAccounts();
@@ -52,7 +53,8 @@ export const NFTPage = () => {
     myCollections,
     onSearch,
     onSortingChange,
-    setFilterState
+    setFilterState,
+    onMobileFilterApply
   } = useMyTokensFilter({
     offers,
     tokens,
@@ -147,17 +149,16 @@ export const NFTPage = () => {
           </>}
         </PaginationWrapper>
       </MainContent>
-      {deviceSize <= DeviceSize.md && <MobileFilters
+      {deviceSize <= DeviceSize.md && <MobileFilters<MyTokensFilterState>
         filterCount={filterCount}
         defaultSortingValue={defaultSortingValue}
         sortingValue={sortingValue}
         sortingOptions={sortingOptions}
-        onFilterChange={setFilterState}
-        onSortingChange={onSortingChange}
+        onFilterApply={onMobileFilterApply}
         testid={`${testid}-mobile-filters`}
-        filterComponent={<Filters
+        filterComponent={({ filterState, onFilterChange }) => <Filters
           value={filterState}
-          onFilterChange={setFilterState}
+          onFilterChange={onFilterChange}
           testid={`${testid}-filters`}
           tokens={tokensWithOffers}
           featuredTokens={featuredTokens}

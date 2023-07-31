@@ -9,6 +9,7 @@ import { GetTokensRequestPayload, TokensResponse } from 'api/restApi/tokens/type
 import { useApi } from 'hooks/useApi';
 import { Address } from '@unique-nft/utils';
 import { TokensFilter } from '../Filters/types';
+import { SelectOptionProps } from '@unique-nft/ui-kit';
 
 export const useCollectionTokensFilter = ({ isFetching, fetch }: { isFetching: boolean, fetch(payload: GetTokensRequestPayload): Promise<OffersResponse | TokensResponse> }) => {
   const { currentChainId, api } = useApi();
@@ -69,6 +70,7 @@ export const useCollectionTokensFilter = ({ isFetching, fetch }: { isFetching: b
   const onFilterChange = useCallback(async (filterState: TokensFilter | null) => {
     setUrlParameter('filterState', filterState ? JSON.stringify(filterState) : '');
     setFilterState(filterState);
+    console.log('onFilterChange');
     await fetch({
       page: 1,
       pageSize,
@@ -77,6 +79,20 @@ export const useCollectionTokensFilter = ({ isFetching, fetch }: { isFetching: b
       'sort[0]': [sortingValue]
     });
   }, [fetch, sortingValue, getFilterByState, searchValue]);
+
+  const onMobileFilterApply = useCallback(async (filterState: TokensFilter | null, sorting: SelectOptionProps) => {
+    setUrlParameter('filterState', filterState ? JSON.stringify(filterState) : '');
+    setUrlParameter('sortingValue', sorting.id as string);
+    await fetch({
+      page: 1,
+      pageSize: 20,
+      ...(getFilterByState(filterState)),
+      searchText: searchValue || undefined,
+      'sort[0]': [sorting.id as string]
+    });
+    setFilterState(filterState);
+    setSortingValue(sorting.id as string);
+  }, [fetch, getFilterByState, searchValue]);
 
   const onChangeAccount = useCallback(() => {
     if (isFetching) return;
@@ -121,6 +137,7 @@ export const useCollectionTokensFilter = ({ isFetching, fetch }: { isFetching: b
     setFilterState,
     setSortingValue,
     setSearchValue,
-    getFilterByState
+    getFilterByState,
+    onMobileFilterApply
   };
 };
