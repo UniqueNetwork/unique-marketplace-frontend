@@ -9,11 +9,13 @@ type SlideProps = {
   description: string
   mediaUrl: string
   link: string
+  link2?: string
   buttonTitle: string
+  buttonTitle2?: string
   className?: string
 }
 
-export const Slide = ({ title, description, buttonTitle, mediaUrl, link, className }: SlideProps) => {
+export const Slide = ({ title, description, buttonTitle, mediaUrl, link, link2, buttonTitle2, className }: SlideProps) => {
   const mediaType = useMemo(() => /(\.mp4|\.webm|\.ogv)$/.test(mediaUrl.toLowerCase())
     ? 'video'
     : /\.html$/.test(mediaUrl.toLowerCase()) ? 'html' : 'image', [mediaUrl]);
@@ -40,9 +42,14 @@ export const Slide = ({ title, description, buttonTitle, mediaUrl, link, classNa
     <LeftSide>
       <HeadingStyled >{title}</HeadingStyled>
       <Description><Text size='l'>{description}</Text></Description>
-      <Link href={link} >
-        <Button title={buttonTitle} role='primary' />
-      </Link>
+      <ButtonWrapper>
+        {buttonTitle && <Link href={link} >
+          <Button title={buttonTitle} role='primary' />
+        </Link>}
+        {buttonTitle2 && <Link href={link2} >
+          <Button title={buttonTitle2} role='ghost' />
+        </Link>}
+      </ButtonWrapper>
     </LeftSide>
     <RightSide>
       {mediaType === 'html' && <IFrame ref={iFrameRef} src='about:blank' />}
@@ -153,9 +160,22 @@ const SlideWrapper = styled.div`
 
 const RightSide = styled.div`
   display: flex;
-  min-width: 50%;
+  
+  width: calc(50vw - 128px);
+  height: calc(37.5vw - 96px);
+  @media (min-width: 1920px) {
+    height: 478px;
+    width: 637px;
+    min-width: 637px;
+  }
+
+  @media (max-width: 1024px) {
+    width: calc(50vw - 64px);
+    height: calc(37.5vw - 48px);
+  }
   @media (max-width: 768px) {
-    width: 100%;
+    width: 100vw;
+    height: calc(75vw);
     flex: auto;
   }
 `;
@@ -168,13 +188,22 @@ const LeftSide = styled.div`
   justify-content: center;
   width: calc(50vw - 256px);
 
-  @media (max-width: 1278px) {
+  @media (max-width: 1378px) {
     padding: 16px;
     width: calc(50vw - 144px);
   }
+  @media (max-width: 1278px) {
+    padding: 0 16px;
+    gap: calc(var(--gap) * 1);
+  }
+  @media (max-width: 1024px) {
+    width: calc(50vw - 64px);
+    height: calc(37.5vw - 48px);
+  }
   @media (max-width: 768px) {
     padding: 16px;
-    width: calc(100% - 32px);
+    width: calc(100vw - 32px);
+    height: 200px;
   }
 `;
 
@@ -187,13 +216,13 @@ const HeadingStyled = styled(Heading)`
   margin-bottom: 0 !important;
   opacity: 1;
 
-  @media (max-width: 1295px) {
+  @media (max-width: 1395px) {
     font-size: 48px !important;
     line-height: 32px !important;
   }
   @media (max-width: 1278px) {
-    font-size: 36px !important;
-    line-height: 36px !important;
+    font-size: 30px !important;
+    line-height: 30px !important;
   }
 `;
 const Description = styled.div`
@@ -206,6 +235,13 @@ const Description = styled.div`
   opacity: 1;
   &>span {
     text-overflow: ellipsis;   
+    font-size: 18px !important;
+  }
+  @media (max-width: 1280px) {
+    &>span {
+      font-size: 14px;
+      font-size: 14px !important;
+    }
   }
   @media (max-width: 1024px) {
     max-height: 108px;
@@ -237,4 +273,8 @@ const IFrame = styled.iframe`
   object-fit: cover;
   @media (max-width: 768px) {
   }
+`;
+const ButtonWrapper = styled.div`
+  display: flex;
+  gap: 32px;
 `;

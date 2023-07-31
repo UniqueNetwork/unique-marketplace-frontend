@@ -41,7 +41,7 @@ const classNames = { ...DEFAULT_CLASSNAMES };
 export const BannerSlider: FC<SliderProps> = ({
   slideIndex = 0,
   direction = Direction.Horizontal,
-  autoplay = DEFAULT_AUTOPLAY,
+  autoplay, // = DEFAULT_AUTOPLAY,
   duration = DEFAULT_DURATION,
   disabled = false,
   infinite = true,
@@ -364,7 +364,8 @@ const Bullet = styled.div<{ isCurrent: boolean }>`
 
 const SliderPaper = styled.div`
   position: relative;
-  height: 600px;
+  
+  height: calc(37.5vw - 100px);
   overflow: hidden;
   background: ${AdditionalLight};
   box-shadow: 0 4px 12px rgb(0 0 0 / 8%);
@@ -394,6 +395,9 @@ const SliderPaper = styled.div`
     &.previousButton {
       left: 20px;
 
+      @media (max-width: 1024px) {
+        left: 4px;
+      }
       @media (max-width: 768px) {
         display: none;
       }
@@ -402,6 +406,9 @@ const SliderPaper = styled.div`
     &.nextButton {
       right: 20px;
 
+      @media (max-width: 1024px) {
+        right: 4px;
+      }
       @media (max-width: 768px) {
         display: none;
       }
@@ -453,17 +460,21 @@ const SliderPaper = styled.div`
     }
   }
 
-  @media (max-width: 1440px) {
-    height: calc(32.5vw + 32px);
+  @media (min-width: 1920px) {
+    height: calc(478px);
   }
   @media (max-width: 1024px) {
     background: ${AdditionalLight};
     box-shadow: none;
+
+    height: calc(37.5vw - 26px);
+    padding: 16px 44px 16px 44px;
+    margin: 0 -24px;
   }
   @media (max-width: 768px) {
     padding: 0px;
     margin: 0 -16px;
-    height: calc(75vw + 390px);
+    height: calc(75vw + 232px);
   }
 `;
 
