@@ -365,12 +365,11 @@ const Bullet = styled.div<{ isCurrent: boolean }>`
 const SliderPaper = styled.div`
   position: relative;
   
-  height: calc(37.5vw - 100px);
+  height: calc(37.5vw);
   overflow: hidden;
   background: ${AdditionalLight};
   box-shadow: 0 4px 12px rgb(0 0 0 / 8%);
   border-radius: 4px;
-  padding: 40px 88px 40px 88px;
   & a {
     &.previousButton, &.nextButton {
       font-size: 22px;
@@ -386,6 +385,8 @@ const SliderPaper = styled.div`
       text-decoration: none;
       backface-visibility: hidden; /* prevent jump effect when scaling */
 
+      filter: invert(1);
+      mix-blend-mode: difference;
       &:not(.disabled):hover {
         transform: translateY(-50%) scale(1.25);
         cursor: pointer;
@@ -415,8 +416,6 @@ const SliderPaper = styled.div`
     }
   }
   .slide {
-    width: 100%;
-    height: 100%;
     position: absolute;
     overflow: hidden;
 
@@ -461,19 +460,16 @@ const SliderPaper = styled.div`
   }
 
   @media (min-width: 1920px) {
-    height: calc(478px);
+    height: calc(548px);
   }
   @media (max-width: 1024px) {
     background: ${AdditionalLight};
     box-shadow: none;
 
-    height: calc(37.5vw - 26px);
-    padding: 16px 44px 16px 44px;
     margin: 0 -24px;
   }
   @media (max-width: 768px) {
-    padding: 0px;
-    margin: 0 -16px;
+    margin: 0 -24px;
     height: calc(75vw + 232px);
   }
 `;

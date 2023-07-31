@@ -1,21 +1,27 @@
 import { Heading, Link } from '@unique-nft/ui-kit';
+import { Banner } from 'api/restApi/banners/types';
 import { get } from 'api/restApi/base';
 import { Button, Text } from 'components/UI';
 import { useEffect, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 
-type SlideProps = {
-  title: string
-  description: string
-  mediaUrl: string
-  link: string
-  link2?: string
-  buttonTitle: string
-  buttonTitle2?: string
+type SlideProps = Banner & {
   className?: string
 }
 
-export const Slide = ({ title, description, buttonTitle, mediaUrl, link, link2, buttonTitle2, className }: SlideProps) => {
+export const Slide = ({
+  title,
+  description,
+  mediaUrl,
+  backgroundColor,
+  buttonTitle,
+  buttonUrl,
+  buttonColor,
+  secondaryButtonTitle,
+  secondaryButtonColor,
+  secondaryButtonUrl,
+  className
+}: SlideProps) => {
   const mediaType = useMemo(() => /(\.mp4|\.webm|\.ogv)$/.test(mediaUrl.toLowerCase())
     ? 'video'
     : /\.html$/.test(mediaUrl.toLowerCase()) ? 'html' : 'image', [mediaUrl]);
@@ -38,16 +44,16 @@ export const Slide = ({ title, description, buttonTitle, mediaUrl, link, link2, 
     })();
   }, [mediaType, mediaUrl]);
 
-  return <SlideWrapper className={className}>
+  return <SlideWrapper className={className} style={{ backgroundColor: backgroundColor || undefined }}>
     <LeftSide>
       <HeadingStyled >{title}</HeadingStyled>
       <Description><Text size='l'>{description}</Text></Description>
       <ButtonWrapper>
-        {buttonTitle && <Link href={link} >
+        {buttonTitle && <Link href={buttonUrl} >
           <Button title={buttonTitle} role='primary' />
         </Link>}
-        {buttonTitle2 && <Link href={link2} >
-          <Button title={buttonTitle2} role='ghost' />
+        {secondaryButtonTitle && <Link href={secondaryButtonUrl} >
+          <Button title={secondaryButtonTitle} role='ghost' />
         </Link>}
       </ButtonWrapper>
     </LeftSide>
@@ -61,9 +67,15 @@ export const Slide = ({ title, description, buttonTitle, mediaUrl, link, link2, 
 
 const SlideWrapper = styled.div`
   display: flex;
-  height: 100%;
   object-fit: cover;
+
+  padding: 40px 88px 40px 88px;
+
+  @media (max-width: 1024px) {
+    padding: 16px 44px 16px 44px;
+  }
   @media (max-width: 768px) {
+    padding: 0px;
     flex-direction: column-reverse;
     padding: 0 4px;
   }
@@ -161,8 +173,8 @@ const SlideWrapper = styled.div`
 const RightSide = styled.div`
   display: flex;
   
-  width: calc(50vw - 128px);
-  height: calc(37.5vw - 96px);
+  width: calc(50vw - 114px);
+  height: calc(37.5vw - 84px);
   @media (min-width: 1920px) {
     height: 478px;
     width: 637px;
@@ -174,7 +186,7 @@ const RightSide = styled.div`
     height: calc(37.5vw - 48px);
   }
   @media (max-width: 768px) {
-    width: 100vw;
+    width: calc(100vw - 8px);
     height: calc(75vw);
     flex: auto;
   }
@@ -186,8 +198,14 @@ const LeftSide = styled.div`
   gap: calc(var(--gap) * 2);
   padding: 40px 96px 40px 48px;
   justify-content: center;
-  width: calc(50vw - 256px);
+  width: calc(50vw - 302px);
 
+  @media (min-width: 1920px) {
+    width: calc(417px);
+  }
+  @media (max-width: 1440px) {
+    width: calc(50vw - 254px);
+  }
   @media (max-width: 1378px) {
     padding: 16px;
     width: calc(50vw - 144px);
@@ -202,7 +220,7 @@ const LeftSide = styled.div`
   }
   @media (max-width: 768px) {
     padding: 16px;
-    width: calc(100vw - 32px);
+    width: calc(100vw - 40px);
     height: 200px;
   }
 `;
@@ -216,6 +234,9 @@ const HeadingStyled = styled(Heading)`
   margin-bottom: 0 !important;
   opacity: 1;
 
+  filter: invert(1);
+  mix-blend-mode: difference;
+
   @media (max-width: 1395px) {
     font-size: 48px !important;
     line-height: 32px !important;
@@ -225,6 +246,7 @@ const HeadingStyled = styled(Heading)`
     line-height: 30px !important;
   }
 `;
+
 const Description = styled.div`
   display: -webkit-box;
   margin-bottom: var(--gap);
@@ -233,6 +255,10 @@ const Description = styled.div`
   overflow: hidden; 
   -webkit-line-clamp: 3;
   opacity: 1;
+
+  filter: invert(1);
+  mix-blend-mode: difference;
+
   &>span {
     text-overflow: ellipsis;   
     font-size: 18px !important;
