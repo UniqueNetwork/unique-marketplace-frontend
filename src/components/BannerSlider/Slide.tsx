@@ -1,9 +1,11 @@
 import { Heading, Link } from '@unique-nft/ui-kit';
 import { Banner } from 'api/restApi/banners/types';
 import { get } from 'api/restApi/base';
-import { Button, Text } from 'components/UI';
-import { useEffect, useMemo, useRef } from 'react';
+import { Text } from 'components/UI';
+import { Button, ButtonProps } from '../UI/Button/Button';
+import { ComponentType, FC, useEffect, useMemo, useRef } from 'react';
 import styled from 'styled-components';
+import { invertColor } from 'utils/helpers';
 
 type SlideProps = Banner & {
   className?: string
@@ -50,10 +52,10 @@ export const Slide = ({
       <Description><Text size='l'>{description}</Text></Description>
       <ButtonWrapper>
         {buttonTitle && <Link href={buttonUrl} >
-          <Button title={buttonTitle} role='primary' />
+          <ButtonStyled title={buttonTitle} role='primary' backgroundColor={buttonColor} />
         </Link>}
         {secondaryButtonTitle && <Link href={secondaryButtonUrl} >
-          <Button title={secondaryButtonTitle} role='ghost' />
+          <ButtonStyled title={secondaryButtonTitle} role='ghost' backgroundColor={secondaryButtonColor} />
         </Link>}
       </ButtonWrapper>
     </LeftSide>
@@ -304,3 +306,15 @@ const ButtonWrapper = styled.div`
   display: flex;
   gap: 32px;
 `;
+
+type ButtonStyledProps = { backgroundColor?: string } & ButtonProps;
+const ButtonStyled: FC<ButtonStyledProps> = ({ backgroundColor, ...props }) => {
+  const Wrapper = styled.div<{ backgroundColor?: string }>`
+    button {
+      background-color: ${({ backgroundColor }) => backgroundColor || ''} !important;
+      border-color: ${({ backgroundColor }) => backgroundColor || ''} !important;
+      color: ${({ backgroundColor }) => backgroundColor ? invertColor(backgroundColor) : ''} !important;
+    }
+  `;
+  return <Wrapper backgroundColor={backgroundColor}><Button {...props} /></Wrapper>;
+};
