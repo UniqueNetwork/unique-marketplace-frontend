@@ -55,7 +55,7 @@ export const Slide = ({
           <ButtonStyled title={buttonTitle} role='primary' backgroundColor={buttonColor} />
         </Link>}
         {secondaryButtonTitle && <Link href={secondaryButtonUrl} >
-          <ButtonStyled title={secondaryButtonTitle} role='ghost' backgroundColor={secondaryButtonColor} />
+          <ButtonStyled title={secondaryButtonTitle} role='ghost' />
         </Link>}
       </ButtonWrapper>
     </LeftSide>
@@ -175,8 +175,8 @@ const SlideWrapper = styled.div`
 const RightSide = styled.div`
   display: flex;
   
-  width: calc(50vw - 114px);
-  height: calc(37.5vw - 84px);
+  width: calc(50vw - 112px);
+  height: calc(37.5vw - 80px);
   @media (min-width: 1920px) {
     height: 478px;
     width: 637px;
@@ -236,9 +236,6 @@ const HeadingStyled = styled(Heading)`
   margin-bottom: 0 !important;
   opacity: 1;
 
-  filter: invert(1);
-  mix-blend-mode: difference;
-
   @media (max-width: 1395px) {
     font-size: 48px !important;
     line-height: 32px !important;
@@ -257,9 +254,6 @@ const Description = styled.div`
   overflow: hidden; 
   -webkit-line-clamp: 3;
   opacity: 1;
-
-  filter: invert(1);
-  mix-blend-mode: difference;
 
   &>span {
     text-overflow: ellipsis;   
@@ -313,7 +307,6 @@ const ButtonStyled: FC<ButtonStyledProps> = ({ backgroundColor, ...props }) => {
     button {
       background-color: ${({ backgroundColor }) => backgroundColor || ''} !important;
       border-color: ${({ backgroundColor }) => backgroundColor || ''} !important;
-      color: ${({ backgroundColor }) => backgroundColor ? invertColor(backgroundColor) : ''} !important;
     }
   `;
   return <Wrapper backgroundColor={backgroundColor}><Button {...props} /></Wrapper>;

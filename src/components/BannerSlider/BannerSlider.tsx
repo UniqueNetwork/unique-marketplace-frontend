@@ -385,8 +385,6 @@ const SliderPaper = styled.div`
       text-decoration: none;
       backface-visibility: hidden; /* prevent jump effect when scaling */
 
-      filter: invert(1);
-      mix-blend-mode: difference;
       &:not(.disabled):hover {
         transform: translateY(-50%) scale(1.25);
         cursor: pointer;
