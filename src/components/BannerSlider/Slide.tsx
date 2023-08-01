@@ -200,13 +200,13 @@ const LeftSide = styled.div`
   gap: calc(var(--gap) * 2);
   padding: 40px 96px 40px 48px;
   justify-content: center;
-  width: calc(50vw - 302px);
+  width: calc(50vw - 304px);
 
   @media (min-width: 1920px) {
     width: calc(417px);
   }
   @media (max-width: 1440px) {
-    width: calc(50vw - 254px);
+    width: calc(50vw - 256px);
   }
   @media (max-width: 1378px) {
     padding: 16px;
