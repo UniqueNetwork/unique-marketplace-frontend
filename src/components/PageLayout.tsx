@@ -21,7 +21,7 @@ export const PageLayout: FC = () => {
         }
       };
     }
-    if (pathname.includes('/market')) return { heading: 'Market' };
+    if (pathname.includes('/market')) return { heading: undefined };
 
     if (pathname.includes('/collections')) {
       return { heading: 'My collections' };

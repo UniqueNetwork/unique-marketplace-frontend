@@ -3,9 +3,8 @@ import { Banner } from 'api/restApi/banners/types';
 import { get } from 'api/restApi/base';
 import { Text } from 'components/UI';
 import { Button, ButtonProps } from '../UI/Button/Button';
-import { ComponentType, FC, useEffect, useMemo, useRef } from 'react';
+import { FC, useEffect, useMemo, useRef } from 'react';
 import styled from 'styled-components';
-import { invertColor } from 'utils/helpers';
 
 type SlideProps = Banner & {
   className?: string
@@ -20,7 +19,6 @@ export const Slide = ({
   buttonUrl,
   buttonColor,
   secondaryButtonTitle,
-  secondaryButtonColor,
   secondaryButtonUrl,
   className
 }: SlideProps) => {
@@ -49,7 +47,7 @@ export const Slide = ({
   return <SlideWrapper className={className} style={{ backgroundColor: backgroundColor || undefined }}>
     <LeftSide>
       <HeadingStyled >{title}</HeadingStyled>
-      <Description><Text size='l'>{description}</Text></Description>
+      <Description><Text size='l' ><div dangerouslySetInnerHTML={{ __html: description }} /></Text></Description>
       <ButtonWrapper>
         {buttonTitle && <Link href={buttonUrl} >
           <ButtonStyled title={buttonTitle} role='primary' backgroundColor={buttonColor} />
@@ -62,7 +60,12 @@ export const Slide = ({
     <RightSide>
       {mediaType === 'html' && <IFrame ref={iFrameRef} src='about:blank' />}
       {mediaType === 'image' && <Picture src={mediaUrl} />}
-      {mediaType === 'video' && <Video src={mediaUrl} autoPlay loop />}
+      {mediaType === 'video' && <Video src={mediaUrl}
+        playsInline
+        autoPlay
+        muted
+        loop
+      />}
     </RightSide>
   </SlideWrapper>;
 };
@@ -229,7 +232,7 @@ const LeftSide = styled.div`
 
 const HeadingStyled = styled(Heading)`
   display: flex;
-  font-size: 64px !important;
+  font-size: 40px !important;
   font-weight: 700;
   line-height: 64px !important;
 
@@ -237,7 +240,7 @@ const HeadingStyled = styled(Heading)`
   opacity: 1;
 
   @media (max-width: 1395px) {
-    font-size: 48px !important;
+    font-size: 36px !important;
     line-height: 32px !important;
   }
   @media (max-width: 1278px) {
