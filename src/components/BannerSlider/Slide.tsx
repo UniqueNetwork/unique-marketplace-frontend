@@ -1,10 +1,11 @@
-import { Heading, Link } from '@unique-nft/ui-kit';
+import { Heading, Link as ExternalLink } from '@unique-nft/ui-kit';
 import { Banner } from 'api/restApi/banners/types';
 import { get } from 'api/restApi/base';
 import { Text } from 'components/UI';
 import { Button, ButtonProps } from '../UI/Button/Button';
 import { FC, useEffect, useMemo, useRef } from 'react';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 
 type SlideProps = Banner & {
   className?: string
@@ -49,12 +50,12 @@ export const Slide = ({
       <HeadingStyled >{title}</HeadingStyled>
       <Description><Text size='l' ><div dangerouslySetInnerHTML={{ __html: description }} /></Text></Description>
       <ButtonWrapper>
-        {buttonTitle && <Link href={buttonUrl} >
+        {!!buttonTitle && !!buttonUrl && <LinkComponent linkTo={buttonUrl} >
           <ButtonStyled title={buttonTitle} role='primary' backgroundColor={buttonColor} />
-        </Link>}
-        {secondaryButtonTitle && <Link href={secondaryButtonUrl} >
+        </LinkComponent>}
+        {!!secondaryButtonTitle && !!secondaryButtonUrl && <LinkComponent linkTo={secondaryButtonUrl} >
           <ButtonStyled title={secondaryButtonTitle} role='ghost' />
-        </Link>}
+        </LinkComponent>}
       </ButtonWrapper>
     </LeftSide>
     <RightSide>
@@ -313,4 +314,10 @@ const ButtonStyled: FC<ButtonStyledProps> = ({ backgroundColor, ...props }) => {
     }
   `;
   return <Wrapper backgroundColor={backgroundColor}><Button {...props} /></Wrapper>;
+};
+
+const LinkComponent: FC<{ linkTo: string }> = ({ children, linkTo }) => {
+  return linkTo.startsWith('https://')
+    ? <ExternalLink href={linkTo} target='_blank'>{children}</ExternalLink>
+    : <Link to={linkTo}>{children}</Link>;
 };
