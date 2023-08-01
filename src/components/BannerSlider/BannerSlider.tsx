@@ -23,7 +23,7 @@ const DEFAULT_CLASSNAMES = {
   animateOut: 'animateOut'
 };
 
-const DEFAULT_AUTOPLAY = 3000;
+const DEFAULT_AUTOPLAY = 10_000;
 const DEFAULT_DURATION = 500;
 
 interface SliderProps {
@@ -247,7 +247,6 @@ export const BannerSlider: FC<SliderProps> = ({
       }
     };
     const handleTouchMove = (e: TouchEvent) => {
-        e.preventDefault();
         if (!sliderRef.current) return;
         if (animating.current) {
           requestAnimationFrame(() => {
@@ -467,7 +466,7 @@ const SliderPaper = styled.div`
     margin: 0 -24px;
   }
   @media (max-width: 768px) {
-    margin: 0 -24px;
+    margin: 0 -16px;
     height: calc(75vw + 232px);
   }
 `;
