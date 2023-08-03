@@ -194,6 +194,7 @@ export const BannerSlider: FC<SliderProps> = ({
 
     const handleTouchEnd = () => {
       if (!sliderRef.current) return;
+      setIsMouseOver(false);
       animating.current = false;
       isSwiping = false;
       currentElement?.style.removeProperty(swipeProperty);
@@ -220,6 +221,7 @@ export const BannerSlider: FC<SliderProps> = ({
 
     const handleTouchStart = (e: TouchEvent) => {
       if (!sliderRef.current) return;
+      setIsMouseOver(true);
       animating.current = true;
       const touch = e.touches[0];
       isSwiping = true;
