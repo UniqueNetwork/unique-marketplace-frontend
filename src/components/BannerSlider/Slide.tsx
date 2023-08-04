@@ -48,7 +48,11 @@ export const Slide = ({
   return <SlideWrapper className={className} style={{ backgroundColor: backgroundColor || undefined }}>
     <LeftSide>
       <HeadingStyled >{title}</HeadingStyled>
-      <Description><Text size='l' ><div dangerouslySetInnerHTML={{ __html: description }} /></Text></Description>
+      <Description >
+        <Text size='l' >
+          <div dangerouslySetInnerHTML={{ __html: description }} />
+        </Text>
+      </Description>
       <ButtonWrapper>
         {!!buttonTitle && !!buttonUrl && <LinkComponent linkTo={buttonUrl} >
           <ButtonStyled title={buttonTitle} role='primary' backgroundColor={buttonColor} />
@@ -79,6 +83,8 @@ const SlideWrapper = styled.div`
 
   @media (max-width: 1024px) {
     padding: 16px 44px 16px 44px;
+    width: 100%;
+    box-sizing: border-box;
   }
   @media (max-width: 768px) {
     padding: 0px;
@@ -201,16 +207,17 @@ const RightSide = styled.div`
 const LeftSide = styled.div`
   display: flex;
   flex-direction: column;
-  gap: calc(var(--gap) * 2);
-  padding: 40px 96px 40px 48px;
+  gap: calc(var(--gap));
+  padding: 40px 40px 40px 40px;
   justify-content: center;
-  width: calc(50vw - 304px);
+  align-items: space-between;
+  width: calc(50vw - 240px);
 
   @media (min-width: 1920px) {
-    width: calc(417px);
+    width: calc(480px);
   }
   @media (max-width: 1440px) {
-    width: calc(50vw - 256px);
+    width: calc(50vw - 192px);
   }
   @media (max-width: 1378px) {
     padding: 16px;
@@ -221,13 +228,22 @@ const LeftSide = styled.div`
     gap: calc(var(--gap) * 1);
   }
   @media (max-width: 1024px) {
-    width: calc(50vw - 64px);
+    width: calc(50vw - 70px);
     height: calc(37.5vw - 48px);
+    gap: calc(var(--gap) / 2);
   }
   @media (max-width: 768px) {
-    padding: 16px;
+    padding: 0 16px;
     width: calc(100vw - 40px);
-    height: 200px;
+    height: 250px;
+  }
+  @media (max-width: 620px) {
+    padding: 0 16px;
+    width: calc(100vw - 40px);
+    height: 250px;
+  }
+  @media (max-width: 520px) {
+    gap: calc(var(--gap) / 2);
   }
 `;
 
@@ -235,24 +251,31 @@ const HeadingStyled = styled(Heading)`
   display: flex;
   font-size: 40px !important;
   font-weight: 700;
-  line-height: 64px !important;
+  line-height: 42px !important;
 
   margin-bottom: 0 !important;
   opacity: 1;
 
   @media (max-width: 1395px) {
     font-size: 36px !important;
-    line-height: 32px !important;
+    line-height: 36px !important;
   }
   @media (max-width: 1278px) {
     font-size: 30px !important;
-    line-height: 30px !important;
+    line-height: 32px !important;
+  }
+  @media (max-width: 1024px) {
+    font-size: 24px !important;
+    line-height: 26px !important;
+  }
+  @media (max-width: 1024px) {
+    font-size: 20px !important;
+    line-height: 22px !important;
   }
 `;
 
 const Description = styled.div`
   display: -webkit-box;
-  margin-bottom: var(--gap);
   width: 100%;
   height: auto;
   overflow: hidden; 
@@ -260,22 +283,19 @@ const Description = styled.div`
   opacity: 1;
 
   &>span {
-    text-overflow: ellipsis;   
-    font-size: 18px !important;
+    &>div {
+      font-size: 18px !important;
+    }
   }
   @media (max-width: 1280px) {
-    &>span {
-      font-size: 14px;
+    &>span>div {
       font-size: 14px !important;
     }
   }
   @media (max-width: 1024px) {
-    max-height: 108px;
-    -webkit-box-orient: vertical;
-  }
-  @media (max-width: 768px) {
-    max-height: 84px;
-    -webkit-box-orient: vertical;
+    &>span>div {
+      font-size: 14px !important;
+    }
   }
 `;
 const Picture = styled.img`

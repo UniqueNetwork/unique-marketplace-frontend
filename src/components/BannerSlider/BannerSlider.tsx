@@ -396,7 +396,7 @@ const SliderPaper = styled.div`
       left: 20px;
 
       @media (max-width: 1024px) {
-        left: 4px;
+        left: 0px;
       }
       @media (max-width: 768px) {
         display: none;
@@ -407,7 +407,7 @@ const SliderPaper = styled.div`
       right: 20px;
 
       @media (max-width: 1024px) {
-        right: 4px;
+        right: 0px;
       }
       @media (max-width: 768px) {
         display: none;
@@ -464,12 +464,14 @@ const SliderPaper = styled.div`
   @media (max-width: 1024px) {
     background: ${AdditionalLight};
     box-shadow: none;
-
     margin: 0 -24px;
+    width: 100vw;
   }
   @media (max-width: 768px) {
-    margin: 0 -16px;
     height: calc(75vw + 232px);
+  }
+  @media (max-width: 620px) {
+    margin: 0 -16px;
   }
 `;
 

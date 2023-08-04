@@ -17,7 +17,7 @@ export const useInfinityScroll = (onBottomReached: (...args: any[]) => void, onl
 
   useEffect(() => {
     const callback = debouncedScrollHandler();
-    if ((onlyOnMobileScreen && deviceSize < DeviceSize.lg) || !onlyOnMobileScreen) {
+    if ((onlyOnMobileScreen && deviceSize < DeviceSize.xl) || !onlyOnMobileScreen) {
       document.addEventListener('scroll', callback);
     }
     return () => {

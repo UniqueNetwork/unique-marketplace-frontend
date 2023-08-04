@@ -133,7 +133,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
           <MobileMenuLink to='/faq' active={activeItem === 'FAQ'} onClick={mobileMenuToggler}>
             FAQ
           </MobileMenuLink>
-          {deviceSize < DeviceSize.lg && !!accounts.length &&
+          {deviceSize < DeviceSize.xl && !!accounts.length &&
             <MobileMenuLink to={`/${currentChainId || ''}/accounts`} active={activeItem === 'Manage accounts'} onClick={mobileMenuToggler}>
               Manage accounts
             </MobileMenuLink>

@@ -62,7 +62,7 @@ export const NFTPage = () => {
   });
 
   useEffect(() => {
-    setPageSize(deviceSize === DeviceSize.lg ? 21 : 20);
+    setPageSize(deviceSize === DeviceSize.xl ? 21 : 20);
   }, [deviceSize]);
 
   return (<PagePaper>
