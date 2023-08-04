@@ -18,11 +18,14 @@ export const useGetBanners = () => {
     if (!currentChainId) return;
     void (async () => {
       setIsFetching(true);
-      const { data, status } = await getBanners(config.blockchains[currentChainId].apiEndpoint);
-      if (status === 200) {
-        setBanners(data?.banners);
+      try {
+        const { data, status } = await getBanners(config.blockchains[currentChainId].apiEndpoint);
+        if (status === 200) {
+          setBanners(data?.banners);
+        }
+      } finally {
+        setIsFetching(false);
       }
-      setIsFetching(false);
     })();
   }, [currentChainId]);
 
