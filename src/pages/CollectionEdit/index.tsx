@@ -31,7 +31,7 @@ export const CollectionEditPage = () => {
   const [banner, setBanner] = useState<{src: string, file?: Blob}>();
   const [cover, setCover] = useState<{src: string, file?: Blob}>();
   const [metadata, setMetadata] = useState<MarketableCollectionMetadata>({});
-  const [royalty, setRoyalty] = useState<RoyaltiesFormData>();
+  const [royalty, setRoyalty] = useState<RoyaltiesFormData>({ royalties: [] });
   const [modalType, setModalType] = useState<'metadata' | 'royalty'>();
   const navigate = useNavigate();
 
@@ -52,14 +52,14 @@ export const CollectionEditPage = () => {
 
       const collectionOnChain = await api?.collection?.getCollection(Number(collectionId));
       if (collectionOnChain?.schema?.royalties?.length) {
-        const decimals = collectionOnChain.schema.royalties[0]?.decimals || 4;
-        const value = collectionOnChain.schema.royalties[0]?.value
-          ? (Number(collectionOnChain.schema.royalties[0]?.value) / 100).toFixed(2)
-          : '0';
-        const address = collectionOnChain.schema.royalties[0]?.address;
         setRoyalty({
-          value,
-          address
+          royalties: collectionOnChain?.schema?.royalties.map((royalty) => {
+            const value = royalty.value
+              ? (Number(royalty.value) / 100).toFixed(2)
+              : '0';
+            const address = royalty.address;
+            return ({ value, address });
+          })
         });
       }
 
@@ -171,7 +171,7 @@ export const CollectionEditPage = () => {
       </Modal>
       <Modal isVisible={modalType === 'royalty'}>
         <SetRoyaltiesStagesModal
-          royalty={royalty}
+          formData={royalty}
           onFinish={onUpdateFinish}
           collectionId={collection.collectionId}
         />

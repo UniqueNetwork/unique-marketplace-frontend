@@ -11,6 +11,10 @@ export type CollectionFormData = {
 };
 
 export type RoyaltiesFormData = {
+  royalties: Royalty[]
+};
+
+export type Royalty = {
   address: string;
   value: string;
 };
