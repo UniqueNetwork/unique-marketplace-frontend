@@ -164,7 +164,7 @@ export const CommonTokenDetail: FC<IProps> = ({
             {!(isRft && !isRftFracton) && <OwnerCard
               address={owner || ''}
               // to={`${config.blockchains[currentChainId || '']?.scanUrl}account/${owner || '404'}`}
-              isShort={deviceSize < DeviceSize.lg}
+              isShort={deviceSize < DeviceSize.xl}
               canCopy={false}
               prefixOwned='Owned by'
               prefixNested='Nested in bundle'
@@ -177,7 +177,7 @@ export const CommonTokenDetail: FC<IProps> = ({
               <Account href={`${config.blockchains[currentChainId || '']?.scanUrl}account/${owner || '404'}`}>
                 <Avatar size={24} src={DefaultAvatar} address={owner}/>
                 <Text color='primary-600' size='m' data-testid={`${testid}-owner-address`}>
-                  {deviceSize >= DeviceSize.lg ? owner || '' : shortcutText(owner || '') }
+                  {deviceSize >= DeviceSize.xl ? owner || '' : shortcutText(owner || '') }
                 </Text>
               </Account>
             </>} */}

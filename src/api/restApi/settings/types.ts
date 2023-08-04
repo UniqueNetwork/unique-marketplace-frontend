@@ -1,6 +1,7 @@
 import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 
 export type AllowedCollection = {
+  isCurated: boolean
   allowedTokens: string
   description: CollectionInfoWithSchemaResponse
 }

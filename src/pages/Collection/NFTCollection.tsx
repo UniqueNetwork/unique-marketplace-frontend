@@ -11,7 +11,6 @@ import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 
-import { MobileFilters } from './Filters/MobileFilter';
 import { Filters } from './Filters/Filters';
 import { defaultSortingValue, pageSize, sortingOptions, testid } from './constants';
 import { CollectionDetail } from './CollectionDetail/CollectionDetail';
@@ -25,6 +24,7 @@ import { TokensFilter } from './Filters/types';
 import { RoyaltiesFormData } from 'pages/CollectionEdit/types';
 import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 import { CollectionPageProps } from './types';
+import { MobileFilters } from 'components/Filters/MobileFilter';
 
 export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionPageProps) => {
   const { selectedAccount, isLoading: isAccountsLoading } = useAccounts();
@@ -52,7 +52,8 @@ export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
     onFilterChange,
     onSearch,
     onSortingChange,
-    getFilterByState
+    getFilterByState,
+    onMobileFilterApply
    } = useCollectionTokensFilter({ isFetching, fetch });
 
   const [royalty, setRoyalty] = useState<RoyaltiesFormData>();
@@ -129,7 +130,7 @@ export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
     <CollectionDetail collection={collection} royalty={royalty} />
     <CollectionPagePaper>
       <MarketMainPageStyled>
-        <LeftColumn>
+        {deviceSize > DeviceSize.md && <LeftColumn>
           <Filters
             value={filterState}
             attributes={attributes}
@@ -138,7 +139,7 @@ export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
             testid={`${testid}-filters`}
             disabled={scanning}
           />
-        </LeftColumn>
+        </LeftColumn>}
         <MainContent>
           <SearchAndSortingWrapper>
             <SearchField
@@ -185,14 +186,13 @@ export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
         defaultSortingValue={defaultSortingValue}
         sortingValue={sortingValue}
         sortingOptions={sortingOptions}
-        onFilterChange={onFilterChange}
-        onSortingChange={onSortingChange}
+        onFilterApply={onMobileFilterApply}
         testid={`${testid}-mobile-filters`}
-        filterComponent={<Filters
-          value={filterState}
+        filterComponent={({ filterState: _filterState, onFilterChange: _onFilterChange }) => <Filters
+          value={_filterState}
           attributes={attributes}
           attributeCounts={attributeCounts}
-          onFilterChange={onFilterChange}
+          onFilterChange={_onFilterChange}
           testid={`${testid}-filters`}
         />}
       />}

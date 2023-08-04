@@ -1,5 +1,6 @@
 import { BN, BN_MAX_INTEGER } from '@polkadot/util';
 import { DecodedAttributeDto } from '@unique-nft/sdk';
+import { SelectOptionProps } from '@unique-nft/ui-kit';
 import { MyCollection } from 'api/restApi/collections/types';
 
 import { Offer } from 'api/restApi/offers/types';
@@ -8,7 +9,7 @@ import { useApi } from 'hooks/useApi';
 import { useCollections } from 'hooks/useCollections';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { fromStringToBnString } from 'utils/bigNum';
-import { parseFilterState, setUrlParameter, stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
+import { parseFilterState, setUrlParameter } from 'utils/helpers';
 import { defaultSortingValue, sortingOptions } from '../constants';
 import { MyTokensFilterState } from '../Filters/types';
 import { countTokenAttributes } from '../Filters/utils/attributes';
@@ -103,6 +104,7 @@ export const useMyTokensFilter = ({ tokens, offers, isFetchingTokens }: UseMyTok
       const { tokenPrefix, name: collectionName } = token.collectionDescription || {};
 
       filteredBySearchValue = token.tokenId === Number(searchString) ||
+        token.collectionId === Number(searchString) ||
         tokenPrefix?.includes(searchString.toLowerCase()) || // offer
         collectionName?.includes(searchString.toLowerCase()) || // offer
         featuredCollections.some(({ id, name, tokenPrefix }) => { // token
@@ -207,6 +209,13 @@ export const useMyTokensFilter = ({ tokens, offers, isFetchingTokens }: UseMyTok
     setUrlParameter('sortingValue', val.id);
   }, []);
 
+  const onMobileFilterApply = useCallback((filterState: MyTokensFilterState | null, sorting: SelectOptionProps) => {
+    setFilterState(filterState);
+    setUrlParameter('filterState', filterState ? JSON.stringify(filterState) : '');
+    setSortingValue(sorting.id as string);
+    setUrlParameter('sortingValue', sorting.id as string);
+  }, []);
+
   return {
     filterState,
     sortingValue,
@@ -218,6 +227,7 @@ export const useMyTokensFilter = ({ tokens, offers, isFetchingTokens }: UseMyTok
     searchString,
     onSearch,
     onSortingChange,
-    setFilterState
+    setFilterState,
+    onMobileFilterApply
   };
 };

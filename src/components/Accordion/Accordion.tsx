@@ -1,6 +1,8 @@
+import { IconButton } from 'components/IconButton/IconButton';
 import { Button, Text } from 'components/UI';
 import React, { FC, ReactNode, useCallback, useState } from 'react';
 import styled from 'styled-components/macro';
+import { Coral500 } from 'styles/colors';
 
 export interface AccordionProps {
   title: ReactNode;
@@ -58,9 +60,10 @@ export const Accordion: FC<AccordionProps> = ({
           <AccordionChevronIcon />
         </AccordionTitle>
         {isClearShow && (
-          <Button size='small'
-            title='Clear'
-            role='danger'
+          <StyledIconButton
+            name='close'
+            size={12}
+            color={Coral500}
             onClick={onClearClick}
           />
         )}
@@ -76,6 +79,7 @@ const AccordionHeaderWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
+  min-height: 30px;
 `;
 
 const AccordionTitle = styled.div<{ isOpen?: boolean }>`
@@ -117,5 +121,15 @@ const AccordionBodyWrapper = styled.div<{ isOpen?: boolean }>`
       max-height: 1000px;
       visibility: visible;
     }
+  }
+`;
+
+const StyledIconButton = styled(IconButton)`
+  border: 1px solid ${Coral500};
+  border-radius: var(--prop-border-radius);
+  padding: 8px 8px;
+  height: 30px;
+  &:hover svg {
+    fill: ${Coral500};
   }
 `;

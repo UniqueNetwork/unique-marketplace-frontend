@@ -1,6 +1,6 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
-import { Text } from '@unique-nft/ui-kit';
+import { Skeleton, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { Select } from 'components/UI';
 import { Filters } from '../../components';
@@ -15,11 +15,15 @@ import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
 import { useCollections } from 'hooks/useCollections';
 import { defaultSortingValue, pageSize, sortingOptions, testid } from './constants';
 import { useMarketFilter } from './hooks/useMarketFilter';
+import { BannerSlider } from 'components/BannerSlider/BannerSlider';
+import { Slide } from 'components/BannerSlider/Slide';
+import { useGetBanners } from 'api/restApi/banners/banners';
 
 export const MarketPage = () => {
   const { offers, offersCount, isFetching, fetchMore, fetch, attributes, attributeCounts } = useOffers();
   const { isFetching: isFetchingCollections } = useCollections();
   const { isLoading: isAccountsLoading } = useAccounts();
+  const { banners, isFetching: isFetchingBanners } = useGetBanners();
   const deviceSize = useDeviceSize();
 
   const {
@@ -30,7 +34,8 @@ export const MarketPage = () => {
     onSearch,
     onSortingChange,
     onFilterChange,
-    getFilterByState
+    getFilterByState,
+    onMobileFilterApply
   } = useMarketFilter({ isFetching, fetch });
 
   const hasMore = offers && offers.length < offersCount;
@@ -49,70 +54,79 @@ export const MarketPage = () => {
 
   const isLoading = isAccountsLoading || isFetching || isFetchingCollections;
 
-  return (<PagePaper>
-    <MarketMainPageStyled>
-      <LeftColumn>
-        {deviceSize !== DeviceSize.md && <Filters
+  return (<>
+    {isFetchingBanners && <Skeleton height={600} />}
+    {!isFetchingBanners && banners.length > 0 && <BannerSlider >
+      {banners.map((banner, index) => (
+        <Slide key={index}
+          {...banner}
+        />
+      ))}
+    </BannerSlider>}
+    <PagePaper>
+      <MarketMainPageStyled>
+        <LeftColumn>
+          {deviceSize !== DeviceSize.md && <Filters
+            value={filterState}
+            attributes={attributes}
+            attributeCounts={attributeCounts}
+            onFilterChange={onFilterChange}
+            testid={`${testid}-filters`}
+          />}
+        </LeftColumn>
+        <MainContent>
+          <SearchAndSortingWrapper>
+            <SearchField
+              searchValue={searchValue}
+              placeholder='Collection / token / attribute'
+              onSearch={onSearch}
+              testid={`${testid}-search-field`}
+            />
+            <SortSelectWrapper>
+              <Select
+                onChange={onSortingChange}
+                options={sortingOptions}
+                value={sortingValue}
+                testid={`${testid}-sorting-select`}
+              />
+            </SortSelectWrapper>
+          </SearchAndSortingWrapper>
+          <div>
+            <Text
+              testid={`${testid}-items-count`}
+              size='m'
+            >{isLoading ? 'Loading items' : `${offersCount} items`}</Text>
+          </div>
+          <InfiniteScroll
+            hasMore={hasMore}
+            initialLoad={false}
+            loadMore={onClickSeeMore}
+            pageStart={1}
+            threshold={200}
+            useWindow={true}
+          >
+            {!isLoading && !offers?.length && <NoItems isSearchResult={!!searchValue || !!filterCount} />}
+            <OffersList offers={offers || []} isLoading={isLoading} testid={`${testid}-offers`} />
+          </InfiniteScroll>
+        </MainContent>
+      </MarketMainPageStyled>
+      {deviceSize <= DeviceSize.md && <MobileFilters
+        filterCount={filterCount}
+        defaultSortingValue={defaultSortingValue}
+        sortingValue={sortingValue}
+        sortingOptions={sortingOptions}
+        onFilterApply={onMobileFilterApply}
+        testid={`${testid}-mobile-filters`}
+        filterComponent={({ filterState, onFilterChange }) => <Filters
           value={filterState}
           attributes={attributes}
           attributeCounts={attributeCounts}
           onFilterChange={onFilterChange}
           testid={`${testid}-filters`}
         />}
-      </LeftColumn>
-      <MainContent>
-        <SearchAndSortingWrapper>
-          <SearchField
-            searchValue={searchValue}
-            placeholder='Collection / token / attribute'
-            onSearch={onSearch}
-            testid={`${testid}-search-field`}
-          />
-          <SortSelectWrapper>
-            <Select
-              onChange={onSortingChange}
-              options={sortingOptions}
-              value={sortingValue}
-              testid={`${testid}-sorting-select`}
-            />
-          </SortSelectWrapper>
-        </SearchAndSortingWrapper>
-        <div>
-          <Text
-            testid={`${testid}-items-count`}
-            size='m'
-          >{isLoading ? 'Loading items' : `${offersCount} items`}</Text>
-        </div>
-        <InfiniteScroll
-          hasMore={hasMore}
-          initialLoad={false}
-          loadMore={onClickSeeMore}
-          pageStart={1}
-          threshold={200}
-          useWindow={true}
-        >
-          {!isLoading && !offers?.length && <NoItems isSearchResult={!!searchValue || !!filterCount} />}
-          <OffersList offers={offers || []} isLoading={isLoading} testid={`${testid}-offers`} />
-        </InfiniteScroll>
-      </MainContent>
-    </MarketMainPageStyled>
-    {deviceSize <= DeviceSize.md && <MobileFilters
-      filterCount={filterCount}
-      defaultSortingValue={defaultSortingValue}
-      sortingValue={sortingValue}
-      sortingOptions={sortingOptions}
-      onFilterChange={onFilterChange}
-      onSortingChange={onSortingChange}
-      testid={`${testid}-mobile-filters`}
-      filterComponent={<Filters
-        value={filterState}
-        attributes={attributes}
-        attributeCounts={attributeCounts}
-        onFilterChange={onFilterChange}
-        testid={`${testid}-filters`}
       />}
-    />}
-  </PagePaper>);
+    </PagePaper>
+  </>);
 };
 
 const MarketMainPageStyled = styled.div`

@@ -1,10 +1,10 @@
 import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { AdditionalDark, AdditionalLight, BlueGrey100, BlueGrey200 } from '../styles/colors';
 import Skeleton from './Skeleton/Skeleton';
-import { DecodedInfixOrUrlOrCidAndHash, VideoAttribute } from 'api/chainApi/types';
+import { DecodedInfixOrUrlOrCidAndHash } from 'api/chainApi/types';
 import styled from 'styled-components';
 import { DecodedVideoUri } from 'utils/helpers';
-import { Tooltip } from '@unique-nft/ui-kit';
+import { Tooltip } from './UI';
 
 interface VideoProps {
   autoplay?: boolean
@@ -93,7 +93,7 @@ export const Picture: FC<PictureProps> = ({
   return (<div className={'picture'}>
     {isLoading && <Skeleton width={'100%'} height={'100%'} />}
     {badges && <BadgesWrapper>
-      {badges.map((badge) => <Badge className={'badge'} tooltip={badgesTooltips[badge]} >{badge}</Badge>)}
+      {badges.map((badge, key) => <Badge key={key} className={'badge'} tooltip={badgesTooltips[badge]} >{badge}</Badge>)}
     </BadgesWrapper>}
     {!isLoading && video?.fullUrl &&
       <VideoStyled

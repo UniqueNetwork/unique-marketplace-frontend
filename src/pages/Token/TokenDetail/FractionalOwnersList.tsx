@@ -32,7 +32,7 @@ const getColumns = ({ currentChainId, collectionId, tokenId, totalPieces, device
         address={address}
         canCopy={false}
         to={`/${currentChainId}/token/${address}/${collectionId}/${tokenId}`}
-        isShort={deviceSize <= DeviceSize.lg}
+        isShort={deviceSize <= DeviceSize.xl}
         prefixNested={'Nested in'}
       />;
     },

@@ -40,7 +40,7 @@ const getTradesColumns = ({ deviceSize, onShowTradesDetailsModal, currentChainId
           to={`/${currentChainId}/collection/${collectionId || ''}`}
           className={'unique-link primary'}
           data-testid={`${testid}-${offerId}-collection`}
-        >{`${deviceSize >= DeviceSize.lg ? collectionName : `${collectionName.slice(0, 6)}...`} [ID\xa0${collectionId || ''}]`}</Link>
+        >{`${deviceSize >= DeviceSize.xl ? collectionName : `${collectionName.slice(0, 6)}...`} [ID\xa0${collectionId || ''}]`}</Link>
       </LinkWrapper>;
     },
     field: 'tokenDescription'

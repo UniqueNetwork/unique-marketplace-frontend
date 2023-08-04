@@ -57,6 +57,16 @@ const PricesFilter: FC<PricesFilterProps> = ({ value, onChange, testid, disabled
     onChange(undefined);
   }, [onChange]);
 
+  const onClearMinPrice = useCallback(() => {
+    if (maxPriceValue !== undefined) return;
+    onChange(undefined);
+  }, [onChange, maxPriceValue]);
+
+  const onClearMaxPrice = useCallback(() => {
+    if (minPriceValue !== undefined) return;
+    onChange(undefined);
+  }, [onChange, minPriceValue]);
+
   return (
     <Accordion title={'Price'}
       isOpen={true}
@@ -71,6 +81,7 @@ const PricesFilter: FC<PricesFilterProps> = ({ value, onChange, testid, disabled
             placeholder={'Min'}
             testid={`${testid}-minPrice`}
             disabled={disabled}
+            onClear={onClearMinPrice}
           />
           <Text>to</Text>
           <NumberInput
@@ -79,6 +90,7 @@ const PricesFilter: FC<PricesFilterProps> = ({ value, onChange, testid, disabled
             placeholder={'Max'}
             testid={`${testid}-maxPrice`}
             disabled={disabled}
+            onClear={onClearMaxPrice}
           />
         </PricesRangeWrapper>
         <Button

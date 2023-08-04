@@ -65,6 +65,7 @@ export const UnnestModal: FC<TBundleTrunsferModalBodyProps> = ({ token, setIsClo
   }
   if (status === 'unnest-stage') {
     return (<UnnestStagesModal
+      tokenPrefix={collection?.tokenPrefix || ''}
       onFinish={onFinish}
       parentAddress={token.owner || parentAddress}
       mode={collection?.mode || 'NFT'}
@@ -169,9 +170,10 @@ type UnnestStagesModalProps = Omit<TBundleTrunsferModalBodyProps, 'token'> & Tok
   amount: number
   parentAddress: string
   mode: CollectionMode
+  tokenPrefix: string
 };
 
-const UnnestStagesModal: FC<UnnestStagesModalProps> = ({ tokenId, collectionId, parentAddress, mode, amount, onFinish, testid }) => {
+const UnnestStagesModal: FC<UnnestStagesModalProps> = ({ tokenId, collectionId, parentAddress, mode, amount, tokenPrefix, onFinish, testid }) => {
   const { stages, status, initiate } = useUnnestStages({ tokenId, collectionId }, parentAddress, mode);
   const { info } = useNotifications();
   const { selectedAccount } = useAccounts();
@@ -184,7 +186,7 @@ const UnnestStagesModal: FC<UnnestStagesModalProps> = ({ tokenId, collectionId, 
   useEffect(() => {
     if (status === StageStatus.success) {
       info(
-        <div data-testid={`${testid}-success-notification`}><Link href={`/token/${collectionId}/${tokenId}`} title={`${''} #${tokenId}`}/> unnested</div>,
+        <div data-testid={`${testid}-success-notification`}><Link href={`/token/${collectionId}/${tokenId}`} title={`${tokenPrefix} #${tokenId}`}/> unnested</div>,
         { name: 'success', size: 32, color: 'var(--color-additional-light)' }
       );
     }
