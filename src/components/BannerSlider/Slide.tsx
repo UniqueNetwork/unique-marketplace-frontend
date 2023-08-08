@@ -221,7 +221,7 @@ const LeftSide = styled.div`
   }
   @media (max-width: 1378px) {
     padding: 16px;
-    width: calc(50vw - 144px);
+    width: calc(50vw - 168px);
   }
   @media (max-width: 1278px) {
     padding: 0 16px;
