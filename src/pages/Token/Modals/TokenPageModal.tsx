@@ -11,7 +11,7 @@ import { WithdrawBidStagesModal } from './WithdrawBidModal';
 import { CancelAuctionStagesModal } from './CancelAuctionModal';
 import { Modal } from 'components/UI';
 import { TokenByIdResponse, CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
-import { ReportModal } from '../TokenDetail/ReportModal';
+import { ChangePriceModal } from './ChangePriceModal';
 
 export type TTokenPageModalProps = {
   offer?: Offer
@@ -59,6 +59,8 @@ const TokenPageModal = ({ onClose, onFinish, marketType, offer, token, collectio
         return PurchaseModal;
       case MarketType.transfer:
         return TransferModal;
+      case MarketType.changePrice:
+        return ChangePriceModal;
       case MarketType.default:
       default:
         return null;

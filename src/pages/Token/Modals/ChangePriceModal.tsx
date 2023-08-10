@@ -1,0 +1,228 @@
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+
+import { Heading, Link } from '@unique-nft/ui-kit';
+import { useNotifications, Button, Text } from 'components/UI';
+import { NumberInput } from 'components/NumberInput/NumberInput';
+import styled from 'styled-components';
+
+import { useApi } from 'hooks/useApi';
+
+import DefaultMarketStages from './StagesModal';
+import { TTokenPageModalBodyProps } from './TokenPageModal';
+import { TFixPriceProps } from './types';
+import { useChangePriceStages } from '../../../hooks/marketplaceStages';
+import { useAccounts } from '../../../hooks/useAccounts';
+import { StageStatus } from '../../../types/StagesTypes';
+import MarketController from 'api/chainApi/MarketController';
+import { useGetFee } from 'hooks/useGetFee';
+import { debounce } from 'utils/helpers';
+import { FeeMessage } from 'components';
+import { BN } from '@polkadot/util';
+import { fromStringToBnString } from 'utils/bigNum';
+import { WarningBlock } from 'components/WarningBlock/WarningBlock';
+
+export const ChangePriceModal: FC<TTokenPageModalBodyProps> = ({ token, collection, onFinish, setIsClosable, testid }) => {
+  const { collectionId, tokenId } = token || {};
+  const [status, setStatus] = useState<'ask' | 'stage'>('ask'); // TODO: naming
+  const [fixPrice, setFixPrice] = useState<TFixPriceProps>();
+
+  const onChangePrice = useCallback((fixPrice: TFixPriceProps) => {
+    setFixPrice(fixPrice);
+    setStatus('stage');
+    setIsClosable(false);
+  }, [setStatus, setFixPrice, setIsClosable]);
+
+  if (!token) return null;
+
+  if (status === 'ask') {
+    return (<AskPriceModal
+      collectionId={token.collectionId}
+      tokenId={token.tokenId}
+      onChangePrice={onChangePrice}
+      testid={`${testid}-sell-ask`}
+    />);
+  }
+  return (<ChangePriceStagesModal
+    collectionId={collectionId || 0}
+    tokenId={tokenId || 0}
+    tokenPrefix={collection?.tokenPrefix || ''}
+    sellFix={fixPrice as TFixPriceProps}
+    onFinish={onFinish}
+    testid={`${testid}-change-price`}
+  />);
+};
+
+type TChangePriceModalProps = {
+  collectionId: number,
+  tokenId: number,
+  onChangePrice: (price: TFixPriceProps) => void,
+  testid: string
+}
+
+export const AskPriceModal: FC<TChangePriceModalProps> = ({ collectionId, tokenId, onChangePrice, testid }) => {
+  const { chainProperties, api } = useApi();
+  const { selectedAccount } = useAccounts();
+  const [priceInputValue, setPriceInputValue] = useState<string>();
+
+  const [isSponsored, setIsSponsored] = useState(false);
+
+  useEffect(() => {
+    void (async () => {
+      const collection = await api?.collection?.getCollection(collectionId);
+      setIsSponsored(!!collection?.sponsorship?.isConfirmed);
+    })();
+  }, [collectionId]);
+
+  const onPriceInputChange = useCallback((value: string) => {
+      setPriceInputValue(value);
+    },
+    [setPriceInputValue]
+  );
+
+  const onConfirmFixPriceClick = useCallback(() => {
+    if (!selectedAccount || !priceInputValue || !Number(priceInputValue)) return;
+
+    onChangePrice({ price: priceInputValue, accountAddress: selectedAccount.address } as TFixPriceProps); // TODO: proper typing, proper calculated object
+  }, [priceInputValue, selectedAccount, onChangePrice]);
+
+  const tokenSymbol = useMemo(() => chainProperties?.token || '', [chainProperties]);
+
+  const { fee, fetchingFee, getFee } = useGetFee<Parameters<MarketController['getSellFixFee']>>(api?.market?.getSellFixFee.bind(api?.market));
+
+  const isEnoughBalance = useMemo(() => {
+    if (isSponsored) return true;
+    if (!selectedAccount?.balance?.raw || selectedAccount.balance?.raw.isZero() || !fee) return false;
+
+    return selectedAccount.balance?.raw.gte(new BN(fromStringToBnString(fee)));
+  }, [fee, selectedAccount?.balance?.raw, isSponsored]);
+
+  useEffect(() => {
+    if (!api || !selectedAccount || !priceInputValue) return;
+    debounce(async () => {
+      await getFee(
+        collectionId,
+        tokenId,
+        Number(priceInputValue),
+        1,
+        { account: selectedAccount }
+      );
+    }, 300)();
+  }, [collectionId, tokenId, priceInputValue, api?.market, selectedAccount?.address]);
+
+  return (
+    <SellModalStyled data-testid={testid}>
+      <Content>
+        <Heading size='2' testid={`${testid}-heading`}>Changing price</Heading>
+      </Content>
+      <InputWrapper
+        label={`Price (${tokenSymbol})*`}
+        onChange={onPriceInputChange}
+        value={priceInputValue?.toString()}
+        testid={`${testid}-price-input`}
+      />
+      {!isSponsored && <FeeMessage
+        isFeeLoading={fetchingFee}
+        fee={fee || '0'}
+        testid={`${testid}-fee-message`}
+      />}
+      {isSponsored && <WarningBlock>
+        Collection ID {collectionId} sponsored
+      </WarningBlock>}
+      {!isEnoughBalance && <Text color={'coral-500'} testid={`${testid}-low-balance-warning`}>Your balance is too low to sell</Text>}
+      <ButtonWrapper>
+        <Button
+          disabled={!isSponsored && (fetchingFee || !isEnoughBalance || !priceInputValue || !Number(priceInputValue))}
+          onClick={onConfirmFixPriceClick}
+          role='primary'
+          title='Confirm'
+          testid={`${testid}-confirm-button`}
+        />
+      </ButtonWrapper>
+    </SellModalStyled>
+  );
+};
+
+type TChangePriceStagesModal = {
+  onFinish: () => void
+  collectionId: number
+  tokenId: number
+  tokenPrefix: string
+  sellFix: TFixPriceProps
+  testid: string
+}
+
+export const ChangePriceStagesModal: FC<TChangePriceStagesModal> = ({ collectionId, tokenId, tokenPrefix, sellFix, onFinish, testid }) => {
+  const { stages, status, initiate } = useChangePriceStages(collectionId, tokenId);
+  const { info } = useNotifications();
+
+  useEffect(() => { initiate(sellFix); }, [sellFix]);
+
+  useEffect(() => {
+    if (status === StageStatus.success) {
+      info(
+        <div data-testid={`${testid}-success-notification`}> The price of <Link href={`/token/${collectionId}/${tokenId}`} title={`${tokenPrefix} #${tokenId}`}/> changed</div>,
+        { name: 'success', size: 32, color: 'var(--color-additional-light)' }
+      );
+    }
+  }, [status]);
+
+  return (
+    <div>
+      <DefaultMarketStages
+        stages={stages}
+        status={status}
+        onFinish={onFinish}
+        testid={`${testid}`}
+      />
+    </div>
+  );
+};
+
+const InputWrapper = styled(NumberInput)`
+  width: 100%;
+`;
+
+const ButtonWrapper = styled.div`
+  display: flex;
+  justify-content: flex-end;
+
+  @media (max-width: 568px) {
+    button {
+      width: 100%;
+    }
+  }
+`;
+
+const Content = styled.div`
+  && h2 {
+  }
+`;
+
+const SellModalStyled = styled.div`
+  width: 100%;
+
+  .unique-input-text, div[class^=NumberInput] {
+    width: 100%;
+  }
+
+  .unique-select {
+    margin-left: 24px;
+
+    @media (max-width: 568px) {
+      margin-left: 0;
+    }
+  }
+
+  .unique-select .select-wrapper > svg {
+    z-index: 0;
+  }
+
+  .unique-tabs-contents {
+    padding-top: 32px;
+    padding-bottom: 0;
+  }
+
+  .unique-tabs-labels {
+    margin-top: 16px;
+  }
+`;

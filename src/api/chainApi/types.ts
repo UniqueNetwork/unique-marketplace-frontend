@@ -15,6 +15,8 @@ export type TransactionOptions = {
   account: Account
   // if not provided, signed.send() will be called instead
   send?: (tx: TTransaction) => Promise<any | void>
+  // contract address
+  contractAddress?: string
 };
 
 export interface NFTCollectionSponsorship {
@@ -76,94 +78,5 @@ export interface PayableOverrides extends Overrides {
 }
 export type PromiseOrValue<T> = T | Promise<T>;
 export type BigNumberish = BN | Bytes | bigint | string | number;
-export type MarketplaceAbiMethods = {
-  buy(
-    collectionId: PromiseOrValue<BigNumberish>,
-    tokenId: PromiseOrValue<BigNumberish>,
-    amount: PromiseOrValue<BigNumberish>,
-    overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  checkApproved(
-    collectionId: PromiseOrValue<BigNumberish>,
-    tokenId: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  getOrder(
-    collectionId: PromiseOrValue<BigNumberish>,
-    tokenId: PromiseOrValue<BigNumberish>,
-    overrides?: any
-  ): Promise<[any]>;
-
-  marketFee(overrides?: any): Promise<[number]>;
-
-  put(
-    collectionId: PromiseOrValue<BigNumberish>,
-    tokenId: PromiseOrValue<BigNumberish>,
-    price: PromiseOrValue<BigNumberish>,
-    amount: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  revoke(
-    collectionId: PromiseOrValue<BigNumberish>,
-    tokenId: PromiseOrValue<BigNumberish>,
-    amount: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  setOwner(
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  setPause(
-    pause: PromiseOrValue<boolean>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  version(overrides?: any): Promise<[number]>;
-
-  withdraw(
-    transferTo: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-}
-
-export type OldMarketplaceAbiMethods = {
-  addAsk: (price: string, currencyCode: string, address: string, tokenId: string) => {
-    encodeABI: () => any;
-  },
-  balanceKSM: (ethAddress: string) => {
-    call: () => Promise<string>;
-  };
-  buyKSM: (collectionAddress: string, tokenId: string, buyer: string, receiver: string) => {
-    encodeABI: () => any;
-  };
-  cancelAsk: (collectionId: string, tokenId: string) => {
-    encodeABI: () => any;
-  };
-  depositKSM: (price: number) => {
-    encodeABI: () => any;
-  },
-  getOrder: (collectionId: string, tokenId: string) => {
-    call: () => Promise<TokenAskType>;
-  };
-  getOrdersLen: () => {
-    call: () => Promise<number>;
-  },
-  orders: (orderNumber: number) => {
-    call: () => Promise<TokenAskType>;
-  },
-  setEscrow: (escrow: string) => {
-    encodeABI: () => any;
-  },
-  withdraw: (amount: string, currencyCode: string, address: string) => {
-    encodeABI: () => any;
-  };
-  withdrawAllKSM: (ethAddress: string) => {
-    encodeABI: () => any;
-  };
-}
 
 export type CollectionMode = 'NFT' | 'Fungible' | 'ReFungible';
