@@ -7,13 +7,13 @@ import { useSetRoyaltiesStages } from 'hooks/marketplaceStages/useSetRoyaltiesSt
 import { RoyaltiesFormData } from '../types';
 
 type SetRoyaltiesStagesModalProps = {
-  royalty?: RoyaltiesFormData,
+  formData?: RoyaltiesFormData,
   collectionId: number
   onFinish(): void
 }
 
 export const SetRoyaltiesStagesModal: FC<SetRoyaltiesStagesModalProps> = ({
-  royalty,
+  formData,
   collectionId,
   onFinish
 }) => {
@@ -22,17 +22,11 @@ export const SetRoyaltiesStagesModal: FC<SetRoyaltiesStagesModalProps> = ({
   const { info } = useNotifications();
 
   useEffect(() => {
-    if (!selectedAccount || !royalty) throw new Error('Account not selected');
+    if (!selectedAccount || !formData) throw new Error('Account not selected');
     void initiate({
-      royalty: {
-        address: royalty?.address || selectedAccount.address,
-        value: Number(royalty.value),
-        decimals: 4,
-        version: 1,
-        royaltyType: 'DEFAULT'
-      }
+      royalties: formData.royalties
     });
-  }, [selectedAccount, royalty]);
+  }, [selectedAccount, formData]);
 
   useEffect(() => {
     if (status === StageStatus.success) {

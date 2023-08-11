@@ -43,17 +43,16 @@ export const RFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
   const [sortingValue, setSortingValue] = useState<string>(searchParams.get('sortingValue') || 'asc(TokenId)');
   const [searchValue, setSearchValue] = useState<string | undefined>(searchParams.get('searchValue') || '');
 
-  const [royalty, setRoyalty] = useState<RoyaltiesFormData>();
-  const setRoyalties = useCallback((collectionOnChain: CollectionInfoWithSchemaResponse | null | undefined) => {
+  const [royalties, setRoyalties] = useState<RoyaltiesFormData>();
+  const updateRoyalties = useCallback((collectionOnChain: CollectionInfoWithSchemaResponse | null | undefined) => {
     if (collectionOnChain?.schema?.royalties?.length) {
-      const value = collectionOnChain.schema.royalties[0]?.value
-        ? (Number(collectionOnChain.schema.royalties[0]?.value) / 100).toFixed(2)
-        : '0';
-      const address = collectionOnChain.schema.royalties[0]?.address;
-      setRoyalty({
-        value,
-        address
-      });
+      const royalties = collectionOnChain?.schema?.royalties.map(({ value, address }) => ({
+        address,
+        value: value
+          ? (Number(value) / 100).toFixed(2)
+          : '0'
+      }));
+      setRoyalties({ royalties });
     }
   }, []);
 
@@ -64,7 +63,7 @@ export const RFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
       setTokensCountOnScan(tokensCountOnScan);
 
       const collectionData = await fetchCollection(collectionId);
-      setRoyalties(collectionOnChain);
+      updateRoyalties(collectionOnChain);
       void fetchTokens({
         page: 1,
         pageSize,
@@ -118,7 +117,7 @@ export const RFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
   }, [fetch, sortingValue, searchValue]);
 
   return (<>
-    <CollectionDetail collection={collection} royalty={royalty} />
+    <CollectionDetail collection={collection} royalties={royalties} />
     <CollectionPagePaper>
       <MarketMainPageStyled>
         <MainContent>

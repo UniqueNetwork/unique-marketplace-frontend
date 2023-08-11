@@ -25,10 +25,10 @@ import { MetamaskAccount } from '@unique-nft/accounts/metamask';
 import { Address } from '@unique-nft/utils';
 interface IProps {
   collection?: MarketableCollection
-  royalty?: RoyaltiesFormData
+  royalties?: RoyaltiesFormData
 }
 
-export const CollectionDetail: FC<IProps> = ({ collection, royalty }) => {
+export const CollectionDetail: FC<IProps> = ({ collection, royalties }) => {
   const { selectedAccount } = useAccounts();
   const deviceSize = useDeviceSize();
 
@@ -98,7 +98,7 @@ export const CollectionDetail: FC<IProps> = ({ collection, royalty }) => {
               <CollapsableText size='l' >{metadata?.description || description}</CollapsableText>
             </Row>
           </div>
-          {deviceSize < DeviceSize.lg && <>
+          {deviceSize < DeviceSize.xl && <>
             {isOwner && <Row>
               <EditCollectionLink to={`/collection/${collectionId}/edit`}>
                 <span>Edit collection</span>
@@ -129,8 +129,8 @@ export const CollectionDetail: FC<IProps> = ({ collection, royalty }) => {
               </>}
             </OwnerWrapper>
           </Row>
-          <CollectionStatisticsBlock collection={collection} royalty={royalty} />
-          {deviceSize < DeviceSize.lg && <CreationInfoWrapper>
+          <CollectionStatisticsBlock collection={collection} royalties={royalties} />
+          {deviceSize < DeviceSize.xl && <CreationInfoWrapper>
             <Text color={'grey-500'} >Created on {collection.createdAt}</Text>
             <LinkStyled
               target={'_blank'}
@@ -145,7 +145,7 @@ export const CollectionDetail: FC<IProps> = ({ collection, royalty }) => {
           </CreationInfoWrapper>}
         </CollectionInfoWrapper>
       </CollectionCardWrapper>
-      {deviceSize >= DeviceSize.lg && <RightSidebar>
+      {deviceSize >= DeviceSize.xl && <RightSidebar>
         {isOwner && <EditCollectionLink to={`/collection/${collectionId}/edit`}>
           {/* TODO: use link from react-router-dom instead of href to avoid page refresh */}
           <span>Edit collection</span>

@@ -7,7 +7,9 @@ import { RoyaltiesFormData } from 'pages/CollectionEdit/types';
 import styled from 'styled-components';
 import { formatAmount, formatBalance } from 'utils/textUtils';
 
-export const CollectionStatisticsBlock = ({ collection, royalty }: { collection: MarketableCollection, royalty?: RoyaltiesFormData }) => {
+//
+
+export const CollectionStatisticsBlock = ({ collection, royalties }: { collection: MarketableCollection, royalties?: RoyaltiesFormData }) => {
   const { chainProperties } = useApi();
   return <CollectionStatisticsBlockWrapper>
     <div>
@@ -31,8 +33,8 @@ export const CollectionStatisticsBlock = ({ collection, royalty }: { collection:
         <Heading size='3'>{Number(collection.uniqueHolders !== 'NaN' ? collection.uniqueHolders : '0' || '0').toFixed(0)}%</Heading>
         <Text size={'m'} color='grey-600'>unique holders</Text>
       </div>
-      {!!royalty?.value && <div>
-        <Heading size='3'>{formatAmount(Number(royalty.value))}%</Heading>
+      {!!royalties?.royalties && <div>
+        <Heading size='3'>{formatAmount(Number(royalties?.royalties.reduce((acc, { value }) => Number(acc) + Number(value), 0)))}%</Heading>
         <Text size={'m'} color='grey-600'>flexible royalties</Text>
       </div>}
     </>}

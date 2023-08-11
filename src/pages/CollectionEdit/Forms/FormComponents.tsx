@@ -20,6 +20,8 @@ export const FormRow = styled.div`
 
 export const ButtonsRow = styled.div`
   margin-top: var(--gap);
+  display: flex;
+  justify-content: space-between;
 `;
 
 export const LabelWrapper = styled.div`

@@ -56,17 +56,16 @@ export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
     onMobileFilterApply
    } = useCollectionTokensFilter({ isFetching, fetch });
 
-  const [royalty, setRoyalty] = useState<RoyaltiesFormData>();
-  const setRoyalties = useCallback((collectionOnChain: CollectionInfoWithSchemaResponse | null | undefined) => {
+  const [royalties, setRoyalties] = useState<RoyaltiesFormData>();
+  const updateRoyalties = useCallback((collectionOnChain: CollectionInfoWithSchemaResponse | null | undefined) => {
     if (collectionOnChain?.schema?.royalties?.length) {
-      const value = collectionOnChain.schema.royalties[0]?.value
-        ? (Number(collectionOnChain.schema.royalties[0]?.value) / 100).toFixed(2)
-        : '0';
-      const address = collectionOnChain.schema.royalties[0]?.address;
-      setRoyalty({
-        value,
-        address
-      });
+      const royalties = collectionOnChain?.schema?.royalties.map(({ value, address }) => ({
+        address,
+        value: value
+          ? (Number(value) / 100).toFixed(2)
+          : '0'
+      }));
+      setRoyalties({ royalties });
     }
   }, []);
 
@@ -77,7 +76,7 @@ export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
       setTokensCountOnScan(tokensCountOnScan);
 
       const collectionData = await fetchCollection(collectionId);
-      setRoyalties(collectionOnChain);
+      updateRoyalties(collectionOnChain);
 
       if (!collectionData || (tokensCountOnScan > 0 && collectionData.tokensCount !== tokensCountOnScan)) {
         void addCollection(collectionId);
@@ -127,7 +126,7 @@ export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
   }, [isFetching, tokens.length, getFilterByState, filterState, searchValue, sortingValue]);
 
   return (<>
-    <CollectionDetail collection={collection} royalty={royalty} />
+    <CollectionDetail collection={collection} royalties={royalties} />
     <CollectionPagePaper>
       <MarketMainPageStyled>
         {deviceSize > DeviceSize.md && <LeftColumn>

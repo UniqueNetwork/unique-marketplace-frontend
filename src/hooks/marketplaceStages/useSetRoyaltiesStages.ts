@@ -6,9 +6,10 @@ import { useAccounts } from '../useAccounts';
 import useStages from '../useStages';
 import { CollectionProperty, UniqueRoyaltyPartDto } from '@unique-nft/sdk';
 import { SchemaTools } from '@unique-nft/schemas';
+import { Royalty } from 'pages/CollectionEdit/types';
 
 export type TSetRoyaltiesProps = {
-  royalty: UniqueRoyaltyPartDto
+  royalties: Royalty[]
 }
 
 const defaultDecimals = 4;
@@ -34,16 +35,15 @@ export const useSetRoyaltiesStages = (collectionId: number) => {
         image: {
           urlTemplate: '{infix}'
         },
-        royalties: txParams.royalty.value > 0
-        ? [
-          {
-            value: BigInt(txParams.royalty.value * (10 ** (defaultDecimals - 2))),
-            address: txParams.royalty.address,
+        royalties: txParams.royalties.length > 0
+        ? txParams.royalties.map((royalty) => ({
+            value: BigInt(Number(royalty.value) * (10 ** (defaultDecimals - 2))),
+            address: royalty.address,
             decimals: defaultDecimals,
             version: 1,
             royaltyType: 'DEFAULT'
-          }
-        ]
+          })
+        )
         : []
       });
       const royalties = encodedSchema.find(({ key }) => key === 'royalties');
