@@ -108,7 +108,7 @@ const ButtonWrapper = styled.div`
   width: 200px;
   margin-top: calc(var(--gap) / 2);
   display: flex;
-  gap: calc(var(--gap) / 2);
+  gap: var(--gap);
 `;
 
 const Divider = styled.div`
