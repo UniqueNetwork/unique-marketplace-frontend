@@ -20,8 +20,9 @@ import { FeeMessage } from 'components';
 import { BN } from '@polkadot/util';
 import { fromStringToBnString } from 'utils/bigNum';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
+import { Offer } from 'api/restApi/offers/types';
 
-export const ChangePriceModal: FC<TTokenPageModalBodyProps> = ({ token, collection, onFinish, setIsClosable, testid }) => {
+export const ChangePriceModal: FC<TTokenPageModalBodyProps> = ({ token, offer, collection, onFinish, setIsClosable, testid }) => {
   const { collectionId, tokenId } = token || {};
   const [status, setStatus] = useState<'ask' | 'stage'>('ask'); // TODO: naming
   const [fixPrice, setFixPrice] = useState<TFixPriceProps>();
@@ -47,6 +48,7 @@ export const ChangePriceModal: FC<TTokenPageModalBodyProps> = ({ token, collecti
     tokenId={tokenId || 0}
     tokenPrefix={collection?.tokenPrefix || ''}
     sellFix={fixPrice as TFixPriceProps}
+    offer={offer}
     onFinish={onFinish}
     testid={`${testid}-change-price`}
   />);
@@ -147,12 +149,14 @@ type TChangePriceStagesModal = {
   collectionId: number
   tokenId: number
   tokenPrefix: string
+  offer?: Offer
   sellFix: TFixPriceProps
   testid: string
 }
 
-export const ChangePriceStagesModal: FC<TChangePriceStagesModal> = ({ collectionId, tokenId, tokenPrefix, sellFix, onFinish, testid }) => {
-  const { stages, status, initiate } = useChangePriceStages(collectionId, tokenId);
+export const ChangePriceStagesModal: FC<TChangePriceStagesModal> = ({ collectionId, offer, tokenId, tokenPrefix, sellFix, onFinish, testid }) => {
+  const { contractAddress } = offer || {};
+  const { stages, status, initiate } = useChangePriceStages(collectionId, tokenId, contractAddress);
   const { info } = useNotifications();
 
   useEffect(() => { initiate(sellFix); }, [sellFix]);

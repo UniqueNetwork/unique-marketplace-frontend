@@ -275,7 +275,6 @@ class UniqueAdapter implements IMarketContractAdapter {
       abi: contract.abi || marketplaceAbi as any,
       address: signer.address || '',
       contractAddress: contract.address,
-      value: price,
       funcName: 'changePrice',
       gasLimit: buyGasLimit,
       args: {
@@ -291,7 +290,6 @@ class UniqueAdapter implements IMarketContractAdapter {
       abi: contract.abi || marketplaceAbi as any,
       address: signer.address || '',
       contractAddress: contract.address,
-      value: price,
       funcName: 'changePrice',
       gasLimit: buyGasLimit,
       args: {

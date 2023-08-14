@@ -18,11 +18,23 @@ interface SellTokenProps {
   onSellClick(): void
   onTransferClick(): void
   onDelistClick(): void
+  onChangePriceClick(): void
   testid: string
 }
 
-export const SellToken: FC<SellTokenProps> = ({ offer, collectionId, royalty, isAllowed, isRFT, onSellClick, onTransferClick, onDelistClick, testid }) => {
-  const { currentChainId } = useApi();
+export const SellToken: FC<SellTokenProps> = ({
+  offer,
+  collectionId,
+  royalty,
+  isAllowed,
+  isRFT,
+  onSellClick,
+  onTransferClick,
+  onDelistClick,
+  onChangePriceClick,
+  testid
+}) => {
+  const { currentChainId, api } = useApi();
 
   const [hideSellBtn, hideTransferBtn] = useMemo(() => {
     if (!currentChainId || !collectionId) return [false, false];
@@ -32,6 +44,11 @@ export const SellToken: FC<SellTokenProps> = ({ offer, collectionId, royalty, is
       blockedTransferringCollections[currentChainId]?.includes(collectionId)
     ];
   }, [currentChainId, collectionId, isRFT]);
+
+  const canChangePrice = useMemo(() => {
+    if (!offer?.contractAddress) return false;
+    return api?.market?.hasContractMethod(offer.contractAddress, 'changePrice');
+  }, [offer, api]);
 
   if (offer) {
     return (<>
@@ -45,6 +62,11 @@ export const SellToken: FC<SellTokenProps> = ({ offer, collectionId, royalty, is
           onClick={onDelistClick}
           testid={`${testid}-delist-button`}
         />
+        {canChangePrice && <Button
+          title={'Change price'}
+          onClick={onChangePriceClick}
+          testid={`${testid}-delist-button`}
+        />}
       </ButtonWrapper>
       <Divider />
     </>);
@@ -85,6 +107,8 @@ const ActionsWrapper = styled.div`
 const ButtonWrapper = styled.div`
   width: 200px;
   margin-top: calc(var(--gap) / 2);
+  display: flex;
+  gap: calc(var(--gap) / 2);
 `;
 
 const Divider = styled.div`

@@ -6,7 +6,7 @@ import { InternalStage, StageStatus } from 'types/StagesTypes';
 import { useAccounts } from '../useAccounts';
 import useStages from '../useStages';
 
-export const useChangePriceStages = (collectionId: number, tokenId: number) => {
+export const useChangePriceStages = (collectionId: number, tokenId: number, contractAddress?: string) => {
   const { api } = useApi();
   const { selectedAccount } = useAccounts();
   const marketApi = api?.market;
@@ -16,8 +16,8 @@ export const useChangePriceStages = (collectionId: number, tokenId: number) => {
     title: 'Change price',
     description: '',
     status: StageStatus.default,
-    action: ({ txParams, options }) => marketApi?.changePrice(collectionId, tokenId, Number(txParams.price), options)
-  }], [selectedAccount, marketApi, collectionId, tokenId]);
+    action: ({ txParams, options }) => marketApi?.changePrice(collectionId, tokenId, Number(txParams.price), { ...options, contractAddress })
+  }], [selectedAccount, marketApi, collectionId, tokenId, contractAddress]);
   const { stages, error, status, initiate } = useStages<TFixPriceProps>(sellFixStages, selectedAccount);
 
   return {
