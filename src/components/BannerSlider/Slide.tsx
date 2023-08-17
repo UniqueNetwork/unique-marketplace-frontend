@@ -337,7 +337,7 @@ const ButtonStyled: FC<ButtonStyledProps> = ({ backgroundColor, ...props }) => {
 };
 
 const LinkComponent: FC<{ linkTo: string }> = ({ children, linkTo }) => {
-  return linkTo.startsWith('https://')
+  return !linkTo.startsWith(location.origin)
     ? <ExternalLink href={linkTo} target='_blank'>{children}</ExternalLink>
     : <Link to={linkTo}>{children}</Link>;
 };
