@@ -1,10 +1,9 @@
-import { Heading, Link as ExternalLink } from '@unique-nft/ui-kit';
+import { Heading } from '@unique-nft/ui-kit';
 import { Banner } from 'api/restApi/banners/types';
 import { get } from 'api/restApi/base';
 import { Text } from 'components/UI';
-import { Button, ButtonProps } from '../UI/Button/Button';
 import { FC, useEffect, useMemo, useRef } from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { Link } from 'react-router-dom';
 
 type SlideProps = Banner & {
@@ -54,11 +53,11 @@ export const Slide = ({
         </Text>
       </Description>
       <ButtonWrapper>
-        {!!buttonTitle && !!buttonUrl && <LinkComponent linkTo={buttonUrl} >
-          <ButtonStyled title={buttonTitle} role='primary' backgroundColor={buttonColor} />
+        {!!buttonTitle && !!buttonUrl && <LinkComponent role='primary' linkTo={buttonUrl} >
+          {buttonTitle}
         </LinkComponent>}
-        {!!secondaryButtonTitle && !!secondaryButtonUrl && <LinkComponent linkTo={secondaryButtonUrl} >
-          <ButtonStyled title={secondaryButtonTitle} role='ghost' />
+        {!!secondaryButtonTitle && !!secondaryButtonUrl && <LinkComponent linkTo={secondaryButtonUrl} role='ghost' >
+          {secondaryButtonTitle}
         </LinkComponent>}
       </ButtonWrapper>
     </LeftSide>
@@ -325,19 +324,36 @@ const ButtonWrapper = styled.div`
   gap: 32px;
 `;
 
-type ButtonStyledProps = { backgroundColor?: string } & ButtonProps;
-const ButtonStyled: FC<ButtonStyledProps> = ({ backgroundColor, ...props }) => {
-  const Wrapper = styled.div<{ backgroundColor?: string }>`
-    button {
-      background-color: ${({ backgroundColor }) => backgroundColor || ''} !important;
-      border-color: ${({ backgroundColor }) => backgroundColor || ''} !important;
-    }
-  `;
-  return <Wrapper backgroundColor={backgroundColor}><Button {...props} /></Wrapper>;
+const LinkComponent: FC<{ linkTo: string, role: 'primary' | 'ghost', bgColor?: string }> = ({ children, linkTo, role, bgColor }) => {
+  return !linkTo.startsWith(location.origin)
+    ? <ExternalLink href={linkTo} role={role} bgColor={bgColor}>{children}</ExternalLink>
+    : <LocalLink role={role} bgColor={bgColor} to={linkTo.replace(location.origin, '')}>{children}</LocalLink>;
 };
 
-const LinkComponent: FC<{ linkTo: string }> = ({ children, linkTo }) => {
-  return !linkTo.startsWith(location.origin)
-    ? <ExternalLink href={linkTo} target='_blank'>{children}</ExternalLink>
-    : <Link to={linkTo.replace(location.origin, '')}>{children}</Link>;
-};
+const baseLink = css<{ role: 'primary' | 'ghost', bgColor?: string }>`
+  padding: 8px 24px;
+  font-size: 16px;
+  height: 40px;
+  line-height: 20px;
+  box-sizing: border-box;
+  font-weight: var(--prop-font-weight);
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: var(--prop-border-radius);
+  cursor: pointer;
+  border-width: 1px;
+  border-style: solid;
+  text-decoration: none;
+  white-space: nowrap;
+  color: ${({ role }) => role === 'primary' ? 'var(--color-additional-light)' : 'var(--color-blue-grey-500)'};
+  background: ${({ role, bgColor }) => bgColor || (role === 'primary' ? 'var(--color-primary-500);' : 'none')};
+  border-color: ${({ role, bgColor }) => bgColor || (role === 'primary' ? 'var(--color-primary-500);' : 'none')};
+`;
+
+const ExternalLink = styled.a<{ role: 'primary' | 'ghost', bgColor?: string }>`
+  ${baseLink}
+`;
+const LocalLink = styled(Link)<{ role: 'primary' | 'ghost', bgColor?: string }>`
+    ${baseLink}
+`;
