@@ -1,5 +1,5 @@
 import { Signer as EthersSigner } from 'ethers';
-import { Signer as UniqueSigner } from '@unique-nft/sdk';
+import { CollectionProperty, Signer as UniqueSigner } from '@unique-nft/sdk';
 import { ChainValue } from '../controllers/BaseController';
 import { CollectionMode } from '../types';
 
@@ -21,6 +21,8 @@ interface IBaseAdapter {
 
   getTransferBalanceFee(from: string, to: string, amount: ChainValue, signer: Signer): Promise<string>
   transferBalance(from: string, to: string, amount: ChainValue, signer: Signer): Promise<void>
+
+  setCollectionProperties(collectionId: number, properties: CollectionProperty[], signer: Signer): Promise<void>
 }
 
 export default IBaseAdapter;

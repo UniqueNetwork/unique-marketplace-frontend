@@ -9,27 +9,54 @@ import { NetworkOptions } from '../sdk/sdkClient';
 import IMarketController from './controllers/base/IMarketController';
 import { CollectionMode, TransactionOptions } from './types';
 import BaseController from './controllers/BaseController';
+import { MarketContract, MarketContractAbiItem } from 'api/restApi/settings/types';
+import { IMarketContractProperties } from './adapters/IMarketContractAdapter';
 
 class MarketController extends BaseController implements IMarketController {
-  contractAddress: string;
   public decimals = 18; // TODO: move from controller to API
+
+  actualContract: IMarketContractProperties;
+  contracts: MarketContract[] = [];
+  contractsAbi: Record<string, MarketContractAbiItem[]> = {};
+
+  private getActualContract() {
+    let actualContract = this.contracts[0];
+    this.contracts.forEach((contract) => {
+      if (contract.version > actualContract.version) {
+        actualContract = contract;
+      }
+    });
+    return actualContract;
+  }
 
   constructor(options: NetworkOptions) {
     super(options);
-    const contractAddress = options.settings.blockchain.unique.contracts[0].address;
-    this.contractAddress = contractAddress;
+    this.contracts = options.settings.blockchain.unique.contracts;
+    if (this.contracts.length === 0) throw new Error('Market API didn\'t provide deployed contracts');
+    this.contractsAbi = options.settings.blockchain.unique.contractsAbi || {};
+    const contractAddress = this.getActualContract().address;
+    this.actualContract = {
+      address: contractAddress,
+      abi: this.contractsAbi[contractAddress]
+    };
   }
 
   public setNetwork(options: NetworkOptions): void {
-    const contractAddress = options.settings.blockchain.unique.contracts[0].address;
-    this.contractAddress = contractAddress;
     super.setNetwork(options);
+    this.contracts = options.settings.blockchain.unique.contracts;
+    if (this.contracts.length === 0) throw new Error('Market API didn\'t provide deployed contracts');
+    this.contractsAbi = options.settings.blockchain.unique.contractsAbi || {};
+    const contractAddress = this.getActualContract().address;
+    this.actualContract = {
+      address: contractAddress,
+      abi: this.contractsAbi[contractAddress]
+    };
   }
 
-  async changeAllowance(collectionId: number, tokenId: number, targetAllowance: boolean, { account }: TransactionOptions): Promise<void> {
+  async changeAllowance(collectionId: number, tokenId: number, targetAllowance: boolean, { account, contractAddress }: TransactionOptions): Promise<void> {
     if (!account) throw new Error('Account not provided');
     const from = account.address;
-    const to = this.contractAddress;
+    const to = contractAddress || this.actualContract.address;
     const isAlreadyAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from, to });
     if (isAlreadyAllowed.isAllowed === targetAllowance) return;
 
@@ -41,22 +68,40 @@ class MarketController extends BaseController implements IMarketController {
 
   public async getSellFixFee(collectionId: number, tokenId: number, price: number, amount: number, { account }: TransactionOptions): Promise<string> {
     const from = Address.extract.ethCrossAccountId(account.address);
-    const to = this.contractAddress;
-    // const isAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from: account.address, to });
-    // if (!isAllowed.isAllowed) throw new Error('Token not approved for sale');
     const adapter = this.getAdapter(account.account);
     const priceWithDecimals = (price * (10 ** this.decimals)).toLocaleString('fullwide', { useGrouping: false });
-    const rawFee = await adapter.getSellFee(from, collectionId, tokenId, priceWithDecimals, amount, account.signer);
+    const rawFee = await adapter.getSellFee(
+      from,
+      collectionId,
+      tokenId,
+      priceWithDecimals,
+      amount,
+      account.signer,
+      this.actualContract
+    );
     return this.getChainValue(rawFee, this.decimals).parsed.toString();
   }
 
-  public async getBuyFixFee(collectionId: number, tokenId: number, amount: number, { account }: TransactionOptions): Promise<string> {
+  public async getBuyFixFee(collectionId: number, tokenId: number, amount: number, { account, contractAddress }: TransactionOptions): Promise<string> {
     const to = Address.extract.ethCrossAccountId(account.address);
     const order = (await this.getOrder(collectionId, tokenId));
     const value = order.price as { type: string, hex: string };
     const adapter = this.getAdapter(account.account);
     const parsedPrice = BigInt(value.hex).toString();
-    const rawFee = await adapter.getBuyFee(to, collectionId, tokenId, parsedPrice, amount, account.signer);
+    const rawFee = await adapter.getBuyFee(
+      to,
+      collectionId,
+      tokenId,
+      parsedPrice,
+      amount,
+      account.signer,
+      contractAddress
+      ? {
+        address: contractAddress,
+        abi: this.contractsAbi[contractAddress]
+      }
+      : this.actualContract
+    );
     return this.getChainValue(rawFee, this.decimals).parsed.toString();
   }
 
@@ -70,22 +115,21 @@ class MarketController extends BaseController implements IMarketController {
    */
   async sellFix(collectionId: number, tokenId: number, price: number, amount: number, { account }: TransactionOptions): Promise<void> {
     const from = Address.extract.ethCrossAccountId(account.address);
-    const to = this.contractAddress;
+    const to = this.actualContract.address;
     const isAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from: account.address, to });
     if (!isAllowed.isAllowed) throw new Error('Token not approved for sale');
     const adapter = this.getAdapter(account.account);
     // chain format from human format: 1.25 -> 1250000000000000000
     const priceWithDecimals = (price * (10 ** this.decimals)).toLocaleString('fullwide', { useGrouping: false });
-    await adapter.sell(from, collectionId, tokenId, priceWithDecimals, amount, account.signer);
+    await adapter.sell(from, collectionId, tokenId, priceWithDecimals, amount, account.signer, this.actualContract);
     await sleep(1000); // little lag to make sure offer is added to db
   }
 
-  async buyFix(collectionId: number, tokenId: number, amount: number, { account }: TransactionOptions): Promise<void> {
+  async buyFix(collectionId: number, tokenId: number, amount: number, { account, contractAddress }: TransactionOptions): Promise<void> {
     const to = Address.extract.ethCrossAccountId(account.address);
 
     const order = (await this.getOrder(collectionId, tokenId));
-    const value = order.price as { type: string, hex: string }; // { type: BigNumber, hex: '0x000001}
-    const seller = order.seller[0] as CrossAccountId;
+    const value = order.price as { type: string, hex: string };
     // console.log('seller', seller); // TODO: recheck allowance? If so - which out of two accounts
     // const isAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from: seller.eth, to });
     // if (!isAllowed.isAllowed) throw new Error('Token not approved for sale');
@@ -93,7 +137,14 @@ class MarketController extends BaseController implements IMarketController {
     const adapter = this.getAdapter(account.account);
 
     const parsedPrice = BigInt(value.hex).toString();
-    await adapter.buy(to, collectionId, tokenId, parsedPrice, amount, account.signer);
+    await adapter.buy(to, collectionId, tokenId, parsedPrice, amount, account.signer,
+      contractAddress
+      ? {
+        address: contractAddress,
+        abi: this.contractsAbi[contractAddress]
+      }
+      : this.actualContract
+    );
   }
 
   async cancelFix(collectionId: number, tokenId: number, amount: number, options: TransactionOptions): Promise<void> {
@@ -109,7 +160,7 @@ class MarketController extends BaseController implements IMarketController {
       const res = await this.uniqueSdk.evm.call({
         abi: marketplaceAbi as any,
         address: '5CSxpZepJj5dxkSBEDnN23pgg6B5X6VFRJ2kyubhb5Svstuu', // TODO: remove after sdk update
-        contractAddress: this.contractAddress,
+        contractAddress: this.actualContract.address,
         funcName: 'getOrder',
         args: [collectionId, tokenId]
       });
@@ -135,8 +186,7 @@ class MarketController extends BaseController implements IMarketController {
     if (!balance) throw new Error('Failed to fetch balance');
     return { raw: new BN(balance?.availableBalance?.raw || 0),
       parsed: balance?.availableBalance?.amount || '0',
-      withdraw
-    };
+      withdraw };
   }
 
   async getTransferTokenFee(sender: string, recipient: string, collectionId: number, tokenId: number, mode: CollectionMode, amount: number, { account }: TransactionOptions): Promise<string | null> {
@@ -165,6 +215,36 @@ class MarketController extends BaseController implements IMarketController {
    */
   async transferBalance(from: string, to: string, amount: BN | number | string, { account }: TransactionOptions): Promise<void> {
     await this.getAdapter(account.account).transferBalance(from, to, this.getChainValue(amount, this.decimals), account.signer);
+  }
+
+  hasContractMethod(contractAddress: string, method: string): boolean {
+    return !!this.contractsAbi[contractAddress]?.find(({ name }) => name === method);
+  }
+
+  async changePrice(collectionId: number, tokenId: number, price: number, { account, contractAddress }: TransactionOptions): Promise<void> {
+    const adapter = this.getAdapter(account.account);
+    const contract = contractAddress
+    ? {
+        address: contractAddress,
+        abi: this.contractsAbi[contractAddress]
+      }
+    : this.actualContract;
+    const priceWithDecimals = (price * (10 ** this.decimals)).toLocaleString('fullwide', { useGrouping: false });
+    await adapter.changePrice(collectionId, tokenId, priceWithDecimals, account.signer, contract);
+  }
+
+  async getChangePriceFee(collectionId: number, tokenId: number, price: number, { account, contractAddress }: TransactionOptions): Promise<string> {
+    const adapter = this.getAdapter(account.account);
+    const contract = contractAddress
+    ? {
+        address: contractAddress,
+        abi: this.contractsAbi[contractAddress]
+      }
+    : this.actualContract;
+    const priceWithDecimals = (price * (10 ** this.decimals)).toLocaleString('fullwide', { useGrouping: false });
+    const rawFee = await adapter.getChangePriceFee(collectionId, tokenId, priceWithDecimals, account.signer, contract);
+
+    return this.getChainValue(rawFee, this.decimals).parsed.toString();
   }
 }
 

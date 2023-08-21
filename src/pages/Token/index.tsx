@@ -128,6 +128,7 @@ const TokenPage = () => {
             onDelistAuctionClick={onActionClick(MarketType.delistAuction)}
             onPlaceABidClick={onActionClick(MarketType.bid)}
             onWithdrawClick={onActionClick(MarketType.withdrawBid)}
+            onChangePriceClick={onActionClick(MarketType.changePrice)}
             onAuctionClose={onAuctionClose}
             testid={`${testid}`}
           />

@@ -6,6 +6,7 @@ import { Settings, WhitelistBody } from './types';
 import { ResponseError } from '../base/types';
 import { AxiosError } from 'axios';
 import { Chain } from 'utils/configParser';
+import { getContractsAbi } from '../contracts/contracts';
 
 const endpoint = '/settings';
 
@@ -22,7 +23,9 @@ export const useSettings = () => {
     try {
       const settingsSet = await Promise.all(Object.values(blockchains).map(async (blockchain) => {
         const { data: settings, status } = await getSettings(blockchain.apiEndpoint);
-        if (status === 200) {
+        const { data: abi, status: contractAbyStatus } = (await getContractsAbi(blockchain.apiEndpoint)) || {};
+        if (status === 200 && contractAbyStatus === 200) {
+          settings.blockchain.unique.contractsAbi = abi;
           return { ...blockchain, networkId: blockchain.network.toLowerCase(), settings };
         }
       }));
