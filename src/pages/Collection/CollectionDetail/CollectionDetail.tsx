@@ -131,7 +131,7 @@ export const CollectionDetail: FC<IProps> = ({ collection, royalties }) => {
           </Row>
           <CollectionStatisticsBlock collection={collection} royalties={royalties} />
           {deviceSize < DeviceSize.xl && <CreationInfoWrapper>
-            <Text color={'grey-500'} >Created on {collection.createdAt}</Text>
+            <Text color={'grey-500'} >Created on {dateFormat(collection.createdAt)}</Text>
             <LinkStyled
               target={'_blank'}
               rel={'noreferrer'}
