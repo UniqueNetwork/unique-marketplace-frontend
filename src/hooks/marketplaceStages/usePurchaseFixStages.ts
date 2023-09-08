@@ -8,7 +8,7 @@ import { InternalStage, StageStatus, TInternalStageActionParams } from '../../ty
 import useStages from '../useStages';
 import { useAccounts } from '../useAccounts';
 
-export const usePurchaseFixStages = (collectionId: number, tokenId: number) => {
+export const usePurchaseFixStages = (collectionId: number, tokenId: number, contractAddress?: string) => {
   const { api } = useApi();
   const { selectedAccount } = useAccounts();
   const marketApi = api?.market;
@@ -28,7 +28,7 @@ export const usePurchaseFixStages = (collectionId: number, tokenId: number) => {
       action: async ({ options, txParams }) => {
         const mirrorAddress = Address.mirror.substrateToEthereum(account.address);
         const mirrorBalance = await marketApi?.getAccountBalance(mirrorAddress);
-        const fee = Number(await marketApi?.getBuyFixFee(collectionId, tokenId, txParams.amount, options));
+        const fee = Number(await marketApi?.getBuyFixFee(collectionId, tokenId, txParams.amount, { ...options, contractAddress }));
         const toTransfer = Number(txParams.price) + fee - Number(mirrorBalance?.parsed);
         if (toTransfer <= 0) return Promise.resolve();
         // just to be safe and makeup for potential rounding issues
@@ -39,7 +39,7 @@ export const usePurchaseFixStages = (collectionId: number, tokenId: number) => {
       title: 'Purchasing token',
       description: '',
       status: StageStatus.default,
-      action: ({ options, txParams }) => marketApi?.buyFix(collectionId, tokenId, txParams.amount, options)
+      action: ({ options, txParams }) => marketApi?.buyFix(collectionId, tokenId, txParams.amount, { ...options, contractAddress })
     },
     ...(selectedAccount?.account.constructor === MetamaskAccount
       ? []
@@ -56,7 +56,7 @@ export const usePurchaseFixStages = (collectionId: number, tokenId: number) => {
       }
     }]) as InternalStage<TPurchaseProps>[]
   ];
-}, [marketApi, collectionId, tokenId]);
+}, [marketApi, collectionId, tokenId, contractAddress]);
   const { stages, error, status, initiate } = useStages<TPurchaseProps>(purchaseStages, selectedAccount);
 
   return {
