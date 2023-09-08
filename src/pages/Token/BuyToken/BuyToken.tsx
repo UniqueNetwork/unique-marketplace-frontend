@@ -61,7 +61,7 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, royalty, onBuy, testid }) =
         offer.collectionId,
         offer.tokenId,
         1,
-        { account: selectedAccount }
+        { account: selectedAccount, contractAddress: offer.contractAddress }
       );
     }, 300)();
   }, [offer, api?.market, selectedAccount?.address]);

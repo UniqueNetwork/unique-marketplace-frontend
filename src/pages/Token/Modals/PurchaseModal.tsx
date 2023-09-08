@@ -16,7 +16,7 @@ import { debounce } from 'utils/helpers';
 const PurchaseModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, setIsClosable, testid }) => {
   const { api } = useApi();
   const { selectedAccount } = useAccounts();
-  const { stages, status, initiate } = usePurchaseFixStages(offer?.collectionId || 0, offer?.tokenId || 0);
+  const { stages, status, initiate } = usePurchaseFixStages(offer?.collectionId || 0, offer?.tokenId || 0, offer?.contractAddress);
   const { info } = useNotifications();
 
   const { fee, fetchingFee, getFee } = useGetFee<Parameters<MarketController['getBuyFixFee']>>(api?.market?.getBuyFixFee.bind(api?.market));
@@ -28,7 +28,7 @@ const PurchaseModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, setIsClo
         offer.collectionId,
         offer.tokenId,
         1,
-        { account: selectedAccount }
+        { account: selectedAccount, contractAddress: offer.contractAddress }
       );
     }, 300)();
   }, [offer, selectedAccount]);

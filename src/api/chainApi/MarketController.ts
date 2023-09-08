@@ -84,7 +84,7 @@ class MarketController extends BaseController implements IMarketController {
 
   public async getBuyFixFee(collectionId: number, tokenId: number, amount: number, { account, contractAddress }: TransactionOptions): Promise<string> {
     const to = Address.extract.ethCrossAccountId(account.address);
-    const order = (await this.getOrder(collectionId, tokenId));
+    const order = (await this.getOrder(collectionId, tokenId, contractAddress));
     const value = order.price as { type: string, hex: string };
     const adapter = this.getAdapter(account.account);
     const parsedPrice = BigInt(value.hex).toString();
@@ -128,7 +128,7 @@ class MarketController extends BaseController implements IMarketController {
   async buyFix(collectionId: number, tokenId: number, amount: number, { account, contractAddress }: TransactionOptions): Promise<void> {
     const to = Address.extract.ethCrossAccountId(account.address);
 
-    const order = (await this.getOrder(collectionId, tokenId));
+    const order = (await this.getOrder(collectionId, tokenId, contractAddress));
     const value = order.price as { type: string, hex: string };
     // console.log('seller', seller); // TODO: recheck allowance? If so - which out of two accounts
     // const isAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from: seller.eth, to });
@@ -154,13 +154,13 @@ class MarketController extends BaseController implements IMarketController {
     await this.changeAllowance(collectionId, tokenId, false, options);
   }
 
-  async getOrder(collectionId: number, tokenId: number): Promise<any> {
+  async getOrder(collectionId: number, tokenId: number, contractAddress?: string): Promise<any> {
     if (!collectionId || !tokenId) throw new Error(`Cant get order for ${collectionId}-${tokenId}`);
     try {
       const res = await this.uniqueSdk.evm.call({
         abi: marketplaceAbi as any,
         address: '5CSxpZepJj5dxkSBEDnN23pgg6B5X6VFRJ2kyubhb5Svstuu', // TODO: remove after sdk update
-        contractAddress: this.actualContract.address,
+        contractAddress: contractAddress || this.actualContract.address,
         funcName: 'getOrder',
         args: [collectionId, tokenId]
       });
