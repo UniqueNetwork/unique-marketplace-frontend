@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNotifications } from 'components/UI';
 import { InternalStage, StageStatus, useStagesReturn } from '../types/StagesTypes';
-import { MarketAccount as Account } from 'account/types';
+import { Account } from 'account/types';
 
 const useStages = <T>(stages: InternalStage<T>[], account?: Account): useStagesReturn<T> => {
   if (!account) throw new Error('Can\'t execute stages without account');

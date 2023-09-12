@@ -12,21 +12,16 @@ export const useAccounts = () => {
     accounts,
     selectedAccount,
     isLoading,
-    isLoadingDeposits,
     fetchAccountsError,
     changeAccount,
-    setSelectedAccount,
-    fetchAccounts,
-    updateAccountsDeposits,
-    updateAccountBalance,
-    updateCurrentAccountDeposit,
-    forgetAccount
+    forgetLocalAccount,
+    walletsCenter
   } = useContext(AccountContext);
 
-  useEffect(() => {
-    const updatedSelectedAccount = accounts.find((account) => account.address === selectedAccount?.address);
-    if (updatedSelectedAccount) setSelectedAccount(updatedSelectedAccount);
-  }, [accounts, setSelectedAccount, selectedAccount, api]);
+  // useEffect(() => {
+  //   const updatedSelectedAccount = accounts.find((account) => account.address === selectedAccount?.address);
+  //   if (updatedSelectedAccount) changeAccount(updatedSelectedAccount);
+  // }, [accounts, changeAccount, selectedAccount, api]);
 
   const addLocalAccount = useCallback((seed: string, derivePath: string, name: string, password: string, pairType: PairType) => {
     const options = { genesisHash: chainProperties?.genesisHash, isHardware: false, name: name.trim(), tags: [] };
@@ -34,21 +29,17 @@ export const useAccounts = () => {
   }, [chainProperties]);
 
   const deleteLocalAccount = useCallback((address: string) => {
-    forgetAccount(address);
-  }, [forgetAccount]);
+    forgetLocalAccount(address);
+  }, [forgetLocalAccount]);
 
   return {
     accounts,
     selectedAccount,
     isLoading,
-    isLoadingDeposits,
     fetchAccountsError,
     addLocalAccount,
-    fetchAccounts,
-    updateAccountsDeposits,
-    updateAccountBalance,
-    updateCurrentAccountDeposit,
     changeAccount,
-    deleteLocalAccount
+    deleteLocalAccount,
+    walletsCenter
   };
 };

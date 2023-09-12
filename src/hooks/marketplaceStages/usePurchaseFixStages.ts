@@ -14,11 +14,11 @@ export const usePurchaseFixStages = (collectionId: number, tokenId: number, cont
   const marketApi = api?.market;
   // move money to mirror for payment on substrate wallet
   const purchaseStages: InternalStage<TPurchaseProps>[] = useMemo(() => {
-    const account = selectedAccount?.account;
+    const account = selectedAccount;
     if (!account) return [];
     return [
     // for polkadot accounts transfer money to mirror
-    ...(selectedAccount?.account.constructor === MetamaskAccount
+    ...(selectedAccount?.constructor === MetamaskAccount
 ? []
 : [
     {
@@ -27,9 +27,9 @@ export const usePurchaseFixStages = (collectionId: number, tokenId: number, cont
       status: StageStatus.default,
       action: async ({ options, txParams }) => {
         const mirrorAddress = Address.mirror.substrateToEthereum(account.address);
-        const mirrorBalance = await marketApi?.getAccountBalance(mirrorAddress);
+        const balance = await marketApi?.getAccountBalance(mirrorAddress);
         const fee = Number(await marketApi?.getBuyFixFee(collectionId, tokenId, txParams.amount, { ...options, contractAddress }));
-        const toTransfer = Number(txParams.price) + fee - Number(mirrorBalance?.parsed);
+        const toTransfer = Number(txParams.price) + fee - Number(balance?.proper?.parsed);
         if (toTransfer <= 0) return Promise.resolve();
         // just to be safe and makeup for potential rounding issues
         return marketApi?.transferBalance(account.address, mirrorAddress, toTransfer + 1, options);
@@ -41,7 +41,7 @@ export const usePurchaseFixStages = (collectionId: number, tokenId: number, cont
       status: StageStatus.default,
       action: ({ options, txParams }) => marketApi?.buyFix(collectionId, tokenId, txParams.amount, { ...options, contractAddress })
     },
-    ...(selectedAccount?.account.constructor === MetamaskAccount
+    ...(selectedAccount?.constructor === MetamaskAccount
       ? []
       : [{
       title: 'Withdraw',
@@ -50,8 +50,8 @@ export const usePurchaseFixStages = (collectionId: number, tokenId: number, cont
       action: async ({ options, txParams }) => {
         const mirrorAddress = Address.mirror.substrateToEthereum(account.address);
         const mirrorBalance = await marketApi?.getAccountBalance(mirrorAddress);
-        if (mirrorBalance && Number(mirrorBalance.parsed) !== 0) {
-          return marketApi?.transferBalance(mirrorAddress, txParams.accountAddress, mirrorBalance.raw, options);
+        if (mirrorBalance && !mirrorBalance.proper.raw.isZero()) {
+          return marketApi?.transferBalance(mirrorAddress, txParams.accountAddress, mirrorBalance.proper.raw, options);
         }
       }
     }]) as InternalStage<TPurchaseProps>[]

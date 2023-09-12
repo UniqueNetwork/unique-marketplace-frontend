@@ -8,12 +8,13 @@ import { ButtonsRow, FormRow, FormWrapper } from './FormComponents';
 import styled from 'styled-components';
 import { SelectInput } from 'components/SelectInput/SelectInput';
 import { useAccounts } from 'hooks/useAccounts';
-import { MarketAccount } from 'account/types';
+import { Account } from 'account/types';
 import AccountCard from 'components/Account/Account';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { validateAddress } from 'api/chainApi/utils/addressUtils';
 import { useApi } from 'hooks/useApi';
 import { IconButton } from 'components/IconButton/IconButton';
+import { useAccountsFilter } from 'hooks/useAccountsFilter';
 
 interface RoyaltiesFormProps {
   initialFormData: RoyaltiesFormData;
@@ -96,22 +97,16 @@ const RoyaltyComplexComponent = ({ initialValue, onChange, onRemove }: RoyaltyCo
   const { accounts } = useAccounts();
   const [isValidRecipientAddress, setIsValidRecipientAddress] = useState(true);
   const [percentage, setPercentage] = useState<string>(initialValue.value || '');
-  const [recipient, setRecipient] = useState<string | MarketAccount | undefined>(initialValue.address);
+  const [recipient, setRecipient] = useState<string | Account | undefined>(initialValue.address);
 
-  const [filteredAccounts, setFilteredAccounts] = useState(accounts);
+  const { filteredAccounts, onFilter, onReset } = useAccountsFilter();
 
   useEffect(() => {
     setPercentage(initialValue?.value);
     setRecipient(initialValue?.address || '');
   }, [initialValue]);
 
-  const onFilter = useCallback((input: string) => {
-    setFilteredAccounts(accounts.filter((account) => {
-      return account.address.toLowerCase().includes(input.toLowerCase()) || account.name?.toLowerCase().includes(input.toLowerCase());
-    }));
-  }, [accounts]);
-
-  const onChangeAddress = useCallback((value: string | MarketAccount) => {
+  const onChangeAddress = useCallback((value: string | Account) => {
     setRecipient(value);
     if (typeof value === 'string') {
       const isValid = value ? validateAddress(value, prefixes) : true;
@@ -119,11 +114,11 @@ const RoyaltyComplexComponent = ({ initialValue, onChange, onRemove }: RoyaltyCo
       onFilter(value);
       onChange({ value: percentage, address: value }, !!value && isValid);
     } else {
-      setFilteredAccounts(accounts);
+      onReset();
       setIsValidRecipientAddress(true);
       onChange({ value: percentage, address: value.address }, !!value);
     }
-  }, [accounts, onFilter, prefixes, percentage, onChange]);
+  }, [accounts, onFilter, onReset, prefixes, percentage, onChange]);
 
   const onChangePercentage = useCallback((value: string) => {
     if (Number(value) > 99) return;
@@ -131,7 +126,7 @@ const RoyaltyComplexComponent = ({ initialValue, onChange, onRemove }: RoyaltyCo
     const isValid = !!recipient && (typeof recipient === 'string' ? validateAddress(recipient, prefixes) : true);
     onChange({
       value,
-      address: typeof value === 'string' ? recipient as string : (recipient as MarketAccount).address
+      address: typeof value === 'string' ? recipient as string : (recipient as Account).address
     }, isValid);
   }, [recipient, prefixes, onChange]);
 
@@ -139,8 +134,8 @@ const RoyaltyComplexComponent = ({ initialValue, onChange, onRemove }: RoyaltyCo
     <FormRow>
       <RecipientSelectWrapper >
         <Text color='secondary-500'>Royalty recipient address</Text>
-        <SelectInput<MarketAccount>
-          options={(filteredAccounts as unknown as MarketAccount[])}
+        <SelectInput<Account>
+          options={(filteredAccounts as unknown as Account[])}
           value={recipient}
           onChange={onChangeAddress}
           renderOption={(option) => <AddressOptionWrapper>
@@ -183,10 +178,9 @@ const RoyaltyWrapper = styled.div`
 const TotalWrapper = styled.div`
   display: flex;
   gap: 8px;
-  align-items; flex-end;
+  align-items: flex-end;
   flex-direction: column;
   width: 100%;
-
 `;
 
 const RecipientSelectWrapper = styled.div`

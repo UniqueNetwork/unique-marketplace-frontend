@@ -18,8 +18,8 @@ import { useApi } from 'hooks/useApi';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import { TWithdrawBid } from 'api/restApi/auction/types';
 import BalanceSkeleton from '../../Skeleton/BalanceSkeleton';
-import AccountContext from 'account/AccountContext';
 import { ChainSwitcher } from './ChainSwitcher/ChainSwithcher';
+import { ConnectWalletModalContext } from 'account/ConnectWalletModalContext';
 
 const fractionDigits = 4;
 
@@ -28,7 +28,7 @@ function widgetAvatarRender(accountAddress: string) {
 }
 
 export const WalletManager: FC = () => {
-  const { setIsOpenConnectWalletModal } = useContext(AccountContext);
+  const { setIsOpenConnectWalletModal } = useContext(ConnectWalletModalContext);
   const { selectedAccount, accounts, isLoading, changeAccount } = useAccounts();
   const [isOpen, setIsOpen] = useState(false);
   const [isGetKsmOpened, setIsGetKsmOpened] = useState(false);
@@ -53,11 +53,12 @@ export const WalletManager: FC = () => {
   }, [onChangeChainId]);
 
   const widgetSelectedAccount = useMemo(() => (
-    { name: selectedAccount?.name, address: selectedAccount ? selectedAccount.address || selectedAccount.account.getAddress(chainProperties?.SS58Prefix) : '', substrateAddress: selectedAccount?.address }
+    { name: selectedAccount?.name, address: selectedAccount ? selectedAccount.address : '', substrateAddress: selectedAccount?.address }
   ), [selectedAccount, chainProperties?.SS58Prefix]);
 
   const widgetAccountChange = useCallback(({ address }: IAccount) => {
-    const account = accounts.find((account) => account.address === address);
+    if (!address) return;
+    const account = accounts.get(address);
     if (!account) return;
     changeAccount(account);
   }, [accounts, changeAccount]);
@@ -88,23 +89,23 @@ export const WalletManager: FC = () => {
     setIsOpen(false);
   }, [setIsGetKsmOpened]);
 
-  const formattedAccountDeposit = useMemo(() => {
-    if (!selectedAccount?.deposits) {
-      return undefined;
-    }
+  // const formattedAccountDeposit = useMemo(() => {
+  //   if (!selectedAccount?.deposits) {
+  //     return undefined;
+  //   }
 
-    const { sponsorshipFee, bids } = selectedAccount.deposits;
-    const { leader, withdraw } = bids || { leader: [], withdraw: [] };
-    if ((sponsorshipFee?.isZero() && leader.length === 0 && withdraw.length === 0)) {
-      return undefined;
-    }
+  //   const { sponsorshipFee, bids } = selectedAccount.deposits;
+  //   const { leader, withdraw } = bids || { leader: [], withdraw: [] };
+  //   if ((sponsorshipFee?.isZero() && leader.length === 0 && withdraw.length === 0)) {
+  //     return undefined;
+  //   }
 
-    const getTotalAmount = (acc: BN, bid: TWithdrawBid) => acc.add(new BN(bid.amount));
-    const deposit = (sponsorshipFee || new BN(0))
-    .add(withdraw.reduce(getTotalAmount, new BN(0)))
-    .add(leader.reduce(getTotalAmount, new BN(0)));
-    return formatBalance(deposit.toString(), fractionDigits);
-  }, [selectedAccount?.deposits]);
+  //   const getTotalAmount = (acc: BN, bid: TWithdrawBid) => acc.add(new BN(bid.amount));
+  //   const deposit = (sponsorshipFee || new BN(0))
+  //   .add(withdraw.reduce(getTotalAmount, new BN(0)))
+  //   .add(leader.reduce(getTotalAmount, new BN(0)));
+  //   return formatBalance(deposit.toString(), fractionDigits);
+  // }, [selectedAccount?.deposits]);
 
   if (!isLoading && !selectedAccount) {
     return (<>
@@ -123,14 +124,14 @@ export const WalletManager: FC = () => {
     <WalletManagerWrapper>
       <AccountsManager
         open={isOpen}
-        accounts={accounts}
+        accounts={[...accounts.values()]}
         activeNetwork={currentNetwork}
-        balance={formatBalance(selectedAccount?.balance?.parsed || '0', fractionDigits)}
-        deposit={formattedAccountDeposit}
+        balance={formatBalance(selectedAccount?.balances?.proper.parsed || '0', fractionDigits)}
+        // deposit={formattedAccountDeposit}
         depositDescription={
           <>
-            {formattedAccountDeposit && <Text color='grey-500' weight={'light'} size='xs'>The total market deposit for participation in auctions and
-              sponsorship. <br/> Use the “Manage accounts” section to withdraw.</Text>}
+            {/* {formattedAccountDeposit && <Text color='grey-500' weight={'light'} size='xs'>The total market deposit for participation in auctions and
+              sponsorship. <br/> Use the “Manage accounts” section to withdraw.</Text>} */}
           </>
         }
         networks={networks}

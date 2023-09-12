@@ -136,7 +136,7 @@ const AskTransferToBundleModal: FC<AskTransferToBundleModalProps> = ({ token, co
         setIsFeeLoading(false);
       });
     }, 300)();
-  }, [api?.market, token, selectedAccount?.account, collectionProp, isSponsored, amount]);
+  }, [api?.market, token, selectedAccount, collectionProp, isSponsored, amount]);
 
   const onConfirmTransferToBundleClick = useCallback(
     () => {
@@ -160,8 +160,8 @@ const AskTransferToBundleModal: FC<AskTransferToBundleModalProps> = ({ token, co
   const isFeeGreaterThanBalance = useMemo(() => {
     if (!fee || isSponsored) return false;
     const feeBN = new BN(fromStringToBnString(fee));
-    return feeBN.gt(selectedAccount?.balance?.raw || new BN(0));
-  }, [fee, selectedAccount?.balance?.raw, isSponsored]);
+    return feeBN.gt(selectedAccount?.balances?.proper.raw || new BN(0));
+  }, [fee, selectedAccount?.balances?.proper.raw, isSponsored]);
 
   return (
     <>

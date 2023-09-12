@@ -17,9 +17,9 @@ import config from 'config';
 import { AccountInfo } from './types';
 import NoAccountsIcon from 'static/icons/no-accounts.svg';
 import { getAccountsColumns } from './columns';
-import AccountContext from 'account/AccountContext';
-import { MarketAccount as Account } from 'account/types';
+import { Account, AccountSigner } from 'account/types';
 import { useNavigate } from 'react-router-dom';
+import { ConnectWalletModalContext } from 'account/ConnectWalletModalContext';
 
 const testid = 'accounts-page';
 
@@ -36,15 +36,12 @@ enum AccountModal {
 
 export const AccountsPage = () => {
   const { setIsOpenConnectWalletModal } = useContext(
-    AccountContext
+    ConnectWalletModalContext
   );
   const {
     accounts,
-    fetchAccounts,
     isLoading,
-    isLoadingDeposits,
-    deleteLocalAccount,
-    updateAccountsDeposits
+    deleteLocalAccount
   } = useAccounts();
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
   const [selectedAddress, setSelectedAddress] = useState<string>();
@@ -54,18 +51,18 @@ export const AccountsPage = () => {
   const { info } = useNotifications();
 
   useEffect(() => {
-    if (!isLoading && !accounts.length) {
+    if (!isLoading && !accounts.size) {
       navigate(`/${currentChainId}/market`);
     }
   }, [accounts, isLoading]);
 
-  useEffect(() => {
-    // void updateAccountsDeposits();
-  }, [updateAccountsDeposits]);
+  // useEffect(() => {
+  //   // void updateAccountsDeposits();
+  // }, [updateAccountsDeposits]);
 
   useEffect(() => {
     setCurrentModal(undefined);
-    void updateAccountsDeposits();
+    // void updateAccountsDeposits();
   }, [currentChainId]);
 
   const formatAddress = useCallback((address: string) => {
@@ -95,42 +92,45 @@ export const AccountsPage = () => {
 
   const filteredAccounts: AccountInfo[] = useMemo(() => {
     const reduceAccounts = (acc: AccountInfo[], account: Account) => {
-      acc.push(account);
-      if (!account.deposits) return acc;
+      acc.push({
+        ...account,
+        isLocal: account.signerType === AccountSigner.local
+      });
+      // if (!account.deposits) return acc;
 
-      const { sponsorshipFee, bids } = account.deposits;
-      const { leader, withdraw } = bids || { leader: [], withdraw: [] };
+      // const { sponsorshipFee, bids } = account.deposits;
+      // const { leader, withdraw } = bids || { leader: [], withdraw: [] };
 
-      if ((!sponsorshipFee?.isZero() || leader.length !== 0 || withdraw.length !== 0)) {
-        const getTotalAmount = (acc: BN, bid: TWithdrawBid) => acc.add(new BN(bid.amount));
+      // if ((!sponsorshipFee?.isZero() || leader.length !== 0 || withdraw.length !== 0)) {
+      //   const getTotalAmount = (acc: BN, bid: TWithdrawBid) => acc.add(new BN(bid.amount));
 
-        // add row with deposit info only on big screens
-        if (deviceSize !== DeviceSize.sm) {
-          acc.push({
-            ...account,
-            deposit: (sponsorshipFee || new BN(0))
-              .add(withdraw.reduce(getTotalAmount, new BN(0)))
-              .add(leader.reduce(getTotalAmount, new BN(0)))
-          });
-        } else {
-          acc[acc.length - 1] = {
-            ...account,
-            deposit: (sponsorshipFee || new BN(0))
-              .add(withdraw.reduce(getTotalAmount, new BN(0)))
-              .add(leader.reduce(getTotalAmount, new BN(0)))
-          };
-        }
-      }
+      //   // add row with deposit info only on big screens
+      //   if (deviceSize !== DeviceSize.sm) {
+      //     acc.push({
+      //       ...account,
+      //       deposit: (sponsorshipFee || new BN(0))
+      //         .add(withdraw.reduce(getTotalAmount, new BN(0)))
+      //         .add(leader.reduce(getTotalAmount, new BN(0)))
+      //     });
+      //   } else {
+      //     acc[acc.length - 1] = {
+      //       ...account,
+      //       deposit: (sponsorshipFee || new BN(0))
+      //         .add(withdraw.reduce(getTotalAmount, new BN(0)))
+      //         .add(leader.reduce(getTotalAmount, new BN(0)))
+      //     };
+      //   }
+      // }
       return acc;
     };
 
-    return accounts.reduce(reduceAccounts, []);
+    return [...accounts.values()].reduce(reduceAccounts, []);
   }, [accounts, deviceSize]);
 
-  const onChangeAccountsFinish = useCallback(async () => {
+  const onChangeAccountsFinish = useCallback(() => {
     setCurrentModal(undefined);
-    await fetchAccounts();
-  }, [fetchAccounts]);
+    // await fetchAccounts();
+  }, []);
 
   const onModalClose = useCallback(() => {
     setCurrentModal(undefined);
@@ -164,7 +164,7 @@ export const AccountsPage = () => {
             scanUrl: currentChainId ? config.blockchains[currentChainId]?.scanUrl : ''
           })}
           data={filteredAccounts}
-          loading={isLoading || isLoadingDeposits}
+          loading={isLoading}
           emptyIconProps={{ file: NoAccountsIcon }}
           idColumnName={'address'}
         />

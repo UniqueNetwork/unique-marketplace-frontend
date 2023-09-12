@@ -71,27 +71,27 @@ export class UniqueSDKNFTController extends BaseController {
   }
 
   async getTransferToBundleFee(address: string, nested: TokenIdQuery, newParent: TokenIdQuery, mode: CollectionMode, amount: number, { account }: TransactionOptions): Promise<string> {
-    const adapter = this.getAdapter(account.account);
+    const adapter = this.getAdapter(account);
     const rawFee = await adapter.getNestTokenFee(
       address,
       { collectionId: Number(nested.collectionId), tokenId: nested.tokenId },
       { collectionId: Number(newParent.collectionId), tokenId: newParent.tokenId },
       mode,
       amount,
-      account.signer
+      account
     );
     return this.getChainValue(rawFee, this.decimals).parsed.toString();
   }
 
   async transferToBundle(address: string, nested: TokenIdQuery, newParent: TokenIdQuery, mode: CollectionMode, amount: number, { account }: TransactionOptions): Promise<void> {
-    const adapter = this.getAdapter(account.account);
+    const adapter = this.getAdapter(account);
     await adapter.nestToken(
       address,
       { collectionId: Number(nested.collectionId), tokenId: nested.tokenId },
       { collectionId: Number(newParent.collectionId), tokenId: newParent.tokenId },
       mode,
       amount,
-      account.signer
+      account
     );
   }
 
@@ -100,8 +100,8 @@ export class UniqueSDKNFTController extends BaseController {
 
     if (!parent) return '0';
 
-    const adapter = this.getAdapter(account.account);
-    const rawFee = await adapter.getUnnestTokenFee({ collectionId, tokenId }, parent, mode, amount, account.signer);
+    const adapter = this.getAdapter(account);
+    const rawFee = await adapter.getUnnestTokenFee({ collectionId, tokenId }, parent, mode, amount, account);
     return this.getChainValue(rawFee, this.decimals).parsed.toString();
   }
 
@@ -110,8 +110,8 @@ export class UniqueSDKNFTController extends BaseController {
 
     if (!parent) return;
 
-    const adapter = this.getAdapter(account.account);
-    await adapter.unnestToken({ collectionId, tokenId }, parent, mode, amount, account.signer);
+    const adapter = this.getAdapter(account);
+    await adapter.unnestToken({ collectionId, tokenId }, parent, mode, amount, account);
   }
 
   async getOwner(collectionId: number, tokenId: number): Promise<TokenOwnerResponse | null> {

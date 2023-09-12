@@ -1,7 +1,7 @@
 import { MetamaskAccount } from '@unique-nft/accounts/metamask';
 import { Sdk } from '@unique-nft/sdk/full';
 import { NetworkOptions } from 'api/sdk/sdkClient';
-import { Account } from '@unique-nft/accounts/types';
+import { Account } from 'account/types';
 import IMarketContractAdapter from '../adapters/IMarketContractAdapter';
 import MetamaskAdapter from '../adapters/MetamaskAdapter';
 import UniqueAdapter from '../adapters/UniqueAdapter';

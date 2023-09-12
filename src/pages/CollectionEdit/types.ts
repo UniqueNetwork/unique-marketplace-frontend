@@ -1,4 +1,4 @@
-import { MarketAccount } from 'account/types';
+import { Account } from 'account/types';
 
 export type CollectionFormData = {
   description: string;

@@ -173,10 +173,10 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
 
   const isEnoughBalance = useMemo(() => {
     if (isSponsored) return true;
-    if (!selectedAccount?.balance?.raw || selectedAccount.balance?.raw.isZero() || !fee) return false;
+    if (!selectedAccount?.balances?.proper.raw || selectedAccount.balances?.proper.raw.isZero() || !fee) return false;
 
-    return selectedAccount.balance?.raw.gte(new BN(fromStringToBnString(fee)));
-  }, [fee, selectedAccount?.balance?.raw, isSponsored]);
+    return selectedAccount.balances?.proper.raw.gte(new BN(fromStringToBnString(fee)));
+  }, [fee, selectedAccount?.balances?.proper.raw, isSponsored]);
 
   useEffect(() => {
     if (!api || !selectedAccount || !priceInputValue) return;

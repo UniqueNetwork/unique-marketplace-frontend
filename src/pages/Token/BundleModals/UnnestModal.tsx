@@ -123,8 +123,8 @@ const AskUnnestModal: FC<AskUnnestModalProps> = ({ token, parentAddress, collect
   const isFeeGreaterThanBalance = useMemo(() => {
     if (!fee || isSponsored) return false;
     const feeBN = new BN(fromStringToBnString(fee));
-    return feeBN.gt(selectedAccount?.balance?.raw || new BN(0));
-  }, [fee, selectedAccount?.balance?.raw, isSponsored]);
+    return feeBN.gt(selectedAccount?.balances?.proper.raw || new BN(0));
+  }, [fee, selectedAccount?.balances?.proper.raw, isSponsored]);
 
   return (
     <>

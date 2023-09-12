@@ -1,4 +1,4 @@
-import { MarketAccount } from 'account/types';
+import { Account } from 'account/types';
 import { post } from 'api/restApi/base';
 import { useApi } from 'hooks/useApi';
 import { useCallback, useState } from 'react';
@@ -57,7 +57,7 @@ export const useGetMyTokens = () => {
   const [isFetching, setIsFetching] = useState(false);
   const [tokens, setTokens] = useState<MyToken[]>([]);
 
-  const fetchMyTokens = useCallback(async (account: MarketAccount | undefined) => {
+  const fetchMyTokens = useCallback(async (account: Account | undefined) => {
     if (!account) return [];
     setIsFetching(true);
     const address = Address.is.ethereumAddressInAnyForm(account.address)
