@@ -1,4 +1,4 @@
-import { ChainPropertiesResponse, UnsignedTxPayloadResponse } from '@unique-nft/sdk';
+import { ChainPropertiesResponse, UnsignedTxPayloadResponse, SignTxResultResponse } from '@unique-nft/sdk';
 import { web3Accounts, web3Enable, web3FromSource } from '@polkadot/extension-dapp';
 import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -42,6 +42,7 @@ export class PolkadotWallet implements BaseWalletEntity<InjectedAccountWithMeta>
     this._accounts = new Map(
       accounts.map((account) => {
         const normalizedAddress = AccountUtils.normalizedAddressAccount(account.address);
+
         return [
           normalizedAddress,
           {
@@ -54,6 +55,19 @@ export class PolkadotWallet implements BaseWalletEntity<InjectedAccountWithMeta>
             walletMetaInformation: account,
             signerType: AccountSigner.extension,
             sign: this.getSignature.bind(this),
+            signer: {
+              address: normalizedAddress,
+              sign: async (unsignedTxPayload: UnsignedTxPayloadResponse) => {
+                const injector = await web3FromSource(account.meta.source);
+                if (!injector.signer.signPayload) {
+                  throw new Error('Web3 not available');
+                }
+                const result = await injector.signer.signPayload(
+                  unsignedTxPayload?.signerPayloadJSON
+                );
+                return { signature: result.signature, signatureType: account.type } as SignTxResultResponse;
+              }
+            },
             changeChain: this.changeChain.bind(this),
             isMintingEnabled: this.isMintingEnabled
           }

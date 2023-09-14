@@ -24,7 +24,7 @@ export const ConnectWallets = () => {
   );
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
   const [missingExtension, setMissingExtension] = useState<'Polkadot' | 'Metamask'>();
-  const { walletsCenter } = useAccounts();
+  const { walletsCenter, showSignDialog } = useAccounts();
 
   const onCreateAccountClick = useCallback(() => {
     setCurrentModal(AccountModal.CREATE);
@@ -53,7 +53,9 @@ export const ConnectWallets = () => {
   const handleConnectToPolkadotExtension = async () => {
     try {
       await walletsCenter.connectWallet('polkadot');
-      await walletsCenter.connectWallet('keyring');
+      await walletsCenter.connectWallet('keyring', {
+        requestPasswordCallback: showSignDialog
+      });
       setIsOpenConnectWalletModal(false);
     } catch (e: any) {
       setMissingExtension('Polkadot');

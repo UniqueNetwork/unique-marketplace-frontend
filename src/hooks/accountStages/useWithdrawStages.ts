@@ -14,12 +14,12 @@ export const useWithdrawStages = (accountAddress: string) => {
     description: '',
     status: StageStatus.default,
     action: (params) => marketApi?.transferBalance(
-      params.txParams.sender,
+      params.txParams?.sender,
       params.txParams?.recipient || '',
-      params.options.account.balances?.ethMirror.parsed || '0',
+      params.options.account.balances?.ethMirror.raw || '0',
       params.options
     )
-  }], [marketApi]) as InternalStage<TWithdrawFunds>[];
+  }], [marketApi, accountAddress]) as InternalStage<TWithdrawFunds>[];
 
   const signer = useMemo(() => {
     return accounts.get(accountAddress);

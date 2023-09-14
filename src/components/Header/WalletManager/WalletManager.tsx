@@ -89,23 +89,10 @@ export const WalletManager: FC = () => {
     setIsOpen(false);
   }, [setIsGetKsmOpened]);
 
-  // const formattedAccountDeposit = useMemo(() => {
-  //   if (!selectedAccount?.deposits) {
-  //     return undefined;
-  //   }
-
-  //   const { sponsorshipFee, bids } = selectedAccount.deposits;
-  //   const { leader, withdraw } = bids || { leader: [], withdraw: [] };
-  //   if ((sponsorshipFee?.isZero() && leader.length === 0 && withdraw.length === 0)) {
-  //     return undefined;
-  //   }
-
-  //   const getTotalAmount = (acc: BN, bid: TWithdrawBid) => acc.add(new BN(bid.amount));
-  //   const deposit = (sponsorshipFee || new BN(0))
-  //   .add(withdraw.reduce(getTotalAmount, new BN(0)))
-  //   .add(leader.reduce(getTotalAmount, new BN(0)));
-  //   return formatBalance(deposit.toString(), fractionDigits);
-  // }, [selectedAccount?.deposits]);
+  const balance = useMemo(() => {
+    if (!selectedAccount) return '0';
+    return formatBalance(accounts.get(selectedAccount?.address)?.balances?.proper.parsed || '0', fractionDigits);
+  }, [selectedAccount, accounts]);
 
   if (!isLoading && !selectedAccount) {
     return (<>
@@ -126,14 +113,7 @@ export const WalletManager: FC = () => {
         open={isOpen}
         accounts={[...accounts.values()]}
         activeNetwork={currentNetwork}
-        balance={formatBalance(selectedAccount?.balances?.proper.parsed || '0', fractionDigits)}
-        // deposit={formattedAccountDeposit}
-        depositDescription={
-          <>
-            {/* {formattedAccountDeposit && <Text color='grey-500' weight={'light'} size='xs'>The total market deposit for participation in auctions and
-              sponsorship. <br/> Use the “Manage accounts” section to withdraw.</Text>} */}
-          </>
-        }
+        balance={balance}
         networks={networks}
         onAccountChange={widgetAccountChange}
         onCopyAddressClick={onCopyAddress}

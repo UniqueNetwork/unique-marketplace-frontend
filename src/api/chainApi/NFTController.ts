@@ -78,7 +78,7 @@ export class UniqueSDKNFTController extends BaseController {
       { collectionId: Number(newParent.collectionId), tokenId: newParent.tokenId },
       mode,
       amount,
-      account
+      account.signer
     );
     return this.getChainValue(rawFee, this.decimals).parsed.toString();
   }
@@ -91,7 +91,7 @@ export class UniqueSDKNFTController extends BaseController {
       { collectionId: Number(newParent.collectionId), tokenId: newParent.tokenId },
       mode,
       amount,
-      account
+      account.signer
     );
   }
 
@@ -111,7 +111,7 @@ export class UniqueSDKNFTController extends BaseController {
     if (!parent) return;
 
     const adapter = this.getAdapter(account);
-    await adapter.unnestToken({ collectionId, tokenId }, parent, mode, amount, account);
+    await adapter.unnestToken({ collectionId, tokenId }, parent, mode, amount, account.signer);
   }
 
   async getOwner(collectionId: number, tokenId: number): Promise<TokenOwnerResponse | null> {

@@ -1,4 +1,4 @@
-import { FC, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import keyring from '@polkadot/ui-keyring';
 import { Address } from '@unique-nft/utils';
 
@@ -9,23 +9,21 @@ import { DefaultAccountKey } from './constants';
 import { SignModal } from '../components/SignModal/SignModal';
 import { AccountProvider } from './AccountContext';
 import { useApi } from 'hooks/useApi';
+import { useBalanceSubscriptions } from './useBalanceSubscriptions';
+import { KeyringPair } from '@polkadot/keyring/types';
 
 export const AccountWrapper: FC = ({ children }) => {
-  const { currentChainId, chainProperties } = useApi();
+  const { chainProperties, api } = useApi();
   const [accounts, setAccounts] = useState<Map<string, BaseWalletType<WalletsType>>>(
     new Map()
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [fetchAccountsError, setFetchAccountsError] = useState<string | undefined>();
   const [selectedAccount, setSelectedAccount] = useState<Account>();
-  const [signer, setSigner] = useState<Account>();
-
-  // const { data: balanceAccount, refetch: refetchAccount } = useAccountBalanceService(
-  //   selectedAccount?.address,
-  //   currentChain.apiEndpoint
-  // );
+  const [signer, setSigner] = useState<KeyringPair>();
 
   const walletsCenter = useWalletCenter(chainProperties);
+  const { subscribeBalancesChanges, isBalancesFetching } = useBalanceSubscriptions();
 
   useEffect(() => {
     setAccounts((accounts) => {
@@ -51,7 +49,6 @@ export const AccountWrapper: FC = ({ children }) => {
         account.address,
         chainProperties?.SS58Prefix
       );
-      // refetchAccount();
       return { ...account, address };
     });
   }, [chainProperties]);
@@ -72,8 +69,8 @@ export const AccountWrapper: FC = ({ children }) => {
 
   const onSignCallback = useRef<(password?: string) => void | undefined>();
 
-  const showSignDialog = useCallback((signer: Account) => {
-    setSigner(signer);
+  const showSignDialog = useCallback((pair: KeyringPair) => {
+    setSigner(pair);
     setIsSignModalVisible(true);
 
     return new Promise<string>((resolve, reject) => {
@@ -101,7 +98,12 @@ export const AccountWrapper: FC = ({ children }) => {
     async (forgetAddress: string) => {
       keyring.forgetAccount(forgetAddress);
       setIsLoading(true);
-      await walletsCenter.connectWallet('keyring');
+      await walletsCenter.connectWallet(
+        'keyring',
+        {
+          requestPasswordCallback: showSignDialog
+        }
+      );
       setIsLoading(false);
     },
     [walletsCenter]
@@ -112,31 +114,24 @@ export const AccountWrapper: FC = ({ children }) => {
       return;
     }
 
-    const defaultAccountAddress = localStorage.getItem(DefaultAccountKey) || '';
+    const defaultAccountNormalizedAddress = localStorage.getItem(DefaultAccountKey) || '';
+
+    const defaultAccountAddress = Address.is.ethereumAddressInAnyForm(defaultAccountNormalizedAddress)
+      ? defaultAccountNormalizedAddress
+      : Address.normalize.substrateAddress(defaultAccountNormalizedAddress, chainProperties?.SS58Prefix);
 
     const defaultAccount = accounts.get(defaultAccountAddress);
 
     const [firstAccount] = accounts.keys();
     const account = accounts.get(firstAccount);
-    const selectedAccount = defaultAccount ?? account;
+    const selectedAccount = defaultAccount || account;
     if (selectedAccount) {
       changeAccount(selectedAccount);
     }
   }, [accounts, changeAccount, isLoading]);
 
   useEffect(() => {
-    const map = new Map();
-
-    for (const value of walletsCenter.connectedWallets.values()) {
-      value.forEach((w) => {
-        map.set(w.normalizedAddress, w);
-      });
-    }
-
-    setAccounts(map);
-  }, [walletsCenter.connectedWallets]);
-
-  useEffect(() => {
+    if (!chainProperties || !api?.market?.uniqueSdk) return;
     const getConnectedWallets = localStorage.getItem(CONNECTED_WALLET_TYPE);
     if (!getConnectedWallets) {
       setIsLoading(false);
@@ -145,31 +140,38 @@ export const AccountWrapper: FC = ({ children }) => {
     setIsLoading(true);
     const wallets = getConnectedWallets.split(';') as ConnectedWalletsName[];
     const connectedWallets = wallets.map((typeWallet) =>
-      walletsCenter.connectWallet(typeWallet)
+      walletsCenter.connectWallet(
+        typeWallet,
+        {
+          requestPasswordCallback: showSignDialog
+        }
+      )
     );
     if (!connectedWallets.length) {
       setIsLoading(false);
       return;
     }
 
-    Promise.allSettled(connectedWallets).finally(() => {
-      setIsLoading(false);
-    });
-  }, []);
+    void Promise.allSettled(connectedWallets)
+      .then((results) => {
+        const map = new Map();
+        results.forEach((result) => {
+          if (result.status !== 'fulfilled' || !result.value) return;
+          result.value.forEach((acc, address) => {
+            map.set(address, acc);
+          });
+        });
 
-  useEffect(() => {
-    // if (selectedAccount) {
-    //   setSelectedAccount(() => ({
-    //     ...selectedAccount,
-    //     balance: balanceAccount,
-    //     unitBalance: (balanceAccount?.availableBalance.unit as NetworkType) ?? ''
-    //   }));
-    // }
-  }, [selectedAccount]);
+        void (async () => {
+          setAccounts(await subscribeBalancesChanges(map, setAccounts));
+          setIsLoading(false);
+        })();
+      });
+  }, [chainProperties, api?.market?.uniqueSdk]);
 
   const value = useMemo(
     () => ({
-      isLoading,
+      isLoading: isLoading || isBalancesFetching,
       signer,
       accounts,
       selectedAccount,
@@ -183,6 +185,7 @@ export const AccountWrapper: FC = ({ children }) => {
     }),
     [
       isLoading,
+      isBalancesFetching,
       signer,
       accounts,
       selectedAccount,
@@ -195,7 +198,6 @@ export const AccountWrapper: FC = ({ children }) => {
   );
 
   return (
-    // @ts-ignore
     <AccountProvider value={value}>
       {children}
       <SignModal

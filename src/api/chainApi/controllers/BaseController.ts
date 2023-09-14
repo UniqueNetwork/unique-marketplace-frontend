@@ -10,6 +10,7 @@ import { BN } from '@polkadot/util';
 import { ethers } from 'ethers';
 import { changeMetamaskChain } from 'utils/metamask';
 import { EthereumChainParams } from 'account/constants';
+import { MetamaskAccountName } from 'account/MetamaskWallet';
 
 export type ChainValue = {
   raw: string;
@@ -64,7 +65,7 @@ class BaseController implements IBaseController {
   }
 
   private isMetamaskSigner(account: Account): boolean {
-    return account instanceof MetamaskAccount;
+    return account.name === MetamaskAccountName;
   }
 
   protected getAdapter(account: Account): IMarketContractAdapter {

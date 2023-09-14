@@ -61,7 +61,7 @@ export class UniqueSDKCollectionController extends BaseController {
     // const { signature } = await this.uniqueSdk.collection.setProperties.sign(unsignedTxPayload, { signer: account });
     // if (!signature) throw new Error('Signing failed');
     const adapter = this.getAdapter(account);
-    await adapter.setCollectionProperties(collectionId, properties, account);
+    await adapter.setCollectionProperties(collectionId, properties, account.signer);
 
     // await this.uniqueSdk.collection.setProperties.submit({
     //   signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,

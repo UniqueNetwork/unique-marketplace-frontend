@@ -1,15 +1,20 @@
 import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
 import { KeyringAddress } from '@polkadot/ui-keyring/types';
 import { BN } from '@polkadot/util';
-import { AllBalancesResponse, UnsignedTxPayloadResponse } from '@unique-nft/sdk';
+import { Signer as SdkSigner, UnsignedTxPayloadResponse } from '@unique-nft/sdk';
 import { IEthereumExtensionResultSafe } from '@unique-nft/utils/extension';
 import { useWalletCenter } from './useWalletCenter';
+import { Signer as EthSigner } from 'ethers';
+import { KeyringPair } from '@polkadot/keyring/types';
+
+export type Signer = SdkSigner | EthSigner;
 
 export type BaseWalletType<T> = {
   name: string;
   address: string;
   normalizedAddress: string;
   signerType: AccountSigner;
+  signer: Signer;
   walletMetaInformation: T;
   sign(data: any, account?: any, meta?: any): any;
   changeChain(network: string): Promise<void>;
@@ -26,6 +31,12 @@ export type BaseWalletEntity<T> = {
     meta: any,
   ): any;
 };
+
+export type RequestPasswordCallback = (pair: KeyringPair) => Promise<string>;
+
+export type ConnectedWalletOptions = {
+  requestPasswordCallback?: RequestPasswordCallback;
+}
 
 export enum AccountSigner {
   extension = 'Extension',
@@ -54,14 +65,14 @@ export type Account<T extends WalletsType = WalletsType> = BaseWalletType<T> & {
 
 export type AccountContextProps = {
   isLoading: boolean;
-  signer?: Account;
+  signer?: KeyringPair;
   accounts: Map<string, Account>;
   selectedAccount: Account | undefined;
   fetchAccountsError: string | undefined;
   changeAccount(account: Account): void;
   setFetchAccountsError(error: string | undefined): void;
   setIsLoading(loading: boolean): void;
-  showSignDialog(signer: Account): Promise<string>;
+  showSignDialog(pair: KeyringPair): Promise<string>;
   forgetLocalAccount(addressWallet: string): void;
   walletsCenter: ReturnType<typeof useWalletCenter>;
 };

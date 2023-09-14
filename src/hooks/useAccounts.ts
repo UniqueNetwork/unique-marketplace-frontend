@@ -15,7 +15,8 @@ export const useAccounts = () => {
     fetchAccountsError,
     changeAccount,
     forgetLocalAccount,
-    walletsCenter
+    walletsCenter,
+    showSignDialog
   } = useContext(AccountContext);
 
   // useEffect(() => {
@@ -40,6 +41,7 @@ export const useAccounts = () => {
     addLocalAccount,
     changeAccount,
     deleteLocalAccount,
-    walletsCenter
+    walletsCenter,
+    showSignDialog
   };
 };

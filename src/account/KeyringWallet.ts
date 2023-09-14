@@ -3,11 +3,12 @@ import { u8aToHex } from '@polkadot/util';
 import keyring from '@polkadot/ui-keyring';
 import { KeyringAddress } from '@polkadot/ui-keyring/types';
 
-import { Account, AccountSigner, BaseWalletEntity, BaseWalletType } from './types';
+import { Account, AccountSigner, BaseWalletEntity, BaseWalletType, ConnectedWalletOptions, RequestPasswordCallback } from './types';
 import { AccountUtils } from './AccountUtils';
 
 export class KeyringWallet implements BaseWalletEntity<KeyringAddress> {
   private _accounts = new Map<string, BaseWalletType<KeyringAddress>>();
+  public passwordCallback?: RequestPasswordCallback;
   isMintingEnabled = true;
 
   // eslint-disable-next-line no-useless-constructor
@@ -30,6 +31,28 @@ export class KeyringWallet implements BaseWalletEntity<KeyringAddress> {
             walletMetaInformation: account,
             signerType: AccountSigner.local,
             sign: this.getSignature,
+            signer: {
+              address: normalizedAddress,
+              sign: async (unsignedTxPayload: UnsignedTxPayloadResponse) => {
+                const keyringPair = keyring.getPair(account.address);
+                  if (keyringPair.isLocked && this.passwordCallback) {
+                    const password = await this.passwordCallback(keyringPair);
+                    keyringPair.unlock(password);
+                  }
+
+                  const signature = keyringPair.sign(
+                    unsignedTxPayload.signerPayloadHex,
+                    {
+                      withType: true
+                    }
+                  );
+
+                  return {
+                    signature: u8aToHex(signature),
+                    signatureType: keyringPair.type
+                  };
+              }
+            },
             changeChain: this.changeChain.bind(this),
             isMintingEnabled: this.isMintingEnabled
           }

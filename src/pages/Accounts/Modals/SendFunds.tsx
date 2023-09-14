@@ -90,10 +90,11 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   const [isSetMaxLoading, setIsSetMaxLoading] = useState(false);
   const deviceSize = useDeviceSize();
   const { filteredAccounts, onFilter, onReset } = useAccountsFilter({
-    excluded: sender ? [sender?.address] : []
+    excluded: useMemo(() => sender ? [sender?.address] : [], [sender])
   });
 
   useEffect(() => {
+    if (!senderAddress) return;
     const account = accounts.get(senderAddress);
     setSender(account);
   }, [senderAddress, accounts]);

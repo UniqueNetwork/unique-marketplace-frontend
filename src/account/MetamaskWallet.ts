@@ -1,6 +1,6 @@
 import { Ethereum, IEthereumExtensionResultSafe } from '@unique-nft/utils/extension';
 import { ChainPropertiesResponse, UnsignedTxPayloadResponse } from '@unique-nft/sdk';
-import { ethers } from 'ethers';
+import { ethers, Signer } from 'ethers';
 
 import { BaseWalletEntity, BaseWalletType, Account, AccountSigner } from './types';
 
@@ -51,6 +51,10 @@ export class MetamaskWallet
     if (!res.result.address) {
       return new Map();
     }
+
+    // @ts-ignore
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+
     this._accounts = new Map([
       [
         res.result.address,
@@ -61,6 +65,7 @@ export class MetamaskWallet
           walletMetaInformation: res.result,
           signerType: AccountSigner.extension,
           sign: this.getSignature,
+          signer: provider.getSigner() as Signer,
           changeChain: this.changeChain.bind(this),
           isMintingEnabled: this.isMintingEnabled
         }

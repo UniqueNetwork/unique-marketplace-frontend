@@ -4,7 +4,7 @@ import { ChainPropertiesResponse } from '@unique-nft/sdk';
 import { PolkadotWallet } from './PolkadotWallet';
 import { KeyringWallet } from './KeyringWallet';
 import { MetamaskWallet } from './MetamaskWallet';
-import { BaseWalletType } from './types';
+import { Account, BaseWalletType, ConnectedWalletOptions } from './types';
 
 export type ConnectedWalletsName = 'polkadot' | 'keyring' | 'metamask';
 
@@ -25,11 +25,15 @@ export const useWalletCenter = (chainProperties?: ChainPropertiesResponse) => {
   );
 
   const connectWallet = useCallback(
-    async (typeWallet: ConnectedWalletsName) => {
+    async (typeWallet: ConnectedWalletsName, options?: ConnectedWalletOptions) => {
       if (!chainProperties) return;
       try {
         const wallet = new (wallets.get(typeWallet)!)(chainProperties);
         const currentWallets = await wallet.getAccounts();
+
+        if (typeWallet === 'keyring' && options?.requestPasswordCallback) {
+          (wallet as KeyringWallet).passwordCallback = options.requestPasswordCallback;
+        }
 
         const connectedWallets =
           localStorage.getItem(CONNECTED_WALLET_TYPE)?.split(';') || [];
@@ -40,6 +44,7 @@ export const useWalletCenter = (chainProperties?: ChainPropertiesResponse) => {
         }
 
         setConnectedWallets((prev) => new Map([...prev, [typeWallet, currentWallets]]));
+        return currentWallets;
       } catch (e: any) {
         const connectedWallets =
           localStorage.getItem(CONNECTED_WALLET_TYPE)?.split(';') || [];

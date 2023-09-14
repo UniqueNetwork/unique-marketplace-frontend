@@ -76,7 +76,7 @@ class MarketController extends BaseController implements IMarketController {
       tokenId,
       priceWithDecimals,
       amount,
-      account,
+      account.signer,
       this.actualContract
     );
     return this.getChainValue(rawFee, this.decimals).parsed.toString();
@@ -94,7 +94,7 @@ class MarketController extends BaseController implements IMarketController {
       tokenId,
       parsedPrice,
       amount,
-      account,
+      account.signer,
       contractAddress
       ? {
         address: contractAddress,
@@ -121,7 +121,7 @@ class MarketController extends BaseController implements IMarketController {
     const adapter = this.getAdapter(account);
     // chain format from human format: 1.25 -> 1250000000000000000
     const priceWithDecimals = (price * (10 ** this.decimals)).toLocaleString('fullwide', { useGrouping: false });
-    await adapter.sell(from, collectionId, tokenId, priceWithDecimals, amount, account, this.actualContract);
+    await adapter.sell(from, collectionId, tokenId, priceWithDecimals, amount, account.signer, this.actualContract);
     await sleep(1000); // little lag to make sure offer is added to db
   }
 
@@ -137,7 +137,7 @@ class MarketController extends BaseController implements IMarketController {
     const adapter = this.getAdapter(account);
 
     const parsedPrice = BigInt(value.hex).toString();
-    await adapter.buy(to, collectionId, tokenId, parsedPrice, amount, account,
+    await adapter.buy(to, collectionId, tokenId, parsedPrice, amount, account.signer,
       contractAddress
       ? {
         address: contractAddress,
@@ -196,7 +196,7 @@ class MarketController extends BaseController implements IMarketController {
 
   async getTransferTokenFee(sender: string, recipient: string, collectionId: number, tokenId: number, mode: CollectionMode, amount: number, { account }: TransactionOptions): Promise<string | null> {
     const adapter = this.getAdapter(account);
-    const rawFee = await adapter.getTransferTokenFee(sender, recipient, collectionId, tokenId, mode, amount, account);
+    const rawFee = await adapter.getTransferTokenFee(sender, recipient, collectionId, tokenId, mode, amount, account.signer);
     return this.getChainValue(rawFee, this.decimals).parsed.toString();
   }
 
@@ -219,7 +219,7 @@ class MarketController extends BaseController implements IMarketController {
    * @param param3
    */
   async transferBalance(from: string, to: string, amount: BN | number | string, { account }: TransactionOptions): Promise<void> {
-    await this.getAdapter(account).transferBalance(from, to, this.getChainValue(amount, this.decimals), account);
+    await this.getAdapter(account).transferBalance(from, to, this.getChainValue(amount, this.decimals), account.signer);
   }
 
   hasContractMethod(contractAddress: string, method: string): boolean {
@@ -235,7 +235,7 @@ class MarketController extends BaseController implements IMarketController {
       }
     : this.actualContract;
     const priceWithDecimals = (price * (10 ** this.decimals)).toLocaleString('fullwide', { useGrouping: false });
-    await adapter.changePrice(collectionId, tokenId, priceWithDecimals, account, contract);
+    await adapter.changePrice(collectionId, tokenId, priceWithDecimals, account.signer, contract);
   }
 
   async getChangePriceFee(collectionId: number, tokenId: number, price: number, { account, contractAddress }: TransactionOptions): Promise<string> {
@@ -247,7 +247,7 @@ class MarketController extends BaseController implements IMarketController {
       }
     : this.actualContract;
     const priceWithDecimals = (price * (10 ** this.decimals)).toLocaleString('fullwide', { useGrouping: false });
-    const rawFee = await adapter.getChangePriceFee(collectionId, tokenId, priceWithDecimals, account, contract);
+    const rawFee = await adapter.getChangePriceFee(collectionId, tokenId, priceWithDecimals, account.signer, contract);
 
     return this.getChainValue(rawFee, this.decimals).parsed.toString();
   }
