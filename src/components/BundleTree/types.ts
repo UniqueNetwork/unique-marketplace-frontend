@@ -13,6 +13,7 @@ export interface INestingToken extends NestedToken {
 export interface ITokenCard {
   token?: INestingToken
   tokenId: number
+  fixedWidth?: boolean
   collectionId: number
   isCurrentAccountOwner?: boolean
   onViewNodeDetails?: (token: INestingToken, collectionMode: CollectionMode) => void

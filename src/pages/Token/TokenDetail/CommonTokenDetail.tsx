@@ -2,7 +2,8 @@ import { Heading, Text } from '@unique-nft/ui-kit';
 import React, { FC, ReactChild, useCallback, useContext, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { Dropdown, Icon } from 'components/UI';
-import { Picture } from 'components';
+import { Picture, TokensCard } from 'components';
+import TokensBandleCard from 'components/BundleTree/NestedSection/TokenCard';
 import { CollectionsCard } from './CollectionsCard';
 import { AttributesBlock } from './AttributesBlock';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
@@ -20,13 +21,14 @@ import ShareTokenModal from './ShareTokenModal';
 import { stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
 import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
 import { ReportModal } from './ReportModal';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Address } from '@unique-nft/utils';
 import { FractionalDetail } from './FractionalDetail';
 import { TokenContext } from '../context/TokenContext';
 import { FractionalOwnersList } from './FractionalOwnersList';
 import { OwnerCard } from 'components/OwnerCard/OwnerCard';
 import { BadgeEnum } from 'components/Picture';
+import { INestingToken } from 'components/BundleTree/types';
 
 interface IProps {
   token?: TokenByIdResponse
@@ -37,6 +39,7 @@ interface IProps {
   isBundle: boolean
   isNested: boolean
   isOwner: boolean
+  topmostOwner?: string
 }
 
 export const CommonTokenDetail: FC<IProps> = ({
@@ -48,8 +51,10 @@ export const CommonTokenDetail: FC<IProps> = ({
   testid,
   isBundle,
   isNested,
-  isOwner
+  isOwner,
+  topmostOwner
 }) => {
+  const navigate = useNavigate();
   const { address } = useParams<{ address: string }>();
   const { isRft, isRftFracton } = useContext(TokenContext);
   const {
@@ -96,9 +101,10 @@ export const CommonTokenDetail: FC<IProps> = ({
     if (offer) {
       return formatAddress(offer?.seller);
     }
+    if (isNested && topmostOwner) return formatAddress(topmostOwner);
     if (!token?.owner) return undefined;
     return (token.owner ? formatAddress(token.owner) : token.owner);
-  }, [token, collection?.mode, offer, formatAddress, address]);
+  }, [token, collection?.mode, offer, formatAddress, address, isNested, topmostOwner]);
 
   const [shareModalVisible, setShareModalVisible] = useState(false);
   const [reportModalVisible, setReportModalVisible] = useState(false);
@@ -134,6 +140,15 @@ export const CommonTokenDetail: FC<IProps> = ({
     ...(isNested ? [BadgeEnum.Nested] : isBundle ? [BadgeEnum.Bundle] : [])
   ];
 
+  const onViewTokenDetails = useCallback((token: INestingToken, mode: string) => {
+    if (mode === 'ReFungible' && token.nestingParentToken) {
+      const parentOwner = Address.nesting.idsToAddress(token.nestingParentToken.collectionId, token.nestingParentToken.tokenId);
+      navigate(`/${currentChainId}/token/${parentOwner}/${token.collectionId}/${token.tokenId}`);
+    } else {
+      navigate(`/${currentChainId}/token/${token.collectionId}/${token.tokenId}`);
+    }
+  }, [currentChainId]);
+
   return (
     <CommonTokenDetailStyled>
       <PictureWrapper>
@@ -163,26 +178,24 @@ export const CommonTokenDetail: FC<IProps> = ({
           <Row data-testid={`${testid}-owner-section`}>
             {!(isRft && !isRftFracton) && <OwnerCard
               address={owner || ''}
-              // to={`${config.blockchains[currentChainId || '']?.scanUrl}account/${owner || '404'}`}
               isShort={deviceSize < DeviceSize.xl}
               canCopy={false}
               prefixOwned='Owned by'
               prefixNested='Nested in bundle'
             />}
-            {/* {isOwner && <Text color='grey-500' size='m'>You own it</Text>}
-            {!isOwner && !(isRft && !isRftFracton) && <>
-              <Text color='grey-500' size='m'>
-                Owned&nbsp;by
-              </Text>
-              <Account href={`${config.blockchains[currentChainId || '']?.scanUrl}account/${owner || '404'}`}>
-                <Avatar size={24} src={DefaultAvatar} address={owner}/>
-                <Text color='primary-600' size='m' data-testid={`${testid}-owner-address`}>
-                  {deviceSize >= DeviceSize.xl ? owner || '' : shortcutText(owner || '') }
-                </Text>
-              </Account>
-            </>} */}
           </Row>
           <Divider />
+          {isNested && token?.nestingParentToken?.tokenId && token?.nestingParentToken?.collectionId && <>
+            <Heading size='4'>Inventory in</Heading>
+            <ParentTokenWrapper>
+              <TokensBandleCard
+                tokenId={token.nestingParentToken.tokenId}
+                collectionId={token.nestingParentToken.collectionId}
+                onViewNodeDetails={onViewTokenDetails}
+              />
+            </ParentTokenWrapper>
+            <Divider />
+          </>}
           {isRft && !isRftFracton && <>
             <FractionalOwnersList />
             <Divider />
@@ -321,6 +334,20 @@ const PictureWrapper = styled.div`
       border-radius: 8px;
       height: auto;
     }
+  }
+`;
+
+const ParentTokenWrapper = styled.div`
+  width: 160px;
+  margin-top: 8px;
+  &>div {
+    min-height: 230px;
+    border: 1px solid ${BlueGrey300};
+    border-radius: 8px;
+  }
+  .picture {
+    width: 160px;
+    height: 160px;
   }
 `;
 

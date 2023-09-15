@@ -44,7 +44,8 @@ const TokenPage = () => {
     isBundle,
     isNested,
     isFetching,
-    isOwner
+    isOwner,
+    topmostOwner
   } = useContext(TokenContext);
 
   const onClose = useCallback(() => {
@@ -110,6 +111,7 @@ const TokenPage = () => {
           isBundle={isBundle}
           isNested={isNested}
           isOwner={isOwner}
+          topmostOwner={topmostOwner}
         >
           {isOwner && isNested && <NestedTokenBlock
             token={token}

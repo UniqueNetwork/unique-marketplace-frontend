@@ -11,7 +11,7 @@ import { Icon } from 'components/UI/Icon/Icon';
 import { useApi } from 'hooks/useApi';
 import { TokenByIdResponse } from '@unique-nft/sdk';
 
-function TokenCard({ tokenId, collectionId, token: initialToken, onViewNodeDetails, onUnnestClick, onTransferClick, isCurrentAccountOwner }: ITokenCard) {
+function TokenCard({ tokenId, collectionId, fixedWidth, token: initialToken, onViewNodeDetails, onUnnestClick, onTransferClick, isCurrentAccountOwner }: ITokenCard) {
   const [token, setToken] = useState<INestingToken | TokenByIdResponse | null>(initialToken || null);
   const [menuVisible, setMenuVisible] = useState(false);
   const { isCollectionLoading, collection } = useCollection(collectionId);
@@ -50,7 +50,11 @@ function TokenCard({ tokenId, collectionId, token: initialToken, onViewNodeDetai
   if (!token) return <Skeleton />;
 
   return (
-    <TokenCardWrapper onMouseEnter={showMenu} onMouseLeave={hideMenu} onClick={viewTokenDetails}>
+    <TokenCardWrapper fixedWidth={fixedWidth}
+      onMouseEnter={showMenu}
+      onMouseLeave={hideMenu}
+      onClick={viewTokenDetails}
+    >
       <Picture alt={`T-${token.tokenId} C-${token.collectionId}`} src={(typeof token.image === 'string' ? token.image : token.image?.fullUrl) || undefined}/>
       <TokenTitle
         token={token}
@@ -58,7 +62,6 @@ function TokenCard({ tokenId, collectionId, token: initialToken, onViewNodeDetai
         collectionName={`${collection?.name} [id ${collection?.id}]`}
         isCollectionLoading={isCollectionLoading}
       />
-      {/* {token?.nestingChildTokens && <Text color='grey-500' size='xs'>{token.nestingChildTokens.length} item{token.nestingChildTokens.length > 1 && 's'}</Text>} */}
       {(menuVisible && isCurrentAccountOwner) && <ActionsMenuWrapper className={'menu'}>
         <Tooltip
           align={{ vertical: 'top', horizontal: 'middle', appearance: 'vertical' }}
@@ -97,7 +100,8 @@ function TokenCard({ tokenId, collectionId, token: initialToken, onViewNodeDetai
   );
 }
 
-const TokenCardWrapper = styled.div`
+const TokenCardWrapper = styled.div<{ fixedWidth?: boolean }>`
+  max-width: ${({ fixedWidth }) => fixedWidth ? '250px' : 'undefined'};
   position: relative;
   display: flex;
   flex-direction: column;
