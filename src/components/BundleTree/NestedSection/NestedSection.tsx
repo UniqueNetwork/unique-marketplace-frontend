@@ -18,7 +18,7 @@ export const NestedSection: FC<INestedSectionView<INestingToken>> = ({ selectedT
       </TitleWrapper>}
       {selectedToken && !selectedToken?.nestingChildTokens?.length && <NoNestedWrapper><Icon file={NoTrades} size={80}/><Text color='grey-500' size='m'>No nested tokens</Text></NoNestedWrapper>}
       {!!selectedToken?.nestingChildTokens?.length && <NestedTokens>
-        {selectedToken.nestingChildTokens.map((token) => (
+        {/* {selectedToken.nestingChildTokens.map((token) => (
           <TokenCard
             key={`T-${token.tokenId} C-${token.collectionId}`}
             token={token}
@@ -26,7 +26,7 @@ export const NestedSection: FC<INestedSectionView<INestingToken>> = ({ selectedT
             onUnnestClick={onUnnestClick}
             onTransferClick={onTransferClick}
           />
-        ))}
+        ))} */}
       </NestedTokens>}
     </NestedDetails>
   );
