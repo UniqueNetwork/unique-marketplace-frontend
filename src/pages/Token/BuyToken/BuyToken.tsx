@@ -33,11 +33,11 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, royalty, onBuy, testid }) =
   }, [fee]);
 
   const isNotEnoughBalanceOnPolkadot = useMemo(() => {
-    if (selectedAccount?.name !== 'Metamask Account') {
-      if (!selectedAccount?.balances?.proper?.raw || selectedAccount.balances?.proper?.raw.isZero() || !offer?.price?.raw) return false;
-      if (selectedAccount.balances?.proper?.raw.lte(new BN(offer?.price?.raw))) return false;
-      return selectedAccount.balances?.proper?.raw.lte(new BN(offer?.price?.raw).mul(new BN(2)).add(rawFee));
-    }
+    // if (selectedAccount?.name !== 'Metamask Account') {
+    //   if (!selectedAccount?.balances?.proper?.raw || selectedAccount.balances?.proper?.raw.isZero() || !offer?.price?.raw) return false;
+    //   if (selectedAccount.balances?.proper?.raw.lte(new BN(offer?.price?.raw))) return false;
+    //   return selectedAccount.balances?.proper?.raw.lte(new BN(offer?.price?.raw).mul(new BN(2)).add(rawFee));
+    // }
     return false;
   }, [offer?.price?.raw, selectedAccount, rawFee]);
 

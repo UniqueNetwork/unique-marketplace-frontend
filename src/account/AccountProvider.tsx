@@ -116,9 +116,11 @@ export const AccountWrapper: FC = ({ children }) => {
 
     const defaultAccountNormalizedAddress = localStorage.getItem(DefaultAccountKey) || '';
 
-    const defaultAccountAddress = Address.is.ethereumAddressInAnyForm(defaultAccountNormalizedAddress)
-      ? defaultAccountNormalizedAddress
-      : Address.normalize.substrateAddress(defaultAccountNormalizedAddress, chainProperties?.SS58Prefix);
+    const defaultAccountAddress = defaultAccountNormalizedAddress
+      ? Address.is.ethereumAddressInAnyForm(defaultAccountNormalizedAddress)
+        ? defaultAccountNormalizedAddress
+        : Address.normalize.substrateAddress(defaultAccountNormalizedAddress, chainProperties?.SS58Prefix)
+          : '';
 
     const defaultAccount = accounts.get(defaultAccountAddress);
 
