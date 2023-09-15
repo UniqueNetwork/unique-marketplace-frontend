@@ -186,7 +186,7 @@ export const CommonTokenDetail: FC<IProps> = ({
           </Row>
           <Divider />
           {isNested && token?.nestingParentToken?.tokenId && token?.nestingParentToken?.collectionId && <>
-            <Heading size='4'>Inventory in</Heading>
+            <Heading size='4'>NFT Wearable for</Heading>
             <ParentTokenWrapper>
               <TokensBandleCard
                 tokenId={token.nestingParentToken.tokenId}

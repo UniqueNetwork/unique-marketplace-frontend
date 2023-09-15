@@ -97,7 +97,7 @@ function BundleTreeSection({ token, offer, testid, onFinish, isOwner }: IProps) 
     <>
       <BundlePagePaper>
         <HeaderStyled id={'bundle'}>
-          <Heading size={'2'}>Inventory</Heading>
+          <Heading size={'2'}>NFT Wearables</Heading>
         </HeaderStyled>
         <ChildrenWraper>
           {bundle.children.map((token) => <TokenCard
@@ -187,7 +187,7 @@ export default BundleTreeSection;
 const BundleIsLoading = () => (
   <BundlePagePaper>
     <HeaderStyled>
-      <Heading size={'2'}>Inventory</Heading>
+      <Heading size={'2'}>NFT Wearables</Heading>
     </HeaderStyled>
     <Skeleton height={60} width={'100%'} />
   </BundlePagePaper>
