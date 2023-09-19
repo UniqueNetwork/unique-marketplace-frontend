@@ -14,7 +14,7 @@ jobs:
     secrets: inherit
     with:
       tag: unique-marketplace-frontend
-      dockerfile: ./.docker/Dockerfile
+      dockerfile: ./.docker/new.Dockerfile
 
 # todo: implement, just a placeholder for now
   deploy:
