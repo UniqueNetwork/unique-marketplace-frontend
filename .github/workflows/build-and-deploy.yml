@@ -10,7 +10,7 @@ on:
 jobs:
   build:
     name: Build and push Docker Image
-    uses: UniqueNetwork/dundas/.github/workflows/build-docker-image.yml@master
+    uses: UniqueNetwork/web-deploy/.github/workflows/build-docker-image.yml@master
     secrets: inherit
     with:
       tag: unique-marketplace-frontend
