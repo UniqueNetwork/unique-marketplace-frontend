@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Check if PUBLIC_URL is not empty
 if [ -n "$PUBLIC_URL" ]; then

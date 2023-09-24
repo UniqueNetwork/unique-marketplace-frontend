@@ -13,11 +13,11 @@ WORKDIR /usr/share/nginx/html
 
 COPY --from=builder /app/build /usr/share/nginx/html
 
-COPY ./.docker/env.js /usr/share/nginx/html
+COPY ./.docker/env.js /usr/share/nginx/html/env.js
 
-COPY ./.docker/new-entrypoint.sh /new-entrypoint.sh
-RUN chmod +x /new-entrypoint.sh
+COPY ./.docker/new-entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 EXPOSE 80
-ENTRYPOINT ["/new-entrypoint.sh"]
+ENTRYPOINT ["entrypoint.sh"]
 CMD ["nginx"]
