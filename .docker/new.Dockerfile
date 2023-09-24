@@ -15,5 +15,9 @@ COPY --from=builder /app/build /usr/share/nginx/html
 
 COPY ./.docker/env.js /usr/share/nginx/html
 
+COPY new-entrypoint.sh /new-entrypoint.sh
+RUN chmod +x /new-entrypoint.sh
+
 EXPOSE 80
+ENTRYPOINT ["/new-entrypoint.sh"]
 CMD ["nginx"]
