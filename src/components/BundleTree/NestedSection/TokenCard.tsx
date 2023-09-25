@@ -59,7 +59,7 @@ function TokenCard({ tokenId, collectionId, fixedWidth, token: initialToken, onV
       <TokenTitle
         token={token}
         prefix={collection?.tokenPrefix || ''}
-        collectionName={`${collection?.name} [id ${collection?.id}]`}
+        collectionName={`${collection?.name}`}
         isCollectionLoading={isCollectionLoading}
       />
       {(menuVisible && isCurrentAccountOwner) && <ActionsMenuWrapper className={'menu'}>
@@ -218,4 +218,5 @@ const TokenTitleWrapper = styled.div`
   display: flex;
   flex-direction: column;
   padding: 16px;
+  border-top: 1px solid var(--color-blue-grey-300);
 `;
