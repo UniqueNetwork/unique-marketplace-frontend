@@ -7,3 +7,6 @@ if [ -n "$PUBLIC_URL" ]; then
     # Replace <head> with <head><base href="PUBLIC_URL">
     sed -i "s/<head>/<head><base href=\"$ESCAPED_PUBLIC_URL\">/" /usr/share/nginx/html/index.html
 fi
+
+# Start nginx
+exec nginx -g 'daemon off;'
