@@ -110,15 +110,15 @@ const TokenCardWrapper = styled.div<{ fixedWidth?: boolean }>`
   background-color: ${AdditionalLight};
   .picture {
     overflow: hidden;
-    border-radius: var(--prop-border-radius);
+    border-radius: var(--prop-border-radius) var(--prop-border-radius) 0 0;
     position: relative;
     transform: translateZ(0px);
     flex: 1;
     img {
-      border-radius: 4px;
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: fill;
+      border-radius: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
   }
   /* span:first-of-type,

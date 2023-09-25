@@ -144,12 +144,6 @@ const HeaderStyled = styled.div`
   }
 `;
 
-const Content = styled.div`
-  display: flex;
-  /* border: 1px solid ${Grey300};
-  border-radius: 4px; */
-`;
-
 const ChildrenWraper = styled.div`
   display: grid;
   grid-template-columns: repeat(6, 1fr);
