@@ -61,7 +61,7 @@ class MarketController extends BaseController implements IMarketController {
     if (isAlreadyAllowed.isAllowed === targetAllowance) return;
 
     const adapter = this.getAdapter(account);
-    await adapter.changeAllowance(from, to, collectionId, tokenId, targetAllowance, account);
+    await adapter.changeAllowance(from, to, collectionId, tokenId, targetAllowance, account.signer);
     const newAllowance = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from, to });
     if (newAllowance.isAllowed !== targetAllowance) throw new Error('Allowance change failed');
   }

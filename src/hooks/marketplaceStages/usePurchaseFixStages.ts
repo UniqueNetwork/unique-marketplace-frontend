@@ -30,6 +30,8 @@ export const usePurchaseFixStages = (collectionId: number, tokenId: number, cont
         const balance = await marketApi?.getAccountBalance(mirrorAddress);
         const fee = Number(await marketApi?.getBuyFixFee(collectionId, tokenId, txParams.amount, { ...options, contractAddress }));
         const toTransfer = Number(txParams.price) + fee - Number(balance?.proper?.parsed);
+        console.log(toTransfer);
+
         if (toTransfer <= 0) return Promise.resolve();
         // just to be safe and makeup for potential rounding issues
         return marketApi?.transferBalance(account.address, mirrorAddress, toTransfer + 1, options);

@@ -348,6 +348,7 @@ const ParentTokenWrapper = styled.div`
   .picture {
     width: 160px;
     height: 160px;
+    max-height: 160px;
   }
 `;
 
