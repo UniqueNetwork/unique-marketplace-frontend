@@ -91,6 +91,12 @@ export const MarketPage = () => {
               />
             </SortSelectWrapper>
           </SearchAndSortingWrapper>
+          {!!filterCount && <div>
+            <Text
+              testid={`${testid}-items-count`}
+              size='m'
+            >{isLoading ? 'Loading items' : `${offersCount} items`}</Text>
+          </div>}
           <InfiniteScroll
             hasMore={hasMore}
             initialLoad={false}
