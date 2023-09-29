@@ -17,7 +17,7 @@ export type TAccountModalProps = {
   isVisible: boolean
   onFinish(): void
   onClose(): void
-  testid: string
+  testid?: string
 };
 
 export type TCreateAccountBodyModalProps = {

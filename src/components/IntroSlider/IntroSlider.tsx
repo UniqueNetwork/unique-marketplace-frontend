@@ -1,4 +1,4 @@
-import { ConnectedAccountTypesKey } from 'account/AccountProvider';
+import { CONNECTED_WALLET_TYPE } from 'account/useWalletCenter';
 import { useEffect, useState } from 'react';
 import { IntroCard } from './IntroCard';
 import { Slider } from './Slider';
@@ -10,7 +10,7 @@ import bundle from 'static/images/bundle.svg';
 
 const BUNDLE_SHOW_MODAL = 'new-market-intro-show-modal';
 
-const getConnectedWallets = localStorage.getItem(ConnectedAccountTypesKey);
+const getConnectedWallets = localStorage.getItem(CONNECTED_WALLET_TYPE);
 
 export const IntroSlider = () => {
   const [open, setOpen] = useState(() => {

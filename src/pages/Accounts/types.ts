@@ -1,8 +1,8 @@
 import { BN } from '@polkadot/util';
-import { MarketAccount } from 'account/types';
+import { Account } from 'account/types';
 import { TableRowProps } from '@unique-nft/ui-kit';
 
-export type AccountInfo = MarketAccount & TableRowProps & {
+export type AccountInfo = Account & TableRowProps & {
   deposit?: BN
   isLocal?: boolean
 }

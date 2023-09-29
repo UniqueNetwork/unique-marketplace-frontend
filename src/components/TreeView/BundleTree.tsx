@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Tree } from './Tree';
 import { IBundleTree, INode } from './types';
 
@@ -13,7 +13,8 @@ function BundleTree<T extends INode>({
   getKey,
   onViewNodeDetails,
   onUnnestClick,
-  onTransferClick
+  onTransferClick,
+  showTree
 }: IBundleTree<T>) {
   const [selectedToken, setSelectedToken] = useState<T | null>(null);
   const onNodeClicked = useCallback((data: T) => {
@@ -24,7 +25,7 @@ function BundleTree<T extends INode>({
 
   return (
     <>
-      <Tree<T>
+      {showTree && <Tree<T>
         dataSource={dataSource}
         nodeView={NodeView}
         onNodeClicked={onNodeClicked}
@@ -35,7 +36,7 @@ function BundleTree<T extends INode>({
         onViewNodeDetails={onViewNodeDetails}
         onUnnestClick={onUnnestClick}
         onTransferClick={onTransferClick}
-      />
+      />}
       {NestedSectionView && <NestedSectionView
         selectedToken={selectedToken}
         onViewNodeDetails={onViewNodeDetails}

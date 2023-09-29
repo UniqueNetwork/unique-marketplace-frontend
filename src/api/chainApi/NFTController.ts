@@ -1,4 +1,4 @@
-import { GetBundleResponse, TokenByIdResponse, TokenOwnerResponse, TokenIdQuery, TopmostTokenOwnerResponse } from '@unique-nft/sdk';
+import { GetBundleResponse, TokenByIdResponse, TokenOwnerResponse, TokenIdQuery, TopmostTokenOwnerResponse, TokenChildrenResponse } from '@unique-nft/sdk';
 import { Address } from '@unique-nft/utils';
 import { CollectionMode, TransactionOptions } from './types';
 import { getEthAccount } from './utils/addressUtils';
@@ -66,12 +66,16 @@ export class UniqueSDKNFTController extends BaseController {
     return await this.uniqueSdk.token.getBundle({ collectionId, tokenId }) || null;
   }
 
+  async getChildren(collectionId: number, tokenId: number): Promise<TokenChildrenResponse | null> {
+    return await this.uniqueSdk.token.children({ collectionId, tokenId }) || null;
+  }
+
   async getTopmostOwner(collectionId: number, tokenId: number): Promise<TopmostTokenOwnerResponse | null> {
     return await this.uniqueSdk.token.topmostOwner({ collectionId, tokenId }) || null;
   }
 
   async getTransferToBundleFee(address: string, nested: TokenIdQuery, newParent: TokenIdQuery, mode: CollectionMode, amount: number, { account }: TransactionOptions): Promise<string> {
-    const adapter = this.getAdapter(account.account);
+    const adapter = this.getAdapter(account);
     const rawFee = await adapter.getNestTokenFee(
       address,
       { collectionId: Number(nested.collectionId), tokenId: nested.tokenId },
@@ -84,7 +88,7 @@ export class UniqueSDKNFTController extends BaseController {
   }
 
   async transferToBundle(address: string, nested: TokenIdQuery, newParent: TokenIdQuery, mode: CollectionMode, amount: number, { account }: TransactionOptions): Promise<void> {
-    const adapter = this.getAdapter(account.account);
+    const adapter = this.getAdapter(account);
     await adapter.nestToken(
       address,
       { collectionId: Number(nested.collectionId), tokenId: nested.tokenId },
@@ -100,8 +104,8 @@ export class UniqueSDKNFTController extends BaseController {
 
     if (!parent) return '0';
 
-    const adapter = this.getAdapter(account.account);
-    const rawFee = await adapter.getUnnestTokenFee({ collectionId, tokenId }, parent, mode, amount, account.signer);
+    const adapter = this.getAdapter(account);
+    const rawFee = await adapter.getUnnestTokenFee({ collectionId, tokenId }, parent, mode, amount, account);
     return this.getChainValue(rawFee, this.decimals).parsed.toString();
   }
 
@@ -110,7 +114,7 @@ export class UniqueSDKNFTController extends BaseController {
 
     if (!parent) return;
 
-    const adapter = this.getAdapter(account.account);
+    const adapter = this.getAdapter(account);
     await adapter.unnestToken({ collectionId, tokenId }, parent, mode, amount, account.signer);
   }
 

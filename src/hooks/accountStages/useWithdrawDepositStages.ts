@@ -44,7 +44,7 @@ export const useWithdrawDepositStages = (accountAddress: string, bids: TWithdraw
   ], [withdrawBidsStage]);
 
   const account = useMemo(() => {
-    return accounts.find(({ address }) => address === accountAddress);
+    return accounts.get(accountAddress);
   }, [accounts, accountAddress]);
 
   const { stages, error, status, initiate: initiateStages } = useStages<TWithdrawDeposit>(withdrawDepositStages, account);

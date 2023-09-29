@@ -101,9 +101,9 @@ export const getAccountsColumns = ({
     title: isSmallDevice ? '' : (<Title data-testid={`${testid}-actions-column`}>Actions</Title>),
     width: '28%',
     field: 'actions',
-    render(_, { address, balance, isLocal }: AccountInfo) {
-      const deposit = balance.withdraw.raw;
-      const canSend = formatBalance(balance?.parsed) !== '0';
+    render(_, { address, balances, isLocal }: AccountInfo) {
+      const deposit = balances?.ethMirror.raw;
+      const canSend = formatBalance(balances?.proper.parsed || '0') !== '0';
       return (
         <ActionsWrapper>
           <TransferActionsWrapper>
@@ -115,9 +115,9 @@ export const getAccountsColumns = ({
                 testid={`${testid}-${address}-get-button`}
               />
             </SendGetWrapper>
-            {(!deposit.isZero()) && <DepositActionsWrapper>
+            {(!deposit?.isZero()) && <DepositActionsWrapper>
               <WithdrawButton
-                amount={`${formatBalance(balance.withdraw.parsed, 4)} ${tokenSymbol}`}
+                amount={`${formatBalance(balances?.ethMirror.parsed || '0', 4)} ${tokenSymbol}`}
                 onWithdraw={onShowWithdrawDepositModal(address)}
                 testid={`${testid}-${address}-get-button`}
               />

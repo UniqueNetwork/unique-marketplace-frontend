@@ -1,7 +1,7 @@
 import { BN } from '@polkadot/util';
 import { Bytes } from '@polkadot/types';
 import { SignerPayloadJSON } from '@polkadot/types/types';
-import { MarketAccount as Account } from 'account/types';
+import { Account } from 'account/types';
 
 export type TTransaction = {
   signerPayloadJSON?: SignerPayloadJSON

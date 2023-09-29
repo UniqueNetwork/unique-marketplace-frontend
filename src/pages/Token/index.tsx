@@ -28,7 +28,7 @@ import { TokenContext } from './context/TokenContext';
 const testid = 'token-page';
 
 const TokenPage = () => {
-  const { selectedAccount, updateCurrentAccountDeposit } = useAccounts();
+  const { selectedAccount } = useAccounts();
   const { id, collectionId } = useParams<{ address: string, id: string, collectionId: string}>();
   const [marketType, setMarketType] = useState<MarketType>(MarketType.default);
   const navigate = useNavigate();
@@ -44,7 +44,8 @@ const TokenPage = () => {
     isBundle,
     isNested,
     isFetching,
-    isOwner
+    isOwner,
+    topmostOwner
   } = useContext(TokenContext);
 
   const onClose = useCallback(() => {
@@ -52,14 +53,14 @@ const TokenPage = () => {
   }, []);
 
   const onFinish = useCallback(() => {
-    if (marketType === MarketType.bid || marketType === MarketType.withdrawBid) {
-      void updateCurrentAccountDeposit();
-    }
+    // if (marketType === MarketType.bid || marketType === MarketType.withdrawBid) {
+    //   void updateCurrentAccountDeposit();
+    // }
 
     setMarketType(MarketType.default);
     void fetchToken();
     void fetchOffer();
-  }, [fetchOffer, fetchToken, collectionId, id, marketType, updateCurrentAccountDeposit]);
+  }, [fetchOffer, fetchToken, collectionId, id, marketType]);
 
   const onActionClick = useCallback((action: MarketType) => () => {
     setMarketType(action);
@@ -110,6 +111,7 @@ const TokenPage = () => {
           isBundle={isBundle}
           isNested={isNested}
           isOwner={isOwner}
+          topmostOwner={topmostOwner}
         >
           {isOwner && isNested && <NestedTokenBlock
             token={token}

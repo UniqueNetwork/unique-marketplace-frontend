@@ -11,7 +11,11 @@ export interface INestingToken extends NestedToken {
 }
 
 export interface ITokenCard {
-  token: INestingToken
+  token?: INestingToken
+  tokenId: number
+  fixedWidth?: boolean
+  collectionId: number
+  isCurrentAccountOwner?: boolean
   onViewNodeDetails?: (token: INestingToken, collectionMode: CollectionMode) => void
   onUnnestClick?: (token: INestingToken) => void
   onTransferClick?: (token: INestingToken) => void

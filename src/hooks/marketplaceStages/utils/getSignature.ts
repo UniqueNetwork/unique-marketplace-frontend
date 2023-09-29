@@ -1,5 +1,5 @@
 import { web3FromSource } from '@polkadot/extension-dapp';
-import { MarketAccount } from 'account/types';
+import { Account } from 'account/types';
 import { Signer as EthersSigner } from 'ethers';
 import { Signer as UniqueSigner } from '@unique-nft/sdk';
 
@@ -9,14 +9,14 @@ export const isEthersSigner = (signer: any): signer is EthersSigner =>
 export const isUniqueSigner = (signer: any): signer is UniqueSigner =>
   !!(signer as UniqueSigner).sign;
 
-export const getSignature = async (account: MarketAccount): Promise<{
+export const getSignature = async (account: Account): Promise<{
   signature: string | null,
   message: string,
   type: 'keyring' | 'metamask' | null
 }> => {
-  if (isEthersSigner(account.signer)) {
+  if (isEthersSigner(account)) {
     const message = `${Date.now()}`;
-    const signature = await account.signer.signMessage(message);
+    const signature = await account.signMessage(message);
     return {
       signature,
       message,
@@ -24,7 +24,7 @@ export const getSignature = async (account: MarketAccount): Promise<{
     };
   }
 
-  if (isUniqueSigner(account.signer)) {
+  if (isUniqueSigner(account)) {
     // @ts-ignore
     const injector = await web3FromSource(account.signer.injectedAccount.meta.source);
     if (!injector.signer.signRaw) throw new Error('Web3 not available');

@@ -1,4 +1,4 @@
-import { CollectionInfoWithSchemaResponse, GetBundleResponse, TokenByIdResponse } from '@unique-nft/sdk';
+import { CollectionInfoWithSchemaResponse, GetBundleResponse, TokenByIdResponse, TokenChildrenResponse } from '@unique-nft/sdk';
 import { Address } from '@unique-nft/utils';
 import { isTokenOwner } from 'api/chainApi/utils/addressUtils';
 import { useOffer } from 'api/restApi/offers/offer';
@@ -32,7 +32,7 @@ export const TokenContextProvider: FC = ({ children }) => {
   const [isFetchingToken, setIsFetchingToken] = useState(true);
   const { offer, fetch: fetchOffer, isFetching: isFetchingOffer } = useOffer(collectionId, tokenId);
   const [isFetchingBundle, setIsFetchingBundle] = useState(false);
-  const [bundle, setBundle] = useState<GetBundleResponse>();
+  const [bundle, setBundle] = useState<TokenChildrenResponse>();
   const [isNested, setIsNested] = useState(false);
   const [fraction, setFraction] = useState<Fraction>();
   const [topmostOwner, setTopmostOwner] = useState<string>();
@@ -86,15 +86,13 @@ export const TokenContextProvider: FC = ({ children }) => {
     setIsNested(!!isNested);
     if (isBundle || isNested) {
       setIsFetchingBundle(true);
+      const bundle = (await api?.nft?.getChildren(collectionId, tokenId)) || undefined;
 
       if (isNested) {
         const parent = address ? Address.nesting.addressToIds(address) : token.nestingParentToken;
         setTopmostOwner((await api.nft?.getTopmostOwner(parent.collectionId, parent.tokenId))?.topmostOwner || undefined);
-
-        setBundle((await api?.nft?.getBundle(parent.collectionId, parent.tokenId)) || undefined);
-      } else {
-        setBundle((await api?.nft?.getBundle(collectionId, tokenId)) || undefined);
       }
+      setBundle(bundle);
       setIsFetchingBundle(false);
     } else {
       setBundle(undefined);
@@ -124,7 +122,7 @@ export const TokenContextProvider: FC = ({ children }) => {
       token,
       collection,
       offer,
-      bundle: bundle ? addIsCurrentAccountOwnerToBundleAndSort(bundle, isOwner) : undefined,
+      bundle: bundle, // ? addIsCurrentAccountOwnerToBundleAndSort(bundle, isOwner) : undefined,
       topmostOwner,
       isBundle: !!bundle,
       isNested,

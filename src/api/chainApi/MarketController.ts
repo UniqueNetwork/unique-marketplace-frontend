@@ -1,5 +1,5 @@
 import { BN } from '@polkadot/util';
-import { MarketAccountBalance } from 'account/types';
+import { AccountBalances } from 'account/types';
 import { Address, CrossAccountId } from '@unique-nft/utils';
 import { sleep } from 'utils/helpers';
 
@@ -60,7 +60,7 @@ class MarketController extends BaseController implements IMarketController {
     const isAlreadyAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from, to });
     if (isAlreadyAllowed.isAllowed === targetAllowance) return;
 
-    const adapter = this.getAdapter(account.account);
+    const adapter = this.getAdapter(account);
     await adapter.changeAllowance(from, to, collectionId, tokenId, targetAllowance, account.signer);
     const newAllowance = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from, to });
     if (newAllowance.isAllowed !== targetAllowance) throw new Error('Allowance change failed');
@@ -68,7 +68,7 @@ class MarketController extends BaseController implements IMarketController {
 
   public async getSellFixFee(collectionId: number, tokenId: number, price: number, amount: number, { account }: TransactionOptions): Promise<string> {
     const from = Address.extract.ethCrossAccountId(account.address);
-    const adapter = this.getAdapter(account.account);
+    const adapter = this.getAdapter(account);
     const priceWithDecimals = (price * (10 ** this.decimals)).toLocaleString('fullwide', { useGrouping: false });
     const rawFee = await adapter.getSellFee(
       from,
@@ -86,7 +86,7 @@ class MarketController extends BaseController implements IMarketController {
     const to = Address.extract.ethCrossAccountId(account.address);
     const order = (await this.getOrder(collectionId, tokenId, contractAddress));
     const value = order.price as { type: string, hex: string };
-    const adapter = this.getAdapter(account.account);
+    const adapter = this.getAdapter(account);
     const parsedPrice = BigInt(value.hex).toString();
     const rawFee = await adapter.getBuyFee(
       to,
@@ -118,7 +118,7 @@ class MarketController extends BaseController implements IMarketController {
     const to = this.actualContract.address;
     const isAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from: account.address, to });
     if (!isAllowed.isAllowed) throw new Error('Token not approved for sale');
-    const adapter = this.getAdapter(account.account);
+    const adapter = this.getAdapter(account);
     // chain format from human format: 1.25 -> 1250000000000000000
     const priceWithDecimals = (price * (10 ** this.decimals)).toLocaleString('fullwide', { useGrouping: false });
     await adapter.sell(from, collectionId, tokenId, priceWithDecimals, amount, account.signer, this.actualContract);
@@ -134,7 +134,7 @@ class MarketController extends BaseController implements IMarketController {
     // const isAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from: seller.eth, to });
     // if (!isAllowed.isAllowed) throw new Error('Token not approved for sale');
     if (!value || !value.hex) throw new Error('Order price incorrect');
-    const adapter = this.getAdapter(account.account);
+    const adapter = this.getAdapter(account);
 
     const parsedPrice = BigInt(value.hex).toString();
     await adapter.buy(to, collectionId, tokenId, parsedPrice, amount, account.signer,
@@ -148,7 +148,7 @@ class MarketController extends BaseController implements IMarketController {
   }
 
   async cancelFix(collectionId: number, tokenId: number, amount: number, options: TransactionOptions): Promise<void> {
-    if (!options.account) throw new Error('Account not found');
+    if (!options) throw new Error('Account not found');
     // throws error if not found
     await this.getOrder(collectionId, tokenId);
     await this.changeAllowance(collectionId, tokenId, false, options);
@@ -171,38 +171,43 @@ class MarketController extends BaseController implements IMarketController {
     }
   }
 
-  async getAccountBalance(address: string): Promise<MarketAccountBalance> {
-    const balance = await this.uniqueSdk.balance.get({ address });
-    let withdraw = { parsed: '0', raw: new BN(0) };
+  async getAccountBalance(address: string): Promise<AccountBalances> {
+    const response = await this.uniqueSdk.balance.get({ address });
+    let ethMirror = { parsed: '0', raw: new BN(0) };
     if (Address.is.substrateAddress(address)) {
       const withdrawBalance = await this.uniqueSdk.balance.get({
         address: Address.mirror.substrateToEthereum(address)
       });
-      withdraw = {
+      ethMirror = {
         raw: new BN(withdrawBalance?.availableBalance?.raw || 0),
         parsed: withdrawBalance?.availableBalance?.amount
       };
     }
-    if (!balance) throw new Error('Failed to fetch balance');
-    return { raw: new BN(balance?.availableBalance?.raw || 0),
-      parsed: balance?.availableBalance?.amount || '0',
-      withdraw };
+    if (!response) throw new Error('Failed to fetch balance');
+    const proper = {
+      raw: new BN(response?.availableBalance?.raw || 0),
+      parsed: response?.availableBalance?.amount || '0'
+    };
+    return {
+      proper,
+      ethMirror
+    };
   }
 
   async getTransferTokenFee(sender: string, recipient: string, collectionId: number, tokenId: number, mode: CollectionMode, amount: number, { account }: TransactionOptions): Promise<string | null> {
-    const adapter = this.getAdapter(account.account);
+    const adapter = this.getAdapter(account);
     const rawFee = await adapter.getTransferTokenFee(sender, recipient, collectionId, tokenId, mode, amount, account.signer);
     return this.getChainValue(rawFee, this.decimals).parsed.toString();
   }
 
   // ____ EXTRA _____
   async transferToken(from: string, to: string, collectionId: number, tokenId: number, mode: CollectionMode, amount: number, { account }: TransactionOptions): Promise<void> {
-    await this.getAdapter(account.account).transferToken(from, to, collectionId, tokenId, mode, amount, account.signer);
+    await this.getAdapter(account).transferToken(from, to, collectionId, tokenId, mode, amount, account);
   }
 
   async getTransferBalanceFee(sender: string, recipient: string, value: number, { account }: TransactionOptions): Promise<string> {
-    const adapter = this.getAdapter(account.account);
-    const rawFee = await adapter.getTransferBalanceFee(sender, recipient, this.getChainValue(value, this.decimals), account.signer);
+    const adapter = this.getAdapter(account);
+    const rawFee = await adapter.getTransferBalanceFee(sender, recipient, this.getChainValue(value, this.decimals), account);
     return this.getChainValue(rawFee, this.decimals).parsed.toString();
   }
 
@@ -214,7 +219,7 @@ class MarketController extends BaseController implements IMarketController {
    * @param param3
    */
   async transferBalance(from: string, to: string, amount: BN | number | string, { account }: TransactionOptions): Promise<void> {
-    await this.getAdapter(account.account).transferBalance(from, to, this.getChainValue(amount, this.decimals), account.signer);
+    await this.getAdapter(account).transferBalance(from, to, this.getChainValue(amount, this.decimals), account.signer);
   }
 
   hasContractMethod(contractAddress: string, method: string): boolean {
@@ -222,7 +227,7 @@ class MarketController extends BaseController implements IMarketController {
   }
 
   async changePrice(collectionId: number, tokenId: number, price: number, { account, contractAddress }: TransactionOptions): Promise<void> {
-    const adapter = this.getAdapter(account.account);
+    const adapter = this.getAdapter(account);
     const contract = contractAddress
     ? {
         address: contractAddress,
@@ -234,7 +239,7 @@ class MarketController extends BaseController implements IMarketController {
   }
 
   async getChangePriceFee(collectionId: number, tokenId: number, price: number, { account, contractAddress }: TransactionOptions): Promise<string> {
-    const adapter = this.getAdapter(account.account);
+    const adapter = this.getAdapter(account);
     const contract = contractAddress
     ? {
         address: contractAddress,

@@ -18,8 +18,8 @@ function BalanceCell({ isSmallDevice, accountInfo, tokenSymbol, testid }: IProps
   const isDeposit = !!accountInfo.deposit; // TODO: irrelevant
 
   const balance = useMemo(() => {
-    return formatBalance(accountInfo.balance?.parsed, fractionDigits);
-  }, [accountInfo.balance]);
+    return formatBalance(accountInfo.balances?.proper.parsed || '0', fractionDigits);
+  }, [accountInfo.balances]);
 
   if (!isSmallDevice) {
     return (
