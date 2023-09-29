@@ -41,7 +41,7 @@ export const AccountsPage = () => {
   const {
     accounts,
     isLoading,
-    deleteLocalAccount
+    forgetLocalAccount
   } = useAccounts();
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
   const [selectedAddress, setSelectedAddress] = useState<string>();
@@ -56,13 +56,8 @@ export const AccountsPage = () => {
     }
   }, [accounts, isLoading]);
 
-  // useEffect(() => {
-  //   // void updateAccountsDeposits();
-  // }, [updateAccountsDeposits]);
-
   useEffect(() => {
     setCurrentModal(undefined);
-    // void updateAccountsDeposits();
   }, [currentChainId]);
 
   const formatAddress = useCallback((address: string) => {
@@ -96,31 +91,6 @@ export const AccountsPage = () => {
         ...account,
         isLocal: account.signerType === AccountSigner.local
       });
-      // if (!account.deposits) return acc;
-
-      // const { sponsorshipFee, bids } = account.deposits;
-      // const { leader, withdraw } = bids || { leader: [], withdraw: [] };
-
-      // if ((!sponsorshipFee?.isZero() || leader.length !== 0 || withdraw.length !== 0)) {
-      //   const getTotalAmount = (acc: BN, bid: TWithdrawBid) => acc.add(new BN(bid.amount));
-
-      //   // add row with deposit info only on big screens
-      //   if (deviceSize !== DeviceSize.sm) {
-      //     acc.push({
-      //       ...account,
-      //       deposit: (sponsorshipFee || new BN(0))
-      //         .add(withdraw.reduce(getTotalAmount, new BN(0)))
-      //         .add(leader.reduce(getTotalAmount, new BN(0)))
-      //     });
-      //   } else {
-      //     acc[acc.length - 1] = {
-      //       ...account,
-      //       deposit: (sponsorshipFee || new BN(0))
-      //         .add(withdraw.reduce(getTotalAmount, new BN(0)))
-      //         .add(leader.reduce(getTotalAmount, new BN(0)))
-      //     };
-      //   }
-      // }
       return acc;
     };
 
@@ -129,7 +99,6 @@ export const AccountsPage = () => {
 
   const onChangeAccountsFinish = useCallback(() => {
     setCurrentModal(undefined);
-    // await fetchAccounts();
   }, []);
 
   const onModalClose = useCallback(() => {
@@ -137,10 +106,10 @@ export const AccountsPage = () => {
   }, []);
 
   const deleteLocalAccountConfirmed = useCallback(() => {
-    deleteLocalAccount(selectedAddress || '');
+    forgetLocalAccount(selectedAddress || '');
     info('Account successfully deleted');
     void onChangeAccountsFinish();
-  }, [selectedAddress, deleteLocalAccount, onChangeAccountsFinish]);
+  }, [selectedAddress, forgetLocalAccount, onChangeAccountsFinish]);
 
   return (<PagePaper>
     <AccountPageWrapper>

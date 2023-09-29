@@ -36,8 +36,7 @@ export class KeyringWallet implements BaseWalletEntity<KeyringAddress> {
               sign: async (unsignedTxPayload: UnsignedTxPayloadResponse) => {
                 const keyringPair = keyring.getPair(account.address);
                   if (keyringPair.isLocked && this.passwordCallback) {
-                    const password = await this.passwordCallback(keyringPair);
-                    keyringPair.unlock(password);
+                    await this.passwordCallback(keyringPair);
                   }
 
                   const signature = keyringPair.sign(

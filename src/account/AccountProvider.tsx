@@ -11,6 +11,8 @@ import { AccountProvider } from './AccountContext';
 import { useApi } from 'hooks/useApi';
 import { useBalanceSubscriptions } from './useBalanceSubscriptions';
 import { KeyringPair } from '@polkadot/keyring/types';
+import { getSuri, PairType } from 'utils/seedUtils';
+import { KeypairType } from '@polkadot/util-crypto/types';
 
 export const AccountWrapper: FC = ({ children }) => {
   const { chainProperties, api } = useApi();
@@ -94,21 +96,6 @@ export const AccountWrapper: FC = ({ children }) => {
     onSignCallback.current && onSignCallback.current(password);
   }, []);
 
-  const forgetLocalAccount = useCallback(
-    async (forgetAddress: string) => {
-      keyring.forgetAccount(forgetAddress);
-      setIsLoading(true);
-      await walletsCenter.connectWallet(
-        'keyring',
-        {
-          requestPasswordCallback: showSignDialog
-        }
-      );
-      setIsLoading(false);
-    },
-    [walletsCenter]
-  );
-
   useEffect(() => {
     if (!accounts?.size || isLoading) {
       return;
@@ -132,7 +119,7 @@ export const AccountWrapper: FC = ({ children }) => {
     }
   }, [accounts, changeAccount, isLoading]);
 
-  useEffect(() => {
+  const fetchAccounts = useCallback(() => {
     if (!chainProperties || !api?.market?.uniqueSdk) return;
     const getConnectedWallets = localStorage.getItem(CONNECTED_WALLET_TYPE);
     if (!getConnectedWallets) {
@@ -171,19 +158,44 @@ export const AccountWrapper: FC = ({ children }) => {
       });
   }, [chainProperties, api?.market?.uniqueSdk]);
 
+  useEffect(fetchAccounts, [fetchAccounts]);
+
+  const addLocalAccount = useCallback((seed: string, derivePath: string, name: string, password: string, pairType: PairType) => {
+    const options = { genesisHash: chainProperties?.genesisHash, isHardware: false, name: name.trim(), tags: [] };
+    keyring.addUri(getSuri(seed, derivePath, pairType), password, options, pairType as KeypairType);
+    fetchAccounts();
+  }, [chainProperties, fetchAccounts]);
+
+  const forgetLocalAccount = useCallback(
+    (forgetAddress: string) => {
+      keyring.forgetAccount(forgetAddress);
+      setIsLoading(true);
+
+      setAccounts((accounts) => {
+        const copyAccounts = new Map(accounts);
+        copyAccounts.delete(forgetAddress);
+        return copyAccounts;
+      });
+      setIsLoading(false);
+    },
+    [walletsCenter]
+  );
+
   const value = useMemo(
     () => ({
       isLoading: isLoading || isBalancesFetching,
       signer,
       accounts,
       selectedAccount,
+      addLocalAccount,
       forgetLocalAccount,
       fetchAccountsError,
       changeAccount,
       setFetchAccountsError,
       setIsLoading,
       showSignDialog,
-      walletsCenter
+      walletsCenter,
+      fetchAccounts
     }),
     [
       isLoading,
@@ -191,11 +203,13 @@ export const AccountWrapper: FC = ({ children }) => {
       signer,
       accounts,
       selectedAccount,
+      addLocalAccount,
       forgetLocalAccount,
       fetchAccountsError,
       changeAccount,
       showSignDialog,
-      walletsCenter
+      walletsCenter,
+      fetchAccounts
     ]
   );
 
@@ -204,6 +218,7 @@ export const AccountWrapper: FC = ({ children }) => {
       {children}
       <SignModal
         isVisible={isSignModalVisible}
+        keyringPair={signer}
         onClose={onClose}
         onFinish={onSignFinish}
       />

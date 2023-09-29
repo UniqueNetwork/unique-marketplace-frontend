@@ -34,7 +34,7 @@ export const usePurchaseFixStages = (collectionId: number, tokenId: number, cont
 
         if (toTransfer <= 0) return Promise.resolve();
         // just to be safe and makeup for potential rounding issues
-        return marketApi?.transferBalance(account.address, mirrorAddress, toTransfer + 1, options);
+        return marketApi?.transferBalance(account.address, mirrorAddress, toTransfer + 2, options);
       }
 }]) as InternalStage<TPurchaseProps>[],
     {

@@ -6,6 +6,7 @@ import { IEthereumExtensionResultSafe } from '@unique-nft/utils/extension';
 import { useWalletCenter } from './useWalletCenter';
 import { Signer as EthSigner } from 'ethers';
 import { KeyringPair } from '@polkadot/keyring/types';
+import { PairType } from 'utils/seedUtils';
 
 export type Signer = SdkSigner | EthSigner;
 
@@ -73,6 +74,8 @@ export type AccountContextProps = {
   setFetchAccountsError(error: string | undefined): void;
   setIsLoading(loading: boolean): void;
   showSignDialog(pair: KeyringPair): Promise<string>;
+  addLocalAccount(seed: string, derivePath: string, name: string, password: string, pairType: PairType): void;
   forgetLocalAccount(addressWallet: string): void;
   walletsCenter: ReturnType<typeof useWalletCenter>;
+  fetchAccounts(): void;
 };
