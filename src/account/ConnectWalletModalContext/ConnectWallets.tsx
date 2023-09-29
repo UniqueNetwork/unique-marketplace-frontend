@@ -70,6 +70,7 @@ export const ConnectWallets = () => {
         onClose={() => {
           setIsOpenConnectWalletModal(false);
         }}
+        isClosable
       >
         <Heading size='2'>Connect wallet</Heading>
         <p>Create or import an existing one in any suitable way:</p>
