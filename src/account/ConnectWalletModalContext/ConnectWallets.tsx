@@ -24,7 +24,7 @@ export const ConnectWallets = () => {
   );
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
   const [missingExtension, setMissingExtension] = useState<'Polkadot' | 'Metamask'>();
-  const { walletsCenter, showSignDialog } = useAccounts();
+  const { walletsCenter, showSignDialog, fetchAccounts } = useAccounts();
 
   const onCreateAccountClick = useCallback(() => {
     setCurrentModal(AccountModal.CREATE);
@@ -43,6 +43,7 @@ export const ConnectWallets = () => {
     try {
       await Ethereum.requestAccounts();
       await walletsCenter.connectWallet('metamask');
+      fetchAccounts();
       setIsOpenConnectWalletModal(false);
     } catch (e: any) {
       setMissingExtension('Metamask');
@@ -56,6 +57,7 @@ export const ConnectWallets = () => {
       await walletsCenter.connectWallet('keyring', {
         requestPasswordCallback: showSignDialog
       });
+      fetchAccounts();
       setIsOpenConnectWalletModal(false);
     } catch (e: any) {
       setMissingExtension('Polkadot');
