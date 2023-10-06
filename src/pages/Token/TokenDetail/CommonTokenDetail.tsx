@@ -63,6 +63,7 @@ export const CommonTokenDetail: FC<IProps> = ({
     coverImageUrl,
     description,
     attributes,
+    attributesList,
     image,
     tokenId,
     prefix,
@@ -72,6 +73,8 @@ export const CommonTokenDetail: FC<IProps> = ({
     const { image, attributes, video } = offer?.tokenDescription || token || {};
     const { name: collectionName, tokenPrefix: prefix, schema, description } = offer?.collectionDescription || collection || {};
     const owner = offer?.seller || token?.owner;
+
+    const attributesList = attributes ? Object.values(attributes) : [];
     return {
       tokenId,
       collectionId,
@@ -80,6 +83,7 @@ export const CommonTokenDetail: FC<IProps> = ({
       coverImageUrl: schema?.coverPicture?.fullUrl || '',
       description,
       attributes,
+      attributesList,
       image: typeof image === 'string' ? image : image?.fullUrl || '',
       video,
       owner
@@ -205,7 +209,7 @@ export const CommonTokenDetail: FC<IProps> = ({
             <FractionalDetail testid={`${testid}-fractional`} />
             <Divider />
           </>}
-          {attributes && <AttributesBlock attributes={attributes} />}
+          {attributes && <AttributesBlock attributes={attributesList} />}
           <Divider />
           <CollectionsCard
             avatarSrc={coverImageUrl || ''}
