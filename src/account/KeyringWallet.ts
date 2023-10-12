@@ -35,21 +35,21 @@ export class KeyringWallet implements BaseWalletEntity<KeyringAddress> {
               address: normalizedAddress,
               sign: async (unsignedTxPayload: UnsignedTxPayloadResponse) => {
                 const keyringPair = keyring.getPair(account.address);
-                  if (keyringPair.isLocked && this.passwordCallback) {
-                    await this.passwordCallback(keyringPair);
+                if (keyringPair.isLocked && this.passwordCallback) {
+                  await this.passwordCallback(keyringPair);
+                }
+
+                const signature = keyringPair.sign(
+                  unsignedTxPayload.signerPayloadHex,
+                  {
+                    withType: true
                   }
+                );
 
-                  const signature = keyringPair.sign(
-                    unsignedTxPayload.signerPayloadHex,
-                    {
-                      withType: true
-                    }
-                  );
-
-                  return {
-                    signature: u8aToHex(signature),
-                    signatureType: keyringPair.type
-                  };
+                return {
+                  signature: u8aToHex(signature),
+                  signatureType: keyringPair.type
+                };
               }
             },
             changeChain: this.changeChain.bind(this),
