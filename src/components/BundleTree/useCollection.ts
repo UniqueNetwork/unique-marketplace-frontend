@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react';
-import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
 import { useApi } from 'hooks/useApi';
 import { useCollections } from 'hooks/useCollections';
+import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 
 export const useCollection = (collectionId: number | undefined) => {
   const [isCollectionLoading, setIsCollectionLoading] = useState(false);
-  const [collection, setCollection] = useState<CollectionInfoWithSchema>();
+  const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse>();
   const { getCollection } = useCollections();
   const { api } = useApi();
 
   useEffect(() => {
-    if (!collectionId) return;
-    (async () => {
+    if (!collectionId || !api) return;
+    void (async () => {
       setIsCollectionLoading(true);
       const collection = await getCollection(collectionId);
       if (collection) {
@@ -19,7 +19,7 @@ export const useCollection = (collectionId: number | undefined) => {
         setIsCollectionLoading(false);
       }
     })();
-  }, [collectionId, api]);
+  }, [collectionId, api, getCollection]);
 
   return {
     collection,

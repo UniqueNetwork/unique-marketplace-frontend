@@ -1,5 +1,5 @@
 import { Text } from '@unique-nft/ui-kit';
-import React, { ChangeEvent, useCallback, useRef, useState, VFC } from 'react';
+import React, { ChangeEvent, ReactNode, useCallback, useRef, useState, VFC } from 'react';
 import styled from 'styled-components';
 import { Icon } from 'components/UI/Icon/Icon';
 import UploadIcon from 'static/icons/upload.svg';
@@ -13,18 +13,16 @@ type UploadProps = {
   accept?: string;
   onChange?: (url: string, file: Blob) => void;
   testid?: string
+  label?: ReactNode;
 };
 
-export const Upload: VFC<UploadProps> = ({ className, disabled, accept, onChange, testid }) => {
+export const Upload: VFC<UploadProps> = ({ className, disabled, accept, onChange, testid, label = null }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File>();
   const deviceSize = useDeviceSize();
 
   const onFileChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) {
-      setSelectedFile(undefined);
-      return;
-    }
+    if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
     setSelectedFile(file);
     const objectUrl = URL.createObjectURL(file);
@@ -33,6 +31,7 @@ export const Upload: VFC<UploadProps> = ({ className, disabled, accept, onChange
 
   return <UploadWrapper className={className} onClick={inputRef.current?.click}>
     <Icon file={UploadIcon} size={32} />
+    {label}
     {selectedFile && <TextStyled weight='light'>{deviceSize === DeviceSize.sm ? shortcutText(selectedFile.name) : selectedFile.name}</TextStyled>}
     <input
       ref={inputRef}

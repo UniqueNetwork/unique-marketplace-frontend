@@ -1,36 +1,38 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { Loader, Text } from '@unique-nft/ui-kit';
-import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 import { generatePath, Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { Icon, Link as UILink } from 'components/UI';
-import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
+import { Icon } from 'components/UI';
+import { compareEncodedAddresses, isTokenOwner } from 'api/chainApi/utils/addressUtils';
 import { Offer } from 'api/restApi/offers/types';
 import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
-import { formatKusamaBalance } from 'utils/textUtils';
-import { timeDifference } from 'utils/timestampUtils';
+import { formatBalance, shortcutText } from 'utils/textUtils';
 import { Primary600 } from 'styles/colors';
-import config from 'config';
 import { TokensMedia } from './TokensMedia';
 import { countNestedChildren, stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
 import { useCollections } from 'hooks/useCollections';
 import BundleItemsCount from '../BundleItemsCount/BundleItemsCount';
+import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
+import { MyToken, TokenTypeEnum } from 'pages/MyTokens/types';
+import { BadgeEnum } from 'components/Picture';
 
 export type TTokensCard = {
-  token?: TokenByIdResult
+  token?: Omit<TokenByIdResponse | MyToken, 'collection' | 'nestingParentToken' | 'properties'>
   offer?: Partial<Offer>
   tokenId?: number
   collectionId?: number
   tokenImageUrl?: string
   testid: string
+  showOwner?: boolean
 };
 
-export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, testid, ...props }) => {
-  const [token, setToken] = useState<TokenByIdResult | undefined>(props.token);
-  const [collection, setCollection] = useState<(CollectionInfoWithSchema) | undefined>();
+export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, testid, showOwner, ...props }) => {
+  const [token, setToken] = useState<Omit<TokenByIdResponse | MyToken, 'collection' | 'nestingParentToken' | 'properties'> | undefined>(props.token);
+  const [collection, setCollection] = useState<(CollectionInfoWithSchemaResponse) | undefined>();
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isBundleState, setIsBundleState] = useState<boolean>();
+  const [isNestedState, setIsNestedState] = useState<boolean>();
   const [tokensCount, setTokensCount] = useState<number>();
 
   const { api, currentChainId } = useApi();
@@ -43,30 +45,38 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
     imageUrl,
     price,
     auction,
-    video
+    video,
+    owner,
+    type,
+    amount,
+    totalPieces
   } = useMemo(() => {
-    if (offer || (token && collection)) {
-      const { image, video } = offer?.tokenDescription || token || {};
-      const { name: collectionName, tokenPrefix } = offer?.collectionDescription || collection || {};
-      const { auction, price } = offer || {};
+    if (offer || (token && collection) || ((token as MyToken).collectionName && (token as MyToken).tokenPrefix)) {
+      const { image, video, owner } = offer?.tokenDescription || token || {};
+      const collectionName = offer?.collectionDescription?.name || collection?.name || (token as MyToken)?.collectionName || '';
+      const tokenPrefix = offer?.collectionDescription?.tokenPrefix || collection?.tokenPrefix || (token as MyToken)?.tokenPrefix || '';
+      const { auction, price, seller } = offer || {};
       return {
         tokenTitle: `${tokenPrefix || ''} #${tokenId || ''}`,
         collectionTitle: `${collectionName?.substring(0, 25) || ''} [id ${collectionId || ''}]`,
         imageUrl: image,
         video: stringToDecodedInfixOrUrlOrCidAndHash(video),
         auction,
-        price
+        price,
+        owner: seller || owner,
+        type: (token as MyToken)?.type || TokenTypeEnum.NFT,
+        amount: (token as MyToken)?.tokens_amount,
+        totalPieces: (token as MyToken)?.total_pieces
       };
     }
 
     if (tokenId && collectionId) {
       setIsFetching(true);
-      (async () => {
+      void (async () => {
         if (!token) {
           const token = await api?.nft?.getToken(collectionId, tokenId);
           if (token) setToken(token);
         }
-
         if (!collection) {
           const collection = await getCollection(collectionId);
           if (collection) setCollection(collection);
@@ -78,16 +88,19 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
   }, [collectionId, tokenId, collection, token, api]);
 
   useEffect(() => {
-    (async () => {
+    void (async () => {
       let count;
       if (offer) {
         count = countNestedChildren(offer?.tokenDescription?.nestingChildTokens || []);
+      } else if ((token as MyToken)?.nested !== undefined) {
+        count = (token as MyToken).childrenCount;
       } else if (tokenId && collectionId) {
         const bundle = await api?.nft?.getBundle(collectionId, tokenId);
         count = countNestedChildren(bundle?.nestingChildTokens || []);
       }
       setIsBundleState(!!count);
       setTokensCount(count);
+      setIsNestedState(!!offer?.tokenDescription?.nestingParentToken);
     })();
   }, [offer, tokenId, collectionId, api?.nft]);
 
@@ -106,11 +119,31 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
     return compareEncodedAddresses(auction.bids[0].bidderAddress, selectedAccount.address);
   }, [isBidder, topBid, selectedAccount, auction]);
 
-  const tokenPath = useMemo(() => generatePath('/:currentChainId/token/:collectionId/:tokenId', {
-    currentChainId,
-    collectionId: collectionId?.toString(),
-    tokenId: tokenId?.toString()
-  }), [currentChainId, collectionId, tokenId]);
+  const tokenPath = useMemo(() => {
+    if (owner && type === TokenTypeEnum.RFT) {
+      return generatePath('/:currentChainId/token/:address/:collectionId/:tokenId', {
+        currentChainId,
+        address: owner,
+        collectionId: collectionId?.toString(),
+        tokenId: tokenId?.toString()
+      });
+    }
+    return generatePath('/:currentChainId/token/:collectionId/:tokenId', {
+      currentChainId,
+      collectionId: collectionId?.toString(),
+      tokenId: tokenId?.toString()
+    });
+  }, [currentChainId, collectionId, tokenId, type, owner]);
+
+  const isOwner = useMemo(() => {
+    if (!selectedAccount?.address || !owner) return false;
+    return isTokenOwner(selectedAccount.address, owner);
+  }, [selectedAccount?.address, owner]);
+
+  const badges: BadgeEnum[] = [
+    ...(collection?.mode === 'ReFungible' || (token as MyToken)?.type === TokenTypeEnum.RFT ? [BadgeEnum.Fractional] : []),
+    ...(isNestedState ? [BadgeEnum.Nested] : isBundleState ? [BadgeEnum.Bundle] : [])
+  ];
 
   return (
     <TokensCardStyled>
@@ -120,38 +153,41 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
         imageUrl={imageUrl}
         video={video}
         testid={`${testid}-token-media`}
-        badge={isBundleState ? 'Bundle' : ''}
+        badges={badges}
       />
       <Description>
-        <Link to={tokenPath} title={tokenTitle}>
-          <Text
-            size='l'
-            weight='regular'
-            testid={`${testid}-tokenId`}
+        <BasicDataWrapper>
+          <Link to={tokenPath} title={tokenTitle}>
+            <Text
+              size='l'
+              weight='regular'
+              testid={`${testid}-tokenId`}
+            >
+              {tokenTitle}
+            </Text>
+          </Link>
+          <Link
+            data-testid={`${testid}-collection-${collectionId}-link`}
+            to={`/${currentChainId?.toLowerCase()}/collection/${collectionId || ''}`}
           >
-            {tokenTitle}
-          </Text>
-        </Link>
-        <UILink
-          data-testid={`${testid}-collection-${collectionId}-link`}
-          href={`${config.blockchains[currentChainId || '']?.scanUrl || ''}collections/${collectionId || ''}`}
-          target={'_blank'}
-          rel='noreferrer'
-        >
-          <Text color='primary-600' size='s'>
-            {collectionTitle}
-          </Text>
-        </UILink>
-        {isBundleState && <BundleItemsCount count={tokensCount || 0} testId={testid} />}
-        {price && <PriceWrapper>
-          <Text
-            testid={`${testid}-price`}
-            size='s'
-          >{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(price)}` }</Text>
-          <IconStyled name={'chain-kusama'} size={16} />
-          {!auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
-        </PriceWrapper>}
-        {auction && <AuctionInfoWrapper>
+            <Text color='primary-600' size='s'>
+              {collectionTitle}
+            </Text>
+          </Link>
+          {showOwner && <Text size={'s'} color={'grey-500'}>{isOwner ? 'You own it' : `Owned by: ${shortcutText(owner || '')}`}</Text>}
+          {isBundleState && <BundleItemsCount count={tokensCount || 0} testId={testid} />}
+        </BasicDataWrapper>
+        {!!price?.parsed && <TradingInfoWrapper>
+          <Text size={'xs'} color={'grey-500'} >Price</Text>
+          <PriceWrapper length={price.parsed.toFixed(5).length}>
+            <Text
+              testid={`${testid}-price`}
+              size='l'
+            >{topBid ? `${formatBalance(Number(topBid))}` : `${formatBalance(price.parsed, 4, true)}` }</Text>
+            <IconStyled name={`chain-${currentChainId?.toLowerCase()}`} size={16} />
+          </PriceWrapper>
+        </TradingInfoWrapper>}
+        {/* {auction && <AuctionInfoWrapper>
           {isTopBidder && <Text
             testid={`${testid}-leading-bid`}
             size={'xs'}
@@ -170,10 +206,13 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
             auction.bids.length > 0 ? 'Last bid' : 'Minimum bid'
           }</Text>}
           <StyledText color={'dark'} size={'xs'}>{`${timeDifference(new Date(auction?.stopAt || '').getTime() / 1000)} left`}</StyledText>
-        </AuctionInfoWrapper>}
+        </AuctionInfoWrapper>} */}
+        {type === TokenTypeEnum.RFT && !!amount && !!totalPieces && <Text size={'xs'} color={'grey-500'} >
+          Owned fractions: {amount}/{totalPieces}
+        </Text>}
       </Description>
 
-      {isFetching && <Loader isFullPage />}
+      {!!isFetching && <Loader isFullPage />}
     </TokensCardStyled>
   );
 };
@@ -187,20 +226,40 @@ const TokensCardStyled = styled.div`
   cursor: pointer;
 `;
 
+const BasicDataWrapper = styled.div`
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  justify-content: flex-start;
+  flex-grow: 1;
+`;
+
 const Description = styled.div`
   display: flex;
   flex-direction: column;
-
+  width: 100%;
   span {
     color: ${Primary600};
   }
 `;
 
-const PriceWrapper = styled.div` 
+const PriceWrapper = styled.div<{ length: number }>` 
   display: flex;
   align-items: center;
-  column-gap: calc(var(--gap) / 4);
+  span:first-child {
+    font-size: ${({ length }) => `${length > 11 ? 18 - (length - 11) : 18}px !important`}
+  }
+  span {
+    white-space: nowrap;
+  }
+`;
+
+const TradingInfoWrapper = styled.div` 
+  display: flex;
   margin-top: calc(var(--gap) / 2);
+  column-gap: calc(var(--gap) / 4);
+  align-items: center;
+  justify-content: space-between;
 `;
 
 const StyledText = styled(Text)` 

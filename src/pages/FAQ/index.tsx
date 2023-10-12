@@ -1,111 +1,242 @@
-import React from 'react';
-import styled from 'styled-components';
-import { Heading } from '@unique-nft/ui-kit';
-import { PagePaper } from 'components/PagePaper/PagePaper';
-import { Primary600 } from 'styles/colors';
-import { Link } from 'components/UI';
+import React, { ReactNode, useCallback, useEffect, useState } from 'react';
+import styled from 'styled-components/macro';
+import { useLocation } from 'react-router-dom';
 
-const Faq = (): React.ReactElement<void> => {
-  return (<PagePaper>
-    <MainWrapper>
-      <Heading size='4'>Q: How can I connect my wallet?</Heading>
-      <p>A: You can use either <Link href='https://polkadot.js.org/extension/'>https://polkadot.js.org/extension/</Link> or the market `Accounts` page. Restore your wallet through the seed phrase, JSON file+password or QR code.</p>
-      <p>Make sure that using Chrome or Firefox desktop with the Polkadot.js browser extension you’ve set your wallet account setting to `allow use on any chain`.</p>
-      <p>Note that this option is not available to Ledger or TrustWallet users, their support will be added later. Rest assured your NFT is still safe in your wallet!</p>
-      <Heading size='4'>Q: I connected the right wallet to the app but it shows that my SubstraPunk|Chelobrick belongs to a different address. Why?</Heading>
-      <p>A: Substrate account addresses (Polkadot, Kusama etc.) may look different on different networks but they have all the same private key underneath. You can see all transformations of any address on <Link href='https://polkadot.subscan.io/tools/ss58_transform'>https://polkadot.subscan.io/tools/ss58_transform</Link></p>
-      <Heading size='4'>Q: How can I create a wallet?</Heading>
-      <p>A: You can use either <Link href='https://polkadot.js.org/extension/'>https://polkadot.js.org/extension/</Link> or the market ‘Accounts’ page and follow the instructions. </p>
-      <p>Keep your wallet seed phrase safe! Write it down on paper or export the JSON key with a password you would never forget.</p>
-      <Heading size='4'>Q: How can I get KSM to my account?</Heading>
-      <p>A: You need to transfer (withdraw) from the other wallet or exchange. To do that:</p>
-      <ol>
-        <li>Copy your address at the marketplace (click on the icon at the top right corner);</li>
-        <li>Go to the <Link href='https://polkadot.subscan.io/tools/ss58_transform'>https://polkadot.subscan.io/tools/ss58_transform</Link> and transform your address;</li>
-        <li>Copy your address at Kusama network;</li>
-        <li>Use this Kusama address to send KSM from any wallet or exchange;</li>
-      </ol>
-      <Heading size='4'>Q: I see my NFT on the My tokens page twice and one of them is `on hold`</Heading>
-      <p>A: It can happen if the previous version of the market had information about an unfinished listing. In that case:</p>
-      <ol>
-        <li>Go to the page of ‘on hold’ token and complete listing;</li>
-        <li>Then delist this token;</li>
-      </ol>
-      <Heading size='4'>Q: I see the error `1010: Invalid Transaction: Inability to pay some fees, e.g. account balance too low`</Heading>
-      <p>A: Just wail for half a minute and try again</p>
-      <Heading size='4'>Q: I am trying to buy an NFT, but I am seeing the other owner and the “Withdraw your KSM” button on the Heading is active. Why?</Heading>
-      <p>A: Unfortunately someone has beaten you in buying the same NFT, but you can either withdraw your KSM back to your wallet or leave it in the deposit balance to use in future purchases.</p>
+import { AskQuestion, faqItems } from './components';
+import { useApi } from 'hooks/useApi';
+import { Accordion } from 'components/UI';
 
-      <Heading size='4'>Q: How to transfer KSM to the other wallet or exchange?</Heading>
-      <p>A: KSM that you use and see on the marketplace is on your Kusama (Substrate) account, you don`t have to withdraw it. You can interact with your wallet using any Polkadot/Kusama network tool.
-        To transfer KSM to the other wallet or exchange:</p>
-      <ol>
-        <li>Go to `Accounts` at <Link href='https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Fkusama-rpc.polkadot.io#/accounts'>https://polkadot.js.org/apps/accounts</Link></li>
-        <li> Restore your wallet through the seed phrase, JSON file+password or QR code.Make sure that using Chrome or Firefox desktop with the Polkadot.js browser extension you’ve set your wallet account setting to `allow use on any chain`.</li>
-        <li>Send KSM anywhere you want</li>
-      </ol>
-      <Heading size='4'>Q: How do auctions work?</Heading>
-      <p>
-        A: There are two available options for selling NFTs on the Unique market: Fixed price and Auction.
-        In case of Auction, the ‘English auction’ or ‘Sell to the highest bidder’ type of auction is used in which case the highest bid wins.
-      </p>
-      <br/>
-      <p><b>Seller rules:</b></p>
-      <ol>
-        <li>Choose a starting price.</li>
-        <li>Set an ending time and a minimum bidding step.</li>
-        <li>Highest bid placed wins the auction at auction end.</li>
-        <li>An offer for auction can be cancelled as long as no bids are placed. Once a bid is placed an offer put up for auction cannot be retracted.</li>
-        <li>A seller receives 90% of a winning bid. The remaining 10% is the market commission percentage.</li>
-      </ol>
-      <br/>
-      <p><b>Buyer rules:</b></p>
-      <ol>
-        <li>All bids are held in escrow. When counter-bidding in a sequence of bids, only the difference in price between your most recent bid and the current bid is deducted from your account (bidding price top-up). For example: if your previous bid was for 2 KSM and a counter-bid was placed at 2.5 KSM, should you decide to outbid this offer at 3 KSM only 1 KSM will be deducted from your funding account to top-up the bid in escrow.</li>
-        <li>Auction participants may withdraw from participating in the auction at any point during the auction by choosing “Withdraw” on the token page. In doing so the deposited funds will be automatically redeemed by the participant.</li>
-        <li>All participant’s funds held in escrow other than the winning bid’s  are automatically redeemed by the their owners on successful conclusion of the auction.</li>
-      </ol>
-      <Heading size='4'>Q: Where can I read the Terms of Service?</Heading>
-      <p>A: You can read our Terms of Service&nbsp;
-        <Link
-          download
-          href='/Terms.pdf'
-        >here.
-        </Link>
-      </p>
-
-      <Heading size='4'>Q: Whom can I contact if I have questions regarding the marketplace?</Heading>
-      <p>Please contact <Link href='mailto:unqnftsupport@unique.network'>unqnftsupport@unique.network</Link> if you have any questions.</p>
-    </MainWrapper>
-  </PagePaper>);
+type LocationState = {
+  isNestedInfo?: boolean;
 };
 
-const MainWrapper = styled.div`
-  display: block !important;
-  max-width: 1168px;
+const READ_ITEMS_KEY = 'new-wallet-read-faq';
 
-  h4:not(:first-child) {
-    margin-top: calc(var(--gap) * 2);
-  }
-  
-  a {
-    color: ${Primary600};
-  }
-  
-  p, ol li {
-    font-size: 16px;
-    line-height: 24px;
-    font-family: var(--font-roboto);
-    font-weight: 400;
-    margin-bottom: 0;
-    letter-spacing: normal;
-  }
+const FaqComponent = (): React.ReactElement<void> => {
+  const { currentChainId } = useApi();
+  const location = useLocation();
+  const state = (location.state || {}) as LocationState;
 
-  ol {
-    padding-left: 17px;
+  useEffect(() => {
+    window.history.replaceState({}, document.title);
+  }, []);
+
+  const [readFaqItems, setReadFaqItems] = useState<string[]>(
+    localStorage.getItem(READ_ITEMS_KEY)?.split(',') || []
+  );
+
+  const onToggleItem = useCallback(
+    (index: number) => (isOpen: boolean) => {
+      setReadFaqItems((readFaqItems) => {
+        if (!isOpen || readFaqItems.includes(index.toString())) {
+          return readFaqItems;
+        }
+        localStorage.setItem(READ_ITEMS_KEY, [...readFaqItems, index].join(','));
+        return [...readFaqItems, index.toString()];
+      });
+    },
+    []
+  );
+
+  const keys = Object.keys(state);
+
+  return (
+    <MainWrapperStyled>
+      <WrapperContentStyled>
+        {faqItems(currentChainId || '', state).map(
+          (item: Record<string, ReactNode>, i: number) => {
+            return (
+              <Accordion
+                key={i}
+                className='faq-item'
+                isOpen={keys.length > 0 ? Boolean(item.defaultExpanded) : i === 0}
+                title={
+                  <>
+                    {item.title}
+                    {item.isNew && !readFaqItems.includes(i.toString()) && (
+                      <span className='tooltip'>NEW</span>
+                    )}
+                  </>
+                }
+                onToggle={onToggleItem(i)}
+              >
+                <div>{item.content}</div>
+              </Accordion>
+            );
+          }
+        )}
+      </WrapperContentStyled>
+      <WrapperSidebar>
+        <AskQuestion />
+      </WrapperSidebar>
+    </MainWrapperStyled>
+  );
+};
+
+export const MainWrapper = styled.div`
+  @media screen and (min-width: 1025px) {
+    display: flex;
+    align-items: flex-start;
   }
 `;
 
-export default Faq;
+const MainWrapperStyled = styled(MainWrapper)`
+  @media only screen and (min-width: 800px) and (max-width: 1024px) {
+    width: 85%;
+  }
+  
+  .unique-modal-wrapper {
+    padding: calc(var(--prop-gap) * 5) 5%;
+    box-sizing: border-box;
+    
+    @media screen and (max-width: 567px) {
+      .unique-modal {
+        padding: calc(var(--prop-gap));
+        
+        .unique-font-heading {
+          font-size: 24px;
+          text-align: left;
+        }
+        
+        .close-button {
+          top: 20px;
+        }
+      }
+    }
+  }
+  `;
 
-// export default React.memo(Faq);
+export const WrapperContent = styled.div`
+  box-sizing: border-box;
+  
+  @media screen and (min-width: 1025px) {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-radius: var(--prop-border-radius);
+    padding: calc(var(--prop-gap) * 2);
+    background-color: var(--color-additional-light);
+    flex: 1 1 66.6666%;
+  }
+`;
+
+export const WrapperSidebar = styled.aside`
+  box-sizing: border-box;
+  overflow: hidden;
+  margin: calc(var(--prop-gap) * 2) 0;
+
+  @media screen and (min-width: 1025px) {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-radius: var(--prop-border-radius);
+    padding: calc(var(--prop-gap) * 2);
+    background-color: var(--color-additional-light);
+    flex: 1 1 33.3333%;
+    max-width: 600px;
+    margin: 0 0 0 calc(var(--prop-gap) * 2);
+  }
+
+  @media only screen and (min-width: 1025px) and (max-width: 1500px) {
+    margin: 0 0 0 calc(var(--prop-gap) * 1.5);
+  }
+`;
+
+const WrapperContentStyled = styled(WrapperContent)`
+  .faq-item {
+    position: relative;
+    border-bottom: 1px dashed var(--color-blue-grey-300);
+    font-size: 1rem;
+    line-height: 1.4;
+    color: var(--color-additional-dark);
+    a {
+      white-space: break-spaces;
+    }
+
+    .tooltip {
+      position: absolute;
+      width: 48px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      right: 0;
+      top: 0;
+      background: var(--color-primary-300);
+      color: var(--color-additional-light);
+      @media screen and (max-width: 567px) {
+        width: 24px;
+        height: 12px;
+        font-size: 8px;
+      }
+    }
+
+    &:not(:last-child) {
+      margin-bottom: calc(var(--prop-gap) * 2);
+    }
+
+    div[class^='Accordion__AccordionTitle'] {
+      margin-bottom: var(--prop-gap);
+      column-gap: calc(var(--prop-gap) / 2);
+      & > span {
+        color: inherit;
+        font-weight: 700;
+        font-size: 1.25rem;
+        font-family: Raleway;
+      }
+      @media screen and (max-width: 567px) {
+        margin-right: 40px;
+      }
+    }
+
+    div[class^='Accordion__AccordionBodyWrapper'] {
+      padding: 10px;
+      line-height: 1.5;
+      background-color: var(--color-blue-grey-100);
+    }
+
+    ol,
+    ul,
+    .unique-link {
+      font: inherit;
+    }
+
+    ol,
+    ul {
+      padding-left: 1.5em;
+
+      li {
+        &:not(:first-child) {
+          margin-top: 0.1em;
+        }
+      }
+    }
+
+    ol {
+      list-style-position: inside;
+    }
+
+    ul,
+    ol,
+    p {
+      & + p {
+        margin-top: 1.125em;
+      }
+    }
+
+    a:not([class]),
+    .unique-link {
+      gap: 2px;
+      color: var(--color-primary-600);
+
+      &:hover {
+        text-decoration: underline;
+        text-decoration-thickness: 1px;
+        text-underline-offset: 0.3em;
+      }
+
+      &:focus-visible {
+        outline: -webkit-focus-ring-color auto 1px;
+      }
+    }
+  }
+`;
+
+export const Faq = FaqComponent;

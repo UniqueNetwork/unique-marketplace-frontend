@@ -7,7 +7,7 @@ import BN from 'bn.js';
 import { AdditionalPositive100, AdditionalPositive500, Coral100, Coral500, Grey300 } from 'styles/colors';
 import { useOfferSubscription } from 'hooks/useOfferSubscription';
 import { useAccounts } from 'hooks/useAccounts';
-import { compareEncodedAddresses, isTokenOwner } from 'api/uniqueSdk/utils/addressUtils';
+import { compareEncodedAddresses, isTokenOwner } from 'api/chainApi/utils/addressUtils';
 import { Offer } from 'api/restApi/offers/types';
 import { useAuction } from 'api/restApi/auction/auction';
 import { TCalculatedBid } from 'api/restApi/auction/types';
@@ -41,7 +41,7 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
       bidderAddress: selectedAccount?.address || ''
     });
     setCalculatedBid(_calculatedBid);
-  }, [offer?.collectionId, offer?.tokenId, selectedAccount?.address]);
+  }, [offer?.collectionId, offer?.tokenId, selectedAccount]);
 
   useEffect(() => {
     if (!offer || offer.auction?.status !== 'active' || !selectedAccount) return;
@@ -49,14 +49,14 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
   }, [fetchCalculatedBid]);
 
   const canPlaceABid = useMemo(() => {
-    if (!selectedAccount?.address || !offer?.seller) return false;
+    if (!selectedAccount || !offer?.seller) return false;
     return !isTokenOwner(selectedAccount.address, offer.seller);
-  }, [offer, selectedAccount?.address]);
+  }, [offer, selectedAccount]);
 
   const canDelist = useMemo(() => {
-    if (!selectedAccount?.address || !offer?.seller) return false;
+    if (!selectedAccount || !offer?.seller) return false;
     return isTokenOwner(selectedAccount.address, offer.seller) && !offer.auction?.bids?.length;
-  }, [offer, selectedAccount?.address]);
+  }, [offer, selectedAccount]);
 
   const isBidder = useMemo(() => {
     if (!selectedAccount || !calculatedBid) return false;
@@ -109,7 +109,7 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
 
   useOfferSubscription({ offer, onPlaceBid, onAuctionStopped, onAuctionClosed });
 
-  const price = offer.price;
+  const price = offer.price.raw;
 
   return (<>
     <Text size={'l'} testid={`${testid}-bid-title`}>{topBid ? 'Next minimum bid' : 'Starting bid'}</Text>

@@ -7,5 +7,8 @@ export enum MarketType {
   sellAuction = 'Auction',
   transfer = 'Transfer',
   delist = 'Cancel sell',
-  delistAuction = 'Cancel auction'
+  delistAuction = 'Cancel auction',
+  nestedTransfer = 'NestedTransfer',
+  unnest = 'Unnest',
+  changePrice = 'changePrice'
 }

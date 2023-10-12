@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNotifications } from 'components/UI';
-import { UnsignedTxPayload } from '@unique-nft/substrate-client/types';
-import { InternalStage, SignFunction, StageStatus, useStagesReturn } from '../types/StagesTypes';
+import { InternalStage, StageStatus, useStagesReturn } from '../types/StagesTypes';
+import { Account } from 'account/types';
 
-const useStages = <T>(stages: InternalStage<T>[], signFunction: SignFunction): useStagesReturn<T> => {
+const useStages = <T>(stages: InternalStage<T>[], account?: Account): useStagesReturn<T> => {
+  if (!account) throw new Error('Can\'t execute stages without account');
   const [internalStages, setInternalStages] = useState<InternalStage<T>[]>(stages);
   const [stagesStatus, setStagesStatus] = useState<StageStatus>(StageStatus.default);
   const [executionError, setExecutionError] = useState<Error | undefined | null>(null);
@@ -27,28 +28,19 @@ const useStages = <T>(stages: InternalStage<T>[], signFunction: SignFunction): u
     });
   }, [setInternalStages]);
 
-  const getSignFunction = useCallback((index: number, internalStage: InternalStage<T>) => {
-    return async (unsignedTxPayload: UnsignedTxPayload): Promise<`0x${string}` | null> => {
-      updateStage(index, { ...internalStage, status: StageStatus.awaitingSign });
-      const signedTx = await signFunction(unsignedTxPayload);
-      updateStage(index, { ...internalStage, status: StageStatus.inProgress });
-      return signedTx;
-    };
-  }, [updateStage, signFunction]);
-
   const executeStep = useCallback(async (stage: InternalStage<T>, index: number, txParams: T) => {
     updateStage(index, { ...stage, status: StageStatus.inProgress });
     try {
       // if sign is required by action -> promise wouldn't be resolved until transaction is signed
-      // transaction sign could be triggered in the component that uses current stage (you can track it by using stage.signer)
-      await stage.action({ txParams, options: { sign: getSignFunction(index, stage) } });
+      // transaction sign could be triggered in the component that uses current stage (you can track it by using stage.account)
+      await stage.action({ txParams, options: { account } });
       updateStage(index, { ...stage, status: StageStatus.success });
-    } catch (e) {
+    } catch (e: any) {
       updateStage(index, { ...stage, status: StageStatus.error });
       console.error('Execute stage failed', stage, e);
-      throw new Error(`Execute stage "${stage.title}" failed`);
+      throw new Error(`Execute step "${stage.title}" failed: ${e?.message}`);
     }
-  }, [updateStage, getSignFunction]);
+  }, [updateStage, account]);
 
   const initiate = useCallback(async (params: T) => {
     setStagesStatus(StageStatus.inProgress);

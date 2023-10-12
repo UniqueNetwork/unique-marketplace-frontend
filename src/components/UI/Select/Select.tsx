@@ -200,7 +200,6 @@ export const Select = ({
               const selected = isSelected(option);
               return (
                 <div
-                  data-testid={`${testid}-${(option)[optionKey]}`}
                   className={classNames('dropdown-option', {
                     selected,
                     'with-icon': icon,
@@ -214,6 +213,7 @@ export const Select = ({
                       ? handleOptionUnselect(option)
                       : handleOptionSelect(option)
                   }
+                  data-testid={`${testid}-${(option)[optionKey]}`}
                 >
                   {
                     option[

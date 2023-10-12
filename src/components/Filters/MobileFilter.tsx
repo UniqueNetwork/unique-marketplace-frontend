@@ -15,17 +15,21 @@ type MobileFiltersProps<T> = {
     title: string | number
     iconRight?: IconProps
   }[]
-  onFilterChange: FilterChangeHandler<T>
-  onSortingChange(value: SelectOptionProps): void
-  filterComponent?: ReactElement | null
+  onFilterApply: (filter: T | null, sorting: SelectOptionProps) => void
+  filterComponent?: (props: {
+    filterState: T | null,
+    onFilterChange: FilterChangeHandler<T>
+  }) => ReactElement | null
   testid: string
 }
 
 const tabs = ['Filter', 'Sort'];
 
-export function MobileFilters<T = FilterState>({ filterCount, filterComponent, defaultSortingValue, sortingValue, sortingOptions, onFilterChange, onSortingChange, testid }: MobileFiltersProps<T>) {
+export function MobileFilters<T = FilterState>({ filterCount, filterComponent, defaultSortingValue, sortingOptions, onFilterApply, testid }: MobileFiltersProps<T>) {
   const [isVisible, setIsVisible] = useState(false);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const [filterState, setFilterState] = useState<T | null>(null);
+  const [sortingState, setSortingState] = useState<SelectOptionProps>(defaultSortingValue);
 
   const onVisibleButtonClick = useCallback(() => {
     setIsVisible(true);
@@ -33,13 +37,18 @@ export function MobileFilters<T = FilterState>({ filterCount, filterComponent, d
 
   const onShowButtonClick = useCallback(() => {
     setIsVisible(false);
-  }, [setIsVisible]);
+    onFilterApply(filterState, sortingState);
+  }, [filterState, sortingState, setIsVisible, onFilterApply]);
+
+  const onSortingChange = useCallback((option: SelectOptionProps) => setSortingState(option),
+    [setSortingState]);
 
   const onResetButtonClick = useCallback(() => {
     setIsVisible(false);
-    onFilterChange(null);
-    onSortingChange(defaultSortingValue);
-  }, [setIsVisible]);
+    setFilterState(null);
+    setSortingState(defaultSortingValue);
+    onFilterApply(null, defaultSortingValue);
+  }, [setIsVisible, setFilterState, setSortingState, onFilterApply, defaultSortingValue]);
 
   return <>
     <MobileFilterActionsWrapper>
@@ -74,12 +83,15 @@ export function MobileFilters<T = FilterState>({ filterCount, filterComponent, d
       <Tabs
         activeIndex={activeTabIndex}
       >
-        {filterComponent || <></>}
+        {filterComponent?.({
+          filterState,
+          onFilterChange: setFilterState
+        }) || <></>}
         <SortStyled>
           <Select
             onChange={onSortingChange}
             options={sortingOptions}
-            value={sortingValue}
+            value={sortingState.id as string}
             testid={`${testid}-sorting-select`}
           />
         </SortStyled>

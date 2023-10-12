@@ -63,24 +63,24 @@ const NodeView: FC<INodeView<INestingToken>> = ({
   const tokenMenuActions = useMemo(() => {
     return (
       <>
-        <TransferMenuItem onClick={onTransfer}>Transfer
+        <TransferMenuItem onClick={onTransfer} withBorder={level > 1}>Transfer
           <IconWrapper>
             <Icon name={'sorting-initial'} size={16} color={'var(--color-primary-500)'} />
           </IconWrapper>
         </TransferMenuItem>
-        <UnnestMenuItem onClick={onUnnest}>Unnest token
+        {level > 1 && <UnnestMenuItem onClick={onUnnest}>Unnest token
           <IconWrapper>
             <Icon name={'logout'} size={16} color={'var(--color-coral-500)'} />
           </IconWrapper>
-        </UnnestMenuItem>
+        </UnnestMenuItem>}
       </>
     );
   }, [onTransfer, onUnnest]);
 
   const viewTokenDetails = useCallback(() => {
-    if (onViewNodeDetails) onViewNodeDetails(data);
+    if (onViewNodeDetails) onViewNodeDetails(data, collection?.mode || 'NFT');
     setModalVisible(false);
-  }, [onViewNodeDetails, data]);
+  }, [onViewNodeDetails, data, collection]);
 
   const closeModal = useCallback(() => {
     setModalVisible(false);
@@ -148,6 +148,13 @@ const NodeView: FC<INodeView<INestingToken>> = ({
               />
             </div>}
           </ActionButtons>}
+          {deviceSize < DeviceSize.md && !isCurrent &&
+            <Icon
+              size={32}
+              name={'meatball-menu'}
+              color={Secondary400}
+              ref={meatballIconMenu}
+            />}
           {isCurrent && <PinIcon className={'pin-icon'}>
             <Tooltip
               align={{ vertical: 'top', horizontal: 'middle', appearance: 'vertical' }}
@@ -287,7 +294,8 @@ const DropdownMenu = styled.div`
   min-width: 138px;
 `;
 
-const DropdownMenuItem = styled.div`
+const DropdownMenuItem = styled.div<{ withBorder?: boolean }>`
+  border-bottom: ${({ withBorder }) => withBorder ? `1px dashed ${Grey300}` : 'none'};
   display: flex;
   align-items: center;
   padding: 4px 8px;
@@ -300,7 +308,6 @@ const DropdownMenuItem = styled.div`
 `;
 
 const TransferMenuItem = styled(DropdownMenuItem)`
-  border-bottom: 1px dashed ${Grey300};
   color: ${Primary500};
   &:hover {
     color: ${Primary600};

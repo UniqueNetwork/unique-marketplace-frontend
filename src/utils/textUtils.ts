@@ -6,6 +6,15 @@ export const shortcutText = (text: string) => {
   return start && end ? `${start}...${end}` : text;
 };
 
+export const ellipsisText = (text: string, allowSymbols = 30) => {
+  if (text.length > allowSymbols) {
+    const nextSpacePosition = text.indexOf(' ', allowSymbols);
+    if (!nextSpacePosition) return text;
+    return text.slice(0, nextSpacePosition) + '…';
+  }
+  return text;
+};
+
 export const capitalize = (text: string) => `${text[0].toUpperCase()}${text.slice(1)}`;
 
 export const formatAmount = (amount: number | string) => {
@@ -23,11 +32,47 @@ export const formatBlockNumber = (blockNumber: number | undefined) => {
   return blockNumber.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 };
 
-export const formatKusamaBalance = (balance: string | number, options?: { decimals?: number, fractionDigits?: number }) => {
-  const { decimals, fractionDigits } = options || {};
+/**
+ *
+ * @param balance Human format number
+ * @param fractionDigits Amount of digits after the dot
+ * @returns
+ */
+export const formatBalance = (balance: string | number, fractionDigits = 4, useGrouping = true) => {
   const balanceValue = Number(balance);
-  return (balanceValue / Math.pow(10, decimals || 12)).toLocaleString('en-US', {
+  return balanceValue.toLocaleString('en-US', {
     minimumFractionDigits: 0,
-    maximumFractionDigits: fractionDigits || decimals || 12
-  });
+    maximumFractionDigits: fractionDigits,
+    useGrouping
+  }).replaceAll(',', ' ');
+};
+
+export const formatLongNumber = (number = 0): string => {
+  if (!number) {
+    return '0';
+  }
+
+  if (number < 10000) {
+    return formatBlockNumber(number);
+  }
+
+  if (number < 1000000) {
+    return formatBlockNumber(Math.floor(number / 100) / 10) + 'K';
+  }
+
+  if (number < 1000000000) {
+    return formatBlockNumber(Math.floor(number / 100000) / 10) + 'M';
+  }
+
+  return formatBlockNumber(Math.floor(number / 100000000) / 10) + 'B';
+};
+
+export const percentText = (percent: number) => {
+  if (percent < 0.01) {
+    return '<0.01 %';
+  }
+  if (percent > 99.99 && percent < 100) {
+    return '>99.99 %';
+  }
+  return `${percent.toFixed(2)} %`;
 };

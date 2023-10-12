@@ -11,7 +11,7 @@ import { useAuctionBidStages } from 'hooks/marketplaceStages';
 import { useAccounts } from 'hooks/useAccounts';
 import { useFee } from 'hooks/useFee';
 import { useApi } from 'hooks/useApi';
-import { formatKusamaBalance } from 'utils/textUtils';
+import { formatBalance } from 'utils/textUtils';
 import { fromStringToBnString } from 'utils/bigNum';
 import { NumberInput } from 'components/NumberInput/NumberInput';
 import { StageStatus } from 'types/StagesTypes';
@@ -43,17 +43,16 @@ export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosabl
   return null;
 };
 
-const chainOptions = [{ id: 'KSM', title: 'KSM', iconRight: { size: 18, name: 'chain-kusama' } }];
+const chainOptions = [{ id: 'KSM', title: '!!!OLD_KSM!!!', iconRight: { size: 18, name: 'chain-kusama' } }];
 
 export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceABid): void, testid: string}> = ({ offer, onConfirmPlaceABid, testid }) => {
-  const [chain, setChain] = useState<string | undefined>('KSM');
-  const { kusamaFee, getKusamaFee } = useFee();
-  const { selectedAccount } = useAccounts();
   const { api, settings } = useApi();
+  const [chain, setChain] = useState<string | undefined>('KSM');
+  const { transferBalanceFee, getTransferBalanceFee } = useFee();
+  const { selectedAccount } = useAccounts();
   const [calculatedBid, setCalculatedBid] = useState<TCalculatedBid>();
   const [isFetchingCalculatedbid, setIsFetchingCalculatedBid] = useState<boolean>(true);
   const { getCalculatedBid } = useAuction();
-  const decimals = api?.market?.kusamaDecimals;
 
   const fetchCalculatedBid = useCallback(async () => {
     if (!offer || !selectedAccount || !settings) return;
@@ -63,7 +62,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
       tokenId: offer?.tokenId || 0,
       bidderAddress: selectedAccount?.address || ''
     });
-    await getKusamaFee(settings.auction.address, new BN(_calculatedBid?.minBidderAmount || 0));
+    await getTransferBalanceFee(settings.auction.address, _calculatedBid?.minBidderAmount || 0);
     setCalculatedBid(_calculatedBid);
     setIsFetchingCalculatedBid(false);
   }, [offer, selectedAccount?.address]);
@@ -84,36 +83,36 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
     return new BN(Number(leadingBid) + Number(offer?.auction?.priceStep || '0'));
   }, [offer?.auction, leadingBid]);
 
-  const [bidAmount, setBidAmount] = useState<string>(formatKusamaBalance(minimalBid.toString(), { decimals }));
+  const [bidAmount, setBidAmount] = useState<string>(formatBalance(minimalBid.toString()));
 
   const isEnoughBalance = useMemo(() => {
-    if (!selectedAccount?.balance?.KSM || selectedAccount?.balance?.KSM.isZero()) return false;
-    const bnAmount = new BN(fromStringToBnString(bidAmount, api?.market?.kusamaDecimals));
-    return selectedAccount?.balance?.KSM.gte(bnAmount.sub(new BN(lastBidFromThisAccount || 0)));
-  }, [selectedAccount?.balance?.KSM, bidAmount, api?.market?.kusamaDecimals, lastBidFromThisAccount]);
+    if (!selectedAccount?.balances?.proper.raw || selectedAccount?.balances?.proper.raw.isZero()) return false;
+    const bnAmount = new BN(fromStringToBnString(bidAmount, api?.market?.decimals));
+    return selectedAccount?.balances?.proper.raw.gte(bnAmount.sub(new BN(lastBidFromThisAccount || 0)));
+  }, [selectedAccount?.balances?.proper.raw, bidAmount, api?.market?.decimals, lastBidFromThisAccount]);
 
   const onBidAmountChange = useCallback((value: string) => {
     setBidAmount(value);
     if (!settings) return;
-    getKusamaFee(settings.auction.address, new BN(fromStringToBnString(value, api?.market?.kusamaDecimals)));
-  }, [setBidAmount]);
+    void (getTransferBalanceFee(settings.auction.address, value));
+  }, [setBidAmount, api, getTransferBalanceFee, settings]);
 
   const isAmountValid = useMemo(() => {
     if (!bidAmount || bidAmount === '0') return false;
-    return new BN(fromStringToBnString(bidAmount, api?.market?.kusamaDecimals)).gte(minimalBid);
-  }, [bidAmount, minimalBid, api?.market?.kusamaDecimals]);
+    return new BN(fromStringToBnString(bidAmount, api?.market?.decimals)).gte(minimalBid);
+  }, [bidAmount, minimalBid, api?.market?.decimals]);
 
   const onConfirmPlaceABidClick = useCallback(
     () => {
       if (!isAmountValid || !isEnoughBalance) return;
-      const bnAmount = new BN(fromStringToBnString(bidAmount, api?.market?.kusamaDecimals));
+      const bnAmount = new BN(fromStringToBnString(bidAmount, api?.market?.decimals));
 
       onConfirmPlaceABid({
         accountAddress: selectedAccount?.address || '',
-        amount: formatKusamaBalance(Number(bnAmount.toString()) - Number(lastBidFromThisAccount))
+        amount: formatBalance(Number(bnAmount.toString()) - Number(lastBidFromThisAccount))
       });
     },
-    [onConfirmPlaceABid, bidAmount, isEnoughBalance, isAmountValid, chain, api?.market?.kusamaDecimals, lastBidFromThisAccount]
+    [onConfirmPlaceABid, bidAmount, isEnoughBalance, isAmountValid, chain, api?.market?.decimals, lastBidFromThisAccount]
   );
 
   const onChainChange = useCallback(
@@ -142,16 +141,16 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
         />
       </InputWrapper>
       <Text size={'s'} color={'grey-500'} testid={`${testid}-minimum-bid-text`}>
-        {`Minimum bid ${formatKusamaBalance(minimalBid.toString(), { decimals })} ${chain || ''}`}
+        {`Minimum bid ${formatBalance(minimalBid.toString())} ${chain || ''}`}
       </Text>
       <CautionTextWrapper>
-        {!isEnoughBalance && <WarningStyled color={'coral-500'} testid={`${testid}-low-balance-warning`}>Your balance is too low to place a bid</WarningStyled>}
-        {isEnoughBalance && <TextStyled
+        {(!isEnoughBalance || !isAmountValid) && <WarningStyled color={'coral-500'} testid={`${testid}-low-balance-warning`}>Check the bid. You may haven’t enough funds or the entered value is less than the minimum or previous bid.</WarningStyled>}
+        {(isEnoughBalance && isAmountValid) && <TextStyled
           color='additional-warning-500'
           size='s'
           testid={`${testid}-fee-warning`}
         >
-          {`A fee of ~ ${kusamaFee} ${chain || ''} can be applied to the transaction`}
+          {`A fee of ~ ${transferBalanceFee} ${chain || ''} can be applied to the transaction`}
         </TextStyled>}
       </CautionTextWrapper>
       <ButtonWrapper>

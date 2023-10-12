@@ -1,3 +1,5 @@
+import { BN } from '@polkadot/util';
+
 export enum CreateAccountModalStages {
   AskSeed,
   AskCredentials,
@@ -15,7 +17,7 @@ export type TAccountModalProps = {
   isVisible: boolean
   onFinish(): void
   onClose(): void
-  testid: string
+  testid?: string
 };
 
 export type TCreateAccountBodyModalProps = {
@@ -35,5 +37,10 @@ export type Scanned = {
 export type TTransferFunds = {
   sender: string
   recipient: string
-  amount: string
+  amount: BN | number | string
 }
+
+export type TWithdrawFunds = {
+  sender: string,
+  recipient: string
+};

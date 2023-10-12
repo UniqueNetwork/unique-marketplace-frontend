@@ -1,13 +1,15 @@
 import { FC } from 'react';
 import styled from 'styled-components';
 
-import { Offer } from 'api/restApi/offers/types';
 import { TokensCard } from '..';
 import CardSkeleton from '../Skeleton/CardSkeleton';
-import { TokenByIdResult } from '@unique-nft/substrate-client/tokens';
+import { MyToken } from '../../pages/MyTokens/types';
+import { TokenByIdResponse } from '@unique-nft/sdk';
+import { Offer } from 'api/restApi/offers/types';
+import { Token } from 'api/restApi/tokens/types';
 
 type TTokensList = {
-  tokens: (TokenByIdResult & Partial<Offer>)[]
+  tokens: (Omit<TokenByIdResponse | MyToken, 'collection' | 'nestingParentToken' | 'properties'> | Offer | Token)[]
   isLoading?: boolean
   testid: string
 };
@@ -16,9 +18,9 @@ export const TokensList: FC<TTokensList> = ({ tokens, isLoading, testid }) => {
   return (
     <TokensListStyled>
       {(!isLoading && tokens?.map) &&
-        tokens.map((token) => (
+        tokens.map((token, index) => (
           <TokensCard
-            key={`token-${token?.collectionId || ''}-${token?.tokenId}`}
+            key={`token-${token?.collectionId || ''}-${token?.tokenId}-${index}`}
             tokenId={token?.tokenId}
             collectionId={token?.collectionId}
             {...('seller' in token ? { offer: token } : { token })}

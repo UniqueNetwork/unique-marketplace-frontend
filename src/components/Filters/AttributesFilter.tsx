@@ -2,11 +2,11 @@ import React, { FC, useCallback } from 'react';
 import styled from 'styled-components';
 import { Text } from '@unique-nft/ui-kit';
 import { Checkbox } from 'components/UI';
-import Accordion from '../Accordion/Accordion';
+import { Accordion } from '../Accordion/Accordion';
 import CheckboxSkeleton from '../Skeleton/CheckboxSkeleton';
 import { AttributeItem } from './types';
 import { Attribute } from '../../api/restApi/offers/types';
-import { capitalize } from '../../utils/textUtils';
+import { capitalize, ellipsisText } from '../../utils/textUtils';
 import { sortAttributes } from './utils/sortAttributes';
 
 interface AttributesFilterProps {
@@ -15,9 +15,10 @@ interface AttributesFilterProps {
   isAttributesFetching?: boolean
   onAttributesChange?(value: { key: string, attribute: string }[]): void
   testid: string
+  disabled?: boolean
 }
 
-const AttributesFilter: FC<AttributesFilterProps> = ({ selectedAttributes = [], attributes, isAttributesFetching, onAttributesChange, testid }) => {
+const AttributesFilter: FC<AttributesFilterProps> = ({ selectedAttributes = [], attributes, isAttributesFetching, onAttributesChange, testid, disabled }) => {
   const onAttributeSelect = useCallback((attributeItem: AttributeItem) => (value: boolean) => {
     let _selectedAttributes;
     if (value) {
@@ -39,17 +40,18 @@ const AttributesFilter: FC<AttributesFilterProps> = ({ selectedAttributes = [], 
         isOpen={true}
         onClear={onClear(attributeName)}
         isClearShow={selectedAttributes?.some((attribute) => attributeName === attribute.key)}
-        testid={`${testid}-accordion`}
+        key={attributeName}
       >
         <CollectionFilterWrapper>
           {attributes[attributeName].sort(sortAttributes).map((attribute) => (
             <AttributeWrapper key={`attribute-${attribute.key}`}>
               <Checkbox
                 checked={selectedAttributes.findIndex((item) => item.key === attributeName && item.attribute === attribute.key) !== -1}
-                label={attribute.key}
+                label={ellipsisText(attribute.key)}
                 size={'m'}
                 onChange={onAttributeSelect({ key: attributeName, attribute: attribute.key })}
                 testid={`${testid}-checkbox-${attribute.key}`}
+                disabled={disabled}
               />
               <Text
                 testid={`${testid}-count-${attribute.key}`}
@@ -72,6 +74,10 @@ const CollectionFilterWrapper = styled.div`
   min-height: 50px;
   max-height: 400px;
   overflow-y: auto;
+  padding-right: var(--gap);
+  @media (max-width: 1024px) {
+    padding-bottom: calc(var(--gap) * 2);
+  }
   .unique-checkbox-wrapper label {
     max-width: 230px;
     text-overflow: ellipsis;

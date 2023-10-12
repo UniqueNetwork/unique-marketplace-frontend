@@ -1,6 +1,12 @@
 export type TTransfer = {
   sender: string
   recipient: string
+  amount: number
+}
+
+export type TEnableAllowanceProps = {
+  collectionId: number,
+  tokenId: number
 }
 
 export type TFixPriceProps = {
@@ -10,6 +16,8 @@ export type TFixPriceProps = {
 
 export type TPurchaseProps = {
   accountAddress: string
+  price: number
+  amount: number
 }
 
 export type TDelistProps = {

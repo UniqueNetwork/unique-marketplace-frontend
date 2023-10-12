@@ -1,98 +1,135 @@
-import React, { FC, ReactNode, useCallback, useState } from 'react';
-import styled from 'styled-components';
+import { IconButton } from 'components/IconButton/IconButton';
 import { Button, Text } from 'components/UI';
-import { Secondary400 } from '../../styles/colors';
+import React, { FC, ReactNode, useCallback, useState } from 'react';
+import styled from 'styled-components/macro';
+import { Coral500 } from 'styles/colors';
 
-interface AccordionProps {
-  title: ReactNode
-  isOpen?: boolean
-  isClearShow?: boolean
-  onClear?(): void
-  testid: string
+export interface AccordionProps {
+  title: ReactNode;
+  isOpen?: boolean;
+  isClearShow?: boolean;
+  onClear?(): void;
+  className?: string;
+  onToggle?(isOpen: boolean): void;
 }
 
 const AccordionChevronIcon = () => {
-  return (<svg width='24'
-    height='24'
-    viewBox='0 0 24 24'
-    fill='none'
-    xmlns='http://www.w3.org/2000/svg'
-  >
-    <path fillRule='evenodd'
-      clipRule='evenodd'
-      d='M3.96967 8.46967C4.26256 8.17678 4.73744 8.17678 5.03033 8.46967L12 15.4393L18.9697 8.46967C19.2626 8.17678 19.7374 8.17678 20.0303 8.46967C20.3232 8.76256 20.3232 9.23744 20.0303 9.53033L12.5303 17.0303C12.2374 17.3232 11.7626 17.3232 11.4697 17.0303L3.96967 9.53033C3.67678 9.23744 3.67678 8.76256 3.96967 8.46967Z'
-      fill={Secondary400}
-    />
-  </svg>
+  return (
+    <svg
+      width='24'
+      height='24'
+      viewBox='0 0 24 24'
+      fill='none'
+      xmlns='http://www.w3.org/2000/svg'
+    >
+      <path
+        fillRule='evenodd'
+        clipRule='evenodd'
+        d='M3.96967 8.46967C4.26256 8.17678 4.73744 8.17678 5.03033 8.46967L12 15.4393L18.9697 8.46967C19.2626 8.17678 19.7374 8.17678 20.0303 8.46967C20.3232 8.76256 20.3232 9.23744 20.0303 9.53033L12.5303 17.0303C12.2374 17.3232 11.7626 17.3232 11.4697 17.0303L3.96967 9.53033C3.67678 9.23744 3.67678 8.76256 3.96967 8.46967Z'
+        fill='var(--color-secondary-400)'
+      />
+    </svg>
   );
 };
 
-const Accordion: FC<AccordionProps> = ({ title, isOpen: isOpenProps, children, onClear, isClearShow, testid }) => {
+export const Accordion: FC<AccordionProps> = ({
+  title,
+  isOpen: isOpenProps,
+  children,
+  onClear,
+  className,
+  isClearShow,
+  onToggle
+}) => {
   const [isOpen, setIsOpen] = useState(isOpenProps);
 
-  const onToggle = useCallback(() => {
+  const onTitleClick = useCallback(() => {
     setIsOpen(!isOpen);
+    onToggle?.(!isOpen);
   }, [isOpen]);
 
   const onClearClick = useCallback(() => {
-    onClear && onClear();
+    onClear?.();
   }, [onClear]);
 
   return (
-    <AccordionWrapper>
+    <AccordionWrapper className={className}>
       <AccordionHeaderWrapper>
-        <AccordionTitle onClick={onToggle} isOpen={isOpen} data-testid={`${testid}`} >
+        <AccordionTitle isOpen={isOpen} onClick={onTitleClick}>
           <Text>{title}</Text>
           <AccordionChevronIcon />
         </AccordionTitle>
-        {isClearShow && <Button size={'small'}
-          title={'Clear'}
-          onClick={onClearClick}
-          role={'danger'}
-          testid={`${testid}-clear-button`}
-        />}
+        {isClearShow && (
+          <StyledIconButton
+            name='close'
+            size={12}
+            color={Coral500}
+            onClick={onClearClick}
+          />
+        )}
       </AccordionHeaderWrapper>
-      <AccordionBodyWrapper isOpen={isOpen}>
-        {children}
-      </AccordionBodyWrapper>
+      <AccordionBodyWrapper isOpen={isOpen}>{children}</AccordionBodyWrapper>
     </AccordionWrapper>
   );
 };
 
-const AccordionWrapper = styled.div`
-  
-`;
+const AccordionWrapper = styled.div``;
 
 const AccordionHeaderWrapper = styled.div`
   display: flex;
   align-items: center;
-  height: 32px;
   justify-content: space-between;
+  min-height: 30px;
 `;
 
-const AccordionTitle = styled.div<{ isOpen?: boolean}>`
+const AccordionTitle = styled.div<{ isOpen?: boolean }>`
   display: flex;
   cursor: pointer;
   align-items: center;
-  column-gap: calc(var(--gap) / 4);
+  column-gap: calc(var(--prop-gap) / 4);
   svg {
+    min-width: 24px;
     transform-origin: center;
-    transform: ${({ isOpen }) => isOpen ? 'rotate(0deg);' : 'rotate(-90deg);'};
+    transform: ${({ isOpen }) => (isOpen ? 'rotate(0deg);' : 'rotate(-90deg);')};
     transition: all 0.3s;
   }
 `;
 
-const AccordionBodyWrapper = styled.div<{ isOpen?: boolean}>`
-  animation: ${({ isOpen }) => isOpen ? 'show 0.3s forwards' : 'hide 0.3s forwards'};
+const AccordionBodyWrapper = styled.div<{ isOpen?: boolean }>`
+  animation: ${({ isOpen }) => (isOpen ? 'show 0.3s forwards' : 'hide 0.3s forwards')};
 
   @keyframes hide {
-    from { opacity: 1; max-height: 500px; visibility: visible }
-    to { opacity: 0; max-height: 0; visibility: hidden }
-  } 
+    from {
+      opacity: 1;
+      max-height: 500px;
+      visibility: visible;
+    }
+    to {
+      opacity: 0;
+      max-height: 0;
+      visibility: hidden;
+    }
+  }
   @keyframes show {
-    from { opacity: 0; max-height: 0; visibility: hidden }
-    to { opacity: 1; max-height: 500px; visibility: visible }
+    from {
+      opacity: 0;
+      max-height: 0;
+      visibility: hidden;
+    }
+    to {
+      opacity: 1;
+      max-height: 1000px;
+      visibility: visible;
+    }
   }
 `;
 
-export default Accordion;
+const StyledIconButton = styled(IconButton)`
+  border: 1px solid ${Coral500};
+  border-radius: var(--prop-border-radius);
+  padding: 8px 8px;
+  height: 30px;
+  &:hover svg {
+    fill: ${Coral500};
+  }
+`;

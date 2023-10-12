@@ -5,8 +5,8 @@ import styled from 'styled-components';
 import { Icon } from 'components/UI/Icon/Icon';
 import { Offer } from 'api/restApi/offers/types';
 import { useAccounts } from 'hooks/useAccounts';
-import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
-import { formatKusamaBalance } from 'utils/textUtils';
+import { compareEncodedAddresses } from 'api/chainApi/utils/addressUtils';
+import { formatBalance } from 'utils/textUtils';
 import { timeDifference } from 'utils/timestampUtils';
 import { countNestedChildren, stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
 import { Primary600 } from 'styles/colors';
@@ -15,6 +15,7 @@ import { TokensMedia } from '../TokensCard/TokensMedia';
 import { useApi } from '../../hooks/useApi';
 import BundleItemsCount from '../BundleItemsCount/BundleItemsCount';
 import { Link as UILink } from 'components/UI';
+import { BadgeEnum } from 'components/Picture';
 
 export type TTokensCard = {
   offer: Offer
@@ -23,7 +24,7 @@ export type TTokensCard = {
 
 export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
   const { selectedAccount } = useAccounts();
-  const { currentChainId } = useApi();
+  const { currentChainId, chainProperties } = useApi();
 
   const {
     image,
@@ -61,6 +62,11 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
     tokenId: offer?.tokenId.toString()
   }), [currentChainId, offer]);
 
+  const collectionPath = useMemo(() => generatePath('/:currentChainId/collection/:collectionId', {
+    currentChainId,
+    collectionId: offer?.collectionId.toString()
+  }), [currentChainId, offer]);
+
   const tokensCount = useMemo(() => {
     if (!isBundle) return 0;
     return countNestedChildren(nestingChildTokens);
@@ -74,39 +80,41 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
         imageUrl={image}
         video={videoProp}
         testid={`${testid}-token-media`}
-        badge={isBundle ? 'Bundle' : ''}
+        badges={isBundle ? [BadgeEnum.Bundle] : []}
       />
       <Description>
-        <Link to={tokenPath} title={`${tokenPrefix || ''} #${offer?.tokenId}`}>
-          <Text
-            size='l'
-            weight='regular'
-            color={'secondary-500'}
-            testid={`${testid}-tokenId`}
+        <BasicDataWrapper>
+          <Link to={tokenPath} title={`${tokenPrefix || ''} #${offer?.tokenId}`}>
+            <Text
+              size='l'
+              weight='regular'
+              color={'secondary-500'}
+              testid={`${testid}-tokenId`}
+            >
+              {`${tokenPrefix || ''} #${offer?.tokenId}`}
+            </Text>
+          </Link>
+          <Link
+            data-testid={`${testid}-collection-${offer?.collectionId}-link`}
+            to={collectionPath}
           >
-            {`${tokenPrefix || ''} #${offer?.tokenId}`}
-          </Text>
-        </Link>
-        <UILink
-          data-testid={`${testid}-collection-${offer?.collectionId}-link`}
-          href={`${config.blockchains[currentChainId || ''].scanUrl || ''}collections/${offer?.collectionId}`}
-          target={'_blank'}
-          rel='noreferrer'
-        >
-          <Text color='primary-600' size='s'>
-            {`${collectionName?.substring(0, 25) || ''} [id ${offer?.collectionId || ''}]`}
-          </Text>
-        </UILink>
-        {isBundle && <BundleItemsCount count={tokensCount || 0} testId={testid} />}
-        <PriceWrapper>
-          <Text
-            testid={`${testid}-price`}
-            size='l'
-          >{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(offer?.price)}` }</Text>
-          <IconStyled name={'chain-kusama'} size={16} />
-          {!offer?.auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
-        </PriceWrapper>
-        {offer?.auction && <AuctionInfoWrapper>
+            <Text color='primary-600' size='s'>
+              {`${collectionName?.substring(0, 25) || ''} [id ${offer?.collectionId || ''}]`}
+            </Text>
+          </Link>
+          {isBundle && <BundleItemsCount count={tokensCount || 0} testId={testid} />}
+        </BasicDataWrapper>
+        <TradingInfoWrapper>
+          <Text size={'xs'} color={'grey-500'} >Price</Text>
+          <PriceWrapper length={offer.price.parsed.toFixed(5).length}>
+            <Text
+              testid={`${testid}-price`}
+              size='l'
+            >{topBid ? `${formatBalance(Number(topBid))}` : `${formatBalance(offer.price.parsed, 4, true)}` }</Text>
+            <IconStyled name={`chain-${currentChainId?.toLowerCase()}`} size={16} />
+          </PriceWrapper>
+        </TradingInfoWrapper>
+        {/* {offer?.auction && <AuctionInfoWrapper>
           {isTopBidder && <Text
             testid={`${testid}-leading-bid`}
             size={'xs'}
@@ -125,7 +133,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
             offer.auction.bids.length > 0 ? 'Last bid' : 'Minimum bid'
           }</Text>}
           <StyledText color={'dark'} size={'xs'} testid={`${testid}-auction-close-time`}>{`${timeDifference(new Date(offer.auction?.stopAt || '').getTime() / 1000)} left`}</StyledText>
-        </AuctionInfoWrapper>}
+        </AuctionInfoWrapper>} */}
       </Description>
     </TokensCardStyled>
   );
@@ -135,28 +143,43 @@ const TokensCardStyled = styled.div`
   display: flex;
   align-items: flex-start;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   position: relative;
   cursor: pointer;
 `;
 
-const PriceWrapper = styled.div` 
+const BasicDataWrapper = styled.div`
   display: flex;
-  align-items: center;
-  column-gap: calc(var(--gap) / 4);
-  margin-top: calc(var(--gap) / 2);
+  align-items: flex-start;
+  flex-direction: column;
+  justify-content: flex-start;
+  flex-grow: 1;
 `;
 
-const StyledText = styled(Text)` 
-  && {
-    color: var(--color-additional-dark);
+const PriceWrapper = styled.div<{ length: number }>` 
+  display: flex;
+  align-items: center;
+  span:first-child {
+    font-size: ${({ length }) => `${length > 11 ? 18 - (length - 11) : 18}px !important`}
   }
+  span {
+    white-space: nowrap;
+  }
+`;
+
+const TradingInfoWrapper = styled.div` 
+  display: flex;
+  margin-top: calc(var(--gap) / 2);
+  column-gap: calc(var(--gap) / 4);
+  align-items: center;
+  justify-content: space-between;
 `;
 
 const Description = styled.div`
   display: flex;
   flex-direction: column;
-
+  flex-grow: 1;
+  width: 100%;
   span {
     color: ${Primary600};
   }

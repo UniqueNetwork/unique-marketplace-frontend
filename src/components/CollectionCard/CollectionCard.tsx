@@ -1,58 +1,32 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Text } from '@unique-nft/ui-kit';
-import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
 import styled from 'styled-components/macro';
-import { Icon, Dropdown } from 'components/UI';
-import { CollectionData } from 'api/restApi/admin/types';
-import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
+import { ExternalLink } from 'components/UI';
+import { MyCollection } from 'api/restApi/collections/types';
 import { useApi } from 'hooks/useApi';
-import { useAccounts } from 'hooks/useAccounts';
 import { shortcutText } from 'utils/textUtils';
 import { Picture } from '..';
 import { AdditionalDark, AdditionalLight } from 'styles/colors';
+import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
+import { getIpfsUriByImagePath } from 'utils/urlUtils';
 
 export type TCollectionCard = {
-  collection: CollectionData
-  onManageTokensClick(): void
-  onManageSponsorshipClick(): void
-  onRemoveSponsorshipClick(): void
-  onRemoveCollectionClick(): void
+  collection: MyCollection
+
   onViewOnScanClick(): void
 };
 
 export const CollectionCard: FC<TCollectionCard> = ({
   collection,
-  onManageSponsorshipClick,
-  onRemoveSponsorshipClick,
-  onManageTokensClick,
-  onRemoveCollectionClick,
   onViewOnScanClick
 }) => {
-  const { api } = useApi();
-  const { selectedAccount } = useAccounts();
-  const collectionApi = api?.collection;
-  const [collectionDetails, setCollectionDetails] = useState<CollectionInfoWithSchema | null>();
+  const { featuredCollections, currentChainId } = useApi();
+  const [collectionDetails, setCollectionDetails] = useState<CollectionInfoWithSchemaResponse | null>();
   useEffect(() => {
     if (!collection?.id) return;
-    (async () => {
-      setCollectionDetails(await collectionApi?.getCollection(collection.id));
-    })();
-  }, [collection, collectionApi]);
-
-  const canConfirmSponsorships = useMemo(() => {
-    return selectedAccount?.address &&
-      collectionDetails?.sponsorship?.address &&
-      !collectionDetails?.sponsorship?.isConfirmed &&
-      compareEncodedAddresses(selectedAccount.address, collectionDetails.sponsorship.address);
-  }, [selectedAccount?.address, collectionDetails?.sponsorship?.isConfirmed, collectionDetails?.sponsorship?.address]);
-
-  const canRemoveSponsorships = useMemo(() => {
-    return selectedAccount?.address &&
-      collectionDetails?.sponsorship?.address &&
-      collectionDetails?.sponsorship?.isConfirmed &&
-      (compareEncodedAddresses(selectedAccount.address, collectionDetails.sponsorship.address) ||
-        compareEncodedAddresses(selectedAccount.address, collection?.owner || ''));
-  }, [selectedAccount?.address, collectionDetails?.sponsorship?.isConfirmed, collectionDetails?.sponsorship?.address, collection?.owner]);
+    setCollectionDetails(featuredCollections[collection.id]?.description);
+  }, [collection, featuredCollections]);
 
   const hasSponsorship = useMemo(() => collectionDetails?.sponsorship && collectionDetails?.sponsorship?.isConfirmed, [collectionDetails]);
   const hasUnconfirmedSponsorship = useMemo(() => collectionDetails?.sponsorship && !collectionDetails?.sponsorship?.isConfirmed, [collectionDetails]);
@@ -60,37 +34,17 @@ export const CollectionCard: FC<TCollectionCard> = ({
   return (
     <CollectionCardStyled>
       <PictureWrapper>
-        <Picture alt={collection?.id?.toString() || ''} src={collection.schema?.coverPicture.fullUrl || collectionDetails?.schema?.coverPicture.fullUrl || ''} />
-        <ActionsMenuWrapper>
-          <Dropdown placement={'right'}
-            dropdownRender={() => (<DropdownMenu>
-              {canConfirmSponsorships && <DropdownMenuItem onClick={onManageSponsorshipClick}>Manage sponsorship</DropdownMenuItem>}
-              {/* TODO: wait until the network can grant access to remove sponsorship */}
-              {/* canRemoveSponsorships && <DropdownMenuItem onClick={onRemoveSponsorshipClick}>Remove sponsorship</DropdownMenuItem> */}
-              <DropdownMenuItem onClick={onManageTokensClick}>Manage tokens</DropdownMenuItem>
-              <DropdownMenuItem onClick={onRemoveCollectionClick}>Remove collection</DropdownMenuItem>
-              <DropdownMenuItem onClick={onViewOnScanClick}>View on Scan
-                <IconWrapper>
-                  <Icon name={'arrow-up-right'} size={16} color={'var(--color-primary-500)'} />
-                </IconWrapper>
-              </DropdownMenuItem>
-            </DropdownMenu>)}
-          >
-            <DropdownWrapper>
-              <Icon name='more-horiz' size={24} color='var(--color-additional-light)' />
-            </DropdownWrapper>
-          </Dropdown>
-        </ActionsMenuWrapper>
+        <Link to={`/${currentChainId}/collection/${collection?.id}`}>
+          <Picture alt={collection?.id?.toString() || ''} src={getIpfsUriByImagePath(collection.cover || '')} />
+        </Link>
       </PictureWrapper>
       <Description>
-        <Text size='l' weight='regular' color={'secondary-500'}>
-          {`${collection.name || ''} [id ${collection?.id}]`}
-        </Text>
+        <Link to={`/${currentChainId}/collection/${collection?.id}`}>
+          <Text size='l' weight='regular'>
+            {`${collection.name || ''} [id ${collection?.id}]`}
+          </Text>
+        </Link>
         <AttributesWrapper>
-          <Row>
-            <Text size='s' color={'grey-500'} >Allowed tokens:</Text>
-            <Text size='s' >{collection.allowedTokens || 'all'}</Text>
-          </Row>
           {hasSponsorship && <Row>
             <Text size='s' color={'grey-500'} >Sponsor:</Text>
             <Text size='s' >{collectionDetails?.sponsorship?.isConfirmed ? shortcutText(collectionDetails?.sponsorship?.address || '') : 'not assigned'}</Text>
@@ -99,7 +53,6 @@ export const CollectionCard: FC<TCollectionCard> = ({
             <Text size='s' color={'coral-500'} >Waiting for sponsorship approval</Text>
           </Row>}
         </AttributesWrapper>
-
       </Description>
     </CollectionCardStyled>
   );
@@ -139,10 +92,14 @@ const PictureWrapper = styled.div`
     max-height: 100%;
     border-radius: 8px;
     transition: 50ms;
-
-    img {
-      max-width: 100%;
-      max-height: 100%;
+    overflow: hidden;
+    
+    img {    
+      // changed it according to the task DAP-290
+      object-fit: contain;
+      height: 100%;
+      width: 100%;
+      min-height: 100%;
     }
 
     svg {

@@ -1,21 +1,41 @@
+import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
+
+export type AllowedCollection = {
+  isCurated: boolean
+  allowedTokens: string
+  description: CollectionInfoWithSchemaResponse
+}
+
+export type AllowedCollections = {
+  [key: string]: AllowedCollection
+}
+
+export type MarketContract = {
+  address: string
+  version: string
+}
+
+export type MarketContractAbiItem = {
+  name: string
+  stateMutability: 'payable'
+  type: 'function'
+}
+
 export type Settings = {
   blockchain: {
-    escrowAddress: string
+    escrowAddress: string // TODO: can be removed (after it is removed from BE)
     unique: {
-      wsEndpoint: string
-      collectionIds: number[]
-      contractAddress: string
-      allowedTokens: { collection: number, tokens: string }[]
-    },
-    kusama: {
-      wsEndpoint: string
-      marketCommission: string
-    },
+      rpcUrl: string,
+      restUrl: string,
+      collections: AllowedCollections,
+      contracts: MarketContract[],
+      contractsAbi?: Record<string, MarketContractAbiItem[]>
+    }
   },
   auction: {
     commission: number,
     address: string
-  }
+  },
   marketType: string,
   mainSaleSeedAddress: string,
   administrators: string[]

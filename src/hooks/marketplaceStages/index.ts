@@ -6,3 +6,4 @@ export { useSellFixStages } from './useSellFixStages';
 export { useTransferStages } from './useTransferStages';
 export { useWithdrawBidStages } from './useWithdrawBidStages';
 export { useCancelAuctionStages } from './useCancelAuctionStages';
+export { useChangePriceStages } from './useChangePriceStages';

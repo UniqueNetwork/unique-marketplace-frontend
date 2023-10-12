@@ -2,28 +2,50 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Heading, Link, Suggest, SuggestProps } from '@unique-nft/ui-kit';
 import { Text, useNotifications, Button } from 'components/UI';
+import { BN } from '@polkadot/util';
 import styled from 'styled-components';
 
 import DefaultMarketStages from '../Modals/StagesModal';
-import { useAccounts } from '../../../hooks/useAccounts';
-import { StageStatus } from '../../../types/StagesTypes';
+import { useAccounts } from 'hooks/useAccounts';
+import { StageStatus } from 'types/StagesTypes';
 import { TBundleTrunsferModalBodyProps } from './BundleTrunsferModal';
-import { useCollections } from 'hooks/useCollections';
 import { useApi } from 'hooks/useApi';
-import { CollectionInfoWithSchema, DecodedInfixOrUrlOrCidAndHash, TokenByIdResult, TokenIdArguments } from '@unique-nft/substrate-client/tokens';
 import { CollectionCover } from 'components/CollectionCover/CollectionCover';
-import { useOffers } from 'api/restApi/offers/offers';
+import { FeeMessage } from 'components';
 import { useTransferToBundleStages } from 'hooks/marketplaceStages/useTransferToBundleStages';
 import { INestingToken } from 'components/BundleTree/types';
-
-const pageSize = 1000;
+import { CollectionInfoWithSchemaResponse, TokenByIdResponse, TokenIdQuery } from '@unique-nft/sdk';
+import { debounce } from 'utils/helpers';
+import { fromStringToBnString } from 'utils/bigNum';
+import { Coral700 } from 'styles/colors';
+import { useGetCollectionsForNesting } from '../hooks/useGetCollectionsForNesting';
+import { CollectionItem, TokenItem } from '../types';
+import { getIpfsUriByImagePath } from 'utils/urlUtils';
+import { useGetAllOwnedTokensByCollection } from '../hooks/useGetAllOwnedTokensByCollection';
+import { FractionalAmountInput } from '../Modals/FractionalAmountInput';
+import { CollectionMode } from 'api/chainApi/types';
 
 export const TransferToBundleModal: FC<TBundleTrunsferModalBodyProps> = ({ token, setIsClosable, onFinish, testid }) => {
   const { selectedAccount } = useAccounts();
+  const { api } = useApi();
   const [status, setStatus] = useState<'ask' | 'transfer-stage'>('ask'); // TODO: naming
   const [newParent, setNewParent] = useState<{ collectionId: number, tokenId: number }>();
+  const [isFetching, setIsFetching] = useState(false);
+  const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse | null>(null);
+  const [amount, setAmount] = useState(1);
 
-  const onTransferToBundle = useCallback((newParent: { collectionId: number, tokenId: number }) => {
+  useEffect(() => {
+    void (async () => {
+      if (!api?.collection) return;
+      setIsFetching(true);
+      const collection = await api.collection.getCollection(token?.collectionId);
+      setCollection(collection);
+      setIsFetching(false);
+    })();
+  }, [api?.collection, token?.collectionId]);
+
+  const onTransferToBundle = useCallback((newParent: { collectionId: number, tokenId: number }, amount: number) => {
+    setAmount(amount);
     setNewParent(newParent);
     setStatus('transfer-stage');
     setIsClosable(false);
@@ -31,15 +53,26 @@ export const TransferToBundleModal: FC<TBundleTrunsferModalBodyProps> = ({ token
 
   if (!selectedAccount || !token) return null;
 
+  const owner = token.owner || selectedAccount.address;
+
   if (status === 'ask') {
-    return (<AskTransferToBundleModal token={token} onTransferToBundle={onTransferToBundle} testid={`${testid}-ask-transfer`} />);
+    return (<AskTransferToBundleModal
+      token={token}
+      collection={collection}
+      onTransferToBundle={onTransferToBundle}
+      testid={`${testid}-ask-transfer`}
+    />);
   }
   if (status === 'transfer-stage') {
     if (!newParent) return null;
     return (<TransferToBundleStagesModal
+      tokenPrefix={collection?.tokenPrefix || ''}
+      owner={owner}
       onFinish={onFinish}
       token={token}
       newParent={newParent}
+      mode={collection?.mode || 'NFT'}
+      amount={amount}
       setIsClosable={setIsClosable}
       testid={testid}
     />);
@@ -47,93 +80,118 @@ export const TransferToBundleModal: FC<TBundleTrunsferModalBodyProps> = ({ token
   return null;
 };
 
-type TokenOption = {
-  tokenId: number
-  collectionId: number
-  image: DecodedInfixOrUrlOrCidAndHash
+type AskTransferToBundleModalProps = {
+  token: INestingToken | TokenByIdResponse,
+  collection: CollectionInfoWithSchemaResponse | null
+  onTransferToBundle(newParent: TokenIdQuery, amount: number): void
+  testid: string
 };
 
-type ITokenOption = TokenOption | null;
+const AskTransferToBundleModal: FC<AskTransferToBundleModalProps> = ({ token, collection: collectionProp, onTransferToBundle, testid }) => {
+  const [collection, setCollection] = useState<CollectionItem | null>(null);
+  const [selectedToken, setSelectedToken] = useState<TokenItem | null>(null);
+  const [isFeeLoading, setIsFeeLoading] = useState(false);
+  const [fee, setFee] = useState<string>('0');
+  const [amount, setAmount] = useState(1);
+  const [isAmountValid, setIsAmountValid] = useState(true);
 
-const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(newParent: TokenIdArguments): void, testid: string }> = ({ token, onTransferToBundle, testid }) => {
-  const [collection, setCollection] = useState<CollectionInfoWithSchema | null>();
-  const [selectedToken, setSelectedToken] = useState<ITokenOption | null>();
-  const [tokens, setTokens] = useState<TokenByIdResult[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const { selectedAccount } = useAccounts();
   const { api } = useApi();
+  const [isSponsored, setIsSponsored] = useState(false);
 
-  const { offers, fetch } = useOffers();
-  const { collections } = useCollections();
+  const { collections: collectionItems, fetchCollections, isFetching: isFetchingCollections } = useGetCollectionsForNesting();
+  const { tokens, isFetchingTokens } = useGetAllOwnedTokensByCollection(collection?.collectionId, useMemo(() => ({
+    excludeTokenId: {
+      collectionId: token.collectionId,
+      tokenId: token.tokenId
+    }
+  }), [token]));
 
   useEffect(() => {
-    if (!selectedAccount?.address) return;
+    if (!selectedAccount) return;
+    const isSponsored = !!collectionProp?.sponsorship?.isConfirmed;
+    setIsSponsored(isSponsored);
     void (async () => {
-      setIsLoading(true);
-      await fetch({ page: 1, pageSize, seller: selectedAccount?.address });
-      const tokens = await api?.nft?.getAccountMarketableTokens(selectedAccount.address);
-      setTokens(tokens || []);
-      setIsLoading(false);
+      await fetchCollections(selectedAccount);
     })();
-  }, [selectedAccount, api?.nft]);
+  }, [selectedAccount, api?.nft, collectionProp]);
 
-  const collectionItems = useMemo(() => {
-    const myTokensCollectionIds = [...tokens, ...offers].map((token) => token.collectionId);
-    return collections.filter((collection) => myTokensCollectionIds.includes(collection.id));
-  }, [tokens, offers, collections]);
+  const getFee = useCallback((newParentToken: TokenItem) => {
+    setIsFeeLoading(true);
+    return debounce(() => {
+      if (!api?.market || !token || !selectedAccount || !newParentToken || isSponsored) return setIsFeeLoading(false);
 
-  const tokenItems: ITokenOption[] = useMemo(() => {
-    if (!collection) return [];
-    return [
-      ...offers.filter(({ collectionId }) => collectionId === collection?.id).map(({ collectionId, tokenId, tokenDescription }) => ({
-        collectionId,
-        tokenId,
-        image: tokenDescription.image
-      })),
-      ...tokens.filter(({ collectionId }) => collectionId === collection?.id).map(({ collectionId, tokenId, image }) => ({
-        collectionId,
-        tokenId,
-        image
-      }))
-    ].filter(({ tokenId }) => tokenId !== token.tokenId);
-  }, [tokens, offers, collection, token]);
+      api?.nft?.getTransferToBundleFee(
+        selectedAccount.address,
+        { collectionId: token.collectionId, tokenId: token.tokenId },
+        { collectionId: newParentToken.collectionId, tokenId: newParentToken.tokenId },
+        collectionProp?.mode || 'NFT',
+        amount,
+        { account: selectedAccount })
+      .then((fee) => {
+        setFee(fee || '0');
+      }).catch((e) => {
+        console.error('Failed to get fee: ', e);
+      }).finally(() => {
+        setIsFeeLoading(false);
+      });
+    }, 300)();
+  }, [api?.market, token, selectedAccount, collectionProp, isSponsored, amount]);
 
   const onConfirmTransferToBundleClick = useCallback(
     () => {
       if (!selectedToken) return;
-      onTransferToBundle({ collectionId: selectedToken?.collectionId, tokenId: selectedToken?.tokenId });
+      onTransferToBundle({ collectionId: selectedToken?.collectionId, tokenId: selectedToken?.tokenId }, amount);
     },
-    [onTransferToBundle, selectedToken]
+    [onTransferToBundle, selectedToken, amount]
   );
 
-  const onChangeSelectedCollection = useCallback((collection: CollectionInfoWithSchema | null) => {
+  const onChangeSelectedCollection = useCallback((collection: CollectionItem | null) => {
     setCollection(collection);
     setSelectedToken(null);
+    setFee('0');
   }, []);
 
-  const onChangeSelectedToken = useCallback((token: ITokenOption) => {
+  const onChangeSelectedToken = useCallback((token: TokenItem) => {
     setSelectedToken(token);
-  }, []);
+    getFee(token);
+  }, [getFee]);
+
+  const isFeeGreaterThanBalance = useMemo(() => {
+    if (!fee || isSponsored) return false;
+    const feeBN = new BN(fromStringToBnString(fee));
+    return feeBN.gt(selectedAccount?.balances?.proper.raw || new BN(0));
+  }, [fee, selectedAccount?.balances?.proper.raw, isSponsored]);
 
   return (
     <>
       <Content>
-        <Heading size='2'>Transfer NFT to bundle</Heading>
+        <Heading size='2'>Transfer token to bundle</Heading>
       </Content>
+      {collectionProp?.mode === 'ReFungible' && <Row>
+        <FractionalAmountInput
+          ownerAddress={token?.owner}
+          amount={amount}
+          collectionId={token?.collectionId}
+          tokenId={token?.tokenId}
+          onChangeAmount={setAmount}
+          onChangeIsAmountValid={setIsAmountValid}
+        />
+      </Row>}
       <Row>
         <RowLabel>
           <Text size='m'>Collections</Text>
           <Text size='s' color='grey-500'>A list of collections that can be nested.</Text>
         </RowLabel>
         <CollectionsSuggestStyled
-          isLoading={isLoading}
+          isLoading={isFetchingCollections}
           suggestions={collectionItems}
-          getSuggestionValue={(suggestion) => `${suggestion.name} ${suggestion.id}`}
-          getActiveSuggestOption={(suggest, activeValue) => suggest.id === activeValue.id}
+          getSuggestionValue={(suggestion) => `${suggestion.collectionName} ${suggestion.collectionId}`}
+          getActiveSuggestOption={(suggest, activeValue) => suggest.collectionId === activeValue.collectionId}
           components={{
             SuggestItem: ({ suggestion }) => <ItemOption>
-              <CollectionCover src={suggestion.schema?.coverPicture.fullUrl || ''} size={24} type={'circle'} />
-              <Text>{`${suggestion?.name} [ID ${suggestion?.id}]`}</Text>
+              <CollectionCover src={getIpfsUriByImagePath(suggestion.collectionCover || '')} size={24} type={'circle'} />
+              <Text>{`${suggestion?.collectionName} [ID ${suggestion?.collectionId}]`}</Text>
             </ItemOption>
           }}
           onChange={onChangeSelectedCollection}
@@ -145,27 +203,38 @@ const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(ne
           <Text size='s' color='grey-500'>A token that will become the bundle owner and the root of the nested structure. You can provide only a token that you own.</Text>
         </RowLabel>
         <TokensSuggestStyled
-          key={collection?.id}
-          isLoading={isLoading}
-          suggestions={collection ? tokenItems : []}
+          key={collection?.collectionId}
+          isLoading={isFetchingTokens}
+          suggestions={collection ? tokens : []}
           getSuggestionValue={(suggestion) => suggestion?.tokenId?.toString() || ''}
           getActiveSuggestOption={(suggest, activeValue) => suggest?.tokenId === activeValue?.tokenId}
           components={{
             SuggestItem: ({ suggestion }) => <ItemOption>
               <CollectionCover src={suggestion?.image?.fullUrl || ''} size={24} type={'square'} />
-              <Text>{`${collection?.tokenPrefix || ''} #${suggestion?.tokenId}`}</Text>
+              <Text>{`${suggestion?.tokenPrefix || ''} #${suggestion?.tokenId}`}</Text>
             </ItemOption>
           }}
           onChange={onChangeSelectedToken}
-          value={selectedToken}
+          value={selectedToken || undefined}
           inputProps={{
             disabled: !collection
           }}
         />
       </Row>
+      <Row>
+        {(!isFeeLoading && isFeeGreaterThanBalance) && <LowBalanceWrapper>
+          <Text size={'s'}>Your balance is insufficient due to transaction fee</Text>
+        </LowBalanceWrapper>}
+        <FeeMessage
+          isFeeLoading={isFeeLoading}
+          fee={fee || '0'}
+          testid={`${testid}-fee-message`}
+          placeholder={isSponsored ? `Collection ID ${token.collectionId} sponsored` : undefined}
+        />
+      </Row>
       <ButtonWrapper>
         <Button
-          disabled={!selectedToken}
+          disabled={!selectedToken || isFeeGreaterThanBalance || !isAmountValid}
           onClick={onConfirmTransferToBundleClick}
           role='primary'
           title='Confirm'
@@ -176,20 +245,27 @@ const AskTransferToBundleModal: FC<{ token: INestingToken, onTransferToBundle(ne
   );
 };
 
-const TransferToBundleStagesModal: FC<TBundleTrunsferModalBodyProps & { newParent: TokenIdArguments }> = ({ token, newParent, onFinish, testid }) => {
-  const { stages, status, initiate } = useTransferToBundleStages(token, newParent);
+type TransferToBundleStagesModalProps = TBundleTrunsferModalBodyProps & { newParent: TokenIdQuery } & {
+  mode: CollectionMode
+  amount: number
+  owner: string
+  tokenPrefix: string
+}
+
+const TransferToBundleStagesModal: FC<TransferToBundleStagesModalProps> = ({ token, owner, newParent, mode, amount, tokenPrefix, onFinish, testid }) => {
   const { info } = useNotifications();
   const { selectedAccount } = useAccounts();
+  const { stages, status, initiate } = useTransferToBundleStages(owner, token, newParent, mode);
 
   useEffect(() => {
-    if (!selectedAccount?.address) return;
-    initiate(null);
-  }, [selectedAccount?.address]);
+    if (!selectedAccount) return;
+    initiate({ amount });
+  }, [selectedAccount, amount]);
 
   useEffect(() => {
     if (status === StageStatus.success) {
       info(
-        <div data-testid={`${testid}-success-notification`}><Link href={`/token/${token?.collectionId}/${token?.tokenId}`} title={`${''} #${token?.tokenId}`}/> transfered</div>,
+        <div data-testid={`${testid}-success-notification`}><Link href={`/token/${token?.collectionId}/${token?.tokenId}`} title={`${tokenPrefix} #${token?.tokenId}`}/> nested</div>,
         { name: 'success', size: 32, color: 'var(--color-additional-light)' }
       );
     }
@@ -244,7 +320,7 @@ const ItemOption = styled.div`
   padding: calc(var(--gap) / 2) calc(var(--gap) / 4);
 `;
 
-const CollectionsSuggest = (props: SuggestProps<CollectionInfoWithSchema>) => <Suggest<CollectionInfoWithSchema> {...props} />;
+const CollectionsSuggest = (props: SuggestProps<CollectionItem>) => <Suggest<CollectionItem> {...props} />;
 const CollectionsSuggestStyled = styled(CollectionsSuggest)`
   width: 100%;
   & .unique-input-text {
@@ -252,10 +328,20 @@ const CollectionsSuggestStyled = styled(CollectionsSuggest)`
   }
 `;
 
-const TokensSuggest = (props: SuggestProps<ITokenOption>) => <Suggest<ITokenOption> {...props} />;
+const TokensSuggest = (props: SuggestProps<TokenItem>) => <Suggest<TokenItem> {...props} />;
 const TokensSuggestStyled = styled(TokensSuggest)`
   width: 100%;
   & .unique-input-text {
     width: 100%;
+  }
+`;
+
+const LowBalanceWrapper = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  position: absolute;
+  right: calc(var(--gap) * 1.5);
+  span {
+    color: ${Coral700} !important;
   }
 `;

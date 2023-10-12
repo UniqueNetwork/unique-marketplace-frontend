@@ -4,8 +4,8 @@ import styled from 'styled-components';
 
 import { useApi } from 'hooks/useApi';
 import { Avatar } from '../Avatar/Avatar';
-import { TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 import { useCollections } from 'hooks/useCollections';
+import { TokenByIdResponse } from '@unique-nft/sdk';
 
 interface InlineTokenCardProps {
   tokenId: number
@@ -16,7 +16,7 @@ interface InlineTokenCardProps {
 export const InlineTokenCard: FC<InlineTokenCardProps> = ({ tokenId, collectionId, children, testid }) => {
   const { api } = useApi();
   const { getCollection } = useCollections();
-  const [token, setToken] = useState<TokenByIdResult>();
+  const [token, setToken] = useState<TokenByIdResponse>();
   const [prefix, setPrefix] = useState<string>();
 
   const [isLoading, setIsLoading] = useState(false);

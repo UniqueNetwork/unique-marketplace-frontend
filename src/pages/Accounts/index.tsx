@@ -1,169 +1,27 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { TableColumnProps, TableRowProps } from '@unique-nft/ui-kit';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { BN } from '@polkadot/util';
-import { Icon, Dropdown, Text, Button, Link } from 'components/UI';
-import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
+import { Button, useNotifications } from 'components/UI';
+import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import { TWithdrawBid } from 'api/restApi/auction/types';
-import { Account } from 'account/AccountContext';
 import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
-import AccountCard from 'components/Account/Account';
 import { Table } from 'components/Table';
 import { PagePaper } from 'components/PagePaper/PagePaper';
-import { TextInput } from 'components/TextInput/TextInput';
-import IconWithHint from 'components/IconWithHint/IconWithHint';
 import ConfirmModal from 'components/ConfirmModal';
 import GetKSMModal from 'components/GetKSMModal/GetKSMModal';
-import { formatKusamaBalance } from 'utils/textUtils';
-import { CreateAccountModal } from './Modals/CreateAccount';
-import { ImportViaSeedAccountModal } from './Modals/ImportViaSeed';
-import { ImportViaJSONAccountModal } from './Modals/ImportViaJson';
-import { ImportViaQRCodeAccountModal } from './Modals/ImportViaQRCode';
 import { WithdrawDepositModal } from './Modals/WithdrawDeposit';
 import { TransferFundsModal } from './Modals/SendFunds';
-import BalanceCell from './BalanceCell';
-import { AdditionalLight, BlueGrey300, Grey500, Primary100, Primary500 } from 'styles/colors';
 import config from 'config';
 import { AccountInfo } from './types';
 import NoAccountsIcon from 'static/icons/no-accounts.svg';
-
-const tokenSymbol = 'KSM';
+import { getAccountsColumns } from './columns';
+import { Account, AccountSigner } from 'account/types';
+import { useNavigate } from 'react-router-dom';
+import { ConnectWalletModalContext } from 'account/ConnectWalletModalContext';
 
 const testid = 'accounts-page';
-
-type AccountsColumnsProps = {
-  isSmallDevice: boolean
-  formatAddress(address: string): string
-  onShowSendFundsModal(address: string): () => void
-  onShowWithdrawDepositModal(address: string): () => void
-  onShowDeleteLocalAccountModal(address: string): () => void
-  onShowGetKsmModal: () => void
-  scanUrl: string
-};
-
-const getAccountsColumns = ({
-    formatAddress,
-    onShowSendFundsModal,
-    onShowWithdrawDepositModal,
-    isSmallDevice,
-    onShowDeleteLocalAccountModal,
-    onShowGetKsmModal,
-    scanUrl
-  }: AccountsColumnsProps): TableColumnProps[] => [
-  {
-    title: (
-      <>
-        <Title data-testid={`${testid}-account-column`}>Account</Title>
-        {!isSmallDevice &&
-          <IconWithHint align={{ appearance: 'horizontal', vertical: 'top', horizontal: 'right' }}>
-            <span>Substrate account addresses (Kusama, Quartz, Polkadot, Unique, etc.) may be represented by a different address
-              character sequence, but they can be converted between each other because they share the same public key. You
-              can see all transformations for any given address on <StyledLink href='https://quartz.subscan.io/' target='_blank' rel='noreferrer'>Subscan</StyledLink>.</span>
-          </IconWithHint>
-        }
-      </>
-    ),
-    width: '25%',
-    field: 'accountInfo',
-    render(accountInfo: AccountInfo) {
-      if (accountInfo.deposit && !isSmallDevice) return <></>;
-      return (
-        <AccountCellWrapper>
-          <AccountCard accountName={accountInfo.name}
-            accountAddress={accountInfo.address}
-            canCopy
-            isShort={isSmallDevice}
-            testid={`${testid}-${accountInfo.address}`}
-          />
-        </AccountCellWrapper>
-      );
-    }
-  },
-  {
-    title: (<Title data-testid={`${testid}-balance-column`}>Balance</Title>),
-    width: '25%',
-    field: 'balance',
-    render(data, { accountInfo }: (Account & { accountInfo: AccountInfo })) {
-      return (<BalanceCell accountInfo={accountInfo}
-        isSmallDevice={isSmallDevice}
-        tokenSymbol={tokenSymbol}
-        data-testid={`${testid}-${accountInfo.address}`}
-      />);
-    }
-  },
-  {
-    title: (<Title data-testid={`${testid}-blockexpolorer-column`}>Block explorer</Title>),
-    width: '25%',
-    field: 'blockExplorer',
-    render(data, { accountInfo }: (Account & { accountInfo: AccountInfo })) {
-      if (accountInfo.deposit && !isSmallDevice) return <></>;
-      return (
-        <LinksWrapper>
-          <LinkStyled
-            target={'_blank'}
-            rel={'noreferrer'}
-            href={`${scanUrl}account/${formatAddress(accountInfo.address)}`}
-            data-testid={`${testid}-${accountInfo.address}-blockexpolorer-link`}
-          >
-            <TextStyled>UniqueScan</TextStyled>
-            <IconWrapper>
-              <Icon name={'arrow-up-right'} size={16} color={Primary500} />
-            </IconWrapper>
-          </LinkStyled>
-        </LinksWrapper>
-      );
-    }
-  },
-  {
-    title: isSmallDevice ? '' : (<Title data-testid={`${testid}-actions-column`}>Actions</Title>),
-    width: '25%',
-    field: 'actions',
-    render(data, { accountInfo }: (Account & { accountInfo: AccountInfo })) {
-      if (accountInfo.deposit && !isSmallDevice) {
-        return (
-          <DepositActionsWrapper>
-            <Button title={'Withdraw'}
-              onClick={onShowWithdrawDepositModal(accountInfo.address)}
-              role={'primary'}
-              testid={`${testid}-${accountInfo.address}-withdraw-button`}
-            />
-            <IconWithHint align={{ appearance: 'vertical', vertical: 'bottom', horizontal: 'right' }}>
-              <span>Learn more in <StyledLink href='/FAQ' target='_blank' rel='noreferrer'>FAQ</StyledLink></span>
-            </IconWithHint>
-          </DepositActionsWrapper>
-        );
-      }
-      return (
-        <>
-          <ActionsWrapper>
-            <Button title={'Send'} onClick={onShowSendFundsModal(accountInfo.address)} disabled={formatKusamaBalance(accountInfo.balance?.KSM?.toString() || 0) === '0'} />
-            <Button
-              title={'Get'}
-              onClick={onShowGetKsmModal}
-              disabled={!config.rampApiKey}
-              testid={`${testid}-${accountInfo.address}-get-button`}
-            />
-            {accountInfo.signerType === 'Local' && <Button title={'Delete'} onClick={onShowDeleteLocalAccountModal(accountInfo.address)} testid={`${testid}-${accountInfo.address}-delete-button`} />}
-          </ActionsWrapper>
-          {(accountInfo.deposit && isSmallDevice) && <DepositActionsWrapper>
-            <Button title={'Withdraw'}
-              onClick={onShowWithdrawDepositModal(accountInfo.address)}
-              role={'primary'}
-              testid={`${testid}-${accountInfo.address}-get-button`}
-            />
-            <IconWithHint align={{ appearance: 'vertical', vertical: 'bottom', horizontal: 'right' }}>
-              <span>Learn more in <StyledLink href='/FAQ' target='_blank' rel='noreferrer'>FAQ</StyledLink></span>
-            </IconWithHint>
-          </DepositActionsWrapper>}
-        </>
-      );
-    }
-  }
-];
-
-const caretDown = { name: 'carret-down', size: 16, color: AdditionalLight };
 
 enum AccountModal {
   create,
@@ -177,229 +35,118 @@ enum AccountModal {
 }
 
 export const AccountsPage = () => {
+  const { setIsOpenConnectWalletModal } = useContext(
+    ConnectWalletModalContext
+  );
   const {
     accounts,
-    fetchAccounts,
     isLoading,
-    isLoadingDeposits,
-    deleteLocalAccount
+    forgetLocalAccount
   } = useAccounts();
-  const [searchString, setSearchString] = useState<string>('');
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
   const [selectedAddress, setSelectedAddress] = useState<string>();
-  const [isDropdownOpened, setIsDropdownOpened] = useState(false);
+  const navigate = useNavigate();
   const deviceSize = useDeviceSize();
-  const { chainData, currentChainId } = useApi();
+  const { chainProperties, currentChainId } = useApi();
+  const { info } = useNotifications();
 
   useEffect(() => {
-    setSearchString('');
+    if (!isLoading && !accounts.size) {
+      navigate(`/${currentChainId}/market`);
+    }
+  }, [accounts, isLoading]);
+
+  useEffect(() => {
     setCurrentModal(undefined);
   }, [currentChainId]);
 
   const formatAddress = useCallback((address: string) => {
-    return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
-  }, [chainData?.SS58Prefix]);
+    return toChainFormatAddress(address, chainProperties?.SS58Prefix || 0);
+  }, [chainProperties?.SS58Prefix]);
 
-  const onCreateAccountClick = useCallback(() => {
-    setCurrentModal(AccountModal.create);
-  }, []);
-
-  const onImportViaSeedClick = useCallback(() => {
-    setCurrentModal(AccountModal.importViaSeed);
-  }, []);
-
-  const onImportViaJSONClick = useCallback(() => {
-    setCurrentModal(AccountModal.importViaJSON);
-  }, []);
-
-  const onImportViaQRClick = useCallback(() => {
-    setCurrentModal(AccountModal.importViaQRCode);
-  }, []);
-
-  const onShowSendFundsModal = useCallback((address: string) => () => {
-    setCurrentModal(AccountModal.sendFunds);
+  const onAccountActionClick = useCallback((modal: AccountModal) => (address: string) => () => {
+    setCurrentModal(modal);
     setSelectedAddress(address);
   }, []);
 
-  const onShowWithdrawDepositModal = useCallback((address: string) => () => {
-    setCurrentModal(AccountModal.withdrawDeposit);
-    setSelectedAddress(address);
-  }, []);
+  const onGetClick = useCallback((address: string) => () => {
+    switch (chainProperties?.token) {
+      case 'OPL':
+        window.open('https://t.me/unique2faucet_opal_bot', '_blank', 'noopener');
+        break;
+      case 'QTZ':
+        window.open('https://www.mexc.com/exchange/QTZ_USDT', '_blank', 'noopener');
+        break;
+      case 'UNQ':
+        window.open('https://www.huobi.com/en-us/exchange/unq_usdt', '_blank', 'noopener');
+        break;
+      default:
+        break;
+    }
+  }, [chainProperties]);
 
-  const onShowDeleteLocalAccountModal = useCallback((address: string) => () => {
-    setCurrentModal(AccountModal.deleteLocalAccount);
-    setSelectedAddress(address);
-  }, []);
-
-  const onShowGetKsmModal = useCallback(() => {
-    if (!config.rampApiKey) return;
-    setCurrentModal(AccountModal.getKsmModal);
-  }, []);
-
-  const onSearchStringChange = useCallback((value: string) => {
-    setSearchString(value);
-  }, []);
-
-  const filteredAccounts = useMemo(() => {
-    const reduceAccounts = (acc: (Account & { accountInfo: AccountInfo } & TableRowProps)[], account: Account) => {
+  const filteredAccounts: AccountInfo[] = useMemo(() => {
+    const reduceAccounts = (acc: AccountInfo[], account: Account) => {
       acc.push({
         ...account,
-        accountInfo: {
-          address: account.address,
-          name: account.meta.name || '',
-          balance: account.balance,
-          signerType: account.signerType
-        }
+        isLocal: account.signerType === AccountSigner.local
       });
-      if (!account.deposits) return acc;
-
-      const { sponsorshipFee, bids } = account.deposits;
-      const { leader, withdraw } = bids || { leader: [], withdraw: [] };
-
-      if ((!sponsorshipFee?.isZero() || leader.length !== 0 || withdraw.length !== 0)) {
-        const getTotalAmount = (acc: BN, bid: TWithdrawBid) => acc.add(new BN(bid.amount));
-        // add row with deposit info only on big screens
-        if (deviceSize !== DeviceSize.sm) {
-          acc.push({
-            ...account,
-            accountInfo: {
-              address: account.address,
-              name: account.meta.name || '',
-              deposit: (sponsorshipFee || new BN(0))
-              .add(withdraw.reduce(getTotalAmount, new BN(0)))
-              .add(leader.reduce(getTotalAmount, new BN(0))),
-              signerType: account.signerType
-            }
-          });
-        } else {
-          acc[acc.length - 1] = {
-            ...account,
-            accountInfo: {
-              address: account.address,
-              name: account.meta.name || '',
-              balance: account.balance,
-              deposit: (sponsorshipFee || new BN(0))
-              .add(withdraw.reduce(getTotalAmount, new BN(0)))
-              .add(leader.reduce(getTotalAmount, new BN(0))),
-              signerType: account.signerType
-            }
-          };
-        }
-      }
       return acc;
     };
 
-    if (!searchString) {
-      return accounts.reduce(reduceAccounts, []);
-    }
-    return accounts
-    .filter(
-      (account) =>
-        formatAddress(account.address).toLowerCase().includes(searchString.trim().toLowerCase()) ||
-        account.meta.name?.toLowerCase().includes(searchString.trim().toLowerCase())
-    )
-    .reduce(reduceAccounts, []);
-  }, [accounts, searchString, formatAddress, deviceSize]);
+    return [...accounts.values()].reduce(reduceAccounts, []);
+  }, [accounts, deviceSize]);
 
-  const onChangeAccountsFinish = useCallback(async () => {
+  const onChangeAccountsFinish = useCallback(() => {
     setCurrentModal(undefined);
-    await fetchAccounts();
-  }, [fetchAccounts]);
+  }, []);
 
   const onModalClose = useCallback(() => {
     setCurrentModal(undefined);
   }, []);
 
   const deleteLocalAccountConfirmed = useCallback(() => {
-    deleteLocalAccount(selectedAddress || '');
-    onChangeAccountsFinish();
-  }, [selectedAddress, deleteLocalAccount, onChangeAccountsFinish]);
+    forgetLocalAccount(selectedAddress || '');
+    info('Account successfully deleted');
+    void onChangeAccountsFinish();
+  }, [selectedAddress, forgetLocalAccount, onChangeAccountsFinish]);
 
   return (<PagePaper>
     <AccountPageWrapper>
       <Row>
         <CreateAccountButton
           testid={`${testid}-create-substrate-button`}
-          title={'Create substrate account'}
-          onClick={onCreateAccountClick}
+          title={'Сonnect or create wallet'}
+          onClick={() => setIsOpenConnectWalletModal(true)}
         />
-        <DropdownStyled
-          dropdownRender={() => <DropdownMenu>
-            <DropdownMenuItem onClick={onImportViaSeedClick} data-testid={`${testid}-seed-button`}>Seed phrase</DropdownMenuItem>
-            <DropdownMenuItem onClick={onImportViaJSONClick} data-testid={`${testid}-json-file-button`}>Backup JSON file</DropdownMenuItem>
-            <DropdownMenuItem onClick={onImportViaQRClick} data-testid={`${testid}-qr-button`}>QR-code</DropdownMenuItem>
-          </DropdownMenu>}
-          onOpenChange={setIsDropdownOpened}
-        >
-          <AddAccountButton
-            testid={`${testid}-add-via-button`}
-            title={'Add account via'}
-            role={'primary'}
-            iconRight={caretDown}
-            isDropdownOpened={isDropdownOpened}
-          />
-        </DropdownStyled>
-        <SearchInputWrapper>
-          <SearchInputStyled
-            testid={`${testid}-search`}
-            placeholder={'Account'}
-            iconLeft={{ name: 'magnify', size: 18 }}
-            value={searchString}
-            onChange={onSearchStringChange}
-          />
-        </SearchInputWrapper>
       </Row>
       <TableWrapper>
-        <Table<(Account & { accountInfo: AccountInfo } & TableRowProps)>
+        <Table<AccountInfo>
           columns={getAccountsColumns({
             isSmallDevice: deviceSize === DeviceSize.sm,
             formatAddress,
-            onShowSendFundsModal,
-            onShowWithdrawDepositModal,
-            onShowDeleteLocalAccountModal,
-            onShowGetKsmModal,
+            onShowSendFundsModal: onAccountActionClick(AccountModal.sendFunds),
+            onShowWithdrawDepositModal: onAccountActionClick(AccountModal.withdrawDeposit),
+            onShowDeleteLocalAccountModal: onAccountActionClick(AccountModal.deleteLocalAccount),
+            onGetClick,
+            tokenSymbol: chainProperties?.token || '',
             scanUrl: currentChainId ? config.blockchains[currentChainId]?.scanUrl : ''
           })}
           data={filteredAccounts}
-          loading={isLoading || isLoadingDeposits}
-          emptyIconProps={searchString ? { name: 'magnifier-found' } : { file: NoAccountsIcon }}
+          loading={isLoading}
+          emptyIconProps={{ file: NoAccountsIcon }}
           idColumnName={'address'}
         />
       </TableWrapper>
-      <CreateAccountModal
-        isVisible={currentModal === AccountModal.create}
-        onFinish={onChangeAccountsFinish}
-        onClose={onModalClose}
-        testid={`${testid}-create-modal`}
-      />
-      <ImportViaSeedAccountModal
-        isVisible={currentModal === AccountModal.importViaSeed}
-        onFinish={onChangeAccountsFinish}
-        onClose={onModalClose}
-        testid={`${testid}-import-via-seed-modal`}
-      />
-      <ImportViaJSONAccountModal
-        isVisible={currentModal === AccountModal.importViaJSON}
-        onFinish={onChangeAccountsFinish}
-        onClose={onModalClose}
-        testid={`${testid}-import-via-json-modal`}
-      />
-      <ImportViaQRCodeAccountModal
-        isVisible={currentModal === AccountModal.importViaQRCode}
-        onFinish={onChangeAccountsFinish}
-        onClose={onModalClose}
-        testid={`${testid}-import-via-qr-modal`}
-      />
       <TransferFundsModal
         isVisible={currentModal === AccountModal.sendFunds}
-        onFinish={onChangeAccountsFinish}
+        onFinish={onModalClose}
         senderAddress={selectedAddress}
         testid={`${testid}-transfer-funds-modal`}
       />
       <WithdrawDepositModal
         isVisible={currentModal === AccountModal.withdrawDeposit}
         onFinish={onChangeAccountsFinish}
-        onClose={onModalClose}
         address={selectedAddress}
         testid={`${testid}-withdraw-modal`}
       />
@@ -459,24 +206,6 @@ const Row = styled.div`
   
 `;
 
-const SearchInputWrapper = styled.div`
-  flex-grow: 1;
-  display: flex;
-  justify-content: flex-end;
-  
-  @media (max-width: 1024px) {
-    justify-content: space-between;
-    .unique-input-text {
-      width: 100%;
-      flex-grow: 1;
-    }
-  }
-`;
-
-const SearchInputStyled = styled(TextInput)`
-  flex-basis: 720px;
-`;
-
 const CreateAccountButton = styled(Button)`
   width: 243px;
   @media (max-width: 1024px) {
@@ -484,137 +213,6 @@ const CreateAccountButton = styled(Button)`
   }
 `;
 
-const DropdownStyled = styled(Dropdown)`
-  .dropdown-options {
-    padding: 0;
-    width: 100%;
-  }
-  @media (max-width: 1024px) {
-    width: 100%;
-  }
-`;
-
-const AddAccountButton = styled(Button)<{ isDropdownOpened: boolean }>`
-  width: 196px;
-  @media (max-width: 1024px) {
-    width: 100%;
-  }
-  svg {
-    transform: ${({ isDropdownOpened }) => isDropdownOpened ? 'rotate(180deg);' : 'rotate(0deg);'};
-    transition: transform 0.3s;
-  }
-`;
-
-const Title = styled.p`
-  color: ${Grey500};
-  font-size: 16px;
-  line-height: 24px;
-  @media (max-width: 768px) {
-    margin-bottom: 4px;
-  }
-`;
-
-const AccountCellWrapper = styled.div`
-  display: flex;
-  column-gap: calc(var(--gap) / 2);
-  align-items: center;
-`;
-
-const LinksWrapper = styled.div`
-  padding: 0 !important;
-`;
-
-const LinkStyled = styled(Link)`
-  display: flex;
-  align-items: center;
-  column-gap: calc(var(--gap) / 4);
-  width: fit-content;
-`;
-
-const ActionsWrapper = styled.div`
-  && {
-    display: flex;
-    align-items: center;
-    column-gap: var(--gap);
-    padding: var(--gap) 0;
-    flex-wrap: wrap;
-    gap: 16px;
-    margin: var(--gap) 0;
-    @media (max-width: 768px) {
-      flex-direction: row;
-      row-gap: var(--gap);
-      width: 100%;
-      margin: 0;
-      button {
-        width: calc((100% - var(--gap)) / 2);
-      }
-    }
-  }
-`;
-
-const DepositActionsWrapper = styled(ActionsWrapper)`
-  && {
-    column-gap: calc(var(--gap) / 2);
-    padding: 0;
-    button {
-      width: calc(100% - 32px);
-      max-width: 148px;
-    }
-    @media (max-width: 768px) {
-      button {
-        max-width: 100%;
-      }
-    }
-  }
-`;
-
-const TextStyled = styled(Text)`
-  && {
-    color: var(--color-primary-500);
-  }
-`;
-
-const IconWrapper = styled.div`
-  && {
-    width: 16px;
-    height: 16px;
-    color: var(--color-primary-500);
-    padding: 0;
-
-    path {
-      stroke: currentColor;
-    }
-  }
-`;
-
 const TableWrapper = styled.div`
   position: relative;
-`;
-
-const DropdownMenu = styled.div`
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-`;
-
-const DropdownMenuItem = styled.div`
-  padding: var(--gap);
-  cursor: pointer;
-  &:hover {
-    background: var(--color-primary-100);
-    color: var(--color-primary-500);
-  }
-  &:active {
-    background: ${BlueGrey300};
-    color: ${Primary100};
-  }
-`;
-
-const StyledLink = styled.a`
-  color: ${AdditionalLight};
-  text-decoration: underline;
-  
-  &&:hover {
-    text-decoration: none;
-  }
 `;

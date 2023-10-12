@@ -1,9 +1,10 @@
 import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { AdditionalDark, AdditionalLight, BlueGrey100, BlueGrey200 } from '../styles/colors';
 import Skeleton from './Skeleton/Skeleton';
-import { VideoAttribute } from '../api/uniqueSdk/types';
+import { DecodedInfixOrUrlOrCidAndHash } from 'api/chainApi/types';
 import styled from 'styled-components';
-import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
+import { DecodedVideoUri } from 'utils/helpers';
+import { Tooltip } from './UI';
 
 interface VideoProps {
   autoplay?: boolean
@@ -12,16 +13,27 @@ interface VideoProps {
   muted?: boolean
 }
 
+export enum BadgeEnum {
+  Fractional = 'Fractional',
+  Bundle = 'Bundle',
+  Nested = 'Nested'
+}
 interface PictureProps {
   src?: string | DecodedInfixOrUrlOrCidAndHash
   alt: string
   testid?: string
   size?: number
-  video?: VideoAttribute
+  video?: DecodedVideoUri
   videoProps?: VideoProps
   isPlaying?: boolean
-  badge?: string
+  badges?: BadgeEnum[]
 }
+
+const badgesTooltips = {
+  Fractional: 'A fractional token provides a way for many users to own a part of an NFT',
+  Bundle: 'A group of tokens nested in an NFT and having a nested, ordered, tree-like structure',
+  Nested: 'A group of tokens nested in an NFT and having a nested, ordered, tree-like structure'
+};
 
 export const Picture: FC<PictureProps> = ({
   alt,
@@ -31,7 +43,7 @@ export const Picture: FC<PictureProps> = ({
   video,
   videoProps,
   isPlaying,
-  badge
+  badges
 }) => {
   const [imageSrc, setImageSrc] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -71,7 +83,7 @@ export const Picture: FC<PictureProps> = ({
 
   const videoUrl = useMemo(() => {
     if (!video) return undefined;
-    const url = video.fullUrl || video.url;
+    const url = video.fullUrl;
     // if video doesn't have poster, we rewind video to 0.001 sec
     // because iphone doesn't render first frame as a poster https://developer.apple.com/forums/thread/129377
     if (!imageSrc) return `${url}#t=0.001`;
@@ -80,11 +92,13 @@ export const Picture: FC<PictureProps> = ({
 
   return (<div className={'picture'}>
     {isLoading && <Skeleton width={'100%'} height={'100%'} />}
-    {badge && <Badge className={'badge'}>{badge}</Badge>}
+    {badges && <BadgesWrapper>
+      {badges.map((badge, key) => <Badge key={key} className={'badge'} tooltip={badgesTooltips[badge]} >{badge}</Badge>)}
+    </BadgesWrapper>}
     {!isLoading && video?.fullUrl &&
       <VideoStyled
         ref={videoRef}
-        src={videoUrl}
+        src={videoUrl || ''}
         poster={imageSrc || undefined}
         controls={controls}
         autoPlay={autoplay}
@@ -92,7 +106,7 @@ export const Picture: FC<PictureProps> = ({
         loop={loop}
         muted={muted}
         data-testid={`${testid}-video`}
-      ></VideoStyled>
+      />
     }
     {!isLoading && imageSrc && !video?.fullUrl &&
       <img
@@ -144,10 +158,26 @@ const VideoStyled = styled.video`
   }
 `;
 
-const Badge = styled.div`
+const BadgesWrapper = styled.div`
   position: absolute;
   top: 8px;
   right: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--gap);
+  z-index: 2;
+`;
+
+const Badge: FC<{ tooltip: string, className?: string }> = ({ tooltip, children, className }) => {
+  const badgeRef = useRef<HTMLDivElement>(null);
+  return <>
+    <Tooltip targetRef={badgeRef} >{tooltip}</Tooltip>
+    <BadgeWrapper ref={badgeRef} className={className} >{children}</BadgeWrapper>
+  </>;
+};
+
+const BadgeWrapper = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -159,5 +189,4 @@ const Badge = styled.div`
   font-size: 16px;
   line-height: 24px;
   color: ${AdditionalDark};
-  z-index: 2;
 `;

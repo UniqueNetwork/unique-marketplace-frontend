@@ -1,34 +1,45 @@
 import { Heading, Text } from '@unique-nft/ui-kit';
-import React, { FC, ReactChild, useCallback, useMemo, useState } from 'react';
+import React, { FC, ReactChild, useCallback, useContext, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { Icon, Link } from 'components/UI';
-import { Picture } from 'components';
+import { Dropdown, Icon } from 'components/UI';
+import { Picture, TokensCard } from 'components';
+import TokensBandleCard from 'components/BundleTree/NestedSection/TokenCard';
 import { CollectionsCard } from './CollectionsCard';
 import { AttributesBlock } from './AttributesBlock';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { shortcutText } from 'utils/textUtils';
-import { Grey300, Grey500, Primary600 } from 'styles/colors';
+import { BlueGrey100, BlueGrey300, Coral100, Coral500, Grey300, Grey500, Primary500, Primary600, Secondary400, Secondary500 } from 'styles/colors';
 import { Avatar } from 'components/Avatar/Avatar';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import config from 'config';
-import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
+import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import { Offer } from 'api/restApi/offers/types';
 import { useApi } from 'hooks/useApi';
 import Skeleton from 'components/Skeleton/Skeleton';
 import { TokenSkeleton } from 'components/Skeleton/TokenSkeleton';
 import ShareTokenModal from './ShareTokenModal';
-import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
-import { stringToDecodedInfixOrUrlOrCidAndHash } from '../../../utils/helpers';
+import { stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
+import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
+import { ReportModal } from './ReportModal';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Address } from '@unique-nft/utils';
+import { FractionalDetail } from './FractionalDetail';
+import { TokenContext } from '../context/TokenContext';
+import { FractionalOwnersList } from './FractionalOwnersList';
+import { OwnerCard } from 'components/OwnerCard/OwnerCard';
+import { BadgeEnum } from 'components/Picture';
+import { INestingToken } from 'components/BundleTree/types';
 
 interface IProps {
-  children: ReactChild[]
-  token?: TokenByIdResult
-  collection?: CollectionInfoWithSchema
+  token?: TokenByIdResponse
+  collection?: CollectionInfoWithSchemaResponse
   offer?: Offer
   isLoading?: boolean
   testid: string
   isBundle: boolean
+  isNested: boolean
   isOwner: boolean
+  topmostOwner?: string
 }
 
 export const CommonTokenDetail: FC<IProps> = ({
@@ -39,14 +50,20 @@ export const CommonTokenDetail: FC<IProps> = ({
   isLoading,
   testid,
   isBundle,
-  isOwner
+  isNested,
+  isOwner,
+  topmostOwner
 }) => {
+  const navigate = useNavigate();
+  const { address } = useParams<{ address: string }>();
+  const { isRft, isRftFracton } = useContext(TokenContext);
   const {
     collectionId,
     collectionName,
     coverImageUrl,
     description,
     attributes,
+    attributesList,
     image,
     tokenId,
     prefix,
@@ -56,14 +73,17 @@ export const CommonTokenDetail: FC<IProps> = ({
     const { image, attributes, video } = offer?.tokenDescription || token || {};
     const { name: collectionName, tokenPrefix: prefix, schema, description } = offer?.collectionDescription || collection || {};
     const owner = offer?.seller || token?.owner;
+
+    const attributesList = attributes ? Object.values(attributes) : [];
     return {
       tokenId,
       collectionId,
       collectionName,
       prefix,
-      coverImageUrl: schema?.coverPicture.fullUrl || '',
+      coverImageUrl: schema?.coverPicture?.fullUrl || '',
       description,
       attributes,
+      attributesList,
       image: typeof image === 'string' ? image : image?.fullUrl || '',
       video,
       owner
@@ -72,21 +92,27 @@ export const CommonTokenDetail: FC<IProps> = ({
 
   const deviceSize = useDeviceSize();
 
-  const { chainData, currentChainId } = useApi();
+  const { chainProperties, currentChainId, settings } = useApi();
 
   const formatAddress = useCallback((address: string) => {
-    return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
-  }, [chainData?.SS58Prefix]);
+    return toChainFormatAddress(address, chainProperties?.SS58Prefix || 0);
+  }, [chainProperties?.SS58Prefix]);
 
   const owner = useMemo(() => {
+    if (collection?.mode === 'ReFungible' && address) {
+      return formatAddress(address);
+    }
     if (offer) {
       return formatAddress(offer?.seller);
     }
+    if (isNested && topmostOwner) return formatAddress(topmostOwner);
     if (!token?.owner) return undefined;
     return (token.owner ? formatAddress(token.owner) : token.owner);
-  }, [token, offer, formatAddress]);
+  }, [token, collection?.mode, offer, formatAddress, address, isNested, topmostOwner]);
 
   const [shareModalVisible, setShareModalVisible] = useState(false);
+  const [reportModalVisible, setReportModalVisible] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const openShareModal = useCallback(() => {
     setShareModalVisible(true);
@@ -96,7 +122,36 @@ export const CommonTokenDetail: FC<IProps> = ({
     setShareModalVisible(false);
   }, []);
 
+  const onScanLinkClick = useCallback(() => {
+    if (!currentChainId) return;
+    setDropdownOpen(false);
+    window.open(`${config.blockchains[currentChainId].scanUrl}tokens/${collectionId}/${tokenId}`, '_blank', 'noopener');
+  }, [tokenId, collectionId]);
+
+  const onReportClick = useCallback(() => {
+    setDropdownOpen(false);
+    setReportModalVisible(true);
+  }, []);
+
+  const closeReportModal = useCallback(() => {
+    setReportModalVisible(false);
+  }, []);
+
   const videoProp = useMemo(() => stringToDecodedInfixOrUrlOrCidAndHash(video), [video]);
+
+  const badges: BadgeEnum[] = [
+    ...(collection?.mode === 'ReFungible' ? [BadgeEnum.Fractional] : []),
+    ...(isNested ? [BadgeEnum.Nested] : isBundle ? [BadgeEnum.Bundle] : [])
+  ];
+
+  const onViewTokenDetails = useCallback((token: INestingToken, mode: string) => {
+    if (mode === 'ReFungible' && token.nestingParentToken) {
+      const parentOwner = Address.nesting.idsToAddress(token.nestingParentToken.collectionId, token.nestingParentToken.tokenId);
+      navigate(`/${currentChainId}/token/${parentOwner}/${token.collectionId}/${token.tokenId}`);
+    } else {
+      navigate(`/${currentChainId}/token/${token.collectionId}/${token.tokenId}`);
+    }
+  }, [currentChainId]);
 
   return (
     <CommonTokenDetailStyled>
@@ -108,7 +163,7 @@ export const CommonTokenDetail: FC<IProps> = ({
             src={image}
             video={videoProp}
             testid={`${testid}-token-picture`}
-            badge={(isBundle && deviceSize > DeviceSize.md) ? 'Bundle' : ''}
+            badges={badges}
           />
         }
       </PictureWrapper>
@@ -125,22 +180,36 @@ export const CommonTokenDetail: FC<IProps> = ({
             </IconWrapper>
           </ShareLink>
           <Row data-testid={`${testid}-owner-section`}>
-            {isOwner && <Text color='grey-500' size='m'>You own it</Text>}
-            {!isOwner && <>
-              <Text color='grey-500' size='m'>
-                Owned&nbsp;by
-              </Text>
-              <Account href={`${config.blockchains[currentChainId || '']?.scanUrl}account/${owner || '404'}`}>
-                <Avatar size={24} src={DefaultAvatar} address={owner}/>
-                <Text color='primary-600' size='m' data-testid={`${testid}-owner-address`}>
-                  {deviceSize === DeviceSize.lg ? owner || '' : shortcutText(owner || '') }
-                </Text>
-              </Account>
-            </>}
+            {!(isRft && !isRftFracton) && <OwnerCard
+              address={owner || ''}
+              isShort={deviceSize < DeviceSize.xl}
+              canCopy={false}
+              prefixOwned='Owned by'
+              prefixNested='Nested in bundle'
+            />}
           </Row>
           <Divider />
+          {isNested && token?.nestingParentToken?.tokenId && token?.nestingParentToken?.collectionId && <>
+            <Heading size='4'>NFT Wearable for</Heading>
+            <ParentTokenWrapper>
+              <TokensBandleCard
+                tokenId={token.nestingParentToken.tokenId}
+                collectionId={token.nestingParentToken.collectionId}
+                onViewNodeDetails={onViewTokenDetails}
+              />
+            </ParentTokenWrapper>
+            <Divider />
+          </>}
+          {isRft && !isRftFracton && <>
+            <FractionalOwnersList />
+            <Divider />
+          </>}
           {children}
-          {attributes && <AttributesBlock attributes={attributes} />}
+          {collection?.mode === 'ReFungible' && !!address && <>
+            <FractionalDetail testid={`${testid}-fractional`} />
+            <Divider />
+          </>}
+          {attributes && <AttributesBlock attributes={attributesList} />}
           <Divider />
           <CollectionsCard
             avatarSrc={coverImageUrl || ''}
@@ -151,7 +220,42 @@ export const CommonTokenDetail: FC<IProps> = ({
           />
         </>}
       </Description>
+      <DropdownStyled
+        placement={'right'}
+        open={dropdownOpen}
+        onOpenChange={setDropdownOpen}
+        dropdownRender={() => (
+          <DropdownMenu>
+            <ScanMenuItem onClick={onScanLinkClick}>View on UniqueScan
+              <MenuIconWrapper>
+                <Icon name={'arrow-up-right'} size={16} color={'var(--color-primary-500)'} />
+              </MenuIconWrapper>
+            </ScanMenuItem>
+            <ReportMenuItem onClick={onReportClick}>Report
+              <MenuIconWrapper>
+                <Icon name={'warning'} size={16} color={'var(--color-coral-500)'} />
+              </MenuIconWrapper>
+            </ReportMenuItem>
+          </DropdownMenu>
+          )}
+      >
+        <DropdownWrapper>
+          <Icon
+            size={32}
+            name={'meatball-menu'}
+            color={'transparent'}
+          />
+        </DropdownWrapper>
+      </DropdownStyled>
       <ShareTokenModal isVisible={shareModalVisible} onClose={closeShareModal} testid={`${testid}-share-modal`} />
+      <ReportModal
+        collectionId={collectionId || 0}
+        tokenId={tokenId || 0}
+        tokenPrefix={offer?.collectionDescription.tokenPrefix || token?.collection?.tokenPrefix || ''}
+        isVisible={reportModalVisible}
+        onClose={closeReportModal}
+        testid={`${testid}-report-modal`}
+      />
     </CommonTokenDetailStyled>
   );
 };
@@ -159,6 +263,7 @@ export const CommonTokenDetail: FC<IProps> = ({
 const CommonTokenDetailStyled = styled.div`
   display: flex;
   width: 100%;
+  position: relative;
 
   @media (max-width: 767px) {
     flex-direction: column;
@@ -173,15 +278,6 @@ const CommonTokenDetailStyled = styled.div`
       padding: 24px 16px;
       width: calc(304px - (var(--gap) * 3));
     }
-  }
-`;
-
-const IconWrapper = styled.div`
-  margin-left: 4px;
-  margin-right: 16px;
-
-  svg {
-    fill: ${Grey500};
   }
 `;
 
@@ -245,6 +341,21 @@ const PictureWrapper = styled.div`
   }
 `;
 
+const ParentTokenWrapper = styled.div`
+  width: 160px;
+  margin-top: 8px;
+  &>div {
+    min-height: 230px;
+    border: 1px solid ${BlueGrey300};
+    border-radius: 8px;
+  }
+  .picture {
+    width: 160px;
+    height: 160px;
+    max-height: 160px;
+  }
+`;
+
 const Row = styled.div`
   display: flex;
   align-items: center;
@@ -286,4 +397,91 @@ const Account = styled.a`
 const Divider = styled.div`
   margin: 24px 0;
   border-top: 1px dashed ${Grey300};
+`;
+
+const DropdownStyled = styled(Dropdown)`
+  position: absolute;
+  right: 0;
+`;
+
+const DropdownMenu = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+`;
+
+const DropdownMenuItem = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 24px;
+  &:hover {
+    background: var(--color-primary-100);
+  }
+`;
+
+const ScanMenuItem = styled(DropdownMenuItem)`
+  border-bottom: 1px dashed ${Grey300};
+  color: ${Primary500};
+  &:hover {
+    color: ${Primary600};
+  }
+`;
+
+const ReportMenuItem = styled(DropdownMenuItem)`
+  color: ${Coral500};
+  &:hover {
+    background-color: ${Coral100};
+  }
+`;
+
+const DropdownWrapper = styled.div`
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid ${BlueGrey300};
+  background: ${BlueGrey100};
+  border-radius: 8px;
+  & svg {
+    fill: ${BlueGrey300};
+    &:hover {
+      fill: ${Secondary400};
+    }
+  }
+`;
+
+const MenuIconWrapper = styled.div`
+  && {
+    width: 16px;
+    height: 16px;
+    margin-left: 4px;
+
+    path {
+      stroke: currentColor;
+    }
+  }
+`;
+
+const IconWrapper = styled.div`
+  margin-left: 4px;
+  margin-right: 16px;
+
+  svg {
+    fill: ${Grey500};
+  }
+`;
+
+const DropdownIconWrapper = styled.div`
+  margin-left: 4px;
+  margin-right: 16px;
+
+  svg {
+    fill: ${Grey500};
+  }
 `;

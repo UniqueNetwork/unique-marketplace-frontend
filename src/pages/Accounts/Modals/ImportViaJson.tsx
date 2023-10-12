@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useState } from 'react';
 import { Heading } from '@unique-nft/ui-kit';
-import { Button, Text, Modal } from 'components/UI';
+import { Button, Text, Modal, useNotifications } from 'components/UI';
 import { KeyringPair } from '@polkadot/keyring/types';
 import styled from 'styled-components';
 
@@ -11,25 +11,28 @@ import { useApi } from '../../../hooks/useApi';
 import keyring from '@polkadot/ui-keyring';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 import { Upload } from 'components/UI/Upload/Upload';
+import { useAccounts } from 'hooks/useAccounts';
 
-export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish, testid }) => {
-  const { uniqueSdk } = useApi();
+export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish, onClose: onCloseProp, testid }) => {
+  const { chainProperties } = useApi();
+  const { fetchAccounts } = useAccounts();
   const [pair, setPair] = useState<KeyringPair | null>(null);
   const [password, setPassword] = useState<string>('');
   const [passwordIncorrect, setPasswordIncorrect] = useState<boolean>(false);
+  const { info } = useNotifications();
 
   const onUploadChange = useCallback((url: string, file: Blob) => {
     const reader = new FileReader();
     reader.onload = ({ target }: ProgressEvent<FileReader>): void => {
-      if (target && target.result && uniqueSdk) {
+      if (target && target.result && chainProperties) {
         const data = convertToU8a(target.result as ArrayBuffer);
-
-        setPair(keyringFromFile(data, uniqueSdk.api.genesisHash.toHex()));
+        const { genesisHash } = chainProperties;
+        setPair(keyringFromFile(data, genesisHash));
       }
     };
 
     reader.readAsArrayBuffer(file);
-  }, [setPair, uniqueSdk?.api]);
+  }, [setPair, chainProperties]);
 
   const onRestoreClick = useCallback(() => {
     if (!pair || !password) return;
@@ -40,7 +43,11 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
       setPasswordIncorrect(true);
       return;
     }
+    setPassword('');
+    setPair(null);
     onFinish();
+    fetchAccounts();
+    info(`Account ${pair.meta.name} successfully restored`);
   }, [pair, password, onFinish]);
 
   const onPasswordChange = useCallback((value: string) => {
@@ -50,8 +57,10 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
 
   const onClose = useCallback(() => {
     setPassword('');
-    onFinish();
-  }, [onFinish]);
+    setPair(null);
+    setPasswordIncorrect(false);
+    onCloseProp();
+  }, [onCloseProp]);
 
   return (<Modal isVisible={isVisible} isClosable={true} onClose={onClose}>
     <Content>
@@ -60,7 +69,7 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
     <InputWrapper>
       <TitleWrapper>
         <Text size={'m'}>Upload</Text>
-        <Text size={'s'} color={'grey-500'}>Click to select or drop the file here</Text>
+        <Text size={'s'} color={'grey-500'}>Click to select the file here</Text>
       </TitleWrapper>
       <Upload
         testid={`${testid}-upload-button`}

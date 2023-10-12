@@ -8,9 +8,20 @@ import { ResponseError } from '../base/types';
 import { useApi } from '../../../hooks/useApi';
 import { fromStringToBnString } from '../../../utils/bigNum';
 
-const endpoint = '/api/Offers';
+const endpoint = '/Offers';
 
 export const getOffers = (baseURL: string, payload: GetOffersRequestPayload) => get<OffersResponse>(endpoint, { ...defaultParams, baseURL, params: payload });
+
+export const emptyResponse: OffersResponse = {
+  items: [],
+  currentPage: 1,
+  itemsPerPage: 20,
+  itemCount: 0,
+  totalItems: 0,
+  totalPages: 0,
+  attributes: {},
+  attributesCount: []
+};
 
 export const useOffers = () => {
   const [offers, setOffers] = useState<Offer[]>([]);
@@ -26,12 +37,12 @@ export const useOffers = () => {
     try {
       const { status, data } = await getOffers(baseURL, {
         ...payload,
-        minPrice: minPrice && fromStringToBnString(minPrice, api?.market?.kusamaDecimals),
-        maxPrice: maxPrice && fromStringToBnString(maxPrice, api?.market?.kusamaDecimals)
+        minPrice: minPrice, // && fromStringToBnString(minPrice, api?.market?.decimals),
+        maxPrice: maxPrice // && fromStringToBnString(maxPrice, api?.market?.decimals)
       });
       if (status === 200) {
         setOffers(data.items);
-        setOffersCount(data.itemsCount);
+        setOffersCount(data.totalItems);
         setAttributes(data.attributes);
         setAttributeCounts(data.attributesCount);
         setIsFetching(false);
@@ -44,16 +55,16 @@ export const useOffers = () => {
         message
       });
     }
-    return { items: [], attributes: {}, attributesCount: [], itemsCount: 0, page: 1, pageSize: 10 };
-  }, [baseURL, api?.market?.kusamaDecimals]);
+    return emptyResponse;
+  }, [baseURL, api?.market?.decimals]);
 
   const fetchMore = useCallback(async ({ minPrice, maxPrice, ...payload }: GetOffersRequestPayload) => {
     setIsFetching(true);
     try {
       const { status, data } = await getOffers(baseURL, {
         ...payload,
-        minPrice: minPrice && fromStringToBnString(minPrice, api?.market?.kusamaDecimals),
-        maxPrice: maxPrice && fromStringToBnString(maxPrice, api?.market?.kusamaDecimals)
+        minPrice: minPrice && fromStringToBnString(minPrice, api?.market?.decimals),
+        maxPrice: maxPrice && fromStringToBnString(maxPrice, api?.market?.decimals)
       });
       if (status === 200) {
         setOffers([...offers, ...data.items]);
@@ -66,7 +77,7 @@ export const useOffers = () => {
         message
       });
     }
-  }, [baseURL, offers, api?.market?.kusamaDecimals]);
+  }, [baseURL, offers, api?.market?.decimals]);
 
   return {
     offers,

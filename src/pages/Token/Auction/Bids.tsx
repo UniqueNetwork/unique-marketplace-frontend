@@ -5,7 +5,7 @@ import Calendar from '../../../static/icons/calendar.svg';
 import { Icon } from 'components/UI/Icon/Icon';
 import { Offer } from '../../../api/restApi/offers/types';
 import { timeDifference, timestampTableFormat } from '../../../utils/timestampUtils';
-import { formatKusamaBalance } from '../../../utils/textUtils';
+import { formatBalance } from '../../../utils/textUtils';
 import { Table } from '../../../components/Table';
 import Bidder from './Bidder';
 
@@ -19,7 +19,7 @@ const getColumns = (tokenSymbol: string, timeRender: 'Age' | 'Time', onTimeRende
     title: 'Bid',
     field: 'bidValue',
     width: '33%',
-    render: (bid: string) => <Text color={'additional-dark'} testid={`${testid}-bid-amount`}>{`${formatKusamaBalance(bid)} ${tokenSymbol}`}</Text>
+    render: (bid: string) => <Text color={'additional-dark'} testid={`${testid}-bid-amount`}>{`${formatBalance(bid)} ${tokenSymbol}`}</Text>
   },
   {
     title: <TimeSwitch onClick={onTimeRenderChange} data-testid={`${testid}-create-at-column`}>{timeRender}<Icon {...(timeRender === 'Age' ? { name: 'clock', size: 18 } : { file: Calendar, size: 24 })}/></TimeSwitch>,
@@ -35,7 +35,7 @@ const getColumns = (tokenSymbol: string, timeRender: 'Age' | 'Time', onTimeRende
   }
 ]);
 
-const tokenSymbol = 'KSM';
+const tokenSymbol = '!!!OLD_KSM!!!';
 
 interface IBid extends TableRowProps {
   bidValue: string,

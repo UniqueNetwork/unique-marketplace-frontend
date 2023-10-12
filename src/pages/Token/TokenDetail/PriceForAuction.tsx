@@ -3,7 +3,7 @@ import { Heading, Text } from '@unique-nft/ui-kit';
 import BN from 'bn.js';
 import styled from 'styled-components';
 import { Icon } from 'components/UI/Icon/Icon';
-import { formatKusamaBalance } from '../../../utils/textUtils';
+import { formatBalance } from '../../../utils/textUtils';
 import { useApi } from '../../../hooks/useApi';
 
 interface PriceProps {
@@ -13,7 +13,7 @@ interface PriceProps {
   testid?: string
 }
 
-const tokenSymbol = 'KSM';
+const tokenSymbol = '!!!OLDK_SM!!!';
 
 export const PriceForAuction: FC<PriceProps> = ({ price, minStep, topBid, testid }) => {
   const { api } = useApi();
@@ -23,25 +23,25 @@ export const PriceForAuction: FC<PriceProps> = ({ price, minStep, topBid, testid
 
   const startPrice = !priceBN.isZero() ? priceBN : minStepBN;
 
-  const decimals = api?.market?.kusamaDecimals;
+  const decimals = api?.market?.decimals;
 
   return (
     <PriceWrapper>
       <Row>
         <Heading size={'1'} testid={`${testid}-value`}>{topBid
-          ? `${formatKusamaBalance(priceBN.add(minStepBN).toString(), { decimals })}`
-          : `${formatKusamaBalance(startPrice.toString(), { decimals })}`
+          ? `${formatBalance(priceBN.add(minStepBN).toString())}`
+          : `${formatBalance(startPrice.toString())}`
         }</Heading>
         <Icon name={'chain-kusama'} size={32} />
       </Row>
       {topBid && <Row>
         <Text color='grey-500' size='m' testid={`${testid}-current-bid`}>
-          {`Current bid: ${formatKusamaBalance(price)} ${tokenSymbol}`}
+          {`Current bid: ${formatBalance(price)} ${tokenSymbol}`}
         </Text>
       </Row>}
       {topBid && minStep && <Row>
         <Text color='grey-500' size='m' testid={`${testid}-minimum-step`}>
-          {`Minimum step: ${formatKusamaBalance(minStep)} ${tokenSymbol}`}
+          {`Minimum step: ${formatBalance(minStep)} ${tokenSymbol}`}
         </Text>
       </Row>}
     </PriceWrapper>

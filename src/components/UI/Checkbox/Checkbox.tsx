@@ -68,6 +68,7 @@ export const Checkbox = forwardRef(
             'icon-left': iconLeft,
             'icon-right': iconRight
           })}
+          data-testid={`${testid}-label`}
         >
           {icon && <Icon {...icon} />}
           <span>{label}</span>

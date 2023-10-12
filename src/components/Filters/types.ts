@@ -26,4 +26,5 @@ export type FiltersProps<T = FilterState> = {
   attributeCounts?: AttributeCount[]
   onFilterChange: FilterChangeHandler<T>
   testid: string
+  disabled?: boolean
 }

@@ -9,34 +9,33 @@ import { useAccounts } from '../useAccounts';
 
 export const useAuctionSellStages = (collectionId: number, tokenId: number) => {
   const { api, baseURL } = useApi();
-  const { signPayloadJSON, signMessage } = useAccounts();
+  const { selectedAccount } = useAccounts();
   const marketApi = api?.market;
 
   const sellAuctionStages: InternalStage<TAuctionProps>[] = useMemo(() => [
-    {
-      title: 'Starting auction',
-      description: '',
-      status: StageStatus.default,
-      action: (params) =>
-        marketApi?.transferToAuction(
-          params.txParams.accountAddress,
-          collectionId.toString(),
-          tokenId.toString(),
-          {
-            ...params.options,
-            signMessage,
-            send:
-              ({ signature, signerPayloadJSON }) => {
-                const startPrice = fromStringToBnString(params.txParams.startingPrice.toString(), api?.market?.kusamaDecimals);
-                const priceStep = fromStringToBnString(params.txParams.minimumStep.toString(), api?.market?.kusamaDecimals);
-                return startAuctionRequest(baseURL, { signerPayloadJSON, signature, days: params.txParams.duration, startPrice, priceStep });
-              }
-            }
-          )
-    }
-  ], [baseURL, marketApi, api?.market?.kusamaDecimals, collectionId, tokenId]);
+    // {
+    //   title: 'Starting auction',
+    //   description: '',
+    //   status: StageStatus.default,
+    //   action: (params) =>
+    //     marketApi?.transferToAuction(
+    //       params.txParams.accountAddress,
+    //       collectionId.toString(),
+    //       tokenId.toString(),
+    //       {
+    //         ...params.options,
+    //         send:
+    //           ({ signature, signerPayloadJSON }) => {
+    //             const startPrice = fromStringToBnString(params.txParams.startingPrice.toString(), api?.market?.decimals);
+    //             const priceStep = fromStringToBnString(params.txParams.minimumStep.toString(), api?.market?.decimals);
+    //             return startAuctionRequest(baseURL, { signerPayloadJSON, signature, days: params.txParams.duration, startPrice, priceStep });
+    //           }
+    //         }
+    //       )
+    // }
+  ], [baseURL, marketApi, api?.market?.decimals, collectionId, tokenId]);
 
-  const { stages, error, status, initiate } = useStages<TAuctionProps>(sellAuctionStages, signPayloadJSON);
+  const { stages, error, status, initiate } = useStages<TAuctionProps>(sellAuctionStages, selectedAccount);
 
   return {
     stages,

@@ -7,7 +7,7 @@ import { ResponseError } from '../base/types';
 import { GetTradesRequestPayload, Trade, TradesResponse } from './types';
 import { useApi } from '../../../hooks/useApi';
 
-const endpoint = '/api/Trades';
+const endpoint = '/trades';
 
 export const getTrades = (baseURL: string, { seller, ...payload }: GetTradesRequestPayload) => get<TradesResponse>(`${endpoint}${seller ? '/' + seller : ''}`, { ...defaultParams, baseURL, params: payload });
 
@@ -24,7 +24,7 @@ export const useTrades = () => {
       const response = await getTrades(baseURL, payload);
       if (response.status === 200) {
         setTrades(response.data.items);
-        setTradesCount(response.data.itemsCount);
+        setTradesCount(response.data.totalItems);
         setIsFetching(false);
       }
     } catch (err) {

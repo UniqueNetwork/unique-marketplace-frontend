@@ -1,16 +1,17 @@
 import { FC, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { Icon } from '../UI';
+import { Dropdown, Icon, Text } from '../UI';
 
 import { useScreenWidthFromThreshold } from 'hooks/useScreenWidthFromThreshold';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
-import { useAdminLoggingIn } from 'api/restApi/admin/login';
 import { useAccounts } from 'hooks/useAccounts';
 import { useApi } from 'hooks/useApi';
 import { TMenuItems } from '../PageLayout';
 import { WalletManager } from './WalletManager/WalletManager';
-import { DesktopMenuLink, MobileMenuLink } from './MenuLink';
+import { DesktopMenuItem, DesktopMenuLink, MobileMenuItem, MobileMenuLink } from './MenuLink';
+import config from 'config';
+import { GetButton } from './GetButton';
 
 interface HeaderProps {
   activeItem: TMenuItems;
@@ -20,8 +21,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
   const { lessThanThreshold: showMobileMenu } =
     useScreenWidthFromThreshold(1279);
   const [mobileMenuIsOpen, toggleMobileMenu] = useState(false);
-  const { selectedAccount, isLoading } = useAccounts();
-  const { hasAdminPermission } = useAdminLoggingIn();
+  const { selectedAccount, isLoading, accounts } = useAccounts();
   const { currentChainId } = useApi();
 
   const mobileMenuToggler = useCallback(() => {
@@ -40,15 +40,40 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
           {/* <img src={menuIcon} alt='menu_icon' /> */}
         </MenuIcon>}
         <LogoLink to={'/'}>
-          <LogoIcon src={activeItem === 'Collections' ? '/logos/admin.svg' : '/logos/logo.svg'} />
+          <LogoIcon src='/logos/logo.svg'/>
         </LogoLink>
         {!showMobileMenu && (
           <nav>
             <DesktopMenuLink to={`/${currentChainId || ''}/market`} active={activeItem === 'Market'}>
               Market
             </DesktopMenuLink>
-            <DesktopMenuLink to={`/${currentChainId || ''}/myTokens`} active={activeItem === 'My tokens'} disabled={!selectedAccount && !isLoading}>
-              My tokens
+            <MenuDropdown
+              options={[
+                {
+                  title: 'NFT',
+                  url: `${config.blockchains[currentChainId || ''].walletUrl}create-nft`
+                },
+                {
+                  title: 'Collection',
+                  url: `${config.blockchains[currentChainId || ''].walletUrl}create-collection/main-information`
+                }
+              ]}
+              optionKey='title'
+              optionValue='title'
+              onChange={({ url }) => {
+                window.open(url as string, '_blank', 'noopener');
+              }}
+              optionRender={(option) => {
+                return <DesktopMenuItem>{option.title as string}</DesktopMenuItem>;
+              }}
+            >
+              <DesktopMenuItem>Create</DesktopMenuItem>
+            </MenuDropdown>
+            <DesktopMenuLink to={`/${currentChainId || ''}/sellTokens`} active={activeItem === 'Sell tokens'} disabled={!selectedAccount || isLoading}>
+              Sell tokens
+            </DesktopMenuLink>
+            <DesktopMenuLink to={`/${currentChainId || ''}/collections`} active={activeItem === 'My collections'} disabled={!selectedAccount || isLoading}>
+              My collections
             </DesktopMenuLink>
             <DesktopMenuLink to={`/${currentChainId || ''}/trades`} active={activeItem === 'Trades'}>
               Trades
@@ -56,15 +81,11 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
             <DesktopMenuLink to='/faq' active={activeItem === 'FAQ'}>
               FAQ
             </DesktopMenuLink>
-            {hasAdminPermission &&
-              <DesktopMenuLink to={`/${currentChainId || ''}/administration`} active={activeItem === 'Collections'}>
-                Admin panel
-              </DesktopMenuLink>
-            }
           </nav>
         )}
       </LeftSideColumn>
       <RightSide>
+        <GetButton />
         <WalletManager />
       </RightSide>
       {showMobileMenu && mobileMenuIsOpen && (
@@ -72,13 +93,39 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
           <MobileMenuLink to={`/${currentChainId || ''}/market`} active={activeItem === 'Market'} onClick={mobileMenuToggler}>
             Market
           </MobileMenuLink>
+          <MobileMenuDropdown
+            options={[
+                {
+                  title: 'NFT',
+                  url: `${config.blockchains[currentChainId || ''].walletUrl}create-nft`
+                },
+                {
+                  title: 'Collection',
+                  url: `${config.blockchains[currentChainId || ''].walletUrl}create-collection/main-information`
+                }
+              ]}
+            optionValue='title'
+            optionKey='title'
+            onChange={({ url }) => {
+              window.open(url as string, '_blank', 'noopener');
+            }}
+          >
+            <Text color = 'additional-dark'>Create</Text>
+          </MobileMenuDropdown>
           <MobileMenuLink
-            to={`/${currentChainId || ''}/myTokens`}
-            active={activeItem === 'My tokens'}
+            to={`/${currentChainId || ''}/sellTokens`}
+            active={activeItem === 'Sell tokens'}
             onClick={mobileMenuToggler}
             disabled={!selectedAccount && !isLoading}
           >
-            My tokens
+            Sell tokens
+          </MobileMenuLink>
+          <MobileMenuLink to={`/${currentChainId || ''}/collections`}
+            active={activeItem === 'My collections'}
+            onClick={mobileMenuToggler}
+            disabled={!selectedAccount && !isLoading}
+          >
+            My collections
           </MobileMenuLink>
           <MobileMenuLink to={`/${currentChainId || ''}/trades`} active={activeItem === 'Trades'} onClick={mobileMenuToggler}>
             Trades
@@ -86,14 +133,9 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
           <MobileMenuLink to='/faq' active={activeItem === 'FAQ'} onClick={mobileMenuToggler}>
             FAQ
           </MobileMenuLink>
-          {deviceSize !== DeviceSize.lg &&
+          {deviceSize < DeviceSize.xl && !!accounts.size &&
             <MobileMenuLink to={`/${currentChainId || ''}/accounts`} active={activeItem === 'Manage accounts'} onClick={mobileMenuToggler}>
               Manage accounts
-            </MobileMenuLink>
-          }
-          {hasAdminPermission &&
-            <MobileMenuLink to={`/${currentChainId || ''}/administration`} active={activeItem === 'Collections'} onClick={mobileMenuToggler}>
-              Admin panel
             </MobileMenuLink>
           }
         </MobileMenu>
@@ -141,6 +183,7 @@ const LogoIcon = styled.img`
 const RightSide = styled.div`
   display: flex;
   align-items: center;
+  gap: var(--gap);
 `;
 
 const MobileMenu = styled.div`
@@ -155,4 +198,23 @@ const MobileMenu = styled.div`
   flex-direction: column;
   padding: 16px;
   z-index: 9;
+`;
+
+const MenuDropdown = styled(Dropdown)`
+  display: inline-grid;
+  .dropdown-wrapper {
+    width: auto;
+  }
+`;
+
+const MobileMenuDropdown = styled(Dropdown)`
+  display: inline-grid;
+  padding: 8px 16px;
+  .dropdown-wrapper {
+    width: auto;
+    .unique-text:hover {
+      color: var(--color-primary-500);
+      cursor: pointer;
+    }
+  }
 `;

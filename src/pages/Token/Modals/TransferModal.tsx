@@ -1,6 +1,9 @@
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Heading, Link } from '@unique-nft/ui-kit';
-import { useNotifications, Button } from 'components/UI';
+import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
+import { Address } from '@unique-nft/utils';
+import { useNotifications, Button, Text } from 'components/UI';
+import { BN } from '@polkadot/util';
 import styled from 'styled-components';
 
 import { TTransfer } from './types';
@@ -11,68 +14,190 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import { StageStatus } from '../../../types/StagesTypes';
 import { TextInput } from 'components/TextInput/TextInput';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
+import { FeeMessage } from 'components';
+import { Coral700 } from 'styles/colors';
+import { debounce } from 'utils/helpers';
+import { useApi } from 'hooks/useApi';
+import { fromStringToBnString } from 'utils/bigNum';
+import { NumberInput } from 'components/NumberInput/NumberInput';
+import { formatBlockNumber } from 'utils/textUtils';
 
-export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosable, onFinish, testid }) => {
+export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosable, onFinish, testid, collection }) => {
   const { selectedAccount } = useAccounts();
   const [status, setStatus] = useState<'ask' | 'transfer-stage'>('ask'); // TODO: naming
   const [recipient, setRecipient] = useState<string>('');
+  const [amount, setAmount] = useState<number>(1);
 
-  const onTransfer = useCallback((_recipient: string) => {
+  const onTransfer = useCallback((_recipient: string, amount: number) => {
     setRecipient(_recipient);
+    setAmount(amount);
     setStatus('transfer-stage');
     setIsClosable(false);
   }, [setStatus, setRecipient, setIsClosable]);
 
   if (!selectedAccount) return null;
 
-  if (status === 'ask') return (<AskTransferModal onTransfer={onTransfer} testid={`${testid}-ask-transfer`} />);
+  if (status === 'ask') {
+ return (<AskTransferModal
+   token={token}
+   collection={collection}
+   onTransfer={onTransfer}
+   testid={`${testid}-ask-transfer`}
+ />);
+}
   if (status === 'transfer-stage') {
     return (<TransferStagesModal
       recipient={recipient}
+      amount={amount}
       onFinish={onFinish}
       token={token}
       setIsClosable={setIsClosable}
       sender={selectedAccount.address}
       testid={testid}
+      collection={collection}
     />);
   }
   return null;
 };
 
-const AskTransferModal: FC<{ onTransfer(receiver: string): void, testid: string }> = ({ onTransfer, testid }) => {
+type AskTransferModalProps = {
+  token?: TokenByIdResponse
+  collection?: CollectionInfoWithSchemaResponse | null
+  onTransfer(receiver: string, amount: number): void
+  testid: string
+}
+
+const AskTransferModal: FC<AskTransferModalProps> = ({ token, collection, onTransfer, testid }) => {
+  const { api, chainProperties } = useApi();
+  const { selectedAccount } = useAccounts();
   const [address, setAddress] = useState<string>('');
+  const [isAddressValid, setIsAddressValid] = useState(false);
+  const [isFeeLoading, setIsFeeLoading] = useState(false);
+  const [fee, setFee] = useState<string>('0');
+  const [isSponsored, setIsSponsored] = useState(false);
+  const [amount, setAmount] = useState('1');
+  const [totalAmount, setTotalAmount] = useState(0);
+  const [isFetchingAmount, setIsFetchingAmount] = useState(false);
+
+  useEffect(() => {
+    if (!token?.collectionId || !selectedAccount?.address) return;
+    void (async () => {
+      setIsFeeLoading(true);
+      const collection = await api?.collection?.getCollection(token?.collectionId);
+      setIsSponsored(!!collection?.sponsorship?.isConfirmed);
+      setIsFeeLoading(false);
+      if (collection?.mode === 'ReFungible') {
+        setIsFetchingAmount(true);
+        const totalAmount = await api?.rft?.getTokenBalance(token.collectionId, token.tokenId, selectedAccount?.address);
+        setTotalAmount(totalAmount?.amount || 0);
+        setIsFetchingAmount(false);
+      }
+    })();
+  }, [token?.collectionId, selectedAccount?.address]);
+
+  const getFee = useCallback((recipient: string) => {
+    setIsFeeLoading(true);
+    return debounce(() => {
+      if (!api?.market ||
+          !token ||
+          !selectedAccount ||
+          !recipient ||
+          recipient === selectedAccount.address ||
+          isSponsored) return setIsFeeLoading(false);
+      const sender = Address.is.ethereumAddress(selectedAccount.address)
+        ? selectedAccount.address
+        : Address.normalize.substrateAddress(selectedAccount.address, chainProperties?.SS58Prefix);
+
+      api?.market?.getTransferTokenFee(
+        sender,
+        recipient,
+        token.collectionId,
+        token.tokenId,
+        collection?.mode || 'NFT',
+        Number(amount),
+        { account: selectedAccount })
+      .then((fee) => {
+        setFee(fee || '0');
+      }).catch((e) => {
+        console.error('Failed to get fee: ', e);
+      }).finally(() => {
+        setIsFeeLoading(false);
+      });
+    }, 300);
+  }, [api?.market, amount, token, selectedAccount, isSponsored, collection?.mode, chainProperties?.SS58Prefix]);
+
   const onAddressInputChange = useCallback((value: string) => {
     setAddress(value);
-  }, []);
+    const isOwnerAddress = selectedAccount?.address && (Address.compare.substrateAddresses(value, selectedAccount?.address) || Address.compare.ethereumAddresses(value, selectedAccount?.address));
+    if ((Address.is.ethereumAddress(value) || Address.is.substrateAddress(value)) && !isOwnerAddress) {
+      getFee(value)();
+      setIsAddressValid(true);
+    } else {
+      setIsAddressValid(false);
+    }
+  }, [selectedAccount]);
 
   const onConfirmTransferClick = useCallback(
     () => {
       if (!address) return;
-      onTransfer(address);
+      onTransfer(address, Number(amount));
     },
-    [address, onTransfer]
+    [address, onTransfer, amount]
   );
 
+  const isFeeGreaterThanBalance = useMemo(() => {
+    if (!fee || !isSponsored) return false;
+    const feeBN = new BN(fromStringToBnString(fee));
+    return feeBN.gt(selectedAccount?.balances?.proper.raw || new BN(0));
+  }, [fee, selectedAccount?.balances, isSponsored]);
+
+  const onSetMaxAmount = useCallback(() => setAmount(totalAmount.toString()), [totalAmount]);
+  const isAmountValid = useMemo(() => {
+    if (collection?.mode !== 'ReFungible') return true;
+    return amount && amount !== '0' && Number(amount) <= totalAmount;
+  }, [amount, totalAmount, collection]);
   return (
     <>
       <Content>
-        <Heading size='2'>Transfer NFT token</Heading>
+        <Heading size='2'>Transfer token</Heading>
       </Content>
-      <InputWrapper
-        label='Please enter the address you wish to send the NFT to'
+      {collection?.mode === 'ReFungible' && <AmountInputWrapper>
+        <AmountInputStyled
+          loading={isFetchingAmount}
+          label='Number of fractions to be sent'
+          additionalText={isFetchingAmount ? 'Loading...' : `You own: ${formatBlockNumber(totalAmount)}`}
+          value={amount.toString()}
+          onChange={setAmount}
+          onSetMax={onSetMaxAmount}
+        />
+        {!isAmountValid && <InvalidAddressWrapper>
+          <Text size={'s'}>Invalid number of fractions</Text>
+        </InvalidAddressWrapper>}
+      </AmountInputWrapper>}
+      <InputStyled
+        label='Please enter the address you wish to send the token to'
         onChange={onAddressInputChange}
         value={address}
         testid={`${testid}-address-input`}
       />
+      {(isFeeGreaterThanBalance) && <LowBalanceWrapper>
+        <Text size={'s'}>Your balance is insufficient due to transaction fee</Text>
+      </LowBalanceWrapper>}
+      {!isAddressValid && address && <InvalidAddressWrapper>
+        <Text size={'s'}>Entered address is not valid</Text>
+      </InvalidAddressWrapper>}
       <WarningBlock>
         Proceed with caution, once confirmed the transaction cannot be reverted.
       </WarningBlock>
-      <WarningBlock>
-        Make sure to use a Substrate address created with a Polkadot.&#123;js&#125; wallet. There is no guarantee that third-party wallets, exchanges or hardware wallets can successfully sign and process your transfer which will result in a possible loss of the NFT.
-      </WarningBlock>
+      <FeeMessage
+        isFeeLoading={isFeeLoading}
+        fee={fee || '0'}
+        testid={`${testid}-fee-message`}
+        placeholder={isSponsored ? `Collection ID ${collection?.id} sponsored` : undefined}
+      />
       <ButtonWrapper>
         <Button
-          disabled={!address}
+          disabled={!address || isFeeGreaterThanBalance || !isAddressValid || !isAmountValid}
           onClick={onConfirmTransferClick}
           role='primary'
           title='Confirm'
@@ -83,12 +208,12 @@ const AskTransferModal: FC<{ onTransfer(receiver: string): void, testid: string 
   );
 };
 
-const TransferStagesModal: FC<TTokenPageModalBodyProps & TTransfer> = ({ token, collection, onFinish, sender, recipient, testid }) => {
-  const { stages, status, initiate } = useTransferStages(token?.collectionId || 0, token?.tokenId || 0);
+const TransferStagesModal: FC<TTokenPageModalBodyProps & TTransfer> = ({ token, collection, onFinish, sender, amount, recipient, testid }) => {
+  const { stages, status, initiate } = useTransferStages(token?.collectionId || 0, token?.tokenId || 0, collection?.mode || 'NFT');
   const { info } = useNotifications();
 
   useEffect(() => {
-    initiate({ sender, recipient });
+    initiate({ sender, recipient, amount });
   }, [sender, recipient]);
 
   useEffect(() => {
@@ -112,7 +237,7 @@ const TransferStagesModal: FC<TTokenPageModalBodyProps & TTransfer> = ({ token, 
   );
 };
 
-const InputWrapper = styled(TextInput)`
+const InputStyled = styled(TextInput)`
   margin-bottom: 8px;
   width: 100%;
 
@@ -121,6 +246,15 @@ const InputWrapper = styled(TextInput)`
     white-space: break-spaces;
     height: auto;
   }
+`;
+
+const AmountInputWrapper = styled.div`
+  width: 100%;
+  margin-bottom: calc(var(--gap) * 2);
+`;
+
+const AmountInputStyled = styled(NumberInput)`
+  width: 100%;
 `;
 
 const ButtonWrapper = styled.div`
@@ -132,5 +266,24 @@ const ButtonWrapper = styled.div`
 const Content = styled.div`
   && h2 {
     margin-bottom: 32px;
+  }
+`;
+
+const InvalidAddressWrapper = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  right: calc(var(--gap) * 1.5);
+  height: 0;
+  span {
+    color: ${Coral700} !important;
+  }
+`;
+
+const LowBalanceWrapper = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  right: calc(var(--gap) * 1.5);
+  span {
+    color: ${Coral700} !important;
   }
 `;

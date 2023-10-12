@@ -2,22 +2,39 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
-import { Market, MyTokens, Accounts, Trades, FAQ, TokenPage, AdminPanel, AdminLogin } from './pages';
+import { Market, MyTokens, Collection, Accounts, Trades, Faq, TokenPage, Collections, CollectionEdit } from './pages';
 import { GlobalStyle } from './styles';
-import { Error404 } from './pages/errors/404';
+import { Error404 } from './pages/Errors/404';
+import { TokenContextProvider } from 'pages/Token/context/TokenContext';
 
 const commonRoutes = (<>
   <Route
-    element={<TokenPage />}
+    element={<TokenContextProvider><TokenPage /></TokenContextProvider>}
+    path={'token/:address/:collectionId/:id'}
+  />
+  <Route
+    element={<TokenContextProvider><TokenPage /></TokenContextProvider>}
     path={'token/:collectionId/:id'}
   />
+  <Route
+    path={'collection/:collectionId'}
+  >
+    <Route
+      element={<Collection />}
+      index
+    />
+    <Route
+      path={'edit'}
+      element={<CollectionEdit />}
+    />
+  </Route>
   <Route
     element={<Market />}
     path={'market'}
   />
   <Route
     element={<MyTokens />}
-    path={'myTokens'}
+    path={'sellTokens'}
   />
   <Route
     element={<Accounts />}
@@ -28,18 +45,14 @@ const commonRoutes = (<>
     path={'trades'}
   />
   <Route
-    element={<FAQ />}
+    element={<Faq />}
     path={'faq'}
   />
   <Route
-    path={'administration'}
+    path={'collections'}
   >
     <Route
-      element={<AdminLogin />}
-      path={'login'}
-    />
-    <Route
-      element={<AdminPanel />}
+      element={<Collections />}
       index
     />
   </Route>

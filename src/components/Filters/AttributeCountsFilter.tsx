@@ -2,7 +2,7 @@ import React, { FC, useCallback } from 'react';
 import styled from 'styled-components';
 import { Text } from '@unique-nft/ui-kit';
 import { Checkbox } from 'components/UI';
-import Accordion from '../Accordion/Accordion';
+import { Accordion } from '../Accordion/Accordion';
 import CheckboxSkeleton from '../Skeleton/CheckboxSkeleton';
 import { AttributeCount } from '../../api/restApi/offers/types';
 import { sortAttributeCounts } from './utils/sortAttributes';
@@ -13,9 +13,10 @@ interface AttributeCountsFilterProps {
   isAttributeCountsFetching?: boolean
   onAttributeCountsChange?(value: number[]): void
   testid: string
+  disabled?: boolean
 }
 
-const AttributeCountsFilter: FC<AttributeCountsFilterProps> = ({ attributeCounts = [], selectedAttributeCounts = [], isAttributeCountsFetching, onAttributeCountsChange, testid }) => {
+const AttributeCountsFilter: FC<AttributeCountsFilterProps> = ({ attributeCounts = [], selectedAttributeCounts = [], isAttributeCountsFetching, onAttributeCountsChange, testid, disabled }) => {
   const onAttributeCountSelect = useCallback((attributeCount: number) => (value: boolean) => {
     let _selectedAttributeCounts;
     if (value) {
@@ -35,7 +36,6 @@ const AttributeCountsFilter: FC<AttributeCountsFilterProps> = ({ attributeCounts
       isOpen={true}
       onClear={onClear}
       isClearShow={selectedAttributeCounts.length > 0}
-      testid={`${testid}-accordion`}
     >
       <CollectionFilterWrapper>
         {isAttributeCountsFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
@@ -47,6 +47,7 @@ const AttributeCountsFilter: FC<AttributeCountsFilterProps> = ({ attributeCounts
               size={'m'}
               onChange={onAttributeCountSelect(attributeCount.numberOfAttributes)}
               testid={`${testid}-checkbox`}
+              disabled={disabled}
             />
             <Text
               testid={`${testid}-amount-${attributeCount.amount}`}
@@ -69,6 +70,7 @@ const CollectionFilterWrapper = styled.div`
   min-height: 50px;
   max-height: 400px;
   overflow-y: auto;
+  padding-right: var(--gap);
   .unique-checkbox-wrapper label {
     max-width: 230px;
     text-overflow: ellipsis;

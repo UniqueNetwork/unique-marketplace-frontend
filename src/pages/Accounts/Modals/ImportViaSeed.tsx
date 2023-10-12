@@ -15,6 +15,7 @@ export const ImportViaSeedAccountModal: FC<TAccountModalProps> = ({ isVisible, o
   const [accountProperties, setAccountProperties] = useState<TAccountProperties>();
   const { addLocalAccount } = useAccounts();
   const { error } = useNotifications();
+  const { info } = useNotifications();
 
   const ModalBodyComponent = useMemo<FC<TCreateAccountBodyModalProps> | null>(() => {
     switch (stage) {
@@ -36,6 +37,8 @@ export const ImportViaSeedAccountModal: FC<TAccountModalProps> = ({ isVisible, o
         addLocalAccount(accountProperties.seed, derivePath, accountProperties.name || '', accountProperties.password || '', defaultPairType);
         onFinish();
         setStage(CreateAccountModalStages.AskSeed);
+
+        info(`Account ${accountProperties.name} successfully restored`);
         return;
       } catch (e) {
         error('Specified phrase is not a valid mnemonic. Please type seed phrase corresponding to mnemonic');

@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ForwardedRef, forwardRef, ReactNode } from 'react';
 import classNames from 'classnames';
 import { ComponentProps } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
@@ -9,12 +9,13 @@ export interface ITextBaseProps {
   weight?: 'light' | 'regular' | 'bold';
   color?: string;
   appearance?: 'inline' | 'block';
+  title?: string;
 }
 
 export type TextProps = ITextBaseProps &
   Pick<ComponentProps, 'className' | 'id' | 'testid'>;
 
-export const Text = ({
+export const Text = forwardRef(({
   children,
   size = 'm',
   weight = 'regular',
@@ -23,7 +24,7 @@ export const Text = ({
   appearance = 'inline',
   testid,
   ...rest
-}: TextProps) => {
+}: TextProps, ref: ForwardedRef<any>) => {
   return (
     <TextStyled
       className={classNames(
@@ -35,12 +36,13 @@ export const Text = ({
         className
       )}
       data-testid={testid}
+      ref={ref}
       {...rest}
     >
       {children}
     </TextStyled>
   );
-};
+});
 
 const TextStyled = styled.span`
   @each $color, $value in $base-colors-map {

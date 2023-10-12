@@ -1,10 +1,11 @@
 import { Consumer, Context, createContext, Provider } from 'react';
-import { CollectionInfoWithSchema } from '@unique-nft/substrate-client/tokens';
+import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 
 export type CollectionsContextProps = {
   isFetching: boolean
-  collections: CollectionInfoWithSchema[]
-  fetchCollections(): Promise<void>
+  collections: CollectionInfoWithSchemaResponse[]
+  curatedCollections: CollectionInfoWithSchemaResponse[]
+  fetchCollections(): void
 }
 
 const CollectionsContext: Context<CollectionsContextProps> = createContext({} as unknown as CollectionsContextProps);

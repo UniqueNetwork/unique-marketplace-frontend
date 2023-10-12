@@ -6,7 +6,7 @@ import { Header } from '.';
 import { useFooter } from '../hooks/useFooter';
 import useBackground from '../hooks/useBackground';
 
-export type TMenuItems = 'Market' | 'My tokens' | 'Trades' | 'FAQ' | 'Manage accounts' | 'Collections';
+export type TMenuItems = 'Market' | 'Sell tokens' | 'Trades' | 'FAQ' | 'Manage accounts' | 'My collections';
 
 export const PageLayout: FC = () => {
   const { pathname } = useLocation();
@@ -21,14 +21,14 @@ export const PageLayout: FC = () => {
         }
       };
     }
-    if (pathname.includes('/market')) return { heading: 'Market' };
+    if (pathname.includes('/market')) return { heading: undefined };
 
-    if (pathname.includes('/administration')) {
-      return { heading: 'Collections' };
+    if (pathname.includes('/collections')) {
+      return { heading: 'My collections' };
     }
 
-    if (pathname.includes('/myTokens')) {
-      return { heading: 'My tokens' };
+    if (pathname.includes('/sellTokens')) {
+      return { heading: 'Sell tokens' };
     }
 
     if (pathname.includes('/trades')) {
@@ -45,13 +45,13 @@ export const PageLayout: FC = () => {
   }, [pathname]);
 
   return (
-    <BgLayoutStyled backgroundImage={backgroundImage} hasFooterSpacing={pathname === '/market' || pathname === '/myTokens' || pathname.includes('/token')}>
+    <BgLayoutStyled backgroundImage={backgroundImage} hasFooterSpacing={pathname === '/market' || pathname === '/sellTokens' || pathname.includes('/token')}>
       <Layout
         {...layoutProps}
         footer={<div dangerouslySetInnerHTML={{ __html: footer }} />}
         header={
           <Header
-            activeItem={(layoutProps?.heading as TMenuItems) || 'Market'}
+            activeItem={layoutProps?.heading as TMenuItems}
           />
         }
       >
@@ -72,7 +72,7 @@ const LayoutStyled = styled.div<{hasFooterSpacing: boolean}>`
     }
 
     .unique-font-heading.size-1 {
-      font-family: var(--font-heading);
+      font-family: var(--prop-font-family-heading);
     }
 
     footer {

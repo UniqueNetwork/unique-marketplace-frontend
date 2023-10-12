@@ -10,10 +10,12 @@ export type Sortable = {
 }
 
 export type PaginatedResponse<T> = {
-  page: number
-  pageSize: number
-  itemsCount: number
+  currentPage: number
+  itemsPerPage: number
+  itemCount: number
   items: T[]
+  totalItems: number
+  totalPages: number
 }
 
 export type ResponseError = {

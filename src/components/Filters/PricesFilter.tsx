@@ -2,16 +2,17 @@ import React, { FC, useCallback, useEffect, useState } from 'react';
 import { Button, Text } from 'components/UI';
 import styled from 'styled-components';
 import { PriceRange } from './types';
-import Accordion from '../Accordion/Accordion';
+import { Accordion } from '../Accordion/Accordion';
 import { NumberInput } from '../NumberInput/NumberInput';
 
 interface PricesFilterProps {
   value: PriceRange | undefined
   onChange(value: PriceRange | undefined): void
   testid: string
+  disabled?: boolean
 }
 
-const PricesFilter: FC<PricesFilterProps> = ({ value, onChange, testid }) => {
+const PricesFilter: FC<PricesFilterProps> = ({ value, onChange, testid, disabled }) => {
   const { minPrice, maxPrice } = value || {};
   const [minPriceValue, setMinPriceValue] = useState<string>();
   const [maxPriceValue, setMaxPriceValue] = useState<string>();
@@ -56,12 +57,21 @@ const PricesFilter: FC<PricesFilterProps> = ({ value, onChange, testid }) => {
     onChange(undefined);
   }, [onChange]);
 
+  const onClearMinPrice = useCallback(() => {
+    if (maxPriceValue !== undefined) return;
+    onChange(undefined);
+  }, [onChange, maxPriceValue]);
+
+  const onClearMaxPrice = useCallback(() => {
+    if (minPriceValue !== undefined) return;
+    onChange(undefined);
+  }, [onChange, minPriceValue]);
+
   return (
     <Accordion title={'Price'}
       isOpen={true}
       onClear={onPricesClear}
       isClearShow={!!minPrice || !!maxPrice}
-      testid={`${testid}-accordion`}
     >
       <PriceFilterWrapper>
         <PricesRangeWrapper>
@@ -70,6 +80,8 @@ const PricesFilter: FC<PricesFilterProps> = ({ value, onChange, testid }) => {
             onChange={onChangeMinPrice}
             placeholder={'Min'}
             testid={`${testid}-minPrice`}
+            disabled={disabled}
+            onClear={onClearMinPrice}
           />
           <Text>to</Text>
           <NumberInput
@@ -77,12 +89,15 @@ const PricesFilter: FC<PricesFilterProps> = ({ value, onChange, testid }) => {
             onChange={onChangeMaxPrice}
             placeholder={'Max'}
             testid={`${testid}-maxPrice`}
+            disabled={disabled}
+            onClear={onClearMaxPrice}
           />
         </PricesRangeWrapper>
         <Button
           title={'Apply'}
           onClick={onApply}
           testid={`${testid}-apply-button`}
+          disabled={disabled || (!minPriceValue && !maxPriceValue)}
         />
       </PriceFilterWrapper>
     </Accordion>

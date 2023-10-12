@@ -24,7 +24,10 @@ export type Trade = {
   collectionId: number
   creationDate: string
   metadata: Record<string, any>
-  price: string
+  price: {
+    parsed: number, // 123
+    raw: string // 123000000000000
+  }
   quoteId: number
   tokenId: number
   tradeDate: number

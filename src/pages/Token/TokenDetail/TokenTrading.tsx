@@ -5,13 +5,16 @@ import accountContext from '../../../account/AccountContext';
 import { SellToken } from '../SellToken/SellToken';
 import { BuyToken } from '../BuyToken/BuyToken';
 import Auction from '../Auction/Auction';
-import { isTokenOwner } from 'api/uniqueSdk/utils/addressUtils';
+import { isTokenOwner } from 'api/chainApi/utils/addressUtils';
 import { useApi } from '../../../hooks/useApi';
-import { checkAllowedTokenInSettings } from 'api/uniqueSdk/utils/checkTokenIsAllowed';
-import { TokenByIdResult } from '@unique-nft/substrate-client/tokens';
+import { checkAllowedTokenInSettings } from 'api/chainApi/utils/checkTokenIsAllowed';
+import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
+import { ethers } from 'ethers';
+import { useParams } from 'react-router-dom';
 
 interface TokenTradingProps {
-  token?: TokenByIdResult
+  token?: TokenByIdResponse
+  collection?: CollectionInfoWithSchemaResponse | null
   offer?: Offer
   onSellClick(): void
   onBuyClick(): void
@@ -19,30 +22,59 @@ interface TokenTradingProps {
   onPlaceABidClick(): void
   onDelistClick(): void
   onDelistAuctionClick(): void
+  onChangePriceClick(): void
   onWithdrawClick(): void
   onAuctionClose(newOwnerAddress: string): void
   testid: string
 }
 
-export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick, onTransferClick, onDelistClick, onDelistAuctionClick, onPlaceABidClick, onWithdrawClick, onBuyClick, onAuctionClose, testid }) => {
+export const TokenTrading: FC<TokenTradingProps> = ({
+  token,
+  offer,
+  collection,
+  onSellClick,
+  onTransferClick,
+  onDelistClick,
+  onDelistAuctionClick,
+  onChangePriceClick,
+  onPlaceABidClick,
+  onWithdrawClick,
+  onBuyClick,
+  onAuctionClose,
+  testid
+}) => {
   const { selectedAccount } = useContext(accountContext);
-  const { settings, currentChainId } = useApi();
-
-  const allowedTokens = useMemo(() => settings && currentChainId ? settings.blockchain.unique.allowedTokens : undefined, [settings]);
+  const { settings } = useApi();
+  const { address } = useParams<{ address: string }>();
 
   const isAllowed = useMemo(() => {
-    if (!token && !offer) return;
-    const { tokenId, collectionId } = offer || token!;
-    return checkAllowedTokenInSettings(tokenId, collectionId, allowedTokens);
-  }, [allowedTokens, token, offer]);
+    const { tokenId, collectionId } = offer || token || {};
+    if (!tokenId || !collectionId) return false;
+    return checkAllowedTokenInSettings(tokenId, collectionId, settings?.blockchain.unique.collections);
+  }, [settings, token, offer]);
 
   const isOwner = useMemo(() => {
     if (!selectedAccount) return false;
+    if (collection?.mode === 'ReFungible' && address) {
+      return isTokenOwner(selectedAccount.address, address);
+    }
+
     if (offer) {
       return isTokenOwner(selectedAccount.address, offer.seller);
     }
     return token?.owner ? isTokenOwner(selectedAccount.address, token.owner) : false;
-  }, [selectedAccount, token, offer]);
+  }, [selectedAccount, token, offer, address]);
+
+  const royalty = useMemo(() => {
+    const tokenRoyalties = token?.royalties?.reduce((acc, { value, decimals }) => {
+      acc += Number(ethers.utils.formatUnits(value.toString(), decimals));
+      return acc;
+    }, 0) || 0;
+    return tokenRoyalties + (token?.collection?.schema?.royalties?.reduce((acc, { value, decimals }) => {
+      acc += Number(ethers.utils.formatUnits(value.toString(), decimals));
+      return acc;
+    }, 0) || 0);
+  }, [token]);
 
   if (offer?.auction) {
     return (<Auction
@@ -54,14 +86,17 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
       testid={`${testid}-auction`}
     />);
   }
-
   if (isOwner) {
     return (<SellToken
+      collectionId={token?.collectionId}
       offer={offer}
+      royalty={royalty}
       isAllowed={isAllowed}
+      isRFT={collection?.mode === 'ReFungible'}
       onSellClick={onSellClick}
       onTransferClick={onTransferClick}
       onDelistClick={onDelistClick}
+      onChangePriceClick={onChangePriceClick}
       testid={`${testid}-sell`}
     />);
   }
@@ -69,6 +104,11 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
   if (!isAllowed) return null;
 
   return (
-    <BuyToken offer={offer} onBuy={onBuyClick} testid={`${testid}-buy`}/>
+    <BuyToken
+      offer={offer}
+      royalty={royalty}
+      onBuy={onBuyClick}
+      testid={`${testid}-buy`}
+    />
   );
 };

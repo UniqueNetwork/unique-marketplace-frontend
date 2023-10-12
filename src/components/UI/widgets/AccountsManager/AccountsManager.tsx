@@ -1,9 +1,10 @@
-import React, { ReactNode, useEffect } from 'react';
+import React, { ReactNode } from 'react';
 import { AccountsManagerDropdown } from './components';
 import styled from 'styled-components';
-import { Text, IconProps, SelectOptionProps } from '@unique-nft/ui-kit';
-import { Icon, Dropdown } from 'components/UI';
+import { IconProps, SelectOptionProps } from '@unique-nft/ui-kit';
+import { Text, Icon, Dropdown, CopyButton } from 'components/UI';
 import useCopyToClipboard from './hooks/useCopyToClipboard';
+import { Account } from 'account/types';
 
 export interface IAccount extends SelectOptionProps {
   address?: string;
@@ -73,21 +74,18 @@ export const AccountsManager = (props: AccountsManagerProps) => {
       <AccountsManagerWrapper>
         <div className='accounts-manager-selected-account'>
           <div className='accounts-manager-selected-account-name'>
-            <Text color='blue-grey-500' size='s'>
+            <Text color='blue-grey-500' size='s' title={selectedAccount?.name}>
               {selectedAccount?.name}
             </Text>
-            <div
-              className='address-copy'
+            <CopyButton
               onClick={(event) => {
                 if (!selectedAccount?.address) return;
                 event.stopPropagation();
-                copy(selectedAccount.address);
+                void copy(selectedAccount.address);
                 onCopyAddressClick?.(selectedAccount.address);
               }}
-              data-testid={`selected-address-copy-${selectedAccount?.address}`}
-            >
-              <Icon size={16} name='copy' />
-            </div>
+              testid={`selected-address-copy-${selectedAccount?.address || ''}`}
+            />
           </div>
           <Text size='s'>{`${balance} ${symbol}`}</Text>
         </div>
@@ -119,6 +117,7 @@ const AccountsManagerWrapper = styled.div`
   padding: calc(var(--prop-gap) * 1.5 / 4) calc(var(--prop-gap) * 2)
   calc(var(--prop-gap) * 1.5 / 4) var(--prop-gap);
   cursor: pointer;
+  max-width: 230px;
   &:hover {
     border: 1px solid var(--color-blue-grey-400);
   }
@@ -129,9 +128,12 @@ const AccountsManagerWrapper = styled.div`
     padding-right: var(--prop-gap);
     cursor: pointer;
     justify-content: center;
+    overflow: hidden;
     .unique-text {
       white-space: nowrap;
       line-height: 21px;
+      text-overflow: ellipsis;
+      overflow: hidden;
     }
     .accounts-manager-selected-account-name {
       display: flex;

@@ -1,0 +1,256 @@
+import { BN } from '@polkadot/util';
+import { AccountBalances } from 'account/types';
+import { Address, CrossAccountId } from '@unique-nft/utils';
+import { sleep } from 'utils/helpers';
+
+import marketplaceAbi from './contracts/marketplace-0.json';
+import { NetworkOptions } from '../sdk/sdkClient';
+
+import IMarketController from './controllers/base/IMarketController';
+import { CollectionMode, TransactionOptions } from './types';
+import BaseController from './controllers/BaseController';
+import { MarketContract, MarketContractAbiItem } from 'api/restApi/settings/types';
+import { IMarketContractProperties } from './adapters/IMarketContractAdapter';
+
+class MarketController extends BaseController implements IMarketController {
+  public decimals = 18; // TODO: move from controller to API
+
+  actualContract: IMarketContractProperties;
+  contracts: MarketContract[] = [];
+  contractsAbi: Record<string, MarketContractAbiItem[]> = {};
+
+  private getActualContract() {
+    let actualContract = this.contracts[0];
+    this.contracts.forEach((contract) => {
+      if (contract.version > actualContract.version) {
+        actualContract = contract;
+      }
+    });
+    return actualContract;
+  }
+
+  constructor(options: NetworkOptions) {
+    super(options);
+    this.contracts = options.settings.blockchain.unique.contracts;
+    if (this.contracts.length === 0) throw new Error('Market API didn\'t provide deployed contracts');
+    this.contractsAbi = options.settings.blockchain.unique.contractsAbi || {};
+    const contractAddress = this.getActualContract().address;
+    this.actualContract = {
+      address: contractAddress,
+      abi: this.contractsAbi[contractAddress]
+    };
+  }
+
+  public setNetwork(options: NetworkOptions): void {
+    super.setNetwork(options);
+    this.contracts = options.settings.blockchain.unique.contracts;
+    if (this.contracts.length === 0) throw new Error('Market API didn\'t provide deployed contracts');
+    this.contractsAbi = options.settings.blockchain.unique.contractsAbi || {};
+    const contractAddress = this.getActualContract().address;
+    this.actualContract = {
+      address: contractAddress,
+      abi: this.contractsAbi[contractAddress]
+    };
+  }
+
+  async changeAllowance(collectionId: number, tokenId: number, targetAllowance: boolean, { account, contractAddress }: TransactionOptions): Promise<void> {
+    if (!account) throw new Error('Account not provided');
+    const from = account.address;
+    const to = contractAddress || this.actualContract.address;
+    const isAlreadyAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from, to });
+    if (isAlreadyAllowed.isAllowed === targetAllowance) return;
+
+    const adapter = this.getAdapter(account);
+    await adapter.changeAllowance(from, to, collectionId, tokenId, targetAllowance, account.signer);
+    const newAllowance = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from, to });
+    if (newAllowance.isAllowed !== targetAllowance) throw new Error('Allowance change failed');
+  }
+
+  public async getSellFixFee(collectionId: number, tokenId: number, price: number, amount: number, { account }: TransactionOptions): Promise<string> {
+    const from = Address.extract.ethCrossAccountId(account.address);
+    const adapter = this.getAdapter(account);
+    const priceWithDecimals = (price * (10 ** this.decimals)).toLocaleString('fullwide', { useGrouping: false });
+    const rawFee = await adapter.getSellFee(
+      from,
+      collectionId,
+      tokenId,
+      priceWithDecimals,
+      amount,
+      account.signer,
+      this.actualContract
+    );
+    return this.getChainValue(rawFee, this.decimals).parsed.toString();
+  }
+
+  public async getBuyFixFee(collectionId: number, tokenId: number, amount: number, { account, contractAddress }: TransactionOptions): Promise<string> {
+    const to = Address.extract.ethCrossAccountId(account.address);
+    const order = (await this.getOrder(collectionId, tokenId, contractAddress));
+    const value = order.price as { type: string, hex: string };
+    const adapter = this.getAdapter(account);
+    const parsedPrice = BigInt(value.hex).toString();
+    const rawFee = await adapter.getBuyFee(
+      to,
+      collectionId,
+      tokenId,
+      parsedPrice,
+      amount,
+      account.signer,
+      contractAddress
+      ? {
+        address: contractAddress,
+        abi: this.contractsAbi[contractAddress]
+      }
+      : this.actualContract
+    );
+    return this.getChainValue(rawFee, this.decimals).parsed.toString();
+  }
+
+  /**
+   *
+   * @param collectionId
+   * @param tokenId
+   * @param price - human format (ex. 1.25, not 125000000000000000)
+   * @param amount - amount of fractions, 1 for NFT
+   * @param param4 - signer and extras
+   */
+  async sellFix(collectionId: number, tokenId: number, price: number, amount: number, { account }: TransactionOptions): Promise<void> {
+    const from = Address.extract.ethCrossAccountId(account.address);
+    const to = this.actualContract.address;
+    const isAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from: account.address, to });
+    if (!isAllowed.isAllowed) throw new Error('Token not approved for sale');
+    const adapter = this.getAdapter(account);
+    // chain format from human format: 1.25 -> 1250000000000000000
+    const priceWithDecimals = (price * (10 ** this.decimals)).toLocaleString('fullwide', { useGrouping: false });
+    await adapter.sell(from, collectionId, tokenId, priceWithDecimals, amount, account.signer, this.actualContract);
+    await sleep(1000); // little lag to make sure offer is added to db
+  }
+
+  async buyFix(collectionId: number, tokenId: number, amount: number, { account, contractAddress }: TransactionOptions): Promise<void> {
+    const to = Address.extract.ethCrossAccountId(account.address);
+
+    const order = (await this.getOrder(collectionId, tokenId, contractAddress));
+    const value = order.price as { type: string, hex: string };
+    // console.log('seller', seller); // TODO: recheck allowance? If so - which out of two accounts
+    // const isAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from: seller.eth, to });
+    // if (!isAllowed.isAllowed) throw new Error('Token not approved for sale');
+    if (!value || !value.hex) throw new Error('Order price incorrect');
+    const adapter = this.getAdapter(account);
+
+    const parsedPrice = BigInt(value.hex).toString();
+    await adapter.buy(to, collectionId, tokenId, parsedPrice, amount, account.signer,
+      contractAddress
+      ? {
+        address: contractAddress,
+        abi: this.contractsAbi[contractAddress]
+      }
+      : this.actualContract
+    );
+  }
+
+  async cancelFix(collectionId: number, tokenId: number, amount: number, options: TransactionOptions): Promise<void> {
+    if (!options) throw new Error('Account not found');
+    // throws error if not found
+    await this.getOrder(collectionId, tokenId);
+    await this.changeAllowance(collectionId, tokenId, false, options);
+  }
+
+  async getOrder(collectionId: number, tokenId: number, contractAddress?: string): Promise<any> {
+    if (!collectionId || !tokenId) throw new Error(`Cant get order for ${collectionId}-${tokenId}`);
+    try {
+      const res = await this.uniqueSdk.evm.call({
+        abi: marketplaceAbi as any,
+        address: '5CSxpZepJj5dxkSBEDnN23pgg6B5X6VFRJ2kyubhb5Svstuu', // TODO: remove after sdk update
+        contractAddress: contractAddress || this.actualContract.address,
+        funcName: 'getOrder',
+        args: [collectionId, tokenId]
+      });
+      return res;
+    } catch (e) {
+      console.error('Failed to get order', e);
+      throw e;
+    }
+  }
+
+  async getAccountBalance(address: string): Promise<AccountBalances> {
+    const response = await this.uniqueSdk.balance.get({ address });
+    let ethMirror = { parsed: '0', raw: new BN(0) };
+    if (Address.is.substrateAddress(address)) {
+      const withdrawBalance = await this.uniqueSdk.balance.get({
+        address: Address.mirror.substrateToEthereum(address)
+      });
+      ethMirror = {
+        raw: new BN(withdrawBalance?.availableBalance?.raw || 0),
+        parsed: withdrawBalance?.availableBalance?.amount
+      };
+    }
+    if (!response) throw new Error('Failed to fetch balance');
+    const proper = {
+      raw: new BN(response?.availableBalance?.raw || 0),
+      parsed: response?.availableBalance?.amount || '0'
+    };
+    return {
+      proper,
+      ethMirror
+    };
+  }
+
+  async getTransferTokenFee(sender: string, recipient: string, collectionId: number, tokenId: number, mode: CollectionMode, amount: number, { account }: TransactionOptions): Promise<string | null> {
+    const adapter = this.getAdapter(account);
+    const rawFee = await adapter.getTransferTokenFee(sender, recipient, collectionId, tokenId, mode, amount, account.signer);
+    return this.getChainValue(rawFee, this.decimals).parsed.toString();
+  }
+
+  // ____ EXTRA _____
+  async transferToken(from: string, to: string, collectionId: number, tokenId: number, mode: CollectionMode, amount: number, { account }: TransactionOptions): Promise<void> {
+    await this.getAdapter(account).transferToken(from, to, collectionId, tokenId, mode, amount, account);
+  }
+
+  async getTransferBalanceFee(sender: string, recipient: string, value: number, { account }: TransactionOptions): Promise<string> {
+    const adapter = this.getAdapter(account);
+    const rawFee = await adapter.getTransferBalanceFee(sender, recipient, this.getChainValue(value, this.decimals), account);
+    return this.getChainValue(rawFee, this.decimals).parsed.toString();
+  }
+
+  /**
+   *
+   * @param from Sender
+   * @param to Receiver
+   * @param amount amount to send. Send as number if in human format, BN/string for chain formats.
+   * @param param3
+   */
+  async transferBalance(from: string, to: string, amount: BN | number | string, { account }: TransactionOptions): Promise<void> {
+    await this.getAdapter(account).transferBalance(from, to, this.getChainValue(amount, this.decimals), account.signer);
+  }
+
+  hasContractMethod(contractAddress: string, method: string): boolean {
+    return !!this.contractsAbi[contractAddress]?.find(({ name }) => name === method);
+  }
+
+  async changePrice(collectionId: number, tokenId: number, price: number, { account, contractAddress }: TransactionOptions): Promise<void> {
+    const adapter = this.getAdapter(account);
+    const contract = contractAddress
+    ? {
+        address: contractAddress,
+        abi: this.contractsAbi[contractAddress]
+      }
+    : this.actualContract;
+    const priceWithDecimals = (price * (10 ** this.decimals)).toLocaleString('fullwide', { useGrouping: false });
+    await adapter.changePrice(collectionId, tokenId, priceWithDecimals, account.signer, contract);
+  }
+
+  async getChangePriceFee(collectionId: number, tokenId: number, price: number, { account, contractAddress }: TransactionOptions): Promise<string> {
+    const adapter = this.getAdapter(account);
+    const contract = contractAddress
+    ? {
+        address: contractAddress,
+        abi: this.contractsAbi[contractAddress]
+      }
+    : this.actualContract;
+    const priceWithDecimals = (price * (10 ** this.decimals)).toLocaleString('fullwide', { useGrouping: false });
+    const rawFee = await adapter.getChangePriceFee(collectionId, tokenId, priceWithDecimals, account.signer, contract);
+
+    return this.getChainValue(rawFee, this.decimals).parsed.toString();
+  }
+}
+
+export default MarketController;

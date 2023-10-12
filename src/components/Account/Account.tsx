@@ -1,8 +1,7 @@
-import React, { FC, useCallback, useMemo } from 'react';
-import { Text, useNotifications } from 'components/UI';
+import React, { FC, useCallback, useMemo, MouseEvent } from 'react';
+import { CopyButton, Text, useNotifications } from 'components/UI';
 import styled from 'styled-components';
-import { Icon } from 'components/UI/Icon/Icon';
-import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
+import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import { useApi } from 'hooks/useApi';
 import { shortcutText } from 'utils/textUtils';
@@ -27,15 +26,16 @@ const AccountCard: FC<AccountProps> = ({
   hideName = false,
   testid
 }) => {
-  const { chainData } = useApi();
+  const { chainProperties } = useApi();
   const { info } = useNotifications();
 
   const formatAddress = useCallback((address: string) => {
     if (!address) return '';
-    return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
-  }, [chainData?.SS58Prefix]);
+    return toChainFormatAddress(address, chainProperties?.SS58Prefix || 0);
+  }, [chainProperties?.SS58Prefix]);
 
-  const onCopyAddress = (account: string) => () => {
+  const onCopyAddress = (account: string) => (event: MouseEvent) => {
+    event.stopPropagation();
     navigator.clipboard.writeText(account).then(() => {
       info(
         'Address copied',
@@ -49,7 +49,7 @@ const AccountCard: FC<AccountProps> = ({
       <Avatar size={24} src={DefaultAvatar} address={accountAddress} />
       <AccountInfoWrapper>
         {!hideName && <Text testid={`${testid}-account-name`}>{accountName}</Text>}
-        {!hideAddress && <AddressRow>
+        {!hideAddress && <Row>
           <FormattedAddress
             formatAddress={formatAddress}
             accountAddress={accountAddress}
@@ -57,12 +57,8 @@ const AccountCard: FC<AccountProps> = ({
             hideName={hideName}
             testid={testid}
           />
-          {canCopy && <a onClick={onCopyAddress(formatAddress(accountAddress) || '')} data-testid={`${testid}-copy`}>
-            <CopyIconWrapper>
-              <Icon name={'copy'} size={16} />
-            </CopyIconWrapper>
-          </a>}
-        </AddressRow>}
+          {canCopy && <CopyButton onClick={onCopyAddress(formatAddress(accountAddress) || '')} data-testid={`${testid}-copy`} />}
+        </Row>}
       </AccountInfoWrapper>
     </>
   );
@@ -100,29 +96,12 @@ const AccountInfoWrapper = styled.div`
   }
 `;
 
-const CopyIconWrapper = styled.div`
-  && {
-    width: 24px;
-    height: 24px;
-    color: var(--color-grey-400);
-    padding: 0;
-    cursor: pointer;
-    svg {
-      transform: translateX(3px);
-    }
-    
-    &:hover {
-      svg {
-        fill: var(--color-primary-500);
-      }
-    }
-  }
-`;
-
-const AddressRow = styled.div`
+const Row = styled.div`
   && {
     display: flex;
     padding: 0;
+    align-items: center;
+    gap: calc(var(--gap) / 2);
   }
 `;
 

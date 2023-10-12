@@ -20,12 +20,18 @@ const CollectionCoverWrapper = styled.div<{ type: 'circle' | 'square', size: num
   border-radius: ${({ type }) => type === 'circle' ? '50% 50%' : '4px'};
   height: ${({ size }) => size}px;
   width: ${({ size }) => size}px;
+  min-width: ${({ size }) => size}px;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+
   .picture {
     width: 100%;
     height: 100%;
+    img {
+      width: 100%;
+      object-fit: cover;
+    }
   }
 `;

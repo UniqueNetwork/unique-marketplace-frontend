@@ -1,10 +1,10 @@
-import React, { ReactNode, useEffect } from 'react';
+import React, { ReactNode, useRef } from 'react';
 import { IAccount } from '../AccountsManager';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import useCopyToClipboard from '../hooks/useCopyToClipboard';
-import { Text, Avatar } from '@unique-nft/ui-kit';
+import { Avatar, Tooltip } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
-import { Icon } from 'components/UI/Icon/Icon';
+import { CopyButton, Text } from 'components/UI';
 
 interface AccountCardProps extends IAccount {
   avatarRender?(address: string): ReactNode;
@@ -23,6 +23,8 @@ export const AccountCard = ({
       : address;
 
   const [_, copy] = useCopyToClipboard();
+  const nameTextRef = useRef<HTMLDivElement>(null);
+  const addressTextRef = useRef<HTMLDivElement>(null);
 
   return (
     <AccountCardWrapper>
@@ -34,13 +36,24 @@ export const AccountCard = ({
           <Avatar src={DefaultAvatar} type='circle' />
         )}
       <div className='account-card-content'>
-        <Text size='m'>{name}</Text>
+        <TooltipStyled
+          align={{ vertical: 'top', horizontal: 'middle', appearance: 'vertical' }}
+          targetRef={nameTextRef}
+        >
+          {name}
+        </TooltipStyled>
+        <Text size='m' ref={nameTextRef} >{name}</Text>
         <div className='account-card-address'>
-          <Text size='s' color='grey-500'>
+          <TooltipStyled
+            align={{ vertical: 'top', horizontal: 'middle', appearance: 'vertical' }}
+            targetRef={addressTextRef}
+          >
+            {address}
+          </TooltipStyled>
+          <Text size='s' color='grey-500' ref={addressTextRef}>
             {shortAddress}
           </Text>
-          <div
-            className='address-copy'
+          <CopyButton
             onClick={(event) => {
               if (!address) return;
               event.stopPropagation();
@@ -48,9 +61,7 @@ export const AccountCard = ({
               onCopyAddressClick?.(address);
             }}
             data-testid={`address-copy-${address}`}
-          >
-            <Icon size={16} name='copy' />
-          </div>
+          />
         </div>
       </div>
     </AccountCardWrapper>
@@ -69,6 +80,7 @@ const AccountCardWrapper = styled.div`
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
+      position: relative;
     }
     .account-card-address {
       display: flex;
@@ -76,4 +88,9 @@ const AccountCardWrapper = styled.div`
       column-gap: calc(var(--prop-gap) / 4);
     }
   }
+`;
+
+const TooltipStyled = styled(Tooltip)`
+  z-index: 9999;
+  max-width: unset;
 `;

@@ -1,10 +1,9 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import { Text } from '@unique-nft/ui-kit';
 import { Checkbox } from 'components/UI';
-import { CollectionInfoWithSchema, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 import styled from 'styled-components';
 
-import Accordion from 'components/Accordion/Accordion';
+import { Accordion } from 'components/Accordion/Accordion';
 import AttributeCountsFilter from 'components/Filters/AttributeCountsFilter';
 import AttributesFilter from 'components/Filters/AttributesFilter';
 import CheckboxSkeleton from 'components/Skeleton/CheckboxSkeleton';
@@ -12,6 +11,9 @@ import { AttributeItem } from 'components/Filters/types';
 import { CollectionCover } from 'components/CollectionCover/CollectionCover';
 import { Attribute, AttributeCount } from 'api/restApi/offers/types';
 import { getAttributesCountFromTokens, getAttributesFromTokens } from './utils/attributes';
+import { MixedMyTokenAndOffer } from '../types';
+import { MyCollection } from 'api/restApi/collections/types';
+import { getIpfsUriByImagePath } from 'utils/urlUtils';
 
 interface CollectionsFilterProps {
   value?: { collections?: number[], attributes?: { key: string, attribute: string }[], attributeCounts?: number[] } | null
@@ -19,11 +21,11 @@ interface CollectionsFilterProps {
   onAttributesChange?(value: { key: string, attribute: string }[]): void
   onAttributeCountsChange?(value: number[]): void
   testid: string
-  featuredTokens: TokenByIdResult[]
-  tokens: TokenByIdResult[]
-  collections: CollectionInfoWithSchema[]
+  featuredTokens: MixedMyTokenAndOffer[]
+  tokens: MixedMyTokenAndOffer[]
+  collections: MyCollection[]
   isFetchingTokens: boolean
-  featuredTokensForAttributeCounts: TokenByIdResult[]
+  featuredTokensForAttributeCounts: MixedMyTokenAndOffer[]
 }
 
 const CollectionsFilter: FC<CollectionsFilterProps> = ({
@@ -82,7 +84,6 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({
       isOpen={true}
       onClear={onCollectionsClear}
       isClearShow={selectedCollections.length > 0}
-      testid={`${testid}-accordion`}
     >
       <CollectionFilterWrapper>
         {isFetchingTokens && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
@@ -97,7 +98,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({
               onChange={onCollectionSelect(collection.id)}
               testid={`${testid}-checkbox-${collection.id}`}
             />
-            <CollectionCover src={collection.schema?.coverPicture.fullUrl || ''} size={22} type={'circle'}/>
+            <CollectionCover src={getIpfsUriByImagePath(collection.cover || '')} size={22} type={'circle'}/>
             <Text
               testid={`${testid}-name-${collection.id}`}
             >{collection.name || ''}</Text>

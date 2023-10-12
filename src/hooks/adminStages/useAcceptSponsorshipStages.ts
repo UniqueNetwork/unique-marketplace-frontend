@@ -6,16 +6,16 @@ import { useAccounts } from '../useAccounts';
 
 export const useAcceptSponsorshipStages = (collectionId: number) => {
   const { api } = useApi();
-  const { signPayloadJSON, selectedAccount } = useAccounts();
+  const { selectedAccount } = useAccounts();
   const collectionApi = api?.collection;
   const acceptSponsorshipStages: InternalStage<null>[] = useMemo(() => [{
     title: 'Accepting sponsorship',
     description: '',
     status: StageStatus.default,
-    action: (params) => collectionApi?.confirmSponsorship(collectionId, { ...params.options, signer: selectedAccount?.address })
-  }], [collectionApi, selectedAccount]);
+    action: (params) => collectionApi?.confirmSponsorship(collectionId, params.options)
+  }], [collectionApi]);
 
-  const { stages, error, status, initiate } = useStages<null>(acceptSponsorshipStages, signPayloadJSON);
+  const { stages, error, status, initiate } = useStages<null>(acceptSponsorshipStages, selectedAccount);
 
   return {
     stages,

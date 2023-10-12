@@ -1,12 +1,11 @@
 import React, { FC, useCallback, useState } from 'react';
 import { BlueGrey200, BlueGrey500, BlueGrey100, BlueGrey300 } from 'styles/colors';
-import { VideoAttribute } from 'api/uniqueSdk/types';
+import { DecodedInfixOrUrlOrCidAndHash, VideoAttribute } from 'api/chainApi/types';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import playIcon from 'static/icons/play.svg';
 import pauseIcon from 'static/icons/pause.svg';
-import { Picture } from '../Picture';
-import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
+import { BadgeEnum, Picture } from '../Picture';
 
 interface ITokensMedia {
   to: string
@@ -14,10 +13,10 @@ interface ITokensMedia {
   imageUrl?: string | DecodedInfixOrUrlOrCidAndHash
   video?: VideoAttribute
   testid: string
-  badge?: string
+  badges?: BadgeEnum[]
 }
 
-export const TokensMedia: FC<ITokensMedia> = ({ to, imageUrl, tokenId, video, testid, badge }) => {
+export const TokensMedia: FC<ITokensMedia> = ({ to, imageUrl, tokenId, video, testid, badges }) => {
   const [isPlaying, setIsPlaying] = useState(false);
 
   const togglePlay = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -34,7 +33,7 @@ export const TokensMedia: FC<ITokensMedia> = ({ to, imageUrl, tokenId, video, te
         testid={`${testid}-token-picture`}
         videoProps={{ autoplay: false, controls: false }}
         isPlaying={isPlaying}
-        badge={badge}
+        badges={badges}
       />
       {video?.fullUrl &&
         <div className={'play-button'} onClick={togglePlay}>
@@ -73,8 +72,10 @@ const PictureWrapper = styled(Link)<{ isPlaying: boolean }>`
     overflow: hidden;
 
     img {
-      max-width: 100%;
-      max-height: 100%;
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+      min-height: 100%;
     }
 
     svg {

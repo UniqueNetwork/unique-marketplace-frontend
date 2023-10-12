@@ -1,24 +1,25 @@
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import config from 'config';
+
 import { BN } from '@polkadot/util';
+
 import { INetwork } from '@unique-nft/ui-kit';
+
+import { formatBalance } from 'utils/textUtils';
 import { Text, useNotifications, Button } from 'components/UI';
-import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
-import { useAccounts } from 'hooks/useAccounts';
-import { Account } from 'account/AccountContext';
+import { AccountsManager, IAccount } from 'components/UI/widgets/AccountsManager';
 import { Avatar } from 'components/Avatar/Avatar';
 import GetKSMModal from 'components/GetKSMModal/GetKSMModal';
-import { BalanceOption } from './types';
+import { useAccounts } from 'hooks/useAccounts';
 import { useApi } from 'hooks/useApi';
+
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import { TWithdrawBid } from 'api/restApi/auction/types';
-import { formatKusamaBalance } from 'utils/textUtils';
 import BalanceSkeleton from '../../Skeleton/BalanceSkeleton';
-import config from '../../../config';
-import { AccountsManager } from '../../UI/widgets/AccountsManager';
-
-const tokenSymbol = 'KSM';
+import { ChainSwitcher } from './ChainSwitcher/ChainSwithcher';
+import { ConnectWalletModalContext } from 'account/ConnectWalletModalContext';
 
 const fractionDigits = 4;
 
@@ -27,26 +28,22 @@ function widgetAvatarRender(accountAddress: string) {
 }
 
 export const WalletManager: FC = () => {
+  const { setIsOpenConnectWalletModal } = useContext(ConnectWalletModalContext);
   const { selectedAccount, accounts, isLoading, changeAccount } = useAccounts();
   const [isOpen, setIsOpen] = useState(false);
   const [isGetKsmOpened, setIsGetKsmOpened] = useState(false);
-  const { chainData, settings, currentChainId, onChangeChainId, api } = useApi();
+  const { chainProperties, currentChainId, onChangeChainId, api } = useApi();
   const { info } = useNotifications();
   const navigate = useNavigate();
-  const decimals = api?.market?.kusamaDecimals;
 
-  const formatAddress = useCallback((address: string) => {
-    return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
-  }, [chainData?.SS58Prefix]);
-
-  const networks: INetwork[] = useMemo(() => Object.keys(config?.blockchains || {}).map<INetwork>((id) => ({
+  const networks: INetwork[] = useMemo(() => Object.keys(config?.blockchains || {}).reverse().map<INetwork>((id) => ({
     id,
     name: config?.blockchains[id]?.name || '',
     icon: {
       name: `chain-${id.toLowerCase()}`,
       size: 40
     }
-  })), [settings]);
+  })), []);
 
   const currentNetwork = useMemo(() => networks.find(({ id }) => id === currentChainId), [networks, currentChainId]);
 
@@ -55,33 +52,33 @@ export const WalletManager: FC = () => {
     setIsOpen(false);
   }, [onChangeChainId]);
 
-  const widgetAccounts = useMemo(() => accounts.map((account) => (
-    { name: account.meta.name, ...account, address: formatAddress(account.address), substrateAddress: account?.address })
-  ), [accounts, formatAddress]);
-
   const widgetSelectedAccount = useMemo(() => (
-    { name: selectedAccount?.meta.name, ...selectedAccount, address: selectedAccount?.address ? formatAddress(selectedAccount.address) : '', substrateAddress: selectedAccount?.address }
-  ), [selectedAccount, formatAddress]);
+    { name: selectedAccount?.name, address: selectedAccount ? selectedAccount.address : '', substrateAddress: selectedAccount?.address }
+  ), [selectedAccount, chainProperties?.SS58Prefix]);
 
-  const widgetAccountChange = useCallback((account) => {
-    changeAccount({ ...account, address: account.substrateAddress } as Account);
-  }, [changeAccount]);
+  const widgetAccountChange = useCallback(({ address }: IAccount) => {
+    if (!address) return;
+    const account = accounts.get(address);
+    if (!account) return;
+    changeAccount(account);
+  }, [accounts, changeAccount]);
 
-  const onCopyAddress = useCallback((address: string) => {
+  const onCopyAddress = useCallback((_: string) => {
     info(
       'Address copied',
       { name: 'success', size: 32, color: 'var(--color-additional-light)' }
     );
   }, []);
 
-  const onCreateAccountClick = useCallback(() => {
+  const onManageAccountsClick = useCallback(() => {
     navigate('/accounts');
     setIsOpen(false);
   }, [navigate]);
 
-  const currentBalance: BalanceOption = useMemo(() => {
-    return { value: selectedAccount?.balance?.KSM?.toString() || '0', chain: chainData?.token || '' };
-  }, [selectedAccount, chainData?.token]);
+  const onCreateAccountClick = useCallback(() => {
+    setIsOpenConnectWalletModal(true);
+    setIsOpen(false);
+  }, [navigate]);
 
   const closeModal = useCallback(() => {
     setIsGetKsmOpened(false);
@@ -92,28 +89,20 @@ export const WalletManager: FC = () => {
     setIsOpen(false);
   }, [setIsGetKsmOpened]);
 
-  const formattedAccountDeposit = useMemo(() => {
-    if (!selectedAccount?.deposits) {
-      return undefined;
-    }
-
-    const { sponsorshipFee, bids } = selectedAccount.deposits;
-    const { leader, withdraw } = bids || { leader: [], withdraw: [] };
-    if ((sponsorshipFee?.isZero() && leader.length === 0 && withdraw.length === 0)) {
-      return undefined;
-    }
-
-    const getTotalAmount = (acc: BN, bid: TWithdrawBid) => acc.add(new BN(bid.amount));
-    const deposit = (sponsorshipFee || new BN(0))
-    .add(withdraw.reduce(getTotalAmount, new BN(0)))
-    .add(leader.reduce(getTotalAmount, new BN(0)));
-    return formatKusamaBalance(deposit.toString(), { decimals, fractionDigits });
-  }, [selectedAccount?.deposits]);
+  const balance = useMemo(() => {
+    if (!selectedAccount) return '0';
+    return formatBalance(accounts.get(selectedAccount?.address)?.balances?.proper.parsed || '0', fractionDigits);
+  }, [selectedAccount, accounts]);
 
   if (!isLoading && !selectedAccount) {
-    return (
-      <Button title={'Connect or create account'} onClick={onCreateAccountClick} />
-    );
+    return (<>
+      <Button title={'Connect'} onClick={onCreateAccountClick} />
+      <ChainSwitcher
+        activeChain={currentNetwork}
+        chains={networks}
+        onChainChange={onNetworkChange}
+      />
+    </>);
   }
 
   if (isLoading || !api) return <BalanceSkeleton />;
@@ -122,30 +111,16 @@ export const WalletManager: FC = () => {
     <WalletManagerWrapper>
       <AccountsManager
         open={isOpen}
-        accounts={widgetAccounts}
+        accounts={[...accounts.values()]}
         activeNetwork={currentNetwork}
-        balance={formatKusamaBalance(currentBalance.value, { decimals, fractionDigits })}
-        deposit={formattedAccountDeposit}
-        depositDescription={
-          <>
-            {formattedAccountDeposit && <Text color='grey-500' weight={'light'} size='xs'>The total market deposit for participation in auctions and
-              sponsorship. <br/> Use the “Manage accounts” section to withdraw.</Text>}
-            {config.rampApiKey && <GetKsmButton
-              title={'Get KSM'}
-              size={'small'}
-              role={'outlined'}
-              wide
-              onClick={openModal}
-            />}
-          </>
-        }
+        balance={balance}
         networks={networks}
         onAccountChange={widgetAccountChange}
         onCopyAddressClick={onCopyAddress}
-        onManageBalanceClick={onCreateAccountClick}
+        onManageBalanceClick={onManageAccountsClick}
         onNetworkChange={onNetworkChange}
         selectedAccount={widgetSelectedAccount}
-        symbol={tokenSymbol}
+        symbol={chainProperties?.token || ''}
         avatarRender={widgetAvatarRender}
         onOpenChange={setIsOpen}
       />
@@ -153,9 +128,6 @@ export const WalletManager: FC = () => {
     </WalletManagerWrapper>
   );
 };
-
-const DescriptionText = styled(Text)`
-`;
 
 const GetKsmButton = styled(Button)`
   margin-top: 12px;
