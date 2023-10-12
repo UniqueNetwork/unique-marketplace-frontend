@@ -8,7 +8,7 @@ import { BN } from '@polkadot/util';
 
 export const useTransferFundsStages = (accountAddress: string) => {
   const { api } = useApi();
-  const { accounts, updateAccountBalance } = useAccounts();
+  const { accounts } = useAccounts();
   const marketApi = api?.market;
   const transferStages: InternalStage<TTransferFunds>[] = useMemo(() => [{
     title: 'Transfer funds',
@@ -16,13 +16,13 @@ export const useTransferFundsStages = (accountAddress: string) => {
     status: StageStatus.default,
     action: async (params) => {
       await marketApi?.transferBalance(params.txParams.sender, params.txParams?.recipient || '', params.txParams?.amount, params.options);
-      await updateAccountBalance(params.txParams.sender);
-      await updateAccountBalance(params.txParams?.recipient);
+      // await updateAccountBalance(params.txParams.sender);
+      // await updateAccountBalance(params.txParams?.recipient);
     }
   }], [marketApi]) as InternalStage<TTransferFunds>[];
 
   const signer = useMemo(() => {
-    return accounts.find(({ address }) => address === accountAddress);
+    return accounts.get(accountAddress);
   }, [accounts, accountAddress]);
 
   const { stages, error, status, initiate } = useStages<TTransferFunds>(transferStages, signer);

@@ -19,8 +19,9 @@ import { Coral700 } from 'styles/colors';
 import DefaultMarketStages from '../../Token/Modals/StagesModal';
 import { TTransferFunds } from './types';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
-import { MarketAccount as Account, MarketAccount } from 'account/types';
+import { Account } from 'account/types';
 import { FeeMessage } from 'components';
+import { useAccountsFilter } from 'hooks/useAccountsFilter';
 
 export type TransferFundsModalProps = {
   isVisible: boolean
@@ -88,11 +89,14 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   const [isFeeLoading, setIsFeeLoading] = useState(false);
   const [isSetMaxLoading, setIsSetMaxLoading] = useState(false);
   const deviceSize = useDeviceSize();
+  const { filteredAccounts, onFilter, onReset } = useAccountsFilter({
+    excluded: useMemo(() => sender ? [sender?.address] : [], [sender])
+  });
 
   useEffect(() => {
-    const account = accounts.find((account) => account.address === senderAddress);
+    if (!senderAddress) return;
+    const account = accounts.get(senderAddress);
     setSender(account);
-    setFilteredAccounts(accounts.filter(({ address }) => address !== senderAddress));
   }, [senderAddress, accounts]);
 
   const getFee = useCallback((newRecipientAddress, amount: number) => {
@@ -116,10 +120,8 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     }, 300);
   }, [api?.market, sender]);
 
-  const [filteredAccounts, setFilteredAccounts] = useState(accounts);
-
   const recipientBalance = useMemo(() => {
-    return typeof recipientAddress !== 'string' && recipientAddress?.balance?.parsed;
+    return typeof recipientAddress !== 'string' && recipientAddress?.balances?.proper.parsed;
   }, [recipientAddress]);
 
   const onAmountChange = useCallback((value: string) => {
@@ -129,13 +131,13 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
 
   const isAmountGreaterThanBalance = useMemo(() => {
     const amountBN = new BN(fromStringToBnString(amount));
-    return amountBN.gt(sender?.balance?.raw || new BN(0));
-  }, [amount, sender?.balance?.raw]);
+    return amountBN.gt(sender?.balances?.proper.raw || new BN(0));
+  }, [amount, sender?.balances?.proper.raw]);
 
   const isAmountPlusFeeGreaterThanBalance = useMemo(() => {
     const amountBN = new BN(fromStringToBnString(amount));
-    return amountBN.add(new BN(fromStringToBnString(fee))).gt(sender?.balance?.raw || new BN(0));
-  }, [amount, sender?.balance?.raw, fee]);
+    return amountBN.add(new BN(fromStringToBnString(fee))).gt(sender?.balances?.proper.raw || new BN(0));
+  }, [amount, sender?.balances?.proper.raw, fee]);
 
   const isConfirmDisabled = useMemo(() => {
     return !isValidRecipientAddress || !sender || !recipientAddress || Number(amount) <= 0 || isAmountGreaterThanBalance || isAmountPlusFeeGreaterThanBalance;
@@ -148,20 +150,9 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   }, [sender, recipientAddress, amount, onFinish, isConfirmDisabled]);
 
   const senders = useMemo(
-    () => accounts.filter(({ address }) => address !== ((recipientAddress as MarketAccount)?.address || recipientAddress)),
+    () => [...accounts.values()].filter(({ address }) => recipientAddress !== address),
     [recipientAddress]
   );
-
-  const recipients = useMemo(
-    () => accounts.filter(({ address }) => address !== sender?.address),
-    [sender]
-  );
-
-  const onFilter = useCallback((input: string) => {
-    setFilteredAccounts(recipients.filter((account) => {
-      return account.address.toLowerCase().includes(input.toLowerCase()) || account.name?.toLowerCase().includes(input.toLowerCase());
-    }));
-  }, [recipients]);
 
   const onChangeAddress = useCallback((value: string | Account) => {
     setRecipientAddress(value);
@@ -172,15 +163,15 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
       setIsValidRecipientAddress(isValid);
       onFilter(value);
     } else {
-      setFilteredAccounts(recipients);
+      onReset();
       setIsValidRecipientAddress(true);
     }
-  }, [recipients, onFilter, amount, getFee, prefixes]);
+  }, [onReset, onFilter, amount, getFee, prefixes]);
 
   const onCloseModal = useCallback(() => {
     setRecipientAddress('');
     setAmount('');
-    setFilteredAccounts(accounts);
+    onReset();
     setIsValidRecipientAddress(true);
     setFee('0');
     onClose();
@@ -190,7 +181,6 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     const newSender = value as unknown as Account;
     setSender(newSender);
     getFee(recipientAddress, Number(amount))();
-    setFilteredAccounts(accounts.filter(({ address }) => address !== newSender.address));
   }, [getFee, recipientAddress, amount]);
 
   const tokenSymbol = useMemo(() => chainProperties?.token || '', [chainProperties]);
@@ -200,11 +190,11 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     setIsSetMaxLoading(true);
     try {
       const recipient = typeof recipientAddress === 'string' ? recipientAddress : recipientAddress?.address;
-      const fee = await api?.market?.getTransferBalanceFee(sender.address, recipient, Number(sender.balance.parsed), { account: sender });
+      const fee = await api?.market?.getTransferBalanceFee(sender.address, recipient, Number(sender.balances?.proper.parsed), { account: sender });
 
-      const amount = Number(sender.balance.parsed) - Number(fee);
+      const amount = Number(sender.balances?.proper.parsed) - Number(fee);
       setFee(fee);
-      setAmount(amount > 0 ? ((amount * 10000 | 0) / 10000).toString() : sender.balance.parsed);
+      setAmount(amount > 0 ? ((amount * 10000 | 0) / 10000).toString() : (sender.balances?.proper.parsed || '0'));
     } catch (e) {
       console.error('Failed to get max value: ', e);
     } finally {
@@ -252,7 +242,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
       <Text
         testid={`${testid}-balance`}
         size={'s'}
-      >{`${formatBalance(sender?.balance?.parsed || 0)} ${tokenSymbol}`}</Text>
+      >{`${formatBalance(sender?.balances?.proper.parsed || 0)} ${tokenSymbol}`}</Text>
     </AmountWrapper>
 
     <Text size={'s'} color={'grey-500'}>{'To'}</Text>

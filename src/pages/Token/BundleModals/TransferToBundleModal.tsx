@@ -66,6 +66,7 @@ export const TransferToBundleModal: FC<TBundleTrunsferModalBodyProps> = ({ token
   if (status === 'transfer-stage') {
     if (!newParent) return null;
     return (<TransferToBundleStagesModal
+      tokenPrefix={collection?.tokenPrefix || ''}
       owner={owner}
       onFinish={onFinish}
       token={token}
@@ -135,7 +136,7 @@ const AskTransferToBundleModal: FC<AskTransferToBundleModalProps> = ({ token, co
         setIsFeeLoading(false);
       });
     }, 300)();
-  }, [api?.market, token, selectedAccount?.account, collectionProp, isSponsored, amount]);
+  }, [api?.market, token, selectedAccount, collectionProp, isSponsored, amount]);
 
   const onConfirmTransferToBundleClick = useCallback(
     () => {
@@ -159,8 +160,8 @@ const AskTransferToBundleModal: FC<AskTransferToBundleModalProps> = ({ token, co
   const isFeeGreaterThanBalance = useMemo(() => {
     if (!fee || isSponsored) return false;
     const feeBN = new BN(fromStringToBnString(fee));
-    return feeBN.gt(selectedAccount?.balance?.raw || new BN(0));
-  }, [fee, selectedAccount?.balance?.raw, isSponsored]);
+    return feeBN.gt(selectedAccount?.balances?.proper.raw || new BN(0));
+  }, [fee, selectedAccount?.balances?.proper.raw, isSponsored]);
 
   return (
     <>
@@ -248,9 +249,10 @@ type TransferToBundleStagesModalProps = TBundleTrunsferModalBodyProps & { newPar
   mode: CollectionMode
   amount: number
   owner: string
+  tokenPrefix: string
 }
 
-const TransferToBundleStagesModal: FC<TransferToBundleStagesModalProps> = ({ token, owner, newParent, mode, amount, onFinish, testid }) => {
+const TransferToBundleStagesModal: FC<TransferToBundleStagesModalProps> = ({ token, owner, newParent, mode, amount, tokenPrefix, onFinish, testid }) => {
   const { info } = useNotifications();
   const { selectedAccount } = useAccounts();
   const { stages, status, initiate } = useTransferToBundleStages(owner, token, newParent, mode);
@@ -263,7 +265,7 @@ const TransferToBundleStagesModal: FC<TransferToBundleStagesModalProps> = ({ tok
   useEffect(() => {
     if (status === StageStatus.success) {
       info(
-        <div data-testid={`${testid}-success-notification`}><Link href={`/token/${token?.collectionId}/${token?.tokenId}`} title={`${''} #${token?.tokenId}`}/> transfered</div>,
+        <div data-testid={`${testid}-success-notification`}><Link href={`/token/${token?.collectionId}/${token?.tokenId}`} title={`${tokenPrefix} #${token?.tokenId}`}/> nested</div>,
         { name: 'success', size: 32, color: 'var(--color-additional-light)' }
       );
     }

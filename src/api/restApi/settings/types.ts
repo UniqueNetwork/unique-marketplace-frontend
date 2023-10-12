@@ -1,12 +1,24 @@
 import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 
 export type AllowedCollection = {
+  isCurated: boolean
   allowedTokens: string
   description: CollectionInfoWithSchemaResponse
 }
 
 export type AllowedCollections = {
   [key: string]: AllowedCollection
+}
+
+export type MarketContract = {
+  address: string
+  version: string
+}
+
+export type MarketContractAbiItem = {
+  name: string
+  stateMutability: 'payable'
+  type: 'function'
 }
 
 export type Settings = {
@@ -16,9 +28,8 @@ export type Settings = {
       rpcUrl: string,
       restUrl: string,
       collections: AllowedCollections,
-      contracts: {
-        address: string
-      }[]
+      contracts: MarketContract[],
+      contractsAbi?: Record<string, MarketContractAbiItem[]>
     }
   },
   auction: {

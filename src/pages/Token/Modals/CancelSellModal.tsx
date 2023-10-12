@@ -9,13 +9,15 @@ import { StageStatus } from '../../../types/StagesTypes';
 
 export const CancelSellFixStagesModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, setIsClosable, testid }) => {
   const { selectedAccount } = useAccounts();
-  const { stages, status, initiate } = useCancelSellFixStages(offer?.collectionId || 0, offer?.tokenId || 0);
+
+  const { collectionId, tokenId, contractAddress } = offer!;
+  const { stages, status, initiate } = useCancelSellFixStages(collectionId, tokenId, contractAddress);
   const { info } = useNotifications();
 
   useEffect(() => {
     if (!selectedAccount) throw new Error('Account not selected');
     setIsClosable(false);
-    void initiate({ accountAddress: selectedAccount?.address });
+    void initiate({ accountAddress: selectedAccount.address });
   }, [selectedAccount]);
 
   useEffect(() => {

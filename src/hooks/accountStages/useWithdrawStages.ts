@@ -13,11 +13,16 @@ export const useWithdrawStages = (accountAddress: string) => {
     title: 'Withdrawing funds',
     description: '',
     status: StageStatus.default,
-    action: (params) => marketApi?.transferBalance(params.txParams.sender, params.txParams?.recipient || '', params.options.account.balance.withdraw.raw, params.options)
-  }], [marketApi]) as InternalStage<TWithdrawFunds>[];
+    action: (params) => marketApi?.transferBalance(
+      params.txParams?.sender,
+      params.txParams?.recipient || '',
+      params.options.account.balances?.ethMirror.raw || '0',
+      params.options
+    )
+  }], [marketApi, accountAddress]) as InternalStage<TWithdrawFunds>[];
 
   const signer = useMemo(() => {
-    return accounts.find(({ address }) => address === accountAddress);
+    return accounts.get(accountAddress);
   }, [accounts, accountAddress]);
 
   const { stages, error, status, initiate } = useStages<TWithdrawFunds>(transferStages, signer);

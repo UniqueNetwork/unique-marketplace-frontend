@@ -23,7 +23,7 @@ const DEFAULT_CLASSNAMES = {
   animateOut: 'animateOut'
 };
 
-const DEFAULT_AUTOPLAY = 3000;
+const DEFAULT_AUTOPLAY = 10_000;
 const DEFAULT_DURATION = 500;
 
 interface SliderProps {
@@ -194,6 +194,7 @@ export const BannerSlider: FC<SliderProps> = ({
 
     const handleTouchEnd = () => {
       if (!sliderRef.current) return;
+      setIsMouseOver(false);
       animating.current = false;
       isSwiping = false;
       currentElement?.style.removeProperty(swipeProperty);
@@ -220,6 +221,7 @@ export const BannerSlider: FC<SliderProps> = ({
 
     const handleTouchStart = (e: TouchEvent) => {
       if (!sliderRef.current) return;
+      setIsMouseOver(true);
       animating.current = true;
       const touch = e.touches[0];
       isSwiping = true;
@@ -247,7 +249,6 @@ export const BannerSlider: FC<SliderProps> = ({
       }
     };
     const handleTouchMove = (e: TouchEvent) => {
-        e.preventDefault();
         if (!sliderRef.current) return;
         if (animating.current) {
           requestAnimationFrame(() => {
@@ -364,12 +365,12 @@ const Bullet = styled.div<{ isCurrent: boolean }>`
 
 const SliderPaper = styled.div`
   position: relative;
-  height: 600px;
+  
+  height: calc(37.5vw);
   overflow: hidden;
   background: ${AdditionalLight};
   box-shadow: 0 4px 12px rgb(0 0 0 / 8%);
   border-radius: 4px;
-  padding: 40px 88px 40px 88px;
   & a {
     &.previousButton, &.nextButton {
       font-size: 22px;
@@ -394,6 +395,9 @@ const SliderPaper = styled.div`
     &.previousButton {
       left: 20px;
 
+      @media (max-width: 1024px) {
+        left: 0px;
+      }
       @media (max-width: 768px) {
         display: none;
       }
@@ -402,14 +406,15 @@ const SliderPaper = styled.div`
     &.nextButton {
       right: 20px;
 
+      @media (max-width: 1024px) {
+        right: 0px;
+      }
       @media (max-width: 768px) {
         display: none;
       }
     }
   }
   .slide {
-    width: 100%;
-    height: 100%;
     position: absolute;
     overflow: hidden;
 
@@ -453,17 +458,20 @@ const SliderPaper = styled.div`
     }
   }
 
-  @media (max-width: 1440px) {
-    height: calc(32.5vw + 32px);
+  @media (min-width: 1920px) {
+    height: calc(548px);
   }
   @media (max-width: 1024px) {
     background: ${AdditionalLight};
     box-shadow: none;
+    margin: 0 -24px;
+    width: 100vw;
   }
   @media (max-width: 768px) {
-    padding: 0px;
+    height: calc(75vw + 232px);
+  }
+  @media (max-width: 620px) {
     margin: 0 -16px;
-    height: calc(75vw + 390px);
   }
 `;
 

@@ -160,7 +160,7 @@ const InputWrapper = styled.div`
   border-radius: 4px;
   padding: calc(var(--gap) / 2) var(--gap);
   position: relative;
-  min-height: 36px;     
+  min-height: 40px;     
   &:hover {
     border: 1px solid var(--color-grey-500);
   }

@@ -1,7 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo } from 'react';
 import { Button, Text } from 'components/UI';
 import styled from 'styled-components';
-import { FeeMessage } from 'components';
 import { useApi } from 'hooks/useApi';
 import MarketController from 'api/chainApi/MarketController';
 import { debounce } from 'utils/helpers';
@@ -14,7 +13,6 @@ import { Offer } from '../../../api/restApi/offers/types';
 import { useAccounts } from '../../../hooks/useAccounts';
 import BuyBundleInformation from '../TokenDetail/BuyBundleInformation';
 import { RoyaltyValue } from '../TokenDetail/Royalty';
-import { PolkadotAccount } from '@unique-nft/accounts/polkadot';
 import { fromStringToBnString } from 'utils/bigNum';
 
 interface BuyTokenProps {
@@ -25,7 +23,7 @@ interface BuyTokenProps {
 }
 
 export const BuyToken: FC<BuyTokenProps> = ({ offer, royalty, onBuy, testid }) => {
-  const { api } = useApi();
+  const { api, chainProperties } = useApi();
 
   const { fee, fetchingFee, getFee } = useGetFee<Parameters<MarketController['getBuyFixFee']>>(api?.market?.getBuyFixFee.bind(api?.market));
   const { selectedAccount } = useAccounts();
@@ -36,17 +34,18 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, royalty, onBuy, testid }) =
 
   const isNotEnoughBalanceOnPolkadot = useMemo(() => {
     if (selectedAccount?.name !== 'Metamask Account') {
-      if (!selectedAccount?.balance?.raw || selectedAccount.balance?.raw.isZero() || !offer?.price?.raw) return false;
-      if (selectedAccount.balance?.raw.lte(new BN(offer?.price?.raw))) return false;
-      return selectedAccount.balance?.raw.lte(new BN(offer?.price?.raw).mul(new BN(2)).add(rawFee));
+      if (!selectedAccount?.balances?.proper?.raw || selectedAccount.balances?.proper?.raw.isZero() || !offer?.price?.raw) return false;
+      if (selectedAccount.balances?.proper?.raw.lte(new BN(offer?.price?.raw))) return false;
+      return selectedAccount.balances?.proper?.raw.lte(new BN(offer?.price?.raw).add(rawFee));
     }
     return false;
   }, [offer?.price?.raw, selectedAccount, rawFee]);
 
   const isEnoughBalance = useMemo(() => {
-    if (!selectedAccount?.balance?.raw || selectedAccount.balance?.raw.isZero() || !offer?.price?.raw) return false;
-    return selectedAccount.balance?.raw.gte(new BN(offer?.price?.raw).add(rawFee));
-  }, [offer?.price?.raw, selectedAccount?.balance?.raw, rawFee]);
+    const extra = new BN(10).pow(new BN(chainProperties?.decimals || 18));
+    if (!selectedAccount?.balances?.proper?.raw || selectedAccount.balances?.proper?.raw.isZero() || !offer?.price?.raw) return false;
+    return selectedAccount.balances?.proper?.raw.gte(new BN(offer?.price?.raw).add(rawFee).add(extra));
+  }, [offer?.price?.raw, selectedAccount?.balances?.proper?.raw, rawFee, chainProperties]);
 
   const onBuyClick = useCallback(() => {
     if (!isEnoughBalance) return;
@@ -61,7 +60,7 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, royalty, onBuy, testid }) =
         offer.collectionId,
         offer.tokenId,
         1,
-        { account: selectedAccount }
+        { account: selectedAccount, contractAddress: offer.contractAddress }
       );
     }, 300)();
   }, [offer, api?.market, selectedAccount?.address]);
@@ -82,10 +81,10 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, royalty, onBuy, testid }) =
       />
     </ButtonWrapper>
     {!isEnoughBalance && !isNotEnoughBalanceOnPolkadot && <Text color={'coral-500'} testid={`${testid}-low-balance-warning`}>Your balance is not enough to pay the price and transaction fees</Text>}
-    {isNotEnoughBalanceOnPolkadot && <MessageWrapper>
+    {/* {isNotEnoughBalanceOnPolkadot && <MessageWrapper>
       <p>Oops, looks like you&apos;re lucky to discover that we have an issue working with Polkadot wallets. Please transfer the required amount to your MetaMask address and purchase the token using MetaMask. We apologize for the inconvenience, and we&apos;ll have this problem fixed very soon!</p>
       <p>For the ones who are curious: we need Polkadot wallet to have 2x amount of NFT price + fee, otherwise the buy transaction will fail. Nonetheless, buying with MetaMask works</p>
-    </MessageWrapper>}
+    </MessageWrapper>} */}
     {(royalty || 0) >= 1 && <Text color={'coral-500'} testid={`${testid}-low-balance-warning`}>The royalty is too big. Maximum royalty - 99%</Text>}
     {!!offer?.tokenDescription?.nestingChildTokens?.length && <BuyBundleInformation testid={testid}/>}
     <Divider />

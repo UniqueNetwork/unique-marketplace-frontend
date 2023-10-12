@@ -1,4 +1,4 @@
-import { MarketAccount } from 'account/types';
+import { Account } from 'account/types';
 import { post } from 'api/restApi/base';
 import { useApi } from 'hooks/useApi';
 import { useCallback, useState } from 'react';
@@ -37,7 +37,7 @@ export const useGetTokensCollection = () => {
   const [isFetching, setIsFetching] = useState(false);
   const [tokens, setTokens] = useState<TokenItem[]>([]);
 
-  const fetchTokens = useCallback(async (collectionId: number, account: MarketAccount | undefined) => {
+  const fetchTokens = useCallback(async (collectionId: number, account: Account | undefined) => {
     if (!account) return [];
     setIsFetching(true);
     const address = Address.is.substrateAddressInAnyForm(account.address)

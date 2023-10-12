@@ -148,8 +148,8 @@ const AskTransferModal: FC<AskTransferModalProps> = ({ token, collection, onTran
   const isFeeGreaterThanBalance = useMemo(() => {
     if (!fee || !isSponsored) return false;
     const feeBN = new BN(fromStringToBnString(fee));
-    return feeBN.gt(selectedAccount?.balance?.raw || new BN(0));
-  }, [fee, selectedAccount?.balance, isSponsored]);
+    return feeBN.gt(selectedAccount?.balances?.proper.raw || new BN(0));
+  }, [fee, selectedAccount?.balances, isSponsored]);
 
   const onSetMaxAmount = useCallback(() => setAmount(totalAmount.toString()), [totalAmount]);
   const isAmountValid = useMemo(() => {

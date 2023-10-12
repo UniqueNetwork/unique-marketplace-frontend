@@ -1,4 +1,4 @@
-import { MarketAccount } from 'account/types';
+import { Account } from 'account/types';
 
 export type CollectionFormData = {
   description: string;
@@ -11,6 +11,10 @@ export type CollectionFormData = {
 };
 
 export type RoyaltiesFormData = {
+  royalties: Royalty[]
+};
+
+export type Royalty = {
   address: string;
   value: string;
 };

@@ -4,8 +4,9 @@ import config from './config';
 // contains gql and rpc with contexts and providers
 import ApiWrapper from './api/ApiWrapper';
 import { PageLayout, IntroSlider } from './components';
-import AccountWrapper from './account/AccountProvider';
+import { AccountWrapper } from 'account/AccountProvider';
 import CollectionsWrapper from './collections/CollectionsProvider';
+import { ConnectWalletModalProvider } from 'account/ConnectWalletModalContext';
 
 document.title = config.documentTitle || 'Unique Market';
 
@@ -14,12 +15,14 @@ export default function App() {
     <Notifications closingDelay={2 * 1000}>
       <ApiWrapper>
         <AccountWrapper>
-          <CollectionsWrapper>
-            <IntroSlider />
-            <PageLayout>
-              <Outlet />
-            </PageLayout>
-          </CollectionsWrapper>
+          <ConnectWalletModalProvider>
+            <CollectionsWrapper>
+              <IntroSlider />
+              <PageLayout>
+                <Outlet />
+              </PageLayout>
+            </CollectionsWrapper>
+          </ConnectWalletModalProvider>
         </AccountWrapper>
       </ApiWrapper>
     </Notifications>

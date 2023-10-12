@@ -6,6 +6,7 @@ import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 
 const CollectionsWrapper: FC = ({ children }) => {
   const [collections, setCollections] = useState<CollectionInfoWithSchemaResponse[]>([]);
+  const [curatedCollections, setCuratedCollections] = useState<CollectionInfoWithSchemaResponse[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(true);
 
   const { currentChainId, featuredCollections } = useApi();
@@ -13,6 +14,9 @@ const CollectionsWrapper: FC = ({ children }) => {
   const fetchCollections = useCallback(() => {
     setIsFetching(true);
     const featuredCollectionsAsArray = Object.keys(featuredCollections).map((key) => featuredCollections[key].description);
+    setCuratedCollections(Object.values(featuredCollections)
+      .filter(({ isCurated }) => isCurated)
+      .map(({ description }) => description));
     setCollections(featuredCollectionsAsArray || []);
     setIsFetching(false);
   }, [featuredCollections]);
@@ -24,6 +28,7 @@ const CollectionsWrapper: FC = ({ children }) => {
   const value = useMemo(() => ({
     isFetching,
     collections,
+    curatedCollections,
     fetchCollections
   }), [isFetching, collections, fetchCollections]);
 

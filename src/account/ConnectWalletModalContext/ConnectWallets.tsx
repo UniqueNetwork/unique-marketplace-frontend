@@ -1,13 +1,14 @@
 import { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
-import AccountContext from 'account/AccountContext';
+import { Ethereum } from '@unique-nft/utils/extension';
+import { ConnectWalletModalContext } from './ConnectWalletModalContext';
+import { useAccounts } from 'hooks/useAccounts';
 import { Button, Icon, Modal } from 'components/UI';
+import { Heading } from '@unique-nft/ui-kit';
 import { CreateAccountModal } from 'pages/Accounts/Modals/CreateAccount';
 import { ImportViaSeedAccountModal } from 'pages/Accounts/Modals/ImportViaSeed';
 import { ImportViaJSONAccountModal } from 'pages/Accounts/Modals/ImportViaJson';
 import { ExtensionMissingModal } from './ExtensionMissing';
-import { Heading } from '@unique-nft/ui-kit';
-import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 
 enum AccountModal {
   CREATE = 'create',
@@ -17,13 +18,13 @@ enum AccountModal {
   EXTENSION_MISSING = 'extensionMissing',
 }
 
-export const ConnectAccounts = () => {
-  const deviceSize = useDeviceSize();
-  const { isOpenConnectWalletModal, setIsOpenConnectWalletModal, connectProvider, fetchAccounts } = useContext(
-    AccountContext
+export const ConnectWallets = () => {
+  const { isOpenConnectWalletModal, setIsOpenConnectWalletModal } = useContext(
+    ConnectWalletModalContext
   );
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
   const [missingExtension, setMissingExtension] = useState<'Polkadot' | 'Metamask'>();
+  const { walletsCenter, showSignDialog } = useAccounts();
 
   const onCreateAccountClick = useCallback(() => {
     setCurrentModal(AccountModal.CREATE);
@@ -32,17 +33,16 @@ export const ConnectAccounts = () => {
   const onChangeAccountsFinish = useCallback(() => {
     setCurrentModal(undefined);
     setIsOpenConnectWalletModal(false);
-    void fetchAccounts();
-  }, [fetchAccounts]);
+  }, []);
 
   const handleOpenModal = (modalType: AccountModal) => () => {
     setCurrentModal(modalType);
-    void fetchAccounts();
   };
 
   const handleConnectToMetamask = async () => {
     try {
-      await connectProvider('metamask');
+      await Ethereum.requestAccounts();
+      await walletsCenter.connectWallet('metamask');
       setIsOpenConnectWalletModal(false);
     } catch (e: any) {
       setMissingExtension('Metamask');
@@ -52,7 +52,10 @@ export const ConnectAccounts = () => {
 
   const handleConnectToPolkadotExtension = async () => {
     try {
-      await connectProvider('polkadot');
+      await walletsCenter.connectWallet('polkadot');
+      await walletsCenter.connectWallet('keyring', {
+        requestPasswordCallback: showSignDialog
+      });
       setIsOpenConnectWalletModal(false);
     } catch (e: any) {
       setMissingExtension('Polkadot');
@@ -69,7 +72,7 @@ export const ConnectAccounts = () => {
         }}
         isClosable
       >
-        <Heading size={deviceSize >= DeviceSize.md ? '2' : '3'}>Connect wallet</Heading>
+        <Heading size='2'>Connect wallet</Heading>
         <p>Create or import an existing one in any suitable way:</p>
         <Buttons>
           <Button
@@ -99,19 +102,16 @@ export const ConnectAccounts = () => {
         isVisible={currentModal === AccountModal.CREATE}
         onFinish={onChangeAccountsFinish}
         onClose={() => setCurrentModal(undefined)}
-        testid=''
       />
       <ImportViaSeedAccountModal
         isVisible={currentModal === AccountModal.VIA_SEED}
         onFinish={onChangeAccountsFinish}
         onClose={() => setCurrentModal(undefined)}
-        testid=''
       />
       <ImportViaJSONAccountModal
         isVisible={currentModal === AccountModal.VIA_JSON}
         onFinish={onChangeAccountsFinish}
         onClose={() => setCurrentModal(undefined)}
-        testid=''
       />
       <ExtensionMissingModal
         isVisible={currentModal === AccountModal.EXTENSION_MISSING}

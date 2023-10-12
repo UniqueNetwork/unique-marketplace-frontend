@@ -4,12 +4,13 @@ import { GetOffersRequestPayload, OffersResponse } from 'api/restApi/offers/type
 import { FilterState } from 'components/Filters/types';
 import { useAccounts } from 'hooks/useAccounts';
 import { parseFilterState, setUrlParameter } from 'utils/helpers';
-import { defaultSortingValue, pageSize } from '../constants';
+import { defaultSortingValue } from '../constants';
 import { TOption } from '../types';
 import { TokensResponse } from 'api/restApi/tokens/types';
 import { useApi } from 'hooks/useApi';
 import { Address } from '@unique-nft/utils';
 import { useIsFirstRender } from 'hooks/useIsFirstRender';
+import { SelectOptionProps } from '@unique-nft/ui-kit';
 
 export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fetch(payload: GetOffersRequestPayload): Promise<OffersResponse | TokensResponse> }) => {
   const { currentChainId, api } = useApi();
@@ -78,6 +79,20 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
     setFilterState(filterState);
   }, [fetch, sortingValue, getFilterByState, searchValue]);
 
+  const onMobileFilterApply = useCallback(async (filterState: FilterState | null, sorting: SelectOptionProps) => {
+    setUrlParameter('filterState', filterState ? JSON.stringify(filterState) : '');
+    setUrlParameter('sortingValue', sorting.id as string);
+    await fetch({
+      page: 1,
+      pageSize: 20,
+      ...(getFilterByState(filterState)),
+      searchText: searchValue || undefined,
+      sort: [sorting.id as string]
+    });
+    setFilterState(filterState);
+    setSortingValue(sorting.id as string);
+  }, [fetch, getFilterByState, searchValue]);
+
   const onChangeAccount = useCallback(() => {
     if (isFetching) return;
     void onFilterChange(filterState);
@@ -129,6 +144,7 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
     setFilterState,
     setSortingValue,
     setSearchValue,
-    getFilterByState
+    getFilterByState,
+    onMobileFilterApply
   };
 };

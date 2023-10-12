@@ -1,5 +1,5 @@
 import { BN } from '@polkadot/util';
-import { MarketAccountBalance } from 'account/types';
+import { AccountBalances } from 'account/types';
 import { CollectionMode, TransactionOptions } from 'api/chainApi/types';
 interface IMarketController {
   changeAllowance(collectionId: number, tokenId: number, targetAllowance: boolean, options: TransactionOptions): Promise<void>
@@ -14,7 +14,7 @@ interface IMarketController {
   // TODO: type for order
   getOrder(collectionId: number, tokenId: number): Promise<any>
 
-  getAccountBalance(address: string): Promise<MarketAccountBalance>
+  getAccountBalance(address: string): Promise<AccountBalances>
 
   getTransferTokenFee(sender: string, recipient: string, collectionId: number, tokenId: number, mode: CollectionMode, amount: number, options: TransactionOptions): Promise<string | null>;
   // TODO: remove "from" param, we can calculate it from signer

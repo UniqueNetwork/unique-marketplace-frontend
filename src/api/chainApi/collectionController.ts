@@ -21,7 +21,7 @@ export class UniqueSDKCollectionController extends BaseController {
     if (!account) throw new Error('Account not provided');
     const unsignedTxPayload = await this.uniqueSdk.collections.confirmSponsorship.build({ collectionId, address: account.address });
     if (!unsignedTxPayload) throw new Error('Transaction build error');
-    const { signature } = await this.uniqueSdk.collections.confirmSponsorship.sign(unsignedTxPayload, { signer: account.account });
+    const { signature } = await this.uniqueSdk.collections.confirmSponsorship.sign(unsignedTxPayload, { signer: account });
     if (!signature) throw new Error('Signing failed');
     await this.uniqueSdk.extrinsics.submit({
       signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
@@ -38,7 +38,7 @@ export class UniqueSDKCollectionController extends BaseController {
     if (!account) throw new Error('Account not provided');
     const unsignedTxPayload = await this.uniqueSdk.collections.removeSponsorship.build({ collectionId, address: account.address });
     if (!unsignedTxPayload) throw new Error('Transaction build error');
-    const { signature } = await this.uniqueSdk.collections.removeSponsorship.sign(unsignedTxPayload, { signer: account.account });
+    const { signature } = await this.uniqueSdk.collections.removeSponsorship.sign(unsignedTxPayload, { signer: account });
     if (!signature) throw new Error('Signing failed');
     await this.uniqueSdk.extrinsics.submit({
       signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
@@ -58,9 +58,9 @@ export class UniqueSDKCollectionController extends BaseController {
     //   properties
     // });
     // if (!unsignedTxPayload) throw new Error('Transaction build error');
-    // const { signature } = await this.uniqueSdk.collection.setProperties.sign(unsignedTxPayload, { signer: account.account });
+    // const { signature } = await this.uniqueSdk.collection.setProperties.sign(unsignedTxPayload, { signer: account });
     // if (!signature) throw new Error('Signing failed');
-    const adapter = this.getAdapter(account.account);
+    const adapter = this.getAdapter(account);
     await adapter.setCollectionProperties(collectionId, properties, account.signer);
 
     // await this.uniqueSdk.collection.setProperties.submit({

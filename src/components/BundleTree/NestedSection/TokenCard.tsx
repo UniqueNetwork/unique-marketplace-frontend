@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useRef, useState } from 'react';
+import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { Text, Tooltip } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { AdditionalLight, Coral100, Coral500, Grey300, Primary500, Primary600, Secondary400, Secondary500 } from 'styles/colors';
@@ -8,19 +8,30 @@ import { useCollection } from '../useCollection';
 import Skeleton from '../../Skeleton/Skeleton';
 import { Dropdown } from 'components/UI/Dropdown/Dropdown';
 import { Icon } from 'components/UI/Icon/Icon';
+import { useApi } from 'hooks/useApi';
+import { TokenByIdResponse } from '@unique-nft/sdk';
 
-function TokenCard({ token, onViewNodeDetails, onUnnestClick, onTransferClick }: ITokenCard) {
+function TokenCard({ tokenId, collectionId, fixedWidth, token: initialToken, onViewNodeDetails, onUnnestClick, onTransferClick, isCurrentAccountOwner }: ITokenCard) {
+  const [token, setToken] = useState<INestingToken | TokenByIdResponse | null>(initialToken || null);
   const [menuVisible, setMenuVisible] = useState(false);
-  const { isCollectionLoading, collection } = useCollection(token.collectionId);
+  const { isCollectionLoading, collection } = useCollection(collectionId);
   const meatballIconMenu = useRef(null);
+  const { api } = useApi();
+
+  useEffect(() => {
+    if (!api?.nft || initialToken) return;
+    (async () => {
+      setToken(await api.nft!.getToken(collectionId, tokenId));
+    })();
+  }, [initialToken, api]);
 
   const onTransfer = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
-    onTransferClick?.(token);
+    onTransferClick?.(token as INestingToken);
     event.stopPropagation();
   }, [token, onTransferClick]);
 
   const onUnnest = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
-    onUnnestClick?.(token);
+    onUnnestClick?.(token as INestingToken);
     event.stopPropagation();
   }, [token, onUnnestClick]);
 
@@ -33,20 +44,25 @@ function TokenCard({ token, onViewNodeDetails, onUnnestClick, onTransferClick }:
   }, []);
 
   const viewTokenDetails = useCallback(() => {
-    if (onViewNodeDetails) onViewNodeDetails(token, collection?.mode || 'NFT');
+    if (onViewNodeDetails) onViewNodeDetails(token as INestingToken, collection?.mode || 'NFT');
   }, [onViewNodeDetails, token, collection]);
 
+  if (!token) return <Skeleton />;
+
   return (
-    <TokenCardWrapper onMouseEnter={showMenu} onMouseLeave={hideMenu} onClick={viewTokenDetails}>
+    <TokenCardWrapper fixedWidth={fixedWidth}
+      onMouseEnter={showMenu}
+      onMouseLeave={hideMenu}
+      onClick={viewTokenDetails}
+    >
       <Picture alt={`T-${token.tokenId} C-${token.collectionId}`} src={(typeof token.image === 'string' ? token.image : token.image?.fullUrl) || undefined}/>
       <TokenTitle
         token={token}
-        mode={collection?.mode || ''}
         prefix={collection?.tokenPrefix || ''}
+        collectionName={`${collection?.name}`}
         isCollectionLoading={isCollectionLoading}
       />
-      {token.nestingChildTokens && <Text color='grey-500' size='xs'>{token.nestingChildTokens.length} item{token.nestingChildTokens.length > 1 && 's'}</Text>}
-      {(menuVisible && token.isCurrentAccountOwner) && <ActionsMenuWrapper className={'menu'}>
+      {(menuVisible && isCurrentAccountOwner) && <ActionsMenuWrapper className={'menu'}>
         <Tooltip
           align={{ vertical: 'top', horizontal: 'middle', appearance: 'vertical' }}
           targetRef={meatballIconMenu}
@@ -84,29 +100,31 @@ function TokenCard({ token, onViewNodeDetails, onUnnestClick, onTransferClick }:
   );
 }
 
-const TokenCardWrapper = styled.div`
+const TokenCardWrapper = styled.div<{ fixedWidth?: boolean }>`
+  max-width: ${({ fixedWidth }) => fixedWidth ? '250px' : 'undefined'};
   position: relative;
   display: flex;
   flex-direction: column;
-  padding: 12px;
   cursor: pointer;
   border-radius: 8px;
   background-color: ${AdditionalLight};
   .picture {
-    width: 128px;
-    height: 128px;
-    text-align: center;
+    overflow: hidden;
+    border-radius: var(--prop-border-radius) var(--prop-border-radius) 0 0;
+    position: relative;
+    transform: translateZ(0px);
+    flex: 1;
     img {
-      border-radius: 4px;
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: fill;
+      border-radius: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
   }
-  span:first-of-type,
+  /* span:first-of-type,
   span:last-of-type {
     margin-top: calc(var(--gap) / 2);
-  }
+  } */
   &:hover {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
     .menu { display: flex; }
@@ -116,8 +134,8 @@ const TokenCardWrapper = styled.div`
 const ActionsMenuWrapper = styled.div`
   display: flex;
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 8px;
+  right: 8px;
   div[class*=DropdownMenuDropdown] {
     width: max-content;
     & > div {
@@ -186,12 +204,19 @@ const IconWrapper = styled.div`
 
 export default TokenCard;
 
-const TokenTitle: FC<{isCollectionLoading: boolean, prefix: string, token: INestingToken, mode: string }> = ({ isCollectionLoading, prefix, token, mode }) => {
+const TokenTitle: FC<{isCollectionLoading: boolean, prefix: string, token: INestingToken | TokenByIdResponse, collectionName: string }> = ({ isCollectionLoading, prefix, token, collectionName }) => {
   if (isCollectionLoading) return <Skeleton height={52} width={62} />;
   return (
-    <>
+    <TokenTitleWrapper>
       <Text color='additional-dark' size='m'>{prefix} #{token.tokenId}</Text>
-      <Text color='grey-500' size='s'>{mode}</Text>
-    </>
+      <Text color='primary-500' size='s'>{collectionName}</Text>
+    </TokenTitleWrapper>
   );
 };
+
+const TokenTitleWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  border-top: 1px solid var(--color-blue-grey-300);
+`;

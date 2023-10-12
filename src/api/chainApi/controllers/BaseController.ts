@@ -1,7 +1,7 @@
 import { MetamaskAccount } from '@unique-nft/accounts/metamask';
 import { Sdk } from '@unique-nft/sdk/full';
 import { NetworkOptions } from 'api/sdk/sdkClient';
-import { Account } from '@unique-nft/accounts/types';
+import { Account } from 'account/types';
 import IMarketContractAdapter from '../adapters/IMarketContractAdapter';
 import MetamaskAdapter from '../adapters/MetamaskAdapter';
 import UniqueAdapter from '../adapters/UniqueAdapter';
@@ -10,6 +10,7 @@ import { BN } from '@polkadot/util';
 import { ethers } from 'ethers';
 import { changeMetamaskChain } from 'utils/metamask';
 import { EthereumChainParams } from 'account/constants';
+import { MetamaskAccountName } from 'account/MetamaskWallet';
 
 export type ChainValue = {
   raw: string;
@@ -24,10 +25,9 @@ class BaseController implements IBaseController {
   networkId: string;
 
   constructor(options: NetworkOptions) {
-    const contractAddress = options.settings.blockchain.unique.contracts[0].address;
     this.uniqueSdk = new Sdk({ baseUrl: options.settings.blockchain.unique.restUrl });
-    this.uniqueAdapter = new UniqueAdapter(contractAddress, this.uniqueSdk);
-    this.metamaskAdapter = new MetamaskAdapter(contractAddress);
+    this.uniqueAdapter = new UniqueAdapter(this.uniqueSdk);
+    this.metamaskAdapter = new MetamaskAdapter();
     this.isConnected = true;
     this.networkId = options.networkId;
   }
@@ -58,16 +58,14 @@ class BaseController implements IBaseController {
     const sdk = this.uniqueSdk = new Sdk({ baseUrl: options.settings.blockchain.unique.restUrl });
     this.uniqueSdk = sdk;
     this.isConnected = false;
-    // TODO: base adapter doesn't need contract address (split adapters into BaseAdapter and MarketAdapter for clarity)
-    const contractAddress = options.settings.blockchain.unique.contracts[0].address;
-    this.uniqueAdapter = new UniqueAdapter(contractAddress, sdk);
-    this.metamaskAdapter = new MetamaskAdapter(contractAddress);
+    this.uniqueAdapter = new UniqueAdapter(sdk);
+    this.metamaskAdapter = new MetamaskAdapter();
     this.isConnected = true;
     this.networkId = options.networkId;
   }
 
   private isMetamaskSigner(account: Account): boolean {
-    return account instanceof MetamaskAccount;
+    return account.name === MetamaskAccountName;
   }
 
   protected getAdapter(account: Account): IMarketContractAdapter {

@@ -37,11 +37,10 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
     (async () => {
       await cryptoWaitReady();
       const settings = await fetchSettings(config.blockchains);
-      // TODO: #########DEBUG#########
-      // (settings as any)[0].settings.blockchain.unique.restUrl = 'https://rest.unique.network/opal/v1';
+
       const networkOptions = settings.map<NetworkOptions>(({ networkId, settings }) => ({ networkId, settings }));
       setAvailableNetworkOptions(networkOptions);
-      // TODO: setup current chain properly from localStorage/url
+
       const currentNetworkOption = networkOptions.find((no) => no.networkId === currentChainId) || networkOptions[0];
 
       setSettings(currentNetworkOption.settings);

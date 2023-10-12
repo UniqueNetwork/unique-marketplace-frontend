@@ -34,7 +34,8 @@ export const MarketPage = () => {
     onSearch,
     onSortingChange,
     onFilterChange,
-    getFilterByState
+    getFilterByState,
+    onMobileFilterApply
   } = useMarketFilter({ isFetching, fetch });
 
   const hasMore = offers && offers.length < offersCount;
@@ -56,13 +57,9 @@ export const MarketPage = () => {
   return (<>
     {isFetchingBanners && <Skeleton height={600} />}
     {!isFetchingBanners && banners.length > 0 && <BannerSlider >
-      {banners.map(({ mediaUrl, title, description, buttonTitle, buttonUrl }, index) => (
+      {banners.map((banner, index) => (
         <Slide key={index}
-          image={mediaUrl}
-          title={title}
-          description={description}
-          buttonTitle={buttonTitle}
-          link={buttonUrl}
+          {...banner}
         />
       ))}
     </BannerSlider>}
@@ -94,12 +91,12 @@ export const MarketPage = () => {
               />
             </SortSelectWrapper>
           </SearchAndSortingWrapper>
-          <div>
+          {!!filterCount && <div>
             <Text
               testid={`${testid}-items-count`}
               size='m'
             >{isLoading ? 'Loading items' : `${offersCount} items`}</Text>
-          </div>
+          </div>}
           <InfiniteScroll
             hasMore={hasMore}
             initialLoad={false}
@@ -118,10 +115,9 @@ export const MarketPage = () => {
         defaultSortingValue={defaultSortingValue}
         sortingValue={sortingValue}
         sortingOptions={sortingOptions}
-        onFilterChange={onFilterChange}
-        onSortingChange={onSortingChange}
+        onFilterApply={onMobileFilterApply}
         testid={`${testid}-mobile-filters`}
-        filterComponent={<Filters
+        filterComponent={({ filterState, onFilterChange }) => <Filters
           value={filterState}
           attributes={attributes}
           attributeCounts={attributeCounts}

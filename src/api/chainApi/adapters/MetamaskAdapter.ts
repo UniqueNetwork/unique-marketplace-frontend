@@ -1,7 +1,7 @@
 import { UniqueNFTFactory, UniqueFungibleFactory, UniqueRefungibleTokenFactory } from '@unique-nft/solidity-interfaces';
 import { Address, EthCrossAccountId } from '@unique-nft/utils';
 import { Contract, ethers, Signer } from 'ethers';
-import IMarketContractAdapter from './IMarketContractAdapter';
+import IMarketContractAdapter, { IMarketContractProperties } from './IMarketContractAdapter';
 
 import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
@@ -13,13 +13,8 @@ import { Utf16 } from 'utf-helpers';
 const buyGasLimit = 1_000_000;
 const sellGasLimit = 200_000;
 class MetamaskAdapter implements IMarketContractAdapter {
-  contractAddress: string;
-  constructor(contractAddress: string) {
-    this.contractAddress = contractAddress;
-  }
-
-  private getContract(signer: Signer) {
-    return new ethers.Contract(this.contractAddress, marketplaceAbi, signer);
+  private getContract(signer: Signer, contract: IMarketContractProperties) {
+    return new ethers.Contract(contract.address, marketplaceAbi, signer);
   }
 
   private async validateCall(method: (...methodArgs: any[]) => Promise<void>, args: any[]) {
@@ -147,7 +142,7 @@ class MetamaskAdapter implements IMarketContractAdapter {
   }
 
   async transferBalance(addressFrom: string, addressTo: string, amount: ChainValue, signer: Signer): Promise<void> {
-    await signer.checkNetwork?.();
+    // TODO await signer.checkNetwork?.();
     const from = Address.extract.ethCrossAccountId(addressFrom);
     const to = Address.extract.ethCrossAccountId(addressTo);
     const uniqueFungible = await UniqueFungibleFactory(0, signer);
@@ -160,8 +155,8 @@ class MetamaskAdapter implements IMarketContractAdapter {
     await (await nftFactory.approve(targetTo, tokenId)).wait();
   }
 
-  async getSellFee(from: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<string> {
-    const contract = this.getContract(signer);
+  async getSellFee(from: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer, contractProps: IMarketContractProperties): Promise<string> {
+    const contract = this.getContract(signer, contractProps);
     const gasPrice = await contract.provider.getGasPrice();
     const estimateGas = await contract.provider.estimateGas({
       from: from.eth,
@@ -171,23 +166,39 @@ class MetamaskAdapter implements IMarketContractAdapter {
     return estimateGas.mul(gasPrice).toString();
   }
 
-  async sell(from: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<void> {
-    const contract = this.getContract(signer);
+  async sell(from: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer, contractProps: IMarketContractProperties): Promise<void> {
+    const contract = this.getContract(signer, contractProps);
     await this.callContract(contract, 'put', collectionId, tokenId, price, amount, from, { gasLimit: sellGasLimit });
   }
 
-  async getBuyFee(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<string> {
-    const contract = this.getContract(signer);
+  async getBuyFee(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer, contractProps: IMarketContractProperties): Promise<string> {
+    const contract = this.getContract(signer, contractProps);
     const estimateGas = await contract.estimateGas.buy(collectionId, tokenId, amount, to, { value: price, gasLimit: buyGasLimit });
     const gasPrice = await contract.provider.getGasPrice();
     return estimateGas.mul(gasPrice).toString();
   }
 
-  async buy(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer): Promise<void> {
-    const contract = this.getContract(signer);
+  async buy(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer, contractProps: IMarketContractProperties): Promise<void> {
+    const contract = this.getContract(signer, contractProps);
 
     const estimateGas = await contract.estimateGas.buy(collectionId, tokenId, amount, to, { value: price, gasLimit: buyGasLimit });
     await this.callContract(contract, 'buy', collectionId, tokenId, amount, to, { value: price, gasLimit: estimateGas.add(1000) });
+  }
+
+  async changePrice(collectionId: number, tokenId: number, price: string, signer: Signer, contractProps: IMarketContractProperties): Promise<void> {
+    const contract = this.getContract(signer, contractProps);
+
+    const estimateGas = await contract.estimateGas.changePrice(collectionId, tokenId, { value: price, gasLimit: buyGasLimit });
+    await this.callContract(contract, 'changePrice', collectionId, tokenId, { value: price, gasLimit: estimateGas.add(1000) });
+  }
+
+  async getChangePriceFee(collectionId: number, tokenId: number, price: string, signer: Signer, contractProps: IMarketContractProperties): Promise<string> {
+    const contract = this.getContract(signer, contractProps);
+
+    const estimateGas = await contract.estimateGas.changePrice(collectionId, tokenId, { value: price, gasLimit: buyGasLimit });
+    const gasPrice = await contract.provider.getGasPrice();
+
+    return estimateGas.mul(gasPrice).toString();
   }
 }
 

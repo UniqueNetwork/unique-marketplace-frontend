@@ -1,5 +1,8 @@
 import { AddEthereumChainParameter, Ethereum } from '@unique-nft/utils/extension';
 
+export const DefaultAccountKey = 'unique_minter_account_address';
+export const DefaultNetworkKey = 'unique_minter_network_id';
+
 export const EthereumChainParams: Record<string, AddEthereumChainParameter> = {
   unique: Ethereum.UNIQUE_CHAINS_DATA_FOR_EXTENSIONS.unique,
   quartz: Ethereum.UNIQUE_CHAINS_DATA_FOR_EXTENSIONS.quartz,

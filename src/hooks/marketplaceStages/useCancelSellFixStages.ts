@@ -5,7 +5,7 @@ import { InternalStage, StageStatus } from '../../types/StagesTypes';
 import useStages from '../useStages';
 import { useAccounts } from '../useAccounts';
 
-export const useCancelSellFixStages = (collectionId: number, tokenId: number) => {
+export const useCancelSellFixStages = (collectionId: number, tokenId: number, contractAddress: string) => {
   const { api } = useApi();
   const { selectedAccount } = useAccounts();
   const marketApi = api?.market;
@@ -14,7 +14,9 @@ export const useCancelSellFixStages = (collectionId: number, tokenId: number) =>
       title: 'Remove allowance from contract',
       description: '',
       status: StageStatus.default,
-      action: ({ options }) => marketApi?.changeAllowance(collectionId, tokenId, false, options)
+      action: ({ options }) => {
+        return marketApi?.changeAllowance(collectionId, tokenId, false, { ...options, contractAddress });
+      }
     }
   ], [marketApi, collectionId, tokenId]);
   const { stages, error, status, initiate } = useStages<TDelistProps>(delistStages, selectedAccount);

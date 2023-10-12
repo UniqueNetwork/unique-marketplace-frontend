@@ -11,9 +11,11 @@ import { useApi } from '../../../hooks/useApi';
 import keyring from '@polkadot/ui-keyring';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 import { Upload } from 'components/UI/Upload/Upload';
+import { useAccounts } from 'hooks/useAccounts';
 
 export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish, onClose: onCloseProp, testid }) => {
   const { chainProperties } = useApi();
+  const { fetchAccounts } = useAccounts();
   const [pair, setPair] = useState<KeyringPair | null>(null);
   const [password, setPassword] = useState<string>('');
   const [passwordIncorrect, setPasswordIncorrect] = useState<boolean>(false);
@@ -44,7 +46,7 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
     setPassword('');
     setPair(null);
     onFinish();
-
+    fetchAccounts();
     info(`Account ${pair.meta.name} successfully restored`);
   }, [pair, password, onFinish]);
 

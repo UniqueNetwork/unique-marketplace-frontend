@@ -56,6 +56,7 @@ export type Offer = {
   auction: Auction | null
   tokenDescription: TokenDescription,
   collectionDescription: CollectionDescription
+  contractAddress: string
 }
 
 export type OfferResponse = Offer

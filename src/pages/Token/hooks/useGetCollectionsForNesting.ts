@@ -1,4 +1,4 @@
-import { MarketAccount } from 'account/types';
+import { Account } from 'account/types';
 import { post } from 'api/restApi/base';
 import { useApi } from 'hooks/useApi';
 import { useCallback, useState } from 'react';
@@ -36,7 +36,7 @@ export const useGetCollectionsForNesting = () => {
   const [isFetching, setIsFetching] = useState(false);
   const [collections, setCollections] = useState<CollectionItem[]>([]);
 
-  const fetchCollections = useCallback(async (account: MarketAccount | undefined) => {
+  const fetchCollections = useCallback(async (account: Account | undefined) => {
     if (!account) return [];
     setIsFetching(true);
     const address = account.address;

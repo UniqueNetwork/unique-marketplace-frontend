@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { IconProps, SelectOptionProps } from '@unique-nft/ui-kit';
 import { Text, Icon, Dropdown, CopyButton } from 'components/UI';
 import useCopyToClipboard from './hooks/useCopyToClipboard';
+import { Account } from 'account/types';
 
 export interface IAccount extends SelectOptionProps {
   address?: string;

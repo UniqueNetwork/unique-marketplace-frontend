@@ -52,6 +52,7 @@ export interface ITree<T> {
 
 export interface IBundleTree<T> extends ITree<T>{
   nestedSectionView?: React.FC<INestedSectionView<T>>
+  showTree?: boolean
 }
 
 export interface INestedSectionView<T> {

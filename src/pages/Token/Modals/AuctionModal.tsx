@@ -86,10 +86,10 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
   const [bidAmount, setBidAmount] = useState<string>(formatBalance(minimalBid.toString()));
 
   const isEnoughBalance = useMemo(() => {
-    if (!selectedAccount?.balance?.raw || selectedAccount?.balance?.raw.isZero()) return false;
+    if (!selectedAccount?.balances?.proper.raw || selectedAccount?.balances?.proper.raw.isZero()) return false;
     const bnAmount = new BN(fromStringToBnString(bidAmount, api?.market?.decimals));
-    return selectedAccount?.balance?.raw.gte(bnAmount.sub(new BN(lastBidFromThisAccount || 0)));
-  }, [selectedAccount?.balance?.raw, bidAmount, api?.market?.decimals, lastBidFromThisAccount]);
+    return selectedAccount?.balances?.proper.raw.gte(bnAmount.sub(new BN(lastBidFromThisAccount || 0)));
+  }, [selectedAccount?.balances?.proper.raw, bidAmount, api?.market?.decimals, lastBidFromThisAccount]);
 
   const onBidAmountChange = useCallback((value: string) => {
     setBidAmount(value);

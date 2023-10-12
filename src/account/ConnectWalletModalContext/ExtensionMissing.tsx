@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 import smile from 'static/images/hmm.png';
-import { Link, Modal, Text } from 'components/UI';
+import { Modal, Text, Link } from 'components/UI';
 
 type Props = {
   isVisible?: boolean;
@@ -28,7 +28,6 @@ export const ExtensionMissingModal = ({
       onClose={() => {
         onFinish?.();
       }}
-      isClosable
     >
       <ModalContent>
         <SmileImg src={smile} alt='something wrong'></SmileImg>

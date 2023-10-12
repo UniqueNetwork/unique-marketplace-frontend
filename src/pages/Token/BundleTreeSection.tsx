@@ -2,7 +2,7 @@ import React, { Dispatch, SetStateAction, useCallback, useContext, useEffect, us
 import { Heading, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { PagePaper } from 'components/PagePaper/PagePaper';
-import { Grey300 } from 'styles/colors';
+import { BlueGrey300, Grey300 } from 'styles/colors';
 import NodeView from 'components/BundleTree/Node/NodeView';
 import { INestingToken } from 'components/BundleTree/types';
 import { NestedSection } from 'components/BundleTree/NestedSection/NestedSection';
@@ -19,6 +19,7 @@ import { TokenByIdResponse } from '@unique-nft/sdk';
 import { CollectionMode } from 'api/chainApi/types';
 import { Address } from '@unique-nft/utils';
 import { TokenContext } from './context/TokenContext';
+import TokenCard from 'components/BundleTree/NestedSection/TokenCard';
 
 const areNodesEqual = (a: INestingToken, b: INestingToken) => a.collectionId === b.collectionId && a.tokenId === b.tokenId;
 
@@ -78,11 +79,6 @@ function BundleTreeSection({ token, offer, testid, onFinish, isOwner }: IProps) 
     setModalType(BundleModalType.default);
   }, []);
 
-  const tokensCount = useMemo(() => {
-    if (!bundle || !bundle.nestingChildTokens) return 0;
-    return countNestedChildren(bundle.nestingChildTokens);
-  }, [bundle]);
-
   const onViewTokenDetails = useCallback((token: INestingToken, mode: string) => {
     if (mode === 'ReFungible' && token.nestingParentToken) {
       const parentOwner = Address.nesting.idsToAddress(token.nestingParentToken.collectionId, token.nestingParentToken.tokenId);
@@ -93,52 +89,26 @@ function BundleTreeSection({ token, offer, testid, onFinish, isOwner }: IProps) 
     if (isMobileViewVisible) closeView();
   }, [isMobileViewVisible, closeView, currentChainId]);
 
-  if (!bundle) return null;
+  if (!bundle?.children?.length) return null;
 
   if (isFetching) return (<BundleIsLoading />);
 
   return (
     <>
-      <MobileBundleTreeSection
-        isVisible={isMobileViewVisible}
-        closeView={closeView}
-        openView={openView}
-        bundleTreeComponent={
-          <BundleTree<INestingToken>
-            dataSource={[bundle] || []}
-            nodeView={NodeView}
-            onNodeClicked={onNodeClicked}
-            nestedSectionView={NestedSection}
-            className={'tree-container'}
-            compareNodes={areNodesEqual}
-            childrenProperty={'nestingChildTokens'}
-            getKey={getKey}
-            onViewNodeDetails={onViewTokenDetails}
-            onTransferClick={onActionClick(BundleModalType.nestedTransfer)}
-            onUnnestClick={onActionClick(BundleModalType.unnest)}
-          />
-        }
-      />
       <BundlePagePaper>
         <HeaderStyled id={'bundle'}>
-          <Heading size={'2'}>Bundle tree structure</Heading>
-          <Text color='grey-500' size='m'>{tokensCount + 1} items total</Text>
+          <Heading size={'2'}>NFT Wearables</Heading>
         </HeaderStyled>
-        <Content>
-          <BundleTree<INestingToken>
-            dataSource={[bundle] || []}
-            nodeView={NodeView}
-            onNodeClicked={onNodeClicked}
-            nestedSectionView={NestedSection}
-            className={'tree-container'}
-            compareNodes={areNodesEqual}
-            childrenProperty={'nestingChildTokens'}
-            getKey={getKey}
-            onViewNodeDetails={onViewTokenDetails}
+        <ChildrenWraper>
+          {bundle.children.map((token) => <TokenCard
+            key={token.tokenId}
+            tokenId={token.tokenId}
+            collectionId={token.collectionId}
             onTransferClick={onActionClick(BundleModalType.nestedTransfer)}
             onUnnestClick={onActionClick(BundleModalType.unnest)}
-          />
-        </Content>
+            onViewNodeDetails={onViewTokenDetails}
+          />)}
+        </ChildrenWraper>
       </BundlePagePaper>
       <BundleModal
         token={selectedToken}
@@ -174,10 +144,36 @@ const HeaderStyled = styled.div`
   }
 `;
 
-const Content = styled.div`
-  display: flex;
-  border: 1px solid ${Grey300};
-  border-radius: 4px;
+const ChildrenWraper = styled.div`
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 32px;
+  min-height: 300px;
+
+  @media (max-width: 1919px) {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  @media (max-width: 1489px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  @media (max-width: 1223px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+
+  @media (max-width: 567px) {
+    display: flex;
+    flex-direction: column;
+  }
+  & > div {
+    border: 1px solid ${BlueGrey300};
+    border-radius: 8px;
+  }
 `;
 
 export default BundleTreeSection;
@@ -185,7 +181,7 @@ export default BundleTreeSection;
 const BundleIsLoading = () => (
   <BundlePagePaper>
     <HeaderStyled>
-      <Heading size={'2'}>Bundle tree structure</Heading>
+      <Heading size={'2'}>NFT Wearables</Heading>
     </HeaderStyled>
     <Skeleton height={60} width={'100%'} />
   </BundlePagePaper>

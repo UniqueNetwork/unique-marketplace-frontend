@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import playIcon from 'static/icons/play.svg';
 import pauseIcon from 'static/icons/pause.svg';
-import { Picture } from '../Picture';
+import { BadgeEnum, Picture } from '../Picture';
 
 interface ITokensMedia {
   to: string
@@ -13,7 +13,7 @@ interface ITokensMedia {
   imageUrl?: string | DecodedInfixOrUrlOrCidAndHash
   video?: VideoAttribute
   testid: string
-  badges?: string[]
+  badges?: BadgeEnum[]
 }
 
 export const TokensMedia: FC<ITokensMedia> = ({ to, imageUrl, tokenId, video, testid, badges }) => {

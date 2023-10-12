@@ -194,6 +194,10 @@ const NotificationStyled = styled.div`
     &.closed {
       animation: slide-close-right 0.6s ease-in-out both;
     }
+    a {
+      color: var(--color-additional-light);
+      text-decoration: underline;
+    }
   }
 
   &.left {

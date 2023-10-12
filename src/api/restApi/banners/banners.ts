@@ -7,7 +7,7 @@ import { useApi } from 'hooks/useApi';
 
 const endpoint = '/banners';
 
-export const getBanners = (baseURL: string) => get<{ banners: Banner[] }>(`${endpoint}`, { ...defaultParams, baseURL });
+export const getBanners = (baseURL: string) => get<{ banners: Banner[] }>(`${endpoint}`, { ...defaultParams, baseURL, params: { offFilter: 'On' } });
 
 export const useGetBanners = () => {
   const { currentChainId } = useApi();
@@ -18,11 +18,14 @@ export const useGetBanners = () => {
     if (!currentChainId) return;
     void (async () => {
       setIsFetching(true);
-      const { data, status } = await getBanners(config.blockchains[currentChainId].apiEndpoint);
-      if (status === 200) {
-        setBanners(data?.banners.sort((a, b) => a.sortIndex > b.sortIndex ? 1 : -1));
+      try {
+        const { data, status } = await getBanners(config.blockchains[currentChainId].apiEndpoint);
+        if (status === 200) {
+          setBanners(data?.banners);
+        }
+      } finally {
+        setIsFetching(false);
       }
-      setIsFetching(false);
     })();
   }, [currentChainId]);
 

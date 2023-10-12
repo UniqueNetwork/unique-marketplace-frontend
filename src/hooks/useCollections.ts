@@ -1,6 +1,6 @@
 import { useCallback, useContext, useState } from 'react';
 import { useApi } from 'hooks/useApi';
-import { MarketAccount } from 'account/types';
+import { Account } from 'account/types';
 import { defaultParams } from 'api/restApi/base/axios';
 import { deleteRequest, patch, post } from 'api/restApi/base';
 import { MyCollection, SetCollectionTokensPayload } from 'api/restApi/collections/types';
@@ -63,7 +63,7 @@ export const useCollections = () => {
     });
   }, [settings]);
 
-  const fetchCollections = useCallback(async (account: MarketAccount | undefined) => {
+  const fetchCollections = useCallback(async (account: Account | undefined) => {
     if (!account) return [];
     setIsFetching(true);
     const address = account.address;
