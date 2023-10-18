@@ -2,7 +2,6 @@
   "name": "uniq-market",
   "version": "0.1.0",
   "private": true,
-  "homepage": ".",
   "dependencies": {
     "@apollo/client": "^3.5.5",
     "@phala/typedefs": "^0.2.30",
