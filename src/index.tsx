@@ -56,6 +56,10 @@ const commonRoutes = (<>
       index
     />
   </Route>
+  <Route
+    element={<Error404 />}
+    index
+  />
 </>);
 
 ReactDOM.render(
@@ -80,8 +84,8 @@ ReactDOM.render(
             path={'404'}
           />
           <Route
-            element={<Navigate to='market' />}
-            path={'*'}
+            element={<Error404 />}
+            path={'/*'}
           />
         </Route>
       </Routes>

@@ -6,7 +6,6 @@ import { keyring } from '@polkadot/ui-keyring';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 
 import { ApiContextProps, ApiProvider } from './ApiContext';
-// import AuctionSocketProvider from './restApi/auction/AuctionSocketProvider';
 import { Settings } from './restApi/settings/types';
 import { NetworkOptions, SdkClient } from './sdk/sdkClient';
 import config from '../config';
@@ -25,13 +24,13 @@ const initialChainId = getInitialChainId();
 const ApiWrapper = ({ children }: ChainProviderProps) => {
   const [sdkClient, setSdkClient] = useState<SdkClient>();
   const [isRpcClientInitialized, setRpcClientInitialized] = useState<boolean>(false);
-  const navigate = useNavigate();
   const [availableNetworkOptions, setAvailableNetworkOptions] = useState<NetworkOptions[]>();
-  const [settings, setSettings] = useState<Settings>();
   const [chainProperties, setChainProperties] = useState<ChainPropertiesResponse>();
   const [currentChainId, setCurrentChainId] = useState<string>(initialChainId);
-  const { error } = useNotifications();
+  const [settings, setSettings] = useState<Settings>();
   const { fetchSettings } = useSettings();
+  const { error } = useNotifications();
+  const navigate = useNavigate();
 
   useEffect(() => {
     (async () => {
