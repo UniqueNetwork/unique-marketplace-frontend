@@ -13,6 +13,7 @@ export const CollectionPage = () => {
   const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse | null>();
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const { currentChainId, api } = useApi();
+  const navigate = useNavigate();
 
   const isRFTCollection = collection?.mode === 'ReFungible';
 
@@ -20,8 +21,13 @@ export const CollectionPage = () => {
     if (!api?.collection) return;
     const id = Number(collectionId);
     void (async () => {
-      const collection = await api?.collection?.getCollection(id);
-      setCollection(collection);
+      try {
+        const collection = await api?.collection?.getCollection(id);
+
+        setCollection(collection);
+      } catch (err) {
+        navigate(`/${currentChainId}/collections`);
+      }
       setIsFetching(false);
     })();
   }, [currentChainId, collectionId, api?.collection]);
