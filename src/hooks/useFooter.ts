@@ -5,7 +5,7 @@ export const useFooter = () => {
 
   useEffect(() => {
     (async () => {
-      const footerResponse = await fetch('/footer.html');
+      const footerResponse = await fetch('./footer.html');
       const footerHtml = await footerResponse.text();
       setFooter(footerHtml);
     })();

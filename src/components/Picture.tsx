@@ -45,33 +45,10 @@ export const Picture: FC<PictureProps> = ({
   isPlaying,
   badges
 }) => {
-  const [imageSrc, setImageSrc] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [hasError, setHasError] = useState<boolean>(false);
   const { autoplay = true, controls = true, loop = true, muted = true } = useMemo(() => videoProps || {}, [videoProps]);
   const videoRef = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    const imageUrl = src ? (typeof src === 'string' ? src.trim() : src.fullUrl) : '';
-    if (!imageUrl) {
-      setImageSrc(undefined);
-      return;
-    }
-
-    const image = new Image();
-
-    setIsLoading(true);
-
-    image.onload = () => {
-      setIsLoading(false);
-      setImageSrc(imageUrl);
-    };
-
-    image.onerror = () => {
-      setIsLoading(false);
-    };
-
-    image.src = imageUrl;
-  }, [src]);
 
   useEffect(() => {
     if (isPlaying && videoRef.current?.paused) {
@@ -80,6 +57,11 @@ export const Picture: FC<PictureProps> = ({
       void videoRef.current?.pause();
     }
   }, [isPlaying]);
+
+  const imageSrc = useMemo(() => {
+    const imageUrl = src ? (typeof src === 'string' ? src.trim() : src.fullUrl) : '';
+    return imageUrl;
+  }, [src]);
 
   const videoUrl = useMemo(() => {
     if (!video) return undefined;
@@ -108,14 +90,18 @@ export const Picture: FC<PictureProps> = ({
         data-testid={`${testid}-video`}
       />
     }
-    {!isLoading && imageSrc && !video?.fullUrl &&
+    {!isLoading && !hasError && imageSrc && !video?.fullUrl &&
       <img
         alt={alt}
         src={imageSrc}
         height={size || undefined}
         data-testid={`${testid}`}
+        loading='lazy'
+        onLoadStart={() => setIsLoading(true)}
+        onLoad={() => setIsLoading(false)}
+        onError={() => setHasError(true)}
       />}
-    {!isLoading && !imageSrc && !video?.fullUrl && <svg
+    {!isLoading && (hasError || !imageSrc) && !video?.fullUrl && <svg
       fill={'white'}
       height='100%'
       viewBox='0 0 1000 1000'
