@@ -27,6 +27,7 @@ interface PictureProps {
   videoProps?: VideoProps
   isPlaying?: boolean
   badges?: BadgeEnum[]
+  isWithThumbor?: boolean
 }
 
 const badgesTooltips = {
@@ -43,7 +44,8 @@ export const Picture: FC<PictureProps> = ({
   video,
   videoProps,
   isPlaying,
-  badges
+  badges,
+  isWithThumbor = false
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [hasError, setHasError] = useState<boolean>(false);
@@ -60,6 +62,14 @@ export const Picture: FC<PictureProps> = ({
 
   const imageSrc = useMemo(() => {
     const imageUrl = src ? (typeof src === 'string' ? src.trim() : src.fullUrl) : '';
+
+    if (isWithThumbor && imageUrl?.startsWith('https://ipfs.unique.network')) {
+      return imageUrl.replace(
+        'https://ipfs.unique.network',
+        'https://rest.uniquenetwork.dev/thumbor/unsafe/500x500/ipfs.unique.network'
+      );
+    }
+
     return imageUrl;
   }, [src]);
 

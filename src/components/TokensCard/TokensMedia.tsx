@@ -34,6 +34,7 @@ export const TokensMedia: FC<ITokensMedia> = ({ to, imageUrl, tokenId, video, te
         videoProps={{ autoplay: false, controls: false }}
         isPlaying={isPlaying}
         badges={badges}
+        isWithThumbor={true}
       />
       {video?.fullUrl &&
         <div className={'play-button'} onClick={togglePlay}>
