@@ -75,7 +75,7 @@ const ModalWrapper = styled.div<{ isGlobalBackdrop?: boolean, align: 'top' | 'mi
 
   .unique-modal {
     position: relative;
-    width: calc(640px - var(--prop-gap) * 3);
+    width: calc(840px - var(--prop-gap) * 3);
     background-color: var(--color-additional-light);
     border-radius: 8px;
     padding: calc(var(--prop-gap) * 1.5);

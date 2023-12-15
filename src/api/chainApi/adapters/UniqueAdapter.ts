@@ -6,7 +6,7 @@ import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
 import { ChainValue } from '../controllers/BaseController';
 import { CollectionMode } from '../types';
-import { CollectionProperty } from '@unique-nft/sdk';
+import { CollectionProperty, TokenId } from '@unique-nft/sdk';
 
 const buyGasLimit = 1_000_000;
 const sellGasLimit = 200_000;
@@ -300,6 +300,23 @@ class UniqueAdapter implements IMarketContractAdapter {
     });
     return res.fee.raw;
   }
+
+  // async transferNftBatch(tokens: TokenId, to: string, signer: Signer) {
+  //   const res = this.uniqueSdk.extrinsic.submitWaitResult({
+  //     address: signer.address,
+  //     section: 'utility',
+  //     method: 'batchAll',
+  //     args: [
+  //       tokens.map(tokenId => ({
+  //         from,
+  //         to: signer.address,
+  //         amount,
+  //         collectionId: nested.collectionId,
+  //         tokenId: nested.tokenId
+  //       })),
+  //     ]
+  //   }, signer)
+  // }
 }
 
 export default UniqueAdapter;

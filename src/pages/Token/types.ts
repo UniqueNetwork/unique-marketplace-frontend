@@ -10,6 +10,7 @@ export type TokenItem = {
   tokenName: string
   tokenPrefix: string
   collectionId: number
+  parent?: string
   image: {
     fullUrl?: string | null;
     ipfsCid?: string | null;

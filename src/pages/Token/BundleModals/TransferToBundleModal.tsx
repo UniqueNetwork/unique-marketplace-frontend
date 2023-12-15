@@ -8,7 +8,7 @@ import styled from 'styled-components';
 import DefaultMarketStages from '../Modals/StagesModal';
 import { useAccounts } from 'hooks/useAccounts';
 import { StageStatus } from 'types/StagesTypes';
-import { TBundleTrunsferModalBodyProps } from './BundleTrunsferModal';
+import { TBundleTransferModalBodyProps } from './BundleTrunsferModal';
 import { useApi } from 'hooks/useApi';
 import { CollectionCover } from 'components/CollectionCover/CollectionCover';
 import { FeeMessage } from 'components';
@@ -25,7 +25,7 @@ import { useGetAllOwnedTokensByCollection } from '../hooks/useGetAllOwnedTokensB
 import { FractionalAmountInput } from '../Modals/FractionalAmountInput';
 import { CollectionMode } from 'api/chainApi/types';
 
-export const TransferToBundleModal: FC<TBundleTrunsferModalBodyProps> = ({ token, setIsClosable, onFinish, testid }) => {
+export const TransferToBundleModal: FC<TBundleTransferModalBodyProps> = ({ token, setIsClosable, onFinish, testid }) => {
   const { selectedAccount } = useAccounts();
   const { api } = useApi();
   const [status, setStatus] = useState<'ask' | 'transfer-stage'>('ask'); // TODO: naming
@@ -245,7 +245,7 @@ const AskTransferToBundleModal: FC<AskTransferToBundleModalProps> = ({ token, co
   );
 };
 
-type TransferToBundleStagesModalProps = TBundleTrunsferModalBodyProps & { newParent: TokenIdQuery } & {
+type TransferToBundleStagesModalProps = TBundleTransferModalBodyProps & { newParent: TokenIdQuery } & {
   mode: CollectionMode
   amount: number
   owner: string
