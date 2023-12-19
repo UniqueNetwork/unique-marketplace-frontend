@@ -5,11 +5,13 @@ import { ReactNode } from 'react';
 import styled from 'styled-components';
 
 type Props = Pick<ModalProps, 'isVisible'> & {
-  totalTokens: number;
-  current: number;
+  totalNesting: number;
+  totalUnnesting: number;
+  unnestingProgress: number;
+  nestingProgress: number;
   isVisible: boolean;
   title?: string;
-  stage: 'nesting' | 'done';
+  stage: 'unnesting' | 'nesting' | 'done';
   warning?: ReactNode;
   onComplete(): void;
   onContinue(): void;
@@ -17,8 +19,10 @@ type Props = Pick<ModalProps, 'isVisible'> & {
 
 export const StatusTransactionModal = ({
   title = 'Please wait',
-  totalTokens,
-  current,
+  totalNesting,
+  totalUnnesting,
+  unnestingProgress,
+  nestingProgress,
   isVisible,
   stage,
   onComplete,
@@ -28,15 +32,28 @@ export const StatusTransactionModal = ({
     <Modal isVisible={isVisible} isClosable={false}>
       <Heading>{title}</Heading>
       <StagesWrapper>
-        {stage === 'nesting' ? <Loader /> : <Icon name={'check-circle'} size={24} color={'var(--color-additional-dark)'} />}
-        <StageDescription>
-          <Text size='m' weight='regular'>{`Nesting ${
-            current
-          } of ${totalTokens} tokens`}</Text>
-          <Text size='s' color='grey-500'>
-            Step 1
-          </Text>
-        </StageDescription>
+        {!!totalUnnesting && <>
+          {stage === 'unnesting' ? <Loader /> : <Icon name={'check-circle'} size={24} color={'var(--color-additional-dark)'} />}
+          <StageDescription>
+            <Text size='m' weight='regular'>{`Unnesting ${
+              unnestingProgress
+            } of ${totalUnnesting} tokens`}</Text>
+            <Text size='s' color='grey-500'>
+              Step 1
+            </Text>
+          </StageDescription>
+        </>}
+        {!!totalNesting && <>
+          {stage === 'nesting' ? <Loader /> : stage === 'done' ? <Icon name={'check-circle'} size={24} color={'var(--color-additional-dark)'} /> : <div></div>}
+          <StageDescription>
+            <Text size='m' weight='regular'>{`Nesting ${
+              nestingProgress
+            } of ${totalNesting} tokens`}</Text>
+            <Text size='s' color='grey-500'>
+              Step {totalUnnesting ? '2' : '1'}
+            </Text>
+          </StageDescription>
+        </>}
       </StagesWrapper>
       {stage !== 'done' && (
         <AlertStyled type='warning'>
@@ -46,7 +63,7 @@ export const StatusTransactionModal = ({
       {stage === 'done' && (
         <ButtonsWrapper>
           <Button title='Customize more' role='primary' onClick={onContinue} />
-          <Button title='Go to my tokens' onClick={onComplete} />
+          <Button title='Go to token' onClick={onComplete} />
         </ButtonsWrapper>
       )}
     </Modal>

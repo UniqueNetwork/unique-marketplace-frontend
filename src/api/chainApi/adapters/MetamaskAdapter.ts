@@ -6,9 +6,10 @@ import IMarketContractAdapter, { IMarketContractProperties } from './IMarketCont
 import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
 import { ChainValue } from '../controllers/BaseController';
-import { CollectionMode } from '../types';
+import { CollectionMode, TransferTokenParams } from '../types';
 import { CollectionProperty, TokenId } from '@unique-nft/sdk';
 import { Utf16 } from 'utf-helpers';
+import { sleep } from 'utils/helpers';
 
 const buyGasLimit = 1_000_000;
 const sellGasLimit = 200_000;
@@ -201,11 +202,12 @@ class MetamaskAdapter implements IMarketContractAdapter {
     return estimateGas.mul(gasPrice).toString();
   }
 
-  async transferTokensBatch(transfers: {token: TokenId, from: string, to: string, amount: number, mode: CollectionMode }[], signer: Signer, onSubmittedOne?: (token: TokenId, index: number) => void): Promise<void> {
+  async transferTokensBatch(transfers: TransferTokenParams[], signer: Signer, onSubmittedOne?: (token: TokenId, index: number) => void): Promise<void> {
     await Promise.all(transfers.map(async ({ token, from, to, mode, amount }, index) => {
       const { collectionId, tokenId } = token;
       const fromCross = Address.extract.ethCrossAccountId(from);
       const toCross = Address.extract.ethCrossAccountId(to);
+      await sleep(100);
       const tokenHelper = await (mode === 'ReFungible'
         ? UniqueRefungibleTokenFactory({ collectionId, tokenId }, signer)
         : UniqueNFTFactory(collectionId, signer));

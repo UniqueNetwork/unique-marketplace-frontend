@@ -13,6 +13,7 @@ import { useBalanceSubscriptions } from './useBalanceSubscriptions';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { getSuri, PairType } from 'utils/seedUtils';
 import { KeypairType } from '@polkadot/util-crypto/types';
+import { sleep } from 'utils/helpers';
 
 export const AccountWrapper: FC = ({ children }) => {
   const { chainProperties, api } = useApi();
@@ -127,6 +128,7 @@ export const AccountWrapper: FC = ({ children }) => {
       return;
     }
     setIsLoading(true);
+    sleep(100);
     const wallets = getConnectedWallets.split(';') as ConnectedWalletsName[];
     const connectedWallets = wallets.map((typeWallet) =>
       walletsCenter.connectWallet(

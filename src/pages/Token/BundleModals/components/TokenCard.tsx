@@ -3,7 +3,6 @@ import { Loader, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { useApi } from 'hooks/useApi';
 import { Primary600 } from 'styles/colors';
-import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 import { TokenTypeEnum } from 'pages/MyTokens/types';
 import { BadgeEnum } from 'components/Picture';
 import { TokensMedia } from './TokenMedia';

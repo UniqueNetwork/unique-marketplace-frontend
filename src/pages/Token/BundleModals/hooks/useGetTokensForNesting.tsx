@@ -18,7 +18,6 @@ const gqlQuery = {
       limit: $limit
       offset: $offset
       order_by: { token_id: asc }
-      distinct_on: token_id
     ) {
       count
       data {
@@ -90,7 +89,7 @@ export const useGetTokensForNesting = ({ parentToken }: UseGetTokensForNestingPr
     const nestedTokens = searchText
       ? params.nestedTokens.filter(({ tokenId, collectionName }) => {
         if (!Number.isNaN(Number(searchText))) {
-          return tokenId === Number(searchText);
+          return tokenId === Number(searchText) || collectionName?.includes(searchText);
         }
         return collectionName?.includes(searchText);
       })
@@ -156,10 +155,13 @@ export const useGetTokensForNesting = ({ parentToken }: UseGetTokensForNestingPr
 const getSearchConditions = (searchText: string) => {
   if (!Number.isNaN(Number(searchText))) {
     return {
-      token_id: { _eq: Number(searchText) }
+      _or: [
+        { token_id: { _eq: Number(searchText) } },
+        { collection_name: { _like: `%${searchText}%` } }
+      ]
     };
   }
   return {
-    collection_name: { _like: searchText }
+    collection_name: { _like: `%${searchText}%` }
   };
 };
