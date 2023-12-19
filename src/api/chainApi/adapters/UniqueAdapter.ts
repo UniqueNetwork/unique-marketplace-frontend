@@ -301,22 +301,23 @@ class UniqueAdapter implements IMarketContractAdapter {
     return res.fee.raw;
   }
 
-  // async transferNftBatch(tokens: TokenId, to: string, signer: Signer) {
-  //   const res = this.uniqueSdk.extrinsic.submitWaitResult({
-  //     address: signer.address,
-  //     section: 'utility',
-  //     method: 'batchAll',
-  //     args: [
-  //       tokens.map(tokenId => ({
-  //         from,
-  //         to: signer.address,
-  //         amount,
-  //         collectionId: nested.collectionId,
-  //         tokenId: nested.tokenId
-  //       })),
-  //     ]
-  //   }, signer)
-  // }
+  async transferTokensBatch(transfers: {token: TokenId, from: string, to: string, amount: number, mode: CollectionMode }[], signer: Signer, onSubmittedOne?: (token: TokenId, index: number) => void): Promise<void> {
+    // TODO: extend this method to RFT
+    // const method = mode === 'ReFungible' ? this.uniqueSdk.refungible.transferToken : this.uniqueSdk.token.transfer;
+
+    const txs = await this.uniqueSdk.token.transfer.buildBatch(transfers.map(({ token, from, to }) => ({
+      collectionId: token.collectionId,
+      tokenId: token.tokenId,
+      from,
+      to,
+      address: from === signer.address ? signer.address : from
+    }), { signer }));
+
+    await Promise.all(txs.payloads.map(async (tx, index) => {
+      await this.uniqueSdk.token.transfer.submitWaitResult(tx, { signer });
+      onSubmittedOne?.(transfers[index].token, index);
+    }));
+  }
 }
 
 export default UniqueAdapter;

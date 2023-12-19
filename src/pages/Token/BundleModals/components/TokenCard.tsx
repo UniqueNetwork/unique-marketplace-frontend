@@ -1,17 +1,14 @@
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 import { Loader, Text } from '@unique-nft/ui-kit';
-import { generatePath, Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { useApi } from 'hooks/useApi';
 import { Primary600 } from 'styles/colors';
-import { countNestedChildren, stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
-import { useCollections } from 'hooks/useCollections';
-import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
-import { MyToken, TokenTypeEnum } from 'pages/MyTokens/types';
+import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
+import { TokenTypeEnum } from 'pages/MyTokens/types';
 import { BadgeEnum } from 'components/Picture';
 import { TokensMedia } from './TokenMedia';
 import { Checkbox } from 'components/UI';
-import { TokenItem } from 'pages/Token/types';
+import { TokenItem } from '../../types';
 
 export type TTokensCard = {
   token?: TokenItem
@@ -25,31 +22,29 @@ export type TTokensCard = {
 };
 
 export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, showOwner, isChecked, onCheck, ...props }) => {
-  const [token, setToken] = useState<TokenItem | undefined>(props.token);
-  const [collection, setCollection] = useState<(CollectionInfoWithSchemaResponse) | undefined>();
+  const [token] = useState<TokenItem | undefined>(props.token);
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isBundleState, setIsBundleState] = useState<boolean>();
-  const [tokensCount, setTokensCount] = useState<number>();
 
   const { api } = useApi();
-  const { getCollection } = useCollections();
 
   const {
     tokenTitle,
     imageUrl,
-    type
+    collectionName
   } = useMemo(() => {
     if (token) {
-      const { image, tokenName } = token || {};
+      const { image, tokenName, collectionName } = token || {};
       return {
         tokenTitle: tokenName,
         // collectionTitle: `${collectionName?.substring(0, 25) || ''} [id ${collectionId || ''}]`,
         imageUrl: image,
-        type: TokenTypeEnum.NFT
+        type: TokenTypeEnum.NFT,
+        collectionName
       };
     }
     return {};
-  }, [collectionId, tokenId, collection, token, api]);
+  }, [collectionId, tokenId, token, api]);
 
   const badges: BadgeEnum[] = [
     ...(isBundleState ? [BadgeEnum.Bundle] : [])
@@ -77,14 +72,9 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, sho
           >
             {tokenTitle}
           </Text>
-          {/* <Link
-            data-testid={`${testid}-collection-${collectionId}-link`}
-            to={`/${currentChainId?.toLowerCase()}/collection/${collectionId || ''}`}
-          >
-            <Text color='primary-600' size='s'>
-              {collectionTitle}
-            </Text>
-          </Link> */}
+          <Text color='primary-600' size='s'>
+            {collectionName}
+          </Text>
         </BasicDataWrapper>
       </Description>
 
