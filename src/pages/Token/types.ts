@@ -16,6 +16,10 @@ export type TokenItem = {
     fullUrl?: string | null;
     ipfsCid?: string | null;
   }
+  file?: {
+    fullUrl?: string | null;
+    ipfsCid?: string | null;
+  }
   nested: boolean
 };
 

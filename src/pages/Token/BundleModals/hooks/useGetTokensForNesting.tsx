@@ -1,6 +1,6 @@
 import { post } from 'api/restApi/base';
 import { useApi } from 'hooks/useApi';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Address } from '@unique-nft/utils';
 import config from '../../../../config';
 import { useAccounts } from 'hooks/useAccounts';
@@ -56,6 +56,12 @@ export const useGetTokensForNesting = ({ parentToken }: UseGetTokensForNestingPr
   const { selectedAccount } = useAccounts();
   const [isFetching, setIsFetching] = useState(false);
   const [isNestedFetching, setIsNestedFetching] = useState(false);
+  const { api } = useApi();
+
+  const fetchFile = useCallback(async (token: TokenItem): Promise<TokenItem> => {
+    const response = await api?.nft?.getToken(token.collectionId, token.tokenId);
+    return { ...token, file: response?.file };
+  }, [api?.nft]);
 
   const fetchNestedTokens = useCallback(async (): Promise<TokenItem[]> => {
     setIsNestedFetching(true);
@@ -77,7 +83,7 @@ export const useGetTokensForNesting = ({ parentToken }: UseGetTokensForNestingPr
     setIsNestedFetching(false);
 
     if (response.status === 200) {
-      return response?.data?.data?.tokens?.data as TokenItem[] || [];
+      return await Promise.all((response?.data?.data?.tokens?.data as TokenItem[] || []).map(fetchFile));
     }
     return [];
   }, [currentChainId, parentToken.collectionId, parentToken.tokenId]);
@@ -134,7 +140,7 @@ export const useGetTokensForNesting = ({ parentToken }: UseGetTokensForNestingPr
     });
 
     if (response.status === 200) {
-      const tokens = response?.data?.data?.tokens?.data as TokenItem[] | [];
+      const tokens = await Promise.all((response?.data?.data?.tokens?.data as TokenItem[] || []).map(fetchFile));
       const total = (response.data?.data?.tokens.count as number) + nestedTokens.length;
 
       setIsFetching(false);

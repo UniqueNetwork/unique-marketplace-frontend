@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Button, Pagination, Text, useNotifications } from 'components/UI';
-import { CollectionInfoWithSchemaResponse, TokenByIdResponse, TokenId } from '@unique-nft/sdk';
+import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
 import { TBundleTransferModalBodyProps } from './BundleTrunsferModal';
 import styled from 'styled-components';
 import { useApi } from 'hooks/useApi';
@@ -86,7 +86,7 @@ export const CreateBundleModal = ({ token, onFinish, testid }: TBundleTransferMo
   }, []);
 
   const images = useMemo(() => {
-    return Object.values(selectedTokens).filter((token) => !!token).map((token) => token?.image);
+    return Object.values(selectedTokens).filter((token) => !!token).map((token) => token?.file || token?.image);
   }, [selectedTokens]);
 
   const onSubmut = useCallback(async () => {
@@ -105,7 +105,6 @@ export const CreateBundleModal = ({ token, onFinish, testid }: TBundleTransferMo
 
     const parentAddress = Address.nesting.idsToAddress(token.collectionId, token.tokenId);
 
-    console.log(tokensToNest, tokensToUnnest);
     setTotalUnnesting(tokensToUnnest.length);
     setTotalNesting(tokensToNest.length);
     if (tokensToNest.length === 0 && tokensToUnnest.length === 0) {
