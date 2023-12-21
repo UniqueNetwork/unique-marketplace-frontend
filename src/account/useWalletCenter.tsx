@@ -4,7 +4,8 @@ import { ChainPropertiesResponse } from '@unique-nft/sdk';
 import { PolkadotWallet } from './PolkadotWallet';
 import { KeyringWallet } from './KeyringWallet';
 import { MetamaskWallet } from './MetamaskWallet';
-import { Account, BaseWalletType, ConnectedWalletOptions } from './types';
+import { BaseWalletType, ConnectedWalletOptions } from './types';
+import { sleep } from 'utils/helpers';
 
 export type ConnectedWalletsName = 'polkadot' | 'keyring' | 'metamask';
 
@@ -28,6 +29,7 @@ export const useWalletCenter = (chainProperties?: ChainPropertiesResponse) => {
     async (typeWallet: ConnectedWalletsName, options?: ConnectedWalletOptions) => {
       if (!chainProperties) return;
       try {
+        await sleep(1000);
         const wallet = new (wallets.get(typeWallet)!)(chainProperties);
         const currentWallets = await wallet.getAccounts();
 

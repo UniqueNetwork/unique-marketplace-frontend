@@ -56,6 +56,7 @@ const BundleTrunsferModal = ({ token, onClose, onFinish, bundleModalType, testid
       isClosable={isClosable}
       onClose={onClose}
       isGlobalBackdrop
+      isFlexible
     >
       <ModalBodyComponent
         setIsClosable={setIsClosable}

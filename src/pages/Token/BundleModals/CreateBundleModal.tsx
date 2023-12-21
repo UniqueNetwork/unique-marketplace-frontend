@@ -15,6 +15,7 @@ import { StatusTransactionModal } from './components/StatusTransactionModal';
 import { Address } from '@unique-nft/utils';
 import { useAccounts } from 'hooks/useAccounts';
 import { CollectionMode } from 'api/chainApi/types';
+import { FeeMessage } from 'components';
 
 export const CreateBundleModal = ({ token, onFinish, testid }: TBundleTransferModalBodyProps) => {
   const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse | null>(null);
@@ -181,6 +182,58 @@ export const CreateBundleModal = ({ token, onFinish, testid }: TBundleTransferMo
     setTotal(total);
   }, [collection?.permissions?.nesting?.restricted, fetchTokens, nestedTokens]);
 
+  const [fee, setFee] = useState<string>();
+  const [isFetchingFee, setIsFetchingFee] = useState(false);
+
+  const getFee = useCallback(async () => {
+    if (!api?.nft || !selectedAccount) return;
+    setIsFetchingFee(true);
+    const nestedIndexes = nestedTokens.map(({ collectionId, tokenId }) => `${collectionId}_${tokenId}`);
+    const tokensToNest = Object.values(selectedTokens)
+      .filter((token) => !!token && !nestedIndexes.includes(`${token.collectionId}_${token.tokenId}`)) as TokenItem[];
+
+    const tokensToUnnest = nestedTokens.filter((token) => {
+      return !selectedTokens[`${token.collectionId}_${token.tokenId}`];
+    });
+    let fee = 0;
+    const parentAddress = Address.nesting.idsToAddress(token.collectionId, token.tokenId);
+    if (tokensToUnnest.length > 0) {
+      const feeResponse = await api?.nft?.getUnnestFee(
+        tokensToUnnest[0].collectionId,
+        tokensToUnnest[0].tokenId,
+        parentAddress,
+        'NFT',
+        1,
+        { account: selectedAccount }
+      );
+      fee = Number(feeResponse) * tokensToUnnest.length;
+    }
+
+    if (tokensToNest.length > 0) {
+      const feeResponse = await api?.nft?.getTransferToBundleFee(
+        selectedAccount.address,
+        {
+          collectionId: tokensToNest[0].collectionId,
+          tokenId: tokensToNest[0].tokenId
+        },
+        {
+          collectionId: token.collectionId,
+          tokenId: token.tokenId
+        },
+        'NFT',
+        1,
+        { account: selectedAccount }
+      );
+      fee = Number(feeResponse) * tokensToNest.length;
+    }
+    setFee(fee.toFixed(4));
+    setIsFetchingFee(false);
+  }, [api?.nft, nestedTokens, selectedAccount, selectedTokens, token.collectionId, token.tokenId]);
+
+  useEffect(() => {
+    void getFee();
+  }, [selectedTokens]);
+
   if (!token) return null;
 
   return (<>
@@ -190,8 +243,10 @@ export const CreateBundleModal = ({ token, onFinish, testid }: TBundleTransferMo
     <CreateBundleModalWrapper>
       <NestingWrapper>
         <TokenWrapper>
-          <TokensMedia imageUrl={(token as TokenByIdResponse).file || (token as TokenByIdResponse).image} testid={''} />
-          {images.map((image) => <TokensMedia key={image?.ipfsCid} imageUrl={image} testid={'bundle-token-image'} />)}
+          <TokenMediaWrapper>
+            <TokensMedia imageUrl={(token as TokenByIdResponse).file || (token as TokenByIdResponse).image} testid={''} />
+            {images.map((image) => <TokensMedia key={image?.ipfsCid} imageUrl={image} testid={'bundle-token-image'} />)}
+          </TokenMediaWrapper>
           <Text
             size='l'
             weight='regular'
@@ -209,13 +264,13 @@ export const CreateBundleModal = ({ token, onFinish, testid }: TBundleTransferMo
           </Text>
         </TokenWrapper>
         <EquipsSection>
-          <FilterWrapper>
+          {/* <FilterWrapper>
             <SearchField
               searchValue={searchText}
               onSearchStringChange={setSearchText}
               onSearch={onSearch}
             />
-          </FilterWrapper>
+          </FilterWrapper> */}
           <EquipsListWrapper>
             {tokens.map((token) => <TokensCard
               testid={''}
@@ -234,6 +289,7 @@ export const CreateBundleModal = ({ token, onFinish, testid }: TBundleTransferMo
         </EquipsSection>
       </NestingWrapper>
       <ActionsWrapper>
+        <FeeMessage isFeeLoading={isFetchingFee} fee={fee || ''} testid={''}/>
         <Button role='primary' title='Save' onClick={onSubmut} />
         <Button role='outlined' title='Cancel' onClick={onFinish} />
       </ActionsWrapper>
@@ -281,15 +337,20 @@ const ActionsWrapper = styled.div`
   flex-direction: row;
   gap: var(--gap);
   justify-content: flex-end;
+  align-items: center;
 `;
 
 const TokenWrapper = styled.div`
   display: flex;
   flex-direction: column;
   gap: calc(var(--gap) / 2);
-  width: 250px;
-  height: 300px;
-  padding-top: 258px;
+`;
+
+const TokenMediaWrapper = styled.div`
+  display: flex;
+
+  width: 400px;
+  height: 450px;
   position: relative;
   &>div {
     position: absolute;

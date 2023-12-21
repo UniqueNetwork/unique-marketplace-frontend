@@ -62,7 +62,6 @@ export const StatusTransactionModal = ({
       )}
       {stage === 'done' && (
         <ButtonsWrapper>
-          <Button title='Customize more' role='primary' onClick={onContinue} />
           <Button title='Go to token' onClick={onComplete} />
         </ButtonsWrapper>
       )}
