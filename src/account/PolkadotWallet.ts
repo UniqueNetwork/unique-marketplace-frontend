@@ -43,6 +43,8 @@ export class PolkadotWallet implements BaseWalletEntity<InjectedAccountWithMeta>
       accounts.map((account) => {
         const normalizedAddress = AccountUtils.normalizedAddressAccount(account.address);
 
+        console.log(account);
+
         return [
           normalizedAddress,
           {
@@ -82,6 +84,8 @@ export class PolkadotWallet implements BaseWalletEntity<InjectedAccountWithMeta>
     unsignedTxPayload: UnsignedTxPayloadResponse,
     account: Account<InjectedAccountWithMeta>
   ) => {
+    console.log(account);
+
     const injector = await web3FromSource(account.walletMetaInformation.meta.source);
     if (!injector.signer.signPayload) {
       throw new Error('Web3 not available');
