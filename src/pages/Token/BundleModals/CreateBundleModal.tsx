@@ -338,6 +338,9 @@ const ActionsWrapper = styled.div`
   gap: var(--gap);
   justify-content: flex-end;
   align-items: center;
+  &>div {
+    margin: 0;
+  } 
 `;
 
 const TokenWrapper = styled.div`
