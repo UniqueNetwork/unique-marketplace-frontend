@@ -6,7 +6,7 @@ const useBackground = () => {
   useEffect(() => {
     (async () => {
       try {
-        const response = await fetch('/background.jpeg');
+        const response = await fetch('./background.jpeg');
         const imageBlob = await response.blob();
         const imageObjectURL = URL.createObjectURL(imageBlob);
         setImage(imageObjectURL);
