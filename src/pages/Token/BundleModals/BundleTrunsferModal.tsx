@@ -3,6 +3,7 @@ import React, { FC, useEffect, useMemo, useState } from 'react';
 import { BundleModalType } from './types';
 import { UnnestModal } from './UnnestModal';
 import { TransferToBundleModal } from './TransferToBundleModal';
+import { CreateBundleModal } from './CreateBundleModal';
 import { INestingToken } from 'components/BundleTree/types';
 import { Modal } from 'components/UI';
 import { TokenByIdResponse } from '@unique-nft/sdk';
@@ -15,7 +16,7 @@ export type TBundleTrunsferModalProps = {
   testid: string
 }
 
-export type TBundleTrunsferModalBodyProps = {
+export type TBundleTransferModalBodyProps = {
   token: INestingToken | TokenByIdResponse
   onFinish(): void
   setIsClosable(value: boolean): void
@@ -33,12 +34,14 @@ const BundleTrunsferModal = ({ token, onClose, onFinish, bundleModalType, testid
     } else setIsVisible(true);
   }, [bundleModalType]);
 
-  const ModalBodyComponent = useMemo<FC<TBundleTrunsferModalBodyProps> | null>(() => {
+  const ModalBodyComponent = useMemo<FC<TBundleTransferModalBodyProps> | null>(() => {
     switch (bundleModalType) {
       case BundleModalType.unnest:
         return UnnestModal;
       case BundleModalType.nestedTransfer:
         return TransferToBundleModal;
+      case BundleModalType.createBundle:
+        return CreateBundleModal;
       case BundleModalType.default:
       default:
         return null;
@@ -48,10 +51,12 @@ const BundleTrunsferModal = ({ token, onClose, onFinish, bundleModalType, testid
   if (!ModalBodyComponent || !token) return null;
 
   return (
-    <Modal isVisible={isVisible}
+    <Modal
+      isVisible={isVisible}
       isClosable={isClosable}
       onClose={onClose}
       isGlobalBackdrop
+      isFlexible
     >
       <ModalBodyComponent
         setIsClosable={setIsClosable}

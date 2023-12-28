@@ -8,7 +8,8 @@ import { Heading } from '@unique-nft/ui-kit';
 import { CreateAccountModal } from 'pages/Accounts/Modals/CreateAccount';
 import { ImportViaSeedAccountModal } from 'pages/Accounts/Modals/ImportViaSeed';
 import { ImportViaJSONAccountModal } from 'pages/Accounts/Modals/ImportViaJson';
-import { ExtensionMissingModal } from './ExtensionMissing';
+import { ExtensionMissingModal, Extensions } from './ExtensionMissing';
+import SubWalletIcon from 'static/icons/subwallet.svg';
 
 enum AccountModal {
   CREATE = 'create',
@@ -23,7 +24,7 @@ export const ConnectWallets = () => {
     ConnectWalletModalContext
   );
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
-  const [missingExtension, setMissingExtension] = useState<'Polkadot' | 'Metamask'>();
+  const [missingExtension, setMissingExtension] = useState<Extensions>();
   const { walletsCenter, showSignDialog, fetchAccounts } = useAccounts();
 
   const onCreateAccountClick = useCallback(() => {
@@ -53,14 +54,37 @@ export const ConnectWallets = () => {
 
   const handleConnectToPolkadotExtension = async () => {
     try {
-      await walletsCenter.connectWallet('polkadot');
+      await walletsCenter.connectWallet('polkadot-js');
       await walletsCenter.connectWallet('keyring', {
         requestPasswordCallback: showSignDialog
       });
       fetchAccounts();
       setIsOpenConnectWalletModal(false);
     } catch (e: any) {
+      console.log(e);
       setMissingExtension('Polkadot');
+      setCurrentModal(AccountModal.EXTENSION_MISSING);
+    }
+  };
+
+  const handleConnectToTalismanExtension = async () => {
+    try {
+      await walletsCenter.connectWallet('talisman');
+      fetchAccounts();
+      setIsOpenConnectWalletModal(false);
+    } catch (e: any) {
+      setMissingExtension('Talisman');
+      setCurrentModal(AccountModal.EXTENSION_MISSING);
+    }
+  };
+
+  const handleConnectToSubWalletExtension = async () => {
+    try {
+      await walletsCenter.connectWallet('subwallet-js');
+      fetchAccounts();
+      setIsOpenConnectWalletModal(false);
+    } catch (e: any) {
+      setMissingExtension('SubWallet');
       setCurrentModal(AccountModal.EXTENSION_MISSING);
     }
   };
@@ -75,8 +99,9 @@ export const ConnectWallets = () => {
         isClosable
       >
         <Heading size='2'>Connect wallet</Heading>
-        <p>Create or import an existing one in any suitable way:</p>
-        <Buttons>
+        <p>Choose how you want to connect. If you don&apos;t have a wallet, you can select a provider and create one.</p>
+        {/* TODO: remove this part if not needed */}
+        {/* <Buttons>
           <Button
             title='Seed phrase'
             role='primary'
@@ -89,13 +114,20 @@ export const ConnectWallets = () => {
           />
         </Buttons>
 
-        <p>You can also create or connect wallets via these providers:</p>
+        <p>You can also create or connect wallets via these providers:</p> */}
         <Wallets>
           <WalletItem onClick={handleConnectToPolkadotExtension}>
             <Icon size={40} name='polkadot-wallet' /> <span>Polkadot.js</span>
           </WalletItem>
           <WalletItem onClick={handleConnectToMetamask}>
             <Icon size={40} name='metamask-wallet' /> <span>Metamask</span>
+          </WalletItem>
+          <WalletItem onClick={handleConnectToTalismanExtension}>
+            <Icon size={40} name='talisman-wallet' /> <span>Talisman</span>
+          </WalletItem>
+          <WalletItem onClick={handleConnectToSubWalletExtension}>
+            <Icon file={SubWalletIcon} size={40} />
+            <span>SubWallet</span>
           </WalletItem>
         </Wallets>
       </Modal>
@@ -129,6 +161,9 @@ const Wallets = styled.div`
   flex-wrap: wrap;
   margin-top: var(--prop-gap);
   gap: calc(var(--prop-gap) / 2);
+  &>div {
+    width: 45%;
+  }
 `;
 
 const WalletItem = styled.div`

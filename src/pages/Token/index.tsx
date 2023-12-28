@@ -137,6 +137,7 @@ const TokenPage = () => {
           {isOwner && !offer && !isNested && <NestingTokenBlock
             token={token}
             onNestClick={onActionClick(MarketType.nestedTransfer)}
+            onCreateBundle={onActionClick(MarketType.createBundle)}
             testid={`${testid}`}
           />}
           <TokenPageModal
@@ -163,6 +164,7 @@ const TokenPage = () => {
         token={token}
         bundleModalType={
           marketType === MarketType.nestedTransfer ||
+          marketType === MarketType.createBundle ||
           marketType === MarketType.unnest
             ? marketType as unknown as BundleModalType
             : BundleModalType.default }

@@ -1,7 +1,7 @@
 import { Signer as EthersSigner } from 'ethers';
-import { CollectionProperty, Signer as UniqueSigner } from '@unique-nft/sdk';
+import { CollectionProperty, Signer as UniqueSigner, TokenId } from '@unique-nft/sdk';
 import { ChainValue } from '../controllers/BaseController';
-import { CollectionMode } from '../types';
+import { CollectionMode, TransferTokenParams } from '../types';
 
 export type Signer = EthersSigner | UniqueSigner;
 
@@ -23,6 +23,8 @@ interface IBaseAdapter {
   transferBalance(from: string, to: string, amount: ChainValue, signer: Signer): Promise<void>
 
   setCollectionProperties(collectionId: number, properties: CollectionProperty[], signer: Signer): Promise<void>
+
+  transferTokensBatch(transfers: TransferTokenParams[], signer: Signer, onSubmittedOne?: (token: TokenId, index: number) => void): Promise<void>
 }
 
 export default IBaseAdapter;

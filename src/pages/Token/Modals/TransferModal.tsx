@@ -146,7 +146,7 @@ const AskTransferModal: FC<AskTransferModalProps> = ({ token, collection, onTran
   );
 
   const isFeeGreaterThanBalance = useMemo(() => {
-    if (!fee || !isSponsored) return false;
+    if (!fee || isSponsored) return false;
     const feeBN = new BN(fromStringToBnString(fee));
     return feeBN.gt(selectedAccount?.balances?.proper.raw || new BN(0));
   }, [fee, selectedAccount?.balances, isSponsored]);

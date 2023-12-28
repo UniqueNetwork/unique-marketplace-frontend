@@ -12,23 +12,33 @@ interface NestingTokenBlockProps {
   token?: TokenByIdResponse
   testid: string
   onNestClick(): void
+  onCreateBundle(): void
 }
 
-export const NestingTokenBlock: FC<NestingTokenBlockProps> = ({ token, testid, onNestClick }) => {
+export const NestingTokenBlock: FC<NestingTokenBlockProps> = ({ token, testid, onNestClick, onCreateBundle }) => {
   const { tokenOwner } = token?.collection?.permissions?.nesting || {};
   const { currentChainId } = useApi();
 
-  if (!tokenOwner || blockedNestingCollections[currentChainId || '']?.includes(token?.collectionId || 0)) return null;
+  const canCustomize = token?.collection.properties.find(({ key }) => key === 'is_customizable')?.value;
+
+  if (blockedNestingCollections[currentChainId || '']?.includes(token?.collectionId || 0)) return null;
 
   return (
     <>
       <ActionsWrapper>
         <Heading size='4' >Nesting</Heading>
-        <Button
-          title={'Nest this token'}
-          onClick={onNestClick}
-          testid={`${testid}-transfer-button`}
-        />
+        <ButtonsWrapper>
+          <Button
+            title={'Nest this token'}
+            onClick={onNestClick}
+            testid={`${testid}-transfer-button`}
+          />
+          {canCustomize && tokenOwner && <Button
+            title={'Customize'}
+            onClick={onCreateBundle}
+            testid={`${testid}-transfer-button`}
+          />}
+        </ButtonsWrapper>
       </ActionsWrapper>
       <Divider />
     </>
@@ -46,4 +56,9 @@ const ActionsWrapper = styled.div`
 const Divider = styled.div`
   margin: calc(var(--gap) * 1.5) 0;
   border-top: 1px dashed ${Grey300};
+`;
+
+const ButtonsWrapper = styled.div`
+  display: flex;
+  gap: var(--gap);
 `;

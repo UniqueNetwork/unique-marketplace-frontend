@@ -8,7 +8,7 @@ import DefaultMarketStages from '../Modals/StagesModal';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { StageStatus } from '../../../types/StagesTypes';
 import { useUnnestStages } from '../../../hooks/marketplaceStages/useUnnestStages';
-import { TBundleTrunsferModalBodyProps } from './BundleTrunsferModal';
+import { TBundleTransferModalBodyProps } from './BundleTrunsferModal';
 import { FeeMessage } from 'components';
 import { INestingToken } from 'components/BundleTree/types';
 import { useApi } from 'hooks/useApi';
@@ -19,7 +19,7 @@ import { FractionalAmountInput } from '../Modals/FractionalAmountInput';
 import { CollectionMode } from 'api/chainApi/types';
 import { Address } from '@unique-nft/utils';
 
-export const UnnestModal: FC<TBundleTrunsferModalBodyProps> = ({ token, setIsClosable, onFinish, testid }) => {
+export const UnnestModal: FC<TBundleTransferModalBodyProps> = ({ token, setIsClosable, onFinish, testid }) => {
   const { selectedAccount } = useAccounts();
   const { api } = useApi();
   const [status, setStatus] = useState<'ask' | 'unnest-stage'>('ask'); // TODO: naming
@@ -166,7 +166,7 @@ const AskUnnestModal: FC<AskUnnestModalProps> = ({ token, parentAddress, collect
   );
 };
 
-type UnnestStagesModalProps = Omit<TBundleTrunsferModalBodyProps, 'token'> & TokenIdQuery & {
+type UnnestStagesModalProps = Omit<TBundleTransferModalBodyProps, 'token'> & TokenIdQuery & {
   amount: number
   parentAddress: string
   mode: CollectionMode
