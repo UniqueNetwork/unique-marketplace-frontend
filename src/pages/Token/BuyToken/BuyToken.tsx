@@ -1,5 +1,5 @@
-import React, { FC, useCallback, useEffect, useMemo } from 'react';
-import { Button, Text } from 'components/UI';
+import React, { FC, useCallback, useContext, useEffect, useMemo, useRef } from 'react';
+import { Button, Text, Tooltip } from 'components/UI';
 import styled from 'styled-components';
 import { useApi } from 'hooks/useApi';
 import MarketController from 'api/chainApi/MarketController';
@@ -14,6 +14,7 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import BuyBundleInformation from '../TokenDetail/BuyBundleInformation';
 import { RoyaltyValue } from '../TokenDetail/Royalty';
 import { fromStringToBnString } from 'utils/bigNum';
+import { ConnectWalletModalContext } from 'account/ConnectWalletModalContext';
 
 interface BuyTokenProps {
   offer?: Offer;
@@ -27,6 +28,7 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, royalty, onBuy, testid }) =
 
   const { fee, fetchingFee, getFee } = useGetFee<Parameters<MarketController['getBuyFixFee']>>(api?.market?.getBuyFixFee.bind(api?.market));
   const { selectedAccount } = useAccounts();
+  const { setIsOpenConnectWalletModal } = useContext(ConnectWalletModalContext);
 
   const rawFee = useMemo(() => {
     return new BN(fromStringToBnString(fee));
@@ -65,6 +67,12 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, royalty, onBuy, testid }) =
     }, 300)();
   }, [offer, api?.market, selectedAccount?.address]);
 
+  const onShowConnectAccountDialog = useCallback(() => {
+    setIsOpenConnectWalletModal(true);
+  }, []);
+
+  const buyButtonRef = useRef<HTMLButtonElement>(null);
+
   if (!offer) return null;
 
   return (<>
@@ -73,18 +81,17 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, royalty, onBuy, testid }) =
     <RoyaltyValue value={royalty} />
     <ButtonWrapper>
       <Button
-        onClick={onBuyClick}
+        onClick={selectedAccount ? onBuyClick : onShowConnectAccountDialog}
         role='primary'
         title='Buy'
+        ref={buyButtonRef}
         wide={true}
-        disabled={!isEnoughBalance || (royalty || 0) >= 1 || isNotEnoughBalanceOnPolkadot}
+        disabled={(!!selectedAccount && !isEnoughBalance) || (royalty || 0) >= 1 || isNotEnoughBalanceOnPolkadot}
       />
     </ButtonWrapper>
-    {!isEnoughBalance && !isNotEnoughBalanceOnPolkadot && <Text color={'coral-500'} testid={`${testid}-low-balance-warning`}>Your balance is not enough to pay the price and transaction fees</Text>}
-    {/* {isNotEnoughBalanceOnPolkadot && <MessageWrapper>
-      <p>Oops, looks like you&apos;re lucky to discover that we have an issue working with Polkadot wallets. Please transfer the required amount to your MetaMask address and purchase the token using MetaMask. We apologize for the inconvenience, and we&apos;ll have this problem fixed very soon!</p>
-      <p>For the ones who are curious: we need Polkadot wallet to have 2x amount of NFT price + fee, otherwise the buy transaction will fail. Nonetheless, buying with MetaMask works</p>
-    </MessageWrapper>} */}
+    {!!selectedAccount && !isEnoughBalance && <Tooltip targetRef={buyButtonRef} >
+      Not enough funds in your wallet
+    </Tooltip>}
     {(royalty || 0) >= 1 && <Text color={'coral-500'} testid={`${testid}-low-balance-warning`}>The royalty is too big. Maximum royalty - 99%</Text>}
     {!!offer?.tokenDescription?.nestingChildTokens?.length && <BuyBundleInformation testid={testid}/>}
     <Divider />
