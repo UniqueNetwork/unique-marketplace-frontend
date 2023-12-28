@@ -9,7 +9,7 @@ const getConnectedWallets = localStorage.getItem(CONNECTED_WALLET_TYPE);
 
 export const ConnectWalletModalProvider: FC = ({ children }) => {
   const [isOpenConnectWalletModal, setIsOpenConnectWalletModal] = useState<boolean>(
-    !getConnectedWallets || getConnectedWallets.split(';').length === 0
+    false
   );
 
   return (
