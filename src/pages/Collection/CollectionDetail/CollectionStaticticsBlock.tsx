@@ -1,16 +1,40 @@
 import { Heading, Skeleton } from '@unique-nft/ui-kit';
 import { MarketableCollection } from 'api/restApi/collections/types';
+import { useTokens } from 'api/restApi/tokens/tokens';
 import { Text } from 'components/UI';
 import { useApi } from 'hooks/useApi';
 import { RoyaltiesFormData } from 'pages/CollectionEdit/types';
+import { useState, useEffect, useMemo } from 'react';
 
 import styled from 'styled-components';
 import { formatAmount, formatBalance } from 'utils/textUtils';
 
-//
-
 export const CollectionStatisticsBlock = ({ collection, royalties }: { collection: MarketableCollection, royalties?: RoyaltiesFormData }) => {
   const { chainProperties } = useApi();
+  const [currentFloorPrice, setCurrentFloorPrice] = useState<string>();
+  const { fetch } = useTokens(collection);
+  useEffect(() => {
+    void (async () => {
+      const result = await fetch({
+        page: 1,
+        pageSize: 1,
+        saleType: 'OnSale',
+        'sort[0]': ['asc(Price)']
+      });
+      setCurrentFloorPrice(result.items[0]?.price.parsed.toString());
+    })();
+  }, [collection, fetch]);
+
+  const [floorPrice, floorPriceLabel] = useMemo(() => {
+    if (currentFloorPrice) {
+      return [`${currentFloorPrice} ${chainProperties?.token || ''}`, 'Current floor price'];
+    }
+    if (collection?.minPrice) {
+      return [`${formatBalance(collection.minPrice)} ${chainProperties?.token || ''}`, 'Last sold price'];
+    }
+    return ['NO', 'floor price yet'];
+  }, [currentFloorPrice, collection.minPrice, chainProperties?.token]);
+
   return <CollectionStatisticsBlockWrapper>
     <div>
       <Heading size='3'>{Math.max(collection.tokensCount, collection.tokensTotal || 0)}</Heading>
@@ -22,8 +46,8 @@ export const CollectionStatisticsBlock = ({ collection, royalties }: { collectio
         <Text size={'m'} color='grey-600'>listed NFTs</Text>
       </div>
       <div>
-        <Heading size='3'>{formatBalance(collection.minPrice || 0)} {chainProperties?.token || ''}</Heading>
-        <Text size={'m'} color='grey-600'>floor price</Text>
+        <Heading size='3'>{floorPrice}</Heading>
+        <Text size={'m'} color='grey-600'>{floorPriceLabel}</Text>
       </div>
       <div>
         <Heading size='3'>{collection.holders || 0}</Heading>
