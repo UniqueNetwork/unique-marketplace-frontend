@@ -99,8 +99,9 @@ export const ConnectWallets = () => {
         isClosable
       >
         <Heading size='2'>Connect wallet</Heading>
-        <p>Create or import an existing one in any suitable way:</p>
-        <Buttons>
+        <p>Choose how you want to connect. If you don&apos;t have a wallet, you can select a provider and create one.</p>
+        {/* TODO: remove this part if not needed */}
+        {/* <Buttons>
           <Button
             title='Seed phrase'
             role='primary'
@@ -113,7 +114,7 @@ export const ConnectWallets = () => {
           />
         </Buttons>
 
-        <p>You can also create or connect wallets via these providers:</p>
+        <p>You can also create or connect wallets via these providers:</p> */}
         <Wallets>
           <WalletItem onClick={handleConnectToPolkadotExtension}>
             <Icon size={40} name='polkadot-wallet' /> <span>Polkadot.js</span>
