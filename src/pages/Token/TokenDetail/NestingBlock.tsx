@@ -19,7 +19,7 @@ export const NestingTokenBlock: FC<NestingTokenBlockProps> = ({ token, testid, o
   const { tokenOwner } = token?.collection?.permissions?.nesting || {};
   const { currentChainId } = useApi();
 
-  const canCustomize = token?.collection.properties.find(({ key }) => key === 'is_customizable')?.value;
+  const canCustomize = false; // token?.collection.properties.find(({ key }) => key === 'is_customizable')?.value;
 
   if (blockedNestingCollections[currentChainId || '']?.includes(token?.collectionId || 0)) return null;
 
