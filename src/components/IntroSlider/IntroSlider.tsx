@@ -15,6 +15,8 @@ const getConnectedWallets = localStorage.getItem(CONNECTED_WALLET_TYPE);
 export const IntroSlider = () => {
   const [open, setOpen] = useState(() => {
     if (!getConnectedWallets || getConnectedWallets.split(';').length === 0) {
+      console.log('No ConnectedWallet');
+
       return false;
     }
 
@@ -28,14 +30,6 @@ export const IntroSlider = () => {
     }
     localStorage.setItem(BUNDLE_SHOW_MODAL, JSON.stringify(false));
   }, [open]);
-
-  useEffect(() => {
-    const status = localStorage.getItem(BUNDLE_SHOW_MODAL);
-    if ((status !== null && !JSON.parse(status))) {
-      return;
-    }
-    setOpen(true);
-  }, []);
 
   return <Slider open={open} onClose={() => setOpen(false)}>
     {({ setActiveSlide, onClose }) => {
