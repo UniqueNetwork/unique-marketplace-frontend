@@ -9,6 +9,7 @@ import { CreateAccountModal } from 'pages/Accounts/Modals/CreateAccount';
 import { ImportViaSeedAccountModal } from 'pages/Accounts/Modals/ImportViaSeed';
 import { ImportViaJSONAccountModal } from 'pages/Accounts/Modals/ImportViaJson';
 import { ExtensionMissingModal, Extensions } from './ExtensionMissing';
+import SubWalletIcon from 'static/icons/subwallet.svg';
 
 enum AccountModal {
   CREATE = 'create',
@@ -124,7 +125,8 @@ export const ConnectWallets = () => {
             <Icon size={40} name='talisman-wallet' /> <span>Talisman</span>
           </WalletItem>
           <WalletItem onClick={handleConnectToSubWalletExtension}>
-            <Icon size={40} name='subwallet-wallet' /> <span>SubWallet</span>
+            <Icon file={SubWalletIcon} size={40} />
+            <span>SubWallet</span>
           </WalletItem>
         </Wallets>
       </Modal>
