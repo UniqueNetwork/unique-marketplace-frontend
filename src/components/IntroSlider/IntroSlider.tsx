@@ -19,7 +19,7 @@ export const IntroSlider = () => {
     }
 
     const status = localStorage.getItem(BUNDLE_SHOW_MODAL);
-    return status ? JSON.parse(status) : true;
+    return status ? JSON.parse(status) : false;
   });
 
   useEffect(() => {
