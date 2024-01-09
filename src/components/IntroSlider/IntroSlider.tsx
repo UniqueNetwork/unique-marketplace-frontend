@@ -15,8 +15,6 @@ const getConnectedWallets = localStorage.getItem(CONNECTED_WALLET_TYPE);
 export const IntroSlider = () => {
   const [open, setOpen] = useState(() => {
     if (!getConnectedWallets || getConnectedWallets.split(';').length === 0) {
-      console.log('No ConnectedWallet');
-
       return false;
     }
 
