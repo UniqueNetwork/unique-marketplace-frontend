@@ -164,6 +164,14 @@ const Wallets = styled.div`
   &>div {
     width: 45%;
   }
+  svg {
+    min-width: 40px;
+  }
+  @media (max-width: 768px) {
+    &>div {
+      width: 100%;
+    }
+  }
 `;
 
 const WalletItem = styled.div`
@@ -181,19 +189,5 @@ const WalletItem = styled.div`
     font-size: 18px;
     font-weight: 500;
     color: var(--color-additional-dark);
-  }
-`;
-
-const Buttons = styled.div`
-  margin: var(--prop-gap) 0 calc(var(--prop-gap) * 2);
-  display: flex;
-  flex-wrap: wrap;
-  gap: calc(var(--prop-gap) / 2);
-
-  & > button {
-    flex: 1 1 calc(50% - 10px);
-    &:first-child {
-      flex: 1 1 100%;
-    }
   }
 `;
