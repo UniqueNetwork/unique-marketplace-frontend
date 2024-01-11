@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import smile from 'static/images/hmm.png';
 import { Modal, Text, Link } from 'components/UI';
 
-export type Extensions = 'Polkadot' | 'Metamask' | 'Talisman' | 'SubWallet';
+export type Extensions = 'Polkadot' | 'Metamask' | 'Talisman' | 'SubWallet' | 'NovaWallet' | 'Enkript';
 
 type Props = {
   isVisible?: boolean;
@@ -15,7 +15,9 @@ const extensionSourceLinks = {
   Polkadot: 'https://polkadot.js.org/extension/',
   SubWallet: 'https://www.subwallet.app/download.html',
   Talisman: 'https://www.talisman.xyz/',
-  Metamask: 'https://metamask.io/download/'
+  Metamask: 'https://metamask.io/download/',
+  NovaWallet: 'https://novawallet.io',
+  Enkript: 'https://www.enkript.com'
 };
 
 export const ExtensionMissingModal = ({

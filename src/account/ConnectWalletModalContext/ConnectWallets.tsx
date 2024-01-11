@@ -10,6 +10,8 @@ import { ImportViaSeedAccountModal } from 'pages/Accounts/Modals/ImportViaSeed';
 import { ImportViaJSONAccountModal } from 'pages/Accounts/Modals/ImportViaJson';
 import { ExtensionMissingModal, Extensions } from './ExtensionMissing';
 import SubWalletIcon from 'static/icons/subwallet.svg';
+import EnkriptIcon from 'static/icons/enkript.svg';
+import NovaWalletIcon from 'static/icons/nova_icon_radial.svg';
 
 enum AccountModal {
   CREATE = 'create',
@@ -89,6 +91,28 @@ export const ConnectWallets = () => {
     }
   };
 
+  const handleConnectToEnkriptExtension = async () => {
+    try {
+      await walletsCenter.connectWallet('enkript');
+      fetchAccounts();
+      setIsOpenConnectWalletModal(false);
+    } catch (e: any) {
+      setMissingExtension('Enkript');
+      setCurrentModal(AccountModal.EXTENSION_MISSING);
+    }
+  };
+
+  const handleConnectToNovaWallet = async () => {
+    try {
+      await walletsCenter.connectWallet('polkadot-js');
+      fetchAccounts();
+      setIsOpenConnectWalletModal(false);
+    } catch (e: any) {
+      setMissingExtension('NovaWallet');
+      setCurrentModal(AccountModal.EXTENSION_MISSING);
+    }
+  };
+
   return (
     <>
       <Modal
@@ -116,19 +140,30 @@ export const ConnectWallets = () => {
 
         <p>You can also create or connect wallets via these providers:</p> */}
         <Wallets>
-          <WalletItem onClick={handleConnectToPolkadotExtension}>
-            <Icon size={40} name='polkadot-wallet' /> <span>Polkadot.js</span>
-          </WalletItem>
-          <WalletItem onClick={handleConnectToMetamask}>
-            <Icon size={40} name='metamask-wallet' /> <span>Metamask</span>
-          </WalletItem>
-          <WalletItem onClick={handleConnectToTalismanExtension}>
-            <Icon size={40} name='talisman-wallet' /> <span>Talisman</span>
-          </WalletItem>
-          <WalletItem onClick={handleConnectToSubWalletExtension}>
-            <Icon file={SubWalletIcon} size={40} />
-            <span>SubWallet</span>
-          </WalletItem>
+          {!window.walletExtension?.isNovaWallet && <>
+            <WalletItem onClick={handleConnectToPolkadotExtension}>
+              <Icon size={40} name='polkadot-wallet' /> <span>Polkadot.js</span>
+            </WalletItem>
+            <WalletItem onClick={handleConnectToMetamask}>
+              <Icon size={40} name='metamask-wallet' /> <span>Metamask</span>
+            </WalletItem>
+            <WalletItem onClick={handleConnectToTalismanExtension}>
+              <Icon size={40} name='talisman-wallet' /> <span>Talisman</span>
+            </WalletItem>
+            <WalletItem onClick={handleConnectToSubWalletExtension}>
+              <Icon file={SubWalletIcon} size={40} />
+              <span>SubWallet</span>
+            </WalletItem>
+            <WalletItem onClick={handleConnectToEnkriptExtension}>
+              <Icon file={EnkriptIcon} size={40} />
+              <span>Enkript</span>
+            </WalletItem>
+            <div></div>
+          </>}
+          {window.walletExtension?.isNovaWallet && <WalletItem onClick={handleConnectToNovaWallet}>
+            <Icon file={NovaWalletIcon} size={40} />
+            <span>Nova Wallet</span>
+          </WalletItem>}
         </Wallets>
       </Modal>
 
@@ -162,7 +197,12 @@ const Wallets = styled.div`
   margin-top: var(--prop-gap);
   gap: calc(var(--prop-gap) / 2);
   &>div {
-    width: 45%;
+    width: calc(50% - 6px);
+  }
+  @media (max-width: 768px) {
+    &>div {
+        width: 100%;
+    }
   }
 `;
 
@@ -175,12 +215,14 @@ const WalletItem = styled.div`
   flex: 1 1 auto;
   cursor: pointer;
   border-radius: calc(var(--prop-gap) / 2);
-
   span {
     margin-left: 10px;
     font-size: 18px;
     font-weight: 500;
     color: var(--color-additional-dark);
+  }
+  svg {
+    min-width: 40px;
   }
 `;
 

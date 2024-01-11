@@ -6,7 +6,7 @@ import { KeyringWallet } from './KeyringWallet';
 import { MetamaskWallet } from './MetamaskWallet';
 import { BaseWalletType, ConnectedWalletOptions } from './types';
 
-export type ConnectedWalletsName = 'polkadot-js' | 'keyring' | 'metamask' | 'talisman' | 'subwallet-js';
+export type ConnectedWalletsName = 'polkadot-js' | 'keyring' | 'metamask' | 'talisman' | 'subwallet-js' | 'enkript' | 'novawallet';
 
 const wallets = new Map<
   ConnectedWalletsName,
@@ -15,6 +15,8 @@ const wallets = new Map<
   ['polkadot-js', PolkadotWallet],
   ['talisman', PolkadotWallet],
   ['subwallet-js', PolkadotWallet],
+  ['enkript', PolkadotWallet],
+  ['novawallet', PolkadotWallet],
   ['keyring', KeyringWallet],
   ['metamask', MetamaskWallet]
 ]);

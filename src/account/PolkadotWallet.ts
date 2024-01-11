@@ -6,9 +6,8 @@ import { Address } from '@unique-nft/utils';
 
 import { AccountUtils } from './AccountUtils';
 import { Account, AccountSigner, BaseWalletEntity, BaseWalletType } from './types';
-import { HexString } from '@polkadot/util/types';
 
-export type PolkadotWalletName = 'polkadot-js' | 'subwallet-js' | 'talisman';
+export type PolkadotWalletName = 'polkadot-js' | 'subwallet-js' | 'talisman' | 'enkrypt' | 'novawallet';
 
 export class PolkadotWallet implements BaseWalletEntity<InjectedAccountWithMeta> {
   _accounts = new Map<string, BaseWalletType<InjectedAccountWithMeta>>();
