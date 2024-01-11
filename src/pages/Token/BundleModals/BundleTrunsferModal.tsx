@@ -3,7 +3,7 @@ import React, { FC, useEffect, useMemo, useState } from 'react';
 import { BundleModalType } from './types';
 import { UnnestModal } from './UnnestModal';
 import { TransferToBundleModal } from './TransferToBundleModal';
-import { CreateBundleModal } from './CreateBundleModal';
+import { CustomizeModal } from './CustomizeModal';
 import { INestingToken } from 'components/BundleTree/types';
 import { Modal } from 'components/UI';
 import { TokenByIdResponse } from '@unique-nft/sdk';
@@ -41,7 +41,7 @@ const BundleTrunsferModal = ({ token, onClose, onFinish, bundleModalType, testid
       case BundleModalType.nestedTransfer:
         return TransferToBundleModal;
       case BundleModalType.createBundle:
-        return CreateBundleModal;
+        return CustomizeModal;
       case BundleModalType.default:
       default:
         return null;

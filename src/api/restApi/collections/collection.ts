@@ -61,7 +61,6 @@ export const useMarketableCollection = () => {
         return collectionData;
       }
       setIsFetching(false);
-      return;
     } catch (error) {
       setFetchingError(error as AxiosError);
       setIsFetching(false);

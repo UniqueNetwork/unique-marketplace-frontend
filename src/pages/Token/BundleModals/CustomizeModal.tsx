@@ -17,7 +17,7 @@ import { useAccounts } from 'hooks/useAccounts';
 import { CollectionMode } from 'api/chainApi/types';
 import { FeeMessage } from 'components';
 
-export const CreateBundleModal = ({ token, onFinish, testid }: TBundleTransferModalBodyProps) => {
+export const CustomizeModal = ({ token, onFinish, testid }: TBundleTransferModalBodyProps) => {
   const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse | null>(null);
   const [tokens, setTokens] = useState<(TokenItem & { selected?: boolean })[]>([]);
   const [total, setTotal] = useState<number>(0);
@@ -264,13 +264,6 @@ export const CreateBundleModal = ({ token, onFinish, testid }: TBundleTransferMo
           </Text>
         </TokenWrapper>
         <EquipsSection>
-          {/* <FilterWrapper>
-            <SearchField
-              searchValue={searchText}
-              onSearchStringChange={setSearchText}
-              onSearch={onSearch}
-            />
-          </FilterWrapper> */}
           <EquipsListWrapper>
             {tokens.map((token) => <TokensCard
               testid={''}

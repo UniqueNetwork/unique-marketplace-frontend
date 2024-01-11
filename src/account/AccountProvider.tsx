@@ -161,7 +161,7 @@ export const AccountWrapper: FC = ({ children }) => {
   useEffect(fetchAccounts, [fetchAccounts]);
 
   const addLocalAccount = useCallback((seed: string, derivePath: string, name: string, password: string, pairType: PairType) => {
-    const options = { genesisHash: chainProperties?.genesisHash, isHardware: false, name: name.trim(), tags: [] };
+    const options = { genesisHash: chainProperties?.genesisHash as `0x${string}`, isHardware: false, name: name.trim(), tags: [] };
     keyring.addUri(getSuri(seed, derivePath, pairType), password, options, pairType as KeypairType);
     fetchAccounts();
   }, [chainProperties, fetchAccounts]);

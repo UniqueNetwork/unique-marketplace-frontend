@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import styled from 'styled-components';
 
 import { Picture } from 'components';
-import { Button, Text, Upload } from 'components/UI';
+import { Upload } from 'components/UI';
 
 interface CollectionCoverProps {
   name: string
