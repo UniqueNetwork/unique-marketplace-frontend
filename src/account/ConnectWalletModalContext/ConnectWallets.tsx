@@ -10,7 +10,7 @@ import { ImportViaSeedAccountModal } from 'pages/Accounts/Modals/ImportViaSeed';
 import { ImportViaJSONAccountModal } from 'pages/Accounts/Modals/ImportViaJson';
 import { ExtensionMissingModal, Extensions } from './ExtensionMissing';
 import SubWalletIcon from 'static/icons/subwallet.svg';
-import EnkriptIcon from 'static/icons/enkript.svg';
+import EnkriptIcon from 'static/icons/enkrypt.svg';
 import NovaWalletIcon from 'static/icons/nova_icon_radial.svg';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 
@@ -92,13 +92,13 @@ export const ConnectWallets = () => {
     }
   };
 
-  const handleConnectToEnkriptExtension = async () => {
+  const handleConnectToEnkryptExtension = async () => {
     try {
-      await walletsCenter.connectWallet('enkript');
+      await walletsCenter.connectWallet('enkrypt');
       fetchAccounts();
       setIsOpenConnectWalletModal(false);
     } catch (e: any) {
-      setMissingExtension('Enkript');
+      setMissingExtension('Enkrypt');
       setCurrentModal(AccountModal.EXTENSION_MISSING);
     }
   };
@@ -157,9 +157,9 @@ export const ConnectWallets = () => {
               <Icon file={SubWalletIcon} size={40} />
               <span>SubWallet</span>
             </WalletItem>
-            <WalletItem onClick={handleConnectToEnkriptExtension}>
+            <WalletItem onClick={handleConnectToEnkryptExtension}>
               <Icon file={EnkriptIcon} size={40} />
-              <span>Enkript</span>
+              <span>Enkrypt</span>
             </WalletItem>
             {!isMobile && <div></div>}
             {isMobile && <WalletItem href='https://novawallet.io' target='_blank'>
