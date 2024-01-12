@@ -12,6 +12,7 @@ import { ExtensionMissingModal, Extensions } from './ExtensionMissing';
 import SubWalletIcon from 'static/icons/subwallet.svg';
 import EnkriptIcon from 'static/icons/enkript.svg';
 import NovaWalletIcon from 'static/icons/nova_icon_radial.svg';
+import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 
 enum AccountModal {
   CREATE = 'create',
@@ -113,6 +114,8 @@ export const ConnectWallets = () => {
     }
   };
 
+  const isMobile = DeviceSize.sm <= useDeviceSize();
+
   return (
     <>
       <Modal
@@ -158,7 +161,11 @@ export const ConnectWallets = () => {
               <Icon file={EnkriptIcon} size={40} />
               <span>Enkript</span>
             </WalletItem>
-            <div></div>
+            {!isMobile && <div></div>}
+            {isMobile && <WalletItem href='https://novawallet.io' target='_blank'>
+              <Icon file={NovaWalletIcon} size={40} />
+              <span>Nova Wallet</span>
+            </WalletItem>}
           </>}
           {window.walletExtension?.isNovaWallet && <WalletItem onClick={handleConnectToNovaWallet}>
             <Icon file={NovaWalletIcon} size={40} />
@@ -196,17 +203,17 @@ const Wallets = styled.div`
   flex-wrap: wrap;
   margin-top: var(--prop-gap);
   gap: calc(var(--prop-gap) / 2);
-  &>div {
+  &>a {
     width: calc(50% - 6px);
   }
   @media (max-width: 768px) {
-    &>div {
+    &>a {
         width: 100%;
     }
   }
 `;
 
-const WalletItem = styled.div`
+const WalletItem = styled.a`
   display: inline-flex;
   align-items: center;
   border: 1px solid var(--color-grey-100);
