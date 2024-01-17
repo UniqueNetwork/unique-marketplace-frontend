@@ -136,7 +136,7 @@ export const CustomizeModal = ({ token, onFinish, testid }: TBundleTransferModal
       error(e.message);
       setStagesModalIsVisible(false);
     }
-    setProgress(total);
+    setProgress(totalToTransfer);
     setTransferStage('done');
   }, [selectedAccount, nestedTokens, selectedTokens, token.collectionId, token.tokenId, api?.nft]);
 
@@ -276,7 +276,7 @@ export const CustomizeModal = ({ token, onFinish, testid }: TBundleTransferModal
     <StatusTransactionModal
       title={transferStage === 'transferring' ? 'Please wait' : 'Done'}
       isVisible={stagesModalIsVisible}
-      total={total}
+      total={totalToTransfer}
       progress={progress}
       stage={transferStage}
       onComplete={() => {
