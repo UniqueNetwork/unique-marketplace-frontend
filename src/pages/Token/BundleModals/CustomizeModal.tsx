@@ -120,7 +120,7 @@ export const CustomizeModal = ({ token, onFinish, testid }: TBundleTransferModal
         })),
         ...tokensToNest.map(({ collectionId, tokenId }) => ({
           from: selectedAccount?.address,
-          to: parentAddress,
+          to: Address.normalize.ethereumAddress(parentAddress),
           token: { collectionId, tokenId },
           amount: 1,
           mode: 'NFT' as CollectionMode
