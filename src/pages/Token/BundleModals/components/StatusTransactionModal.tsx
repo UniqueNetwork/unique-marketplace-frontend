@@ -5,13 +5,11 @@ import { ReactNode } from 'react';
 import styled from 'styled-components';
 
 type Props = Pick<ModalProps, 'isVisible'> & {
-  totalNesting: number;
-  totalUnnesting: number;
-  unnestingProgress: number;
-  nestingProgress: number;
+  total: number;
+  progress: number;
   isVisible: boolean;
   title?: string;
-  stage: 'unnesting' | 'nesting' | 'done';
+  stage: 'transferring' | 'done';
   warning?: ReactNode;
   onComplete(): void;
   onContinue(): void;
@@ -19,10 +17,8 @@ type Props = Pick<ModalProps, 'isVisible'> & {
 
 export const StatusTransactionModal = ({
   title = 'Please wait',
-  totalNesting,
-  totalUnnesting,
-  unnestingProgress,
-  nestingProgress,
+  total,
+  progress,
   isVisible,
   stage,
   onComplete,
@@ -32,28 +28,15 @@ export const StatusTransactionModal = ({
     <Modal isVisible={isVisible} isClosable={false}>
       <Heading>{title}</Heading>
       <StagesWrapper>
-        {!!totalUnnesting && <>
-          {stage === 'unnesting' ? <Loader /> : <Icon name={'check-circle'} size={24} color={'var(--color-additional-dark)'} />}
-          <StageDescription>
-            <Text size='m' weight='regular'>{`Unnesting ${
-              unnestingProgress
-            } of ${totalUnnesting} tokens`}</Text>
-            <Text size='s' color='grey-500'>
-              Step 1
-            </Text>
-          </StageDescription>
-        </>}
-        {!!totalNesting && <>
-          {stage === 'nesting' ? <Loader /> : stage === 'done' ? <Icon name={'check-circle'} size={24} color={'var(--color-additional-dark)'} /> : <div></div>}
-          <StageDescription>
-            <Text size='m' weight='regular'>{`Nesting ${
-              nestingProgress
-            } of ${totalNesting} tokens`}</Text>
-            <Text size='s' color='grey-500'>
-              Step {totalUnnesting ? '2' : '1'}
-            </Text>
-          </StageDescription>
-        </>}
+        {stage === 'transferring' ? <Loader /> : <Icon name={'check-circle'} size={24} color={'var(--color-additional-dark)'} />}
+        <StageDescription>
+          <Text size='m' weight='regular'>{`Transferring ${
+              progress
+            } of ${total} tokens`}</Text>
+          <Text size='s' color='grey-500'>
+            Step 1
+          </Text>
+        </StageDescription>
       </StagesWrapper>
       {stage !== 'done' && (
         <AlertStyled type='warning'>

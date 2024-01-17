@@ -6,7 +6,7 @@ import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
 import { ChainValue } from '../controllers/BaseController';
 import { CollectionMode, TransferTokenParams } from '../types';
-import { CollectionProperty, TokenId } from '@unique-nft/sdk';
+import { BatchCallArgumentsBody, CollectionProperty, TokenId } from '@unique-nft/sdk';
 
 const buyGasLimit = 1_000_000;
 const sellGasLimit = 200_000;
@@ -304,44 +304,25 @@ class UniqueAdapter implements IMarketContractAdapter {
   async transferTokensBatch(transfers: TransferTokenParams[], signer: Signer, onSubmittedOne?: (token: TokenId, index: number) => void): Promise<void> {
     // TODO: extend this method to RFT
     // const method = mode === 'ReFungible' ? this.uniqueSdk.refungible.transferToken : this.uniqueSdk.token.transfer;
-    const unnestTransfers: TransferTokenParams[] = [];
-    const nestTransfers: TransferTokenParams[] = [];
 
-    transfers.forEach((params) => {
-      if (params.from !== signer.address) {
-        unnestTransfers.push(params);
-      } else {
-        nestTransfers.push(params);
+    const calls: BatchCallArgumentsBody[] = transfers.map(({ from, to, token }) => ({
+      method: {
+        section: 'unique',
+        method: 'transferFrom'
+      },
+      rawPayload: {
+        from,
+        to,
+        collectionId: token.collectionId,
+        tokenId: token.tokenId,
+        value: 1
       }
-    });
+    }));
 
-    const txToUnnest = await this.uniqueSdk.token.unnest.buildBatch(unnestTransfers.map(({ token, to }) => ({
-      nested: token,
-      to,
-      address: signer.address
-    }), { signer }));
-
-    const txToNest = await this.uniqueSdk.token.transfer.buildBatch(nestTransfers.map(({ token, from, to }) => ({
-      collectionId: token.collectionId,
-      tokenId: token.tokenId,
-      from,
-      to,
-      address: from === signer.address ? signer.address : from
-    }), { signer, nonce: txToUnnest.nextNonce }));
-
-    await Promise.all([
-      ...txToUnnest.payloads.map(async (tx, index) => {
-        await this.uniqueSdk.token.unnest.submitWaitResult(tx, { signer, nonce: txToUnnest.nextNonce + index });
-        onSubmittedOne?.(unnestTransfers[index].token, index);
-      }),
-      ...txToNest.payloads.map(async (tx, index) => {
-        await this.uniqueSdk.token.transfer.submitWaitResult(tx, {
-          signer,
-          nonce: txToUnnest.nextNonce + unnestTransfers.length + 1 + index
-        });
-        onSubmittedOne?.(nestTransfers[index].token, index);
-      })
-    ]);
+    await this.uniqueSdk.common.batch.submitWaitResult({
+      address: signer.address,
+      calls
+    }, { signer });
   }
 }
 

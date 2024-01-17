@@ -27,11 +27,9 @@ export const CustomizeModal = ({ token, onFinish, testid }: TBundleTransferModal
   const [page, setPage] = useState<number>(0);
   const [isFetching, setIsFetching] = useState(false);
   const [stagesModalIsVisible, setStagesModalIsVisible] = useState(false);
-  const [totalNesting, setTotalNesting] = useState(0);
-  const [nestingProgress, setNestingProgress] = useState(1);
-  const [totalUnnesting, setTotalUnnesting] = useState(0);
-  const [unnestingProgress, setUnnestingProgress] = useState(1);
-  const [transferStage, setTransferStage] = useState<'unnesting' | 'nesting' | 'done'>('nesting');
+  const [totalToTransfer, setTotalToTransfer] = useState(0);
+  const [progress, setProgress] = useState(1);
+  const [transferStage, setTransferStage] = useState<'transferring' | 'done'>('transferring');
   const { api } = useApi();
   const { error } = useNotifications();
 
@@ -92,9 +90,8 @@ export const CustomizeModal = ({ token, onFinish, testid }: TBundleTransferModal
 
   const onSubmut = useCallback(async () => {
     if (!selectedAccount) return;
-    setTransferStage('unnesting');
-    setUnnestingProgress(0);
-    setNestingProgress(0);
+    setTransferStage('transferring');
+    setProgress(0);
     setStagesModalIsVisible(true);
     const nestedIndexes = nestedTokens.map(({ collectionId, tokenId }) => `${collectionId}_${tokenId}`);
     const tokensToNest = Object.values(selectedTokens)
@@ -106,52 +103,40 @@ export const CustomizeModal = ({ token, onFinish, testid }: TBundleTransferModal
 
     const parentAddress = Address.nesting.idsToAddress(token.collectionId, token.tokenId);
 
-    setTotalUnnesting(tokensToUnnest.length);
-    setTotalNesting(tokensToNest.length);
-    if (tokensToNest.length === 0 && tokensToUnnest.length === 0) {
+    setTotalToTransfer(tokensToUnnest.length + tokensToNest.length);
+    if ((tokensToNest.length + tokensToUnnest.length) === 0) {
       setStagesModalIsVisible(false);
 
       return;
     }
     try {
-      await api?.nft?.transferTokensBatch(tokensToUnnest.map((token) => ({
-          from: parentAddress,
+      await api?.nft?.transferTokensBatch([
+        ...tokensToUnnest.map(({ collectionId, tokenId }) => ({
+          from: Address.normalize.ethereumAddress(parentAddress).toLowerCase(),
           to: selectedAccount?.address,
-          token: {
-            collectionId: token.collectionId,
-            tokenId: token.tokenId
-          },
+          token: { collectionId, tokenId },
           amount: 1,
           mode: 'NFT' as CollectionMode
         })),
+        ...tokensToNest.map(({ collectionId, tokenId }) => ({
+          from: selectedAccount?.address,
+          to: parentAddress,
+          token: { collectionId, tokenId },
+          amount: 1,
+          mode: 'NFT' as CollectionMode
+        }))
+      ],
         {
           account: selectedAccount,
           onSubmittedOne: () => {
-            setUnnestingProgress((count) => count + 1);
-          }
-        });
-
-      setTransferStage('nesting');
-
-      await api?.nft?.transferTokensBatch(tokensToNest.map((token) => ({
-          from: selectedAccount?.address,
-          to: parentAddress,
-          token: {
-            collectionId: token.collectionId,
-            tokenId: token.tokenId
-          },
-          amount: 1,
-          mode: 'NFT' as CollectionMode
-        })), {
-          account: selectedAccount,
-          onSubmittedOne: () => {
-            setNestingProgress((count) => count + 1);
+            setProgress((count) => count + 1);
           }
         });
     } catch (e: any) {
       error(e.message);
       setStagesModalIsVisible(false);
     }
+    setProgress(total);
     setTransferStage('done');
   }, [selectedAccount, nestedTokens, selectedTokens, token.collectionId, token.tokenId, api?.nft]);
 
@@ -245,7 +230,7 @@ export const CustomizeModal = ({ token, onFinish, testid }: TBundleTransferModal
         <TokenWrapper>
           <TokenMediaWrapper>
             <TokensMedia imageUrl={(token as TokenByIdResponse).file || (token as TokenByIdResponse).image} testid={''} />
-            {images.map((image) => <TokensMedia key={image?.ipfsCid} imageUrl={image} testid={'bundle-token-image'} />)}
+            {images.map((image, index) => <TokensMedia key={`${image?.ipfsCid}_${index}`} imageUrl={image} testid={'bundle-token-image'} />)}
           </TokenMediaWrapper>
           <Text
             size='l'
@@ -289,11 +274,10 @@ export const CustomizeModal = ({ token, onFinish, testid }: TBundleTransferModal
       {(isFetching || isFetchingTokens || stagesModalIsVisible) && <LoaderWrapper><Loader /></LoaderWrapper>}
     </CreateBundleModalWrapper>
     <StatusTransactionModal
+      title={transferStage === 'transferring' ? 'Please wait' : 'Done'}
       isVisible={stagesModalIsVisible}
-      totalNesting={totalNesting}
-      totalUnnesting={totalUnnesting}
-      nestingProgress={nestingProgress}
-      unnestingProgress={unnestingProgress}
+      total={total}
+      progress={progress}
       stage={transferStage}
       onComplete={() => {
         setStagesModalIsVisible(false);
