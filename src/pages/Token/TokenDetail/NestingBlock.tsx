@@ -26,7 +26,7 @@ export const NestingTokenBlock: FC<NestingTokenBlockProps> = ({ token, testid, o
   return (
     <>
       <ActionsWrapper>
-        <Heading size='4' >Nesting</Heading>
+        <Heading size='4' >{canCustomize ? 'Customization' : 'Nesting'}</Heading>
         <ButtonsWrapper>
           {!canCustomize && <Button
             title={'Nest this token'}
@@ -34,7 +34,7 @@ export const NestingTokenBlock: FC<NestingTokenBlockProps> = ({ token, testid, o
             testid={`${testid}-transfer-button`}
           />}
           {canCustomize && tokenOwner && <Button
-            title={'Customization'}
+            title={'Customize'}
             onClick={onCreateBundle}
             testid={`${testid}-transfer-button`}
           />}
