@@ -39,11 +39,6 @@ export const StatusTransactionModal = ({
         </StageDescription>
       </StagesWrapper>
       <FeeMessage isFeeLoading={false} fee={fee || ''} testid={''}/>
-      {stage !== 'done' && (
-        <AlertStyled type='warning'>
-          Please do not close or refresh this page until the token nesting is completed.
-        </AlertStyled>
-      )}
       {stage === 'done' && (
         <ButtonsWrapper>
           <Button title='Go to token' onClick={onComplete} />
