@@ -17,7 +17,7 @@ import { useAccounts } from 'hooks/useAccounts';
 import { CollectionMode } from 'api/chainApi/types';
 import { FeeMessage } from 'components';
 
-export const CreateBundleModal = ({ token, onFinish, testid }: TBundleTransferModalBodyProps) => {
+export const CustomizeModal = ({ token, onFinish, testid }: TBundleTransferModalBodyProps) => {
   const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse | null>(null);
   const [tokens, setTokens] = useState<(TokenItem & { selected?: boolean })[]>([]);
   const [total, setTotal] = useState<number>(0);
@@ -27,11 +27,9 @@ export const CreateBundleModal = ({ token, onFinish, testid }: TBundleTransferMo
   const [page, setPage] = useState<number>(0);
   const [isFetching, setIsFetching] = useState(false);
   const [stagesModalIsVisible, setStagesModalIsVisible] = useState(false);
-  const [totalNesting, setTotalNesting] = useState(0);
-  const [nestingProgress, setNestingProgress] = useState(1);
-  const [totalUnnesting, setTotalUnnesting] = useState(0);
-  const [unnestingProgress, setUnnestingProgress] = useState(1);
-  const [transferStage, setTransferStage] = useState<'unnesting' | 'nesting' | 'done'>('nesting');
+  const [totalToTransfer, setTotalToTransfer] = useState(0);
+  const [progress, setProgress] = useState(1);
+  const [transferStage, setTransferStage] = useState<'transferring' | 'done'>('transferring');
   const { api } = useApi();
   const { error } = useNotifications();
 
@@ -92,9 +90,8 @@ export const CreateBundleModal = ({ token, onFinish, testid }: TBundleTransferMo
 
   const onSubmut = useCallback(async () => {
     if (!selectedAccount) return;
-    setTransferStage('unnesting');
-    setUnnestingProgress(0);
-    setNestingProgress(0);
+    setTransferStage('transferring');
+    setProgress(0);
     setStagesModalIsVisible(true);
     const nestedIndexes = nestedTokens.map(({ collectionId, tokenId }) => `${collectionId}_${tokenId}`);
     const tokensToNest = Object.values(selectedTokens)
@@ -106,52 +103,40 @@ export const CreateBundleModal = ({ token, onFinish, testid }: TBundleTransferMo
 
     const parentAddress = Address.nesting.idsToAddress(token.collectionId, token.tokenId);
 
-    setTotalUnnesting(tokensToUnnest.length);
-    setTotalNesting(tokensToNest.length);
-    if (tokensToNest.length === 0 && tokensToUnnest.length === 0) {
+    setTotalToTransfer(tokensToUnnest.length + tokensToNest.length);
+    if ((tokensToNest.length + tokensToUnnest.length) === 0) {
       setStagesModalIsVisible(false);
 
       return;
     }
     try {
-      await api?.nft?.transferTokensBatch(tokensToUnnest.map((token) => ({
-          from: parentAddress,
+      await api?.nft?.transferTokensBatch([
+        ...tokensToUnnest.map(({ collectionId, tokenId }) => ({
+          from: Address.normalize.ethereumAddress(parentAddress).toLowerCase(),
           to: selectedAccount?.address,
-          token: {
-            collectionId: token.collectionId,
-            tokenId: token.tokenId
-          },
+          token: { collectionId, tokenId },
           amount: 1,
           mode: 'NFT' as CollectionMode
         })),
+        ...tokensToNest.map(({ collectionId, tokenId }) => ({
+          from: selectedAccount?.address,
+          to: Address.normalize.ethereumAddress(parentAddress),
+          token: { collectionId, tokenId },
+          amount: 1,
+          mode: 'NFT' as CollectionMode
+        }))
+      ],
         {
           account: selectedAccount,
           onSubmittedOne: () => {
-            setUnnestingProgress((count) => count + 1);
-          }
-        });
-
-      setTransferStage('nesting');
-
-      await api?.nft?.transferTokensBatch(tokensToNest.map((token) => ({
-          from: selectedAccount?.address,
-          to: parentAddress,
-          token: {
-            collectionId: token.collectionId,
-            tokenId: token.tokenId
-          },
-          amount: 1,
-          mode: 'NFT' as CollectionMode
-        })), {
-          account: selectedAccount,
-          onSubmittedOne: () => {
-            setNestingProgress((count) => count + 1);
+            setProgress((count) => count + 1);
           }
         });
     } catch (e: any) {
       error(e.message);
       setStagesModalIsVisible(false);
     }
+    setProgress(totalToTransfer);
     setTransferStage('done');
   }, [selectedAccount, nestedTokens, selectedTokens, token.collectionId, token.tokenId, api?.nft]);
 
@@ -238,14 +223,14 @@ export const CreateBundleModal = ({ token, onFinish, testid }: TBundleTransferMo
 
   return (<>
     <Content>
-      <Heading size='2'>Customize</Heading>
+      <Heading size='2'>Customize your NFT</Heading>
     </Content>
     <CreateBundleModalWrapper>
       <NestingWrapper>
         <TokenWrapper>
           <TokenMediaWrapper>
             <TokensMedia imageUrl={(token as TokenByIdResponse).file || (token as TokenByIdResponse).image} testid={''} />
-            {images.map((image) => <TokensMedia key={image?.ipfsCid} imageUrl={image} testid={'bundle-token-image'} />)}
+            {images.map((image, index) => <TokensMedia key={`${image?.ipfsCid}_${index}`} imageUrl={image} testid={'bundle-token-image'} />)}
           </TokenMediaWrapper>
           <Text
             size='l'
@@ -264,13 +249,6 @@ export const CreateBundleModal = ({ token, onFinish, testid }: TBundleTransferMo
           </Text>
         </TokenWrapper>
         <EquipsSection>
-          {/* <FilterWrapper>
-            <SearchField
-              searchValue={searchText}
-              onSearchStringChange={setSearchText}
-              onSearch={onSearch}
-            />
-          </FilterWrapper> */}
           <EquipsListWrapper>
             {tokens.map((token) => <TokensCard
               testid={''}
@@ -289,19 +267,26 @@ export const CreateBundleModal = ({ token, onFinish, testid }: TBundleTransferMo
         </EquipsSection>
       </NestingWrapper>
       <ActionsWrapper>
-        <FeeMessage isFeeLoading={isFetchingFee} fee={fee || ''} testid={''}/>
-        <Button role='primary' title='Save' onClick={onSubmut} />
-        <Button role='outlined' title='Cancel' onClick={onFinish} />
+        <Button role='primary'
+          size='middle'
+          title='Save'
+          onClick={onSubmut}
+        />
+        <Button role='outlined'
+          size='middle'
+          title='Cancel'
+          onClick={onFinish}
+        />
       </ActionsWrapper>
       {(isFetching || isFetchingTokens || stagesModalIsVisible) && <LoaderWrapper><Loader /></LoaderWrapper>}
     </CreateBundleModalWrapper>
     <StatusTransactionModal
+      title={transferStage === 'transferring' ? 'Please wait' : 'Done'}
       isVisible={stagesModalIsVisible}
-      totalNesting={totalNesting}
-      totalUnnesting={totalUnnesting}
-      nestingProgress={nestingProgress}
-      unnestingProgress={unnestingProgress}
+      total={totalToTransfer}
+      progress={progress}
       stage={transferStage}
+      fee={fee}
       onComplete={() => {
         setStagesModalIsVisible(false);
         onFinish();
@@ -330,6 +315,9 @@ const NestingWrapper = styled.div`
   display: flex;
   flex-direction: row;
   gap: var(--gap);
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 `;
 
 const ActionsWrapper = styled.div`
@@ -341,6 +329,9 @@ const ActionsWrapper = styled.div`
   &>div {
     margin: 0;
   } 
+  button {
+    min-width: 140px;
+  }
 `;
 
 const TokenWrapper = styled.div`
@@ -367,19 +358,28 @@ const EquipsSection = styled.div`
   gap: var(--gap);
 `;
 
-const FilterWrapper = styled.div`
-  height: 42px;
-`;
-
 const EquipsListWrapper = styled.div`
   display: grid;
   gap: 16px;
-  grid-template-columns: 1fr 1fr 1fr;
-  min-width: 500px;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  width: 700px;
   max-height: 500px;
   overflow-y: auto;
   padding-right: 8px;
   height: 100%;
+  @media (max-width: 1280px) {
+    grid-template-columns: 1fr 1fr 1fr;
+    min-width: auto;
+    width: 550px;
+  }
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr 1fr 1fr;
+    width: auto;
+  }
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr 1fr;
+    width: auto;
+  }
 `;
 
 const LoaderWrapper = styled.div`

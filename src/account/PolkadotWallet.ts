@@ -1,13 +1,13 @@
 import { ChainPropertiesResponse, UnsignedTxPayloadResponse } from '@unique-nft/sdk';
 import { web3FromSource } from '@polkadot/extension-dapp';
 import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
-import { Polkadot } from '@unique-nft/utils/extension';
+import { Polkadot, SignerPayloadJSON } from '@unique-nft/utils/extension';
 import { Address } from '@unique-nft/utils';
 
 import { AccountUtils } from './AccountUtils';
 import { Account, AccountSigner, BaseWalletEntity, BaseWalletType } from './types';
 
-export type PolkadotWalletName = 'polkadot-js' | 'subwallet-js' | 'talisman';
+export type PolkadotWalletName = 'polkadot-js' | 'subwallet-js' | 'talisman' | 'enkrypt' | 'novawallet';
 
 export class PolkadotWallet implements BaseWalletEntity<InjectedAccountWithMeta> {
   _accounts = new Map<string, BaseWalletType<InjectedAccountWithMeta>>();
@@ -65,7 +65,17 @@ export class PolkadotWallet implements BaseWalletEntity<InjectedAccountWithMeta>
     }
 
     const result = await injector.signer.signPayload(
-      unsignedTxPayload?.signerPayloadJSON
+      {
+        ...unsignedTxPayload?.signerPayloadJSON as SignerPayloadJSON,
+        transactionVersion: unsignedTxPayload.signerPayloadJSON.transactionVersion as `0x${string}`,
+        tip: unsignedTxPayload.signerPayloadJSON.tip as `0x${string}`,
+        specVersion: unsignedTxPayload.signerPayloadJSON.specVersion as `0x${string}`,
+        nonce: unsignedTxPayload.signerPayloadJSON.nonce as `0x${string}`,
+        era: unsignedTxPayload.signerPayloadJSON.era as `0x${string}`,
+        genesisHash: unsignedTxPayload.signerPayloadJSON.genesisHash as `0x${string}`,
+        blockNumber: unsignedTxPayload.signerPayloadJSON.blockNumber as `0x${string}`,
+        blockHash: unsignedTxPayload.signerPayloadJSON.blockHash as `0x${string}`
+      }
     );
 
     return result.signature;

@@ -3,6 +3,7 @@ import { AllowedCollections } from 'api/restApi/settings/types';
 import { NetworkOptions } from 'api/sdk/sdkClient';
 import BaseController from './controllers/BaseController';
 import { TransactionOptions } from './types';
+import { Blob as BufferBlob, Buffer } from 'buffer';
 
 export class UniqueSDKCollectionController extends BaseController {
   private allowedCollections: AllowedCollections;
@@ -48,24 +49,14 @@ export class UniqueSDKCollectionController extends BaseController {
 
   async uploadFile(file: Blob): Promise<string | undefined> {
     if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
-    return (await this.uniqueSdk.ipfs.uploadFile({ file }))?.fullUrl;
+
+    const blob = Buffer.from(await file.arrayBuffer());
+
+    return (await this.uniqueSdk.ipfs.uploadFile({ file: blob }))?.fullUrl;
   }
 
   async setProperties(collectionId: number, properties: CollectionProperty[], { account }: TransactionOptions): Promise<void> {
-    // const unsignedTxPayload = await this.uniqueSdk.collection.setProperties.build({
-    //   address: account.address,
-    //   collectionId,
-    //   properties
-    // });
-    // if (!unsignedTxPayload) throw new Error('Transaction build error');
-    // const { signature } = await this.uniqueSdk.collection.setProperties.sign(unsignedTxPayload, { signer: account });
-    // if (!signature) throw new Error('Signing failed');
     const adapter = this.getAdapter(account);
     await adapter.setCollectionProperties(collectionId, properties, account.signer);
-
-    // await this.uniqueSdk.collection.setProperties.submit({
-    //   signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
-    //   signature
-    // });
   }
 }

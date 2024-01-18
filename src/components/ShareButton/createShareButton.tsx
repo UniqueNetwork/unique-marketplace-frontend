@@ -17,7 +17,7 @@ function createShareButton<OptionProps extends Record<string, any>, LinkOptions 
     const passedProps = { ...props };
 
     // remove keys from passed props that are passed as opts
-    const optsKeys = Object.keys(opts);
+    const optsKeys = Object.keys(opts as Record<string, any>);
     optsKeys.forEach((key) => {
       delete passedProps[key];
     });
@@ -30,7 +30,7 @@ function createShareButton<OptionProps extends Record<string, any>, LinkOptions 
         networkLink={link}
         opts={optsMap(props)}
       />
-  );
+    );
 }
 
   CreatedButton.displayName = `ShareButton-${networkName}`;

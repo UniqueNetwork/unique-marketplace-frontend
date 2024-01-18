@@ -1,10 +1,9 @@
 import React, { FC, useMemo, useState } from 'react';
-import { Loader, Text } from '@unique-nft/ui-kit';
+import { Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { useApi } from 'hooks/useApi';
 import { Primary600 } from 'styles/colors';
 import { TokenTypeEnum } from 'pages/MyTokens/types';
-import { BadgeEnum } from 'components/Picture';
 import { TokensMedia } from './TokenMedia';
 import { Checkbox } from 'components/UI';
 import { TokenItem } from '../../types';
@@ -22,8 +21,6 @@ export type TTokensCard = {
 
 export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, showOwner, isChecked, onCheck, ...props }) => {
   const [token] = useState<TokenItem | undefined>(props.token);
-  const [isFetching, setIsFetching] = useState<boolean>(false);
-  const [isBundleState, setIsBundleState] = useState<boolean>();
 
   const { api } = useApi();
 
@@ -36,7 +33,6 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, sho
       const { image, tokenName, collectionName } = token || {};
       return {
         tokenTitle: tokenName,
-        // collectionTitle: `${collectionName?.substring(0, 25) || ''} [id ${collectionId || ''}]`,
         imageUrl: image,
         type: TokenTypeEnum.NFT,
         collectionName
@@ -44,10 +40,6 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, sho
     }
     return {};
   }, [collectionId, tokenId, token, api]);
-
-  const badges: BadgeEnum[] = [
-    ...(isBundleState ? [BadgeEnum.Bundle] : [])
-  ];
 
   return (
     <TokensCardStyled onClick={() => onCheck?.(!isChecked)}>
@@ -60,7 +52,6 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, sho
         tokenId={tokenId}
         imageUrl={imageUrl}
         testid={`${testid}-token-media`}
-        badges={badges}
       />
       <Description>
         <BasicDataWrapper>
@@ -71,13 +62,11 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, sho
           >
             {tokenTitle}
           </Text>
-          <Text color='primary-600' size='s'>
+          <Text color='primary-600' size='xs'>
             {collectionName}
           </Text>
         </BasicDataWrapper>
       </Description>
-
-      {!!isFetching && <Loader isFullPage />}
     </TokensCardStyled>
   );
 };
@@ -89,6 +78,12 @@ const TokensCardStyled = styled.div`
   justify-content: flex-start;
   position: relative;
   cursor: pointer;
+  border: 1px solid var(--color-grey-300);
+  border-radius: var(--prop-border-radius);
+  height: fit-content;
+  &:hover {
+    box-shadow: 1 1 2 var(--prop-shadow);
+  }
 `;
 
 const BasicDataWrapper = styled.div`
@@ -102,7 +97,8 @@ const BasicDataWrapper = styled.div`
 const Description = styled.div`
   display: flex;
   flex-direction: column;
-  width: 100%;
+  width: calc(100% - var(--gap));
+  padding: 0 calc(var(--gap) / 2) calc(var(--gap) / 2);
   span {
     color: ${Primary600};
   }

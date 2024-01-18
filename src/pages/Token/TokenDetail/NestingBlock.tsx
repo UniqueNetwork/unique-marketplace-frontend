@@ -19,20 +19,20 @@ export const NestingTokenBlock: FC<NestingTokenBlockProps> = ({ token, testid, o
   const { tokenOwner } = token?.collection?.permissions?.nesting || {};
   const { currentChainId } = useApi();
 
-  const canCustomize = false; // token?.collection.properties.find(({ key }) => key === 'is_customizable')?.value;
+  const canCustomize = token?.collection.properties.find(({ key }) => key === 'is_customizable')?.value;
 
   if (blockedNestingCollections[currentChainId || '']?.includes(token?.collectionId || 0)) return null;
 
   return (
     <>
       <ActionsWrapper>
-        <Heading size='4' >Nesting</Heading>
+        <Heading size='4' >{canCustomize ? 'Customization' : 'Nesting'}</Heading>
         <ButtonsWrapper>
-          <Button
+          {!canCustomize && <Button
             title={'Nest this token'}
             onClick={onNestClick}
             testid={`${testid}-transfer-button`}
-          />
+          />}
           {canCustomize && tokenOwner && <Button
             title={'Customize'}
             onClick={onCreateBundle}

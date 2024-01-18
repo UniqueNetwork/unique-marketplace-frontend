@@ -1,30 +1,29 @@
 import { Alert, Heading, Loader, Text } from '@unique-nft/ui-kit';
+import { FeeMessage } from 'components';
 import { Button, Icon } from 'components/UI';
 import { Modal, ModalProps } from 'components/UI/Modal';
 import { ReactNode } from 'react';
 import styled from 'styled-components';
 
 type Props = Pick<ModalProps, 'isVisible'> & {
-  totalNesting: number;
-  totalUnnesting: number;
-  unnestingProgress: number;
-  nestingProgress: number;
+  total: number;
+  progress: number;
   isVisible: boolean;
   title?: string;
-  stage: 'unnesting' | 'nesting' | 'done';
+  stage: 'transferring' | 'done';
   warning?: ReactNode;
+  fee?: string;
   onComplete(): void;
   onContinue(): void;
 };
 
 export const StatusTransactionModal = ({
   title = 'Please wait',
-  totalNesting,
-  totalUnnesting,
-  unnestingProgress,
-  nestingProgress,
+  total,
+  progress,
   isVisible,
   stage,
+  fee,
   onComplete,
   onContinue
 }: Props) => {
@@ -32,34 +31,14 @@ export const StatusTransactionModal = ({
     <Modal isVisible={isVisible} isClosable={false}>
       <Heading>{title}</Heading>
       <StagesWrapper>
-        {!!totalUnnesting && <>
-          {stage === 'unnesting' ? <Loader /> : <Icon name={'check-circle'} size={24} color={'var(--color-additional-dark)'} />}
-          <StageDescription>
-            <Text size='m' weight='regular'>{`Unnesting ${
-              unnestingProgress
-            } of ${totalUnnesting} tokens`}</Text>
-            <Text size='s' color='grey-500'>
-              Step 1
-            </Text>
-          </StageDescription>
-        </>}
-        {!!totalNesting && <>
-          {stage === 'nesting' ? <Loader /> : stage === 'done' ? <Icon name={'check-circle'} size={24} color={'var(--color-additional-dark)'} /> : <div></div>}
-          <StageDescription>
-            <Text size='m' weight='regular'>{`Nesting ${
-              nestingProgress
-            } of ${totalNesting} tokens`}</Text>
-            <Text size='s' color='grey-500'>
-              Step {totalUnnesting ? '2' : '1'}
-            </Text>
-          </StageDescription>
-        </>}
+        {stage === 'transferring' ? <Loader /> : <Icon name={'check-circle'} size={24} color={'var(--color-additional-dark)'} />}
+        <StageDescription>
+          <Text size='m' weight='regular'>{`Transferring ${
+              progress
+            } of ${total} tokens`}</Text>
+        </StageDescription>
       </StagesWrapper>
-      {stage !== 'done' && (
-        <AlertStyled type='warning'>
-          Please do not close or refresh this page until the token nesting is completed.
-        </AlertStyled>
-      )}
+      <FeeMessage isFeeLoading={false} fee={fee || ''} testid={''}/>
       {stage === 'done' && (
         <ButtonsWrapper>
           <Button title='Go to token' onClick={onComplete} />

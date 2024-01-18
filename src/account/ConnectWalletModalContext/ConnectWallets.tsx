@@ -10,6 +10,9 @@ import { ImportViaSeedAccountModal } from 'pages/Accounts/Modals/ImportViaSeed';
 import { ImportViaJSONAccountModal } from 'pages/Accounts/Modals/ImportViaJson';
 import { ExtensionMissingModal, Extensions } from './ExtensionMissing';
 import SubWalletIcon from 'static/icons/subwallet.svg';
+import EnkriptIcon from 'static/icons/enkrypt.svg';
+import NovaWalletIcon from 'static/icons/nova_icon_radial.svg';
+import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 
 enum AccountModal {
   CREATE = 'create',
@@ -89,6 +92,30 @@ export const ConnectWallets = () => {
     }
   };
 
+  const handleConnectToEnkryptExtension = async () => {
+    try {
+      await walletsCenter.connectWallet('enkrypt');
+      fetchAccounts();
+      setIsOpenConnectWalletModal(false);
+    } catch (e: any) {
+      setMissingExtension('Enkrypt');
+      setCurrentModal(AccountModal.EXTENSION_MISSING);
+    }
+  };
+
+  const handleConnectToNovaWallet = async () => {
+    try {
+      await walletsCenter.connectWallet('polkadot-js');
+      fetchAccounts();
+      setIsOpenConnectWalletModal(false);
+    } catch (e: any) {
+      setMissingExtension('NovaWallet');
+      setCurrentModal(AccountModal.EXTENSION_MISSING);
+    }
+  };
+
+  const isMobile = DeviceSize.sm <= useDeviceSize();
+
   return (
     <>
       <Modal
@@ -116,19 +143,34 @@ export const ConnectWallets = () => {
 
         <p>You can also create or connect wallets via these providers:</p> */}
         <Wallets>
-          <WalletItem onClick={handleConnectToPolkadotExtension}>
-            <Icon size={40} name='polkadot-wallet' /> <span>Polkadot.js</span>
-          </WalletItem>
-          <WalletItem onClick={handleConnectToMetamask}>
-            <Icon size={40} name='metamask-wallet' /> <span>Metamask</span>
-          </WalletItem>
-          <WalletItem onClick={handleConnectToTalismanExtension}>
-            <Icon size={40} name='talisman-wallet' /> <span>Talisman</span>
-          </WalletItem>
-          <WalletItem onClick={handleConnectToSubWalletExtension}>
-            <Icon file={SubWalletIcon} size={40} />
-            <span>SubWallet</span>
-          </WalletItem>
+          {!window.walletExtension?.isNovaWallet && <>
+            <WalletItem onClick={handleConnectToPolkadotExtension}>
+              <Icon size={40} name='polkadot-wallet' /> <span>Polkadot.js</span>
+            </WalletItem>
+            <WalletItem onClick={handleConnectToMetamask}>
+              <Icon size={40} name='metamask-wallet' /> <span>Metamask</span>
+            </WalletItem>
+            <WalletItem onClick={handleConnectToTalismanExtension}>
+              <Icon size={40} name='talisman-wallet' /> <span>Talisman</span>
+            </WalletItem>
+            <WalletItem onClick={handleConnectToSubWalletExtension}>
+              <Icon file={SubWalletIcon} size={40} />
+              <span>SubWallet</span>
+            </WalletItem>
+            <WalletItem onClick={handleConnectToEnkryptExtension}>
+              <Icon file={EnkriptIcon} size={40} />
+              <span>Enkrypt</span>
+            </WalletItem>
+            {!isMobile && <div></div>}
+            {isMobile && <WalletItem href='https://novawallet.io' target='_blank'>
+              <Icon file={NovaWalletIcon} size={40} />
+              <span>Nova Wallet</span>
+            </WalletItem>}
+          </>}
+          {window.walletExtension?.isNovaWallet && <WalletItem onClick={handleConnectToNovaWallet}>
+            <Icon file={NovaWalletIcon} size={40} />
+            <span>Nova Wallet</span>
+          </WalletItem>}
         </Wallets>
       </Modal>
 
@@ -161,8 +203,13 @@ const Wallets = styled.div`
   flex-wrap: wrap;
   margin-top: var(--prop-gap);
   gap: calc(var(--prop-gap) / 2);
-  &>div {
-    width: 45%;
+  &>a {
+    width: calc(50% - 6px);
+  }
+  @media (max-width: 768px) {
+    &>a {
+        width: 100%;
+    }
   }
   svg {
     min-width: 40px;
@@ -174,7 +221,7 @@ const Wallets = styled.div`
   }
 `;
 
-const WalletItem = styled.div`
+const WalletItem = styled.a`
   display: inline-flex;
   align-items: center;
   border: 1px solid var(--color-grey-100);
@@ -183,11 +230,13 @@ const WalletItem = styled.div`
   flex: 1 1 auto;
   cursor: pointer;
   border-radius: calc(var(--prop-gap) / 2);
-
   span {
     margin-left: 10px;
     font-size: 18px;
     font-weight: 500;
     color: var(--color-additional-dark);
+  }
+  svg {
+    min-width: 40px;
   }
 `;

@@ -122,16 +122,16 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
   const tokenPath = useMemo(() => {
     if (owner && type === TokenTypeEnum.RFT) {
       return generatePath('/:currentChainId/token/:address/:collectionId/:tokenId', {
-        currentChainId,
+        currentChainId: currentChainId || null,
         address: owner,
-        collectionId: collectionId?.toString(),
-        tokenId: tokenId?.toString()
+        collectionId: collectionId?.toString() || null,
+        tokenId: tokenId?.toString() || null
       });
     }
     return generatePath('/:currentChainId/token/:collectionId/:tokenId', {
-      currentChainId,
-      collectionId: collectionId?.toString(),
-      tokenId: tokenId?.toString()
+      currentChainId: currentChainId || null,
+      collectionId: collectionId?.toString() || null,
+      tokenId: tokenId?.toString() || null
     });
   }, [currentChainId, collectionId, tokenId, type, owner]);
 

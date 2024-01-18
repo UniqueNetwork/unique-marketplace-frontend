@@ -76,6 +76,7 @@ module.exports = {
     "@typescript-eslint/no-unsafe-call": "warn",
     "@typescript-eslint/no-unsafe-member-access": "warn",
     "@typescript-eslint/restrict-template-expressions": "warn",
+    "@typescript-eslint/no-misused-promises": "off",
     "react/display-name": "warn",
     "arrow-parens": ["error", "always"],
     "default-param-last": [0], // conflicts with TS version (this one doesn't allow TS ?)

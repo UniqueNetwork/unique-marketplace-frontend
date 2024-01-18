@@ -97,7 +97,7 @@ export const Picture: FC<PictureProps> = ({
         height={size || undefined}
         data-testid={`${testid}`}
         loading='lazy'
-        onLoadStart={() => setIsLoading(true)}
+        // onLoadStart={() => setIsLoading(true)}
         onLoad={() => setIsLoading(false)}
         onError={() => setHasError(true)}
       />}

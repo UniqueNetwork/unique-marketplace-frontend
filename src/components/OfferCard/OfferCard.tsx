@@ -57,13 +57,13 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
   }, [isBidder, topBid, selectedAccount]);
 
   const tokenPath = useMemo(() => generatePath('/:currentChainId/token/:collectionId/:tokenId', {
-    currentChainId,
+    currentChainId: currentChainId || null,
     collectionId: offer?.collectionId.toString(),
     tokenId: offer?.tokenId.toString()
   }), [currentChainId, offer]);
 
   const collectionPath = useMemo(() => generatePath('/:currentChainId/collection/:collectionId', {
-    currentChainId,
+    currentChainId: currentChainId || null,
     collectionId: offer?.collectionId.toString()
   }), [currentChainId, offer]);
 
