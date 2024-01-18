@@ -62,7 +62,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, sho
           >
             {tokenTitle}
           </Text>
-          <Text color='primary-600' size='s'>
+          <Text color='primary-600' size='xs'>
             {collectionName}
           </Text>
         </BasicDataWrapper>
