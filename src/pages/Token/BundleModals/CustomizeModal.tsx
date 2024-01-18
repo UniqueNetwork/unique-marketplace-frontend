@@ -361,12 +361,20 @@ const EquipsSection = styled.div`
 const EquipsListWrapper = styled.div`
   display: grid;
   gap: 16px;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
   min-width: 500px;
   max-height: 500px;
   overflow-y: auto;
   padding-right: 8px;
   height: 100%;
+  @media (max-width: 1280px) {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    min-width: auto;
+  }
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr 1fr 1fr;
+    min-width: auto;
+  }
   @media (max-width: 768px) {
     grid-template-columns: 1fr 1fr;
     min-width: auto;
