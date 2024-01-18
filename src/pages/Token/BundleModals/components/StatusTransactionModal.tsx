@@ -1,4 +1,5 @@
 import { Alert, Heading, Loader, Text } from '@unique-nft/ui-kit';
+import { FeeMessage } from 'components';
 import { Button, Icon } from 'components/UI';
 import { Modal, ModalProps } from 'components/UI/Modal';
 import { ReactNode } from 'react';
@@ -11,6 +12,7 @@ type Props = Pick<ModalProps, 'isVisible'> & {
   title?: string;
   stage: 'transferring' | 'done';
   warning?: ReactNode;
+  fee?: string;
   onComplete(): void;
   onContinue(): void;
 };
@@ -21,6 +23,7 @@ export const StatusTransactionModal = ({
   progress,
   isVisible,
   stage,
+  fee,
   onComplete,
   onContinue
 }: Props) => {
@@ -33,11 +36,9 @@ export const StatusTransactionModal = ({
           <Text size='m' weight='regular'>{`Transferring ${
               progress
             } of ${total} tokens`}</Text>
-          <Text size='s' color='grey-500'>
-            Step 1
-          </Text>
         </StageDescription>
       </StagesWrapper>
+      <FeeMessage isFeeLoading={false} fee={fee || ''} testid={''}/>
       {stage !== 'done' && (
         <AlertStyled type='warning'>
           Please do not close or refresh this page until the token nesting is completed.

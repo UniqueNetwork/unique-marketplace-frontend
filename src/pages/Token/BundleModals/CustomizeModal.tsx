@@ -223,7 +223,7 @@ export const CustomizeModal = ({ token, onFinish, testid }: TBundleTransferModal
 
   return (<>
     <Content>
-      <Heading size='2'>Customize</Heading>
+      <Heading size='2'>Customize your NFT</Heading>
     </Content>
     <CreateBundleModalWrapper>
       <NestingWrapper>
@@ -267,9 +267,16 @@ export const CustomizeModal = ({ token, onFinish, testid }: TBundleTransferModal
         </EquipsSection>
       </NestingWrapper>
       <ActionsWrapper>
-        <FeeMessage isFeeLoading={isFetchingFee} fee={fee || ''} testid={''}/>
-        <Button role='primary' title='Save' onClick={onSubmut} />
-        <Button role='outlined' title='Cancel' onClick={onFinish} />
+        <Button role='primary'
+          size='middle'
+          title='Save'
+          onClick={onSubmut}
+        />
+        <Button role='outlined'
+          size='middle'
+          title='Cancel'
+          onClick={onFinish}
+        />
       </ActionsWrapper>
       {(isFetching || isFetchingTokens || stagesModalIsVisible) && <LoaderWrapper><Loader /></LoaderWrapper>}
     </CreateBundleModalWrapper>
@@ -279,6 +286,7 @@ export const CustomizeModal = ({ token, onFinish, testid }: TBundleTransferModal
       total={totalToTransfer}
       progress={progress}
       stage={transferStage}
+      fee={fee}
       onComplete={() => {
         setStagesModalIsVisible(false);
         onFinish();
@@ -307,6 +315,9 @@ const NestingWrapper = styled.div`
   display: flex;
   flex-direction: row;
   gap: var(--gap);
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 `;
 
 const ActionsWrapper = styled.div`
@@ -318,6 +329,9 @@ const ActionsWrapper = styled.div`
   &>div {
     margin: 0;
   } 
+  button {
+    min-width: 140px;
+  }
 `;
 
 const TokenWrapper = styled.div`
@@ -344,10 +358,6 @@ const EquipsSection = styled.div`
   gap: var(--gap);
 `;
 
-const FilterWrapper = styled.div`
-  height: 42px;
-`;
-
 const EquipsListWrapper = styled.div`
   display: grid;
   gap: 16px;
@@ -357,6 +367,10 @@ const EquipsListWrapper = styled.div`
   overflow-y: auto;
   padding-right: 8px;
   height: 100%;
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr 1fr;
+    min-width: auto;
+  }
 `;
 
 const LoaderWrapper = styled.div`
