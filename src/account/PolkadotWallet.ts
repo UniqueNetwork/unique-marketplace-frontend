@@ -31,20 +31,20 @@ export class PolkadotWallet implements BaseWalletEntity<InjectedAccountWithMeta>
         .filter(({ address }) => Address.is.substrateAddress(address))
         .map((account) => {
         const normalizedAddress = Address.normalize.substrateAddress(account.address);
-
+        const address = AccountUtils.encodeAddress(
+          account.address,
+          this.chainProperties.SS58Prefix
+        );
         return [
           normalizedAddress,
           {
             name: account.meta.name || '',
             normalizedAddress,
-            address: AccountUtils.encodeAddress(
-              account.address,
-              this.chainProperties.SS58Prefix
-            ),
+            address,
             walletMetaInformation: account,
             signerType: AccountSigner.extension,
             sign: this.getSignature.bind(this),
-            signer: account.signer,
+            signer: { ...account.signer, address },
             changeChain: this.changeChain.bind(this),
             isMintingEnabled: this.isMintingEnabled
           }
