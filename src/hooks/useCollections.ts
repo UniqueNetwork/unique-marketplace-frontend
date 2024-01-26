@@ -1,4 +1,4 @@
-import { useCallback, useContext, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { useApi } from 'hooks/useApi';
 import { Account } from 'account/types';
 import { defaultParams } from 'api/restApi/base/axios';
@@ -7,6 +7,7 @@ import { MyCollection, SetCollectionTokensPayload } from 'api/restApi/collection
 import CollectionsContext from 'collections/CollectionsContext';
 import config from '../config';
 import { Address } from '@unique-nft/utils';
+import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 
 const endpoint = '/collections';
 
@@ -15,15 +16,36 @@ export const addCollection = (baseURL: string, id: number) => patch(`${endpoint}
 export const deleteCollections = (baseURL: string, id: number) => deleteRequest(`${endpoint}/${id}`, { headers: { ...defaultParams.headers }, ...defaultParams, baseURL });
 export const setCollectionTokens = (baseURL: string, { collectionId, tokens }: SetCollectionTokensPayload) => patch(`${endpoint}/allowed/tokens/${collectionId}`, { tokens }, { headers: { ...defaultParams.headers }, ...defaultParams, baseURL });
 
+type CustomizableCollectionRelationship = Record<number, number[]>;
+
 export const useCollections = () => {
   const { api, baseURL, settings, currentChainId } = useApi();
-  const { isFetching: isFetchingFeaturedCollections, collections: featuredCollections, fetchCollections: fetchFeaturedCollections } = useContext(CollectionsContext);
+  const { collections: featuredCollections } = useContext(CollectionsContext);
   const [isFetching, setIsFetching] = useState(false);
   const [collections, setCollections] = useState<MyCollection[]>([]);
+  const [customizableCollections, setCustomizableCollections] = useState<CustomizableCollectionRelationship>({});
+
+  useEffect(() => {
+    const customizableCollections = [...collections, ...featuredCollections].reduce<CustomizableCollectionRelationship>((acc, { id, properties, permissions }) => {
+      if (properties.find(({ key }) => key === 'is_customizable')) {
+        acc[id] = permissions?.nesting?.restricted || [];
+      }
+      return acc;
+    }, {});
+
+    setCustomizableCollections((value) => {
+      return {
+        ...value,
+        ...customizableCollections
+      };
+    });
+  }, [featuredCollections, collections]);
 
   const getCollection = useCallback(async (collectionId: number) => {
-    const collection = featuredCollections.find(({ id }) => collectionId === id);
-    return collection || await api?.collection?.getCollection(Number(collectionId));
+    const collection = featuredCollections.find(({ id }) => collectionId === id) || collections.find(({ id }) => collectionId === id);
+    console.log(collection, collections);
+
+    return collection as CollectionInfoWithSchemaResponse || await api?.collection?.getCollection(Number(collectionId));
   }, [api?.collection, featuredCollections]);
 
   const getCollectionTokensCount = useCallback(async (collectionId: number) => {
@@ -82,6 +104,8 @@ export const useCollections = () => {
             id: collection_id
             name: name
             tokenPrefix: token_prefix
+            properties
+            permissions
             __typename
           }
           __typename
@@ -126,6 +150,14 @@ export const useCollections = () => {
     setIsFetching(false);
   }, [baseURL]);
 
+  const collectionIsCustomizable = useCallback((collectionId: number) => {
+    return !!customizableCollections[collectionId];
+  }, [customizableCollections]);
+
+  const collectionIsWearable = useCallback((collectionId: number) => {
+    return Object.values(customizableCollections).flat().includes(collectionId);
+  }, [customizableCollections]);
+
   return {
     // TODO: get rid of featuredCollections and, perhaps, CollectionContext as well
     featuredCollections,
@@ -136,6 +168,9 @@ export const useCollections = () => {
     appendCollection,
     removeCollection,
     setAllowedTokens,
-    getCollectionTokensCount
+    getCollectionTokensCount,
+    customizableCollections,
+    collectionIsCustomizable,
+    collectionIsWearable
   };
 };

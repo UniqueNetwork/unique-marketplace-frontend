@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { GetOffersRequestPayload, OffersResponse } from 'api/restApi/offers/types';
-import { FilterState } from 'components/Filters/types';
+import { FilterState, TypeOfAssets, TypeOfCustomizableNFTs } from 'components/Filters/types';
 import { useAccounts } from 'hooks/useAccounts';
 import { parseFilterState, setUrlParameter } from 'utils/helpers';
 import { defaultSortingValue } from '../constants';
@@ -11,9 +11,11 @@ import { useApi } from 'hooks/useApi';
 import { Address } from '@unique-nft/utils';
 import { useIsFirstRender } from 'hooks/useIsFirstRender';
 import { SelectOptionProps } from '@unique-nft/ui-kit';
+import { useCollections } from 'hooks/useCollections';
 
 export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fetch(payload: GetOffersRequestPayload): Promise<OffersResponse | TokensResponse> }) => {
   const { currentChainId, api } = useApi();
+  const { customizableCollections, featuredCollections } = useCollections();
   const { selectedAccount, isLoading: isAccountsLoading } = useAccounts();
   const searchParams = new URLSearchParams(window.location.search);
 
@@ -31,12 +33,40 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
         : Address.normalize.substrateAddress(selectedAccount.address))
       : undefined;
 
+    let _collections = collections;
+
+    if (otherFilter.typeOfAssets === TypeOfAssets.NFTs) {
+      const wearables = Object.values(customizableCollections).flat();
+      const customizables = Object.keys(customizableCollections).map(Number);
+
+      _collections = featuredCollections.map(({ id }) => id).filter((id) => {
+        return ![...customizables, ...wearables].includes(id);
+      });
+    }
+    if (otherFilter.typeOfAssets === TypeOfAssets.CustomizableNFTs) {
+      const wearables = Object.values(customizableCollections).flat();
+      const customizables = Object.keys(customizableCollections).map(Number);
+
+      _collections = [...customizables, ...wearables];
+    }
+
+    if (otherFilter.typeOfCustomizableNFTs === TypeOfCustomizableNFTs.Base) {
+      const customizables = Object.keys(customizableCollections).map(Number);
+
+      _collections = customizables;
+    }
+    if (otherFilter.typeOfCustomizableNFTs === TypeOfCustomizableNFTs.Wearables) {
+      const wearables = Object.values(customizableCollections).flat();
+
+      _collections = wearables;
+    }
+
     return {
       seller,
       bidderAddress: myBets ? selectedAccount?.address : undefined,
       isAuction: (timedAuction && fixedPrice) || (!timedAuction && !fixedPrice) ? undefined : !!timedAuction && !fixedPrice,
       ...prices,
-      collectionId: collections,
+      collectionId: _collections,
       numberOfAttributes: attributeCounts,
       attributes: attributes?.map(({ attribute }) => attribute),
       ...otherFilter
@@ -110,13 +140,14 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
   }, [selectedAccount?.address]);
 
   const filterCount = useMemo(() => {
-    const { statuses, prices, collections = [], attributes = [], attributeCounts = [] } = filterState || {};
+    const { statuses, prices, collections = [], attributes = [], attributeCounts = [], typeOfAssets, typeOfCustomizableNFTs } = filterState || {};
     const statusesCount: number = Object.values(statuses || {}).filter((status) => status).length;
     const collectionsCount: number = collections.length;
     const numberOfAttributesCount: number = attributeCounts.length;
     const attributesCount: number = attributes.length;
+    const typesCount = (!typeOfAssets ? 0 : 1) + (!typeOfCustomizableNFTs ? 0 : 1);
 
-    return statusesCount + collectionsCount + attributesCount + numberOfAttributesCount + (prices ? 1 : 0);
+    return statusesCount + collectionsCount + attributesCount + numberOfAttributesCount + (prices ? 1 : 0) + typesCount;
   }, [filterState]);
 
   const isFirstRender = useIsFirstRender();

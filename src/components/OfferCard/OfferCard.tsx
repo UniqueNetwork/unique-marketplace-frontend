@@ -1,21 +1,18 @@
-import React, { FC, useMemo } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 import { Text } from '@unique-nft/ui-kit';
 import { generatePath, Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Icon } from 'components/UI/Icon/Icon';
 import { Offer } from 'api/restApi/offers/types';
-import { useAccounts } from 'hooks/useAccounts';
-import { compareEncodedAddresses } from 'api/chainApi/utils/addressUtils';
 import { formatBalance } from 'utils/textUtils';
-import { timeDifference } from 'utils/timestampUtils';
 import { countNestedChildren, stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
 import { Primary600 } from 'styles/colors';
-import config from '../../config';
 import { TokensMedia } from '../TokensCard/TokensMedia';
 import { useApi } from '../../hooks/useApi';
 import BundleItemsCount from '../BundleItemsCount/BundleItemsCount';
-import { Link as UILink } from 'components/UI';
 import { BadgeEnum } from 'components/Picture';
+import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
+import { useCollections } from 'hooks/useCollections';
 
 export type TTokensCard = {
   offer: Offer
@@ -23,8 +20,9 @@ export type TTokensCard = {
 };
 
 export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
-  const { selectedAccount } = useAccounts();
-  const { currentChainId, chainProperties } = useApi();
+  const { currentChainId } = useApi();
+  const [collection, setCollection] = useState<(CollectionInfoWithSchemaResponse) | undefined>();
+  const { getCollection, collectionIsCustomizable, collectionIsWearable } = useCollections();
 
   const {
     image,
@@ -41,20 +39,20 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
 
   const videoProp = useMemo(() => stringToDecodedInfixOrUrlOrCidAndHash(video), [video]);
 
-  const isBidder = useMemo(() => {
-    if (!selectedAccount) return false;
-    return offer?.auction?.bids.some((bid) => compareEncodedAddresses(bid.bidderAddress, selectedAccount.address));
-  }, [offer, selectedAccount]);
+  // const isBidder = useMemo(() => {
+  //   if (!selectedAccount) return false;
+  //   return offer?.auction?.bids.some((bid) => compareEncodedAddresses(bid.bidderAddress, selectedAccount.address));
+  // }, [offer, selectedAccount]);
 
   const topBid = useMemo(() => {
     if (!offer?.auction?.bids?.length) return null;
     return offer?.auction?.bids[0].balance;
   }, [offer]);
 
-  const isTopBidder = useMemo(() => {
-    if (!selectedAccount || !isBidder || !topBid) return false;
-    return compareEncodedAddresses(offer?.auction!.bids[0].bidderAddress, selectedAccount.address);
-  }, [isBidder, topBid, selectedAccount]);
+  // const isTopBidder = useMemo(() => {
+  //   if (!selectedAccount || !isBidder || !topBid) return false;
+  //   return compareEncodedAddresses(offer?.auction!.bids[0].bidderAddress, selectedAccount.address);
+  // }, [isBidder, topBid, selectedAccount]);
 
   const tokenPath = useMemo(() => generatePath('/:currentChainId/token/:collectionId/:tokenId', {
     currentChainId: currentChainId || null,
@@ -72,6 +70,13 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
     return countNestedChildren(nestingChildTokens);
   }, [nestingChildTokens]);
 
+  const isCustomizable = useMemo(() => {
+    if (!offer?.collectionId) {
+      return;
+    }
+    return collectionIsCustomizable(offer?.collectionId) || collectionIsWearable(offer?.collectionId);
+  }, [offer?.collectionId, collectionIsCustomizable, collectionIsWearable]);
+
   return (
     <TokensCardStyled>
       <TokensMedia
@@ -80,7 +85,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
         imageUrl={image}
         video={videoProp}
         testid={`${testid}-token-media`}
-        badges={isBundle ? [BadgeEnum.Bundle] : []}
+        badges={isCustomizable ? [BadgeEnum.Customizable] : []}
       />
       <Description>
         <BasicDataWrapper>

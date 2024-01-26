@@ -181,7 +181,16 @@ export const useMyTokensFilter = ({ tokens, offers, isFetchingTokens }: UseMyTok
         owner,
         tokenPrefix,
         isMarketable: true,
-        allowedTokens: ''
+        allowedTokens: '',
+        properties: [],
+        permissions: {
+          access: 'Normal',
+          nesting: {
+            restricted: [],
+            tokenOwner: false,
+            collectionAdmin: false
+          }
+        }
       });
     });
     tokens.forEach(({ collectionId, collectionCover, collectionName, collectionOwner, tokenPrefix }) => {
@@ -193,7 +202,17 @@ export const useMyTokensFilter = ({ tokens, offers, isFetchingTokens }: UseMyTok
         owner: collectionOwner || '',
         tokenPrefix: tokenPrefix || '',
         isMarketable: featuredCollections.findIndex(({ id }) => id === collectionId) !== -1,
-        allowedTokens: ''
+        allowedTokens: '',
+        properties: [],
+        permissions: {
+          access: 'Normal',
+          nesting: {
+            restricted: [],
+            tokenOwner: false,
+            collectionAdmin: false
+          }
+        }
+
       });
     });
     return [...collections.values()];

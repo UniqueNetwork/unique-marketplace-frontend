@@ -4,7 +4,7 @@ import Skeleton from './Skeleton/Skeleton';
 import { DecodedInfixOrUrlOrCidAndHash } from 'api/chainApi/types';
 import styled from 'styled-components';
 import { DecodedVideoUri } from 'utils/helpers';
-import { Tooltip } from './UI';
+import { Icon, Tooltip } from './UI';
 
 interface VideoProps {
   autoplay?: boolean
@@ -16,7 +16,8 @@ interface VideoProps {
 export enum BadgeEnum {
   Fractional = 'Fractional',
   Bundle = 'Bundle',
-  Nested = 'Nested'
+  Nested = 'Nested',
+  Customizable = 'customizable',
 }
 interface PictureProps {
   src?: string | DecodedInfixOrUrlOrCidAndHash
@@ -32,7 +33,8 @@ interface PictureProps {
 const badgesTooltips = {
   Fractional: 'A fractional token provides a way for many users to own a part of an NFT',
   Bundle: 'A group of tokens nested in an NFT and having a nested, ordered, tree-like structure',
-  Nested: 'A group of tokens nested in an NFT and having a nested, ordered, tree-like structure'
+  Nested: 'A group of tokens nested in an NFT and having a nested, ordered, tree-like structure',
+  customizable: 'This token is a customizable'
 };
 
 export const Picture: FC<PictureProps> = ({
@@ -75,7 +77,9 @@ export const Picture: FC<PictureProps> = ({
   return (<div className={'picture'}>
     {isLoading && <Skeleton width={'100%'} height={'100%'} />}
     {badges && <BadgesWrapper>
-      {badges.map((badge, key) => <Badge key={key} className={'badge'} tooltip={badgesTooltips[badge]} >{badge}</Badge>)}
+      {badges.map((badge, key) => <Badge key={key} className={'badge'} tooltip={badgesTooltips[badge]} >
+        <Icon name={badge} size={24} />
+      </Badge>)}
     </BadgesWrapper>}
     {!isLoading && video?.fullUrl &&
       <VideoStyled
@@ -167,12 +171,13 @@ const BadgeWrapper = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 4px 8px;
+  padding: 4px;
   background-color: ${AdditionalLight};
-  border: 1px solid ${BlueGrey200};
   border-radius: 4px;
   font-weight: 500;
   font-size: 16px;
   line-height: 24px;
   color: ${AdditionalDark};
+  box-shadow: 0px 2.767256498336792px 2.2138051986694336px 0px #68686812, 0px 6.650102138519287px 5.32008171081543px 0px #6868680D, 0px 12.521552085876465px 10.017241477966309px 0px #6868680B, 0px 22.3363094329834px 17.869047164916992px 0px #68686809, 0px 41.777610778808594px 33.422088623046875px 0px #68686807, 0px 100px 80px 0px #68686805;
+
 `;

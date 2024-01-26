@@ -104,20 +104,20 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
     })();
   }, [offer, tokenId, collectionId, api?.nft]);
 
-  const isBidder = useMemo(() => {
-    if (!selectedAccount) return false;
-    return auction?.bids.some((bid) => compareEncodedAddresses(bid.bidderAddress, selectedAccount.address));
-  }, [auction, selectedAccount]);
+  // const isBidder = useMemo(() => {
+  //   if (!selectedAccount) return false;
+  //   return auction?.bids.some((bid) => compareEncodedAddresses(bid.bidderAddress, selectedAccount.address));
+  // }, [auction, selectedAccount]);
 
   const topBid = useMemo(() => {
     if (!auction?.bids?.length) return null;
     return auction.bids[0].balance;
   }, [auction]);
 
-  const isTopBidder = useMemo(() => {
-    if (!selectedAccount || !isBidder || !topBid || !auction?.bids?.[0]?.bidderAddress) return false;
-    return compareEncodedAddresses(auction.bids[0].bidderAddress, selectedAccount.address);
-  }, [isBidder, topBid, selectedAccount, auction]);
+  // const isTopBidder = useMemo(() => {
+  //   if (!selectedAccount || !isBidder || !topBid || !auction?.bids?.[0]?.bidderAddress) return false;
+  //   return compareEncodedAddresses(auction.bids[0].bidderAddress, selectedAccount.address);
+  // }, [isBidder, topBid, selectedAccount, auction]);
 
   const tokenPath = useMemo(() => {
     if (owner && type === TokenTypeEnum.RFT) {
@@ -140,10 +140,20 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
     return isTokenOwner(selectedAccount.address, owner);
   }, [selectedAccount?.address, owner]);
 
-  const badges: BadgeEnum[] = [
-    ...(collection?.mode === 'ReFungible' || (token as MyToken)?.type === TokenTypeEnum.RFT ? [BadgeEnum.Fractional] : []),
-    ...(isNestedState ? [BadgeEnum.Nested] : isBundleState ? [BadgeEnum.Bundle] : [])
-  ];
+  // const badges: BadgeEnum[] = [
+  //   ...(collection?.mode === 'ReFungible' || (token as MyToken)?.type === TokenTypeEnum.RFT ? [BadgeEnum.Fractional] : []),
+  //   ...(isNestedState ? [BadgeEnum.Nested] : isBundleState ? [BadgeEnum.Bundle] : [])
+  // ];
+  const isCustomizable = useMemo(() => {
+    if (!collection && token?.collectionId) {
+      void (async () => {
+        const collection = await getCollection(token?.collectionId);
+        if (collection) setCollection(collection);
+      })();
+      return;
+    }
+    return !!collection?.properties?.find(({ key }) => key === 'is_customizable')?.value;
+  }, [collection, getCollection, token?.collectionId]);
 
   return (
     <TokensCardStyled>
@@ -153,7 +163,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
         imageUrl={imageUrl}
         video={video}
         testid={`${testid}-token-media`}
-        badges={badges}
+        badges={isCustomizable ? [BadgeEnum.Customizable] : []}
       />
       <Description>
         <BasicDataWrapper>
