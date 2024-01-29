@@ -6,7 +6,8 @@ import { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { mockWearables } from '../constants';
 import { TokenItem } from '../types';
-import { TBundleTransferModalBodyProps } from './BundleTrunsferModal';
+import { BaseOffersModal } from './BaseOffersModal';
+import { TBundleTransferModalBodyProps } from './BundleTransferModal';
 import { TokensCard } from './components/TokenCard';
 import { CustomizeModal } from './CustomizeModal';
 import { useGetBaseTokens } from './hooks/useGetBaseTokens';
@@ -27,9 +28,14 @@ export const EquipModal = ({
       const baseCollectionIds = mockWearables[currentChainId].find(({ collectionId }) => collectionId === token.collectionId)?.baseCollections || [];
       const tokens = await fetchBaseTokens(baseCollectionIds);
       if (!tokens) return;
+
+      if (tokens.length === 1) {
+        setBaseToken(tokens[0] as unknown as INestingToken);
+        return;
+      }
       setTokens(tokens);
     })();
-  }, [token, currentChainId]);
+  }, [token, currentChainId, fetchBaseTokens]);
 
   const onSelectBaseToken = useCallback((token: INestingToken) => () => {
     setBaseToken(token);
@@ -42,6 +48,15 @@ export const EquipModal = ({
       setIsClosable={setIsClosable}
       selectedWearable={token as unknown as TokenItem}
       testid={'customize-modal'}
+    />;
+  }
+
+  if (!isFetching && tokens.length === 0) {
+    return <BaseOffersModal
+      token={token}
+      onFinish={onFinish}
+      setIsClosable={setIsClosable}
+      testid={'offers-modal'}
     />;
   }
 

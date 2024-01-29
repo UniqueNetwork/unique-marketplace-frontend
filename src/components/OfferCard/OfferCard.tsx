@@ -78,7 +78,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
       />
       <Description>
         <BasicDataWrapper>
-          <Link to={tokenPath} title={`${tokenPrefix || ''} #${offer?.tokenId}`}>
+          <Link to={tokenPath} title={`${tokenPrefix || ''} #${offer?.tokenId}`} >
             <Text
               size='l'
               weight='regular'

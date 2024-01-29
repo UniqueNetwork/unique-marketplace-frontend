@@ -36,8 +36,6 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
 
     let _collections = collections;
 
-    console.log(otherFilter);
-
     // mocked wearables and base collections used to filter
     const wearables = mockWearables[currentChainId || ''].map(({ collectionId }) => collectionId);
     const customizables = mockWearables[currentChainId || ''].map(({ baseCollections }) => baseCollections).flat();

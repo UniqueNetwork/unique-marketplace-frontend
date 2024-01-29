@@ -8,7 +8,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useApi } from 'hooks/useApi';
 import Skeleton from '../../components/Skeleton/Skeleton';
 import { Offer } from '../../api/restApi/offers/types';
-import BundleModal from './BundleModals/BundleTrunsferModal';
+import BundleModal from './BundleModals/BundleTransferModal';
 import { TokenByIdResponse } from '@unique-nft/sdk';
 import { Address } from '@unique-nft/utils';
 import { TokenContext } from './context/TokenContext';

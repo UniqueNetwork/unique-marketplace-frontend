@@ -15,7 +15,7 @@ import styled from 'styled-components';
 import { BlueGrey500 } from 'styles/colors';
 import BundleTreeSection from './BundleTreeSection';
 import { NestedTokenBlock } from './TokenDetail/NestedTokenBlock';
-import BundleModal from './BundleModals/BundleTrunsferModal';
+import BundleModal from './BundleModals/BundleTransferModal';
 import { NestingTokenBlock } from './TokenDetail/NestingBlock';
 import { TokenContext } from './context/TokenContext';
 
