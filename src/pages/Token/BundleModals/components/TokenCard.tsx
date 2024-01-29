@@ -17,9 +17,10 @@ export type TTokensCard = {
   showOwner?: boolean
   isChecked?: boolean
   onCheck?: (checked: boolean) => void
+  onClick?: () => void
 };
 
-export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, showOwner, isChecked, onCheck, ...props }) => {
+export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, showOwner, isChecked, onClick, onCheck, ...props }) => {
   const [token] = useState<TokenItem | undefined>(props.token);
 
   const { api } = useApi();
@@ -42,12 +43,15 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, sho
   }, [collectionId, tokenId, token, api]);
 
   return (
-    <TokensCardStyled onClick={() => onCheck?.(!isChecked)}>
-      <CheckboxStyled
+    <TokensCardStyled onClick={() => {
+      onCheck?.(!isChecked);
+      onClick?.();
+    }}>
+      {!!onCheck && <CheckboxStyled
         checked={!!isChecked}
         label={''}
         testid={''}
-      />
+      />}
       <TokensMedia
         tokenId={tokenId}
         imageUrl={imageUrl}

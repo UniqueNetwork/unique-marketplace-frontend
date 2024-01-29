@@ -7,19 +7,22 @@ import { TokenByIdResponse } from '@unique-nft/sdk';
 import { Heading } from '@unique-nft/ui-kit';
 import { blockedNestingCollections } from '../SellToken/constants';
 import { useApi } from 'hooks/useApi';
+import { mockWearables } from '../constants';
 
 interface NestingTokenBlockProps {
   token?: TokenByIdResponse
   testid: string
   onNestClick(): void
   onCreateBundle(): void
+  onEquipClick(): void
 }
 
-export const NestingTokenBlock: FC<NestingTokenBlockProps> = ({ token, testid, onNestClick, onCreateBundle }) => {
+export const NestingTokenBlock: FC<NestingTokenBlockProps> = ({ token, testid, onNestClick, onCreateBundle, onEquipClick }) => {
   const { tokenOwner } = token?.collection?.permissions?.nesting || {};
   const { currentChainId } = useApi();
 
   const canCustomize = token?.collection.properties.find(({ key }) => key === 'is_customizable')?.value;
+  const canEquip = !!mockWearables[currentChainId || '']?.find(({ collectionId }) => collectionId === token?.collectionId);
 
   if (blockedNestingCollections[currentChainId || '']?.includes(token?.collectionId || 0)) return null;
 
@@ -28,9 +31,14 @@ export const NestingTokenBlock: FC<NestingTokenBlockProps> = ({ token, testid, o
       <ActionsWrapper>
         <Heading size='4' >{canCustomize ? 'Customization' : 'Nesting'}</Heading>
         <ButtonsWrapper>
-          {!canCustomize && <Button
+          {!canCustomize && !canEquip && <Button
             title={'Nest this token'}
             onClick={onNestClick}
+            testid={`${testid}-transfer-button`}
+          />}
+          {canEquip && tokenOwner && <Button
+            title={'Equip'}
+            onClick={onEquipClick}
             testid={`${testid}-transfer-button`}
           />}
           {canCustomize && tokenOwner && <Button

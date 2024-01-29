@@ -43,7 +43,6 @@ export const useCollections = () => {
 
   const getCollection = useCallback(async (collectionId: number) => {
     const collection = featuredCollections.find(({ id }) => collectionId === id) || collections.find(({ id }) => collectionId === id);
-    console.log(collection, collections);
 
     return collection as CollectionInfoWithSchemaResponse || await api?.collection?.getCollection(Number(collectionId));
   }, [api?.collection, featuredCollections]);

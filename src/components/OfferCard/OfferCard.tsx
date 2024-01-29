@@ -21,8 +21,7 @@ export type TTokensCard = {
 
 export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
   const { currentChainId } = useApi();
-  const [collection, setCollection] = useState<(CollectionInfoWithSchemaResponse) | undefined>();
-  const { getCollection, collectionIsCustomizable, collectionIsWearable } = useCollections();
+  const { collectionIsCustomizable, collectionIsWearable } = useCollections();
 
   const {
     image,
@@ -39,20 +38,10 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
 
   const videoProp = useMemo(() => stringToDecodedInfixOrUrlOrCidAndHash(video), [video]);
 
-  // const isBidder = useMemo(() => {
-  //   if (!selectedAccount) return false;
-  //   return offer?.auction?.bids.some((bid) => compareEncodedAddresses(bid.bidderAddress, selectedAccount.address));
-  // }, [offer, selectedAccount]);
-
   const topBid = useMemo(() => {
     if (!offer?.auction?.bids?.length) return null;
     return offer?.auction?.bids[0].balance;
   }, [offer]);
-
-  // const isTopBidder = useMemo(() => {
-  //   if (!selectedAccount || !isBidder || !topBid) return false;
-  //   return compareEncodedAddresses(offer?.auction!.bids[0].bidderAddress, selectedAccount.address);
-  // }, [isBidder, topBid, selectedAccount]);
 
   const tokenPath = useMemo(() => generatePath('/:currentChainId/token/:collectionId/:tokenId', {
     currentChainId: currentChainId || null,
@@ -119,26 +108,6 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
             <IconStyled name={`chain-${currentChainId?.toLowerCase()}`} size={16} />
           </PriceWrapper>
         </TradingInfoWrapper>
-        {/* {offer?.auction && <AuctionInfoWrapper>
-          {isTopBidder && <Text
-            testid={`${testid}-leading-bid`}
-            size={'xs'}
-            color={'additional-positive-500'}
-          >Leading bid</Text>}
-          {isBidder && !isTopBidder && <Text
-            testid={`${testid}-outbid`}
-            size={'xs'}
-            color={'coral-500'}
-          >Outbid</Text>}
-          {!isBidder && !isTopBidder && <Text
-            testid={`${testid}-bids`}
-            size={'xs'}
-            color={'grey-500'}
-          >{
-            offer.auction.bids.length > 0 ? 'Last bid' : 'Minimum bid'
-          }</Text>}
-          <StyledText color={'dark'} size={'xs'} testid={`${testid}-auction-close-time`}>{`${timeDifference(new Date(offer.auction?.stopAt || '').getTime() / 1000)} left`}</StyledText>
-        </AuctionInfoWrapper>} */}
       </Description>
     </TokensCardStyled>
   );

@@ -3,27 +3,17 @@ import { Heading, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { PagePaper } from 'components/PagePaper/PagePaper';
 import { BlueGrey300, Grey300 } from 'styles/colors';
-import NodeView from 'components/BundleTree/Node/NodeView';
 import { INestingToken } from 'components/BundleTree/types';
-import { NestedSection } from 'components/BundleTree/NestedSection/NestedSection';
-import BundleTree from 'components/TreeView/BundleTree';
 import { useNavigate, useParams } from 'react-router-dom';
-import MobileBundleTreeSection from './MobileBundleTreeSection';
 import { useApi } from 'hooks/useApi';
 import Skeleton from '../../components/Skeleton/Skeleton';
 import { Offer } from '../../api/restApi/offers/types';
 import BundleModal from './BundleModals/BundleTrunsferModal';
-import { BundleModalType } from './BundleModals/types';
-import { countNestedChildren } from '../../utils/helpers';
 import { TokenByIdResponse } from '@unique-nft/sdk';
-import { CollectionMode } from 'api/chainApi/types';
 import { Address } from '@unique-nft/utils';
 import { TokenContext } from './context/TokenContext';
 import TokenCard from 'components/BundleTree/NestedSection/TokenCard';
-
-const areNodesEqual = (a: INestingToken, b: INestingToken) => a.collectionId === b.collectionId && a.tokenId === b.tokenId;
-
-const getKey = (a: INestingToken) => `T${a.tokenId}C${a.collectionId}`;
+import { MarketType } from 'types/MarketTypes';
 
 const addIsCurrentAccountOwnerToBundleAndSort = (bundle: INestingToken, isOwner: boolean, parent?: INestingToken) => {
   bundle.isCurrentAccountOwner = isOwner;
@@ -42,16 +32,15 @@ interface IProps {
   onFinish(): void
 }
 
-function BundleTreeSection({ token, offer, testid, onFinish, isOwner }: IProps) {
+function BundleTreeSection({ testid, onFinish }: IProps) {
   const navigate = useNavigate();
-  const { api, currentChainId } = useApi();
-  const { address } = useParams<{ address: string }>();
+  const { currentChainId } = useApi();
   const [isMobileViewVisible, setIsMobileViewVisible] = useState(false);
   const { bundle, isFetching, fetchToken } = useContext(TokenContext);
-  const [modalType, setModalType] = useState(BundleModalType.default);
+  const [modalType, setModalType] = useState(MarketType.default);
   const [selectedToken, setSelectedToken] = useState<INestingToken>();
 
-  const onActionClick = useCallback((action: BundleModalType) => (token: INestingToken) => {
+  const onActionClick = useCallback((action: MarketType) => (token: INestingToken) => {
     setSelectedToken(token);
     setModalType(action);
   }, []);
@@ -60,15 +49,8 @@ function BundleTreeSection({ token, offer, testid, onFinish, isOwner }: IProps) 
     setIsMobileViewVisible(false);
   }, []);
 
-  const openView = useCallback(() => {
-    setIsMobileViewVisible(true);
-  }, []);
-
-  const onNodeClicked = useCallback((data: INestingToken) => {
-  }, []);
-
   const onFinishAction = useCallback(() => {
-    setModalType(BundleModalType.default);
+    setModalType(MarketType.default);
     // setBundle(undefined);
     void fetchToken();
 
@@ -76,7 +58,7 @@ function BundleTreeSection({ token, offer, testid, onFinish, isOwner }: IProps) 
   }, [onFinish, fetchToken]);
 
   const onClose = useCallback(() => {
-    setModalType(BundleModalType.default);
+    setModalType(MarketType.default);
   }, []);
 
   const onViewTokenDetails = useCallback((token: INestingToken, mode: string) => {
@@ -104,13 +86,14 @@ function BundleTreeSection({ token, offer, testid, onFinish, isOwner }: IProps) 
             key={token.tokenId}
             tokenId={token.tokenId}
             collectionId={token.collectionId}
-            onTransferClick={onActionClick(BundleModalType.nestedTransfer)}
-            onUnnestClick={onActionClick(BundleModalType.unnest)}
+            onTransferClick={onActionClick(MarketType.nestedTransfer)}
+            onUnnestClick={onActionClick(MarketType.unnest)}
             onViewNodeDetails={onViewTokenDetails}
           />)}
         </ChildrenWraper>
       </BundlePagePaper>
       <BundleModal
+        setModalType={() => {}}
         token={selectedToken}
         bundleModalType={modalType}
         onFinish={onFinishAction}

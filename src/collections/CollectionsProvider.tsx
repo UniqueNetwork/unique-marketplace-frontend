@@ -54,8 +54,6 @@ const CollectionsWrapper: FC = ({ children }) => {
     const { scanApi } = config.blockchains[currentChainId || ''] || {};
     const { data } = await post(scanApi, gqlQuery);
 
-    console.log(data);
-
     setCollections(data.data.collections.data || []);
     setIsFetching(false);
   }, [featuredCollections]);

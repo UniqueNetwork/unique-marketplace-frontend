@@ -1,28 +1,22 @@
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Link } from '@unique-nft/ui-kit';
 import { Icon, useNotifications } from 'components/UI';
-import { useApi } from 'hooks/useApi';
 import { MarketType } from 'types/MarketTypes';
 import { CommonTokenDetail } from './TokenDetail/CommonTokenDetail';
-import { useOffer } from 'api/restApi/offers/offer';
 import { TokenTrading } from './TokenDetail/TokenTrading';
 import { Error404 } from '../Errors/404';
 import TokenPageModal from './Modals/TokenPageModal';
 import { PagePaper } from 'components/PagePaper/PagePaper';
 import { useAccounts } from 'hooks/useAccounts';
 import { shortcutText } from 'utils/textUtils';
-import { compareEncodedAddresses, isTokenOwner } from 'api/chainApi/utils/addressUtils';
+import { compareEncodedAddresses } from 'api/chainApi/utils/addressUtils';
 import styled from 'styled-components';
 import { BlueGrey500 } from 'styles/colors';
 import BundleTreeSection from './BundleTreeSection';
-import { useCollections } from 'hooks/useCollections';
-import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
 import { NestedTokenBlock } from './TokenDetail/NestedTokenBlock';
 import BundleModal from './BundleModals/BundleTrunsferModal';
-import { BundleModalType } from './BundleModals/types';
 import { NestingTokenBlock } from './TokenDetail/NestingBlock';
-import { Address } from '@unique-nft/utils';
 import { TokenContext } from './context/TokenContext';
 
 const testid = 'token-page';
@@ -138,6 +132,7 @@ const TokenPage = () => {
             token={token}
             onNestClick={onActionClick(MarketType.nestedTransfer)}
             onCreateBundle={onActionClick(MarketType.createBundle)}
+            onEquipClick={onActionClick(MarketType.equipWearable)}
             testid={`${testid}`}
           />}
           <TokenPageModal
@@ -162,12 +157,8 @@ const TokenPage = () => {
       }
       <BundleModal
         token={token}
-        bundleModalType={
-          marketType === MarketType.nestedTransfer ||
-          marketType === MarketType.createBundle ||
-          marketType === MarketType.unnest
-            ? marketType as unknown as BundleModalType
-            : BundleModalType.default }
+        setModalType={setMarketType}
+        bundleModalType={marketType}
         onFinish={onFinish}
         testid={`${testid}-modal`}
         onClose={onClose}
