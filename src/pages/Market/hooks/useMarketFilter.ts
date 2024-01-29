@@ -12,6 +12,7 @@ import { Address } from '@unique-nft/utils';
 import { useIsFirstRender } from 'hooks/useIsFirstRender';
 import { SelectOptionProps } from '@unique-nft/ui-kit';
 import { useCollections } from 'hooks/useCollections';
+import { mockWearables } from 'pages/Token/constants';
 
 export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fetch(payload: GetOffersRequestPayload): Promise<OffersResponse | TokensResponse> }) => {
   const { currentChainId, api } = useApi();
@@ -35,29 +36,24 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
 
     let _collections = collections;
 
-    if (otherFilter.typeOfAssets === TypeOfAssets.NFTs) {
-      const wearables = Object.values(customizableCollections).flat();
-      const customizables = Object.keys(customizableCollections).map(Number);
+    console.log(otherFilter);
 
+    // mocked wearables and base collections used to filter
+    const wearables = mockWearables[currentChainId || ''].map(({ collectionId }) => collectionId);
+    const customizables = mockWearables[currentChainId || ''].map(({ baseCollections }) => baseCollections).flat();
+    if (otherFilter.typeOfAssets === TypeOfAssets.NFTs) {
       _collections = featuredCollections.map(({ id }) => id).filter((id) => {
         return ![...customizables, ...wearables].includes(id);
       });
     }
     if (otherFilter.typeOfAssets === TypeOfAssets.CustomizableNFTs) {
-      const wearables = Object.values(customizableCollections).flat();
-      const customizables = Object.keys(customizableCollections).map(Number);
-
       _collections = [...customizables, ...wearables];
     }
 
     if (otherFilter.typeOfCustomizableNFTs === TypeOfCustomizableNFTs.Base) {
-      const customizables = Object.keys(customizableCollections).map(Number);
-
       _collections = customizables;
     }
     if (otherFilter.typeOfCustomizableNFTs === TypeOfCustomizableNFTs.Wearables) {
-      const wearables = Object.values(customizableCollections).flat();
-
       _collections = wearables;
     }
 

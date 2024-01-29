@@ -30,7 +30,7 @@ const TypeOfCustomizablesFilter: FC<TypeOfCustomizablesFilterProps> = ({
   const onClear = useCallback(() => { onChange(undefined); }, [onChange]);
 
   return (<>
-    <Accordion title={'Types of Customizable NFTs'}
+    <Accordion title={'Type of Customizable NFTs'}
       isOpen={true}
       onClear={onClear}
       isClearShow={!!value}
