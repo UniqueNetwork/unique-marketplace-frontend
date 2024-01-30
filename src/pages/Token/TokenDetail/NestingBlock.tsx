@@ -24,6 +24,8 @@ export const NestingTokenBlock: FC<NestingTokenBlockProps> = ({ token, testid, o
   const canCustomize = token?.collection.properties.find(({ key }) => key === 'is_customizable')?.value;
   const canEquip = !!mockWearables[currentChainId || '']?.find(({ collectionId }) => collectionId === token?.collectionId);
 
+  console.log(mockWearables[currentChainId || ''], token?.collectionId, canEquip);
+
   if (blockedNestingCollections[currentChainId || '']?.includes(token?.collectionId || 0)) return null;
 
   return (
@@ -36,7 +38,7 @@ export const NestingTokenBlock: FC<NestingTokenBlockProps> = ({ token, testid, o
             onClick={onNestClick}
             testid={`${testid}-transfer-button`}
           />}
-          {canEquip && tokenOwner && <Button
+          {canEquip && <Button
             title={'Equip'}
             onClick={onEquipClick}
             testid={`${testid}-transfer-button`}
