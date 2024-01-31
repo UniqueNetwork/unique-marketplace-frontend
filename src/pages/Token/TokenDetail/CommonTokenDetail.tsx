@@ -123,7 +123,7 @@ export const CommonTokenDetail: FC<IProps> = ({
   const onScanLinkClick = useCallback(() => {
     if (!currentChainId) return;
     setDropdownOpen(false);
-    window.open(`${config.blockchains[currentChainId].scanUrl}tokens/${collectionId}/${tokenId}`, '_blank', 'noopener');
+    window.open(`${config.blockchains[currentChainId].scanUrl}unique_item/${collectionId}-${tokenId}`, '_blank', 'noopener');
   }, [tokenId, collectionId]);
 
   const onReportClick = useCallback(() => {
@@ -229,7 +229,7 @@ export const CommonTokenDetail: FC<IProps> = ({
         onOpenChange={setDropdownOpen}
         dropdownRender={() => (
           <DropdownMenu>
-            <ScanMenuItem onClick={onScanLinkClick}>View on UniqueScan
+            <ScanMenuItem onClick={onScanLinkClick}>View on Subscan
               <MenuIconWrapper>
                 <Icon name={'arrow-up-right'} size={16} color={'var(--color-primary-500)'} />
               </MenuIconWrapper>
