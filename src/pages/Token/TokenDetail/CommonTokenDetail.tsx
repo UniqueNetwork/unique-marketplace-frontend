@@ -1,16 +1,13 @@
 import { Heading, Text } from '@unique-nft/ui-kit';
-import React, { FC, ReactChild, useCallback, useContext, useMemo, useState } from 'react';
+import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { Dropdown, Icon } from 'components/UI';
-import { Picture, TokensCard } from 'components';
+import { Picture } from 'components';
 import TokensBandleCard from 'components/BundleTree/NestedSection/TokenCard';
 import { CollectionsCard } from './CollectionsCard';
 import { AttributesBlock } from './AttributesBlock';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
-import { shortcutText } from 'utils/textUtils';
 import { BlueGrey100, BlueGrey300, Coral100, Coral500, Grey300, Grey500, Primary500, Primary600, Secondary400, Secondary500 } from 'styles/colors';
-import { Avatar } from 'components/Avatar/Avatar';
-import DefaultAvatar from 'static/icons/default-avatar.svg';
 import config from 'config';
 import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import { Offer } from 'api/restApi/offers/types';
@@ -29,6 +26,7 @@ import { FractionalOwnersList } from './FractionalOwnersList';
 import { OwnerCard } from 'components/OwnerCard/OwnerCard';
 import { BadgeEnum } from 'components/Picture';
 import { INestingToken } from 'components/BundleTree/types';
+import { CustomizableBlock } from './CustomizableBlock';
 
 interface IProps {
   token?: TokenByIdResponse
@@ -188,6 +186,11 @@ export const CommonTokenDetail: FC<IProps> = ({
               prefixNested='Nested in bundle'
             />}
           </Row>
+          <CustomizableBlock
+            token={token}
+            offer={offer}
+            collection={collection}
+          />
           <Divider />
           {isNested && token?.nestingParentToken?.tokenId && token?.nestingParentToken?.collectionId && <>
             <Heading size='4'>NFT Wearable for</Heading>
@@ -469,15 +472,6 @@ const MenuIconWrapper = styled.div`
 `;
 
 const IconWrapper = styled.div`
-  margin-left: 4px;
-  margin-right: 16px;
-
-  svg {
-    fill: ${Grey500};
-  }
-`;
-
-const DropdownIconWrapper = styled.div`
   margin-left: 4px;
   margin-right: 16px;
 
