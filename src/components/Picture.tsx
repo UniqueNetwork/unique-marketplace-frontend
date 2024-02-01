@@ -95,7 +95,7 @@ export const Picture: FC<PictureProps> = ({
       />
     }
     {!isLoading && !hasError && imageSrc && !video?.fullUrl &&
-      <img
+      <ImgStyled
         alt={alt}
         src={imageSrc}
         height={size || undefined}
@@ -137,6 +137,10 @@ export const Picture: FC<PictureProps> = ({
     }
   </div>);
 };
+
+const ImgStyled = styled.img`
+  box-sizing: border-box;
+`;
 
 const VideoStyled = styled.video`
   width: 100%;

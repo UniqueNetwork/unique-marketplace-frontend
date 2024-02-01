@@ -16,6 +16,7 @@ import BundleItemsCount from '../BundleItemsCount/BundleItemsCount';
 import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
 import { MyToken, TokenTypeEnum } from 'pages/MyTokens/types';
 import { BadgeEnum } from 'components/Picture';
+import { CollectionTitle } from 'components/OfferCard/CollectionTitle';
 
 export type TTokensCard = {
   token?: Omit<TokenByIdResponse | MyToken, 'collection' | 'nestingParentToken' | 'properties'>
@@ -58,7 +59,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
       const { auction, price, seller } = offer || {};
       return {
         tokenTitle: `${tokenPrefix || ''} #${tokenId || ''}`,
-        collectionTitle: `${collectionName?.substring(0, 25) || ''} [id ${collectionId || ''}]`,
+        collectionTitle: collectionName,
         imageUrl: image,
         video: stringToDecodedInfixOrUrlOrCidAndHash(video),
         auction,
@@ -180,9 +181,10 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
             data-testid={`${testid}-collection-${collectionId}-link`}
             to={`/${currentChainId?.toLowerCase()}/collection/${collectionId || ''}`}
           >
-            <Text color='primary-600' size='s'>
-              {collectionTitle}
-            </Text>
+            <CollectionTitle
+              collectionId={collectionId || 0}
+              collectionName={collectionTitle || ''}
+            />
           </Link>
           {showOwner && <Text size={'s'} color={'grey-500'}>{isOwner ? 'You own it' : `Owned by: ${shortcutText(owner || '')}`}</Text>}
           {isBundleState && <BundleItemsCount count={tokensCount || 0} testId={testid} />}
@@ -234,6 +236,16 @@ const TokensCardStyled = styled.div`
   justify-content: flex-start;
   position: relative;
   cursor: pointer;
+  background: #fff;
+  border-radius: 8px;
+  transition: transform 0.2s;
+  box-shadow: 0 4px 14px rgba(0,0,0,.08);
+  padding: 4px;
+
+  &:hover {
+    z-index: 10;
+    transform: scale(1.05);
+  }
 `;
 
 const BasicDataWrapper = styled.div`

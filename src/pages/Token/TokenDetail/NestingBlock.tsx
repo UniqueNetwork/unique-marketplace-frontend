@@ -3,39 +3,48 @@ import styled from 'styled-components';
 import { Button } from 'components/UI';
 
 import { Grey300 } from 'styles/colors';
-import { TokenByIdResponse } from '@unique-nft/sdk';
+import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
 import { Heading } from '@unique-nft/ui-kit';
 import { blockedNestingCollections } from '../SellToken/constants';
 import { useApi } from 'hooks/useApi';
 import { mockWearables } from '../constants';
+import { CustomizableBlock } from './CustomizableBlock';
+import { Offer } from 'api/restApi/offers/types';
 
 interface NestingTokenBlockProps {
   token?: TokenByIdResponse
+  collection?: CollectionInfoWithSchemaResponse | undefined
+  offer?: Offer | undefined
+  isOwner?: boolean
+  isNested?: boolean
   testid: string
   onNestClick(): void
   onCreateBundle(): void
   onEquipClick(): void
 }
 
-export const NestingTokenBlock: FC<NestingTokenBlockProps> = ({ token, testid, onNestClick, onCreateBundle, onEquipClick }) => {
-  const { tokenOwner } = token?.collection?.permissions?.nesting || {};
+export const NestingTokenBlock: FC<NestingTokenBlockProps> = ({ token, offer, collection, isNested, isOwner, testid, onNestClick, onCreateBundle, onEquipClick }) => {
+  const { tokenOwner } = token?.collection?.permissions?.nesting || offer?.collectionDescription.permissions?.nesting || {};
   const { currentChainId } = useApi();
+  const _collectionId = token?.collectionId || offer?.collectionId || 0;
 
   const canCustomize = token?.collection.properties.find(({ key }) => key === 'is_customizable')?.value;
-  const canEquip = !!mockWearables[currentChainId || '']?.find(({ collectionId }) => collectionId === token?.collectionId);
+  const canEquip = !!mockWearables[currentChainId || '']?.find(({ collectionId }) => collectionId === _collectionId);
 
-  if (blockedNestingCollections[currentChainId || '']?.includes(token?.collectionId || 0)) return null;
+  if (blockedNestingCollections[currentChainId || '']?.includes(_collectionId || 0)) return null;
 
-  return (
-    <>
+  if (!(canCustomize || canEquip || isOwner || isNested)) return null;
+
+  if (canCustomize || canEquip) {
+    return <>
       <ActionsWrapper>
-        <Heading size='4' >{(canCustomize || canEquip) ? 'Customization' : 'Nesting'}</Heading>
-        <ButtonsWrapper>
-          {!canCustomize && !canEquip && <Button
-            title={'Nest this token'}
-            onClick={onNestClick}
-            testid={`${testid}-transfer-button`}
-          />}
+        <Heading size='4'>Customization</Heading>
+        <CustomizableBlock
+          token={token}
+          offer={offer}
+          collection={collection}
+        />
+        {isOwner && <ButtonsWrapper>
           {canEquip && <Button
             title={'Equip'}
             onClick={onEquipClick}
@@ -44,6 +53,22 @@ export const NestingTokenBlock: FC<NestingTokenBlockProps> = ({ token, testid, o
           {canCustomize && tokenOwner && <Button
             title={'Customize'}
             onClick={onCreateBundle}
+            testid={`${testid}-transfer-button`}
+          />}
+        </ButtonsWrapper>}
+      </ActionsWrapper>
+      <Divider />
+    </>;
+    }
+
+  return (
+    <>
+      <ActionsWrapper>
+        <Heading size='4' >Nesting</Heading>
+        <ButtonsWrapper>
+          {isOwner && <Button
+            title={'Nest this token'}
+            onClick={onNestClick}
             testid={`${testid}-transfer-button`}
           />}
         </ButtonsWrapper>
@@ -59,6 +84,9 @@ const ActionsWrapper = styled.div`
   flex-direction: column;
   justify-content: flex-start;
   align-items: flex-start;
+  h4.unique-font-heading.size-4 {
+    margin-bottom: 0;
+  }
 `;
 
 const Divider = styled.div`

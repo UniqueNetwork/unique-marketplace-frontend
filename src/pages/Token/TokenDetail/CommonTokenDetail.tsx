@@ -187,11 +187,11 @@ export const CommonTokenDetail: FC<IProps> = ({
               prefixNested='Nested in bundle'
             />}
           </OwnerBlock>
-          <CustomizableBlock
+          {/* <CustomizableBlock
             token={token}
             offer={offer}
             collection={collection}
-          />
+          /> */}
           <Divider />
           {isNested && token?.nestingParentToken?.tokenId && token?.nestingParentToken?.collectionId && <>
             <Heading size='4'>NFT Wearable for</Heading>
@@ -344,7 +344,8 @@ const PictureWrapper = styled.div`
     img {
       max-width: 100%;
       max-height: 100%;
-      
+      border: 1px solid var(--color-grey-200);
+      border-radius: 8px;
     }
 
     svg {

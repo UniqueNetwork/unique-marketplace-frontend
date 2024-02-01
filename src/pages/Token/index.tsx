@@ -128,13 +128,17 @@ const TokenPage = () => {
             onAuctionClose={onAuctionClose}
             testid={`${testid}`}
           />
-          {isOwner && !offer && !isNested && <NestingTokenBlock
+          <NestingTokenBlock
+            isNested={isNested}
+            isOwner={isOwner}
             token={token}
+            offer={offer}
+            collection={collection}
             onNestClick={onActionClick(MarketType.nestedTransfer)}
             onCreateBundle={onActionClick(MarketType.createBundle)}
             onEquipClick={onActionClick(MarketType.equipWearable)}
             testid={`${testid}`}
-          />}
+          />
           <TokenPageModal
             token={token}
             collection={collection}
