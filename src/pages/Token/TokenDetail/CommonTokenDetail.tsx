@@ -18,7 +18,7 @@ import ShareTokenModal from './ShareTokenModal';
 import { stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
 import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
 import { ReportModal } from './ReportModal';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Address } from '@unique-nft/utils';
 import { FractionalDetail } from './FractionalDetail';
 import { TokenContext } from '../context/TokenContext';
@@ -168,16 +168,17 @@ export const CommonTokenDetail: FC<IProps> = ({
       <Description>
         {isLoading && <TokenSkeleton />}
         {!isLoading && <>
-          <Heading size={'1'} testid={`${testid}-token-name`}>{`${prefix || ''} #${tokenId}`}</Heading>
-          <ShareLink onClick={openShareModal} data-testid={`${testid}-share-button`}>
-            <Text color='grey-500' size='m'>
-              Share
-            </Text>
-            <IconWrapper>
-              <Icon name={'shared'} size={24} />
-            </IconWrapper>
-          </ShareLink>
-          <Row data-testid={`${testid}-owner-section`}>
+          <Link to={`/collection/${collectionId}`} >{collectionName} [id {collectionId}]</Link>
+          <HeadingWrapper>
+            <Heading size={'1'} testid={`${testid}-token-name`}>
+              {`${prefix || ''} #${tokenId}`}
+            </Heading>
+            <ShareLink onClick={openShareModal} data-testid={`${testid}-share-button`}>
+              <IconWrapper>
+              </IconWrapper>
+            </ShareLink>
+          </HeadingWrapper>
+          <OwnerBlock data-testid={`${testid}-owner-section`}>
             {!(isRft && !isRftFracton) && <OwnerCard
               address={owner || ''}
               isShort={deviceSize < DeviceSize.xl}
@@ -185,7 +186,7 @@ export const CommonTokenDetail: FC<IProps> = ({
               prefixOwned='Owned by'
               prefixNested='Nested in bundle'
             />}
-          </Row>
+          </OwnerBlock>
           <CustomizableBlock
             token={token}
             offer={offer}
@@ -212,15 +213,11 @@ export const CommonTokenDetail: FC<IProps> = ({
             <FractionalDetail testid={`${testid}-fractional`} />
             <Divider />
           </>}
-          {attributes && <AttributesBlock attributes={attributesList} />}
+          {attributes && collectionId && <AttributesBlock
+            attributes={attributesList}
+            collectionId={collectionId}
+          />}
           <Divider />
-          <CollectionsCard
-            avatarSrc={coverImageUrl || ''}
-            description={description || ''}
-            id={collectionId || -1}
-            title={collectionName || ''}
-            testid={`${testid}-collection`}
-          />
         </>}
       </Description>
       <DropdownStyled
@@ -229,6 +226,11 @@ export const CommonTokenDetail: FC<IProps> = ({
         onOpenChange={setDropdownOpen}
         dropdownRender={() => (
           <DropdownMenu>
+            <ShareMenuItem onClick={openShareModal}>Share
+              <MenuIconWrapper>
+                <Icon name={'shared'} size={16} color={'var(--color-primary-500)'} />
+              </MenuIconWrapper>
+            </ShareMenuItem>
             <ScanMenuItem onClick={onScanLinkClick}>View on Subscan
               <MenuIconWrapper>
                 <Icon name={'arrow-up-right'} size={16} color={'var(--color-primary-500)'} />
@@ -281,6 +283,14 @@ const CommonTokenDetailStyled = styled.div`
       padding: 24px 16px;
       width: calc(304px - (var(--gap) * 3));
     }
+  }
+`;
+
+const HeadingWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  &>h1.unique-font-heading.size-1 {
+    margin: 0;
   }
 `;
 
@@ -359,9 +369,10 @@ const ParentTokenWrapper = styled.div`
   }
 `;
 
-const Row = styled.div`
+const OwnerBlock = styled.div`
   display: flex;
   align-items: center;
+  margin-top: 12px;
 
   && h1 {
     margin-bottom: 0;
@@ -372,29 +383,22 @@ const Description = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1;
+
+  a {
+    color: var(--color-primary-500);
+    &:hover {
+      color: var(--color-primary-500);
+      text-decoration: underline;
+    }  
+
+  }
 `;
 
 const ShareLink = styled.div`
   display: flex;
   align-items: center;
-  margin-bottom: var(--gap);
   cursor: pointer;
   width: 120px;
-`;
-
-const Account = styled.a`
-  margin-left: 8px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: flex;
-  color: ${Primary600};
-  
-  span {
-    margin-left: 8px;
-    &:hover {
-      text-decoration: underline;
-    }
-  }
 `;
 
 const Divider = styled.div`
@@ -423,6 +427,13 @@ const DropdownMenuItem = styled.div`
   line-height: 24px;
   &:hover {
     background: var(--color-primary-100);
+  }
+`;
+
+const ShareMenuItem = styled(DropdownMenuItem)`
+  color: ${Primary500};
+  &:hover {
+    color: ${Primary600};
   }
 `;
 

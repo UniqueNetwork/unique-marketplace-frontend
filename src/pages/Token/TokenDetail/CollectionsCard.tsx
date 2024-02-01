@@ -63,7 +63,7 @@ const CollectionsCardStyled = styled(Link)`
   }
 
   && h4:last-of-type {
-    margin-bottom: 8px;
+    margin-bottom: 4px;
   }
 `;
 
@@ -78,4 +78,5 @@ const Content = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
+
 `;

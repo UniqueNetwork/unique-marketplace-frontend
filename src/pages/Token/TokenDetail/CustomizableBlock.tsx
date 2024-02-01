@@ -84,9 +84,12 @@ const CustomizableWrapper = styled.div`
 `;
 
 const Row = styled.div`
-  display: flex;
-  align-items: center;
-
+  & > * {
+    display: inline-block;
+  }
+  & > span:first-child {
+    margin-right: 8px;
+  }
   &>a {
     font-size: 16px;
   }

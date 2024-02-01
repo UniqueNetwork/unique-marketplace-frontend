@@ -11,7 +11,7 @@ export const Trait: FC<ITraitProps> = ({ trait }: ITraitProps) => (
   <TraitStyled>
     <Text
       size='s'
-      weight='regular'
+      weight='bold'
     >
       {trait}
     </Text>
@@ -21,11 +21,10 @@ export const Trait: FC<ITraitProps> = ({ trait }: ITraitProps) => (
 const TraitStyled = styled.div`
   display: flex;
   flex-wrap: nowrap;
-  padding: 1px 8px;
+  padding: 0 8px;
   border-radius: 4px;
-  background-color: ${BlueGrey100};
   .unique-text {
-    color: var(--color-secondary-300);
+    color: var(--color-advanced-dark);
   }
   &:not(:last-of-type) {
     margin-right: 8px;
