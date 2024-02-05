@@ -26,6 +26,7 @@
     "react-infinite-scroller": "^1.2.6",
     "react-router-dom": "^6.0.2",
     "react-scripts": "5.0.0",
+    "react-slideshow-image": "^4.3.0",
     "socket.io-client": "^4.4.1",
     "utf-helpers": "^0.0.3",
     "web-vitals": "^1.0.1"

@@ -27,6 +27,7 @@ import { OwnerCard } from 'components/OwnerCard/OwnerCard';
 import { BadgeEnum } from 'components/Picture';
 import { INestingToken } from 'components/BundleTree/types';
 import { CustomizableBlock } from './CustomizableBlock';
+import { CustomizableRecommendation } from './CustomizableRecommendation';
 
 interface IProps {
   token?: TokenByIdResponse
@@ -218,6 +219,10 @@ export const CommonTokenDetail: FC<IProps> = ({
             collectionId={collectionId}
           />}
           <Divider />
+          <CustomizableRecommendation
+            offer={offer}
+            collection={collection}
+          />
         </>}
       </Description>
       <DropdownStyled
@@ -313,11 +318,11 @@ const PictureWrapper = styled.div`
   }
 
   @media (max-width: 1919px) {
-    width: 326px;
+    width: 536px;
   }
   
   @media (max-width: 1023px) {
-    width: 224px;
+    width: 326px;
   }
 
   @media (max-width: 767px) {
