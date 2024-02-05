@@ -83,10 +83,15 @@ export const CustomizableRecommendation = ({ offer, collection }: IProps) => {
     <Slide
       autoplay={false}
       transitionDuration={150}
-      slidesToShow={4}
-      slidesToScroll={4}
+      slidesToShow={2}
+      slidesToScroll={2}
       infinite={false}
       arrows={tokens.length > 4}
+      responsive={[
+        { breakpoint: 1024, settings: { slidesToShow: 4, slidesToScroll: 4 } },
+        { breakpoint: 768, settings: { slidesToShow: 3, slidesToScroll: 3 } },
+        { breakpoint: 512, settings: { slidesToShow: 2, slidesToScroll: 2 } }
+      ]}
     >
       {tokens.map((token) => {
         return (
@@ -114,6 +119,18 @@ const CustomizableRecommendationWrapper = styled.div`
     &>div {
       flex: 25%;
       max-width: 25%;
+      @media (max-width:512px) {
+        flex: 100%;
+        max-width: 100%;
+      }
+      @media (max-width:768px) {
+        flex: 50%;
+        max-width: 50%;
+      }
+      @media (max-width:1024px) {
+        flex: 33.33%;
+        max-width: 33.33%;
+      }
     }
     &>div>div{
       padding: 0 8px;
