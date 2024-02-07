@@ -8,6 +8,7 @@ import { Modal } from 'components/UI';
 import { TokenByIdResponse } from '@unique-nft/sdk';
 import { EquipModal } from './EquipModal';
 import { MarketType } from 'types/MarketTypes';
+import { UnequipModal } from './UnequipModal';
 
 export type TBundleTrunsferModalProps = {
   token?: INestingToken | TokenByIdResponse
@@ -46,6 +47,8 @@ const BundleTrunsferModal = ({ token, onClose, onFinish, bundleModalType, setMod
         return CustomizeModal;
       case MarketType.equipWearable:
         return EquipModal;
+      case MarketType.unequipWearable:
+        return UnequipModal;
       case MarketType.default:
       default:
         return null;

@@ -4,7 +4,6 @@ import styled from 'styled-components';
 import { Dropdown, Icon } from 'components/UI';
 import { Picture } from 'components';
 import TokensBandleCard from 'components/BundleTree/NestedSection/TokenCard';
-import { CollectionsCard } from './CollectionsCard';
 import { AttributesBlock } from './AttributesBlock';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { BlueGrey100, BlueGrey300, Coral100, Coral500, Grey300, Grey500, Primary500, Primary600, Secondary400, Secondary500 } from 'styles/colors';
@@ -26,7 +25,6 @@ import { FractionalOwnersList } from './FractionalOwnersList';
 import { OwnerCard } from 'components/OwnerCard/OwnerCard';
 import { BadgeEnum } from 'components/Picture';
 import { INestingToken } from 'components/BundleTree/types';
-import { CustomizableBlock } from './CustomizableBlock';
 import { CustomizableRecommendation } from './CustomizableRecommendation';
 
 interface IProps {
@@ -50,7 +48,6 @@ export const CommonTokenDetail: FC<IProps> = ({
   testid,
   isBundle,
   isNested,
-  isOwner,
   topmostOwner
 }) => {
   const navigate = useNavigate();
@@ -59,8 +56,6 @@ export const CommonTokenDetail: FC<IProps> = ({
   const {
     collectionId,
     collectionName,
-    coverImageUrl,
-    description,
     attributes,
     attributesList,
     image,

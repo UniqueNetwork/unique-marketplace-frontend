@@ -66,21 +66,30 @@ const AttributesRow = ({
     value: string;
   }[]> | undefined;
 }) => {
-  const count = statistics?.[attribute]?.find(({ value }) => value === enumeration)?.count || 0;
-  const percent = tokensCount ? (count / tokensCount) * 100 : 0;
-  console.log(count, tokensCount);
+  const percents = useMemo(() => {
+    if (typeof enumeration === 'string') {
+      const count = statistics?.[attribute]?.find(({ value }) => value === enumeration)?.count || 0;
+      return tokensCount ? (count / tokensCount) * 100 : 0;
+    }
+    if (!tokensCount) return [];
+    return enumeration.map((item) => (statistics?.[attribute]?.find(({ value }) => value === item)?.count || 0) / tokensCount * 100);
+  }, [attribute, enumeration, statistics, tokensCount]);
+
   return (
     <AttributeCard key={attribute}>
       <Text color='grey-500' size='s' weight='bold'>
         {attribute.toUpperCase()}
       </Text>
-      <Row>
+      <>
         {typeof enumeration === 'string'
-          ? (<Trait trait={enumeration} />)
-          : (enumeration.map((trait) => <Trait key={trait} trait={trait} />))}
-
-      </Row>
-      {!isFetching && <Row><Text size='s' color='grey-500'>{percent.toFixed(0)}%</Text></Row>}
+        ? (<Row><Trait trait={enumeration} /></Row>)
+        : (enumeration.map((trait, index) => <>
+          <Row><Trait key={trait} trait={trait} /></Row>
+          {Array.isArray(percents) && !!percents[index] && <Row><Text size='s' color='grey-500'>{percents[index].toFixed(0)}%</Text></Row>}
+        </>))
+      }
+      </>
+      {!isFetching && typeof percents === 'number' && <Row><Text size='s' color='grey-500'>{percents.toFixed(0)}%</Text></Row>}
     </AttributeCard>
   );
 };
@@ -118,7 +127,6 @@ const AttributeCard = styled.div`
   align-items: center;
   justify-content: center;
   flex-direction: column;
-
 `;
 
 const HeadingStyled = styled(Heading)`

@@ -13,4 +13,5 @@ export enum MarketType {
   changePrice = 'changePrice',
   createBundle = 'createBundle',
   equipWearable = 'equipWearable',
+  unequipWearable = 'unequipWearable'
 }

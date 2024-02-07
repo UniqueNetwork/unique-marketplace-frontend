@@ -21,9 +21,21 @@ interface NestingTokenBlockProps {
   onNestClick(): void
   onCreateBundle(): void
   onEquipClick(): void
+  onUnequipClick(): void
 }
 
-export const NestingTokenBlock: FC<NestingTokenBlockProps> = ({ token, offer, collection, isNested, isOwner, testid, onNestClick, onCreateBundle, onEquipClick }) => {
+export const NestingTokenBlock: FC<NestingTokenBlockProps> = ({
+  token,
+  offer,
+  collection,
+  isNested,
+  isOwner,
+  testid,
+  onNestClick,
+  onCreateBundle,
+  onEquipClick,
+  onUnequipClick
+}) => {
   const { tokenOwner } = token?.collection?.permissions?.nesting || offer?.collectionDescription.permissions?.nesting || {};
   const { currentChainId } = useApi();
   const _collectionId = token?.collectionId || offer?.collectionId || 0;
@@ -45,10 +57,19 @@ export const NestingTokenBlock: FC<NestingTokenBlockProps> = ({ token, offer, co
           collection={collection}
         />
         {isOwner && <ButtonsWrapper>
-          {canEquip && <Button
+          {canEquip && !isNested && <Button
+            className='equip-button'
             title={'Equip'}
             onClick={onEquipClick}
             testid={`${testid}-transfer-button`}
+            wide
+          />}
+          {canEquip && isNested && <Button
+            className='equip-button'
+            title={'Unequip'}
+            onClick={onUnequipClick}
+            testid={`${testid}-transfer-button`}
+            wide
           />}
           {canCustomize && tokenOwner && <Button
             title={'Customize'}
@@ -97,4 +118,7 @@ const Divider = styled.div`
 const ButtonsWrapper = styled.div`
   display: flex;
   gap: var(--gap);
+  button.outlined.equip-button {
+    padding: 8px 64px;
+  }
 `;

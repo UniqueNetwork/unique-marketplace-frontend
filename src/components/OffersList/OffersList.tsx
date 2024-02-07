@@ -38,15 +38,15 @@ const OffersListStyled = styled.div`
   }
 
   @media (max-width: 1489px) {
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
   }
 
   @media (max-width: 1223px) {
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
   }
 
   @media (max-width: 768px) {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
   }
 
   @media (max-width: 567px) {

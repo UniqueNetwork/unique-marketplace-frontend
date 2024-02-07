@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Link } from '@unique-nft/ui-kit';
 import { Icon, useNotifications } from 'components/UI';
@@ -87,6 +87,10 @@ const TokenPage = () => {
     }
   }, [navigate]);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   if (!isFetching && !token && !offer && !collection) return <Error404 />;
 
   return (
@@ -137,6 +141,7 @@ const TokenPage = () => {
             onNestClick={onActionClick(MarketType.nestedTransfer)}
             onCreateBundle={onActionClick(MarketType.createBundle)}
             onEquipClick={onActionClick(MarketType.equipWearable)}
+            onUnequipClick={onActionClick(MarketType.unequipWearable)}
             testid={`${testid}`}
           />
           <TokenPageModal

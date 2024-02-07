@@ -9,10 +9,12 @@ export type PriceRange = {
 };
 
 export enum TypeOfAssets {
+  All = 'all',
   NFTs = 'NFTs',
   CustomizableNFTs = 'Customizable NFTs'
 }
 export enum TypeOfCustomizableNFTs {
+  All = 'all',
   Base = 'Base NFTs',
   Wearables = 'NFT Wearables',
 }

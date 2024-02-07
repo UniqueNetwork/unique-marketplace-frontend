@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Text } from '@unique-nft/ui-kit';
 import { Checkbox } from 'components/UI';
 import styled from 'styled-components';
@@ -14,6 +14,7 @@ import { getAttributesCountFromTokens, getAttributesFromTokens } from './utils/a
 import { MixedMyTokenAndOffer } from '../types';
 import { MyCollection } from 'api/restApi/collections/types';
 import { getIpfsUriByImagePath } from 'utils/urlUtils';
+import SearchField from 'components/SearchField/SearchField';
 
 interface CollectionsFilterProps {
   value?: { collections?: number[], attributes?: { key: string, attribute: string }[], attributeCounts?: number[] } | null
@@ -43,6 +44,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({
   const [attributes, setAttributes] = useState<Record<string, Attribute[]>>({});
   const [attributeCounts, setAttributeCounts] = useState<AttributeCount[]>([]);
   const { collections: selectedCollections = [], attributes: selectedAttributes = [], attributeCounts: selectedAttributeCounts = [] } = value || {};
+  const [searchString, setSearchString] = useState<string>();
 
   useEffect(() => {
     if (!isFetchingTokens && tokens.length > 0) {
@@ -79,15 +81,27 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({
     onChange([], [], []);
   }, [onChange]);
 
+  const filteredCollections = useMemo(() => {
+    if (!searchString) return myCollections;
+    return myCollections.filter(({ name }) => name.toLowerCase().includes(searchString.toLowerCase()));
+  }, [myCollections, searchString]);
+
   return (<>
     <Accordion title={'Collections'}
       isOpen={true}
       onClear={onCollectionsClear}
       isClearShow={selectedCollections.length > 0}
     >
+      <SearchFieldWrapper>
+        <SearchField searchValue={searchString}
+          onSearchStringChange={setSearchString}
+          hideButton
+          placeholder='Search by collections'
+        />
+      </SearchFieldWrapper>
       <CollectionFilterWrapper>
         {isFetchingTokens && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
-        {!isFetchingTokens && myCollections.map((collection) => (
+        {!isFetchingTokens && filteredCollections.map((collection) => (
           <CheckboxWrapper
             key={`collection-${collection.id}`}
           >
@@ -144,6 +158,10 @@ const CheckboxWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 4);
   align-items: flex-start;
+`;
+
+const SearchFieldWrapper = styled.div`
+  margin-top: calc(var(--gap) / 2);
 `;
 
 export default CollectionsFilter;

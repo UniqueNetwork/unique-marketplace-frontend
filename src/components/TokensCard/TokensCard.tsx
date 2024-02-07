@@ -240,7 +240,7 @@ const TokensCardStyled = styled.div`
   border-radius: 8px;
   transition: transform 0.2s;
   box-shadow: 0 4px 14px rgba(0,0,0,.08);
-  padding: 4px;
+  padding: 12px 12px 8px 12px;
 
   &:hover {
     z-index: 10;

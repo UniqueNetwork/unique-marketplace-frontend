@@ -166,7 +166,7 @@ const TokensCardStyled = styled.div`
   transition: transform 0.2s;
   box-shadow: 0 4px 14px rgba(0,0,0,.08);
   cursor: pointer;
-  padding: 8px 8px 6px 8px;
+  padding: 12px 12px 8px 12px;
 
   &:hover {
     z-index: 10;

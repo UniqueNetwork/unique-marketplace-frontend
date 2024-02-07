@@ -54,6 +54,9 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
     if (otherFilter.typeOfCustomizableNFTs === TypeOfCustomizableNFTs.Wearables) {
       _collections = wearables;
     }
+    if (otherFilter.typeOfCustomizableNFTs === TypeOfCustomizableNFTs.All) {
+      _collections = [...wearables, ...customizables];
+    }
 
     return {
       seller,

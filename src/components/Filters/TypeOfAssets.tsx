@@ -19,13 +19,21 @@ const TypeOfAssetsFilter: FC<TypeOfAssetsFilterProps> = ({
   testid,
   isFetchingTokens
 }) => {
-  const onCheckboxClick = useCallback((value: TypeOfAssets) => (checked: boolean) => {
+  const onCheckboxClick = useCallback((newValue: TypeOfAssets) => (checked: boolean) => {
     if (checked) {
-      onChange(value);
+      if (value === TypeOfAssets.CustomizableNFTs || value === TypeOfAssets.NFTs) {
+        onChange(TypeOfAssets.All);
+        return;
+      }
+      onChange(newValue);
     } else {
+      if (value === TypeOfAssets.All) {
+        onChange(newValue === TypeOfAssets.CustomizableNFTs ? TypeOfAssets.NFTs : TypeOfAssets.CustomizableNFTs);
+        return;
+      }
       onChange(undefined);
     }
-  }, [onChange]);
+  }, [onChange, value]);
 
   const onClear = useCallback(() => { onChange(undefined); }, [onChange]);
 
@@ -39,7 +47,7 @@ const TypeOfAssetsFilter: FC<TypeOfAssetsFilterProps> = ({
         {isFetchingTokens && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
         <CheckboxWrapper>
           <Checkbox
-            checked={value === TypeOfAssets.NFTs}
+            checked={value === TypeOfAssets.NFTs || value === TypeOfAssets.All}
             label={'NFTs'}
             size={'m'}
             onChange={onCheckboxClick(TypeOfAssets.NFTs)}
@@ -48,7 +56,7 @@ const TypeOfAssetsFilter: FC<TypeOfAssetsFilterProps> = ({
         </CheckboxWrapper>
         <CheckboxWrapper>
           <Checkbox
-            checked={value === TypeOfAssets.CustomizableNFTs}
+            checked={value === TypeOfAssets.CustomizableNFTs || value === TypeOfAssets.All}
             label={'Customizable NFTs'}
             size={'m'}
             onChange={onCheckboxClick(TypeOfAssets.CustomizableNFTs)}

@@ -19,13 +19,21 @@ const TypeOfCustomizablesFilter: FC<TypeOfCustomizablesFilterProps> = ({
   testid,
   isFetchingTokens
 }) => {
-  const onCheckboxClick = useCallback((value: TypeOfCustomizableNFTs) => (checked: boolean) => {
+  const onCheckboxClick = useCallback((newValue: TypeOfCustomizableNFTs) => (checked: boolean) => {
     if (checked) {
-      onChange(value);
+      if (value === TypeOfCustomizableNFTs.Base || value === TypeOfCustomizableNFTs.Wearables) {
+        onChange(TypeOfCustomizableNFTs.All);
+        return;
+      }
+      onChange(newValue);
     } else {
+      if (value === TypeOfCustomizableNFTs.All) {
+        onChange(newValue === TypeOfCustomizableNFTs.Wearables ? TypeOfCustomizableNFTs.Base : TypeOfCustomizableNFTs.Wearables);
+        return;
+      }
       onChange(undefined);
     }
-  }, [onChange]);
+  }, [onChange, value]);
 
   const onClear = useCallback(() => { onChange(undefined); }, [onChange]);
 
@@ -39,7 +47,7 @@ const TypeOfCustomizablesFilter: FC<TypeOfCustomizablesFilterProps> = ({
         {isFetchingTokens && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
         <CheckboxWrapper>
           <Checkbox
-            checked={value === TypeOfCustomizableNFTs.Base}
+            checked={value === TypeOfCustomizableNFTs.Base || value === TypeOfCustomizableNFTs.All}
             label={'Base NFTs'}
             size={'m'}
             onChange={onCheckboxClick(TypeOfCustomizableNFTs.Base)}
@@ -48,7 +56,7 @@ const TypeOfCustomizablesFilter: FC<TypeOfCustomizablesFilterProps> = ({
         </CheckboxWrapper>
         <CheckboxWrapper>
           <Checkbox
-            checked={value === TypeOfCustomizableNFTs.Wearables}
+            checked={value === TypeOfCustomizableNFTs.Wearables || value === TypeOfCustomizableNFTs.All}
             label={'NFT Wearables'}
             size={'m'}
             onChange={onCheckboxClick(TypeOfCustomizableNFTs.Wearables)}
