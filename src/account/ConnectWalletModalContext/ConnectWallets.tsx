@@ -1,10 +1,10 @@
-import { useCallback, useContext, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { Ethereum } from '@unique-nft/utils/extension';
+import { Ethereum, Polkadot } from '@unique-nft/utils/extension';
 import { ConnectWalletModalContext } from './ConnectWalletModalContext';
 import { useAccounts } from 'hooks/useAccounts';
 import { Button, Icon, Modal } from 'components/UI';
-import { Heading } from '@unique-nft/ui-kit';
+import { Heading, Loader } from '@unique-nft/ui-kit';
 import { CreateAccountModal } from 'pages/Accounts/Modals/CreateAccount';
 import { ImportViaSeedAccountModal } from 'pages/Accounts/Modals/ImportViaSeed';
 import { ImportViaJSONAccountModal } from 'pages/Accounts/Modals/ImportViaJson';
@@ -116,6 +116,20 @@ export const ConnectWallets = () => {
 
   const isMobile = DeviceSize.sm <= useDeviceSize();
 
+  const [isFetching, setIsFetching] = useState<boolean>(false);
+  const [availableWallets, setAvailableWallets] = useState<string[]>([]);
+
+  useEffect(() => {
+    void (async () => {
+      setIsFetching(true);
+      const wallets = await Polkadot.listWallets();
+      const canConnectMetamask = window.ethereum?.isMetaMask;
+      console.log(wallets, canConnectMetamask);
+      setAvailableWallets(wallets.wallets.map(({ name }) => name));
+      setIsFetching(false);
+    })();
+  }, []);
+
   return (
     <>
       <Modal
@@ -127,51 +141,39 @@ export const ConnectWallets = () => {
       >
         <Heading size='2'>Connect wallet</Heading>
         <p>Choose how you want to connect. If you don&apos;t have a wallet, you can select a provider and create one.</p>
-        {/* TODO: remove this part if not needed */}
-        {/* <Buttons>
-          <Button
-            title='Seed phrase'
-            role='primary'
-            onClick={handleOpenModal(AccountModal.VIA_SEED)}
-          />
-          <Button title='New substrate account' onClick={onCreateAccountClick} />
-          <Button
-            title='Backup JSON file'
-            onClick={handleOpenModal(AccountModal.VIA_JSON)}
-          />
-        </Buttons>
-
-        <p>You can also create or connect wallets via these providers:</p> */}
         <Wallets>
-          {!window.walletExtension?.isNovaWallet && <>
-            <WalletItem onClick={handleConnectToPolkadotExtension}>
-              <Icon size={40} name='polkadot-wallet' /> <span>Polkadot.js</span>
-            </WalletItem>
-            <WalletItem onClick={handleConnectToMetamask}>
-              <Icon size={40} name='metamask-wallet' /> <span>Metamask</span>
-            </WalletItem>
-            <WalletItem onClick={handleConnectToTalismanExtension}>
-              <Icon size={40} name='talisman-wallet' /> <span>Talisman</span>
-            </WalletItem>
-            <WalletItem onClick={handleConnectToSubWalletExtension}>
-              <Icon file={SubWalletIcon} size={40} />
-              <span>SubWallet</span>
-            </WalletItem>
-            <WalletItem onClick={handleConnectToEnkryptExtension}>
-              <Icon file={EnkriptIcon} size={40} />
-              <span>Enkrypt</span>
-            </WalletItem>
-            {!isMobile && <div></div>}
+          {availableWallets.includes('polkadot-js') && <WalletItem onClick={handleConnectToPolkadotExtension}>
+            <Icon size={40} name='polkadot-wallet' /> <span>Polkadot.js</span>
+          </WalletItem>}
+          {window.ethereum?.isMetaMask && <WalletItem onClick={handleConnectToMetamask}>
+            <Icon size={40} name='metamask-wallet' /> <span>Metamask</span>
+          </WalletItem>}
+          {availableWallets.includes('talisman') && <WalletItem onClick={handleConnectToTalismanExtension}>
+            <Icon size={40} name='talisman-wallet' /> <span>Talisman</span>
+          </WalletItem>}
+          {availableWallets.includes('subwallet-js') && <WalletItem onClick={handleConnectToSubWalletExtension}>
+            <Icon file={SubWalletIcon} size={40} />
+            <span>SubWallet</span>
+          </WalletItem>}
+          {availableWallets.includes('enkrypt') && <WalletItem onClick={handleConnectToEnkryptExtension}>
+            <Icon file={EnkriptIcon} size={40} />
+            <span>Enkrypt</span>
+          </WalletItem>}
+          {/* {!isMobile && <div></div>}
             {isMobile && <WalletItem href='https://novawallet.io' target='_blank'>
               <Icon file={NovaWalletIcon} size={40} />
               <span>Nova Wallet</span>
-            </WalletItem>}
-          </>}
+            </WalletItem>} */}
+          {/* {!!window.SubWallet && <WalletItem onClick={handleConnectToSubWalletExtension}>
+            <Icon file={SubWalletIcon} size={40} />
+            <span>SubWallet</span>
+            </WalletItem>} */}
           {window.walletExtension?.isNovaWallet && <WalletItem onClick={handleConnectToNovaWallet}>
             <Icon file={NovaWalletIcon} size={40} />
             <span>Nova Wallet</span>
           </WalletItem>}
         </Wallets>
+        {isFetching && <Loader />}
       </Modal>
 
       <CreateAccountModal
@@ -227,7 +229,6 @@ const WalletItem = styled.a`
   border: 1px solid var(--color-grey-100);
   box-sizing: border-box;
   padding: 11px 27px;
-  flex: 1 1 auto;
   cursor: pointer;
   border-radius: calc(var(--prop-gap) / 2);
   span {
