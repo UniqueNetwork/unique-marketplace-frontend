@@ -45,7 +45,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
         {!showMobileMenu && (
           <nav>
             <DesktopMenuLink to={`/${currentChainId || ''}/market`} active={activeItem === 'Market'}>
-              Market
+              Explore
             </DesktopMenuLink>
             <MenuDropdown
               options={[
@@ -91,7 +91,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
       {showMobileMenu && mobileMenuIsOpen && (
         <MobileMenu>
           <MobileMenuLink to={`/${currentChainId || ''}/market`} active={activeItem === 'Market'} onClick={mobileMenuToggler}>
-            Market
+            Explore
           </MobileMenuLink>
           <MobileMenuDropdown
             options={[

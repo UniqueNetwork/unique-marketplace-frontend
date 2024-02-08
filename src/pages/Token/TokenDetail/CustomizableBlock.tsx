@@ -64,7 +64,7 @@ export const CustomizableBlock = ({ token, offer, collection }: CustomizableBloc
       <Text>{isCustomizable ? 'Base NFT' : 'NFT Wearables'}</Text>
     </Row>
     <Row>
-      <Text color='grey-500'>{isCustomizable ? 'Connected NFT Wearables collections:' : 'Connected Base collection:'}</Text>
+      <Text color='grey-500'>{isCustomizable ? 'Wearables collections:' : 'Base collection:'}</Text>
       {isCustomizable && wearableCollections.length > 0 && wearableCollections.map(({ id, name }) => {
         return <Link to={`/${currentChainId}/collection/${id}`}>{name}</Link>;
       })}

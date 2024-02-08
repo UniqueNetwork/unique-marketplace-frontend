@@ -60,6 +60,7 @@ export const NestingTokenBlock: FC<NestingTokenBlockProps> = ({
           {canEquip && !isNested && <Button
             className='equip-button'
             title={'Equip'}
+            role='primary'
             onClick={onEquipClick}
             testid={`${testid}-transfer-button`}
             wide
@@ -118,7 +119,7 @@ const Divider = styled.div`
 const ButtonsWrapper = styled.div`
   display: flex;
   gap: var(--gap);
-  button.outlined.equip-button {
-    padding: 8px 64px;
+  button.primary.equip-button {
+    padding: 8px 128px;
   }
 `;
