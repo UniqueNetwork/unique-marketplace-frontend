@@ -114,7 +114,8 @@ export const ConnectWallets = () => {
     }
   };
 
-  const isMobile = DeviceSize.sm <= useDeviceSize();
+  const isMobile = DeviceSize.sm >= useDeviceSize();
+  console.log(isMobile);
 
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [availableWallets, setAvailableWallets] = useState<string[]>([]);
@@ -142,7 +143,7 @@ export const ConnectWallets = () => {
         <Heading size='2'>Connect wallet</Heading>
         <p>Choose how you want to connect. If you don&apos;t have a wallet, you can select a provider and create one.</p>
         <Wallets>
-          {availableWallets.includes('polkadot-js') && <WalletItem onClick={handleConnectToPolkadotExtension}>
+          {availableWallets.includes('polkadot-js') && !isMobile && <WalletItem onClick={handleConnectToPolkadotExtension}>
             <Icon size={40} name='polkadot-wallet' /> <span>Polkadot.js</span>
           </WalletItem>}
           {window.ethereum?.isMetaMask && <WalletItem onClick={handleConnectToMetamask}>
@@ -159,15 +160,6 @@ export const ConnectWallets = () => {
             <Icon file={EnkriptIcon} size={40} />
             <span>Enkrypt</span>
           </WalletItem>}
-          {/* {!isMobile && <div></div>}
-            {isMobile && <WalletItem href='https://novawallet.io' target='_blank'>
-              <Icon file={NovaWalletIcon} size={40} />
-              <span>Nova Wallet</span>
-            </WalletItem>} */}
-          {/* {!!window.SubWallet && <WalletItem onClick={handleConnectToSubWalletExtension}>
-            <Icon file={SubWalletIcon} size={40} />
-            <span>SubWallet</span>
-            </WalletItem>} */}
           {window.walletExtension?.isNovaWallet && <WalletItem onClick={handleConnectToNovaWallet}>
             <Icon file={NovaWalletIcon} size={40} />
             <span>Nova Wallet</span>
