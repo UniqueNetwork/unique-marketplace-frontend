@@ -131,6 +131,8 @@ export const ConnectWallets = () => {
     })();
   }, []);
 
+  const noAvailableWallets = availableWallets.length === 0;
+
   return (
     <>
       <Modal
@@ -146,13 +148,13 @@ export const ConnectWallets = () => {
           {availableWallets.includes('polkadot-js') && !isMobile && <WalletItem onClick={handleConnectToPolkadotExtension}>
             <Icon size={40} name='polkadot-wallet' /> <span>Polkadot.js</span>
           </WalletItem>}
-          {window.ethereum?.isMetaMask && <WalletItem onClick={handleConnectToMetamask}>
+          {(window.ethereum?.isMetaMask || noAvailableWallets) && <WalletItem onClick={handleConnectToMetamask}>
             <Icon size={40} name='metamask-wallet' /> <span>Metamask</span>
           </WalletItem>}
           {availableWallets.includes('talisman') && <WalletItem onClick={handleConnectToTalismanExtension}>
             <Icon size={40} name='talisman-wallet' /> <span>Talisman</span>
           </WalletItem>}
-          {availableWallets.includes('subwallet-js') && <WalletItem onClick={handleConnectToSubWalletExtension}>
+          {(availableWallets.includes('subwallet-js') || noAvailableWallets) && <WalletItem onClick={handleConnectToSubWalletExtension}>
             <Icon file={SubWalletIcon} size={40} />
             <span>SubWallet</span>
           </WalletItem>}
@@ -160,7 +162,7 @@ export const ConnectWallets = () => {
             <Icon file={EnkriptIcon} size={40} />
             <span>Enkrypt</span>
           </WalletItem>}
-          {window.walletExtension?.isNovaWallet && <WalletItem onClick={handleConnectToNovaWallet}>
+          {(window.walletExtension?.isNovaWallet || noAvailableWallets) && <WalletItem onClick={handleConnectToNovaWallet}>
             <Icon file={NovaWalletIcon} size={40} />
             <span>Nova Wallet</span>
           </WalletItem>}
