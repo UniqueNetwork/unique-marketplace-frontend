@@ -112,24 +112,6 @@ const ActionsWrapper = styled.div`
   }
 `;
 
-const TokenWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: calc(var(--gap) / 2);
-`;
-
-const TokenMediaWrapper = styled.div`
-  display: flex;
-
-  width: 400px;
-  height: 450px;
-  position: relative;
-  &>div {
-    position: absolute;
-    top: 0;
-  }
-`;
-
 const EquipsSection = styled.div`
   display: flex;
   flex-direction: column;

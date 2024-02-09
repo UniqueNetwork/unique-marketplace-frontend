@@ -114,24 +114,6 @@ const ActionsWrapper = styled.div`
   }
 `;
 
-const TokenWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: calc(var(--gap) / 2);
-`;
-
-const TokenMediaWrapper = styled.div`
-  display: flex;
-
-  width: 400px;
-  height: 450px;
-  position: relative;
-  &>div {
-    position: absolute;
-    top: 0;
-  }
-`;
-
 const EquipsSection = styled.div`
   display: flex;
   flex-direction: column;
@@ -141,16 +123,14 @@ const EquipsSection = styled.div`
 const EquipsListWrapper = styled.div`
   display: grid;
   gap: 16px;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  width: 700px;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
   max-height: 500px;
   overflow-y: auto;
   padding-right: 8px;
   height: 100%;
   @media (max-width: 1280px) {
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     min-width: auto;
-    width: 550px;
   }
   @media (max-width: 1024px) {
     grid-template-columns: 1fr 1fr 1fr;
