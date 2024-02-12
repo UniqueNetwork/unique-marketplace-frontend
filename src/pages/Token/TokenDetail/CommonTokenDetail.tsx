@@ -25,7 +25,6 @@ import { FractionalOwnersList } from './FractionalOwnersList';
 import { OwnerCard } from 'components/OwnerCard/OwnerCard';
 import { BadgeEnum } from 'components/Picture';
 import { INestingToken } from 'components/BundleTree/types';
-import { CustomizableRecommendation } from './CustomizableRecommendation';
 
 interface IProps {
   token?: TokenByIdResponse
@@ -213,11 +212,6 @@ export const CommonTokenDetail: FC<IProps> = ({
             attributes={attributesList}
             collectionId={collectionId}
           />}
-          <Divider />
-          <CustomizableRecommendation
-            offer={offer}
-            collection={collection}
-          />
         </>}
       </Description>
       <DropdownStyled

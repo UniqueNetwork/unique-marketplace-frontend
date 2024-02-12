@@ -1,6 +1,6 @@
 import { Offer } from 'api/restApi/offers/types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { mockWearables } from '../constants';
+import { mockWearables } from './constants';
 import { useApi } from 'hooks/useApi';
 import { Slide } from 'react-slideshow-image';
 import 'react-slideshow-image/dist/styles.css';
@@ -11,13 +11,14 @@ import styled from 'styled-components';
 import { Button, Heading } from '@unique-nft/ui-kit';
 import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 import { useNavigate } from 'react-router-dom';
+import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 
 interface IProps {
   offer?: Offer | undefined
   collection?: CollectionInfoWithSchemaResponse
 }
 
-export const CustomizableRecommendation = ({ offer, collection }: IProps) => {
+export const RecommendationSection = ({ offer, collection }: IProps) => {
   const [tokens, setTokens] = useState<(Offer | MyToken)[]>([]);
   const collectionId = offer?.collectionId;
   const { currentChainId } = useApi();
@@ -51,7 +52,7 @@ export const CustomizableRecommendation = ({ offer, collection }: IProps) => {
           pageSize: 40
         });
         setTokens(items);
-      } else {
+      } else if (collection) {
         const { items } = await fetch({
           collectionId: collection?.id,
           page: 1,
@@ -76,60 +77,104 @@ export const CustomizableRecommendation = ({ offer, collection }: IProps) => {
     }
   }, [baseCollection, wearableCollections, navigate, currentChainId]);
 
-  if (!offer) return null;
+  const deviceSize = useDeviceSize();
 
-  return <CustomizableRecommendationWrapper>
+  const slidesToShow = useMemo(() => {
+    switch (deviceSize) {
+      case DeviceSize.sm: return 3;
+      case DeviceSize.md: return 3;
+      case DeviceSize.lg: return 5;
+      default: return 5;
+    }
+  }, [deviceSize]);
+
+  const slides = useMemo(() => {
+    const slidesCount = Math.ceil(Math.min(tokens.length, 20) / slidesToShow);
+    const slides = Array.from({ length: slidesCount })
+    .map((_, index) => tokens.slice(index * slidesToShow, index * slidesToShow + slidesToShow));
+
+    return slides.map((tokens, index) => {
+        return <SlideWrapper key={index}>
+          {tokens.map((token) => {
+            return (
+              <TokensCard
+                key={`${token.collectionId}_${token.tokenId}`}
+                collectionId={token.collectionId}
+                tokenId={token.tokenId}
+                offer={token}
+                testid={''}
+              />
+            );
+          })}
+        </SlideWrapper>;
+      });
+  }, [slidesToShow, tokens]);
+
+  if (!offer || isFetching) return null;
+
+  return <RecommendationWrapper>
     <Heading size='2' >{baseCollection ? 'Base NFTs for this collection' : (wearableCollections?.length ? 'NFT Wearables for this collection' : 'More NFTs from this collection')}</Heading>
     <Slide
       autoplay={false}
       transitionDuration={150}
-      slidesToShow={4}
-      slidesToScroll={4}
-      infinite={false}
-      arrows={tokens.length > 4}
+      infinite={true}
+      arrows={tokens.length > slidesToShow}
     >
-      {tokens.map((token) => {
-        return (
-          <TokensCard
-            key={token.tokenId}
-            collectionId={token.collectionId}
-            tokenId={token.tokenId}
-            offer={token}
-            testid={''}
-          />
-        );
-      })}
+      {slides}
     </Slide>
     <ActionWrapper>
       <Button title={wearableCollections && wearableCollections?.length > 1 ? 'More info' : 'Explore collection'} onClick={onExploreCollectionClick} />
     </ActionWrapper>
-  </CustomizableRecommendationWrapper>;
+  </RecommendationWrapper>;
 };
 
-const CustomizableRecommendationWrapper = styled.div`
+const SlideWrapper = styled.div`
+  display: flex;
+  width: calc(100vw - 128px);
+  gap: 16px;
+  padding: 16px;
+  box-sizing: border-box;
+  justify-content: center;
+  @media (max-width: 1024px) {
+    width: calc(100vw - 64px);
+  }
+  @media (max-width: 620px) {
+    width: calc(100vw - 32px);
+  }
+
+`;
+
+const RecommendationWrapper = styled.div`
+  margin-top: 32px;
   width: 100%;
   div.images-wrap {
     flex-wrap: nowrap !important;
     width: auto !important;
+
     &>div {
-      flex: 25%;
-      max-width: 25%;
-      @media (max-width:512px) {
-        flex: 100%;
-        max-width: 100%;
-      }
-      @media (max-width:768px) {
+      display: block !important;
+    }
+    /* padding: 16px 0;
+    &>div {
+      padding: 0 16px;
+      flex: 20%;
+      max-width: 20%;
+      @media (max-width: 768px) {
         flex: 50%;
         max-width: 50%;
       }
-      @media (max-width:1024px) {
+      @media (max-width: 1024px) {
         flex: 33.33%;
         max-width: 33.33%;
+      }
+      @media (max-width: 1279px) {
+        flex: 25%;
+        max-width: 25%;
       }
     }
     &>div>div{
       padding: 0 8px;
-    }
+    } */
   }
   button.nav[data-type=prev] {
     margin-left: -24px;

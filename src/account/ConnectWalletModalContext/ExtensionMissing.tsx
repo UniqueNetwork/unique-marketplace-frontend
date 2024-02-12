@@ -17,7 +17,7 @@ const extensionSourceLinks = {
   Talisman: 'https://www.talisman.xyz/',
   Metamask: 'https://metamask.io/download/',
   NovaWallet: 'https://novawallet.io',
-  Enkrypt: 'https://www.enkript.com'
+  Enkrypt: 'https://www.enkrypt.com'
 };
 
 export const ExtensionMissingModal = ({

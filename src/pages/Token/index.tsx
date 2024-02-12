@@ -18,6 +18,7 @@ import { NestedTokenBlock } from './TokenDetail/NestedTokenBlock';
 import BundleModal from './BundleModals/BundleTransferModal';
 import { NestingTokenBlock } from './TokenDetail/NestingBlock';
 import { TokenContext } from './context/TokenContext';
+import { RecommendationSection } from './RecommendationSection';
 
 const testid = 'token-page';
 
@@ -154,6 +155,10 @@ const TokenPage = () => {
             testid={`${testid}`}
           />
         </CommonTokenDetail>
+        <RecommendationSection
+          offer={offer}
+          collection={collection}
+        />
       </TokenPagePaper>
       {isBundle &&
         <BundleTreeSection
