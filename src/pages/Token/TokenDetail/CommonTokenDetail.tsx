@@ -133,8 +133,7 @@ export const CommonTokenDetail: FC<IProps> = ({
   const videoProp = useMemo(() => stringToDecodedInfixOrUrlOrCidAndHash(video), [video]);
 
   const badges: BadgeEnum[] = [
-    ...(collection?.mode === 'ReFungible' ? [BadgeEnum.Fractional] : []),
-    ...(isNested ? [BadgeEnum.Nested] : isBundle ? [BadgeEnum.Bundle] : [])
+    ...(collection?.mode === 'ReFungible' ? [BadgeEnum.Fractional] : [])
   ];
 
   const onViewTokenDetails = useCallback((token: INestingToken, mode: string) => {

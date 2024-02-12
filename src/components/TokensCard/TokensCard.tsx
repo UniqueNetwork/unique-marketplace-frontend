@@ -187,7 +187,6 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
             />
           </Link>
           {showOwner && <Text size={'s'} color={'grey-500'}>{isOwner ? 'You own it' : `Owned by: ${shortcutText(owner || '')}`}</Text>}
-          {isBundleState && <BundleItemsCount count={tokensCount || 0} testId={testid} />}
         </BasicDataWrapper>
         {!!price?.parsed && <TradingInfoWrapper>
           <Text size={'xs'} color={'grey-500'} >Price</Text>
@@ -199,26 +198,6 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
             <IconStyled name={`chain-${currentChainId?.toLowerCase()}`} size={16} />
           </PriceWrapper>
         </TradingInfoWrapper>}
-        {/* {auction && <AuctionInfoWrapper>
-          {isTopBidder && <Text
-            testid={`${testid}-leading-bid`}
-            size={'xs'}
-            color={'additional-positive-500'}
-          >Leading bid</Text>}
-          {isBidder && !isTopBidder && <Text
-            testid={`${testid}-outbid`}
-            size={'xs'}
-            color={'coral-500'}
-          >Outbid</Text>}
-          {!isBidder && !isTopBidder && <Text
-            testid={`${testid}-bids`}
-            size={'xs'}
-            color={'grey-500'}
-          >{
-            auction.bids.length > 0 ? 'Last bid' : 'Minimum bid'
-          }</Text>}
-          <StyledText color={'dark'} size={'xs'}>{`${timeDifference(new Date(auction?.stopAt || '').getTime() / 1000)} left`}</StyledText>
-        </AuctionInfoWrapper>} */}
         {type === TokenTypeEnum.RFT && !!amount && !!totalPieces && <Text size={'xs'} color={'grey-500'} >
           Owned fractions: {amount}/{totalPieces}
         </Text>}
@@ -282,17 +261,6 @@ const TradingInfoWrapper = styled.div`
   column-gap: calc(var(--gap) / 4);
   align-items: center;
   justify-content: space-between;
-`;
-
-const StyledText = styled(Text)` 
-  && {
-    color: var(--color-additional-dark);
-  }
-`;
-
-const AuctionInfoWrapper = styled.div`
-  display: flex;
-  column-gap: calc(var(--gap) / 2);
 `;
 
 const IconStyled = styled(Icon)`

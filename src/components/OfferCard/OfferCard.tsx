@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FC, useMemo, useRef } from 'react';
 import { Text } from '@unique-nft/ui-kit';
 import { generatePath, Link } from 'react-router-dom';
 import styled from 'styled-components';
@@ -9,9 +9,7 @@ import { countNestedChildren, stringToDecodedInfixOrUrlOrCidAndHash } from 'util
 import { Primary600 } from 'styles/colors';
 import { TokensMedia } from '../TokensCard/TokensMedia';
 import { useApi } from '../../hooks/useApi';
-import BundleItemsCount from '../BundleItemsCount/BundleItemsCount';
 import { BadgeEnum } from 'components/Picture';
-import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 import { useCollections } from 'hooks/useCollections';
 import { CollectionTitle } from './CollectionTitle';
 
@@ -33,7 +31,6 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
   const isBundle = !!nestingChildTokens?.length;
 
   const {
-    name: collectionName,
     tokenPrefix
   } = offer?.collectionDescription || {};
 
@@ -66,44 +63,6 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
     }
     return collectionIsCustomizable(offer?.collectionId) || collectionIsWearable(offer?.collectionId);
   }, [offer?.collectionId, collectionIsCustomizable, collectionIsWearable]);
-
-  // useEffect(() => {
-  //   function map(val: number, minA: number, maxA: number, minB: number, maxB: number) {
-  //     return minB + ((val - minA) * (maxB - minB)) / (maxA - minA);
-  //   }
-
-  //   function Card3D(card: HTMLDivElement, ev: MouseEvent) {
-  //     const img = card.querySelector('img');
-  //     const imgRect = card.getBoundingClientRect();
-  //     const width = imgRect.width;
-  //     const height = imgRect.height;
-  //     const mouseX = ev.clientX - imgRect.left;
-  //     const mouseY = ev.clientY - imgRect.top;
-  //     const rotateY = map(mouseX, 0, 180, -25, 25);
-  //     const rotateX = map(mouseY, 0, 250, 25, -25);
-  //     const brightness = map(mouseY, 0, 250, 1.2, 0.8);
-
-  //     if (!img || !card) return;
-  //     card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
-  //     img.style.filter = `brightness(${brightness})`;
-  //   }
-
-  //   if (!cardRef.current) return;
-
-  //   cardRef.current.addEventListener('mousemove', (ev) => {
-  //     if (!cardRef.current) return;
-  //     Card3D(cardRef.current, ev);
-  //   });
-
-  //   cardRef.current.addEventListener('mouseleave', () => {
-  //     if (!cardRef.current) return;
-  //     const img = cardRef.current.querySelector('img');
-
-  //     if (!img) return;
-  //     cardRef.current.style.transform = 'rotateX(0deg) rotateY(0deg) scale(1)';
-  //     img.style.filter = 'brightness(1)';
-  //   });
-  // }, []);
 
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -138,7 +97,6 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
               collectionName={offer.collectionDescription.name}
             />
           </Link>
-          {isBundle && <BundleItemsCount count={tokensCount || 0} testId={testid} />}
         </BasicDataWrapper>
         <TradingInfoWrapper>
           <Text size={'xs'} color={'grey-500'} >Price</Text>
@@ -211,11 +169,6 @@ const Description = styled.div`
   span {
     color: ${Primary600};
   }
-`;
-
-const AuctionInfoWrapper = styled.div`
-  display: flex;
-  column-gap: calc(var(--gap) / 2);
 `;
 
 const IconStyled = styled(Icon)`
