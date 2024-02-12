@@ -81,7 +81,7 @@ export const RecommendationSection = ({ offer, collection }: IProps) => {
 
   const slidesToShow = useMemo(() => {
     switch (deviceSize) {
-      case DeviceSize.sm: return 3;
+      case DeviceSize.sm: return 2;
       case DeviceSize.md: return 3;
       case DeviceSize.lg: return 5;
       default: return 5;
@@ -160,27 +160,6 @@ const RecommendationWrapper = styled.div`
     &>div {
       display: block !important;
     }
-    /* padding: 16px 0;
-    &>div {
-      padding: 0 16px;
-      flex: 20%;
-      max-width: 20%;
-      @media (max-width: 768px) {
-        flex: 50%;
-        max-width: 50%;
-      }
-      @media (max-width: 1024px) {
-        flex: 33.33%;
-        max-width: 33.33%;
-      }
-      @media (max-width: 1279px) {
-        flex: 25%;
-        max-width: 25%;
-      }
-    }
-    &>div>div{
-      padding: 0 8px;
-    } */
   }
   button.nav[data-type=prev] {
     margin-left: -24px;

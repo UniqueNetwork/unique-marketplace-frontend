@@ -160,15 +160,6 @@ const TokenPage = () => {
           collection={collection}
         />
       </TokenPagePaper>
-      {isBundle &&
-        <BundleTreeSection
-          token={token}
-          offer={offer}
-          testid={`${testid}-bundle`}
-          isOwner={isOwner}
-          onFinish={onFinish}
-        />
-      }
       <BundleModal
         token={token}
         setModalType={setMarketType}

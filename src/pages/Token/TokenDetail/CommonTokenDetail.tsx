@@ -25,6 +25,7 @@ import { FractionalOwnersList } from './FractionalOwnersList';
 import { OwnerCard } from 'components/OwnerCard/OwnerCard';
 import { BadgeEnum } from 'components/Picture';
 import { INestingToken } from 'components/BundleTree/types';
+import { EquippedWearables } from './EquippedWearables';
 
 interface IProps {
   token?: TokenByIdResponse
@@ -158,6 +159,7 @@ export const CommonTokenDetail: FC<IProps> = ({
             badges={badges}
           />
         }
+        <EquippedWearables />
       </PictureWrapper>
       <Description>
         {isLoading && <TokenSkeleton />}
@@ -294,7 +296,7 @@ const PictureWrapper = styled.div`
   align-items: center;
   width: 536px;
   margin-right: calc(var(--gap) * 2);
-  
+  flex-direction: column;
   &::before {
     content: '';
     display: block;

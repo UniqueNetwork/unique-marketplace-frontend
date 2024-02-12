@@ -15,9 +15,9 @@ export const CollectionTitle = ({
     <Text color='primary-600' size='s' >
       {collectionName}
     </Text>
-    <Text color='primary-600' size='s'>
+    {/* <Text color='primary-600' size='s'>
       [id {collectionId}]
-    </Text>
+    </Text> */}
     <Tooltip
       align={{ vertical: 'top', horizontal: 'middle', appearance: 'vertical' }}
       targetRef={collectionNameRef}
