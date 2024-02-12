@@ -130,11 +130,17 @@ export const RecommendationSection = ({ offer, collection }: IProps) => {
 
 const SlideWrapper = styled.div`
   display: flex;
-  width: calc(100vw - 128px);
+  width: calc(100vw - 160px);
   gap: 16px;
   padding: 16px;
   box-sizing: border-box;
   justify-content: center;
+  &>div {
+    flex: auto;
+  }
+  @media (max-width: 1440px) {
+    width: calc(100vw - 128px);
+  }
   @media (max-width: 1024px) {
     width: calc(100vw - 64px);
   }
