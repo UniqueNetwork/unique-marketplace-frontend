@@ -8,6 +8,7 @@ import CollectionsContext from 'collections/CollectionsContext';
 import config from '../config';
 import { Address } from '@unique-nft/utils';
 import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
+import { mockWearables } from 'pages/Token/constants';
 
 const endpoint = '/collections';
 
@@ -26,20 +27,33 @@ export const useCollections = () => {
   const [customizableCollections, setCustomizableCollections] = useState<CustomizableCollectionRelationship>({});
 
   useEffect(() => {
-    const customizableCollections = [...collections, ...featuredCollections].reduce<CustomizableCollectionRelationship>((acc, { id, properties, permissions }) => {
-      if (properties.find(({ key }) => key === 'is_customizable')) {
-        acc[id] = permissions?.nesting?.restricted || [];
-      }
-      return acc;
-    }, {});
+    if (!currentChainId || !mockWearables[currentChainId || '']) return;
+    const customizables = mockWearables[currentChainId].map(({ baseCollections }) => baseCollections).flat();
+    // TODO: it replaced with hardcode for customizable collections, need change when release schema 2.0
+    // const customizableCollections = [...collections, ...featuredCollections].reduce<CustomizableCollectionRelationship>((acc, { id, permissions }) => {
 
-    setCustomizableCollections((value) => {
-      return {
-        ...value,
-        ...customizableCollections
-      };
-    });
-  }, [featuredCollections, collections]);
+      // if (properties.find(({ key }) => key === 'is_customizable')) {
+      //   acc[id] = permissions?.nesting?.restricted || [];
+      // }
+    //   if (customizables.includes(id)) {
+    //     acc[id] = permissions?.nesting?.restricted || [];
+    //   }
+
+    //   return acc;
+    // }, {});
+
+    // setCustomizableCollections((value) => {
+    //   return {
+    //     ...value,
+    //     ...customizableCollections
+    //   };
+    // });
+
+    setCustomizableCollections(mockWearables[currentChainId].reduce<CustomizableCollectionRelationship>((acc, { collectionId, baseCollections }) => {
+      acc[baseCollections[0]] = [...(acc[baseCollections[0]] || []), collectionId];
+      return acc;
+    }, {}));
+  }, [featuredCollections, collections, currentChainId]);
 
   const getCollection = useCallback(async (collectionId: number) => {
     const collection = featuredCollections.find(({ id }) => collectionId === id) || collections.find(({ id }) => collectionId === id);

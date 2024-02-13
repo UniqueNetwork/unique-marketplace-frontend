@@ -6,6 +6,7 @@ export const mockWearables: Record<string, { collectionId: number, baseCollectio
   ],
   quartz: [],
   unique: [
-    { collectionId: 388, baseCollections: [387] }
+    { collectionId: 388, baseCollections: [387] },
+    { collectionId: 139, baseCollections: [138] }
   ]
 };
