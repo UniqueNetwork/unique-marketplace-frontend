@@ -104,7 +104,7 @@ export const CollectionsPage: FC = () => {
   const onViewOnScanClick = useCallback((collection: MyCollection) => () => {
     const { scanUrl } = config.blockchains[currentChainId || ''] || {};
     if (!scanUrl) return;
-    window.open(`${scanUrl}collections/${collection.id}`, '_blank')?.focus();
+    window.open(`${scanUrl}unique_collection/${collection.id}`, '_blank')?.focus();
   }, [currentChainId]);
 
   const filteredCollections = useMemo(() => {

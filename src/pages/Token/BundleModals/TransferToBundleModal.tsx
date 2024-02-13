@@ -8,7 +8,7 @@ import styled from 'styled-components';
 import DefaultMarketStages from '../Modals/StagesModal';
 import { useAccounts } from 'hooks/useAccounts';
 import { StageStatus } from 'types/StagesTypes';
-import { TBundleTransferModalBodyProps } from './BundleTrunsferModal';
+import { TBundleTransferModalBodyProps } from './BundleTransferModal';
 import { useApi } from 'hooks/useApi';
 import { CollectionCover } from 'components/CollectionCover/CollectionCover';
 import { FeeMessage } from 'components';

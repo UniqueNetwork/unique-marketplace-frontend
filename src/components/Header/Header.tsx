@@ -44,8 +44,8 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
         </LogoLink>
         {!showMobileMenu && (
           <nav>
-            <DesktopMenuLink to={`/${currentChainId || ''}/market`} active={activeItem === 'Market'}>
-              Market
+            <DesktopMenuLink to={`/${currentChainId || ''}/market`} active={activeItem === undefined}>
+              Explore
             </DesktopMenuLink>
             <MenuDropdown
               options={[
@@ -69,8 +69,8 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
             >
               <DesktopMenuItem>Create</DesktopMenuItem>
             </MenuDropdown>
-            <DesktopMenuLink to={`/${currentChainId || ''}/sellTokens`} active={activeItem === 'Sell tokens'} disabled={!selectedAccount || isLoading}>
-              Sell tokens
+            <DesktopMenuLink to={`/${currentChainId || ''}/sellTokens`} active={activeItem === 'My NFTs'} disabled={!selectedAccount || isLoading}>
+              My NFTs
             </DesktopMenuLink>
             <DesktopMenuLink to={`/${currentChainId || ''}/collections`} active={activeItem === 'My collections'} disabled={!selectedAccount || isLoading}>
               My collections
@@ -90,8 +90,8 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
       </RightSide>
       {showMobileMenu && mobileMenuIsOpen && (
         <MobileMenu>
-          <MobileMenuLink to={`/${currentChainId || ''}/market`} active={activeItem === 'Market'} onClick={mobileMenuToggler}>
-            Market
+          <MobileMenuLink to={`/${currentChainId || ''}/market`} active={activeItem === undefined} onClick={mobileMenuToggler}>
+            Explore
           </MobileMenuLink>
           <MobileMenuDropdown
             options={[
@@ -114,11 +114,11 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
           </MobileMenuDropdown>
           <MobileMenuLink
             to={`/${currentChainId || ''}/sellTokens`}
-            active={activeItem === 'Sell tokens'}
+            active={activeItem === 'My NFTs'}
             onClick={mobileMenuToggler}
             disabled={!selectedAccount && !isLoading}
           >
-            Sell tokens
+            My NFTs
           </MobileMenuLink>
           <MobileMenuLink to={`/${currentChainId || ''}/collections`}
             active={activeItem === 'My collections'}

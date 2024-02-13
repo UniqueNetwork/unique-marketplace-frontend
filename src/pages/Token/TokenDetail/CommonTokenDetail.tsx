@@ -1,16 +1,12 @@
 import { Heading, Text } from '@unique-nft/ui-kit';
-import React, { FC, ReactChild, useCallback, useContext, useMemo, useState } from 'react';
+import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { Dropdown, Icon } from 'components/UI';
-import { Picture, TokensCard } from 'components';
+import { Picture } from 'components';
 import TokensBandleCard from 'components/BundleTree/NestedSection/TokenCard';
-import { CollectionsCard } from './CollectionsCard';
 import { AttributesBlock } from './AttributesBlock';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
-import { shortcutText } from 'utils/textUtils';
 import { BlueGrey100, BlueGrey300, Coral100, Coral500, Grey300, Grey500, Primary500, Primary600, Secondary400, Secondary500 } from 'styles/colors';
-import { Avatar } from 'components/Avatar/Avatar';
-import DefaultAvatar from 'static/icons/default-avatar.svg';
 import config from 'config';
 import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import { Offer } from 'api/restApi/offers/types';
@@ -21,7 +17,7 @@ import ShareTokenModal from './ShareTokenModal';
 import { stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
 import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
 import { ReportModal } from './ReportModal';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Address } from '@unique-nft/utils';
 import { FractionalDetail } from './FractionalDetail';
 import { TokenContext } from '../context/TokenContext';
@@ -29,6 +25,7 @@ import { FractionalOwnersList } from './FractionalOwnersList';
 import { OwnerCard } from 'components/OwnerCard/OwnerCard';
 import { BadgeEnum } from 'components/Picture';
 import { INestingToken } from 'components/BundleTree/types';
+import { EquippedWearables } from './EquippedWearables';
 
 interface IProps {
   token?: TokenByIdResponse
@@ -51,7 +48,6 @@ export const CommonTokenDetail: FC<IProps> = ({
   testid,
   isBundle,
   isNested,
-  isOwner,
   topmostOwner
 }) => {
   const navigate = useNavigate();
@@ -60,8 +56,6 @@ export const CommonTokenDetail: FC<IProps> = ({
   const {
     collectionId,
     collectionName,
-    coverImageUrl,
-    description,
     attributes,
     attributesList,
     image,
@@ -125,7 +119,7 @@ export const CommonTokenDetail: FC<IProps> = ({
   const onScanLinkClick = useCallback(() => {
     if (!currentChainId) return;
     setDropdownOpen(false);
-    window.open(`${config.blockchains[currentChainId].scanUrl}tokens/${collectionId}/${tokenId}`, '_blank', 'noopener');
+    window.open(`${config.blockchains[currentChainId].scanUrl}unique_item/${collectionId}-${tokenId}`, '_blank', 'noopener');
   }, [tokenId, collectionId]);
 
   const onReportClick = useCallback(() => {
@@ -140,8 +134,7 @@ export const CommonTokenDetail: FC<IProps> = ({
   const videoProp = useMemo(() => stringToDecodedInfixOrUrlOrCidAndHash(video), [video]);
 
   const badges: BadgeEnum[] = [
-    ...(collection?.mode === 'ReFungible' ? [BadgeEnum.Fractional] : []),
-    ...(isNested ? [BadgeEnum.Nested] : isBundle ? [BadgeEnum.Bundle] : [])
+    ...(collection?.mode === 'ReFungible' ? [BadgeEnum.Fractional] : [])
   ];
 
   const onViewTokenDetails = useCallback((token: INestingToken, mode: string) => {
@@ -166,20 +159,22 @@ export const CommonTokenDetail: FC<IProps> = ({
             badges={badges}
           />
         }
+        <EquippedWearables />
       </PictureWrapper>
       <Description>
         {isLoading && <TokenSkeleton />}
         {!isLoading && <>
-          <Heading size={'1'} testid={`${testid}-token-name`}>{`${prefix || ''} #${tokenId}`}</Heading>
-          <ShareLink onClick={openShareModal} data-testid={`${testid}-share-button`}>
-            <Text color='grey-500' size='m'>
-              Share
-            </Text>
-            <IconWrapper>
-              <Icon name={'shared'} size={24} />
-            </IconWrapper>
-          </ShareLink>
-          <Row data-testid={`${testid}-owner-section`}>
+          <Link to={`/collection/${collectionId}`} >{collectionName} [id {collectionId}]</Link>
+          <HeadingWrapper>
+            <Heading size={'1'} testid={`${testid}-token-name`}>
+              {`${prefix || ''} #${tokenId}`}
+            </Heading>
+            <ShareLink onClick={openShareModal} data-testid={`${testid}-share-button`}>
+              <IconWrapper>
+              </IconWrapper>
+            </ShareLink>
+          </HeadingWrapper>
+          <OwnerBlock data-testid={`${testid}-owner-section`}>
             {!(isRft && !isRftFracton) && <OwnerCard
               address={owner || ''}
               isShort={deviceSize < DeviceSize.xl}
@@ -187,7 +182,12 @@ export const CommonTokenDetail: FC<IProps> = ({
               prefixOwned='Owned by'
               prefixNested='Nested in bundle'
             />}
-          </Row>
+          </OwnerBlock>
+          {/* <CustomizableBlock
+            token={token}
+            offer={offer}
+            collection={collection}
+          /> */}
           <Divider />
           {isNested && token?.nestingParentToken?.tokenId && token?.nestingParentToken?.collectionId && <>
             <Heading size='4'>NFT Wearable for</Heading>
@@ -209,15 +209,10 @@ export const CommonTokenDetail: FC<IProps> = ({
             <FractionalDetail testid={`${testid}-fractional`} />
             <Divider />
           </>}
-          {attributes && <AttributesBlock attributes={attributesList} />}
-          <Divider />
-          <CollectionsCard
-            avatarSrc={coverImageUrl || ''}
-            description={description || ''}
-            id={collectionId || -1}
-            title={collectionName || ''}
-            testid={`${testid}-collection`}
-          />
+          {attributes && collectionId && <AttributesBlock
+            attributes={attributesList}
+            collectionId={collectionId}
+          />}
         </>}
       </Description>
       <DropdownStyled
@@ -226,7 +221,12 @@ export const CommonTokenDetail: FC<IProps> = ({
         onOpenChange={setDropdownOpen}
         dropdownRender={() => (
           <DropdownMenu>
-            <ScanMenuItem onClick={onScanLinkClick}>View on UniqueScan
+            <ShareMenuItem onClick={openShareModal}>Share
+              <MenuIconWrapper>
+                <Icon name={'shared'} size={16} color={'var(--color-primary-500)'} />
+              </MenuIconWrapper>
+            </ShareMenuItem>
+            <ScanMenuItem onClick={onScanLinkClick}>View on Subscan
               <MenuIconWrapper>
                 <Icon name={'arrow-up-right'} size={16} color={'var(--color-primary-500)'} />
               </MenuIconWrapper>
@@ -281,6 +281,14 @@ const CommonTokenDetailStyled = styled.div`
   }
 `;
 
+const HeadingWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  &>h1.unique-font-heading.size-1 {
+    margin: 0;
+  }
+`;
+
 const PictureWrapper = styled.div`
   position: relative;
   display: flex;
@@ -288,7 +296,7 @@ const PictureWrapper = styled.div`
   align-items: center;
   width: 536px;
   margin-right: calc(var(--gap) * 2);
-  
+  flex-direction: column;
   &::before {
     content: '';
     display: block;
@@ -300,11 +308,11 @@ const PictureWrapper = styled.div`
   }
 
   @media (max-width: 1919px) {
-    width: 326px;
+    width: 536px;
   }
   
   @media (max-width: 1023px) {
-    width: 224px;
+    width: 326px;
   }
 
   @media (max-width: 767px) {
@@ -331,7 +339,8 @@ const PictureWrapper = styled.div`
     img {
       max-width: 100%;
       max-height: 100%;
-      
+      border: 1px solid var(--color-grey-200);
+      border-radius: 8px;
     }
 
     svg {
@@ -356,9 +365,10 @@ const ParentTokenWrapper = styled.div`
   }
 `;
 
-const Row = styled.div`
+const OwnerBlock = styled.div`
   display: flex;
   align-items: center;
+  margin-top: 12px;
 
   && h1 {
     margin-bottom: 0;
@@ -369,29 +379,22 @@ const Description = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1;
+
+  a {
+    color: var(--color-primary-500);
+    &:hover {
+      color: var(--color-primary-500);
+      text-decoration: underline;
+    }  
+
+  }
 `;
 
 const ShareLink = styled.div`
   display: flex;
   align-items: center;
-  margin-bottom: var(--gap);
   cursor: pointer;
   width: 120px;
-`;
-
-const Account = styled.a`
-  margin-left: 8px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: flex;
-  color: ${Primary600};
-  
-  span {
-    margin-left: 8px;
-    &:hover {
-      text-decoration: underline;
-    }
-  }
 `;
 
 const Divider = styled.div`
@@ -420,6 +423,13 @@ const DropdownMenuItem = styled.div`
   line-height: 24px;
   &:hover {
     background: var(--color-primary-100);
+  }
+`;
+
+const ShareMenuItem = styled(DropdownMenuItem)`
+  color: ${Primary500};
+  &:hover {
+    color: ${Primary600};
   }
 `;
 
@@ -469,15 +479,6 @@ const MenuIconWrapper = styled.div`
 `;
 
 const IconWrapper = styled.div`
-  margin-left: 4px;
-  margin-right: 16px;
-
-  svg {
-    fill: ${Grey500};
-  }
-`;
-
-const DropdownIconWrapper = styled.div`
   margin-left: 4px;
   margin-right: 16px;
 

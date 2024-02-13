@@ -121,11 +121,10 @@ const PictureWrapper = styled(Link)<{ isPlaying: boolean }>`
     }
   }
 
-  &:hover .picture,
-  &:hover .badge {
+  /* &:hover .picture {
     transform: ${({ isPlaying }) => (!isPlaying && 'translate(0, -5px)')};
     text-decoration: none;
-  }
+  } */
   
   .play-button:hover {
     background-color: ${BlueGrey100};

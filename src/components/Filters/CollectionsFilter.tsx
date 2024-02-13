@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { Text } from '@unique-nft/ui-kit';
 import { Checkbox } from 'components/UI';
@@ -11,6 +11,7 @@ import AttributeCountsFilter from './AttributeCountsFilter';
 import { Attribute, AttributeCount } from '../../api/restApi/offers/types';
 import { CollectionCover } from '../CollectionCover/CollectionCover';
 import { useCuratedCollections } from 'hooks/useCuratedCollections';
+import SearchField from 'components/SearchField/SearchField';
 
 interface CollectionsFilterProps {
   value?: { collections?: number[], attributes?: { key: string, attribute: string }[], attributeCounts?: number[] } | null
@@ -26,6 +27,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attr
   const { featuredCollections, isFetching } = useCollections();
   const { curatedCollections, isFetchingCurated } = useCuratedCollections();
   const { collections: selectedCollections = [], attributes: selectedAttributes = [], attributeCounts: selectedAttributeCounts = [] } = value || {};
+  const [searchString, setSearchString] = useState<string>();
 
   const onCollectionSelect = useCallback((collectionId: number) => (value: boolean) => {
     let _selectedCollections;
@@ -40,6 +42,11 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attr
   const onCollectionsClear = useCallback(() => {
     onChange([]);
   }, [onChange]);
+
+  const filteredCollections = useMemo(() => {
+    if (!searchString) return featuredCollections;
+    return featuredCollections.filter(({ name }) => name.toLowerCase().includes(searchString.toLowerCase()));
+  }, [featuredCollections, searchString]);
 
   return (<>
     {curatedCollections.length > 0 && <Accordion title={'Curated collections'}
@@ -74,9 +81,16 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attr
       onClear={onCollectionsClear}
       isClearShow={selectedCollections.length > 0}
     >
+      <SearchFieldWrapper>
+        <SearchField searchValue={searchString}
+          onSearchStringChange={setSearchString}
+          hideButton
+          placeholder='Search by collections'
+        />
+      </SearchFieldWrapper>
       <CollectionFilterWrapper>
         {isFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
-        {featuredCollections.map((collection) => (
+        {filteredCollections.map((collection) => (
           <CheckboxWrapper
             key={`collection-${collection.id}`}
           >
@@ -185,6 +199,10 @@ const CuratedCheckboxLabelWrapper = styled.div`
     height: 50px;
     width: 50px;
   }
+`;
+
+const SearchFieldWrapper = styled.div`
+  margin-top: calc(var(--gap) / 2);
 `;
 
 export default CollectionsFilter;

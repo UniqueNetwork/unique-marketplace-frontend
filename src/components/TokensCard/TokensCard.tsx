@@ -3,7 +3,7 @@ import { Loader, Text } from '@unique-nft/ui-kit';
 import { generatePath, Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Icon } from 'components/UI';
-import { compareEncodedAddresses, isTokenOwner } from 'api/chainApi/utils/addressUtils';
+import { isTokenOwner } from 'api/chainApi/utils/addressUtils';
 import { Offer } from 'api/restApi/offers/types';
 import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
@@ -12,10 +12,10 @@ import { Primary600 } from 'styles/colors';
 import { TokensMedia } from './TokensMedia';
 import { countNestedChildren, stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
 import { useCollections } from 'hooks/useCollections';
-import BundleItemsCount from '../BundleItemsCount/BundleItemsCount';
 import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
 import { MyToken, TokenTypeEnum } from 'pages/MyTokens/types';
 import { BadgeEnum } from 'components/Picture';
+import { CollectionTitle } from 'components/OfferCard/CollectionTitle';
 
 export type TTokensCard = {
   token?: Omit<TokenByIdResponse | MyToken, 'collection' | 'nestingParentToken' | 'properties'>
@@ -25,9 +25,18 @@ export type TTokensCard = {
   tokenImageUrl?: string
   testid: string
   showOwner?: boolean
+  showCollectionLink?: boolean
 };
 
-export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, testid, showOwner, ...props }) => {
+export const TokensCard: FC<TTokensCard> = ({
+  collectionId,
+  tokenId,
+  offer,
+  testid,
+  showOwner,
+  showCollectionLink = true,
+  ...props
+}) => {
   const [token, setToken] = useState<Omit<TokenByIdResponse | MyToken, 'collection' | 'nestingParentToken' | 'properties'> | undefined>(props.token);
   const [collection, setCollection] = useState<(CollectionInfoWithSchemaResponse) | undefined>();
   const [isFetching, setIsFetching] = useState<boolean>(false);
@@ -38,9 +47,8 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
   const { api, currentChainId } = useApi();
   const { selectedAccount } = useAccounts();
   const { getCollection } = useCollections();
-
   const {
-    tokenTitle,
+    tokenPrefix,
     collectionTitle,
     imageUrl,
     price,
@@ -51,14 +59,14 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
     amount,
     totalPieces
   } = useMemo(() => {
-    if (offer || (token && collection) || ((token as MyToken).collectionName && (token as MyToken).tokenPrefix)) {
+    if (offer || (token && collection) || ((token as MyToken)?.collectionName && (token as MyToken).tokenPrefix)) {
       const { image, video, owner } = offer?.tokenDescription || token || {};
       const collectionName = offer?.collectionDescription?.name || collection?.name || (token as MyToken)?.collectionName || '';
       const tokenPrefix = offer?.collectionDescription?.tokenPrefix || collection?.tokenPrefix || (token as MyToken)?.tokenPrefix || '';
       const { auction, price, seller } = offer || {};
       return {
-        tokenTitle: `${tokenPrefix || ''} #${tokenId || ''}`,
-        collectionTitle: `${collectionName?.substring(0, 25) || ''} [id ${collectionId || ''}]`,
+        tokenPrefix,
+        collectionTitle: collectionName,
         imageUrl: image,
         video: stringToDecodedInfixOrUrlOrCidAndHash(video),
         auction,
@@ -104,20 +112,10 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
     })();
   }, [offer, tokenId, collectionId, api?.nft]);
 
-  const isBidder = useMemo(() => {
-    if (!selectedAccount) return false;
-    return auction?.bids.some((bid) => compareEncodedAddresses(bid.bidderAddress, selectedAccount.address));
-  }, [auction, selectedAccount]);
-
   const topBid = useMemo(() => {
     if (!auction?.bids?.length) return null;
     return auction.bids[0].balance;
   }, [auction]);
-
-  const isTopBidder = useMemo(() => {
-    if (!selectedAccount || !isBidder || !topBid || !auction?.bids?.[0]?.bidderAddress) return false;
-    return compareEncodedAddresses(auction.bids[0].bidderAddress, selectedAccount.address);
-  }, [isBidder, topBid, selectedAccount, auction]);
 
   const tokenPath = useMemo(() => {
     if (owner && type === TokenTypeEnum.RFT) {
@@ -140,10 +138,16 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
     return isTokenOwner(selectedAccount.address, owner);
   }, [selectedAccount?.address, owner]);
 
-  const badges: BadgeEnum[] = [
-    ...(collection?.mode === 'ReFungible' || (token as MyToken)?.type === TokenTypeEnum.RFT ? [BadgeEnum.Fractional] : []),
-    ...(isNestedState ? [BadgeEnum.Nested] : isBundleState ? [BadgeEnum.Bundle] : [])
-  ];
+  const isCustomizable = useMemo(() => {
+    if (!collection && token?.collectionId) {
+      void (async () => {
+        const collection = await getCollection(token?.collectionId);
+        if (collection) setCollection(collection);
+      })();
+      return;
+    }
+    return !!collection?.properties?.find(({ key }) => key === 'is_customizable')?.value;
+  }, [collection, getCollection, token?.collectionId]);
 
   return (
     <TokensCardStyled>
@@ -153,29 +157,31 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
         imageUrl={imageUrl}
         video={video}
         testid={`${testid}-token-media`}
-        badges={badges}
+        badges={isCustomizable ? [BadgeEnum.Customizable] : []}
       />
       <Description>
         <BasicDataWrapper>
-          <Link to={tokenPath} title={tokenTitle}>
+          <Link to={tokenPath} title={tokenPrefix}>
             <Text
               size='l'
               weight='regular'
               testid={`${testid}-tokenId`}
+              className='token-title'
             >
-              {tokenTitle}
+              <span>{tokenPrefix} </span>
+              <span>#{tokenId}</span>
             </Text>
           </Link>
-          <Link
+          {showCollectionLink && <Link
             data-testid={`${testid}-collection-${collectionId}-link`}
             to={`/${currentChainId?.toLowerCase()}/collection/${collectionId || ''}`}
           >
-            <Text color='primary-600' size='s'>
-              {collectionTitle}
-            </Text>
-          </Link>
+            <CollectionTitle
+              collectionId={collectionId || 0}
+              collectionName={collectionTitle || ''}
+            />
+          </Link>}
           {showOwner && <Text size={'s'} color={'grey-500'}>{isOwner ? 'You own it' : `Owned by: ${shortcutText(owner || '')}`}</Text>}
-          {isBundleState && <BundleItemsCount count={tokensCount || 0} testId={testid} />}
         </BasicDataWrapper>
         {!!price?.parsed && <TradingInfoWrapper>
           <Text size={'xs'} color={'grey-500'} >Price</Text>
@@ -187,26 +193,6 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, offer, test
             <IconStyled name={`chain-${currentChainId?.toLowerCase()}`} size={16} />
           </PriceWrapper>
         </TradingInfoWrapper>}
-        {/* {auction && <AuctionInfoWrapper>
-          {isTopBidder && <Text
-            testid={`${testid}-leading-bid`}
-            size={'xs'}
-            color={'additional-positive-500'}
-          >Leading bid</Text>}
-          {isBidder && !isTopBidder && <Text
-            testid={`${testid}-outbid`}
-            size={'xs'}
-            color={'coral-500'}
-          >Outbid</Text>}
-          {!isBidder && !isTopBidder && <Text
-            testid={`${testid}-bids`}
-            size={'xs'}
-            color={'grey-500'}
-          >{
-            auction.bids.length > 0 ? 'Last bid' : 'Minimum bid'
-          }</Text>}
-          <StyledText color={'dark'} size={'xs'}>{`${timeDifference(new Date(auction?.stopAt || '').getTime() / 1000)} left`}</StyledText>
-        </AuctionInfoWrapper>} */}
         {type === TokenTypeEnum.RFT && !!amount && !!totalPieces && <Text size={'xs'} color={'grey-500'} >
           Owned fractions: {amount}/{totalPieces}
         </Text>}
@@ -224,6 +210,16 @@ const TokensCardStyled = styled.div`
   justify-content: flex-start;
   position: relative;
   cursor: pointer;
+  background: #fff;
+  border-radius: 8px;
+  transition: transform 0.2s;
+  box-shadow: 0 4px 14px rgba(0,0,0,.08);
+  padding: 12px 12px 8px 12px;
+
+  &:hover {
+    z-index: 10;
+    transform: scale(1.05);
+  }
 `;
 
 const BasicDataWrapper = styled.div`
@@ -238,7 +234,7 @@ const Description = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
-  span {
+  & > span {
     color: ${Primary600};
   }
 `;
@@ -260,17 +256,6 @@ const TradingInfoWrapper = styled.div`
   column-gap: calc(var(--gap) / 4);
   align-items: center;
   justify-content: space-between;
-`;
-
-const StyledText = styled(Text)` 
-  && {
-    color: var(--color-additional-dark);
-  }
-`;
-
-const AuctionInfoWrapper = styled.div`
-  display: flex;
-  column-gap: calc(var(--gap) / 2);
 `;
 
 const IconStyled = styled(Icon)`

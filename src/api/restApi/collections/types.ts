@@ -62,4 +62,13 @@ export interface MyCollection {
   owner: string
   cover: string
   name: string
+  properties: { key: string, value: any }[]
+  permissions: {
+    access: 'Normal'
+    nesting: {
+      restricted: number[] | null
+      tokenOwner: boolean
+      collectionAdmin: boolean
+    }
+  }
 }

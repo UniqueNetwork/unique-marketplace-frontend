@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Button, Pagination, Text, useNotifications } from 'components/UI';
 import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
-import { TBundleTransferModalBodyProps } from './BundleTrunsferModal';
+import { TBundleTransferModalBodyProps } from './BundleTransferModal';
 import styled from 'styled-components';
 import { useApi } from 'hooks/useApi';
 import { Heading, Loader } from '@unique-nft/ui-kit';
@@ -10,16 +10,14 @@ import { TokensCard } from './components/TokenCard';
 import { TokensMedia } from './components/TokenMedia';
 import { useGetTokensForNesting } from './hooks/useGetTokensForNesting';
 import { TokenItem } from '../types';
-import SearchField from 'components/SearchField/SearchField';
 import { StatusTransactionModal } from './components/StatusTransactionModal';
 import { Address } from '@unique-nft/utils';
 import { useAccounts } from 'hooks/useAccounts';
 import { CollectionMode } from 'api/chainApi/types';
-import { FeeMessage } from 'components';
 
-export const CustomizeModal = ({ token, onFinish, testid }: TBundleTransferModalBodyProps) => {
+export const CustomizeModal = ({ token, onFinish, testid, selectedWearable }: TBundleTransferModalBodyProps & { selectedWearable?: TokenItem }) => {
   const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse | null>(null);
-  const [tokens, setTokens] = useState<(TokenItem & { selected?: boolean })[]>([]);
+  const [tokens, setTokens] = useState<TokenItem[]>([]);
   const [total, setTotal] = useState<number>(0);
   const [nestedTokens, setNestedTokens] = useState<TokenItem[]>([]);
   const [selectedTokens, setSelectedTokens] = useState<Record<string, TokenItem | undefined>>({});
@@ -56,12 +54,19 @@ export const CustomizeModal = ({ token, onFinish, testid }: TBundleTransferModal
 
     setTokens(tokens);
     setTotal(total);
+
+    const initialSelectedTokens = selectedWearable
+    ? {
+        [`${selectedWearable.collectionId}_${selectedWearable.tokenId}`]: selectedWearable
+      }
+    : {};
+
     setSelectedTokens(nestedTokens.reduce<Record<string, TokenItem>>((acc, _token) => {
       if (_token.parent === `${token.collectionId}_${token.tokenId}`) {
         acc[`${_token.collectionId}_${_token.tokenId}`] = _token;
       }
       return acc;
-     }, {}));
+     }, initialSelectedTokens));
     setIsFetching(false);
   }, [api?.collection, api?.nft, token.collectionId, token.tokenId]);
 
@@ -152,20 +157,6 @@ export const CustomizeModal = ({ token, onFinish, testid }: TBundleTransferModal
     setTokens(tokens);
     setTotal(total);
   }, [collection?.permissions?.nesting?.restricted, fetchTokens, searchText, nestedTokens]);
-
-  const onSearch = useCallback(async (searchText: string) => {
-    setPage(0);
-    setSearchText(searchText);
-    const [tokens, total] = await fetchTokens({
-      page: 0,
-      searchText,
-      restrictedCollections: collection?.permissions?.nesting?.restricted,
-      nestedTokens
-    });
-
-    setTokens(tokens);
-    setTotal(total);
-  }, [collection?.permissions?.nesting?.restricted, fetchTokens, nestedTokens]);
 
   const [fee, setFee] = useState<string>();
   const [isFetchingFee, setIsFetchingFee] = useState(false);

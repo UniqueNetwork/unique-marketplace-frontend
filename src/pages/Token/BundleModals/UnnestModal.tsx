@@ -8,7 +8,7 @@ import DefaultMarketStages from '../Modals/StagesModal';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { StageStatus } from '../../../types/StagesTypes';
 import { useUnnestStages } from '../../../hooks/marketplaceStages/useUnnestStages';
-import { TBundleTransferModalBodyProps } from './BundleTrunsferModal';
+import { TBundleTransferModalBodyProps } from './BundleTransferModal';
 import { FeeMessage } from 'components';
 import { INestingToken } from 'components/BundleTree/types';
 import { useApi } from 'hooks/useApi';

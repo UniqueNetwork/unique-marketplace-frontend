@@ -28,7 +28,7 @@ export const StatusTransactionModal = ({
   onContinue
 }: Props) => {
   return (
-    <Modal isVisible={isVisible} isClosable={false}>
+    <Modal isVisible={isVisible} isClosable={stage === 'done'} onClose={onContinue}>
       <Heading>{title}</Heading>
       <StagesWrapper>
         {stage === 'transferring' ? <Loader /> : <Icon name={'check-circle'} size={24} color={'var(--color-additional-dark)'} />}
