@@ -39,13 +39,14 @@ export const NestingTokenBlock: FC<NestingTokenBlockProps> = ({
   const { tokenOwner } = token?.collection?.permissions?.nesting || offer?.collectionDescription.permissions?.nesting || {};
   const { currentChainId } = useApi();
   const _collectionId = token?.collectionId || offer?.collectionId || 0;
+  const canTransfer = token?.collection.limits?.transfersEnabled !== false;
 
   const canCustomize = token?.collection.properties.find(({ key }) => key === 'is_customizable')?.value;
   const canEquip = !!mockWearables[currentChainId || '']?.find(({ collectionId }) => collectionId === _collectionId);
 
   if (blockedNestingCollections[currentChainId || '']?.includes(_collectionId || 0)) return null;
 
-  if (!(canCustomize || canEquip || isOwner || isNested)) return null;
+  if (!(canCustomize || canEquip || canTransfer || isOwner || isNested)) return null;
 
   if (canCustomize || canEquip) {
     return <>
