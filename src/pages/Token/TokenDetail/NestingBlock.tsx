@@ -46,12 +46,12 @@ export const NestingTokenBlock: FC<NestingTokenBlockProps> = ({
 
   if (blockedNestingCollections[currentChainId || '']?.includes(_collectionId || 0)) return null;
 
-  if (!(canCustomize || canEquip || canTransfer || isOwner || isNested)) return null;
+  if (!(canCustomize || canEquip || isOwner || isNested) || !canTransfer) return null;
 
   if (canCustomize || canEquip) {
     return <>
       <ActionsWrapper>
-        <Heading size='4'>Customization</Heading>
+        <Heading size='4'>Customization details</Heading>
         <CustomizableBlock
           token={token}
           offer={offer}

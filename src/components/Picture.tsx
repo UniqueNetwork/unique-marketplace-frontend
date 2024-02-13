@@ -34,7 +34,7 @@ const badgesTooltips = {
   Fractional: 'A fractional token provides a way for many users to own a part of an NFT',
   Bundle: 'A group of tokens nested in an NFT and having a nested, ordered, tree-like structure',
   Nested: 'A group of tokens nested in an NFT and having a nested, ordered, tree-like structure',
-  customizable: 'This token can be customized'
+  customizable: 'This token is customizable'
 };
 
 export const Picture: FC<PictureProps> = ({

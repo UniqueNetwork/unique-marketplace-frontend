@@ -75,23 +75,28 @@ const AttributesRow = ({
     return enumeration.map((item) => (statistics?.[attribute]?.find(({ value }) => value === item)?.count || 0) / tokensCount * 100);
   }, [attribute, enumeration, statistics, tokensCount]);
 
-  return (
-    <AttributeCard key={attribute}>
+  if (typeof enumeration === 'string') {
+    return (
+      <AttributeCard key={attribute}>
+        <Text color='grey-500' size='s' weight='bold'>
+          {attribute.toUpperCase()}
+        </Text>
+        <Row><Trait trait={enumeration} /></Row>
+        {!isFetching && typeof percents === 'number' && <Row><Text size='s' color='grey-500'>{percents.toFixed(0)}%</Text></Row>}
+      </AttributeCard>
+    );
+  }
+
+  return (<>
+    {enumeration.map((trait, index) => <AttributeCard key={`${attribute}_${index}`}>
       <Text color='grey-500' size='s' weight='bold'>
         {attribute.toUpperCase()}
       </Text>
-      <>
-        {typeof enumeration === 'string'
-        ? (<Row><Trait trait={enumeration} /></Row>)
-        : (enumeration.map((trait, index) => <>
-          <Row><Trait key={trait} trait={trait} /></Row>
-          {Array.isArray(percents) && !!percents[index] && <Row><Text size='s' color='grey-500'>{percents[index].toFixed(0)}%</Text></Row>}
-        </>))
-      }
-      </>
+      <Row><Trait key={trait} trait={trait} /></Row>
+      {Array.isArray(percents) && !!percents[index] && <Row><Text size='s' color='grey-500'>{percents[index].toFixed(0)}%</Text></Row>}
       {!isFetching && typeof percents === 'number' && <Row><Text size='s' color='grey-500'>{percents.toFixed(0)}%</Text></Row>}
-    </AttributeCard>
-  );
+    </AttributeCard>)}
+  </>);
 };
 
 const HeadingWrapper = styled.div`
