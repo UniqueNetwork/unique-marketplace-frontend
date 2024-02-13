@@ -74,8 +74,10 @@ export const NestingTokenBlock: FC<NestingTokenBlockProps> = ({
             wide
           />}
           {canCustomize && tokenOwner && <Button
+            className='customize-button'
             title={'Customize'}
             onClick={onCreateBundle}
+            role='primary'
             testid={`${testid}-transfer-button`}
           />}
         </ButtonsWrapper>}
@@ -122,5 +124,8 @@ const ButtonsWrapper = styled.div`
   gap: var(--gap);
   button.primary.equip-button {
     padding: 8px 128px;
+  }
+  button.primary.customize-button {
+    padding: 8px 64px;
   }
 `;
