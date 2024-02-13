@@ -71,11 +71,14 @@ export const RecommendationSection = ({ offer, collection }: IProps) => {
     }
     if (wearableCollections?.length === 1) {
       navigate(`/${currentChainId}/collection/${wearableCollections[0]}/`);
+      return;
     }
     if (wearableCollections && wearableCollections?.length > 1) {
       navigate(`/${currentChainId}/market?filterState={"attributeCounts":[],"collections":[${wearableCollections.join(',')}],"attributes":[]}`);
+      return;
     }
-  }, [baseCollection, wearableCollections, navigate, currentChainId]);
+    navigate(`/${currentChainId}/collection/${collection?.id}/`);
+  }, [baseCollection, wearableCollections, navigate, currentChainId, collection]);
 
   const deviceSize = useDeviceSize();
 
@@ -137,6 +140,13 @@ const SlideWrapper = styled.div`
   justify-content: center;
   &>div {
     flex: auto;
+    max-width: 20%;
+    @media (max-width: 1024px) {
+      max-width: 33.33%;
+    }
+    @media (max-width: 768px) {
+      max-width: 50%;
+    }
   }
   @media (max-width: 1440px) {
     width: calc(100vw - 128px);
