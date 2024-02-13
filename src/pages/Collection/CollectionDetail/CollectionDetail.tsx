@@ -137,7 +137,7 @@ export const CollectionDetail: FC<IProps> = ({ collection, royalties }) => {
               rel={'noreferrer'}
               href={`${scanUrl}unique_collection/${collectionId}`}
             >
-              <TextStyled>View on UniqueScan</TextStyled>
+              <TextStyled>View on SubScan</TextStyled>
               <IconWrapper>
                 <Icon name={'arrow-up-right'} size={16} color={Primary500} />
               </IconWrapper>
@@ -161,7 +161,7 @@ export const CollectionDetail: FC<IProps> = ({ collection, royalties }) => {
             rel={'noreferrer'}
             href={`${scanUrl}unique_collection/${collectionId}`}
           >
-            <TextStyled>View on UniqueScan</TextStyled>
+            <TextStyled>View on SubScan</TextStyled>
             <IconWrapper>
               <Icon name={'arrow-up-right'} size={16} color={Primary500} />
             </IconWrapper>
