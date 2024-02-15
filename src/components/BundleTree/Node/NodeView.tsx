@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { AdditionalDark, AdditionalLight, BlueGrey500, Coral100, Coral500, Grey300, Primary100, Primary200, Primary400, Primary500, Primary600, Secondary400, Secondary200 } from 'styles/colors';
 import Pin from 'static/icons/pin.svg';
 import { INodeView } from '../../TreeView/types';
-import { Picture } from '../../Picture';
+import { Picture } from '../../TokenMedia/Picture';
 import { INestingToken } from '../types';
 import { useParams } from 'react-router-dom';
 import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';

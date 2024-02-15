@@ -3,11 +3,8 @@ import styled from 'styled-components';
 import { Ethereum, Polkadot } from '@unique-nft/utils/extension';
 import { ConnectWalletModalContext } from './ConnectWalletModalContext';
 import { useAccounts } from 'hooks/useAccounts';
-import { Button, Icon, Modal } from 'components/UI';
+import { Icon, Modal } from 'components/UI';
 import { Heading, Loader } from '@unique-nft/ui-kit';
-import { CreateAccountModal } from 'pages/Accounts/Modals/CreateAccount';
-import { ImportViaSeedAccountModal } from 'pages/Accounts/Modals/ImportViaSeed';
-import { ImportViaJSONAccountModal } from 'pages/Accounts/Modals/ImportViaJson';
 import { ExtensionMissingModal, Extensions } from './ExtensionMissing';
 import SubWalletIcon from 'static/icons/subwallet.svg';
 import EnkriptIcon from 'static/icons/enkrypt.svg';
@@ -29,19 +26,6 @@ export const ConnectWallets = () => {
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
   const [missingExtension, setMissingExtension] = useState<Extensions>();
   const { walletsCenter, showSignDialog, fetchAccounts } = useAccounts();
-
-  const onCreateAccountClick = useCallback(() => {
-    setCurrentModal(AccountModal.CREATE);
-  }, []);
-
-  const onChangeAccountsFinish = useCallback(() => {
-    setCurrentModal(undefined);
-    setIsOpenConnectWalletModal(false);
-  }, []);
-
-  const handleOpenModal = (modalType: AccountModal) => () => {
-    setCurrentModal(modalType);
-  };
 
   const handleConnectToMetamask = async () => {
     try {
@@ -115,8 +99,6 @@ export const ConnectWallets = () => {
   };
 
   const isMobile = DeviceSize.sm >= useDeviceSize();
-  console.log(isMobile);
-
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [availableWallets, setAvailableWallets] = useState<string[]>([]);
 
@@ -124,8 +106,6 @@ export const ConnectWallets = () => {
     void (async () => {
       setIsFetching(true);
       const wallets = await Polkadot.listWallets();
-      const canConnectMetamask = window.ethereum?.isMetaMask;
-      console.log(wallets, canConnectMetamask);
       setAvailableWallets(wallets.wallets.map(({ name }) => name));
       setIsFetching(false);
     })();
@@ -169,22 +149,6 @@ export const ConnectWallets = () => {
         </Wallets>
         {isFetching && <Loader />}
       </Modal>
-
-      <CreateAccountModal
-        isVisible={currentModal === AccountModal.CREATE}
-        onFinish={onChangeAccountsFinish}
-        onClose={() => setCurrentModal(undefined)}
-      />
-      <ImportViaSeedAccountModal
-        isVisible={currentModal === AccountModal.VIA_SEED}
-        onFinish={onChangeAccountsFinish}
-        onClose={() => setCurrentModal(undefined)}
-      />
-      <ImportViaJSONAccountModal
-        isVisible={currentModal === AccountModal.VIA_JSON}
-        onFinish={onChangeAccountsFinish}
-        onClose={() => setCurrentModal(undefined)}
-      />
       <ExtensionMissingModal
         isVisible={currentModal === AccountModal.EXTENSION_MISSING}
         missingExtension={missingExtension}

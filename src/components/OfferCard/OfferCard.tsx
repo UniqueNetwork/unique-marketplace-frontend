@@ -9,7 +9,7 @@ import { countNestedChildren, stringToDecodedInfixOrUrlOrCidAndHash } from 'util
 import { Primary600 } from 'styles/colors';
 import { TokensMedia } from '../TokensCard/TokensMedia';
 import { useApi } from '../../hooks/useApi';
-import { BadgeEnum } from 'components/Picture';
+import { BadgeEnum } from 'components/TokenMedia/Picture';
 import { useCollections } from 'hooks/useCollections';
 import { CollectionTitle } from './CollectionTitle';
 

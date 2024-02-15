@@ -14,7 +14,7 @@ import { countNestedChildren, stringToDecodedInfixOrUrlOrCidAndHash } from 'util
 import { useCollections } from 'hooks/useCollections';
 import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
 import { MyToken, TokenTypeEnum } from 'pages/MyTokens/types';
-import { BadgeEnum } from 'components/Picture';
+import { BadgeEnum } from 'components/TokenMedia/Picture';
 import { CollectionTitle } from 'components/OfferCard/CollectionTitle';
 
 export type TTokensCard = {

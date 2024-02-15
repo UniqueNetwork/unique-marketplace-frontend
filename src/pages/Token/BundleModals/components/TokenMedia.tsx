@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import playIcon from 'static/icons/play.svg';
 import pauseIcon from 'static/icons/pause.svg';
 import { Picture } from 'components';
-import { BadgeEnum } from 'components/Picture';
+import { BadgeEnum } from 'components/TokenMedia/Picture';
 
 interface ITokensMedia {
   tokenId?: number

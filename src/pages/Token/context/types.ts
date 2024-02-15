@@ -13,6 +13,8 @@ export type TokenContextValue = {
   isRft: boolean
   isRftFracton: boolean
   isOwner: boolean
+  isWearable: boolean
+  isCustomizable: boolean
   topmostOwner?: string
   bundle?: TokenChildrenResponse
   fraction?: Fraction

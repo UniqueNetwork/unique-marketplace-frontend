@@ -28,7 +28,7 @@ export const useCollections = () => {
 
   useEffect(() => {
     if (!currentChainId || !mockWearables[currentChainId || '']) return;
-    const customizables = mockWearables[currentChainId].map(({ baseCollections }) => baseCollections).flat();
+    // const customizables = mockWearables[currentChainId].map(({ baseCollections }) => baseCollections).flat();
     // TODO: it replaced with hardcode for customizable collections, need change when release schema 2.0
     // const customizableCollections = [...collections, ...featuredCollections].reduce<CustomizableCollectionRelationship>((acc, { id, permissions }) => {
 

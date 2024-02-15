@@ -1,5 +1,5 @@
 import { Heading, Text } from '@unique-nft/ui-kit';
-import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
+import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { Dropdown, Icon } from 'components/UI';
 import { Picture } from 'components';
@@ -23,9 +23,12 @@ import { FractionalDetail } from './FractionalDetail';
 import { TokenContext } from '../context/TokenContext';
 import { FractionalOwnersList } from './FractionalOwnersList';
 import { OwnerCard } from 'components/OwnerCard/OwnerCard';
-import { BadgeEnum } from 'components/Picture';
+import { BadgeEnum } from 'components/TokenMedia/Picture';
 import { INestingToken } from 'components/BundleTree/types';
 import { EquippedWearables } from './EquippedWearables';
+import { WearablePicture } from 'components/TokenMedia/WearablePicture';
+import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/schemas';
+import { mockWearables } from '../constants';
 
 interface IProps {
   token?: TokenByIdResponse
@@ -52,19 +55,20 @@ export const CommonTokenDetail: FC<IProps> = ({
 }) => {
   const navigate = useNavigate();
   const { address } = useParams<{ address: string }>();
-  const { isRft, isRftFracton } = useContext(TokenContext);
+  const { isRft, isRftFracton, isWearable } = useContext(TokenContext);
   const {
     collectionId,
     collectionName,
     attributes,
     attributesList,
     image,
+    file,
     tokenId,
     prefix,
     video
   } = useMemo(() => {
     const { tokenId, collectionId } = offer || token || {};
-    const { image, attributes, video } = offer?.tokenDescription || token || {};
+    const { image, file, attributes, video } = offer?.tokenDescription || token || {};
     const { name: collectionName, tokenPrefix: prefix, schema, description } = offer?.collectionDescription || collection || {};
     const owner = offer?.seller || token?.owner;
 
@@ -79,6 +83,7 @@ export const CommonTokenDetail: FC<IProps> = ({
       attributes,
       attributesList,
       image: typeof image === 'string' ? image : image?.fullUrl || '',
+      file: typeof file === 'string' ? file : file?.fullUrl || '',
       video,
       owner
     };
@@ -86,7 +91,7 @@ export const CommonTokenDetail: FC<IProps> = ({
 
   const deviceSize = useDeviceSize();
 
-  const { chainProperties, currentChainId, settings } = useApi();
+  const { chainProperties, currentChainId, api } = useApi();
 
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainProperties?.SS58Prefix || 0);
@@ -146,19 +151,43 @@ export const CommonTokenDetail: FC<IProps> = ({
     }
   }, [currentChainId]);
 
+  const [baseTokenImg, setBaseTokenImg] = useState<string | DecodedInfixOrUrlOrCidAndHash | undefined>();
+  const [wearableTokenImg, setWearableTokenImg] = useState<string | DecodedInfixOrUrlOrCidAndHash | undefined>();
+  useEffect(() => {
+    void (async () => {
+      if (!isWearable || !collectionId || !tokenId || !currentChainId) return;
+      const baseCollectionId = mockWearables[currentChainId].find((item) => collectionId === item.collectionId)?.baseCollections[0];
+      if (!baseCollectionId) return;
+      const token = await api?.nft?.getToken(baseCollectionId, 1);
+
+      setBaseTokenImg(token?.file?.fullUrl || token?.image.fullUrl || undefined);
+
+      const _token = await api?.nft?.getToken(collectionId, tokenId);
+
+      setWearableTokenImg(_token?.file?.fullUrl || undefined);
+    })();
+  }, [currentChainId, collectionId, tokenId, isWearable, api?.nft]);
+
   return (
     <CommonTokenDetailStyled>
       <PictureWrapper>
         {isLoading && <Skeleton />}
-        {!isLoading &&
-          <Picture
+        {!isLoading && <>
+          {!isWearable && <Picture
             alt={tokenId?.toString() || ''}
             src={image}
             video={videoProp}
             testid={`${testid}-token-picture`}
             badges={badges}
-          />
-        }
+          />}
+          {isWearable && <WearablePicture
+            alt={tokenId?.toString() || ''}
+            src={image}
+            wearableSrc={wearableTokenImg || image}
+            baseSrc={baseTokenImg}
+            testid={`${testid}-token-picture`}
+          />}
+        </>}
         <EquippedWearables />
       </PictureWrapper>
       <Description>
