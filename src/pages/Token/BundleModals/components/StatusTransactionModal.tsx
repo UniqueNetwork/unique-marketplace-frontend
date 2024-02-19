@@ -68,8 +68,3 @@ const ButtonsWrapper = styled.div`
   margin-top: calc(var(--gap) * 2);
   gap: calc(var(--gap) * 2);
 `;
-
-const AlertStyled = styled(Alert)`
-  margin-top: calc(var(--prop-gap) * 1.5);
-  margin-bottom: 8px !important;
-`;

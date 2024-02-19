@@ -86,7 +86,7 @@ export const NFTPage = () => {
           <SearchField
             hideButton
             searchValue={searchString}
-            placeholder='Collection / token'
+            placeholder='Search for collections, NFTs and attributes'
             onSearch={onSearch}
             testid={`${testid}-search-field`}
           />

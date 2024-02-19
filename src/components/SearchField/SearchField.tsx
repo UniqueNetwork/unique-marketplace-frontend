@@ -67,6 +67,7 @@ const SearchField: FC<SearchFieldProps> = ({ className, searchValue, placeholder
           <SearchIconButton
             name={'magnify'}
             size={16}
+            color='primary'
             onClick={onSearchClick}
             testid={`${testid}-clear-button`}
           />
@@ -109,15 +110,12 @@ const SearchWrapper = styled.div`
 
 const InputTextStyled = styled(InputText)`
   width: 100%;
-  max-width: 610px;
 `;
 
 const InputWrapper = styled.div<{ hideButton: boolean }>`
   position: relative;
   display: inline-block;
   flex-grow: 1;
-  max-width: 610px;
-  flex-basis: 610px;
   .unique-input-text {
     width: auto;
     div.input-wrapper.with-icon.to-left > input {
@@ -141,4 +139,7 @@ const SearchIconButton = styled(IconButton)`
   right: calc(var(--gap) / 2 + 2px);
   bottom: 8px;
   width: auto !important;
+  svg {
+    fill: var(--color-primary-500);
+  }
 `;

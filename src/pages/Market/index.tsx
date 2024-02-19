@@ -79,7 +79,7 @@ export const MarketPage = () => {
             <SearchField
               hideButton
               searchValue={searchValue}
-              placeholder='Collection / token / attribute'
+              placeholder='Search for collections, NFTs and attributes'
               onSearch={onSearch}
               testid={`${testid}-search-field`}
             />
