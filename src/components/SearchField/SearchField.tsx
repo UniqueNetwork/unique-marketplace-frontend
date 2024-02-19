@@ -44,9 +44,9 @@ const SearchField: FC<SearchFieldProps> = ({ className, searchValue, placeholder
 
   return (
     <SearchWrapper className={className}>
-      <InputWrapper>
+      <InputWrapper hideButton={!!hideButton}>
         <InputTextStyled
-          iconLeft={{ name: 'magnify', size: 16 }}
+          iconLeft={hideButton ? undefined : { name: 'magnify', size: 16 }}
           onChange={onValueChange}
           onKeyDown={onSearchInputKeyDown}
           placeholder={placeholder}
@@ -57,8 +57,17 @@ const SearchField: FC<SearchFieldProps> = ({ className, searchValue, placeholder
         {value &&
           <ClearButton
             name={'circle-close'}
-            size={24}
+            size={16}
             onClick={onClear}
+            className='clear-button'
+            testid={`${testid}-clear-button`}
+          />
+        }
+        {hideButton &&
+          <SearchIconButton
+            name={'magnify'}
+            size={16}
+            onClick={onSearchClick}
             testid={`${testid}-clear-button`}
           />
         }
@@ -103,7 +112,7 @@ const InputTextStyled = styled(InputText)`
   max-width: 610px;
 `;
 
-const InputWrapper = styled.div`
+const InputWrapper = styled.div<{ hideButton: boolean }>`
   position: relative;
   display: inline-block;
   flex-grow: 1;
@@ -115,11 +124,21 @@ const InputWrapper = styled.div`
       padding-right: 32px;
     }
   }
+  .clear-button {
+    right: ${({ hideButton }) => hideButton ? 'calc(var(--gap) / 2 + 24px)' : 'calc(var(--gap) / 2 + 2px)'};
+  }
+
 `;
 
 const ClearButton = styled(IconButton)`
   position: absolute;
-  right: calc(var(--gap) / 2);
-  bottom: 6px;
+  bottom: 8px;
+  width: auto !important;
+`;
+
+const SearchIconButton = styled(IconButton)`
+  position: absolute;
+  right: calc(var(--gap) / 2 + 2px);
+  bottom: 8px;
   width: auto !important;
 `;

@@ -142,6 +142,7 @@ export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
         <MainContent>
           <SearchAndSortingWrapper>
             <SearchField
+              hideButton
               searchValue={searchValue}
               placeholder='Token / attribute'
               onSearch={onSearch}

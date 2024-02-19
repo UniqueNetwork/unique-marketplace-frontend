@@ -77,6 +77,7 @@ export const MarketPage = () => {
         <MainContent>
           <SearchAndSortingWrapper>
             <SearchField
+              hideButton
               searchValue={searchValue}
               placeholder='Collection / token / attribute'
               onSearch={onSearch}

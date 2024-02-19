@@ -123,6 +123,7 @@ export const RFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
         <MainContent>
           <SearchAndSortingWrapper>
             <SearchField
+              hideButton
               searchValue={searchValue}
               placeholder='Token / attribute'
               onSearch={onSearch}

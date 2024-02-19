@@ -84,6 +84,7 @@ export const NFTPage = () => {
       <MainContent>
         <SearchAndSortingWrapper>
           <SearchField
+            hideButton
             searchValue={searchString}
             placeholder='Collection / token'
             onSearch={onSearch}
