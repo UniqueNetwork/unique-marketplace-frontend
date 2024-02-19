@@ -97,7 +97,9 @@ export const useMyTokensFilter = ({ tokens, offers, isFetchingTokens }: UseMyTok
     }
     let filteredByTypeOfCustomizable = true;
     if (filterState?.typeOfCustomizableNFTs) {
-      filteredByTypeOfCustomizable = filterState?.typeOfCustomizableNFTs === TypeOfCustomizableNFTs.Base
+      filteredByTypeOfCustomizable = filterState.typeOfCustomizableNFTs === TypeOfCustomizableNFTs.All
+        ? [...wearables, ...customizables].includes(token.collectionId)
+        : filterState?.typeOfCustomizableNFTs === TypeOfCustomizableNFTs.Base
         ? customizables.includes(token.collectionId)
         : filterState?.typeOfCustomizableNFTs === TypeOfCustomizableNFTs.Wearables ? wearables.includes(token.collectionId) : false;
     }
