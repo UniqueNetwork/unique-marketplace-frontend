@@ -179,7 +179,6 @@ const MarketMainPageStyled = styled.div`
 
 const LeftColumn = styled.div`
   padding-right: 24px;
-  border-right: 1px solid var(--grey-300);
   @media (max-width: 1024px) {
     display: none;
   }
