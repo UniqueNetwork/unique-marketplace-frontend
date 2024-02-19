@@ -1,4 +1,4 @@
-import { CollectionInfoWithSchemaResponse, GetBundleResponse, TokenByIdResponse, TokenChildrenResponse } from '@unique-nft/sdk';
+import { CollectionInfoWithSchemaResponse, TokenByIdResponse, TokenChildrenResponse } from '@unique-nft/sdk';
 import { Address } from '@unique-nft/utils';
 import { isTokenOwner } from 'api/chainApi/utils/addressUtils';
 import { useOffer } from 'api/restApi/offers/offer';
