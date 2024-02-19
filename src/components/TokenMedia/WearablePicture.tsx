@@ -30,42 +30,61 @@ export const WearablePicture: FC<PictureProps> = ({
     setTryMode(!tryMode);
   }, [tryMode]);
 
-  return (<div className={'picture'}>
-    <ImgStyled
-      visible={!!baseSrc && tryMode}
-      alt={alt}
-      src={getUrl(baseSrc)}
-      height={size || undefined}
-      data-testid={`${testid}`}
-    />
-    <ImgStyled
-      visible={!!baseSrc && tryMode}
-      alt={alt}
-      src={getUrl(wearableSrc)}
-      height={size || undefined}
-      data-testid={`${testid}`}
-    />
-    {!hasError && src &&
+  return (<>
+    <PictureWrapper className={'picture'}>
       <ImgStyled
-        visible={!isLoading && !tryMode}
+        visible={!!baseSrc && tryMode}
         alt={alt}
-        src={getUrl(src)}
+        src={getUrl(baseSrc)}
         height={size || undefined}
         data-testid={`${testid}`}
-        loading='lazy'
-        onLoad={() => setIsLoading(false)}
-        onError={() => setHasError(true)}
-      />}
-    {!isLoading && (hasError || !src || !baseSrc) && <Placeholder size={size} />}
-    {!isLoading && !hasError && baseSrc && <ActionsWrapper>
-      <Button onClick={onTryOnClick} title={tryMode ? 'Wearable' : 'Try on'} />
-    </ActionsWrapper>}
-    {isLoading && <Skeleton width={'100%'} height={'100%'} />}
-  </div>);
+      />
+      <ImgStyled
+        visible={!!baseSrc && tryMode}
+        alt={alt}
+        src={getUrl(wearableSrc)}
+        height={size || undefined}
+        data-testid={`${testid}`}
+      />
+      {!hasError && src &&
+      <PreviewWrapper>
+        <ImgStyled
+          visible={!isLoading && !tryMode}
+          alt={alt}
+          src={getUrl(src)}
+          height={size || undefined}
+          data-testid={`${testid}`}
+          loading='lazy'
+          onLoad={() => setIsLoading(false)}
+          onError={() => setHasError(true)}
+        />
+        {!isLoading && !hasError && baseSrc && <ActionsWrapper size={size}>
+          <Button onClick={onTryOnClick} title={tryMode ? 'Wearable' : 'Try on'} />
+        </ActionsWrapper>}
+      </PreviewWrapper>}
+      {!isLoading && (hasError || !src || !baseSrc) && <Placeholder size={size} />}
+      {isLoading && <Skeleton width={'100%'} height={'100%'} />}
+    </PictureWrapper>
+  </>);
 };
 
+const PictureWrapper = styled.div`
+`;
+
+const PreviewWrapper = styled.div`
+  position: absolute;
+  top: 0;
+  top: 0;
+  left: 0;
+
+  &>img {
+    position: relative;
+  }
+`;
+
 const ImgStyled = styled.img<{ visible: boolean }>`
-  display: ${({ visible }) => visible ? 'block' : 'none'};
+  opacity: ${({ visible }) => visible ? 1 : 0};
+  transition: all 0.2s;
   box-sizing: border-box;
   position: absolute;
   top: 0;
@@ -74,10 +93,11 @@ const ImgStyled = styled.img<{ visible: boolean }>`
   bottom: 0;
 `;
 
-const ActionsWrapper = styled.div`
+const ActionsWrapper = styled.div<{ size: number | undefined }>`
+  z-index: 1;
   position: absolute;
-  top: 16px;
-  left: 16px;
+  right: 16px;
+  bottom: 22px;
 `;
 
 const getUrl = (src?: string | DecodedInfixOrUrlOrCidAndHash) => src ? (typeof src === 'string' ? src.trim() : (src.fullUrl || '')) : '';
