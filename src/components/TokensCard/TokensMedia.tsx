@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import playIcon from 'static/icons/play.svg';
 import pauseIcon from 'static/icons/pause.svg';
-import { BadgeEnum, Picture } from '../Picture';
+import { BadgeEnum, Picture } from '../TokenMedia/Picture';
 
 interface ITokensMedia {
   to: string

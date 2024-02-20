@@ -1,4 +1,4 @@
-import { CollectionInfoWithSchemaResponse, GetBundleResponse, TokenByIdResponse, TokenChildrenResponse } from '@unique-nft/sdk';
+import { CollectionInfoWithSchemaResponse, TokenByIdResponse, TokenChildrenResponse } from '@unique-nft/sdk';
 import { Address } from '@unique-nft/utils';
 import { isTokenOwner } from 'api/chainApi/utils/addressUtils';
 import { useOffer } from 'api/restApi/offers/offer';
@@ -8,6 +8,7 @@ import { useApi } from 'hooks/useApi';
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Fraction, TokenContextValue } from './types';
+import { mockWearables } from '../constants';
 
 export const TokenContext = React.createContext<TokenContextValue>({
   isFetching: true,
@@ -16,6 +17,8 @@ export const TokenContext = React.createContext<TokenContextValue>({
   isOwner: false,
   isRft: false,
   isRftFracton: false,
+  isWearable: false,
+  isCustomizable: false,
   fetchToken: () => Promise.resolve(),
   fetchOffer: () => Promise.resolve()
 });
@@ -133,9 +136,11 @@ export const TokenContextProvider: FC = ({ children }) => {
       ownerAddress: token?.owner,
       fraction,
       fetchToken,
-      fetchOffer: async () => { await fetchOffer(collectionId, tokenId); }
+      fetchOffer: async () => { await fetchOffer(collectionId, tokenId); },
+      isWearable: !!mockWearables[currentChainId || '']?.find(({ collectionId }) => collectionId === collection?.id),
+      isCustomizable: !!collection?.properties.find(({ key }) => key === 'is_customizable')?.value
     };
-  }, [collectionId, tokenId, token, collection, offer, bundle, isOwner, topmostOwner, isNested, address, isFetchingToken, isFetchingOffer, isFetchingBundle, fraction, fetchToken, fetchOffer]);
+  }, [token, collection, offer, bundle, topmostOwner, isNested, address, isFetchingToken, isFetchingOffer, isFetchingBundle, isOwner, fraction, fetchToken, currentChainId, fetchOffer, collectionId, tokenId]);
 
   return <TokenContext.Provider value={value} >
     {children}

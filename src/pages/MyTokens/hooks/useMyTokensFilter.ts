@@ -97,9 +97,13 @@ export const useMyTokensFilter = ({ tokens, offers, isFetchingTokens }: UseMyTok
     }
     let filteredByTypeOfCustomizable = true;
     if (filterState?.typeOfCustomizableNFTs) {
-      filteredByTypeOfCustomizable = filterState?.typeOfCustomizableNFTs === TypeOfCustomizableNFTs.Base
-        ? customizables.includes(token.collectionId)
-        : filterState?.typeOfCustomizableNFTs === TypeOfCustomizableNFTs.Wearables ? wearables.includes(token.collectionId) : false;
+      if (filterState.typeOfCustomizableNFTs === TypeOfCustomizableNFTs.All) {
+        filteredByTypeOfCustomizable = [...wearables, ...customizables].includes(token.collectionId);
+      } else {
+        filteredByTypeOfCustomizable = filterState?.typeOfCustomizableNFTs === TypeOfCustomizableNFTs.Base
+          ? customizables.includes(token.collectionId)
+          : filterState?.typeOfCustomizableNFTs === TypeOfCustomizableNFTs.Wearables ? wearables.includes(token.collectionId) : false;
+      }
     }
 
     let filteredByCollections = true;

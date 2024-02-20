@@ -142,8 +142,9 @@ export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
         <MainContent>
           <SearchAndSortingWrapper>
             <SearchField
+              hideButton
               searchValue={searchValue}
-              placeholder='Token / attribute'
+              placeholder='Search for NFTs and attributes'
               onSearch={onSearch}
               testid={`${testid}-search-field`}
             />

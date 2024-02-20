@@ -94,6 +94,7 @@ const PricesFilter: FC<PricesFilterProps> = ({ value, onChange, testid, disabled
           />
         </PricesRangeWrapper>
         <Button
+          wide
           title={'Apply'}
           onClick={onApply}
           testid={`${testid}-apply-button`}

@@ -1,18 +1,16 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { Ethereum, Polkadot } from '@unique-nft/utils/extension';
 import { ConnectWalletModalContext } from './ConnectWalletModalContext';
 import { useAccounts } from 'hooks/useAccounts';
-import { Button, Icon, Modal } from 'components/UI';
+import { Icon, Modal } from 'components/UI';
 import { Heading, Loader } from '@unique-nft/ui-kit';
-import { CreateAccountModal } from 'pages/Accounts/Modals/CreateAccount';
-import { ImportViaSeedAccountModal } from 'pages/Accounts/Modals/ImportViaSeed';
-import { ImportViaJSONAccountModal } from 'pages/Accounts/Modals/ImportViaJson';
-import { ExtensionMissingModal, Extensions } from './ExtensionMissing';
+import { ExtensionMissingModal } from './ExtensionMissing';
 import SubWalletIcon from 'static/icons/subwallet.svg';
 import EnkriptIcon from 'static/icons/enkrypt.svg';
 import NovaWalletIcon from 'static/icons/nova_icon_radial.svg';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
+import { ConnectedWalletsName } from 'account/useWalletCenter';
 
 enum AccountModal {
   CREATE = 'create',
@@ -27,21 +25,8 @@ export const ConnectWallets = () => {
     ConnectWalletModalContext
   );
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
-  const [missingExtension, setMissingExtension] = useState<Extensions>();
-  const { walletsCenter, showSignDialog, fetchAccounts } = useAccounts();
-
-  const onCreateAccountClick = useCallback(() => {
-    setCurrentModal(AccountModal.CREATE);
-  }, []);
-
-  const onChangeAccountsFinish = useCallback(() => {
-    setCurrentModal(undefined);
-    setIsOpenConnectWalletModal(false);
-  }, []);
-
-  const handleOpenModal = (modalType: AccountModal) => () => {
-    setCurrentModal(modalType);
-  };
+  const [missingExtension, setMissingExtension] = useState<ConnectedWalletsName>();
+  const { walletsCenter, fetchAccounts } = useAccounts();
 
   const handleConnectToMetamask = async () => {
     try {
@@ -50,73 +35,24 @@ export const ConnectWallets = () => {
       fetchAccounts();
       setIsOpenConnectWalletModal(false);
     } catch (e: any) {
-      setMissingExtension('Metamask');
+      setMissingExtension('metamask');
       setCurrentModal(AccountModal.EXTENSION_MISSING);
     }
   };
 
-  const handleConnectToPolkadotExtension = async () => {
+  const handleConnectToPolkadotExtension = (walletName: ConnectedWalletsName = 'polkadot-js') => async () => {
     try {
-      await walletsCenter.connectWallet('polkadot-js');
-      await walletsCenter.connectWallet('keyring', {
-        requestPasswordCallback: showSignDialog
-      });
+      await walletsCenter.connectWallet(walletName);
       fetchAccounts();
       setIsOpenConnectWalletModal(false);
     } catch (e: any) {
       console.log(e);
-      setMissingExtension('Polkadot');
-      setCurrentModal(AccountModal.EXTENSION_MISSING);
-    }
-  };
-
-  const handleConnectToTalismanExtension = async () => {
-    try {
-      await walletsCenter.connectWallet('talisman');
-      fetchAccounts();
-      setIsOpenConnectWalletModal(false);
-    } catch (e: any) {
-      setMissingExtension('Talisman');
-      setCurrentModal(AccountModal.EXTENSION_MISSING);
-    }
-  };
-
-  const handleConnectToSubWalletExtension = async () => {
-    try {
-      await walletsCenter.connectWallet('subwallet-js');
-      fetchAccounts();
-      setIsOpenConnectWalletModal(false);
-    } catch (e: any) {
-      setMissingExtension('SubWallet');
-      setCurrentModal(AccountModal.EXTENSION_MISSING);
-    }
-  };
-
-  const handleConnectToEnkryptExtension = async () => {
-    try {
-      await walletsCenter.connectWallet('enkrypt');
-      fetchAccounts();
-      setIsOpenConnectWalletModal(false);
-    } catch (e: any) {
-      setMissingExtension('Enkrypt');
-      setCurrentModal(AccountModal.EXTENSION_MISSING);
-    }
-  };
-
-  const handleConnectToNovaWallet = async () => {
-    try {
-      await walletsCenter.connectWallet('polkadot-js');
-      fetchAccounts();
-      setIsOpenConnectWalletModal(false);
-    } catch (e: any) {
-      setMissingExtension('NovaWallet');
+      setMissingExtension(walletName);
       setCurrentModal(AccountModal.EXTENSION_MISSING);
     }
   };
 
   const isMobile = DeviceSize.sm >= useDeviceSize();
-  console.log(isMobile);
-
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [availableWallets, setAvailableWallets] = useState<string[]>([]);
 
@@ -124,8 +60,6 @@ export const ConnectWallets = () => {
     void (async () => {
       setIsFetching(true);
       const wallets = await Polkadot.listWallets();
-      const canConnectMetamask = window.ethereum?.isMetaMask;
-      console.log(wallets, canConnectMetamask);
       setAvailableWallets(wallets.wallets.map(({ name }) => name));
       setIsFetching(false);
     })();
@@ -133,65 +67,101 @@ export const ConnectWallets = () => {
 
   const noAvailableWallets = availableWallets.length === 0;
 
-  return (
-    <>
-      <Modal
-        isVisible={isOpenConnectWalletModal}
-        onClose={() => {
-          setIsOpenConnectWalletModal(false);
-        }}
-        isClosable
-      >
-        <Heading size='2'>Connect wallet</Heading>
-        <p>Choose how you want to connect. If you don&apos;t have a wallet, you can select a provider and create one.</p>
-        <Wallets>
-          {availableWallets.includes('polkadot-js') && !isMobile && <WalletItem onClick={handleConnectToPolkadotExtension}>
-            <Icon size={40} name='polkadot-wallet' /> <span>Polkadot.js</span>
-          </WalletItem>}
-          {(window.ethereum?.isMetaMask || noAvailableWallets) && <WalletItem onClick={handleConnectToMetamask}>
-            <Icon size={40} name='metamask-wallet' /> <span>Metamask</span>
-          </WalletItem>}
-          {availableWallets.includes('talisman') && <WalletItem onClick={handleConnectToTalismanExtension}>
-            <Icon size={40} name='talisman-wallet' /> <span>Talisman</span>
-          </WalletItem>}
-          {(availableWallets.includes('subwallet-js') || noAvailableWallets) && <WalletItem onClick={handleConnectToSubWalletExtension}>
-            <Icon file={SubWalletIcon} size={40} />
-            <span>SubWallet</span>
-          </WalletItem>}
-          {availableWallets.includes('enkrypt') && <WalletItem onClick={handleConnectToEnkryptExtension}>
-            <Icon file={EnkriptIcon} size={40} />
-            <span>Enkrypt</span>
-          </WalletItem>}
-          {(window.walletExtension?.isNovaWallet || noAvailableWallets) && <WalletItem onClick={handleConnectToNovaWallet}>
-            <Icon file={NovaWalletIcon} size={40} />
-            <span>Nova Wallet</span>
-          </WalletItem>}
-        </Wallets>
-        {isFetching && <Loader />}
-      </Modal>
+  if (isMobile) {
+    return (
+      <>
+        <Modal
+          isVisible={isOpenConnectWalletModal}
+          onClose={() => {
+            setIsOpenConnectWalletModal(false);
+          }}
+          isClosable
+        >
+          <Heading size='2'>Connect wallet</Heading>
+          <p>Choose how you want to connect. If you don&apos;t have a wallet, you can select a provider and create one.</p>
+          <Wallets>
+            {availableWallets.includes('polkadot-js') && <WalletItem onClick={handleConnectToPolkadotExtension()}>
+              <Icon size={40} name='polkadot-wallet' /> <span>Polkadot.js</span>
+            </WalletItem>}
+            {(window.ethereum?.isMetaMask || noAvailableWallets) && <WalletItem onClick={handleConnectToMetamask}>
+              <Icon size={40} name='metamask-wallet' /> <span>Metamask</span>
+            </WalletItem>}
+            {availableWallets.includes('talisman') && <WalletItem onClick={handleConnectToPolkadotExtension('talisman')}>
+              <Icon size={40} name='talisman-wallet' /> <span>Talisman</span>
+            </WalletItem>}
+            {(availableWallets.includes('subwallet-js') || noAvailableWallets) && <WalletItem
+              onClick={handleConnectToPolkadotExtension('subwallet-js')}
+            >
+              <Icon file={SubWalletIcon} size={40} />
+              <span>SubWallet</span>
+            </WalletItem>}
+            {availableWallets.includes('enkrypt') && <WalletItem
+              onClick={handleConnectToPolkadotExtension('enkrypt')}
+            >
+              <Icon file={EnkriptIcon} size={40} />
+              <span>Enkrypt</span>
+            </WalletItem>}
+            {(window.walletExtension?.isNovaWallet || noAvailableWallets) && <WalletItem
+              onClick={handleConnectToPolkadotExtension('novawallet')}
+            >
+              <Icon file={NovaWalletIcon} size={40} />
+              <span>Nova Wallet</span>
+            </WalletItem>}
+          </Wallets>
+          {isFetching && <Loader />}
+        </Modal>
+        <ExtensionMissingModal
+          isVisible={currentModal === AccountModal.EXTENSION_MISSING}
+          missingExtension={missingExtension}
+          onFinish={() => setCurrentModal(undefined)}
+        />
+      </>
+    );
+  }
 
-      <CreateAccountModal
-        isVisible={currentModal === AccountModal.CREATE}
-        onFinish={onChangeAccountsFinish}
-        onClose={() => setCurrentModal(undefined)}
-      />
-      <ImportViaSeedAccountModal
-        isVisible={currentModal === AccountModal.VIA_SEED}
-        onFinish={onChangeAccountsFinish}
-        onClose={() => setCurrentModal(undefined)}
-      />
-      <ImportViaJSONAccountModal
-        isVisible={currentModal === AccountModal.VIA_JSON}
-        onFinish={onChangeAccountsFinish}
-        onClose={() => setCurrentModal(undefined)}
-      />
-      <ExtensionMissingModal
-        isVisible={currentModal === AccountModal.EXTENSION_MISSING}
-        missingExtension={missingExtension}
-        onFinish={() => setCurrentModal(undefined)}
-      />
-    </>
-  );
+  return <>
+    <Modal
+      isVisible={isOpenConnectWalletModal}
+      onClose={() => {
+      setIsOpenConnectWalletModal(false);
+    }}
+      isClosable
+    >
+      <Heading size='2'>Connect wallet</Heading>
+      <p>Choose how you want to connect. If you don&apos;t have a wallet, you can select a provider and create one.</p>
+      <Wallets>
+        <WalletItem onClick={handleConnectToPolkadotExtension()}>
+          <Icon size={40} name='polkadot-wallet' /> <span>Polkadot.js</span>
+        </WalletItem>
+        <WalletItem onClick={handleConnectToMetamask}>
+          <Icon size={40} name='metamask-wallet' /> <span>Metamask</span>
+        </WalletItem>
+        <WalletItem onClick={handleConnectToPolkadotExtension('talisman')}>
+          <Icon size={40} name='talisman-wallet' /> <span>Talisman</span>
+        </WalletItem>
+        <WalletItem onClick={handleConnectToPolkadotExtension('subwallet-js')}>
+          <Icon file={SubWalletIcon} size={40} />
+          <span>SubWallet</span>
+        </WalletItem>
+        <WalletItem onClick={handleConnectToPolkadotExtension('enkrypt')}>
+          <Icon file={EnkriptIcon} size={40} />
+          <span>Enkrypt</span>
+        </WalletItem>
+        {(window.walletExtension?.isNovaWallet || noAvailableWallets) && <WalletItem
+          onClick={handleConnectToPolkadotExtension('novawallet')}
+        >
+          <Icon file={NovaWalletIcon} size={40} />
+          <span>Nova Wallet</span>
+        </WalletItem>}
+      </Wallets>
+      {isFetching && <Loader />}
+    </Modal>
+    <ExtensionMissingModal
+      isVisible={currentModal === AccountModal.EXTENSION_MISSING}
+      missingExtension={missingExtension}
+      onFinish={() => setCurrentModal(undefined)}
+    />
+  </>;
 };
 
 const Wallets = styled.div`

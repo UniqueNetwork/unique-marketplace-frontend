@@ -34,7 +34,7 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
         : Address.normalize.substrateAddress(selectedAccount.address))
       : undefined;
 
-    let _collections = collections;
+    let _collections: number[] = [];
 
     // mocked wearables and base collections used to filter
     const wearables = mockWearables[currentChainId || ''].map(({ collectionId }) => collectionId);
@@ -58,12 +58,20 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
       _collections = [...wearables, ...customizables];
     }
 
+    let collectionId = (collections?.length && _collections.length)
+      ? collections.filter((value) => (_collections).includes(value))
+      : [...(collections || []), ...(_collections || [])];
+
+    if (collectionId.length === 0 && collections?.length && _collections.length) {
+      collectionId = [0];
+    }
+
     return {
       seller,
       bidderAddress: myBets ? selectedAccount?.address : undefined,
       isAuction: (timedAuction && fixedPrice) || (!timedAuction && !fixedPrice) ? undefined : !!timedAuction && !fixedPrice,
       ...prices,
-      collectionId: _collections,
+      collectionId,
       numberOfAttributes: attributeCounts,
       attributes: attributes?.map(({ attribute }) => attribute),
       ...otherFilter

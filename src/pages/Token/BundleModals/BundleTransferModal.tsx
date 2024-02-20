@@ -61,7 +61,7 @@ const BundleTrunsferModal = ({ token, onClose, onFinish, bundleModalType, setMod
     <Modal
       isVisible={isVisible}
       isClosable={isClosable}
-      onClose={onClose}
+      onClose={onFinish}
       isGlobalBackdrop
       isFlexible
     >
