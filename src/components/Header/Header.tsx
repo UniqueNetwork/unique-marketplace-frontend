@@ -75,9 +75,6 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
             <DesktopMenuLink to={`/${currentChainId || ''}/collections`} active={activeItem === 'My collections'} disabled={!selectedAccount || isLoading}>
               My collections
             </DesktopMenuLink>
-            <DesktopMenuLink to={`/${currentChainId || ''}/trades`} active={activeItem === 'Trades'}>
-              Trades
-            </DesktopMenuLink>
             <DesktopMenuLink to='/faq' active={activeItem === 'FAQ'}>
               FAQ
             </DesktopMenuLink>
@@ -126,9 +123,6 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
             disabled={!selectedAccount && !isLoading}
           >
             My collections
-          </MobileMenuLink>
-          <MobileMenuLink to={`/${currentChainId || ''}/trades`} active={activeItem === 'Trades'} onClick={mobileMenuToggler}>
-            Trades
           </MobileMenuLink>
           <MobileMenuLink to='/faq' active={activeItem === 'FAQ'} onClick={mobileMenuToggler}>
             FAQ
