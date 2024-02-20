@@ -1,18 +1,22 @@
 import { useCallback, useState } from 'react';
 import { ChainPropertiesResponse } from '@unique-nft/sdk';
 
-import { PolkadotWallet } from './PolkadotWallet';
+import { PolkadotWallet, PolkadotWalletName } from './PolkadotWallet';
 import { KeyringWallet } from './KeyringWallet';
 import { MetamaskWallet } from './MetamaskWallet';
-import { Account, BaseWalletType, ConnectedWalletOptions } from './types';
+import { BaseWalletType, ConnectedWalletOptions } from './types';
 
-export type ConnectedWalletsName = 'polkadot' | 'keyring' | 'metamask';
+export type ConnectedWalletsName = 'polkadot-js' | 'keyring' | 'metamask' | 'talisman' | 'subwallet-js' | 'enkrypt' | 'novawallet';
 
 const wallets = new Map<
   ConnectedWalletsName,
   typeof PolkadotWallet | typeof KeyringWallet | typeof MetamaskWallet
 >([
-  ['polkadot', PolkadotWallet],
+  ['polkadot-js', PolkadotWallet],
+  ['talisman', PolkadotWallet],
+  ['subwallet-js', PolkadotWallet],
+  ['enkrypt', PolkadotWallet],
+  ['novawallet', PolkadotWallet],
   ['keyring', KeyringWallet],
   ['metamask', MetamaskWallet]
 ]);
@@ -28,7 +32,7 @@ export const useWalletCenter = (chainProperties?: ChainPropertiesResponse) => {
     async (typeWallet: ConnectedWalletsName, options?: ConnectedWalletOptions) => {
       if (!chainProperties) return;
       try {
-        const wallet = new (wallets.get(typeWallet)!)(chainProperties);
+        const wallet = new (wallets.get(typeWallet)!)(chainProperties, typeWallet as PolkadotWalletName);
         const currentWallets = await wallet.getAccounts();
 
         if (typeWallet === 'keyring' && options?.requestPasswordCallback) {

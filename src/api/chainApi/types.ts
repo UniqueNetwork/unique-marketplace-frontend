@@ -2,6 +2,7 @@ import { BN } from '@polkadot/util';
 import { Bytes } from '@polkadot/types';
 import { SignerPayloadJSON } from '@polkadot/types/types';
 import { Account } from 'account/types';
+import { TokenId } from '@unique-nft/sdk';
 
 export type TTransaction = {
   signerPayloadJSON?: SignerPayloadJSON
@@ -80,3 +81,5 @@ export type PromiseOrValue<T> = T | Promise<T>;
 export type BigNumberish = BN | Bytes | bigint | string | number;
 
 export type CollectionMode = 'NFT' | 'Fungible' | 'ReFungible';
+
+export type TransferTokenParams = {token: TokenId, from: string, to: string, amount: number, mode: CollectionMode };

@@ -44,8 +44,8 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
         </LogoLink>
         {!showMobileMenu && (
           <nav>
-            <DesktopMenuLink to={`/${currentChainId || ''}/market`} active={activeItem === 'Market'}>
-              Market
+            <DesktopMenuLink to={`/${currentChainId || ''}/market`} active={activeItem === undefined}>
+              Explore
             </DesktopMenuLink>
             <MenuDropdown
               options={[
@@ -69,14 +69,11 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
             >
               <DesktopMenuItem>Create</DesktopMenuItem>
             </MenuDropdown>
-            <DesktopMenuLink to={`/${currentChainId || ''}/sellTokens`} active={activeItem === 'Sell tokens'} disabled={!selectedAccount || isLoading}>
-              Sell tokens
+            <DesktopMenuLink to={`/${currentChainId || ''}/sellTokens`} active={activeItem === 'My NFTs'} disabled={!selectedAccount || isLoading}>
+              My NFTs
             </DesktopMenuLink>
             <DesktopMenuLink to={`/${currentChainId || ''}/collections`} active={activeItem === 'My collections'} disabled={!selectedAccount || isLoading}>
               My collections
-            </DesktopMenuLink>
-            <DesktopMenuLink to={`/${currentChainId || ''}/trades`} active={activeItem === 'Trades'}>
-              Trades
             </DesktopMenuLink>
             <DesktopMenuLink to='/faq' active={activeItem === 'FAQ'}>
               FAQ
@@ -90,8 +87,8 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
       </RightSide>
       {showMobileMenu && mobileMenuIsOpen && (
         <MobileMenu>
-          <MobileMenuLink to={`/${currentChainId || ''}/market`} active={activeItem === 'Market'} onClick={mobileMenuToggler}>
-            Market
+          <MobileMenuLink to={`/${currentChainId || ''}/market`} active={activeItem === undefined} onClick={mobileMenuToggler}>
+            Explore
           </MobileMenuLink>
           <MobileMenuDropdown
             options={[
@@ -114,11 +111,11 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
           </MobileMenuDropdown>
           <MobileMenuLink
             to={`/${currentChainId || ''}/sellTokens`}
-            active={activeItem === 'Sell tokens'}
+            active={activeItem === 'My NFTs'}
             onClick={mobileMenuToggler}
             disabled={!selectedAccount && !isLoading}
           >
-            Sell tokens
+            My NFTs
           </MobileMenuLink>
           <MobileMenuLink to={`/${currentChainId || ''}/collections`}
             active={activeItem === 'My collections'}
@@ -126,9 +123,6 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
             disabled={!selectedAccount && !isLoading}
           >
             My collections
-          </MobileMenuLink>
-          <MobileMenuLink to={`/${currentChainId || ''}/trades`} active={activeItem === 'Trades'} onClick={mobileMenuToggler}>
-            Trades
           </MobileMenuLink>
           <MobileMenuLink to='/faq' active={activeItem === 'FAQ'} onClick={mobileMenuToggler}>
             FAQ

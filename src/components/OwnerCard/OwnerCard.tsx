@@ -68,7 +68,7 @@ export const OwnerCard: FC<OwnerCardProps> = ({
   };
   const linkTo = useMemo(() => to || (isParentToken
     ? generatePath('/:currentChainId/token/:collectionId/:tokenId', {
-      currentChainId,
+      currentChainId: currentChainId || null,
       collectionId: parentToken?.collectionId.toString() || '',
       tokenId: parentToken?.tokenId.toString() || ''
     })

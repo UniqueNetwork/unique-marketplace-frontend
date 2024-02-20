@@ -12,7 +12,7 @@ type TTokenComponentProps = Pick<Trade, 'collectionId' | 'tokenId' | 'tokenDescr
 export const TokenComponent = ({ collectionId, tokenId, tokenDescription, testid }: TTokenComponentProps) => {
   const { currentChainId } = useApi();
   const tokenUrl = useMemo(() => generatePath('/:currentChainId/token/:collectionId/:tokenId', {
-    currentChainId,
+    currentChainId: currentChainId || null,
     collectionId: collectionId?.toString() || '',
     tokenId: tokenId?.toString()
   }), [currentChainId, collectionId, tokenId]);

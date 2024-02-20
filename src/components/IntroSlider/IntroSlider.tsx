@@ -19,7 +19,7 @@ export const IntroSlider = () => {
     }
 
     const status = localStorage.getItem(BUNDLE_SHOW_MODAL);
-    return status ? JSON.parse(status) : true;
+    return status ? JSON.parse(status) : false;
   });
 
   useEffect(() => {
@@ -28,14 +28,6 @@ export const IntroSlider = () => {
     }
     localStorage.setItem(BUNDLE_SHOW_MODAL, JSON.stringify(false));
   }, [open]);
-
-  useEffect(() => {
-    const status = localStorage.getItem(BUNDLE_SHOW_MODAL);
-    if ((status !== null && !JSON.parse(status))) {
-      return;
-    }
-    setOpen(true);
-  }, []);
 
   return <Slider open={open} onClose={() => setOpen(false)}>
     {({ setActiveSlide, onClose }) => {

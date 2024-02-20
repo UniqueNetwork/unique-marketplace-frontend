@@ -15,8 +15,6 @@ import { MyCollection } from 'api/restApi/collections/types';
 import config from 'config';
 import { useApi } from 'hooks/useApi';
 import { useCollections } from 'hooks/useCollections';
-import { MetamaskAccount } from '@unique-nft/accounts/metamask';
-import { Address } from '@unique-nft/utils';
 
 type TOption = {
   iconRight: {
@@ -104,7 +102,7 @@ export const CollectionsPage: FC = () => {
   const onViewOnScanClick = useCallback((collection: MyCollection) => () => {
     const { scanUrl } = config.blockchains[currentChainId || ''] || {};
     if (!scanUrl) return;
-    window.open(`${scanUrl}collections/${collection.id}`, '_blank')?.focus();
+    window.open(`${scanUrl}unique_collection/${collection.id}`, '_blank')?.focus();
   }, [currentChainId]);
 
   const filteredCollections = useMemo(() => {
@@ -135,7 +133,7 @@ export const CollectionsPage: FC = () => {
       <ControlsWrapper>
         <SearchAndSortingWrapper>
           <SearchField
-            placeholder='Search'
+            placeholder='Search for collections'
             searchValue={searchValue}
             onSearchStringChange={onSearch}
             hideButton
@@ -192,6 +190,7 @@ const MainContent = styled.div`
 const ControlsWrapper = styled.div`
   display: flex;
   justify-content: space-between;
+  gap: 16px;
 
   @media (max-width: 1110px) {
     flex-direction: column;
@@ -230,11 +229,12 @@ const SortSelectWrapper = styled.div`
 const SearchAndSortingWrapper = styled.div`
   display: flex;
   justify-content: space-between;
+  flex: 1;
   .unique-input-text {
     min-width: 436px;
   }
   div {
-    flex-grow: unset;
+    /* flex-grow: unset; */
   }
   
   @media (max-width: 1279px) {

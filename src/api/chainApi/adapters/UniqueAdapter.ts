@@ -5,8 +5,8 @@ import IMarketContractAdapter, { IMarketContractProperties } from './IMarketCont
 import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
 import { ChainValue } from '../controllers/BaseController';
-import { CollectionMode } from '../types';
-import { CollectionProperty } from '@unique-nft/sdk';
+import { CollectionMode, TransferTokenParams } from '../types';
+import { BatchCallArgumentsBody, CollectionProperty, TokenId } from '@unique-nft/sdk';
 
 const buyGasLimit = 1_000_000;
 const sellGasLimit = 200_000;
@@ -299,6 +299,30 @@ class UniqueAdapter implements IMarketContractAdapter {
       }
     });
     return res.fee.raw;
+  }
+
+  async transferTokensBatch(transfers: TransferTokenParams[], signer: Signer, onSubmittedOne?: (token: TokenId, index: number) => void): Promise<void> {
+    // TODO: extend this method to RFT
+    // const method = mode === 'ReFungible' ? this.uniqueSdk.refungible.transferToken : this.uniqueSdk.token.transfer;
+
+    const calls: BatchCallArgumentsBody[] = transfers.map(({ from, to, token }) => ({
+      method: {
+        section: 'unique',
+        method: 'transferFrom'
+      },
+      rawPayload: {
+        from,
+        to,
+        collectionId: token.collectionId,
+        tokenId: token.tokenId,
+        value: 1
+      }
+    }));
+
+    await this.uniqueSdk.common.batch.submitWaitResult({
+      address: signer.address,
+      calls
+    }, { signer });
   }
 }
 

@@ -21,7 +21,7 @@ export type TooltipAlign = {
 };
 
 export interface TooltipProps {
-  targetRef: React.MutableRefObject<HTMLDivElement | null>;
+  targetRef: React.MutableRefObject<HTMLDivElement | HTMLButtonElement | null>;
   className?: string;
   align?: TooltipAlign;
 }
@@ -51,7 +51,7 @@ export const Tooltip: React.FC<TooltipProps> = (props) => {
 
   const handleMouseOut = () => setTooltip(tooltipProps);
 
-  const handleMouseEnter = (e: MouseEvent) => {
+  const handleMouseEnter = () => {
     let leftPos = 0;
     let topPos = 0;
     const arrowPos = { x: 'right', y: 'bottom' };

@@ -50,6 +50,7 @@ export const TokenTrading: FC<TokenTradingProps> = ({
   const isAllowed = useMemo(() => {
     const { tokenId, collectionId } = offer || token || {};
     if (!tokenId || !collectionId) return false;
+    if (!(token?.collection.limits?.transfersEnabled !== false)) return false;
     return checkAllowedTokenInSettings(tokenId, collectionId, settings?.blockchain.unique.collections);
   }, [settings, token, offer]);
 

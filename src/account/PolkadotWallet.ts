@@ -1,28 +1,22 @@
-import { ChainPropertiesResponse, UnsignedTxPayloadResponse, SignTxResultResponse } from '@unique-nft/sdk';
-import { web3Accounts, web3Enable, web3FromSource } from '@polkadot/extension-dapp';
+import { ChainPropertiesResponse, UnsignedTxPayloadResponse } from '@unique-nft/sdk';
+import { web3FromSource } from '@polkadot/extension-dapp';
 import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
-import { isEthereumAddress } from '@polkadot/util-crypto';
+import { Polkadot, SignerPayloadJSON } from '@unique-nft/utils/extension';
+import { Address } from '@unique-nft/utils';
 
 import { AccountUtils } from './AccountUtils';
 import { Account, AccountSigner, BaseWalletEntity, BaseWalletType } from './types';
-import { sleep } from 'utils/helpers';
+
+export type PolkadotWalletName = 'polkadot-js' | 'subwallet-js' | 'talisman' | 'enkrypt' | 'novawallet';
 
 export class PolkadotWallet implements BaseWalletEntity<InjectedAccountWithMeta> {
   _accounts = new Map<string, BaseWalletType<InjectedAccountWithMeta>>();
   isMintingEnabled = true;
+  wallet: PolkadotWalletName;
 
   // eslint-disable-next-line no-useless-constructor
-  constructor(private readonly chainProperties: ChainPropertiesResponse) {}
-
-  static async existExtension() {
-    let extensions = await web3Enable('unique-minter-wallet');
-
-    if (extensions.length === 0) {
-      await sleep(1000);
-
-      extensions = await web3Enable('unique-minter-wallet');
-    }
-    return extensions.length > 0;
+  constructor(private readonly chainProperties: ChainPropertiesResponse, defaultWallet: PolkadotWalletName = 'polkadot-js') {
+    this.wallet = defaultWallet;
   }
 
   changeChain(): Promise<void> {
@@ -30,44 +24,27 @@ export class PolkadotWallet implements BaseWalletEntity<InjectedAccountWithMeta>
   }
 
   async getAccounts() {
-    const existAccount = await PolkadotWallet.existExtension();
-    if (!existAccount) {
-      throw new Error('Polkadot extension not found');
-    }
-
-    const accounts = (await web3Accounts()).filter(
-      (account) => !isEthereumAddress(account.address)
-    );
+    const wallets = await Polkadot.loadWalletByName(this.wallet);
 
     this._accounts = new Map(
-      accounts.map((account) => {
-        const normalizedAddress = AccountUtils.normalizedAddressAccount(account.address);
-
+      wallets.accounts
+        .filter(({ address }) => Address.is.substrateAddress(address))
+        .map((account) => {
+        const normalizedAddress = Address.normalize.substrateAddress(account.address);
+        const address = AccountUtils.encodeAddress(
+          account.address,
+          this.chainProperties.SS58Prefix
+        );
         return [
           normalizedAddress,
           {
             name: account.meta.name || '',
             normalizedAddress,
-            address: AccountUtils.encodeAddress(
-              account.address,
-              this.chainProperties.SS58Prefix
-            ),
+            address,
             walletMetaInformation: account,
             signerType: AccountSigner.extension,
             sign: this.getSignature.bind(this),
-            signer: {
-              address: normalizedAddress,
-              sign: async (unsignedTxPayload: UnsignedTxPayloadResponse) => {
-                const injector = await web3FromSource(account.meta.source);
-                if (!injector.signer.signPayload) {
-                  throw new Error('Web3 not available');
-                }
-                const result = await injector.signer.signPayload(
-                  unsignedTxPayload?.signerPayloadJSON
-                );
-                return { signature: result.signature, signatureType: account.type } as SignTxResultResponse;
-              }
-            },
+            signer: { ...account.signer, address },
             changeChain: this.changeChain.bind(this),
             isMintingEnabled: this.isMintingEnabled
           }
@@ -88,7 +65,17 @@ export class PolkadotWallet implements BaseWalletEntity<InjectedAccountWithMeta>
     }
 
     const result = await injector.signer.signPayload(
-      unsignedTxPayload?.signerPayloadJSON
+      {
+        ...unsignedTxPayload?.signerPayloadJSON as SignerPayloadJSON,
+        transactionVersion: unsignedTxPayload.signerPayloadJSON.transactionVersion as `0x${string}`,
+        tip: unsignedTxPayload.signerPayloadJSON.tip as `0x${string}`,
+        specVersion: unsignedTxPayload.signerPayloadJSON.specVersion as `0x${string}`,
+        nonce: unsignedTxPayload.signerPayloadJSON.nonce as `0x${string}`,
+        era: unsignedTxPayload.signerPayloadJSON.era as `0x${string}`,
+        genesisHash: unsignedTxPayload.signerPayloadJSON.genesisHash as `0x${string}`,
+        blockNumber: unsignedTxPayload.signerPayloadJSON.blockNumber as `0x${string}`,
+        blockHash: unsignedTxPayload.signerPayloadJSON.blockHash as `0x${string}`
+      }
     );
 
     return result.signature;

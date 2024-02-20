@@ -1,6 +1,6 @@
 import React, { VFC } from 'react';
 import styled from 'styled-components';
-import { Picture } from '../Picture';
+import { Picture } from '../TokenMedia/Picture';
 
 interface collectionCoverProps {
   src: string | undefined

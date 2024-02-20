@@ -23,13 +23,17 @@ export const GetButton = () => {
 
   if (!chainProperties) return null;
 
-  return <StyledButton onClick={onGetClick(chainProperties.token)} title={`Get ${chainProperties.token}`}/>;
+  return <StyledButton
+    role='primary'
+    onClick={onGetClick(chainProperties.token)}
+    title={`Get ${chainProperties.token}`}
+  />;
 };
 
 const StyledButton = styled(Button)`
-  color: var(--color-additional-light) !important;
-  background-color: #2DBF15 !important;
-  border-color: #2DBF15 !important;
+  /* color: var(--color-additional-light) !important; */
+  /* background-color: #2DBF15 !important;
+  border-color: #2DBF15 !important; */
   @media (max-width: 420px) {
     display: none;
   }

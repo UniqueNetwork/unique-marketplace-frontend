@@ -113,18 +113,6 @@ export const useCollectionTokensFilter = ({ isFetching, fetch }: { isFetching: b
     return statusesCount + collectionsCount + attributesCount + numberOfAttributesCount + (prices ? 1 : 0);
   }, [filterState]);
 
-  useEffect(() => {
-    if (!currentChainId || !api) return;
-    setFilterState(null);
-    setSearchValue(undefined);
-    setSortingValue(defaultSortingValue.id);
-    void fetch({
-      page: 1,
-      pageSize,
-      'sort[0]': [defaultSortingValue.id]
-    });
-  }, [currentChainId]);
-
   return {
     filterState,
     sortingValue,

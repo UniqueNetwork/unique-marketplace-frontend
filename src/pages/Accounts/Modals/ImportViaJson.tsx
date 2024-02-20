@@ -27,7 +27,7 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
       if (target && target.result && chainProperties) {
         const data = convertToU8a(target.result as ArrayBuffer);
         const { genesisHash } = chainProperties;
-        setPair(keyringFromFile(data, genesisHash));
+        setPair(keyringFromFile(data, genesisHash as `0x${string}`));
       }
     };
 
