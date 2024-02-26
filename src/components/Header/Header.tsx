@@ -1,5 +1,5 @@
 import { FC, useCallback, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { Dropdown, Icon, Text } from '../UI';
 
@@ -23,6 +23,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
   const [mobileMenuIsOpen, toggleMobileMenu] = useState(false);
   const { selectedAccount, isLoading, accounts } = useAccounts();
   const { currentChainId } = useApi();
+  const navigate = useNavigate();
 
   const mobileMenuToggler = useCallback(() => {
     toggleMobileMenu((prevState) => !prevState);
@@ -51,17 +52,17 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
               options={[
                 {
                   title: 'NFT',
-                  url: `${config.blockchains[currentChainId || ''].walletUrl}create-nft`
+                  url: `/${currentChainId || ''}/create-token`
                 },
                 {
                   title: 'Collection',
-                  url: `${config.blockchains[currentChainId || ''].walletUrl}create-collection/main-information`
+                  url: `/${currentChainId || ''}/create-collection/main-information`
                 }
               ]}
               optionKey='title'
               optionValue='title'
               onChange={({ url }) => {
-                window.open(url as string, '_blank', 'noopener');
+                navigate(url as string);
               }}
               optionRender={(option) => {
                 return <DesktopMenuItem>{option.title as string}</DesktopMenuItem>;
@@ -94,17 +95,17 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
             options={[
                 {
                   title: 'NFT',
-                  url: `${config.blockchains[currentChainId || ''].walletUrl}create-nft`
+                  url: `/${currentChainId || ''}/create-token`
                 },
                 {
                   title: 'Collection',
-                  url: `${config.blockchains[currentChainId || ''].walletUrl}create-collection/main-information`
+                  url: `/${currentChainId || ''}/create-collection/main-information`
                 }
               ]}
             optionValue='title'
             optionKey='title'
             onChange={({ url }) => {
-              window.open(url as string, '_blank', 'noopener');
+              navigate(url as string);
             }}
           >
             <Text color = 'additional-dark'>Create</Text>

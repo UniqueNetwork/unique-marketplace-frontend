@@ -33,11 +33,11 @@ export const useUpdateCollectionMetadataStages = (collectionId: number) => {
 
         if (bannerFile) {
           const bannerSrc = await api?.collection?.uploadFile(bannerFile);
-          metadata.banner = bannerSrc;
+          metadata.banner = bannerSrc?.fullUrl;
         }
         if (coverFile) {
           const coverSrc = await api?.collection?.uploadFile(coverFile);
-          metadata.cover = coverSrc;
+          metadata.cover = coverSrc?.fullUrl;
         }
 
         await updateCollection(collectionId, metadata, type, { message, signature });

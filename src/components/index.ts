@@ -8,3 +8,4 @@ export { Avatar } from './Avatar/Avatar';
 export { FeeMessage } from './FeeMessage/FeeMessage';
 export { IntroSlider } from './IntroSlider/IntroSlider';
 export { ProgressBar } from './ProgressBar/ProgressBar';
+export * from './ActionBtn';

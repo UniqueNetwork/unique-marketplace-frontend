@@ -6,7 +6,7 @@ import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
 import { ChainValue } from '../controllers/BaseController';
 import { CollectionMode, TransferTokenParams } from '../types';
-import { BatchCallArgumentsBody, CollectionProperty, TokenId } from '@unique-nft/sdk';
+import { BatchCallArgumentsBody, CollectionProperty, CreateCollectionBody, CreateCollectionParsed, CreateTokenPayload, PropertyKeyPermission, TokenId } from '@unique-nft/sdk';
 
 const buyGasLimit = 1_000_000;
 const sellGasLimit = 200_000;
@@ -26,6 +26,21 @@ class UniqueAdapter implements IMarketContractAdapter {
       address: signer.address,
       collectionId,
       properties
+    });
+    if (!unsignedTxPayload) throw new Error('Transaction build error');
+    const { signature } = await this.uniqueSdk.collection.setProperties.sign(unsignedTxPayload, { signer });
+    if (!signature) throw new Error('Signing failed');
+    await this.uniqueSdk.collection.setProperties.submit({
+      signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
+      signature
+    });
+  }
+
+  async setTokenPropertyPermissions(collectionId: number, propertyPermissions: PropertyKeyPermission[], signer: Signer): Promise<void> {
+    const unsignedTxPayload = await this.uniqueSdk.collection.setPropertyPermissions.build({
+      address: signer.address,
+      collectionId,
+      propertyPermissions
     });
     if (!unsignedTxPayload) throw new Error('Transaction build error');
     const { signature } = await this.uniqueSdk.collection.setProperties.sign(unsignedTxPayload, { signer });
@@ -323,6 +338,18 @@ class UniqueAdapter implements IMarketContractAdapter {
       address: signer.address,
       calls
     }, { signer });
+  }
+
+  async createCollection(payload: CreateCollectionBody, signer: Signer): Promise<CreateCollectionParsed | undefined> {
+    return (await this.uniqueSdk.collection.create.submitWaitResult(payload, { signer })).parsed;
+  }
+
+  async getCreateCollectionFee(payload: CreateCollectionBody): Promise<string> {
+    return (await this.uniqueSdk.collection.create.getFee(payload)).fee.formatted;
+  }
+
+  async createTokens({ tokens, collectionId }: { tokens: CreateTokenPayload[], collectionId: number }, signer: Signer): Promise<TokenId[] | undefined> {
+    return (await this.uniqueSdk.token.createMultiple({ collectionId, tokens, address: signer.address }, { signer })).parsed;
   }
 }
 

@@ -1,0 +1,136 @@
+import { VFC } from 'react';
+import styled from 'styled-components';
+
+import noImage from 'static/icons/no-collections.svg';
+
+import { Tag, Tags, Text } from 'components/UI';
+import { AttributeView } from 'pages/CreateNFT/types';
+import { Avatar } from 'components';
+import { usePreloadImage } from 'pages/CreateCollection/hooks/usePreloadImage';
+
+interface IPreviewCard {
+  attributes?: AttributeView[];
+  attributesInline?: string[];
+  description?: string;
+  geometry?: 'square' | 'circle';
+  picture?: string;
+  title?: string;
+  size?: number;
+  color?: string;
+}
+
+export const Card: VFC<IPreviewCard> = ({
+  attributes,
+  attributesInline,
+  description = 'Description',
+  title = 'Name',
+  picture,
+  geometry = 'circle',
+  size = 64,
+  color
+}) => {
+  return (
+    <PreviewCard>
+      <Avatar size={size} src={usePreloadImage(picture || '', noImage)} type={geometry} />
+      <PreviewCardInfo>
+        <PreviewCardTitle color={color}>{title}</PreviewCardTitle>
+        <PreviewCardDescription>{description}</PreviewCardDescription>
+        {(attributes || !!attributesInline?.length) && (
+          <PreviewCardAttributes>
+            <Text size='m'>
+              {attributesInline ? 'Attribute names' : 'Attributes'}
+            </Text>
+            {attributesInline && (
+              <PreviewCardDescription>
+                {attributesInline.map(
+                  (el, i) =>
+                    el && `${el}${i !== attributesInline?.length - 1 ? ', ' : ''}`
+                )}
+              </PreviewCardDescription>
+            )}
+            {attributes?.map((item, i) => {
+              return (
+                <AttributesGroup key={i}>
+                  <Text size='s' color='grey-500'>
+                    {item.group}
+                  </Text>
+                  {item.values && (
+                    <Tags>
+                      {item.values
+                        .filter((val: string) => !!val)
+                        .map((value: string, index) => (
+                          <Tag key={`${value}-${index}`} label={value} type='default' />
+                        ))}
+                    </Tags>
+                  )}
+                </AttributesGroup>
+              );
+            })}
+          </PreviewCardAttributes>
+        )}
+      </PreviewCardInfo>
+    </PreviewCard>
+  );
+};
+
+const PreviewCard = styled.div`
+  display: flex;
+  word-break: break-all;
+
+  .unique-text {
+    display: block;
+  }
+
+  .unique-avatar {
+    outline: none;
+    background-color: #f5f6f7;
+    object-fit: cover;
+
+    &.square {
+      border-radius: var(--prop-border-radius);
+    }
+  }
+`;
+
+const PreviewCardInfo = styled.div`
+  overflow: hidden;
+  flex: 1 1 auto;
+  padding-left: var(--prop-gap);
+`;
+
+const PreviewCardTitle = styled.h5<{ color?: string }>`
+  margin-bottom: calc(var(--prop-gap) / 4);
+  font-weight: 500;
+  font-size: 1.125rem;
+  line-height: 1.5;
+  color: ${({ color }) => color || 'inherit'};
+`;
+
+const PreviewCardDescription = styled(Text).attrs({
+  size: 's',
+  color: 'grey-500'
+})`
+  &:not(:last-child) {
+    margin-bottom: var(--prop-gap);
+  }
+
+  &.unique-text {
+    font-weight: 400;
+    word-break: break-word;
+  }
+`;
+
+const PreviewCardAttributes = styled.div`
+  ${PreviewCardDescription} {
+    margin-top: calc(var(--prop-gap) / 4);
+  }
+`;
+
+const AttributesGroup = styled.div`
+  overflow: hidden;
+  margin-top: calc(var(--prop-gap) / 2);
+
+  &:not(:first-of-type) {
+    margin-top: var(--prop-gap);
+  }
+`;

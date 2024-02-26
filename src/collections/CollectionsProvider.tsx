@@ -35,6 +35,7 @@ const CollectionsWrapper: FC = ({ children }) => {
         ) {
           count
           data {
+            attributesSchema: attributes_schema
             owner: owner_normalized
             cover: collection_cover
             id: collection_id

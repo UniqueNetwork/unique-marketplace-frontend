@@ -16,6 +16,16 @@ export enum DeviceSize {
   xxl
 }
 
+export enum SizeMap {
+  xxs = -1,
+  xs = 0,
+  sm = 1,
+  md = 2,
+  lg = 3,
+  xl = 4,
+  xxl = 5,
+}
+
 const useDeviceSize = (): DeviceSize => {
   const [windowWidth, setWindowWidth] = useState<number | undefined>();
 
