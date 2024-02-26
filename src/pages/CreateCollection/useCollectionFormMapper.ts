@@ -26,10 +26,10 @@ export const useCollectionFormMapper = () => {
       permissions: {
         nesting
       },
-      sponsorship: {
-        isConfirmed: false,
-        address: sponsorAddress || ''
-      },
+      // sponsorship: {
+      //   isConfirmed: false,
+      //   address: sponsorAddress || ''
+      // },
       tokenPrefix: symbol || '',
       limits: {
         tokenLimit,

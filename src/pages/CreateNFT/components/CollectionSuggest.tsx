@@ -48,15 +48,11 @@ export const CollectionSuggest: FC<CollectionSuggestProps> = ({
     onChange(presetCollection);
   }, [onChange, presetCollection, collectionId]);
 
-  const { collections, isFetching } = useCollections();
+  const { collections, isFetching, fetchCollections } = useCollections();
 
-  // const { collections, isCollectionsLoading } = useGraphQlCollectionsByAccount({
-  //   accountAddress:
-  //     selectedAccount && Address.is.ethereumAddressInAnyForm(selectedAccount?.address)
-  //       ? Address.mirror.ethereumToSubstrate(selectedAccount.address)
-  //       : selectedAccount?.address,
-  //   options: defaultOptions
-  // });
+  useEffect(() => {
+    void fetchCollections(selectedAccount);
+  }, [fetchCollections, selectedAccount]);
 
   useEffect(() => {
     if (collectionId) {

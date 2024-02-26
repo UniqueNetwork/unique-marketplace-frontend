@@ -54,9 +54,9 @@ export class UniqueSDKCollectionController extends BaseController {
   async uploadFile(file: Blob): Promise<IpfsUploadResponse | undefined> {
     if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
 
-    const blob = Buffer.from(await file.arrayBuffer());
+    // const blob = Buffer.from(await file.arrayBuffer());
 
-    return (await this.uniqueSdk.ipfs.uploadFile({ file: blob }));
+    return (await this.uniqueSdk.ipfs.uploadFile({ file: file as BufferBlob }));
   }
 
   async setProperties(collectionId: number, properties: CollectionProperty[], { account }: TransactionOptions): Promise<void> {

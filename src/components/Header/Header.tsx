@@ -56,7 +56,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 },
                 {
                   title: 'Collection',
-                  url: `/${currentChainId || ''}/create-collection/main-information`
+                  url: `/${currentChainId || ''}/create-collection`
                 }
               ]}
               optionKey='title'
@@ -68,7 +68,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 return <DesktopMenuItem>{option.title as string}</DesktopMenuItem>;
               }}
             >
-              <DesktopMenuItem>Create</DesktopMenuItem>
+              <DesktopMenuItem $active={activeItem === 'Create collection' || activeItem === 'Create tokens'}>Create</DesktopMenuItem>
             </MenuDropdown>
             <DesktopMenuLink to={`/${currentChainId || ''}/sellTokens`} active={activeItem === 'My NFTs'} disabled={!selectedAccount || isLoading}>
               My NFTs
@@ -99,7 +99,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 },
                 {
                   title: 'Collection',
-                  url: `/${currentChainId || ''}/create-collection/main-information`
+                  url: `/${currentChainId || ''}/create-collection`
                 }
               ]}
             optionValue='title'

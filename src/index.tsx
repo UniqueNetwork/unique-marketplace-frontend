@@ -8,6 +8,7 @@ import { Error404 } from './pages/Errors/404';
 import { TokenContextProvider } from 'pages/Token/context/TokenContext';
 import { CreateNFTv2 } from 'pages/CreateNFT';
 import { CreateCollectionPage } from 'pages/CreateCollection';
+import { MainInformation, NFTAttributes } from 'pages/CreateCollection/tabs';
 
 const commonRoutes = (<>
   <Route
@@ -51,15 +52,16 @@ const commonRoutes = (<>
     path={'create-token'}
   />
   <Route
+    element={<CreateCollectionPage />}
     path={'create-collection'}
   >
     <Route
-      element={<CreateCollectionPage />}
+      element={<MainInformation />}
       path={'main-information'}
     />
     <Route
-      element={<CreateCollectionPage />}
-      path={'create-collection'}
+      element={<NFTAttributes />}
+      path={'nft-attributes'}
     />
   </Route>
   <Route

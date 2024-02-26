@@ -39,8 +39,12 @@ const MainInformationComponent: VFC<MainInformationProps> = ({ className }) => {
       data: { url: string; file: Blob } | null,
       callbackFn: (cid: string) => void
     ) => {
+      console.log('onFileChangeHandler');
       if (!data?.url) {
         callbackFn('');
+        return;
+      }
+      if (!beforeUploadHandler(data)) {
         return;
       }
       setIsFileUploading(true);
@@ -48,7 +52,7 @@ const MainInformationComponent: VFC<MainInformationProps> = ({ className }) => {
       setIsFileUploading(false);
       response && callbackFn(response.cid);
     },
-    []
+    [api?.collection]
   );
 
   return (

@@ -20,7 +20,6 @@ import { useCollectionSetTokenPropertyPermissions } from './hooks/useCollectionS
 import { useCollectionSetProperties } from './hooks/useCollectionSetProperties';
 import { useBalanceInsufficient } from './hooks/useBalanceInsufficient';
 import { MetamaskAccountName } from 'account/MetamaskWallet';
-import { PagePaper } from 'components/PagePaper/PagePaper';
 import { FormWrapper } from 'pages/CollectionEdit/Forms/FormComponents';
 import { CollectionStepper } from './components/CollectionStepper';
 import { Alert } from '@unique-nft/ui-kit';
@@ -126,8 +125,10 @@ const CreateCollectionComponent = ({ className }: CreateCollectionProps) => {
   }, [location.state]);
 
   useEffect(() => {
+    if (window.location.pathname.includes(tabsUrls[currentStep - 1])) return;
     navigate(tabsUrls[currentStep - 1], { state: { returnToCreateToken } });
-  }, [currentStep, returnToCreateToken]);
+    console.log(currentStep);
+  }, [currentStep]);
 
   useEffect(() => {
     if (isLoading) {
@@ -322,7 +323,7 @@ const CreateCollectionComponent = ({ className }: CreateCollectionProps) => {
   }, [selectedAccount?.name]);
 
   return (
-    <PagePaper className={classNames('create-collection-page', className)}>
+    <Wrapper className={classNames('create-collection-page', className)}>
       <WrapperContentStyled>
         <FormWrapper>
           <CollectionStepper activeStep={currentStep} onClickStep={goToPreviousStep} />
@@ -429,8 +430,15 @@ const CreateCollectionComponent = ({ className }: CreateCollectionProps) => {
     </ButtonsGroup>
   </BottomBar>
       )}
-    </PagePaper>
+    </Wrapper>
   );
 };
+
+const Wrapper = styled.div`
+  @media screen and (min-width: 1025px) {
+    display: flex;
+    align-items: flex-start;
+  }
+`;
 
 export const CreateCollection = CreateCollectionComponent;
