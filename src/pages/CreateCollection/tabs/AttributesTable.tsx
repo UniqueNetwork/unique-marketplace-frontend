@@ -69,7 +69,7 @@ const attributesColumns: TableColumnProps[] = [
             }
           }}
           render={({ field: { value, onChange }, fieldState: { error } }) => (
-            <InputText
+            <InputName
               value={value}
               placeholder='Attribute name'
               error={!!error}
@@ -202,6 +202,10 @@ const TableTitle = styled.span`
   @media screen and (min-width: 1024px) {
     margin-bottom: 0;
   }
+`;
+
+const InputName = styled(InputText)`
+  width: 100%;
 `;
 
 const AddButtonWrapper = styled.div`

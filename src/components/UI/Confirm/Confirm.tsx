@@ -2,6 +2,7 @@ import { ReactNode, VFC } from 'react';
 import { Button, ButtonProps } from '../Button/Button';
 import { Modal } from '../Modal';
 import { Heading } from '@unique-nft/ui-kit';
+import styled from 'styled-components';
 
 interface IConfirmProps {
   children?: ReactNode;
@@ -28,11 +29,17 @@ export const Confirm: VFC<IConfirmProps> = ({
     >
       {title && <Heading>{title}</Heading>}
       {children}
-      {buttons && <div>
+      {buttons && <ButtonsWrapper>
         {buttons?.map((btn, i) => (
           <Button key={i} {...btn} />
         ))}
-      </div>}
+      </ButtonsWrapper>}
     </Modal>
   );
 };
+
+const ButtonsWrapper = styled.div`
+  display: flex;
+  gap: var(--prop-gap);
+  margin-top: var(--prop-gap);
+`;

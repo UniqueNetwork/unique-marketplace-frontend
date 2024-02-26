@@ -6,6 +6,7 @@ export const ButtonGroup = styled.div<{
   gap?: number;
   stack?: boolean;
 }>`
+  margin-top: var(--prop-gap);
   flex: 1 1 auto;
   display: flex;
   flex-wrap: wrap;
