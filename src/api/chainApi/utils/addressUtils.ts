@@ -22,7 +22,7 @@ export const getEthAccount = (account: string) => {
 
 export const isTokenOwner = (account: string, tokenOwner: string): boolean => {
   if (isEthereumAddress(tokenOwner)) {
-    return getEthAccount(account).toLowerCase() === tokenOwner.toLowerCase();
+    return account.toLowerCase() === tokenOwner.toLowerCase();
   }
   if (isEthereumAddress(account)) {
     return Address.mirror.ethereumToSubstrate(account).toLowerCase() === tokenOwner.toLowerCase();
