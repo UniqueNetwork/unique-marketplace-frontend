@@ -44,4 +44,5 @@ const ModalStyled = styled(Modal)`
 
 const AlertStyled = styled(Alert)`
   margin-bottom: 0 !important;
+  margin-top: var(--prop-gap) !important;
 `;

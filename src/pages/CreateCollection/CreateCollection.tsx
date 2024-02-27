@@ -250,7 +250,7 @@ const CreateCollectionComponent = ({ className }: CreateCollectionProps) => {
     info('Collection created successfully');
 
     if (returnToCreateToken) {
-      navigate(`/${currentChainId}/create-nft`, {
+      navigate(`/${currentChainId}/create-token`, {
         state: {
           collection_id: collectionId,
           name: payload.name,
