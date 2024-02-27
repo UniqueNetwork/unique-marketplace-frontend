@@ -71,6 +71,9 @@ export const FormRow = styled.div`
   & > span.unique-text {
     margin-bottom: calc(var(--prop-gap) / 2);
   }
+  & div.unique-input-text, & div.unique-textarea-text {
+    width: 100%;
+  }
 `;
 
 export const FormRowEmpty = styled.div`
