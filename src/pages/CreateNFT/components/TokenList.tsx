@@ -259,7 +259,7 @@ const TokenListWrapper = styled.div`
   display: flex;
   margin-top: calc(var(--prop-gap) * 2);
   margin-bottom: calc(var(--prop-gap) * 2);
-  min-height: calc(80vh - 444px);
+  min-height: calc(120vh - 444px);
   position: relative;
 `;
 

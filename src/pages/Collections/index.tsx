@@ -15,6 +15,7 @@ import { MyCollection } from 'api/restApi/collections/types';
 import config from 'config';
 import { useApi } from 'hooks/useApi';
 import { useCollections } from 'hooks/useCollections';
+import { useNavigate } from 'react-router-dom';
 
 type TOption = {
   iconRight: {
@@ -68,6 +69,7 @@ export const CollectionsPage: FC = () => {
   const [selectedCollection, setSelectedCollection] = useState<MyCollection>();
   const { collections, isFetching, fetchCollections } = useCollections();
   const { isLoading: isAccountsLoading } = useAccounts();
+  const navigate = useNavigate();
 
   useEffect(() => {
     void (async () => {
@@ -94,9 +96,8 @@ export const CollectionsPage: FC = () => {
     void await fetchCollections(selectedAccount);
   }, []);
 
-  const onCreateCollectionViaWalletClick = useCallback(() => {
-    const { walletUrl } = config.blockchains[currentChainId || ''] || {};
-    window.open(walletUrl, '_blank')?.focus();
+  const onCreateCollectionClick = useCallback(() => {
+    navigate(`/${currentChainId}/create-collection`);
   }, [currentChainId]);
 
   const onViewOnScanClick = useCallback((collection: MyCollection) => () => {
@@ -148,7 +149,7 @@ export const CollectionsPage: FC = () => {
           </SortSelectWrapper>
         </SearchAndSortingWrapper>
         <ButtonsWrapper>
-          <Button role='primary' title={'Create new via wallet'} onClick={onCreateCollectionViaWalletClick}/>
+          <Button role='primary' title={'Create collection'} onClick={onCreateCollectionClick}/>
         </ButtonsWrapper>
       </ControlsWrapper>
       <CollectionListWrapper>

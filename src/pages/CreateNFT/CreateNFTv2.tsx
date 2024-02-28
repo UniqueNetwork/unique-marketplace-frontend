@@ -285,7 +285,7 @@ export const CreateNFTv2Component: FC<{ className?: string }> = ({ className }) 
           </CollectionBlock>
         </WrapperCollectionContentStyled>
         <WrapperTokenListContentStyled disabled={!collection}>
-          <Heading size='3'>Create tokens</Heading>
+          <Heading size='3'>Create NFTs</Heading>
           <Text size='m' color='grey-500'>
             You can mass-mint {MAX_MINT_TOKENS} tokens using JPEG, PNG, and GIF files,
             with a maximum size of 10MB each
@@ -404,7 +404,7 @@ export const CreateNFTv2Component: FC<{ className?: string }> = ({ className }) 
           tokens={selected}
           tokenPrefix={collection?.tokenPrefix || ''}
           leftTokens={leftTokens}
-          attributesSchema={collection?.attributesSchema}
+          attributesSchema={collection?.attributesSchema || []}
           mode={collection?.mode}
           onClose={() => setDialog(undefined)}
           onChange={changeSelected}
@@ -514,7 +514,7 @@ const ButtonGroup = styled.div`
   padding: calc(var(--prop-gap) * 2);
   margin: -32px;
   bottom: 0px;
-  z-index: 1001;
+  z-index: 49;
   background: white;
   position: sticky;
   border-radius: 4px;

@@ -26,3 +26,4 @@ export { Textarea } from './Textarea/Textarea';
 export { Tooltip } from './Tooltip/Tooltip';
 export { TooltipWrapper } from './TooltipWrapper/TooltipWrapper';
 export { Upload } from './Upload/Upload';
+export { UploadImage } from './UploadImage/UploadImage';

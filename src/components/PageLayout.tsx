@@ -30,7 +30,7 @@ export const PageLayout: FC = () => {
       return { heading: 'Create collection' };
     }
     if (pathname.includes('/create-token')) {
-      return { heading: 'Create tokens' };
+      return { heading: 'Create NFTs' };
     }
     if (pathname.includes('/collections')) {
       return { heading: 'My collections' };

@@ -102,9 +102,9 @@ export const AttributesModal = ({
     }
   }, []);
 
-  if (!attributesSchema) {
-    return null;
-  }
+  // if (!attributesSchema) {
+  //   return null;
+  // }
 
   return (
     <ModalStyled
@@ -143,7 +143,7 @@ export const AttributesModal = ({
           <AttributesForm
             initialAttributes={summaryAttributes}
             attributes={attributes}
-            attributesSchema={attributesSchema}
+            attributesSchema={attributesSchema || []}
             onChange={onChangeAttributes}
           />
         </FormGrid>

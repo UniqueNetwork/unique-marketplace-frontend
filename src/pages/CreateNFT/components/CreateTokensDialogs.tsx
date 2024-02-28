@@ -37,7 +37,7 @@ export const CreateTokensDialogs = ({
         <AttributesModal
           tokens={tokens}
           tokenPrefix={tokenPrefix}
-          attributesSchema={attributesSchema}
+          attributesSchema={attributesSchema || []}
           mode={mode}
           onChange={onChange}
           onClose={onClose}
