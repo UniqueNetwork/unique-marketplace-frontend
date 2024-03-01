@@ -128,6 +128,10 @@ export const CollectionEditPage = () => {
     setIsFetchingCollection(true);
     const collection = await fetchCollection(Number(collectionId));
     setCollection(collection || null);
+
+    const collectionOnChain = await api?.collection?.getCollection(Number(collectionId));
+    setCollectionInfo(collectionOnChain || null);
+
     setIsFetchingCollection(false);
     setModalType(undefined);
   }, [fetchCollection]);
