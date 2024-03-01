@@ -16,9 +16,9 @@ export const useCollectionCreate = () => {
   const submitWaitResult = useCallback(async ({ payload }: { payload: CreateCollectionBody }) => {
     if (!api || !selectedAccount) return;
     setIsLoadingSubmitResult(true);
-    const responce = await api?.collection?.createCollection(payload, { account: selectedAccount });
+    const response = await api?.collection?.createCollection(payload, { account: selectedAccount });
     setIsLoadingSubmitResult(false);
-    return responce;
+    return response;
   }, [api, selectedAccount]);
 
   const getFee = useCallback(async ({ payload }: { payload: CreateCollectionBody }) => {

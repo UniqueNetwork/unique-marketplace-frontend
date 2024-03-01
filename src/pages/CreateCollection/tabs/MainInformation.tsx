@@ -39,7 +39,6 @@ const MainInformationComponent: VFC<MainInformationProps> = ({ className }) => {
       data: { url: string; file: Blob } | null,
       callbackFn: (cid: string) => void
     ) => {
-      console.log('onFileChangeHandler');
       if (!data?.url) {
         callbackFn('');
         return;

@@ -6,7 +6,7 @@ import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
 import { ChainValue } from '../controllers/BaseController';
 import { CollectionMode, TransferTokenParams } from '../types';
-import { BatchCallArgumentsBody, CollectionProperty, CreateCollectionBody, CreateCollectionParsed, CreateTokenPayload, PropertyKeyPermission, TokenId } from '@unique-nft/sdk';
+import { BatchCallArgumentsBody, CollectionProperty, CreateCollectionBody, CreateCollectionParsed, CreateTokenPayload, PropertyKeyPermission, SetCollectionLimitsBody, SetSponsorshipBody, TokenId } from '@unique-nft/sdk';
 
 const buyGasLimit = 1_000_000;
 const sellGasLimit = 200_000;
@@ -30,7 +30,7 @@ class UniqueAdapter implements IMarketContractAdapter {
     if (!unsignedTxPayload) throw new Error('Transaction build error');
     const { signature } = await this.uniqueSdk.collection.setProperties.sign(unsignedTxPayload, { signer });
     if (!signature) throw new Error('Signing failed');
-    await this.uniqueSdk.collection.setProperties.submit({
+    await this.uniqueSdk.collection.setProperties.submitWaitResult({
       signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
       signature
     });
@@ -350,6 +350,22 @@ class UniqueAdapter implements IMarketContractAdapter {
 
   async createTokens({ tokens, collectionId }: { tokens: CreateTokenPayload[], collectionId: number }, signer: Signer): Promise<TokenId[] | undefined> {
     return (await this.uniqueSdk.token.createMultiple({ collectionId, tokens, address: signer.address }, { signer })).parsed;
+  }
+
+  async getSetSponsorshipFee(payload: SetSponsorshipBody, signer: Signer): Promise<string> {
+    return (await this.uniqueSdk.collection.setSponsorship.getFee(payload)).fee.formatted;
+  }
+
+  async setSponsorship(payload: SetSponsorshipBody, signer: Signer): Promise<void> {
+    await this.uniqueSdk.collection.setSponsorship(payload, { signer });
+  }
+
+  async getSetCollectionLimitsFee(payload: SetCollectionLimitsBody, signer: Signer): Promise<string> {
+    return (await this.uniqueSdk.collection.setLimits.getFee(payload)).fee.formatted;
+  }
+
+  async setCollectionLimits(payload: SetCollectionLimitsBody, signer: Signer): Promise<void> {
+    await this.uniqueSdk.collection.setLimits(payload, { signer });
   }
 }
 

@@ -49,7 +49,7 @@ export const CollectionStats = ({
       </LoaderWrapper>
     );
   }
-  console.log('tokensLimit', tokensLimit);
+
   return (
     <CollectionStatisticsBlockWrapper>
       <div>

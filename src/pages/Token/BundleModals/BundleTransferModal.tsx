@@ -10,7 +10,7 @@ import { EquipModal } from './EquipModal';
 import { MarketType } from 'types/MarketTypes';
 import { UnequipModal } from './UnequipModal';
 
-export type TBundleTrunsferModalProps = {
+export type TBundleTransferModalProps = {
   token?: INestingToken | TokenByIdResponse
   bundleModalType: MarketType
   setModalType(type: MarketType): void
@@ -26,7 +26,7 @@ export type TBundleTransferModalBodyProps = {
   testid: string
 }
 
-const BundleTrunsferModal = ({ token, onClose, onFinish, bundleModalType, setModalType, testid }: TBundleTrunsferModalProps) => {
+const BundleTransferModal = ({ token, onClose, onFinish, bundleModalType, setModalType, testid }: TBundleTransferModalProps) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const [isClosable, setIsClosable] = useState<boolean>(true);
 
@@ -75,4 +75,4 @@ const BundleTrunsferModal = ({ token, onClose, onFinish, bundleModalType, setMod
   );
 };
 
-export default BundleTrunsferModal;
+export default BundleTransferModal;

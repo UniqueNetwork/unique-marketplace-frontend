@@ -6,7 +6,7 @@ import classNames from 'classnames';
 import { useDebounce } from 'use-debounce';
 import { CollectionAttributesSchema, SchemaTools, UniqueCollectionSchemaToCreate } from '@unique-nft/schemas';
 
-import { Button, ButtonGroup, Confirm, Text, useNotifications } from 'components/UI';
+import { Button, ButtonGroup, Confirm, Text, useNotifications, Alert } from 'components/UI';
 
 import { CollectionForm, Warning } from './types';
 import { FORM_ERRORS, tabsUrls, warnings } from './constants';
@@ -22,7 +22,6 @@ import { useBalanceInsufficient } from './hooks/useBalanceInsufficient';
 import { MetamaskAccountName } from 'account/MetamaskWallet';
 import { FormWrapper } from 'pages/CollectionEdit/Forms/FormComponents';
 import { CollectionStepper } from './components/CollectionStepper';
-import { Alert } from '@unique-nft/ui-kit';
 import { ConfirmBtn, FeeMessage } from 'components';
 import { BottomBar } from './components/BottomBar';
 import { CollectionSidebar } from './components/CollectionSidebar';
@@ -127,7 +126,6 @@ const CreateCollectionComponent = ({ className }: CreateCollectionProps) => {
   useEffect(() => {
     if (window.location.pathname.includes(tabsUrls[currentStep - 1])) return;
     navigate(tabsUrls[currentStep - 1], { state: { returnToCreateToken } });
-    console.log(currentStep);
   }, [currentStep]);
 
   useEffect(() => {

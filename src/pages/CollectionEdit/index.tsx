@@ -18,13 +18,15 @@ import { SaveCollectionStagesModal } from './Modals/SaveCollectionModal';
 import { BlueGrey500 } from 'styles/colors';
 import { SetRoyaltiesStagesModal } from './Modals/SetRoyaltiesModal';
 import { RoyaltiesFormData } from './types';
-import { useCollections } from 'hooks/useCollections';
-import { formatKsm } from 'api/chainApi/utils/textFormat';
-import { BN } from '@polkadot/util';
+import { Sponsorship } from './Forms/Sponsorship';
+import { Limits } from './Forms/Limits';
+import { BurningPermission } from './Forms/BurningPermission';
+import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 
 export const CollectionEditPage = () => {
   const { collectionId } = useParams<{ collectionId: string }>();
   const [collection, setCollection] = useState<MarketableCollection | null>(null);
+  const [collectionInfo, setCollectionInfo] = useState<CollectionInfoWithSchemaResponse | null>(null);
   const [isFetchingCollection, setIsFetchingCollection] = useState<boolean>(true);
   const { fetchCollection } = useMarketableCollection();
   const { api, currentChainId } = useApi();
@@ -51,6 +53,7 @@ export const CollectionEditPage = () => {
       });
 
       const collectionOnChain = await api?.collection?.getCollection(Number(collectionId));
+      setCollectionInfo(collectionOnChain || null);
       if (collectionOnChain?.schema?.royalties?.length) {
         setRoyalty({
           royalties: collectionOnChain?.schema?.royalties.map((royalty) => {
@@ -121,13 +124,21 @@ export const CollectionEditPage = () => {
     }
   }, [navigate, currentChainId, collectionId]);
 
+  const onComplete = useCallback(async () => {
+    setIsFetchingCollection(true);
+    const collection = await fetchCollection(Number(collectionId));
+    setCollection(collection || null);
+    setIsFetchingCollection(false);
+    setModalType(undefined);
+  }, [fetchCollection]);
+
   if (isFetchingCollection) {
     return <CollectionEditPaper>
       <CollectionEditSkeleton />
     </CollectionEditPaper>;
   }
 
-  if (!collection) return <Error404 />;
+  if (!collection || !collectionInfo) return <Error404 />;
 
   return (<>
     <BackLink onClick={backClickHandler}>
@@ -158,6 +169,9 @@ export const CollectionEditPage = () => {
             initialFormData={royalty}
             onSubmit={onRoyaltiesFormSubmit}
           />
+          <Sponsorship collection={collection} collectionInfo={collectionInfo} onComplete={onComplete} />
+          <Limits collection={collection} collectionInfo={collectionInfo} onComplete={onComplete} />
+          <BurningPermission collection={collection} collectionInfo={collectionInfo} onComplete={onComplete} />
         </CollectionEditFormWrapper>
       </CollectionEditContentWrapper>
       <Modal isVisible={modalType === 'metadata'}>

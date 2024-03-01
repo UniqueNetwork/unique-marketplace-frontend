@@ -25,6 +25,7 @@ import { RoyaltiesFormData } from 'pages/CollectionEdit/types';
 import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 import { CollectionPageProps } from './types';
 import { MobileFilters } from 'components/Filters/MobileFilter';
+import { Address } from '@unique-nft/utils';
 
 export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionPageProps) => {
   const { selectedAccount, isLoading: isAccountsLoading } = useAccounts();

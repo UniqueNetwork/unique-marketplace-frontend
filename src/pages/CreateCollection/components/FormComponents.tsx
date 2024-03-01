@@ -109,10 +109,12 @@ export const SettingsRow = styled.div`
     gap: 0.3em;
   }
 
-  .unique-input-text {
+  div.unique-input-text {
     & + .unique-font-heading {
       margin-top: calc(var(--prop-gap) * 0.375);
     }
+    width: 100%;
+    max-width: 756px;
   }
 `;
 

@@ -1,4 +1,4 @@
-import { CollectionInfoWithSchemaResponse, CollectionProperty, CreateCollectionBody, CreateCollectionParsed, IpfsUploadResponse, LastTokenIdResultDto, PropertyKeyPermission } from '@unique-nft/sdk';
+import { CollectionInfoWithSchemaResponse, CollectionProperty, CreateCollectionBody, CreateCollectionParsed, IpfsUploadResponse, LastTokenIdResultDto, PropertyKeyPermission, SetCollectionLimitsBody, SetSponsorshipBody } from '@unique-nft/sdk';
 import { AllowedCollections } from 'api/restApi/settings/types';
 import { NetworkOptions } from 'api/sdk/sdkClient';
 import BaseController from './controllers/BaseController';
@@ -20,9 +20,12 @@ export class UniqueSDKCollectionController extends BaseController {
   async confirmSponsorship(collectionId: number, { account }: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
     if (!account) throw new Error('Account not provided');
-    const unsignedTxPayload = await this.uniqueSdk.collections.confirmSponsorship.build({ collectionId, address: account.address });
+    const unsignedTxPayload = await this.uniqueSdk.collection.confirmSponsorship.build({
+      collectionId,
+      address: account.address
+    });
     if (!unsignedTxPayload) throw new Error('Transaction build error');
-    const { signature } = await this.uniqueSdk.collections.confirmSponsorship.sign(unsignedTxPayload, { signer: account });
+    const { signature } = await this.uniqueSdk.collection.confirmSponsorship.sign(unsignedTxPayload, { signer: account });
     if (!signature) throw new Error('Signing failed');
     await this.uniqueSdk.extrinsics.submit({
       signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
@@ -41,20 +44,11 @@ export class UniqueSDKCollectionController extends BaseController {
   async removeCollectionSponsor(collectionId: number, { account }: TransactionOptions): Promise<void> {
     if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
     if (!account) throw new Error('Account not provided');
-    const unsignedTxPayload = await this.uniqueSdk.collections.removeSponsorship.build({ collectionId, address: account.address });
-    if (!unsignedTxPayload) throw new Error('Transaction build error');
-    const { signature } = await this.uniqueSdk.collections.removeSponsorship.sign(unsignedTxPayload, { signer: account });
-    if (!signature) throw new Error('Signing failed');
-    await this.uniqueSdk.extrinsics.submit({
-      signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
-      signature
-    });
+    await this.uniqueSdk.collection.removeSponsorship.submitWaitResult({ collectionId, address: account.address }, { signer: account });
   }
 
   async uploadFile(file: Blob): Promise<IpfsUploadResponse | undefined> {
     if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
-
-    // const blob = Buffer.from(await file.arrayBuffer());
 
     return (await this.uniqueSdk.ipfs.uploadFile({ file: file as BufferBlob }));
   }
@@ -77,5 +71,45 @@ export class UniqueSDKCollectionController extends BaseController {
   async getCreateCollectionFee(collectionPayload: CreateCollectionBody, { account }: TransactionOptions): Promise<string> {
     const adapter = this.getAdapter(account);
     return await adapter.getCreateCollectionFee(collectionPayload, account.signer);
+  }
+
+  async getSetSponsorshipFee(payload: SetSponsorshipBody, { account }: TransactionOptions): Promise<string> {
+    const adapter = this.getAdapter(account);
+    return await adapter.getSetSponsorshipFee(payload, account.signer);
+  }
+
+  async setSponsorship(payload: SetSponsorshipBody, { account }: TransactionOptions): Promise<void> {
+    const adapter = this.getAdapter(account);
+    await adapter.setSponsorship(payload, account.signer);
+  }
+
+  async getSetCollectionLimitsFee(payload: SetCollectionLimitsBody, { account }: TransactionOptions): Promise<string> {
+    const adapter = this.getAdapter(account);
+    return await adapter.getSetCollectionLimitsFee(payload, account.signer);
+  }
+
+  async setCollectionLimits(payload: SetCollectionLimitsBody, { account }: TransactionOptions): Promise<void> {
+    const adapter = this.getAdapter(account);
+    await adapter.setCollectionLimits(payload, account.signer);
+  }
+
+  async getRemoveCollectionSponsorFee(collectionId: number, { account }: TransactionOptions): Promise<string> {
+    if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
+    return (await this.uniqueSdk.collection.removeSponsorship.getFee({ collectionId, address: account.address })).fee.formatted;
+  }
+
+  async getConfirmCollectionSponsorFee(collectionId: number, { account }: TransactionOptions): Promise<string> {
+    if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
+    return (await this.uniqueSdk.collection.confirmSponsorship.getFee({ collectionId, address: account.address })).fee.formatted;
+  }
+
+  async burn(collectionId: number, { account }: TransactionOptions): Promise<void> {
+    if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
+    await this.uniqueSdk.collection.destroy.submitWaitResult({ collectionId, address: account.address }, { signer: account });
+  }
+
+  async getBurnFee(collectionId: number, { account }: TransactionOptions): Promise<string> {
+    if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
+    return (await this.uniqueSdk.collection.destroy.getFee({ collectionId, address: account.address })).fee.formatted;
   }
 }

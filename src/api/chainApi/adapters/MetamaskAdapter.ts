@@ -7,7 +7,7 @@ import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
 import { ChainValue } from '../controllers/BaseController';
 import { CollectionMode, TransferTokenParams } from '../types';
-import { CollectionProperty, CreateCollectionBody, CreateCollectionParsed, CreateTokenPayload, ExtrinsicResultResponse, PropertyKeyPermission, TokenId } from '@unique-nft/sdk';
+import { CollectionProperty, CreateCollectionBody, CreateCollectionParsed, CreateTokenPayload, PropertyKeyPermission, SetCollectionLimitsBody, SetSponsorshipBody, TokenId } from '@unique-nft/sdk';
 import { Utf16 } from 'utf-helpers';
 import { sleep } from 'utils/helpers';
 import { SchemaTools, UniqueCollectionSchemaDecoded, UniqueTokenToCreate } from '@unique-nft/schemas';
@@ -304,6 +304,22 @@ class MetamaskAdapter implements IMarketContractAdapter {
       })
     );
     return ids;
+  }
+
+  getSetSponsorshipFee(payload: SetSponsorshipBody, signer: Signer): Promise<string> {
+    throw new Error('not implemented');
+  }
+
+  setSponsorship(payload: SetSponsorshipBody, signer: Signer): Promise<void> {
+    throw new Error('not implemented');
+  }
+
+  getSetCollectionLimitsFee(payload: SetCollectionLimitsBody, signer: Signer): Promise<string> {
+    throw new Error('not implemented');
+  }
+
+  setCollectionLimits(payload: SetCollectionLimitsBody, signer: Signer): Promise<void> {
+    throw new Error('not implemented');
   }
 }
 

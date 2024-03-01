@@ -1,5 +1,5 @@
-import { Alert, Heading } from '@unique-nft/ui-kit';
-import { Button, Loader, Text } from 'components/UI';
+import { Heading } from '@unique-nft/ui-kit';
+import { Alert, Button, Loader, Text } from 'components/UI';
 import { Modal, ModalProps } from 'components/UI/Modal';
 import { ReactNode } from 'react';
 import styled from 'styled-components';

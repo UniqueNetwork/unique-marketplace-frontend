@@ -1,4 +1,5 @@
 export { Accordion } from './Accordion';
+export { Alert } from './Alert/Alert';
 export { Button } from './Button/Button';
 export { ButtonGroup } from './ButtonGroup/ButtonGroup';
 export { Checkbox } from './Checkbox/Checkbox';
@@ -23,6 +24,7 @@ export { Tabs } from './Tabs/Tabs';
 export { Tags, Tag } from './Tags';
 export { Text } from './Text/Text';
 export { Textarea } from './Textarea/Textarea';
+export { Toggle } from './Toggle/Toggle';
 export { Tooltip } from './Tooltip/Tooltip';
 export { TooltipWrapper } from './TooltipWrapper/TooltipWrapper';
 export { Upload } from './Upload/Upload';

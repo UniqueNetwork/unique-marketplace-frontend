@@ -1,5 +1,5 @@
 import { Signer as EthersSigner } from 'ethers';
-import { CollectionProperty, Signer as UniqueSigner, TokenId, CreateCollectionBody, CreateCollectionParsed, PropertyKeyPermission, CreateTokenPayload } from '@unique-nft/sdk';
+import { CollectionProperty, Signer as UniqueSigner, TokenId, CreateCollectionBody, CreateCollectionParsed, PropertyKeyPermission, CreateTokenPayload, SetSponsorshipBody, SetCollectionLimitsBody } from '@unique-nft/sdk';
 import { ChainValue } from '../controllers/BaseController';
 import { CollectionMode, TransferTokenParams } from '../types';
 
@@ -30,6 +30,12 @@ interface IBaseAdapter {
 
   transferTokensBatch(transfers: TransferTokenParams[], signer: Signer, onSubmittedOne?: (token: TokenId, index: number) => void): Promise<void>
   createTokens(payload: { tokens: CreateTokenPayload[], collectionId: number }, signer: Signer): Promise<TokenId[] | undefined>
+
+  getSetSponsorshipFee(payload: SetSponsorshipBody, signer: Signer): Promise<string>;
+  setSponsorship(payload: SetSponsorshipBody, signer: Signer): Promise<void>;
+
+  getSetCollectionLimitsFee(payload: SetCollectionLimitsBody, signer: Signer): Promise<string>;
+  setCollectionLimits(payload: SetCollectionLimitsBody, signer: Signer): Promise<void>;
 }
 
 export default IBaseAdapter;
