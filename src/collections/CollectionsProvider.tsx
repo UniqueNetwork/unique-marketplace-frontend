@@ -5,6 +5,8 @@ import { CollectionsProvider } from './CollectionsContext';
 import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 import config from 'config';
 import { post } from 'api/restApi/base';
+import { GQLCollection } from './types';
+import { getIpfsUriByImagePath } from 'utils/urlUtils';
 
 const CollectionsWrapper: FC = ({ children }) => {
   const [collections, setCollections] = useState<CollectionInfoWithSchemaResponse[]>([]);
@@ -55,7 +57,14 @@ const CollectionsWrapper: FC = ({ children }) => {
     const { scanApi } = config.blockchains[currentChainId || ''] || {};
     const { data } = await post(scanApi, gqlQuery);
 
-    setCollections(data.data.collections.data || []);
+    setCollections(data.data.collections.data.map((collection: GQLCollection) => ({
+      ...collection,
+      schema: {
+        coverPicture: {
+          fullUrl: getIpfsUriByImagePath(collection.cover)
+        }
+      }
+    })) || []);
     setIsFetching(false);
   }, [featuredCollections]);
 
