@@ -12,7 +12,6 @@ import { useAccounts } from 'hooks/useAccounts';
 import { shortcutText } from 'utils/textUtils';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import { Primary500, Primary600 } from 'styles/colors';
-import CollectionBanner from 'static/images/banner.svg';
 import config from 'config';
 import { PagePaper } from 'components/PagePaper/PagePaper';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
@@ -21,7 +20,6 @@ import { MarketableCollection } from 'api/restApi/collections/types';
 import ShareTokenModal from 'pages/Token/TokenDetail/ShareTokenModal';
 import { RoyaltiesFormData } from 'pages/CollectionEdit/types';
 import { dateFormat } from 'utils/timestampUtils';
-import { MetamaskAccount } from '@unique-nft/accounts/metamask';
 import { Address } from '@unique-nft/utils';
 interface IProps {
   collection?: MarketableCollection

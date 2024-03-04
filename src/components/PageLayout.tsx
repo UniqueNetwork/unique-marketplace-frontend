@@ -6,7 +6,7 @@ import { Header } from '.';
 import { useFooter } from '../hooks/useFooter';
 import useBackground from '../hooks/useBackground';
 
-export type TMenuItems = 'Explore' | 'My NFTs' | 'Trades' | 'FAQ' | 'Manage accounts' | 'My collections';
+export type TMenuItems = 'Explore' | 'My NFTs' | 'Trades' | 'Create collection' | 'Create tokens' | 'FAQ' | 'Manage accounts' | 'My collections';
 
 export const PageLayout: FC = () => {
   const { pathname } = useLocation();
@@ -23,6 +23,15 @@ export const PageLayout: FC = () => {
     }
     if (pathname.includes('/market')) return { heading: undefined };
 
+    if (pathname.includes('/collections')) {
+      return { heading: 'My collections' };
+    }
+    if (pathname.includes('/create-collection')) {
+      return { heading: 'Create collection' };
+    }
+    if (pathname.includes('/create-token')) {
+      return { heading: 'Create NFTs' };
+    }
     if (pathname.includes('/collections')) {
       return { heading: 'My collections' };
     }

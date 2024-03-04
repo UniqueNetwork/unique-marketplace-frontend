@@ -52,7 +52,7 @@ export const useSetRoyaltiesStages = (collectionId: number) => {
         ...collection?.properties || [],
         royalties
       ];
-      return collectionApi?.setProperties(collectionId, properties, options);
+      return await collectionApi?.setProperties(collectionId, properties, options);
     }
   }], [chainProperties?.decimals, collectionApi, collectionId]);
 

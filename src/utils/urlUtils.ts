@@ -1,4 +1,4 @@
-const IPFSGateway = 'https://ipfs.uniquenetwork.dev/ipfs/';
+export const IPFSGateway = 'https://ipfs.uniquenetwork.dev/ipfs/';
 
 type ImagePath = {
   ipfs: string;

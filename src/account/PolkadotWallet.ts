@@ -43,7 +43,7 @@ export class PolkadotWallet implements BaseWalletEntity<InjectedAccountWithMeta>
             address,
             walletMetaInformation: account,
             signerType: AccountSigner.extension,
-            sign: this.getSignature.bind(this),
+            sign: account.signer.sign,
             signer: { ...account.signer, address },
             changeChain: this.changeChain.bind(this),
             isMintingEnabled: this.isMintingEnabled

@@ -14,8 +14,9 @@ import { StatusTransactionModal } from './components/StatusTransactionModal';
 import { Address } from '@unique-nft/utils';
 import { useAccounts } from 'hooks/useAccounts';
 import { CollectionMode } from 'api/chainApi/types';
+import { WearableOffersModal } from './WearableOffersModal';
 
-export const CustomizeModal = ({ token, onFinish, testid, selectedWearable }: TBundleTransferModalBodyProps & { selectedWearable?: TokenItem }) => {
+export const CustomizeModal = ({ token, onFinish, testid, selectedWearable, setIsClosable }: TBundleTransferModalBodyProps & { selectedWearable?: TokenItem }) => {
   const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse | null>(null);
   const [tokens, setTokens] = useState<TokenItem[]>([]);
   const [total, setTotal] = useState<number>(0);
@@ -211,6 +212,15 @@ export const CustomizeModal = ({ token, onFinish, testid, selectedWearable }: TB
   }, [selectedTokens]);
 
   if (!token) return null;
+
+  if (!isFetching && tokens.length === 0) {
+    return <WearableOffersModal
+      token={token}
+      onFinish={onFinish}
+      setIsClosable={setIsClosable}
+      testid={'offers-modal'}
+    />;
+  }
 
   return (<>
     <Content>

@@ -112,11 +112,15 @@ export const useCollections = () => {
         ) {
           count
           data {
+            description
             owner: owner_normalized
             cover: collection_cover
             id: collection_id
             name: name
             tokenPrefix: token_prefix
+            tokenCount: tokens_count
+            tokenLimit: token_limit
+            mode
             properties
             permissions
             __typename

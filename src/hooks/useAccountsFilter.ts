@@ -11,7 +11,7 @@ export const useAccountsFilter = ({ excluded }: useAccountsFilterProps = { exclu
 
   useEffect(() => {
     setFilteredAccounts([...accounts.values()].filter(({ address }) => !excluded?.includes(address)));
-  }, [excluded, accounts]);
+  }, []);
 
   const onFilter = useCallback((input: string) => {
     setFilteredAccounts([...accounts.values()].filter((account) => {

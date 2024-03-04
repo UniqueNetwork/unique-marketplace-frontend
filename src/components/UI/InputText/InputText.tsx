@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { IconType, userIcon } from '../Icon/Icon';
 
 export interface InputBaseProps {
-  additionalText?: string;
+  additionalText?: ReactNode;
   error?: boolean;
   label?: ReactNode;
   statusText?: string;

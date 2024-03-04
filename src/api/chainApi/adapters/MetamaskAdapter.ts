@@ -1,4 +1,4 @@
-import { UniqueNFTFactory, UniqueFungibleFactory, UniqueRefungibleTokenFactory } from '@unique-nft/solidity-interfaces';
+import { UniqueNFTFactory, UniqueFungibleFactory, UniqueRefungibleTokenFactory, CollectionHelpersFactory } from '@unique-nft/solidity-interfaces';
 import { Address, EthCrossAccountId } from '@unique-nft/utils';
 import { Contract, ethers, Signer } from 'ethers';
 import IMarketContractAdapter, { IMarketContractProperties } from './IMarketContractAdapter';
@@ -7,9 +7,10 @@ import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
 import { ChainValue } from '../controllers/BaseController';
 import { CollectionMode, TransferTokenParams } from '../types';
-import { CollectionProperty, TokenId } from '@unique-nft/sdk';
+import { CollectionProperty, CreateCollectionBody, CreateCollectionParsed, CreateTokenPayload, PropertyKeyPermission, SetCollectionLimitsBody, SetSponsorshipBody, TokenId } from '@unique-nft/sdk';
 import { Utf16 } from 'utf-helpers';
 import { sleep } from 'utils/helpers';
+import { SchemaTools, UniqueCollectionSchemaDecoded, UniqueTokenToCreate } from '@unique-nft/schemas';
 
 const buyGasLimit = 1_000_000;
 const sellGasLimit = 200_000;
@@ -218,6 +219,107 @@ class MetamaskAdapter implements IMarketContractAdapter {
       )).wait();
       onSubmittedOne?.(token, index);
     }));
+  }
+
+  async getCreateCollectionFee({ address, tokenPrefix, description, name }: CreateCollectionBody, signer: Signer): Promise<string> {
+    const collectionHelper = await CollectionHelpersFactory(signer);
+
+    const fee = await collectionHelper.collectionCreationFee();
+    const estimateGas = await collectionHelper.estimateGas.createNFTCollection(
+      name,
+      description,
+      tokenPrefix,
+      {
+        from: address,
+        value: fee
+      }
+    );
+    const gasPrice = await collectionHelper.provider.getGasPrice();
+    return estimateGas.mul(gasPrice).toString();
+  }
+
+  async createCollection({ name, description, tokenPrefix, address }: CreateCollectionBody, signer: Signer): Promise<CreateCollectionParsed | undefined> {
+    const collectionHelpers = await CollectionHelpersFactory(signer);
+    const fee = await collectionHelpers.collectionCreationFee();
+    const createCollectionTx = await collectionHelpers.createNFTCollection(
+      name,
+      description,
+      tokenPrefix,
+      {
+        from: address,
+        value: fee
+      }
+    );
+
+    const createCollectionResult = await createCollectionTx.wait();
+
+    const collectionAddress = createCollectionResult.events?.[0].args
+      ?.collectionId as string;
+
+    const collectionId = Address.collection.addressToId(collectionAddress);
+
+    return {
+      collectionId
+    } as unknown as CreateCollectionParsed;
+  }
+
+  setTokenPropertyPermissions(collectionId: number, propertyPermissions: PropertyKeyPermission[], signer: Signer): Promise<void> {
+    throw new Error('not implemented');
+  }
+
+  async createTokens({ tokens, collectionId, schema }: { tokens: CreateTokenPayload[]; collectionId: number; schema?: UniqueCollectionSchemaDecoded }, signer: Signer): Promise<TokenId[] | undefined> {
+    if (!tokens.length || !schema) {
+      throw new Error('UniqueTokenToCreateDto unavailable');
+    }
+
+    const nftHelper = await UniqueNFTFactory(collectionId, signer);
+
+    const toCross = Address.extract.ethCrossAccountId(signer.getAddress());
+
+    const ids = await Promise.all(
+      tokens.map(async ({ data }) => {
+        const encodedSchema = SchemaTools.tools.unique.token
+          .encodeTokenToProperties(
+            data as UniqueTokenToCreate,
+            schema
+          )
+          .map(({ key, value }) => ({
+            key,
+            value: Utf16.stringToNumberArray(value)
+          }));
+
+        const tx = await nftHelper.mintCross(toCross, encodedSchema);
+
+        const createTokenResult = await tx.wait();
+        const event = createTokenResult.events?.find(({ transactionHash, event }) => {
+          return transactionHash === tx.hash && event === 'TokenChanged';
+        });
+
+        if (!event) {
+          throw new Error('Creating NFT failed');
+        }
+
+        const tokenId = Number(event?.args?.tokenId?.toString() || 1);
+        return { collectionId, tokenId };
+      })
+    );
+    return ids;
+  }
+
+  getSetSponsorshipFee(payload: SetSponsorshipBody, signer: Signer): Promise<string> {
+    throw new Error('not implemented');
+  }
+
+  setSponsorship(payload: SetSponsorshipBody, signer: Signer): Promise<void> {
+    throw new Error('not implemented');
+  }
+
+  getSetCollectionLimitsFee(payload: SetCollectionLimitsBody, signer: Signer): Promise<string> {
+    throw new Error('not implemented');
+  }
+
+  setCollectionLimits(payload: SetCollectionLimitsBody, signer: Signer): Promise<void> {
+    throw new Error('not implemented');
   }
 }
 
