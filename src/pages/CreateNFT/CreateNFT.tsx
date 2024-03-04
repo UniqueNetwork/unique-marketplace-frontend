@@ -264,8 +264,6 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
     setViewMode(viewMode);
   };
 
-  console.log(collectionInfo);
-
   return (
     <AttributeFilterProvider>
       <MainWrapper className='create-nft-page' ref={mainWrapperRef}>
