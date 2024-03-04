@@ -7,16 +7,16 @@ import { Button, Checkbox, InputText, Text } from 'components/UI';
 
 import { Attribute, NewToken, ViewMode } from '../types';
 import { AttributesForm, LabelText } from './AttributesForm';
-import { AttributeSchema } from '@unique-nft/schemas';
 import { TokenTypeEnum } from 'pages/MyTokens/types';
 import { Image } from './TokenBasicCard';
+import { AttributeSchemaDto } from '@unique-nft/sdk';
 
 export type TokenCardCommonProps = {
   onChange(token: NewToken): void;
   onRemove(id: number): void;
   onOpenModifyModal?(token: NewToken): void;
   tokenPrefix: string;
-  attributesSchema: Record<number, AttributeSchema>;
+  attributesSchema: Record<number, AttributeSchemaDto>;
   mode: TokenTypeEnum | undefined;
   viewMode: ViewMode;
 };

@@ -7,16 +7,16 @@ import { Attribute, AttributeOption, NewToken } from '../types';
 import { AttributesForm, LabelText } from './AttributesForm';
 import { TokenBasicCard } from './TokenBasicCard';
 import { FormGrid } from './TokenCard';
-import { AttributeSchema } from '@unique-nft/schemas';
 import { TokenTypeEnum } from 'pages/MyTokens/types';
 import { Button, InputAmount, Modal } from 'components/UI';
 import { Heading } from '@unique-nft/ui-kit';
 import { ModalFooter } from './ModalFooter';
+import { AttributeSchemaDto } from '@unique-nft/sdk';
 
 interface AttribytesModalProps {
   tokens: NewToken[];
   tokenPrefix: string;
-  attributesSchema: Record<number, AttributeSchema> | undefined;
+  attributesSchema: Record<number, AttributeSchemaDto> | undefined;
   onChange(tokens: NewToken[]): void;
   onClose(): void;
   mode?: TokenTypeEnum;

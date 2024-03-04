@@ -6,7 +6,7 @@ import { Market, MyTokens, Collection, Accounts, Trades, Faq, TokenPage, Collect
 import { GlobalStyle } from './styles';
 import { Error404 } from './pages/Errors/404';
 import { TokenContextProvider } from 'pages/Token/context/TokenContext';
-import { CreateNFTv2 } from 'pages/CreateNFT';
+import { CreateNFT } from 'pages/CreateNFT';
 import { CreateCollectionPage } from 'pages/CreateCollection';
 import { MainInformation, NFTAttributes } from 'pages/CreateCollection/tabs';
 
@@ -48,7 +48,7 @@ const commonRoutes = (<>
     path={'trades'}
   />
   <Route
-    element={<CreateNFTv2 />}
+    element={<CreateNFT />}
     path={'create-token'}
   />
   <Route

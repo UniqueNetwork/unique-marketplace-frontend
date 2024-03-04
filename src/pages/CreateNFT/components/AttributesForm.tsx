@@ -2,15 +2,15 @@ import styled from 'styled-components';
 import { useMemo } from 'react';
 
 import { Attribute, AttributeOption } from '../types';
-import { AttributeSchema } from '@unique-nft/schemas';
 import { Heading, SelectOptionProps } from '@unique-nft/ui-kit';
 import { Icon, InputText, Select, Text, TooltipWrapper } from 'components/UI';
+import { AttributeSchemaDto } from '@unique-nft/sdk';
 
 type AttributesFormProps = {
   isValid?: boolean;
   initialAttributes: Attribute[];
   attributes: Attribute[];
-  attributesSchema: Record<number, AttributeSchema>;
+  attributesSchema: Record<number, AttributeSchemaDto>;
   onChange(attributes: Attribute[]): void;
 };
 
@@ -77,7 +77,7 @@ interface AttributeRowProps {
   label?: string;
   required?: boolean;
   isArray?: boolean;
-  type: AttributeSchema['type'];
+  type: AttributeSchemaDto['type'];
   enumValues?: Record<
     number,
     {

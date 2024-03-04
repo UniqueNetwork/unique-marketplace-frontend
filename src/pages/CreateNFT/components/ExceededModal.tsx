@@ -2,7 +2,7 @@ import styled from 'styled-components';
 
 import { Button, Modal, Text } from 'components/UI';
 
-import { MAX_MINT_TOKENS } from '../CreateNFTv2';
+import { MAX_MINT_TOKENS } from '../CreateNFT';
 import { ModalFooter } from './ModalFooter';
 import { Heading } from '@unique-nft/ui-kit';
 

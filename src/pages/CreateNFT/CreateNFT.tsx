@@ -29,7 +29,7 @@ import { WrapperContent } from 'pages/CreateCollection/CreateCollection';
 
 export const MAX_MINT_TOKENS = 300;
 
-export const CreateNFTv2Component: FC<{ className?: string }> = ({ className }) => {
+export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) => {
   const [collection, setCollection] = useState<MyCollection>();
   const [collectionToSubmit, setCollectionToSubmit] = useState<MyCollection>();
   const collectionBlockRef = useRef<HTMLDivElement>(null);
@@ -264,6 +264,8 @@ export const CreateNFTv2Component: FC<{ className?: string }> = ({ className }) 
     setViewMode(viewMode);
   };
 
+  console.log(collectionInfo);
+
   return (
     <AttributeFilterProvider>
       <MainWrapper className='create-nft-page' ref={mainWrapperRef}>
@@ -326,7 +328,7 @@ export const CreateNFTv2Component: FC<{ className?: string }> = ({ className }) 
           <TokenList
             viewMode={viewMode}
             tokenPrefix={collection?.tokenPrefix || ''}
-            attributesSchema={collection?.attributesSchema || []}
+            attributesSchema={collectionInfo?.schema?.attributesSchema || {}}
             mode={collection?.mode}
             tokensLimit={collection?.tokenLimit}
             tokensStartId={lastTokenId}
@@ -577,4 +579,4 @@ const StyledCheckbox = styled(Checkbox)`
   }
 `;
 
-export const CreateNFTv2 = CreateNFTv2Component;
+export const CreateNFT = CreateNFTComponent;

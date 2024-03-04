@@ -1,4 +1,4 @@
-import { CreateTokenBody, CreateTokenPayload } from '@unique-nft/sdk';
+import { AttributeSchemaDto, CreateTokenBody, CreateTokenPayload } from '@unique-nft/sdk';
 
 import { Attribute, AttributeOption, AttributesForFilter, FilledTokenForm, NewToken } from './types';
 import { AttributeSchema, LocalizedStringOrBoxedNumberWithDefault } from '@unique-nft/schemas';
@@ -137,7 +137,7 @@ export const scrollToTokenCard = (id: number) => {
 };
 
 export const getAttributesFromTokens = (
-  attributesSchema: Record<number, AttributeSchema>,
+  attributesSchema: Record<number, AttributeSchemaDto>,
   tokens: NewToken[]
 ) => {
   // attributes formatted for Filter component

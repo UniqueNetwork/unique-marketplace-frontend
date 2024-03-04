@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { CollectionInfoWithSchemaResponse, CollectionNestingPermissionsDto, CollectionSponsorship } from '@unique-nft/sdk';
+import { CollectionNestingPermissionsDto, CollectionSponsorship } from '@unique-nft/sdk';
 import { addSeconds, format } from 'date-fns';
 import { useMemo } from 'react';
 import { MyCollection } from 'api/restApi/collections/types';
