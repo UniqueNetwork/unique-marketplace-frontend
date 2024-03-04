@@ -8,10 +8,23 @@ export type PriceRange = {
   maxPrice?: string
 };
 
+export enum TypeOfAssets {
+  All = 'all',
+  NFTs = 'NFTs',
+  CustomizableNFTs = 'Customizable NFTs'
+}
+export enum TypeOfCustomizableNFTs {
+  All = 'all',
+  Base = 'Base NFTs',
+  Wearables = 'NFT Wearables',
+}
+
 export type AttributeItem = { key: string, attribute: string };
 
 export type FilterState = {
   statuses?: Statuses | undefined
+  typeOfAssets?: TypeOfAssets | undefined
+  typeOfCustomizableNFTs?: TypeOfCustomizableNFTs | undefined
   prices?: PriceRange | undefined
   collections?: number[]
   attributes?: AttributeItem[]

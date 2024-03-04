@@ -18,7 +18,7 @@ type TTokensList = {
 export const TokensList: FC<TTokensList> = ({ tokens, isLoading, showOwner, testid }) => {
   return (
     <TokensListStyled>
-      {(!isLoading && tokens?.map) &&
+      {!isLoading &&
         tokens.map((token, index) => (
           <TokensCard
             key={`token-${token?.collectionId || ''}-${token?.tokenId}-${index}`}
@@ -37,23 +37,23 @@ export const TokensList: FC<TTokensList> = ({ tokens, isLoading, showOwner, test
 
 const TokensListStyled = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-  gap: 32px;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+  gap: 16px;
 
   @media (max-width: 1919px) {
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  }
+
+  @media (max-width: 1489px) {
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  }
+
+  @media (max-width: 1223px) {
     grid-template-columns: 1fr 1fr 1fr 1fr;
   }
 
-  @media (max-width: 1439px) {
-    grid-template-columns: 1fr 1fr 1fr;
-  }
-
-  @media (max-width: 1023px) {
-    grid-template-columns: 1fr 1fr;
-  }
-
   @media (max-width: 768px) {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
   }
 
   @media (max-width: 567px) {

@@ -15,8 +15,7 @@ import { MyCollection } from 'api/restApi/collections/types';
 import config from 'config';
 import { useApi } from 'hooks/useApi';
 import { useCollections } from 'hooks/useCollections';
-import { MetamaskAccount } from '@unique-nft/accounts/metamask';
-import { Address } from '@unique-nft/utils';
+import { useNavigate } from 'react-router-dom';
 
 type TOption = {
   iconRight: {
@@ -70,6 +69,7 @@ export const CollectionsPage: FC = () => {
   const [selectedCollection, setSelectedCollection] = useState<MyCollection>();
   const { collections, isFetching, fetchCollections } = useCollections();
   const { isLoading: isAccountsLoading } = useAccounts();
+  const navigate = useNavigate();
 
   useEffect(() => {
     void (async () => {
@@ -96,15 +96,14 @@ export const CollectionsPage: FC = () => {
     void await fetchCollections(selectedAccount);
   }, []);
 
-  const onCreateCollectionViaWalletClick = useCallback(() => {
-    const { walletUrl } = config.blockchains[currentChainId || ''] || {};
-    window.open(walletUrl, '_blank')?.focus();
+  const onCreateCollectionClick = useCallback(() => {
+    navigate(`/${currentChainId}/create-collection`);
   }, [currentChainId]);
 
   const onViewOnScanClick = useCallback((collection: MyCollection) => () => {
     const { scanUrl } = config.blockchains[currentChainId || ''] || {};
     if (!scanUrl) return;
-    window.open(`${scanUrl}collections/${collection.id}`, '_blank')?.focus();
+    window.open(`${scanUrl}unique_collection/${collection.id}`, '_blank')?.focus();
   }, [currentChainId]);
 
   const filteredCollections = useMemo(() => {
@@ -135,7 +134,7 @@ export const CollectionsPage: FC = () => {
       <ControlsWrapper>
         <SearchAndSortingWrapper>
           <SearchField
-            placeholder='Search'
+            placeholder='Search for collections'
             searchValue={searchValue}
             onSearchStringChange={onSearch}
             hideButton
@@ -150,7 +149,7 @@ export const CollectionsPage: FC = () => {
           </SortSelectWrapper>
         </SearchAndSortingWrapper>
         <ButtonsWrapper>
-          <Button role='primary' title={'Create new via wallet'} onClick={onCreateCollectionViaWalletClick}/>
+          <Button role='primary' title={'Create collection'} onClick={onCreateCollectionClick}/>
         </ButtonsWrapper>
       </ControlsWrapper>
       <CollectionListWrapper>
@@ -192,6 +191,7 @@ const MainContent = styled.div`
 const ControlsWrapper = styled.div`
   display: flex;
   justify-content: space-between;
+  gap: 16px;
 
   @media (max-width: 1110px) {
     flex-direction: column;
@@ -230,11 +230,12 @@ const SortSelectWrapper = styled.div`
 const SearchAndSortingWrapper = styled.div`
   display: flex;
   justify-content: space-between;
+  flex: 1;
   .unique-input-text {
     min-width: 436px;
   }
   div {
-    flex-grow: unset;
+    /* flex-grow: unset; */
   }
   
   @media (max-width: 1279px) {

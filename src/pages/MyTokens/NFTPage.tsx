@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { Text } from '@unique-nft/ui-kit';
-import { Pagination, Select } from 'components/UI';
+import { Button, Pagination, Select } from 'components/UI';
 
 import { useOffers } from 'api/restApi/offers/offers';
 import { PagePaper } from 'components/PagePaper/PagePaper';
@@ -19,6 +19,7 @@ import { TokensList } from 'components';
 import { Address } from '@unique-nft/utils';
 import { MobileFilters } from 'components/Filters/MobileFilter';
 import { MyTokensFilterState } from './Filters/types';
+import { useNavigate } from 'react-router-dom';
 
 export const NFTPage = () => {
   const { selectedAccount, isLoading: isAccountsLoading } = useAccounts();
@@ -29,6 +30,7 @@ export const NFTPage = () => {
   const { tokens, fetchMyTokens, isFetching: isFetchingTokens } = useGetMyTokens();
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(20);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!api?.nft || !selectedAccount || isAccountsLoading) return;
@@ -65,6 +67,10 @@ export const NFTPage = () => {
     setPageSize(deviceSize === DeviceSize.xl ? 21 : 20);
   }, [deviceSize]);
 
+  const onCreateTokenClick = useCallback(() => {
+    navigate(`/${currentChainId}/create-token`);
+  }, [currentChainId]);
+
   return (<PagePaper>
     <MarketMainPageStyled>
       <LeftColumn>
@@ -84,8 +90,9 @@ export const NFTPage = () => {
       <MainContent>
         <SearchAndSortingWrapper>
           <SearchField
+            hideButton
             searchValue={searchString}
-            placeholder='Collection / token'
+            placeholder='Search for collections, NFTs and attributes'
             onSearch={onSearch}
             testid={`${testid}-search-field`}
           />
@@ -97,6 +104,10 @@ export const NFTPage = () => {
               testid={`${testid}-sorting-select`}
             />
           </SortSelectWrapper>
+
+          <ButtonsWrapper>
+            <Button role='primary' title={'Create an NFT'} onClick={onCreateTokenClick}/>
+          </ButtonsWrapper>
         </SearchAndSortingWrapper>
         <PaginationWrapper>
           {isFetchingTokens || isFetchingOffers || isAccountsLoading
@@ -178,7 +189,6 @@ const MarketMainPageStyled = styled.div`
 
 const LeftColumn = styled.div`
   padding-right: 24px;
-  border-right: 1px solid var(--grey-300);
   @media (max-width: 1024px) {
     display: none;
   }
@@ -215,6 +225,10 @@ const SortSelectWrapper = styled.div`
 const SearchAndSortingWrapper = styled.div`
   display: flex;
   justify-content: space-between;
+  gap: var(--prop-gap);
+  div:first-child {
+    margin-right: 0px;
+  }
 `;
 
 const TokensListWrapper = styled.div`
@@ -225,4 +239,26 @@ const TokensListWrapper = styled.div`
 const PaginationWrapper = styled.div`
   display: flex;
   justify-content: space-between;
+`;
+
+const ButtonsWrapper = styled.div`
+  display: flex;
+  column-gap: calc(var(--gap) / 2);
+  
+  @media (max-width: 1279px) {
+    .unique-button.size-middle {
+      padding: 8px 29px;
+    }
+    button:last-of-type {
+      width: 228px;
+    }
+  }
+
+  @media (max-width: 567px) {
+    flex-direction: column;
+    gap: calc(var(--gap) / 2);
+    button:last-of-type {
+      width: 100%;
+    }
+  }
 `;

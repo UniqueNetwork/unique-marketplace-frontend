@@ -6,7 +6,7 @@ import { UniqueSDKRFTController } from './chainApi/RFTController';
 import { ChainPropertiesResponse, Sdk } from '@unique-nft/sdk/full';
 import MarketController from './chainApi/MarketController';
 
-type Api = {
+export type Api = {
   nft?: UniqueSDKNFTController
   rft?: UniqueSDKRFTController
   collection?: UniqueSDKCollectionController

@@ -9,7 +9,8 @@ export interface CheckboxProps extends Omit<ComponentProps, 'onChange'> {
   label: ReactNode;
   size?: 's' | 'm';
   disabled?: boolean;
-  onChange: (value: boolean) => void;
+  className?: string;
+  onChange?: (value: boolean) => void;
   iconRight?: IconProps;
   iconLeft?: IconProps;
   testid: string;
@@ -27,7 +28,8 @@ export const Checkbox = forwardRef(
       onChange,
       iconRight,
       iconLeft,
-      testid
+      testid,
+      className
     }: CheckboxProps,
     ref: LegacyRef<HTMLInputElement>
   ) => {
@@ -35,12 +37,13 @@ export const Checkbox = forwardRef(
     return (
       <CheckboxStyled
         className={classNames(
+          className,
           'unique-checkbox-wrapper',
           `checkbox-size-${size}`,
           { disabled }
         )}
         {...(!disabled && {
-          onClick: () => onChange(!checked)
+          onClick: () => onChange?.(!checked)
         })}
       >
         <input

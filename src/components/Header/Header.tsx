@@ -1,5 +1,5 @@
 import { FC, useCallback, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { Dropdown, Icon, Text } from '../UI';
 
@@ -23,6 +23,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
   const [mobileMenuIsOpen, toggleMobileMenu] = useState(false);
   const { selectedAccount, isLoading, accounts } = useAccounts();
   const { currentChainId } = useApi();
+  const navigate = useNavigate();
 
   const mobileMenuToggler = useCallback(() => {
     toggleMobileMenu((prevState) => !prevState);
@@ -44,39 +45,36 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
         </LogoLink>
         {!showMobileMenu && (
           <nav>
-            <DesktopMenuLink to={`/${currentChainId || ''}/market`} active={activeItem === 'Market'}>
-              Market
+            <DesktopMenuLink to={`/${currentChainId || ''}/market`} active={activeItem === undefined}>
+              Explore
             </DesktopMenuLink>
             <MenuDropdown
               options={[
                 {
                   title: 'NFT',
-                  url: `${config.blockchains[currentChainId || ''].walletUrl}create-nft`
+                  url: `/${currentChainId || ''}/create-token`
                 },
                 {
                   title: 'Collection',
-                  url: `${config.blockchains[currentChainId || ''].walletUrl}create-collection/main-information`
+                  url: `/${currentChainId || ''}/create-collection`
                 }
               ]}
               optionKey='title'
               optionValue='title'
               onChange={({ url }) => {
-                window.open(url as string, '_blank', 'noopener');
+                navigate(url as string);
               }}
               optionRender={(option) => {
                 return <DesktopMenuItem>{option.title as string}</DesktopMenuItem>;
               }}
             >
-              <DesktopMenuItem>Create</DesktopMenuItem>
+              <DesktopMenuItem $active={activeItem === 'Create collection' || activeItem === 'Create tokens'}>Create</DesktopMenuItem>
             </MenuDropdown>
-            <DesktopMenuLink to={`/${currentChainId || ''}/sellTokens`} active={activeItem === 'Sell tokens'} disabled={!selectedAccount || isLoading}>
-              Sell tokens
+            <DesktopMenuLink to={`/${currentChainId || ''}/sellTokens`} active={activeItem === 'My NFTs'} disabled={!selectedAccount || isLoading}>
+              My NFTs
             </DesktopMenuLink>
             <DesktopMenuLink to={`/${currentChainId || ''}/collections`} active={activeItem === 'My collections'} disabled={!selectedAccount || isLoading}>
               My collections
-            </DesktopMenuLink>
-            <DesktopMenuLink to={`/${currentChainId || ''}/trades`} active={activeItem === 'Trades'}>
-              Trades
             </DesktopMenuLink>
             <DesktopMenuLink to='/faq' active={activeItem === 'FAQ'}>
               FAQ
@@ -90,35 +88,35 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
       </RightSide>
       {showMobileMenu && mobileMenuIsOpen && (
         <MobileMenu>
-          <MobileMenuLink to={`/${currentChainId || ''}/market`} active={activeItem === 'Market'} onClick={mobileMenuToggler}>
-            Market
+          <MobileMenuLink to={`/${currentChainId || ''}/market`} active={activeItem === undefined} onClick={mobileMenuToggler}>
+            Explore
           </MobileMenuLink>
           <MobileMenuDropdown
             options={[
                 {
                   title: 'NFT',
-                  url: `${config.blockchains[currentChainId || ''].walletUrl}create-nft`
+                  url: `/${currentChainId || ''}/create-token`
                 },
                 {
                   title: 'Collection',
-                  url: `${config.blockchains[currentChainId || ''].walletUrl}create-collection/main-information`
+                  url: `/${currentChainId || ''}/create-collection`
                 }
               ]}
             optionValue='title'
             optionKey='title'
             onChange={({ url }) => {
-              window.open(url as string, '_blank', 'noopener');
+              navigate(url as string);
             }}
           >
             <Text color = 'additional-dark'>Create</Text>
           </MobileMenuDropdown>
           <MobileMenuLink
             to={`/${currentChainId || ''}/sellTokens`}
-            active={activeItem === 'Sell tokens'}
+            active={activeItem === 'My NFTs'}
             onClick={mobileMenuToggler}
             disabled={!selectedAccount && !isLoading}
           >
-            Sell tokens
+            My NFTs
           </MobileMenuLink>
           <MobileMenuLink to={`/${currentChainId || ''}/collections`}
             active={activeItem === 'My collections'}
@@ -126,9 +124,6 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
             disabled={!selectedAccount && !isLoading}
           >
             My collections
-          </MobileMenuLink>
-          <MobileMenuLink to={`/${currentChainId || ''}/trades`} active={activeItem === 'Trades'} onClick={mobileMenuToggler}>
-            Trades
           </MobileMenuLink>
           <MobileMenuLink to='/faq' active={activeItem === 'FAQ'} onClick={mobileMenuToggler}>
             FAQ

@@ -1,11 +1,29 @@
 import { useEffect, useMemo, useState } from 'react';
 
+/**
+ * @enum {number}
+ * sm: <769px
+ * * md: <1025px
+ * * lg: <1280px
+ * * xl: <1440px
+ * * xxl: others
+ */
 export enum DeviceSize {
   sm,
   md,
   lg,
   xl,
   xxl
+}
+
+export enum SizeMap {
+  xxs = -1,
+  xs = 0,
+  sm = 1,
+  md = 2,
+  lg = 3,
+  xl = 4,
+  xxl = 5,
 }
 
 const useDeviceSize = (): DeviceSize => {

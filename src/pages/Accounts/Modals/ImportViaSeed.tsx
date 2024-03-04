@@ -39,7 +39,6 @@ export const ImportViaSeedAccountModal: FC<TAccountModalProps> = ({ isVisible, o
         setStage(CreateAccountModalStages.AskSeed);
 
         info(`Account ${accountProperties.name} successfully restored`);
-        return;
       } catch (e) {
         error('Specified phrase is not a valid mnemonic. Please type seed phrase corresponding to mnemonic');
         console.log('error', e);

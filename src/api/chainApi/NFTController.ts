@@ -1,4 +1,4 @@
-import { GetBundleResponse, TokenByIdResponse, TokenOwnerResponse, TokenIdQuery, TopmostTokenOwnerResponse, TokenChildrenResponse } from '@unique-nft/sdk';
+import { GetBundleResponse, TokenByIdResponse, TokenOwnerResponse, TokenIdQuery, TopmostTokenOwnerResponse, TokenChildrenResponse, TokenId, CreateTokenPayload } from '@unique-nft/sdk';
 import { Address } from '@unique-nft/utils';
 import { CollectionMode, TransactionOptions } from './types';
 import { getEthAccount } from './utils/addressUtils';
@@ -6,6 +6,7 @@ import { filterAllowedTokens } from './utils/checkTokenIsAllowed';
 import BaseController from './controllers/BaseController';
 import { NetworkOptions } from 'api/sdk/sdkClient';
 import { AllowedCollections } from 'api/restApi/settings/types';
+import { UniqueCollectionSchemaDecoded } from '@unique-nft/schemas';
 
 declare module '@unique-nft/sdk' {
   type arrayNumberRecordStringAny = string | number | Record<string, string>
@@ -138,5 +139,15 @@ export class UniqueSDKNFTController extends BaseController {
       console.log(`Wrong ID of collection ${collectionId}`, e);
     }
     return [];
+  }
+
+  async transferTokensBatch(transfers: {token: TokenId, from: string, to: string, amount: number, mode: CollectionMode }[], { account, onSubmittedOne }: TransactionOptions & { onSubmittedOne?(token: TokenId, index: number): void }): Promise<void> {
+    const adapter = this.getAdapter(account);
+    await adapter.transferTokensBatch(transfers, account.signer, onSubmittedOne);
+  }
+
+  async create(payload: { tokens: CreateTokenPayload[], collectionId: number, schema?: UniqueCollectionSchemaDecoded }, { account }: TransactionOptions): Promise<void> {
+    const adapter = this.getAdapter(account);
+    await adapter.createTokens(payload, account.signer);
   }
 }

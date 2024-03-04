@@ -2,16 +2,22 @@ import styled from 'styled-components';
 
 import smile from 'static/images/hmm.png';
 import { Modal, Text, Link } from 'components/UI';
+import { ConnectedWalletsName } from 'account/useWalletCenter';
 
 type Props = {
   isVisible?: boolean;
   onFinish?: () => void;
-  missingExtension?: 'Polkadot' | 'Metamask';
+  missingExtension?: ConnectedWalletsName;
 };
 
-const extensionSourceLinks = {
-  Polkadot: 'https://polkadot.js.org/extension/',
-  Metamask: 'https://metamask.io/download/'
+const extensionSourceLinks: Record<ConnectedWalletsName, string> = {
+  'polkadot-js': 'https://polkadot.js.org/extension/',
+  'subwallet-js': 'https://www.subwallet.app/download.html',
+  talisman: 'https://www.talisman.xyz/',
+  metamask: 'https://metamask.io/download/',
+  novawallet: 'https://novawallet.io',
+  enkrypt: 'https://www.enkrypt.com',
+  keyring: ''
 };
 
 export const ExtensionMissingModal = ({
@@ -25,6 +31,7 @@ export const ExtensionMissingModal = ({
   return (
     <Modal
       isVisible={!!isVisible}
+      isClosable
       onClose={() => {
         onFinish?.();
       }}
@@ -44,7 +51,6 @@ export const ExtensionMissingModal = ({
 };
 
 const ModalContent = styled.div`
-  margin-top: -32px;
   display: flex;
   flex-direction: column;
   justify-content: center;

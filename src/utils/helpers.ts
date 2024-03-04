@@ -89,3 +89,17 @@ export function invertColor(hex: string) {
   // pad each with zeros and return
   return '#' + padZero(r) + padZero(g) + padZero(b);
 }
+
+export const truncateDecimalsBalanceSheet = (balance: string | undefined) => {
+  if (!balance) {
+    return '0';
+  }
+  const arrBalance = balance.split('.');
+
+  if (arrBalance.length === 1) {
+    return balance;
+  }
+  const lastElem = arrBalance.length - 1;
+  arrBalance[lastElem] = arrBalance[lastElem].slice(0, 4);
+  return arrBalance.join('.');
+};

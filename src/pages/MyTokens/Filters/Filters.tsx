@@ -7,6 +7,9 @@ import StatusFilter from './StatusFilter';
 import CollectionsFilter from './CollectionsFilter';
 import { MixedMyTokenAndOffer } from '../types';
 import { MyCollection } from 'api/restApi/collections/types';
+import { TypeOfAssets, TypeOfCustomizableNFTs } from 'components/Filters/types';
+import TypeOfAssetsFilter from 'components/Filters/TypeOfAssets';
+import TypeOfCustomizablesFilter from 'components/Filters/TypeOfCustomizables';
 
 type FilterProps = {
   value: MyTokensFilterState | null
@@ -40,8 +43,28 @@ export const Filters: FC<FilterProps> = ({ value, onFilterChange, featuredTokens
     onFilterChange({ ...(value || {}), attributeCounts });
   }, [value, onFilterChange]);
 
+  const onTypeOfAssetsFilterChange = useCallback((typeOfAssets: TypeOfAssets) => {
+    onFilterChange({ ...(value || {}), typeOfAssets });
+  }, [value, onFilterChange]);
+
+  const onTypeOfCustomizableChange = useCallback((typeOfCustomizableNFTs: TypeOfCustomizableNFTs) => {
+    onFilterChange({ ...(value || {}), typeOfCustomizableNFTs });
+  }, [value, onFilterChange]);
+
   return <FiltersStyled>
     <StatusFilter value={value?.statuses} onChange={onStatusFilterChange} testid={`${testid}-status`} />
+    <TypeOfAssetsFilter
+      isFetchingTokens={isFetchingTokens}
+      value={value?.typeOfAssets}
+      onChange={onTypeOfAssetsFilterChange}
+      testid={`${testid}-assets`}
+    />
+    <TypeOfCustomizablesFilter
+      isFetchingTokens={isFetchingTokens}
+      value={value?.typeOfCustomizableNFTs}
+      onChange={onTypeOfCustomizableChange}
+      testid={`${testid}-customizable`}
+    />
     <PricesFilter value={value?.prices} onChange={onPricesFilterChange} testid={`${testid}-prices`} />
     <CollectionsFilter
       value={value}

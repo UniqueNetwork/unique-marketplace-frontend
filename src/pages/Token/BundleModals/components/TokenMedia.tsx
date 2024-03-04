@@ -1,0 +1,137 @@
+import React, { FC, useCallback, useState } from 'react';
+import { BlueGrey200, BlueGrey500, BlueGrey100, BlueGrey300 } from 'styles/colors';
+import { DecodedInfixOrUrlOrCidAndHash, VideoAttribute } from 'api/chainApi/types';
+import styled from 'styled-components';
+import playIcon from 'static/icons/play.svg';
+import pauseIcon from 'static/icons/pause.svg';
+import { Picture } from 'components';
+import { BadgeEnum } from 'components/TokenMedia/Picture';
+
+interface ITokensMedia {
+  tokenId?: number
+  imageUrl?: string | DecodedInfixOrUrlOrCidAndHash
+  video?: VideoAttribute
+  testid: string
+  badges?: BadgeEnum[]
+}
+
+export const TokensMedia: FC<ITokensMedia> = ({ imageUrl, tokenId, video, testid, badges }) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const togglePlay = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsPlaying(!isPlaying);
+  }, [isPlaying]);
+
+  return (
+    <PictureWrapper isPlaying={isPlaying}>
+      <Picture
+        alt={tokenId?.toString() || ''}
+        src={imageUrl}
+        video={video}
+        testid={`${testid}-token-picture`}
+        videoProps={{ autoplay: false, controls: false }}
+        isPlaying={isPlaying}
+        badges={badges}
+      />
+      {video?.fullUrl &&
+        <div className={'play-button'} onClick={togglePlay}>
+          <img src={isPlaying ? pauseIcon : playIcon} alt='icon' />
+        </div>
+      }
+    </PictureWrapper>
+  );
+};
+
+const PictureWrapper = styled.div<{ isPlaying: boolean }>`
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 8px;
+
+  &::before {
+    content: "";
+    display: block;
+    padding-top: 100%;
+  }
+
+  .picture {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    color: white;
+    text-align: center;
+    max-height: 100%;
+    border-radius: 8px;
+    transition: 50ms;
+    overflow: hidden;
+
+    img {
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+      min-height: 100%;
+    }
+
+    svg {
+      border-radius: 8px;
+    }
+    
+    video {
+      height: 100% !important;
+      width: 100% !important;
+    }
+  }
+  
+  .play-button {
+    align-items: center;
+    border-radius: 50%;
+    display: flex;
+    height: 54px;
+    justify-content: center;
+    bottom: 8px;
+    right: 8px;
+    width: 54px;
+    z-index: 1;
+    position: absolute;
+    background-color: #FFFFFF;
+    backdrop-filter: blur(8px);
+    border: 1px solid ${BlueGrey200};
+    cursor: pointer;
+    img {
+      width: 24px;
+      height: 24px;
+      margin-left: ${({ isPlaying }) => (isPlaying ? '0' : '4px')};
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .play-button {
+      height: 64px;
+      width: 64px;
+      img {
+        width: 22px;
+        height: 26px;
+      }
+    }
+  }
+
+  /* &:hover .picture,
+  &:hover .badge {
+    transform: ${({ isPlaying }) => (!isPlaying && 'translate(0, -5px)')};
+    text-decoration: none;
+  }
+   */
+  /* .play-button:hover {
+    background-color: ${BlueGrey100};
+    border: 1px solid ${BlueGrey300};
+  } */
+  
+  .play-button:active {
+    border: 1px solid ${BlueGrey500};
+  }
+`;

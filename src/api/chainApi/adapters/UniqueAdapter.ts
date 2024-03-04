@@ -5,8 +5,8 @@ import IMarketContractAdapter, { IMarketContractProperties } from './IMarketCont
 import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
 import { ChainValue } from '../controllers/BaseController';
-import { CollectionMode } from '../types';
-import { CollectionProperty } from '@unique-nft/sdk';
+import { CollectionMode, TransferTokenParams } from '../types';
+import { BatchCallArgumentsBody, CollectionProperty, CreateCollectionBody, CreateCollectionParsed, CreateTokenPayload, PropertyKeyPermission, SetCollectionLimitsBody, SetSponsorshipBody, TokenId } from '@unique-nft/sdk';
 
 const buyGasLimit = 1_000_000;
 const sellGasLimit = 200_000;
@@ -26,6 +26,21 @@ class UniqueAdapter implements IMarketContractAdapter {
       address: signer.address,
       collectionId,
       properties
+    });
+    if (!unsignedTxPayload) throw new Error('Transaction build error');
+    const { signature } = await this.uniqueSdk.collection.setProperties.sign(unsignedTxPayload, { signer });
+    if (!signature) throw new Error('Signing failed');
+    await this.uniqueSdk.collection.setProperties.submitWaitResult({
+      signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
+      signature
+    });
+  }
+
+  async setTokenPropertyPermissions(collectionId: number, propertyPermissions: PropertyKeyPermission[], signer: Signer): Promise<void> {
+    const unsignedTxPayload = await this.uniqueSdk.collection.setPropertyPermissions.build({
+      address: signer.address,
+      collectionId,
+      propertyPermissions
     });
     if (!unsignedTxPayload) throw new Error('Transaction build error');
     const { signature } = await this.uniqueSdk.collection.setProperties.sign(unsignedTxPayload, { signer });
@@ -299,6 +314,58 @@ class UniqueAdapter implements IMarketContractAdapter {
       }
     });
     return res.fee.raw;
+  }
+
+  async transferTokensBatch(transfers: TransferTokenParams[], signer: Signer, onSubmittedOne?: (token: TokenId, index: number) => void): Promise<void> {
+    // TODO: extend this method to RFT
+    // const method = mode === 'ReFungible' ? this.uniqueSdk.refungible.transferToken : this.uniqueSdk.token.transfer;
+
+    const calls: BatchCallArgumentsBody[] = transfers.map(({ from, to, token }) => ({
+      method: {
+        section: 'unique',
+        method: 'transferFrom'
+      },
+      rawPayload: {
+        from,
+        to,
+        collectionId: token.collectionId,
+        tokenId: token.tokenId,
+        value: 1
+      }
+    }));
+
+    await this.uniqueSdk.common.batch.submitWaitResult({
+      address: signer.address,
+      calls
+    }, { signer });
+  }
+
+  async createCollection(payload: CreateCollectionBody, signer: Signer): Promise<CreateCollectionParsed | undefined> {
+    return (await this.uniqueSdk.collection.create.submitWaitResult(payload, { signer })).parsed;
+  }
+
+  async getCreateCollectionFee(payload: CreateCollectionBody): Promise<string> {
+    return (await this.uniqueSdk.collection.create.getFee(payload)).fee.formatted;
+  }
+
+  async createTokens({ tokens, collectionId }: { tokens: CreateTokenPayload[], collectionId: number }, signer: Signer): Promise<TokenId[] | undefined> {
+    return (await this.uniqueSdk.token.createMultiple({ collectionId, tokens, address: signer.address }, { signer })).parsed;
+  }
+
+  async getSetSponsorshipFee(payload: SetSponsorshipBody, signer: Signer): Promise<string> {
+    return (await this.uniqueSdk.collection.setSponsorship.getFee(payload)).fee.formatted;
+  }
+
+  async setSponsorship(payload: SetSponsorshipBody, signer: Signer): Promise<void> {
+    await this.uniqueSdk.collection.setSponsorship(payload, { signer });
+  }
+
+  async getSetCollectionLimitsFee(payload: SetCollectionLimitsBody, signer: Signer): Promise<string> {
+    return (await this.uniqueSdk.collection.setLimits.getFee(payload)).fee.formatted;
+  }
+
+  async setCollectionLimits(payload: SetCollectionLimitsBody, signer: Signer): Promise<void> {
+    await this.uniqueSdk.collection.setLimits(payload, { signer });
   }
 }
 

@@ -2,7 +2,7 @@ import classNames from 'classnames';
 import { ComponentProps, DimentionType, IconProps } from '@unique-nft/ui-kit';
 import { Icon } from '..';
 import styled from 'styled-components';
-import React, { ReactNode } from 'react';
+import React, { ForwardedRef, forwardRef, ReactNode } from 'react';
 
 export interface ButtonBaseProps {
   title: ReactNode;
@@ -28,7 +28,7 @@ export type ButtonProps = ButtonBaseProps &
     'className' | 'disabled' | 'id' | 'tabIndex' | 'testid'
     >;
 
-export const Button = ({
+const ButtonComponent = ({
   title,
   disabled,
   wide,
@@ -41,11 +41,12 @@ export const Button = ({
   link,
   onClick,
   testid
-}: ButtonProps) => {
+}: ButtonProps, ref: ForwardedRef<HTMLButtonElement>) => {
   const icon = iconLeft || iconRight;
   const ButtonStyled: any = link ? aStyled : buttonsStyled;
   return (
     <ButtonStyled
+      ref={ref}
       className={classNames(
         'unique-button',
         role,
@@ -70,6 +71,8 @@ export const Button = ({
     </ButtonStyled>
   );
 };
+
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(ButtonComponent);
 
 const styles = `
   font-family: var(--prop-font-family);

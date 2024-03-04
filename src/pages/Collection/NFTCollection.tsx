@@ -25,6 +25,7 @@ import { RoyaltiesFormData } from 'pages/CollectionEdit/types';
 import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 import { CollectionPageProps } from './types';
 import { MobileFilters } from 'components/Filters/MobileFilter';
+import { Address } from '@unique-nft/utils';
 
 export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionPageProps) => {
   const { selectedAccount, isLoading: isAccountsLoading } = useAccounts();
@@ -142,8 +143,9 @@ export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
         <MainContent>
           <SearchAndSortingWrapper>
             <SearchField
+              hideButton
               searchValue={searchValue}
-              placeholder='Token / attribute'
+              placeholder='Search for NFTs and attributes'
               onSearch={onSearch}
               testid={`${testid}-search-field`}
             />

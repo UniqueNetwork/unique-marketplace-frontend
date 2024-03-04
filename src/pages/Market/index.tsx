@@ -77,8 +77,9 @@ export const MarketPage = () => {
         <MainContent>
           <SearchAndSortingWrapper>
             <SearchField
+              hideButton
               searchValue={searchValue}
-              placeholder='Collection / token / attribute'
+              placeholder='Search for collections, NFTs and attributes'
               onSearch={onSearch}
               testid={`${testid}-search-field`}
             />
@@ -136,7 +137,6 @@ const MarketMainPageStyled = styled.div`
 
 const LeftColumn = styled.div`
   padding-right: 24px;
-  border-right: 1px solid var(--grey-300);
   @media (max-width: 1024px) {
     display: none;
   }

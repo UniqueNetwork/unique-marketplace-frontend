@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import playIcon from 'static/icons/play.svg';
 import pauseIcon from 'static/icons/pause.svg';
-import { BadgeEnum, Picture } from '../Picture';
+import { BadgeEnum, Picture } from '../TokenMedia/Picture';
 
 interface ITokensMedia {
   to: string
@@ -121,11 +121,10 @@ const PictureWrapper = styled(Link)<{ isPlaying: boolean }>`
     }
   }
 
-  &:hover .picture,
-  &:hover .badge {
+  /* &:hover .picture {
     transform: ${({ isPlaying }) => (!isPlaying && 'translate(0, -5px)')};
     text-decoration: none;
-  }
+  } */
   
   .play-button:hover {
     background-color: ${BlueGrey100};
