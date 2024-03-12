@@ -34,6 +34,7 @@ export const NumberInput: FC<AmountInputProps> = ({
   testid = ''
 }) => {
   const onChangeInput = useCallback((_value: string) => {
+    if (disabled) return;
     if (_value === '') onChange(_value);
     // regExp to check value according to valid number format
     const regExp = new RegExp(`^([1-9]\\d{0,9}|0)(\\.\\d{0,${decimals}})?$`);
@@ -42,15 +43,17 @@ export const NumberInput: FC<AmountInputProps> = ({
     if (regExp.test(_value.trim())) {
       onChange(_value.trim());
     }
-  }, [onChange, decimals]);
+  }, [onChange, decimals, disabled]);
 
   const onClearClick = useCallback(() => {
+    if (disabled) return;
     onChange('');
     onClear?.();
   }, [onChange, onClear]);
 
   return <InputWrapper className={className}>
     <InputText
+      disabled={disabled}
       additionalText={additionalText}
       placeholder={placeholder}
       onChange={onChangeInput}
