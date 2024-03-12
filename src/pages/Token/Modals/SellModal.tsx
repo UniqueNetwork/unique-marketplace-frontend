@@ -1,8 +1,7 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Heading, Link } from '@unique-nft/ui-kit';
-import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
-import { Tabs, Select, useNotifications, Button, Text } from 'components/UI';
+import { useNotifications, Button } from 'components/UI';
 import { NumberInput } from 'components/NumberInput/NumberInput';
 import styled from 'styled-components';
 
@@ -21,18 +20,12 @@ import { FeeMessage } from 'components';
 import { BN } from '@polkadot/util';
 import { fromStringToBnString } from 'utils/bigNum';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
+import { fixPriceSellingCollectionIds } from '../constants';
 
 export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, collection, onFinish, setIsClosable, testid }) => {
   const { collectionId, tokenId } = token || {};
   const [status, setStatus] = useState<'ask' | 'auction-stage' | 'fix-price-stage'>('ask'); // TODO: naming
-  const [auction, setAuction] = useState<TAuctionProps>();
   const [fixPrice, setFixPrice] = useState<TFixPriceProps>();
-
-  const onSellAuction = useCallback((auction: TAuctionProps) => {
-      setAuction(auction);
-      setStatus('auction-stage');
-      setIsClosable(false);
-  }, [setStatus, setAuction, setIsClosable]);
 
   const onSellFixPrice = useCallback((fixPrice: TFixPriceProps) => {
     setFixPrice(fixPrice);
@@ -46,21 +39,11 @@ export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, collection, onF
     return (<AskSellModal
       collectionId={token.collectionId}
       tokenId={token.tokenId}
-      onSellAuction={onSellAuction}
       onSellFixPrice={onSellFixPrice}
       testid={`${testid}-sell-ask`}
     />);
   }
   switch (status) {
-    case 'auction-stage':
-      return (<SellAuctionStagesModal
-        collectionId={collectionId || 0}
-        tokenId={tokenId || 0}
-        tokenPrefix={collection?.tokenPrefix || ''}
-        auction={auction as TAuctionProps}
-        onFinish={onFinish}
-        testid={`${testid}-sell-auction`}
-      />);
     case 'fix-price-stage':
       return (<SellFixStagesModal
         collectionId={collectionId || 0}
@@ -74,25 +57,26 @@ export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, collection, onF
   }
 };
 
-type TOnSellAuction = (auction: TAuctionProps) => void;
 type TOnSellFix = (price: TFixPriceProps) => void;
 type TAskSellModalProps = {
   collectionId: number,
   tokenId: number,
-  onSellAuction: TOnSellAuction,
   onSellFixPrice: TOnSellFix,
   testid: string
 }
 
-export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, onSellAuction, onSellFixPrice, testid }) => {
-  const { chainProperties, api } = useApi();
+export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, onSellFixPrice, testid }) => {
+  const { chainProperties, api, currentChainId } = useApi();
   const { selectedAccount } = useAccounts();
-  const [activeTab, setActiveTab] = useState<number>(0);
   const [priceInputValue, setPriceInputValue] = useState<string>();
 
-  const [minStepInputValueAuction, setMinStepInputValueAuction] = useState<string>();
-  const [inputStartingPriceValue, setInputStartingPriceValue] = useState<string>();
-  const [durationSelectValue, setDurationSelectValue] = useState<number>();
+  // use FHF mock
+  const isFixedPrice = useMemo(() => {
+    const price = fixPriceSellingCollectionIds[currentChainId || '']?.find((item) => item.collectionId === collectionId)?.price;
+    setPriceInputValue(price?.toString());
+    return !!price;
+  }, [collectionId, currentChainId]);
+
   const [isSponsored, setIsSponsored] = useState(false);
 
   useEffect(() => {
@@ -102,26 +86,11 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
     })();
   }, [collectionId]);
 
-  const handleClick = useCallback(
-    (tabIndex: number) => {
-      setActiveTab(tabIndex);
-    },
-    [setActiveTab]
-  );
-
   const onPriceInputChange = useCallback((value: string) => {
       setPriceInputValue(value);
     },
     [setPriceInputValue]
   );
-
-  const isAuctionValid = selectedAccount && minStepInputValueAuction && durationSelectValue && Number(minStepInputValueAuction);
-
-  const onConfirmAuctionClick = useCallback(() => {
-    if (!isAuctionValid) return;
-
-    onSellAuction({ minimumStep: minStepInputValueAuction, startingPrice: inputStartingPriceValue || minStepInputValueAuction, duration: durationSelectValue, accountAddress: selectedAccount.address } as TAuctionProps);
-  }, [minStepInputValueAuction, inputStartingPriceValue, durationSelectValue, selectedAccount, onSellAuction]);
 
   const onConfirmFixPriceClick = useCallback(() => {
     if (!selectedAccount || !priceInputValue || !Number(priceInputValue)) return;
@@ -129,45 +98,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
     onSellFixPrice({ price: priceInputValue, accountAddress: selectedAccount.address } as TFixPriceProps); // TODO: proper typing, proper calculated object
   }, [priceInputValue, selectedAccount, onSellFixPrice]);
 
-  const onMinStepInputChange = useCallback(
-    (value: string) => {
-      setMinStepInputValueAuction(value);
-    },
-    [setMinStepInputValueAuction]
-  );
-
-  const onInputStartingPriceChange = useCallback(
-    (value: string) => {
-      setInputStartingPriceValue(value);
-    },
-    [setInputStartingPriceValue]
-  );
-
-  const onDurationSelectChange = useCallback((value: SelectOptionProps) => {
-      setDurationSelectValue(Number(value.id));
-    }, [setDurationSelectValue]
-  );
-
   const tokenSymbol = useMemo(() => chainProperties?.token || '', [chainProperties]);
-
-  const durationOptions: SelectOptionProps[] = [
-    {
-      id: '3',
-      title: '3 days'
-    },
-    {
-      id: '7',
-      title: '7 days'
-    },
-    {
-      id: '14',
-      title: '14 days'
-    },
-    {
-      id: '21',
-      title: '21 days'
-    }
-  ];
 
   const { fee, fetchingFee, getFee } = useGetFee<Parameters<MarketController['getSellFixFee']>>(api?.market?.getSellFixFee.bind(api?.market));
 
@@ -196,6 +127,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
       <InputWrapper
         label={`Price (${tokenSymbol})*`}
         onChange={onPriceInputChange}
+        disabled={isFixedPrice}
         value={priceInputValue?.toString()}
         testid={`${testid}-price-input`}
       />
@@ -207,47 +139,10 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
       {isSponsored && <WarningBlock>
         Collection ID {collectionId} sponsored
       </WarningBlock>}
-      {/* {!isEnoughBalance && <Text color={'coral-500'} testid={`${testid}-low-balance-warning`}>Your balance is too low to sell</Text>} */}
       <ButtonWrapper>
         <Button
           disabled={!isSponsored && (fetchingFee || !priceInputValue || !Number(priceInputValue))}
           onClick={onConfirmFixPriceClick}
-          role='primary'
-          title='Confirm'
-          testid={`${testid}-confirm-button`}
-        />
-      </ButtonWrapper>
-    </>
-  );
-
-  const AuctionTab = (
-    <>
-      <InputWrapper
-        label={`Minimum step (${tokenSymbol})*`}
-        onChange={onMinStepInputChange}
-        value={minStepInputValueAuction?.toString()}
-        testid={`${testid}-min-step`}
-      />
-      <Row>
-        <InputWrapper
-          label={`Starting Price (${tokenSymbol})`}
-          onChange={onInputStartingPriceChange}
-          value={inputStartingPriceValue?.toString()}
-          testid={`${testid}-starting-price`}
-        />
-        <SelectWrapper
-          label='Duration*'
-          onChange={onDurationSelectChange}
-          options={durationOptions}
-          optionKey={'id'}
-          value={durationSelectValue?.toString()}
-          testid={`${testid}-duration-select`}
-        />
-      </Row>
-      <ButtonWrapper>
-        <Button
-          disabled={!isAuctionValid}
-          onClick={onConfirmAuctionClick}
           role='primary'
           title='Confirm'
           testid={`${testid}-confirm-button`}
@@ -262,16 +157,6 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
         <Heading size='2' testid={`${testid}-heading`}>Selling token</Heading>
       </Content>
       {FixedPriceTab}
-      {/* <Tabs
-        activeIndex={activeTab}
-        labels={['Fixed price', 'Auction']}
-        onClick={handleClick}
-        testid={`${testid}-tabs`}
-      />
-      <Tabs activeIndex={activeTab}>
-        {FixedPriceTab}
-        {AuctionTab}
-      </Tabs> */}
     </SellModalStyled>
   );
 };
@@ -347,10 +232,6 @@ export const SellAuctionStagesModal: FC<TSellAuctionStagesModal> = ({ collection
 
 const InputWrapper = styled(NumberInput)`
   width: 100%;
-`;
-
-const SelectWrapper = styled(Select)`
-  margin-bottom: 32px;
 `;
 
 const ButtonWrapper = styled.div`
