@@ -9,7 +9,6 @@ import { useApi } from 'hooks/useApi';
 
 const endpoint = '/offers';
 
-export const getOfferById = (baseURL: string, offerId: string) => get<OfferResponse>(`${endpoint}/${offerId}`, { ...defaultParams, baseURL });
 export const getOffer = (baseURL: string, collectionId: number, tokenId: number) => get<OfferResponse>(`${endpoint}/${collectionId}/${tokenId}`, { ...defaultParams, baseURL });
 
 export const useOffer = (collectionId: number, tokenId: number) => {

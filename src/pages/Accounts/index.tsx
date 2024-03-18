@@ -1,9 +1,7 @@
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { BN } from '@polkadot/util';
 import { Button, useNotifications } from 'components/UI';
 import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
-import { TWithdrawBid } from 'api/restApi/auction/types';
 import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';

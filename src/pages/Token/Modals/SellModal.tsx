@@ -9,8 +9,8 @@ import { useApi } from 'hooks/useApi';
 
 import DefaultMarketStages from './StagesModal';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
-import { TAuctionProps, TFixPriceProps } from './types';
-import { useAuctionSellStages, useSellFixStages } from '../../../hooks/marketplaceStages';
+import { TFixPriceProps } from './types';
+import { useSellFixStages } from '../../../hooks/marketplaceStages';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { StageStatus } from '../../../types/StagesTypes';
 import MarketController from 'api/chainApi/MarketController';
@@ -170,15 +170,6 @@ type TSellFixStagesModal = {
   testid: string
 }
 
-type TSellAuctionStagesModal = {
-  onFinish: () => void
-  collectionId: number
-  tokenId: number
-  tokenPrefix: string
-  auction: TAuctionProps
-  testid: string
-}
-
 export const SellFixStagesModal: FC<TSellFixStagesModal> = ({ collectionId, tokenId, tokenPrefix, sellFix, onFinish, testid }) => {
   const { stages, status, initiate } = useSellFixStages(collectionId, tokenId);
   const { info } = useNotifications();
@@ -191,30 +182,6 @@ export const SellFixStagesModal: FC<TSellFixStagesModal> = ({ collectionId, toke
         <div data-testid={`${testid}-success-notification`}><Link href={`/token/${collectionId}/${tokenId}`} title={`${tokenPrefix} #${tokenId}`}/> offered for sale</div>,
         { name: 'success', size: 32, color: 'var(--color-additional-light)' }
       );
-    }
-  }, [status]);
-
-  return (
-    <div>
-      <DefaultMarketStages
-        stages={stages}
-        status={status}
-        onFinish={onFinish}
-        testid={`${testid}`}
-      />
-    </div>
-  );
-};
-
-export const SellAuctionStagesModal: FC<TSellAuctionStagesModal> = ({ collectionId, tokenId, tokenPrefix, auction, onFinish, testid }) => {
-  const { stages, status, initiate } = useAuctionSellStages(collectionId, tokenId);
-  const { info } = useNotifications();
-
-  useEffect(() => { initiate(auction); }, [auction]); //
-
-  useEffect(() => {
-    if (status === StageStatus.success) {
-      info(<div data-testid={`${testid}-success-notification`}><Link href={`/token/${collectionId}/${tokenId}`} title={`${tokenPrefix} #${tokenId}`}/> is up for auction</div>, { name: 'success', size: 32, color: 'var(--color-additional-light)' });
     }
   }, [status]);
 
@@ -247,15 +214,6 @@ const ButtonWrapper = styled.div`
 
 const Content = styled.div`
   && h2 {
-  }
-`;
-
-const Row = styled.div`
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  @media (max-width: 568px) {
-    flex-direction: column;
   }
 `;
 

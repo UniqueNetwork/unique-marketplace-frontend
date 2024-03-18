@@ -136,9 +136,7 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
 
   return (
     <ApiProvider value={value}>
-      {/* <AuctionSocketProvider url={config.blockchains[currentChainId]?.apiEndpoint}> */}
       {children}
-      {/* </AuctionSocketProvider> */}
     </ApiProvider>
   );
 };

@@ -36,11 +36,6 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
 
   const videoProp = useMemo(() => stringToDecodedInfixOrUrlOrCidAndHash(video), [video]);
 
-  const topBid = useMemo(() => {
-    if (!offer?.auction?.bids?.length) return null;
-    return offer?.auction?.bids[0].balance;
-  }, [offer]);
-
   const tokenPath = useMemo(() => generatePath('/:currentChainId/token/:collectionId/:tokenId', {
     currentChainId: currentChainId || null,
     collectionId: offer?.collectionId.toString(),
@@ -104,7 +99,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
             <Text
               testid={`${testid}-price`}
               size='l'
-            >{topBid ? `${formatBalance(Number(topBid))}` : `${formatBalance(offer.price.parsed, 4, true)}` }</Text>
+            >{formatBalance(offer.price.parsed, 4, true)}</Text>
             <IconStyled name={`chain-${currentChainId?.toLowerCase()}`} size={16} />
           </PriceWrapper>
         </TradingInfoWrapper>
