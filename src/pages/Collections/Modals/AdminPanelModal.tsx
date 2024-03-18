@@ -5,18 +5,18 @@ import { RemoveCollectionModal } from './RemoveCollectionModal';
 import { AcceptSponsorshipModal } from './AcceptSponsorshipModal';
 import { AddCollectionModal } from './AddCollectionModal';
 import { SelectNFTsModal } from './SelectNFTsModal';
-import { MyCollection } from 'api/restApi/collections/types';
 import styled from 'styled-components';
 import { Modal } from 'components/UI';
+import { GQLCollection } from 'api/scanApi/types';
 
 export type TAdminPanelModalProps = {
-  collection?: MyCollection
+  collection?: GQLCollection
   modalType: AdminPanelModalType
   onClose(): void
   onFinish(): void
 }
 export type TAdminPanelModalBodyProps = {
-  collection?: MyCollection
+  collection?: GQLCollection
   setIsClosable(value: boolean): void
   onClose(): void
   onFinish(): void

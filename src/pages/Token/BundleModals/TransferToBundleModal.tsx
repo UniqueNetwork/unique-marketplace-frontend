@@ -18,12 +18,13 @@ import { CollectionInfoWithSchemaResponse, TokenByIdResponse, TokenIdQuery } fro
 import { debounce } from 'utils/helpers';
 import { fromStringToBnString } from 'utils/bigNum';
 import { Coral700 } from 'styles/colors';
-import { useGetCollectionsForNesting } from '../hooks/useGetCollectionsForNesting';
-import { CollectionItem, TokenItem } from '../types';
+import { TokenItem } from '../types';
 import { getIpfsUriByImagePath } from 'utils/urlUtils';
 import { useGetAllOwnedTokensByCollection } from '../hooks/useGetAllOwnedTokensByCollection';
 import { FractionalAmountInput } from '../Modals/FractionalAmountInput';
 import { CollectionMode } from 'api/chainApi/types';
+import { useQueryCollectionsForNesting } from 'api/scanApi/useQueryCollectionsForNesting';
+import { GQLCollection } from 'api/scanApi/types';
 
 export const TransferToBundleModal: FC<TBundleTransferModalBodyProps> = ({ token, setIsClosable, onFinish, testid }) => {
   const { selectedAccount } = useAccounts();
@@ -88,7 +89,7 @@ type AskTransferToBundleModalProps = {
 };
 
 const AskTransferToBundleModal: FC<AskTransferToBundleModalProps> = ({ token, collection: collectionProp, onTransferToBundle, testid }) => {
-  const [collection, setCollection] = useState<CollectionItem | null>(null);
+  const [collection, setCollection] = useState<GQLCollection | null>(null);
   const [selectedToken, setSelectedToken] = useState<TokenItem | null>(null);
   const [isFeeLoading, setIsFeeLoading] = useState(false);
   const [fee, setFee] = useState<string>('0');
@@ -99,8 +100,8 @@ const AskTransferToBundleModal: FC<AskTransferToBundleModalProps> = ({ token, co
   const { api } = useApi();
   const [isSponsored, setIsSponsored] = useState(false);
 
-  const { collections: collectionItems, fetchCollections, isFetching: isFetchingCollections } = useGetCollectionsForNesting();
-  const { tokens, isFetchingTokens } = useGetAllOwnedTokensByCollection(collection?.collectionId, useMemo(() => ({
+  const { collections: collectionItems, fetchCollections, isFetching: isFetchingCollections } = useQueryCollectionsForNesting();
+  const { tokens, isFetchingTokens } = useGetAllOwnedTokensByCollection(collection?.id, useMemo(() => ({
     excludeTokenId: {
       collectionId: token.collectionId,
       tokenId: token.tokenId
@@ -146,7 +147,7 @@ const AskTransferToBundleModal: FC<AskTransferToBundleModalProps> = ({ token, co
     [onTransferToBundle, selectedToken, amount]
   );
 
-  const onChangeSelectedCollection = useCallback((collection: CollectionItem | null) => {
+  const onChangeSelectedCollection = useCallback((collection: GQLCollection | null) => {
     setCollection(collection);
     setSelectedToken(null);
     setFee('0');
@@ -186,12 +187,12 @@ const AskTransferToBundleModal: FC<AskTransferToBundleModalProps> = ({ token, co
         <CollectionsSuggestStyled
           isLoading={isFetchingCollections}
           suggestions={collectionItems}
-          getSuggestionValue={(suggestion) => `${suggestion.collectionName} ${suggestion.collectionId}`}
-          getActiveSuggestOption={(suggest, activeValue) => suggest.collectionId === activeValue.collectionId}
+          getSuggestionValue={(suggestion) => `${suggestion.name} ${suggestion.id}`}
+          getActiveSuggestOption={(suggest, activeValue) => suggest.id === activeValue.id}
           components={{
             SuggestItem: ({ suggestion }) => <ItemOption>
-              <CollectionCover src={getIpfsUriByImagePath(suggestion.collectionCover || '')} size={24} type={'circle'} />
-              <Text>{`${suggestion?.collectionName} [ID ${suggestion?.collectionId}]`}</Text>
+              <CollectionCover src={getIpfsUriByImagePath(suggestion.cover || '')} size={24} type={'circle'} />
+              <Text>{`${suggestion?.name} [ID ${suggestion?.id}]`}</Text>
             </ItemOption>
           }}
           onChange={onChangeSelectedCollection}
@@ -203,7 +204,7 @@ const AskTransferToBundleModal: FC<AskTransferToBundleModalProps> = ({ token, co
           <Text size='s' color='grey-500'>A token that will become the bundle owner and the root of the nested structure. You can provide only a token that you own.</Text>
         </RowLabel>
         <TokensSuggestStyled
-          key={collection?.collectionId}
+          key={collection?.id}
           isLoading={isFetchingTokens}
           suggestions={collection ? tokens : []}
           getSuggestionValue={(suggestion) => suggestion?.tokenId?.toString() || ''}
@@ -320,7 +321,7 @@ const ItemOption = styled.div`
   padding: calc(var(--gap) / 2) calc(var(--gap) / 4);
 `;
 
-const CollectionsSuggest = (props: SuggestProps<CollectionItem>) => <Suggest<CollectionItem> {...props} />;
+const CollectionsSuggest = (props: SuggestProps<GQLCollection>) => <Suggest<GQLCollection> {...props} />;
 const CollectionsSuggestStyled = styled(CollectionsSuggest)`
   width: 100%;
   & .unique-input-text {

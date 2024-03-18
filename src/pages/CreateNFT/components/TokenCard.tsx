@@ -17,7 +17,7 @@ export type TokenCardCommonProps = {
   onOpenModifyModal?(token: NewToken): void;
   tokenPrefix: string;
   attributesSchema: Record<number, AttributeSchemaDto>;
-  mode: TokenTypeEnum | undefined;
+  mode: 'NFT' | 'Fungible' | 'ReFungible' | undefined;
   viewMode: ViewMode;
 };
 
@@ -118,7 +118,7 @@ export const TokenCard = ({
       </TokenBasicWrapper>
       {viewMode === ViewMode.list && (
         <FormGrid>
-          {mode === TokenTypeEnum.RFT && (
+          {mode === 'ReFungible' && (
             <>
               <LabelText>Total fractions</LabelText>
               <InputText

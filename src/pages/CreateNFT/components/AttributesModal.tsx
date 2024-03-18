@@ -19,7 +19,7 @@ interface AttribytesModalProps {
   attributesSchema: Record<number, AttributeSchemaDto> | undefined;
   onChange(tokens: NewToken[]): void;
   onClose(): void;
-  mode?: TokenTypeEnum;
+  mode?: 'NFT' | 'ReFungible' | 'Fungible';
 }
 
 export const AttributesModal = ({
@@ -48,7 +48,7 @@ export const AttributesModal = ({
           }
           return attribute;
         }),
-        ...(mode === TokenTypeEnum.RFT
+        ...(mode === 'ReFungible'
           ? {
               totalFractions: (totalFractions as { hasDifferentValues: boolean })
                 .hasDifferentValues
@@ -89,7 +89,7 @@ export const AttributesModal = ({
     );
     setAttributes(summaryAttributes);
     setSummaryAttributes(summaryAttributes);
-    if (mode === TokenTypeEnum.RFT) {
+    if (mode === 'ReFungible') {
       let totalFractionsValue: Attribute;
       const isDifferent = tokens.some(({ totalFractions }, tokenIndex) => {
         if (tokenIndex === 0) {
@@ -125,7 +125,7 @@ export const AttributesModal = ({
           </Slide>
         </TokensImages>
         <FormGrid>
-          {mode === TokenTypeEnum.RFT && (
+          {mode === 'ReFungible' && (
             <>
               <LabelText>Total fractions</LabelText>
               <InputAmount

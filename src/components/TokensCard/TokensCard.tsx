@@ -16,6 +16,7 @@ import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft
 import { MyToken, TokenTypeEnum } from 'pages/MyTokens/types';
 import { BadgeEnum } from 'components/TokenMedia/Picture';
 import { CollectionTitle } from 'components/OfferCard/CollectionTitle';
+import { GQLCollection } from 'api/scanApi/types';
 
 export type TTokensCard = {
   token?: Omit<TokenByIdResponse | MyToken, 'collection' | 'nestingParentToken' | 'properties'>
@@ -38,7 +39,7 @@ export const TokensCard: FC<TTokensCard> = ({
   ...props
 }) => {
   const [token, setToken] = useState<Omit<TokenByIdResponse | MyToken, 'collection' | 'nestingParentToken' | 'properties'> | undefined>(props.token);
-  const [collection, setCollection] = useState<(CollectionInfoWithSchemaResponse) | undefined>();
+  const [collection, setCollection] = useState<(GQLCollection) | undefined>();
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isBundleState, setIsBundleState] = useState<boolean>();
   const [isNestedState, setIsNestedState] = useState<boolean>();
@@ -52,7 +53,6 @@ export const TokensCard: FC<TTokensCard> = ({
     collectionTitle,
     imageUrl,
     price,
-    auction,
     video,
     owner,
     type,
@@ -63,13 +63,12 @@ export const TokensCard: FC<TTokensCard> = ({
       const { image, video, owner } = offer?.tokenDescription || token || {};
       const collectionName = offer?.collectionDescription?.name || collection?.name || (token as MyToken)?.collectionName || '';
       const tokenPrefix = offer?.collectionDescription?.tokenPrefix || collection?.tokenPrefix || (token as MyToken)?.tokenPrefix || '';
-      const { auction, price, seller } = offer || {};
+      const { price, seller } = offer || {};
       return {
         tokenPrefix,
         collectionTitle: collectionName,
         imageUrl: image,
         video: stringToDecodedInfixOrUrlOrCidAndHash(video),
-        auction,
         price,
         owner: seller || owner,
         type: (token as MyToken)?.type || TokenTypeEnum.NFT,
@@ -111,11 +110,6 @@ export const TokensCard: FC<TTokensCard> = ({
       setIsNestedState(!!offer?.tokenDescription?.nestingParentToken);
     })();
   }, [offer, tokenId, collectionId, api?.nft]);
-
-  const topBid = useMemo(() => {
-    if (!auction?.bids?.length) return null;
-    return auction.bids[0].balance;
-  }, [auction]);
 
   const tokenPath = useMemo(() => {
     if (owner && type === TokenTypeEnum.RFT) {
@@ -189,7 +183,7 @@ export const TokensCard: FC<TTokensCard> = ({
             <Text
               testid={`${testid}-price`}
               size='l'
-            >{topBid ? `${formatBalance(Number(topBid))}` : `${formatBalance(price.parsed, 4, true)}` }</Text>
+            >{formatBalance(price.parsed, 4, true)}</Text>
             <IconStyled name={`chain-${currentChainId?.toLowerCase()}`} size={16} />
           </PriceWrapper>
         </TradingInfoWrapper>}

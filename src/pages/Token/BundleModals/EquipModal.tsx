@@ -11,6 +11,7 @@ import { TBundleTransferModalBodyProps } from './BundleTransferModal';
 import { TokensCard } from './components/TokenCard';
 import { CustomizeModal } from './CustomizeModal';
 import { useGetBaseTokens } from './hooks/useGetBaseTokens';
+import { GQLToken } from 'api/scanApi/types';
 
 export const EquipModal = ({
   token,
@@ -46,7 +47,7 @@ export const EquipModal = ({
       token={baseToken}
       onFinish={onFinish}
       setIsClosable={setIsClosable}
-      selectedWearable={token as unknown as TokenItem}
+      selectedWearable={token as unknown as GQLToken}
       testid={'customize-modal'}
     />;
   }

@@ -4,8 +4,8 @@ import { Heading, Text } from '@unique-nft/ui-kit';
 import { Trait } from './Trait';
 import IconWithHint from '../../../components/IconWithHint/IconWithHint';
 import { DecodedAttributeDto } from '@unique-nft/sdk';
-import { useAttributes } from '../hooks/useAttributes';
-import { useGetCollectionTokensCount } from '../hooks/useGetCollectionTokensCount';
+import { useQueryAttributes } from 'api/scanApi/useQueryAttributes';
+import { useQueryCollectionTokensCount } from 'api/scanApi/useQueryCollectionTokensCount';
 
 interface IProps {
   attributes: DecodedAttributeDto[];
@@ -13,8 +13,8 @@ interface IProps {
 }
 
 export const AttributesBlock: FC<IProps> = ({ attributes, collectionId }: IProps) => {
-  const { tokensCount } = useGetCollectionTokensCount(collectionId);
-  const { attributes: attributeStatistics, isFetching } = useAttributes(collectionId);
+  const { tokensCount } = useQueryCollectionTokensCount(collectionId);
+  const { attributes: attributeStatistics, isFetching } = useQueryAttributes(collectionId);
 
   const statistics = useMemo(() => {
     return attributeStatistics.reduce<Record<string, { count: number, value: string }[]>>((acc, { name, values }) => {

@@ -97,7 +97,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attr
             <Checkbox
               checked={selectedCollections.indexOf(collection.id) !== -1}
               label={<CheckboxLabelWrapper>
-                <CollectionCover src={collection.schema?.coverPicture.fullUrl || ''} size={22} type={'circle'}/>
+                <CollectionCover src={collection?.cover || ''} size={22} type={'circle'}/>
                 <Text
                   testid={`${testid}-name-${collection.id}`}
                 >{collection.name || ''}</Text>

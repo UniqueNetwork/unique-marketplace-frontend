@@ -6,17 +6,17 @@ import { AttributeItem, PriceRange, MyTokensFilterState, MyTokensStatuses, Filte
 import StatusFilter from './StatusFilter';
 import CollectionsFilter from './CollectionsFilter';
 import { MixedMyTokenAndOffer } from '../types';
-import { MyCollection } from 'api/restApi/collections/types';
 import { TypeOfAssets, TypeOfCustomizableNFTs } from 'components/Filters/types';
 import TypeOfAssetsFilter from 'components/Filters/TypeOfAssets';
 import TypeOfCustomizablesFilter from 'components/Filters/TypeOfCustomizables';
+import { GQLCollection } from 'api/scanApi/types';
 
 type FilterProps = {
   value: MyTokensFilterState | null
   onFilterChange: FilterChangeHandler<MyTokensFilterState>
   tokens: MixedMyTokenAndOffer[]
   featuredTokens: MixedMyTokenAndOffer[]
-  collections: MyCollection[]
+  collections: GQLCollection[]
   isFetchingTokens: boolean
   testid: string
   featuredTokensForAttributeCounts: MixedMyTokenAndOffer[]

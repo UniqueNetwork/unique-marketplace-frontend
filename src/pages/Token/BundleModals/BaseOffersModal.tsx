@@ -1,4 +1,3 @@
-import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 import { Button, Heading, Loader, Text } from '@unique-nft/ui-kit';
 import { useOffers } from 'api/restApi/offers/offers';
 import { OfferCard } from 'components/OfferCard/OfferCard';
@@ -10,12 +9,13 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { mockWearables } from '../constants';
 import { TBundleTransferModalBodyProps } from './BundleTransferModal';
+import { GQLCollection } from 'api/scanApi/types';
 
 export const BaseOffersModal = ({
   token,
   onFinish
 }: TBundleTransferModalBodyProps) => {
-  const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse>();
+  const [collection, setCollection] = useState<GQLCollection>();
   const { currentChainId } = useApi();
   const { offers, isFetching, fetch } = useOffers();
   const navigate = useNavigate();
@@ -27,7 +27,9 @@ export const BaseOffersModal = ({
       if (!currentChainId) return;
       const baseCollectionIds = mockWearables[currentChainId].find(({ collectionId }) => collectionId === token.collectionId)?.baseCollections || [];
       if (!baseCollectionIds.length) return;
-      setCollection(await getCollection(baseCollectionIds[0]));
+      const baseCollection = await getCollection(baseCollectionIds[0]);
+      if (!baseCollection) return;
+      setCollection(baseCollection);
       await fetch({
         pageSize: 8,
         page: 1,

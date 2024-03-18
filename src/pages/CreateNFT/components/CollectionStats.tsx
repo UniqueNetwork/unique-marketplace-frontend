@@ -2,14 +2,14 @@ import styled from 'styled-components';
 import { CollectionNestingPermissionsDto, CollectionSponsorship } from '@unique-nft/sdk';
 import { addSeconds, format } from 'date-fns';
 import { useMemo } from 'react';
-import { MyCollection } from 'api/restApi/collections/types';
 import { useApi } from 'hooks/useApi';
 import { maxTokenLimit } from '../constants';
 import { Link, Loader, Text } from 'components/UI';
 import { shortcutText } from 'utils/textUtils';
+import { GQLCollection } from 'api/scanApi/types';
 
 interface CollectionStatsProps {
-  collection: MyCollection;
+  collection: GQLCollection;
   tokensLimit: number;
   tokensLeft: number | string;
   lastTokenId: number;

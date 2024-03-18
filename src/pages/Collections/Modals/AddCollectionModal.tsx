@@ -3,7 +3,6 @@ import { Heading } from '@unique-nft/ui-kit';
 import { Text, useNotifications, Button } from 'components/UI';
 import styled from 'styled-components/macro';
 
-import { MyCollection } from 'api/restApi/collections/types';
 import { useApi } from 'hooks/useApi';
 import { CollectionCover } from 'components/CollectionCover/CollectionCover';
 import { SelectInput } from 'components/SelectInput/SelectInput';
@@ -11,12 +10,13 @@ import { TAdminPanelModalBodyProps } from './AdminPanelModal';
 import { BlueGrey100 } from 'styles/colors';
 import { useAccounts } from 'hooks/useAccounts';
 import { useCollections } from 'hooks/useCollections';
+import { GQLCollection } from 'api/scanApi/types';
 
 export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish, collection }) => {
   const { selectedAccount } = useAccounts();
-  const [selectedCollection, setSelectedCollection] = useState<MyCollection | string | undefined>(collection);
+  const [selectedCollection, setSelectedCollection] = useState<GQLCollection | string | undefined>(collection);
   const { appendCollection, collections, fetchCollections } = useCollections();
-  const [collectionItems, setCollectionItems] = useState<MyCollection[]>([]);
+  const [collectionItems, setCollectionItems] = useState<GQLCollection[]>([]);
   const { api } = useApi();
   const { info, error } = useNotifications();
 
@@ -53,13 +53,13 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish, co
     setCollectionItems(collectionData);
   }, [api, collections]);
 
-  const onChangeSelectedCollection = useCallback((collection: MyCollection | string) => {
+  const onChangeSelectedCollection = useCallback((collection: GQLCollection | string) => {
     if (typeof collection === 'string') {
       if (!/^\d{0,9}$/.test(collection) && collection !== '') return;
 
       void findCollection(collection);
     }
-    setSelectedCollection(collection as unknown as MyCollection);
+    setSelectedCollection(collection as unknown as GQLCollection);
   }, [findCollection]);
 
   return (<>
@@ -67,7 +67,7 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish, co
       <Heading size='2'>Add collection</Heading>
     </Content>
     <SelectWrapper>
-      <SelectInput<MyCollection>
+      <SelectInput<GQLCollection>
         isClearable
         placeholder='Search by id'
         options={collectionItems}

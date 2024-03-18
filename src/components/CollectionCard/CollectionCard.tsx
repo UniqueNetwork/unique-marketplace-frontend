@@ -2,17 +2,16 @@ import React, { FC, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
-import { ExternalLink } from 'components/UI';
-import { MyCollection } from 'api/restApi/collections/types';
 import { useApi } from 'hooks/useApi';
 import { shortcutText } from 'utils/textUtils';
 import { Picture } from '..';
 import { AdditionalDark, AdditionalLight } from 'styles/colors';
 import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 import { getIpfsUriByImagePath } from 'utils/urlUtils';
+import { GQLCollection } from 'api/scanApi/types';
 
 export type TCollectionCard = {
-  collection: MyCollection
+  collection: GQLCollection
 
   onViewOnScanClick(): void
 };

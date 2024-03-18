@@ -73,7 +73,7 @@ export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
   useEffect(() => {
     if (!api?.collection) return;
     void (async () => {
-      const tokensCountOnScan = await getCollectionTokensCount(collectionId);
+      const tokensCountOnScan = await getCollectionTokensCount(collectionId) || 0;
       setTokensCountOnScan(tokensCountOnScan);
 
       const collectionData = await fetchCollection(collectionId);

@@ -11,11 +11,11 @@ import { PagePaper } from 'components/PagePaper/PagePaper';
 import CardSkeleton from 'components/Skeleton/CardSkeleton';
 import SearchField from 'components/SearchField/SearchField';
 import { useAccounts } from 'hooks/useAccounts';
-import { MyCollection } from 'api/restApi/collections/types';
 import config from 'config';
 import { useApi } from 'hooks/useApi';
 import { useCollections } from 'hooks/useCollections';
 import { useNavigate } from 'react-router-dom';
+import { GQLCollection } from 'api/scanApi/types';
 
 type TOption = {
   iconRight: {
@@ -26,7 +26,7 @@ type TOption = {
   id: string
   title: string
   direction: string
-  field: keyof MyCollection
+  field: keyof GQLCollection
 }
 
 const sortingOptions: TOption[] = [
@@ -66,7 +66,7 @@ export const CollectionsPage: FC = () => {
   const [sortingValue, setSortingValue] = useState<TOption>(sortingOptions[0]);
   const [searchValue, setSearchValue] = useState<string>();
   const [modalType, setModalType] = useState(AdminPanelModalType.default);
-  const [selectedCollection, setSelectedCollection] = useState<MyCollection>();
+  const [selectedCollection, setSelectedCollection] = useState<GQLCollection>();
   const { collections, isFetching, fetchCollections } = useCollections();
   const { isLoading: isAccountsLoading } = useAccounts();
   const navigate = useNavigate();
@@ -100,7 +100,7 @@ export const CollectionsPage: FC = () => {
     navigate(`/${currentChainId}/create-collection`);
   }, [currentChainId]);
 
-  const onViewOnScanClick = useCallback((collection: MyCollection) => () => {
+  const onViewOnScanClick = useCallback((collection: GQLCollection) => () => {
     const { scanUrl } = config.blockchains[currentChainId || ''] || {};
     if (!scanUrl) return;
     window.open(`${scanUrl}unique_collection/${collection.id}`, '_blank')?.focus();
@@ -108,14 +108,14 @@ export const CollectionsPage: FC = () => {
 
   const filteredCollections = useMemo(() => {
     if (!collections) return [];
-    const sortCollection = (collectionA: MyCollection, collectionB: MyCollection) => {
+    const sortCollection = (collectionA: GQLCollection, collectionB: GQLCollection) => {
       if (!sortingValue) return 0;
       const order = sortingValue.direction === 'asc' ? 1 : -1;
       if (sortingValue.field === 'id') return Number(collectionA[sortingValue.field]) > Number(collectionB[sortingValue.field]) ? order : -order;
       return (collectionA[sortingValue.field] || '') > (collectionB[sortingValue.field] || '') ? order : -order;
     };
 
-    const filterCollection = (collection: MyCollection) => {
+    const filterCollection = (collection: GQLCollection) => {
       if (!collection) return false;
       if (searchValue) {
         const searchString = searchValue.trim().toLocaleLowerCase();

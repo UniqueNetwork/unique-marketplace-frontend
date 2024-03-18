@@ -1,8 +1,8 @@
 import { post } from 'api/restApi/base';
+import config from 'config';
 import { useApi } from 'hooks/useApi';
+import { NestedTokenItem } from 'pages/Token/types';
 import { useCallback, useState } from 'react';
-import { NestedTokenItem } from '../types';
-import config from '../../../config';
 
 const gqlQuery = {
   operationName: 'getBundleTree',
@@ -39,7 +39,7 @@ const gqlQuery = {
   }`
 };
 
-export const useGetBundleTree = () => {
+export const useQueryBundleTree = () => {
   const { settings, currentChainId } = useApi();
   const [isFetching, setIsFetching] = useState(false);
 

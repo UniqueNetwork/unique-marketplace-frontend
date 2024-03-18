@@ -12,9 +12,9 @@ import { CollectionCover } from 'components/CollectionCover/CollectionCover';
 import { Attribute, AttributeCount } from 'api/restApi/offers/types';
 import { getAttributesCountFromTokens, getAttributesFromTokens } from './utils/attributes';
 import { MixedMyTokenAndOffer } from '../types';
-import { MyCollection } from 'api/restApi/collections/types';
 import { getIpfsUriByImagePath } from 'utils/urlUtils';
 import SearchField from 'components/SearchField/SearchField';
+import { GQLCollection } from 'api/scanApi/types';
 
 interface CollectionsFilterProps {
   value?: { collections?: number[], attributes?: { key: string, attribute: string }[], attributeCounts?: number[] } | null
@@ -24,7 +24,7 @@ interface CollectionsFilterProps {
   testid: string
   featuredTokens: MixedMyTokenAndOffer[]
   tokens: MixedMyTokenAndOffer[]
-  collections: MyCollection[]
+  collections: GQLCollection[]
   isFetchingTokens: boolean
   featuredTokensForAttributeCounts: MixedMyTokenAndOffer[]
 }

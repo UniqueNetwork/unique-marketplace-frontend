@@ -4,16 +4,16 @@ import { useApi } from '../hooks/useApi';
 import { CollectionsProvider } from './CollectionsContext';
 import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 import config from 'config';
-import { post } from 'api/restApi/base';
-import { GQLCollection } from './types';
-import { getIpfsUriByImagePath } from 'utils/urlUtils';
+import { useQueryCollections } from 'api/scanApi/useQueryCollections';
+import { GQLCollection } from 'api/scanApi/types';
 
 const CollectionsWrapper: FC = ({ children }) => {
-  const [collections, setCollections] = useState<CollectionInfoWithSchemaResponse[]>([]);
+  const [collections, setCollections] = useState<GQLCollection[]>([]);
   const [curatedCollections, setCuratedCollections] = useState<CollectionInfoWithSchemaResponse[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(true);
 
   const { currentChainId, featuredCollections } = useApi();
+  const { fetch } = useQueryCollections();
 
   const fetchCollections = useCallback(async () => {
     setIsFetching(true);
@@ -27,44 +27,9 @@ const CollectionsWrapper: FC = ({ children }) => {
       .filter(({ isCurated }) => isCurated)
       .map(({ description }) => description));
 
-    const gqlQuery = {
-      operationName: 'collections_query',
-      query: `query collections_query($ids: [Float!]) {
-        collections(
-          where: { collection_id: { _in: $ids } }
-          distinct_on: collection_id
-          limit: 10000
-        ) {
-          count
-          data {
-            attributesSchema: attributes_schema
-            owner: owner_normalized
-            cover: collection_cover
-            id: collection_id
-            name: name
-            tokenPrefix: token_prefix
-            properties
-            permissions
-            __typename
-          }
-          __typename
-        }
-      }`,
-      variables: {
-        ids: featuredCollectionsAsArray.map(({ id }) => id)
-      }
-    };
     const { scanApi } = config.blockchains[currentChainId || ''] || {};
-    const { data } = await post(scanApi, gqlQuery);
 
-    setCollections(data.data.collections.data.map((collection: GQLCollection) => ({
-      ...collection,
-      schema: {
-        coverPicture: {
-          fullUrl: getIpfsUriByImagePath(collection.cover)
-        }
-      }
-    })) || []);
+    setCollections(await fetch());
     setIsFetching(false);
   }, [featuredCollections]);
 

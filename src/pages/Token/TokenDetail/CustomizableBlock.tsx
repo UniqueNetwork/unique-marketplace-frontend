@@ -7,6 +7,7 @@ import { mockWearables } from '../constants';
 import { useApi } from 'hooks/useApi';
 import { useCollections } from 'hooks/useCollections';
 import { Link } from 'react-router-dom';
+import { GQLCollection } from 'api/scanApi/types';
 
 type CustomizableBlockProps = {
   token?: TokenByIdResponse
@@ -16,8 +17,8 @@ type CustomizableBlockProps = {
 
 export const CustomizableBlock = ({ token, offer, collection }: CustomizableBlockProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [baseCollection, setBaseCollection] = useState<CollectionInfoWithSchemaResponse>();
-  const [wearableCollections, setWearableCollections] = useState<CollectionInfoWithSchemaResponse[]>([]);
+  const [baseCollection, setBaseCollection] = useState<GQLCollection>();
+  const [wearableCollections, setWearableCollections] = useState<GQLCollection[]>([]);
   const { getCollection } = useCollections();
   const { currentChainId } = useApi();
   const { collectionId } = useMemo(() => {
@@ -43,7 +44,7 @@ export const CustomizableBlock = ({ token, offer, collection }: CustomizableBloc
       if (isCustomizable) {
         const ids = collection?.permissions?.nesting?.restricted;
         if (!ids?.length) return;
-        const collections = await Promise.all(ids.map(getCollection));
+        const collections = (await Promise.all(ids.map(getCollection))).filter((collection) => !!collection) as GQLCollection[];
         setWearableCollections(collections);
       }
       if (wearable) {

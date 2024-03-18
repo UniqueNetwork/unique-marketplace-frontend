@@ -10,12 +10,13 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { mockWearables } from '../constants';
 import { TBundleTransferModalBodyProps } from './BundleTransferModal';
+import { GQLCollection } from 'api/scanApi/types';
 
 export const WearableOffersModal = ({
   token,
   onFinish
 }: TBundleTransferModalBodyProps) => {
-  const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse>();
+  const [collection, setCollection] = useState<GQLCollection>();
   const { currentChainId } = useApi();
   const { offers, isFetching, fetch } = useOffers();
   const navigate = useNavigate();
@@ -27,7 +28,9 @@ export const WearableOffersModal = ({
       if (!currentChainId) return;
       const wearableCollectionId = mockWearables[currentChainId].find(({ baseCollections }) => baseCollections.includes(token.collectionId))?.collectionId;
       if (!wearableCollectionId) return;
-      setCollection(await getCollection(wearableCollectionId));
+      const collection = await getCollection(wearableCollectionId);
+      if (!collection) return;
+      setCollection(collection);
       await fetch({
         pageSize: 8,
         page: 1,

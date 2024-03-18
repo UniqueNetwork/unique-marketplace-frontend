@@ -11,10 +11,10 @@ import { useApi } from 'hooks/useApi';
 import { Suggest, SuggestListProps } from 'components/UI/Suggest';
 import { Button, Tag, Text } from 'components/UI';
 import { useCollections } from 'hooks/useCollections';
-import { MyCollection } from 'api/restApi/collections/types';
 import { getTokenIpfsUriByImagePath } from 'pages/CreateCollection/helpers';
 import { SuggestOption } from './SuggestOption';
 import { TokenTypeEnum } from 'pages/MyTokens/types';
+import { GQLCollection } from 'api/scanApi/types';
 
 export interface CollectionItem {
   id: number;
@@ -23,12 +23,12 @@ export interface CollectionItem {
   img: string | undefined;
   tokensLimit?: number;
   tokensCount: number;
-  mode: TokenTypeEnum;
+  mode: 'NFT' | 'ReFungible' | 'Fungible';
 }
 
 type CollectionSuggestProps = {
-  collection?: MyCollection;
-  onChange(collection: MyCollection | undefined): void;
+  collection?: GQLCollection;
+  onChange(collection: GQLCollection | undefined): void;
 };
 
 export const CollectionSuggest: FC<CollectionSuggestProps> = ({
@@ -39,7 +39,7 @@ export const CollectionSuggest: FC<CollectionSuggestProps> = ({
   const collectionId = Number(params.get('collectionId') || 0);
   const { state: locationState } = useLocation();
   const { selectedAccount } = useAccounts();
-  const presetCollection = locationState as MyCollection;
+  const presetCollection = locationState as GQLCollection;
 
   useEffect(() => {
     if (!presetCollection) {
@@ -74,9 +74,9 @@ export const CollectionSuggest: FC<CollectionSuggestProps> = ({
           title: collection.name,
           description: collection.description,
           img: getTokenIpfsUriByImagePath(collection.cover),
-          tokensCount: collection.tokenCount || 0,
+          tokensCount: collection.tokensCount || 0,
           tokensLimit: collection.tokenLimit,
-          mode: collection.mode as TokenTypeEnum || TokenTypeEnum.NFT
+          mode: collection.mode
         })) ?? []),
       ...(presetCollection?.id && !presetCollectionExists
         ? [
@@ -214,7 +214,7 @@ const CollectionSuggestion: FC<{
       <span className='suggestion-item__title'>
         {suggestion.title} [id {suggestion.id}]
       </span>
-      {suggestion.mode === 'RFT' && <Tag label='FRACTIONAL' type='info' />}
+      {suggestion.mode === 'ReFungible' && <Tag label='FRACTIONAL' type='info' />}
     </SuggestOption>
   );
 };
