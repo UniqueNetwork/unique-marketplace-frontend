@@ -17,6 +17,9 @@ export const fixPriceSellingCollectionIds: Record<string, { collectionId: number
   ],
   quartz: [],
   unique: [
-    { collectionId: 316, price: 850 }
+    { collectionId: 474, price: 850 }
   ]
 };
+
+export const disallowSellingAttributeName = 'Ticket status';
+export const disallowSellingAttributeValue = 'TICKET USED';
