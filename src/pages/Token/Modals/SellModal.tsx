@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Heading, Link } from '@unique-nft/ui-kit';
-import { useNotifications, Button } from 'components/UI';
+import { Heading, Link, Loader } from '@unique-nft/ui-kit';
+import { useNotifications, Button, Text } from 'components/UI';
 import { NumberInput } from 'components/NumberInput/NumberInput';
 import styled from 'styled-components';
 
@@ -21,6 +21,7 @@ import { BN } from '@polkadot/util';
 import { fromStringToBnString } from 'utils/bigNum';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 import { fixPriceSellingCollectionIds } from '../constants';
+import { useCoinMarketCapApi } from 'api/coinMarketCapApi/useCoinMarketCapApi';
 
 export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, collection, onFinish, setIsClosable, testid }) => {
   const { collectionId, tokenId } = token || {};
@@ -70,12 +71,19 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
   const { selectedAccount } = useAccounts();
   const [priceInputValue, setPriceInputValue] = useState<string>();
 
-  // use FHF mock
-  const isFixedPrice = useMemo(() => {
-    const price = fixPriceSellingCollectionIds[currentChainId || '']?.find((item) => item.collectionId === collectionId)?.price;
-    setPriceInputValue(price?.toString());
-    return !!price;
-  }, [collectionId, currentChainId]);
+  // use FHF min price
+  const [minPrice, setMinPrice] = useState<number>(0);
+  const { fetchCryptoCurrency, isFetching } = useCoinMarketCapApi();
+  useEffect(() => {
+    void (async () => {
+      const price = fixPriceSellingCollectionIds[currentChainId || '']?.find((item) => item.collectionId === collectionId)?.price;
+      if (!price) return;
+      const currency = await fetchCryptoCurrency();
+      const minPrice = Math.floor(price / currency * 1000) / 1000;
+      setMinPrice(minPrice);
+      setPriceInputValue((minPrice).toFixed(4));
+    })();
+  }, []);
 
   const [isSponsored, setIsSponsored] = useState(false);
 
@@ -109,6 +117,10 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
     return selectedAccount.balances?.proper.raw.gte(new BN(fromStringToBnString(fee)));
   }, [fee, selectedAccount?.balances?.proper.raw, isSponsored]);
 
+  const isPriceAvailable = useMemo(() => {
+    return Number(priceInputValue) >= minPrice;
+  }, [priceInputValue, minPrice]);
+
   useEffect(() => {
     if (!api || !selectedAccount || !priceInputValue) return;
     debounce(async () => {
@@ -122,15 +134,19 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
     }, 300)();
   }, [collectionId, tokenId, priceInputValue, api?.market, selectedAccount?.address]);
 
+  if (isFetching) return <Loader />;
+
   const FixedPriceTab = (
     <>
       <InputWrapper
         label={`Price (${tokenSymbol})*`}
         onChange={onPriceInputChange}
-        disabled={isFixedPrice}
         value={priceInputValue?.toString()}
         testid={`${testid}-price-input`}
       />
+      {minPrice > 0 && <WarningBlock>
+        <Text color='grey-500' size='s'>Min price: {minPrice.toFixed(4)} {chainProperties?.token}</Text>
+      </WarningBlock>}
       {!isSponsored && <FeeMessage
         isFeeLoading={fetchingFee}
         fee={fee || '0'}
@@ -141,7 +157,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
       </WarningBlock>}
       <ButtonWrapper>
         <Button
-          disabled={!isSponsored && (fetchingFee || !priceInputValue || !Number(priceInputValue))}
+          disabled={(!isSponsored && (fetchingFee || !priceInputValue || !Number(priceInputValue))) || !isPriceAvailable}
           onClick={onConfirmFixPriceClick}
           role='primary'
           title='Confirm'

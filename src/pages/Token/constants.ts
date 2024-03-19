@@ -13,11 +13,12 @@ export const mockWearables: Record<string, { collectionId: number, baseCollectio
 
 export const fixPriceSellingCollectionIds: Record<string, { collectionId: number, price: number }[]> = {
   opal: [
-    { collectionId: 2461, price: 850 }
+    { collectionId: 2461, price: 10 },
+    { collectionId: 2450, price: 10 }
   ],
   quartz: [],
   unique: [
-    { collectionId: 474, price: 850 }
+    { collectionId: 474, price: 10 }
   ]
 };
 
