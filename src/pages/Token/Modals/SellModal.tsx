@@ -21,7 +21,7 @@ import { BN } from '@polkadot/util';
 import { fromStringToBnString } from 'utils/bigNum';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 import { fixPriceSellingCollectionIds } from '../constants';
-import { useCoinMarketCapApi } from 'api/coinMarketCapApi/useCoinMarketCapApi';
+import { useCoinGeckoApi } from 'api/coinGeckoApi/useCoinGeckoApi';
 
 export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, collection, onFinish, setIsClosable, testid }) => {
   const { collectionId, tokenId } = token || {};
@@ -70,11 +70,11 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
   const { chainProperties, api, currentChainId } = useApi();
   const { selectedAccount } = useAccounts();
   const [priceInputValue, setPriceInputValue] = useState<string>();
-  const [currency, setCurrency] = useState<string>();
 
   // use FHF min price
   const [minPrice, setMinPrice] = useState<number>(0);
-  const { fetchCryptoCurrency, isFetching } = useCoinMarketCapApi();
+  const { fetchCryptoCurrency, isFetching } = useCoinGeckoApi();
+  const [currency, setCurrency] = useState<string>();
   useEffect(() => {
     void (async () => {
       const price = fixPriceSellingCollectionIds[currentChainId || '']?.find((item) => item.collectionId === collectionId)?.price;

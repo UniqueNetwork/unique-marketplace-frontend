@@ -4,7 +4,7 @@ import { useCallback, useState } from 'react';
 
 const baseURL = 'https://api.coingecko.com/api/v3/';
 
-export const useCoinMarketCapApi = () => {
+export const useCoinGeckoApi = () => {
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const fetchCryptoCurrency = useCallback(async () => {
     setIsFetching(true);
