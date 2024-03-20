@@ -16,7 +16,7 @@ const buyGasLimit = 1_000_000;
 const sellGasLimit = 200_000;
 class MetamaskAdapter implements IMarketContractAdapter {
   private getContract(signer: Signer, contract: IMarketContractProperties) {
-    return new ethers.Contract(contract.address, marketplaceAbi, signer);
+    return new ethers.Contract(contract.address, (contract.abi as ethers.ContractInterface) || marketplaceAbi, signer);
   }
 
   private async validateCall(method: (...methodArgs: any[]) => Promise<void>, args: any[]) {
@@ -190,14 +190,14 @@ class MetamaskAdapter implements IMarketContractAdapter {
   async changePrice(collectionId: number, tokenId: number, price: string, signer: Signer, contractProps: IMarketContractProperties): Promise<void> {
     const contract = this.getContract(signer, contractProps);
 
-    const estimateGas = await contract.estimateGas.changePrice(collectionId, tokenId, { value: price, gasLimit: buyGasLimit });
-    await this.callContract(contract, 'changePrice', collectionId, tokenId, { value: price, gasLimit: estimateGas.add(1000) });
+    const estimateGas = await contract.estimateGas.changePrice(collectionId, tokenId, price, { gasLimit: buyGasLimit });
+    await this.callContract(contract, 'changePrice', collectionId, tokenId, price, { gasLimit: estimateGas.add(1000) });
   }
 
   async getChangePriceFee(collectionId: number, tokenId: number, price: string, signer: Signer, contractProps: IMarketContractProperties): Promise<string> {
     const contract = this.getContract(signer, contractProps);
 
-    const estimateGas = await contract.estimateGas.changePrice(collectionId, tokenId, { value: price, gasLimit: buyGasLimit });
+    const estimateGas = await contract.estimateGas.changePrice(collectionId, tokenId, price, { value: price, gasLimit: buyGasLimit });
     const gasPrice = await contract.provider.getGasPrice();
 
     return estimateGas.mul(gasPrice).toString();
