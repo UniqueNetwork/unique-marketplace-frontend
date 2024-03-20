@@ -70,6 +70,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
   const { chainProperties, api, currentChainId } = useApi();
   const { selectedAccount } = useAccounts();
   const [priceInputValue, setPriceInputValue] = useState<string>();
+  const [currency, setCurrency] = useState<string>();
 
   // use FHF min price
   const [minPrice, setMinPrice] = useState<number>(0);
@@ -79,6 +80,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
       const price = fixPriceSellingCollectionIds[currentChainId || '']?.find((item) => item.collectionId === collectionId)?.price;
       if (!price) return;
       const currency = await fetchCryptoCurrency();
+      setCurrency(currency.toFixed(6));
       const minPrice = Math.floor(price / currency * 1000) / 1000;
       setMinPrice(minPrice);
       setPriceInputValue((minPrice).toFixed(4));
@@ -145,7 +147,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
         testid={`${testid}-price-input`}
       />
       {minPrice > 0 && <WarningBlock>
-        <Text color='grey-500' size='s'>Min price: {minPrice.toFixed(4)} {chainProperties?.token}</Text>
+        <Text color='grey-500' size='s'>Min price: {minPrice.toFixed(4)} UNQ equivalent $10 (current rate: 1 UNQ = ${currency})</Text>
       </WarningBlock>}
       {!isSponsored && <FeeMessage
         isFeeLoading={fetchingFee}
