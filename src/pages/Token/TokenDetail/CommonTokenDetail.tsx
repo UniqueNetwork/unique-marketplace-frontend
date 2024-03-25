@@ -40,6 +40,7 @@ interface IProps {
   isNested: boolean
   isOwner: boolean
   topmostOwner?: string
+  onBurn(): void
 }
 
 export const CommonTokenDetail: FC<IProps> = ({
@@ -51,7 +52,8 @@ export const CommonTokenDetail: FC<IProps> = ({
   testid,
   isBundle,
   isNested,
-  topmostOwner
+  topmostOwner,
+  onBurn
 }) => {
   const navigate = useNavigate();
   const { address } = useParams<{ address: string }>();
@@ -255,6 +257,11 @@ export const CommonTokenDetail: FC<IProps> = ({
                 <Icon name={'arrow-up-right'} size={16} color={'var(--color-primary-500)'} />
               </MenuIconWrapper>
             </ScanMenuItem>
+            {!offer && <BurnMenuItem onClick={onBurn}>Burn
+              <MenuIconWrapper>
+                <Icon name={'burn'} size={16} color={'var(--color-coral-500)'} />
+              </MenuIconWrapper>
+            </BurnMenuItem>}
             <ReportMenuItem onClick={onReportClick}>Report
               <MenuIconWrapper>
                 <Icon name={'warning'} size={16} color={'var(--color-coral-500)'} />
@@ -458,14 +465,21 @@ const ShareMenuItem = styled(DropdownMenuItem)`
 `;
 
 const ScanMenuItem = styled(DropdownMenuItem)`
-  border-bottom: 1px dashed ${Grey300};
   color: ${Primary500};
   &:hover {
     color: ${Primary600};
   }
 `;
 
+const BurnMenuItem = styled(DropdownMenuItem)`
+  color: ${Coral500};
+  &:hover {
+    background-color: ${Coral100};
+  }
+`;
+
 const ReportMenuItem = styled(DropdownMenuItem)`
+  border-top: 1px dashed ${Grey300};
   color: ${Coral500};
   &:hover {
     background-color: ${Coral100};
