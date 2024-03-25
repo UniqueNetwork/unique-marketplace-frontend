@@ -150,4 +150,9 @@ export class UniqueSDKNFTController extends BaseController {
     const adapter = this.getAdapter(account);
     await adapter.createTokens(payload, account.signer);
   }
+
+  async burn(payload: { collectionId: number, tokenId: number }, { account }: TransactionOptions): Promise<void> {
+    const adapter = this.getAdapter(account);
+    await adapter.burn(payload, account.signer);
+  }
 }

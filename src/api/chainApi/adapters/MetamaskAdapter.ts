@@ -306,6 +306,11 @@ class MetamaskAdapter implements IMarketContractAdapter {
     return ids;
   }
 
+  async burn(payload: { collectionId: number, tokenId: number }, signer: Signer): Promise<void> {
+    const nftHelper = await UniqueNFTFactory(payload.collectionId, signer);
+    await (await nftHelper.burn(payload.tokenId)).wait();
+  }
+
   getSetSponsorshipFee(payload: SetSponsorshipBody, signer: Signer): Promise<string> {
     throw new Error('not implemented');
   }

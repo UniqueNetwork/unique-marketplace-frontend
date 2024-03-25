@@ -111,6 +111,7 @@ const TokenPage = () => {
           isNested={isNested}
           isOwner={isOwner}
           topmostOwner={topmostOwner}
+          onBurn={onActionClick(MarketType.burn)}
         >
           {isOwner && isNested && <NestedTokenBlock
             token={token}
