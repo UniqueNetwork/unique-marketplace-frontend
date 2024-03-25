@@ -36,6 +36,8 @@ interface IBaseAdapter {
 
   getSetCollectionLimitsFee(payload: SetCollectionLimitsBody, signer: Signer): Promise<string>;
   setCollectionLimits(payload: SetCollectionLimitsBody, signer: Signer): Promise<void>;
+
+  burn(payload: { collectionId: number, tokenId: number }, signer: Signer): Promise<void>;
 }
 
 export default IBaseAdapter;
