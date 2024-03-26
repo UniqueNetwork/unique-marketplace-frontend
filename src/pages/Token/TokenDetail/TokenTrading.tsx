@@ -10,6 +10,7 @@ import { checkAllowedTokenInSettings } from 'api/chainApi/utils/checkTokenIsAllo
 import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
 import { ethers } from 'ethers';
 import { useParams } from 'react-router-dom';
+import { disallowSellingAttributeName, disallowSellingAttributeValue } from '../constants';
 
 interface TokenTradingProps {
   token?: TokenByIdResponse
@@ -50,6 +51,14 @@ export const TokenTrading: FC<TokenTradingProps> = ({
     const { tokenId, collectionId } = offer || token || {};
     if (!tokenId || !collectionId) return false;
     if (!(token?.collection.limits?.transfersEnabled !== false)) return false;
+
+    // for FHF
+    if (Object.values(token?.attributes || {}).some(({ name, value }) =>
+      name?._ === disallowSellingAttributeName &&
+      (value as { _: string })?._ === disallowSellingAttributeValue)) {
+      return false;
+    }
+
     return checkAllowedTokenInSettings(tokenId, collectionId, settings?.blockchain.unique.collections);
   }, [settings, token, offer]);
 
