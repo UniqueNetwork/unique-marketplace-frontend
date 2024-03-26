@@ -1,13 +1,12 @@
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { Button, useNotifications } from 'components/UI';
+import { Button } from 'components/UI';
 import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { Table } from 'components/Table';
 import { PagePaper } from 'components/PagePaper/PagePaper';
-import ConfirmModal from 'components/ConfirmModal';
 import GetKSMModal from 'components/GetKSMModal/GetKSMModal';
 import { WithdrawDepositModal } from './Modals/WithdrawDeposit';
 import { TransferFundsModal } from './Modals/SendFunds';
@@ -22,13 +21,8 @@ import { ConnectWalletModalContext } from 'account/ConnectWalletModalContext';
 const testid = 'accounts-page';
 
 enum AccountModal {
-  create,
-  importViaSeed,
-  importViaJSON,
-  importViaQRCode,
   sendFunds,
   withdrawDeposit,
-  deleteLocalAccount,
   getKsmModal
 }
 
@@ -38,15 +32,13 @@ export const AccountsPage = () => {
   );
   const {
     accounts,
-    isLoading,
-    forgetLocalAccount
+    isLoading
   } = useAccounts();
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
   const [selectedAddress, setSelectedAddress] = useState<string>();
   const navigate = useNavigate();
   const deviceSize = useDeviceSize();
   const { chainProperties, currentChainId } = useApi();
-  const { info } = useNotifications();
 
   useEffect(() => {
     if (!isLoading && !accounts.size) {
@@ -86,8 +78,7 @@ export const AccountsPage = () => {
   const filteredAccounts: AccountInfo[] = useMemo(() => {
     const reduceAccounts = (acc: AccountInfo[], account: Account) => {
       acc.push({
-        ...account,
-        isLocal: account.signerType === AccountSigner.local
+        ...account
       });
       return acc;
     };
@@ -102,12 +93,6 @@ export const AccountsPage = () => {
   const onModalClose = useCallback(() => {
     setCurrentModal(undefined);
   }, []);
-
-  const deleteLocalAccountConfirmed = useCallback(() => {
-    forgetLocalAccount(selectedAddress || '');
-    info('Account successfully deleted');
-    void onChangeAccountsFinish();
-  }, [selectedAddress, forgetLocalAccount, onChangeAccountsFinish]);
 
   return (<PagePaper>
     <AccountPageWrapper>
@@ -125,7 +110,6 @@ export const AccountsPage = () => {
             formatAddress,
             onShowSendFundsModal: onAccountActionClick(AccountModal.sendFunds),
             onShowWithdrawDepositModal: onAccountActionClick(AccountModal.withdrawDeposit),
-            onShowDeleteLocalAccountModal: onAccountActionClick(AccountModal.deleteLocalAccount),
             onGetClick,
             tokenSymbol: chainProperties?.token || '',
             scanUrl: currentChainId ? config.blockchains[currentChainId]?.scanUrl : ''
@@ -148,15 +132,6 @@ export const AccountsPage = () => {
         address={selectedAddress}
         testid={`${testid}-withdraw-modal`}
       />
-      <ConfirmModal
-        isVisible={currentModal === AccountModal.deleteLocalAccount}
-        onCancel={onModalClose}
-        onConfirm={deleteLocalAccountConfirmed}
-        headerText={'Delete local account'}
-        testid={`${testid}-delete-account-modal`}
-      >
-        <p data-testid={`${testid}-delete-account-modal-content`}>Are you sure, you want to perform this action? You won&apos;t be able to recover this account in future.</p>
-      </ConfirmModal>
     </AccountPageWrapper>
     {config.rampApiKey && currentModal === AccountModal.getKsmModal && <GetKSMModal key={'modal-accounts-getKsm'} onClose={onModalClose}/>}
   </PagePaper>);

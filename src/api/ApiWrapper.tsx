@@ -2,8 +2,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChainPropertiesResponse } from '@unique-nft/sdk';
 import { useNotifications } from 'components/UI';
-import { keyring } from '@polkadot/ui-keyring';
-import { cryptoWaitReady } from '@polkadot/util-crypto';
 
 import { ApiContextProps, ApiProvider } from './ApiContext';
 import { Settings } from './restApi/settings/types';
@@ -11,8 +9,6 @@ import { NetworkOptions, SdkClient } from './sdk/sdkClient';
 import config from '../config';
 import { useSettings } from './restApi/settings/settings';
 import { ChainIdLocalStorageKey, getInitialChainId } from '../utils/initialChainId';
-
-keyring.loadAll({});
 
 interface ChainProviderProps {
   children: React.ReactNode
@@ -34,7 +30,6 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
 
   useEffect(() => {
     (async () => {
-      await cryptoWaitReady();
       const settings = await fetchSettings(config.blockchains);
 
       const networkOptions = settings.map<NetworkOptions>(({ networkId, settings }) => ({ networkId, settings }));

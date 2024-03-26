@@ -17,7 +17,6 @@ type AccountsColumnsProps = {
   formatAddress(address: string): string
   onShowSendFundsModal(address: string): () => void
   onShowWithdrawDepositModal(address: string): () => void
-  onShowDeleteLocalAccountModal(address: string): () => void
   onGetClick: (address: string) => () => void
   tokenSymbol: string
   scanUrl: string
@@ -28,7 +27,6 @@ export const getAccountsColumns = ({
                               onShowSendFundsModal,
                               onShowWithdrawDepositModal,
                               isSmallDevice,
-                              onShowDeleteLocalAccountModal,
                               onGetClick,
                               tokenSymbol,
                               scanUrl
@@ -127,13 +125,6 @@ export const getAccountsColumns = ({
             </DepositActionsWrapper>}
           </TransferActionsWrapper>
           <div>
-            {isLocal && <Button
-              title=''
-              role='ghost'
-              iconLeft={{ name: 'trash', size: 24 }}
-              onClick={onShowDeleteLocalAccountModal(address)}
-              testid={`${testid}-${address}-delete-button`}
-            />}
           </div>
         </ActionsWrapper>
       );

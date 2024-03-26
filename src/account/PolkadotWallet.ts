@@ -4,7 +4,6 @@ import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
 import { Polkadot, SignerPayloadJSON } from '@unique-nft/utils/extension';
 import { Address } from '@unique-nft/utils';
 
-import { AccountUtils } from './AccountUtils';
 import { Account, AccountSigner, BaseWalletEntity, BaseWalletType } from './types';
 
 export type PolkadotWalletName = 'polkadot-js' | 'subwallet-js' | 'talisman' | 'enkrypt' | 'novawallet';
@@ -31,7 +30,7 @@ export class PolkadotWallet implements BaseWalletEntity<InjectedAccountWithMeta>
         .filter(({ address }) => Address.is.substrateAddress(address))
         .map((account) => {
         const normalizedAddress = Address.normalize.substrateAddress(account.address);
-        const address = AccountUtils.encodeAddress(
+        const address = Address.normalize.substrateAddress(
           account.address,
           this.chainProperties.SS58Prefix
         );

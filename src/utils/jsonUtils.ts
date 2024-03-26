@@ -1,6 +1,4 @@
 import { hexToU8a, isHex, u8aToString } from '@polkadot/util';
-import { KeyringPair, KeyringPair$Json } from '@polkadot/keyring/types';
-import keyring from '@polkadot/ui-keyring';
 
 const BYTE_STR_0 = '0'.charCodeAt(0);
 const BYTE_STR_X = 'x'.charCodeAt(0);
@@ -23,14 +21,4 @@ export const convertToU8a = (result: ArrayBuffer): Uint8Array => {
   }
 
   return data;
-};
-
-export const keyringFromFile = (file: Uint8Array, genesisHash?: `0x${string}` | null): KeyringPair | null => {
-  try {
-    return keyring.createFromJson(JSON.parse(u8aToString(file)) as KeyringPair$Json, { genesisHash });
-  } catch (error) {
-    console.error(error);
-  }
-
-  return null;
 };
