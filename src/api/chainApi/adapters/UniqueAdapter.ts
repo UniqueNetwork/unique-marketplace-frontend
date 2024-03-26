@@ -367,6 +367,10 @@ class UniqueAdapter implements IMarketContractAdapter {
   async setCollectionLimits(payload: SetCollectionLimitsBody, signer: Signer): Promise<void> {
     await this.uniqueSdk.collection.setLimits(payload, { signer });
   }
+
+  async burn(payload: { collectionId: number, tokenId: number }, signer: Signer): Promise<void> {
+    await this.uniqueSdk.token.burn({ ...payload, address: signer.address }, { signer });
+  }
 }
 
 export default UniqueAdapter;
