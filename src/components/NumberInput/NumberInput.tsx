@@ -1,8 +1,7 @@
 import React, { FC, useCallback } from 'react';
-import { Button, InputText } from 'components/UI';
+import { Button, InputText, Loader } from 'components/UI';
 import styled from 'styled-components';
 import { IconButton } from '../IconButton/IconButton';
-import { Loader } from '@unique-nft/ui-kit';
 
 interface AmountInputProps {
   disabled?: boolean

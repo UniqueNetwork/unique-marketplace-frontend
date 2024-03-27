@@ -1,7 +1,6 @@
 /* eslint-disable react/jsx-no-bind */
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Heading, Link, Suggest, SuggestProps } from '@unique-nft/ui-kit';
-import { Text, useNotifications, Button } from 'components/UI';
+import { Heading, Link, Text, useNotifications, Button, Suggest } from 'components/UI';
 import { BN } from '@polkadot/util';
 import styled from 'styled-components';
 
@@ -25,6 +24,7 @@ import { FractionalAmountInput } from '../Modals/FractionalAmountInput';
 import { CollectionMode } from 'api/chainApi/types';
 import { useQueryCollectionsForNesting } from 'api/scanApi/useQueryCollectionsForNesting';
 import { GQLCollection } from 'api/scanApi/types';
+import { SuggestProps } from 'components/UI/Suggest';
 
 export const TransferToBundleModal: FC<TBundleTransferModalBodyProps> = ({ token, setIsClosable, onFinish, testid }) => {
   const { selectedAccount } = useAccounts();

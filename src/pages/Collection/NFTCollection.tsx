@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { Text } from '@unique-nft/ui-kit';
-import { Select } from 'components/UI';
+import { Select, Text } from 'components/UI';
 
 import { TokensList } from './TokensList/TokensList';
 import { PagePaper } from 'components/PagePaper/PagePaper';

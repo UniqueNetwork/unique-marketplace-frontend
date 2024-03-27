@@ -1,6 +1,5 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import { Heading } from '@unique-nft/ui-kit';
-import { Text, useNotifications, Button } from 'components/UI';
+import { Text, useNotifications, Button, Heading } from 'components/UI';
 import styled from 'styled-components/macro';
 
 import { useApi } from 'hooks/useApi';

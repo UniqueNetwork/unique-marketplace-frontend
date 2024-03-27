@@ -1,5 +1,5 @@
 import { TokenByIdResponse } from '@unique-nft/sdk';
-import { Button, Heading, Loader } from '@unique-nft/ui-kit';
+import { Button, Heading, Loader } from 'components/UI';
 import { INestingToken } from 'components/BundleTree/types';
 import { useApi } from 'hooks/useApi';
 import { useCallback, useEffect, useState } from 'react';

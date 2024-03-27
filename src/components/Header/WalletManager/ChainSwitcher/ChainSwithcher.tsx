@@ -1,5 +1,5 @@
-import { INetwork, Toggle } from '@unique-nft/ui-kit';
-import { Dropdown, Icon, Text } from 'components/UI';
+import { Dropdown, Icon, Text, Toggle } from 'components/UI';
+import { INetwork } from 'components/UI/widgets/AccountsManager';
 import { useCallback } from 'react';
 import styled from 'styled-components';
 

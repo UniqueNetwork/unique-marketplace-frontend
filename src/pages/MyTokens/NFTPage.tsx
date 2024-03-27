@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { Text } from '@unique-nft/ui-kit';
-import { Button, Pagination, Select } from 'components/UI';
+import { Button, Pagination, Select, Text } from 'components/UI';
 
 import { useOffers } from 'api/restApi/offers/offers';
 import { PagePaper } from 'components/PagePaper/PagePaper';

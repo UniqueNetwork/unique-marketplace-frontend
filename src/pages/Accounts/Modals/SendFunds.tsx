@@ -1,10 +1,9 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Heading, SelectOptionProps } from '@unique-nft/ui-kit';
-import { Text, useNotifications, Dropdown, Button, Modal } from 'components/UI';
+import { Text, useNotifications, Dropdown, Button, Modal, Heading } from 'components/UI';
 import { BN } from '@polkadot/util';
 import styled from 'styled-components';
 
-import { toChainFormatAddress, validateAddress } from 'api/chainApi/utils/addressUtils';
+import { validateAddress } from 'api/chainApi/utils/addressUtils';
 import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
 import { useTransferFundsStages } from 'hooks/accountStages/useTransferFundsStages';
@@ -22,6 +21,7 @@ import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { Account } from 'account/types';
 import { FeeMessage } from 'components';
 import { useAccountsFilter } from 'hooks/useAccountsFilter';
+import { SelectOptionProps } from 'components/UI/types';
 
 export type TransferFundsModalProps = {
   isVisible: boolean

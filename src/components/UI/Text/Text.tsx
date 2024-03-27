@@ -1,7 +1,7 @@
 import { ForwardedRef, forwardRef, ReactNode } from 'react';
 import classNames from 'classnames';
-import { ComponentProps } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
+import { ComponentProps } from '../types';
 
 export interface ITextBaseProps {
   children: ReactNode;

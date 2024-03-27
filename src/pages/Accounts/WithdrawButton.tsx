@@ -1,5 +1,4 @@
-import { Tooltip } from '@unique-nft/ui-kit';
-import { Button } from 'components/UI';
+import { Button, Tooltip } from 'components/UI';
 import { useRef } from 'react';
 import styled from 'styled-components';
 

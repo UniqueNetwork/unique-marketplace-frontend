@@ -10,8 +10,7 @@ import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';
 import MobileModalActions from './MobileModalActions';
 import Skeleton from '../../Skeleton/Skeleton';
 import { useCollection } from '../useCollection';
-import { Icon, Dropdown } from 'components/UI';
-import { Tooltip } from '@unique-nft/ui-kit';
+import { Icon, Dropdown, Tooltip } from 'components/UI';
 
 const NodeView: FC<INodeView<INestingToken>> = ({
   arrowClicked,

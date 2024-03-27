@@ -1,6 +1,6 @@
 import React, { FC, useMemo } from 'react';
 import styled from 'styled-components';
-import { Heading, Text } from '@unique-nft/ui-kit';
+import { Heading, Text } from 'components/UI';
 import { Trait } from './Trait';
 import IconWithHint from '../../../components/IconWithHint/IconWithHint';
 import { DecodedAttributeDto } from '@unique-nft/sdk';

@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { generatePath, Link } from 'react-router-dom';
-import { Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
+import { Text } from 'components/UI';
 import { Avatar } from 'components/Avatar/Avatar';
 import { Trade } from 'api/restApi/trades/types';
 import { useApi } from 'hooks/useApi';

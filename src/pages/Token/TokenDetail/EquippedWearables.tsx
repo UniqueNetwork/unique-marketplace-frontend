@@ -3,12 +3,13 @@ import { Slide } from 'react-slideshow-image';
 import 'react-slideshow-image/dist/styles.css';
 import { TokensCard } from 'components';
 import styled from 'styled-components';
-import { Heading, Skeleton } from '@unique-nft/ui-kit';
+import { Heading } from 'components/UI';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { TokenContext } from '../context/TokenContext';
+import Skeleton from 'components/Skeleton/Skeleton';
 
 export const EquippedWearables = () => {
-  const { bundle, isFetching, fetchToken } = useContext(TokenContext);
+  const { bundle, isFetching } = useContext(TokenContext);
 
   const deviceSize = useDeviceSize();
 

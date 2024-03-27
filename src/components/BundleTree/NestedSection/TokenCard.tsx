@@ -1,13 +1,11 @@
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
-import { Text, Tooltip } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { AdditionalLight, Coral100, Coral500, Grey300, Primary500, Primary600, Secondary400, Secondary500 } from 'styles/colors';
 import { Picture } from '../../TokenMedia/Picture';
 import { INestingToken, ITokenCard } from '../types';
 import { useCollection } from '../useCollection';
 import Skeleton from '../../Skeleton/Skeleton';
-import { Dropdown } from 'components/UI/Dropdown/Dropdown';
-import { Icon } from 'components/UI/Icon/Icon';
+import { Icon, Dropdown, Text, Tooltip } from 'components/UI';
 import { useApi } from 'hooks/useApi';
 import { TokenByIdResponse } from '@unique-nft/sdk';
 

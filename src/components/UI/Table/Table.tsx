@@ -1,9 +1,9 @@
 import { ReactNode, useState } from 'react';
 import classNames from 'classnames';
-import { IconProps } from '@unique-nft/ui-kit';
 import { getDeepValue, sortData } from 'utils/uiUtils';
 import { Icon, Text } from '..';
 import styled from 'styled-components';
+import { IconProps } from '../Icon/Icon';
 
 const SORT_MODES = ['initial', 'desc', 'asc'];
 

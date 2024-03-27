@@ -1,18 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { GetOffersRequestPayload, OffersResponse } from 'api/restApi/offers/types';
+import { OffersResponse } from 'api/restApi/offers/types';
 import { useAccounts } from 'hooks/useAccounts';
 import { parseFilterState, setUrlParameter } from 'utils/helpers';
 import { defaultSortingValue, pageSize } from '../constants';
 import { TOption } from '../types';
 import { GetTokensRequestPayload, TokensResponse } from 'api/restApi/tokens/types';
-import { useApi } from 'hooks/useApi';
 import { Address } from '@unique-nft/utils';
 import { TokensFilter } from '../Filters/types';
-import { SelectOptionProps } from '@unique-nft/ui-kit';
+import { SelectOptionProps } from 'components/UI/types';
 
 export const useCollectionTokensFilter = ({ isFetching, fetch }: { isFetching: boolean, fetch(payload: GetTokensRequestPayload): Promise<OffersResponse | TokensResponse> }) => {
-  const { currentChainId, api } = useApi();
   const { selectedAccount, isLoading: isAccountsLoading } = useAccounts();
   const searchParams = new URLSearchParams(window.location.search);
 

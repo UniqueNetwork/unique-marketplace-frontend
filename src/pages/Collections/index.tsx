@@ -1,5 +1,4 @@
 import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { SelectOptionProps, Tooltip } from '@unique-nft/ui-kit';
 import { Select, Button } from 'components/UI';
 import styled from 'styled-components/macro';
 import NoItems from 'components/NoItems';
@@ -16,6 +15,7 @@ import { useApi } from 'hooks/useApi';
 import { useCollections } from 'hooks/useCollections';
 import { useNavigate } from 'react-router-dom';
 import { GQLCollection } from 'api/scanApi/types';
+import { SelectOptionProps } from 'components/UI/types';
 
 type TOption = {
   iconRight: {
@@ -30,20 +30,6 @@ type TOption = {
 }
 
 const sortingOptions: TOption[] = [
-  // {
-  //   iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
-  //   id: 'asc(Date)',
-  //   direction: 'asc',
-  //   field: 'updatedAt',
-  //   title: 'Date added'
-  // },
-  // {
-  //   iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
-  //   id: 'desc(Price)',
-  //   direction: 'desc',
-  //   field: 'updatedAt',
-  //   title: 'Date added'
-  // },
   {
     iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
     id: 'asc(collectionId)',

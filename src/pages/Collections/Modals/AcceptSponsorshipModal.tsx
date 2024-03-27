@@ -1,19 +1,16 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import { Heading } from '@unique-nft/ui-kit';
 import { Button, Text } from 'components/UI';
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
 import styled from 'styled-components/macro';
 
 import { useApi } from 'hooks/useApi';
-import { useFee } from 'hooks/useFee';
 import { useAcceptSponsorshipStages } from 'hooks/adminStages/useAcceptSponsorshipStages';
 import { useRejectSponsorshipStages } from 'hooks/adminStages/useRejectSponsorshipStages';
 import AccountCard from 'components/Account/Account';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 import StagesModal from '../../Token/Modals/StagesModal';
 import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
-
-const tokenSymbol = 'KSM';
+import { Heading } from 'components/UI';
 
 export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collection, setIsClosable, onFinish }) => {
   // TODO: calculate contract call fee

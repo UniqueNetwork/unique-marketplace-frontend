@@ -1,8 +1,7 @@
 import React, { FC, useMemo, useRef } from 'react';
-import { Text } from '@unique-nft/ui-kit';
 import { generatePath, Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { Icon } from 'components/UI/Icon/Icon';
+import { Icon, Text } from 'components/UI';
 import { Offer } from 'api/restApi/offers/types';
 import { formatBalance } from 'utils/textUtils';
 import { countNestedChildren, stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';

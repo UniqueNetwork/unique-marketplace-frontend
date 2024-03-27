@@ -1,13 +1,14 @@
+import React, { useEffect, useMemo, useState } from 'react';
 import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
-import { Offer } from 'api/restApi/offers/types';
-import React, { FC, ReactChild, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { Heading, Loader, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
-import { mockWearables } from '../constants';
+
+import { Offer } from 'api/restApi/offers/types';
+import { GQLCollection } from 'api/scanApi/types';
+import { Loader, Text } from 'components/UI';
 import { useApi } from 'hooks/useApi';
 import { useCollections } from 'hooks/useCollections';
 import { Link } from 'react-router-dom';
-import { GQLCollection } from 'api/scanApi/types';
+import { mockWearables } from '../constants';
 
 type CustomizableBlockProps = {
   token?: TokenByIdResponse

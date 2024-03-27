@@ -1,15 +1,15 @@
-import { Button, Heading, Loader, Text } from '@unique-nft/ui-kit';
 import { useOffers } from 'api/restApi/offers/offers';
 import { OfferCard } from 'components/OfferCard/OfferCard';
+import { Button, Heading, Loader, Text } from 'components/UI';
 import { useApi } from 'hooks/useApi';
 import { useCollections } from 'hooks/useCollections';
 import { useIsFirstRender } from 'hooks/useIsFirstRender';
 import { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { mockWearables } from '../constants';
 import { TBundleTransferModalBodyProps } from './BundleTransferModal';
 import { GQLCollection } from 'api/scanApi/types';
+import { mockWearables } from '../constants';
 
 export const BaseOffersModal = ({
   token,

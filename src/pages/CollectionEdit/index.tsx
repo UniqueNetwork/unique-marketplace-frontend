@@ -4,7 +4,6 @@ import styled from 'styled-components';
 
 import { PagePaper } from 'components/PagePaper/PagePaper';
 import { CollectionBannerComponent } from './CollectionBanner';
-import { Heading } from '@unique-nft/ui-kit';
 import { CollectionEditForm } from './Forms/CollectionEditForm';
 import { Error404 } from 'pages/Errors/404';
 import { CollectionEditSkeleton } from './CollectionEditSkeleton';
@@ -13,7 +12,7 @@ import { RoyaltiesForm } from './Forms/RoyaltiesForm';
 import { CollectionCover } from './CollectionCover';
 import { useMarketableCollection } from 'api/restApi/collections/collection';
 import { MarketableCollection, MarketableCollectionMetadata } from 'api/restApi/collections/types';
-import { Icon, Modal } from 'components/UI';
+import { Heading, Icon, Modal } from 'components/UI';
 import { SaveCollectionStagesModal } from './Modals/SaveCollectionModal';
 import { BlueGrey500 } from 'styles/colors';
 import { SetRoyaltiesStagesModal } from './Modals/SetRoyaltiesModal';

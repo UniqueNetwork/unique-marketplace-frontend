@@ -1,7 +1,6 @@
-import { Text } from '@unique-nft/ui-kit';
 import React, { ChangeEvent, ReactNode, useCallback, useRef, useState, VFC } from 'react';
 import styled from 'styled-components';
-import { Icon } from 'components/UI/Icon/Icon';
+import { Icon, Text } from 'components/UI';
 import UploadIcon from 'static/icons/upload.svg';
 import { Primary500 } from 'styles/colors';
 import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';

@@ -1,7 +1,6 @@
-import { Heading, Text } from '@unique-nft/ui-kit';
 import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { Dropdown, Icon } from 'components/UI';
+import { Heading, Dropdown, Icon } from 'components/UI';
 import { Picture } from 'components';
 import TokensBandleCard from 'components/BundleTree/NestedSection/TokenCard';
 import { AttributesBlock } from './AttributesBlock';

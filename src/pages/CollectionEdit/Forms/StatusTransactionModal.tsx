@@ -2,8 +2,7 @@ import { ReactNode } from 'react';
 import styled from 'styled-components';
 
 import { Modal, ModalProps } from 'components/UI/Modal';
-import { Alert, Loader } from 'components/UI';
-import { Heading } from '@unique-nft/ui-kit';
+import { Heading, Alert, Loader } from 'components/UI';
 
 type Props = Pick<ModalProps, 'isVisible'> & {
   description: string;

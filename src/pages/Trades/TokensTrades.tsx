@@ -1,24 +1,24 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { SortQuery, TableRowProps } from '@unique-nft/ui-kit';
+import { Address } from '@unique-nft/utils';
 import styled from 'styled-components';
+
 import { Pagination } from 'components/UI';
-import { useTrades } from 'api/restApi/trades/trades';
 import { Table } from 'components/Table';
 import { PagePaper } from 'components/PagePaper/PagePaper';
-import getTradesColumns from './columns';
-import { useAccounts } from 'hooks/useAccounts';
-import { TradesTabs } from './types';
 import SearchField from 'components/SearchField/SearchField';
-
-import NoTradesIcon from 'static/icons/no-trades.svg';
-import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
-import TokenTradesDetailsModal from './TradesDetailsModal';
-import { Trade } from 'api/restApi/trades/types';
+import { useAccounts } from 'hooks/useAccounts';
 import { useApi } from 'hooks/useApi';
-import { debounce } from 'utils/helpers';
 import { useInfinityScroll } from 'hooks/useInfinityScroll';
-import config from '../../config';
-import { Address } from '@unique-nft/utils';
+import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
+import { useTrades } from 'api/restApi/trades/trades';
+import { debounce } from 'utils/helpers';
+import getTradesColumns from './columns';
+import { TradesTabs } from './types';
+
+import { Trade } from 'api/restApi/trades/types';
+import TokenTradesDetailsModal from './TradesDetailsModal';
+import NoTradesIcon from 'static/icons/no-trades.svg';
+import { SortQuery, TableRowProps } from 'components/UI/Table/Table';
 
 type TokensTradesPage = {
   currentTab: TradesTabs

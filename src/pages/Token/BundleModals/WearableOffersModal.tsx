@@ -1,5 +1,4 @@
-import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
-import { Button, Heading, Loader, Text } from '@unique-nft/ui-kit';
+import { Button, Heading, Loader, Text } from 'components/UI';
 import { useOffers } from 'api/restApi/offers/offers';
 import { OfferCard } from 'components/OfferCard/OfferCard';
 import { useApi } from 'hooks/useApi';

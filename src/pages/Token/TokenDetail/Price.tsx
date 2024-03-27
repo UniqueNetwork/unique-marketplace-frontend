@@ -1,8 +1,7 @@
 import React, { FC } from 'react';
-import { Heading } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
-import { Icon } from 'components/UI/Icon/Icon';
 
+import { Icon, Heading } from 'components/UI';
 import { useApi } from '../../../hooks/useApi';
 import { formatBalance } from 'utils/textUtils';
 

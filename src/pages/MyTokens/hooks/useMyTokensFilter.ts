@@ -1,6 +1,5 @@
 import { BN, BN_MAX_INTEGER } from '@polkadot/util';
 import { DecodedAttributeDto } from '@unique-nft/sdk';
-import { SelectOptionProps } from '@unique-nft/ui-kit';
 
 import { Offer } from 'api/restApi/offers/types';
 import { TypeOfAssets, TypeOfCustomizableNFTs } from 'components/Filters/types';
@@ -16,6 +15,7 @@ import { MyTokensFilterState } from '../Filters/types';
 import { countTokenAttributes } from '../Filters/utils/attributes';
 import { MixedMyTokenAndOffer, MyToken, TOption } from '../types';
 import { GQLCollection } from 'api/scanApi/types';
+import { SelectOptionProps } from 'components/UI/types';
 
 export type UseMyTokensFilterProps = {
   isFetchingTokens: boolean

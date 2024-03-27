@@ -1,8 +1,7 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Heading, Link } from '@unique-nft/ui-kit';
 import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
 import { Address } from '@unique-nft/utils';
-import { useNotifications, Button, Text } from 'components/UI';
+import { Heading, Link, useNotifications, Button, Text } from 'components/UI';
 import { BN } from '@polkadot/util';
 import styled from 'styled-components';
 

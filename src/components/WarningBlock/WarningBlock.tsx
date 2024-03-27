@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import styled from 'styled-components';
-import { Text } from '@unique-nft/ui-kit';
 import { Primary100 } from '../../styles/colors';
+import { Text } from 'components/UI';
 
 export const WarningBlock: FC<{ margin?: number, testid?: string }> = ({ margin = 1.5, children, testid }) => {
   return (

@@ -1,10 +1,12 @@
 import React from 'react';
-import { IconProps, TableColumnProps, TableRowProps, Text } from '@unique-nft/ui-kit';
 
 import { MobileTableRow } from './MobileTableRow';
 import MobileTableSkeleton from '../Skeleton/MobileTableSkeleton';
 import EmptyTable from '../EmptyTable';
 import { getDeepValue } from 'utils/uiUtils';
+import { TableColumnProps, TableRowProps } from 'components/UI/Table/Table';
+import { IconProps } from 'components/UI/Icon/Icon';
+import { Text } from 'components/UI';
 
 interface MobileTableProps<T> {
   className?: string

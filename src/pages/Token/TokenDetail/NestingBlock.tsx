@@ -1,10 +1,9 @@
 import React, { FC } from 'react';
 import styled from 'styled-components';
-import { Button } from 'components/UI';
+import { Button, Heading } from 'components/UI';
 
 import { Grey300 } from 'styles/colors';
 import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
-import { Heading } from '@unique-nft/ui-kit';
 import { blockedNestingCollections } from '../SellToken/constants';
 import { useApi } from 'hooks/useApi';
 import { mockWearables } from '../constants';

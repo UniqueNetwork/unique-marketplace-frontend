@@ -1,4 +1,4 @@
-import { Stepper, StepperProps } from '@unique-nft/ui-kit';
+import { Stepper, StepperProps } from 'components/UI/Stepper';
 import { memo } from 'react';
 import styled from 'styled-components';
 

@@ -1,10 +1,10 @@
 import React, { ReactNode } from 'react';
 import { AccountsManagerDropdown } from './components';
 import styled from 'styled-components';
-import { IconProps, SelectOptionProps } from '@unique-nft/ui-kit';
 import { Text, Icon, Dropdown, CopyButton } from 'components/UI';
 import useCopyToClipboard from './hooks/useCopyToClipboard';
-import { Account } from 'account/types';
+import { SelectOptionProps } from 'components/UI/types';
+import { IconProps } from 'components/UI/Icon/Icon';
 
 export interface IAccount extends SelectOptionProps {
   address?: string;

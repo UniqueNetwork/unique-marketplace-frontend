@@ -1,9 +1,10 @@
 import React, { FC, useMemo, useState } from 'react';
-import { Heading } from '@unique-nft/ui-kit';
+import { Link } from 'react-router-dom';
+import { Address } from '@unique-nft/utils';
 import styled from 'styled-components';
 
 import { Picture, Avatar } from 'components';
-import { CollapsableText, Icon, Text, Link as UILink } from 'components/UI';
+import { CollapsableText, Icon, Text, Link as UILink, Heading } from 'components/UI';
 import { isTokenOwner, toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import { CollectionStatisticsBlock } from './CollectionStaticticsBlock';
 import { CollectionDetailSkeleton } from './CollectionDetailSkeleton';
@@ -12,15 +13,13 @@ import { useAccounts } from 'hooks/useAccounts';
 import { shortcutText } from 'utils/textUtils';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import { Primary500, Primary600 } from 'styles/colors';
-import config from 'config';
 import { PagePaper } from 'components/PagePaper/PagePaper';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
-import { Link } from 'react-router-dom';
 import { MarketableCollection } from 'api/restApi/collections/types';
 import ShareTokenModal from 'pages/Token/TokenDetail/ShareTokenModal';
 import { RoyaltiesFormData } from 'pages/CollectionEdit/types';
 import { dateFormat } from 'utils/timestampUtils';
-import { Address } from '@unique-nft/utils';
+import config from 'config';
 interface IProps {
   collection?: MarketableCollection
   royalties?: RoyaltiesFormData

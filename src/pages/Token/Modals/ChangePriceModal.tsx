@@ -1,7 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Heading, Link, Loader } from '@unique-nft/ui-kit';
-import { useNotifications, Button, Text } from 'components/UI';
+import { useNotifications, Button, Text, Heading, Link, Loader } from 'components/UI';
 import { NumberInput } from 'components/NumberInput/NumberInput';
 import styled from 'styled-components';
 

@@ -4,7 +4,7 @@ import { Button, Text } from 'components/UI';
 
 import { formatBalance } from '../../utils/textUtils';
 import ChainLogo from '../../components/ChainLogo';
-import { TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/components';
+import { TableColumnProps } from 'components/UI/Table/Table';
 
 const tokenSymbol = '!!!OLD_KSM!!!';
 

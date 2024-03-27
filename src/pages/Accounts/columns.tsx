@@ -1,6 +1,5 @@
 import React from 'react';
 import styled from 'styled-components';
-import { TableColumnProps } from '@unique-nft/ui-kit';
 import IconWithHint from 'components/IconWithHint/IconWithHint';
 import AccountCard from 'components/Account/Account';
 import { Button, Icon, Link, Text } from 'components/UI';
@@ -9,6 +8,7 @@ import { formatBalance } from 'utils/textUtils';
 import { AccountInfo } from './types';
 import BalanceCell from './BalanceCell';
 import { WithdrawButton } from './WithdrawButton';
+import { TableColumnProps } from 'components/UI/Table/Table';
 
 const testid = 'accounts-page';
 

@@ -3,11 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import config from 'config';
 
-import { INetwork } from '@unique-nft/ui-kit';
-
 import { formatBalance } from 'utils/textUtils';
 import { useNotifications, Button } from 'components/UI';
-import { AccountsManager, IAccount } from 'components/UI/widgets/AccountsManager';
+import { AccountsManager, IAccount, INetwork } from 'components/UI/widgets/AccountsManager';
 import { Avatar } from 'components/Avatar/Avatar';
 import GetKSMModal from 'components/GetKSMModal/GetKSMModal';
 import { useAccounts } from 'hooks/useAccounts';

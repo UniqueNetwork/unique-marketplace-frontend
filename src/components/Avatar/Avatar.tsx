@@ -7,7 +7,7 @@ import { Address } from '@unique-nft/utils';
 export interface IAvatarProps {
   src?: string | DecodedInfixOrUrlOrCidAndHash;
   address?: string;
-  size: number;
+  size?: number;
   type?: 'circle' | 'square';
   testid?: string
   video?: string | DecodedInfixOrUrlOrCidAndHash;

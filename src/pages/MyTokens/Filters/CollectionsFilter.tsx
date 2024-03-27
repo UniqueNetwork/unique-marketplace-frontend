@@ -1,6 +1,5 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Text } from '@unique-nft/ui-kit';
-import { Checkbox } from 'components/UI';
+import { Checkbox, Text } from 'components/UI';
 import styled from 'styled-components';
 
 import { Accordion } from 'components/Accordion/Accordion';
@@ -11,10 +10,10 @@ import { AttributeItem } from 'components/Filters/types';
 import { CollectionCover } from 'components/CollectionCover/CollectionCover';
 import { Attribute, AttributeCount } from 'api/restApi/offers/types';
 import { getAttributesCountFromTokens, getAttributesFromTokens } from './utils/attributes';
-import { MixedMyTokenAndOffer } from '../types';
 import { getIpfsUriByImagePath } from 'utils/urlUtils';
 import SearchField from 'components/SearchField/SearchField';
 import { GQLCollection } from 'api/scanApi/types';
+import { MixedMyTokenAndOffer } from '../types';
 
 interface CollectionsFilterProps {
   value?: { collections?: number[], attributes?: { key: string, attribute: string }[], attributeCounts?: number[] } | null

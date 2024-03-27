@@ -25,7 +25,6 @@ a{
   }
 }
 
-/* TODO: move it to ui-kit */
 .notification-container {
   position: fixed;
 }

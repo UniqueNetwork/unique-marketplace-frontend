@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { CreateTokenPayload } from '@unique-nft/sdk';
 
-import { Button, Checkbox, Text, useNotifications } from 'components/UI';
+import { Button, Checkbox, Text, useNotifications, Heading } from 'components/UI';
 import { ConfirmBtn } from 'components';
 
 import { CollectionSuggest } from './components/CollectionSuggest';
@@ -23,7 +23,6 @@ import { sleep } from 'utils/helpers';
 import { useCreateMultipleTokens } from './hooks/useCreateMultipleTokens';
 import { useCollectionGetById } from './hooks/useCollectionGetById';
 import { useCollectionGetLastTokenId } from './hooks/useCollectionGetLastTokenId';
-import { Heading } from '@unique-nft/ui-kit';
 import { WrapperContent } from 'pages/CreateCollection/CreateCollection';
 import { GQLCollection } from 'api/scanApi/types';
 

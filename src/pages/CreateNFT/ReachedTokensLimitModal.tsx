@@ -1,5 +1,4 @@
-import { Heading } from '@unique-nft/ui-kit';
-import { Button, Modal, Text } from 'components/UI';
+import { Button, Modal, Text, Heading } from 'components/UI';
 import { ModalProps } from 'components/UI/Modal';
 
 type ReachedTokensLimitModalProps = Pick<ModalProps, 'isVisible' | 'onClose'>;

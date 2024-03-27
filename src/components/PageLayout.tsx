@@ -1,10 +1,10 @@
 import { FC, useMemo } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import { Layout } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { Header } from '.';
 import { useFooter } from '../hooks/useFooter';
 import useBackground from '../hooks/useBackground';
+import { Layout } from './UI';
 
 export type TMenuItems = 'Explore' | 'My NFTs' | 'Trades' | 'Create collection' | 'Create tokens' | 'FAQ' | 'Manage accounts' | 'My collections';
 

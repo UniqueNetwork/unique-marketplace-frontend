@@ -1,9 +1,9 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 import { useApi } from 'hooks/useApi';
 import { shortcutText } from 'utils/textUtils';
+import { Text } from 'components/UI';
 import { Picture } from '..';
 import { AdditionalDark, AdditionalLight } from 'styles/colors';
 import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';

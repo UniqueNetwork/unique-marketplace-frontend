@@ -1,11 +1,11 @@
 import React, { ReactElement, useCallback, useState } from 'react';
 import styled from 'styled-components/macro';
-import { IconProps } from '@unique-nft/ui-kit';
 import { Tabs, Select, Button } from 'components/UI';
-import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
 import { AdditionalLight } from 'styles/colors';
 import { FilterChangeHandler, MyTokensFilterState } from './types';
+import { SelectOptionProps } from 'components/UI/types';
+import { IconProps } from 'components/UI/Icon/Icon';
 
 type MobileFiltersProps<T> = {
   filterCount: number

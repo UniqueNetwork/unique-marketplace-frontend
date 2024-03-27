@@ -1,11 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Button, Pagination, Text, useNotifications } from 'components/UI';
+import { Button, Pagination, Text, useNotifications, Heading, Loader } from 'components/UI';
 import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
 import { TBundleTransferModalBodyProps } from './BundleTransferModal';
 import styled from 'styled-components';
 import { useApi } from 'hooks/useApi';
-import { Heading, Loader } from '@unique-nft/ui-kit';
 import { TokensCard } from './components/TokenCard';
 import { TokensMedia } from './components/TokenMedia';
 import { StatusTransactionModal } from './components/StatusTransactionModal';

@@ -1,7 +1,6 @@
 import React, { FC, useEffect } from 'react';
 import styled from 'styled-components';
-import { Text, Heading, Loader } from '@unique-nft/ui-kit';
-import { Icon } from 'components/UI/Icon/Icon';
+import { Text, Heading, Loader, Icon } from 'components/UI';
 import { Stage, StageStatus } from '../../../types/StagesTypes';
 
 type TStagesModalProps = {

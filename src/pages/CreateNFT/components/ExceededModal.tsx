@@ -1,10 +1,9 @@
 import styled from 'styled-components';
 
-import { Button, Modal, Text } from 'components/UI';
+import { Button, Modal, Text, Heading } from 'components/UI';
 
 import { MAX_MINT_TOKENS } from '../CreateNFT';
 import { ModalFooter } from './ModalFooter';
-import { Heading } from '@unique-nft/ui-kit';
 
 type ExceededModalProps = {
   isVisible?: boolean;

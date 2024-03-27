@@ -1,16 +1,16 @@
-import { Heading, Pagination, TableColumnProps, TableRowProps, Text } from '@unique-nft/ui-kit';
+import { useCallback, useContext, useEffect, useState } from 'react';
+
+import { Heading, Pagination, Text } from 'components/UI';
 import { ProgressBar } from 'components';
-import AccountCard from 'components/Account/Account';
-import AccountLink from 'components/Account/AccountLink';
 import { OwnerCard } from 'components/OwnerCard/OwnerCard';
 import { Table } from 'components/Table';
 import { useApi } from 'hooks/useApi';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
-import { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { percentText } from 'utils/textUtils';
 import { TokenContext } from '../context/TokenContext';
-import { FractionalOwner, useGetRFTOwners } from '../hooks/useGetRFTOwners';
+import { useGetRFTOwners } from '../hooks/useGetRFTOwners';
+import { TableColumnProps, TableRowProps } from 'components/UI/Table/Table';
 
 const pageSize = 20;
 

@@ -1,5 +1,4 @@
-import { Heading, Text } from '@unique-nft/ui-kit';
-import { Button, Upload } from 'components/UI';
+import { Button, Upload, Heading, Text } from 'components/UI';
 import { useCallback } from 'react';
 import styled from 'styled-components';
 

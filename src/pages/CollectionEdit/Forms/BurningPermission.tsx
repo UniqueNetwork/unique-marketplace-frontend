@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { Button, useNotifications, Icon, Toggle, ButtonGroup, TooltipWrapper, Alert } from 'components/UI';
+import { Heading, Button, useNotifications, Icon, Toggle, ButtonGroup, TooltipWrapper, Alert } from 'components/UI';
 import { ConfirmUpdateCollectionModal } from './ConfirmUpdateCollectionModal';
 
 import { CollectionBurn } from './CollectionBurn';
@@ -10,7 +10,6 @@ import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { useAccounts } from 'hooks/useAccounts';
 import { useCollectionSetLimits } from './hooks/useCollectionSetLimits';
 import { FormRow } from './FormComponents';
-import { Heading } from '@unique-nft/ui-kit';
 import { SettingsRow } from 'pages/CreateCollection/components/FormComponents';
 import { StatusTransactionModal } from './StatusTransactionModal';
 import { DEFAULT_POSITION_TOOLTIP } from '../constants';

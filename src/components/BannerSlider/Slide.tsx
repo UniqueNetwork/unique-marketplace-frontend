@@ -1,8 +1,7 @@
-import { Heading } from '@unique-nft/ui-kit';
+import { FC, useEffect, useMemo, useRef } from 'react';
 import { Banner } from 'api/restApi/banners/types';
 import { get } from 'api/restApi/base';
-import { Text } from 'components/UI';
-import { FC, useEffect, useMemo, useRef } from 'react';
+import { Text, Heading } from 'components/UI';
 import styled, { css } from 'styled-components';
 import { Link } from 'react-router-dom';
 

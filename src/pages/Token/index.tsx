@@ -1,7 +1,6 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Link } from '@unique-nft/ui-kit';
-import { Icon, useNotifications } from 'components/UI';
+import { Icon, Link, useNotifications } from 'components/UI';
 import { MarketType } from 'types/MarketTypes';
 import { CommonTokenDetail } from './TokenDetail/CommonTokenDetail';
 import { TokenTrading } from './TokenDetail/TokenTrading';
@@ -13,7 +12,6 @@ import { shortcutText } from 'utils/textUtils';
 import { compareEncodedAddresses } from 'api/chainApi/utils/addressUtils';
 import styled from 'styled-components';
 import { BlueGrey500 } from 'styles/colors';
-import BundleTreeSection from './BundleTreeSection';
 import { NestedTokenBlock } from './TokenDetail/NestedTokenBlock';
 import BundleModal from './BundleModals/BundleTransferModal';
 import { NestingTokenBlock } from './TokenDetail/NestingBlock';

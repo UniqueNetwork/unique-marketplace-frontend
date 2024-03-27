@@ -1,8 +1,7 @@
 import React, { FC } from 'react';
 import styled from 'styled-components';
-import { Heading } from '@unique-nft/ui-kit';
 import { PagePaper } from 'components/PagePaper/PagePaper';
-import { Icon } from 'components/UI';
+import { Icon, Heading } from 'components/UI';
 import Icon404 from 'static/icons/404icon.svg';
 import Text404 from 'static/icons/404.svg';
 import { BlueGrey400 } from '../../styles/colors';

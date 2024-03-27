@@ -1,6 +1,6 @@
-import { Heading, Skeleton } from '@unique-nft/ui-kit';
 import { MarketableCollection } from 'api/restApi/collections/types';
-import { Text } from 'components/UI';
+import Skeleton from 'components/Skeleton/Skeleton';
+import { Text, Heading } from 'components/UI';
 import { useApi } from 'hooks/useApi';
 import { RoyaltiesFormData } from 'pages/CollectionEdit/types';
 

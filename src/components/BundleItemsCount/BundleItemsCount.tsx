@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text } from '@unique-nft/ui-kit';
+import { Text } from 'components/UI';
 import styled from 'styled-components';
 
 function BundleItemsCount({ count, testId }: { count: number, testId: string }) {

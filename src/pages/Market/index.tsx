@@ -1,8 +1,7 @@
 import { useCallback } from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
-import { Skeleton, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
-import { Select } from 'components/UI';
+import { Select, Text } from 'components/UI';
 import { Filters } from '../../components';
 import { useOffers } from '../../api/restApi/offers/offers';
 import { OffersList } from '../../components/OffersList/OffersList';
@@ -18,6 +17,7 @@ import { useMarketFilter } from './hooks/useMarketFilter';
 import { BannerSlider } from 'components/BannerSlider/BannerSlider';
 import { Slide } from 'components/BannerSlider/Slide';
 import { useGetBanners } from 'api/restApi/banners/banners';
+import Skeleton from 'components/Skeleton/Skeleton';
 
 export const MarketPage = () => {
   const { offers, offersCount, isFetching, fetchMore, fetch, attributes, attributeCounts } = useOffers();

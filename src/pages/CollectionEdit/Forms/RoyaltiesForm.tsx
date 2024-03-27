@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Heading } from '@unique-nft/ui-kit';
 
-import { Button, Text } from 'components/UI';
+import { Heading,Button, Text } from 'components/UI';
 import { RoyaltiesFormData, Royalty } from '../types';
 import { NumberInput } from 'components/NumberInput/NumberInput';
 import { ButtonsRow, FormRow, FormWrapper } from './FormComponents';
