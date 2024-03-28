@@ -7,7 +7,6 @@ import { Address } from '@unique-nft/utils';
 import { Account } from 'account/types';
 
 const gqlQuery = {
-  operationName: 'tokens_query',
   query: `query tokens_by_collection_query(\
     $where: TokenWhereParams
     $offset: Int
