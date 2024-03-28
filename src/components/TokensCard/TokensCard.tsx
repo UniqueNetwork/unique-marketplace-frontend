@@ -160,6 +160,7 @@ export const TokensCard: FC<TTokensCard> = ({
               weight='regular'
               testid={`${testid}-tokenId`}
               className='token-title'
+              color='primary'
             >
               <span>{tokenPrefix} </span>
               <span>#{tokenId}</span>
@@ -221,6 +222,9 @@ const BasicDataWrapper = styled.div`
   flex-direction: column;
   justify-content: flex-start;
   flex-grow: 1;
+  a {
+    color: var(--color-primary-500);
+  }
 `;
 
 const Description = styled.div`
