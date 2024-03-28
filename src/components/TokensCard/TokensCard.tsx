@@ -159,8 +159,8 @@ export const TokensCard: FC<TTokensCard> = ({
               size='l'
               weight='regular'
               testid={`${testid}-tokenId`}
+              color='additional-dark'
               className='token-title'
-              color='primary'
             >
               <span>{tokenPrefix} </span>
               <span>#{tokenId}</span>
