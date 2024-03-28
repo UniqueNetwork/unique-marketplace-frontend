@@ -2,12 +2,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
-import { Button, Icon, Modal, Text, useNotifications, Textarea } from 'components/UI';
+import { Button, Icon, Modal, Text, useNotifications, Textarea, Heading, Loader } from 'components/UI';
 
 import { SidePlateFooter } from './SidePlateFooter';
 import { SocialNav } from './SocialNav';
 import { AskQuestionRequest, useZendeskRequest } from 'hooks/useZendeskRequest';
-import { Heading, Loader } from '@unique-nft/ui-kit';
 import { TextInput } from 'components/TextInput/TextInput';
 
 const Wrapper = styled.div`

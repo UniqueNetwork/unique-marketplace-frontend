@@ -1,0 +1,60 @@
+$base-colors-map: (
+  color-primary-500: var(--color-primary-500),
+  color-secondary-500: var(--color-secondary-500),
+  color-blue-grey-500: var(--color-blue-grey-500),
+  color-grey-500: var(--color-grey-500),
+  color-coral-500: var(--color-coral-500),
+  color-additional-positive-500: var(--color-additional-positive-500),
+  color-additional-warning-500: var(--color-additional-warning-500),
+  color-additional-light: var(--color-additional-light),
+  color-additional-dark: var(--color-additional-dark),
+);
+
+@mixin font-body($size) {
+  font-family: var(--prop-font-family);
+  font-weight: 400;
+  @if ($size== 'xs') {
+      font-size: 12px;
+      line-height: 18px;
+  } @else if ($size== 's') {
+      font-size: 14px;
+      line-height: 21px;
+  } @else if ($size== 'm') {
+      font-size: 16px;
+      line-height: 24px;
+  } @else if ($size== 'l') {
+      font-size: 18px;
+      line-height: 26px;
+  }
+}
+
+@mixin font-weight($weight) {
+  @if ($weight== 'bold') {
+      font-weight: 700;
+  } @else if ($weight== 'regular') {
+      font-weight: 500;
+  } @else if ($weight== 'light') {
+      font-weight: 400;
+  }
+}
+
+@each $color, $value in $base-colors-map {
+  [class*='#{$color}'] {
+    color: $value;
+  }
+}
+@each $size in xs, s, m, l {
+  [class*='size-#{$size}'] {
+  @include font-body($size);
+  }
+}
+@each $weight in light, regular, bold {
+  [class*='weight-#{$weight}'] {
+  @include font-weight($weight);
+  }
+}
+@each $appearance in inline, block {
+  [class*='appearance-#{$appearance}'] {
+    display: $appearance;
+  }
+}

@@ -1,5 +1,4 @@
-import { Heading, Text } from '@unique-nft/ui-kit';
-import { Button, Upload } from 'components/UI';
+import { Button, Upload, Heading, Text } from 'components/UI';
 import { useCallback } from 'react';
 import styled from 'styled-components';
 
@@ -99,7 +98,7 @@ const UploadBannerLabelWrapper = styled.div`
   justify-content: center;
   h3.unique-font-heading.size-3 {
     margin-bottom: 0;
-    margin-top: var(--gap);
+    margin-top: var(--prop-gap);
   }
 `;
 
@@ -125,8 +124,8 @@ const BannerOverlayWrapper = styled.div`
 `;
 
 const ButtonsWrapper = styled.div`
-  margin-top: var(--gap);
+  margin-top: var(--prop-gap);
   display: flex;
-  gap: var(--gap);
+  gap: var(--prop-gap);
   
 `;

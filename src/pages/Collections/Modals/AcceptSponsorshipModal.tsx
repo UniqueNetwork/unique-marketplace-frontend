@@ -1,19 +1,16 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import { Heading } from '@unique-nft/ui-kit';
 import { Button, Text } from 'components/UI';
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
 import styled from 'styled-components/macro';
 
 import { useApi } from 'hooks/useApi';
-import { useFee } from 'hooks/useFee';
 import { useAcceptSponsorshipStages } from 'hooks/adminStages/useAcceptSponsorshipStages';
 import { useRejectSponsorshipStages } from 'hooks/adminStages/useRejectSponsorshipStages';
 import AccountCard from 'components/Account/Account';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 import StagesModal from '../../Token/Modals/StagesModal';
 import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
-
-const tokenSymbol = 'KSM';
+import { Heading } from 'components/UI';
 
 export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collection, setIsClosable, onFinish }) => {
   // TODO: calculate contract call fee
@@ -84,7 +81,7 @@ export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collecti
 
 const Content = styled.div`
   && h2 {
-    margin-bottom: calc(var(--gap) * 1.5);
+    margin-bottom: calc(var(--prop-gap) * 1.5);
   }
   @media (max-width: 567px) {
     && h2 {
@@ -99,11 +96,11 @@ const Row = styled.div`
 
 const AddressWrapper = styled.div`
   display: flex;
-  column-gap: calc(var(--gap) / 2);
+  column-gap: calc(var(--prop-gap) / 2);
   border: 1px solid var(--grey-300);
   border-radius: 4px;
-  padding: calc(var(--gap) / 2) var(--gap);
-  margin: calc(var(--gap)) 0 calc(var(--gap) * 2);
+  padding: calc(var(--prop-gap) / 2) var(--prop-gap);
+  margin: calc(var(--prop-gap)) 0 calc(var(--prop-gap) * 2);
   align-items: center;
   .unique-text {
     text-overflow: ellipsis;
@@ -118,8 +115,8 @@ const AddressWrapper = styled.div`
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
-  column-gap: var(--gap);
-  gap: calc(var(--gap) / 2);
+  column-gap: var(--prop-gap);
+  gap: calc(var(--prop-gap) / 2);
   @media (max-width: 567px) {
     justify-content: normal;
     button {

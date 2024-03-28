@@ -14,7 +14,7 @@ const PagePaperWrapper = styled.div`
   background: ${AdditionalLight};
   border-radius: 8px;
   box-shadow: 0 4px 12px rgb(0 0 0 / 8%);
-  padding: calc(var(--gap) * 2);
+  padding: calc(var(--prop-gap) * 2);
   flex: 1;
 
   @media (max-width: 1024px) {

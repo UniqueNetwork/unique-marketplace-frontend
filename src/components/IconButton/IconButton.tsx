@@ -1,7 +1,6 @@
 import React, { FC } from 'react';
-import { IconProps } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
-import { Icon } from 'components/UI/Icon/Icon';
+import { Icon, IconProps } from 'components/UI/Icon/Icon';
 
 interface IconButtonProps extends IconProps {
   onClick(): void;

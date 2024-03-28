@@ -1,6 +1,5 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Heading, Link, Skeleton } from '@unique-nft/ui-kit';
-import { Text, useNotifications, Button } from 'components/UI';
+import { Text, useNotifications, Button, Heading, Link } from 'components/UI';
 import { BN } from '@polkadot/util';
 import styled from 'styled-components';
 
@@ -18,6 +17,7 @@ import { CollectionInfoWithSchemaResponse, TokenByIdResponse, TokenIdQuery } fro
 import { FractionalAmountInput } from '../Modals/FractionalAmountInput';
 import { CollectionMode } from 'api/chainApi/types';
 import { Address } from '@unique-nft/utils';
+import Skeleton from 'components/Skeleton/Skeleton';
 
 export const UnnestModal: FC<TBundleTransferModalBodyProps> = ({ token, setIsClosable, onFinish, testid }) => {
   const { selectedAccount } = useAccounts();

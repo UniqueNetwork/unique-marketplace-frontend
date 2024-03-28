@@ -42,10 +42,10 @@ export const NestedTokenBlock: FC<NestedTokenBlockProps> = ({ token, testid, onT
 
 const ActionsWrapper = styled.div`
   display: flex;
-  column-gap: var(--gap);
+  column-gap: var(--prop-gap);
 `;
 
 const Divider = styled.div`
-  margin: calc(var(--gap) * 1.5) 0;
+  margin: calc(var(--prop-gap) * 1.5) 0;
   border-top: 1px dashed ${Grey300};
 `;

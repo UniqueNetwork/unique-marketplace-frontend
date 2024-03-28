@@ -3,20 +3,19 @@ import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { CreateTokenPayload } from '@unique-nft/sdk';
 
-import { Button, Checkbox, Text, useNotifications } from 'components/UI';
+import { Button, Checkbox, Text, useNotifications, Heading } from 'components/UI';
 import { ConfirmBtn } from 'components';
 
 import { CollectionSuggest } from './components/CollectionSuggest';
 import { TokenList } from './components/TokenList';
 import { CreateTokenDialog, NewToken, ViewMode } from './types';
 import { CreateTokensDialogs } from './components/CreateTokensDialogs';
-import { checkRequiredAttributes, mapTokensToPayload, mapTokensToPayload$1, scrollToTokenCard } from './helpers';
+import { checkRequiredAttributes, mapTokensToPayload, scrollToTokenCard } from './helpers';
 import { UploadFAB } from './components/UploadFAB';
 import { CollectionStats } from './components/CollectionStats';
 import { StatusTransactionModal } from './components/StatusTransactionModal';
 import { AttributeFilterProvider } from './contexts/AttributesFilterContext';
 import { MobileFilters } from './components/MobileFilter';
-import { MyCollection } from 'api/restApi/collections/types';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
@@ -24,14 +23,14 @@ import { sleep } from 'utils/helpers';
 import { useCreateMultipleTokens } from './hooks/useCreateMultipleTokens';
 import { useCollectionGetById } from './hooks/useCollectionGetById';
 import { useCollectionGetLastTokenId } from './hooks/useCollectionGetLastTokenId';
-import { Heading } from '@unique-nft/ui-kit';
 import { WrapperContent } from 'pages/CreateCollection/CreateCollection';
+import { GQLCollection } from 'api/scanApi/types';
 
 export const MAX_MINT_TOKENS = 300;
 
 export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) => {
-  const [collection, setCollection] = useState<MyCollection>();
-  const [collectionToSubmit, setCollectionToSubmit] = useState<MyCollection>();
+  const [collection, setCollection] = useState<GQLCollection>();
+  const [collectionToSubmit, setCollectionToSubmit] = useState<GQLCollection>();
   const collectionBlockRef = useRef<HTMLDivElement>(null);
   const deviceSize = useDeviceSize();
 
@@ -66,11 +65,11 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
   } = useCollectionGetById(collection?.id);
   const { tokenId: lastTokenId } = lastTokenIdDto || {};
 
-  const { submitWaitResult, getFee, feeFormatted, feeLoading } =
+  const { submitWaitResult } =
     useCreateMultipleTokens();
 
   const leftTokens = collection?.tokenLimit
-    ? collection.tokenLimit - (collection?.tokenCount || 0) - tokens.length
+    ? collection.tokenLimit - (collection?.tokensCount || 0) - tokens.length
     : 'Unlimited';
 
   const selected = useMemo(() => {
@@ -183,7 +182,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
     info(`${files.length} files added`);
   };
 
-  const onChangeCollection = (_collection: MyCollection) => {
+  const onChangeCollection = (_collection: GQLCollection) => {
     if (_collection === collection) {
       return;
     }
@@ -491,7 +490,7 @@ const TokensCounterWrapper = styled.div`
   top: 32px;
   display: flex;
   align-items: center;
-  gap: var(--gap);
+  gap: var(--prop-gap);
 
   button.unique-button.ghost {
     padding: 0;

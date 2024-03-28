@@ -1,7 +1,7 @@
 import { MetamaskAccountName } from 'account/MetamaskWallet';
 import { BaseActionBtn } from './BaseActionBtn';
-import { ButtonProps } from '@unique-nft/ui-kit';
 import { useAccounts } from 'hooks/useAccounts';
+import { ButtonProps } from 'components/UI/Button/Button';
 
 export const ConfirmBtn = (props: ButtonProps & { tooltip?: string | null }) => {
   const { selectedAccount } = useAccounts();

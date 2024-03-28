@@ -1,10 +1,7 @@
-import { Account } from 'account/types';
 import { post } from 'api/restApi/base';
+import config from 'config';
 import { useApi } from 'hooks/useApi';
-import { useCallback, useEffect, useState } from 'react';
-import { CollectionItem } from '../types';
-import config from '../../../config';
-import { Address } from '@unique-nft/utils';
+import { useEffect, useState } from 'react';
 
 const gqlQuery = {
   operationName: 'attributes_by_collection_id',
@@ -38,7 +35,7 @@ export type AttributeStatistic = {
   }[]
 }
 
-export const useAttributes = (collectionId: number) => {
+export const useQueryAttributes = (collectionId: number) => {
   const { settings, currentChainId, chainProperties } = useApi();
   const [isFetching, setIsFetching] = useState(false);
   const [attributes, setAttributes] = useState<AttributeStatistic[]>([]);

@@ -102,7 +102,7 @@ const Wrapper = styled.div`
     box-sizing: border-box;
     border: 1px solid var(--color-grey-300);
     background: white;
-    border-radius: calc(var(--gap) / 4);
+    border-radius: calc(var(--prop-gap) / 4);
     width: 100%;
     padding: 4px 8px;
     min-height: 30px;

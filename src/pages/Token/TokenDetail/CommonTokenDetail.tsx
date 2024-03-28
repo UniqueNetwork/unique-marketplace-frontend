@@ -1,7 +1,6 @@
-import { Heading, Text } from '@unique-nft/ui-kit';
 import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { Dropdown, Icon } from 'components/UI';
+import { Heading, Dropdown, Icon } from 'components/UI';
 import { Picture } from 'components';
 import TokensBandleCard from 'components/BundleTree/NestedSection/TokenCard';
 import { AttributesBlock } from './AttributesBlock';
@@ -298,16 +297,16 @@ const CommonTokenDetailStyled = styled.div`
 
   @media (max-width: 767px) {
     flex-direction: column;
-    row-gap: var(--gap);
+    row-gap: var(--prop-gap);
     & .unique-modal-wrapper .unique-modal {
-      width: calc(520px - (var(--gap) * 3));
+      width: calc(520px - (var(--prop-gap) * 3));
     }
   }
   
   @media (max-width: 567px) {
     & .unique-modal-wrapper .unique-modal {
       padding: 24px 16px;
-      width: calc(304px - (var(--gap) * 3));
+      width: calc(304px - (var(--prop-gap) * 3));
     }
   }
 `;
@@ -326,7 +325,7 @@ const PictureWrapper = styled.div`
   justify-content: center;
   align-items: center;
   width: 536px;
-  margin-right: calc(var(--gap) * 2);
+  margin-right: calc(var(--prop-gap) * 2);
   flex-direction: column;
   &::before {
     content: '';
@@ -347,11 +346,11 @@ const PictureWrapper = styled.div`
   }
 
   @media (max-width: 767px) {
-    width: calc(100vw - var(--gap) * 3);
+    width: calc(100vw - var(--prop-gap) * 3);
   }
 
   @media (max-width: 567px) {
-    width: calc(100vw - var(--gap) * 2);
+    width: calc(100vw - var(--prop-gap) * 2);
   }
   
   .picture {

@@ -1,16 +1,15 @@
-import { ReactNode, useState } from 'react';
+import { useState, PropsWithChildren } from 'react';
 import styled from 'styled-components';
 import { Icon } from '../Icon/Icon';
 
-export interface ModalProps {
+export type ModalProps = PropsWithChildren<{
   align?: 'top' | 'middle';
-  children: ReactNode;
   isVisible: boolean;
   isClosable?: boolean;
   isGlobalBackdrop?: boolean
   isFlexible?: boolean
   onClose?(): void;
-}
+}>;
 
 export const Modal = ({
     children,

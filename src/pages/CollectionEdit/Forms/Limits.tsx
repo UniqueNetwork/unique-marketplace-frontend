@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { Alert, TooltipWrapper, Button, InputText, Text, useNotifications, ButtonGroup } from 'components/UI';
+import { Heading, Alert, TooltipWrapper, Button, InputText, Text, useNotifications, ButtonGroup } from 'components/UI';
 
 import { SettingsSavingProps } from './types';
 import { Form, FormBody, SettingsRow } from 'pages/CreateCollection/components/FormComponents';
 import { FormRow } from './FormComponents';
-import { Heading } from '@unique-nft/ui-kit';
 import { maxTokenLimit } from 'pages/CreateNFT/constants';
 import { FeeMessage } from 'components';
 import { StatusTransactionModal } from './StatusTransactionModal';

@@ -7,9 +7,7 @@ import { Attribute, AttributeOption, NewToken } from '../types';
 import { AttributesForm, LabelText } from './AttributesForm';
 import { TokenBasicCard } from './TokenBasicCard';
 import { FormGrid } from './TokenCard';
-import { TokenTypeEnum } from 'pages/MyTokens/types';
-import { Button, InputAmount, Modal } from 'components/UI';
-import { Heading } from '@unique-nft/ui-kit';
+import { Button, InputAmount, Modal, Heading } from 'components/UI';
 import { ModalFooter } from './ModalFooter';
 import { AttributeSchemaDto } from '@unique-nft/sdk';
 
@@ -19,7 +17,7 @@ interface AttribytesModalProps {
   attributesSchema: Record<number, AttributeSchemaDto> | undefined;
   onChange(tokens: NewToken[]): void;
   onClose(): void;
-  mode?: TokenTypeEnum;
+  mode?: 'NFT' | 'ReFungible' | 'Fungible';
 }
 
 export const AttributesModal = ({
@@ -48,7 +46,7 @@ export const AttributesModal = ({
           }
           return attribute;
         }),
-        ...(mode === TokenTypeEnum.RFT
+        ...(mode === 'ReFungible'
           ? {
               totalFractions: (totalFractions as { hasDifferentValues: boolean })
                 .hasDifferentValues
@@ -89,7 +87,7 @@ export const AttributesModal = ({
     );
     setAttributes(summaryAttributes);
     setSummaryAttributes(summaryAttributes);
-    if (mode === TokenTypeEnum.RFT) {
+    if (mode === 'ReFungible') {
       let totalFractionsValue: Attribute;
       const isDifferent = tokens.some(({ totalFractions }, tokenIndex) => {
         if (tokenIndex === 0) {
@@ -125,7 +123,7 @@ export const AttributesModal = ({
           </Slide>
         </TokensImages>
         <FormGrid>
-          {mode === TokenTypeEnum.RFT && (
+          {mode === 'ReFungible' && (
             <>
               <LabelText>Total fractions</LabelText>
               <InputAmount

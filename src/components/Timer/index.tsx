@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Heading } from '@unique-nft/ui-kit';
 import { useCalculateTimeLeft } from '../../hooks/useCalculateTimeLeft';
+import { Heading } from 'components/UI';
 
 interface Props {
   time: string;

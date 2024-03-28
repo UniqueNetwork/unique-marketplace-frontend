@@ -1,11 +1,10 @@
 import { FC } from 'react';
 import styled from 'styled-components';
-import { Heading, Text, Link as UILink } from '@unique-nft/ui-kit';
+import { Heading, Text } from 'components/UI';
 import noCollections from '../../../static/icons/no-collections.svg';
 import { CollectionCover } from 'components/CollectionCover/CollectionCover';
 import { Link } from 'react-router-dom';
 import { useApi } from 'hooks/useApi';
-import config from 'config';
 
 interface ICollectionsCardProps {
   id: number;

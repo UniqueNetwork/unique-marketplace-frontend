@@ -1,17 +1,19 @@
-import { Offer } from 'api/restApi/offers/types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { mockWearables } from './constants';
-import { useApi } from 'hooks/useApi';
 import { Slide } from 'react-slideshow-image';
 import 'react-slideshow-image/dist/styles.css';
+import styled from 'styled-components';
+
+import { Offer } from 'api/restApi/offers/types';
+import { useOffers } from 'api/restApi/offers/offers';
+import { useApi } from 'hooks/useApi';
+import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
+
 import { TokensCard } from 'components';
 import { MyToken } from 'pages/MyTokens/types';
-import { useOffers } from 'api/restApi/offers/offers';
-import styled from 'styled-components';
-import { Button, Heading } from '@unique-nft/ui-kit';
 import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 import { useNavigate } from 'react-router-dom';
-import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
+import { mockWearables } from './constants';
+import { Button, Heading } from 'components/UI';
 
 interface IProps {
   offer?: Offer | undefined

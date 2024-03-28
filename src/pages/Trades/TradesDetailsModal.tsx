@@ -1,7 +1,6 @@
 import React, { FC, useEffect, useState } from 'react';
-import { Heading, TableRowProps, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
-import { Icon } from 'components/UI/Icon/Icon';
+import { Heading, Text, Icon } from 'components/UI';
 import { TokenComponent } from './TokenComponent/TokenComponent';
 import { AdditionalDark, BlueGrey600, Grey500 } from 'styles/colors';
 import { timestampTableFormat } from 'utils/timestampUtils';
@@ -12,6 +11,7 @@ import { Bid, Trade } from 'api/restApi/trades/types';
 import { formatBalance } from 'utils/textUtils';
 import Winner from 'static/icons/winner.svg';
 import { Modal } from 'components/UI';
+import { TableRowProps } from 'components/UI/Table/Table';
 
 export interface IConfirmModalProps {
   trade: Trade | null
@@ -126,7 +126,7 @@ const TimeCell = styled.div`
 const BidderCell = styled.div`
   display: flex;
   img {
-    margin-left: var(--gap);
+    margin-left: var(--prop-gap);
   }
 `;
 

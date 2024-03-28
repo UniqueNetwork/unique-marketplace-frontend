@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { Icon, InputText, Select, Text } from 'components/UI';
 
 import { Attribute, AttributeOption } from '../types';
-import { SelectOptionProps } from '@unique-nft/ui-kit';
+import { SelectOptionProps } from 'components/UI/types';
 
 interface PropertyRowProps {
   name: string;

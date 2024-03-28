@@ -1,5 +1,4 @@
-import { Heading } from '@unique-nft/ui-kit';
-import { Alert, Button, Loader, Text } from 'components/UI';
+import { Alert, Button, Loader, Text, Heading } from 'components/UI';
 import { Modal, ModalProps } from 'components/UI/Modal';
 import { ReactNode } from 'react';
 import styled from 'styled-components';
@@ -77,8 +76,8 @@ const StagesWrapper = styled.div`
   display: grid;
   grid-template-columns: 24px 1fr;
   align-items: flex-start;
-  grid-column-gap: var(--gap);
-  grid-row-gap: var(--gap);
+  grid-column-gap: var(--prop-gap);
+  grid-row-gap: var(--prop-gap);
   align-items: center;
 `;
 
@@ -90,8 +89,8 @@ const StageDescription = styled.div`
 const ButtonsWrapper = styled.div`
   display: flex;
   justify-content: space-between;
-  margin-top: calc(var(--gap) * 2);
-  gap: calc(var(--gap) * 2);
+  margin-top: calc(var(--prop-gap) * 2);
+  gap: calc(var(--prop-gap) * 2);
 `;
 
 const AlertStyled = styled(Alert)`

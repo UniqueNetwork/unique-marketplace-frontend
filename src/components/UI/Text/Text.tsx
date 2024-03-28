@@ -1,7 +1,8 @@
 import { ForwardedRef, forwardRef, ReactNode } from 'react';
 import classNames from 'classnames';
-import { ComponentProps } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
+import { ComponentProps } from '../types';
+import './Text.scss';
 
 export interface ITextBaseProps {
   children: ReactNode;
@@ -45,24 +46,5 @@ export const Text = forwardRef(({
 });
 
 const TextStyled = styled.span`
-  @each $color, $value in $base-colors-map {
-    &[class*='#{$color}'] {
-      color: $value;
-    }
-  }
-  @each $size in xs, s, m, l {
-    &[class*='size-#{$size}'] {
-    @include font-body($size);
-    }
-  }
-  @each $weight in light, regular, bold {
-    &[class*='weight-#{$weight}'] {
-    @include font-weight($weight);
-    }
-  }
-  @each $appearance in inline, block {
-    &[class*='appearance-#{$appearance}'] {
-      display: $appearance;
-    }
-  }
+  
 `;

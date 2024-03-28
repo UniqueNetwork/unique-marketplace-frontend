@@ -1,7 +1,6 @@
 import React, { useCallback } from 'react';
-import { TableColumnProps, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
-import { Icon } from 'components/UI';
+import { Icon, Text } from 'components/UI';
 import { AddressComponent } from './AddressComponent/AddressComponent';
 import { timestampTableFormat } from '../../utils/timestampUtils';
 import { TokenComponent } from './TokenComponent/TokenComponent';
@@ -10,6 +9,7 @@ import { BlueGrey600, Grey300, Grey500, Secondary400 } from '../../styles/colors
 import { TokenDescription, Trade } from '../../api/restApi/trades/types';
 import { DeviceSize } from '../../hooks/useDeviceSize';
 import { Link } from 'react-router-dom';
+import { TableColumnProps } from 'components/UI/Table/Table';
 
 type ColumnProps = {
   deviceSize: DeviceSize,
@@ -74,7 +74,7 @@ const getTradesColumns = ({ deviceSize, onShowTradesDetailsModal, currentChainId
   {
     title: '',
     width: '56px',
-    render: (data, row: Trade) => <ShowTradesDetailsButton
+    render: (_, row: Trade) => <ShowTradesDetailsButton
       status={row.status}
       trade={row}
       onShowTradesDetailsModal={onShowTradesDetailsModal}
@@ -116,20 +116,6 @@ const Header = styled.span`
   }
 `;
 
-const HeaderCutted = styled.div`
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-  span {
-    font-size: 16px;
-    line-height: 24px;
-    color: ${Grey500};
-  }
-  @media (max-width: 768px) {
-    margin-bottom: 4px;
-  }
-`;
-
 const StyledButton = styled.button`
   background: transparent;
   cursor: pointer;
@@ -143,7 +129,7 @@ const StyledButton = styled.button`
   }
   @media (max-width: 768px) {
     position: absolute;
-    top: var(--gap);
+    top: var(--prop-gap);
     right: 0;
   }
 `;

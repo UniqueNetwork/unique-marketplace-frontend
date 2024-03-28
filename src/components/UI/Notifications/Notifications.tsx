@@ -1,8 +1,8 @@
 import React, { createContext, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import classNames from 'classnames';
 import { Icon, Text } from '../index';
-import { IconProps } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
+import { IconProps } from '../Icon/Icon';
 
 export type NotificationSeverity = 'warning' | 'error' | 'info';
 

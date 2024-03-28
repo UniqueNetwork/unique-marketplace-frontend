@@ -1,8 +1,8 @@
+import { Tooltip, TooltipAlign } from 'components/UI/Tooltip/Tooltip';
 import React, { FC, useCallback, useRef, useState } from 'react';
 import questionFilledIcon from 'static/icons/question-fill.svg';
 import questionIcon from 'static/icons/question.svg';
 import styled from 'styled-components';
-import { Tooltip, TooltipAlign } from '@unique-nft/ui-kit';
 
 interface IProps {
   align?: TooltipAlign;

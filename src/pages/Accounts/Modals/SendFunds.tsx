@@ -1,10 +1,9 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Heading, SelectOptionProps } from '@unique-nft/ui-kit';
-import { Text, useNotifications, Dropdown, Button, Modal } from 'components/UI';
+import { Text, useNotifications, Dropdown, Button, Modal, Heading } from 'components/UI';
 import { BN } from '@polkadot/util';
 import styled from 'styled-components';
 
-import { toChainFormatAddress, validateAddress } from 'api/chainApi/utils/addressUtils';
+import { validateAddress } from 'api/chainApi/utils/addressUtils';
 import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
 import { useTransferFundsStages } from 'hooks/accountStages/useTransferFundsStages';
@@ -22,6 +21,7 @@ import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { Account } from 'account/types';
 import { FeeMessage } from 'components';
 import { useAccountsFilter } from 'hooks/useAccountsFilter';
+import { SelectOptionProps } from 'components/UI/types';
 
 export type TransferFundsModalProps = {
   isVisible: boolean
@@ -353,22 +353,22 @@ const SenderSelectWrapper = styled.div`
     .dropdown-options {
       max-height: 229px;
       overflow-y: auto;
-      row-gap: calc(var(--gap) / 4);
+      row-gap: calc(var(--prop-gap) / 4);
     }
   }
   & .icon-triangle{
     position: absolute;
     top: calc(50% - 4px);
-    right: calc(var(--gap) / 2);
+    right: calc(var(--prop-gap) / 2);
   }
 `;
 
 const AddressWrapper = styled.div`
   display: flex;
-  column-gap: calc(var(--gap) / 2);
+  column-gap: calc(var(--prop-gap) / 2);
   border: 1px solid var(--grey-300);
   border-radius: 4px;
-  padding: calc(var(--gap) / 2) var(--gap);
+  padding: calc(var(--prop-gap) / 2) var(--prop-gap);
   align-items: center;
   cursor: pointer;
   .unique-text {
@@ -383,27 +383,27 @@ const AddressWrapper = styled.div`
 const AddressOptionWrapper = styled.div`
   display: flex;
   align-items: center;
-  column-gap: calc(var(--gap) / 2);
+  column-gap: calc(var(--prop-gap) / 2);
 `;
 
 const TotalWrapper = styled.div`
   display: flex;
   justify-content: flex-start;
-  column-gap: var(--gap);
-  margin-top: calc(var(--gap) * 1.5);
+  column-gap: var(--prop-gap);
+  margin-top: calc(var(--prop-gap) * 1.5);
 `;
 
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
-  column-gap: var(--gap);
-  margin-top: calc(var(--gap) * 1.5);
+  column-gap: var(--prop-gap);
+  margin-top: calc(var(--prop-gap) * 1.5);
 `;
 
 const RecipientSelectWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  row-gap: calc(var(--gap) / 2);
+  row-gap: calc(var(--prop-gap) / 2);
   .unique-input-text {
     width: 100%;
   }
@@ -415,20 +415,20 @@ const AmountWrapper = styled.div`
 `;
 
 const AmountInputWrapper = styled.div`
-  margin-top: calc(var(--gap) * 1.5);
+  margin-top: calc(var(--prop-gap) * 1.5);
   .unique-input-text, div {
     width: 100%;
   }
 `;
 
 const ErrorWrapper = styled(Text)`
-  margin-top: calc(var(--gap) / 2);
+  margin-top: calc(var(--prop-gap) / 2);
   display: block;
 `;
 
 const LowBalanceWrapper = styled(AmountWrapper)`
   position: absolute;
-  right: calc(var(--gap) * 1.5);
+  right: calc(var(--prop-gap) * 1.5);
   span {
     color: ${Coral700} !important;
   }

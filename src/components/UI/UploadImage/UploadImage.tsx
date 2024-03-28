@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Icon } from '../';
 
 import './Upload.scss';
-import { ComponentProps } from '@unique-nft/ui-kit';
+import { ComponentProps } from '../types';
 
 export interface IUploadBaseProps {
     onChange?: (data: { url: string; file: Blob } | null) => void;

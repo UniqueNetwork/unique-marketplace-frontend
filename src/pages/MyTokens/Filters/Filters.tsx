@@ -6,17 +6,17 @@ import { AttributeItem, PriceRange, MyTokensFilterState, MyTokensStatuses, Filte
 import StatusFilter from './StatusFilter';
 import CollectionsFilter from './CollectionsFilter';
 import { MixedMyTokenAndOffer } from '../types';
-import { MyCollection } from 'api/restApi/collections/types';
 import { TypeOfAssets, TypeOfCustomizableNFTs } from 'components/Filters/types';
 import TypeOfAssetsFilter from 'components/Filters/TypeOfAssets';
 import TypeOfCustomizablesFilter from 'components/Filters/TypeOfCustomizables';
+import { GQLCollection } from 'api/scanApi/types';
 
 type FilterProps = {
   value: MyTokensFilterState | null
   onFilterChange: FilterChangeHandler<MyTokensFilterState>
   tokens: MixedMyTokenAndOffer[]
   featuredTokens: MixedMyTokenAndOffer[]
-  collections: MyCollection[]
+  collections: GQLCollection[]
   isFetchingTokens: boolean
   testid: string
   featuredTokensForAttributeCounts: MixedMyTokenAndOffer[]
@@ -85,7 +85,7 @@ const FiltersStyled = styled.div`
   width: 235px;
   display: flex;
   flex-direction: column;
-  row-gap: calc(var(--gap) * 2);
+  row-gap: calc(var(--prop-gap) * 2);
   @media (max-width: 1024px) {
     width: 100%;
   }

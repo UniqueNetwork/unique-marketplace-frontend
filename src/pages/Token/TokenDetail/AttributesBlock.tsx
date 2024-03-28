@@ -1,11 +1,11 @@
 import React, { FC, useMemo } from 'react';
 import styled from 'styled-components';
-import { Heading, Text } from '@unique-nft/ui-kit';
+import { Heading, Text } from 'components/UI';
 import { Trait } from './Trait';
 import IconWithHint from '../../../components/IconWithHint/IconWithHint';
 import { DecodedAttributeDto } from '@unique-nft/sdk';
-import { useAttributes } from '../hooks/useAttributes';
-import { useGetCollectionTokensCount } from '../hooks/useGetCollectionTokensCount';
+import { useQueryAttributes } from 'api/scanApi/useQueryAttributes';
+import { useQueryCollectionTokensCount } from 'api/scanApi/useQueryCollectionTokensCount';
 
 interface IProps {
   attributes: DecodedAttributeDto[];
@@ -13,8 +13,8 @@ interface IProps {
 }
 
 export const AttributesBlock: FC<IProps> = ({ attributes, collectionId }: IProps) => {
-  const { tokensCount } = useGetCollectionTokensCount(collectionId);
-  const { attributes: attributeStatistics, isFetching } = useAttributes(collectionId);
+  const { tokensCount } = useQueryCollectionTokensCount(collectionId);
+  const { attributes: attributeStatistics, isFetching } = useQueryAttributes(collectionId);
 
   const statistics = useMemo(() => {
     return attributeStatistics.reduce<Record<string, { count: number, value: string }[]>>((acc, { name, values }) => {
@@ -103,7 +103,7 @@ const HeadingWrapper = styled.div`
   display: flex;
   align-items: self-end;
   margin-bottom: 16px;
-  column-gap: calc(var(--gap) / 2);
+  column-gap: calc(var(--prop-gap) / 2);
   & > h4.unique-font-heading {
     margin-bottom: 0px;
   }

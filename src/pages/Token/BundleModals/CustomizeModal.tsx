@@ -1,27 +1,32 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Button, Pagination, Text, useNotifications } from 'components/UI';
+import { Button, Pagination, Text, useNotifications, Heading, Loader } from 'components/UI';
 import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
 import { TBundleTransferModalBodyProps } from './BundleTransferModal';
 import styled from 'styled-components';
 import { useApi } from 'hooks/useApi';
-import { Heading, Loader } from '@unique-nft/ui-kit';
 import { TokensCard } from './components/TokenCard';
 import { TokensMedia } from './components/TokenMedia';
-import { useGetTokensForNesting } from './hooks/useGetTokensForNesting';
-import { TokenItem } from '../types';
 import { StatusTransactionModal } from './components/StatusTransactionModal';
 import { Address } from '@unique-nft/utils';
 import { useAccounts } from 'hooks/useAccounts';
 import { CollectionMode } from 'api/chainApi/types';
 import { WearableOffersModal } from './WearableOffersModal';
+import { useQueryTokens } from 'api/scanApi/useQueryTokens';
+import { GQLToken } from 'api/scanApi/types';
 
-export const CustomizeModal = ({ token, onFinish, testid, selectedWearable, setIsClosable }: TBundleTransferModalBodyProps & { selectedWearable?: TokenItem }) => {
+export const CustomizeModal = ({
+  token,
+  onFinish,
+  testid,
+  selectedWearable,
+  setIsClosable
+}: TBundleTransferModalBodyProps & { selectedWearable?: GQLToken }) => {
   const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse | null>(null);
-  const [tokens, setTokens] = useState<TokenItem[]>([]);
+  const [tokens, setTokens] = useState<GQLToken[]>([]);
   const [total, setTotal] = useState<number>(0);
-  const [nestedTokens, setNestedTokens] = useState<TokenItem[]>([]);
-  const [selectedTokens, setSelectedTokens] = useState<Record<string, TokenItem | undefined>>({});
+  const [nestedTokens, setNestedTokens] = useState<GQLToken[]>([]);
+  const [selectedTokens, setSelectedTokens] = useState<Record<string, GQLToken | undefined>>({});
   const [searchText, setSearchText] = useState<string>();
   const [page, setPage] = useState<number>(0);
   const [isFetching, setIsFetching] = useState(false);
@@ -34,9 +39,7 @@ export const CustomizeModal = ({ token, onFinish, testid, selectedWearable, setI
 
   const { selectedAccount } = useAccounts();
 
-  const { fetchTokens, fetchNestedTokens, isFetching: isFetchingTokens } = useGetTokensForNesting({
-    parentToken: token
-  });
+  const { fetch: fetchTokens, fetchTokensForNesting, isFetching: isFetchingTokens } = useQueryTokens();
 
   const fetch = useCallback(async () => {
     if (!api?.collection || !api?.nft) return;
@@ -45,9 +48,10 @@ export const CustomizeModal = ({ token, onFinish, testid, selectedWearable, setI
 
     setCollection(collection);
 
-    const nestedTokens = await fetchNestedTokens();
+    const parentAddress = Address.nesting.idsToAddress(token.collectionId, token.tokenId);
+    const [nestedTokens] = await fetchTokens({ owner: parentAddress });
     setNestedTokens(nestedTokens);
-    const [tokens, total] = await fetchTokens({
+    const [tokens, total] = await fetchTokensForNesting({
       page: 0,
       restrictedCollections: collection?.permissions?.nesting?.restricted,
       nestedTokens
@@ -62,14 +66,14 @@ export const CustomizeModal = ({ token, onFinish, testid, selectedWearable, setI
       }
     : {};
 
-    setSelectedTokens(nestedTokens.reduce<Record<string, TokenItem>>((acc, _token) => {
+    setSelectedTokens(nestedTokens.reduce<Record<string, GQLToken>>((acc, _token) => {
       if (_token.parent === `${token.collectionId}_${token.tokenId}`) {
         acc[`${_token.collectionId}_${_token.tokenId}`] = _token;
       }
       return acc;
      }, initialSelectedTokens));
     setIsFetching(false);
-  }, [api?.collection, api?.nft, token.collectionId, token.tokenId]);
+  }, [api?.collection, api?.nft, fetchTokens, fetchTokensForNesting, selectedWearable, token.collectionId, token.tokenId]);
 
   useEffect(() => {
     if (!api?.collection || !api?.nft) return;
@@ -101,7 +105,7 @@ export const CustomizeModal = ({ token, onFinish, testid, selectedWearable, setI
     setStagesModalIsVisible(true);
     const nestedIndexes = nestedTokens.map(({ collectionId, tokenId }) => `${collectionId}_${tokenId}`);
     const tokensToNest = Object.values(selectedTokens)
-      .filter((token) => !!token && !nestedIndexes.includes(`${token.collectionId}_${token.tokenId}`)) as TokenItem[];
+      .filter((token) => !!token && !nestedIndexes.includes(`${token.collectionId}_${token.tokenId}`)) as GQLToken[];
 
     const tokensToUnnest = nestedTokens.filter((token) => {
       return !selectedTokens[`${token.collectionId}_${token.tokenId}`];
@@ -148,7 +152,7 @@ export const CustomizeModal = ({ token, onFinish, testid, selectedWearable, setI
 
   const onPageChange = useCallback(async (page: number) => {
     setPage(page);
-    const [tokens, total] = await fetchTokens({
+    const [tokens, total] = await fetchTokensForNesting({
       page,
       searchText,
       restrictedCollections: collection?.permissions?.nesting?.restricted,
@@ -167,7 +171,7 @@ export const CustomizeModal = ({ token, onFinish, testid, selectedWearable, setI
     setIsFetchingFee(true);
     const nestedIndexes = nestedTokens.map(({ collectionId, tokenId }) => `${collectionId}_${tokenId}`);
     const tokensToNest = Object.values(selectedTokens)
-      .filter((token) => !!token && !nestedIndexes.includes(`${token.collectionId}_${token.tokenId}`)) as TokenItem[];
+      .filter((token) => !!token && !nestedIndexes.includes(`${token.collectionId}_${token.tokenId}`)) as GQLToken[];
 
     const tokensToUnnest = nestedTokens.filter((token) => {
       return !selectedTokens[`${token.collectionId}_${token.tokenId}`];
@@ -309,13 +313,13 @@ const Content = styled.div`
 const CreateBundleModalWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--gap);
+  gap: var(--prop-gap);
 `;
 
 const NestingWrapper = styled.div`
   display: flex;
   flex-direction: row;
-  gap: var(--gap);
+  gap: var(--prop-gap);
   @media (max-width: 768px) {
     flex-direction: column;
   }
@@ -324,7 +328,7 @@ const NestingWrapper = styled.div`
 const ActionsWrapper = styled.div`
   display: flex;
   flex-direction: row;
-  gap: var(--gap);
+  gap: var(--prop-gap);
   justify-content: flex-end;
   align-items: center;
   &>div {
@@ -338,7 +342,7 @@ const ActionsWrapper = styled.div`
 const TokenWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: calc(var(--gap) / 2);
+  gap: calc(var(--prop-gap) / 2);
 `;
 
 const TokenMediaWrapper = styled.div`
@@ -356,7 +360,7 @@ const TokenMediaWrapper = styled.div`
 const EquipsSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--gap);
+  gap: var(--prop-gap);
 `;
 
 const EquipsListWrapper = styled.div`

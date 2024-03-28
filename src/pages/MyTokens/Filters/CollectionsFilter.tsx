@@ -1,6 +1,5 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Text } from '@unique-nft/ui-kit';
-import { Checkbox } from 'components/UI';
+import { Checkbox, Text } from 'components/UI';
 import styled from 'styled-components';
 
 import { Accordion } from 'components/Accordion/Accordion';
@@ -11,10 +10,10 @@ import { AttributeItem } from 'components/Filters/types';
 import { CollectionCover } from 'components/CollectionCover/CollectionCover';
 import { Attribute, AttributeCount } from 'api/restApi/offers/types';
 import { getAttributesCountFromTokens, getAttributesFromTokens } from './utils/attributes';
-import { MixedMyTokenAndOffer } from '../types';
-import { MyCollection } from 'api/restApi/collections/types';
 import { getIpfsUriByImagePath } from 'utils/urlUtils';
 import SearchField from 'components/SearchField/SearchField';
+import { GQLCollection } from 'api/scanApi/types';
+import { MixedMyTokenAndOffer } from '../types';
 
 interface CollectionsFilterProps {
   value?: { collections?: number[], attributes?: { key: string, attribute: string }[], attributeCounts?: number[] } | null
@@ -24,7 +23,7 @@ interface CollectionsFilterProps {
   testid: string
   featuredTokens: MixedMyTokenAndOffer[]
   tokens: MixedMyTokenAndOffer[]
-  collections: MyCollection[]
+  collections: GQLCollection[]
   isFetchingTokens: boolean
   featuredTokensForAttributeCounts: MixedMyTokenAndOffer[]
 }
@@ -139,11 +138,11 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({
 
 const CollectionFilterWrapper = styled.div`
   position: relative;
-  margin-top: var(--gap);
+  margin-top: var(--prop-gap);
   padding-top: 2px;
   display: flex;
   flex-direction: column;
-  row-gap: var(--gap);
+  row-gap: var(--prop-gap);
   min-height: 50px;
   max-height: 400px;
   overflow-y: auto;
@@ -156,12 +155,12 @@ const CollectionFilterWrapper = styled.div`
 
 const CheckboxWrapper = styled.div`
   display: flex;
-  column-gap: calc(var(--gap) / 4);
+  column-gap: calc(var(--prop-gap) / 4);
   align-items: flex-start;
 `;
 
 const SearchFieldWrapper = styled.div`
-  margin-top: calc(var(--gap) / 2);
+  margin-top: calc(var(--prop-gap) / 2);
 `;
 
 export default CollectionsFilter;

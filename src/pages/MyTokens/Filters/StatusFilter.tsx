@@ -73,10 +73,10 @@ const StatusFilter: FC<StatusFilterProps> = ({ value, onChange, testid }) => {
 };
 
 const StatusFilterWrapper = styled.div`
-  padding-top: var(--gap);
+  padding-top: var(--prop-gap);
   display: flex;
   flex-direction: column;
-  row-gap: var(--gap);
+  row-gap: var(--prop-gap);
 `;
 
 export default StatusFilter;

@@ -17,7 +17,7 @@ export type TokenCardCommonProps = {
   onOpenModifyModal?(token: NewToken): void;
   tokenPrefix: string;
   attributesSchema: Record<number, AttributeSchemaDto>;
-  mode: TokenTypeEnum | undefined;
+  mode: 'NFT' | 'Fungible' | 'ReFungible' | undefined;
   viewMode: ViewMode;
 };
 
@@ -118,7 +118,7 @@ export const TokenCard = ({
       </TokenBasicWrapper>
       {viewMode === ViewMode.list && (
         <FormGrid>
-          {mode === TokenTypeEnum.RFT && (
+          {mode === 'ReFungible' && (
             <>
               <LabelText>Total fractions</LabelText>
               <InputText
@@ -250,7 +250,7 @@ const TokenCardActions = styled.div`
 
 const ButtonsWrapper = styled.div`
   display: flex;
-  gap: calc(var(--gap) / 2);
+  gap: calc(var(--prop-gap) / 2);
 `;
 
 const TokenLinkTitle = styled(Text).attrs({ appearance: 'block', size: 'l' })`

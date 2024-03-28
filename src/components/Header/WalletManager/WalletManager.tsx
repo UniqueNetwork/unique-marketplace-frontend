@@ -3,20 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import config from 'config';
 
-import { BN } from '@polkadot/util';
-
-import { INetwork } from '@unique-nft/ui-kit';
-
 import { formatBalance } from 'utils/textUtils';
-import { Text, useNotifications, Button } from 'components/UI';
-import { AccountsManager, IAccount } from 'components/UI/widgets/AccountsManager';
+import { useNotifications, Button } from 'components/UI';
+import { AccountsManager, IAccount, INetwork } from 'components/UI/widgets/AccountsManager';
 import { Avatar } from 'components/Avatar/Avatar';
 import GetKSMModal from 'components/GetKSMModal/GetKSMModal';
 import { useAccounts } from 'hooks/useAccounts';
 import { useApi } from 'hooks/useApi';
 
 import DefaultAvatar from 'static/icons/default-avatar.svg';
-import { TWithdrawBid } from 'api/restApi/auction/types';
 import BalanceSkeleton from '../../Skeleton/BalanceSkeleton';
 import { ChainSwitcher } from './ChainSwitcher/ChainSwithcher';
 import { ConnectWalletModalContext } from 'account/ConnectWalletModalContext';

@@ -1,8 +1,7 @@
 import React, { FC, useMemo, useRef } from 'react';
-import { Text } from '@unique-nft/ui-kit';
 import { generatePath, Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { Icon } from 'components/UI/Icon/Icon';
+import { Icon, Text } from 'components/UI';
 import { Offer } from 'api/restApi/offers/types';
 import { formatBalance } from 'utils/textUtils';
 import { countNestedChildren, stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
@@ -35,11 +34,6 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
   } = offer?.collectionDescription || {};
 
   const videoProp = useMemo(() => stringToDecodedInfixOrUrlOrCidAndHash(video), [video]);
-
-  const topBid = useMemo(() => {
-    if (!offer?.auction?.bids?.length) return null;
-    return offer?.auction?.bids[0].balance;
-  }, [offer]);
 
   const tokenPath = useMemo(() => generatePath('/:currentChainId/token/:collectionId/:tokenId', {
     currentChainId: currentChainId || null,
@@ -104,7 +98,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
             <Text
               testid={`${testid}-price`}
               size='l'
-            >{topBid ? `${formatBalance(Number(topBid))}` : `${formatBalance(offer.price.parsed, 4, true)}` }</Text>
+            >{formatBalance(offer.price.parsed, 4, true)}</Text>
             <IconStyled name={`chain-${currentChainId?.toLowerCase()}`} size={16} />
           </PriceWrapper>
         </TradingInfoWrapper>
@@ -155,8 +149,8 @@ const PriceWrapper = styled.div<{ length: number }>`
 
 const TradingInfoWrapper = styled.div` 
   display: flex;
-  margin-top: calc(var(--gap) / 2);
-  column-gap: calc(var(--gap) / 4);
+  margin-top: calc(var(--prop-gap) / 2);
+  column-gap: calc(var(--prop-gap) / 4);
   align-items: center;
   justify-content: space-between;
 `;
@@ -172,5 +166,5 @@ const Description = styled.div`
 `;
 
 const IconStyled = styled(Icon)`
-  margin: 0 calc(var(--gap) / 4);
+  margin: 0 calc(var(--prop-gap) / 4);
 `;

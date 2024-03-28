@@ -10,9 +10,9 @@ import { TokensResponse } from 'api/restApi/tokens/types';
 import { useApi } from 'hooks/useApi';
 import { Address } from '@unique-nft/utils';
 import { useIsFirstRender } from 'hooks/useIsFirstRender';
-import { SelectOptionProps } from '@unique-nft/ui-kit';
 import { useCollections } from 'hooks/useCollections';
 import { mockWearables } from 'pages/Token/constants';
+import { SelectOptionProps } from 'components/UI/types';
 
 export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fetch(payload: GetOffersRequestPayload): Promise<OffersResponse | TokensResponse> }) => {
   const { currentChainId, api } = useApi();

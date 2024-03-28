@@ -1,5 +1,4 @@
-import { Heading } from '@unique-nft/ui-kit';
-import { Button, Text } from 'components/UI';
+import { Button, Text, Heading } from 'components/UI';
 import { useApi } from 'hooks/useApi';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { Dispatch, ReactNode, SetStateAction } from 'react';

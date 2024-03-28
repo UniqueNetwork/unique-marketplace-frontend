@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text } from '@unique-nft/ui-kit';
+import { Text } from 'components/UI';
 import styled from 'styled-components';
 
 function BundleItemsCount({ count, testId }: { count: number, testId: string }) {
@@ -20,7 +20,7 @@ function BundleItemsCount({ count, testId }: { count: number, testId: string }) 
 }
 
 const Wrapper = styled.div`
-  margin-top: calc(var(--gap) / 2);
+  margin-top: calc(var(--prop-gap) / 2);
 `;
 
 export default BundleItemsCount;

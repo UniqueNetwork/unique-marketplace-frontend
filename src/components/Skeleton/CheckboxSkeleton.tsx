@@ -15,7 +15,7 @@ const CheckboxSkeleton: FC = () => {
 const CheckboxSkeletonWrapper = styled.div`
   display: flex;
   align-items: center;
-  column-gap: var(--gap);
+  column-gap: var(--prop-gap);
 `;
 
 export default CheckboxSkeleton;

@@ -2,9 +2,9 @@ import styled from 'styled-components';
 import { useMemo } from 'react';
 
 import { Attribute, AttributeOption } from '../types';
-import { Heading, SelectOptionProps } from '@unique-nft/ui-kit';
-import { Icon, InputText, Select, Text, TooltipWrapper } from 'components/UI';
+import { Icon, InputText, Select, Text, TooltipWrapper, Heading } from 'components/UI';
 import { AttributeSchemaDto } from '@unique-nft/sdk';
+import { SelectOptionProps } from 'components/UI/types';
 
 type AttributesFormProps = {
   isValid?: boolean;

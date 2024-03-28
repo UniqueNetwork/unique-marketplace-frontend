@@ -1,5 +1,5 @@
-import { INetwork, Toggle } from '@unique-nft/ui-kit';
-import { Dropdown, Icon, Text } from 'components/UI';
+import { Dropdown, Icon, Text, Toggle } from 'components/UI';
+import { INetwork } from 'components/UI/widgets/AccountsManager';
 import { useCallback } from 'react';
 import styled from 'styled-components';
 
@@ -79,8 +79,8 @@ const ChainListWrapper = styled.div`
 && {
   display: flex;
   flex-direction: column;
-  padding: calc(var(--gap) * 1.5);
-  gap: calc(var(--gap) / 2);
+  padding: calc(var(--prop-gap) * 1.5);
+  gap: calc(var(--prop-gap) / 2);
   min-width: 236px;
 }
 `;
@@ -90,8 +90,8 @@ const ChainToggleWrapper = styled.div`
   display: flex;
   align-items: center;
   & > span {
-    margin-left: calc(var(--gap) / 2);
-    margin-right: var(--gap);
+    margin-left: calc(var(--prop-gap) / 2);
+    margin-right: var(--prop-gap);
     flex: 1;
   }
 } 

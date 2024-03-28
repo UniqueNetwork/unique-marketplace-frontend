@@ -1,6 +1,5 @@
 import React from 'react';
 import styled from 'styled-components';
-import { TableColumnProps } from '@unique-nft/ui-kit';
 import IconWithHint from 'components/IconWithHint/IconWithHint';
 import AccountCard from 'components/Account/Account';
 import { Button, Icon, Link, Text } from 'components/UI';
@@ -9,6 +8,7 @@ import { formatBalance } from 'utils/textUtils';
 import { AccountInfo } from './types';
 import BalanceCell from './BalanceCell';
 import { WithdrawButton } from './WithdrawButton';
+import { TableColumnProps } from 'components/UI/Table/Table';
 
 const testid = 'accounts-page';
 
@@ -17,7 +17,6 @@ type AccountsColumnsProps = {
   formatAddress(address: string): string
   onShowSendFundsModal(address: string): () => void
   onShowWithdrawDepositModal(address: string): () => void
-  onShowDeleteLocalAccountModal(address: string): () => void
   onGetClick: (address: string) => () => void
   tokenSymbol: string
   scanUrl: string
@@ -28,7 +27,6 @@ export const getAccountsColumns = ({
                               onShowSendFundsModal,
                               onShowWithdrawDepositModal,
                               isSmallDevice,
-                              onShowDeleteLocalAccountModal,
                               onGetClick,
                               tokenSymbol,
                               scanUrl
@@ -127,13 +125,6 @@ export const getAccountsColumns = ({
             </DepositActionsWrapper>}
           </TransferActionsWrapper>
           <div>
-            {isLocal && <Button
-              title=''
-              role='ghost'
-              iconLeft={{ name: 'trash', size: 24 }}
-              onClick={onShowDeleteLocalAccountModal(address)}
-              testid={`${testid}-${address}-delete-button`}
-            />}
           </div>
         </ActionsWrapper>
       );
@@ -152,7 +143,7 @@ const Title = styled.p`
 
 const AccountCellWrapper = styled.div`
   display: flex;
-  column-gap: calc(var(--gap) / 2);
+  column-gap: calc(var(--prop-gap) / 2);
   align-items: center;
 `;
 
@@ -163,7 +154,7 @@ const LinksWrapper = styled.div`
 const LinkStyled = styled(Link)`
   display: flex;
   align-items: center;
-  column-gap: calc(var(--gap) / 4);
+  column-gap: calc(var(--prop-gap) / 4);
   width: fit-content;
 `;
 
@@ -177,7 +168,7 @@ const TransferActionsWrapper = styled.div`
 const DepositActionsWrapper = styled(TransferActionsWrapper)`
   && {
     display: flex;
-    column-gap: calc(var(--gap) / 2);
+    column-gap: calc(var(--prop-gap) / 2);
     padding: 0;
     button {
       width: calc(100% - 32px);

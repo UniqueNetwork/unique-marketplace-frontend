@@ -18,8 +18,8 @@ const BalanceSkeleton: FC = () => {
 const AccountSkeletonWrapper = styled.div`
   display: flex;
   align-items: center;
-  column-gap: calc(var(--gap) * 2);
-  padding: calc(var(--gap) / 2) var(--gap);
+  column-gap: calc(var(--prop-gap) * 2);
+  padding: calc(var(--prop-gap) / 2) var(--prop-gap);
   min-width: 100px;
   div {
     padding: 0;
@@ -31,8 +31,8 @@ const BalanceSkeletonWrapper = styled.div`
   display: flex;
   align-items: flex-start;
   flex-direction: column;
-  row-gap: calc(var(--gap) / 2);
-  padding: calc(var(--gap) / 2) var(--gap);
+  row-gap: calc(var(--prop-gap) / 2);
+  padding: calc(var(--prop-gap) / 2) var(--prop-gap);
   min-width: 100px;
   div {
     padding: 0;

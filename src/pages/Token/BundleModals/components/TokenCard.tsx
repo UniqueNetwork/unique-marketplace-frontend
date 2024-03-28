@@ -1,11 +1,10 @@
 import React, { FC, useMemo, useState } from 'react';
-import { Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { useApi } from 'hooks/useApi';
 import { Primary600 } from 'styles/colors';
 import { TokenTypeEnum } from 'pages/MyTokens/types';
 import { TokensMedia } from './TokenMedia';
-import { Checkbox } from 'components/UI';
+import { Checkbox, Text } from 'components/UI';
 import { TokenItem } from '../../types';
 
 export type TTokensCard = {
@@ -101,8 +100,8 @@ const BasicDataWrapper = styled.div`
 const Description = styled.div`
   display: flex;
   flex-direction: column;
-  width: calc(100% - var(--gap));
-  padding: 0 calc(var(--gap) / 2) calc(var(--gap) / 2);
+  width: calc(100% - var(--prop-gap));
+  padding: 0 calc(var(--prop-gap) / 2) calc(var(--prop-gap) / 2);
   span {
     color: ${Primary600};
   }

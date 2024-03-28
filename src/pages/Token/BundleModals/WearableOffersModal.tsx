@@ -1,5 +1,4 @@
-import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
-import { Button, Heading, Loader, Text } from '@unique-nft/ui-kit';
+import { Button, Heading, Loader, Text } from 'components/UI';
 import { useOffers } from 'api/restApi/offers/offers';
 import { OfferCard } from 'components/OfferCard/OfferCard';
 import { useApi } from 'hooks/useApi';
@@ -10,12 +9,13 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { mockWearables } from '../constants';
 import { TBundleTransferModalBodyProps } from './BundleTransferModal';
+import { GQLCollection } from 'api/scanApi/types';
 
 export const WearableOffersModal = ({
   token,
   onFinish
 }: TBundleTransferModalBodyProps) => {
-  const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse>();
+  const [collection, setCollection] = useState<GQLCollection>();
   const { currentChainId } = useApi();
   const { offers, isFetching, fetch } = useOffers();
   const navigate = useNavigate();
@@ -27,7 +27,9 @@ export const WearableOffersModal = ({
       if (!currentChainId) return;
       const wearableCollectionId = mockWearables[currentChainId].find(({ baseCollections }) => baseCollections.includes(token.collectionId))?.collectionId;
       if (!wearableCollectionId) return;
-      setCollection(await getCollection(wearableCollectionId));
+      const collection = await getCollection(wearableCollectionId);
+      if (!collection) return;
+      setCollection(collection);
       await fetch({
         pageSize: 8,
         page: 1,
@@ -97,13 +99,13 @@ const Content = styled.div`
 const CreateBundleModalWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--gap);
+  gap: var(--prop-gap);
 `;
 
 const ActionsWrapper = styled.div`
   display: flex;
   flex-direction: row;
-  gap: var(--gap);
+  gap: var(--prop-gap);
   justify-content: flex-end;
   align-items: center;
   &>div {
@@ -117,7 +119,7 @@ const ActionsWrapper = styled.div`
 const EquipsSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--gap);
+  gap: var(--prop-gap);
 `;
 
 const EquipsListWrapper = styled.div`

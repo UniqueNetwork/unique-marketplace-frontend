@@ -5,14 +5,15 @@ import { ChangeCollectionModal } from './ChangeCollectionModel';
 import { ExceededModal } from './ExceededModal';
 import { RemovingModal } from './RemovingModal';
 import { TokenTypeEnum } from 'pages/MyTokens/types';
+import { AttributeSchemaDto } from '@unique-nft/sdk';
 
 interface CreateTokensDialogsProps {
   dialog?: CreateTokenDialog;
   tokens: NewToken[];
   tokenPrefix: string;
   leftTokens: number | string;
-  attributesSchema: Record<number, AttributeSchema> | undefined;
-  mode?: TokenTypeEnum;
+  attributesSchema: Record<number, AttributeSchemaDto> | undefined;
+  mode?: 'NFT' | 'ReFungible' | 'Fungible';
   onChange(tokens: NewToken[]): void;
   onConfirm(): void;
   onClose(): void;

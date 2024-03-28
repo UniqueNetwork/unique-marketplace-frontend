@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Heading } from '@unique-nft/ui-kit';
 
-import { Button, Text } from 'components/UI';
+import { Heading,Button, Text } from 'components/UI';
 import { RoyaltiesFormData, Royalty } from '../types';
 import { NumberInput } from 'components/NumberInput/NumberInput';
 import { ButtonsRow, FormRow, FormWrapper } from './FormComponents';
@@ -186,7 +185,7 @@ const TotalWrapper = styled.div`
 const RecipientSelectWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  row-gap: calc(var(--gap) / 2);
+  row-gap: calc(var(--prop-gap) / 2);
   .unique-input-text {
     width: 100%;
   }
@@ -198,7 +197,7 @@ const RecipientSelectWrapper = styled.div`
 const AddressOptionWrapper = styled.div`
   display: flex;
   align-items: center;
-  column-gap: calc(var(--gap) / 2);
+  column-gap: calc(var(--prop-gap) / 2);
   &>div:first-child{
     flex-grow: 0;
     min-width: 24px;
@@ -206,6 +205,6 @@ const AddressOptionWrapper = styled.div`
 `;
 
 const ErrorWrapper = styled(Text)`
-  margin-top: calc(var(--gap) / 2);
+  margin-top: calc(var(--prop-gap) / 2);
   display: block;
 `;

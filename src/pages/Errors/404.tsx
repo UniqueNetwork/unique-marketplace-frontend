@@ -1,8 +1,7 @@
 import React, { FC } from 'react';
 import styled from 'styled-components';
-import { Heading } from '@unique-nft/ui-kit';
 import { PagePaper } from 'components/PagePaper/PagePaper';
-import { Icon } from 'components/UI';
+import { Icon, Heading } from 'components/UI';
 import Icon404 from 'static/icons/404icon.svg';
 import Text404 from 'static/icons/404.svg';
 import { BlueGrey400 } from '../../styles/colors';
@@ -29,7 +28,7 @@ const PagePaperStyled = styled(PagePaper)`
 
 const Content = styled.div`
   display: flex;
-  gap: calc(var(--gap) * 3);
+  gap: calc(var(--prop-gap) * 3);
   img {
     width: 150px;
     height: 212px;
@@ -61,5 +60,5 @@ const ErrorText = styled.div`
 
 const HeadingStyled = styled(Heading)`
   color: ${BlueGrey400};
-  margin-top: calc(var(--gap) * 1.5) !important;
+  margin-top: calc(var(--prop-gap) * 1.5) !important;
 `;

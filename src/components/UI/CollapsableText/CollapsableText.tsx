@@ -76,7 +76,7 @@ const CollapsableTextWrapper = styled.div<{ isCollapsed: boolean }>`
     font-weight: 400;
     font-size: 18px;
     line-height: 28px;
-    margin-left: calc(var(--gap) / 2);
+    margin-left: calc(var(--prop-gap) / 2);
     color: var(--color-primary-500);
     cursor: pointer;
     white-space: nowrap;

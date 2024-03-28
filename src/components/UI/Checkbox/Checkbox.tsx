@@ -1,8 +1,8 @@
 import classNames from 'classnames';
 import { Icon, IconProps } from '../Icon/Icon';
 import { ReactNode, forwardRef, LegacyRef } from 'react';
-import { ComponentProps } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
+import { ComponentProps } from '../types';
 
 export interface CheckboxProps extends Omit<ComponentProps, 'onChange'> {
   checked: boolean;

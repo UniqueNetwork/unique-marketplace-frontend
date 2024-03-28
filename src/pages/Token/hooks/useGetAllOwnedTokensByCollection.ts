@@ -2,8 +2,8 @@ import { TokenId } from '@unique-nft/sdk';
 import { useAccounts } from 'hooks/useAccounts';
 import { useEffect, useState } from 'react';
 import { NestedTokenItem, TokenItem } from '../types';
-import { useGetBundleTree } from './useGetBundleTree';
 import { useGetTokensCollection } from './useGetTokensCollection';
+import { useQueryBundleTree } from 'api/scanApi/useQueryBundleTree';
 
 export const useGetAllOwnedTokensByCollection = (
   collectionId?: number,
@@ -14,12 +14,12 @@ export const useGetAllOwnedTokensByCollection = (
 
   const { fetchTokens, isFetching } = useGetTokensCollection();
 
-  const { fetchBundle, isFetching: isBundleFetching } = useGetBundleTree();
+  const { fetchBundle, isFetching: isBundleFetching } = useQueryBundleTree();
 
   useEffect(() => {
     if (!collectionId) return;
     void (async () => {
-      const tokensData = (await fetchTokens(collectionId, selectedAccount)) || [];
+      const [tokensData] = (await fetchTokens(collectionId, selectedAccount)) || [];
       const nestedTokens = await Promise.all(tokensData.map(async (token) => {
         if (token.nested) {
           const bundleData = await fetchBundle({

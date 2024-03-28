@@ -1,7 +1,7 @@
 import { post } from 'api/restApi/base';
+import config from 'config';
 import { useApi } from 'hooks/useApi';
 import { useEffect, useState } from 'react';
-import config from '../../../config';
 
 const gqlQuery = {
   operationName: 'tokens_count_by_collection_id',
@@ -21,17 +21,7 @@ const gqlQuery = {
   `
 };
 
-export type AttributeStatistic = {
-  key: string
-  name: { _: string }
-  values: {
-    tokens_count: number
-    raw_value: string
-    value: { _: string }
-  }[]
-}
-
-export const useGetCollectionTokensCount = (collectionId: number) => {
+export const useQueryCollectionTokensCount = (collectionId: number) => {
   const { settings, currentChainId, chainProperties } = useApi();
   const [isFetching, setIsFetching] = useState(false);
   const [tokensCount, setTokensCount] = useState<number>(0);

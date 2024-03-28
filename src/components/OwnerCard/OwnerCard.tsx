@@ -127,7 +127,7 @@ const StyledLink = styled(Link)`
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
-  gap: calc(var(--gap) / 2);
+  gap: calc(var(--prop-gap) / 2);
   &>div>div>span {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -142,7 +142,7 @@ const StyledExternalLink = styled(UILink)`
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
-  gap: calc(var(--gap) / 2);
+  gap: calc(var(--prop-gap) / 2);
   &>span:hover {
     text-decoration: none;
   }
@@ -160,7 +160,7 @@ const StyledContainer = styled.div`
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
-  gap: calc(var(--gap) / 2);
+  gap: calc(var(--prop-gap) / 2);
   &>span:hover {
     text-decoration: none;
   }
@@ -185,7 +185,7 @@ const Row = styled.div`
     display: flex;
     padding: 0;
     align-items: center;
-    gap: calc(var(--gap) / 2);
+    gap: calc(var(--prop-gap) / 2);
 
   }
 `;

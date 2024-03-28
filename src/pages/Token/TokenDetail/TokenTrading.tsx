@@ -4,7 +4,6 @@ import { Offer } from '../../../api/restApi/offers/types';
 import accountContext from '../../../account/AccountContext';
 import { SellToken } from '../SellToken/SellToken';
 import { BuyToken } from '../BuyToken/BuyToken';
-import Auction from '../Auction/Auction';
 import { isTokenOwner } from 'api/chainApi/utils/addressUtils';
 import { useApi } from '../../../hooks/useApi';
 import { checkAllowedTokenInSettings } from 'api/chainApi/utils/checkTokenIsAllowed';
@@ -86,16 +85,6 @@ export const TokenTrading: FC<TokenTradingProps> = ({
     }, 0) || 0);
   }, [token]);
 
-  if (offer?.auction) {
-    return (<Auction
-      offer={offer}
-      onPlaceABidClick={onPlaceABidClick}
-      onWithdrawClick={onWithdrawClick}
-      onDelistAuctionClick={onDelistAuctionClick}
-      onClose={onAuctionClose}
-      testid={`${testid}-auction`}
-    />);
-  }
   if (isOwner) {
     return (<SellToken
       collectionId={token?.collectionId}

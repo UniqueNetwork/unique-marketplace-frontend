@@ -1,5 +1,4 @@
 import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { SelectOptionProps, Tooltip } from '@unique-nft/ui-kit';
 import { Select, Button } from 'components/UI';
 import styled from 'styled-components/macro';
 import NoItems from 'components/NoItems';
@@ -11,11 +10,12 @@ import { PagePaper } from 'components/PagePaper/PagePaper';
 import CardSkeleton from 'components/Skeleton/CardSkeleton';
 import SearchField from 'components/SearchField/SearchField';
 import { useAccounts } from 'hooks/useAccounts';
-import { MyCollection } from 'api/restApi/collections/types';
 import config from 'config';
 import { useApi } from 'hooks/useApi';
 import { useCollections } from 'hooks/useCollections';
 import { useNavigate } from 'react-router-dom';
+import { GQLCollection } from 'api/scanApi/types';
+import { SelectOptionProps } from 'components/UI/types';
 
 type TOption = {
   iconRight: {
@@ -26,24 +26,10 @@ type TOption = {
   id: string
   title: string
   direction: string
-  field: keyof MyCollection
+  field: keyof GQLCollection
 }
 
 const sortingOptions: TOption[] = [
-  // {
-  //   iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
-  //   id: 'asc(Date)',
-  //   direction: 'asc',
-  //   field: 'updatedAt',
-  //   title: 'Date added'
-  // },
-  // {
-  //   iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
-  //   id: 'desc(Price)',
-  //   direction: 'desc',
-  //   field: 'updatedAt',
-  //   title: 'Date added'
-  // },
   {
     iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
     id: 'asc(collectionId)',
@@ -66,7 +52,7 @@ export const CollectionsPage: FC = () => {
   const [sortingValue, setSortingValue] = useState<TOption>(sortingOptions[0]);
   const [searchValue, setSearchValue] = useState<string>();
   const [modalType, setModalType] = useState(AdminPanelModalType.default);
-  const [selectedCollection, setSelectedCollection] = useState<MyCollection>();
+  const [selectedCollection, setSelectedCollection] = useState<GQLCollection>();
   const { collections, isFetching, fetchCollections } = useCollections();
   const { isLoading: isAccountsLoading } = useAccounts();
   const navigate = useNavigate();
@@ -100,7 +86,7 @@ export const CollectionsPage: FC = () => {
     navigate(`/${currentChainId}/create-collection`);
   }, [currentChainId]);
 
-  const onViewOnScanClick = useCallback((collection: MyCollection) => () => {
+  const onViewOnScanClick = useCallback((collection: GQLCollection) => () => {
     const { scanUrl } = config.blockchains[currentChainId || ''] || {};
     if (!scanUrl) return;
     window.open(`${scanUrl}unique_collection/${collection.id}`, '_blank')?.focus();
@@ -108,14 +94,14 @@ export const CollectionsPage: FC = () => {
 
   const filteredCollections = useMemo(() => {
     if (!collections) return [];
-    const sortCollection = (collectionA: MyCollection, collectionB: MyCollection) => {
+    const sortCollection = (collectionA: GQLCollection, collectionB: GQLCollection) => {
       if (!sortingValue) return 0;
       const order = sortingValue.direction === 'asc' ? 1 : -1;
       if (sortingValue.field === 'id') return Number(collectionA[sortingValue.field]) > Number(collectionB[sortingValue.field]) ? order : -order;
       return (collectionA[sortingValue.field] || '') > (collectionB[sortingValue.field] || '') ? order : -order;
     };
 
-    const filterCollection = (collection: MyCollection) => {
+    const filterCollection = (collection: GQLCollection) => {
       if (!collection) return false;
       if (searchValue) {
         const searchString = searchValue.trim().toLocaleLowerCase();
@@ -180,11 +166,11 @@ export const CollectionsPage: FC = () => {
 const MainContent = styled.div`
   position: relative;
   flex: 1;
-  margin-top: calc(var(--gap) * 0.5);
+  margin-top: calc(var(--prop-gap) * 0.5);
 
   > div:nth-of-type(2) {
-    margin-top: calc(var(--gap) * 2);
-    margin-bottom: calc(var(--gap) * 2);
+    margin-top: calc(var(--prop-gap) * 2);
+    margin-bottom: calc(var(--prop-gap) * 2);
   }
 `;
 
@@ -195,13 +181,13 @@ const ControlsWrapper = styled.div`
 
   @media (max-width: 1110px) {
     flex-direction: column;
-    gap: calc(var(--gap) * 1.5);
+    gap: calc(var(--prop-gap) * 1.5);
   }
 `;
 
 const ButtonsWrapper = styled.div`
   display: flex;
-  column-gap: calc(var(--gap) / 2);
+  column-gap: calc(var(--prop-gap) / 2);
   
   @media (max-width: 1279px) {
     .unique-button.size-middle {
@@ -214,7 +200,7 @@ const ButtonsWrapper = styled.div`
 
   @media (max-width: 567px) {
     flex-direction: column;
-    gap: calc(var(--gap) / 2);
+    gap: calc(var(--prop-gap) / 2);
     button:last-of-type {
       width: 100%;
     }
@@ -259,7 +245,7 @@ const SearchAndSortingWrapper = styled.div`
 
   @media (max-width: 767px) {
     flex-direction: column;
-    gap: var(--gap);
+    gap: var(--prop-gap);
     .unique-input-text {
       width: 100%;
     }

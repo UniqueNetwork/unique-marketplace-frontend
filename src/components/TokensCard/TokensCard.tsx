@@ -1,8 +1,7 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
-import { Loader, Text } from '@unique-nft/ui-kit';
 import { generatePath, Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { Icon } from 'components/UI';
+import { Icon, Loader, Text } from 'components/UI';
 import { isTokenOwner } from 'api/chainApi/utils/addressUtils';
 import { Offer } from 'api/restApi/offers/types';
 import { useApi } from 'hooks/useApi';
@@ -12,10 +11,11 @@ import { Primary600 } from 'styles/colors';
 import { TokensMedia } from './TokensMedia';
 import { countNestedChildren, stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
 import { useCollections } from 'hooks/useCollections';
-import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
+import { TokenByIdResponse } from '@unique-nft/sdk';
 import { MyToken, TokenTypeEnum } from 'pages/MyTokens/types';
 import { BadgeEnum } from 'components/TokenMedia/Picture';
 import { CollectionTitle } from 'components/OfferCard/CollectionTitle';
+import { GQLCollection } from 'api/scanApi/types';
 
 export type TTokensCard = {
   token?: Omit<TokenByIdResponse | MyToken, 'collection' | 'nestingParentToken' | 'properties'>
@@ -38,7 +38,7 @@ export const TokensCard: FC<TTokensCard> = ({
   ...props
 }) => {
   const [token, setToken] = useState<Omit<TokenByIdResponse | MyToken, 'collection' | 'nestingParentToken' | 'properties'> | undefined>(props.token);
-  const [collection, setCollection] = useState<(CollectionInfoWithSchemaResponse) | undefined>();
+  const [collection, setCollection] = useState<(GQLCollection) | undefined>();
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isBundleState, setIsBundleState] = useState<boolean>();
   const [isNestedState, setIsNestedState] = useState<boolean>();
@@ -52,7 +52,6 @@ export const TokensCard: FC<TTokensCard> = ({
     collectionTitle,
     imageUrl,
     price,
-    auction,
     video,
     owner,
     type,
@@ -63,13 +62,12 @@ export const TokensCard: FC<TTokensCard> = ({
       const { image, video, owner } = offer?.tokenDescription || token || {};
       const collectionName = offer?.collectionDescription?.name || collection?.name || (token as MyToken)?.collectionName || '';
       const tokenPrefix = offer?.collectionDescription?.tokenPrefix || collection?.tokenPrefix || (token as MyToken)?.tokenPrefix || '';
-      const { auction, price, seller } = offer || {};
+      const { price, seller } = offer || {};
       return {
         tokenPrefix,
         collectionTitle: collectionName,
         imageUrl: image,
         video: stringToDecodedInfixOrUrlOrCidAndHash(video),
-        auction,
         price,
         owner: seller || owner,
         type: (token as MyToken)?.type || TokenTypeEnum.NFT,
@@ -111,11 +109,6 @@ export const TokensCard: FC<TTokensCard> = ({
       setIsNestedState(!!offer?.tokenDescription?.nestingParentToken);
     })();
   }, [offer, tokenId, collectionId, api?.nft]);
-
-  const topBid = useMemo(() => {
-    if (!auction?.bids?.length) return null;
-    return auction.bids[0].balance;
-  }, [auction]);
 
   const tokenPath = useMemo(() => {
     if (owner && type === TokenTypeEnum.RFT) {
@@ -166,6 +159,7 @@ export const TokensCard: FC<TTokensCard> = ({
               size='l'
               weight='regular'
               testid={`${testid}-tokenId`}
+              color='additional-dark'
               className='token-title'
             >
               <span>{tokenPrefix} </span>
@@ -189,7 +183,7 @@ export const TokensCard: FC<TTokensCard> = ({
             <Text
               testid={`${testid}-price`}
               size='l'
-            >{topBid ? `${formatBalance(Number(topBid))}` : `${formatBalance(price.parsed, 4, true)}` }</Text>
+            >{formatBalance(price.parsed, 4, true)}</Text>
             <IconStyled name={`chain-${currentChainId?.toLowerCase()}`} size={16} />
           </PriceWrapper>
         </TradingInfoWrapper>}
@@ -228,6 +222,9 @@ const BasicDataWrapper = styled.div`
   flex-direction: column;
   justify-content: flex-start;
   flex-grow: 1;
+  a {
+    color: var(--color-primary-500);
+  }
 `;
 
 const Description = styled.div`
@@ -252,12 +249,12 @@ const PriceWrapper = styled.div<{ length: number }>`
 
 const TradingInfoWrapper = styled.div` 
   display: flex;
-  margin-top: calc(var(--gap) / 2);
-  column-gap: calc(var(--gap) / 4);
+  margin-top: calc(var(--prop-gap) / 2);
+  column-gap: calc(var(--prop-gap) / 4);
   align-items: center;
   justify-content: space-between;
 `;
 
 const IconStyled = styled(Icon)`
-  margin: 0 calc(var(--gap) / 4);
+  margin: 0 calc(var(--prop-gap) / 4);
 `;

@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useState } from 'react';
-import { Loader, Text } from '@unique-nft/ui-kit';
+import { Loader, Text } from 'components/UI';
 import styled from 'styled-components';
 
 import { useApi } from 'hooks/useApi';
@@ -52,7 +52,7 @@ export default InlineTokenCard;
 
 const InlineTokenCardWrapper = styled.div`
   display: flex;
-  column-gap: var(--gap);
+  column-gap: var(--prop-gap);
   position: relative;
   align-items: center;
 `;

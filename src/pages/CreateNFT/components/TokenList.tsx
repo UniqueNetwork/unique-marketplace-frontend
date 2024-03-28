@@ -25,7 +25,7 @@ export type TokenListProps = {
   tokensLimit?: number;
   tokensStartId?: number;
   attributesSchema: Record<number, AttributeSchemaDto>;
-  mode: TokenTypeEnum | undefined;
+  mode: 'NFT' | 'Fungible' | 'ReFungible' | undefined;
   onChange(tokens: NewToken[]): void;
   onAddTokens(files: File[]): void;
 };

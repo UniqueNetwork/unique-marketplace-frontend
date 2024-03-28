@@ -1,9 +1,9 @@
 import React, { FC } from 'react';
-import { TableColumnProps } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
 import { MobileTableRow } from '../MobileTable/MobileTableRow';
 import Skeleton from './Skeleton';
+import { TableColumnProps } from 'components/UI/Table/Table';
 
 interface MobileTableSkeletonProps {
   columns: TableColumnProps[]
@@ -25,7 +25,7 @@ const MobileTableSkeleton: FC<MobileTableSkeletonProps> = ({ columns }) => {
 const MobileTableSkeletonRowWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  row-gap: calc(var(--gap) / 4);
+  row-gap: calc(var(--prop-gap) / 4);
 `;
 
 export default MobileTableSkeleton;

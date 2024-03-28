@@ -1,6 +1,6 @@
 import { DecodedAttributeDto, TokenByIdResponse } from '@unique-nft/sdk';
-import { SelectOptionProps } from '@unique-nft/ui-kit';
 import { Offer } from 'api/restApi/offers/types';
+import { SelectOptionProps } from 'components/UI/types';
 
 export type TOption = SelectOptionProps & {
   direction: 'asc' | 'desc';

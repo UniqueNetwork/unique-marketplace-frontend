@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { Text } from '@unique-nft/ui-kit';
-import { Select } from 'components/UI';
+import { Select, Text } from 'components/UI';
 
 import { TokensList } from './TokensList/TokensList';
 import { PagePaper } from 'components/PagePaper/PagePaper';
@@ -73,7 +72,7 @@ export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
   useEffect(() => {
     if (!api?.collection) return;
     void (async () => {
-      const tokensCountOnScan = await getCollectionTokensCount(collectionId);
+      const tokensCountOnScan = await getCollectionTokensCount(collectionId) || 0;
       setTokensCountOnScan(tokensCountOnScan);
 
       const collectionData = await fetchCollection(collectionId);
@@ -203,7 +202,7 @@ export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
 
 const CollectionPagePaper = styled(PagePaper)`
   && {
-    margin-top: calc(var(--gap) / 2);
+    margin-top: calc(var(--prop-gap) / 2);
   }
 `;
 
@@ -214,7 +213,7 @@ const MarketMainPageStyled = styled.div`
 `;
 
 const LeftColumn = styled.div<{ isVisible?: boolean }>`
-  margin-right: calc(var(--gap) * 2);
+  margin-right: calc(var(--prop-gap) * 2);
   @media (max-width: 1024px) {
     display: none;
   }
@@ -244,7 +243,7 @@ const SortSelectWrapper = styled.div`
 `;
 
 const SearchAndSortingWrapper = styled.div`
-  margin-bottom: var(--gap);
+  margin-bottom: var(--prop-gap);
   display: flex;
   justify-content: space-between;
 `;

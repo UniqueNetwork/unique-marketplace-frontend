@@ -116,7 +116,7 @@ export const mapNewToken$1 = (
 
 export const checkRequiredAttributes = (
   tokens: NewToken[],
-  attributeSchema?: Record<number, AttributeSchema>
+  attributeSchema?: Record<number, AttributeSchemaDto>
 ) => {
   if (!attributeSchema) {
     return;

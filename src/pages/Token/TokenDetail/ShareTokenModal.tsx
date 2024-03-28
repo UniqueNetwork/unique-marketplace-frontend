@@ -1,14 +1,14 @@
 import React, { useCallback } from 'react';
-import { Heading } from '@unique-nft/ui-kit';
-import { Modal, useNotifications } from 'components/UI';
 import styled from 'styled-components/macro';
+
+import { Heading, Modal, useNotifications } from 'components/UI';
+import { TelegramShareButton, TwitterShareButton, FacebookShareButton, RedditShareButton } from 'components/ShareButton';
 import { Primary600 } from 'styles/colors';
 import copyIcon from 'static/icons/copy_blue.svg';
 import facebookIcon from 'static/icons/facebook.svg';
 import redditIcon from 'static/icons/reddit.svg';
 import telegramIcon from 'static/icons/telegram.svg';
 import twitterIcon from 'static/icons/twitter.svg';
-import { TelegramShareButton, TwitterShareButton, FacebookShareButton, RedditShareButton } from 'components/ShareButton';
 
 interface IShareTokenModalProps {
   isVisible: boolean;

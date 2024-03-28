@@ -1,6 +1,5 @@
 import React, { FC, useCallback, useState } from 'react';
-import { Heading } from '@unique-nft/ui-kit';
-import { Button, Text } from 'components/UI';
+import { Button, Text, Heading } from 'components/UI';
 import styled from 'styled-components/macro';
 
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
@@ -47,7 +46,7 @@ const Content = styled.div`
 `;
 
 const Row = styled.div`
-  margin: calc(var(--gap) * 1.5) 0;
+  margin: calc(var(--prop-gap) * 1.5) 0;
 `;
 
 const ButtonWrapper = styled.div`

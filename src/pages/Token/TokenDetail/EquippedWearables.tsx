@@ -3,12 +3,13 @@ import { Slide } from 'react-slideshow-image';
 import 'react-slideshow-image/dist/styles.css';
 import { TokensCard } from 'components';
 import styled from 'styled-components';
-import { Heading, Skeleton } from '@unique-nft/ui-kit';
+import { Heading } from 'components/UI';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { TokenContext } from '../context/TokenContext';
+import Skeleton from 'components/Skeleton/Skeleton';
 
 export const EquippedWearables = () => {
-  const { bundle, isFetching, fetchToken } = useContext(TokenContext);
+  const { bundle, isFetching } = useContext(TokenContext);
 
   const deviceSize = useDeviceSize();
 
@@ -87,11 +88,11 @@ const SlideWrapper = styled.div`
   }
 
   @media (max-width: 767px) {
-    width: calc(100vw - var(--gap) * 3);
+    width: calc(100vw - var(--prop-gap) * 3);
   }
 
   @media (max-width: 567px) {
-    width: calc(100vw - var(--gap) * 2);
+    width: calc(100vw - var(--prop-gap) * 2);
   }
 
 `;
@@ -146,7 +147,7 @@ const EquippedWearablesWrapper = styled.div`
 
 const HeaderStyled = styled.div`
   display: flex;
-  gap: var(--gap);
+  gap: var(--prop-gap);
   & > h3.unique-font-heading.size-3 {
     padding-top: 12px;
     margin-bottom: 0px;

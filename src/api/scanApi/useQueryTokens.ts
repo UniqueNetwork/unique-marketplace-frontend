@@ -1,23 +1,23 @@
-import { post } from 'api/restApi/base';
+import config from 'config';
 import { useApi } from 'hooks/useApi';
 import { useCallback, useState } from 'react';
+import { post } from 'api/restApi/base';
+import { GQLToken } from './types';
 import { Address } from '@unique-nft/utils';
-import config from '../../../../config';
-import { useAccounts } from 'hooks/useAccounts';
-import { TokenItem } from 'pages/Token/types';
+import { Account } from 'account/types';
 
 const gqlQuery = {
-  operationName: 'tokens_by_collection_query',
   query: `query tokens_by_collection_query(\
     $where: TokenWhereParams
     $offset: Int
     $limit: Int
+    $orderBy: TokenOrderByParams = {}
   ) {
     tokens(
       where: $where
       limit: $limit
       offset: $offset
-      order_by: { token_id: asc }
+      order_by: $orderBy
     ) {
       count
       data {
@@ -27,68 +27,89 @@ const gqlQuery = {
         tokenPrefix: token_prefix
         collectionId: collection_id
         collectionName: collection_name
+        collectionCover: collection_cover
+        collectionOwner: collection_owner
+        creationDate: date_of_creation
         image
         nested
         parent: parent_id
+        attributes
+        type
+        tokensAmount: tokens_amount
+        totalPieces: total_pieces
       }
     }
   }`
 };
 
-type UseGetTokensForNestingProps = {
-  parentToken: {
-    tokenId: number,
-    collectionId: number
-  }
-}
+const tokensOnPage = 21;
 
 type FetchTokensParams = {
+  limit?: number
+  offset?: number
+  owner?: string
+  searchText?: string
+  collectionIds?: number[]
+  type?: 'NFT' | 'ReFungible' | 'Fungible'
+  orderBy?: { token_id: 'asc' | 'desc' }
+}
+
+type FetchTokensForNestingParams = {
   page: number,
   searchText?: string,
   restrictedCollections?: number[],
-  nestedTokens: TokenItem[],
+  nestedTokens: GQLToken[],
 }
 
-const tokensOnPage = 21;
-
-export const useGetTokensForNesting = ({ parentToken }: UseGetTokensForNestingProps) => {
-  const { currentChainId, chainProperties } = useApi();
-  const { selectedAccount } = useAccounts();
+export const useQueryTokens = () => {
+  const { currentChainId, chainProperties, api } = useApi();
   const [isFetching, setIsFetching] = useState(false);
-  const [isNestedFetching, setIsNestedFetching] = useState(false);
-  const { api } = useApi();
 
-  const fetchFile = useCallback(async (token: TokenItem): Promise<TokenItem> => {
+  const fetchFile = useCallback(async (token: GQLToken): Promise<GQLToken> => {
     const response = await api?.nft?.getToken(token.collectionId, token.tokenId);
     return { ...token, file: response?.file };
   }, [api?.nft]);
 
-  const fetchNestedTokens = useCallback(async (): Promise<TokenItem[]> => {
-    setIsNestedFetching(true);
-    const parentAddress = Address.nesting.idsToAddress(parentToken.collectionId, parentToken.tokenId);
+  const fetch = useCallback(async ({ owner, collectionIds, type, limit, offset, searchText, orderBy }: FetchTokensParams): Promise<[GQLToken[], number]> => {
+    setIsFetching(true);
 
     const { scanApi } = config.blockchains[currentChainId || ''] || {};
     const response = await post(scanApi, {
       ...gqlQuery,
       variables: {
-        limit: 1000,
-        offset: 0,
+        limit: limit || 10000,
+        offset: offset || 0,
+        orderBy: orderBy || { token_id: 'asc' },
         where: {
-          owner: { _eq: parentAddress.toLowerCase() },
           burned: { _eq: 'false' },
-          type: { _eq: 'NFT' }
+          ...(collectionIds ? { collection_id: { _in: collectionIds } } : {}),
+          ...(type ? { type: { _eq: type } } : {}),
+          ...(searchText ? getSearchConditions(searchText) : {}),
+          ...(owner
+            ? { _or: [
+              { owner: { _eq: owner } },
+              {
+                owner_normalized: {
+                  _eq: Address.is.ethereumAddressInAnyForm(owner)
+                  ? Address.mirror.ethereumToSubstrate(owner)
+                  : Address.normalize.substrateAddress(owner)
+                }
+              }
+            ] }
+          : {})
         }
       }
     });
-    setIsNestedFetching(false);
-
     if (response.status === 200) {
-      return await Promise.all((response?.data?.data?.tokens?.data as TokenItem[] || []).map(fetchFile));
+      const tokens = response?.data?.data?.tokens?.data as GQLToken[] | [];
+      setIsFetching(false);
+      return [tokens || [], response?.data?.data?.tokens?.count || 0];
     }
-    return [];
-  }, [currentChainId, parentToken.collectionId, parentToken.tokenId]);
+    setIsFetching(false);
+    return [[], 0];
+  }, [currentChainId]);
 
-  const fetchTokens = useCallback(async (params: FetchTokensParams): Promise<[TokenItem[], number]> => {
+  const fetchTokensForNesting = useCallback(async (params: FetchTokensForNestingParams, selectedAccount?: Account): Promise<[GQLToken[], number]> => {
     if (!selectedAccount) return [[], 0];
 
     const { page, searchText, restrictedCollections } = params;
@@ -100,7 +121,7 @@ export const useGetTokensForNesting = ({ parentToken }: UseGetTokensForNestingPr
         return collectionName?.includes(searchText);
       })
       : params.nestedTokens;
-    let _nested: TokenItem[] = [];
+    let _nested: GQLToken[] = [];
 
     const nestedPages = Math.floor(nestedTokens.length / tokensOnPage);
 
@@ -140,7 +161,7 @@ export const useGetTokensForNesting = ({ parentToken }: UseGetTokensForNestingPr
     });
 
     if (response.status === 200) {
-      const tokens = await Promise.all((response?.data?.data?.tokens?.data as TokenItem[] || []).map(fetchFile));
+      const tokens = await Promise.all((response?.data?.data?.tokens?.data as GQLToken[] || []).map(fetchFile));
       const total = (response.data?.data?.tokens.count as number) + nestedTokens.length;
 
       setIsFetching(false);
@@ -148,13 +169,13 @@ export const useGetTokensForNesting = ({ parentToken }: UseGetTokensForNestingPr
     }
     setIsFetching(false);
     return [[], 0];
-  }, [selectedAccount, isNestedFetching, chainProperties?.SS58Prefix, currentChainId]);
+  }, [chainProperties?.SS58Prefix, currentChainId, fetchFile]);
 
   return {
     isFetching,
-    isNestedFetching,
-    fetchTokens,
-    fetchNestedTokens
+    fetch,
+    fetchTokensForNesting,
+    fetchFile
   };
 };
 

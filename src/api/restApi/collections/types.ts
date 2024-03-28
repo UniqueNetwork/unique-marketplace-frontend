@@ -1,6 +1,4 @@
-import { AttributeSchema } from '@unique-nft/schemas';
 import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
-import { TokenTypeEnum } from 'pages/MyTokens/types';
 
 export type LoginPayload = {
     account: string
@@ -54,28 +52,4 @@ export interface MarketableCollection {
   holders: number
   uniqueHolders: string | null
   metadata: MarketableCollectionMetadata | null
-}
-
-export interface MyCollection {
-  attributesSchema?: Record<number, AttributeSchema> | undefined
-  allowedTokens: string
-  isMarketable: boolean
-  id: number
-  description?: string
-  tokenPrefix: string
-  tokenCount?: number
-  tokenLimit?: number
-  owner: string
-  cover: string
-  name: string
-  mode?: TokenTypeEnum
-  properties: { key: string, value: any }[]
-  permissions: {
-    access: 'Normal'
-    nesting: {
-      restricted: number[] | null
-      tokenOwner: boolean
-      collectionAdmin: boolean
-    }
-  }
 }

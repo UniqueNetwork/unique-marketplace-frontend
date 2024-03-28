@@ -1,7 +1,6 @@
 import React, { FC, useCallback } from 'react';
 import styled from 'styled-components';
-import { Text } from '@unique-nft/ui-kit';
-import { Checkbox } from 'components/UI';
+import { Checkbox, Text } from 'components/UI';
 import { Accordion } from '../Accordion/Accordion';
 import CheckboxSkeleton from '../Skeleton/CheckboxSkeleton';
 import { AttributeItem } from './types';
@@ -66,17 +65,17 @@ const AttributesFilter: FC<AttributesFilterProps> = ({ selectedAttributes = [], 
 
 const CollectionFilterWrapper = styled.div`
   position: relative;
-  margin-top: var(--gap);
+  margin-top: var(--prop-gap);
   padding-top: 2px;
   display: flex;
   flex-direction: column;
-  row-gap: var(--gap);
+  row-gap: var(--prop-gap);
   min-height: 50px;
   max-height: 400px;
   overflow-y: auto;
-  padding-right: var(--gap);
+  padding-right: var(--prop-gap);
   @media (max-width: 1024px) {
-    padding-bottom: calc(var(--gap) * 2);
+    padding-bottom: calc(var(--prop-gap) * 2);
   }
   .unique-checkbox-wrapper label {
     max-width: 230px;
@@ -87,7 +86,7 @@ const CollectionFilterWrapper = styled.div`
 const AttributesFilterWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  row-gap: var(--gap);
+  row-gap: var(--prop-gap);
 
   .unique-checkbox-wrapper label {
     max-width: 230px;

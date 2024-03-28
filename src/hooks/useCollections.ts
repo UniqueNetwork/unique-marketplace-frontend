@@ -3,12 +3,11 @@ import { useApi } from 'hooks/useApi';
 import { Account } from 'account/types';
 import { defaultParams } from 'api/restApi/base/axios';
 import { deleteRequest, patch, post } from 'api/restApi/base';
-import { MyCollection, SetCollectionTokensPayload } from 'api/restApi/collections/types';
+import { SetCollectionTokensPayload } from 'api/restApi/collections/types';
 import CollectionsContext from 'collections/CollectionsContext';
-import config from '../config';
-import { Address } from '@unique-nft/utils';
-import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 import { mockWearables } from 'pages/Token/constants';
+import { useQueryCollections } from 'api/scanApi/useQueryCollections';
+import { GQLCollection } from 'api/scanApi/types';
 
 const endpoint = '/collections';
 
@@ -23,8 +22,9 @@ export const useCollections = () => {
   const { api, baseURL, settings, currentChainId } = useApi();
   const { collections: featuredCollections } = useContext(CollectionsContext);
   const [isFetching, setIsFetching] = useState(false);
-  const [collections, setCollections] = useState<MyCollection[]>([]);
+  const [collections, setCollections] = useState<GQLCollection[]>([]);
   const [customizableCollections, setCustomizableCollections] = useState<CustomizableCollectionRelationship>({});
+  const { fetchOne, fetch } = useQueryCollections();
 
   useEffect(() => {
     if (!currentChainId || !mockWearables[currentChainId || '']) return;
@@ -54,96 +54,33 @@ export const useCollections = () => {
       return acc;
     }, {}));
   }, [featuredCollections, collections, currentChainId]);
-
   const getCollection = useCallback(async (collectionId: number) => {
     const collection = featuredCollections.find(({ id }) => collectionId === id) || collections.find(({ id }) => collectionId === id);
 
-    return collection as CollectionInfoWithSchemaResponse || await api?.collection?.getCollection(Number(collectionId));
-  }, [api?.collection, featuredCollections]);
+    return collection || await fetchOne(Number(collectionId));
+  }, [fetchOne, featuredCollections]);
 
   const getCollectionTokensCount = useCallback(async (collectionId: number) => {
-    const gqlQuery = {
-      operationName: 'collections_by_account_query',
-      query: `query collections_by_account_query($id: Float) {
-        collections(
-          where: {collection_id: {_eq: $id}, burned: {_eq: "false"}}
-          limit: 1
-        ) {
-          count
-          data {
-            id: collection_id
-            tokensCount: tokens_count
-            __typename
-          }
-          __typename
-        }
-      }`,
-      variables: {
-        id: collectionId
-      }
-    };
-    const { scanApi } = config.blockchains[currentChainId || ''] || {};
-    const response = await post(scanApi, gqlQuery);
-    if (response.status === 200) {
-      const backendMyCollections = response?.data?.data?.collections?.data as { tokensCount: number }[] | [];
-      return backendMyCollections[0].tokensCount || 0;
-    }
-    return 0;
-  }, [settings]);
+    const collection = featuredCollections.find(({ id }) => collectionId === id) || collections.find(({ id }) => collectionId === id);
 
-  const getMyCollectionsWithMarketable = useCallback((backendMyCollections: MyCollection[]) => {
+    return collection?.tokensCount || (await fetchOne(Number(collectionId)))?.tokensCount;
+  }, [getCollection]);
+
+  const getMyCollectionsWithMarketable = useCallback((backendMyCollections: GQLCollection[]) => {
     return backendMyCollections.map((bmc) => {
       const allowedCollection = settings?.blockchain.unique.collections[bmc.id];
-      return { ...bmc, isMarketable: !!allowedCollection, allowedTokens: allowedCollection?.allowedTokens || undefined } as MyCollection;
+      return { ...bmc, isMarketable: !!allowedCollection, allowedTokens: allowedCollection?.allowedTokens || undefined } as GQLCollection;
     });
   }, [settings]);
 
   const fetchCollections = useCallback(async (account: Account | undefined) => {
     if (!account) return [];
     setIsFetching(true);
-    const address = account.address;
-    const gqlQuery = {
-      operationName: 'collections_by_account_query',
-      query: `query collections_by_account_query($owner: String, $owner_normalized: String) {
-        collections(
-          where: {_or: [{owner: {_eq: $owner}}, {owner_normalized: {_eq: $owner_normalized}}], burned: {_eq: "false"}}
-          distinct_on: collection_id
-          limit: 1000
-        ) {
-          count
-          data {
-            description
-            owner: owner_normalized
-            cover: collection_cover
-            id: collection_id
-            name: name
-            tokenPrefix: token_prefix
-            tokenCount: tokens_count
-            tokenLimit: token_limit
-            mode
-            properties
-            permissions
-            __typename
-          }
-          __typename
-        }
-      }`,
-      variables: {
-        owner: address,
-        owner_normalized: Address.is.ethereumAddressInAnyForm(address)
-          ? Address.mirror.ethereumToSubstrate(address)
-          : Address.normalize.substrateAddress(address)
-      }
-    };
+    const { address } = account;
 
-    const { scanApi } = config.blockchains[currentChainId || ''] || {};
-    const response = await post(scanApi, gqlQuery);
-    if (response.status === 200) {
-      // TODO: merge with data from "collections" in settings to highlight already "added" collections
-      const backendMyCollections = response?.data?.data?.collections?.data as MyCollection[] | [];
-      const myCollections = getMyCollectionsWithMarketable(backendMyCollections);
-      setCollections(myCollections);
-    }
+    setCollections(await fetch({
+      owner: address
+    }));
     setIsFetching(false);
   }, [settings, getMyCollectionsWithMarketable]);
 

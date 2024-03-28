@@ -1,7 +1,6 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { Text } from '@unique-nft/ui-kit';
-import { Checkbox } from 'components/UI';
+import { Checkbox, Text } from 'components/UI';
 import { useCollections } from '../../hooks/useCollections';
 import { Accordion } from '../Accordion/Accordion';
 import CheckboxSkeleton from '../Skeleton/CheckboxSkeleton';
@@ -97,7 +96,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attr
             <Checkbox
               checked={selectedCollections.indexOf(collection.id) !== -1}
               label={<CheckboxLabelWrapper>
-                <CollectionCover src={collection.schema?.coverPicture.fullUrl || ''} size={22} type={'circle'}/>
+                <CollectionCover src={collection?.cover || ''} size={22} type={'circle'}/>
                 <Text
                   testid={`${testid}-name-${collection.id}`}
                 >{collection.name || ''}</Text>
@@ -127,15 +126,15 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attr
 
 const CollectionFilterWrapper = styled.div`
   position: relative;
-  margin-top: var(--gap);
+  margin-top: var(--prop-gap);
   padding-top: 2px;
   display: flex;
   flex-direction: column;
-  row-gap: var(--gap);
+  row-gap: var(--prop-gap);
   min-height: 50px;
   max-height: 400px;
   overflow-y: auto;
-  padding-right: var(--gap);
+  padding-right: var(--prop-gap);
   .unique-checkbox-wrapper label {
     max-width: 230px;
     text-overflow: ellipsis;
@@ -145,15 +144,15 @@ const CollectionFilterWrapper = styled.div`
 
 const CuratedCollectionFilterWrapper = styled.div`
   position: relative;
-  margin-top: var(--gap);
+  margin-top: var(--prop-gap);
   padding-top: 2px;
   display: flex;
   flex-direction: column;
-  row-gap: var(--gap);
+  row-gap: var(--prop-gap);
   min-height: 50px;
   max-height: 400px;
   overflow-y: auto;
-  padding-right: var(--gap);
+  padding-right: var(--prop-gap);
   .unique-checkbox-wrapper {
     align-items: center;
   }
@@ -170,7 +169,7 @@ const CheckboxWrapper = styled.div`
 
 const CheckboxLabelWrapper = styled.div`
   display: flex;
-  column-gap: calc(var(--gap) / 4);
+  column-gap: calc(var(--prop-gap) / 4);
   align-items: flex-start;
   cursor: pointer;
   .unique-text {
@@ -182,7 +181,7 @@ const CheckboxLabelWrapper = styled.div`
 
 const CuratedCheckboxLabelWrapper = styled.div`
   display: flex;
-  column-gap: calc(var(--gap) / 4);
+  column-gap: calc(var(--prop-gap) / 4);
   align-items: center;
   cursor: pointer;
   .unique-text {
@@ -202,7 +201,7 @@ const CuratedCheckboxLabelWrapper = styled.div`
 `;
 
 const SearchFieldWrapper = styled.div`
-  margin-top: calc(var(--gap) / 2);
+  margin-top: calc(var(--prop-gap) / 2);
 `;
 
 export default CollectionsFilter;

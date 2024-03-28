@@ -1,11 +1,10 @@
-import { Text, Loader } from 'components/UI';
+import { Heading, Text, Loader } from 'components/UI';
 import { Modal, ModalProps } from 'components/UI/Modal';
 import { useAccounts } from 'hooks/useAccounts';
 import { useBalanceInsufficient } from 'pages/CreateCollection/hooks/useBalanceInsufficient';
 import { FeeMessage, TransferBtn } from 'components';
 import { NOT_ENOUGH_BALANCE_MESSAGE } from '../constants';
 import { ContentRow } from './ContentRow';
-import { Heading } from '@unique-nft/ui-kit';
 
 export type ConfirmUpdateCollectionModalProps = Omit<
   ModalProps,

@@ -1,8 +1,7 @@
 import React, { FC, useCallback } from 'react';
-import { Button, InputText } from 'components/UI';
+import { Button, InputText, Loader } from 'components/UI';
 import styled from 'styled-components';
 import { IconButton } from '../IconButton/IconButton';
-import { Loader } from '@unique-nft/ui-kit';
 
 interface AmountInputProps {
   disabled?: boolean
@@ -93,13 +92,13 @@ const InputWrapper = styled.div`
 
 const ButtonsWrapper = styled.div`
   position: absolute;
-  right: calc(var(--gap) / 2);
+  right: calc(var(--prop-gap) / 2);
   bottom: 0;
   max-width: min-content;
   display: flex;
   align-items: center;
   height: 40px;
-  gap: calc(var(--gap) / 4);
+  gap: calc(var(--prop-gap) / 4);
 `;
 
 const ClearButton = styled(IconButton)`

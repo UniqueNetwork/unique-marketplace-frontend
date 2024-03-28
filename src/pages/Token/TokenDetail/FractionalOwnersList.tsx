@@ -1,16 +1,16 @@
-import { Heading, Pagination, TableColumnProps, TableRowProps, Text } from '@unique-nft/ui-kit';
+import { useCallback, useContext, useEffect, useState } from 'react';
+
+import { Heading, Pagination, Text } from 'components/UI';
 import { ProgressBar } from 'components';
-import AccountCard from 'components/Account/Account';
-import AccountLink from 'components/Account/AccountLink';
 import { OwnerCard } from 'components/OwnerCard/OwnerCard';
 import { Table } from 'components/Table';
 import { useApi } from 'hooks/useApi';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
-import { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { percentText } from 'utils/textUtils';
 import { TokenContext } from '../context/TokenContext';
-import { FractionalOwner, useGetRFTOwners } from '../hooks/useGetRFTOwners';
+import { useGetRFTOwners } from '../hooks/useGetRFTOwners';
+import { TableColumnProps, TableRowProps } from 'components/UI/Table/Table';
 
 const pageSize = 20;
 
@@ -110,7 +110,7 @@ export const FractionalOwnersList = () => {
 };
 
 const PaginationWrapper = styled.div`
-  margin-top: calc(var(--gap) * 2);
+  margin-top: calc(var(--prop-gap) * 2);
   
   .unique-pagination-wrapper {
     justify-content: space-between;
@@ -125,7 +125,7 @@ const PaginationWrapper = styled.div`
 const Row = styled.div`
   display: flex;
   align-items: center;
-  column-gap: calc(var(--gap) / 2);
+  column-gap: calc(var(--prop-gap) / 2);
   align-items: center;
   && span {
     min-width: 30%;

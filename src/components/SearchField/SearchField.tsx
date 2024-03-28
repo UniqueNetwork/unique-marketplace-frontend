@@ -123,7 +123,7 @@ const InputWrapper = styled.div<{ hideButton: boolean }>`
     }
   }
   .clear-button {
-    right: ${({ hideButton }) => hideButton ? 'calc(var(--gap) / 2 + 24px)' : 'calc(var(--gap) / 2 + 2px)'};
+    right: ${({ hideButton }) => hideButton ? 'calc(var(--prop-gap) / 2 + 24px)' : 'calc(var(--prop-gap) / 2 + 2px)'};
   }
 
 `;
@@ -136,7 +136,7 @@ const ClearButton = styled(IconButton)`
 
 const SearchIconButton = styled(IconButton)`
   position: absolute;
-  right: calc(var(--gap) / 2 + 2px);
+  right: calc(var(--prop-gap) / 2 + 2px);
   bottom: 8px;
   width: auto !important;
   svg {

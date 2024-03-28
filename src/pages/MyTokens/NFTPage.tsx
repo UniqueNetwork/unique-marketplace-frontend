@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { Text } from '@unique-nft/ui-kit';
-import { Button, Pagination, Select } from 'components/UI';
+import { Button, Pagination, Select, Text } from 'components/UI';
 
 import { useOffers } from 'api/restApi/offers/offers';
 import { PagePaper } from 'components/PagePaper/PagePaper';
@@ -233,7 +232,7 @@ const SearchAndSortingWrapper = styled.div`
 
 const TokensListWrapper = styled.div`
   min-height: 640px;
-  margin-bottom: calc(var(--gap) * 2);
+  margin-bottom: calc(var(--prop-gap) * 2);
 `;
 
 const PaginationWrapper = styled.div`
@@ -243,7 +242,7 @@ const PaginationWrapper = styled.div`
 
 const ButtonsWrapper = styled.div`
   display: flex;
-  column-gap: calc(var(--gap) / 2);
+  column-gap: calc(var(--prop-gap) / 2);
   
   @media (max-width: 1279px) {
     .unique-button.size-middle {
@@ -256,7 +255,7 @@ const ButtonsWrapper = styled.div`
 
   @media (max-width: 567px) {
     flex-direction: column;
-    gap: calc(var(--gap) / 2);
+    gap: calc(var(--prop-gap) / 2);
     button:last-of-type {
       width: 100%;
     }

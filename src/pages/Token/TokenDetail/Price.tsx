@@ -1,8 +1,7 @@
 import React, { FC } from 'react';
-import { Heading } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
-import { Icon } from 'components/UI/Icon/Icon';
 
+import { Icon, Heading } from 'components/UI';
 import { useApi } from '../../../hooks/useApi';
 import { formatBalance } from 'utils/textUtils';
 
@@ -33,7 +32,7 @@ const PriceWrapper = styled.div`
 const Row = styled.div`
   display: flex;
   align-items: center;
-  column-gap: calc(var(--gap) / 2);
+  column-gap: calc(var(--prop-gap) / 2);
   && h1 {
     margin-bottom: 0;
   }
