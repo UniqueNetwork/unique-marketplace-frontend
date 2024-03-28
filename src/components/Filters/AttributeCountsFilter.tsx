@@ -61,15 +61,15 @@ const AttributeCountsFilter: FC<AttributeCountsFilterProps> = ({ attributeCounts
 
 const CollectionFilterWrapper = styled.div`
   position: relative;
-  margin-top: var(--gap);
+  margin-top: var(--prop-gap);
   padding-top: 2px;
   display: flex;
   flex-direction: column;
-  row-gap: var(--gap);
+  row-gap: var(--prop-gap);
   min-height: 50px;
   max-height: 400px;
   overflow-y: auto;
-  padding-right: var(--gap);
+  padding-right: var(--prop-gap);
   .unique-checkbox-wrapper label {
     max-width: 230px;
     text-overflow: ellipsis;
@@ -80,7 +80,7 @@ const CollectionFilterWrapper = styled.div`
 const AttributesFilterWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  row-gap: var(--gap);
+  row-gap: var(--prop-gap);
 
   .unique-checkbox-wrapper label {
     max-width: 230px;

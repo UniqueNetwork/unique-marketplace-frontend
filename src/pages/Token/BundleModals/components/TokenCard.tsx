@@ -100,8 +100,8 @@ const BasicDataWrapper = styled.div`
 const Description = styled.div`
   display: flex;
   flex-direction: column;
-  width: calc(100% - var(--gap));
-  padding: 0 calc(var(--gap) / 2) calc(var(--gap) / 2);
+  width: calc(100% - var(--prop-gap));
+  padding: 0 calc(var(--prop-gap) / 2) calc(var(--prop-gap) / 2);
   span {
     color: ${Primary600};
   }

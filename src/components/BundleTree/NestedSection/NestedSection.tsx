@@ -47,10 +47,10 @@ const NestedDetails = styled.div`
 `;
 
 const NestedTokens = styled.div`
-  margin-top: var(--gap);
+  margin-top: var(--prop-gap);
   display: flex;
   flex-wrap: wrap;
-  gap: var(--gap);
+  gap: var(--prop-gap);
 `;
 
 const TitleWrapper = styled.div`
@@ -70,7 +70,7 @@ const NoNestedWrapper = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  row-gap: var(--gap);
+  row-gap: var(--prop-gap);
   width: 100%;
   height: 100%;
   min-height: 140px;

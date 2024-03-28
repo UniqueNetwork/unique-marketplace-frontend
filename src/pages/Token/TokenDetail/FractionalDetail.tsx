@@ -82,14 +82,14 @@ export const FractionalDetail: FC<FractionalDetailProps> = () => {
 const FractionalDetailWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  margin-bottom: calc(var(--gap) / 2);
-  gap: calc(var(--gap) / 4);
+  margin-bottom: calc(var(--prop-gap) / 2);
+  gap: calc(var(--prop-gap) / 4);
 `;
 
 const Row = styled.div`
   display: flex;
   align-items: center;
-  column-gap: calc(var(--gap) / 2);
+  column-gap: calc(var(--prop-gap) / 2);
   && h1 {
     margin-bottom: 0;
   }

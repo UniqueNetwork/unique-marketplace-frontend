@@ -46,7 +46,7 @@ const Content = styled.div`
 `;
 
 const Row = styled.div`
-  margin: calc(var(--gap) * 1.5) 0;
+  margin: calc(var(--prop-gap) * 1.5) 0;
 `;
 
 const ButtonWrapper = styled.div`

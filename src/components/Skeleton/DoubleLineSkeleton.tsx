@@ -14,9 +14,9 @@ const DoubleLineSkeleton: FC = () => {
 
 const DoubleLineSkeletonWrapper = styled.div`
   display: flex;
-  row-gap: calc(var(--gap) / 2);
+  row-gap: calc(var(--prop-gap) / 2);
   flex-direction: column;
-  padding: calc(var(--gap) / 2) var(--gap);
+  padding: calc(var(--prop-gap) / 2) var(--prop-gap);
 `;
 
 export default DoubleLineSkeleton;

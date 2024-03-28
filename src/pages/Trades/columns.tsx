@@ -129,7 +129,7 @@ const StyledButton = styled.button`
   }
   @media (max-width: 768px) {
     position: absolute;
-    top: var(--gap);
+    top: var(--prop-gap);
     right: 0;
   }
 `;

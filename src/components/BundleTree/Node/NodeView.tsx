@@ -200,8 +200,8 @@ const ViewContainer = styled.div<{ isFirst: boolean | undefined, isSelected: boo
     display: inline-block;
     width: 40px;
     height: 40px;
-    margin-left: var(--gap);
-    margin-right: calc(var(--gap) / 2);
+    margin-left: var(--prop-gap);
+    margin-right: calc(var(--prop-gap) / 2);
     img {
       border-radius: 4px;
       max-width: 100%;
@@ -280,7 +280,7 @@ const ActionsMenuWrapper = styled.div`
     position: absolute;
     width: max-content;
     & > div {
-      padding: calc(var(--gap) / 2) var(--gap);
+      padding: calc(var(--prop-gap) / 2) var(--prop-gap);
       display: flex;
     }
   }

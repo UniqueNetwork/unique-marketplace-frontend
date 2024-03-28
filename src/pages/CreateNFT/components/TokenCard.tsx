@@ -250,7 +250,7 @@ const TokenCardActions = styled.div`
 
 const ButtonsWrapper = styled.div`
   display: flex;
-  gap: calc(var(--gap) / 2);
+  gap: calc(var(--prop-gap) / 2);
 `;
 
 const TokenLinkTitle = styled(Text).attrs({ appearance: 'block', size: 'l' })`

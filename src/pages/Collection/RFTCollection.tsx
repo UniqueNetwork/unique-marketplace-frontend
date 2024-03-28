@@ -177,7 +177,7 @@ export const RFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
 
 const CollectionPagePaper = styled(PagePaper)`
   && {
-    margin-top: calc(var(--gap) / 2);
+    margin-top: calc(var(--prop-gap) / 2);
   }
 `;
 
@@ -188,7 +188,7 @@ const MarketMainPageStyled = styled.div`
 `;
 
 const LeftColumn = styled.div<{ isVisible?: boolean }>`
-  margin-right: calc(var(--gap) * 2);
+  margin-right: calc(var(--prop-gap) * 2);
   @media (max-width: 1024px) {
     display: none;
   }
@@ -218,7 +218,7 @@ const SortSelectWrapper = styled.div`
 `;
 
 const SearchAndSortingWrapper = styled.div`
-  margin-bottom: var(--gap);
+  margin-bottom: var(--prop-gap);
   display: flex;
   justify-content: space-between;
 `;

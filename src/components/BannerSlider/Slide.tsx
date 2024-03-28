@@ -205,7 +205,7 @@ const RightSide = styled.div`
 const LeftSide = styled.div`
   display: flex;
   flex-direction: column;
-  gap: calc(var(--gap));
+  gap: calc(var(--prop-gap));
   padding: 40px 40px 40px 40px;
   justify-content: center;
   align-items: space-between;
@@ -223,12 +223,12 @@ const LeftSide = styled.div`
   }
   @media (max-width: 1278px) {
     padding: 0 16px;
-    gap: calc(var(--gap) * 1);
+    gap: calc(var(--prop-gap) * 1);
   }
   @media (max-width: 1024px) {
     width: calc(50vw - 70px);
     height: calc(37.5vw - 48px);
-    gap: calc(var(--gap) / 2);
+    gap: calc(var(--prop-gap) / 2);
   }
   @media (max-width: 768px) {
     padding: 0 16px;
@@ -241,7 +241,7 @@ const LeftSide = styled.div`
     height: 250px;
   }
   @media (max-width: 520px) {
-    gap: calc(var(--gap) / 2);
+    gap: calc(var(--prop-gap) / 2);
   }
 `;
 

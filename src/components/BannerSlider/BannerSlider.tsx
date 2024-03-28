@@ -349,9 +349,9 @@ const SliderWrapper = styled.div`
 
 const Bullets = styled.div` 
   display: flex;
-  gap: calc(var(--gap) / 2);
+  gap: calc(var(--prop-gap) / 2);
   height: 8px;
-  margin: calc(var(--gap) * 2) 0;
+  margin: calc(var(--prop-gap) * 2) 0;
   align-self: center;
 `;
 

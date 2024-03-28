@@ -82,7 +82,7 @@ export const SelectNFTsModal: FC<TAdminPanelModalBodyProps> = ({ collection, onF
 
 const Content = styled.div`
   && h2 {
-    margin-bottom: calc(var(--gap) * 1.5);
+    margin-bottom: calc(var(--prop-gap) * 1.5);
   }
   @media (max-width: 567px) {
     && h2 {
@@ -102,9 +102,9 @@ const Row = styled.div`
 
 const InputWrapper = styled.div`
   display: flex;
-  column-gap: calc(var(--gap) / 2);
-  margin-bottom: calc(var(--gap) * 2);
-  margin-top: var(--gap);
+  column-gap: calc(var(--prop-gap) / 2);
+  margin-bottom: calc(var(--prop-gap) * 2);
+  margin-top: var(--prop-gap);
   &>div {
     width: 100%;
     .unique-input-text {

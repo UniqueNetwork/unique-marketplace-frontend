@@ -104,7 +104,7 @@ export const NestingTokenBlock: FC<NestingTokenBlockProps> = ({
 
 const ActionsWrapper = styled.div`
   display: flex;
-  row-gap: var(--gap);
+  row-gap: var(--prop-gap);
   flex-direction: column;
   justify-content: flex-start;
   align-items: flex-start;
@@ -114,13 +114,13 @@ const ActionsWrapper = styled.div`
 `;
 
 const Divider = styled.div`
-  margin: calc(var(--gap) * 1.5) 0;
+  margin: calc(var(--prop-gap) * 1.5) 0;
   border-top: 1px dashed ${Grey300};
 `;
 
 const ButtonsWrapper = styled.div`
   display: flex;
-  gap: var(--gap);
+  gap: var(--prop-gap);
   button.primary.equip-button {
     padding: 8px 128px;
   }

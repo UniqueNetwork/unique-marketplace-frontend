@@ -138,11 +138,11 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({
 
 const CollectionFilterWrapper = styled.div`
   position: relative;
-  margin-top: var(--gap);
+  margin-top: var(--prop-gap);
   padding-top: 2px;
   display: flex;
   flex-direction: column;
-  row-gap: var(--gap);
+  row-gap: var(--prop-gap);
   min-height: 50px;
   max-height: 400px;
   overflow-y: auto;
@@ -155,12 +155,12 @@ const CollectionFilterWrapper = styled.div`
 
 const CheckboxWrapper = styled.div`
   display: flex;
-  column-gap: calc(var(--gap) / 4);
+  column-gap: calc(var(--prop-gap) / 4);
   align-items: flex-start;
 `;
 
 const SearchFieldWrapper = styled.div`
-  margin-top: calc(var(--gap) / 2);
+  margin-top: calc(var(--prop-gap) / 2);
 `;
 
 export default CollectionsFilter;

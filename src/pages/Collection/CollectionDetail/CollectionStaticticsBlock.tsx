@@ -51,16 +51,16 @@ export const CollectionStatisticsBlock = ({ collection, royalties }: { collectio
 
 const CollectionStatisticsBlockWrapper = styled.div`
   display: flex;
-  margin-top: calc(var(--gap) / 2);
-  margin-right: calc(var(--gap) / 2);
+  margin-top: calc(var(--prop-gap) / 2);
+  margin-right: calc(var(--prop-gap) / 2);
   & > div {
     display: flex;
     flex-direction: column;
-    padding-right: calc(var(--gap) * 1.5);
-    margin-right: calc(var(--gap) * 1.5);
+    padding-right: calc(var(--prop-gap) * 1.5);
+    margin-right: calc(var(--prop-gap) * 1.5);
     border-right: 1px solid var(--color-blue-grey-200);
     & > h3.unique-font-heading {
-      margin-bottom: calc(var(--gap) / 4) ;
+      margin-bottom: calc(var(--prop-gap) / 4) ;
     }
     span.color-grey-600 {
       color: var(--color-grey-600);
@@ -69,15 +69,15 @@ const CollectionStatisticsBlockWrapper = styled.div`
   @media (max-width: 1024px) {
     margin-right: 0;
     & > div {
-      padding-right: calc(var(--gap) * 1);
-      margin-right: calc(var(--gap) * 1);
+      padding-right: calc(var(--prop-gap) * 1);
+      margin-right: calc(var(--prop-gap) * 1);
     }
   }
   @media (max-width: 576px) {
     flex-direction: column;
     & > div {
       flex-direction: row;
-      gap: calc(var(--gap) / 2);
+      gap: calc(var(--prop-gap) / 2);
       align-items: baseline;
       border-right: none;
     }

@@ -52,7 +52,7 @@ export default InlineTokenCard;
 
 const InlineTokenCardWrapper = styled.div`
   display: flex;
-  column-gap: var(--gap);
+  column-gap: var(--prop-gap);
   position: relative;
   align-items: center;
 `;

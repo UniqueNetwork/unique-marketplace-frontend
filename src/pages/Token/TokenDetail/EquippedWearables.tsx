@@ -88,11 +88,11 @@ const SlideWrapper = styled.div`
   }
 
   @media (max-width: 767px) {
-    width: calc(100vw - var(--gap) * 3);
+    width: calc(100vw - var(--prop-gap) * 3);
   }
 
   @media (max-width: 567px) {
-    width: calc(100vw - var(--gap) * 2);
+    width: calc(100vw - var(--prop-gap) * 2);
   }
 
 `;
@@ -147,7 +147,7 @@ const EquippedWearablesWrapper = styled.div`
 
 const HeaderStyled = styled.div`
   display: flex;
-  gap: var(--gap);
+  gap: var(--prop-gap);
   & > h3.unique-font-heading.size-3 {
     padding-top: 12px;
     margin-bottom: 0px;

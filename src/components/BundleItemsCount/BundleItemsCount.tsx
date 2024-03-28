@@ -20,7 +20,7 @@ function BundleItemsCount({ count, testId }: { count: number, testId: string }) 
 }
 
 const Wrapper = styled.div`
-  margin-top: calc(var(--gap) / 2);
+  margin-top: calc(var(--prop-gap) / 2);
 `;
 
 export default BundleItemsCount;

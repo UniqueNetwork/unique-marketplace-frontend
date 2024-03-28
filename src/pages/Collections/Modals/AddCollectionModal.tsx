@@ -112,8 +112,8 @@ const Content = styled.div`
 const SelectWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  row-gap: calc(var(--gap) / 2);
-  margin: calc(var(--gap) * 1.5) 0;
+  row-gap: calc(var(--prop-gap) / 2);
+  margin: calc(var(--prop-gap) * 1.5) 0;
   .unique-input-text {
     width: 100%;
   }
@@ -121,7 +121,7 @@ const SelectWrapper = styled.div`
 
 const CollectionOption = styled.div`
   display: flex;
-  column-gap: calc(var(--gap) / 2);
+  column-gap: calc(var(--prop-gap) / 2);
 `;
 
 const CollectionNameStyled = styled.div`
@@ -132,8 +132,8 @@ const CollectionNameStyled = styled.div`
   border-radius: 4px;
   background-color: ${BlueGrey100};
   width: 100%;
-  column-gap: calc(var(--gap) / 2);
-  margin-top: calc(var(--gap) * 1.5);
+  column-gap: calc(var(--prop-gap) / 2);
+  margin-top: calc(var(--prop-gap) * 1.5);
 `;
 
 const ButtonWrapper = styled.div`

@@ -32,7 +32,7 @@ const PriceWrapper = styled.div`
 const Row = styled.div`
   display: flex;
   align-items: center;
-  column-gap: calc(var(--gap) / 2);
+  column-gap: calc(var(--prop-gap) / 2);
   && h1 {
     margin-bottom: 0;
   }

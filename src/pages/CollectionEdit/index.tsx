@@ -204,8 +204,8 @@ const CollectionEditPaper = styled(PagePaper)`
 
 const CollectionEditContentWrapper = styled.div`
   display: flex;
-  gap: calc(var(--gap) * 2);
-  padding: 0 calc(var(--gap) * 2);
+  gap: calc(var(--prop-gap) * 2);
+  padding: 0 calc(var(--prop-gap) * 2);
   @media (max-width: 768px) {
     padding: 0;
     flex-direction: column;
@@ -213,7 +213,7 @@ const CollectionEditContentWrapper = styled.div`
 `;
 
 const CollectionEditFormWrapper = styled.div`
-  padding: calc(var(--gap) * 1.5) 0;
+  padding: calc(var(--prop-gap) * 1.5) 0;
   flex: 1;
   @media (max-width: 1024px) {
     flex: 1;

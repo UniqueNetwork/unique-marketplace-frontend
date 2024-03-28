@@ -109,8 +109,8 @@ const PictureWrapper = styled.div`
 
 const ActionsMenuWrapper = styled.div`
   position: absolute;
-  top: calc(var(--gap) / 2);
-  right: calc(var(--gap) / 2);
+  top: calc(var(--prop-gap) / 2);
+  right: calc(var(--prop-gap) / 2);
   
   div[class*=DropdownMenuButtonWrapper] {
     & > button {
@@ -131,7 +131,7 @@ const ActionsMenuWrapper = styled.div`
   div[class*=DropdownMenuDropdown] {
     width: max-content;
     & > div {
-      padding: calc(var(--gap) / 2) var(--gap);
+      padding: calc(var(--prop-gap) / 2) var(--prop-gap);
       display: flex;
     }
   }
@@ -146,14 +146,14 @@ const Description = styled.div`
 const AttributesWrapper = styled.div` 
   display: flex;
   flex-direction: column;
-  row-gap: calc(var(--gap) / 4);
+  row-gap: calc(var(--prop-gap) / 4);
 `;
 
 const Row = styled.div` 
   && {
     display: flex;
     align-items: center;
-    column-gap: calc(var(--gap) / 4);
+    column-gap: calc(var(--prop-gap) / 4);
   }
 `;
 
@@ -173,7 +173,7 @@ const IconWrapper = styled.div`
 const DropdownWrapper = styled.div`
   background: var(--color-additional-dark);
   border-radius: 4px;
-  padding: calc(var(--gap) / 4) calc(var(--gap) / 4) 0 calc(var(--gap) / 4);
+  padding: calc(var(--prop-gap) / 4) calc(var(--prop-gap) / 4) 0 calc(var(--prop-gap) / 4);
 `;
 
 const DropdownMenu = styled.div`
@@ -185,7 +185,7 @@ const DropdownMenu = styled.div`
 
 const DropdownMenuItem = styled.div`
   display: flex;
-  padding: var(--gap);
+  padding: var(--prop-gap);
   cursor: pointer;
   &:hover {
     background: var(--color-primary-100);

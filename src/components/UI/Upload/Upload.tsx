@@ -50,8 +50,8 @@ const UploadWrapper = styled.div`
   border-radius: 8px;
   justify-content: center;
   align-items: center;
-  padding: var(--gap);
-  column-gap: calc(var(--gap) / 2);
+  padding: var(--prop-gap);
+  column-gap: calc(var(--prop-gap) / 2);
 
   input {
     opacity: 0;

@@ -99,12 +99,12 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, royalty, onBuy, testid }) =
 
 const ButtonWrapper = styled.div`
   width: 200px;
-  margin-top: calc(var(--gap) / 2);
-  margin-bottom: calc(var(--gap) / 2);
+  margin-top: calc(var(--prop-gap) / 2);
+  margin-bottom: calc(var(--prop-gap) / 2);
 `;
 
 const Divider = styled.div`
-  margin: calc(var(--gap) * 1.5) 0;
+  margin: calc(var(--prop-gap) * 1.5) 0;
   border-top: 1px dashed ${Grey300};
 `;
 
@@ -114,7 +114,7 @@ const MessageWrapper = styled.div`
   flex-direction: column;
   font-size: 16px;
   padding: 8px 16px;
-  margin: calc(var(--gap) * 1.5) 0;
+  margin: calc(var(--prop-gap) * 1.5) 0;
   border-radius: 4px;
   background-color: var(--color-primary-100);
   color: var(--color-primary-500);

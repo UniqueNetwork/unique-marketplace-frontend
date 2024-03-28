@@ -24,8 +24,8 @@ const RoyaltyWrapper = styled.div`
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  margin-bottom: calc(var(--gap) / 2);  
-  gap: calc(var(--gap) / 2); 
+  margin-bottom: calc(var(--prop-gap) / 2);  
+  gap: calc(var(--prop-gap) / 2); 
 `;
 
 const RoyaltyText = styled(Text)`

@@ -166,11 +166,11 @@ export const CollectionsPage: FC = () => {
 const MainContent = styled.div`
   position: relative;
   flex: 1;
-  margin-top: calc(var(--gap) * 0.5);
+  margin-top: calc(var(--prop-gap) * 0.5);
 
   > div:nth-of-type(2) {
-    margin-top: calc(var(--gap) * 2);
-    margin-bottom: calc(var(--gap) * 2);
+    margin-top: calc(var(--prop-gap) * 2);
+    margin-bottom: calc(var(--prop-gap) * 2);
   }
 `;
 
@@ -181,13 +181,13 @@ const ControlsWrapper = styled.div`
 
   @media (max-width: 1110px) {
     flex-direction: column;
-    gap: calc(var(--gap) * 1.5);
+    gap: calc(var(--prop-gap) * 1.5);
   }
 `;
 
 const ButtonsWrapper = styled.div`
   display: flex;
-  column-gap: calc(var(--gap) / 2);
+  column-gap: calc(var(--prop-gap) / 2);
   
   @media (max-width: 1279px) {
     .unique-button.size-middle {
@@ -200,7 +200,7 @@ const ButtonsWrapper = styled.div`
 
   @media (max-width: 567px) {
     flex-direction: column;
-    gap: calc(var(--gap) / 2);
+    gap: calc(var(--prop-gap) / 2);
     button:last-of-type {
       width: 100%;
     }
@@ -245,7 +245,7 @@ const SearchAndSortingWrapper = styled.div`
 
   @media (max-width: 767px) {
     flex-direction: column;
-    gap: var(--gap);
+    gap: var(--prop-gap);
     .unique-input-text {
       width: 100%;
     }

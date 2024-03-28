@@ -48,8 +48,8 @@ export default DefaultMarketStages;
 const StageWrapper = styled.div`
   display: grid;
   grid-template-columns: 24px 1fr;
-  grid-column-gap: var(--gap);
-  grid-row-gap: var(--gap);
+  grid-column-gap: var(--prop-gap);
+  grid-row-gap: var(--prop-gap);
   align-items: flex-start;
 `;
 

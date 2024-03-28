@@ -103,7 +103,7 @@ const HeadingWrapper = styled.div`
   display: flex;
   align-items: self-end;
   margin-bottom: 16px;
-  column-gap: calc(var(--gap) / 2);
+  column-gap: calc(var(--prop-gap) / 2);
   & > h4.unique-font-heading {
     margin-bottom: 0px;
   }

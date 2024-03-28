@@ -313,13 +313,13 @@ const Content = styled.div`
 const CreateBundleModalWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--gap);
+  gap: var(--prop-gap);
 `;
 
 const NestingWrapper = styled.div`
   display: flex;
   flex-direction: row;
-  gap: var(--gap);
+  gap: var(--prop-gap);
   @media (max-width: 768px) {
     flex-direction: column;
   }
@@ -328,7 +328,7 @@ const NestingWrapper = styled.div`
 const ActionsWrapper = styled.div`
   display: flex;
   flex-direction: row;
-  gap: var(--gap);
+  gap: var(--prop-gap);
   justify-content: flex-end;
   align-items: center;
   &>div {
@@ -342,7 +342,7 @@ const ActionsWrapper = styled.div`
 const TokenWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: calc(var(--gap) / 2);
+  gap: calc(var(--prop-gap) / 2);
 `;
 
 const TokenMediaWrapper = styled.div`
@@ -360,7 +360,7 @@ const TokenMediaWrapper = styled.div`
 const EquipsSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--gap);
+  gap: var(--prop-gap);
 `;
 
 const EquipsListWrapper = styled.div`

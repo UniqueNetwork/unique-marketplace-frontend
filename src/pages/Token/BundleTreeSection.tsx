@@ -121,7 +121,7 @@ const BundlePagePaper = styled(PagePaper)`
 
 const HeaderStyled = styled.div`
   display: flex;
-  gap: var(--gap);
+  gap: var(--prop-gap);
   & > span {
     padding-top: 12px;
   }

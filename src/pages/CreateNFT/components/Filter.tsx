@@ -77,25 +77,25 @@ const FilterWrapper = styled.div`
   flex-direction: column;
   width: 300px;
   min-width: 300px;
-  padding-right: var(--gap);
-  gap: var(--gap);
-  margin-right: calc(var(--gap) * 2);
+  padding-right: var(--prop-gap);
+  gap: var(--prop-gap);
+  margin-right: calc(var(--prop-gap) * 2);
   border-right: 1px solid var(--color-grey-300);
 `;
 
 const CollectionFilterWrapper = styled.div`
   position: relative;
-  margin-top: var(--gap);
+  margin-top: var(--prop-gap);
   padding-top: 2px;
   display: flex;
   flex-direction: column;
-  row-gap: var(--gap);
+  row-gap: var(--prop-gap);
   min-height: 50px;
   max-height: 400px;
   overflow-y: auto;
-  padding-right: var(--gap);
+  padding-right: var(--prop-gap);
   @media (max-width: 1024px) {
-    padding-bottom: calc(var(--gap) * 2);
+    padding-bottom: calc(var(--prop-gap) * 2);
   }
   .unique-checkbox-wrapper label {
     max-width: 230px;

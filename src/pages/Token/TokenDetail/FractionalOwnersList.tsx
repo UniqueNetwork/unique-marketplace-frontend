@@ -110,7 +110,7 @@ export const FractionalOwnersList = () => {
 };
 
 const PaginationWrapper = styled.div`
-  margin-top: calc(var(--gap) * 2);
+  margin-top: calc(var(--prop-gap) * 2);
   
   .unique-pagination-wrapper {
     justify-content: space-between;
@@ -125,7 +125,7 @@ const PaginationWrapper = styled.div`
 const Row = styled.div`
   display: flex;
   align-items: center;
-  column-gap: calc(var(--gap) / 2);
+  column-gap: calc(var(--prop-gap) / 2);
   align-items: center;
   && span {
     min-width: 30%;

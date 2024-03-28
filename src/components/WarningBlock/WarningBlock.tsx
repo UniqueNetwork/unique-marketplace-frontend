@@ -19,7 +19,7 @@ const WarningBlockWrapper = styled.div<{ margin: number }>`
   box-sizing: border-box;
   display: flex;
   padding: 8px 16px;
-  margin: ${({ margin }) => `calc(var(--gap) * ${margin}) 0`};
+  margin: ${({ margin }) => `calc(var(--prop-gap) * ${margin}) 0`};
   border-radius: 4px;
   background-color: ${Primary100};
   width: 100%;

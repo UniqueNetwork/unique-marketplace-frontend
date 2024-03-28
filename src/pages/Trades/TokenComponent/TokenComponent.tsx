@@ -33,9 +33,9 @@ export const TokenComponent = ({ collectionId, tokenId, tokenDescription, testid
 
 const TokenComponentWrapper = styled.div`
   display: flex;
-  column-gap: calc(var(--gap) / 2);
+  column-gap: calc(var(--prop-gap) / 2);
   align-items: center;
-  padding: calc(var(--gap) / 2) 0 !important;
+  padding: calc(var(--prop-gap) / 2) 0 !important;
   @media (max-width: 768px) {
     width: 100%;
     .unique-input-text {

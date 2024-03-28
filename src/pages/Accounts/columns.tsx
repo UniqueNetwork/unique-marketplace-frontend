@@ -143,7 +143,7 @@ const Title = styled.p`
 
 const AccountCellWrapper = styled.div`
   display: flex;
-  column-gap: calc(var(--gap) / 2);
+  column-gap: calc(var(--prop-gap) / 2);
   align-items: center;
 `;
 
@@ -154,7 +154,7 @@ const LinksWrapper = styled.div`
 const LinkStyled = styled(Link)`
   display: flex;
   align-items: center;
-  column-gap: calc(var(--gap) / 4);
+  column-gap: calc(var(--prop-gap) / 4);
   width: fit-content;
 `;
 
@@ -168,7 +168,7 @@ const TransferActionsWrapper = styled.div`
 const DepositActionsWrapper = styled(TransferActionsWrapper)`
   && {
     display: flex;
-    column-gap: calc(var(--gap) / 2);
+    column-gap: calc(var(--prop-gap) / 2);
     padding: 0;
     button {
       width: calc(100% - 32px);

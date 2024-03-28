@@ -39,7 +39,7 @@ const FeeMessageWrapper = styled.div`
   box-sizing: border-box;
   display: flex;
   padding: 8px 16px;
-  margin: calc(var(--gap) * 1.5) 0;
+  margin: calc(var(--prop-gap) * 1.5) 0;
   border-radius: 4px;
   background-color: var(--color-primary-100);
   width: 100%;

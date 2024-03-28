@@ -64,10 +64,10 @@ const UploadCover = styled(Upload)`
 `;
 
 const ButtonsWrapper = styled.div`
-  margin-top: var(--gap);
+  margin-top: var(--prop-gap);
   display: flex;
   flex-direction: column;
-  gap: calc(var(--gap) / 2);
+  gap: calc(var(--prop-gap) / 2);
   span {
     text-align: center;
   }
@@ -91,6 +91,6 @@ const PictureWrapper = styled.div`
     width: 100%;
   }
   /* @media (max-width: 768px) {
-    margin-left: calc(var(--gap) * 2);
+    margin-left: calc(var(--prop-gap) * 2);
   } */
 `;

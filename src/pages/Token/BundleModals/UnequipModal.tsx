@@ -95,7 +95,7 @@ const Content = styled.div`
 const CreateBundleModalWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--gap);
+  gap: var(--prop-gap);
 `;
 
 const LoaderWrapper = styled.div`

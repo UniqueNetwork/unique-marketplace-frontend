@@ -149,8 +149,8 @@ const PriceWrapper = styled.div<{ length: number }>`
 
 const TradingInfoWrapper = styled.div` 
   display: flex;
-  margin-top: calc(var(--gap) / 2);
-  column-gap: calc(var(--gap) / 4);
+  margin-top: calc(var(--prop-gap) / 2);
+  column-gap: calc(var(--prop-gap) / 4);
   align-items: center;
   justify-content: space-between;
 `;
@@ -166,5 +166,5 @@ const Description = styled.div`
 `;
 
 const IconStyled = styled(Icon)`
-  margin: 0 calc(var(--gap) / 4);
+  margin: 0 calc(var(--prop-gap) / 4);
 `;

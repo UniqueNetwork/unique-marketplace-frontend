@@ -490,7 +490,7 @@ const TokensCounterWrapper = styled.div`
   top: 32px;
   display: flex;
   align-items: center;
-  gap: var(--gap);
+  gap: var(--prop-gap);
 
   button.unique-button.ghost {
     padding: 0;

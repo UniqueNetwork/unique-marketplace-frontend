@@ -220,7 +220,7 @@ const TradesPageWrapper = styled.div`
 `;
 
 const StyledSearchField = styled(SearchField)`
-  margin-bottom: calc(var(--gap) * 2);
+  margin-bottom: calc(var(--prop-gap) * 2);
 `;
 
 const StyledTable = styled(Table)`
@@ -237,7 +237,7 @@ const StyledTable = styled(Table)`
 `;
 
 const PaginationWrapper = styled.div`
-  margin-top: calc(var(--gap) * 2);
+  margin-top: calc(var(--prop-gap) * 2);
   
   .unique-pagination-wrapper {
     justify-content: space-between;

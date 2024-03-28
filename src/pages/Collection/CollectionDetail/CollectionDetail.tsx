@@ -190,24 +190,24 @@ const BannerWrapper = styled.div`
     min-width: 100%;
   }
   @media (max-width: 1024px) {
-    margin-left: calc(var(--gap) * -2);
-    margin-right: calc(var(--gap) * -2);
+    margin-left: calc(var(--prop-gap) * -2);
+    margin-right: calc(var(--prop-gap) * -2);
   }
 `;
 
 const CollectionDetailWrapper = styled.div`
   display: flex;
   justify-content: space-between;
-  padding: calc(var(--gap) * 1.5) calc(var(--gap) * 2) calc(var(--gap) * 2);
+  padding: calc(var(--prop-gap) * 1.5) calc(var(--prop-gap) * 2) calc(var(--prop-gap) * 2);
   position: relative;
   @media (max-width: 768px) {
-    padding: calc(var(--gap) * 1.5) 0 calc(var(--gap) * 2);
+    padding: calc(var(--prop-gap) * 1.5) 0 calc(var(--prop-gap) * 2);
   }
 `;
 
 const CollectionCardWrapper = styled.div`
   display: flex;
-  gap: calc(var(--gap) * 2);
+  gap: calc(var(--prop-gap) * 2);
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -232,16 +232,16 @@ const PictureWrapper = styled.div`
     height: 100%;
   }
   @media (max-width: 768px) {
-    margin-left: calc(var(--gap) * 2);
+    margin-left: calc(var(--prop-gap) * 2);
   }
 `;
 
 const CollectionInfoWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--gap);
+  gap: var(--prop-gap);
   h1.unique-font-heading.size-1 {
-    margin-bottom: var(--gap);
+    margin-bottom: var(--prop-gap);
   }
   @media (min-width: 1920px){
     max-width: 900px;
@@ -251,31 +251,31 @@ const CollectionInfoWrapper = styled.div`
 const OwnerWrapper = styled.div`
   display: flex;
   align-items: center;
-  margin-left: calc(var(--gap) / 2);
+  margin-left: calc(var(--prop-gap) / 2);
 `;
 
 const RightSidebar = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: calc(var(--gap) / 2);
+  gap: calc(var(--prop-gap) / 2);
 `;
 
 const EditCollectionLink = styled(Link)`
   display: flex;
-  gap: var(--gap);
+  gap: var(--prop-gap);
   align-items: center;
   text-align: center;
-  margin-bottom: calc(var(--gap) * 1.5);
+  margin-bottom: calc(var(--prop-gap) * 1.5);
   color: ${Primary500};
   font-size: 16px;
 `;
 
 const LinksWrapper = styled.div`
   display: flex;
-  gap: var(--gap);
+  gap: var(--prop-gap);
   justify-content: flex-end;
-  margin-bottom: calc(var(--gap) * 1.5);
+  margin-bottom: calc(var(--prop-gap) * 1.5);
   flex-wrap: wrap;
 `;
 
@@ -286,7 +286,7 @@ const CreationInfoWrapper = styled.div`
 const Row = styled.div`
   display: flex;
   align-items: center;
-  gap: calc(var(--gap) / 2);
+  gap: calc(var(--prop-gap) / 2);
 `;
 
 const AccountLink = styled.a`
@@ -307,9 +307,9 @@ const AccountLink = styled.a`
 const LinkStyled = styled(UILink)`
   display: flex;
   align-items: center;
-  column-gap: calc(var(--gap) / 4);
+  column-gap: calc(var(--prop-gap) / 4);
   width: fit-content;
-  margin-top: calc(var(--gap) / 2);
+  margin-top: calc(var(--prop-gap) / 2);
 `;
 
 const TextStyled = styled(Text)`

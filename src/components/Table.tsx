@@ -65,7 +65,7 @@ const TableWrapper = styled.div`
      padding: 0;
    }
    & > div {
-     padding: 0 var(--gap);
+     padding: 0 var(--prop-gap);
    } 
  }
 `;

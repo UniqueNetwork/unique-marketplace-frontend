@@ -37,11 +37,11 @@ const MobileTreeViewButtons = styled.div`
   top: calc(100% - 60px);   
   right: 0;
   left: 0;
-  padding: 10px var(--gap);
+  padding: 10px var(--prop-gap);
   background-color: ${AdditionalLight};
   box-shadow: 0px -8px 12px rgba(0, 0, 0, 0.06);
   z-index: 8;
-  column-gap: calc(var(--gap) / 2);
+  column-gap: calc(var(--prop-gap) / 2);
 
   @media (max-width: 567px) {
     display: flex;
@@ -55,7 +55,7 @@ const MobileFilterModal = styled.div<{ isVisible: boolean }>`
   display: none;
   position: fixed;
   background-color: ${AdditionalLight};
-  padding: calc(var(--gap) * 1.5);
+  padding: calc(var(--prop-gap) * 1.5);
   height: calc(100% - 184px);
   top: 80px;
   right: 0;

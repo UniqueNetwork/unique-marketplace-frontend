@@ -84,7 +84,7 @@ export const FractionalAmountInput = ({
 
 const AmountInputWrapper = styled.div`
   width: 100%;
-  margin-bottom: calc(var(--gap) * 2);
+  margin-bottom: calc(var(--prop-gap) * 2);
 `;
 
 const AmountInputStyled = styled(NumberInput)`
@@ -94,7 +94,7 @@ const AmountInputStyled = styled(NumberInput)`
 const InvalidAmountWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
-  right: calc(var(--gap) * 1.5);
+  right: calc(var(--prop-gap) * 1.5);
   height: 0;
   span {
     color: ${Coral700} !important;

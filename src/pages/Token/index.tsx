@@ -173,7 +173,7 @@ const TokenPage = () => {
 
 const TokenPagePaper = styled(PagePaper)`
   && {
-    margin-top: calc(var(--gap) / 2);
+    margin-top: calc(var(--prop-gap) / 2);
   }
 `;
 

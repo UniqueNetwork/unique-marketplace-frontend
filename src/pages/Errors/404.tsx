@@ -28,7 +28,7 @@ const PagePaperStyled = styled(PagePaper)`
 
 const Content = styled.div`
   display: flex;
-  gap: calc(var(--gap) * 3);
+  gap: calc(var(--prop-gap) * 3);
   img {
     width: 150px;
     height: 212px;
@@ -60,5 +60,5 @@ const ErrorText = styled.div`
 
 const HeadingStyled = styled(Heading)`
   color: ${BlueGrey400};
-  margin-top: calc(var(--gap) * 1.5) !important;
+  margin-top: calc(var(--prop-gap) * 1.5) !important;
 `;

@@ -55,6 +55,6 @@ const MaxIcon = styled.div`
   font-size: 16px;
   line-height: 42px;
   color: var(--color-primary-500);
-  right: var(--gap);
+  right: var(--prop-gap);
   top: calc(48px + var(--prop-gap));
 `;

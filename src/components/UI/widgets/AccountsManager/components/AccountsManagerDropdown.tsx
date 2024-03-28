@@ -190,7 +190,7 @@ const AccountsManagerDropdownWrapper = styled.div`
   }
 
   .wallet-link {
-    margin-top: calc(var(--gap));
+    margin-top: calc(var(--prop-gap));
     a {
       font-size: 16px;
       font-weight: 500;

@@ -13,7 +13,7 @@ function BuyBundleInformation({ testid }: { testid?: string }) {
 }
 
 const Wrapper = styled.div`
-  margin-top: calc(var(--gap) * 1.5);
+  margin-top: calc(var(--prop-gap) * 1.5);
 `;
 
 export default BuyBundleInformation;

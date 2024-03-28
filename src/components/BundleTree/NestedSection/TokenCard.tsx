@@ -121,7 +121,7 @@ const TokenCardWrapper = styled.div<{ fixedWidth?: boolean }>`
   }
   /* span:first-of-type,
   span:last-of-type {
-    margin-top: calc(var(--gap) / 2);
+    margin-top: calc(var(--prop-gap) / 2);
   } */
   &:hover {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
@@ -137,7 +137,7 @@ const ActionsMenuWrapper = styled.div`
   div[class*=DropdownMenuDropdown] {
     width: max-content;
     & > div {
-      padding: calc(var(--gap) / 2) var(--gap);
+      padding: calc(var(--prop-gap) / 2) var(--prop-gap);
       display: flex;
     }
   }

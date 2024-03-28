@@ -126,7 +126,7 @@ const TimeCell = styled.div`
 const BidderCell = styled.div`
   display: flex;
   img {
-    margin-left: var(--gap);
+    margin-left: var(--prop-gap);
   }
 `;
 

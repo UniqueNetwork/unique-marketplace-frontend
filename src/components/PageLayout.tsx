@@ -97,7 +97,7 @@ const LayoutStyled = styled.div<{hasFooterSpacing: boolean}>`
         line-height: 24px;
       }
       @media (max-width: 568px) {
-        padding-bottom: ${({ hasFooterSpacing }) => hasFooterSpacing ? 'calc(var(--gap) * 5)' : 'var(--gap)'};
+        padding-bottom: ${({ hasFooterSpacing }) => hasFooterSpacing ? 'calc(var(--prop-gap) * 5)' : 'var(--prop-gap)'};
       }
     }
   }
@@ -108,7 +108,7 @@ const LayoutStyled = styled.div<{hasFooterSpacing: boolean}>`
     box-shadow: none !important;
     display: flex;
     flex-direction: column;
-    row-gap: calc(var(--gap) * 1.5);
+    row-gap: calc(var(--prop-gap) * 1.5);
     @media (min-width: 1920px) {
       width: 1374px;
     }
@@ -164,7 +164,7 @@ const LayoutStyled = styled.div<{hasFooterSpacing: boolean}>`
       justify-content: space-between;
       width: 100%;
       @media (max-width: 568px) {
-        padding: var(--gap) 0;
+        padding: var(--prop-gap) 0;
         flex-direction: column;
         align-items: flex-start;
       }

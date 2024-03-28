@@ -99,13 +99,13 @@ const Content = styled.div`
 const CreateBundleModalWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--gap);
+  gap: var(--prop-gap);
 `;
 
 const ActionsWrapper = styled.div`
   display: flex;
   flex-direction: row;
-  gap: var(--gap);
+  gap: var(--prop-gap);
   justify-content: flex-end;
   align-items: center;
   &>div {
@@ -119,7 +119,7 @@ const ActionsWrapper = styled.div`
 const EquipsSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--gap);
+  gap: var(--prop-gap);
 `;
 
 const EquipsListWrapper = styled.div`

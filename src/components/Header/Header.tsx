@@ -178,7 +178,7 @@ const LogoIcon = styled.img`
 const RightSide = styled.div`
   display: flex;
   align-items: center;
-  gap: var(--gap);
+  gap: var(--prop-gap);
 `;
 
 const MobileMenu = styled.div`
