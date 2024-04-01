@@ -1,7 +1,6 @@
-import { AttributeSchemaDto, CreateTokenBody, CreateTokenPayload } from '@unique-nft/sdk';
+import { PotentialAttribute, AttributeSchemaDto, CreateTokenBody, Attribute as UniqueAttribute, TokenV2ItemForMultipleDto } from '@unique-nft/sdk';
 
-import { Attribute, AttributeOption, AttributesForFilter, FilledTokenForm, NewToken } from './types';
-import { AttributeSchema, LocalizedStringOrBoxedNumberWithDefault } from '@unique-nft/schemas';
+import { Attribute, AttributeOption, AttributesForFilter, NewToken } from './types';
 
 const attributeMapper = (attribute?: Attribute) => {
   if (
@@ -18,7 +17,7 @@ const attributeMapper = (attribute?: Attribute) => {
   }
 
   if (typeof attribute === 'string') {
-    return { _: attribute };
+    return attribute;
   }
 
   if (typeof attribute === 'object') {
@@ -32,52 +31,48 @@ const attributeMapper = (attribute?: Attribute) => {
 export const mapTokensToPayload = (
   tokens: NewToken[],
   collectionId: number,
-  owner: string
-): CreateTokenPayload[] => {
-  return tokens.map((token) => mapNewToken(token, collectionId, owner));
-};
-
-export const mapTokensToPayload$1 = (
-  tokens: NewToken[],
-  collectionId: number,
-  owner: string
-): CreateTokenBody[] => {
-  return tokens.map((token) => mapNewToken$1(token, collectionId, owner));
+  owner: string,
+  schema?: PotentialAttribute[]
+): TokenV2ItemForMultipleDto[] => {
+  return tokens.map((token) => mapNewToken(token, collectionId, owner, schema));
 };
 
 export const mapNewToken = (
   token: NewToken,
   collectionId: number,
-  owner: string
-): CreateTokenPayload => {
-  const mappedTokenDto: CreateTokenPayload = {
-    data: {
-      image: {
-        ipfsCid: token.ipfsCid?.cid
-      },
-      encodedAttributes: {}
-    }
+  owner: string,
+  schema?: PotentialAttribute[]
+): TokenV2ItemForMultipleDto => {
+  const mappedTokenDto: TokenV2ItemForMultipleDto = {
+    image: token.ipfsCid?.fullUrl, 
+    attributes: []
   };
 
-  if (mappedTokenDto.data && token.attributes?.length) {
-    mappedTokenDto.data.encodedAttributes = token.attributes.reduce(
+  if (schema && token.attributes?.length) {
+    mappedTokenDto.attributes = token.attributes.reduce<UniqueAttribute[]>(
       (acc, attr, index) => {
-        const mapped = attributeMapper(attr);
-        if (mapped === null) {
-          return acc;
+        if (!schema[index]?.trait_type) return acc;
+        if (Array.isArray(attr)) {
+          acc.push(...attr.map(({ title }: AttributeOption) => ({
+            trait_type: schema[index].trait_type!,
+            value: title
+          })));
         }
-
-        return {
-          ...acc,
-          [index]: mapped
-        };
+        if (typeof attr === 'string') {
+          acc.push({
+            trait_type: schema[index].trait_type!,
+            value: attr as string
+          });
+        }
+        return acc;
       },
-      {}
+      []
     );
   }
 
   return mappedTokenDto;
 };
+
 export const mapNewToken$1 = (
   token: NewToken,
   collectionId: number,
@@ -137,7 +132,7 @@ export const scrollToTokenCard = (id: number) => {
 };
 
 export const getAttributesFromTokens = (
-  attributesSchema: Record<number, AttributeSchemaDto>,
+  attributesSchema: PotentialAttribute[],
   tokens: NewToken[]
 ) => {
   // attributes formatted for Filter component
@@ -147,17 +142,18 @@ export const getAttributesFromTokens = (
     attributeName: string,
     index: number,
     value: number,
-    enumValues: Record<number, LocalizedStringOrBoxedNumberWithDefault>
+    enumValues: (string | number)[]
   ) => {
     const existsValue = attributesForFilter[attributeName].find(({ id }) => id === value);
     if (existsValue) {
       existsValue.count += 1;
     } else {
+      console.log(enumValues, value);
       attributesForFilter[attributeName].push({
         index,
         key: attributeName,
         id: value,
-        value: enumValues[value]._.toString(),
+        value: enumValues[value].toString(),
         count: 1
       });
     }
@@ -167,10 +163,12 @@ export const getAttributesFromTokens = (
     if (!attributes) {
       return;
     }
+
+    console.log(attributes);
     // Calculate filters to show
     attributes.forEach((attribute, index) => {
-      const { name, isArray, enumValues } = attributesSchema[index];
-      const attributeName = name?._?.toLocaleLowerCase();
+      const { trait_type, values } = attributesSchema[index];
+      const attributeName = (trait_type || '').toLocaleLowerCase();
 
       if (!attributeName) {
         return;
@@ -186,19 +184,14 @@ export const getAttributesFromTokens = (
         return;
       }
 
-      if (enumValues) {
-        if (isArray) {
-          (value as number[]).forEach((_value) => {
-            addSelectableValue(attributeName, index, _value, enumValues);
-          });
-          return;
+      if (values) {
+        if (Array.isArray(value)) {
+          value.forEach((v) => addSelectableValue(attributeName, index, v, values));
         }
-        addSelectableValue(attributeName, index, value as number, enumValues);
-
         return;
       }
 
-      const stringValue = (value as { _: string })?._;
+      const stringValue = value as string;
 
       const existsValue = attributesForFilter[attributeName].find(
         ({ value }) => value === stringValue

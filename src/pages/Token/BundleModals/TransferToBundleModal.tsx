@@ -13,7 +13,7 @@ import { CollectionCover } from 'components/CollectionCover/CollectionCover';
 import { FeeMessage } from 'components';
 import { useTransferToBundleStages } from 'hooks/marketplaceStages/useTransferToBundleStages';
 import { INestingToken } from 'components/BundleTree/types';
-import { CollectionInfoWithSchemaResponse, TokenByIdResponse, TokenIdQuery } from '@unique-nft/sdk';
+import { CollectionWithInfoV2Dto, TokenByIdResponse, TokenIdQuery } from '@unique-nft/sdk';
 import { debounce } from 'utils/helpers';
 import { fromStringToBnString } from 'utils/bigNum';
 import { Coral700 } from 'styles/colors';
@@ -32,7 +32,7 @@ export const TransferToBundleModal: FC<TBundleTransferModalBodyProps> = ({ token
   const [status, setStatus] = useState<'ask' | 'transfer-stage'>('ask'); // TODO: naming
   const [newParent, setNewParent] = useState<{ collectionId: number, tokenId: number }>();
   const [isFetching, setIsFetching] = useState(false);
-  const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse | null>(null);
+  const [collection, setCollection] = useState<CollectionWithInfoV2Dto | null>(null);
   const [amount, setAmount] = useState(1);
 
   useEffect(() => {
@@ -83,7 +83,7 @@ export const TransferToBundleModal: FC<TBundleTransferModalBodyProps> = ({ token
 
 type AskTransferToBundleModalProps = {
   token: INestingToken | TokenByIdResponse,
-  collection: CollectionInfoWithSchemaResponse | null
+  collection: CollectionWithInfoV2Dto | null
   onTransferToBundle(newParent: TokenIdQuery, amount: number): void
   testid: string
 };

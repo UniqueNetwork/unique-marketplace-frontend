@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Button, Pagination, Text, useNotifications, Heading, Loader } from 'components/UI';
-import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
+import { CollectionWithInfoV2Dto, TokenByIdResponse } from '@unique-nft/sdk';
 import { TBundleTransferModalBodyProps } from './BundleTransferModal';
 import styled from 'styled-components';
 import { useApi } from 'hooks/useApi';
@@ -22,7 +22,7 @@ export const CustomizeModal = ({
   selectedWearable,
   setIsClosable
 }: TBundleTransferModalBodyProps & { selectedWearable?: GQLToken }) => {
-  const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse | null>(null);
+  const [collection, setCollection] = useState<CollectionWithInfoV2Dto | null>(null);
   const [tokens, setTokens] = useState<GQLToken[]>([]);
   const [total, setTotal] = useState<number>(0);
   const [nestedTokens, setNestedTokens] = useState<GQLToken[]>([]);

@@ -9,7 +9,7 @@ import { useRejectSponsorshipStages } from 'hooks/adminStages/useRejectSponsorsh
 import AccountCard from 'components/Account/Account';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 import StagesModal from '../../Token/Modals/StagesModal';
-import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
+import { CollectionWithInfoV2Dto } from '@unique-nft/sdk';
 import { Heading } from 'components/UI';
 
 export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collection, setIsClosable, onFinish }) => {
@@ -33,7 +33,7 @@ export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collecti
 
   const { api } = useApi();
   const collectionApi = api?.collection;
-  const [collectionDetails, setCollectionDetails] = useState<CollectionInfoWithSchemaResponse | null>();
+  const [collectionDetails, setCollectionDetails] = useState<CollectionWithInfoV2Dto | null>();
   useEffect(() => {
     if (!collection) return;
     (async () => {

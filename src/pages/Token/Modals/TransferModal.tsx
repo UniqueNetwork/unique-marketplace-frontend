@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
+import { CollectionWithInfoV2Dto, TokenByIdResponse } from '@unique-nft/sdk';
 import { Address } from '@unique-nft/utils';
 import { Heading, Link, useNotifications, Button, Text } from 'components/UI';
 import { BN } from '@polkadot/util';
@@ -61,7 +61,7 @@ export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosab
 
 type AskTransferModalProps = {
   token?: TokenByIdResponse
-  collection?: CollectionInfoWithSchemaResponse | null
+  collection?: CollectionWithInfoV2Dto | null
   onTransfer(receiver: string, amount: number): void
   testid: string
 }
@@ -192,7 +192,7 @@ const AskTransferModal: FC<AskTransferModalProps> = ({ token, collection, onTran
         isFeeLoading={isFeeLoading}
         fee={fee || '0'}
         testid={`${testid}-fee-message`}
-        placeholder={isSponsored ? `Collection ID ${collection?.id} sponsored` : undefined}
+        placeholder={isSponsored ? `Collection ID ${collection?.collectionId} sponsored` : undefined}
       />
       <ButtonWrapper>
         <Button

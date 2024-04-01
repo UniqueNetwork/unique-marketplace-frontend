@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { Button, Heading } from 'components/UI';
 
 import { Grey300 } from 'styles/colors';
-import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
+import { CollectionWithInfoV2Dto, TokenByIdResponse } from '@unique-nft/sdk';
 import { blockedNestingCollections } from '../SellToken/constants';
 import { useApi } from 'hooks/useApi';
 import { mockWearables } from '../constants';
@@ -12,7 +12,7 @@ import { Offer } from 'api/restApi/offers/types';
 
 interface NestingTokenBlockProps {
   token?: TokenByIdResponse
-  collection?: CollectionInfoWithSchemaResponse | undefined
+  collection?: CollectionWithInfoV2Dto | undefined
   offer?: Offer | undefined
   isOwner?: boolean
   isNested?: boolean

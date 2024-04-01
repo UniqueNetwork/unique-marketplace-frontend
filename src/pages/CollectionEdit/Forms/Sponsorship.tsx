@@ -26,7 +26,7 @@ export const Sponsorship = ({ collectionInfo, onComplete }: SettingsSavingProps)
   } = useCollectionSetSponsor();
   const { error, info } = useNotifications();
 
-  const { sponsorship, id: collectionId } = collectionInfo || {};
+  const { sponsorship, collectionId } = collectionInfo || {};
 
   const [sponsor, setSponsor] = useState<string | undefined>(sponsorship?.address);
 

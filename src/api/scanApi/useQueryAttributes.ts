@@ -12,9 +12,8 @@ const gqlQuery = {
       where: {collection_id: {_eq: $collectionId} }
     ) {
       count
-      data {        
-        key
-        name
+      data {     
+        name: trait_type
         values {
           tokens_count
           raw_value
@@ -26,7 +25,6 @@ const gqlQuery = {
 };
 
 export type AttributeStatistic = {
-  key: string
   name: { _: string }
   values: {
     tokens_count: number

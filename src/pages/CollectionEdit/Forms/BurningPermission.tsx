@@ -29,7 +29,7 @@ export const BurningPermission = ({ collection, collectionInfo, onComplete }: Se
   } = useCollectionSetLimits();
   const { error, info } = useNotifications();
 
-  const { limits, id: collectionId } = collectionInfo || {};
+  const { limits, collectionId } = collectionInfo || {};
 
   const initialOwnerCanDestroy =
     limits?.ownerCanDestroy === undefined || limits?.ownerCanDestroy === null

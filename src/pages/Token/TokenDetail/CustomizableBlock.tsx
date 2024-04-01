@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
+import { CollectionWithInfoV2Dto, TokenByIdResponse } from '@unique-nft/sdk';
 import styled from 'styled-components';
 
 import { Offer } from 'api/restApi/offers/types';
@@ -12,7 +12,7 @@ import { mockWearables } from '../constants';
 
 type CustomizableBlockProps = {
   token?: TokenByIdResponse
-  collection?: CollectionInfoWithSchemaResponse
+  collection?: CollectionWithInfoV2Dto
   offer?: Offer
 }
 

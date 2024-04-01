@@ -4,13 +4,13 @@ import { FieldError, FormProvider, useForm, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 import classNames from 'classnames';
 import { useDebounce } from 'use-debounce';
-import { CollectionAttributesSchema, SchemaTools, UniqueCollectionSchemaToCreate } from '@unique-nft/schemas';
+import { SchemaTools } from '@unique-nft/schemas-v2';
 
 import { Button, ButtonGroup, Confirm, Text, useNotifications, Alert } from 'components/UI';
 
 import { CollectionForm, Warning } from './types';
 import { FORM_ERRORS, tabsUrls, warnings } from './constants';
-import { useCollectionFormMapper } from './useCollectionFormMapper';
+import { useCollectionFormMapper } from './hooks/useCollectionFormMapper';
 import { StatusCreateTransactionsModal } from './components/StatusCreateTransactionsModal/StatusCreateTransactionsModal';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { useApi } from 'hooks/useApi';
@@ -25,6 +25,8 @@ import { CollectionStepper } from './components/CollectionStepper';
 import { ConfirmBtn, FeeMessage } from 'components';
 import { BottomBar } from './components/BottomBar';
 import { CollectionSidebar } from './components/CollectionSidebar';
+import { getIpfsUriByImagePath } from 'utils/urlUtils';
+import { c } from '@unique-nft/utils/index-406151a5';
 
 interface CreateCollectionProps {
   className?: string;
@@ -209,40 +211,49 @@ const CreateCollectionComponent = ({ className }: CreateCollectionProps) => {
     const createdCollection = await submitWaitResult({ payload });
     const collectionId = createdCollection?.collectionId;
 
-    if (selectedAccount.name === MetamaskAccountName) {
-      if (!collectionId) {
-        setIsCreating(false);
-        error('Something went wrong');
-        return;
-      }
-      setCurrentStage(1);
-      const { schema } = payload;
-      const { coverPicture, attributesSchema } = schema || {};
-      const schemaToCreate = {
-        ...schema,
-        coverPicture: { ipfsCid: (coverPicture as { ipfsCid: string })?.ipfsCid || '' },
-        attributesSchema: attributesSchema as CollectionAttributesSchema
-      } as UniqueCollectionSchemaToCreate;
 
-      const properties =
-        SchemaTools.tools.unique.collection.encodeCollectionSchemaToProperties(
-          schemaToCreate
-        );
 
-      const propertyPermissions =
-        SchemaTools.tools.unique.collection.generateTokenPropertyPermissionsFromCollectionSchema(
-          schemaToCreate
-        );
-      await setTokenPropertyPermissions.submitWaitResult({
-        collectionId,
-        propertyPermissions
-      });
-      setCurrentStage(2);
-      await setProperties.submitWaitResult({
-        collectionId,
-        properties
-      });
-    }
+    // if (selectedAccount.name === MetamaskAccountName) {
+    //   if (!collectionId) {
+    //     setIsCreating(false);
+    //     error('Something went wrong');
+    //     return;
+    //   }
+    //   setCurrentStage(1);
+    //   const { schema } = payload;
+    //   const { coverPicture, attributesSchema } = schema || {};
+    //   const { attributes } = form;
+    //   // const schemaToCreate = {
+    //   //   ...schema,
+    //   //   coverPicture: { ipfsCid: (coverPicture as { ipfsCid: string })?.ipfsCid || '' },
+    //   //   attributesSchema: attributesSchema as CollectionAttributesSchema
+    //   // } as ;
+    //   const coverPictureUrl = getIpfsUriByImagePath(form.coverPictureIpfsCid);
+    //   const properties =
+    //     SchemaTools.encode.collection({
+    //       schemaName: 'unique',
+    //       schemaVersion: '2.0.0',
+    //       cover_image: coverPictureUrl ? { url: coverPictureUrl } : undefined,
+    //       potential_attributes: attributes ? attributes.map(({ name, values }) => ({ 
+    //         trait_type: name || "",
+    //         values
+    //       })) : undefined,
+    //     });
+
+    //   const propertyPermissions =
+    //     SchemaTools.tools.unique.collection.generateTokenPropertyPermissionsFromCollectionSchema(
+    //       schemaToCreate
+    //     );
+    //   await setTokenPropertyPermissions.submitWaitResult({
+    //     collectionId,
+    //     propertyPermissions
+    //   });
+    //   setCurrentStage(2);
+    //   await setProperties.submitWaitResult({
+    //     collectionId,
+    //     properties
+    //   });
+    // }
 
     setIsCreating(false);
     info('Collection created successfully');

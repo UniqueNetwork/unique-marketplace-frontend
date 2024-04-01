@@ -26,10 +26,10 @@ export const useSetRoyaltiesStages = (collectionId: number) => {
     status: StageStatus.default,
     action: async ({ txParams, options }) => {
       const collection = await collectionApi?.getCollection(collectionId);
-      if (!collection?.schema) throw new Error('Collection not found');
+      if (!collection?.info) throw new Error('Collection not found');
       const encodedSchema = SchemaTools.tools.unique.collection.encodeCollectionSchemaToProperties({
-        schemaName: collection.schema.schemaName,
-        schemaVersion: collection.schema.schemaVersion,
+        schemaName: collection.info.schemaName || '',
+        schemaVersion: collection.info.schemaVersion || '',
         // @ts-ignore
         coverPicture: collection.schema.coverPicture,
         image: {

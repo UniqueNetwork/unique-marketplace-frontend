@@ -13,7 +13,7 @@ import { INestingToken } from 'components/BundleTree/types';
 import { useApi } from 'hooks/useApi';
 import { fromStringToBnString } from 'utils/bigNum';
 import { Coral700 } from 'styles/colors';
-import { CollectionInfoWithSchemaResponse, TokenByIdResponse, TokenIdQuery } from '@unique-nft/sdk';
+import { CollectionWithInfoV2Dto, TokenByIdResponse, TokenIdQuery } from '@unique-nft/sdk';
 import { FractionalAmountInput } from '../Modals/FractionalAmountInput';
 import { CollectionMode } from 'api/chainApi/types';
 import { Address } from '@unique-nft/utils';
@@ -24,7 +24,7 @@ export const UnnestModal: FC<TBundleTransferModalBodyProps> = ({ token, setIsClo
   const { api } = useApi();
   const [status, setStatus] = useState<'ask' | 'unnest-stage'>('ask'); // TODO: naming
   const [isFetching, setIsFetching] = useState(false);
-  const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse | null>(null);
+  const [collection, setCollection] = useState<CollectionWithInfoV2Dto | null>(null);
   const [amount, setAmount] = useState(1);
   const [parentAddress, setParentAddress] = useState<string>('');
 
@@ -79,7 +79,13 @@ export const UnnestModal: FC<TBundleTransferModalBodyProps> = ({ token, setIsClo
   return null;
 };
 
-type AskUnnestModalProps = { token: INestingToken | TokenByIdResponse, parentAddress: string, collection: CollectionInfoWithSchemaResponse | null, onUnnest(amount: number): void, testid: string };
+type AskUnnestModalProps = { 
+  token: INestingToken | TokenByIdResponse, 
+  parentAddress: string, 
+  collection: CollectionWithInfoV2Dto | null, 
+  onUnnest(amount: number): void, 
+  testid: string 
+};
 
 const AskUnnestModal: FC<AskUnnestModalProps> = ({ token, parentAddress, collection, onUnnest, testid }) => {
   const { api } = useApi();

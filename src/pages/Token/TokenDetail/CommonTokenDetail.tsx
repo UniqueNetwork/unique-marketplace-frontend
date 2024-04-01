@@ -14,7 +14,7 @@ import Skeleton from 'components/Skeleton/Skeleton';
 import { TokenSkeleton } from 'components/Skeleton/TokenSkeleton';
 import ShareTokenModal from './ShareTokenModal';
 import { stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
-import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
+import { CollectionWithInfoV2Dto, TokenByIdResponse } from '@unique-nft/sdk';
 import { ReportModal } from './ReportModal';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Address } from '@unique-nft/utils';
@@ -31,7 +31,7 @@ import { mockWearables } from '../constants';
 
 interface IProps {
   token?: TokenByIdResponse
-  collection?: CollectionInfoWithSchemaResponse
+  collection?: CollectionWithInfoV2Dto
   offer?: Offer
   isLoading?: boolean
   testid: string
@@ -70,7 +70,7 @@ export const CommonTokenDetail: FC<IProps> = ({
   } = useMemo(() => {
     const { tokenId, collectionId } = offer || token || {};
     const { image, file, attributes, video } = offer?.tokenDescription || token || {};
-    const { name: collectionName, tokenPrefix: prefix, schema, description } = offer?.collectionDescription || collection || {};
+    const { name: collectionName, tokenPrefix: prefix, description } = offer?.collectionDescription || collection || {};
     const owner = offer?.seller || token?.owner;
 
     const attributesList = attributes ? Object.values(attributes) : [];
@@ -79,7 +79,7 @@ export const CommonTokenDetail: FC<IProps> = ({
       collectionId,
       collectionName,
       prefix,
-      coverImageUrl: schema?.coverPicture?.fullUrl || '',
+      coverImageUrl: offer?.collectionDescription?.schema?.coverPicture?.fullUrl || collection?.info?.cover_image?.url || '',
       description,
       attributes,
       attributesList,

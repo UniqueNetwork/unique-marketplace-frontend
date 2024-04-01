@@ -1,4 +1,4 @@
-import { CollectionInfoWithSchemaResponse, TokenByIdResponse, TokenChildrenResponse } from '@unique-nft/sdk';
+import { CollectionWithInfoV2Dto, TokenByIdResponse, TokenChildrenResponse } from '@unique-nft/sdk';
 import { Address } from '@unique-nft/utils';
 import { isTokenOwner } from 'api/chainApi/utils/addressUtils';
 import { useOffer } from 'api/restApi/offers/offer';
@@ -31,7 +31,7 @@ export const TokenContextProvider: FC = ({ children }) => {
   const [collectionId, tokenId] = [Number(collectionIdParam), Number(tokenIdParam)];
 
   const [token, setToken] = useState<TokenByIdResponse>();
-  const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse>();
+  const [collection, setCollection] = useState<CollectionWithInfoV2Dto>();
   const [isFetchingToken, setIsFetchingToken] = useState(true);
   const { offer, fetch: fetchOffer, isFetching: isFetchingOffer } = useOffer(collectionId, tokenId);
   const [isFetchingBundle, setIsFetchingBundle] = useState(false);
@@ -137,7 +137,7 @@ export const TokenContextProvider: FC = ({ children }) => {
       fraction,
       fetchToken,
       fetchOffer: async () => { await fetchOffer(collectionId, tokenId); },
-      isWearable: !!mockWearables[currentChainId || '']?.find(({ collectionId }) => collectionId === collection?.id),
+      isWearable: !!mockWearables[currentChainId || '']?.find(({ collectionId }) => collectionId === collection?.collectionId),
       isCustomizable: !!collection?.properties.find(({ key }) => key === 'is_customizable')?.value
     };
   }, [token, collection, offer, bundle, topmostOwner, isNested, address, isFetchingToken, isFetchingOffer, isFetchingBundle, isOwner, fraction, fetchToken, currentChainId, fetchOffer, collectionId, tokenId]);

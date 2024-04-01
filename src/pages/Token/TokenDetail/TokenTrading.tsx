@@ -7,14 +7,14 @@ import { BuyToken } from '../BuyToken/BuyToken';
 import { isTokenOwner } from 'api/chainApi/utils/addressUtils';
 import { useApi } from '../../../hooks/useApi';
 import { checkAllowedTokenInSettings } from 'api/chainApi/utils/checkTokenIsAllowed';
-import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
+import { CollectionWithInfoV2Dto, TokenByIdResponse } from '@unique-nft/sdk';
 import { ethers } from 'ethers';
 import { useParams } from 'react-router-dom';
 import { disallowSellingAttributeName, disallowSellingAttributeValue } from '../constants';
 
 interface TokenTradingProps {
   token?: TokenByIdResponse
-  collection?: CollectionInfoWithSchemaResponse | null
+  collection?: CollectionWithInfoV2Dto | null
   offer?: Offer
   onSellClick(): void
   onBuyClick(): void
