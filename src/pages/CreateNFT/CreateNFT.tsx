@@ -1,7 +1,7 @@
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import { CreateTokenPayload } from '@unique-nft/sdk';
+import { CreateTokenPayload, TokenV2ItemForMultipleDto } from '@unique-nft/sdk';
 
 import { Button, Checkbox, Text, useNotifications, Heading } from 'components/UI';
 import { ConfirmBtn } from 'components';
@@ -81,24 +81,26 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
       return;
     }
 
-    if (collection.attributesSchema) {
-      const invalidToken = checkRequiredAttributes(tokens, collection.attributesSchema);
-      if (invalidToken) {
-        scrollToTokenCard(invalidToken.id);
-        setTokens(
-          tokens.map((token) => {
-            if (token.id === invalidToken.id) {
-              return {
-                ...token,
-                isValid: false
-              };
-            }
-            return { ...token, isValid: true };
-          })
-        );
-        return;
-      }
-    }
+    const schemaVersion = collectionInfo?.info?.originalSchemaVersion;
+
+    // if (collection.attributesSchema) {
+    //   const invalidToken = checkRequiredAttributes(tokens, collection.attributesSchema);
+    //   if (invalidToken) {
+    //     scrollToTokenCard(invalidToken.id);
+    //     setTokens(
+    //       tokens.map((token) => {
+    //         if (token.id === invalidToken.id) {
+    //           return {
+    //             ...token,
+    //             isValid: false
+    //           };
+    //         }
+    //         return { ...token, isValid: true };
+    //       })
+    //     );
+    //     return;
+    //   }
+    // }
 
     setIsLoadingSubmitResult(true);
     setStage('uploading');
@@ -121,17 +123,19 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
     const createTokensPayload = mapTokensToPayload(
       uploadedTokens,
       collection?.id,
-      selectedAccount?.address
+      selectedAccount?.address,
+      collectionInfo?.info?.potential_attributes
     );
 
     let currentPos = 0;
     let batchSize = 30;
-    const submitBatch = async (_tokens: CreateTokenPayload[]) => {
+    const submitBatch = async (_tokens: TokenV2ItemForMultipleDto[]) => {
       return await submitWaitResult({
         payload: {
           tokens: _tokens,
           collectionId: collection?.id
-        }
+        },
+        schemaVersion
       });
     };
 
@@ -325,7 +329,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
           <TokenList
             viewMode={viewMode}
             tokenPrefix={collection?.tokenPrefix || ''}
-            attributesSchema={collectionInfo?.schema?.attributesSchema || {}}
+            attributesSchema={collectionInfo?.info?.potential_attributes || []}
             mode={collection?.mode}
             tokensLimit={collection?.tokenLimit}
             tokensStartId={lastTokenId}
@@ -403,7 +407,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
           tokens={selected}
           tokenPrefix={collection?.tokenPrefix || ''}
           leftTokens={leftTokens}
-          attributesSchema={collection?.attributesSchema || []}
+          attributesSchema={collectionInfo?.info?.potential_attributes || []}
           mode={collection?.mode}
           onClose={() => setDialog(undefined)}
           onChange={changeSelected}

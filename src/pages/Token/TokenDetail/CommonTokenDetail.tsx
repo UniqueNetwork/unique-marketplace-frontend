@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import { CollectionWithInfoV2Dto, TokenWithInfoV2Dto } from '@unique-nft/sdk';
 import { Heading, Dropdown, Icon } from 'components/UI';
 import { Picture } from 'components';
 import TokensBandleCard from 'components/BundleTree/NestedSection/TokenCard';
@@ -13,8 +14,6 @@ import { useApi } from 'hooks/useApi';
 import Skeleton from 'components/Skeleton/Skeleton';
 import { TokenSkeleton } from 'components/Skeleton/TokenSkeleton';
 import ShareTokenModal from './ShareTokenModal';
-import { stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
-import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
 import { ReportModal } from './ReportModal';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Address } from '@unique-nft/utils';
@@ -30,8 +29,8 @@ import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/schemas';
 import { mockWearables } from '../constants';
 
 interface IProps {
-  token?: TokenByIdResponse
-  collection?: CollectionInfoWithSchemaResponse
+  token?: TokenWithInfoV2Dto
+  collection?: CollectionWithInfoV2Dto
   offer?: Offer
   isLoading?: boolean
   testid: string
@@ -49,7 +48,6 @@ export const CommonTokenDetail: FC<IProps> = ({
   offer,
   isLoading,
   testid,
-  isBundle,
   isNested,
   topmostOwner,
   onBurn
@@ -63,30 +61,30 @@ export const CommonTokenDetail: FC<IProps> = ({
     attributes,
     attributesList,
     image,
-    file,
     tokenId,
     prefix,
     video
   } = useMemo(() => {
     const { tokenId, collectionId } = offer || token || {};
-    const { image, file, attributes, video } = offer?.tokenDescription || token || {};
-    const { name: collectionName, tokenPrefix: prefix, schema, description } = offer?.collectionDescription || collection || {};
+    const { image, attributes, } = token || {};
+    const { name: collectionName, tokenPrefix: prefix, description } = offer?.collectionDescription || collection || {};
     const owner = offer?.seller || token?.owner;
+    const video = token?.media?.find((media) => media.type === 'video');
 
     const attributesList = attributes ? Object.values(attributes) : [];
+
     return {
       tokenId,
       collectionId,
       collectionName,
       prefix,
-      coverImageUrl: schema?.coverPicture?.fullUrl || '',
+      coverImageUrl: offer?.collectionDescription?.schema?.coverPicture?.fullUrl || collection?.info?.cover_image?.url || '',
       description,
       attributes,
       attributesList,
-      image: typeof image === 'string' ? image : image?.fullUrl || '',
-      file: typeof file === 'string' ? file : file?.fullUrl || '',
-      video,
-      owner
+      image,
+      owner,
+      video
     };
   }, [token, collection, offer]);
 
@@ -137,7 +135,6 @@ export const CommonTokenDetail: FC<IProps> = ({
     setReportModalVisible(false);
   }, []);
 
-  const videoProp = useMemo(() => stringToDecodedInfixOrUrlOrCidAndHash(video), [video]);
 
   const badges: BadgeEnum[] = [
     ...(collection?.mode === 'ReFungible' ? [BadgeEnum.Fractional] : [])
@@ -177,7 +174,7 @@ export const CommonTokenDetail: FC<IProps> = ({
           {!isWearable && <Picture
             alt={tokenId?.toString() || ''}
             src={image}
-            video={videoProp}
+            video={video?.url || ''}
             testid={`${testid}-token-picture`}
             badges={badges}
           />}
@@ -281,7 +278,7 @@ export const CommonTokenDetail: FC<IProps> = ({
       <ReportModal
         collectionId={collectionId || 0}
         tokenId={tokenId || 0}
-        tokenPrefix={offer?.collectionDescription.tokenPrefix || token?.collection?.tokenPrefix || ''}
+        tokenPrefix={offer?.collectionDescription.tokenPrefix || collection?.tokenPrefix || ''}
         isVisible={reportModalVisible}
         onClose={closeReportModal}
         testid={`${testid}-report-modal`}

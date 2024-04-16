@@ -1,4 +1,4 @@
-import { CollectionInfoWithSchemaResponse, CollectionProperty, CreateCollectionBody, CreateCollectionParsed, IpfsUploadResponse, LastTokenIdResultDto, PropertyKeyPermission, SetCollectionLimitsBody, SetSponsorshipBody } from '@unique-nft/sdk';
+import { CollectionProperty, CollectionWithInfoV2Dto, CreateCollectionParsed, CreateCollectionV2ArgsDto, IpfsUploadResponse, LastTokenIdResultDto, PropertyKeyPermission, SetCollectionLimitsBody, SetSponsorshipBody } from '@unique-nft/sdk';
 import { AllowedCollections } from 'api/restApi/settings/types';
 import { NetworkOptions } from 'api/sdk/sdkClient';
 import BaseController from './controllers/BaseController';
@@ -33,8 +33,8 @@ export class UniqueSDKCollectionController extends BaseController {
     });
   }
 
-  async getCollection(collectionId: number): Promise<CollectionInfoWithSchemaResponse | null> {
-    return await this.uniqueSdk?.collection.get({ collectionId }) || null;
+  async getCollection(collectionId: number): Promise<CollectionWithInfoV2Dto | null> {
+    return await this.uniqueSdk?.collection.getV2({ collectionId }) || null;
   }
 
   async getLastTokenId(collectionId: number): Promise<LastTokenIdResultDto> {
@@ -63,12 +63,12 @@ export class UniqueSDKCollectionController extends BaseController {
     await adapter.setTokenPropertyPermissions(collectionId, permissions, account.signer);
   }
 
-  async createCollection(collectionPayload: CreateCollectionBody, { account }: TransactionOptions): Promise<CreateCollectionParsed | undefined> {
+  async createCollection(collectionPayload: CreateCollectionV2ArgsDto, { account }: TransactionOptions): Promise<CreateCollectionParsed | undefined> {
     const adapter = this.getAdapter(account);
     return await adapter.createCollection(collectionPayload, account.signer);
   }
 
-  async getCreateCollectionFee(collectionPayload: CreateCollectionBody, { account }: TransactionOptions): Promise<string> {
+  async getCreateCollectionFee(collectionPayload: CreateCollectionV2ArgsDto, { account }: TransactionOptions): Promise<string> {
     const adapter = this.getAdapter(account);
     return await adapter.getCreateCollectionFee(collectionPayload, account.signer);
   }

@@ -1,8 +1,8 @@
-import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
+import { CollectionWithInfoV2Dto } from '@unique-nft/sdk';
 import { MarketableCollection } from 'api/restApi/collections/types';
 
 export type SettingsSavingProps = {
   collection: MarketableCollection;
-  collectionInfo: CollectionInfoWithSchemaResponse;
+  collectionInfo: CollectionWithInfoV2Dto;
   onComplete?(): Promise<void>;
 };

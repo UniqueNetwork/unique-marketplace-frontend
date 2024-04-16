@@ -66,7 +66,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
         to={tokenPath}
         tokenId={offer?.tokenId}
         imageUrl={image}
-        video={videoProp}
+        video={videoProp?.fullUrl || undefined}
         testid={`${testid}-token-media`}
         badges={isCustomizable ? [BadgeEnum.Customizable] : []}
       />

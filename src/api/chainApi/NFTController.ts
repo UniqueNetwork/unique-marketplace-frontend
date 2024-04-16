@@ -1,4 +1,4 @@
-import { GetBundleResponse, TokenByIdResponse, TokenOwnerResponse, TokenIdQuery, TopmostTokenOwnerResponse, TokenChildrenResponse, TokenId, CreateTokenPayload } from '@unique-nft/sdk';
+import { GetBundleResponse, TokenByIdResponse, TokenOwnerResponse, TokenIdQuery, TopmostTokenOwnerResponse, TokenChildrenResponse, TokenId, TokenV2ItemForMultipleDto, CreateTokenPayload, TokenWithInfoV2Dto } from '@unique-nft/sdk';
 import { Address } from '@unique-nft/utils';
 import { CollectionMode, TransactionOptions } from './types';
 import { getEthAccount } from './utils/addressUtils';
@@ -57,6 +57,10 @@ export class UniqueSDKNFTController extends BaseController {
 
   async getToken(collectionId: number, tokenId: number): Promise<TokenByIdResponse | null> {
     return await this.uniqueSdk.token.get({ collectionId, tokenId }) || null;
+  }
+
+  async getTokenV2(collectionId: number, tokenId: number): Promise<TokenWithInfoV2Dto | null> {
+    return await this.uniqueSdk.token.getV2({ collectionId, tokenId }) || null;
   }
 
   async isBundle(collectionId: number, tokenId: number): Promise<boolean> {
@@ -146,7 +150,12 @@ export class UniqueSDKNFTController extends BaseController {
     await adapter.transferTokensBatch(transfers, account.signer, onSubmittedOne);
   }
 
-  async create(payload: { tokens: CreateTokenPayload[], collectionId: number, schema?: UniqueCollectionSchemaDecoded }, { account }: TransactionOptions): Promise<void> {
+  async createV1(payload: { tokens: CreateTokenPayload[], collectionId: number, schema?: UniqueCollectionSchemaDecoded }, { account }: TransactionOptions): Promise<void> {
+    const adapter = this.getAdapter(account);
+    await adapter.createTokensV1(payload, account.signer);
+  }
+
+  async create(payload: { tokens: TokenV2ItemForMultipleDto[], collectionId: number, schema?: UniqueCollectionSchemaDecoded }, { account }: TransactionOptions): Promise<void> {
     const adapter = this.getAdapter(account);
     await adapter.createTokens(payload, account.signer);
   }

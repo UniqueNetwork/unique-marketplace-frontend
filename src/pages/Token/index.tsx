@@ -112,7 +112,7 @@ const TokenPage = () => {
           onBurn={onActionClick(MarketType.burn)}
         >
           {isOwner && isNested && <NestedTokenBlock
-            token={token}
+            collection={collection}
             onTransferClick={onActionClick(MarketType.nestedTransfer)}
             onUnnestClick={onActionClick(MarketType.unnest)}
             testid={`${testid}`}

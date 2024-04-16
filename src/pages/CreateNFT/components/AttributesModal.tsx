@@ -9,12 +9,12 @@ import { TokenBasicCard } from './TokenBasicCard';
 import { FormGrid } from './TokenCard';
 import { Button, InputAmount, Modal, Heading } from 'components/UI';
 import { ModalFooter } from './ModalFooter';
-import { AttributeSchemaDto } from '@unique-nft/sdk';
+import { PotentialAttribute } from '@unique-nft/sdk';
 
 interface AttribytesModalProps {
   tokens: NewToken[];
   tokenPrefix: string;
-  attributesSchema: Record<number, AttributeSchemaDto> | undefined;
+  attributesSchema: PotentialAttribute[] | undefined;
   onChange(tokens: NewToken[]): void;
   onClose(): void;
   mode?: 'NFT' | 'ReFungible' | 'Fungible';
@@ -60,29 +60,29 @@ export const AttributesModal = ({
   };
 
   useEffect(() => {
-    const summaryAttributes = Object.values(attributesSchema || {}).map(
-      ({ isArray, enumValues }, index) => {
-        let value: Attribute;
+    const summaryAttributes = (attributesSchema || []).map(
+      ({ trait_type, values }, index) => {
+        let attribute: Attribute;
         const isDifferent = tokens.some(({ attributes }, tokenIndex) => {
           if (tokenIndex === 0) {
-            value = attributes[index];
+            attribute = attributes[index];
             return false;
           }
-          if (isArray) {
+          if (values) {
             return { hasDifferentValues: true };
           }
-          if (enumValues) {
+          if (values) {
             return (
               (attributes[index] as AttributeOption)?.id !==
-              (value as AttributeOption)?.id
+              (attribute as AttributeOption)?.id
             );
           }
-          return attributes[index] !== value;
+          return attributes[index] !== attribute;
         });
         if (isDifferent) {
           return { hasDifferentValues: true };
         }
-        return value;
+        return attribute;
       }
     );
     setAttributes(summaryAttributes);

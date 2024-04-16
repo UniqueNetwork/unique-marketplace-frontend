@@ -20,12 +20,12 @@ import { RoyaltiesFormData } from './types';
 import { Sponsorship } from './Forms/Sponsorship';
 import { Limits } from './Forms/Limits';
 import { BurningPermission } from './Forms/BurningPermission';
-import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
+import { CollectionWithInfoV2Dto } from '@unique-nft/sdk';
 
 export const CollectionEditPage = () => {
   const { collectionId } = useParams<{ collectionId: string }>();
   const [collection, setCollection] = useState<MarketableCollection | null>(null);
-  const [collectionInfo, setCollectionInfo] = useState<CollectionInfoWithSchemaResponse | null>(null);
+  const [collectionInfo, setCollectionInfo] = useState<CollectionWithInfoV2Dto | null>(null);
   const [isFetchingCollection, setIsFetchingCollection] = useState<boolean>(true);
   const { fetchCollection } = useMarketableCollection();
   const { api, currentChainId } = useApi();
@@ -44,7 +44,7 @@ export const CollectionEditPage = () => {
       const collection = await fetchCollection(Number(collectionId));
       setCollection(collection || null);
       collection?.metadata?.banner && setBanner({ src: collection?.metadata?.banner });
-      setCover({ src: collection?.metadata?.cover || collection?.data?.schema?.coverPicture.fullUrl || '' });
+      setCover({ src: collection?.metadata?.cover || collection?.data?.info?.cover_image?.url || '' });
 
       setMetadata({
         ...(collection?.metadata || {}),
@@ -53,13 +53,12 @@ export const CollectionEditPage = () => {
 
       const collectionOnChain = await api?.collection?.getCollection(Number(collectionId));
       setCollectionInfo(collectionOnChain || null);
-      if (collectionOnChain?.schema?.royalties?.length) {
+      if (collectionOnChain?.info?.royalties?.length) {
         setRoyalty({
-          royalties: collectionOnChain?.schema?.royalties.map((royalty) => {
-            const value = royalty.value
-              ? (Number(royalty.value) / 100).toFixed(2)
+          royalties: collectionOnChain?.info?.royalties?.map(({ address, percent }) => {
+            const value = percent
+              ? percent.toFixed(2)
               : '0';
-            const address = royalty.address;
             return ({ value, address });
           })
         });
@@ -102,7 +101,7 @@ export const CollectionEditPage = () => {
     const collection = await fetchCollection(Number(collectionId));
       setCollection(collection || null);
       collection?.metadata?.banner && setBanner({ src: collection?.metadata?.banner });
-      setCover({ src: collection?.metadata?.cover || collection?.data?.schema?.coverPicture.fullUrl || '' });
+      setCover({ src: collection?.metadata?.cover || collection?.data?.info?.cover_image?.url || '' });
 
       setMetadata({
         ...(collection?.metadata || {}),
@@ -111,7 +110,7 @@ export const CollectionEditPage = () => {
   }, [collectionId, fetchCollection]);
 
   const isCollectionChanged = useMemo(() => {
-    const coverNotChanged = (cover?.src === collection?.data?.schema?.coverPicture.fullUrl && !collection?.metadata?.cover) || collection?.metadata?.cover === cover?.src;
+    const coverNotChanged = (cover?.src === collection?.data?.info?.cover_image?.url && !collection?.metadata?.cover) || collection?.metadata?.cover === cover?.src;
     return collection?.metadata?.banner !== banner?.src || !coverNotChanged;
   }, [collection, banner, cover]);
 

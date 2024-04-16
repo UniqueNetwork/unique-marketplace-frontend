@@ -32,7 +32,7 @@ export const CollectionDetail: FC<IProps> = ({ collection, royalties }) => {
   const { currentChainId, chainProperties } = useApi();
 
   const { name, description, data, owner, collectionId, metadata } = collection || {};
-  const { schema } = data || {};
+  const { info } = data || {};
 
   const [isShareModalVisible, setIsShareModalVisible] = useState(false);
 
@@ -86,7 +86,7 @@ export const CollectionDetail: FC<IProps> = ({ collection, royalties }) => {
     <CollectionDetailWrapper>
       <CollectionCardWrapper >
         <PictureWrapper>
-          <Picture alt={name || ''} src={collection.metadata?.cover || schema?.coverPicture.fullUrl || ''} size={160} />
+          <Picture alt={name || ''} src={collection.metadata?.cover || info?.cover_image?.url || ''} size={160} />
         </PictureWrapper>
         <CollectionInfoWrapper>
           <div>

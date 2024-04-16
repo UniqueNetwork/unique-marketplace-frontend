@@ -34,7 +34,6 @@ const PossibleValuesCell: VFC<{ index: number }> = ({ index }) => {
         }
       }}
       defaultValue={null}
-      isDisabled={type.id === 'string'}
       name={`attributes.${index}.values`}
       maxSymbols={40}
       getValues={(values) => values?.map((val) => val)}
@@ -84,50 +83,6 @@ const attributesColumns: TableColumnProps[] = [
         />
       );
     }
-  },
-  {
-    width: '17%',
-    field: 'fieldType',
-    title: (
-      <ColumnTitle
-        title='Type'
-        tooltip={<>Select type of&nbsp;information you want to&nbsp;create</>}
-      />
-    ),
-    render: (data, attribute, { rowIndex }) => (
-      <Controller
-        name={`attributes.${rowIndex}.type`}
-        rules={{
-          deps: `attributes.${rowIndex}.values`
-        }}
-        render={({ field: { value, onChange } }) => (
-          <Select
-            value={value?.id}
-            placeholder='Type'
-            options={types}
-            onChange={onChange}
-          />
-        )}
-      />
-    )
-  },
-  {
-    width: '17%',
-    field: 'rule',
-    title: <ColumnTitle title='Rule' tooltip={<>Set a&nbsp;rule for your attribute</>} />,
-    render: (data, attribute, { rowIndex }) => (
-      <Controller
-        name={`attributes.${rowIndex}.optional`}
-        render={({ field: { value, onChange } }) => (
-          <Select
-            value={value?.id}
-            placeholder='Rule'
-            options={rules}
-            onChange={onChange}
-          />
-        )}
-      />
-    )
   },
   {
     width: '40%',

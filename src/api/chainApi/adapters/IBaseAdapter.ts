@@ -1,5 +1,5 @@
 import { Signer as EthersSigner } from 'ethers';
-import { CollectionProperty, Signer as UniqueSigner, TokenId, CreateCollectionBody, CreateCollectionParsed, PropertyKeyPermission, CreateTokenPayload, SetSponsorshipBody, SetCollectionLimitsBody } from '@unique-nft/sdk';
+import { CollectionProperty, Signer as UniqueSigner, TokenId, CreateCollectionParsed, PropertyKeyPermission, CreateTokenPayload, SetSponsorshipBody, SetCollectionLimitsBody, CreateCollectionV2ArgsDto, TokenV2ItemForMultipleDto } from '@unique-nft/sdk';
 import { ChainValue } from '../controllers/BaseController';
 import { CollectionMode, TransferTokenParams } from '../types';
 
@@ -25,11 +25,12 @@ interface IBaseAdapter {
   setCollectionProperties(collectionId: number, properties: CollectionProperty[], signer: Signer): Promise<void>
   setTokenPropertyPermissions(collectionId: number, propertyPermissions: PropertyKeyPermission[], signer: Signer): Promise<void>
 
-  createCollection(payload: CreateCollectionBody, signer: Signer): Promise<CreateCollectionParsed | undefined>
-  getCreateCollectionFee(payload: CreateCollectionBody, signer: Signer): Promise<string>
+  createCollection(payload: CreateCollectionV2ArgsDto, signer: Signer): Promise<CreateCollectionParsed | undefined>
+  getCreateCollectionFee(payload: CreateCollectionV2ArgsDto, signer: Signer): Promise<string>
 
   transferTokensBatch(transfers: TransferTokenParams[], signer: Signer, onSubmittedOne?: (token: TokenId, index: number) => void): Promise<void>
-  createTokens(payload: { tokens: CreateTokenPayload[], collectionId: number }, signer: Signer): Promise<TokenId[] | undefined>
+  createTokensV1(payload: { tokens: CreateTokenPayload[], collectionId: number }, signer: Signer): Promise<TokenId[] | undefined>
+  createTokens(payload: { tokens: TokenV2ItemForMultipleDto[], collectionId: number }, signer: Signer): Promise<TokenId[] | undefined>
 
   getSetSponsorshipFee(payload: SetSponsorshipBody, signer: Signer): Promise<string>;
   setSponsorship(payload: SetSponsorshipBody, signer: Signer): Promise<void>;

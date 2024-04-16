@@ -7,7 +7,7 @@ import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
 import { ChainValue } from '../controllers/BaseController';
 import { CollectionMode, TransferTokenParams } from '../types';
-import { CollectionProperty, CreateCollectionBody, CreateCollectionParsed, CreateTokenPayload, PropertyKeyPermission, SetCollectionLimitsBody, SetSponsorshipBody, TokenId } from '@unique-nft/sdk';
+import { CollectionProperty, CreateCollectionParsed, CreateCollectionV2ArgsDto, TokenV2ItemForMultipleDto, PropertyKeyPermission, SetCollectionLimitsBody, SetSponsorshipBody, TokenId, CreateTokenPayload } from '@unique-nft/sdk';
 import { Utf16 } from 'utf-helpers';
 import { sleep } from 'utils/helpers';
 import { SchemaTools, UniqueCollectionSchemaDecoded, UniqueTokenToCreate } from '@unique-nft/schemas';
@@ -221,14 +221,14 @@ class MetamaskAdapter implements IMarketContractAdapter {
     }));
   }
 
-  async getCreateCollectionFee({ address, tokenPrefix, description, name }: CreateCollectionBody, signer: Signer): Promise<string> {
+  async getCreateCollectionFee({ address, tokenPrefix, description, name }: CreateCollectionV2ArgsDto, signer: Signer): Promise<string> {
     const collectionHelper = await CollectionHelpersFactory(signer);
 
     const fee = await collectionHelper.collectionCreationFee();
     const estimateGas = await collectionHelper.estimateGas.createNFTCollection(
       name,
       description,
-      tokenPrefix,
+      tokenPrefix || name.slice(0, 4),
       {
         from: address,
         value: fee
@@ -238,13 +238,13 @@ class MetamaskAdapter implements IMarketContractAdapter {
     return estimateGas.mul(gasPrice).toString();
   }
 
-  async createCollection({ name, description, tokenPrefix, address }: CreateCollectionBody, signer: Signer): Promise<CreateCollectionParsed | undefined> {
+  async createCollection({ name, description, tokenPrefix, address }: CreateCollectionV2ArgsDto, signer: Signer): Promise<CreateCollectionParsed | undefined> {
     const collectionHelpers = await CollectionHelpersFactory(signer);
     const fee = await collectionHelpers.collectionCreationFee();
     const createCollectionTx = await collectionHelpers.createNFTCollection(
       name,
       description,
-      tokenPrefix,
+      tokenPrefix || name.slice(0, 4),
       {
         from: address,
         value: fee
@@ -267,7 +267,7 @@ class MetamaskAdapter implements IMarketContractAdapter {
     throw new Error('not implemented');
   }
 
-  async createTokens({ tokens, collectionId, schema }: { tokens: CreateTokenPayload[]; collectionId: number; schema?: UniqueCollectionSchemaDecoded }, signer: Signer): Promise<TokenId[] | undefined> {
+  async createTokensV1({ tokens, collectionId, schema,  }: { tokens: CreateTokenPayload[]; collectionId: number; schema?: UniqueCollectionSchemaDecoded }, signer: Signer): Promise<TokenId[] | undefined> {
     if (!tokens.length || !schema) {
       throw new Error('UniqueTokenToCreateDto unavailable');
     }
@@ -277,10 +277,49 @@ class MetamaskAdapter implements IMarketContractAdapter {
     const toCross = Address.extract.ethCrossAccountId(signer.getAddress());
 
     const ids = await Promise.all(
-      tokens.map(async ({ data }) => {
+      tokens.map(async ({ ...token }) => {
         const encodedSchema = SchemaTools.tools.unique.token
           .encodeTokenToProperties(
-            data as UniqueTokenToCreate,
+            token as UniqueTokenToCreate,
+            schema
+          )
+          .map(({ key, value }) => ({
+            key,
+            value: Utf16.stringToNumberArray(value)
+          }));
+
+        const tx = await nftHelper.mintCross(toCross, encodedSchema);
+
+        const createTokenResult = await tx.wait();
+        const event = createTokenResult.events?.find(({ transactionHash, event }) => {
+          return transactionHash === tx.hash && event === 'TokenChanged';
+        });
+
+        if (!event) {
+          throw new Error('Creating NFT failed');
+        }
+
+        const tokenId = Number(event?.args?.tokenId?.toString() || 1);
+        return { collectionId, tokenId };
+      })
+    );
+    return ids;
+  }
+
+  async createTokens({ tokens, collectionId, schema }: { tokens: TokenV2ItemForMultipleDto[]; collectionId: number; schema?: UniqueCollectionSchemaDecoded }, signer: Signer): Promise<TokenId[] | undefined> {
+    if (!tokens.length || !schema) {
+      throw new Error('UniqueTokenToCreateDto unavailable');
+    }
+
+    const nftHelper = await UniqueNFTFactory(collectionId, signer);
+
+    const toCross = Address.extract.ethCrossAccountId(signer.getAddress());
+
+    const ids = await Promise.all(
+      tokens.map(async ({ image, ...token }) => {
+        const encodedSchema = SchemaTools.tools.unique.token
+          .encodeTokenToProperties(
+            token as UniqueTokenToCreate,
             schema
           )
           .map(({ key, value }) => ({

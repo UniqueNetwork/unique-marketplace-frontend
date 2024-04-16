@@ -3,8 +3,8 @@ import { useWatch, useFormContext } from 'react-hook-form';
 import { useDebouncedCallback } from 'use-debounce';
 
 import { CollectionForm } from '../types';
-import { mapCollectionForm } from '../helpers';
 import { useCollectionCreate } from '../hooks/useCollectionCreate';
+import { useCollectionFormMapper } from '../hooks/useCollectionFormMapper';
 
 export interface FeeContextProps {
   fee: string | undefined;
@@ -18,6 +18,7 @@ export const FeeContext = createContext<FeeContextProps | null>(null);
 export const FeeProvider: FC = ({ children }) => {
   const { getFee, fee, feeError, feeLoading, feeFormatted } = useCollectionCreate();
   const { control } = useFormContext<CollectionForm>();
+  const mapCollectionForm = useCollectionFormMapper();
   const collectionFormValues = useWatch<CollectionForm>({
     control
   });

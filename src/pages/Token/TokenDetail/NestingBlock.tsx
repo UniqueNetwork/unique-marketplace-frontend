@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { Button, Heading } from 'components/UI';
 
 import { Grey300 } from 'styles/colors';
-import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
+import { CollectionWithInfoV2Dto, TokenWithInfoV2Dto } from '@unique-nft/sdk';
 import { blockedNestingCollections } from '../SellToken/constants';
 import { useApi } from 'hooks/useApi';
 import { mockWearables } from '../constants';
@@ -11,8 +11,8 @@ import { CustomizableBlock } from './CustomizableBlock';
 import { Offer } from 'api/restApi/offers/types';
 
 interface NestingTokenBlockProps {
-  token?: TokenByIdResponse
-  collection?: CollectionInfoWithSchemaResponse | undefined
+  token?: TokenWithInfoV2Dto
+  collection?: CollectionWithInfoV2Dto | undefined
   offer?: Offer | undefined
   isOwner?: boolean
   isNested?: boolean
@@ -35,12 +35,12 @@ export const NestingTokenBlock: FC<NestingTokenBlockProps> = ({
   onEquipClick,
   onUnequipClick
 }) => {
-  const { tokenOwner } = token?.collection?.permissions?.nesting || offer?.collectionDescription.permissions?.nesting || {};
+  const { tokenOwner } = collection?.permissions?.nesting || offer?.collectionDescription.permissions?.nesting || {};
   const { currentChainId } = useApi();
   const _collectionId = token?.collectionId || offer?.collectionId || 0;
-  const canTransfer = token?.collection.limits?.transfersEnabled !== false;
+  const canTransfer = collection?.limits?.transfersEnabled !== false;
 
-  const canCustomize = token?.collection.properties.find(({ key }) => key === 'is_customizable')?.value;
+  const canCustomize = collection?.properties.find(({ key }) => key === 'is_customizable')?.value;
   const canEquip = !!mockWearables[currentChainId || '']?.find(({ collectionId }) => collectionId === _collectionId);
 
   if (blockedNestingCollections[currentChainId || '']?.includes(_collectionId || 0)) return null;

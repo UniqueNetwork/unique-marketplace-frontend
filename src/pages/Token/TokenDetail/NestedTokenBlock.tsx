@@ -3,22 +3,22 @@ import styled from 'styled-components';
 import { Button } from 'components/UI';
 
 import { Grey300 } from 'styles/colors';
-import { TokenByIdResponse } from '@unique-nft/sdk';
+import { CollectionWithInfoV2Dto } from '@unique-nft/sdk';
 import { useApi } from 'hooks/useApi';
 import { blockedNestingCollections } from '../SellToken/constants';
 
 interface NestedTokenBlockProps {
-  token?: TokenByIdResponse
+  collection?: CollectionWithInfoV2Dto
   testid: string
   onTransferClick(): void
   onUnnestClick(): void
 }
 
-export const NestedTokenBlock: FC<NestedTokenBlockProps> = ({ token, testid, onTransferClick, onUnnestClick }) => {
-  const { tokenOwner } = token?.collection?.permissions?.nesting || {};
+export const NestedTokenBlock: FC<NestedTokenBlockProps> = ({ collection, testid, onTransferClick, onUnnestClick }) => {
+  const { tokenOwner } = collection?.permissions?.nesting || {};
   const { currentChainId } = useApi();
 
-  if (!tokenOwner || blockedNestingCollections[currentChainId || '']?.includes(token?.collectionId || 0)) return null;
+  if (!tokenOwner || blockedNestingCollections[currentChainId || '']?.includes(collection?.collectionId || 0)) return null;
 
   return (
     <>

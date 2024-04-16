@@ -1,4 +1,4 @@
-import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
+import { CollectionWithInfoV2Dto } from '@unique-nft/sdk';
 
 export type LoginPayload = {
     account: string
@@ -32,7 +32,7 @@ export interface MarketableCollection {
   active: boolean
   collectionId: number
   createdAt: string
-  data: CollectionInfoWithSchemaResponse
+  data: CollectionWithInfoV2Dto;
   decimalPoints: number
   description: string
   id: string

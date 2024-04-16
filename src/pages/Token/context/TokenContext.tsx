@@ -1,4 +1,4 @@
-import { CollectionInfoWithSchemaResponse, TokenByIdResponse, TokenChildrenResponse } from '@unique-nft/sdk';
+import { CollectionWithInfoV2Dto, TokenChildrenResponse, TokenWithInfoV2Dto } from '@unique-nft/sdk';
 import { Address } from '@unique-nft/utils';
 import { isTokenOwner } from 'api/chainApi/utils/addressUtils';
 import { useOffer } from 'api/restApi/offers/offer';
@@ -30,8 +30,8 @@ export const TokenContextProvider: FC = ({ children }) => {
   const { address, id: tokenIdParam, collectionId: collectionIdParam } = useParams<{ address: string, id: string, collectionId: string}>();
   const [collectionId, tokenId] = [Number(collectionIdParam), Number(tokenIdParam)];
 
-  const [token, setToken] = useState<TokenByIdResponse>();
-  const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse>();
+  const [token, setToken] = useState<TokenWithInfoV2Dto>();
+  const [collection, setCollection] = useState<CollectionWithInfoV2Dto>();
   const [isFetchingToken, setIsFetchingToken] = useState(true);
   const { offer, fetch: fetchOffer, isFetching: isFetchingOffer } = useOffer(collectionId, tokenId);
   const [isFetchingBundle, setIsFetchingBundle] = useState(false);
@@ -43,7 +43,7 @@ export const TokenContextProvider: FC = ({ children }) => {
   const fetchToken = useCallback(async () => {
     if (!api?.nft || !api?.rft) return;
     setIsFetchingToken(true);
-    const token = await api.nft?.getToken(collectionId, tokenId);
+    const token = await api.nft?.getTokenV2(collectionId, tokenId);
     setToken(token || undefined);
     const collection = await api.collection?.getCollection(collectionId);
     setCollection(collection || undefined);
@@ -137,7 +137,7 @@ export const TokenContextProvider: FC = ({ children }) => {
       fraction,
       fetchToken,
       fetchOffer: async () => { await fetchOffer(collectionId, tokenId); },
-      isWearable: !!mockWearables[currentChainId || '']?.find(({ collectionId }) => collectionId === collection?.id),
+      isWearable: !!mockWearables[currentChainId || '']?.find(({ collectionId }) => collectionId === collection?.collectionId),
       isCustomizable: !!collection?.properties.find(({ key }) => key === 'is_customizable')?.value
     };
   }, [token, collection, offer, bundle, topmostOwner, isNested, address, isFetchingToken, isFetchingOffer, isFetchingBundle, isOwner, fraction, fetchToken, currentChainId, fetchOffer, collectionId, tokenId]);

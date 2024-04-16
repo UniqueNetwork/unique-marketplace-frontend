@@ -11,11 +11,10 @@ import { Filter } from './Filter';
 import { getAttributesFromTokens } from '../helpers';
 import { AttributesModal } from './AttributesModal';
 import { AttributeFilterContext } from '../contexts/AttributesFilterContext';
-import { TokenTypeEnum } from 'pages/MyTokens/types';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { swap } from 'components/UI/DraggableGrid/helpers';
 import { DraggableGrid, DraggableGridContextProvider, DraggableGridItem } from 'components/UI/DraggableGrid';
-import { AttributeSchemaDto } from '@unique-nft/sdk';
+import { PotentialAttribute } from '@unique-nft/sdk';
 
 export type TokenListProps = {
   disabled: boolean;
@@ -24,7 +23,7 @@ export type TokenListProps = {
   tokenPrefix: string;
   tokensLimit?: number;
   tokensStartId?: number;
-  attributesSchema: Record<number, AttributeSchemaDto>;
+  attributesSchema: PotentialAttribute[];
   mode: 'NFT' | 'Fungible' | 'ReFungible' | undefined;
   onChange(tokens: NewToken[]): void;
   onAddTokens(files: File[]): void;

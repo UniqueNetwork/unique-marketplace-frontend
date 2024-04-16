@@ -12,28 +12,35 @@ const gqlQuery = {
       where: {collection_id: {_eq: $collectionId} }
     ) {
       count
-      data {        
-        key
-        name
-        values {
-          tokens_count
-          raw_value
-          value
-        }
+      data {
+        trait_type
+        collection_id
+        display_type
+        token_id
+        value_number
+        value_string
       }
     }
   }`
 };
 
-export type AttributeStatistic = {
-  key: string
-  name: { _: string }
+export type AttributeStatisticV1 = {
+  name: { _: string };
   values: {
-    tokens_count: number
-    raw_value: string
-    value: { _: string }
-  }[]
-}
+    tokens_count: number;
+    raw_value: string;
+    value: { _: string };
+  }[];
+};
+
+export type AttributeStatistic = {
+  collection_id: number;
+  display_type: string;
+  token_id: number;
+  trait_type: string;
+  value_number: number;
+  value_string: string;
+};
 
 export const useQueryAttributes = (collectionId: number) => {
   const { settings, currentChainId, chainProperties } = useApi();

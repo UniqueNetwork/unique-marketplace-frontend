@@ -28,7 +28,7 @@ export const TokensMedia: FC<ITokensMedia> = ({ imageUrl, tokenId, video, testid
       <Picture
         alt={tokenId?.toString() || ''}
         src={imageUrl}
-        video={video}
+        video={video?.fullUrl || ''}
         testid={`${testid}-token-picture`}
         videoProps={{ autoplay: false, controls: false }}
         isPlaying={isPlaying}

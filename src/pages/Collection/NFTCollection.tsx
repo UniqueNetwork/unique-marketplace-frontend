@@ -21,10 +21,9 @@ import { useCollections } from 'hooks/useCollections';
 import { useCollectionTokensFilter } from './hooks/useCollectionTokensFilter';
 import { TokensFilter } from './Filters/types';
 import { RoyaltiesFormData } from 'pages/CollectionEdit/types';
-import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
+import { CollectionWithInfoV2Dto } from '@unique-nft/sdk';
 import { CollectionPageProps } from './types';
 import { MobileFilters } from 'components/Filters/MobileFilter';
-import { Address } from '@unique-nft/utils';
 
 export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionPageProps) => {
   const { selectedAccount, isLoading: isAccountsLoading } = useAccounts();
@@ -34,7 +33,7 @@ export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
   const { fetchCollection, addCollection } = useMarketableCollection();
   const [scanning, setScanning] = useState(false);
   const [tokensCountOnScan, setTokensCountOnScan] = useState(0);
-  const collectionId = collectionOnChain.id;
+  const collectionId = collectionOnChain.collectionId;
 
   const { tokens, tokensCount, isFetching, fetchMore, fetch, attributes, attributeCounts } = useTokens({
     collectionId
@@ -57,12 +56,12 @@ export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
    } = useCollectionTokensFilter({ isFetching, fetch });
 
   const [royalties, setRoyalties] = useState<RoyaltiesFormData>();
-  const updateRoyalties = useCallback((collectionOnChain: CollectionInfoWithSchemaResponse | null | undefined) => {
-    if (collectionOnChain?.schema?.royalties?.length) {
-      const royalties = collectionOnChain?.schema?.royalties.map(({ value, address }) => ({
+  const updateRoyalties = useCallback((collectionOnChain: CollectionWithInfoV2Dto | null | undefined) => {
+    if (collectionOnChain?.info?.royalties?.length) {
+      const royalties = collectionOnChain?.info?.royalties.map(({ percent, address }) => ({
         address,
-        value: value
-          ? (Number(value) / 100).toFixed(2)
+        value: percent
+          ? percent.toFixed(2)
           : '0'
       }));
       setRoyalties({ royalties });
@@ -248,13 +247,13 @@ const SearchAndSortingWrapper = styled.div`
   justify-content: space-between;
 `;
 
-const mapCollectionToMarketable = (collection: CollectionInfoWithSchemaResponse, tokensCount: number) => ({
+const mapCollectionToMarketable = (collection: CollectionWithInfoV2Dto, tokensCount: number) => ({
   id: '-',
   data: collection,
   allowedTokens: '',
   isMarketable: false,
   active: true,
-  collectionId: collection.id,
+  collectionId: collection.collectionId,
   createdAt: '',
   decimalPoints: 0,
   description: collection.description,

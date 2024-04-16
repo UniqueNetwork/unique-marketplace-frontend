@@ -6,7 +6,7 @@ import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
 import { ChainValue } from '../controllers/BaseController';
 import { CollectionMode, TransferTokenParams } from '../types';
-import { BatchCallArgumentsBody, CollectionProperty, CreateCollectionBody, CreateCollectionParsed, CreateTokenPayload, PropertyKeyPermission, SetCollectionLimitsBody, SetSponsorshipBody, TokenId } from '@unique-nft/sdk';
+import { BatchCallArgumentsBody, CollectionProperty, CreateCollectionParsed, CreateCollectionV2ArgsDto, TokenV2ItemForMultipleDto, PropertyKeyPermission, SetCollectionLimitsBody, SetSponsorshipBody, TokenId, CreateTokenPayload } from '@unique-nft/sdk';
 
 const buyGasLimit = 1_000_000;
 const sellGasLimit = 200_000;
@@ -340,16 +340,20 @@ class UniqueAdapter implements IMarketContractAdapter {
     }, { signer });
   }
 
-  async createCollection(payload: CreateCollectionBody, signer: Signer): Promise<CreateCollectionParsed | undefined> {
-    return (await this.uniqueSdk.collection.create.submitWaitResult(payload, { signer })).parsed;
+  async createCollection(payload: CreateCollectionV2ArgsDto, signer: Signer): Promise<CreateCollectionParsed | undefined> {
+    return (await this.uniqueSdk.collection.createV2.submitWaitResult(payload, { signer })).parsed;
   }
 
-  async getCreateCollectionFee(payload: CreateCollectionBody): Promise<string> {
-    return (await this.uniqueSdk.collection.create.getFee(payload)).fee.formatted;
+  async getCreateCollectionFee(payload: CreateCollectionV2ArgsDto): Promise<string> {
+    return (await this.uniqueSdk.collection.createV2.getFee(payload)).fee.formatted;
   }
 
-  async createTokens({ tokens, collectionId }: { tokens: CreateTokenPayload[], collectionId: number }, signer: Signer): Promise<TokenId[] | undefined> {
+  async createTokensV1({ tokens, collectionId }: { tokens: CreateTokenPayload[], collectionId: number }, signer: Signer): Promise<TokenId[] | undefined> {
     return (await this.uniqueSdk.token.createMultiple({ collectionId, tokens, address: signer.address }, { signer })).parsed;
+  }
+
+  async createTokens({ tokens, collectionId }: { tokens: TokenV2ItemForMultipleDto[], collectionId: number }, signer: Signer): Promise<TokenId[] | undefined> {
+    return (await this.uniqueSdk.token.createMultipleV2({ collectionId, tokens, address: signer.address }, { signer })).parsed;
   }
 
   async getSetSponsorshipFee(payload: SetSponsorshipBody, signer: Signer): Promise<string> {

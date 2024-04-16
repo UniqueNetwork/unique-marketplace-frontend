@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { Select, Text } from 'components/UI';
 
@@ -7,7 +7,6 @@ import { PagePaper } from 'components/PagePaper/PagePaper';
 import NoItems from 'components/NoItems';
 import SearchField from 'components/SearchField/SearchField';
 import { useApi } from 'hooks/useApi';
-import { useAccounts } from 'hooks/useAccounts';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 
 import { MobileFilters } from './Filters/MobileFilter';
@@ -19,7 +18,7 @@ import { MarketableCollection } from 'api/restApi/collections/types';
 import { useCollections } from 'hooks/useCollections';
 import { TokensFilter } from './Filters/types';
 import { RoyaltiesFormData } from 'pages/CollectionEdit/types';
-import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
+import { CollectionWithInfoV2Dto } from '@unique-nft/sdk';
 import { CollectionPageProps, TOption } from './types';
 import { useGetTokens } from './hooks/useGetTokens';
 import { setUrlParameter } from 'utils/helpers';
@@ -33,7 +32,7 @@ export const RFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
   const [tokensCountOnScan, setTokensCountOnScan] = useState(0);
   const searchParams = new URLSearchParams(window.location.search);
 
-  const collectionId = collectionOnChain.id;
+  const collectionId = collectionOnChain.collectionId;
 
   const { tokens, total, fetchTokens, isFetching } = useGetTokens({ collectionId });
 
@@ -43,12 +42,12 @@ export const RFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
   const [searchValue, setSearchValue] = useState<string | undefined>(searchParams.get('searchValue') || '');
 
   const [royalties, setRoyalties] = useState<RoyaltiesFormData>();
-  const updateRoyalties = useCallback((collectionOnChain: CollectionInfoWithSchemaResponse | null | undefined) => {
-    if (collectionOnChain?.schema?.royalties?.length) {
-      const royalties = collectionOnChain?.schema?.royalties.map(({ value, address }) => ({
+  const updateRoyalties = useCallback((collectionOnChain: CollectionWithInfoV2Dto | null | undefined) => {
+    if (collectionOnChain?.info?.royalties?.length) {
+      const royalties = collectionOnChain?.info?.royalties.map(({ percent, address }) => ({
         address,
-        value: value
-          ? (Number(value) / 100).toFixed(2)
+        value: percent
+          ? percent.toFixed(2)
           : '0'
       }));
       setRoyalties({ royalties });
@@ -223,13 +222,13 @@ const SearchAndSortingWrapper = styled.div`
   justify-content: space-between;
 `;
 
-const mapCollectionToMarketable = (collection: CollectionInfoWithSchemaResponse, tokensCount: number) => ({
+const mapCollectionToMarketable = (collection: CollectionWithInfoV2Dto, tokensCount: number) => ({
   id: '-',
   data: collection,
   allowedTokens: '',
   isMarketable: false,
   active: true,
-  collectionId: collection.id,
+  collectionId: collection.collectionId,
   createdAt: '',
   decimalPoints: 0,
   description: collection.description,
