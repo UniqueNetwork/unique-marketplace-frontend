@@ -7,13 +7,13 @@ import { CancelSellFixStagesModal } from './CancelSellModal';
 import PurchaseModal from './PurchaseModal';
 import { TransferModal } from './TransferModal';
 import { Modal } from 'components/UI';
-import { TokenByIdResponse, CollectionWithInfoV2Dto } from '@unique-nft/sdk';
+import { TokenWithInfoV2Dto, CollectionWithInfoV2Dto } from '@unique-nft/sdk';
 import { ChangePriceModal } from './ChangePriceModal';
 import { BurnStagesModal } from './BurnModal';
 
 export type TTokenPageModalProps = {
   offer?: Offer
-  token?: TokenByIdResponse
+  token?: TokenWithInfoV2Dto
   collection?: CollectionWithInfoV2Dto | null
   // once button is clicked (sell/bid/etc) -> we will change marketType for modal and therefore this component decides what to show and how
   marketType: MarketType
@@ -23,7 +23,7 @@ export type TTokenPageModalProps = {
 }
 
 export type TTokenPageModalBodyProps = {
-  token?: TokenByIdResponse
+  token?: TokenWithInfoV2Dto
   collection?: CollectionWithInfoV2Dto | null
   offer?: Offer
   onFinish(): void // TODO: make a type, in future we would definitly wan't to pass smth like success/error/error.message

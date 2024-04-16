@@ -13,7 +13,7 @@ import { INestingToken } from 'components/BundleTree/types';
 import { useApi } from 'hooks/useApi';
 import { fromStringToBnString } from 'utils/bigNum';
 import { Coral700 } from 'styles/colors';
-import { CollectionWithInfoV2Dto, TokenByIdResponse, TokenIdQuery } from '@unique-nft/sdk';
+import { CollectionWithInfoV2Dto, TokenWithInfoV2Dto, TokenIdQuery } from '@unique-nft/sdk';
 import { FractionalAmountInput } from '../Modals/FractionalAmountInput';
 import { CollectionMode } from 'api/chainApi/types';
 import { Address } from '@unique-nft/utils';
@@ -80,7 +80,7 @@ export const UnnestModal: FC<TBundleTransferModalBodyProps> = ({ token, setIsClo
 };
 
 type AskUnnestModalProps = { 
-  token: INestingToken | TokenByIdResponse, 
+  token: INestingToken | TokenWithInfoV2Dto, 
   parentAddress: string, 
   collection: CollectionWithInfoV2Dto | null, 
   onUnnest(amount: number): void, 

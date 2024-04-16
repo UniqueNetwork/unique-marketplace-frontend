@@ -1,4 +1,4 @@
-import { TokenByIdResponse } from '@unique-nft/sdk';
+import { TokenWithInfoV2Dto } from '@unique-nft/sdk';
 import { Button, Heading, Loader } from 'components/UI';
 import { INestingToken } from 'components/BundleTree/types';
 import { useApi } from 'hooks/useApi';
@@ -21,7 +21,7 @@ export const EquipModal = ({
   const { currentChainId } = useApi();
   const [tokens, setTokens] = useState<TokenItem[]>([]);
   const { fetchBaseTokens, isFetching } = useGetBaseTokens();
-  const [baseToken, setBaseToken] = useState<INestingToken | TokenByIdResponse | undefined>();
+  const [baseToken, setBaseToken] = useState<INestingToken | TokenWithInfoV2Dto | undefined>();
 
   useEffect(() => {
     void (async () => {

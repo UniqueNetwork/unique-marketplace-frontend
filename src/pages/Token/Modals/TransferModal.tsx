@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { CollectionWithInfoV2Dto, TokenByIdResponse } from '@unique-nft/sdk';
+import { CollectionWithInfoV2Dto, TokenWithInfoV2Dto } from '@unique-nft/sdk';
 import { Address } from '@unique-nft/utils';
 import { Heading, Link, useNotifications, Button, Text } from 'components/UI';
 import { BN } from '@polkadot/util';
@@ -60,7 +60,7 @@ export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosab
 };
 
 type AskTransferModalProps = {
-  token?: TokenByIdResponse
+  token?: TokenWithInfoV2Dto
   collection?: CollectionWithInfoV2Dto | null
   onTransfer(receiver: string, amount: number): void
   testid: string

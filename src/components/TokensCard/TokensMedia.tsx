@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useState } from 'react';
 import { BlueGrey200, BlueGrey500, BlueGrey100, BlueGrey300 } from 'styles/colors';
-import { DecodedInfixOrUrlOrCidAndHash, VideoAttribute } from 'api/chainApi/types';
+import { DecodedInfixOrUrlOrCidAndHash } from 'api/chainApi/types';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import playIcon from 'static/icons/play.svg';
@@ -11,7 +11,7 @@ interface ITokensMedia {
   to: string
   tokenId?: number
   imageUrl?: string | DecodedInfixOrUrlOrCidAndHash
-  video?: VideoAttribute
+  video?: string
   testid: string
   badges?: BadgeEnum[]
 }
@@ -35,7 +35,7 @@ export const TokensMedia: FC<ITokensMedia> = ({ to, imageUrl, tokenId, video, te
         isPlaying={isPlaying}
         badges={badges}
       />
-      {video?.fullUrl &&
+      {video &&
         <div className={'play-button'} onClick={togglePlay}>
           <img src={isPlaying ? pauseIcon : playIcon} alt='icon' />
         </div>

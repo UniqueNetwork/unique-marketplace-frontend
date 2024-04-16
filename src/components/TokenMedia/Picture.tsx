@@ -25,7 +25,7 @@ interface PictureProps {
   alt: string
   testid?: string
   size?: number
-  video?: DecodedVideoUri
+  video?: string
   videoProps?: VideoProps
   isPlaying?: boolean
   badges?: BadgeEnum[]
@@ -68,7 +68,7 @@ export const Picture: FC<PictureProps> = ({
 
   const videoUrl = useMemo(() => {
     if (!video) return undefined;
-    const url = video.fullUrl;
+    const url = video;
     // if video doesn't have poster, we rewind video to 0.001 sec
     // because iphone doesn't render first frame as a poster https://developer.apple.com/forums/thread/129377
     if (!imageSrc) return `${url}#t=0.001`;
@@ -82,7 +82,7 @@ export const Picture: FC<PictureProps> = ({
         <Icon name={badge} size={24} />
       </Badge>)}
     </BadgesWrapper>}
-    {!isLoading && video?.fullUrl &&
+    {!isLoading && video &&
       <VideoStyled
         ref={videoRef}
         src={videoUrl || ''}
@@ -95,7 +95,7 @@ export const Picture: FC<PictureProps> = ({
         data-testid={`${testid}-video`}
       />
     }
-    {!isLoading && !hasError && imageSrc && !video?.fullUrl &&
+    {!isLoading && !hasError && imageSrc && !video &&
       <ImgStyled
         alt={alt}
         src={imageSrc}

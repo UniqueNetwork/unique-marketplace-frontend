@@ -1,4 +1,4 @@
-import { GetBundleResponse, TokenByIdResponse, TokenOwnerResponse, TokenIdQuery, TopmostTokenOwnerResponse, TokenChildrenResponse, TokenId, TokenV2ItemForMultipleDto, CreateTokenPayload } from '@unique-nft/sdk';
+import { GetBundleResponse, TokenByIdResponse, TokenOwnerResponse, TokenIdQuery, TopmostTokenOwnerResponse, TokenChildrenResponse, TokenId, TokenV2ItemForMultipleDto, CreateTokenPayload, TokenWithInfoV2Dto } from '@unique-nft/sdk';
 import { Address } from '@unique-nft/utils';
 import { CollectionMode, TransactionOptions } from './types';
 import { getEthAccount } from './utils/addressUtils';
@@ -57,6 +57,10 @@ export class UniqueSDKNFTController extends BaseController {
 
   async getToken(collectionId: number, tokenId: number): Promise<TokenByIdResponse | null> {
     return await this.uniqueSdk.token.get({ collectionId, tokenId }) || null;
+  }
+
+  async getTokenV2(collectionId: number, tokenId: number): Promise<TokenWithInfoV2Dto | null> {
+    return await this.uniqueSdk.token.getV2({ collectionId, tokenId }) || null;
   }
 
   async isBundle(collectionId: number, tokenId: number): Promise<boolean> {

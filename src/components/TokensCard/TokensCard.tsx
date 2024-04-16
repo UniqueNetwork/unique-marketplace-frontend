@@ -148,7 +148,7 @@ export const TokensCard: FC<TTokensCard> = ({
         to={tokenPath}
         tokenId={tokenId}
         imageUrl={imageUrl}
-        video={video}
+        video={video?.fullUrl || undefined}
         testid={`${testid}-token-media`}
         badges={isCustomizable ? [BadgeEnum.Customizable] : []}
       />

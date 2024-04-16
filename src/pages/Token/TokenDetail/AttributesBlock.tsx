@@ -1,14 +1,20 @@
 import React, { FC, useMemo } from 'react';
+import { Attribute } from '@unique-nft/sdk';
 import styled from 'styled-components';
 import { Heading, Text } from 'components/UI';
 import { Trait } from './Trait';
 import IconWithHint from '../../../components/IconWithHint/IconWithHint';
-import { DecodedAttributeDto } from '@unique-nft/sdk';
 import { useQueryAttributes } from 'api/scanApi/useQueryAttributes';
 import { useQueryCollectionTokensCount } from 'api/scanApi/useQueryCollectionTokensCount';
 
+interface StatItem {
+  count: number;
+  value: string;
+  trait_type: string;
+}
+
 interface IProps {
-  attributes: DecodedAttributeDto[];
+  attributes: Attribute[];
   collectionId: number;
 }
 
@@ -17,11 +23,12 @@ export const AttributesBlock: FC<IProps> = ({ attributes, collectionId }: IProps
   const { attributes: attributeStatistics, isFetching } = useQueryAttributes(collectionId);
 
   const statistics = useMemo(() => {
-    return attributeStatistics.reduce<Record<string, { count: number, value: string }[]>>((acc, { name, values }) => {
-      acc[name._] = values.map(({ tokens_count, value }) => ({ count: tokens_count, value: value._ }));
-      return acc;
+    return attributeStatistics.reduce<Record<string, StatItem>>((acc, { trait_type, value_string }) => {
+        const key = `${trait_type}_${value_string}`;
+        acc[key] = acc[key] ? {...acc[key], count: acc[key].count + 1} : {count: 1, value: value_string, trait_type};
+        return acc;
     }, {});
-  }, [attributeStatistics]);
+}, [attributeStatistics]);
 
   return (
     <div>
@@ -35,14 +42,11 @@ export const AttributesBlock: FC<IProps> = ({ attributes, collectionId }: IProps
         {Object.values(attributes).map((attribute, index) => {
           return <AttributesRow
             key={index}
-            attribute={typeof attribute.name === 'string' ? attribute.name : attribute?.name?._ || ''}
-            enumeration={Array.isArray(attribute.value)
-              ? attribute.value.map((item: { _: string | number }) => item._.toString())
-              : typeof attribute.value === 'string' ? attribute.value : attribute.value._.toString()
-            }
+            attribute={attribute.trait_type}
+            enumeration={attribute.value.toString()}
             isFetching={isFetching}
             tokensCount={tokensCount}
-            statistics={statistics}
+            percents={statistics[`${attribute.trait_type}_${attribute.value.toString()}`]?.count * 100 / tokensCount}
           />;
         })}
       </AttributesWrapper>
@@ -54,50 +58,22 @@ const AttributesRow = ({
   attribute,
   enumeration,
   isFetching,
-  statistics,
-  tokensCount
+  percents
 }: {
   attribute: string;
-  enumeration: string | string[];
+  enumeration: string;
   isFetching: boolean;
   tokensCount: number;
-  statistics: Record<string, {
-    count: number;
-    value: string;
-  }[]> | undefined;
-}) => {
-  const percents = useMemo(() => {
-    if (typeof enumeration === 'string') {
-      const count = statistics?.[attribute]?.find(({ value }) => value === enumeration)?.count || 0;
-      return tokensCount ? (count / tokensCount) * 100 : 0;
-    }
-    if (!tokensCount) return [];
-    return enumeration.map((item) => (statistics?.[attribute]?.find(({ value }) => value === item)?.count || 0) / tokensCount * 100);
-  }, [attribute, enumeration, statistics, tokensCount]);
-
-  if (typeof enumeration === 'string') {
-    return (
-      <AttributeCard key={attribute}>
-        <Text color='grey-500' size='s' weight='bold'>
-          {attribute.toUpperCase()}
-        </Text>
-        <Row><Trait trait={enumeration} /></Row>
-        {!isFetching && typeof percents === 'number' && <Row><Text size='s' color='grey-500'>{percents.toFixed(0)}%</Text></Row>}
-      </AttributeCard>
-    );
-  }
-
-  return (<>
-    {enumeration.map((trait, index) => <AttributeCard key={`${attribute}_${index}`}>
-      <Text color='grey-500' size='s' weight='bold'>
-        {attribute.toUpperCase()}
-      </Text>
-      <Row><Trait key={trait} trait={trait} /></Row>
-      {Array.isArray(percents) && !!percents[index] && <Row><Text size='s' color='grey-500'>{percents[index].toFixed(0)}%</Text></Row>}
-      {!isFetching && typeof percents === 'number' && <Row><Text size='s' color='grey-500'>{percents.toFixed(0)}%</Text></Row>}
-    </AttributeCard>)}
-  </>);
-};
+  percents: number;
+}) => (
+  <AttributeCard key={attribute}>
+    <Text color='grey-500' size='s' weight='bold'>
+      {attribute.toString().toUpperCase()}
+    </Text>
+    <Row><Trait trait={enumeration} /></Row>
+    {!isFetching && typeof percents === 'number' && <Row><Text size='s' color='grey-500'>{percents.toFixed(0)}%</Text></Row>}
+  </AttributeCard>
+);
 
 const HeadingWrapper = styled.div`
   display: flex;

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Button, Pagination, Text, useNotifications, Heading, Loader } from 'components/UI';
-import { CollectionWithInfoV2Dto, TokenByIdResponse } from '@unique-nft/sdk';
+import { CollectionWithInfoV2Dto } from '@unique-nft/sdk';
 import { TBundleTransferModalBodyProps } from './BundleTransferModal';
 import styled from 'styled-components';
 import { useApi } from 'hooks/useApi';
@@ -234,7 +234,7 @@ export const CustomizeModal = ({
       <NestingWrapper>
         <TokenWrapper>
           <TokenMediaWrapper>
-            <TokensMedia imageUrl={(token as TokenByIdResponse).file || (token as TokenByIdResponse).image} testid={''} />
+            <TokensMedia imageUrl={token.image} testid={''} />
             {images.map((image, index) => <TokensMedia key={`${image?.ipfsCid}_${index}`} imageUrl={image} testid={'bundle-token-image'} />)}
           </TokenMediaWrapper>
           <Text
