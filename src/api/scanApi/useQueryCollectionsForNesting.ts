@@ -3,7 +3,7 @@ import { post } from 'api/restApi/base';
 import { useApi } from 'hooks/useApi';
 import { useCallback, useState } from 'react';
 import { Address } from '@unique-nft/utils';
-import { GQLCollection } from './types';
+import { GQLToken } from './types';
 import config from 'config';
 
 const gqlQuery = {
@@ -34,7 +34,7 @@ const gqlQuery = {
 export const useQueryCollectionsForNesting = () => {
   const { settings, currentChainId, chainProperties } = useApi();
   const [isFetching, setIsFetching] = useState(false);
-  const [collections, setCollections] = useState<GQLCollection[]>([]);
+  const [collections, setCollections] = useState<GQLToken[]>([]);
 
   const fetchCollections = useCallback(async (account: Account | undefined) => {
     if (!account) return [];
@@ -51,7 +51,7 @@ export const useQueryCollectionsForNesting = () => {
       }
     });
     if (response.status === 200) {
-      const collections = response?.data?.data?.tokens?.data as (GQLCollection & { collection: { nestingEnabled: boolean } })[] | [];
+      const collections = response?.data?.data?.tokens?.data as (GQLToken & { collection: { nestingEnabled: boolean } })[] | [];
       setCollections(collections.filter((collection) => collection.collection?.nestingEnabled));
       setIsFetching(false);
       return collections;
