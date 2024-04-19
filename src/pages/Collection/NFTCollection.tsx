@@ -137,7 +137,7 @@ export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
             attributeCounts={attributeCounts}
             onFilterChange={onFilterChange}
             testid={`${testid}-filters`}
-            disabled={scanning}
+            disabled={false}
           />
         </LeftColumn>}
         <MainContent>
