@@ -280,19 +280,17 @@ class MetamaskAdapter implements IMarketContractAdapter {
   async setTokenPropertyPermissions(collectionId: number, tokenPropertyPermissions: PropertyKeyPermission[], signer: Signer): Promise<void> {
     const nftFactory = await UniqueNFTFactory(collectionId, signer);
 
-    parseEthersV5TxReceipt(
-      await(
-        await nftFactory.setTokenPropertyPermissions(
-          tokenPropertyPermissions.map(({ key, permission }) => ({
-            key,
-            permissions: Object.entries(permission).map(([name, value]) => ({
-              code: TPP_TO_TPP[name],
-              value
-            }))
+    await(
+      await nftFactory.setTokenPropertyPermissions(
+        tokenPropertyPermissions.map(({ key, permission }) => ({
+          key,
+          permissions: Object.entries(permission).map(([name, value]) => ({
+            code: TPP_TO_TPP[name],
+            value
           }))
-        )
-      ).wait()
-    );
+        }))
+      )
+    ).wait();
   }
 
   async createTokensV1({ tokens, collectionId, schema,  }: { tokens: CreateTokenPayload[]; collectionId: number; schema?: UniqueCollectionSchemaDecoded }, signer: Signer): Promise<TokenId[] | undefined> {
@@ -313,7 +311,7 @@ class MetamaskAdapter implements IMarketContractAdapter {
           )
           .map(({ key, value }) => ({
             key,
-            value: Utf8.stringToNumberArray(value)
+            value: Utf8.stringToHexString(value)
           }));
 
         const tx = await nftHelper.mintCross(toCross, encodedSchema);
