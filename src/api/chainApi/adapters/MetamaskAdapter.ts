@@ -1,19 +1,36 @@
-import { UniqueNFTFactory, UniqueFungibleFactory, UniqueRefungibleTokenFactory, CollectionHelpersFactory } from '@unique-nft/solidity-interfaces';
-import { Address, EthCrossAccountId } from '@unique-nft/utils';
 import { Contract, ethers, Signer } from 'ethers';
+import { UniqueCollectionSchemaDecoded, UniqueTokenToCreate, SchemaTools } from '@unique-nft/schemas';
+import { IV2Token, SchemaTools as SchemaToolsV2 } from '@unique-nft/schemas-v2';
+import { CollectionProperty, CreateCollectionParsed, CreateCollectionV2ArgsDto, TokenV2ItemForMultipleDto, PropertyKeyPermission, SetCollectionLimitsBody, SetSponsorshipBody, TokenId, CreateTokenPayload } from '@unique-nft/sdk';
+import { UniqueNFTFactory, UniqueFungibleFactory, UniqueRefungibleTokenFactory, CollectionHelpersFactory, parseEthersV5TxReceipt } from '@unique-nft/solidity-interfaces';
+import { EthCrossAccountId, Address } from '@unique-nft/utils';
+import { Utf8 } from 'utf-helpers';
 import IMarketContractAdapter, { IMarketContractProperties } from './IMarketContractAdapter';
 
 import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
 import { ChainValue } from '../controllers/BaseController';
 import { CollectionMode, TransferTokenParams } from '../types';
-import { CollectionProperty, CreateCollectionParsed, CreateCollectionV2ArgsDto, TokenV2ItemForMultipleDto, PropertyKeyPermission, SetCollectionLimitsBody, SetSponsorshipBody, TokenId, CreateTokenPayload } from '@unique-nft/sdk';
-import { Utf16 } from 'utf-helpers';
 import { sleep } from 'utils/helpers';
-import { SchemaTools, UniqueCollectionSchemaDecoded, UniqueTokenToCreate } from '@unique-nft/schemas';
 
 const buyGasLimit = 1_000_000;
 const sellGasLimit = 200_000;
+
+enum TPP {
+  /// Permission to change the property and property permission. See [`up_data_structs::PropertyPermission::mutable`]
+  Mutable,
+  /// Change permission for the collection administrator. See [`up_data_structs::PropertyPermission::token_owner`]
+  TokenOwner,
+  /// Permission to change the property for the owner of the token. See [`up_data_structs::PropertyPermission::collection_admin`]
+  CollectionAdmin
+}
+
+const TPP_TO_TPP: {[K: string]: TPP} = {
+  mutable: TPP.Mutable,
+  collectionAdmin: TPP.CollectionAdmin,
+  tokenOwner: TPP.TokenOwner
+};
+
 class MetamaskAdapter implements IMarketContractAdapter {
   private getContract(signer: Signer, contract: IMarketContractProperties) {
     return new ethers.Contract(contract.address, (contract.abi as ethers.ContractInterface) || marketplaceAbi, signer);
@@ -31,15 +48,6 @@ class MetamaskAdapter implements IMarketContractAdapter {
   protected async callContract(contract: Contract, methodName: string, ...args: any[]) {
     await this.validateCall(contract.callStatic[methodName], args);
     await (await contract[methodName](...args)).wait();
-  }
-
-  async setCollectionProperties(collectionId: number, properties: CollectionProperty[], signer: Signer): Promise<void> {
-    const nftFactory = await UniqueNFTFactory(collectionId, signer);
-    const encodedProperties = properties.map(({ key, value }) => ({
-      key,
-      value: Utf16.stringToNumberArray(value || '')
-    }));
-    await (await nftFactory.setCollectionProperties(encodedProperties, { from: await signer.getAddress() })).wait();
   }
 
   async getTransferTokenFee(from: string, to: string, collectionId: number, tokenId: number, mode: CollectionMode, amount: number, signer: Signer): Promise<string> {
@@ -235,27 +243,27 @@ class MetamaskAdapter implements IMarketContractAdapter {
       }
     );
     const gasPrice = await collectionHelper.provider.getGasPrice();
-    return estimateGas.mul(gasPrice).toString();
+    const decimalNumber = parseFloat(ethers.utils.formatEther(estimateGas.mul(gasPrice)));
+    return String(decimalNumber);
   }
 
   async createCollection({ name, description, tokenPrefix, address }: CreateCollectionV2ArgsDto, signer: Signer): Promise<CreateCollectionParsed | undefined> {
     const collectionHelpers = await CollectionHelpersFactory(signer);
-    const fee = await collectionHelpers.collectionCreationFee();
-    const createCollectionTx = await collectionHelpers.createNFTCollection(
-      name,
-      description,
-      tokenPrefix || name.slice(0, 4),
-      {
-        from: address,
-        value: fee
-      }
+    const createCollectionResult = parseEthersV5TxReceipt(
+      await(
+        await collectionHelpers.createNFTCollection(
+          name,
+          description,
+          tokenPrefix || name.slice(0, 4),
+          {
+            from: address,
+            value: await collectionHelpers.collectionCreationFee()
+          }
+        )
+      ).wait()
     );
 
-    const createCollectionResult = await createCollectionTx.wait();
-
-    const collectionAddress = createCollectionResult.events?.[0].args
-      ?.collectionId as string;
-
+    const collectionAddress = createCollectionResult.events.CollectionCreated.collectionId; // hex string - address
     const collectionId = Address.collection.addressToId(collectionAddress);
 
     return {
@@ -263,8 +271,26 @@ class MetamaskAdapter implements IMarketContractAdapter {
     } as unknown as CreateCollectionParsed;
   }
 
-  setTokenPropertyPermissions(collectionId: number, propertyPermissions: PropertyKeyPermission[], signer: Signer): Promise<void> {
-    throw new Error('not implemented');
+  async setCollectionProperties(collectionId: number, properties: CollectionProperty[], signer: Signer): Promise<void> {
+    const nftFactory = await UniqueNFTFactory(collectionId, signer);
+
+    await (await nftFactory.setCollectionProperties(properties)).wait();
+  }
+
+  async setTokenPropertyPermissions(collectionId: number, tokenPropertyPermissions: PropertyKeyPermission[], signer: Signer): Promise<void> {
+    const nftFactory = await UniqueNFTFactory(collectionId, signer);
+
+    await(
+      await nftFactory.setTokenPropertyPermissions(
+        tokenPropertyPermissions.map(({ key, permission }) => ({
+          key,
+          permissions: Object.entries(permission).map(([name, value]) => ({
+            code: TPP_TO_TPP[name],
+            value
+          }))
+        }))
+      )
+    ).wait();
   }
 
   async createTokensV1({ tokens, collectionId, schema,  }: { tokens: CreateTokenPayload[]; collectionId: number; schema?: UniqueCollectionSchemaDecoded }, signer: Signer): Promise<TokenId[] | undefined> {
@@ -274,7 +300,7 @@ class MetamaskAdapter implements IMarketContractAdapter {
 
     const nftHelper = await UniqueNFTFactory(collectionId, signer);
 
-    const toCross = Address.extract.ethCrossAccountId(signer.getAddress());
+    const toCross = Address.extract.ethCrossAccountId(await signer.getAddress());
 
     const ids = await Promise.all(
       tokens.map(async ({ ...token }) => {
@@ -285,7 +311,7 @@ class MetamaskAdapter implements IMarketContractAdapter {
           )
           .map(({ key, value }) => ({
             key,
-            value: Utf16.stringToNumberArray(value)
+            value: Utf8.stringToHexString(value)
           }));
 
         const tx = await nftHelper.mintCross(toCross, encodedSchema);
@@ -306,39 +332,38 @@ class MetamaskAdapter implements IMarketContractAdapter {
     return ids;
   }
 
-  async createTokens({ tokens, collectionId, schema }: { tokens: TokenV2ItemForMultipleDto[]; collectionId: number; schema?: UniqueCollectionSchemaDecoded }, signer: Signer): Promise<TokenId[] | undefined> {
-    if (!tokens.length || !schema) {
+  async createTokens({ tokens, collectionId }: { tokens: TokenV2ItemForMultipleDto[]; collectionId: number }, signer: Signer): Promise<TokenId[] | undefined> {    
+    if (!tokens.length) {
       throw new Error('UniqueTokenToCreateDto unavailable');
     }
-
     const nftHelper = await UniqueNFTFactory(collectionId, signer);
-
-    const toCross = Address.extract.ethCrossAccountId(signer.getAddress());
+    const toCross = Address.extract.ethCrossAccountId(await signer.getAddress());
 
     const ids = await Promise.all(
-      tokens.map(async ({ image, ...token }) => {
-        const encodedSchema = SchemaTools.tools.unique.token
-          .encodeTokenToProperties(
-            token as UniqueTokenToCreate,
-            schema
-          )
-          .map(({ key, value }) => ({
+      tokens.map(async ({image, name, description, attributes, background_color}) => {
+        const tokenInfo: IV2Token = {
+          schemaName: 'unique',
+          schemaVersion: '2.0.0',
+          image,
+          name,
+          description,
+          attributes,
+          background_color
+        };
+
+        const tokenPropertiesForMinting = SchemaToolsV2.encode
+          .token(tokenInfo)
+          .tokenProperties.map(({ key, valueHex }) => ({
             key,
-            value: Utf16.stringToNumberArray(value)
+            value: valueHex
           }));
 
-        const tx = await nftHelper.mintCross(toCross, encodedSchema);
+        const tokenMintingResult = parseEthersV5TxReceipt(await (await nftHelper.mintCross(
+          toCross,
+          tokenPropertiesForMinting,
+        )).wait());
 
-        const createTokenResult = await tx.wait();
-        const event = createTokenResult.events?.find(({ transactionHash, event }) => {
-          return transactionHash === tx.hash && event === 'TokenChanged';
-        });
-
-        if (!event) {
-          throw new Error('Creating NFT failed');
-        }
-
-        const tokenId = Number(event?.args?.tokenId?.toString() || 1);
+        const tokenId = Number(tokenMintingResult.events.Transfer.tokenId) || 1;
         return { collectionId, tokenId };
       })
     );

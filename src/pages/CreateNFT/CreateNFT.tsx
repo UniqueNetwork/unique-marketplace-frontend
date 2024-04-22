@@ -81,27 +81,6 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
       return;
     }
 
-    const schemaVersion = collectionInfo?.info?.originalSchemaVersion;
-
-    // if (collection.attributesSchema) {
-    //   const invalidToken = checkRequiredAttributes(tokens, collection.attributesSchema);
-    //   if (invalidToken) {
-    //     scrollToTokenCard(invalidToken.id);
-    //     setTokens(
-    //       tokens.map((token) => {
-    //         if (token.id === invalidToken.id) {
-    //           return {
-    //             ...token,
-    //             isValid: false
-    //           };
-    //         }
-    //         return { ...token, isValid: true };
-    //       })
-    //     );
-    //     return;
-    //   }
-    // }
-
     setIsLoadingSubmitResult(true);
     setStage('uploading');
     const uploadedTokens: NewToken[] = [];
@@ -135,11 +114,12 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
           tokens: _tokens,
           collectionId: collection?.id
         },
-        schemaVersion
+        schemaVersion: collectionInfo?.info?.schemaVersion
       });
     };
 
-    while (currentPos < createTokensPayload.length) {
+    let reentryCounter = 0;
+    while (currentPos < createTokensPayload.length && reentryCounter <= MAX_MINT_TOKENS) {
       try {
         setMintingProgress(currentPos);
         await submitBatch(createTokensPayload.slice(currentPos, currentPos + batchSize));
@@ -148,6 +128,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
         batchSize = 10;
         setBatchSize(batchSize);
       }
+      reentryCounter++;
     }
     await refetchLastTokenId();
     await refetchCollectionInfo();

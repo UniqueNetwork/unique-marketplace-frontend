@@ -13,9 +13,9 @@ export const getSignature = async (account: Account): Promise<{
   message: string,
   type: 'keyring' | 'metamask' | null
 }> => {
-  if (isEthersSigner(account)) {
+  if (isEthersSigner(account.signer)) {
     const message = `${Date.now()}`;
-    const signature = await account.signMessage(message);
+    const signature = await account.signer.signMessage(message);
     return {
       signature,
       message,

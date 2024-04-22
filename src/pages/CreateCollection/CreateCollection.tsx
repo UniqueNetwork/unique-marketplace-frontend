@@ -5,7 +5,6 @@ import styled from 'styled-components';
 import classNames from 'classnames';
 import { useDebounce } from 'use-debounce';
 import { SchemaTools } from '@unique-nft/schemas-v2';
-
 import { Button, ButtonGroup, Confirm, Text, useNotifications, Alert } from 'components/UI';
 
 import { CollectionForm, Warning } from './types';
@@ -26,7 +25,6 @@ import { ConfirmBtn, FeeMessage } from 'components';
 import { BottomBar } from './components/BottomBar';
 import { CollectionSidebar } from './components/CollectionSidebar';
 import { getIpfsUriByImagePath } from 'utils/urlUtils';
-import { c } from '@unique-nft/utils/index-406151a5';
 
 interface CreateCollectionProps {
   className?: string;
@@ -198,10 +196,23 @@ const CreateCollectionComponent = ({ className }: CreateCollectionProps) => {
     onSubmit(form);
   };
 
+  // TO DO create method for Reject TX case
+  // const createCollection = async(payload: CreateCollectionV2ArgsDto): Promise<CreateCollectionParsed | undefined> => {
+  //   try {
+  //     const createdCollection = await submitWaitResult({ payload });
+  //     if (!createdCollection) {
+  //       throw new Error('Failed to create collection');
+  //     }
+  //     return createdCollection;
+  //   } catch (err) {
+  //     console.log('You need to sign TX');
+  //     createCollection(payload);
+  //   }
+  // };
+
   const onSubmit = async (form: CollectionForm) => {
     if (!selectedAccount) {
       error('Account is not found');
-
       return;
     }
 
@@ -210,50 +221,45 @@ const CreateCollectionComponent = ({ className }: CreateCollectionProps) => {
     setIsCreating(true);
     const createdCollection = await submitWaitResult({ payload });
     const collectionId = createdCollection?.collectionId;
-
-
-
-    // if (selectedAccount.name === MetamaskAccountName) {
-    //   if (!collectionId) {
-    //     setIsCreating(false);
-    //     error('Something went wrong');
-    //     return;
-    //   }
-    //   setCurrentStage(1);
-    //   const { schema } = payload;
-    //   const { coverPicture, attributesSchema } = schema || {};
-    //   const { attributes } = form;
-    //   // const schemaToCreate = {
-    //   //   ...schema,
-    //   //   coverPicture: { ipfsCid: (coverPicture as { ipfsCid: string })?.ipfsCid || '' },
-    //   //   attributesSchema: attributesSchema as CollectionAttributesSchema
-    //   // } as ;
-    //   const coverPictureUrl = getIpfsUriByImagePath(form.coverPictureIpfsCid);
-    //   const properties =
-    //     SchemaTools.encode.collection({
-    //       schemaName: 'unique',
-    //       schemaVersion: '2.0.0',
-    //       cover_image: coverPictureUrl ? { url: coverPictureUrl } : undefined,
-    //       potential_attributes: attributes ? attributes.map(({ name, values }) => ({ 
-    //         trait_type: name || "",
-    //         values
-    //       })) : undefined,
-    //     });
-
-    //   const propertyPermissions =
-    //     SchemaTools.tools.unique.collection.generateTokenPropertyPermissionsFromCollectionSchema(
-    //       schemaToCreate
-    //     );
-    //   await setTokenPropertyPermissions.submitWaitResult({
-    //     collectionId,
-    //     propertyPermissions
-    //   });
-    //   setCurrentStage(2);
-    //   await setProperties.submitWaitResult({
-    //     collectionId,
-    //     properties
-    //   });
-    // }
+    if (selectedAccount.name === MetamaskAccountName) {
+      if (!collectionId) {
+        setIsCreating(false);
+        error('Something went wrong');
+        return;
+      }
+      setCurrentStage(1);
+      const { attributes } = form;
+      const coverPictureUrl = getIpfsUriByImagePath(form.coverPictureIpfsCid);
+      const { collectionProperties, tokenPropertyPermissions } =
+      SchemaTools.encode.collection(
+        {
+          schemaName: 'unique',
+          schemaVersion: '2.0.0',
+          cover_image: coverPictureUrl ? { url: coverPictureUrl } : undefined,
+          potential_attributes: attributes ? attributes.map(({ name, values }) => ({ 
+            trait_type: name || "",
+            values
+          })) : undefined,
+        },
+        {
+          defaultPermission: {
+            mutable: true,
+            collectionAdmin: true,
+            tokenOwner: false
+          }
+        }
+      );
+      await setTokenPropertyPermissions.submitWaitResult({
+        collectionId,
+        propertyPermissions: tokenPropertyPermissions
+      });
+      
+      setCurrentStage(2);
+      await setProperties.submitWaitResult({
+        collectionId,
+        properties: collectionProperties.map(({key, valueHex}) => ({key, value: valueHex}))
+      });
+    }
 
     setIsCreating(false);
     info('Collection created successfully');
@@ -335,16 +341,21 @@ const CreateCollectionComponent = ({ className }: CreateCollectionProps) => {
     <Wrapper className={classNames('create-collection-page', className)}>
       <WrapperContentStyled>
         <FormWrapper>
-          <CollectionStepper activeStep={currentStep} onClickStep={goToPreviousStep} />
+          <CollectionStepper
+            activeStep={currentStep}
+            onClickStep={goToPreviousStep}
+          />
           {isolatedCollectionForm}
-          {isBalanceInsufficient || (!isBalanceInsufficient && isValid)
-? (
-  <FeeMessage fee={feeFormatted} isFeeLoading={feeLoading} testid='fee' />
-          )
-: (
-  <Alert type='warning'>
-    A fee will be calculated after corrected filling required fields
-  </Alert>
+          {isBalanceInsufficient || (!isBalanceInsufficient && isValid) ? (
+            <FeeMessage
+              fee={feeFormatted}
+              isFeeLoading={feeLoading}
+              testid='fee'
+            />
+          ) : (
+            <Alert type='warning'>
+              A fee will be calculated after corrected filling required fields
+            </Alert>
           )}
           <ButtonGroup $fill>
             {!isLastStep && (
@@ -413,31 +424,33 @@ const CreateCollectionComponent = ({ className }: CreateCollectionProps) => {
           />
         </FormWrapper>
       </WrapperContentStyled>
-      {deviceSize >= DeviceSize.lg
-? (
-  <CollectionSidebar collectionForm={collectionFormValues as CollectionForm} />
-      )
-: (
-  <BottomBar
-    buttons={[
-      <Button
-        title='Preview'
-        key='toggleDrawer'
-        onClick={() => setDrawerOpen(true)}
-      />
+      {deviceSize >= DeviceSize.lg ? (
+        <CollectionSidebar
+          collectionForm={collectionFormValues as CollectionForm}
+        />
+      ) : (
+        <BottomBar
+          buttons={[
+            <Button
+              title='Preview'
+              key='toggleDrawer'
+              onClick={() => setDrawerOpen(true)}
+            />
           ]}
-    isOpen={isDrawerOpen}
-    parent={document.body}
-  >
-    <CollectionSidebar collectionForm={collectionFormValues as CollectionForm} />
-    <ButtonsGroup>
-      <Button
-        title='Back'
-        key='toggleDrawer'
-        onClick={() => setDrawerOpen(false)}
-      />
-    </ButtonsGroup>
-  </BottomBar>
+          isOpen={isDrawerOpen}
+          parent={document.body}
+        >
+          <CollectionSidebar
+            collectionForm={collectionFormValues as CollectionForm}
+          />
+          <ButtonsGroup>
+            <Button
+              title='Back'
+              key='toggleDrawer'
+              onClick={() => setDrawerOpen(false)}
+            />
+          </ButtonsGroup>
+        </BottomBar>
       )}
     </Wrapper>
   );

@@ -23,7 +23,7 @@ import { useGetAllOwnedTokensByCollection } from '../hooks/useGetAllOwnedTokensB
 import { FractionalAmountInput } from '../Modals/FractionalAmountInput';
 import { CollectionMode } from 'api/chainApi/types';
 import { useQueryCollectionsForNesting } from 'api/scanApi/useQueryCollectionsForNesting';
-import { GQLCollection } from 'api/scanApi/types';
+import { GQLToken } from 'api/scanApi/types';
 import { SuggestProps } from 'components/UI/Suggest';
 
 export const TransferToBundleModal: FC<TBundleTransferModalBodyProps> = ({ token, setIsClosable, onFinish, testid }) => {
@@ -89,7 +89,7 @@ type AskTransferToBundleModalProps = {
 };
 
 const AskTransferToBundleModal: FC<AskTransferToBundleModalProps> = ({ token, collection: collectionProp, onTransferToBundle, testid }) => {
-  const [collection, setCollection] = useState<GQLCollection | null>(null);
+  const [collection, setCollection] = useState<GQLToken | null>(null);
   const [selectedToken, setSelectedToken] = useState<TokenItem | null>(null);
   const [isFeeLoading, setIsFeeLoading] = useState(false);
   const [fee, setFee] = useState<string>('0');
@@ -101,12 +101,12 @@ const AskTransferToBundleModal: FC<AskTransferToBundleModalProps> = ({ token, co
   const [isSponsored, setIsSponsored] = useState(false);
 
   const { collections: collectionItems, fetchCollections, isFetching: isFetchingCollections } = useQueryCollectionsForNesting();
-  const { tokens, isFetchingTokens } = useGetAllOwnedTokensByCollection(collection?.id, useMemo(() => ({
+  const { tokens, isFetchingTokens } = useGetAllOwnedTokensByCollection(collection?.collectionId, useMemo(() => ({
     excludeTokenId: {
       collectionId: token.collectionId,
       tokenId: token.tokenId
     }
-  }), [token]));
+  }), [collection, token]));
 
   useEffect(() => {
     if (!selectedAccount) return;
@@ -147,7 +147,7 @@ const AskTransferToBundleModal: FC<AskTransferToBundleModalProps> = ({ token, co
     [onTransferToBundle, selectedToken, amount]
   );
 
-  const onChangeSelectedCollection = useCallback((collection: GQLCollection | null) => {
+  const onChangeSelectedCollection = useCallback((collection: GQLToken | null) => {
     setCollection(collection);
     setSelectedToken(null);
     setFee('0');
@@ -187,12 +187,13 @@ const AskTransferToBundleModal: FC<AskTransferToBundleModalProps> = ({ token, co
         <CollectionsSuggestStyled
           isLoading={isFetchingCollections}
           suggestions={collectionItems}
-          getSuggestionValue={(suggestion) => `${suggestion.name} ${suggestion.id}`}
-          getActiveSuggestOption={(suggest, activeValue) => suggest.id === activeValue.id}
+          getSuggestionValue={(suggestion) => `${suggestion.collectionName} [ID ${suggestion?.collectionId}]}`}
+          getActiveSuggestOption={(suggest, activeValue) => suggest.collectionId === activeValue.collectionId}
           components={{
             SuggestItem: ({ suggestion }) => <ItemOption>
-              <CollectionCover src={getIpfsUriByImagePath(suggestion.cover || '')} size={24} type={'circle'} />
-              <Text>{`${suggestion?.name} [ID ${suggestion?.id}]`}</Text>
+              <CollectionCover src={getIpfsUriByImagePath(suggestion.collectionCover || '')} size={24} type={'circle'} />
+              <Text>
+                {`${suggestion?.collectionName} [ID ${suggestion?.collectionId}]`}</Text>
             </ItemOption>
           }}
           onChange={onChangeSelectedCollection}
@@ -204,7 +205,7 @@ const AskTransferToBundleModal: FC<AskTransferToBundleModalProps> = ({ token, co
           <Text size='s' color='grey-500'>A token that will become the bundle owner and the root of the nested structure. You can provide only a token that you own.</Text>
         </RowLabel>
         <TokensSuggestStyled
-          key={collection?.id}
+          key={collection?.collectionId}
           isLoading={isFetchingTokens}
           suggestions={collection ? tokens : []}
           getSuggestionValue={(suggestion) => suggestion?.tokenId?.toString() || ''}
@@ -321,7 +322,7 @@ const ItemOption = styled.div`
   padding: calc(var(--prop-gap) / 2) calc(var(--prop-gap) / 4);
 `;
 
-const CollectionsSuggest = (props: SuggestProps<GQLCollection>) => <Suggest<GQLCollection> {...props} />;
+const CollectionsSuggest = (props: SuggestProps<GQLToken>) => <Suggest<GQLToken> {...props} />;
 const CollectionsSuggestStyled = styled(CollectionsSuggest)`
   width: 100%;
   & .unique-input-text {

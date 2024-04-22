@@ -21,13 +21,15 @@ export const StatusCreateTransactionsModal = ({
   return (
     <ModalStyled isVisible={isVisible} isClosable={false}>
       <Heading>{title}</Heading>
-      {descriptions.map((description, index) => (
-        <Loader
-          key={description}
-          label={description}
-          state={index === step ? 'process' : index > step ? 'idle' : 'done'}
-        />
-      ))}
+      <StageWrap innerItems={descriptions.length}>
+        {descriptions.map((description, index) => (
+          <Loader
+            key={description}
+            label={description}
+            state={index === step ? 'process' : index > step ? 'idle' : 'done'}
+          />
+        ))}
+      </StageWrap>
       {!!warning && <AlertStyled type='warning'>{warning}</AlertStyled>}
     </ModalStyled>
   );
@@ -44,4 +46,11 @@ const ModalStyled = styled(Modal)`
 const AlertStyled = styled(Alert)`
   margin-bottom: 0 !important;
   margin-top: var(--prop-gap) !important;
+`;
+
+const StageWrap = styled.div<{innerItems?: number}>`
+  display: flex;
+  flex-direction: column;
+  height: ${({innerItems}) => innerItems ? innerItems * 30 + 'px' : 'auto'};
+  justify-content: space-between;
 `;
