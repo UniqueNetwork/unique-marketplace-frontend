@@ -250,11 +250,11 @@ const CreateCollectionComponent = ({ className }: CreateCollectionProps) => {
     if (returnToCreateToken) {
       navigate(`/${currentChainId}/create-token`, {
         state: {
-          collection_id: collectionId,
+          id: collectionId,
           name: payload.name,
           description: payload.description,
           // @ts-ignore
-          collection_cover: payload.schema?.coverPicture.ipfsCid
+          cover: payload.schema?.coverPicture.ipfsCid
         }
       });
       return;
