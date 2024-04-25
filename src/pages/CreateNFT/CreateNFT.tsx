@@ -102,37 +102,12 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
     let createTokensPayload;
     const schemaVersion = collectionInfo?.info?.originalSchemaVersion;
 
-    if (schemaVersion === '1.0.0' && collection.properties) {
-      const propertiesIsArrayMap = new Map();
-      collection.properties.forEach((property, index) => {
-        try {
-          const decodedValue = JSON.parse(property.value);
-          const isArray = decodedValue?.isArray;
-          propertiesIsArrayMap.set(index, isArray);
-        } catch (error) {
-          propertiesIsArrayMap.set(index, false);
-        }
-      });
-      uploadedTokens.forEach((token) => {
-        const tokenAttributes = token.attributes;
-        tokenAttributes.forEach((el, key) => {
-          const isArray = propertiesIsArrayMap.get(key);
-          if (!isArray && Array.isArray(el)) {
-            token.attributes[key] = el[0];
-          }
-        });
-      });
-
-      createTokensPayload = mapTokensToPayloadV1(
-        uploadedTokens,
-        collection?.id,
-        selectedAccount?.address
-      );
+    if (schemaVersion === '1.0.0') {
+      if (!collection.properties) return;
+      createTokensPayload = mapTokensToPayloadV1(uploadedTokens, collection.properties);
     } else {
       createTokensPayload = mapTokensToPayload(
         uploadedTokens,
-        collection?.id,
-        selectedAccount?.address,
         collectionInfo?.info?.potential_attributes
       );
     }
