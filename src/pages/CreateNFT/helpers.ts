@@ -1,4 +1,4 @@
-import { PotentialAttribute, AttributeSchemaDto, CreateTokenBody, Attribute as UniqueAttribute, TokenV2ItemForMultipleDto } from '@unique-nft/sdk';
+import { PotentialAttribute, AttributeSchemaDto, CreateTokenBody, Attribute as UniqueAttribute, TokenV2ItemForMultipleDto, CreateTokenPayload } from '@unique-nft/sdk';
 
 import { Attribute, AttributeOption, AttributesForFilter, NewToken } from './types';
 
@@ -67,6 +67,48 @@ export const mapNewToken = (
         return acc;
       },
       []
+    );
+  }
+
+  return mappedTokenDto;
+};
+
+export const mapTokensToPayloadV1 = (
+  tokens: NewToken[],
+  collectionId: number,
+  owner: string
+): CreateTokenPayload[] => {
+  return tokens.map((token) => mapNewTokenV1(token, collectionId, owner));
+};
+
+export const mapNewTokenV1 = (
+  token: NewToken,
+  collectionId: number,
+  owner: string
+): CreateTokenPayload => {
+  const mappedTokenDto: CreateTokenPayload = {
+    data: {
+      image: {
+        ipfsCid: token.ipfsCid?.cid
+      },
+      encodedAttributes: {}
+    }
+  };
+
+  if (mappedTokenDto.data && token.attributes?.length) {
+    mappedTokenDto.data.encodedAttributes = token.attributes.reduce(
+      (acc, attr, index) => {
+        const mapped = attributeMapper(attr);
+        if (mapped === null) {
+          return acc;
+        }
+
+        return {
+          ...acc,
+          [index]: mapped
+        };
+      },
+      {}
     );
   }
 
