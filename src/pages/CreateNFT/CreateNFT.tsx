@@ -1,7 +1,7 @@
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import { CreateTokenPayload, TokenV2ItemForMultipleDto } from '@unique-nft/sdk';
+import { TokenV2ItemForMultipleDto } from '@unique-nft/sdk';
 
 import { Button, Checkbox, Text, useNotifications, Heading } from 'components/UI';
 import { ConfirmBtn } from 'components';
@@ -10,7 +10,7 @@ import { CollectionSuggest } from './components/CollectionSuggest';
 import { TokenList } from './components/TokenList';
 import { CreateTokenDialog, NewToken, ViewMode } from './types';
 import { CreateTokensDialogs } from './components/CreateTokensDialogs';
-import { checkRequiredAttributes, mapTokensToPayload, scrollToTokenCard } from './helpers';
+import { mapTokensToPayload, mapTokensToPayloadV1 } from './helpers';
 import { UploadFAB } from './components/UploadFAB';
 import { CollectionStats } from './components/CollectionStats';
 import { StatusTransactionModal } from './components/StatusTransactionModal';
@@ -99,27 +99,33 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
     }
     setStage('minting');
 
-    const createTokensPayload = mapTokensToPayload(
-      uploadedTokens,
-      collection?.id,
-      selectedAccount?.address,
-      collectionInfo?.info?.potential_attributes
-    );
+    let createTokensPayload;
+    const schemaVersion = collectionInfo?.info?.originalSchemaVersion;
 
-    let currentPos = 0;
-    let batchSize = 30;
+    if (schemaVersion === '1.0.0') {
+      if (!collection.properties) return;
+      createTokensPayload = mapTokensToPayloadV1(uploadedTokens, collection.properties);
+    } else {
+      createTokensPayload = mapTokensToPayload(
+        uploadedTokens,
+        collectionInfo?.info?.potential_attributes
+      );
+    }
+
     const submitBatch = async (_tokens: TokenV2ItemForMultipleDto[]) => {
       return await submitWaitResult({
         payload: {
           tokens: _tokens,
           collectionId: collection?.id
         },
-        schemaVersion: collectionInfo?.info?.schemaVersion
+        schemaVersion
       });
     };
 
+    let currentPos = 0;
+    let batchSize = 30;
     let reentryCounter = 0;
-    while (currentPos < createTokensPayload.length && reentryCounter <= MAX_MINT_TOKENS) {
+    while (currentPos < createTokensPayload.length && reentryCounter <= (MAX_MINT_TOKENS / batchSize)) {
       try {
         setMintingProgress(currentPos);
         await submitBatch(createTokensPayload.slice(currentPos, currentPos + batchSize));

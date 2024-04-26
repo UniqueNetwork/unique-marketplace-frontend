@@ -293,39 +293,40 @@ class MetamaskAdapter implements IMarketContractAdapter {
     ).wait();
   }
 
-  async createTokensV1({ tokens, collectionId, schema,  }: { tokens: CreateTokenPayload[]; collectionId: number; schema?: UniqueCollectionSchemaDecoded }, signer: Signer): Promise<TokenId[] | undefined> {
-    if (!tokens.length || !schema) {
+
+  async createTokensV1({ tokens, collectionId }: { tokens: CreateTokenPayload[]; collectionId: number }, signer: Signer): Promise<TokenId[] | undefined> {
+    if (!tokens.length) {
       throw new Error('UniqueTokenToCreateDto unavailable');
     }
 
-    const nftHelper = await UniqueNFTFactory(collectionId, signer);
-
+    const collection = await UniqueNFTFactory(collectionId, signer);
     const toCross = Address.extract.ethCrossAccountId(await signer.getAddress());
 
     const ids = await Promise.all(
-      tokens.map(async ({ ...token }) => {
-        const encodedSchema = SchemaTools.tools.unique.token
-          .encodeTokenToProperties(
-            token as UniqueTokenToCreate,
-            schema
-          )
-          .map(({ key, value }) => ({
-            key,
-            value: Utf8.stringToHexString(value)
+      tokens.map(async ({ data }) => {
+        let attr: {key: string, value: string}[] = [];
+        if (data && data.encodedAttributes) {
+          attr = Object.entries(data.encodedAttributes).map(([ key, value ]) => ({
+            key: `a.${key}`,
+            value: Utf8.stringToHexString(JSON.stringify(value))
           }));
-
-        const tx = await nftHelper.mintCross(toCross, encodedSchema);
-
-        const createTokenResult = await tx.wait();
-        const event = createTokenResult.events?.find(({ transactionHash, event }) => {
-          return transactionHash === tx.hash && event === 'TokenChanged';
-        });
-
-        if (!event) {
-          throw new Error('Creating NFT failed');
         }
+ 
+        const encodedSchema = [
+          {
+            key: 'i.c',
+            //@ts-ignore
+            value: data?.image?.ipfsCid ? Utf8.stringToHexString(data?.image?.ipfsCid) : ''
+          },
+          ...attr
+        ];
 
-        const tokenId = Number(event?.args?.tokenId?.toString() || 1);
+        const tokenMintingResult = parseEthersV5TxReceipt(
+          await(await collection.mintCross(toCross, encodedSchema)).wait()
+        );
+
+        const tokenId = Number(tokenMintingResult.events.Transfer.tokenId) || 1;
+
         return { collectionId, tokenId };
       })
     );
@@ -336,7 +337,7 @@ class MetamaskAdapter implements IMarketContractAdapter {
     if (!tokens.length) {
       throw new Error('UniqueTokenToCreateDto unavailable');
     }
-    const nftHelper = await UniqueNFTFactory(collectionId, signer);
+    const collection = await UniqueNFTFactory(collectionId, signer);
     const toCross = Address.extract.ethCrossAccountId(await signer.getAddress());
 
     const ids = await Promise.all(
@@ -358,10 +359,11 @@ class MetamaskAdapter implements IMarketContractAdapter {
             value: valueHex
           }));
 
-        const tokenMintingResult = parseEthersV5TxReceipt(await (await nftHelper.mintCross(
-          toCross,
-          tokenPropertiesForMinting,
-        )).wait());
+        const tokenMintingResult = parseEthersV5TxReceipt(
+          await(
+            await collection.mintCross(toCross, tokenPropertiesForMinting)
+          ).wait()
+        );
 
         const tokenId = Number(tokenMintingResult.events.Transfer.tokenId) || 1;
         return { collectionId, tokenId };

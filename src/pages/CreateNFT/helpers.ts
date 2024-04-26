@@ -1,4 +1,4 @@
-import { PotentialAttribute, AttributeSchemaDto, CreateTokenBody, Attribute as UniqueAttribute, TokenV2ItemForMultipleDto } from '@unique-nft/sdk';
+import { PotentialAttribute, AttributeSchemaDto, CreateTokenBody, Attribute as UniqueAttribute, TokenV2ItemForMultipleDto, CreateTokenPayload, TokenProperty } from '@unique-nft/sdk';
 
 import { Attribute, AttributeOption, AttributesForFilter, NewToken } from './types';
 
@@ -30,17 +30,13 @@ const attributeMapper = (attribute?: Attribute) => {
 
 export const mapTokensToPayload = (
   tokens: NewToken[],
-  collectionId: number,
-  owner: string,
   schema?: PotentialAttribute[]
 ): TokenV2ItemForMultipleDto[] => {
-  return tokens.map((token) => mapNewToken(token, collectionId, owner, schema));
+  return tokens.map((token) => mapNewToken(token, schema));
 };
 
 export const mapNewToken = (
   token: NewToken,
-  collectionId: number,
-  owner: string,
   schema?: PotentialAttribute[]
 ): TokenV2ItemForMultipleDto => {
   const mappedTokenDto: TokenV2ItemForMultipleDto = {
@@ -67,6 +63,64 @@ export const mapNewToken = (
         return acc;
       },
       []
+    );
+  }
+
+  return mappedTokenDto;
+};
+
+export const mapTokensToPayloadV1 = (
+  tokens: NewToken[],
+  properties: TokenProperty[]
+): CreateTokenPayload[] => {
+  const propertiesIsArrayMap = new Map();
+  properties.forEach((property, index) => {
+    try {
+      const decodedValue = JSON.parse(property.value);
+      const isArray = decodedValue?.isArray;
+      propertiesIsArrayMap.set(index, isArray);
+    } catch (error) {
+      propertiesIsArrayMap.set(index, false);
+    }
+  });
+  //check the value is SELECT not MULTISELECT
+  tokens.forEach((token) => {
+    const tokenAttributes = token.attributes;
+    tokenAttributes.forEach((el, key) => {
+      const isArray = propertiesIsArrayMap.get(key);
+      if (!isArray && Array.isArray(el)) {
+        token.attributes[key] = el[0];
+      }
+    });
+  });
+
+  return tokens.map((token) => mapNewTokenV1(token));
+};
+
+export const mapNewTokenV1 = (token: NewToken): CreateTokenPayload => {
+  const mappedTokenDto: CreateTokenPayload = {
+    data: {
+      image: {
+        ipfsCid: token.ipfsCid?.cid
+      },
+      encodedAttributes: {}
+    }
+  };
+
+  if (mappedTokenDto.data && token.attributes?.length) {
+    mappedTokenDto.data.encodedAttributes = token.attributes.reduce(
+      (acc, attr, index) => {
+        const mapped = attributeMapper(attr);
+        if (mapped === null) {
+          return acc;
+        }
+
+        return {
+          ...acc,
+          [index]: mapped
+        };
+      },
+      {}
     );
   }
 
@@ -148,7 +202,6 @@ export const getAttributesFromTokens = (
     if (existsValue) {
       existsValue.count += 1;
     } else {
-      console.log(enumValues, value);
       attributesForFilter[attributeName].push({
         index,
         key: attributeName,
@@ -164,7 +217,6 @@ export const getAttributesFromTokens = (
       return;
     }
 
-    console.log(attributes);
     // Calculate filters to show
     attributes.forEach((attribute, index) => {
       const { trait_type, values } = attributesSchema[index];
