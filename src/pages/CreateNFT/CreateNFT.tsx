@@ -1,7 +1,7 @@
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import { TokenV2ItemForMultipleDto } from '@unique-nft/sdk';
+import { TokenId, TokenV2ItemForMultipleDto } from '@unique-nft/sdk';
 
 import { Button, Checkbox, Text, useNotifications, Heading } from 'components/UI';
 import { ConfirmBtn } from 'components';
@@ -13,7 +13,7 @@ import { CreateTokensDialogs } from './components/CreateTokensDialogs';
 import { mapTokensToPayload, mapTokensToPayloadV1, parseInvalidAttributes } from './helpers';
 import { UploadFAB } from './components/UploadFAB';
 import { CollectionStats } from './components/CollectionStats';
-import { StatusTransactionModal } from './components/StatusTransactionModal';
+import { StatusTransactionModal, TRANSACTION_STAGE_ENUM } from './components/StatusTransactionModal';
 import { AttributeFilterProvider } from './contexts/AttributesFilterContext';
 import { MobileFilters } from './components/MobileFilter';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
@@ -39,12 +39,15 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
   const [dialog, setDialog] = useState<CreateTokenDialog>();
   const [isLoadingSubmitResult, setIsLoadingSubmitResult] = useState<boolean>(false);
 
-  const [stage, setStage] = useState<'uploading' | 'minting' | 'done'>('done');
+  const [stage, setStage] = useState<TRANSACTION_STAGE_ENUM>(TRANSACTION_STAGE_ENUM.DONE);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [mintingProgress, setMintingProgress] = useState<number>(0);
-  const [batchSize, setBatchSize] = useState<number>(30);
+  const BIG_BATCH_SIZE = 30;
+  const SMALL_BATCH_SIZE = 10;
+  const [batchSize, setBatchSize] = useState<number>(BIG_BATCH_SIZE);
   const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.grid);
   const [isFilterVisible, setIsFilterVisible] = useState(false);
+  const [tokensCreated, setTokensCreated] = useState<TokenId[]>();
 
   const { currentChainId, api } = useApi();
 
@@ -83,7 +86,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
     }
 
     setIsLoadingSubmitResult(true);
-    setStage('uploading');
+    setStage(TRANSACTION_STAGE_ENUM.UPLOADING);
     const uploadedTokens: NewToken[] = [];
     try {
       for (let index = 0; index < tokens.length; index++) {
@@ -98,7 +101,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
     } catch (e: any) {
       error(e.message);
     }
-    setStage('minting');
+    setStage(TRANSACTION_STAGE_ENUM.MINTING);
 
     let createTokensPayload;
     const schemaVersion = collectionInfo?.info?.originalSchemaVersion;
@@ -124,23 +127,32 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
     };
 
     let currentPos = 0;
-    let batchSize = 30;
     let reentryCounter = 0;
     while (currentPos < createTokensPayload.length && reentryCounter <= (MAX_MINT_TOKENS / batchSize)) {
       try {
         setMintingProgress(currentPos);
-        await submitBatch(createTokensPayload.slice(currentPos, currentPos + batchSize));
+        const result = await submitBatch(createTokensPayload.slice(currentPos, currentPos + batchSize));
+        if (!result) return;
+        tokensCreated ? setTokensCreated([...tokensCreated, ...result]) : setTokensCreated(result);
+        
         currentPos += batchSize;
       } catch (e) {
-        batchSize = 10;
-        setBatchSize(batchSize);
+        setBatchSize(SMALL_BATCH_SIZE);
       }
       reentryCounter++;
     }
-    await refetchLastTokenId();
-    await refetchCollectionInfo();
-    setStage('done');
-    info(`${createTokensPayload.length} tokens created successfully`);
+
+
+
+    if (tokensCreated && Array.isArray(tokensCreated)) {
+      await refetchLastTokenId();
+      await refetchCollectionInfo();
+      setStage(TRANSACTION_STAGE_ENUM.DONE);
+      info(`${tokensCreated.length} tokens created successfully`);
+    } else {
+      error('Create tokens error');
+      setStage(TRANSACTION_STAGE_ENUM.FAILED);
+    }
   };
 
   const onAddTokens = (files: File[]) => {
@@ -365,7 +377,9 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
                     <StyledCheckbox
                       label={
                         <Text color='grey-500'>
-                          {selected.length ? `${selected.length} selected` : 'Select all'}
+                          {selected.length
+                            ? `${selected.length} selected`
+                            : 'Select all'}
                         </Text>
                       }
                       checked={selected.length > 0}
@@ -410,7 +424,11 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
                 />
                 <SelectedCountWrapper />
                 <ConfirmBtn
-                  disabled={!collection || tokens.length === 0}
+                  disabled={
+                    !collection ||
+                    tokens.length === 0 ||
+                    invalidTokenList.length > 0
+                  }
                   role='primary'
                   title='Confirm and create all'
                   onClick={handleSubmit}
@@ -449,7 +467,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
             setUploadProgress(0);
             setMintingProgress(0);
             setIsLoadingSubmitResult(false);
-            setStage('uploading');
+            setStage(TRANSACTION_STAGE_ENUM.UPLOADING);
           }}
         />
         <MobileFilters

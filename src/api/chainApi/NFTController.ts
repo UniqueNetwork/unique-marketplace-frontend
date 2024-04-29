@@ -150,14 +150,14 @@ export class UniqueSDKNFTController extends BaseController {
     await adapter.transferTokensBatch(transfers, account.signer, onSubmittedOne);
   }
 
-  async createV1(payload: { tokens: CreateTokenPayload[], collectionId: number }, { account }: TransactionOptions): Promise<void> {
+  async createV1(payload: { tokens: CreateTokenPayload[], collectionId: number }, { account }: TransactionOptions): Promise<TokenId[] | undefined> {
     const adapter = this.getAdapter(account);
-    await adapter.createTokensV1(payload, account.signer);
+    return await adapter.createTokensV1(payload, account.signer);
   }
 
-  async create(payload: { tokens: TokenV2ItemForMultipleDto[], collectionId: number }, { account }: TransactionOptions): Promise<void> {
+  async create(payload: { tokens: TokenV2ItemForMultipleDto[], collectionId: number }, { account }: TransactionOptions): Promise<TokenId[] | undefined> {
     const adapter = this.getAdapter(account);
-    await adapter.createTokens(payload, account.signer);
+    return await adapter.createTokens(payload, account.signer);
   }
 
   async burn(payload: { collectionId: number, tokenId: number }, { account }: TransactionOptions): Promise<void> {

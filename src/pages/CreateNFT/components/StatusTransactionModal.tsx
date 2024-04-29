@@ -3,12 +3,19 @@ import { Modal, ModalProps } from 'components/UI/Modal';
 import { ReactNode } from 'react';
 import styled from 'styled-components';
 
+export enum TRANSACTION_STAGE_ENUM {
+  UPLOADING = 'uploading',
+  MINTING = 'minting',
+  DONE = 'done',
+  FAILED = 'failed'
+}
+
 type Props = Pick<ModalProps, 'isVisible'> & {
   uploadingProgress?: number;
   mintingProgress?: number;
   totalTokens: number;
   batchSize: number;
-  stage: 'uploading' | 'minting' | 'done';
+  stage: TRANSACTION_STAGE_ENUM;
   isVisible: boolean;
   title?: string;
   warning?: ReactNode;
@@ -42,7 +49,13 @@ export const StatusTransactionModal = ({
         </StageDescription>
         <Loader
           state={
-            stage === 'uploading' ? 'idle' : stage === 'minting' ? 'process' : 'done'
+            stage === TRANSACTION_STAGE_ENUM.UPLOADING
+              ? 'idle'
+              : stage === TRANSACTION_STAGE_ENUM.MINTING
+              ? 'process'
+              : stage === TRANSACTION_STAGE_ENUM.FAILED
+              ? 'failed'
+              : 'done'
           }
         />
         <StageDescription>
@@ -57,12 +70,17 @@ export const StatusTransactionModal = ({
           </Text>
         </StageDescription>
       </StagesWrapper>
-      {stage !== 'done' && (
+      {(stage === TRANSACTION_STAGE_ENUM.MINTING ||
+        stage === TRANSACTION_STAGE_ENUM.UPLOADING) && (
         <AlertStyled type='warning'>
-          Please do not close or refresh this page until the token minting is completed.
+          Please do not close or refresh this page until the token minting is
+          completed.
         </AlertStyled>
       )}
-      {stage === 'done' && (
+      {stage === TRANSACTION_STAGE_ENUM.FAILED && (
+        <AlertStyled type='warning'>Minting failed.</AlertStyled>
+      )}
+      {stage === TRANSACTION_STAGE_ENUM.DONE && (
         <ButtonsWrapper>
           <Button title='Create more' role='primary' onClick={onContinue} />
           <Button title='Go to my tokens' onClick={onComplete} />
