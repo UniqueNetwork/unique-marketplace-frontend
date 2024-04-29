@@ -10,7 +10,7 @@ import { CollectionSuggest } from './components/CollectionSuggest';
 import { TokenList } from './components/TokenList';
 import { CreateTokenDialog, NewToken, ViewMode } from './types';
 import { CreateTokensDialogs } from './components/CreateTokensDialogs';
-import { mapTokensToPayload, mapTokensToPayloadV1 } from './helpers';
+import { mapTokensToPayload, mapTokensToPayloadV1, parseInvalidAttributes } from './helpers';
 import { UploadFAB } from './components/UploadFAB';
 import { CollectionStats } from './components/CollectionStats';
 import { StatusTransactionModal } from './components/StatusTransactionModal';
@@ -25,6 +25,7 @@ import { useCollectionGetById } from './hooks/useCollectionGetById';
 import { useCollectionGetLastTokenId } from './hooks/useCollectionGetLastTokenId';
 import { WrapperContent } from 'pages/CreateCollection/CreateCollection';
 import { GQLCollection } from 'api/scanApi/types';
+import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 
 export const MAX_MINT_TOKENS = 300;
 
@@ -254,13 +255,26 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
     setViewMode(viewMode);
   };
 
+  const invalidTokenList = useMemo(() => {
+    if (!collection?.properties) return [];
+
+    const invalidTokens = parseInvalidAttributes(
+      tokens,
+      collection?.properties
+    );
+    return invalidTokens;
+  }, [tokens, collection]);
+
   return (
     <AttributeFilterProvider>
       <MainWrapper className='create-nft-page' ref={mainWrapperRef}>
         <WrapperCollectionContentStyled expanded={!!collection}>
           <Heading size='3'>Choose a collection</Heading>
           <CollectionBlock ref={collectionBlockRef}>
-            <CollectionSuggest collection={collection} onChange={onChangeCollection} />
+            <CollectionSuggest
+              collection={collection}
+              onChange={onChangeCollection}
+            />
             {collection && (
               <CollectionStats
                 collection={collection}
@@ -277,8 +291,8 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
         <WrapperTokenListContentStyled disabled={!collection}>
           <Heading size='3'>Create NFTs</Heading>
           <Text size='m' color='grey-500'>
-            You can mass-mint {MAX_MINT_TOKENS} tokens using JPEG, PNG, and GIF files,
-            with a maximum size of 10MB each
+            You can mass-mint {MAX_MINT_TOKENS} tokens using JPEG, PNG, and GIF
+            files, with a maximum size of 10MB each
           </Text>
           {tokens.length > 0 && (
             <TokensCounterWrapper>
@@ -327,64 +341,84 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
           />
           {tokens.length > 0 && !isFilterVisible && (
             <ButtonGroup ref={actionBoxRef}>
-              <Button
-                title={
-                  <StyledCheckbox
-                    label={
-                      <Text color='grey-500'>
-                        {selected.length ? `${selected.length} selected` : 'Select all'}
-                      </Text>
-                    }
-                    checked={selected.length > 0}
-                    onChange={(value: boolean) => {
-                      if (value) {
-                        selectedAll();
-                        return;
+              {invalidTokenList.length > 0 && (
+                <WarningBlock>
+                  {invalidTokenList.map(({ token, invalidAttributes }) => (
+                    <div>
+                      Set properties{' '}
+                      {invalidAttributes.map((property, index) => (
+                        <>
+                          {index ? ', ' : ''}
+                          {collectionInfo?.info?.potential_attributes &&
+                            collectionInfo?.info?.potential_attributes[property]
+                              .trait_type}
+                        </>
+                      ))}{' '}
+                      to token {collectionInfo?.tokenPrefix}#{token.id}
+                    </div>
+                  ))}
+                </WarningBlock>
+              )}
+              <ButtonConatiner>
+                <Button
+                  title={
+                    <StyledCheckbox
+                      label={
+                        <Text color='grey-500'>
+                          {selected.length ? `${selected.length} selected` : 'Select all'}
+                        </Text>
                       }
-                      deselectedAll();
-                    }}
-                    testid='select-all'
-                  />
-                }
-                onClick={() => {
-                  if (selected.length > 0) {
-                    deselectedAll();
-                    return;
+                      checked={selected.length > 0}
+                      onChange={(value: boolean) => {
+                        if (value) {
+                          selectedAll();
+                          return;
+                        }
+                        deselectedAll();
+                      }}
+                      testid='select-all'
+                    />
                   }
-                  selectedAll();
-                }}
-              />
-              {deviceSize <= DeviceSize.sm && (
-                <ConfirmBtn
-                  role='outlined'
-                  title='Filter'
-                  onClick={() => setIsFilterVisible(true)}
+                  onClick={() => {
+                    if (selected.length > 0) {
+                      deselectedAll();
+                      return;
+                    }
+                    selectedAll();
+                  }}
                 />
-              )}
-              <ConfirmBtn
-                className={selected.length > 1 ? 'visible' : 'hidden'}
-                role='outlined'
-                disabled={selected.length === 0}
-                title='Modify selected'
-                onClick={() => setDialog(CreateTokenDialog.editAttributes)}
-              />
-              <ConfirmBtn
-                className={selected.length > 1 ? 'visible' : 'hidden'}
-                role='danger'
-                disabled={selected.length === 0}
-                title='Remove selected'
-                onClick={() => setDialog(CreateTokenDialog.removeToken)}
-              />
-              <SelectedCountWrapper />
-              <ConfirmBtn
-                disabled={!collection || tokens.length === 0}
-                role='primary'
-                title='Confirm and create all'
-                onClick={handleSubmit}
-              />
-              {tokens.length > 0 && Number(leftTokens) > 0 && (
-                <UploadFAB onUpload={onAddTokens} />
-              )}
+                {deviceSize <= DeviceSize.sm && (
+                  <ConfirmBtn
+                    role='outlined'
+                    title='Filter'
+                    onClick={() => setIsFilterVisible(true)}
+                  />
+                )}
+                <ConfirmBtn
+                  className={selected.length > 1 ? 'visible' : 'hidden'}
+                  role='outlined'
+                  disabled={selected.length === 0}
+                  title='Modify selected'
+                  onClick={() => setDialog(CreateTokenDialog.editAttributes)}
+                />
+                <ConfirmBtn
+                  className={selected.length > 1 ? 'visible' : 'hidden'}
+                  role='danger'
+                  disabled={selected.length === 0}
+                  title='Remove selected'
+                  onClick={() => setDialog(CreateTokenDialog.removeToken)}
+                />
+                <SelectedCountWrapper />
+                <ConfirmBtn
+                  disabled={!collection || tokens.length === 0}
+                  role='primary'
+                  title='Confirm and create all'
+                  onClick={handleSubmit}
+                />
+                {tokens.length > 0 && Number(leftTokens) > 0 && (
+                  <UploadFAB onUpload={onAddTokens} />
+                )}
+              </ButtonConatiner>
             </ButtonGroup>
           )}
         </WrapperTokenListContentStyled>
@@ -408,9 +442,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
           totalTokens={tokens.length}
           batchSize={batchSize}
           onComplete={() => {
-            navigate(
-              `/${currentChainId}/sellTokens`
-            );
+            navigate(`/${currentChainId}/sellTokens`);
           }}
           onContinue={() => {
             setTokens([]);
@@ -420,7 +452,10 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
             setStage('uploading');
           }}
         />
-        <MobileFilters isVisible={isFilterVisible} setIsVisible={setIsFilterVisible} />
+        <MobileFilters
+          isVisible={isFilterVisible}
+          setIsVisible={setIsFilterVisible}
+        />
       </MainWrapper>
     </AttributeFilterProvider>
   );
@@ -522,19 +557,6 @@ const ButtonGroup = styled.div`
       opacity: 0;
     }
   }
-  @media screen and (max-width: 768px) {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    & > button:last-of-type {
-      grid-column: 1 / span 2;
-    }
-  }
-  @media screen and (max-width: 568px) {
-    gap: calc(var(--prop-gap) / 2);
-    & > button.unique-button.size-middle {
-      padding: 8px 16px;
-    }
-  }
 `;
 
 const SelectedCountWrapper = styled.div`
@@ -564,6 +586,25 @@ const StyledCheckbox = styled(Checkbox)`
   margin-left: -14px;
   label.checkbox-label {
     margin-left: 42px;
+  }
+`;
+
+const ButtonConatiner = styled.div`
+  display: flex;
+  width: 100%;
+
+  @media screen and (max-width: 768px) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    & > button:last-of-type {
+      grid-column: 1 / span 2;
+    }
+  }
+  @media screen and (max-width: 568px) {
+    gap: calc(var(--prop-gap) / 2);
+    & > button.unique-button.size-middle {
+      padding: 8px 16px;
+    }
   }
 `;
 

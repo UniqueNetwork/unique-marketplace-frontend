@@ -276,3 +276,35 @@ export const ellipsisText = (text: string, allowSymbols = 30) => {
   }
   return text;
 };
+
+export const parseInvalidAttributes = (
+  tokens: NewToken[],
+  collectionProperties: TokenProperty[]
+): { token: NewToken; invalidAttributes: number[] }[] => {
+  const requiredAttributes: number[] = collectionProperties
+    .filter((property) => property.key.startsWith('attributesSchema.'))
+    .map((property, index) => ({
+      optional: JSON.parse(property.value)?.optional,
+      index: index
+    }))
+    .filter((schema) => schema.optional === false)
+    .map((schema) => schema.index);
+
+  const invalidTokensMap: Map<number, { token: NewToken; invalidAttributes: number[] }> = new Map();
+
+  for (const attr of requiredAttributes) {
+    tokens.forEach((token) => {
+      if (!token.attributes[attr]) {
+        const tokenId = token.id;
+        const existingEntry = invalidTokensMap.get(tokenId);
+        if (existingEntry) {
+          existingEntry.invalidAttributes.push(attr);
+        } else {
+          invalidTokensMap.set(tokenId, { token, invalidAttributes: [attr] });
+        }
+      }
+    });
+  }
+  const invalidTokensArray: { token: NewToken; invalidAttributes: number[] }[] = Array.from(invalidTokensMap.values());
+  return invalidTokensArray;
+};
