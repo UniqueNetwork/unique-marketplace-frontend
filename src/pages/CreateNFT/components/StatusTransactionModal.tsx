@@ -78,7 +78,12 @@ export const StatusTransactionModal = ({
         </AlertStyled>
       )}
       {stage === TRANSACTION_STAGE_ENUM.FAILED && (
-        <AlertStyled type='warning'>Minting failed.</AlertStyled>
+        <>
+          <AlertStyled type='warning'>Minting failed.</AlertStyled>
+          <ButtonsWrapper>
+            <Button title='Close' role='primary' onClick={onContinue} />
+          </ButtonsWrapper>
+        </>
       )}
       {stage === TRANSACTION_STAGE_ENUM.DONE && (
         <ButtonsWrapper>

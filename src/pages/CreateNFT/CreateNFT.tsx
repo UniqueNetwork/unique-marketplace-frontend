@@ -47,7 +47,6 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
   const [batchSize, setBatchSize] = useState<number>(BIG_BATCH_SIZE);
   const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.grid);
   const [isFilterVisible, setIsFilterVisible] = useState(false);
-  const [tokensCreated, setTokensCreated] = useState<TokenId[]>();
 
   const { currentChainId, api } = useApi();
 
@@ -126,6 +125,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
       });
     };
 
+    let tokensCreated: TokenId[] = [];
     let currentPos = 0;
     let reentryCounter = 0;
     while (currentPos < createTokensPayload.length && reentryCounter <= (MAX_MINT_TOKENS / batchSize)) {
@@ -133,7 +133,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
         setMintingProgress(currentPos);
         const result = await submitBatch(createTokensPayload.slice(currentPos, currentPos + batchSize));
         if (!result) return;
-        tokensCreated ? setTokensCreated([...tokensCreated, ...result]) : setTokensCreated(result);
+        tokensCreated = tokensCreated.length > 0 ? [...tokensCreated, ...result] : [...result];
         
         currentPos += batchSize;
       } catch (e) {
@@ -142,9 +142,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
       reentryCounter++;
     }
 
-
-
-    if (tokensCreated && Array.isArray(tokensCreated)) {
+    if (tokensCreated.length > 0) {
       await refetchLastTokenId();
       await refetchCollectionInfo();
       setStage(TRANSACTION_STAGE_ENUM.DONE);
@@ -356,15 +354,15 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
               {invalidTokenList.length > 0 && (
                 <WarningBlock>
                   {invalidTokenList.map(({ token, invalidAttributes }) => (
-                    <div>
+                    <div key={'token_validation_item_' + token.image.url}>
                       Set properties{' '}
                       {invalidAttributes.map((property, index) => (
-                        <>
+                        <span key={'token_validation_property_' + token.image.url + '_' + index}>
                           {index ? ', ' : ''}
                           {collectionInfo?.info?.potential_attributes &&
                             collectionInfo?.info?.potential_attributes[property]
                               .trait_type}
-                        </>
+                        </span>
                       ))}{' '}
                       to token {collectionInfo?.tokenPrefix}#{token.id}
                     </div>

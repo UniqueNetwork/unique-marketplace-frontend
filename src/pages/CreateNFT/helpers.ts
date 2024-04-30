@@ -17,7 +17,7 @@ const attributeMapper = (attribute?: Attribute) => {
   }
 
   if (typeof attribute === 'string') {
-    return attribute;
+    return { _: attribute };
   }
 
   if (typeof attribute === 'object') {
@@ -243,7 +243,7 @@ export const getAttributesFromTokens = (
         return;
       }
 
-      const stringValue = value as string;
+      const stringValue = (value as { _: string })?._;
 
       const existsValue = attributesForFilter[attributeName].find(
         ({ value }) => value === stringValue

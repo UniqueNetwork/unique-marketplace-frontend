@@ -42,8 +42,8 @@ const AttributesFilter: FC<AttributesFilterProps> = ({ selectedAttributes = [], 
         key={attributeName}
       >
         <CollectionFilterWrapper>
-          {attributes[attributeName].sort(sortAttributes).map((attribute) => (
-            <AttributeWrapper key={`attribute-${attribute.key}`}>
+          {attributes[attributeName].sort(sortAttributes).map((attribute, index) => (
+            <AttributeWrapper key={`attribute-${attribute.key}-${index}`}>
               <Checkbox
                 checked={selectedAttributes.findIndex((item) => item.key === attributeName && item.attribute === attribute.key) !== -1}
                 label={ellipsisText(attribute.key)}

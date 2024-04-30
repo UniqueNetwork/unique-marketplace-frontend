@@ -50,8 +50,8 @@ export const Filter = ({ attributes, selectedAttributes, onChange }: FilterProps
               onClear={onClear}
             >
               <CollectionFilterWrapper>
-                {attributes[attributeName].map((attribute) => (
-                  <AttributeWrapper key={`attribute-${attribute.key}`}>
+                {attributes[attributeName].map((attribute, index) => (
+                  <AttributeWrapper key={`attribute-${attribute.key}-${index}`}>
                     <Checkbox
                       checked={selectedAttributes.findIndex(
                         (item) => item.key === attributeName && item.value === attribute.value

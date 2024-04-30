@@ -115,8 +115,8 @@ export const TokenList = ({
             return false;
           }
           if (Array.isArray(attribute)) {
-            return (attributes as AttributeOption[]).some(
-              ({ id }) => selectedAttribute.id === id
+            return (attribute as AttributeOption[]).some(
+              ({ id }) => selectedAttribute.id === +id
             );
           }
           if (typeof attribute === 'string') {
