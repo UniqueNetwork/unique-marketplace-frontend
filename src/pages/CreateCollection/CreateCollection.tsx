@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import classNames from 'classnames';
 import { useDebounce } from 'use-debounce';
 import { SchemaTools } from '@unique-nft/schemas-v2';
+import { CreateCollectionParsed } from '@unique-nft/sdk';
 import { Button, ButtonGroup, Confirm, Text, useNotifications, Alert } from 'components/UI';
 
 import { CollectionForm, Warning } from './types';
@@ -219,7 +220,15 @@ const CreateCollectionComponent = ({ className }: CreateCollectionProps) => {
     const payload = formMapper(form);
     setCurrentStage(0);
     setIsCreating(true);
-    const createdCollection = await submitWaitResult({ payload });
+
+    let createdCollection: CreateCollectionParsed | undefined;
+    try {
+      createdCollection = await submitWaitResult({ payload });
+    } catch (err) {
+      setIsCreating(false);
+      error('You need to sign the transaction');
+      return;
+    }
     const collectionId = createdCollection?.collectionId;
     if (selectedAccount.name === MetamaskAccountName) {
       if (!collectionId) {
