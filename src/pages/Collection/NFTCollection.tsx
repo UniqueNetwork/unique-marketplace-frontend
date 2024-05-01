@@ -89,7 +89,16 @@ export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
 
   useEffect(() => {
     if (!scanning) return;
+    const maxFetchAttempts = 100;
+    let fetchAttempts = 0;
+
     const refetchCollection = async () => {
+      if (fetchAttempts >= maxFetchAttempts) {
+        clearInterval(intervalId);
+        return;
+      }
+  
+      fetchAttempts++;
       const collectionData = await fetchCollection(collectionId);
       if (!collectionData) return;
       setCollection(collectionData);
@@ -106,10 +115,9 @@ export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
       }
     };
 
-    const intervalId = setInterval(() => void refetchCollection(), 1000);
+    const intervalId = setInterval(refetchCollection, 3000);
     return () => clearInterval(intervalId);
   }, [scanning, collectionId, tokensCountOnScan, filterState, sortingValue, searchValue]);
-
   const hasMore = tokens && tokens.length < tokensCount && !isFetching;
 
   const onClickSeeMore = useCallback(() => {

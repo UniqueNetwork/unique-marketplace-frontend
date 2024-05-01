@@ -59,7 +59,7 @@ export const CollectionBurn = ({
       await submitWaitResult({ payload: collectionId });
       await onComplete?.();
       info('The collection burned successfully');
-      navigate(`/${currentChainId}/my-collections`);
+      navigate(`/${currentChainId}/collections`);
     } catch (e: any) {
       setVisibleConfirmModal(false);
     }

@@ -132,7 +132,7 @@ export const CollectionDetail: FC<IProps> = ({ collection, royalties }) => {
             <LinkStyled
               target={'_blank'}
               rel={'noreferrer'}
-              href={`${scanUrl}unique_collection/${collectionId}`}
+              href={`${scanUrl}${currentChainId}/collections/${collectionId}`}
             >
               <TextStyled>View on SubScan</TextStyled>
               <IconWrapper>

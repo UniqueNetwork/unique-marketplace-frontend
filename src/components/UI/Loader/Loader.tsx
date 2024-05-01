@@ -12,7 +12,7 @@ export interface LoaderProps {
   label?: string | ReactNode | null;
   size?: DimensionType;
   placement?: PlacementType;
-  state?: 'idle' | 'process' | 'done';
+  state?: 'idle' | 'process' | 'done' | 'failed';
 }
 
 export const Loader = ({
