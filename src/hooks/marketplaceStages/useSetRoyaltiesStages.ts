@@ -47,10 +47,7 @@ export const useSetRoyaltiesStages = (collectionId: number) => {
       });
       const royalties = encodedSchema.find(({ key }) => key === 'royalties');
       if (!royalties) throw new Error('Schema encoding error');
-      const properties: CollectionProperty[] = [
-        ...collection?.properties || [],
-        royalties
-      ];
+      const properties: CollectionProperty[] = [royalties];
       return await collectionApi?.setProperties(collectionId, properties, options);
     }
   }], [chainProperties?.decimals, collectionApi, collectionId]);
