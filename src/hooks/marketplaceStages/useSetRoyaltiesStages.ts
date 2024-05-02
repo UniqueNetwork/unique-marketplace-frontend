@@ -29,9 +29,8 @@ export const useSetRoyaltiesStages = (collectionId: number) => {
       if (!collection?.info) throw new Error('Collection not found');
       const encodedSchema = SchemaTools.tools.unique.collection.encodeCollectionSchemaToProperties({
         schemaName: collection.info.schemaName || '',
-        schemaVersion: collection.info.schemaVersion || '',
-        // @ts-ignore
-        coverPicture: collection.schema.coverPicture,
+        schemaVersion: collection.info.originalSchemaVersion || '1.0.0',
+        coverPicture: collection.info.cover_image || {url: ''},
         image: {
           urlTemplate: '{infix}'
         },
