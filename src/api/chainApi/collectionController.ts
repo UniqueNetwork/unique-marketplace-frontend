@@ -104,12 +104,10 @@ export class UniqueSDKCollectionController extends BaseController {
   }
 
   async burn(collectionId: number, { account }: TransactionOptions): Promise<void> {
-    if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
-    await this.uniqueSdk.collection.destroy.submitWaitResult({ collectionId, address: account.address }, { signer: account });
+    await this.getAdapter(account).burnCollection(collectionId, account.signer);
   }
 
   async getBurnFee(collectionId: number, { account }: TransactionOptions): Promise<string> {
-    if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
-    return (await this.uniqueSdk.collection.destroy.getFee({ collectionId, address: account.address })).fee.formatted;
+    return await this.getAdapter(account).getBurnCollectionFee(collectionId, account.signer);
   }
 }
