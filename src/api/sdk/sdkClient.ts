@@ -28,12 +28,12 @@ export class SdkClient {
   }
 
   async setNetwork(options: NetworkOptions): Promise<void> {
-    await changeMetamaskChain(EthereumChainParams[options.networkId]);
     this.isReady = false;
     this.sdk = new Sdk({ baseUrl: options.settings.blockchain.unique.restUrl });
     this.nftController.setNetwork(options);
     this.collectionController.setNetwork(options);
     this.marketController.setNetwork(options);
+    changeMetamaskChain(EthereumChainParams[options.networkId]);
     this.isReady = true;
   }
 }
