@@ -110,6 +110,6 @@ export class UniqueSDKCollectionController extends BaseController {
 
   async getBurnFee(collectionId: number, { account }: TransactionOptions): Promise<string> {
     if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
-    return (await this.uniqueSdk.collection.destroy.getFee({ collectionId, address: account.address })).fee.formatted;
+    return (await this.uniqueSdk.collection.destroy.getFee({ collectionId, address: account.address })).fee.amount;
   }
 }
