@@ -232,19 +232,24 @@ class MetamaskAdapter implements IMarketContractAdapter {
   async getCreateCollectionFee({ address, tokenPrefix, description, name }: CreateCollectionV2ArgsDto, signer: Signer): Promise<string> {
     const collectionHelper = await CollectionHelpersFactory(signer);
 
-    const fee = await collectionHelper.collectionCreationFee();
-    const estimateGas = await collectionHelper.estimateGas.createNFTCollection(
+    const collectionCreationFee = await collectionHelper.collectionCreationFee();
+
+    const collectionCreationEstimateGas = await collectionHelper.estimateGas.createNFTCollection(
       name,
       description,
       tokenPrefix || name.slice(0, 4),
       {
         from: address,
-        value: fee
+        value: collectionCreationFee
       }
     );
+
     const gasPrice = await collectionHelper.provider.getGasPrice();
-    const decimalNumber = parseFloat(ethers.utils.formatEther(estimateGas.mul(gasPrice)));
-    return String(decimalNumber);
+
+    const totalFeeBigNumber = collectionCreationEstimateGas.mul(gasPrice).add(collectionCreationFee);
+    const totalFeeFormatted = parseFloat(ethers.utils.formatEther(totalFeeBigNumber));
+
+    return String(totalFeeFormatted);
   }
 
   async createCollection({ name, description, tokenPrefix, address }: CreateCollectionV2ArgsDto, signer: Signer): Promise<CreateCollectionParsed | undefined> {
@@ -391,6 +396,24 @@ class MetamaskAdapter implements IMarketContractAdapter {
 
   setCollectionLimits(payload: SetCollectionLimitsBody, signer: Signer): Promise<void> {
     throw new Error('not implemented');
+  }
+
+  async burnCollection(collectionId: number, signer: Signer): Promise<void> {
+    const collectionHelper = await CollectionHelpersFactory(signer);
+    const collectionAddress = Address.collection.idToAddress(collectionId);
+
+    await (await collectionHelper.destroyCollection(collectionAddress)).wait();
+  }
+
+  async getBurnCollectionFee(collectionId: number, signer: Signer): Promise<string> {
+    const collectionHelper = await CollectionHelpersFactory(signer);
+    const collectionAddress = Address.collection.idToAddress(collectionId);
+
+    const collectionBurnFee = await collectionHelper.estimateGas.destroyCollection(collectionAddress);
+    const gasPrice = await collectionHelper.provider.getGasPrice();
+
+    // todo - not sure where to format wei to coin, there this.getChainValue in MarketController for instance, but nothing like that in CollectionController
+    return ethers.utils.formatEther(collectionBurnFee.mul(gasPrice));
   }
 }
 
