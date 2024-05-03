@@ -11,7 +11,7 @@ import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
 import { ChainValue } from '../controllers/BaseController';
 import { CollectionMode, TransferTokenParams } from '../types';
-import { sleep } from 'utils/helpers';
+import { getEthereumSigner, sleep } from 'utils/helpers';
 
 const buyGasLimit = 1_000_000;
 const sellGasLimit = 200_000;
@@ -143,7 +143,7 @@ class MetamaskAdapter implements IMarketContractAdapter {
     const from = Address.extract.ethCrossAccountId(addressFrom);
     const to = Address.extract.ethCrossAccountId(addressTo);
 
-    const uniqueFungible = await UniqueFungibleFactory(0, signer);
+    const uniqueFungible = await UniqueFungibleFactory(0, getEthereumSigner());
     const estimateGas = await uniqueFungible.estimateGas.transferFromCross(
       from, to, amount.raw, { from: addressFrom }
     );
@@ -152,10 +152,9 @@ class MetamaskAdapter implements IMarketContractAdapter {
   }
 
   async transferBalance(addressFrom: string, addressTo: string, amount: ChainValue, signer: Signer): Promise<void> {
-    // TODO await signer.checkNetwork?.();
     const from = Address.extract.ethCrossAccountId(addressFrom);
     const to = Address.extract.ethCrossAccountId(addressTo);
-    const uniqueFungible = await UniqueFungibleFactory(0, signer);
+    const uniqueFungible = await UniqueFungibleFactory(0, getEthereumSigner());
     await (await uniqueFungible.transferFromCross(from, to, amount.raw, { from: addressFrom })).wait();
   }
 
