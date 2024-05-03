@@ -381,7 +381,7 @@ class UniqueAdapter implements IMarketContractAdapter {
   }
 
   async getBurnCollectionFee(collectionId: number, signer: Signer): Promise<string> {
-    return (await this.uniqueSdk.collection.destroy.getFee({ collectionId, address: signer.address })).fee.formatted;
+    return (await this.uniqueSdk.collection.destroy.getFee({ collectionId, address: signer.address })).fee.amount;
   }
 }
 
