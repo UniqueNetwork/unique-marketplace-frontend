@@ -346,6 +346,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
             tokensStartId={lastTokenId}
             tokens={tokens}
             disabled={!collection}
+            schemaVersion={collectionInfo?.info?.originalSchemaVersion || '2.0.0'}
             onChange={setTokens}
             onAddTokens={onAddTokens}
           />
@@ -446,6 +447,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
           leftTokens={leftTokens}
           attributesSchema={collectionInfo?.info?.potential_attributes || []}
           mode={collection?.mode}
+          schemaVersion={collectionInfo?.info?.originalSchemaVersion || '2.0.0'}
           onClose={() => setDialog(undefined)}
           onChange={changeSelected}
           onConfirm={onConfirmDialog}
