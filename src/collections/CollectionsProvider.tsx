@@ -3,7 +3,6 @@ import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useApi } from '../hooks/useApi';
 import { CollectionsProvider } from './CollectionsContext';
 import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
-import config from 'config';
 import { useQueryCollections } from 'api/scanApi/useQueryCollections';
 import { GQLCollection } from 'api/scanApi/types';
 
@@ -14,6 +13,9 @@ const CollectionsWrapper: FC = ({ children }) => {
 
   const { currentChainId, featuredCollections } = useApi();
   const { fetch } = useQueryCollections();
+  const FETCH_COLLECTIONS_LIMIT = 100;
+  const [offset, setOffset] = useState<number>(0);
+  const [totalCount, setTotalCount] = useState<number>(0);
 
   const fetchCollections = useCallback(async () => {
     setIsFetching(true);
@@ -27,20 +29,23 @@ const CollectionsWrapper: FC = ({ children }) => {
       .filter(({ isCurated }) => isCurated)
       .map(({ description }) => description));
 
-    const { scanApi } = config.blockchains[currentChainId || ''] || {};
-
-    setCollections(await fetch());
+    const { collections: newCollections, count } = await fetch({ limit: FETCH_COLLECTIONS_LIMIT, offset });
+    setTotalCount(count);
+    setCollections([...collections, ...newCollections]);
+    setOffset(offset + FETCH_COLLECTIONS_LIMIT);
     setIsFetching(false);
-  }, [featuredCollections]);
+  }, [featuredCollections, offset]);
 
   useEffect(() => {
     void fetchCollections();
-  }, [currentChainId, fetchCollections]);
+  }, [currentChainId, featuredCollections]);
 
   const value = useMemo(() => ({
     isFetching,
     collections,
     curatedCollections,
+    offset,
+    totalCount,
     fetchCollections
   }), [isFetching, collections, fetchCollections]);
 

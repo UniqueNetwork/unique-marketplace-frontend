@@ -73,16 +73,21 @@ export const useCollections = () => {
     });
   }, [settings]);
 
-  const fetchCollections = useCallback(async (account: Account | undefined) => {
-    if (!account) return [];
-    setIsFetching(true);
-    const { address } = account;
+  const fetchCollections = useCallback(
+    async (account: Account | undefined) => {
+      if (!account) return [];
+      setIsFetching(true);
+      const { address } = account;
 
-    setCollections(await fetch({
-      owner: address
-    }));
-    setIsFetching(false);
-  }, [settings, getMyCollectionsWithMarketable]);
+      const { collections } = await fetch({
+        owner: address
+      });
+
+      setCollections(collections);
+      setIsFetching(false);
+    },
+    [settings, getMyCollectionsWithMarketable]
+  );
 
   const appendCollection = useCallback(async (id: number) => {
     setIsFetching(true);

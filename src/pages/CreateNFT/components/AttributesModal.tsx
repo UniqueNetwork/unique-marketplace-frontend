@@ -124,7 +124,7 @@ export const AttributesModal = ({
 
   return (
     <ModalStyled isVisible={true} onClose={onClose}>
-      <Heading>Changing of ${tokens.length} tokens</Heading>
+      <Heading>Changing of {tokens.length} tokens</Heading>
       <ModalContent>
         <TokensImages className='slide-container'>
           <Slide autoplay={false} transitionDuration={150}>
