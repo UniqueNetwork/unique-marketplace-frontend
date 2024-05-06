@@ -1,4 +1,5 @@
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
+import InfiniteScroll from 'react-infinite-scroller';
 import styled from 'styled-components';
 import { Checkbox, Text } from 'components/UI';
 import { useCollections } from '../../hooks/useCollections';
@@ -11,6 +12,7 @@ import { Attribute, AttributeCount } from '../../api/restApi/offers/types';
 import { CollectionCover } from '../CollectionCover/CollectionCover';
 import { useCuratedCollections } from 'hooks/useCuratedCollections';
 import SearchField from 'components/SearchField/SearchField';
+import CollectionsContext from 'collections/CollectionsContext';
 
 interface CollectionsFilterProps {
   value?: { collections?: number[], attributes?: { key: string, attribute: string }[], attributeCounts?: number[] } | null
@@ -27,6 +29,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attr
   const { curatedCollections, isFetchingCurated } = useCuratedCollections();
   const { collections: selectedCollections = [], attributes: selectedAttributes = [], attributeCounts: selectedAttributeCounts = [] } = value || {};
   const [searchString, setSearchString] = useState<string>();
+  const { offset, totalCount, fetchCollections } = useContext(CollectionsContext);
 
   const onCollectionSelect = useCallback((collectionId: number) => (value: boolean) => {
     let _selectedCollections;
@@ -88,6 +91,14 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attr
         />
       </SearchFieldWrapper>
       <CollectionFilterWrapper>
+        <InfiniteScroll
+          hasMore={offset < totalCount}
+          initialLoad={false}
+          loadMore={fetchCollections}
+          pageStart={1}
+          threshold={20}
+          useWindow={false}
+        >
         {isFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
         {filteredCollections.map((collection) => (
           <CheckboxWrapper
@@ -107,6 +118,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attr
             />
           </CheckboxWrapper>
           ))}
+        </InfiniteScroll>
       </CollectionFilterWrapper>
     </Accordion>
     {onAttributeCountsChange && !!attributeCounts?.length && <AttributeCountsFilter

@@ -7,11 +7,16 @@ import { Address } from '@unique-nft/utils';
 
 const gqlQuery = {
   operationName: 'collections_query',
-  query: `query collections_query($where: CollectionWhereParams) {
+  query: `query collections_query(
+    $where: CollectionWhereParams
+    $offset: Int
+    $limit: Int
+    ) {
     collections(
       where: $where
       distinct_on: collection_id
-      limit: 10000
+      limit: $limit
+      offset: $offset
     ) {
       count
       data {
@@ -37,39 +42,53 @@ const gqlQuery = {
 type FetchCollectionParams = {
   owner?: string;
   ids?: number[];
+  limit?: number;
+  offset?: number;
 }
 
 export const useQueryCollections = () => {
   const { currentChainId, featuredCollections } = useApi();
 
-  const fetch = useCallback(async ({ ids, owner }: FetchCollectionParams = {}): Promise<GQLCollection[]> => {
-    if (!currentChainId) return [];
-    const { scanApi } = config.blockchains[currentChainId || ''] || {};
+  const fetch = useCallback(
+    async ({ ids, owner, limit, offset }: FetchCollectionParams = {}): Promise<{
+      collections: GQLCollection[];
+      count: number;
+    }> => {
+      if (!currentChainId) return { collections: [], count: 0 };
+      const { scanApi } = config.blockchains[currentChainId || ''] || {};
 
-    const variables = { where: {
-      ...(ids ? { collection_id: { _in: ids } } : {}),
-      ...(owner
-      ? { _or: [
-        { owner: { _eq: owner } },
+      const variables = {
+        where: {
+          ...(ids ? { collection_id: { _in: ids } } : {}),
+          ...(owner
+            ? {
+                _or: [
+                  { owner: { _eq: owner } },
+                  {
+                    owner_normalized: {
+                      _eq: Address.is.ethereumAddressInAnyForm(owner)
+                        ? Address.mirror.ethereumToSubstrate(owner)
+                        : Address.normalize.substrateAddress(owner)
+                    }
+                  }
+                ]
+              }
+            : {}),
+          burned: { _eq: 'false' }
+        },
+        limit,
+        offset
+      };
+      const { data } = await post(scanApi, { ...gqlQuery, variables });
+      return (
         {
-          owner_normalized: {
-            _eq: Address.is.ethereumAddressInAnyForm(owner)
-            ? Address.mirror.ethereumToSubstrate(owner)
-            : Address.normalize.substrateAddress(owner)
-          }
-        }
-      ] }
-    : {}),
-      burned: { _eq: 'false' }
-    } };
-    const { data } = await post(scanApi, { ...gqlQuery, variables });
-    return (data.data.collections.data || []) as GQLCollection[];
-  }, [currentChainId]);
-
-  const fetchFeatured = useCallback(async (): Promise<GQLCollection[]> => {
-    const ids = Object.values(featuredCollections).map(({ description }) => description.id);
-    return fetch({ ids });
-  }, [fetch]);
+          collections: data.data.collections.data,
+          count: data.data.collections.count
+        } || { collections: [], count: 0 }
+      );
+    },
+    [currentChainId]
+  );
 
   const fetchOne = useCallback(async (id: number): Promise<GQLCollection | undefined> => {
     if (!currentChainId) return;
@@ -88,5 +107,5 @@ export const useQueryCollections = () => {
     return data.data.collections.data[0] as GQLCollection;
   }, [currentChainId]);
 
-  return { fetch, fetchOne, fetchFeatured };
+  return { fetch, fetchOne };
 };

@@ -6,6 +6,8 @@ export type CollectionsContextProps = {
   isFetching: boolean
   collections: GQLCollection[]
   curatedCollections: CollectionInfoWithSchemaResponse[]
+  offset: number
+  totalCount: number,
   fetchCollections(): void
 }
 
