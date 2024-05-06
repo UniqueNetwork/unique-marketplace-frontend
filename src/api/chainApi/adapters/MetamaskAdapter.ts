@@ -32,8 +32,8 @@ const TPP_TO_TPP: {[K: string]: TPP} = {
 };
 
 class MetamaskAdapter implements IMarketContractAdapter {
-  private getContract(signer: Signer, contract: IMarketContractProperties) {
-    return new ethers.Contract(contract.address, (contract.abi as ethers.ContractInterface) || marketplaceAbi, signer);
+  private getContract(contract: IMarketContractProperties) {
+    return new ethers.Contract(contract.address, (contract.abi as ethers.ContractInterface) || marketplaceAbi, getEthereumSigner());
   }
 
   private async validateCall(method: (...methodArgs: any[]) => Promise<void>, args: any[]) {
@@ -50,9 +50,10 @@ class MetamaskAdapter implements IMarketContractAdapter {
     await (await contract[methodName](...args)).wait();
   }
 
-  async getTransferTokenFee(from: string, to: string, collectionId: number, tokenId: number, mode: CollectionMode, amount: number, signer: Signer): Promise<string> {
+  async getTransferTokenFee(from: string, to: string, collectionId: number, tokenId: number, mode: CollectionMode, amount: number): Promise<string> {
     const fromCross = Address.extract.ethCrossAccountId(from);
     const toCross = Address.extract.ethCrossAccountId(to);
+    const signer = getEthereumSigner();
     const tokenHelper = await (mode === 'ReFungible'
       ? UniqueRefungibleTokenFactory({ collectionId, tokenId }, signer)
       : UniqueNFTFactory(collectionId, signer));
@@ -65,9 +66,10 @@ class MetamaskAdapter implements IMarketContractAdapter {
     return estimateGas.mul(gasPrice).toString();
   }
 
-  async transferToken(from: string, to: string, collectionId: number, tokenId: number, mode: CollectionMode, amount: number, signer: Signer): Promise<void> {
+  async transferToken(from: string, to: string, collectionId: number, tokenId: number, mode: CollectionMode, amount: number): Promise<void> {
     const fromCross = Address.extract.ethCrossAccountId(from);
     const toCross = Address.extract.ethCrossAccountId(to);
+    const signer = getEthereumSigner();
     const tokenHelper = await (mode === 'ReFungible'
       ? UniqueRefungibleTokenFactory({ collectionId, tokenId }, signer)
       : UniqueNFTFactory(collectionId, signer));
@@ -78,8 +80,9 @@ class MetamaskAdapter implements IMarketContractAdapter {
     )).wait();
   }
 
-  async getNestTokenFee(address: string, nested: NestTokenParam, parent: NestTokenParam, mode: CollectionMode, amount: number, signer: Signer): Promise<string> {
+  async getNestTokenFee(address: string, nested: NestTokenParam, parent: NestTokenParam, mode: CollectionMode, amount: number): Promise<string> {
     const newParentTokenAddress = Address.nesting.idsToAddress(parent.collectionId, parent.tokenId);
+    const signer = getEthereumSigner();
     const tokenHelper = await (mode === 'ReFungible'
       ? UniqueRefungibleTokenFactory({ collectionId: nested.collectionId, tokenId: nested.tokenId }, signer)
       : UniqueNFTFactory(nested.collectionId, signer));
@@ -95,8 +98,9 @@ class MetamaskAdapter implements IMarketContractAdapter {
     return estimateGas.mul(gasPrice).toString();
   }
 
-  async nestToken(address: string, nested: NestTokenParam, parent: NestTokenParam, mode: CollectionMode, amount: number, signer: Signer): Promise<void> {
+  async nestToken(address: string, nested: NestTokenParam, parent: NestTokenParam, mode: CollectionMode, amount: number): Promise<void> {
     const newParentTokenAddress = Address.nesting.idsToAddress(parent.collectionId, parent.tokenId);
+    const signer = getEthereumSigner();
     const tokenHelper = await (mode === 'ReFungible'
       ? UniqueRefungibleTokenFactory({ collectionId: nested.collectionId, tokenId: nested.tokenId }, signer)
       : UniqueNFTFactory(nested.collectionId, signer));
@@ -108,8 +112,9 @@ class MetamaskAdapter implements IMarketContractAdapter {
     )).wait();
   }
 
-  async getUnnestTokenFee(target: NestTokenParam, parent: NestTokenParam, mode: CollectionMode, amount: number, signer: Signer): Promise<string> {
+  async getUnnestTokenFee(target: NestTokenParam, parent: NestTokenParam, mode: CollectionMode, amount: number): Promise<string> {
     const parentTokenAddress = Address.nesting.idsToAddress(parent.collectionId, parent.tokenId);
+    const signer = getEthereumSigner();
     const tokenHelper = await (mode === 'ReFungible'
       ? UniqueRefungibleTokenFactory({ collectionId: target.collectionId, tokenId: target.tokenId }, signer)
       : UniqueNFTFactory(target.collectionId, signer));
@@ -125,8 +130,9 @@ class MetamaskAdapter implements IMarketContractAdapter {
     return estimateGas.mul(gasPrice).toString();
   }
 
-  async unnestToken(target: NestTokenParam, parent: NestTokenParam, mode: CollectionMode, amount: number, signer: Signer): Promise<void> {
+  async unnestToken(target: NestTokenParam, parent: NestTokenParam, mode: CollectionMode, amount: number): Promise<void> {
     const parentTokenAddress = Address.nesting.idsToAddress(parent.collectionId, parent.tokenId);
+    const signer = getEthereumSigner();
     const tokenHelper = await (mode === 'ReFungible'
       ? UniqueRefungibleTokenFactory({ collectionId: target.collectionId, tokenId: target.tokenId }, signer)
       : UniqueNFTFactory(target.collectionId, signer));
@@ -139,7 +145,7 @@ class MetamaskAdapter implements IMarketContractAdapter {
     )).wait();
   }
 
-  async getTransferBalanceFee(addressFrom: string, addressTo: string, amount: ChainValue, signer: Signer): Promise<string> {
+  async getTransferBalanceFee(addressFrom: string, addressTo: string, amount: ChainValue): Promise<string> {
     const from = Address.extract.ethCrossAccountId(addressFrom);
     const to = Address.extract.ethCrossAccountId(addressTo);
 
@@ -151,21 +157,21 @@ class MetamaskAdapter implements IMarketContractAdapter {
     return estimateGas.mul(gasPrice).toString();
   }
 
-  async transferBalance(addressFrom: string, addressTo: string, amount: ChainValue, signer: Signer): Promise<void> {
+  async transferBalance(addressFrom: string, addressTo: string, amount: ChainValue): Promise<void> {
     const from = Address.extract.ethCrossAccountId(addressFrom);
     const to = Address.extract.ethCrossAccountId(addressTo);
     const uniqueFungible = await UniqueFungibleFactory(0, getEthereumSigner());
     await (await uniqueFungible.transferFromCross(from, to, amount.raw, { from: addressFrom })).wait();
   }
 
-  async changeAllowance(from: string, to: string, collectionId: number, tokenId: number, targetAllowance: boolean, signer: Signer): Promise<void> {
+  async changeAllowance(from: string, to: string, collectionId: number, tokenId: number, targetAllowance: boolean): Promise<void> {
     const targetTo = targetAllowance ? to : from;
-    const nftFactory = await UniqueNFTFactory(collectionId, signer);
+    const nftFactory = await UniqueNFTFactory(collectionId, getEthereumSigner());
     await (await nftFactory.approve(targetTo, tokenId)).wait();
   }
 
   async getSellFee(from: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer, contractProps: IMarketContractProperties): Promise<string> {
-    const contract = this.getContract(signer, contractProps);
+    const contract = this.getContract(contractProps);
     const gasPrice = await contract.provider.getGasPrice();
     const estimateGas = await contract.provider.estimateGas({
       from: from.eth,
@@ -176,33 +182,33 @@ class MetamaskAdapter implements IMarketContractAdapter {
   }
 
   async sell(from: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer, contractProps: IMarketContractProperties): Promise<void> {
-    const contract = this.getContract(signer, contractProps);
+    const contract = this.getContract(contractProps);
     await this.callContract(contract, 'put', collectionId, tokenId, price, amount, from, { gasLimit: sellGasLimit });
   }
 
   async getBuyFee(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer, contractProps: IMarketContractProperties): Promise<string> {
-    const contract = this.getContract(signer, contractProps);
+    const contract = this.getContract(contractProps);
     const estimateGas = await contract.estimateGas.buy(collectionId, tokenId, amount, to, { value: price, gasLimit: buyGasLimit });
     const gasPrice = await contract.provider.getGasPrice();
     return estimateGas.mul(gasPrice).toString();
   }
 
   async buy(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer, contractProps: IMarketContractProperties): Promise<void> {
-    const contract = this.getContract(signer, contractProps);
+    const contract = this.getContract(contractProps);
 
     const estimateGas = await contract.estimateGas.buy(collectionId, tokenId, amount, to, { value: price, gasLimit: buyGasLimit });
     await this.callContract(contract, 'buy', collectionId, tokenId, amount, to, { value: price, gasLimit: estimateGas.add(1000) });
   }
 
   async changePrice(collectionId: number, tokenId: number, price: string, signer: Signer, contractProps: IMarketContractProperties): Promise<void> {
-    const contract = this.getContract(signer, contractProps);
+    const contract = this.getContract(contractProps);
 
     const estimateGas = await contract.estimateGas.changePrice(collectionId, tokenId, price, { gasLimit: buyGasLimit });
     await this.callContract(contract, 'changePrice', collectionId, tokenId, price, { gasLimit: estimateGas.add(1000) });
   }
 
   async getChangePriceFee(collectionId: number, tokenId: number, price: string, signer: Signer, contractProps: IMarketContractProperties): Promise<string> {
-    const contract = this.getContract(signer, contractProps);
+    const contract = this.getContract(contractProps);
 
     const estimateGas = await contract.estimateGas.changePrice(collectionId, tokenId, price, { value: price, gasLimit: buyGasLimit });
     const gasPrice = await contract.provider.getGasPrice();
@@ -215,6 +221,7 @@ class MetamaskAdapter implements IMarketContractAdapter {
       const { collectionId, tokenId } = token;
       const fromCross = Address.extract.ethCrossAccountId(from);
       const toCross = Address.extract.ethCrossAccountId(to);
+      const signer = getEthereumSigner();
       await sleep(100);
       const tokenHelper = await (mode === 'ReFungible'
         ? UniqueRefungibleTokenFactory({ collectionId, tokenId }, signer)
@@ -228,8 +235,8 @@ class MetamaskAdapter implements IMarketContractAdapter {
     }));
   }
 
-  async getCreateCollectionFee({ address, tokenPrefix, description, name }: CreateCollectionV2ArgsDto, signer: Signer): Promise<string> {
-    const collectionHelper = await CollectionHelpersFactory(signer);
+  async getCreateCollectionFee({ address, tokenPrefix, description, name }: CreateCollectionV2ArgsDto): Promise<string> {
+    const collectionHelper = await CollectionHelpersFactory(getEthereumSigner());
 
     const collectionCreationFee = await collectionHelper.collectionCreationFee();
 
@@ -251,8 +258,8 @@ class MetamaskAdapter implements IMarketContractAdapter {
     return String(totalFeeFormatted);
   }
 
-  async createCollection({ name, description, tokenPrefix, address }: CreateCollectionV2ArgsDto, signer: Signer): Promise<CreateCollectionParsed | undefined> {
-    const collectionHelpers = await CollectionHelpersFactory(signer);
+  async createCollection({ name, description, tokenPrefix, address }: CreateCollectionV2ArgsDto): Promise<CreateCollectionParsed | undefined> {
+    const collectionHelpers = await CollectionHelpersFactory(getEthereumSigner());
     const createCollectionResult = parseEthersV5TxReceipt(
       await(
         await collectionHelpers.createNFTCollection(
@@ -275,14 +282,14 @@ class MetamaskAdapter implements IMarketContractAdapter {
     } as unknown as CreateCollectionParsed;
   }
 
-  async setCollectionProperties(collectionId: number, properties: CollectionProperty[], signer: Signer): Promise<void> {
-    const nftFactory = await UniqueNFTFactory(collectionId, signer);
+  async setCollectionProperties(collectionId: number, properties: CollectionProperty[]): Promise<void> {
+    const nftFactory = await UniqueNFTFactory(collectionId, getEthereumSigner());
 
     await (await nftFactory.setCollectionProperties(properties)).wait();
   }
 
-  async setTokenPropertyPermissions(collectionId: number, tokenPropertyPermissions: PropertyKeyPermission[], signer: Signer): Promise<void> {
-    const nftFactory = await UniqueNFTFactory(collectionId, signer);
+  async setTokenPropertyPermissions(collectionId: number, tokenPropertyPermissions: PropertyKeyPermission[]): Promise<void> {
+    const nftFactory = await UniqueNFTFactory(collectionId, getEthereumSigner());
 
     await(
       await nftFactory.setTokenPropertyPermissions(
@@ -298,11 +305,12 @@ class MetamaskAdapter implements IMarketContractAdapter {
   }
 
 
-  async createTokensV1({ tokens, collectionId }: { tokens: CreateTokenPayload[]; collectionId: number }, signer: Signer): Promise<TokenId[] | undefined> {
+  async createTokensV1({ tokens, collectionId }: { tokens: CreateTokenPayload[]; collectionId: number }): Promise<TokenId[] | undefined> {
     if (!tokens.length) {
       throw new Error('UniqueTokenToCreateDto unavailable');
     }
 
+    const signer = getEthereumSigner();
     const collection = await UniqueNFTFactory(collectionId, signer);
     const toCross = Address.extract.ethCrossAccountId(await signer.getAddress());
 
@@ -337,10 +345,11 @@ class MetamaskAdapter implements IMarketContractAdapter {
     return ids;
   }
 
-  async createTokens({ tokens, collectionId }: { tokens: TokenV2ItemForMultipleDto[]; collectionId: number }, signer: Signer): Promise<TokenId[] | undefined> {    
+  async createTokens({ tokens, collectionId }: { tokens: TokenV2ItemForMultipleDto[]; collectionId: number }): Promise<TokenId[] | undefined> {    
     if (!tokens.length) {
       throw new Error('UniqueTokenToCreateDto unavailable');
     }
+    const signer = getEthereumSigner();
     const collection = await UniqueNFTFactory(collectionId, signer);
     const toCross = Address.extract.ethCrossAccountId(await signer.getAddress());
 
@@ -376,8 +385,8 @@ class MetamaskAdapter implements IMarketContractAdapter {
     return ids;
   }
 
-  async burn(payload: { collectionId: number, tokenId: number }, signer: Signer): Promise<void> {
-    const nftHelper = await UniqueNFTFactory(payload.collectionId, signer);
+  async burn(payload: { collectionId: number, tokenId: number }): Promise<void> {
+    const nftHelper = await UniqueNFTFactory(payload.collectionId, getEthereumSigner());
     await (await nftHelper.burn(payload.tokenId)).wait();
   }
 
@@ -397,15 +406,15 @@ class MetamaskAdapter implements IMarketContractAdapter {
     throw new Error('not implemented');
   }
 
-  async burnCollection(collectionId: number, signer: Signer): Promise<void> {
-    const collectionHelper = await CollectionHelpersFactory(signer);
+  async burnCollection(collectionId: number): Promise<void> {
+    const collectionHelper = await CollectionHelpersFactory(getEthereumSigner());
     const collectionAddress = Address.collection.idToAddress(collectionId);
 
     await (await collectionHelper.destroyCollection(collectionAddress)).wait();
   }
 
-  async getBurnCollectionFee(collectionId: number, signer: Signer): Promise<string> {
-    const collectionHelper = await CollectionHelpersFactory(signer);
+  async getBurnCollectionFee(collectionId: number): Promise<string> {
+    const collectionHelper = await CollectionHelpersFactory(getEthereumSigner());
     const collectionAddress = Address.collection.idToAddress(collectionId);
 
     const collectionBurnFee = await collectionHelper.estimateGas.destroyCollection(collectionAddress);
