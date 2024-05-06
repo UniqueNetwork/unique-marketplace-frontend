@@ -13,7 +13,7 @@ export const CollectionCover: VFC<collectionCoverProps> = ({ src, size = 24, typ
     if (!src) return '';
 
     const baseUrl = 'https://ipfs.unique.network/ipfs/';
-    let link = src.startsWith('https://') ? src : baseUrl + src;
+    const link = src.startsWith('https://') ? src : baseUrl + src;
 
     return link;
   };
