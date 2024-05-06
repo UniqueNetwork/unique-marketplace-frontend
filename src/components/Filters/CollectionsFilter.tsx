@@ -99,25 +99,25 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attr
           threshold={20}
           useWindow={false}
         >
-        {isFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
-        {filteredCollections.map((collection) => (
-          <CheckboxWrapper
-            key={`collection-${collection.id}`}
-          >
-            <Checkbox
-              checked={selectedCollections.indexOf(collection.id) !== -1}
-              label={<CheckboxLabelWrapper>
-                <CollectionCover src={collection?.cover || ''} size={22} type={'circle'}/>
-                <Text
-                  testid={`${testid}-name-${collection.id}`}
-                >{collection.name || ''}</Text>
-              </CheckboxLabelWrapper>}
-              size={'m'}
-              onChange={onCollectionSelect(collection.id)}
-              testid={`${testid}-checkbox-${collection.id}`}
-            />
-          </CheckboxWrapper>
-          ))}
+          {isFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
+          {filteredCollections.map((collection) => (
+            <CheckboxWrapper
+              key={`collection-${collection.id}`}
+            >
+              <Checkbox
+                checked={selectedCollections.indexOf(collection.id) !== -1}
+                label={<CheckboxLabelWrapper>
+                  <CollectionCover src={collection?.cover || ''} size={22} type={'circle'}/>
+                  <Text
+                    testid={`${testid}-name-${collection.id}`}
+                  >{collection.name || ''}</Text>
+                </CheckboxLabelWrapper>}
+                size={'m'}
+                onChange={onCollectionSelect(collection.id)}
+                testid={`${testid}-checkbox-${collection.id}`}
+              />
+            </CheckboxWrapper>
+            ))}
         </InfiniteScroll>
       </CollectionFilterWrapper>
     </Accordion>
