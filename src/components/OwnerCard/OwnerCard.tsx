@@ -21,6 +21,7 @@ interface OwnerCardProps {
   prefixOwned?: string
   prefixNested?: string
   testid?: string
+  notOwned?: boolean
 }
 
 export const OwnerCard: FC<OwnerCardProps> = ({
@@ -30,7 +31,8 @@ export const OwnerCard: FC<OwnerCardProps> = ({
   canCopy = true,
   prefixOwned,
   prefixNested,
-  testid
+  testid,
+  notOwned,
 }) => {
   const { chainProperties, api, currentChainId } = useApi();
   const { selectedAccount } = useAccounts();
@@ -43,7 +45,7 @@ export const OwnerCard: FC<OwnerCardProps> = ({
   }, [chainProperties?.SS58Prefix]);
 
   const isParentToken = Address.is.nestingAddress(address);
-  const isOwned = !isParentToken && selectedAccount && (Address.is.ethereumAddressInAnyForm(selectedAccount.address)
+  const isOwned = !notOwned && !isParentToken && selectedAccount && (Address.is.ethereumAddressInAnyForm(selectedAccount.address)
     ? Address.compare.ethereumAddresses(selectedAccount.address, address)
     : Address.compare.substrateAddresses(selectedAccount.address, address));
 
