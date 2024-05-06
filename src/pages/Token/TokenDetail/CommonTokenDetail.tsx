@@ -27,6 +27,7 @@ import { EquippedWearables } from './EquippedWearables';
 import { WearablePicture } from 'components/TokenMedia/WearablePicture';
 import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/schemas';
 import { mockWearables } from '../constants';
+import { RoyaltiesBlock } from './RoyaltiesBlock';
 
 interface IProps {
   token?: TokenWithInfoV2Dto
@@ -60,13 +61,14 @@ export const CommonTokenDetail: FC<IProps> = ({
     collectionName,
     attributes,
     attributesList,
+    royalties,
     image,
     tokenId,
     prefix,
     video
   } = useMemo(() => {
     const { tokenId, collectionId } = offer || token || {};
-    const { image, attributes, } = token || {};
+    const { image, attributes, royalties } = token || {};
     const { name: collectionName, tokenPrefix: prefix, description } = offer?.collectionDescription || collection || {};
     const owner = offer?.seller || token?.owner;
     const video = token?.media?.find((media) => media.type === 'video');
@@ -82,6 +84,7 @@ export const CommonTokenDetail: FC<IProps> = ({
       description,
       attributes,
       attributesList,
+      royalties,
       image,
       owner,
       video
@@ -235,6 +238,10 @@ export const CommonTokenDetail: FC<IProps> = ({
             attributes={attributesList}
             collectionId={collectionId}
           />}
+          {royalties && Array.isArray(royalties) && <>
+            <Divider />
+            <RoyaltiesBlock royalties={royalties} />
+          </>}
         </>}
       </Description>
       <DropdownStyled
