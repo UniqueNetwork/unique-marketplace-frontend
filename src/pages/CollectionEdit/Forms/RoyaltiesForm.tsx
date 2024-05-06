@@ -81,14 +81,14 @@ export const RoyaltiesForm = ({ initialFormData, withSaveButton, hasDifferentRoy
     <FormWrapper>
       <Heading size='2'>Royalties</Heading>
       {!withSaveButton && hasDifferentRoyalties && (
-          <TooltipWrapper
-            message={
-              "Some of the tokens you've selected already possess varying royalties values. You can either select a different set of tokens or modify the royalty value for the current selection."
-            }
-          >
-            <Icon size={24} name='warning' color='var(--color-primary-500)' />
-          </TooltipWrapper>
-        )}
+        <TooltipWrapper
+          message={
+            "Some of the tokens you've selected already possess varying royalties values. You can either select a different set of tokens or modify the royalty value for the current selection."
+          }
+        >
+          <Icon size={24} name='warning' color='var(--color-primary-500)' />
+        </TooltipWrapper>
+      )}
       {royalties.map((royalty, index) => (
         <RoyaltyComplexComponent
           key={`$royalty_${index}`}
@@ -97,16 +97,20 @@ export const RoyaltiesForm = ({ initialFormData, withSaveButton, hasDifferentRoy
           onRemove={onRemoveRoyalty(index)}
         />
       ))}
-    <TotalWrapper>
-      <Text color='secondary-500'>Total royalty: {totalRoyalty}%</Text>
-      <Text color='grey-500' size='s' weight='light'>Maximum royalty - 99%</Text>
-    </TotalWrapper>
+      <TotalWrapper>
+        <Text color='secondary-500'>Total royalty: {totalRoyalty}%</Text>
+        <Text color='grey-500' size='s' weight='light'>
+          Maximum royalty - 99%
+        </Text>
+      </TotalWrapper>
       <ButtonsRow>
-        {withSaveButton && <Button
-          title='Save changes'
-          onClick={onSubmitForm}
-          disabled={!isValid || !isChanged || totalRoyalty > 99}
-        />}
+        {withSaveButton && (
+          <Button
+            title='Save changes'
+            onClick={onSubmitForm}
+            disabled={!isValid || !isChanged || totalRoyalty > 99}
+          />
+        )}
         <Button title='Add royalty' onClick={onAddRoyalty} />
       </ButtonsRow>
     </FormWrapper>
