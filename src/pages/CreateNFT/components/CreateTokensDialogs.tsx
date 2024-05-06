@@ -12,6 +12,7 @@ interface CreateTokensDialogsProps {
   leftTokens: number | string;
   attributesSchema: PotentialAttribute[] | undefined;
   mode?: 'NFT' | 'ReFungible' | 'Fungible';
+  schemaVersion: string;
   onChange(tokens: NewToken[]): void;
   onConfirm(): void;
   onClose(): void;
@@ -24,6 +25,7 @@ export const CreateTokensDialogs = ({
   leftTokens,
   attributesSchema,
   mode,
+  schemaVersion,
   onChange,
   onConfirm,
   onClose
@@ -38,6 +40,7 @@ export const CreateTokensDialogs = ({
           tokenPrefix={tokenPrefix}
           attributesSchema={attributesSchema || []}
           mode={mode}
+          schemaVersion={schemaVersion}
           onChange={onChange}
           onClose={onClose}
         />

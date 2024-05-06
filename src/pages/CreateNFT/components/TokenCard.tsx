@@ -28,7 +28,7 @@ export const TokenCard = ({
   dragHandleProps,
   commonProps
 }: TokenCardProps) => {
-  const { id, tokenId, image, attributes, isValid, isSelected, totalFractions } = item;
+  const { id, tokenId, image, attributes, isValid, isSelected, totalFractions, royalties } = item;
   const {
     onChange,
     onRemove,
@@ -46,11 +46,11 @@ export const TokenCard = ({
   };
 
   const onSelect = () => {
-    onChange({ id, tokenId, image, attributes, isValid, isSelected: !isSelected });
+    onChange({ id, tokenId, image, attributes, isValid, isSelected: !isSelected, royalties });
   };
 
   const onAttributesChange = (attributes: Attribute[]) => {
-    onChange({ id, tokenId, image, attributes, isValid, isSelected });
+    onChange({ id, tokenId, image, attributes, isValid, isSelected, royalties });
   };
 
   const onStartRemove = () => {

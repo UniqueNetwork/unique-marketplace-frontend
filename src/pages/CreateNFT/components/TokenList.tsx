@@ -25,6 +25,7 @@ export type TokenListProps = {
   tokensStartId?: number;
   attributesSchema: PotentialAttribute[];
   mode: 'NFT' | 'Fungible' | 'ReFungible' | undefined;
+  schemaVersion: string;
   onChange(tokens: NewToken[]): void;
   onAddTokens(files: File[]): void;
 };
@@ -38,6 +39,7 @@ export const TokenList = ({
   disabled,
   attributesSchema,
   viewMode,
+  schemaVersion,
   onChange,
   onAddTokens
 }: TokenListProps) => {
@@ -230,6 +232,7 @@ export const TokenList = ({
           tokens={[editingToken]}
           tokenPrefix={tokenPrefix}
           attributesSchema={attributesSchema}
+          schemaVersion={schemaVersion}
           onClose={() => setEditingToken(undefined)}
           onChange={(_tokens: NewToken[]) => {
             const token = _tokens[0];
@@ -243,7 +246,8 @@ export const TokenList = ({
                 }
                 return {
                   ..._token,
-                  attributes: token.attributes
+                  attributes: token.attributes,
+                  royalties: token.royalties
                 };
               })
             );

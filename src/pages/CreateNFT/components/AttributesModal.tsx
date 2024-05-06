@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { Slide } from 'react-slideshow-image';
 import 'react-slideshow-image/dist/styles.css';
@@ -10,6 +10,8 @@ import { FormGrid } from './TokenCard';
 import { Button, InputAmount, Modal, Heading } from 'components/UI';
 import { ModalFooter } from './ModalFooter';
 import { PotentialAttribute } from '@unique-nft/sdk';
+import { RoyaltiesForm } from 'pages/CollectionEdit/Forms/RoyaltiesForm';
+import { Royalty } from '../../CollectionEdit/types';
 
 interface AttribytesModalProps {
   tokens: NewToken[];
@@ -18,6 +20,7 @@ interface AttribytesModalProps {
   onChange(tokens: NewToken[]): void;
   onClose(): void;
   mode?: 'NFT' | 'ReFungible' | 'Fungible';
+  schemaVersion: string;
 }
 
 export const AttributesModal = ({
@@ -26,11 +29,13 @@ export const AttributesModal = ({
   attributesSchema,
   onChange,
   onClose,
-  mode
+  mode,
+  schemaVersion
 }: AttribytesModalProps) => {
   const [summaryAttributes, setSummaryAttributes] = useState<Attribute[]>([]);
   const [attributes, setAttributes] = useState<Attribute[]>([]);
   const [totalFractions, setTotalFractions] = useState<Attribute>();
+  const [royalties, setRoyalties] = useState<Royalty[]>();
 
   const onChangeAttributes = (attributes: Attribute[]) => {
     setAttributes(attributes);
@@ -46,6 +51,7 @@ export const AttributesModal = ({
           }
           return attribute;
         }),
+        royalties: royalties || [],
         ...(mode === 'ReFungible'
           ? {
               totalFractions: (totalFractions as { hasDifferentValues: boolean })
@@ -58,6 +64,15 @@ export const AttributesModal = ({
     );
     onClose();
   };
+
+  const hasDifferentRoyalties = useMemo(() => {
+    if (tokens.length === 0) return false;
+    const firstRoyalties = JSON.stringify(tokens[0].royalties);
+    for (let i = 1; i < tokens.length; i++) {
+      if (JSON.stringify(tokens[i].royalties) !== firstRoyalties) return true;
+    }
+    return false;
+  }, [tokens]);
 
   useEffect(() => {
     const summaryAttributes = (attributesSchema || []).map(
@@ -85,6 +100,9 @@ export const AttributesModal = ({
         return attribute;
       }
     );
+    if (tokens[0]?.royalties && Array.isArray(tokens[0]?.royalties) && !hasDifferentRoyalties) {
+      setRoyalties(tokens[0]?.royalties);
+    }
     setAttributes(summaryAttributes);
     setSummaryAttributes(summaryAttributes);
     if (mode === 'ReFungible') {
@@ -105,46 +123,56 @@ export const AttributesModal = ({
   // }
 
   return (
-    <ModalStyled
-      isVisible={true}
-      onClose={onClose}
-    >
-      <Heading>
-        Changing of ${tokens.length} tokens
-      </Heading>
+    <ModalStyled isVisible={true} onClose={onClose}>
+      <Heading>Changing of ${tokens.length} tokens</Heading>
       <ModalContent>
         <TokensImages className='slide-container'>
           <Slide autoplay={false} transitionDuration={150}>
             {tokens.map((token) => {
               return (
-                <TokenBasicCard key={token.id} token={token} tokenPrefix={tokenPrefix} />
+                <TokenBasicCard
+                  key={token.id}
+                  token={token}
+                  tokenPrefix={tokenPrefix}
+                />
               );
             })}
           </Slide>
         </TokensImages>
-        <FormGrid>
-          {mode === 'ReFungible' && (
-            <>
-              <LabelText>Total fractions</LabelText>
-              <InputAmount
-                label=''
-                value={
-                  (totalFractions as { hasDifferentValues: boolean }).hasDifferentValues
-                    ? ''
-                    : (totalFractions as string)
-                }
-                maxValue={1_000_000_000}
-                onChange={setTotalFractions}
-              />
-            </>
+        <FormWrapper>
+          <FormGrid>
+            {mode === 'ReFungible' && (
+              <>
+                <LabelText>Total fractions</LabelText>
+                <InputAmount
+                  label=''
+                  value={
+                    (totalFractions as { hasDifferentValues: boolean })
+                      .hasDifferentValues
+                      ? ''
+                      : (totalFractions as string)
+                  }
+                  maxValue={1_000_000_000}
+                  onChange={setTotalFractions}
+                />
+              </>
+            )}
+            <AttributesForm
+              initialAttributes={summaryAttributes}
+              attributes={attributes}
+              attributesSchema={attributesSchema || []}
+              onChange={onChangeAttributes}
+            />
+          </FormGrid>
+          {schemaVersion !== '1.0.0' && (
+            <RoyaltiesForm
+              initialFormData={royalties || []}
+              onSubmit={(data) => setRoyalties(data.royalties)}
+              withSaveButton={false}
+              hasDifferentRoyalties={hasDifferentRoyalties}
+            />
           )}
-          <AttributesForm
-            initialAttributes={summaryAttributes}
-            attributes={attributes}
-            attributesSchema={attributesSchema || []}
-            onChange={onChangeAttributes}
-          />
-        </FormGrid>
+        </FormWrapper>
       </ModalContent>
       <ModalFooter>
         <Button role='outlined' title='Cancel' onClick={onClose} />
@@ -203,4 +231,10 @@ export const TokensImages = styled.div`
   @media screen and (max-width: 568px) {
     justify-content: center;
   }
+`;
+
+const FormWrapper = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
 `;

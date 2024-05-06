@@ -41,7 +41,8 @@ export const mapNewToken = (
 ): TokenV2ItemForMultipleDto => {
   const mappedTokenDto: TokenV2ItemForMultipleDto = {
     image: token.ipfsCid?.fullUrl, 
-    attributes: []
+    attributes: [],
+    royalties: token.royalties?.map(({value, ...rest}) => ({...rest, percent: +value}))
   };
 
   if (schema && token.attributes?.length) {

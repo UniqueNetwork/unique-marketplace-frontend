@@ -145,58 +145,75 @@ export const CollectionEditPage = () => {
 
   if (!collection || !collectionInfo) return <Error404 />;
 
-  return (<>
-    <BackLink onClick={backClickHandler}>
-      <Icon name='arrow-left' color={BlueGrey500} size={16}/>
-      <p>back</p>
-    </BackLink>
-    <CollectionEditPaper>
-      <CollectionBannerComponent
-        src={banner?.src}
-        onChange={onUploadBanner}
-        onRemove={onRemoveBanner}
-      />
-      <CollectionEditContentWrapper>
-        <CollectionCover
-          name={name || ''}
-          src={cover?.src}
-          onChange={onUploadCover}
-          onRemove={onRemoveCover}
+  return (
+    <>
+      <BackLink onClick={backClickHandler}>
+        <Icon name='arrow-left' color={BlueGrey500} size={16} />
+        <p>back</p>
+      </BackLink>
+      <CollectionEditPaper>
+        <CollectionBannerComponent
+          src={banner?.src}
+          onChange={onUploadBanner}
+          onRemove={onRemoveBanner}
         />
-        <CollectionEditFormWrapper>
-          <Heading size='1' >{name}</Heading>
-          <CollectionEditForm
-            initialFormData={metadata}
-            onSubmit={onCollectionEditFormSubmit}
-            isCoverChanged={isCollectionChanged}
+        <CollectionEditContentWrapper>
+          <CollectionCover
+            name={name || ''}
+            src={cover?.src}
+            onChange={onUploadCover}
+            onRemove={onRemoveCover}
           />
-          <RoyaltiesForm
-            initialFormData={royalty}
-            onSubmit={onRoyaltiesFormSubmit}
+          <CollectionEditFormWrapper>
+            <Heading size='1'>{name}</Heading>
+            <CollectionEditForm
+              initialFormData={metadata}
+              onSubmit={onCollectionEditFormSubmit}
+              isCoverChanged={isCollectionChanged}
+            />
+            {collectionInfo?.info?.originalSchemaVersion === '1.0.0' && (
+              <RoyaltiesForm
+                initialFormData={royalty.royalties}
+                onSubmit={onRoyaltiesFormSubmit}
+                withSaveButton={true}
+              />
+            )}
+            <Sponsorship
+              collection={collection}
+              collectionInfo={collectionInfo}
+              onComplete={onComplete}
+            />
+            <Limits
+              collection={collection}
+              collectionInfo={collectionInfo}
+              onComplete={onComplete}
+            />
+            <BurningPermission
+              collection={collection}
+              collectionInfo={collectionInfo}
+              onComplete={onComplete}
+            />
+          </CollectionEditFormWrapper>
+        </CollectionEditContentWrapper>
+        <Modal isVisible={modalType === 'metadata'}>
+          <SaveCollectionStagesModal
+            metadata={metadata}
+            bannerFile={banner?.file}
+            coverFile={cover?.file}
+            onFinish={onUpdateFinish}
+            collectionId={collection.collectionId}
           />
-          <Sponsorship collection={collection} collectionInfo={collectionInfo} onComplete={onComplete} />
-          <Limits collection={collection} collectionInfo={collectionInfo} onComplete={onComplete} />
-          <BurningPermission collection={collection} collectionInfo={collectionInfo} onComplete={onComplete} />
-        </CollectionEditFormWrapper>
-      </CollectionEditContentWrapper>
-      <Modal isVisible={modalType === 'metadata'}>
-        <SaveCollectionStagesModal
-          metadata={metadata}
-          bannerFile={banner?.file}
-          coverFile={cover?.file}
-          onFinish={onUpdateFinish}
-          collectionId={collection.collectionId}
-        />
-      </Modal>
-      <Modal isVisible={modalType === 'royalty'}>
-        <SetRoyaltiesStagesModal
-          formData={royalty}
-          onFinish={onUpdateFinish}
-          collectionId={collection.collectionId}
-        />
-      </Modal>
-    </CollectionEditPaper>
-  </>);
+        </Modal>
+        <Modal isVisible={modalType === 'royalty'}>
+          <SetRoyaltiesStagesModal
+            formData={royalty}
+            onFinish={onUpdateFinish}
+            collectionId={collection.collectionId}
+          />
+        </Modal>
+      </CollectionEditPaper>
+    </>
+  );
 };
 
 const CollectionEditPaper = styled(PagePaper)`
