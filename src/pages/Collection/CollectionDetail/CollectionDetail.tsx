@@ -20,6 +20,8 @@ import ShareTokenModal from 'pages/Token/TokenDetail/ShareTokenModal';
 import { RoyaltiesFormData } from 'pages/CollectionEdit/types';
 import { dateFormat } from 'utils/timestampUtils';
 import config from 'config';
+import { getIpfsUriByImagePath } from 'utils/urlUtils';
+
 interface IProps {
   collection?: MarketableCollection
   royalties?: RoyaltiesFormData
@@ -31,8 +33,7 @@ export const CollectionDetail: FC<IProps> = ({ collection, royalties }) => {
 
   const { currentChainId, chainProperties } = useApi();
 
-  const { name, description, data, owner, collectionId, metadata } = collection || {};
-  const { info } = data || {};
+  const { name, description, data, owner, collectionId, metadata, cover } = collection || {};
 
   const [isShareModalVisible, setIsShareModalVisible] = useState(false);
 
@@ -86,7 +87,7 @@ export const CollectionDetail: FC<IProps> = ({ collection, royalties }) => {
     <CollectionDetailWrapper>
       <CollectionCardWrapper >
         <PictureWrapper>
-          <Picture alt={name || ''} src={collection.metadata?.cover || info?.cover_image?.url || ''} size={160} />
+          <Picture alt={name || ''} src={getIpfsUriByImagePath(cover)} size={160} />
         </PictureWrapper>
         <CollectionInfoWrapper>
           <div>
