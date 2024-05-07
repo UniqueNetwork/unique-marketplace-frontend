@@ -47,6 +47,8 @@ type FetchCollectionParams = {
   searchText?: string;
 }
 
+const DEFAULT_LIMIT = 1000;
+
 export const useQueryCollections = () => {
   const { currentChainId } = useApi();
 
@@ -84,7 +86,7 @@ export const useQueryCollections = () => {
             : {}),
           burned: { _eq: 'false' }
         },
-        limit,
+        limit: limit || DEFAULT_LIMIT,
         offset
       };
       const { data } = await post(scanApi, { ...gqlQuery, variables });
