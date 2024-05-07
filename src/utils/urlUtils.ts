@@ -28,7 +28,7 @@ const isValidHttpUrl = (checkUrl: string): boolean => {
 export const getIpfsUriByImagePath = (
   imagePath: string | null | undefined
 ): string | undefined => {
-  if (!imagePath || imagePath === `${IPFSGateway}/`) {
+  if (!imagePath || imagePath === `${IPFSGateway}`) {
     return undefined;
   }
 
@@ -36,7 +36,7 @@ export const getIpfsUriByImagePath = (
     if (isValidHttpUrl(url)) {
       return url;
     }
-    return `${IPFSGateway}/${url}`;
+    return `${IPFSGateway}${url}`;
   };
 
   try {
