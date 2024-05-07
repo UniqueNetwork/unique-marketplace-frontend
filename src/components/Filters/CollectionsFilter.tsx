@@ -1,6 +1,7 @@
-import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
+import React, { FC, useCallback, useContext, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
 import styled from 'styled-components';
+import { useDebouncedCallback } from 'use-debounce';
 import { Checkbox, Text } from 'components/UI';
 import { useCollections } from '../../hooks/useCollections';
 import { Accordion } from '../Accordion/Accordion';
@@ -13,6 +14,7 @@ import { CollectionCover } from '../CollectionCover/CollectionCover';
 import { useCuratedCollections } from 'hooks/useCuratedCollections';
 import SearchField from 'components/SearchField/SearchField';
 import CollectionsContext from 'collections/CollectionsContext';
+import { useTextSearchCollections } from 'hooks/useTextSearchCollections';
 
 interface CollectionsFilterProps {
   value?: { collections?: number[], attributes?: { key: string, attribute: string }[], attributeCounts?: number[] } | null
@@ -45,10 +47,17 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attr
     onChange([]);
   }, [onChange]);
 
-  const filteredCollections = useMemo(() => {
-    if (!searchString) return featuredCollections;
-    return featuredCollections.filter(({ name }) => name.toLowerCase().includes(searchString.toLowerCase()));
-  }, [featuredCollections, searchString]);
+  const {
+    textSearchCollections,
+    isFetching: isFetchingTextSearch,
+    fetchCollectionsTextLike,
+    error: errorTextSearch
+  } = useTextSearchCollections();
+
+  const toggleTextSearch = useDebouncedCallback(async (searchText: string) => {
+    setSearchString(searchText);
+    await fetchCollectionsTextLike(searchText);
+  }, 500);
 
   return (<>
     {curatedCollections.length > 0 && <Accordion title={'Curated collections'}
@@ -85,40 +94,88 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attr
     >
       <SearchFieldWrapper>
         <SearchField searchValue={searchString}
-          onSearchStringChange={setSearchString}
+          onSearchStringChange={toggleTextSearch}
           hideButton
           placeholder='Search by collections'
         />
       </SearchFieldWrapper>
       <CollectionFilterWrapper>
-        <InfiniteScroll
-          hasMore={offset < totalCount}
-          initialLoad={false}
-          loadMore={fetchCollections}
-          pageStart={1}
-          threshold={20}
-          useWindow={false}
-        >
-          {isFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
-          {filteredCollections.map((collection) => (
-            <CheckboxWrapper
-              key={`collection-${collection.id}`}
-            >
-              <Checkbox
-                checked={selectedCollections.indexOf(collection.id) !== -1}
-                label={<CheckboxLabelWrapper>
-                  <CollectionCover src={collection?.cover || ''} size={22} type={'circle'}/>
-                  <Text
-                    testid={`${testid}-name-${collection.id}`}
-                  >{collection.name || ''}</Text>
-                </CheckboxLabelWrapper>}
-                size={'m'}
-                onChange={onCollectionSelect(collection.id)}
-                testid={`${testid}-checkbox-${collection.id}`}
-              />
-            </CheckboxWrapper>
+        {searchString ? (
+          <>
+            {isFetchingTextSearch &&
+              Array.from({ length: 3 }).map((_, index) => (
+                <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />
+              ))}
+            {textSearchCollections.map((collection) => (
+              <CheckboxWrapper key={`collection-${collection.id}`}>
+                <Checkbox
+                  checked={selectedCollections.indexOf(collection.id) !== -1}
+                  label={
+                    <CheckboxLabelWrapper>
+                      <CollectionCover
+                        src={collection?.cover || ''}
+                        size={22}
+                        type={'circle'}
+                      />
+                      <Text testid={`${testid}-name-${collection.id}`}>
+                        {collection.name || ''}
+                      </Text>
+                    </CheckboxLabelWrapper>
+                  }
+                  size={'m'}
+                  onChange={onCollectionSelect(collection.id)}
+                  testid={`${testid}-checkbox-${collection.id}`}
+                />
+              </CheckboxWrapper>
             ))}
-        </InfiniteScroll>
+            {!isFetchingTextSearch && textSearchCollections.length === 0 && (
+              <Text size='s' color='grey-600'>
+                Not found
+              </Text>
+            )}
+            {errorTextSearch && (
+              <Text size='s' color='grey-600'>
+                {errorTextSearch}
+              </Text>
+            )}
+          </>
+        ) : (
+          <InfiniteScroll
+            hasMore={offset < totalCount}
+            initialLoad={false}
+            loadMore={fetchCollections}
+            pageStart={1}
+            threshold={20}
+            useWindow={false}
+          >
+            {isFetching &&
+              Array.from({ length: 3 }).map((_, index) => (
+                <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />
+              ))}
+            {featuredCollections.map((collection) => (
+              <CheckboxWrapper key={`collection-${collection.id}`}>
+                <Checkbox
+                  checked={selectedCollections.indexOf(collection.id) !== -1}
+                  label={
+                    <CheckboxLabelWrapper>
+                      <CollectionCover
+                        src={collection?.cover || ''}
+                        size={22}
+                        type={'circle'}
+                      />
+                      <Text testid={`${testid}-name-${collection.id}`}>
+                        {collection.name || ''}
+                      </Text>
+                    </CheckboxLabelWrapper>
+                  }
+                  size={'m'}
+                  onChange={onCollectionSelect(collection.id)}
+                  testid={`${testid}-checkbox-${collection.id}`}
+                />
+              </CheckboxWrapper>
+            ))}
+          </InfiniteScroll>
+        )}
       </CollectionFilterWrapper>
     </Accordion>
     {onAttributeCountsChange && !!attributeCounts?.length && <AttributeCountsFilter
