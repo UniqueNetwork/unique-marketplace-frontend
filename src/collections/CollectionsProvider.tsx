@@ -47,7 +47,7 @@ const CollectionsWrapper: FC = ({ children }) => {
     offset,
     totalCount,
     fetchCollections
-  }), [isFetching, collections, fetchCollections]);
+  }), [isFetching, collections, curatedCollections, offset, totalCount, fetchCollections]);
 
   return (
     <CollectionsProvider value={value}>

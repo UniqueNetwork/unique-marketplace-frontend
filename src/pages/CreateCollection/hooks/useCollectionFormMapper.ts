@@ -20,7 +20,7 @@ export const useCollectionFormMapper = () => {
       // nesting
     } = form;
 
-    const coverPictureUrl = coverPictureIpfsCid ? `${IPFSGateway}/${coverPictureIpfsCid}` : '';
+    const coverPictureUrl = coverPictureIpfsCid ? `${IPFSGateway}${coverPictureIpfsCid}` : '';
 
     const request: CreateCollectionV2ArgsDto = {
       name: name || '',

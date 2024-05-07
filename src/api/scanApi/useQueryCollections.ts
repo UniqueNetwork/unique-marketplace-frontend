@@ -8,9 +8,9 @@ import { Address } from '@unique-nft/utils';
 const gqlQuery = {
   operationName: 'collections_query',
   query: `query collections_query(
-    $where: CollectionWhereParams
-    $offset: Int
-    $limit: Int
+      $where: CollectionWhereParams
+      $offset: Int
+      $limit: Int
     ) {
     collections(
       where: $where
@@ -44,13 +44,14 @@ type FetchCollectionParams = {
   ids?: number[];
   limit?: number;
   offset?: number;
+  searchText?: string;
 }
 
 export const useQueryCollections = () => {
-  const { currentChainId, featuredCollections } = useApi();
+  const { currentChainId } = useApi();
 
   const fetch = useCallback(
-    async ({ ids, owner, limit, offset }: FetchCollectionParams = {}): Promise<{
+    async ({ ids, owner, limit, offset, searchText }: FetchCollectionParams = {}): Promise<{
       collections: GQLCollection[];
       count: number;
     }> => {
@@ -72,6 +73,13 @@ export const useQueryCollections = () => {
                     }
                   }
                 ]
+              }
+            : {}),
+          ...(searchText
+            ? {
+                name: {
+                  _like: `${searchText}%`
+                }
               }
             : {}),
           burned: { _eq: 'false' }
