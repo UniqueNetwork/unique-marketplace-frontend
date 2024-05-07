@@ -33,6 +33,7 @@ export interface MarketableCollection {
   collectionId: number
   createdAt: string
   data: CollectionWithInfoV2Dto;
+  cover?: string
   decimalPoints: number
   description: string
   id: string

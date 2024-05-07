@@ -83,7 +83,7 @@ export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
         setCollection(mapCollectionToMarketable(collectionOnChain, tokensCountOnScan));
         return;
       }
-      setCollection(collectionData);
+      setCollection({...collectionData, cover: collectionOnChain?.info?.cover_image?.url});
     })();
   }, [currentChainId, collectionId, selectedAccount?.address]);
 
@@ -261,6 +261,7 @@ const mapCollectionToMarketable = (collection: CollectionWithInfoV2Dto, tokensCo
   allowedTokens: '',
   isMarketable: false,
   active: true,
+  cover: collection.info?.cover_image?.url,
   collectionId: collection.collectionId,
   createdAt: '',
   decimalPoints: 0,

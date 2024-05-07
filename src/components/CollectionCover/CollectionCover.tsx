@@ -1,6 +1,7 @@
 import React, { VFC } from 'react';
 import styled from 'styled-components';
 import { Picture } from '../TokenMedia/Picture';
+import { getIpfsUriByImagePath } from 'utils/urlUtils';
 
 interface collectionCoverProps {
   src: string | undefined
@@ -9,18 +10,9 @@ interface collectionCoverProps {
 }
 
 export const CollectionCover: VFC<collectionCoverProps> = ({ src, size = 24, type = 'circle' }) => {
-  const testPictureUrl = (src?: string): string => {
-    if (!src) return '';
-
-    const baseUrl = 'https://ipfs.unique.network/ipfs/';
-    const link = src.startsWith('https://') ? src : baseUrl + src;
-
-    return link;
-  };
-
   return (
     <CollectionCoverWrapper type={type} size={size}>
-      <Picture src={testPictureUrl(src)} alt={'collection-cover'} size={size}/>
+      <Picture src={getIpfsUriByImagePath(src)} alt={'collection-cover'} size={size}/>
     </CollectionCoverWrapper>
   );
 };
