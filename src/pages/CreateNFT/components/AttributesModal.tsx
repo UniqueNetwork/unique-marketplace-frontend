@@ -36,6 +36,14 @@ export const AttributesModal = ({
   const [attributes, setAttributes] = useState<Attribute[]>([]);
   const [totalFractions, setTotalFractions] = useState<Attribute>();
   const [royalties, setRoyalties] = useState<Royalty[]>();
+  const hasDuplicateAddresses = useMemo(() => {
+    if (!royalties) return false;
+    const addresses = royalties.map((item) => item.address);
+    const uniqueAddresses = new Set(addresses);
+    return addresses.length !== uniqueAddresses.size;
+  }, [royalties]);
+
+  const totalRoyaltyLessThen99 = useMemo(() => Number(royalties && royalties.reduce((acc, { value }) => Number(acc) + Number(value), 0)) < 99, [royalties]);
 
   const onChangeAttributes = (attributes: Attribute[]) => {
     setAttributes(attributes);
@@ -170,13 +178,19 @@ export const AttributesModal = ({
               onSubmit={(data) => setRoyalties(data.royalties)}
               withSaveButton={false}
               hasDifferentRoyalties={hasDifferentRoyalties}
+              hasDuplicateAddresses={hasDuplicateAddresses}
             />
           )}
         </FormWrapper>
       </ModalContent>
       <ModalFooter>
         <Button role='outlined' title='Cancel' onClick={onClose} />
-        <Button role='primary' title='Submit' onClick={onSubmit} />
+        <Button
+          role='primary'
+          title='Submit'
+          onClick={onSubmit}
+          disabled={hasDuplicateAddresses || !totalRoyaltyLessThen99}
+        />
       </ModalFooter>
     </ModalStyled>
   );

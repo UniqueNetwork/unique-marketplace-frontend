@@ -19,10 +19,11 @@ interface RoyaltiesFormProps {
   initialFormData: Royalty[];
   withSaveButton: boolean;
   hasDifferentRoyalties?: boolean;
+  hasDuplicateAddresses?: boolean;
   onSubmit(formData: Partial<RoyaltiesFormData>): void;
 }
 
-export const RoyaltiesForm = ({ initialFormData, withSaveButton, hasDifferentRoyalties, onSubmit }: RoyaltiesFormProps) => {
+export const RoyaltiesForm = ({ initialFormData, withSaveButton, hasDifferentRoyalties, hasDuplicateAddresses, onSubmit }: RoyaltiesFormProps) => {
   const [royalties, setRoyalties] = useState<Royalty[]>([]);
   const [validMap, setValidMap] = useState<boolean[]>([]);
   const { prefixes } = useApi();
@@ -99,10 +100,15 @@ export const RoyaltiesForm = ({ initialFormData, withSaveButton, hasDifferentRoy
       ))}
       <TotalWrapper>
         <Text color='secondary-500'>Total royalty: {totalRoyalty}%</Text>
-        <Text color='grey-500' size='s' weight='light'>
+        <Text color={totalRoyalty > 99 ? 'var(--color-coral-500)' : 'grey-500'} size='s' weight='light'>
           Maximum royalty - 99%
         </Text>
       </TotalWrapper>
+      {hasDuplicateAddresses && (
+        <ErrorWrapper size={'s'} color={'var(--color-coral-500)'}>
+          Royalties have duplicate addresses
+        </ErrorWrapper>
+      )}
       <ButtonsRow>
         {withSaveButton && (
           <Button
