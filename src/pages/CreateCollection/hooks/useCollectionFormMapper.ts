@@ -30,15 +30,39 @@ export const useCollectionFormMapper = () => {
         defaultPermission: {
           mutable: true,
           collectionAdmin: true,
-          tokenOwner: true,
+          tokenOwner: true
         },
+        overwriteTPPs: [
+          {
+            key: 'royalties',
+            permission: {
+              mutable: true,
+              collectionAdmin: true,
+              tokenOwner: false
+            }
+          }
+        ]
       },
       symbol: symbol || '',
       tokenPrefix: symbol || '',
-      cover_image: coverPictureUrl ? {
-        url: coverPictureUrl
-      } : undefined,
-      potential_attributes: attributes ? attributes.map(({ name, values }) => ({ trait_type: name || '', display_type: 'string', values })) : undefined,
+      cover_image: coverPictureUrl
+        ? {
+            url: coverPictureUrl
+          }
+        : undefined,
+      potential_attributes: attributes
+        ? attributes.map(({ name, values }) => ({
+            trait_type: name || '',
+            display_type: 'string',
+            values
+          }))
+        : undefined,
+      permissions: {
+        nesting: {
+          tokenOwner: true,
+          collectionAdmin: false
+        }
+      }
     };
     return request;
   };

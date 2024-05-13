@@ -83,3 +83,24 @@ export type BigNumberish = BN | Bytes | bigint | string | number;
 export type CollectionMode = 'NFT' | 'Fungible' | 'ReFungible';
 
 export type TransferTokenParams = {token: TokenId, from: string, to: string, amount: number, mode: CollectionMode };
+
+export enum TPP {
+  /// Permission to change the property and property permission. See [`up_data_structs::PropertyPermission::mutable`]
+  Mutable,
+  /// Change permission for the collection administrator. See [`up_data_structs::PropertyPermission::token_owner`]
+  TokenOwner,
+  /// Permission to change the property for the owner of the token. See [`up_data_structs::PropertyPermission::collection_admin`]
+  CollectionAdmin
+}
+
+export const TPP_TO_TPP: {[K: string]: TPP} = {
+  mutable: TPP.Mutable,
+  collectionAdmin: TPP.CollectionAdmin,
+  tokenOwner: TPP.TokenOwner
+};
+
+export type CollectionNestingAndPermissionStruct$1 = {
+  token_owner: boolean;
+  collection_admin: boolean;
+  restricted: string[];
+};

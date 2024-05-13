@@ -5,7 +5,7 @@ import IMarketContractAdapter, { IMarketContractProperties } from './IMarketCont
 import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
 import { ChainValue } from '../controllers/BaseController';
-import { CollectionMode, TransferTokenParams } from '../types';
+import { CollectionMode, CollectionNestingAndPermissionStruct$1, TransferTokenParams } from '../types';
 import { BatchCallArgumentsBody, CollectionProperty, CreateCollectionParsed, CreateCollectionV2ArgsDto, TokenV2ItemForMultipleDto, PropertyKeyPermission, SetCollectionLimitsBody, SetSponsorshipBody, TokenId, CreateTokenPayload } from '@unique-nft/sdk';
 
 const buyGasLimit = 1_000_000;
@@ -382,6 +382,10 @@ class UniqueAdapter implements IMarketContractAdapter {
 
   async getBurnCollectionFee(collectionId: number, signer: Signer): Promise<string> {
     return (await this.uniqueSdk.collection.destroy.getFee({ collectionId, address: signer.address })).fee.amount;
+  }
+
+  async setCollectionNesting(collectionId: number, value: CollectionNestingAndPermissionStruct$1): Promise<void> {
+    throw new Error('not implemented');
   }
 }
 
