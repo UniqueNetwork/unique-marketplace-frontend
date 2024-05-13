@@ -85,6 +85,7 @@ const CreateCollectionComponent = ({ className }: CreateCollectionProps) => {
     feeError,
     submitWaitResultError
   } = useCollectionCreate();
+  const { api } = useApi();
 
   const setTokenPropertyPermissions = useCollectionSetTokenPropertyPermissions();
   const setProperties = useCollectionSetProperties();
@@ -268,6 +269,13 @@ const CreateCollectionComponent = ({ className }: CreateCollectionProps) => {
         collectionId,
         properties: collectionProperties.map(({key, valueHex}) => ({key, value: valueHex}))
       });
+
+      setCurrentStage(3);
+      await api?.collection?.setCollectionNesting(
+        collectionId,
+        { token_owner: true, collection_admin: false, restricted: [] },
+        { account: selectedAccount }
+      );
     }
 
     setIsCreating(false);
@@ -341,7 +349,7 @@ const CreateCollectionComponent = ({ className }: CreateCollectionProps) => {
 
   const creatingStages = useMemo(() => {
     if (selectedAccount?.name === MetamaskAccountName) {
-      return ['Creating collection', 'Setting permissions', 'Setting properties'];
+      return ['Creating collection', 'Setting permissions', 'Setting properties', 'Setting nesting'];
     }
     return ['Creating collection'];
   }, [selectedAccount?.name]);

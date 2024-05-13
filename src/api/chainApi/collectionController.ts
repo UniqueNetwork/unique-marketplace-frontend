@@ -2,7 +2,7 @@ import { CollectionProperty, CollectionWithInfoV2Dto, CreateCollectionParsed, Cr
 import { AllowedCollections } from 'api/restApi/settings/types';
 import { NetworkOptions } from 'api/sdk/sdkClient';
 import BaseController from './controllers/BaseController';
-import { TransactionOptions } from './types';
+import { CollectionNestingAndPermissionStruct$1, TransactionOptions } from './types';
 import { Blob as BufferBlob, Buffer } from 'buffer';
 
 export class UniqueSDKCollectionController extends BaseController {
@@ -109,5 +109,10 @@ export class UniqueSDKCollectionController extends BaseController {
 
   async getBurnFee(collectionId: number, { account }: TransactionOptions): Promise<string> {
     return await this.getAdapter(account).getBurnCollectionFee(collectionId, account.signer);
+  }
+
+  async setCollectionNesting(collectionId: number, value: CollectionNestingAndPermissionStruct$1, { account }: TransactionOptions): Promise<void> {
+    const adapter = this.getAdapter(account);
+    await adapter.setCollectionNesting(collectionId, value);
   }
 }

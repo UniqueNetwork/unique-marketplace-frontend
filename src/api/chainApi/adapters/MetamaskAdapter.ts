@@ -10,26 +10,12 @@ import IMarketContractAdapter, { IMarketContractProperties } from './IMarketCont
 import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
 import { ChainValue } from '../controllers/BaseController';
-import { CollectionMode, TransferTokenParams } from '../types';
+import { CollectionMode, CollectionNestingAndPermissionStruct$1, TPP_TO_TPP, TransferTokenParams } from '../types';
 import { getEthereumSigner, sleep } from 'utils/helpers';
 
 const buyGasLimit = 1_000_000;
 const sellGasLimit = 200_000;
 
-enum TPP {
-  /// Permission to change the property and property permission. See [`up_data_structs::PropertyPermission::mutable`]
-  Mutable,
-  /// Change permission for the collection administrator. See [`up_data_structs::PropertyPermission::token_owner`]
-  TokenOwner,
-  /// Permission to change the property for the owner of the token. See [`up_data_structs::PropertyPermission::collection_admin`]
-  CollectionAdmin
-}
-
-const TPP_TO_TPP: {[K: string]: TPP} = {
-  mutable: TPP.Mutable,
-  collectionAdmin: TPP.CollectionAdmin,
-  tokenOwner: TPP.TokenOwner
-};
 
 class MetamaskAdapter implements IMarketContractAdapter {
   private getContract(contract: IMarketContractProperties) {
@@ -286,6 +272,12 @@ class MetamaskAdapter implements IMarketContractAdapter {
     const nftFactory = await UniqueNFTFactory(collectionId, getEthereumSigner());
 
     await (await nftFactory.setCollectionProperties(properties)).wait();
+  }
+
+  async setCollectionNesting(collectionId: number, value: CollectionNestingAndPermissionStruct$1): Promise<void> {
+    const collection = await UniqueNFTFactory(collectionId, getEthereumSigner());
+
+    await (await collection.setCollectionNesting(value)).wait();
   }
 
   async setTokenPropertyPermissions(collectionId: number, tokenPropertyPermissions: PropertyKeyPermission[]): Promise<void> {
