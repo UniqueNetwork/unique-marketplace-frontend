@@ -126,13 +126,10 @@ export const AttributesModal = ({
     }
   }, []);
 
-  // if (!attributesSchema) {
-  //   return null;
-  // }
 
   return (
     <ModalStyled isVisible={true} onClose={onClose}>
-      <Heading>Changing of {tokens.length} tokens</Heading>
+      <Heading>Update {tokens.length} {tokens.length > 1 ? 'tokens' : 'token'}</Heading>
       <ModalContent>
         <TokensImages className='slide-container'>
           <Slide autoplay={false} transitionDuration={150}>
