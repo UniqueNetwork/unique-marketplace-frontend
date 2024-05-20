@@ -136,8 +136,14 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
         tokensCreated = tokensCreated.length > 0 ? [...tokensCreated, ...result] : [...result];
         
         currentPos += batchSize;
-      } catch (e) {
-        setBatchSize(SMALL_BATCH_SIZE);
+      } catch (e: any) {
+        if (e.message === "Cancelled") {
+          currentPos = createTokensPayload.length;
+          setStage(TRANSACTION_STAGE_ENUM.FAILED);
+          setIsLoadingSubmitResult(false);
+        } else {
+          setBatchSize(SMALL_BATCH_SIZE);
+        }
       }
       reentryCounter++;
     }
@@ -578,7 +584,7 @@ const ButtonGroup = styled.div`
 `;
 
 const SelectedCountWrapper = styled.div`
-  flex: 1;
+  flex: .8;
   display: flex;
   align-items: center;
 `;
@@ -610,10 +616,12 @@ const StyledCheckbox = styled(Checkbox)`
 const ButtonConatiner = styled.div`
   display: flex;
   width: 100%;
+  justify-content: space-between;
 
   @media screen and (max-width: 768px) {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    grid-gap: 10px;
     & > button:last-of-type {
       grid-column: 1 / span 2;
     }
