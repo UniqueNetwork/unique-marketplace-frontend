@@ -121,7 +121,7 @@ class MarketController extends BaseController implements IMarketController {
     const adapter = this.getAdapter(account);
     // chain format from human format: 1.25 -> 1250000000000000000
     const priceWithDecimals = (price * (10 ** this.decimals)).toLocaleString('fullwide', { useGrouping: false });
-    await adapter.sell(from, collectionId, tokenId, priceWithDecimals, amount, account.signer, this.actualContract);
+    await adapter.sell(from, collectionId, tokenId, priceWithDecimals, 0, amount, account.signer, this.actualContract);
     await sleep(1000); // little lag to make sure offer is added to db
   }
 
