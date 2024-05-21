@@ -86,6 +86,12 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
     })();
   }, []);
 
+  const [selectedCurrencyOption, setSelectedCurrencyOption] = useState(0);
+
+  const handleChange = (event: any) => {
+    setSelectedCurrencyOption(event.target.value);
+  };
+
   const [isSponsored, setIsSponsored] = useState(false);
 
   useEffect(() => {
@@ -104,7 +110,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
   const onConfirmFixPriceClick = useCallback(() => {
     if (!selectedAccount || !priceInputValue || !Number(priceInputValue)) return;
 
-    onSellFixPrice({ price: priceInputValue, accountAddress: selectedAccount.address } as TFixPriceProps); // TODO: proper typing, proper calculated object
+    onSellFixPrice({ price: priceInputValue, accountAddress: selectedAccount.address, currency: selectedCurrencyOption } as TFixPriceProps); // TODO: proper typing, proper calculated object
   }, [priceInputValue, selectedAccount, onSellFixPrice]);
 
   const tokenSymbol = useMemo(() => chainProperties?.token || '', [chainProperties]);
@@ -145,6 +151,16 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
         value={priceInputValue?.toString()}
         testid={`${testid}-price-input`}
       />
+      <Container>
+        {/* @ts-ignore */}
+        <Label>Select Currency:</Label>
+        {/* @ts-ignore */}
+        <Select value={selectedCurrencyOption} onChange={handleChange}>
+          <option value={0}>0</option>
+          <option value={2807}>2807</option>
+        </Select>
+      </Container>
+
       {minPrice > 0 && <WarningBlock>
         <Text color='grey-500' size='s'>Min price: {minPrice.toFixed(4)} UNQ equivalent $10 (current rate: 1 UNQ = ${currency})</Text>
       </WarningBlock>}
@@ -262,3 +278,37 @@ const SellModalStyled = styled.div`
     margin-top: 16px;
   }
 `;
+
+
+//TO DO remove after debug currency add
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const Label = styled.label`
+  font-size: 1.2em;
+  margin-bottom: 10px;
+  color: #333;
+`;
+
+const Select = styled.select`
+  padding: 10px;
+  font-size: 1em;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+
+  &:focus {
+    border-color: #007bff;
+  }
+`;
+
+const Paragraph = styled.p`
+  font-size: 1em;
+  color: #555;
+`;
+
