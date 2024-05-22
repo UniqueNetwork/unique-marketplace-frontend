@@ -122,6 +122,8 @@ export const AskPriceModal: FC<TChangePriceModalProps> = ({ collectionId, tokenI
         collectionId,
         tokenId,
         Number(priceInputValue),
+        //TO DO update for multiple currences
+        0,
         1,
         { account: selectedAccount }
       );
