@@ -135,6 +135,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
         collectionId,
         tokenId,
         Number(priceInputValue),
+        selectedCurrencyOption,
         1,
         { account: selectedAccount }
       );

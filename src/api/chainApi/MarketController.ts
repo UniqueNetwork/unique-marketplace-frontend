@@ -66,7 +66,7 @@ class MarketController extends BaseController implements IMarketController {
     if (newAllowance.isAllowed !== targetAllowance) throw new Error('Allowance change failed');
   }
 
-  public async getSellFixFee(collectionId: number, tokenId: number, price: number, amount: number, { account }: TransactionOptions): Promise<string> {
+  public async getSellFixFee(collectionId: number, tokenId: number, price: number, currency: number, amount: number, { account }: TransactionOptions): Promise<string> {
     const from = Address.extract.ethCrossAccountId(account.address);
     const adapter = this.getAdapter(account);
     const priceWithDecimals = (price * (10 ** this.decimals)).toLocaleString('fullwide', { useGrouping: false });
@@ -75,6 +75,7 @@ class MarketController extends BaseController implements IMarketController {
       collectionId,
       tokenId,
       priceWithDecimals,
+      currency,
       amount,
       account.signer,
       this.actualContract
