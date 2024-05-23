@@ -15,8 +15,8 @@ interface IMarketContractAdapter extends IBaseAdapter {
   getSellFee(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, currency: number, amount: number, signer: Signer, contract: IMarketContractProperties): Promise<string>
   getBuyFee(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer, contract: IMarketContractProperties): Promise<string>
 
-  changePrice(collectionId: number, tokenId: number, price: string, signer: Signer, contract: IMarketContractProperties): Promise<void>
-  getChangePriceFee(collectionId: number, tokenId: number, price: string, signer: Signer, contract: IMarketContractProperties): Promise<string>
+  changePrice(collectionId: number, tokenId: number, price: string, currency: number, signer: Signer, contract: IMarketContractProperties): Promise<void>
+  getChangePriceFee(collectionId: number, tokenId: number, price: string, currency: number, signer: Signer, contract: IMarketContractProperties): Promise<string>
   setCollectionNesting(collectionId: number, value: CollectionNestingAndPermissionStruct$1): Promise<void>
 }
 

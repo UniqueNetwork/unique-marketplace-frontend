@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Heading, Link, Loader, useNotifications, Button, Text } from 'components/UI';
+import { Heading, Link, Loader, useNotifications, Button, Text, Select } from 'components/UI';
 import { NumberInput } from 'components/NumberInput/NumberInput';
 import styled from 'styled-components';
 
@@ -21,6 +21,7 @@ import { fromStringToBnString } from 'utils/bigNum';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 import { fixPriceSellingCollectionIds } from '../constants';
 import { useCoinGeckoApi } from 'api/coinGeckoApi/useCoinGeckoApi';
+import { currencies } from './ChangePriceModal';
 
 export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, collection, onFinish, setIsClosable, testid }) => {
   const { collectionId, tokenId } = token || {};
@@ -86,11 +87,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
     })();
   }, []);
 
-  const [selectedCurrencyOption, setSelectedCurrencyOption] = useState(0);
-
-  const handleChange = (event: any) => {
-    setSelectedCurrencyOption(event.target.value);
-  };
+  const [selectedCurrencyOption, setSelectedCurrencyOption] = useState(currencies[0].id);
 
   const [isSponsored, setIsSponsored] = useState(false);
 
@@ -110,10 +107,10 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
   const onConfirmFixPriceClick = useCallback(() => {
     if (!selectedAccount || !priceInputValue || !Number(priceInputValue)) return;
 
-    onSellFixPrice({ price: priceInputValue, accountAddress: selectedAccount.address, currency: selectedCurrencyOption } as TFixPriceProps); // TODO: proper typing, proper calculated object
-  }, [priceInputValue, selectedAccount, onSellFixPrice]);
+    onSellFixPrice({ price: priceInputValue, accountAddress: selectedAccount.address, currency: Number(selectedCurrencyOption) } as TFixPriceProps); // TODO: proper typing, proper calculated object
+  }, [priceInputValue, selectedAccount, selectedCurrencyOption, onSellFixPrice]);
 
-  const tokenSymbol = useMemo(() => chainProperties?.token || '', [chainProperties]);
+  const tokenSymbol = useMemo(() => currencies.find((item) => item.id === selectedCurrencyOption)?.title || '', [selectedCurrencyOption]);
 
   const { fee, fetchingFee, getFee } = useGetFee<Parameters<MarketController['getSellFixFee']>>(api?.market?.getSellFixFee.bind(api?.market));
 
@@ -135,7 +132,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
         collectionId,
         tokenId,
         Number(priceInputValue),
-        selectedCurrencyOption,
+        Number(selectedCurrencyOption),
         1,
         { account: selectedAccount }
       );
@@ -152,15 +149,13 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
         value={priceInputValue?.toString()}
         testid={`${testid}-price-input`}
       />
-      <Container>
-        {/* @ts-ignore */}
-        <Label>Select Currency:</Label>
-        {/* @ts-ignore */}
-        <Select value={selectedCurrencyOption} onChange={handleChange}>
-          <option value={0}>0</option>
-          <option value={2807}>2807</option>
-        </Select>
-      </Container>
+      <SelectWrapper
+        onChange={(e: any) => setSelectedCurrencyOption(e.id)}
+        options={currencies}
+        value={selectedCurrencyOption}
+        testid={`${testid}-sorting-select`}
+        label={'Select currency'}
+      />
 
       {minPrice > 0 && <WarningBlock>
         <Text color='grey-500' size='s'>Min price: {minPrice.toFixed(4)} UNQ equivalent $10 (current rate: 1 UNQ = ${currency})</Text>
@@ -235,6 +230,11 @@ const InputWrapper = styled(NumberInput)`
   width: 100%;
 `;
 
+const SelectWrapper = styled(Select)`
+  width: 100%;
+  margin: 8px 0 0 0 !important;
+`;
+
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
@@ -278,38 +278,5 @@ const SellModalStyled = styled.div`
   .unique-tabs-labels {
     margin-top: 16px;
   }
-`;
-
-
-//TO DO remove after debug currency add
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-
-const Label = styled.label`
-  font-size: 1.2em;
-  margin-bottom: 10px;
-  color: #333;
-`;
-
-const Select = styled.select`
-  padding: 10px;
-  font-size: 1em;
-  border: 2px solid #ddd;
-  border-radius: 5px;
-  margin-bottom: 20px;
-  outline: none;
-  cursor: pointer;
-  transition: border-color 0.3s ease;
-
-  &:focus {
-    border-color: #007bff;
-  }
-`;
-
-const Paragraph = styled.p`
-  font-size: 1em;
-  color: #555;
 `;
 

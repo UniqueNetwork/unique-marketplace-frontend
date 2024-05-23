@@ -186,17 +186,17 @@ class MetamaskAdapter implements IMarketContractAdapter {
     await this.callContract(contract, 'buy', collectionId, tokenId, amount, to, { value: price, gasLimit: estimateGas.add(1000) });
   }
 
-  async changePrice(collectionId: number, tokenId: number, price: string, signer: Signer, contractProps: IMarketContractProperties): Promise<void> {
+  async changePrice(collectionId: number, tokenId: number, price: string, currency: number, signer: Signer, contractProps: IMarketContractProperties): Promise<void> {
     const contract = this.getContract(contractProps);
 
-    const estimateGas = await contract.estimateGas.changePrice(collectionId, tokenId, price, { gasLimit: buyGasLimit });
-    await this.callContract(contract, 'changePrice', collectionId, tokenId, price, { gasLimit: estimateGas.add(1000) });
+    const estimateGas = await contract.estimateGas.changePrice(collectionId, tokenId, price, currency, { gasLimit: buyGasLimit });
+    await this.callContract(contract, 'changePrice', collectionId, tokenId, price, currency, { gasLimit: estimateGas.add(1000) });
   }
 
-  async getChangePriceFee(collectionId: number, tokenId: number, price: string, signer: Signer, contractProps: IMarketContractProperties): Promise<string> {
+  async getChangePriceFee(collectionId: number, tokenId: number, price: string, currency: number, signer: Signer, contractProps: IMarketContractProperties): Promise<string> {
     const contract = this.getContract(contractProps);
 
-    const estimateGas = await contract.estimateGas.changePrice(collectionId, tokenId, price, { value: price, gasLimit: buyGasLimit });
+    const estimateGas = await contract.estimateGas.changePrice(collectionId, tokenId, price, currency, { value: price, gasLimit: buyGasLimit });
     const gasPrice = await contract.provider.getGasPrice();
 
     return estimateGas.mul(gasPrice).toString();

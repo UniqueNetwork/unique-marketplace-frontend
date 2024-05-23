@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { useNotifications, Button, Text, Heading, Link, Loader } from 'components/UI';
+import { useNotifications, Button, Text, Heading, Loader, Select } from 'components/UI';
 import { NumberInput } from 'components/NumberInput/NumberInput';
 import styled from 'styled-components';
 
@@ -23,6 +23,18 @@ import { Offer } from 'api/restApi/offers/types';
 import { useCoinGeckoApi } from 'api/coinGeckoApi/useCoinGeckoApi';
 import { fixPriceSellingCollectionIds } from '../constants';
 
+//TO DO remove after api for currencies change
+export const currencies = [
+  {
+    id: '0',
+    title: 'OPL'
+  },
+  {
+    id: '2807',
+    title: 'USDT'
+  }
+];
+
 export const ChangePriceModal: FC<TTokenPageModalBodyProps> = ({ token, offer, collection, onFinish, setIsClosable, testid }) => {
   const { collectionId, tokenId } = token || {};
   const [status, setStatus] = useState<'ask' | 'stage'>('ask'); // TODO: naming
@@ -42,6 +54,8 @@ export const ChangePriceModal: FC<TTokenPageModalBodyProps> = ({ token, offer, c
       tokenId={token.tokenId}
       onChangePrice={onChangePrice}
       testid={`${testid}-sell-ask`}
+      oldPrice={offer?.price.parsed || 0}
+      oldCurrency={offer?.price.currency || 0}
     />);
   }
   return (<ChangePriceStagesModal
@@ -59,13 +73,16 @@ type TChangePriceModalProps = {
   collectionId: number,
   tokenId: number,
   onChangePrice: (price: TFixPriceProps) => void,
-  testid: string
+  testid: string,
+  oldPrice: number,
+  oldCurrency: number
 }
 
-export const AskPriceModal: FC<TChangePriceModalProps> = ({ collectionId, tokenId, onChangePrice, testid }) => {
+export const AskPriceModal: FC<TChangePriceModalProps> = ({ collectionId, tokenId, onChangePrice, testid, oldPrice, oldCurrency }) => {
   const { chainProperties, api, currentChainId } = useApi();
   const { selectedAccount } = useAccounts();
   const [priceInputValue, setPriceInputValue] = useState<string>();
+  const [selectedCurrencyOption, setSelectedCurrencyOption] = useState(String(oldCurrency) || currencies[0].id);
 
   // use FHF min price
   const [minPrice, setMinPrice] = useState<number>(0);
@@ -101,10 +118,10 @@ export const AskPriceModal: FC<TChangePriceModalProps> = ({ collectionId, tokenI
   const onConfirmFixPriceClick = useCallback(() => {
     if (!selectedAccount || !priceInputValue || !Number(priceInputValue)) return;
 
-    onChangePrice({ price: priceInputValue, accountAddress: selectedAccount.address } as TFixPriceProps); // TODO: proper typing, proper calculated object
-  }, [priceInputValue, selectedAccount, onChangePrice]);
+    onChangePrice({ price: priceInputValue, accountAddress: selectedAccount.address, currency: Number(selectedCurrencyOption) } as TFixPriceProps); // TODO: proper typing, proper calculated object
+  }, [priceInputValue, selectedAccount, selectedCurrencyOption, onChangePrice]);
 
-  const tokenSymbol = useMemo(() => chainProperties?.token || '', [chainProperties]);
+  const tokenSymbol = useMemo(() => currencies.find((item) => item.id === selectedCurrencyOption)?.title || '', [selectedCurrencyOption]);
 
   const { fee, fetchingFee, getFee } = useGetFee<Parameters<MarketController['getSellFixFee']>>(api?.market?.getSellFixFee.bind(api?.market));
 
@@ -122,13 +139,12 @@ export const AskPriceModal: FC<TChangePriceModalProps> = ({ collectionId, tokenI
         collectionId,
         tokenId,
         Number(priceInputValue),
-        //TO DO update for multiple currences
-        0,
+        Number(selectedCurrencyOption),
         1,
         { account: selectedAccount }
       );
     }, 300)();
-  }, [collectionId, tokenId, priceInputValue, api?.market, selectedAccount?.address]);
+  }, [collectionId, tokenId, priceInputValue, api?.market, selectedAccount?.address, selectedCurrencyOption]);
 
   const isPriceAvailable = useMemo(() => {
     return Number(priceInputValue) >= minPrice;
@@ -139,13 +155,22 @@ export const AskPriceModal: FC<TChangePriceModalProps> = ({ collectionId, tokenI
   return (
     <SellModalStyled data-testid={testid}>
       <Content>
-        <Heading size='2' testid={`${testid}-heading`}>Changing price</Heading>
+        <Heading size='2' testid={`${testid}-heading`}>
+          Changing price
+        </Heading>
       </Content>
       <InputWrapper
         label={`Price (${tokenSymbol})*`}
         onChange={onPriceInputChange}
         value={priceInputValue?.toString()}
         testid={`${testid}-price-input`}
+      />
+      <SelectWrapper
+        onChange={(e: any) => setSelectedCurrencyOption(e.id)}
+        options={currencies}
+        value={selectedCurrencyOption}
+        testid={`${testid}-sorting-select`}
+        label={'Select currency'}
       />
       {minPrice > 0 && <WarningBlock>
         <Text color='grey-500' size='s'>Min price: {minPrice.toFixed(4)} UNQ equivalent $10 (current rate: 1 UNQ = ${currency})</Text>
@@ -218,6 +243,11 @@ export const ChangePriceStagesModal: FC<TChangePriceStagesModal> = ({ collection
 
 const InputWrapper = styled(NumberInput)`
   width: 100%;
+`;
+
+const SelectWrapper = styled(Select)`
+  width: 100%;
+  margin: 8px 0 0 0 !important;
 `;
 
 const ButtonWrapper = styled.div`

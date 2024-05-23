@@ -287,7 +287,7 @@ class UniqueAdapter implements IMarketContractAdapter {
     }, { signer });
   }
 
-  async changePrice(collectionId: number, tokenId: number, price: string, signer: Signer, contract: IMarketContractProperties): Promise<void> {
+  async changePrice(collectionId: number, tokenId: number, price: string, currency: number, signer: Signer, contract: IMarketContractProperties): Promise<void> {
     await this.uniqueSdk.evm.send.submitWaitResult({
       abi: contract.abi || marketplaceAbi as any,
       address: signer.address || '',
@@ -297,12 +297,13 @@ class UniqueAdapter implements IMarketContractAdapter {
       args: {
         collectionId,
         tokenId,
-        price
+        price,
+        currency,
       }
     }, { signer });
   }
 
-  async getChangePriceFee(collectionId: number, tokenId: number, price: string, signer: Signer, contract: IMarketContractProperties): Promise<string> {
+  async getChangePriceFee(collectionId: number, tokenId: number, price: string, currency: number, signer: Signer, contract: IMarketContractProperties): Promise<string> {
     const res = await this.uniqueSdk.evm.send.getFee({
       abi: contract.abi || marketplaceAbi as any,
       address: signer.address || '',
@@ -312,7 +313,8 @@ class UniqueAdapter implements IMarketContractAdapter {
       args: {
         collectionId,
         tokenId,
-        price
+        price,
+        currency
       }
     });
     return res.fee.raw;

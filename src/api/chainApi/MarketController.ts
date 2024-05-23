@@ -227,7 +227,7 @@ class MarketController extends BaseController implements IMarketController {
     return !!this.contractsAbi[contractAddress]?.find(({ name }) => name === method);
   }
 
-  async changePrice(collectionId: number, tokenId: number, price: number, { account, contractAddress }: TransactionOptions): Promise<void> {
+  async changePrice(collectionId: number, tokenId: number, price: number, currency: number, { account, contractAddress }: TransactionOptions): Promise<void> {
     const adapter = this.getAdapter(account);
     const contract = contractAddress
     ? {
@@ -236,10 +236,10 @@ class MarketController extends BaseController implements IMarketController {
       }
     : this.actualContract;
     const priceWithDecimals = (price * (10 ** this.decimals)).toLocaleString('fullwide', { useGrouping: false });
-    await adapter.changePrice(collectionId, tokenId, priceWithDecimals, account.signer, contract);
+    await adapter.changePrice(collectionId, tokenId, priceWithDecimals, currency, account.signer, contract);
   }
 
-  async getChangePriceFee(collectionId: number, tokenId: number, price: number, { account, contractAddress }: TransactionOptions): Promise<string> {
+  async getChangePriceFee(collectionId: number, tokenId: number, price: number, currency: number, { account, contractAddress }: TransactionOptions): Promise<string> {
     const adapter = this.getAdapter(account);
     const contract = contractAddress
     ? {
@@ -248,7 +248,7 @@ class MarketController extends BaseController implements IMarketController {
       }
     : this.actualContract;
     const priceWithDecimals = (price * (10 ** this.decimals)).toLocaleString('fullwide', { useGrouping: false });
-    const rawFee = await adapter.getChangePriceFee(collectionId, tokenId, priceWithDecimals, account.signer, contract);
+    const rawFee = await adapter.getChangePriceFee(collectionId, tokenId, priceWithDecimals, currency, account.signer, contract);
 
     return this.getChainValue(rawFee, this.decimals).parsed.toString();
   }

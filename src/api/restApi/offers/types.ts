@@ -40,6 +40,7 @@ export type Offer = {
   price: {
     parsed: number, // 123
     raw: string // 123000000000000
+    currency: number
   }
   priceParsed: string
   quoteId: number
