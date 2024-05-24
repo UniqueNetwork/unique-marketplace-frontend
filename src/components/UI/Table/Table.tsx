@@ -1,9 +1,11 @@
 import { ReactNode, useState } from 'react';
 import classNames from 'classnames';
-import { getDeepValue, sortData } from 'utils/uiUtils';
+import { BalanceResponse } from '@unique-nft/sdk';
+import { sortData } from 'utils/uiUtils';
 import { Icon, Text } from '..';
 import styled from 'styled-components';
 import { IconProps } from '../Icon/Icon';
+import { TableRow } from './TebleRow';
 
 const SORT_MODES = ['initial', 'desc', 'asc'];
 
@@ -44,6 +46,7 @@ export interface TableProps {
 
 export interface TableRowProps {
   key?: React.Key;
+  fungibleBalances?: Map<string, BalanceResponse>;
 }
 
 export const Table = ({
@@ -136,27 +139,13 @@ export const Table = ({
       {sortedData.length
         ? (<div className='unique-table-data'>
           {sortedData.map((row, rowIndex) => (
-            <div
-              className='unique-table-data-row'
+            <TableRow
               key={row.key || rowIndex}
-            >
-              {columns.map((column, columnIndex) => (
-                <div
-                  key={`${column.field}-${columnIndex}`}
-                  style={{
-                    width: `calc(${column.width} - ${columnPadding}px)`,
-                    paddingLeft: `${columnPadding / 2}px`,
-                    paddingRight: `${columnPadding / 2}px`
-                  }}
-                >
-                  {column.render?.(
-                    getDeepValue(row, column.field),
-                    row,
-                    { rowIndex, columnIndex }
-                  ) || getDeepValue(row, column.field)}
-                </div>
-              ))}
-            </div>
+              row={row}
+              rowIndex={rowIndex}
+              columns={columns}
+              columnPadding={columnPadding}
+            />
           ))}
         </div>
       )
@@ -220,15 +209,6 @@ const TableStyled = styled.div`
       align-items: center;
       min-height: 40px;
       flex-direction: row;
-      background-image: linear-gradient(
-              to right,
-              var(--color-grey-300) 50%,
-              rgba(255, 255, 255, 0) 0%
-      );
-      background-position: bottom;
-      background-size: 4px 1px;
-      background-repeat: repeat-x;
-      color: var(--color-blue-grey-600);
 
       & > div {
         padding: 0 16px;

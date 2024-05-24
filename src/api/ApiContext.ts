@@ -6,6 +6,14 @@ import { UniqueSDKRFTController } from './chainApi/RFTController';
 import { ChainPropertiesResponse, Sdk } from '@unique-nft/sdk/full';
 import MarketController from './chainApi/MarketController';
 
+export interface ICurrency {
+  id: string,
+  collectionId: number
+  title: string
+  iconUrl: string
+  decimals: number
+} 
+
 export type Api = {
   nft?: UniqueSDKNFTController
   rft?: UniqueSDKRFTController
@@ -24,6 +32,7 @@ export type ApiContextProps = {
   baseURL: string
   onChangeChainId(chainId: string): void
   refetchSettings(): Promise<void>
+  currencies: ICurrency[]
 }
 
 const ApiContext: Context<ApiContextProps> = createContext({} as unknown as ApiContextProps);

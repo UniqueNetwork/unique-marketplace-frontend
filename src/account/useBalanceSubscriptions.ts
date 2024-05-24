@@ -9,6 +9,7 @@ export const useBalanceSubscriptions = () => {
   const { api, chainProperties } = useApi();
   const sdkSocketClient = useRef<SocketClient>();
   const [isBalancesFetching, setIsBalancesFetching] = useState(false);
+  const { currencies: erc20Tokens } = useApi();
 
   const subscribeBalancesChanges = useCallback(async (
     accounts: Map<string, Account>,
@@ -27,8 +28,21 @@ export const useBalanceSubscriptions = () => {
     }
     const getBalance = async (account: Account) => {
       const balances = await api?.market?.getAccountBalance(account.address);
+      const fungibleBalances = new Map();
 
-      return { ...account, balances };
+      for (const token of erc20Tokens) {
+        try {
+          const erc20 = await api?.market?.getAccountBalanceFungible({
+            collectionId: token.collectionId,
+            address: account.address
+          });
+          fungibleBalances.set(token.title, erc20);
+        } catch (error) {
+          console.error(`Error fetching balance for ${token.title}:`, error);
+        }
+      }
+
+      return { ...account, balances, fungibleBalances };
     };
 
     const accountsWithBalances = await Promise.all([...accounts.values()].map(getBalance));

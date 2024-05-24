@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Text, useNotifications, Dropdown, Button, Modal, Heading } from 'components/UI';
+import { Text, useNotifications, Dropdown, Button, Modal, Heading, Select } from 'components/UI';
 import { BN } from '@polkadot/util';
 import styled from 'styled-components';
 
@@ -22,6 +22,7 @@ import { Account } from 'account/types';
 import { FeeMessage } from 'components';
 import { useAccountsFilter } from 'hooks/useAccountsFilter';
 import { SelectOptionProps } from 'components/UI/types';
+import { ethers } from 'ethers';
 
 export type TransferFundsModalProps = {
   isVisible: boolean
@@ -35,11 +36,13 @@ export const TransferFundsModal: FC<TransferFundsModalProps> = ({ isVisible, sen
   const [sender, setSender] = useState<string>('');
   const [recipient, setRecipient] = useState<string>('');
   const [amount, setAmount] = useState<number>(0);
+  const [currency, setCurrency] = useState(0);
 
-  const onTransfer = useCallback((_sender: string, _recipient: string, _amount: string) => {
+  const onTransfer = useCallback((_sender: string, _recipient: string, _amount: string, currency: number) => {
     setRecipient(_recipient);
     setSender(_sender);
     setAmount(Number(_amount));
+    setCurrency(currency);
     setStatus('transfer-stage');
   }, [setStatus, setRecipient, setAmount]);
 
@@ -63,6 +66,7 @@ export const TransferFundsModal: FC<TransferFundsModalProps> = ({ isVisible, sen
       sender={sender || ''}
       recipient={recipient}
       amount={amount}
+      currency={currency}
       onFinish={onFinishStages}
       testid={`${testid}-stages`}
     />);
@@ -73,7 +77,7 @@ export const TransferFundsModal: FC<TransferFundsModalProps> = ({ isVisible, sen
 type AskSendFundsModalProps = {
   isVisible: boolean
   senderAddress: string
-  onFinish(sender: string, recipient: string, amount: string): void
+  onFinish(sender: string, recipient: string, amount: string, currency: number): void
   onClose(): void
   testid: string
 }
@@ -89,6 +93,10 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   const [isFeeLoading, setIsFeeLoading] = useState(false);
   const [isSetMaxLoading, setIsSetMaxLoading] = useState(false);
   const deviceSize = useDeviceSize();
+  const { currencies } = useApi();
+  const [selectedCurrencyOption, setSelectedCurrencyOption] = useState(currencies[0]);
+  const selectedFungibleToken = useMemo(() => selectedCurrencyOption.id !== currencies[0].id, [selectedCurrencyOption]);
+
   const { filteredAccounts, onFilter, onReset } = useAccountsFilter({
     excluded: useMemo(() => sender ? [sender?.address] : [], [sender])
   });
@@ -130,9 +138,17 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   }, [setAmount, getFee, recipientAddress]);
 
   const isAmountGreaterThanBalance = useMemo(() => {
-    const amountBN = new BN(fromStringToBnString(amount));
-    return amountBN.gt(sender?.balances?.proper.raw || new BN(0));
-  }, [amount, sender?.balances?.proper.raw]);
+    if (selectedFungibleToken) {
+      return (
+        Number(
+          sender?.fungibleBalances?.get(selectedCurrencyOption.title)?.amount
+        ) < Number(amount)
+      );
+    } else {
+      const amountBN = new BN(fromStringToBnString(amount));
+      return amountBN.gt(sender?.balances?.proper.raw || new BN(0));
+    }
+  }, [amount, sender?.balances?.proper.raw, selectedFungibleToken]);
 
   const isAmountPlusFeeGreaterThanBalance = useMemo(() => {
     const amountBN = new BN(fromStringToBnString(amount));
@@ -146,8 +162,21 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   const onSend = useCallback(() => {
     if (isConfirmDisabled) return;
     const recipient = typeof recipientAddress === 'string' ? recipientAddress : recipientAddress?.address;
-    onFinish(sender?.address || '', recipient || '', amount.toString());
-  }, [sender, recipientAddress, amount, onFinish, isConfirmDisabled]);
+    const decimals = selectedCurrencyOption.decimals;
+    onFinish(
+      sender?.address || '',
+      recipient || '',
+      selectedCurrencyOption.id !== currencies[0].id
+        ? ethers.utils
+            .parseUnits(
+              amount.toString(),
+              decimals
+            )
+            .toString()
+        : amount.toString(),
+      Number(selectedCurrencyOption)
+    );
+  }, [sender, recipientAddress, amount, onFinish, isConfirmDisabled, selectedCurrencyOption]);
 
   const senders = useMemo(
     () => [...accounts.values()].filter(({ address }) => recipientAddress !== address),
@@ -183,126 +212,179 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     getFee(recipientAddress, Number(amount))();
   }, [getFee, recipientAddress, amount]);
 
-  const tokenSymbol = useMemo(() => chainProperties?.token || '', [chainProperties]);
+  const tokenSymbol = useMemo(() => selectedCurrencyOption.title || '', [selectedCurrencyOption]);
+  const selectedBalance = useMemo(
+    () =>
+      selectedFungibleToken
+        ? sender?.fungibleBalances?.get(tokenSymbol)?.formatted
+        : formatBalance(sender?.balances?.proper.parsed || 0),
+    [tokenSymbol, sender, selectedFungibleToken]
+  );
 
   const onSetMax = useCallback(async () => {
     if (!sender || !api?.market || !recipientAddress) return;
     setIsSetMaxLoading(true);
     try {
-      const recipient = typeof recipientAddress === 'string' ? recipientAddress : recipientAddress?.address;
-      const fee = await api?.market?.getTransferBalanceFee(sender.address, recipient, Number(sender.balances?.proper.parsed), { account: sender });
+      if (selectedFungibleToken) {
+        setAmount(String(sender?.fungibleBalances?.get(tokenSymbol)?.amount));
+      } else {
+        const recipient = typeof recipientAddress === 'string' ? recipientAddress : recipientAddress?.address;
+        const fee = await api?.market?.getTransferBalanceFee(sender.address, recipient, Number(sender.balances?.proper.parsed), { account: sender });
+  
+        const amount = Number(sender.balances?.proper.parsed) - Number(fee);
+        setFee(fee);
+        setAmount(amount > 0 ? ((amount * 10000 | 0) / 10000).toString() : (sender.balances?.proper.parsed || '0'));
+      }
 
-      const amount = Number(sender.balances?.proper.parsed) - Number(fee);
-      setFee(fee);
-      setAmount(amount > 0 ? ((amount * 10000 | 0) / 10000).toString() : (sender.balances?.proper.parsed || '0'));
     } catch (e) {
       console.error('Failed to get max value: ', e);
     } finally {
       setIsSetMaxLoading(false);
     }
-  }, [api, sender, recipientAddress]);
+  }, [api, sender, recipientAddress, selectedFungibleToken]);
 
   const total = useMemo(() => {
     if (!amount || !fee || fee === '0') return null;
     return (Number(amount) + Number(fee)).toFixed(4);
   }, [amount, fee]);
 
-  return (<Modal isVisible={isVisible} isClosable={true} onClose={onCloseModal}>
-    <Content>
-      <Heading size='2' testid={`${testid}-heading`}>{'Send funds'}</Heading>
-    </Content>
+  return (
+    <Modal isVisible={isVisible} isClosable={true} onClose={onCloseModal}>
+      <Content>
+        <Heading size='2' testid={`${testid}-heading`}>
+          {'Send funds'}
+        </Heading>
+      </Content>
 
-    <Text size={'s'} color={'grey-500'}>{'From'}</Text>
-    <SenderSelectWrapper>
-      <Dropdown
-        optionKey={'address'}
-        options={senders as unknown as SelectOptionProps[]}
-        onChange={onChangeSender}
-        optionRender={(option) => (
-          <AddressOptionWrapper>
-            <AccountCard accountName={(option as unknown as Account)?.name || ''}
-              accountAddress={(option as unknown as Account)?.address || ''}
+      <Text size={'s'} color={'grey-500'}>
+        {'From'}
+      </Text>
+      <SenderSelectWrapper>
+        <Dropdown
+          optionKey={'address'}
+          options={senders as unknown as SelectOptionProps[]}
+          onChange={onChangeSender}
+          optionRender={(option) => (
+            <AddressOptionWrapper>
+              <AccountCard
+                accountName={(option as unknown as Account)?.name || ''}
+                accountAddress={(option as unknown as Account)?.address || ''}
+                canCopy
+                isShort={deviceSize < DeviceSize.md}
+              />
+            </AddressOptionWrapper>
+          )}
+          iconRight={{ name: 'triangle', size: 8 }}
+        >
+          <AddressWrapper>
+            <AccountCard
+              accountName={sender?.name || ''}
+              accountAddress={sender?.address || ''}
               canCopy
               isShort={deviceSize < DeviceSize.md}
             />
-          </AddressOptionWrapper>
-        )}
-        iconRight={{ name: 'triangle', size: 8 }}
-      >
-        <AddressWrapper>
-          <AccountCard accountName={sender?.name || ''}
-            accountAddress={sender?.address || ''}
-            canCopy
-            isShort={deviceSize < DeviceSize.md}
-          />
-        </AddressWrapper>
-      </Dropdown>
-    </SenderSelectWrapper>
-    <AmountWrapper>
-      <Text
-        testid={`${testid}-balance`}
-        size={'s'}
-      >{`${formatBalance(sender?.balances?.proper.parsed || 0)} ${tokenSymbol}`}</Text>
-    </AmountWrapper>
+          </AddressWrapper>
+        </Dropdown>
+      </SenderSelectWrapper>
+      <AmountWrapper>
+        <Text
+          testid={`${testid}-balance`}
+          size={'s'}
+        >{`${selectedBalance} ${tokenSymbol}`}</Text>
+      </AmountWrapper>
 
-    <Text size={'s'} color={'grey-500'}>{'To'}</Text>
-    <RecipientSelectWrapper >
-      <SelectInput<Account>
-        testid={`${testid}-select-address`}
-        options={(filteredAccounts as unknown as Account[])}
-        value={recipientAddress}
-        onChange={onChangeAddress}
-        renderOption={(option) => <AddressOptionWrapper>
-          <AccountCard accountName={option.name || ''}
-            accountAddress={option.address}
-            canCopy
-            isShort={deviceSize < DeviceSize.md}
-            testid={`${testid}-selected`}
-          />
-        </AddressOptionWrapper>}
+      <Text size={'s'} color={'grey-500'}>
+        {'To'}
+      </Text>
+      <RecipientSelectWrapper>
+        <SelectInput<Account>
+          testid={`${testid}-select-address`}
+          options={filteredAccounts as unknown as Account[]}
+          value={recipientAddress}
+          onChange={onChangeAddress}
+          renderOption={(option) => (
+            <AddressOptionWrapper>
+              <AccountCard
+                accountName={option.name || ''}
+                accountAddress={option.address}
+                canCopy
+                isShort={deviceSize < DeviceSize.md}
+                testid={`${testid}-selected`}
+              />
+            </AddressOptionWrapper>
+          )}
+        />
+      </RecipientSelectWrapper>
+      <AmountWrapper>
+        {recipientBalance && (
+          <Text
+            testid={`${testid}-recipient-balance`}
+            size={'s'}
+          >{`${formatBalance(recipientBalance || 0)} ${tokenSymbol}`}</Text>
+        )}
+      </AmountWrapper>
+      {!isValidRecipientAddress && (
+        <ErrorWrapper size={'s'} color={'var(--color-coral-500)'}>
+          Address is not valid
+        </ErrorWrapper>
+      )}
+      <SelectWrapper
+        onChange={(e: any) => setSelectedCurrencyOption(e)}
+        //@ts-ignore
+        options={currencies}
+        value={selectedCurrencyOption.id}
+        testid={`${testid}-sorting-select`}
+        label={'Select currency'}
       />
-    </RecipientSelectWrapper>
-    <AmountWrapper>
-      {recipientBalance && <Text
-        testid={`${testid}-recipient-balance`}
-        size={'s'}
-      >{`${formatBalance(recipientBalance || 0)} ${tokenSymbol}`}</Text> }
-    </AmountWrapper>
-    {!isValidRecipientAddress && <ErrorWrapper size={'s'} color={'var(--color-coral-500)'} >Address is not valid</ErrorWrapper>}
-    <AmountInputWrapper>
-      <NumberInput
-        disabled={!recipientAddress || !sender}
-        loading={isSetMaxLoading}
-        value={amount}
-        placeholder={`Amount (${tokenSymbol})`}
-        testid={`${testid}-amount-input`}
-        onChange={onAmountChange}
-        onSetMax={onSetMax}
+      <AmountInputWrapper>
+        <NumberInput
+          disabled={!recipientAddress || !sender}
+          loading={isSetMaxLoading}
+          value={amount}
+          placeholder={`Amount (${tokenSymbol})`}
+          testid={`${testid}-amount-input`}
+          onChange={onAmountChange}
+          onSetMax={onSetMax}
+        />
+      </AmountInputWrapper>
+      {isAmountGreaterThanBalance && (
+        <LowBalanceWrapper>
+          <Text size={'s'}>Your balance is too low</Text>
+        </LowBalanceWrapper>
+      )}
+      {!isAmountGreaterThanBalance && isAmountPlusFeeGreaterThanBalance && (
+        <LowBalanceWrapper>
+          <Text size={'s'}>
+            Your balance is insufficient due to transaction fee
+          </Text>
+        </LowBalanceWrapper>
+      )}
+      <FeeMessage
+        isFeeLoading={isFeeLoading}
+        fee={fee}
+        placeholder={
+          'A fee will be calculated after entering the recipient and amount'
+        }
+        testid={`${testid}-fee-message`}
       />
-    </AmountInputWrapper>
-    {isAmountGreaterThanBalance && <LowBalanceWrapper>
-      <Text size={'s'}>Your balance is too low</Text>
-    </LowBalanceWrapper>}
-    {(!isAmountGreaterThanBalance && isAmountPlusFeeGreaterThanBalance) && <LowBalanceWrapper>
-      <Text size={'s'}>Your balance is insufficient due to transaction fee</Text>
-    </LowBalanceWrapper>}
-    <FeeMessage
-      isFeeLoading={isFeeLoading}
-      fee={fee}
-      placeholder={'A fee will be calculated after entering the recipient and amount'}
-      testid={`${testid}-fee-message`}
-    />
-    {total && <TotalWrapper><Text size='m'>Total ~ {total} {tokenSymbol}</Text></TotalWrapper>}
-    <ButtonWrapper>
-      <Button
-        testid={`${testid}-confirm-button`}
-        disabled={isConfirmDisabled}
-        onClick={onSend}
-        role='primary'
-        title='Confirm'
-      />
-    </ButtonWrapper>
-  </Modal>);
+      {total && (
+        <TotalWrapper>
+          <Text size='m'>
+            Total ~ {total} {tokenSymbol}
+          </Text>
+        </TotalWrapper>
+      )}
+      <ButtonWrapper>
+        <Button
+          testid={`${testid}-confirm-button`}
+          disabled={isConfirmDisabled}
+          onClick={onSend}
+          role='primary'
+          title='Confirm'
+        />
+      </ButtonWrapper>
+    </Modal>
+  );
 };
 
 type TransferFundsStagesModalProps = {
@@ -311,10 +393,10 @@ type TransferFundsStagesModalProps = {
   testid: string
 };
 
-const TransferFundsStagesModal: FC<TransferFundsStagesModalProps & TTransferFunds> = ({ isVisible, onFinish, sender, amount, recipient, testid }) => {
+const TransferFundsStagesModal: FC<TransferFundsStagesModalProps & TTransferFunds> = ({ isVisible, onFinish, sender, amount, recipient, currency, testid }) => {
   const { stages, status, initiate } = useTransferFundsStages(sender);
   const { info } = useNotifications();
-  useEffect(() => { void initiate({ sender, recipient, amount }); }, [sender, recipient, amount]);
+  useEffect(() => { void initiate({ sender, recipient, amount, currency }); }, [sender, recipient, amount, currency]);
 
   useEffect(() => {
     if (status === StageStatus.success) {
@@ -432,4 +514,9 @@ const LowBalanceWrapper = styled(AmountWrapper)`
   span {
     color: ${Coral700} !important;
   }
+`;
+
+const SelectWrapper = styled(Select)`
+  width: 100%;
+  margin: 8px 0 0 0 !important;
 `;

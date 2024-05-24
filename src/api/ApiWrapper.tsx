@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChainPropertiesResponse } from '@unique-nft/sdk';
 import { useNotifications } from 'components/UI';
 
-import { ApiContextProps, ApiProvider } from './ApiContext';
+import { ApiContextProps, ApiProvider, ICurrency } from './ApiContext';
 import { Settings } from './restApi/settings/types';
 import { NetworkOptions, SdkClient } from './sdk/sdkClient';
 import config from '../config';
@@ -24,6 +24,11 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
   const [chainProperties, setChainProperties] = useState<ChainPropertiesResponse>();
   const [currentChainId, setCurrentChainId] = useState<string>(initialChainId);
   const [settings, setSettings] = useState<Settings>();
+  //TO DO apdate after settings change
+  const [currencies, setCurrencies] = useState<ICurrency[]>([
+    { collectionId: 0, title: 'OPL', id: '0', iconUrl: '', decimals: 18 },
+    { collectionId: 2807, title: 'TSTUSDT', id: '2807', iconUrl: '', decimals: 6 },
+  ]);
   const { fetchSettings } = useSettings();
   const { error } = useNotifications();
   const navigate = useNavigate();
@@ -124,9 +129,10 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
       settings,
       prefixes,
       currentChainId,
-      onChangeChainId
+      onChangeChainId,
+      currencies
     }),
-    [isRpcClientInitialized, currentChain, settings, currentChainId, prefixes, onChangeChainId, refetchSettings, chainProperties, sdkClient]
+    [isRpcClientInitialized, currentChain, settings, currentChainId, prefixes, onChangeChainId, refetchSettings, chainProperties, sdkClient, currencies]
   );
 
   return (

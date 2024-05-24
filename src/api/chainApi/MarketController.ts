@@ -1,6 +1,6 @@
 import { BN } from '@polkadot/util';
 import { AccountBalances } from 'account/types';
-import { Address, CrossAccountId } from '@unique-nft/utils';
+import { Address } from '@unique-nft/utils';
 import { sleep } from 'utils/helpers';
 
 import marketplaceAbi from './contracts/marketplace-0.json';
@@ -11,6 +11,7 @@ import { CollectionMode, TransactionOptions } from './types';
 import BaseController from './controllers/BaseController';
 import { MarketContract, MarketContractAbiItem } from 'api/restApi/settings/types';
 import { IMarketContractProperties } from './adapters/IMarketContractAdapter';
+import { Account } from 'account/types';
 
 class MarketController extends BaseController implements IMarketController {
   public decimals = 18; // TODO: move from controller to API
@@ -193,6 +194,58 @@ class MarketController extends BaseController implements IMarketController {
       proper,
       ethMirror
     };
+  }
+  async transferBalanceFungible({
+    collectionId,
+    address,
+    recipient,
+    amount,
+    account
+  }: {
+    collectionId: number;
+    address: string;
+    recipient: string;
+    amount: number;
+    account: Account;
+  }): Promise<any> {
+    const adapter = this.getAdapter(account);
+
+    return await adapter.transferBalanceFungible({
+      collectionId,
+      address,
+      recipient,
+      amount,
+      signer: account.signer
+    });
+  }
+
+  async getTransferBalanceFungibleFee({
+    collectionId,
+    address,
+    recipient,
+    amount,
+    account
+  }: {
+    collectionId: number;
+    address: string;
+    recipient: string;
+    amount: number;
+    account: Account;
+  }): Promise<any> {
+    const adapter = this.getAdapter(account);
+
+    return await adapter.getTransferBalanceFungibleFee({
+      collectionId,
+      address,
+      recipient,
+      amount,
+      signer: account.signer
+    });
+  }
+
+  async getAccountBalanceFungible({collectionId, address}: {collectionId: number, address: string}): Promise<any> {
+    const response = await this.uniqueSdk.fungible.getBalance({collectionId, address});
+    return response;
   }
 
   async getTransferTokenFee(sender: string, recipient: string, collectionId: number, tokenId: number, mode: CollectionMode, amount: number, { account }: TransactionOptions): Promise<string | null> {

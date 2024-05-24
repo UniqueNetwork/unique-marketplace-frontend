@@ -1,6 +1,6 @@
 import { ExtrinsicResultResponse, Sdk, Signer } from '@unique-nft/sdk/full';
 import { Address, EthCrossAccountId } from '@unique-nft/utils';
-import IMarketContractAdapter, { IMarketContractProperties } from './IMarketContractAdapter';
+import IMarketContractAdapter, { IMarketContractProperties, ITransferFungible } from './IMarketContractAdapter';
 
 import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
@@ -390,6 +390,29 @@ class UniqueAdapter implements IMarketContractAdapter {
 
   async setCollectionNesting(collectionId: number, value: CollectionNestingAndPermissionStruct$1): Promise<void> {
     throw new Error('not implemented');
+  }
+
+  async transferBalanceFungible({collectionId, address, recipient, amount, signer}: ITransferFungible): Promise<any> {
+    if (!signer) throw Error('No signer provided');
+
+    const typedSigner = signer as Signer;
+    
+    return await this.uniqueSdk.fungible.transferTokens.submitWaitResult(
+      { collectionId, amount, address, from: address, recipient },
+      { signer: typedSigner }
+    );
+  }
+
+  async getTransferBalanceFungibleFee({collectionId, address, recipient, amount, signer}: ITransferFungible): Promise<any> {
+    return (
+      await this.uniqueSdk.fungible.transferTokens({
+        collectionId,
+        amount: 10,
+        address,
+        from: address,
+        recipient
+      })
+    )?.fee?.formatted;
   }
 }
 

@@ -1,11 +1,10 @@
 import { Contract, ethers, Signer } from 'ethers';
-import { UniqueCollectionSchemaDecoded, UniqueTokenToCreate, SchemaTools } from '@unique-nft/schemas';
 import { IV2Token, SchemaTools as SchemaToolsV2 } from '@unique-nft/schemas-v2';
 import { CollectionProperty, CreateCollectionParsed, CreateCollectionV2ArgsDto, TokenV2ItemForMultipleDto, PropertyKeyPermission, SetCollectionLimitsBody, SetSponsorshipBody, TokenId, CreateTokenPayload } from '@unique-nft/sdk';
 import { UniqueNFTFactory, UniqueFungibleFactory, UniqueRefungibleTokenFactory, CollectionHelpersFactory, parseEthersV5TxReceipt } from '@unique-nft/solidity-interfaces';
 import { EthCrossAccountId, Address } from '@unique-nft/utils';
 import { Utf8 } from 'utf-helpers';
-import IMarketContractAdapter, { IMarketContractProperties } from './IMarketContractAdapter';
+import IMarketContractAdapter, { IMarketContractProperties, ITransferFungible } from './IMarketContractAdapter';
 
 import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
@@ -417,6 +416,32 @@ class MetamaskAdapter implements IMarketContractAdapter {
 
     // todo - not sure where to format wei to coin, there this.getChainValue in MarketController for instance, but nothing like that in CollectionController
     return ethers.utils.formatEther(collectionBurnFee.mul(gasPrice));
+  }
+
+  async transferBalanceFungible({collectionId, address, recipient, amount}: ITransferFungible): Promise<any> {
+    const fromCross = Address.extract.ethCrossAccountId(address);
+    const toCross = Address.extract.ethCrossAccountId(recipient);
+    const uniqueFungible = await UniqueFungibleFactory(collectionId, getEthereumSigner());
+    return await uniqueFungible.transferFromCross(fromCross, toCross, amount);
+  }
+
+  async getTransferBalanceFungibleFee({collectionId, address, recipient, amount}: ITransferFungible): Promise<string> {
+    const fromCross = Address.extract.ethCrossAccountId(address);
+    const toCross = Address.extract.ethCrossAccountId(recipient);
+    const uniqueFungible = await UniqueFungibleFactory(
+      collectionId,
+      getEthereumSigner()
+    );
+
+    const uniqueFungibleTransferFee =
+      await uniqueFungible.estimateGas.transferFromCross(
+        fromCross,
+        toCross,
+        amount
+      );
+    const gasPrice = await uniqueFungible.provider.getGasPrice();
+
+    return ethers.utils.formatEther(uniqueFungibleTransferFee.mul(gasPrice));
   }
 }
 

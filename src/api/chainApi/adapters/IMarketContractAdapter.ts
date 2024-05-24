@@ -7,6 +7,15 @@ export interface IMarketContractProperties {
     address: string
     abi?: object
 }
+
+export interface ITransferFungible {
+  collectionId: number
+  address: string
+  recipient: string
+  amount: number
+  signer?: Signer
+}
+
 interface IMarketContractAdapter extends IBaseAdapter {
   changeAllowance(from: string, to: string, collectionId: number, tokenId: number, targetAllowance: boolean, signer: Signer): Promise<void>
 
@@ -18,6 +27,9 @@ interface IMarketContractAdapter extends IBaseAdapter {
   changePrice(collectionId: number, tokenId: number, price: string, currency: number, signer: Signer, contract: IMarketContractProperties): Promise<void>
   getChangePriceFee(collectionId: number, tokenId: number, price: string, currency: number, signer: Signer, contract: IMarketContractProperties): Promise<string>
   setCollectionNesting(collectionId: number, value: CollectionNestingAndPermissionStruct$1): Promise<void>
+
+  transferBalanceFungible({collectionId, address, recipient, amount, signer}: ITransferFungible): Promise<void>
+  getTransferBalanceFungibleFee({collectionId, address, recipient, amount, signer}: ITransferFungible): Promise<string>
 }
 
 export default IMarketContractAdapter;
