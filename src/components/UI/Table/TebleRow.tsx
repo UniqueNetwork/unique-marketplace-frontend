@@ -53,8 +53,8 @@ export const TableRow: React.FC<TableRowItem> = ({
               ([token, balance]: [string, BalanceResponse]) => (
                 <BalanceLine
                   token={token}
-                  amount={balance.formatted}
-                  unit={balance.unit}
+                  amount={balance?.amount}
+                  unit={balance?.unit}
                   key={`balance_line_${token}`}
                 />
               )

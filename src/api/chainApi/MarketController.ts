@@ -200,13 +200,15 @@ class MarketController extends BaseController implements IMarketController {
     address,
     recipient,
     amount,
-    account
+    account,
+    decimals
   }: {
     collectionId: number;
     address: string;
     recipient: string;
     amount: number;
     account: Account;
+    decimals: number;
   }): Promise<any> {
     const adapter = this.getAdapter(account);
 
@@ -215,6 +217,7 @@ class MarketController extends BaseController implements IMarketController {
       address,
       recipient,
       amount,
+      decimals,
       signer: account.signer
     });
   }
@@ -244,6 +247,8 @@ class MarketController extends BaseController implements IMarketController {
   }
 
   async getAccountBalanceFungible({collectionId, address}: {collectionId: number, address: string}): Promise<any> {
+    if (!collectionId) return;
+
     const response = await this.uniqueSdk.fungible.getBalance({collectionId, address});
     return response;
   }

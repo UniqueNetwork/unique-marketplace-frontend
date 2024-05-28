@@ -403,16 +403,23 @@ class UniqueAdapter implements IMarketContractAdapter {
     );
   }
 
-  async getTransferBalanceFungibleFee({collectionId, address, recipient, amount, signer}: ITransferFungible): Promise<any> {
-    return (
-      await this.uniqueSdk.fungible.transferTokens({
+
+  async getTransferBalanceFungibleFee({
+    collectionId,
+    address,
+    recipient,
+    amount,
+  }: ITransferFungible): Promise<string> {
+    const res = await this.uniqueSdk.fungible.transferTokens.getFee(
+      {
         collectionId,
-        amount: 10,
+        amount,
         address,
         from: address,
         recipient
-      })
-    )?.fee?.formatted;
+      }
+    );
+    return res.fee.amount;
   }
 }
 

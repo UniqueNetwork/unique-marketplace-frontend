@@ -418,11 +418,15 @@ class MetamaskAdapter implements IMarketContractAdapter {
     return ethers.utils.formatEther(collectionBurnFee.mul(gasPrice));
   }
 
-  async transferBalanceFungible({collectionId, address, recipient, amount}: ITransferFungible): Promise<any> {
+  async transferBalanceFungible({collectionId, address, recipient, amount, decimals}: ITransferFungible): Promise<any> {
+    const amountWithDecimals = ethers.utils.parseUnits(
+      amount.toString(),
+      decimals
+    );
     const fromCross = Address.extract.ethCrossAccountId(address);
     const toCross = Address.extract.ethCrossAccountId(recipient);
     const uniqueFungible = await UniqueFungibleFactory(collectionId, getEthereumSigner());
-    return await uniqueFungible.transferFromCross(fromCross, toCross, amount);
+    return await uniqueFungible.transferFromCross(fromCross, toCross, amountWithDecimals);
   }
 
   async getTransferBalanceFungibleFee({collectionId, address, recipient, amount}: ITransferFungible): Promise<string> {

@@ -22,7 +22,8 @@ export const useTransferFundsStages = (accountAddress: string) => {
           address: accountAddress,
           recipient: params.txParams?.recipient,
           amount: params.txParams?.amount,
-          account: params.options.account
+          account: params.options?.account,
+          decimals: params.txParams?.decimals
         });
         fetchAccounts();
       } else {

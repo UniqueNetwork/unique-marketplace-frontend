@@ -13,6 +13,7 @@ export interface ITransferFungible {
   address: string
   recipient: string
   amount: number
+  decimals?: number
   signer?: Signer
 }
 
@@ -28,8 +29,8 @@ interface IMarketContractAdapter extends IBaseAdapter {
   getChangePriceFee(collectionId: number, tokenId: number, price: string, currency: number, signer: Signer, contract: IMarketContractProperties): Promise<string>
   setCollectionNesting(collectionId: number, value: CollectionNestingAndPermissionStruct$1): Promise<void>
 
-  transferBalanceFungible({collectionId, address, recipient, amount, signer}: ITransferFungible): Promise<void>
-  getTransferBalanceFungibleFee({collectionId, address, recipient, amount, signer}: ITransferFungible): Promise<string>
+  transferBalanceFungible({collectionId, address, recipient, amount, decimals, signer}: ITransferFungible): Promise<void>
+  getTransferBalanceFungibleFee({collectionId, address, recipient, amount, decimals, signer}: ITransferFungible): Promise<string>
 }
 
 export default IMarketContractAdapter;

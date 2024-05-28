@@ -22,7 +22,6 @@ import { Account } from 'account/types';
 import { FeeMessage } from 'components';
 import { useAccountsFilter } from 'hooks/useAccountsFilter';
 import { SelectOptionProps } from 'components/UI/types';
-import { ethers } from 'ethers';
 
 export type TransferFundsModalProps = {
   isVisible: boolean
@@ -37,12 +36,14 @@ export const TransferFundsModal: FC<TransferFundsModalProps> = ({ isVisible, sen
   const [recipient, setRecipient] = useState<string>('');
   const [amount, setAmount] = useState<number>(0);
   const [currency, setCurrency] = useState(0);
+  const [decimals, setDecimals] = useState(0);
 
-  const onTransfer = useCallback((_sender: string, _recipient: string, _amount: string, currency: number) => {
+  const onTransfer = useCallback((_sender: string, _recipient: string, _amount: string, _currency: number, _decimals) => {
     setRecipient(_recipient);
     setSender(_sender);
     setAmount(Number(_amount));
-    setCurrency(currency);
+    setCurrency(_currency);
+    setDecimals(_decimals);
     setStatus('transfer-stage');
   }, [setStatus, setRecipient, setAmount]);
 
@@ -67,6 +68,7 @@ export const TransferFundsModal: FC<TransferFundsModalProps> = ({ isVisible, sen
       recipient={recipient}
       amount={amount}
       currency={currency}
+      decimals={decimals}
       onFinish={onFinishStages}
       testid={`${testid}-stages`}
     />);
@@ -77,13 +79,13 @@ export const TransferFundsModal: FC<TransferFundsModalProps> = ({ isVisible, sen
 type AskSendFundsModalProps = {
   isVisible: boolean
   senderAddress: string
-  onFinish(sender: string, recipient: string, amount: string, currency: number): void
+  onFinish(sender: string, recipient: string, amount: string, currency: number, decimals: number): void
   onClose(): void
   testid: string
 }
 
 export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, onFinish, senderAddress, onClose, testid }) => {
-  const { chainProperties, api, prefixes } = useApi();
+  const { api, prefixes } = useApi();
   const { accounts } = useAccounts();
   const [sender, setSender] = useState<Account>();
   const [recipientAddress, setRecipientAddress] = useState<string | Account | undefined>();
@@ -95,7 +97,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   const deviceSize = useDeviceSize();
   const { currencies } = useApi();
   const [selectedCurrencyOption, setSelectedCurrencyOption] = useState(currencies[0]);
-  const selectedFungibleToken = useMemo(() => selectedCurrencyOption.id !== currencies[0].id, [selectedCurrencyOption]);
+  const isSelectFungibleToken = useMemo(() => selectedCurrencyOption.id !== currencies[0].id, [selectedCurrencyOption]);
 
   const { filteredAccounts, onFilter, onReset } = useAccountsFilter({
     excluded: useMemo(() => sender ? [sender?.address] : [], [sender])
@@ -109,7 +111,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
 
   const getFee = useCallback((newRecipientAddress, amount: number) => {
     setIsFeeLoading(true);
-    return debounce(() => {
+    return debounce(async() => {
       if (!sender || !api?.market || !newRecipientAddress) return setIsFeeLoading(false);
       if (!amount) {
         setFee('0');
@@ -117,20 +119,24 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
         return;
       }
       const recipient = typeof newRecipientAddress === 'string' ? newRecipientAddress : newRecipientAddress?.address;
-      api?.market?.getTransferBalanceFee(sender.address, recipient, amount, { account: sender })
-      .then((fee) => {
+      try {
+        const fee = isSelectFungibleToken 
+          ? await api?.market?.getTransferBalanceFungibleFee({ 
+              collectionId: selectedCurrencyOption.collectionId,
+              address: sender.address,
+              recipient,
+              amount,
+              account: sender
+            })
+          : await api?.market?.getTransferBalanceFee(sender.address, recipient, amount, { account: sender });
         setFee(fee || '0');
-      }).catch((e) => {
+      } catch (e) {
         console.error('Failed to get fee: ', e);
-      }).finally(() => {
+      } finally {
         setIsFeeLoading(false);
-      });
+      }
     }, 300);
-  }, [api?.market, sender]);
-
-  const recipientBalance = useMemo(() => {
-    return typeof recipientAddress !== 'string' && recipientAddress?.balances?.proper.parsed;
-  }, [recipientAddress]);
+  }, [api?.market, sender, isSelectFungibleToken]);
 
   const onAmountChange = useCallback((value: string) => {
     setAmount(value);
@@ -138,9 +144,10 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   }, [setAmount, getFee, recipientAddress]);
 
   const isAmountGreaterThanBalance = useMemo(() => {
-    if (selectedFungibleToken) {
+    if (isSelectFungibleToken) {
       return (
         Number(
+          //TO DO after settings updates
           sender?.fungibleBalances?.get(selectedCurrencyOption.title)?.amount
         ) < Number(amount)
       );
@@ -148,7 +155,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
       const amountBN = new BN(fromStringToBnString(amount));
       return amountBN.gt(sender?.balances?.proper.raw || new BN(0));
     }
-  }, [amount, sender?.balances?.proper.raw, selectedFungibleToken]);
+  }, [amount, sender?.balances?.proper.raw, isSelectFungibleToken]);
 
   const isAmountPlusFeeGreaterThanBalance = useMemo(() => {
     const amountBN = new BN(fromStringToBnString(amount));
@@ -156,7 +163,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   }, [amount, sender?.balances?.proper.raw, fee]);
 
   const isConfirmDisabled = useMemo(() => {
-    return !isValidRecipientAddress || !sender || !recipientAddress || Number(amount) <= 0 || isAmountGreaterThanBalance || isAmountPlusFeeGreaterThanBalance;
+    return !isValidRecipientAddress || !sender || !recipientAddress || Number(amount) <= 0 || isAmountGreaterThanBalance || (!isSelectFungibleToken && isAmountPlusFeeGreaterThanBalance);
   }, [amount, recipientAddress, sender, isAmountGreaterThanBalance, isValidRecipientAddress, isAmountPlusFeeGreaterThanBalance]);
 
   const onSend = useCallback(() => {
@@ -166,15 +173,9 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     onFinish(
       sender?.address || '',
       recipient || '',
-      selectedCurrencyOption.id !== currencies[0].id
-        ? ethers.utils
-            .parseUnits(
-              amount.toString(),
-              decimals
-            )
-            .toString()
-        : amount.toString(),
-      Number(selectedCurrencyOption)
+      amount.toString(),
+      Number(selectedCurrencyOption.collectionId),
+      decimals
     );
   }, [sender, recipientAddress, amount, onFinish, isConfirmDisabled, selectedCurrencyOption]);
 
@@ -215,33 +216,41 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   const tokenSymbol = useMemo(() => selectedCurrencyOption.title || '', [selectedCurrencyOption]);
   const selectedBalance = useMemo(
     () =>
-      selectedFungibleToken
-        ? sender?.fungibleBalances?.get(tokenSymbol)?.formatted
+      isSelectFungibleToken
+        ? formatBalance(sender?.fungibleBalances?.get(tokenSymbol)?.amount || '')
         : formatBalance(sender?.balances?.proper.parsed || 0),
-    [tokenSymbol, sender, selectedFungibleToken]
+    [tokenSymbol, sender, isSelectFungibleToken]
   );
+
+  const recipientBalance = useMemo(() => {
+    if (typeof recipientAddress === 'string') return;
+
+    return isSelectFungibleToken
+      ? recipientAddress?.fungibleBalances?.get(tokenSymbol)?.amount || 0
+      : recipientAddress?.balances?.proper.parsed || 0;
+
+  }, [recipientAddress, tokenSymbol, isSelectFungibleToken]);
+
 
   const onSetMax = useCallback(async () => {
     if (!sender || !api?.market || !recipientAddress) return;
     setIsSetMaxLoading(true);
     try {
-      if (selectedFungibleToken) {
+      if (isSelectFungibleToken) {
         setAmount(String(sender?.fungibleBalances?.get(tokenSymbol)?.amount));
       } else {
         const recipient = typeof recipientAddress === 'string' ? recipientAddress : recipientAddress?.address;
         const fee = await api?.market?.getTransferBalanceFee(sender.address, recipient, Number(sender.balances?.proper.parsed), { account: sender });
-  
         const amount = Number(sender.balances?.proper.parsed) - Number(fee);
         setFee(fee);
         setAmount(amount > 0 ? ((amount * 10000 | 0) / 10000).toString() : (sender.balances?.proper.parsed || '0'));
       }
-
     } catch (e) {
       console.error('Failed to get max value: ', e);
     } finally {
       setIsSetMaxLoading(false);
     }
-  }, [api, sender, recipientAddress, selectedFungibleToken]);
+  }, [api, sender, recipientAddress, tokenSymbol, isSelectFungibleToken]);
 
   const total = useMemo(() => {
     if (!amount || !fee || fee === '0') return null;
@@ -320,7 +329,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
           <Text
             testid={`${testid}-recipient-balance`}
             size={'s'}
-          >{`${formatBalance(recipientBalance || 0)} ${tokenSymbol}`}</Text>
+          >{`${formatBalance(recipientBalance)} ${tokenSymbol}`}</Text>
         )}
       </AmountWrapper>
       {!isValidRecipientAddress && (
@@ -352,7 +361,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
           <Text size={'s'}>Your balance is too low</Text>
         </LowBalanceWrapper>
       )}
-      {!isAmountGreaterThanBalance && isAmountPlusFeeGreaterThanBalance && (
+      {!isSelectFungibleToken && !isAmountGreaterThanBalance && isAmountPlusFeeGreaterThanBalance && (
         <LowBalanceWrapper>
           <Text size={'s'}>
             Your balance is insufficient due to transaction fee
@@ -367,7 +376,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
         }
         testid={`${testid}-fee-message`}
       />
-      {total && (
+      {(total && !isSelectFungibleToken) && (
         <TotalWrapper>
           <Text size='m'>
             Total ~ {total} {tokenSymbol}
@@ -393,10 +402,10 @@ type TransferFundsStagesModalProps = {
   testid: string
 };
 
-const TransferFundsStagesModal: FC<TransferFundsStagesModalProps & TTransferFunds> = ({ isVisible, onFinish, sender, amount, recipient, currency, testid }) => {
+const TransferFundsStagesModal: FC<TransferFundsStagesModalProps & TTransferFunds> = ({ isVisible, onFinish, sender, amount, recipient, currency, decimals, testid }) => {
   const { stages, status, initiate } = useTransferFundsStages(sender);
   const { info } = useNotifications();
-  useEffect(() => { void initiate({ sender, recipient, amount, currency }); }, [sender, recipient, amount, currency]);
+  useEffect(() => { void initiate({ sender, recipient, amount, currency, decimals }); }, [sender, recipient, amount, currency, decimals]);
 
   useEffect(() => {
     if (status === StageStatus.success) {
