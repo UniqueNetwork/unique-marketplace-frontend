@@ -325,11 +325,11 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
         />
       </RecipientSelectWrapper>
       <AmountWrapper>
-        {recipientBalance && (
+        {recipientAddress && (
           <Text
             testid={`${testid}-recipient-balance`}
             size={'s'}
-          >{`${formatBalance(recipientBalance)} ${tokenSymbol}`}</Text>
+          >{`${formatBalance(recipientBalance || 0)} ${tokenSymbol}`}</Text>
         )}
       </AmountWrapper>
       {!isValidRecipientAddress && (
