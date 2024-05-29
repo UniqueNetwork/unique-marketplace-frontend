@@ -7,7 +7,7 @@ import { useAccounts } from '../useAccounts';
 import useStages from '../useStages';
 
 export const useSellFixStages = (collectionId: number, tokenId: number) => {
-  const { api } = useApi();
+  const { api, currencyMap } = useApi();
   const { selectedAccount } = useAccounts();
   const marketApi = api?.market;
 
@@ -22,7 +22,7 @@ export const useSellFixStages = (collectionId: number, tokenId: number) => {
     title: 'Putting token on sale',
     description: '',
     status: StageStatus.default,
-    action: ({ txParams, options }) => marketApi?.sellFix(collectionId, tokenId, Number(txParams.price), txParams.currency, 1, options) // TODO: price string -> number
+    action: ({ txParams, options }) => marketApi?.sellFix(collectionId, tokenId, Number(txParams.price), txParams.currency, currencyMap.get(String(txParams.currency))?.decimals || 18, 1, options) // TODO: price string -> number
   }], [selectedAccount, marketApi, collectionId, tokenId]);
   const { stages, error, status, initiate } = useStages<TFixPriceProps>(sellFixStages, selectedAccount);
 

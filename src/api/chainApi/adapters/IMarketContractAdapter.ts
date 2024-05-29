@@ -17,11 +17,21 @@ export interface ITransferFungible {
   signer?: Signer
 }
 
+export interface IPurchaseTokenData {
+  to: EthCrossAccountId;
+  collectionId: number;
+  tokenId: number;
+  price: string;
+  amount: number;
+  signer: Signer;
+  contract: IMarketContractProperties;
+}
+
 interface IMarketContractAdapter extends IBaseAdapter {
   changeAllowance(from: string, to: string, collectionId: number, tokenId: number, targetAllowance: boolean, signer: Signer): Promise<void>
 
   sell(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, currency: number, amount: number, signer: Signer, contract: IMarketContractProperties): Promise<void>
-  buy(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer, contract: IMarketContractProperties): Promise<void>
+  buy({to, collectionId, tokenId, price, amount, signer, contract}:  IPurchaseTokenData): Promise<void>
   getSellFee(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, currency: number, amount: number, signer: Signer, contract: IMarketContractProperties): Promise<string>
   getBuyFee(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer, contract: IMarketContractProperties): Promise<string>
 
@@ -31,6 +41,8 @@ interface IMarketContractAdapter extends IBaseAdapter {
 
   transferBalanceFungible({collectionId, address, recipient, amount, decimals, signer}: ITransferFungible): Promise<void>
   getTransferBalanceFungibleFee({collectionId, address, recipient, amount, decimals, signer}: ITransferFungible): Promise<string>
+
+  allowanceFungible({collectionId, address, recipient, amount, signer}: ITransferFungible): Promise<any>
 }
 
 export default IMarketContractAdapter;

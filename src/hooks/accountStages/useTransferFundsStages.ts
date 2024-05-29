@@ -25,7 +25,6 @@ export const useTransferFundsStages = (accountAddress: string) => {
           account: params.options?.account,
           decimals: params.txParams?.decimals
         });
-        fetchAccounts();
       } else {
         await marketApi?.transferBalance(
           params.txParams.sender,

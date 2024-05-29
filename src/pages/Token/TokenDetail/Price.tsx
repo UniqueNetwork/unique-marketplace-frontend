@@ -1,25 +1,31 @@
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { Icon, Heading } from 'components/UI';
 import { useApi } from '../../../hooks/useApi';
 import { formatBalance } from 'utils/textUtils';
+import { OfferPrice } from 'api/restApi/offers/types';
 
 interface PriceProps {
-  price: string;
+  price: OfferPrice
   testid?: string
 }
 
 export const Price: FC<PriceProps> = ({ price, testid = '' }) => {
-  const { currentChainId } = useApi();
+  const { currentChainId, currencyMap } = useApi();
+  const currentCurrency = useMemo(
+    () => currencyMap.get(String(price.currency)),
+    [currencyMap, price.currency]
+  );
+
   return (
     <PriceWrapper>
       <Row>
         <Heading
           testid={`${testid}-price`}
           size={'1'}
-        >{formatBalance(price)}</Heading>
-        <Icon name={`chain-${currentChainId}`} size={32} />
+        >{formatBalance(Number(price.raw) / (10 ** (currentCurrency?.decimals || 1)))}</Heading>
+        {price.currency ? currentCurrency?.title : <Icon name={`chain-${currentChainId}`} size={32} />}
       </Row>
     </PriceWrapper>
   );

@@ -6,10 +6,9 @@ import { Dispatch, SetStateAction, useCallback, useRef, useState } from 'react';
 import { Account } from './types';
 
 export const useBalanceSubscriptions = () => {
-  const { api, chainProperties } = useApi();
+  const { api, chainProperties, currencies: erc20Tokens } = useApi();
   const sdkSocketClient = useRef<SocketClient>();
   const [isBalancesFetching, setIsBalancesFetching] = useState(false);
-  const { currencies: erc20Tokens } = useApi();
 
   const subscribeBalancesChanges = useCallback(async (
     accounts: Map<string, Account>,
@@ -31,14 +30,16 @@ export const useBalanceSubscriptions = () => {
       const fungibleBalances = new Map();
 
       for (const token of erc20Tokens) {
-        try {
-          const erc20 = await api?.market?.getAccountBalanceFungible({
-            collectionId: token.collectionId,
-            address: account.address
-          });
-          fungibleBalances.set(token.title, erc20);
-        } catch (error) {
-          console.error(`Error fetching balance for ${token.title}:`, error);
+        if (token.collectionId) {
+          try {
+            const erc20 = await api?.market?.getAccountBalanceFungible({
+              collectionId: token.collectionId,
+              address: account.address
+            });
+            fungibleBalances.set(String(token.collectionId), erc20);
+          } catch (error) {
+            console.error(`Error fetching balance for ${token.title}:`, error);
+          }
         }
       }
 
@@ -57,12 +58,18 @@ export const useBalanceSubscriptions = () => {
         client.subscribeAccountCurrentBalance({ address: Address.is.substrateAddress(account.address)
           ? Address.normalize.substrateAddress(account.address, chainProperties?.SS58Prefix)
           : account.address });
+        
+        client.subscribeCollection({ collectionId: 2807, signer: Address.is.substrateAddress(account.address)
+          ? Address.normalize.substrateAddress(account.address, chainProperties?.SS58Prefix)
+          : account.address });
 
         const ethMirror = Address.mirror.substrateToEthereum(account.address);
         client.subscribeAccountCurrentBalance({ address: Address.mirror.ethereumToSubstrate(ethMirror, chainProperties?.SS58Prefix) });
+        client.subscribeCollection({ collectionId: 2807, signer: Address.mirror.ethereumToSubstrate(ethMirror, chainProperties?.SS58Prefix) });
       } else {
         const substrateMirror = Address.mirror.ethereumToSubstrate(account.address, chainProperties?.SS58Prefix);
         client.subscribeAccountCurrentBalance({ address: substrateMirror });
+        client.subscribeCollection({ collectionId: 2807, signer: substrateMirror });
       }
     });
 
@@ -96,6 +103,50 @@ export const useBalanceSubscriptions = () => {
               return Address.compare.substrateAddresses(substrateMirror, address);
             });
     };
+
+    client.on(SubscriptionEvents.COLLECTIONS, (_, data) => {
+      try {
+        const address = data.parsed.address;
+        const addressTo = data.parsed.addressTo;
+        const amount = data.parsed.amount;
+        const collectionId = data.parsed.collectionId;
+
+        setAccounts((accounts)=> {
+          const accountsCopy = new Map(accounts);
+          if (!accounts || !addressTo || !amount || !address) return accountsCopy;
+
+          const updateAccountBalance = (  account: Account | undefined,
+            collectionId: string,
+            amountChange: number) => {
+            if (!account || !account.fungibleBalances) return false;
+            
+            const fungibleTokenItem = account.fungibleBalances?.get(String(collectionId));
+            if (!fungibleTokenItem) return false;
+            
+            const updatedRawAmount = Number(fungibleTokenItem.raw) + amountChange;
+            
+            account.fungibleBalances.set(String(collectionId), {
+              ...fungibleTokenItem,
+              amount: (updatedRawAmount / (10 ** fungibleTokenItem.decimals)).toFixed(4),
+              raw: String(updatedRawAmount),
+            });
+            return true;
+          };
+          
+          const amountNumber = Number(amount);
+          
+          const accountTo = accountsCopy.get(addressTo);
+          updateAccountBalance(accountTo, String(collectionId), amountNumber);
+          
+          const accountFrom = accountsCopy.get(address);
+          updateAccountBalance(accountFrom, String(collectionId), -amountNumber);
+          
+          return accountsCopy;     
+        });
+      } catch (e) {
+        console.error('Failed to get balance update: ', e);
+      }
+    });
 
     client.on(SubscriptionEvents.ACCOUNT_CURRENT_BALANCE, (_, data) => {
       try {

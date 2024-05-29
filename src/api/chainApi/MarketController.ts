@@ -115,14 +115,14 @@ class MarketController extends BaseController implements IMarketController {
    * @param amount - amount of fractions, 1 for NFT
    * @param param4 - signer and extras
    */
-  async sellFix(collectionId: number, tokenId: number, price: number, currency: number, amount: number, { account }: TransactionOptions): Promise<void> {
+  async sellFix(collectionId: number, tokenId: number, price: number, currency: number, decimals: number, amount: number, { account }: TransactionOptions): Promise<void> {
     const from = Address.extract.ethCrossAccountId(account.address);
     const to = this.actualContract.address;
     const isAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from: account.address, to });
     if (!isAllowed.isAllowed) throw new Error('Token not approved for sale');
     const adapter = this.getAdapter(account);
     // chain format from human format: 1.25 -> 1250000000000000000
-    const priceWithDecimals = (price * (10 ** this.decimals)).toLocaleString('fullwide', { useGrouping: false });
+    const priceWithDecimals = (collectionId ? (price * (10 ** decimals)) : (price * (10 ** this.decimals))).toLocaleString('fullwide', { useGrouping: false });
     await adapter.sell(from, collectionId, tokenId, priceWithDecimals, currency, amount, account.signer, this.actualContract);
     await sleep(1000); // little lag to make sure offer is added to db
   }
@@ -139,14 +139,14 @@ class MarketController extends BaseController implements IMarketController {
     const adapter = this.getAdapter(account);
 
     const parsedPrice = BigInt(value.hex).toString();
-    await adapter.buy(to, collectionId, tokenId, parsedPrice, amount, account.signer,
-      contractAddress
+    await adapter.buy({to, collectionId, tokenId, price: parsedPrice, amount, signer: account.signer,
+      contract: contractAddress
       ? {
         address: contractAddress,
         abi: this.contractsAbi[contractAddress]
       }
       : this.actualContract
-    );
+    });
   }
 
   async cancelFix(collectionId: number, tokenId: number, amount: number, options: TransactionOptions): Promise<void> {
@@ -246,6 +246,30 @@ class MarketController extends BaseController implements IMarketController {
     });
   }
 
+  async allowanceFungible({
+    collectionId,
+    address,
+    recipient,
+    amount,
+    account
+  }: {
+    collectionId: number;
+    address: string;
+    recipient: string;
+    amount: number;
+    account: Account;
+  }): Promise<any> {
+    const adapter = this.getAdapter(account);
+
+    return await adapter.allowanceFungible({
+      collectionId,
+      address,
+      recipient,
+      amount,
+      signer: account.signer
+    });
+  }
+
   async getAccountBalanceFungible({collectionId, address}: {collectionId: number, address: string}): Promise<any> {
     if (!collectionId) return;
 
@@ -310,6 +334,8 @@ class MarketController extends BaseController implements IMarketController {
 
     return this.getChainValue(rawFee, this.decimals).parsed.toString();
   }
+
+  // async
 }
 
 export default MarketController;

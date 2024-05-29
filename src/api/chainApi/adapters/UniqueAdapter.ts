@@ -1,6 +1,6 @@
 import { ExtrinsicResultResponse, Sdk, Signer } from '@unique-nft/sdk/full';
 import { Address, EthCrossAccountId } from '@unique-nft/utils';
-import IMarketContractAdapter, { IMarketContractProperties, ITransferFungible } from './IMarketContractAdapter';
+import IMarketContractAdapter, { IMarketContractProperties, IPurchaseTokenData, ITransferFungible } from './IMarketContractAdapter';
 
 import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
@@ -270,10 +270,12 @@ class UniqueAdapter implements IMarketContractAdapter {
     return res.fee.raw;
   }
 
-  async buy(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer, contract: IMarketContractProperties): Promise<void> {
+  async buy({to, collectionId, tokenId, price, amount, signer, contract}:  IPurchaseTokenData): Promise<void> {
+    const typedSigner = signer as Signer;
+    
     await this.uniqueSdk.evm.send.submitWaitResult({
       abi: contract.abi || marketplaceAbi as any,
-      address: signer.address || '',
+      address: typedSigner.address || '',
       contractAddress: contract.address,
       value: price,
       funcName: 'buy',
@@ -284,7 +286,7 @@ class UniqueAdapter implements IMarketContractAdapter {
         amount,
         buyer: to
       }
-    }, { signer });
+    }, { signer: typedSigner });
   }
 
   async changePrice(collectionId: number, tokenId: number, price: string, currency: number, signer: Signer, contract: IMarketContractProperties): Promise<void> {
@@ -402,6 +404,17 @@ class UniqueAdapter implements IMarketContractAdapter {
       { signer: typedSigner }
     );
   }
+
+  async allowanceFungible({collectionId, address, recipient, amount, signer}: ITransferFungible): Promise<any> {
+    if (!signer) throw Error('No signer provided');
+    const typedSigner = signer as Signer;
+
+    return await this.uniqueSdk.fungible.approveTokens.submitWaitResult(
+      { collectionId, amount, address, spender: recipient },
+      { signer: typedSigner }
+    );
+  }
+
 
 
   async getTransferBalanceFungibleFee({

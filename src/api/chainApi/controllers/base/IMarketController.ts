@@ -7,7 +7,7 @@ interface IMarketController {
   // price is in SC format
   // ex. to sell for 1 QTZ - price=100000000000000000(18 decimals)
   // amount - "1" for NFT, and amount of pieces for RFT
-  sellFix(collectionId: number, tokenId: number, price: number, currency: number, amount: number, options: TransactionOptions): Promise<void>
+  sellFix(collectionId: number, tokenId: number, price: number, currency: number, decimals: number, amount: number, options: TransactionOptions): Promise<void>
   buyFix(collectionId: number, tokenId: number, amount: number, options: TransactionOptions): Promise<void>
   cancelFix(collectionId: number, tokenId: number, amount: number, options: TransactionOptions): Promise<void>
 

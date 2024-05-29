@@ -26,9 +26,28 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
   const [settings, setSettings] = useState<Settings>();
   //TO DO apdate after settings change
   const [currencies, setCurrencies] = useState<ICurrency[]>([
-    { collectionId: 0, title: 'OPL', id: '0', iconUrl: '', decimals: 18 },
-    { collectionId: 2807, title: 'TSTUSDT', id: '2807', iconUrl: '', decimals: 6 },
+    {
+      id: '0',
+      collectionId: 0,
+      title: 'OPL',
+      iconUrl: '',
+      decimals: 18,
+      fee: 0
+    },
+    {
+      id: '2807',
+      collectionId: 2807,
+      title: 'TSTUSDT',
+      iconUrl: '',
+      decimals: 6,
+      fee: 0
+    }
   ]);
+
+  const currencyMap = useMemo(() => {
+    return new Map(currencies.map((currency) => [currency.id, currency]));
+  }, [currencies]);
+
   const { fetchSettings } = useSettings();
   const { error } = useNotifications();
   const navigate = useNavigate();
@@ -130,9 +149,10 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
       prefixes,
       currentChainId,
       onChangeChainId,
-      currencies
+      currencies,
+      currencyMap
     }),
-    [isRpcClientInitialized, currentChain, settings, currentChainId, prefixes, onChangeChainId, refetchSettings, chainProperties, sdkClient, currencies]
+    [isRpcClientInitialized, currentChain, settings, currentChainId, prefixes, onChangeChainId, refetchSettings, chainProperties, sdkClient, currencies, currencyMap]
   );
 
   return (

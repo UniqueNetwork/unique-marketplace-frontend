@@ -6,7 +6,7 @@ import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import { useAccounts } from 'hooks/useAccounts';
 import { ConnectWalletModalContext } from 'account/ConnectWalletModalContext';
-import { BalanceLine } from 'components/UI/Table/TebleRow';
+import { BalanceLine } from 'components/UI/Table/BalanceDisplay';
 
 const testid = 'header';
 

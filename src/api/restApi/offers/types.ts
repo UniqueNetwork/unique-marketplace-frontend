@@ -34,14 +34,16 @@ export type CollectionDescription = CollectionInfoWithSchemaResponse
 
 export type TokenDescription = TokenByIdResponse & { nestingChildTokens: INestingToken[] };
 
+export type OfferPrice = {
+  parsed: number, // 123
+  raw: string // 123000000000000
+  currency: number
+}
+
 export type Offer = {
   collectionId: number
   tokenId: number
-  price: {
-    parsed: number, // 123
-    raw: string // 123000000000000
-    currency: number
-  }
+  price: OfferPrice
   priceParsed: string
   quoteId: number
   seller: string

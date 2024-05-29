@@ -4,7 +4,7 @@ import { CollectionProperty, CreateCollectionParsed, CreateCollectionV2ArgsDto, 
 import { UniqueNFTFactory, UniqueFungibleFactory, UniqueRefungibleTokenFactory, CollectionHelpersFactory, parseEthersV5TxReceipt } from '@unique-nft/solidity-interfaces';
 import { EthCrossAccountId, Address } from '@unique-nft/utils';
 import { Utf8 } from 'utf-helpers';
-import IMarketContractAdapter, { IMarketContractProperties, ITransferFungible } from './IMarketContractAdapter';
+import IMarketContractAdapter, { IMarketContractProperties, IPurchaseTokenData, ITransferFungible } from './IMarketContractAdapter';
 
 import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
@@ -178,7 +178,7 @@ class MetamaskAdapter implements IMarketContractAdapter {
     return estimateGas.mul(gasPrice).toString();
   }
 
-  async buy(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer, contractProps: IMarketContractProperties): Promise<void> {
+  async buy({to, collectionId, tokenId, price, amount, contract: contractProps}: IPurchaseTokenData): Promise<void> {
     const contract = this.getContract(contractProps);
 
     const estimateGas = await contract.estimateGas.buy(collectionId, tokenId, amount, to, { value: price, gasLimit: buyGasLimit });
@@ -446,6 +446,16 @@ class MetamaskAdapter implements IMarketContractAdapter {
     const gasPrice = await uniqueFungible.provider.getGasPrice();
 
     return ethers.utils.formatEther(uniqueFungibleTransferFee.mul(gasPrice));
+  }
+
+  async allowanceFungible({collectionId, recipient, amount}: ITransferFungible): Promise<any> {
+    const toCross = Address.extract.ethCrossAccountId(recipient);
+    const uniqueFungible = await UniqueFungibleFactory(
+      collectionId,
+      getEthereumSigner()
+    );
+
+    return await uniqueFungible.approveCross(toCross, amount);
   }
 }
 

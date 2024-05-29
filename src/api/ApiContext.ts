@@ -12,6 +12,7 @@ export interface ICurrency {
   title: string
   iconUrl: string
   decimals: number
+  fee: number
 } 
 
 export type Api = {
@@ -33,6 +34,7 @@ export type ApiContextProps = {
   onChangeChainId(chainId: string): void
   refetchSettings(): Promise<void>
   currencies: ICurrency[]
+  currencyMap: Map<string, ICurrency>
 }
 
 const ApiContext: Context<ApiContextProps> = createContext({} as unknown as ApiContextProps);

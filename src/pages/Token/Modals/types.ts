@@ -19,6 +19,7 @@ export type TPurchaseProps = {
   accountAddress: string
   price: number
   amount: number
+  currency: number
 }
 
 export type TDelistProps = {

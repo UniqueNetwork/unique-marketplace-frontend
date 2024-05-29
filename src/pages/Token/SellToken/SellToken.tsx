@@ -53,7 +53,7 @@ export const SellToken: FC<SellTokenProps> = ({
   if (offer) {
     return (<>
       <Text size={'l'}>{'Price'}</Text>
-      <Price testid={testid} price={offer.price.parsed.toString()} />
+      <Price testid={testid} price={offer.price} />
       <RoyaltyValue value={royalty} />
       <ButtonWrapper>
         <Button

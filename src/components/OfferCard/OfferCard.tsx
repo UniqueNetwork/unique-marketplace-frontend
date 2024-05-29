@@ -18,7 +18,7 @@ export type TTokensCard = {
 };
 
 export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
-  const { currentChainId } = useApi();
+  const { currentChainId, currencies: erc20Tokens } = useApi();
   const { collectionIsCustomizable, collectionIsWearable } = useCollections();
 
   const {
@@ -99,7 +99,9 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
               testid={`${testid}-price`}
               size='l'
             >{formatBalance(offer.price.parsed, 4, true)}</Text>
-            <IconStyled name={`chain-${currentChainId?.toLowerCase()}`} size={16} />
+            {/* TO DO update after settings change */}
+            
+            {offer.price.currency ? <>&nbsp;{erc20Tokens.find((i) => i.collectionId === offer.price.currency)?.title}</> : <IconStyled name={`chain-${currentChainId?.toLowerCase()}`} size={16} />}
           </PriceWrapper>
         </TradingInfoWrapper>
       </Description>

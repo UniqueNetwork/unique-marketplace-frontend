@@ -97,7 +97,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   const deviceSize = useDeviceSize();
   const { currencies } = useApi();
   const [selectedCurrencyOption, setSelectedCurrencyOption] = useState(currencies[0]);
-  const isSelectFungibleToken = useMemo(() => selectedCurrencyOption.id !== currencies[0].id, [selectedCurrencyOption]);
+  const isSelectFungibleToken = useMemo(() => selectedCurrencyOption.id !== currencies[0].id, [currencies, selectedCurrencyOption.id]);
 
   const { filteredAccounts, onFilter, onReset } = useAccountsFilter({
     excluded: useMemo(() => sender ? [sender?.address] : [], [sender])
@@ -215,21 +215,20 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
 
   const tokenSymbol = useMemo(() => selectedCurrencyOption.title || '', [selectedCurrencyOption]);
   const selectedBalance = useMemo(
-    () =>
-      isSelectFungibleToken
-        ? formatBalance(sender?.fungibleBalances?.get(tokenSymbol)?.amount || '')
+    () => isSelectFungibleToken
+        ? formatBalance(sender?.fungibleBalances?.get(String(selectedCurrencyOption.id))?.amount || '')
         : formatBalance(sender?.balances?.proper.parsed || 0),
-    [tokenSymbol, sender, isSelectFungibleToken]
+    [isSelectFungibleToken, sender?.fungibleBalances, sender?.balances?.proper.parsed, selectedCurrencyOption.id]
   );
 
   const recipientBalance = useMemo(() => {
     if (typeof recipientAddress === 'string') return;
 
     return isSelectFungibleToken
-      ? recipientAddress?.fungibleBalances?.get(tokenSymbol)?.amount || 0
+      ? recipientAddress?.fungibleBalances?.get(String(selectedCurrencyOption.id))?.amount || 0
       : recipientAddress?.balances?.proper.parsed || 0;
 
-  }, [recipientAddress, tokenSymbol, isSelectFungibleToken]);
+  }, [recipientAddress, isSelectFungibleToken, selectedCurrencyOption.id]);
 
 
   const onSetMax = useCallback(async () => {
@@ -237,7 +236,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     setIsSetMaxLoading(true);
     try {
       if (isSelectFungibleToken) {
-        setAmount(String(sender?.fungibleBalances?.get(tokenSymbol)?.amount));
+        setAmount(String(sender?.fungibleBalances?.get(selectedCurrencyOption.id)?.amount));
       } else {
         const recipient = typeof recipientAddress === 'string' ? recipientAddress : recipientAddress?.address;
         const fee = await api?.market?.getTransferBalanceFee(sender.address, recipient, Number(sender.balances?.proper.parsed), { account: sender });
