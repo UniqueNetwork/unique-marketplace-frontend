@@ -1,5 +1,5 @@
 import { Context, Consumer, Provider, createContext } from 'react';
-import { AllowedCollections, Settings } from './restApi/settings/types';
+import { AllowedCollections, MarketContract, Settings } from './restApi/settings/types';
 import { UniqueSDKNFTController } from './chainApi/NFTController';
 import { UniqueSDKCollectionController } from './chainApi/collectionController';
 import { UniqueSDKRFTController } from './chainApi/RFTController';
@@ -35,6 +35,7 @@ export type ApiContextProps = {
   refetchSettings(): Promise<void>
   currencies: ICurrency[]
   currencyMap: Map<string, ICurrency>
+  lastContract: MarketContract | null
 }
 
 const ApiContext: Context<ApiContextProps> = createContext({} as unknown as ApiContextProps);

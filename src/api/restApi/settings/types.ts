@@ -13,6 +13,9 @@ export type AllowedCollections = {
 export type MarketContract = {
   address: string
   version: string
+  commission: number
+  createdAt: number
+  processedAt: number
 }
 
 export type MarketContractAbiItem = {

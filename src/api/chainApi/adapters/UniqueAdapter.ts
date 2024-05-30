@@ -415,8 +415,6 @@ class UniqueAdapter implements IMarketContractAdapter {
     );
   }
 
-
-
   async getTransferBalanceFungibleFee({
     collectionId,
     address,

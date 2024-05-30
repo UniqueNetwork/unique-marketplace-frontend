@@ -4,11 +4,12 @@ import { ChainPropertiesResponse } from '@unique-nft/sdk';
 import { useNotifications } from 'components/UI';
 
 import { ApiContextProps, ApiProvider, ICurrency } from './ApiContext';
-import { Settings } from './restApi/settings/types';
+import { MarketContract, Settings } from './restApi/settings/types';
 import { NetworkOptions, SdkClient } from './sdk/sdkClient';
 import config from '../config';
 import { useSettings } from './restApi/settings/settings';
 import { ChainIdLocalStorageKey, getInitialChainId } from '../utils/initialChainId';
+import { filterTheLastContract } from 'utils/filterTheLastContract';
 
 interface ChainProviderProps {
   children: React.ReactNode
@@ -43,6 +44,7 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
       fee: 0
     }
   ]);
+  const [lastContract, setLastContract] = useState<MarketContract | null>(null);
 
   const currencyMap = useMemo(() => {
     return new Map(currencies.map((currency) => [currency.id, currency]));
@@ -62,6 +64,7 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
       const currentNetworkOption = networkOptions.find((no) => no.networkId === currentChainId) || networkOptions[0];
 
       setSettings(currentNetworkOption.settings);
+      setLastContract(filterTheLastContract(currentNetworkOption.settings.blockchain.unique.contracts));
 
       const sdkClient = new SdkClient(currentNetworkOption);
       setSdkClient(sdkClient);
@@ -150,9 +153,10 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
       currentChainId,
       onChangeChainId,
       currencies,
-      currencyMap
+      currencyMap,
+      lastContract,
     }),
-    [isRpcClientInitialized, currentChain, settings, currentChainId, prefixes, onChangeChainId, refetchSettings, chainProperties, sdkClient, currencies, currencyMap]
+    [isRpcClientInitialized, currentChain, settings, currentChainId, prefixes, onChangeChainId, refetchSettings, chainProperties, sdkClient, currencies, currencyMap, lastContract]
   );
 
   return (
