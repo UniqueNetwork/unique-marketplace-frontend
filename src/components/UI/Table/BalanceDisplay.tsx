@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 import { BalanceResponse } from '@unique-nft/sdk';
+import { formatBalance } from 'utils/textUtils';
+import { useApi } from 'hooks/useApi';
 
 interface BalanceDisplayProps {
   balances: Map<string, BalanceResponse>;
@@ -38,17 +40,20 @@ const BalanceDisplay: React.FC<BalanceDisplayProps> = ({ balances }) => {
 export const BalanceLine = ({
   token,
   amount,
-  unit
+  unit,
 }: {
   token: string;
   amount: number | string;
   unit: string;
 }) => {
+  const { currencies } = useApi();
+  const currentCurrency = currencies.find((i) => i.title === token);
+
   return (
     <BalanceItem>
-      <TokenName>{token}:</TokenName>
+      <TokenName><img width={20} src={currentCurrency?.iconUrl} /></TokenName>
       <span>
-        {amount} {unit}
+        {formatBalance(amount)} {unit}
       </span>
     </BalanceItem>
   );

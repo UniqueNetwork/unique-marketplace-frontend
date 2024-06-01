@@ -24,7 +24,7 @@ export const usePurchaseFixStages = (
 
     if (currency !== 0) {
       stages.push({
-        title: 'Approve',
+        title: 'Approve allowance for spending ERC20 tokens',
         status: StageStatus.default,
         action: ({ txParams }: TInternalStageActionParams<TPurchaseProps>) => {
           return marketApi?.allowanceFungible({

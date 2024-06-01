@@ -309,7 +309,7 @@ class MarketController extends BaseController implements IMarketController {
     return !!this.contractsAbi[contractAddress]?.find(({ name }) => name === method);
   }
 
-  async changePrice(collectionId: number, tokenId: number, price: number, currency: number, { account, contractAddress }: TransactionOptions): Promise<void> {
+  async changePrice(collectionId: number, tokenId: number, price: number, currency: number, decimals: number, { account, contractAddress }: TransactionOptions): Promise<void> {
     const adapter = this.getAdapter(account);
     const contract = contractAddress
     ? {
@@ -317,7 +317,7 @@ class MarketController extends BaseController implements IMarketController {
         abi: this.contractsAbi[contractAddress]
       }
     : this.actualContract;
-    const priceWithDecimals = (price * (10 ** this.decimals)).toLocaleString('fullwide', { useGrouping: false });
+    const priceWithDecimals = (collectionId ? (price * (10 ** decimals)) : (price * (10 ** this.decimals))).toLocaleString('fullwide', { useGrouping: false });
     await adapter.changePrice(collectionId, tokenId, priceWithDecimals, currency, account.signer, contract);
   }
 

@@ -24,6 +24,13 @@ export type MarketContractAbiItem = {
   type: 'function'
 }
 
+export type ICurrencySettings = {
+  collectionId: number
+  decimals: number
+  fee: number
+  iconUrl: string
+}
+
 export type Settings = {
   blockchain: {
     escrowAddress: string // TODO: can be removed (after it is removed from BE)
@@ -33,6 +40,7 @@ export type Settings = {
       collections: AllowedCollections,
       contracts: MarketContract[],
       contractsAbi?: Record<string, MarketContractAbiItem[]>
+      currencies: ICurrencySettings[],
     }
   },
   auction: {

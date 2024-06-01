@@ -35,14 +35,6 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
       decimals: 18,
       fee: 0
     },
-    {
-      id: '2807',
-      collectionId: 2807,
-      title: 'TSTUSDT',
-      iconUrl: '',
-      decimals: 6,
-      fee: 0
-    }
   ]);
   const [lastContract, setLastContract] = useState<MarketContract | null>(null);
 
@@ -64,6 +56,15 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
       const currentNetworkOption = networkOptions.find((no) => no.networkId === currentChainId) || networkOptions[0];
 
       setSettings(currentNetworkOption.settings);
+      const currencies =
+        currentNetworkOption.settings.blockchain.unique.currencies.map(
+          (currency) => ({
+            ...currency,
+            id: String(currency.collectionId),
+            title: String(currency.collectionId)
+          })
+        );
+      setCurrencies(currencies);
       setLastContract(filterTheLastContract(currentNetworkOption.settings.blockchain.unique.contracts));
 
       const sdkClient = new SdkClient(currentNetworkOption);
@@ -153,10 +154,11 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
       currentChainId,
       onChangeChainId,
       currencies,
+      setCurrencies,
       currencyMap,
       lastContract,
     }),
-    [isRpcClientInitialized, currentChain, settings, currentChainId, prefixes, onChangeChainId, refetchSettings, chainProperties, sdkClient, currencies, currencyMap, lastContract]
+    [isRpcClientInitialized, currentChain, settings, currentChainId, prefixes, onChangeChainId, refetchSettings, chainProperties, sdkClient, currencies, currencyMap, lastContract, setCurrencies]
   );
 
   return (

@@ -21,7 +21,7 @@ import { fromStringToBnString } from 'utils/bigNum';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 import { fixPriceSellingCollectionIds } from '../constants';
 import { useCoinGeckoApi } from 'api/coinGeckoApi/useCoinGeckoApi';
-import { currencies } from './ChangePriceModal';
+import { SelectOptionProps } from 'components/UI/types';
 
 export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, collection, onFinish, setIsClosable, testid }) => {
   const { collectionId, tokenId } = token || {};
@@ -67,7 +67,7 @@ type TAskSellModalProps = {
 }
 
 export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, onSellFixPrice, testid }) => {
-  const { chainProperties, api, currentChainId } = useApi();
+  const { api, currentChainId, currencies, currencyMap } = useApi();
   const { selectedAccount } = useAccounts();
   const [priceInputValue, setPriceInputValue] = useState<string>();
 
@@ -87,7 +87,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
     })();
   }, []);
 
-  const [selectedCurrencyOption, setSelectedCurrencyOption] = useState(currencies[0].id);
+  const [selectedCurrencyOption, setSelectedCurrencyOption] = useState(currencyMap.get('0'));
 
   const [isSponsored, setIsSponsored] = useState(false);
 
@@ -110,7 +110,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
     onSellFixPrice({ price: priceInputValue, accountAddress: selectedAccount.address, currency: Number(selectedCurrencyOption) } as TFixPriceProps); // TODO: proper typing, proper calculated object
   }, [priceInputValue, selectedAccount, selectedCurrencyOption, onSellFixPrice]);
 
-  const tokenSymbol = useMemo(() => currencies.find((item) => item.id === selectedCurrencyOption)?.title || '', [selectedCurrencyOption]);
+  const tokenSymbol = useMemo(() => selectedCurrencyOption?.title, [selectedCurrencyOption]);
 
   const { fee, fetchingFee, getFee } = useGetFee<Parameters<MarketController['getSellFixFee']>>(api?.market?.getSellFixFee.bind(api?.market));
 
@@ -139,6 +139,11 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
     }, 300)();
   }, [collectionId, tokenId, priceInputValue, api?.market, selectedAccount?.address]);
 
+  const onSelectChange = useCallback((value: SelectOptionProps) => {
+    const currencySelected = currencyMap.get(value.id as string);
+    setSelectedCurrencyOption(currencySelected);
+  }, []);
+
   if (isFetching) return <Loader />;
 
   const FixedPriceTab = (
@@ -150,9 +155,9 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
         testid={`${testid}-price-input`}
       />
       <SelectWrapper
-        onChange={(e: any) => setSelectedCurrencyOption(e.id)}
-        options={currencies}
-        value={selectedCurrencyOption}
+        onChange={onSelectChange}
+        options={currencies.map((option) => ({id: option.id, title: option.title}))}
+        value={selectedCurrencyOption?.id || ''}
         testid={`${testid}-sorting-select`}
         label={'Select currency'}
       />

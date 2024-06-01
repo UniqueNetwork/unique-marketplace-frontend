@@ -95,9 +95,9 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   const [isFeeLoading, setIsFeeLoading] = useState(false);
   const [isSetMaxLoading, setIsSetMaxLoading] = useState(false);
   const deviceSize = useDeviceSize();
-  const { currencies } = useApi();
-  const [selectedCurrencyOption, setSelectedCurrencyOption] = useState(currencies[0]);
-  const isSelectFungibleToken = useMemo(() => selectedCurrencyOption.id !== currencies[0].id, [currencies, selectedCurrencyOption.id]);
+  const { currencies, currencyMap } = useApi();
+  const [selectedCurrencyOption, setSelectedCurrencyOption] = useState(currencyMap.get('0'));
+  const isSelectFungibleToken = useMemo(() => selectedCurrencyOption?.id !== currencyMap.get('0')?.id, [currencies, selectedCurrencyOption?.id]);
 
   const { filteredAccounts, onFilter, onReset } = useAccountsFilter({
     excluded: useMemo(() => sender ? [sender?.address] : [], [sender])
@@ -122,7 +122,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
       try {
         const fee = isSelectFungibleToken 
           ? await api?.market?.getTransferBalanceFungibleFee({ 
-              collectionId: selectedCurrencyOption.collectionId,
+              collectionId: selectedCurrencyOption?.collectionId || 0,
               address: sender.address,
               recipient,
               amount,
@@ -145,10 +145,10 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
 
   const isAmountGreaterThanBalance = useMemo(() => {
     if (isSelectFungibleToken) {
+      if (!selectedCurrencyOption?.id) return false;
       return (
         Number(
-          //TO DO after settings updates
-          sender?.fungibleBalances?.get(selectedCurrencyOption.title)?.amount
+          sender?.fungibleBalances?.get(selectedCurrencyOption?.id)?.amount
         ) < Number(amount)
       );
     } else {
@@ -167,15 +167,15 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   }, [amount, recipientAddress, sender, isAmountGreaterThanBalance, isValidRecipientAddress, isAmountPlusFeeGreaterThanBalance]);
 
   const onSend = useCallback(() => {
-    if (isConfirmDisabled) return;
+    if (isConfirmDisabled || !selectedCurrencyOption) return;
     const recipient = typeof recipientAddress === 'string' ? recipientAddress : recipientAddress?.address;
-    const decimals = selectedCurrencyOption.decimals;
+    const decimals = selectedCurrencyOption?.decimals;
     onFinish(
       sender?.address || '',
       recipient || '',
       amount.toString(),
-      Number(selectedCurrencyOption.collectionId),
-      decimals
+      Number(selectedCurrencyOption?.collectionId),
+      decimals || 0
     );
   }, [sender, recipientAddress, amount, onFinish, isConfirmDisabled, selectedCurrencyOption]);
 
@@ -213,30 +213,39 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     getFee(recipientAddress, Number(amount))();
   }, [getFee, recipientAddress, amount]);
 
-  const tokenSymbol = useMemo(() => selectedCurrencyOption.title || '', [selectedCurrencyOption]);
-  const selectedBalance = useMemo(
-    () => isSelectFungibleToken
-        ? formatBalance(sender?.fungibleBalances?.get(String(selectedCurrencyOption.id))?.amount || '')
-        : formatBalance(sender?.balances?.proper.parsed || 0),
-    [isSelectFungibleToken, sender?.fungibleBalances, sender?.balances?.proper.parsed, selectedCurrencyOption.id]
-  );
-
-  const recipientBalance = useMemo(() => {
-    if (typeof recipientAddress === 'string') return;
+  const tokenSymbol = useMemo(() => selectedCurrencyOption?.title || '', [selectedCurrencyOption]);
+  const selectedBalance = useMemo(() => {
+    if (!selectedCurrencyOption) return;
 
     return isSelectFungibleToken
-      ? recipientAddress?.fungibleBalances?.get(String(selectedCurrencyOption.id))?.amount || 0
+      ? formatBalance(
+          sender?.fungibleBalances?.get(String(selectedCurrencyOption?.id))
+            ?.amount || ''
+        )
+      : formatBalance(sender?.balances?.proper.parsed || 0);
+  }, [
+    isSelectFungibleToken,
+    sender?.fungibleBalances,
+    sender?.balances?.proper.parsed,
+    selectedCurrencyOption?.id
+  ]);
+
+  const recipientBalance = useMemo(() => {
+    if (typeof recipientAddress === 'string' || !selectedCurrencyOption) return;
+
+    return isSelectFungibleToken
+      ? recipientAddress?.fungibleBalances?.get(String(selectedCurrencyOption?.id))?.amount || 0
       : recipientAddress?.balances?.proper.parsed || 0;
 
-  }, [recipientAddress, isSelectFungibleToken, selectedCurrencyOption.id]);
+  }, [recipientAddress, isSelectFungibleToken, selectedCurrencyOption?.id]);
 
 
   const onSetMax = useCallback(async () => {
-    if (!sender || !api?.market || !recipientAddress) return;
+    if (!sender || !api?.market || !recipientAddress || !selectedCurrencyOption) return;
     setIsSetMaxLoading(true);
     try {
       if (isSelectFungibleToken) {
-        setAmount(String(sender?.fungibleBalances?.get(selectedCurrencyOption.id)?.amount));
+        setAmount(String(sender?.fungibleBalances?.get(selectedCurrencyOption?.id)?.amount));
       } else {
         const recipient = typeof recipientAddress === 'string' ? recipientAddress : recipientAddress?.address;
         const fee = await api?.market?.getTransferBalanceFee(sender.address, recipient, Number(sender.balances?.proper.parsed), { account: sender });
@@ -340,7 +349,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
         onChange={(e: any) => setSelectedCurrencyOption(e)}
         //@ts-ignore
         options={currencies}
-        value={selectedCurrencyOption.id}
+        value={selectedCurrencyOption?.id || '0'}
         testid={`${testid}-sorting-select`}
         label={'Select currency'}
       />

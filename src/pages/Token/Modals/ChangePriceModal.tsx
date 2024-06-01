@@ -22,18 +22,8 @@ import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 import { Offer } from 'api/restApi/offers/types';
 import { useCoinGeckoApi } from 'api/coinGeckoApi/useCoinGeckoApi';
 import { fixPriceSellingCollectionIds } from '../constants';
+import { SelectOptionProps } from 'components/UI/types';
 
-//TO DO remove after api for currencies change
-export const currencies = [
-  {
-    id: '0',
-    title: 'OPL'
-  },
-  {
-    id: '2807',
-    title: 'USDT'
-  }
-];
 
 export const ChangePriceModal: FC<TTokenPageModalBodyProps> = ({ token, offer, collection, onFinish, setIsClosable, testid }) => {
   const { collectionId, tokenId } = token || {};
@@ -79,10 +69,10 @@ type TChangePriceModalProps = {
 }
 
 export const AskPriceModal: FC<TChangePriceModalProps> = ({ collectionId, tokenId, onChangePrice, testid, oldPrice, oldCurrency }) => {
-  const { chainProperties, api, currentChainId } = useApi();
+  const { api, currentChainId, currencies, currencyMap } = useApi();
   const { selectedAccount } = useAccounts();
   const [priceInputValue, setPriceInputValue] = useState<string>();
-  const [selectedCurrencyOption, setSelectedCurrencyOption] = useState(String(oldCurrency) || currencies[0].id);
+  const [selectedCurrencyOption, setSelectedCurrencyOption] = useState(currencyMap.get(String(oldCurrency) ) || currencyMap.get('0'));
 
   // use FHF min price
   const [minPrice, setMinPrice] = useState<number>(0);
@@ -121,7 +111,7 @@ export const AskPriceModal: FC<TChangePriceModalProps> = ({ collectionId, tokenI
     onChangePrice({ price: priceInputValue, accountAddress: selectedAccount.address, currency: Number(selectedCurrencyOption) } as TFixPriceProps); // TODO: proper typing, proper calculated object
   }, [priceInputValue, selectedAccount, selectedCurrencyOption, onChangePrice]);
 
-  const tokenSymbol = useMemo(() => currencies.find((item) => item.id === selectedCurrencyOption)?.title || '', [selectedCurrencyOption]);
+  const tokenSymbol = useMemo(() => selectedCurrencyOption?.title, [selectedCurrencyOption]);
 
   const { fee, fetchingFee, getFee } = useGetFee<Parameters<MarketController['getSellFixFee']>>(api?.market?.getSellFixFee.bind(api?.market));
 
@@ -150,6 +140,11 @@ export const AskPriceModal: FC<TChangePriceModalProps> = ({ collectionId, tokenI
     return Number(priceInputValue) >= minPrice;
   }, [priceInputValue, minPrice]);
 
+  const onSelectChange = useCallback((value: SelectOptionProps) => {
+    const currencySelected = currencyMap.get(value.id as string);
+    setSelectedCurrencyOption(currencySelected);
+  }, []);
+
   if (isFetching) return <Loader />;
 
   return (
@@ -166,9 +161,9 @@ export const AskPriceModal: FC<TChangePriceModalProps> = ({ collectionId, tokenI
         testid={`${testid}-price-input`}
       />
       <SelectWrapper
-        onChange={(e: any) => setSelectedCurrencyOption(e.id)}
-        options={currencies}
-        value={selectedCurrencyOption}
+        onChange={onSelectChange}
+        options={currencies.map((option) => ({id: option.id, title: option.title}))}
+        value={selectedCurrencyOption?.id || ''}
         testid={`${testid}-sorting-select`}
         label={'Select currency'}
       />

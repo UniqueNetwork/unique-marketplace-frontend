@@ -107,10 +107,10 @@ export const AccountsManagerDropdown = ({
             Token balances:
           </CaptionText>
           {fungibleBalancesArray.map(
-            ({ tokenName, unit, formatted }) => (
+            ({ tokenName, unit, amount }) => (
               <BalanceLine
-                token={tokenName}
-                amount={formatted}
+                token={unit}
+                amount={amount}
                 unit={unit}
                 key={`balance_line_header_${tokenName}`}
               />

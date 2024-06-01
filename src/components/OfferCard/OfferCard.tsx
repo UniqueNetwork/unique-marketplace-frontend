@@ -18,7 +18,7 @@ export type TTokensCard = {
 };
 
 export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
-  const { currentChainId, currencies: erc20Tokens } = useApi();
+  const { currentChainId, currencyMap: erc20Tokens, currencyMap } = useApi();
   const { collectionIsCustomizable, collectionIsWearable } = useCollections();
 
   const {
@@ -60,8 +60,13 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
 
   const cardRef = useRef<HTMLDivElement>(null);
 
+  const currentCurrency = useMemo(
+    () => currencyMap.get(String(offer.price.currency)),
+    [currencyMap, offer.price.currency]
+  );
+
   return (
-    <TokensCardStyled ref={cardRef} >
+    <TokensCardStyled ref={cardRef}>
       <TokensMedia
         to={tokenPath}
         tokenId={offer?.tokenId}
@@ -72,7 +77,10 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
       />
       <Description>
         <BasicDataWrapper>
-          <Link to={tokenPath} title={`${tokenPrefix || ''} #${offer?.tokenId}`} >
+          <Link
+            to={tokenPath}
+            title={`${tokenPrefix || ''} #${offer?.tokenId}`}
+          >
             <Text
               size='l'
               weight='regular'
@@ -93,15 +101,28 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
           </Link>
         </BasicDataWrapper>
         <TradingInfoWrapper>
-          <Text size={'xs'} color={'grey-500'} >Price</Text>
+          <Text size={'xs'} color={'grey-500'}>
+            Price
+          </Text>
           <PriceWrapper length={offer.price.parsed.toFixed(5).length}>
-            <Text
-              testid={`${testid}-price`}
-              size='l'
-            >{formatBalance(offer.price.parsed, 4, true)}</Text>
-            {/* TO DO update after settings change */}
-            
-            {offer.price.currency ? <>&nbsp;{erc20Tokens.find((i) => i.collectionId === offer.price.currency)?.title}</> : <IconStyled name={`chain-${currentChainId?.toLowerCase()}`} size={16} />}
+            <Text testid={`${testid}-price`} size='l'>
+              {formatBalance(Number(offer.price.raw) / 10 ** (currentCurrency?.decimals || 1), 4, true)}
+            </Text>
+            {offer.price.currency ? (
+              <>
+                &nbsp;
+                <img
+                  width={20}
+                  height={24}
+                  src={erc20Tokens.get(String(offer.price.currency))?.iconUrl}
+                />
+              </>
+            ) : (
+              <IconStyled
+                name={`chain-${currentChainId?.toLowerCase()}`}
+                size={16}
+              />
+            )}
           </PriceWrapper>
         </TradingInfoWrapper>
       </Description>

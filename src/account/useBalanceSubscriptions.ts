@@ -6,11 +6,11 @@ import { Dispatch, SetStateAction, useCallback, useRef, useState } from 'react';
 import { Account } from './types';
 
 export const useBalanceSubscriptions = () => {
-  const { api, chainProperties, currencies: erc20Tokens } = useApi();
+  const { api, chainProperties, currencies: erc20Tokens, setCurrencies } = useApi();
   const sdkSocketClient = useRef<SocketClient>();
   const [isBalancesFetching, setIsBalancesFetching] = useState(false);
 
-  const subscribeBalancesChanges = useCallback(async (
+const subscribeBalancesChanges = useCallback(async (
     accounts: Map<string, Account>,
     setAccounts: Dispatch<SetStateAction<Map<string, Account>>>
   ) => {
@@ -43,6 +43,8 @@ export const useBalanceSubscriptions = () => {
         }
       }
 
+      const erc20TokensWithTitle = erc20Tokens.map((token) => ({...token, title: fungibleBalances.get(String(token.collectionId))?.unit || chainProperties?.token }));
+      setCurrencies(erc20TokensWithTitle);
       return { ...account, balances, fungibleBalances };
     };
 

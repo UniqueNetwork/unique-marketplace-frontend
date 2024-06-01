@@ -33,6 +33,7 @@ export type ApiContextProps = {
   baseURL: string
   onChangeChainId(chainId: string): void
   refetchSettings(): Promise<void>
+  setCurrencies(currencies: ICurrency[]): void
   currencies: ICurrency[]
   currencyMap: Map<string, ICurrency>
   lastContract: MarketContract | null

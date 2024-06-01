@@ -21,11 +21,16 @@ export const Price: FC<PriceProps> = ({ price, testid = '' }) => {
   return (
     <PriceWrapper>
       <Row>
-        <Heading
-          testid={`${testid}-price`}
-          size={'1'}
-        >{formatBalance(Number(price.raw) / (10 ** (currentCurrency?.decimals || 1)))}</Heading>
-        {price.currency ? currentCurrency?.title : <Icon name={`chain-${currentChainId}`} size={32} />}
+        <Heading testid={`${testid}-price`} size={'1'}>
+          {formatBalance(
+            Number(price.raw) / 10 ** (currentCurrency?.decimals || 1)
+          )}
+        </Heading>
+        {price.currency ? (
+          <img width={32} height={32} src={currentCurrency?.iconUrl} />
+        ) : (
+          <Icon name={`chain-${currentChainId}`} size={32} />
+        )}
       </Row>
     </PriceWrapper>
   );
