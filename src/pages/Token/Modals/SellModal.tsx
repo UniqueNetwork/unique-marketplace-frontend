@@ -107,7 +107,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
   const onConfirmFixPriceClick = useCallback(() => {
     if (!selectedAccount || !priceInputValue || !Number(priceInputValue)) return;
 
-    onSellFixPrice({ price: priceInputValue, accountAddress: selectedAccount.address, currency: Number(selectedCurrencyOption) } as TFixPriceProps); // TODO: proper typing, proper calculated object
+    onSellFixPrice({ price: priceInputValue, accountAddress: selectedAccount.address, currency: Number(selectedCurrencyOption?.collectionId) } as TFixPriceProps); // TODO: proper typing, proper calculated object
   }, [priceInputValue, selectedAccount, selectedCurrencyOption, onSellFixPrice]);
 
   const tokenSymbol = useMemo(() => selectedCurrencyOption?.title, [selectedCurrencyOption]);
@@ -132,7 +132,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
         collectionId,
         tokenId,
         Number(priceInputValue),
-        Number(selectedCurrencyOption),
+        Number(selectedCurrencyOption?.collectionId),
         1,
         { account: selectedAccount }
       );
