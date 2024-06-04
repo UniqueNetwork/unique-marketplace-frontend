@@ -51,9 +51,9 @@ export const BalanceLine = ({
 
   return (
     <BalanceItem>
-      <TokenName><img width={20} src={currentCurrency?.iconUrl} /></TokenName>
+      <TokenName><img width={20} src={currentCurrency?.iconUrl} />{unit}</TokenName>
       <span>
-        {formatBalance(amount)} {unit}
+        {formatBalance(amount)}
       </span>
     </BalanceItem>
   );
@@ -73,7 +73,10 @@ const BalanceItem = styled.div`
 `;
 
 const TokenName = styled.span`
+  display: flex;
+  align-items: center;
   font-weight: bold;
+  gap: 4px;
 `;
 
 const ShowMoreButton = styled.div`

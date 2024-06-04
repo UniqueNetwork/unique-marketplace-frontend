@@ -110,8 +110,6 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
     onSellFixPrice({ price: priceInputValue, accountAddress: selectedAccount.address, currency: Number(selectedCurrencyOption?.collectionId) } as TFixPriceProps); // TODO: proper typing, proper calculated object
   }, [priceInputValue, selectedAccount, selectedCurrencyOption, onSellFixPrice]);
 
-  const tokenSymbol = useMemo(() => selectedCurrencyOption?.title, [selectedCurrencyOption]);
-
   const { fee, fetchingFee, getFee } = useGetFee<Parameters<MarketController['getSellFixFee']>>(api?.market?.getSellFixFee.bind(api?.market));
 
   const isEnoughBalance = useMemo(() => {
@@ -142,40 +140,55 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
   const onSelectChange = useCallback((value: SelectOptionProps) => {
     const currencySelected = currencyMap.get(value.id as string);
     setSelectedCurrencyOption(currencySelected);
-  }, []);
+  }, [currencyMap]);
 
   if (isFetching) return <Loader />;
 
   const FixedPriceTab = (
     <>
-      <InputWrapper
-        label={`Price (${tokenSymbol})*`}
-        onChange={onPriceInputChange}
-        value={priceInputValue?.toString()}
-        testid={`${testid}-price-input`}
-      />
       <SelectWrapper
         onChange={onSelectChange}
-        options={currencies.map((option) => ({id: option.id, title: option.title}))}
+        options={currencies.map((option) => ({
+          id: option.id,
+          title: option.title,
+          iconLeft: { size: 20, file: option.iconUrl }
+        }))}
         value={selectedCurrencyOption?.id || ''}
         testid={`${testid}-sorting-select`}
         label={'Select currency'}
       />
+      <InputWrapper
+        label={`Price*`}
+        onChange={onPriceInputChange}
+        value={priceInputValue?.toString()}
+        testid={`${testid}-price-input`}
+      />
 
-      {minPrice > 0 && <WarningBlock>
-        <Text color='grey-500' size='s'>Min price: {minPrice.toFixed(4)} UNQ equivalent $10 (current rate: 1 UNQ = ${currency})</Text>
-      </WarningBlock>}
-      {!isSponsored && <FeeMessage
-        isFeeLoading={fetchingFee}
-        fee={fee || '0'}
-        testid={`${testid}-fee-message`}
-      />}
-      {isSponsored && <WarningBlock>
-        Collection ID {collectionId} sponsored
-      </WarningBlock>}
+      {minPrice > 0 && (
+        <WarningBlock>
+          <Text color='grey-500' size='s'>
+            Min price: {minPrice.toFixed(4)} UNQ equivalent $10 (current rate: 1
+            UNQ = ${currency})
+          </Text>
+        </WarningBlock>
+      )}
+      {!isSponsored && (
+        <FeeMessage
+          isFeeLoading={fetchingFee}
+          fee={fee || '0'}
+          testid={`${testid}-fee-message`}
+        />
+      )}
+      {isSponsored && (
+        <WarningBlock>Collection ID {collectionId} sponsored</WarningBlock>
+      )}
       <ButtonWrapper>
         <Button
-          disabled={(!isSponsored && (fetchingFee || !priceInputValue || !Number(priceInputValue))) || !isPriceAvailable}
+          disabled={
+            (!isSponsored &&
+              (fetchingFee || !priceInputValue || !Number(priceInputValue))) ||
+            !isPriceAvailable
+          }
           onClick={onConfirmFixPriceClick}
           role='primary'
           title='Confirm'

@@ -97,7 +97,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   const deviceSize = useDeviceSize();
   const { currencies, currencyMap } = useApi();
   const [selectedCurrencyOption, setSelectedCurrencyOption] = useState(currencyMap.get('0'));
-  const isSelectFungibleToken = useMemo(() => selectedCurrencyOption?.id !== currencyMap.get('0')?.id, [currencies, selectedCurrencyOption?.id]);
+  const isSelectFungibleToken = useMemo(() => selectedCurrencyOption?.id !== currencyMap.get('0')?.id, [currencyMap, selectedCurrencyOption?.id]);
 
   const { filteredAccounts, onFilter, onReset } = useAccountsFilter({
     excluded: useMemo(() => sender ? [sender?.address] : [], [sender])
@@ -119,6 +119,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
         return;
       }
       const recipient = typeof newRecipientAddress === 'string' ? newRecipientAddress : newRecipientAddress?.address;
+      console.log(selectedCurrencyOption);
       try {
         const fee = isSelectFungibleToken 
           ? await api?.market?.getTransferBalanceFungibleFee({ 
@@ -136,7 +137,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
         setIsFeeLoading(false);
       }
     }, 300);
-  }, [api?.market, sender, isSelectFungibleToken]);
+  }, [api?.market, sender, isSelectFungibleToken, selectedCurrencyOption]);
 
   const onAmountChange = useCallback((value: string) => {
     setAmount(value);
@@ -155,7 +156,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
       const amountBN = new BN(fromStringToBnString(amount));
       return amountBN.gt(sender?.balances?.proper.raw || new BN(0));
     }
-  }, [amount, sender?.balances?.proper.raw, isSelectFungibleToken]);
+  }, [amount, sender?.balances?.proper.raw, isSelectFungibleToken, selectedCurrencyOption]);
 
   const isAmountPlusFeeGreaterThanBalance = useMemo(() => {
     const amountBN = new BN(fromStringToBnString(amount));
@@ -170,6 +171,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     if (isConfirmDisabled || !selectedCurrencyOption) return;
     const recipient = typeof recipientAddress === 'string' ? recipientAddress : recipientAddress?.address;
     const decimals = selectedCurrencyOption?.decimals;
+    console.log(selectedCurrencyOption?.collectionId, 'selectedCurrencyOption?.collectionId');
     onFinish(
       sender?.address || '',
       recipient || '',
@@ -265,6 +267,11 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     return (Number(amount) + Number(fee)).toFixed(4);
   }, [amount, fee]);
 
+  const onSelectChange = useCallback((value: SelectOptionProps) => {
+    const currencySelected = currencyMap.get(value.id as string);
+    setSelectedCurrencyOption(currencySelected);
+  }, [currencyMap]);
+
   return (
     <Modal isVisible={isVisible} isClosable={true} onClose={onCloseModal}>
       <Content>
@@ -346,9 +353,12 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
         </ErrorWrapper>
       )}
       <SelectWrapper
-        onChange={(e: any) => setSelectedCurrencyOption(e)}
-        //@ts-ignore
-        options={currencies}
+        onChange={onSelectChange}
+        options={currencies.map((option) => ({
+          id: option.id,
+          title: option.title,
+          iconLeft: { size: 20, file: option.iconUrl }
+        }))}
         value={selectedCurrencyOption?.id || '0'}
         testid={`${testid}-sorting-select`}
         label={'Select currency'}

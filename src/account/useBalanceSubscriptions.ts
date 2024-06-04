@@ -48,6 +48,17 @@ const subscribeBalancesChanges = useCallback(async (
       return { ...account, balances, fungibleBalances };
     };
 
+    const subscribeERC20Balances = (signer: string) => {
+      for (const token of erc20Tokens) {
+        if (token.collectionId) {
+          client.subscribeCollection({
+            collectionId: 2807,
+            signer,
+          });
+        }
+      }
+    };
+
     const accountsWithBalances = await Promise.all([...accounts.values()].map(getBalance));
     const map = new Map(accountsWithBalances.map((account) => [
       account.address, account
@@ -61,17 +72,24 @@ const subscribeBalancesChanges = useCallback(async (
           ? Address.normalize.substrateAddress(account.address, chainProperties?.SS58Prefix)
           : account.address });
         
-        client.subscribeCollection({ collectionId: 2807, signer: Address.is.substrateAddress(account.address)
-          ? Address.normalize.substrateAddress(account.address, chainProperties?.SS58Prefix)
-          : account.address });
+        client.subscribeCollection();
+
+        subscribeERC20Balances(
+          Address.is.substrateAddress(account.address)
+            ? Address.normalize.substrateAddress(
+                account.address,
+                chainProperties?.SS58Prefix
+              )
+            : account.address
+        );
 
         const ethMirror = Address.mirror.substrateToEthereum(account.address);
         client.subscribeAccountCurrentBalance({ address: Address.mirror.ethereumToSubstrate(ethMirror, chainProperties?.SS58Prefix) });
-        client.subscribeCollection({ collectionId: 2807, signer: Address.mirror.ethereumToSubstrate(ethMirror, chainProperties?.SS58Prefix) });
+        subscribeERC20Balances(Address.mirror.ethereumToSubstrate(ethMirror, chainProperties?.SS58Prefix));
       } else {
         const substrateMirror = Address.mirror.ethereumToSubstrate(account.address, chainProperties?.SS58Prefix);
         client.subscribeAccountCurrentBalance({ address: substrateMirror });
-        client.subscribeCollection({ collectionId: 2807, signer: substrateMirror });
+        subscribeERC20Balances(substrateMirror);
       }
     });
 

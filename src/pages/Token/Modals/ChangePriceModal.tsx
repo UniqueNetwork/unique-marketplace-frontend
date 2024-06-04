@@ -111,8 +111,6 @@ export const AskPriceModal: FC<TChangePriceModalProps> = ({ collectionId, tokenI
     onChangePrice({ price: priceInputValue, accountAddress: selectedAccount.address, currency: Number(selectedCurrencyOption?.collectionId) } as TFixPriceProps); // TODO: proper typing, proper calculated object
   }, [priceInputValue, selectedAccount, selectedCurrencyOption, onChangePrice]);
 
-  const tokenSymbol = useMemo(() => selectedCurrencyOption?.title, [selectedCurrencyOption]);
-
   const { fee, fetchingFee, getFee } = useGetFee<Parameters<MarketController['getSellFixFee']>>(api?.market?.getSellFixFee.bind(api?.market));
 
   const isEnoughBalance = useMemo(() => {
@@ -143,7 +141,7 @@ export const AskPriceModal: FC<TChangePriceModalProps> = ({ collectionId, tokenI
   const onSelectChange = useCallback((value: SelectOptionProps) => {
     const currencySelected = currencyMap.get(value.id as string);
     setSelectedCurrencyOption(currencySelected);
-  }, []);
+  }, [currencyMap]);
 
   if (isFetching) return <Loader />;
 
@@ -154,18 +152,22 @@ export const AskPriceModal: FC<TChangePriceModalProps> = ({ collectionId, tokenI
           Changing price
         </Heading>
       </Content>
-      <InputWrapper
-        label={`Price (${tokenSymbol})*`}
-        onChange={onPriceInputChange}
-        value={priceInputValue?.toString()}
-        testid={`${testid}-price-input`}
-      />
       <SelectWrapper
         onChange={onSelectChange}
-        options={currencies.map((option) => ({id: option.id, title: option.title}))}
+        options={currencies.map((option) => ({
+          id: option.id,
+          title: option.title,
+          iconLeft: { size: 20, file: option.iconUrl }
+        }))}
         value={selectedCurrencyOption?.id || ''}
         testid={`${testid}-sorting-select`}
         label={'Select currency'}
+      />
+      <InputWrapper
+        label={`Price*`}
+        onChange={onPriceInputChange}
+        value={priceInputValue?.toString()}
+        testid={`${testid}-price-input`}
       />
       {minPrice > 0 && <WarningBlock>
         <Text color='grey-500' size='s'>Min price: {minPrice.toFixed(4)} UNQ equivalent $10 (current rate: 1 UNQ = ${currency})</Text>
