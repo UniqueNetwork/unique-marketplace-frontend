@@ -1,4 +1,3 @@
-import { CollectionProperty } from '@unique-nft/sdk';
 import { EthCrossAccountId } from '@unique-nft/utils';
 import { CollectionNestingAndPermissionStruct$1 } from '../types';
 import IBaseAdapter, { Signer } from './IBaseAdapter';
@@ -27,6 +26,13 @@ export interface IPurchaseTokenData {
   contract: IMarketContractProperties;
 }
 
+export interface IRemoveFromSell {
+  collectionId: number;
+  tokenId: number;
+  signer?: Signer;
+  contract: IMarketContractProperties;
+}
+
 interface IMarketContractAdapter extends IBaseAdapter {
   changeAllowance(from: string, to: string, collectionId: number, tokenId: number, targetAllowance: boolean, signer: Signer): Promise<void>
 
@@ -42,7 +48,8 @@ interface IMarketContractAdapter extends IBaseAdapter {
   transferBalanceFungible({collectionId, address, recipient, amount, decimals, signer}: ITransferFungible): Promise<void>
   getTransferBalanceFungibleFee({collectionId, address, recipient, amount, decimals, signer}: ITransferFungible): Promise<string>
 
-  allowanceFungible({collectionId, address, recipient, amount, signer}: ITransferFungible): Promise<any>
+  allowanceFungible({collectionId, address, recipient, amount, signer}: ITransferFungible): Promise<void>
+  revokeTokenSell({collectionId, tokenId, contract, signer}: IRemoveFromSell): Promise<void>
 }
 
 export default IMarketContractAdapter;

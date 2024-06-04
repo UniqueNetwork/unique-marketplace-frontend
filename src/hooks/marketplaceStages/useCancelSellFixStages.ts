@@ -15,7 +15,7 @@ export const useCancelSellFixStages = (collectionId: number, tokenId: number, co
       description: '',
       status: StageStatus.default,
       action: ({ options }) => {
-        return marketApi?.changeAllowance(collectionId, tokenId, false, { ...options, contractAddress });
+        return marketApi?.revokeTokenSell({collectionId, tokenId, contractProps: { ...options, contractAddress }});
       }
     }
   ], [marketApi, collectionId, tokenId]);

@@ -1,6 +1,6 @@
 import { ExtrinsicResultResponse, Sdk, Signer } from '@unique-nft/sdk/full';
 import { Address, EthCrossAccountId } from '@unique-nft/utils';
-import IMarketContractAdapter, { IMarketContractProperties, IPurchaseTokenData, ITransferFungible } from './IMarketContractAdapter';
+import IMarketContractAdapter, { IMarketContractProperties, IPurchaseTokenData, IRemoveFromSell, ITransferFungible } from './IMarketContractAdapter';
 
 import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
@@ -212,7 +212,16 @@ class UniqueAdapter implements IMarketContractAdapter {
   }
 
   async changeAllowance(from: string, to: string, collectionId: number, tokenId: number, targetAllowance: boolean, signer: Signer): Promise<void> {
-    await this.uniqueSdk.token.approve.submitWaitResult({ collectionId, tokenId, spender: to, address: from, isApprove: targetAllowance }, { signer });
+    await this.uniqueSdk.token.approve.submitWaitResult(
+      {
+        collectionId,
+        tokenId,
+        spender: to,
+        address: from,
+        isApprove: targetAllowance
+      },
+      { signer }
+    );
   }
 
   async getSellFee(from: EthCrossAccountId, collectionId: number, tokenId: number, price: string, currency: number, amount: number, signer: Signer, contract: IMarketContractProperties): Promise<string> {
@@ -431,6 +440,31 @@ class UniqueAdapter implements IMarketContractAdapter {
       }
     );
     return res.fee.amount;
+  }
+
+  async revokeTokenSell({
+    collectionId,
+    tokenId,
+    contract,
+    signer
+  }: IRemoveFromSell): Promise<void> {
+    const typedSigner = signer as Signer;
+
+    await this.uniqueSdk.evm.send.submitWaitResult(
+      {
+        abi: contract.abi || (marketplaceAbi as any),
+        address: typedSigner.address || '',
+        contractAddress: contract.address,
+        funcName: 'revoke',
+        gasLimit: sellGasLimit,
+        args: {
+          collectionId,
+          tokenId,
+          amount: 1
+        }
+      },
+      { signer: typedSigner }
+    );
   }
 }
 

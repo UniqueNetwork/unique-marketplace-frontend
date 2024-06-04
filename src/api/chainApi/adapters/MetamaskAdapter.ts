@@ -1,10 +1,10 @@
 import { Contract, ethers, Signer } from 'ethers';
 import { IV2Token, SchemaTools as SchemaToolsV2 } from '@unique-nft/schemas-v2';
 import { CollectionProperty, CreateCollectionParsed, CreateCollectionV2ArgsDto, TokenV2ItemForMultipleDto, PropertyKeyPermission, SetCollectionLimitsBody, SetSponsorshipBody, TokenId, CreateTokenPayload } from '@unique-nft/sdk';
-import { UniqueNFTFactory, UniqueFungibleFactory, UniqueRefungibleTokenFactory, CollectionHelpersFactory, parseEthersV5TxReceipt } from '@unique-nft/solidity-interfaces';
+import { UniqueNFTFactory, UniqueFungibleFactory, UniqueRefungibleTokenFactory, CollectionHelpersFactory, parseEthersV5TxReceipt, UniqueRefungibleFactory } from '@unique-nft/solidity-interfaces';
 import { EthCrossAccountId, Address } from '@unique-nft/utils';
 import { Utf8 } from 'utf-helpers';
-import IMarketContractAdapter, { IMarketContractProperties, IPurchaseTokenData, ITransferFungible } from './IMarketContractAdapter';
+import IMarketContractAdapter, { IMarketContractProperties, IPurchaseTokenData, IRemoveFromSell, ITransferFungible } from './IMarketContractAdapter';
 
 import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
@@ -456,6 +456,17 @@ class MetamaskAdapter implements IMarketContractAdapter {
     );
 
     return await uniqueFungible.approveCross(toCross, amount);
+  }
+
+  async revokeTokenSell({
+    collectionId,
+    tokenId,
+    contract: contractOption,
+  }: IRemoveFromSell) {
+    const contract = this.getContract(contractOption);
+    await this.callContract(contract, 'revoke', collectionId, tokenId, {
+      gasLimit: sellGasLimit
+    });
   }
 }
 
