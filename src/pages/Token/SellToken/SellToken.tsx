@@ -48,10 +48,10 @@ export const SellToken: FC<SellTokenProps> = ({
   const canChangePrice = useMemo(() => {
     if (!offer?.contractAddress) return false;
     return (
-      api?.market?.hasContractMethod(offer.contractAddress, 'changePrice') ||
+      api?.market?.hasContractMethod(offer.contractAddress, 'changePrice') &&
       offer?.contractAddress === lastContract?.address
     );
-  }, [offer, api]);
+  }, [offer, api?.market, lastContract?.address]);
 
   if (offer) {
     return (<>
