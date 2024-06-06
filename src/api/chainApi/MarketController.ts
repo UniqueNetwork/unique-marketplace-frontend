@@ -335,7 +335,26 @@ class MarketController extends BaseController implements IMarketController {
     return this.getChainValue(rawFee, this.decimals).parsed.toString();
   }
 
-  // async
+  async revokeTokenSell({
+    collectionId,
+    tokenId,
+    contractProps
+  }: {collectionId: number, tokenId: number, contractProps: TransactionOptions}) {
+    const adapter = this.getAdapter(contractProps.account);
+    const contractAddress = contractProps.contractAddress;
+    const contract = contractAddress
+      ? {
+          address: contractAddress,
+          abi: this.contractsAbi[contractAddress]
+        }
+      : this.actualContract;
+    await adapter.revokeTokenSell({
+      collectionId,
+      tokenId,
+      contract,
+      signer: contractProps.account.signer
+    });
+  }
 }
 
 export default MarketController;
