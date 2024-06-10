@@ -51,3 +51,8 @@ export const getIpfsUriByImagePath = (
 
   return undefined;
 };
+
+export const isYouTubeLink = (url: string): boolean => {
+  const pattern = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/;
+  return pattern.test(url);
+};
