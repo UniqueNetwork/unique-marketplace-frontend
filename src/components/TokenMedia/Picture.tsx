@@ -106,12 +106,13 @@ export const Picture: FC<PictureProps> = ({
         onLoad={() => setIsLoading(false)}
         onError={() => setHasError(true)}
       />}
-    {!isLoading && (hasError || !imageSrc) && <Placeholder size={size} />}
+    {!isLoading && (hasError || (!imageSrc && !video)) && <Placeholder size={size} />}
   </div>);
 };
 
 const ImgStyled = styled.img`
   box-sizing: border-box;
+  margin: auto;
 `;
 
 const VideoStyled = styled.video`
@@ -155,5 +156,4 @@ const BadgeWrapper = styled.div`
   line-height: 24px;
   color: ${AdditionalDark};
   box-shadow: 0px 2.767256498336792px 2.2138051986694336px 0px #68686812, 0px 6.650102138519287px 5.32008171081543px 0px #6868680D, 0px 12.521552085876465px 10.017241477966309px 0px #6868680B, 0px 22.3363094329834px 17.869047164916992px 0px #68686809, 0px 41.777610778808594px 33.422088623046875px 0px #68686807, 0px 100px 80px 0px #68686805;
-
 `;

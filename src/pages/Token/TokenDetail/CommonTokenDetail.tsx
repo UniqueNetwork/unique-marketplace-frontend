@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { CollectionWithInfoV2Dto, TokenWithInfoV2Dto } from '@unique-nft/sdk';
 import { Heading, Dropdown, Icon } from 'components/UI';
@@ -28,6 +28,9 @@ import { WearablePicture } from 'components/TokenMedia/WearablePicture';
 import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/schemas';
 import { mockWearables } from '../constants';
 import { RoyaltiesBlock } from './RoyaltiesBlock';
+import Slider from 'react-slick';
+import { CustomNextArrow, CustomPrevArrow } from './CustomSliderArrows';
+import { isYouTubeLink } from 'utils/urlUtils';
 
 interface IProps {
   token?: TokenWithInfoV2Dto
@@ -65,14 +68,26 @@ export const CommonTokenDetail: FC<IProps> = ({
     image,
     tokenId,
     prefix,
-    video
+    video,
+    audio,
+    youtubeVideo,
+    animation,
   } = useMemo(() => {
     const { tokenId, collectionId } = offer || token || {};
     const { image, attributes, royalties } = token || {};
     const { name: collectionName, tokenPrefix: prefix, description } = offer?.collectionDescription || collection || {};
     const owner = offer?.seller || token?.owner;
-    const video = token?.media?.find((media) => media.type === 'video');
-
+    const youtubeVideo = token?.youtube_url;
+    const animation = token?.animation_url;
+    let video;
+    let audio;
+    if (token?.media) {
+      console.log(token?.media, 'token?.media');
+      //@ts-ignore
+      video = Object.values(token?.media)?.find((media) => media.type === 'video');
+      //@ts-ignore
+      audio = Object.values(token?.media)?.find((media) => media.type === 'audio');
+    }
     const attributesList = attributes ? Object.values(attributes) : [];
 
     return {
@@ -86,10 +101,19 @@ export const CommonTokenDetail: FC<IProps> = ({
       attributesList,
       royalties,
       image,
+      audio,
+      youtubeVideo,
+      animation,
       owner,
       video
     };
   }, [token, collection, offer]);
+
+  const hasSlider = useMemo(() => {
+    const items = [image, video, audio, youtubeVideo, animation];
+    const definedItemsCount = items.filter((item) => item !== undefined && item !== null).length;
+    return definedItemsCount > 1;
+  }, [image, video, audio, youtubeVideo, animation]);
 
   const deviceSize = useDeviceSize();
 
@@ -168,29 +192,116 @@ export const CommonTokenDetail: FC<IProps> = ({
       setWearableTokenImg(_token?.file?.fullUrl || undefined);
     })();
   }, [currentChainId, collectionId, tokenId, isWearable, api?.nft]);
+  
+  const settings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    
+    nextArrow: <CustomNextArrow />,
+    prevArrow: <CustomPrevArrow />,
+  };
 
   return (
     <CommonTokenDetailStyled>
-      <PictureWrapper>
+      <SliderContainer>
         {isLoading && <Skeleton />}
-        {!isLoading && <>
-          {!isWearable && <Picture
-            alt={tokenId?.toString() || ''}
-            src={image}
-            video={video?.url || ''}
-            testid={`${testid}-token-picture`}
-            badges={badges}
-          />}
-          {isWearable && <WearablePicture
-            alt={tokenId?.toString() || ''}
-            src={image}
-            wearableSrc={wearableTokenImg || image}
-            baseSrc={baseTokenImg}
-            testid={`${testid}-token-picture`}
-          />}
-        </>}
-        <EquippedWearables />
-      </PictureWrapper>
+        {!isLoading &&
+          (hasSlider ? (
+            <Slider {...settings}>
+              <PictureWrapper>
+                {!isWearable && (
+                  <Picture
+                    alt={tokenId?.toString() || ''}
+                    src={image}
+                    testid={`${testid}-token-picture`}
+                    badges={badges}
+                  />
+                )}
+                {isWearable && (
+                  <WearablePicture
+                    alt={tokenId?.toString() || ''}
+                    src={image}
+                    wearableSrc={wearableTokenImg || image}
+                    baseSrc={baseTokenImg}
+                    testid={`${testid}-token-picture`}
+                  />
+                )}
+                <EquippedWearables />
+              </PictureWrapper>
+              {video?.url &&
+                (isYouTubeLink(video?.url) ? (
+                  <SliderItem>
+                    <Iframe
+                      src={video?.url}
+                      title='YouTube video player'
+                      allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
+                    ></Iframe>
+                  </SliderItem>
+                ) : (
+                  <PictureWrapper>
+                    <Picture
+                      alt={tokenId?.toString() || ''}
+                      src={''}
+                      video={video?.url || ''}
+                      testid={`${testid}-token-picture`}
+                    />
+                    <EquippedWearables />
+                  </PictureWrapper>
+                ))}
+
+              {youtubeVideo && (
+                <SliderItem>
+                  <Iframe
+                    src={youtubeVideo}
+                    title='YouTube video player'
+                    allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
+                  ></Iframe>
+                </SliderItem>
+              )}
+
+              {audio?.url && (
+                <SliderItem>
+                  <Picture
+                    alt={tokenId?.toString() || ''}
+                    src={''}
+                    video={audio?.url || ''}
+                    testid={`${testid}-token-picture`}
+                  />
+                </SliderItem>
+              )}
+            </Slider>
+          ) : (
+            <PictureWrapper>
+              {isLoading && <Skeleton />}
+              {!isLoading && (
+                <>
+                  {!isWearable && (
+                    <Picture
+                      alt={tokenId?.toString() || ''}
+                      src={image}
+                      video={video?.url || ''}
+                      testid={`${testid}-token-picture`}
+                      badges={badges}
+                    />
+                  )}
+                  {isWearable && (
+                    <WearablePicture
+                      alt={tokenId?.toString() || ''}
+                      src={image}
+                      wearableSrc={wearableTokenImg || image}
+                      baseSrc={baseTokenImg}
+                      testid={`${testid}-token-picture`}
+                    />
+                  )}
+                </>
+              )}
+              <EquippedWearables />
+            </PictureWrapper>
+          ))}
+      </SliderContainer>
       <Description>
         {isLoading && <TokenSkeleton />}
         {!isLoading && <>
@@ -328,8 +439,7 @@ const PictureWrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 536px;
-  margin-right: calc(var(--prop-gap) * 2);
+  width: 100%;
   flex-direction: column;
   &::before {
     content: '';
@@ -340,29 +450,15 @@ const PictureWrapper = styled.div`
   div[class^=Skeleton] {
     position: absolute;
   }
-
-  @media (max-width: 1919px) {
-    width: 536px;
-  }
-  
-  @media (max-width: 1023px) {
-    width: 326px;
-  }
-
-  @media (max-width: 767px) {
-    width: calc(100vw - var(--prop-gap) * 3);
-  }
-
-  @media (max-width: 567px) {
-    width: calc(100vw - var(--prop-gap) * 2);
-  }
   
   .picture {
     position: absolute;
     top: 0;
-    left: 0;
+    left: 2px;
     bottom: 0;
-    right: 0;
+    right: 2px;
+    display: flex;
+    align-items: center;
     color: white;
     text-align: center;
     max-height: 100%;
@@ -381,6 +477,34 @@ const PictureWrapper = styled.div`
       border-radius: 8px;
       height: auto;
     }
+  }
+`;
+
+const SliderItem = styled.div`
+  width: 100%;
+  height: 100%;
+`;
+
+const Iframe = styled.iframe`
+  width: calc(100% - 4px);
+  margin: auto;
+  border: none;
+  height: 536px;
+
+  @media (max-width: 1919px) {
+    height: 536px;
+  }
+  
+  @media (max-width: 1023px) {
+    height: 326px;
+  }
+
+  @media (max-width: 767px) {
+    height: calc(100vw - var(--prop-gap) * 3);
+  }
+
+  @media (max-width: 567px) {
+    height: calc(100vw - var(--prop-gap) * 2);
   }
 `;
 
@@ -525,5 +649,31 @@ const IconWrapper = styled.div`
 
   svg {
     fill: ${Grey500};
+  }
+`;
+
+const SliderContainer = styled.div`
+  display: relative;
+  width: 536px;
+  margin-right: calc(var(--prop-gap)* 2);
+
+  @media (max-width: 1919px) {
+    width: 536px;
+  }
+  
+  @media (max-width: 1023px) {
+    width: 326px;
+  }
+
+  @media (max-width: 767px) {
+    width: calc(100vw - var(--prop-gap) * 3);
+  }
+
+  @media (max-width: 567px) {
+    width: calc(100vw - var(--prop-gap) * 2);
+  }
+
+  .slick-next .slick-prev .slick-next:before, .slick-prev:before {
+    display: none;
   }
 `;
