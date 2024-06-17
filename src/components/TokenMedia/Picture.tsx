@@ -50,7 +50,7 @@ export const Picture: FC<PictureProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [hasError, setHasError] = useState<boolean>(false);
-  const { autoplay = true, controls = true, loop = true, muted = true } = useMemo(() => videoProps || {}, [videoProps]);
+  const { autoplay = false, controls = true, loop = true, muted = false } = useMemo(() => videoProps || {}, [videoProps]);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -74,6 +74,12 @@ export const Picture: FC<PictureProps> = ({
     if (!imageSrc) return `${url}#t=0.001`;
     else return url;
   }, [video, imageSrc]);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.volume = 0.1;
+    }
+  }, []);
 
   return (<div className={'picture'}>
     {isLoading && <Skeleton width={'100%'} height={'100%'} />}
