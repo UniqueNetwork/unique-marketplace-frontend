@@ -95,10 +95,10 @@ export const categorizeFile = (fileOrUrl: string): string => {
   return 'unknown';
 };
 
-export function extractVideoId(url: string) {
+export const extractVideoId = (url: string): string => {
   let videoId = '';
 
-  const regExp = /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+  const regExp = /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
 
   const match = url.match(regExp);
 
@@ -107,4 +107,4 @@ export function extractVideoId(url: string) {
   }
 
   return videoId;
-}
+};
