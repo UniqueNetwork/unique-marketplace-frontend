@@ -28,9 +28,8 @@ import { WearablePicture } from 'components/TokenMedia/WearablePicture';
 import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/schemas';
 import { mockWearables } from '../constants';
 import { RoyaltiesBlock } from './RoyaltiesBlock';
-import Slider from 'react-slick';
-import { CustomNextArrow, CustomPrevArrow } from './CustomSliderArrows';
-import { isYouTubeLink } from 'utils/urlUtils';
+import { TokenSlider } from './Slider/TokenSlider';
+import { BREAKPOINTS } from 'hooks/useBreakpointObserver';
 
 interface IProps {
   token?: TokenWithInfoV2Dto
@@ -66,27 +65,44 @@ export const CommonTokenDetail: FC<IProps> = ({
     attributesList,
     royalties,
     image,
+    sliderItems,
     tokenId,
     prefix,
     video,
-    audio,
-    youtubeVideo,
-    animation,
   } = useMemo(() => {
+    const sliderItems = [];
     const { tokenId, collectionId } = offer || token || {};
     const { image, attributes, royalties } = token || {};
+    image && sliderItems.push({src: image, type: 'token_image'});
     const { name: collectionName, tokenPrefix: prefix, description } = offer?.collectionDescription || collection || {};
-    const owner = offer?.seller || token?.owner;
+    // const owner = offer?.seller || token?.owner;
     const youtubeVideo = token?.youtube_url;
+    youtubeVideo && sliderItems.push({src: token?.youtube_url, type: 'youtube_url'});
     const animation = token?.animation_url;
+    animation && sliderItems.push({src: animation, type: 'animation_url'});
     let video;
-    let audio;
     if (token?.media) {
-      console.log(token?.media, 'token?.media');
-      //@ts-ignore
-      video = Object.values(token?.media)?.find((media) => media.type === 'video');
-      //@ts-ignore
-      audio = Object.values(token?.media)?.find((media) => media.type === 'audio');
+      const images = Object.values(token?.media || {}).filter((media) => media.type === 'image');    
+      if (images.length > 0 ) {
+        for(const image of images) {
+          sliderItems.push({src: image.url, type: 'image'});
+        }
+      }
+
+      const videos = Object.values(token?.media || {}).filter((media) => media.type === 'video');
+      if (videos.length > 0 ) {
+        video = videos[0];
+        for(const video of videos) {
+          sliderItems.push({src: video.url, type: 'video'});
+        }
+      }
+
+      const audios = Object.values(token?.media || {}).filter((media) => media.type === 'audio');    
+      if (audios.length > 0 ) {
+        for(const audio of audios) {
+          sliderItems.push({src: audio.url, type: 'audio'});
+        }
+      }
     }
     const attributesList = attributes ? Object.values(attributes) : [];
 
@@ -100,20 +116,15 @@ export const CommonTokenDetail: FC<IProps> = ({
       attributes,
       attributesList,
       royalties,
+      sliderItems,
       image,
-      audio,
-      youtubeVideo,
-      animation,
-      owner,
       video
     };
   }, [token, collection, offer]);
 
   const hasSlider = useMemo(() => {
-    const items = [image, video, audio, youtubeVideo, animation];
-    const definedItemsCount = items.filter((item) => item !== undefined && item !== null).length;
-    return definedItemsCount > 1;
-  }, [image, video, audio, youtubeVideo, animation]);
+    return sliderItems?.length > 1;
+  }, [sliderItems]);
 
   const deviceSize = useDeviceSize();
 
@@ -192,87 +203,23 @@ export const CommonTokenDetail: FC<IProps> = ({
       setWearableTokenImg(_token?.file?.fullUrl || undefined);
     })();
   }, [currentChainId, collectionId, tokenId, isWearable, api?.nft]);
-  
-  const settings = {
-    dots: true,
-    infinite: true,
-    speed: 500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    
-    nextArrow: <CustomNextArrow />,
-    prevArrow: <CustomPrevArrow />,
-  };
 
   return (
     <CommonTokenDetailStyled>
-      <SliderContainer>
+      <>
         {isLoading && <Skeleton />}
-        {!isLoading &&
+        {!isLoading && 
           (hasSlider ? (
-            <Slider {...settings}>
-              <PictureWrapper>
-                {!isWearable && (
-                  <Picture
-                    alt={tokenId?.toString() || ''}
-                    src={image}
-                    testid={`${testid}-token-picture`}
-                    badges={badges}
-                  />
-                )}
-                {isWearable && (
-                  <WearablePicture
-                    alt={tokenId?.toString() || ''}
-                    src={image}
-                    wearableSrc={wearableTokenImg || image}
-                    baseSrc={baseTokenImg}
-                    testid={`${testid}-token-picture`}
-                  />
-                )}
-                <EquippedWearables />
-              </PictureWrapper>
-              {video?.url &&
-                (isYouTubeLink(video?.url) ? (
-                  <SliderItem>
-                    <Iframe
-                      src={video?.url}
-                      title='YouTube video player'
-                      allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
-                    ></Iframe>
-                  </SliderItem>
-                ) : (
-                  <PictureWrapper>
-                    <Picture
-                      alt={tokenId?.toString() || ''}
-                      src={''}
-                      video={video?.url || ''}
-                      testid={`${testid}-token-picture`}
-                    />
-                    <EquippedWearables />
-                  </PictureWrapper>
-                ))}
-
-              {youtubeVideo && (
-                <SliderItem>
-                  <Iframe
-                    src={youtubeVideo}
-                    title='YouTube video player'
-                    allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
-                  ></Iframe>
-                </SliderItem>
-              )}
-
-              {audio?.url && (
-                <SliderItem>
-                  <Picture
-                    alt={tokenId?.toString() || ''}
-                    src={''}
-                    video={audio?.url || ''}
-                    testid={`${testid}-token-picture`}
-                  />
-                </SliderItem>
-              )}
-            </Slider>
+            <SliderContainer>
+              <TokenSlider 
+                items={sliderItems}
+                isWearable={isWearable}
+                wearableSrc={wearableTokenImg || image}
+                baseSrc={baseTokenImg}
+                badges={badges}
+              />
+              <EquippedWearables />
+            </SliderContainer>
           ) : (
             <PictureWrapper>
               {isLoading && <Skeleton />}
@@ -301,59 +248,79 @@ export const CommonTokenDetail: FC<IProps> = ({
               <EquippedWearables />
             </PictureWrapper>
           ))}
-      </SliderContainer>
+      </>
       <Description>
         {isLoading && <TokenSkeleton />}
-        {!isLoading && <>
-          <Link to={`/collection/${collectionId}`} >{collectionName} [id {collectionId}]</Link>
-          <HeadingWrapper>
-            <Heading size={'1'} testid={`${testid}-token-name`}>
-              {`${prefix || ''} #${tokenId}`}
-            </Heading>
-            <ShareLink onClick={openShareModal} data-testid={`${testid}-share-button`}>
-              <IconWrapper>
-              </IconWrapper>
-            </ShareLink>
-          </HeadingWrapper>
-          <OwnerBlock data-testid={`${testid}-owner-section`}>
-            {!(isRft && !isRftFracton) && <OwnerCard
-              address={owner || ''}
-              isShort={deviceSize < DeviceSize.xl}
-              canCopy={false}
-              prefixOwned='Owned by'
-              prefixNested='Nested in bundle'
-            />}
-          </OwnerBlock>
-          <Divider />
-          {isNested && token?.nestingParentToken?.tokenId && token?.nestingParentToken?.collectionId && <>
-            <Heading size='4'>NFT Wearable for</Heading>
-            <ParentTokenWrapper>
-              <TokensBandleCard
-                tokenId={token.nestingParentToken.tokenId}
-                collectionId={token.nestingParentToken.collectionId}
-                onViewNodeDetails={onViewTokenDetails}
+        {!isLoading && (
+          <>
+            <Link to={`/collection/${collectionId}`}>
+              {collectionName} [id {collectionId}]
+            </Link>
+            <HeadingWrapper>
+              <Heading size={'1'} testid={`${testid}-token-name`}>
+                {`${prefix || ''} #${tokenId}`}
+              </Heading>
+              <ShareLink
+                onClick={openShareModal}
+                data-testid={`${testid}-share-button`}
+              >
+                <IconWrapper></IconWrapper>
+              </ShareLink>
+            </HeadingWrapper>
+            <OwnerBlock data-testid={`${testid}-owner-section`}>
+              {!(isRft && !isRftFracton) && (
+                <OwnerCard
+                  address={owner || ''}
+                  isShort={deviceSize < DeviceSize.xl}
+                  canCopy={false}
+                  prefixOwned='Owned by'
+                  prefixNested='Nested in bundle'
+                />
+              )}
+            </OwnerBlock>
+            <Divider />
+            {isNested &&
+              token?.nestingParentToken?.tokenId &&
+              token?.nestingParentToken?.collectionId && (
+                <>
+                  <Heading size='4'>NFT Wearable for</Heading>
+                  <ParentTokenWrapper>
+                    <TokensBandleCard
+                      tokenId={token.nestingParentToken.tokenId}
+                      collectionId={token.nestingParentToken.collectionId}
+                      onViewNodeDetails={onViewTokenDetails}
+                    />
+                  </ParentTokenWrapper>
+                  <Divider />
+                </>
+              )}
+            {isRft && !isRftFracton && (
+              <>
+                <FractionalOwnersList />
+                <Divider />
+              </>
+            )}
+            {children}
+            {collection?.mode === 'ReFungible' && !!address && (
+              <>
+                <FractionalDetail testid={`${testid}-fractional`} />
+                <Divider />
+              </>
+            )}
+            {attributes && collectionId && (
+              <AttributesBlock
+                attributes={attributesList}
+                collectionId={collectionId}
               />
-            </ParentTokenWrapper>
-            <Divider />
-          </>}
-          {isRft && !isRftFracton && <>
-            <FractionalOwnersList />
-            <Divider />
-          </>}
-          {children}
-          {collection?.mode === 'ReFungible' && !!address && <>
-            <FractionalDetail testid={`${testid}-fractional`} />
-            <Divider />
-          </>}
-          {attributes && collectionId && <AttributesBlock
-            attributes={attributesList}
-            collectionId={collectionId}
-          />}
-          {royalties && Array.isArray(royalties) && <>
-            <Divider />
-            <RoyaltiesBlock royalties={royalties} />
-          </>}
-        </>}
+            )}
+            {royalties && Array.isArray(royalties) && (
+              <>
+                <Divider />
+                <RoyaltiesBlock royalties={royalties} />
+              </>
+            )}
+          </>
+        )}
       </Description>
       <DropdownStyled
         placement={'right'}
@@ -361,42 +328,68 @@ export const CommonTokenDetail: FC<IProps> = ({
         onOpenChange={setDropdownOpen}
         dropdownRender={() => (
           <DropdownMenu>
-            <ShareMenuItem onClick={openShareModal}>Share
+            <ShareMenuItem onClick={openShareModal}>
+              Share
               <MenuIconWrapper>
-                <Icon name={'shared'} size={16} color={'var(--color-primary-500)'} />
+                <Icon
+                  name={'shared'}
+                  size={16}
+                  color={'var(--color-primary-500)'}
+                />
               </MenuIconWrapper>
             </ShareMenuItem>
-            <ScanMenuItem onClick={onScanLinkClick}>View on Subscan
+            <ScanMenuItem onClick={onScanLinkClick}>
+              View on Subscan
               <MenuIconWrapper>
-                <Icon name={'arrow-up-right'} size={16} color={'var(--color-primary-500)'} />
+                <Icon
+                  name={'arrow-up-right'}
+                  size={16}
+                  color={'var(--color-primary-500)'}
+                />
               </MenuIconWrapper>
             </ScanMenuItem>
-            {!offer && <BurnMenuItem onClick={onBurn}>Burn
+            {!offer && (
+              <BurnMenuItem onClick={onBurn}>
+                Burn
+                <MenuIconWrapper>
+                  <Icon
+                    name={'burn'}
+                    size={16}
+                    color={'var(--color-coral-500)'}
+                  />
+                </MenuIconWrapper>
+              </BurnMenuItem>
+            )}
+            <ReportMenuItem onClick={onReportClick}>
+              Report
               <MenuIconWrapper>
-                <Icon name={'burn'} size={16} color={'var(--color-coral-500)'} />
-              </MenuIconWrapper>
-            </BurnMenuItem>}
-            <ReportMenuItem onClick={onReportClick}>Report
-              <MenuIconWrapper>
-                <Icon name={'warning'} size={16} color={'var(--color-coral-500)'} />
+                <Icon
+                  name={'warning'}
+                  size={16}
+                  color={'var(--color-coral-500)'}
+                />
               </MenuIconWrapper>
             </ReportMenuItem>
           </DropdownMenu>
-          )}
+        )}
       >
         <DropdownWrapper>
-          <Icon
-            size={32}
-            name={'meatball-menu'}
-            color={'transparent'}
-          />
+          <Icon size={32} name={'meatball-menu'} color={'transparent'} />
         </DropdownWrapper>
       </DropdownStyled>
-      <ShareTokenModal isVisible={shareModalVisible} onClose={closeShareModal} testid={`${testid}-share-modal`} />
+      <ShareTokenModal
+        isVisible={shareModalVisible}
+        onClose={closeShareModal}
+        testid={`${testid}-share-modal`}
+      />
       <ReportModal
         collectionId={collectionId || 0}
         tokenId={tokenId || 0}
-        tokenPrefix={offer?.collectionDescription.tokenPrefix || collection?.tokenPrefix || ''}
+        tokenPrefix={
+          offer?.collectionDescription.tokenPrefix ||
+          collection?.tokenPrefix ||
+          ''
+        }
         isVisible={reportModalVisible}
         onClose={closeReportModal}
         testid={`${testid}-report-modal`}
@@ -439,8 +432,26 @@ const PictureWrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%;
   flex-direction: column;
+  width: 536px;
+  margin-right: calc(var(--prop-gap)* 2);
+
+  @media (max-width: ${BREAKPOINTS.desktop}px) {
+    width: 536px;
+  }
+  
+  @media (max-width: ${BREAKPOINTS.smallDesktop}px) {
+    width: 326px;
+  }
+
+  @media (max-width: ${BREAKPOINTS.tablet}px) {
+    width: calc(100vw - var(--prop-gap) * 3);
+  }
+
+  @media (max-width: ${BREAKPOINTS.mobile}px) {
+    width: calc(100vw - var(--prop-gap) * 2);
+  }
+
   &::before {
     content: '';
     display: block;
@@ -455,7 +466,6 @@ const PictureWrapper = styled.div`
     position: absolute;
     top: 0;
     left: 2px;
-    bottom: 0;
     right: 2px;
     display: flex;
     align-items: center;
@@ -477,34 +487,6 @@ const PictureWrapper = styled.div`
       border-radius: 8px;
       height: auto;
     }
-  }
-`;
-
-const SliderItem = styled.div`
-  width: 100%;
-  height: 100%;
-`;
-
-const Iframe = styled.iframe`
-  width: calc(100% - 4px);
-  margin: auto;
-  border: none;
-  height: 536px;
-
-  @media (max-width: 1919px) {
-    height: 536px;
-  }
-  
-  @media (max-width: 1023px) {
-    height: 326px;
-  }
-
-  @media (max-width: 767px) {
-    height: calc(100vw - var(--prop-gap) * 3);
-  }
-
-  @media (max-width: 567px) {
-    height: calc(100vw - var(--prop-gap) * 2);
   }
 `;
 
@@ -653,27 +635,6 @@ const IconWrapper = styled.div`
 `;
 
 const SliderContainer = styled.div`
-  display: relative;
-  width: 536px;
-  margin-right: calc(var(--prop-gap)* 2);
-
-  @media (max-width: 1919px) {
-    width: 536px;
-  }
-  
-  @media (max-width: 1023px) {
-    width: 326px;
-  }
-
-  @media (max-width: 767px) {
-    width: calc(100vw - var(--prop-gap) * 3);
-  }
-
-  @media (max-width: 567px) {
-    width: calc(100vw - var(--prop-gap) * 2);
-  }
-
-  .slick-next .slick-prev .slick-next:before, .slick-prev:before {
-    display: none;
-  }
+  display: flex;
+  flex-direction: column;
 `;

@@ -33,27 +33,27 @@ const CustomNextArrow: React.FC<ArrowProps> = (props) => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: isHovered ? Grey200 : Grey300,
-        borderRadius: '12px',
-        width: '24px',
-        height: '24px',
-        transition: 'background-color 0.3s ease'
+        backgroundColor: '#FFF',
+        borderRadius: '25px',
+        width: '50px',
+        height: '50px',
+        transition: 'background-color 0.3s ease',
+        boxShadow: isHovered ? '0px 6px 6px 0px #00000080' : '0px 4px 4px 0px #00000040',
       }}
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <svg
-        width='8'
+        width='9'
         height='12'
-        style={{ marginLeft: 1 }}
-        viewBox='0 0 8 12'
+        viewBox='0 0 9 12'
         fill='none'
         xmlns='http://www.w3.org/2000/svg'
       >
         <path
-          d='M1 1L5.99998 5.99998L1 11'
-          stroke='white'
+          d='M1.50002 1L6.5 5.99998L1.50002 11'
+          stroke='#009CF0'
           strokeWidth='2'
           strokeLinecap='round'
         />
@@ -74,27 +74,28 @@ const CustomPrevArrow: React.FC<ArrowProps> = (props) => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: isHovered ? Grey200 : Grey300,
-        borderRadius: '12px',
-        width: '24px',
-        height: '24px',
-        transition: 'background-color 0.3s ease'
+        backgroundColor: '#FFF',
+        borderRadius: '25px',
+        width: '50px',
+        height: '50px',
+        transition: 'background-color 0.3s ease',
+        boxShadow: isHovered ? '0px 6px 6px 0px #00000080' : '0px 4px 4px 0px #00000040',
+        zIndex: 222,
       }}
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <svg
-        width='8'
+        width='9'
         height='12'
-        style={{ marginRight: 1 }}
-        viewBox='0 0 8 12'
+        viewBox='0 0 9 12'
         fill='none'
         xmlns='http://www.w3.org/2000/svg'
       >
         <path
-          d='M7 1L2.00002 5.99998L7 11'
-          stroke='white'
+          d='M7.49998 1L2.5 5.99998L7.49998 11'
+          stroke='#009CF0'
           strokeWidth='2'
           strokeLinecap='round'
         />
