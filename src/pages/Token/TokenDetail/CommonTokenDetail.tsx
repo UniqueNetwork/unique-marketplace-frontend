@@ -207,7 +207,7 @@ export const CommonTokenDetail: FC<IProps> = ({
   return (
     <CommonTokenDetailStyled>
       <>
-        {isLoading && <Skeleton />}
+        {isLoading && <PictureSkeleton />}
         {!isLoading && 
           (hasSlider ? (
             <SliderContainer>
@@ -424,6 +424,31 @@ const HeadingWrapper = styled.div`
   align-items: center;
   &>h1.unique-font-heading.size-1 {
     margin: 0;
+  }
+`;
+
+const PictureSkeleton = styled(Skeleton)`
+  margin-right: calc(var(--prop-gap)* 2);
+  width: 536px;
+
+  @media (max-width: ${BREAKPOINTS.desktop}px) {
+    width: 536px;
+    height: 536px;
+  }
+
+  @media (max-width: ${BREAKPOINTS.smallDesktop}px) {
+    width: 326px;
+    height: 326px;
+  }
+
+  @media (max-width: ${BREAKPOINTS.tablet}px) {
+    width: calc(100vw - var(--prop-gap) * 3);
+    height: calc(100vw - var(--prop-gap) * 3);
+  }
+
+  @media (max-width: ${BREAKPOINTS.mobile}px) {
+    width: calc(100vw - var(--prop-gap) * 2);
+    height: calc(100vw - var(--prop-gap) * 2);
   }
 `;
 
