@@ -1,11 +1,13 @@
+import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { EquippedWearables } from '../EquippedWearables';
 import { Picture } from 'components';
 import { WearablePicture } from 'components/TokenMedia/WearablePicture';
 import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/schemas';
-import { useEffect, useMemo } from 'react';
 import { BREAKPOINTS } from 'hooks/useBreakpointObserver';
 import { BadgeEnum } from 'components/TokenMedia/Picture';
+import YouTube, { YouTubeEvent, YouTubeProps } from 'react-youtube';
+import { extractVideoId, isYouTubeLink } from 'utils/urlUtils';
 
 interface SliderItem {
   src: string;
@@ -21,13 +23,12 @@ interface SliderItem {
 }
 
 const SliderItem = styled.div`
-  height: 100%;
-`;
-
-const Iframe = styled.iframe`
   width: calc(100% - 4px);
   margin: auto;
   border: none;
+
+  display: flex;
+  align-items: center;
   height: 536px;
 
   @media (max-width: ${BREAKPOINTS.desktop}px) {
@@ -44,6 +45,10 @@ const Iframe = styled.iframe`
 
   @media (max-width: ${BREAKPOINTS.mobile}px) {
     height: calc(100vw - var(--prop-gap) * 2);
+  }
+
+  > div {
+    flex: 1;
   }
 `;
 
@@ -92,31 +97,43 @@ const PictureWrapper = styled.div`
   }
 `;
 
-declare global {
-  interface Window {
-    onYouTubeIframeAPIReady: () => void;
-    YT: any;
-  }
-}
-
 const MainSliderItem = ({
   src,
   type,
   isWearable,
   wearableSrc,
   baseSrc,
-  tokenId = 123,
+  tokenId,
   activeIndex,
   index,
-  badges,
+  badges
 }: SliderItem) => {
-  const isActive = useMemo(() => activeIndex === index, [activeIndex, index]);
+  const isActive = activeIndex === index;
+  const playerRef = useRef<any>(null);
+
   useEffect(() => {
     if (!isActive) {
       const videos = document.querySelectorAll('video');
       videos.forEach((video) => video.pause());
+
+      //Stop youtube video
+      if (playerRef.current && playerRef.current.pauseVideo) {
+        playerRef.current.pauseVideo();
+      }
     }
-  }, [isActive]);
+  }, [isActive, playerRef]);
+
+  const opts: YouTubeProps['opts'] = {
+    width: '100%',
+    playerVars: {
+      autoplay: 0
+    }
+  };
+
+  const onReady = (event: YouTubeEvent) => {
+    event.target.pauseVideo();
+    playerRef.current = event.target;
+  };
 
   switch (type) {
     case 'token_image':
@@ -141,35 +158,42 @@ const MainSliderItem = ({
     case 'image':
       return (
         <PictureWrapper>
-          <Picture
-            alt={tokenId?.toString() || ''}
-            src={src}
-            badges={badges}
-          />
+          <Picture alt={tokenId?.toString() || ''} src={src} badges={badges} />
         </PictureWrapper>
       );
     case 'youtube_url':
       return (
         <SliderItem>
-          <Iframe
-            src={src}
-            title='YouTube video player'
-            allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
-          ></Iframe>
+          <YouTube
+            videoId={extractVideoId(src)}
+            opts={opts}
+            onReady={onReady}
+          />
         </SliderItem>
       );
     case 'video':
       return (
-        <PictureWrapper>
-          <Picture
-            alt={tokenId?.toString() || ''}
-            src={''}
-            video={src || ''}
-            testid={`${`testid`}-token-picture`}
-            // isPlaying={isActive}
-          />
-          <EquippedWearables />
-        </PictureWrapper>
+        <>
+          {isYouTubeLink(src) ? (
+            <SliderItem>
+              <YouTube
+                videoId={extractVideoId(src)}
+                opts={opts}
+                onReady={onReady}
+              />
+            </SliderItem>
+          ) : (
+            <PictureWrapper>
+              <Picture
+                alt={tokenId?.toString() || ''}
+                src={''}
+                video={src || ''}
+                testid={`${`testid`}-token-picture`}
+              />
+              <EquippedWearables />
+            </PictureWrapper>
+          )}
+        </>
       );
     case 'audio':
       return (
