@@ -8,6 +8,7 @@ export const LEFT_SLIDER_ITEM_SIZE = 92;
 
 interface SliderItem {
   src?: string;
+  thumbnail?: string;
   // 'token_image' | 'image' | 'youtube_url' | 'video' | 'audio'
   type: string;
   index: number;
@@ -43,7 +44,7 @@ const Container = styled.div<{
   overflow: hidden;
 
   ${({ type }) =>
-    (type === 'video' || type === 'youtube_url' || type === 'audio') &&
+    (type === 'video' || type === 'youtube_url') &&
     css`
       &:after {
         content: '';
@@ -89,6 +90,7 @@ const LeftSliderItem: React.FC<SliderItem> = ({
   type,
   index,
   activeIndex,
+  thumbnail,
   handleLeftSliderClick
 }) => {
   const onItemClick = () => {
@@ -160,12 +162,11 @@ const LeftSliderItem: React.FC<SliderItem> = ({
       return (
         <Container
           type={type}
-          isMedia={false}
-          backgroundImage='rgba(0, 0, 0, 1)'
+          isMedia={true}
+          backgroundImage={thumbnail || 'rgba(0, 0, 0, 1)'}
           active={isActive}
           onClick={onItemClick}
         >
-          <BlurredMedia style={{ backgroundColor: 'rgba(0, 0, 0, 1)' }} />
           <IconContainer>
             <Icon file={AudioIcon} size={32} />
           </IconContainer>

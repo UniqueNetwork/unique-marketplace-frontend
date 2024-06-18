@@ -100,7 +100,7 @@ export const CommonTokenDetail: FC<IProps> = ({
       const audios = Object.values(token?.media || {}).filter((media) => media.type === 'audio');    
       if (audios.length > 0 ) {
         for(const audio of audios) {
-          sliderItems.push({src: audio.url, type: 'audio'});
+          sliderItems.push({src: audio.url, type: 'audio', thumbnail: image});
         }
       }
     }

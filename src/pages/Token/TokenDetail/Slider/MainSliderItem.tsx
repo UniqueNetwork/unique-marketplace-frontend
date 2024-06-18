@@ -35,7 +35,7 @@ const SliderItem = styled.div`
     height: 536px;
   }
 
-  @media (max-width: ${BREAKPOINTS.smallDesktop}px) {
+  @media (max-width: ${BREAKPOINTS.mediumDesktop}px) {
     height: 326px;
   }
 

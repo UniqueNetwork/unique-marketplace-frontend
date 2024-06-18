@@ -33,7 +33,7 @@ const CustomNextArrowVertical: React.FC<ArrowProps> = (props) => {
       return 4 * baseCalculation - 22;
     } else if (width <= BREAKPOINTS.tablet) {
       return 4 * baseCalculation - 22;
-    } else if (width <= BREAKPOINTS.smallDesktop) {
+    } else if (width <= BREAKPOINTS.mediumDesktop) {
       return 3 * baseCalculation - 22;
     } else if (width <= BREAKPOINTS.desktop) {
       return 4 * baseCalculation - 22;
