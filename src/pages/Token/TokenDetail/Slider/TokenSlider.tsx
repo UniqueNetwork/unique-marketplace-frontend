@@ -37,7 +37,7 @@ export const TokenSlider: FC<ITokenSliderProps> = ({
       return 4;
     } else if (width <= BREAKPOINTS.tablet) {
       return 4;
-    } else if (width <= BREAKPOINTS.smallDesktop) {
+    } else if (width <= BREAKPOINTS.mediumDesktop) {
       return 3;
     } else if (width <= BREAKPOINTS.desktop) {
       return 4;
@@ -45,13 +45,8 @@ export const TokenSlider: FC<ITokenSliderProps> = ({
       return 2;
     }
   }, [width]);
-
-  const [isPlaying, setIsPlaying] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const horizontalSliderRef = useRef<Slider>(null);
-
-  // const sliderItems = useMemo(()=>[], []);
-
   const settings = {
     infinite: true,
     speed: 500,
@@ -67,6 +62,7 @@ export const TokenSlider: FC<ITokenSliderProps> = ({
 
   const settings2 = {
     speed: 500,
+    arrows: sliderItems.length > SLIDES_TO_SHOW,
     slidesToShow: SLIDES_TO_SHOW,
     slidesToScroll: 1,
     vertical: true,
@@ -99,12 +95,13 @@ export const TokenSlider: FC<ITokenSliderProps> = ({
             }
             afterChange={setCurrentLeftSliderPosition}
           >
-            {sliderItems.map(({ type, src }, index) => (
+            {sliderItems.map(({ type, src, thumbnail }, index) => (
               <LeftSliderItem
                 key={index}
                 src={src}
                 type={type}
                 index={index}
+                thumbnail={thumbnail}
                 activeIndex={activeIndex}
                 handleLeftSliderClick={handleLeftSliderClick}
               />
@@ -147,6 +144,10 @@ const SliderContainer = styled.div`
 
   @media (max-width: ${BREAKPOINTS.desktop}px) {
     width: 536px;
+  }
+
+  @media (max-width: ${BREAKPOINTS.mediumDesktop}px) {
+    width: 326px;
   }
 
   @media (max-width: ${BREAKPOINTS.smallDesktop}px) {
