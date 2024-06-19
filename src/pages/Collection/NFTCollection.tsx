@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { Text } from '@unique-nft/ui-kit';
-import { Select } from 'components/UI';
+import { Select, Text } from 'components/UI';
 
 import { TokensList } from './TokensList/TokensList';
 import { PagePaper } from 'components/PagePaper/PagePaper';
@@ -22,10 +21,9 @@ import { useCollections } from 'hooks/useCollections';
 import { useCollectionTokensFilter } from './hooks/useCollectionTokensFilter';
 import { TokensFilter } from './Filters/types';
 import { RoyaltiesFormData } from 'pages/CollectionEdit/types';
-import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
+import { CollectionWithInfoV2Dto } from '@unique-nft/sdk';
 import { CollectionPageProps } from './types';
 import { MobileFilters } from 'components/Filters/MobileFilter';
-import { Address } from '@unique-nft/utils';
 
 export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionPageProps) => {
   const { selectedAccount, isLoading: isAccountsLoading } = useAccounts();
@@ -35,7 +33,7 @@ export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
   const { fetchCollection, addCollection } = useMarketableCollection();
   const [scanning, setScanning] = useState(false);
   const [tokensCountOnScan, setTokensCountOnScan] = useState(0);
-  const collectionId = collectionOnChain.id;
+  const collectionId = collectionOnChain.collectionId;
 
   const { tokens, tokensCount, isFetching, fetchMore, fetch, attributes, attributeCounts } = useTokens({
     collectionId
@@ -58,12 +56,12 @@ export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
    } = useCollectionTokensFilter({ isFetching, fetch });
 
   const [royalties, setRoyalties] = useState<RoyaltiesFormData>();
-  const updateRoyalties = useCallback((collectionOnChain: CollectionInfoWithSchemaResponse | null | undefined) => {
-    if (collectionOnChain?.schema?.royalties?.length) {
-      const royalties = collectionOnChain?.schema?.royalties.map(({ value, address }) => ({
+  const updateRoyalties = useCallback((collectionOnChain: CollectionWithInfoV2Dto | null | undefined) => {
+    if (collectionOnChain?.info?.royalties?.length) {
+      const royalties = collectionOnChain?.info?.royalties.map(({ percent, address }) => ({
         address,
-        value: value
-          ? (Number(value) / 100).toFixed(2)
+        value: percent
+          ? percent.toFixed(2)
           : '0'
       }));
       setRoyalties({ royalties });
@@ -73,7 +71,7 @@ export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
   useEffect(() => {
     if (!api?.collection) return;
     void (async () => {
-      const tokensCountOnScan = await getCollectionTokensCount(collectionId);
+      const tokensCountOnScan = await getCollectionTokensCount(collectionId) || 0;
       setTokensCountOnScan(tokensCountOnScan);
 
       const collectionData = await fetchCollection(collectionId);
@@ -85,13 +83,22 @@ export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
         setCollection(mapCollectionToMarketable(collectionOnChain, tokensCountOnScan));
         return;
       }
-      setCollection(collectionData);
+      setCollection({...collectionData, cover: collectionOnChain?.info?.cover_image?.url});
     })();
   }, [currentChainId, collectionId, selectedAccount?.address]);
 
   useEffect(() => {
     if (!scanning) return;
+    const maxFetchAttempts = 100;
+    let fetchAttempts = 0;
+
     const refetchCollection = async () => {
+      if (fetchAttempts >= maxFetchAttempts) {
+        clearInterval(intervalId);
+        return;
+      }
+  
+      fetchAttempts++;
       const collectionData = await fetchCollection(collectionId);
       if (!collectionData) return;
       setCollection(collectionData);
@@ -108,10 +115,9 @@ export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
       }
     };
 
-    const intervalId = setInterval(() => void refetchCollection(), 1000);
+    const intervalId = setInterval(refetchCollection, 3000);
     return () => clearInterval(intervalId);
   }, [scanning, collectionId, tokensCountOnScan, filterState, sortingValue, searchValue]);
-
   const hasMore = tokens && tokens.length < tokensCount && !isFetching;
 
   const onClickSeeMore = useCallback(() => {
@@ -203,7 +209,7 @@ export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
 
 const CollectionPagePaper = styled(PagePaper)`
   && {
-    margin-top: calc(var(--gap) / 2);
+    margin-top: calc(var(--prop-gap) / 2);
   }
 `;
 
@@ -214,7 +220,7 @@ const MarketMainPageStyled = styled.div`
 `;
 
 const LeftColumn = styled.div<{ isVisible?: boolean }>`
-  margin-right: calc(var(--gap) * 2);
+  margin-right: calc(var(--prop-gap) * 2);
   @media (max-width: 1024px) {
     display: none;
   }
@@ -244,18 +250,19 @@ const SortSelectWrapper = styled.div`
 `;
 
 const SearchAndSortingWrapper = styled.div`
-  margin-bottom: var(--gap);
+  margin-bottom: var(--prop-gap);
   display: flex;
   justify-content: space-between;
 `;
 
-const mapCollectionToMarketable = (collection: CollectionInfoWithSchemaResponse, tokensCount: number) => ({
+const mapCollectionToMarketable = (collection: CollectionWithInfoV2Dto, tokensCount: number) => ({
   id: '-',
   data: collection,
   allowedTokens: '',
   isMarketable: false,
   active: true,
-  collectionId: collection.id,
+  cover: collection.info?.cover_image?.url,
+  collectionId: collection.collectionId,
   createdAt: '',
   decimalPoints: 0,
   description: collection.description,

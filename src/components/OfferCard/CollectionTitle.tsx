@@ -1,6 +1,5 @@
 import styled from 'styled-components';
-import { Text } from '@unique-nft/ui-kit';
-import { Tooltip } from 'components/UI';
+import { Tooltip, Text } from 'components/UI';
 import { useRef } from 'react';
 
 export const CollectionTitle = ({

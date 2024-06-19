@@ -1,9 +1,10 @@
 import React, { ReactElement, useCallback, useState } from 'react';
 import styled from 'styled-components';
-import { IconProps, SelectOptionProps } from '@unique-nft/ui-kit';
 import { Tabs, Select, Button } from 'components/UI';
 import { FilterChangeHandler, FilterState } from 'components/Filters/types';
 import { AdditionalLight } from 'styles/colors';
+import { SelectOptionProps } from 'components/UI/types';
+import { IconProps } from 'components/UI/Icon/Icon';
 
 type MobileFiltersProps<T> = {
   filterCount: number
@@ -93,11 +94,11 @@ const MobileFilterActionsWrapper = styled.div`
   top: calc(100% - 60px);    
   right: 0;
   left: 0;
-  padding: 10px calc(var(--gap) * 1.5);
+  padding: 10px calc(var(--prop-gap) * 1.5);
   background-color: ${AdditionalLight};
   box-shadow: 0px -8px 12px rgba(0, 0, 0, 0.06);
   z-index: 8;
-  column-gap: calc(var(--gap) / 2);
+  column-gap: calc(var(--prop-gap) / 2);
   
   @media (max-width: 1024px) {
     display: flex;
@@ -114,7 +115,7 @@ const MobileFilterModal = styled.div<{ isVisible: boolean }>`
   display: none;
   position: fixed;
   background-color: ${AdditionalLight};
-  padding: calc(var(--gap) * 1.5);
+  padding: calc(var(--prop-gap) * 1.5);
   height: calc(100% - 184px);
   top: 80px;
   right: 0;
@@ -143,5 +144,5 @@ const SortStyled = styled.div`
   width: 235px;
   display: flex;
   flex-direction: column;
-  row-gap: calc(var(--gap) * 2);
+  row-gap: calc(var(--prop-gap) * 2);
 `;

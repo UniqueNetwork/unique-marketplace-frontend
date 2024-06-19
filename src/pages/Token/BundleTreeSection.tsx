@@ -1,10 +1,9 @@
-import React, { Dispatch, SetStateAction, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { Heading, Text } from '@unique-nft/ui-kit';
+import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
 import { PagePaper } from 'components/PagePaper/PagePaper';
-import { BlueGrey300, Grey300 } from 'styles/colors';
+import { BlueGrey300 } from 'styles/colors';
 import { INestingToken } from 'components/BundleTree/types';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useApi } from 'hooks/useApi';
 import Skeleton from '../../components/Skeleton/Skeleton';
 import { Offer } from '../../api/restApi/offers/types';
@@ -14,6 +13,7 @@ import { Address } from '@unique-nft/utils';
 import { TokenContext } from './context/TokenContext';
 import TokenCard from 'components/BundleTree/NestedSection/TokenCard';
 import { MarketType } from 'types/MarketTypes';
+import { Heading } from 'components/UI';
 
 const addIsCurrentAccountOwnerToBundleAndSort = (bundle: INestingToken, isOwner: boolean, parent?: INestingToken) => {
   bundle.isCurrentAccountOwner = isOwner;
@@ -121,7 +121,7 @@ const BundlePagePaper = styled(PagePaper)`
 
 const HeaderStyled = styled.div`
   display: flex;
-  gap: var(--gap);
+  gap: var(--prop-gap);
   & > span {
     padding-top: 12px;
   }

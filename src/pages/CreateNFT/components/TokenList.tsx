@@ -11,11 +11,10 @@ import { Filter } from './Filter';
 import { getAttributesFromTokens } from '../helpers';
 import { AttributesModal } from './AttributesModal';
 import { AttributeFilterContext } from '../contexts/AttributesFilterContext';
-import { TokenTypeEnum } from 'pages/MyTokens/types';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { swap } from 'components/UI/DraggableGrid/helpers';
 import { DraggableGrid, DraggableGridContextProvider, DraggableGridItem } from 'components/UI/DraggableGrid';
-import { AttributeSchemaDto } from '@unique-nft/sdk';
+import { PotentialAttribute } from '@unique-nft/sdk';
 
 export type TokenListProps = {
   disabled: boolean;
@@ -24,8 +23,9 @@ export type TokenListProps = {
   tokenPrefix: string;
   tokensLimit?: number;
   tokensStartId?: number;
-  attributesSchema: Record<number, AttributeSchemaDto>;
-  mode: TokenTypeEnum | undefined;
+  attributesSchema: PotentialAttribute[];
+  mode: 'NFT' | 'Fungible' | 'ReFungible' | undefined;
+  schemaVersion: string;
   onChange(tokens: NewToken[]): void;
   onAddTokens(files: File[]): void;
 };
@@ -39,6 +39,7 @@ export const TokenList = ({
   disabled,
   attributesSchema,
   viewMode,
+  schemaVersion,
   onChange,
   onAddTokens
 }: TokenListProps) => {
@@ -116,8 +117,8 @@ export const TokenList = ({
             return false;
           }
           if (Array.isArray(attribute)) {
-            return (attributes as AttributeOption[]).some(
-              ({ id }) => selectedAttribute.id === id
+            return (attribute as AttributeOption[]).some(
+              ({ id }) => selectedAttribute.id === +id
             );
           }
           if (typeof attribute === 'string') {
@@ -231,6 +232,7 @@ export const TokenList = ({
           tokens={[editingToken]}
           tokenPrefix={tokenPrefix}
           attributesSchema={attributesSchema}
+          schemaVersion={schemaVersion}
           onClose={() => setEditingToken(undefined)}
           onChange={(_tokens: NewToken[]) => {
             const token = _tokens[0];
@@ -244,7 +246,8 @@ export const TokenList = ({
                 }
                 return {
                   ..._token,
-                  attributes: token.attributes
+                  attributes: token.attributes,
+                  royalties: token.royalties
                 };
               })
             );

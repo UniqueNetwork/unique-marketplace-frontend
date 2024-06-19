@@ -1,10 +1,10 @@
 import { Key, ReactNode, useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
-import { ComponentProps, DimentionType, SelectOptionProps } from '@unique-nft/ui-kit';
 import { Icon } from '..';
 import styled from 'styled-components';
+import { ComponentProps, DimentionType, SelectOptionProps } from '../types';
 
-export interface SelectProps extends ComponentProps {
+export interface SelectProps extends Omit<ComponentProps, 'onChange'> {
   options: SelectOptionProps[];
   optionKey?: string;
   optionValue?: string;

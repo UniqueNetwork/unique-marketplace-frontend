@@ -8,7 +8,6 @@ export type GetTokensRequestPayload = {
   address?: string
   accessoryType?: 'All' | 'Owned' | 'Disowned'
   saleType?: 'All' | 'OnSale' | 'NotForSale'
-  isAuction?: boolean
   bidderAddress?: string
   attributes?: string[]
   numberOfAttributes?: number[]

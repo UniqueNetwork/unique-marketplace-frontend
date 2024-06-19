@@ -1,6 +1,6 @@
-import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
+import { SelectOptionProps } from 'components/UI/types';
 import { Offer } from '../../api/restApi/offers/types';
-import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
+import { CollectionWithInfoV2Dto, TokenByIdResponse } from '@unique-nft/sdk';
 
 export type TOption = SelectOptionProps & {
   direction: 'asc' | 'desc';
@@ -9,4 +9,4 @@ export type TOption = SelectOptionProps & {
   title: string;
 }
 
-export type CollectionPageProps = { collection: CollectionInfoWithSchemaResponse };
+export type CollectionPageProps = { collection: CollectionWithInfoV2Dto };

@@ -20,10 +20,6 @@ const StatusFilter: FC<StatusFilterProps> = ({ value, onChange, testid, disabled
     onChange({ myNFTs: value, fixedPrice, timedAuction, myBets });
   }, [fixedPrice, timedAuction, myBets, onChange]);
 
-  // const onMyBetsChange = useCallback((value: boolean) => {
-  //   onChange({ myNFTs, fixedPrice, timedAuction: value || timedAuction, myBets: value });
-  // }, [myNFTs, fixedPrice, timedAuction, onChange]);
-
   const onStatusClear = useCallback(() => {
     onChange({ myNFTs: false, fixedPrice, timedAuction, myBets: false });
   }, [onChange, fixedPrice, timedAuction]);
@@ -53,10 +49,10 @@ const StatusFilter: FC<StatusFilterProps> = ({ value, onChange, testid, disabled
 };
 
 const StatusFilterWrapper = styled.div`
-  padding-top: var(--gap);
+  padding-top: var(--prop-gap);
   display: flex;
   flex-direction: column;
-  row-gap: var(--gap);
+  row-gap: var(--prop-gap);
 `;
 
 export default StatusFilter;

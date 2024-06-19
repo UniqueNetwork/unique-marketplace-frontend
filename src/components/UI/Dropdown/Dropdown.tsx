@@ -1,8 +1,9 @@
 import React, { isValidElement, Key, ReactNode, useEffect, useState, MouseEvent } from 'react';
 import classNames from 'classnames';
 import styled from 'styled-components';
-import { ComponentProps, IconProps, SelectOptionProps } from '@unique-nft/ui-kit';
-import { Icon } from 'components/UI/Icon/Icon';
+import { Icon } from 'components/UI';
+import { ComponentProps, SelectOptionProps } from '../types';
+import { IconProps } from '../Icon/Icon';
 
 export interface DropdownProps extends Omit<ComponentProps, 'onChange'> {
   open?: boolean;

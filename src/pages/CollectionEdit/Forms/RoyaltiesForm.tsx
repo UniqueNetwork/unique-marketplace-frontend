@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Heading } from '@unique-nft/ui-kit';
 
-import { Button, Text } from 'components/UI';
+import { Heading,Button, Text, TooltipWrapper, Icon } from 'components/UI';
 import { RoyaltiesFormData, Royalty } from '../types';
 import { NumberInput } from 'components/NumberInput/NumberInput';
 import { ButtonsRow, FormRow, FormWrapper } from './FormComponents';
@@ -17,17 +16,21 @@ import { IconButton } from 'components/IconButton/IconButton';
 import { useAccountsFilter } from 'hooks/useAccountsFilter';
 
 interface RoyaltiesFormProps {
-  initialFormData: RoyaltiesFormData;
+  initialFormData: Royalty[];
+  withSaveButton: boolean;
+  hasDifferentRoyalties?: boolean;
+  hasDuplicateAddresses?: boolean;
   onSubmit(formData: Partial<RoyaltiesFormData>): void;
 }
 
-export const RoyaltiesForm = ({ initialFormData, onSubmit }: RoyaltiesFormProps) => {
+export const RoyaltiesForm = ({ initialFormData, withSaveButton, hasDifferentRoyalties, hasDuplicateAddresses, onSubmit }: RoyaltiesFormProps) => {
   const [royalties, setRoyalties] = useState<Royalty[]>([]);
   const [validMap, setValidMap] = useState<boolean[]>([]);
+  const { prefixes } = useApi();
 
   useEffect(() => {
-    setRoyalties(initialFormData.royalties);
-    setValidMap(initialFormData.royalties.map(() => true));
+    setRoyalties(initialFormData);
+    setValidMap(initialFormData.map(() => true));
   }, [initialFormData]);
 
   const onAddRoyalty = useCallback(() => {
@@ -39,8 +42,17 @@ export const RoyaltiesForm = ({ initialFormData, onSubmit }: RoyaltiesFormProps)
   }, [royalties, validMap]);
 
   const onChangeRoyalty = useCallback((index: number) => (value: Royalty, isValid: boolean) => {
-    setRoyalties([...royalties.slice(0, index), value, ...royalties.slice(index + 1)]);
+    let newRoyalties = [...royalties.slice(0, index), value, ...royalties.slice(index + 1)];
+    setRoyalties(newRoyalties);
     setValidMap([...validMap.slice(0, index), isValid, ...validMap.slice(index + 1)]);
+
+    if (withSaveButton) return;
+    newRoyalties = newRoyalties.filter(({address, value}) => validateAddress(address, prefixes) && value);
+    if (JSON.stringify(initialFormData) === JSON.stringify(newRoyalties)) return;
+
+    onSubmit({
+      royalties: newRoyalties
+    });
   }, [royalties, validMap]);
 
   const onRemoveRoyalty = useCallback((index: number) => () => {
@@ -56,33 +68,59 @@ export const RoyaltiesForm = ({ initialFormData, onSubmit }: RoyaltiesFormProps)
 
   const totalRoyalty = royalties.reduce((acc, { value }) => Number(acc) + Number(value), 0);
   const isChanged = useMemo(() => {
-    if (royalties.length !== initialFormData.royalties.length) return true;
+    if (royalties.length !== initialFormData.length) return true;
 
-    return initialFormData.royalties.some(({ address, value }, index) => royalties[index].address !== address ||
+    return initialFormData.some(({ address, value }, index) => royalties[index].address !== address ||
       royalties[index].value !== value);
-  }, [initialFormData.royalties, royalties]);
+  }, [initialFormData, royalties]);
 
   const isValid = useMemo(() => {
     return !validMap.some((value) => !value);
   }, [validMap]);
 
-  return <FormWrapper>
-    <Heading size='2' >Royalties</Heading>
-    {royalties.map((royalty, index) => <RoyaltyComplexComponent
-      key={`$royalty_${index}`}
-      initialValue={royalty}
-      onChange={onChangeRoyalty(index)}
-      onRemove={onRemoveRoyalty(index)}
-    />)}
-    <TotalWrapper>
-      <Text color='secondary-500'>Total royalty: {totalRoyalty}%</Text>
-      <Text color='grey-500' size='s' weight='light'>Maximum royalty - 99%</Text>
-    </TotalWrapper>
-    <ButtonsRow>
-      <Button title='Save changes' onClick={onSubmitForm} disabled={!isValid || !isChanged || totalRoyalty > 99} />
-      <Button title='Add royalty' onClick={onAddRoyalty} />
-    </ButtonsRow>
-  </FormWrapper>;
+  return (
+    <FormWrapper>
+      <Heading size='2'>Royalties</Heading>
+      {!withSaveButton && hasDifferentRoyalties && (
+        <TooltipWrapper
+          message={
+            "Some of the tokens you've selected already possess varying royalties values. You can either select a different set of tokens or modify the royalty value for the current selection."
+          }
+        >
+          <Icon size={24} name='warning' color='var(--color-primary-500)' />
+        </TooltipWrapper>
+      )}
+      {royalties.map((royalty, index) => (
+        <RoyaltyComplexComponent
+          key={`$royalty_${index}`}
+          initialValue={royalty}
+          onChange={onChangeRoyalty(index)}
+          onRemove={onRemoveRoyalty(index)}
+        />
+      ))}
+      <TotalWrapper>
+        <Text color='secondary-500'>Total royalty: {totalRoyalty}%</Text>
+        <Text color={totalRoyalty > 99 ? 'var(--color-coral-500)' : 'grey-500'} size='s' weight='light'>
+          Maximum royalty - 99%
+        </Text>
+      </TotalWrapper>
+      {hasDuplicateAddresses && (
+        <ErrorWrapper size={'s'} color={'var(--color-coral-500)'}>
+          Royalties have duplicate addresses
+        </ErrorWrapper>
+      )}
+      <ButtonsRow>
+        {withSaveButton && (
+          <Button
+            title='Save changes'
+            onClick={onSubmitForm}
+            disabled={!isValid || !isChanged || totalRoyalty > 99}
+          />
+        )}
+        <Button title='Add royalty' onClick={onAddRoyalty} />
+      </ButtonsRow>
+    </FormWrapper>
+  );
 };
 
 type RoyaltyComplexComponentProps = {
@@ -130,38 +168,47 @@ const RoyaltyComplexComponent = ({ initialValue, onChange, onRemove }: RoyaltyCo
     }, isValid);
   }, [recipient, prefixes, onChange]);
 
-  return <RoyaltyWrapper>
-    <FormRow>
-      <RecipientSelectWrapper >
-        <Text color='secondary-500'>Royalty recipient address</Text>
-        <SelectInput<Account>
-          options={(filteredAccounts as unknown as Account[])}
-          value={recipient}
-          onChange={onChangeAddress}
-          renderOption={(option) => <AddressOptionWrapper>
-            <AccountCard accountName={option.name || ''}
-              accountAddress={option.address}
-              canCopy
-              isShort={deviceSize < DeviceSize.md}
-            />
-          </AddressOptionWrapper>}
-        />
-      </RecipientSelectWrapper>
-      {!isValidRecipientAddress && <ErrorWrapper size={'s'} color={'var(--color-coral-500)'} >Address is not valid</ErrorWrapper>}
-    </FormRow>
-    <FormRow>
-      <RecipientSelectWrapper >
-        <Text color='secondary-500'>Royalty percentage</Text>
-        <NumberInput
-          placeholder='%'
-          value={percentage}
-          onChange={onChangePercentage}
-          decimals={2}
-        />
-      </RecipientSelectWrapper>
-    </FormRow>
-    <IconButton name='trash' onClick={onRemove} size={24} />
-  </RoyaltyWrapper>;
+  return (
+    <RoyaltyWrapper>
+      <FormRow>
+        <RecipientSelectWrapper>
+          <Text color='secondary-500'>Royalty recipient address</Text>
+          <SelectInput<Account>
+            options={filteredAccounts as unknown as Account[]}
+            value={recipient}
+            onChange={onChangeAddress}
+            renderOption={(option) => (
+              <AddressOptionWrapper>
+                <AccountCard
+                  accountName={option.name || ''}
+                  accountAddress={option.address}
+                  canCopy
+                  isShort={deviceSize < DeviceSize.md}
+                />
+              </AddressOptionWrapper>
+            )}
+          />
+        </RecipientSelectWrapper>
+        {!isValidRecipientAddress && (
+          <ErrorWrapper size={'s'} color={'var(--color-coral-500)'}>
+            Address is not valid
+          </ErrorWrapper>
+        )}
+      </FormRow>
+      <FormRow>
+        <RecipientSelectWrapper>
+          <Text color='secondary-500'>Royalty percentage</Text>
+          <NumberInput
+            placeholder='%'
+            value={percentage}
+            onChange={onChangePercentage}
+            decimals={2}
+          />
+        </RecipientSelectWrapper>
+      </FormRow>
+      <IconButton name='trash' onClick={onRemove} size={24} />
+    </RoyaltyWrapper>
+  );
 };
 
 const RoyaltyWrapper = styled.div`
@@ -186,7 +233,7 @@ const TotalWrapper = styled.div`
 const RecipientSelectWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  row-gap: calc(var(--gap) / 2);
+  row-gap: calc(var(--prop-gap) / 2);
   .unique-input-text {
     width: 100%;
   }
@@ -198,7 +245,7 @@ const RecipientSelectWrapper = styled.div`
 const AddressOptionWrapper = styled.div`
   display: flex;
   align-items: center;
-  column-gap: calc(var(--gap) / 2);
+  column-gap: calc(var(--prop-gap) / 2);
   &>div:first-child{
     flex-grow: 0;
     min-width: 24px;
@@ -206,6 +253,6 @@ const AddressOptionWrapper = styled.div`
 `;
 
 const ErrorWrapper = styled(Text)`
-  margin-top: calc(var(--gap) / 2);
+  margin-top: calc(var(--prop-gap) / 2);
   display: block;
 `;

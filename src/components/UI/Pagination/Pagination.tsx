@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import classNames from 'classnames';
 import { Icon, InputText } from '..';
-import { Text } from '@unique-nft/ui-kit';
-import { Select } from 'components/UI';
+import { Select, Text } from 'components/UI';
 import { usePrevious } from 'utils/uiUtils';
 import styled from 'styled-components';
 

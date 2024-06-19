@@ -1,4 +1,5 @@
 import { DecodedInfixOrUrlOrCidAndHash } from 'api/chainApi/types';
+import { ethers } from 'ethers';
 import { INestingToken } from '../components/BundleTree/types';
 
 export const sleep = (ms: number) => {
@@ -102,4 +103,9 @@ export const truncateDecimalsBalanceSheet = (balance: string | undefined) => {
   const lastElem = arrBalance.length - 1;
   arrBalance[lastElem] = arrBalance[lastElem].slice(0, 4);
   return arrBalance.join('.');
+};
+
+export const getEthereumSigner = () => {
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  return provider.getSigner();
 };

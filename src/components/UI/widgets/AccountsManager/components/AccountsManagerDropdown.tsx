@@ -1,6 +1,5 @@
-import { Toggle } from '@unique-nft/ui-kit';
 import React from 'react';
-import { Icon, Dropdown, Button, Text } from 'components/UI';
+import { Icon, Dropdown, Button, Text, Toggle } from 'components/UI';
 import { AccountsManagerProps } from '../AccountsManager';
 import { AccountCard } from './AccountCard';
 import styled from 'styled-components';
@@ -191,7 +190,7 @@ const AccountsManagerDropdownWrapper = styled.div`
   }
 
   .wallet-link {
-    margin-top: calc(var(--gap));
+    margin-top: calc(var(--prop-gap));
     a {
       font-size: 16px;
       font-weight: 500;

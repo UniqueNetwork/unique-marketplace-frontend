@@ -27,9 +27,9 @@ export const TokenSkeleton: FC = () => {
 const TokenSkeletonWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  row-gap: var(--gap);
+  row-gap: var(--prop-gap);
   div:first-child {
-    margin-bottom: calc(var(--gap) / 2);
+    margin-bottom: calc(var(--prop-gap) / 2);
   }
 `;
 

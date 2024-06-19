@@ -1,7 +1,6 @@
-import { AttributeSchemaDto, CreateTokenBody, CreateTokenPayload } from '@unique-nft/sdk';
+import { PotentialAttribute, AttributeSchemaDto, CreateTokenBody, Attribute as UniqueAttribute, TokenV2ItemForMultipleDto, CreateTokenPayload, TokenProperty } from '@unique-nft/sdk';
 
-import { Attribute, AttributeOption, AttributesForFilter, FilledTokenForm, NewToken } from './types';
-import { AttributeSchema, LocalizedStringOrBoxedNumberWithDefault } from '@unique-nft/schemas';
+import { Attribute, AttributeOption, AttributesForFilter, NewToken } from './types';
 
 const attributeMapper = (attribute?: Attribute) => {
   if (
@@ -31,25 +30,75 @@ const attributeMapper = (attribute?: Attribute) => {
 
 export const mapTokensToPayload = (
   tokens: NewToken[],
-  collectionId: number,
-  owner: string
-): CreateTokenPayload[] => {
-  return tokens.map((token) => mapNewToken(token, collectionId, owner));
-};
-
-export const mapTokensToPayload$1 = (
-  tokens: NewToken[],
-  collectionId: number,
-  owner: string
-): CreateTokenBody[] => {
-  return tokens.map((token) => mapNewToken$1(token, collectionId, owner));
+  schema?: PotentialAttribute[]
+): TokenV2ItemForMultipleDto[] => {
+  return tokens.map((token) => mapNewToken(token, schema));
 };
 
 export const mapNewToken = (
   token: NewToken,
-  collectionId: number,
-  owner: string
-): CreateTokenPayload => {
+  schema?: PotentialAttribute[]
+): TokenV2ItemForMultipleDto => {
+  const mappedTokenDto: TokenV2ItemForMultipleDto = {
+    image: token.ipfsCid?.fullUrl, 
+    attributes: [],
+    royalties: token.royalties?.map(({value, ...rest}) => ({...rest, percent: +value}))
+  };
+
+  if (schema && token.attributes?.length) {
+    mappedTokenDto.attributes = token.attributes.reduce<UniqueAttribute[]>(
+      (acc, attr, index) => {
+        if (!schema[index]?.trait_type) return acc;
+        if (Array.isArray(attr)) {
+          acc.push(...attr.map(({ title }: AttributeOption) => ({
+            trait_type: schema[index].trait_type!,
+            value: title
+          })));
+        }
+        if (typeof attr === 'string') {
+          acc.push({
+            trait_type: schema[index].trait_type!,
+            value: attr as string
+          });
+        }
+        return acc;
+      },
+      []
+    );
+  }
+
+  return mappedTokenDto;
+};
+
+export const mapTokensToPayloadV1 = (
+  tokens: NewToken[],
+  properties: TokenProperty[]
+): CreateTokenPayload[] => {
+  const propertiesIsArrayMap = new Map();
+  properties.forEach((property, index) => {
+    try {
+      const decodedValue = JSON.parse(property.value);
+      const isArray = decodedValue?.isArray;
+      propertiesIsArrayMap.set(index, isArray);
+    } catch (error) {
+      propertiesIsArrayMap.set(index, false);
+    }
+  });
+  //check the value is SELECT not MULTISELECT
+  tokens.forEach((token) => {
+    const tokenAttributes = token.attributes;
+    tokenAttributes.forEach((el, key) => {
+      const isArray = propertiesIsArrayMap.get(key);
+      if (!isArray && Array.isArray(el)) {
+        token.attributes[key] = el[0];
+      }
+    });
+  });
+
+  return tokens.map((token) => mapNewTokenV1(token));
+};
+
+export const mapNewTokenV1 = (token: NewToken): CreateTokenPayload => {
   const mappedTokenDto: CreateTokenPayload = {
     data: {
       image: {
@@ -78,6 +127,7 @@ export const mapNewToken = (
 
   return mappedTokenDto;
 };
+
 export const mapNewToken$1 = (
   token: NewToken,
   collectionId: number,
@@ -116,7 +166,7 @@ export const mapNewToken$1 = (
 
 export const checkRequiredAttributes = (
   tokens: NewToken[],
-  attributeSchema?: Record<number, AttributeSchema>
+  attributeSchema?: Record<number, AttributeSchemaDto>
 ) => {
   if (!attributeSchema) {
     return;
@@ -137,7 +187,7 @@ export const scrollToTokenCard = (id: number) => {
 };
 
 export const getAttributesFromTokens = (
-  attributesSchema: Record<number, AttributeSchemaDto>,
+  attributesSchema: PotentialAttribute[],
   tokens: NewToken[]
 ) => {
   // attributes formatted for Filter component
@@ -147,7 +197,7 @@ export const getAttributesFromTokens = (
     attributeName: string,
     index: number,
     value: number,
-    enumValues: Record<number, LocalizedStringOrBoxedNumberWithDefault>
+    enumValues: (string | number)[]
   ) => {
     const existsValue = attributesForFilter[attributeName].find(({ id }) => id === value);
     if (existsValue) {
@@ -157,7 +207,7 @@ export const getAttributesFromTokens = (
         index,
         key: attributeName,
         id: value,
-        value: enumValues[value]._.toString(),
+        value: enumValues[value].toString(),
         count: 1
       });
     }
@@ -167,10 +217,11 @@ export const getAttributesFromTokens = (
     if (!attributes) {
       return;
     }
+
     // Calculate filters to show
     attributes.forEach((attribute, index) => {
-      const { name, isArray, enumValues } = attributesSchema[index];
-      const attributeName = name?._?.toLocaleLowerCase();
+      const { trait_type, values } = attributesSchema[index];
+      const attributeName = (trait_type || '').toLocaleLowerCase();
 
       if (!attributeName) {
         return;
@@ -186,15 +237,10 @@ export const getAttributesFromTokens = (
         return;
       }
 
-      if (enumValues) {
-        if (isArray) {
-          (value as number[]).forEach((_value) => {
-            addSelectableValue(attributeName, index, _value, enumValues);
-          });
-          return;
+      if (values) {
+        if (Array.isArray(value)) {
+          value.forEach((v) => addSelectableValue(attributeName, index, v, values));
         }
-        addSelectableValue(attributeName, index, value as number, enumValues);
-
         return;
       }
 
@@ -230,4 +276,36 @@ export const ellipsisText = (text: string, allowSymbols = 30) => {
     return text.slice(0, nextSpacePosition) + '…';
   }
   return text;
+};
+
+export const parseInvalidAttributes = (
+  tokens: NewToken[],
+  collectionProperties: TokenProperty[]
+): { token: NewToken; invalidAttributes: number[] }[] => {
+  const requiredAttributes: number[] = collectionProperties
+    .filter((property) => property.key.startsWith('attributesSchema.'))
+    .map((property, index) => ({
+      optional: JSON.parse(property.value)?.optional,
+      index: index
+    }))
+    .filter((schema) => schema.optional === false)
+    .map((schema) => schema.index);
+
+  const invalidTokensMap: Map<number, { token: NewToken; invalidAttributes: number[] }> = new Map();
+
+  for (const attr of requiredAttributes) {
+    tokens.forEach((token) => {
+      if (!token.attributes[attr]) {
+        const tokenId = token.id;
+        const existingEntry = invalidTokensMap.get(tokenId);
+        if (existingEntry) {
+          existingEntry.invalidAttributes.push(attr);
+        } else {
+          invalidTokensMap.set(tokenId, { token, invalidAttributes: [attr] });
+        }
+      }
+    });
+  }
+  const invalidTokensArray: { token: NewToken; invalidAttributes: number[] }[] = Array.from(invalidTokensMap.values());
+  return invalidTokensArray;
 };

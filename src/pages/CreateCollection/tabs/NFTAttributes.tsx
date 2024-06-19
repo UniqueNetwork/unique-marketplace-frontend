@@ -1,7 +1,6 @@
-import { Text } from 'components/UI';
+import { Text, Heading } from 'components/UI';
 
 import { AttributesTable } from './AttributesTable';
-import { Heading } from '@unique-nft/ui-kit';
 import { FormBody, FormHeader } from '../components/FormComponents';
 
 export const NFTAttributes = () => {

@@ -1,7 +1,6 @@
 import React, { ChangeEvent, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { IconProps } from '@unique-nft/ui-kit';
-import { Icon } from 'components/UI/Icon/Icon';
+import { Icon, IconProps } from 'components/UI/Icon/Icon';
 import { AdditionalLight, Grey100, Grey300, Grey500, Primary100, Primary500 } from '../../styles/colors';
 import { IconButton } from '../IconButton/IconButton';
 import { classNames } from '../../utils/classNames';
@@ -158,7 +157,7 @@ const InputWrapper = styled.div`
   border: 1px solid ${Grey300};
   box-sizing: border-box;
   border-radius: 4px;
-  padding: calc(var(--gap) / 2) var(--gap);
+  padding: calc(var(--prop-gap) / 2) var(--prop-gap);
   position: relative;
   min-height: 40px;     
   &:hover {
@@ -168,24 +167,24 @@ const InputWrapper = styled.div`
     position: absolute;
     top: 0;
     left: 0;
-    right: calc(var(--gap) * 3.5);
+    right: calc(var(--prop-gap) * 3.5);
     bottom: 0;
     border: none;
     background: transparent;
     outline: none;
-    padding: calc(var(--gap) / 2) 0 calc(var(--gap) / 2) var(--gap);
+    padding: calc(var(--prop-gap) / 2) 0 calc(var(--prop-gap) / 2) var(--prop-gap);
     width: -moz-available;
     z-index: 1;
   }
 
   &.left-icon {
-    padding-left: calc(var(--gap) * 2);
+    padding-left: calc(var(--prop-gap) * 2);
     &>.icon {
       position: absolute;
-      left: calc(var(--gap) / 2);
+      left: calc(var(--prop-gap) / 2);
     }
     input {
-      left: var(--gap);
+      left: var(--prop-gap);
     }
   }
   
@@ -207,7 +206,7 @@ const Dropdown = styled.div<{ isOpen: boolean }>`
   width: 100%;
   top: calc(100% + 4px);
   flex-direction: column;
-  row-gap: calc(var(--gap) / 4);
+  row-gap: calc(var(--prop-gap) / 4);
   background: ${AdditionalLight};
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
   border-radius: 4px;
@@ -215,11 +214,11 @@ const Dropdown = styled.div<{ isOpen: boolean }>`
   overflow-x: hidden;
   overflow-y: auto;
   z-index: 10;
-  padding: calc(var(--gap) / 2);
+  padding: calc(var(--prop-gap) / 2);
 `;
 
 const OptionWrapper = styled.div`
-  padding: 0 calc(var(--gap) / 2);
+  padding: 0 calc(var(--prop-gap) / 2);
   cursor: pointer;
   &:hover {
     background: ${Primary100};
@@ -236,7 +235,7 @@ const Placeholder = styled.div`
 
 const ClearButton = styled(IconButton)`
   position: absolute;
-  left: calc(100% - calc(var(--gap) * 3));
+  left: calc(100% - calc(var(--prop-gap) * 3));
   top: 50%;
   margin-top: -8px;
   width: auto !important;
@@ -246,6 +245,6 @@ const TriangleButton = styled(IconButton)`
   position: absolute;
   top: calc(50% - 4px);
   margin-top: -4px;
-  right: var(--gap);
+  right: var(--prop-gap);
   cursor: pointer;
 `;

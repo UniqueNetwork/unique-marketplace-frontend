@@ -1,11 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
-import { IconProps, SortQuery, TableColumnProps, TableRowProps } from '@unique-nft/ui-kit';
 import { Table as UITable, Icon } from 'components/UI';
 
 import useDeviceSize, { DeviceSize } from '../hooks/useDeviceSize';
 import MobileTable from './MobileTable/MobileTable';
 import Skeleton from './Skeleton/Skeleton';
+import { SortQuery, TableColumnProps, TableRowProps } from './UI/Table/Table';
+import { IconProps } from './UI/Icon/Icon';
 
 interface TableProps<T> {
   columns: TableColumnProps[]
@@ -64,7 +65,7 @@ const TableWrapper = styled.div`
      padding: 0;
    }
    & > div {
-     padding: 0 var(--gap);
+     padding: 0 var(--prop-gap);
    } 
  }
 `;

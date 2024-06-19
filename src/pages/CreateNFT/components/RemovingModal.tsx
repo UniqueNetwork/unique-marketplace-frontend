@@ -1,10 +1,9 @@
 import styled from 'styled-components';
 
-import { Button, Modal, Text } from 'components/UI';
+import { Button, Modal, Text, Heading } from 'components/UI';
 
 import { NewToken } from '../types';
 import { ModalFooter } from './ModalFooter';
-import { Heading } from '@unique-nft/ui-kit';
 
 type RemovingModalProps = {
   isVisible?: boolean;

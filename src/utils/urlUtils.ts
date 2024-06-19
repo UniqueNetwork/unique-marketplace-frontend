@@ -1,4 +1,4 @@
-export const IPFSGateway = 'https://ipfs.uniquenetwork.dev/ipfs/';
+export const IPFSGateway = 'https://ipfs.unique.network/ipfs/';
 
 type ImagePath = {
   ipfs: string;
@@ -28,7 +28,7 @@ const isValidHttpUrl = (checkUrl: string): boolean => {
 export const getIpfsUriByImagePath = (
   imagePath: string | null | undefined
 ): string | undefined => {
-  if (!imagePath || imagePath === `${IPFSGateway}/`) {
+  if (!imagePath || imagePath === `${IPFSGateway}`) {
     return undefined;
   }
 
@@ -36,7 +36,7 @@ export const getIpfsUriByImagePath = (
     if (isValidHttpUrl(url)) {
       return url;
     }
-    return `${IPFSGateway}/${url}`;
+    return `${IPFSGateway}${url}`;
   };
 
   try {
@@ -50,4 +50,61 @@ export const getIpfsUriByImagePath = (
   }
 
   return undefined;
+};
+
+export const isYouTubeLink = (url: string): boolean => {
+  const pattern = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/;
+  return pattern.test(url);
+};
+
+interface Categories {
+  images: string[];
+  audio: string[];
+  video: string[];
+  youtube: RegExp;
+}
+
+export const categorizeFile = (fileOrUrl: string): string => {
+  const categories: Categories = {
+    images: ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff'],
+    audio: ['mp3', 'wav', 'aac', 'ogg', 'flac'],
+    video: ['mp4', 'avi', 'mkv', 'mov', 'mpeg'],
+    youtube: /^https?:\/\/(www\.)?(youtube|youtu|youtube-nocookie)\.(com|be)\/.+/,
+  };
+  
+  function getFileExtension(fileOrUrl: string): string {
+    const urlParts: string[] = fileOrUrl.split('.');
+    return urlParts[urlParts.length - 1].toLowerCase();
+  }
+
+  if (categories.youtube.test(fileOrUrl)) {
+    return 'youtube';
+  }
+
+  const fileExtension: string = getFileExtension(fileOrUrl);
+
+  for (const category in categories) {
+    if (category !== 'youtube') {
+      const categoryList = categories[category as keyof Categories];
+      if (Array.isArray(categoryList) && categoryList.includes(fileExtension)) {
+        return category;
+      }
+    }
+}
+
+  return 'unknown';
+};
+
+export const extractVideoId = (url: string): string => {
+  let videoId = '';
+
+  const regExp = /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+
+  const match = url.match(regExp);
+
+  if (match) {
+    videoId = match[1];
+  }
+
+  return videoId;
 };

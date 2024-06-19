@@ -2,9 +2,9 @@ import React, { ReactNode, useRef } from 'react';
 import { IAccount } from '../AccountsManager';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import useCopyToClipboard from '../hooks/useCopyToClipboard';
-import { Avatar, Tooltip } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
-import { CopyButton, Text } from 'components/UI';
+import { CopyButton, Text, Tooltip } from 'components/UI';
+import { Avatar } from 'components';
 
 interface AccountCardProps extends IAccount {
   avatarRender?(address: string): ReactNode;

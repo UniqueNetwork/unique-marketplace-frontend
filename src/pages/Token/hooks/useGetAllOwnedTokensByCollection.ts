@@ -1,25 +1,26 @@
 import { TokenId } from '@unique-nft/sdk';
 import { useAccounts } from 'hooks/useAccounts';
 import { useEffect, useState } from 'react';
-import { NestedTokenItem, TokenItem } from '../types';
-import { useGetBundleTree } from './useGetBundleTree';
+import { NestedTokenItem } from '../types';
 import { useGetTokensCollection } from './useGetTokensCollection';
+import { useQueryBundleTree } from 'api/scanApi/useQueryBundleTree';
+import { GQLToken } from 'api/scanApi/types';
 
 export const useGetAllOwnedTokensByCollection = (
   collectionId?: number,
   options?: { excludeTokenId?: TokenId }
 ) => {
   const { selectedAccount } = useAccounts();
-  const [tokens, setTokens] = useState<TokenItem[]>([]);
+  const [tokens, setTokens] = useState<GQLToken[]>([]);
 
   const { fetchTokens, isFetching } = useGetTokensCollection();
 
-  const { fetchBundle, isFetching: isBundleFetching } = useGetBundleTree();
+  const { fetchBundle, isFetching: isBundleFetching } = useQueryBundleTree();
 
   useEffect(() => {
     if (!collectionId) return;
     void (async () => {
-      const tokensData = (await fetchTokens(collectionId, selectedAccount)) || [];
+      const [tokensData] = (await fetchTokens(collectionId, selectedAccount)) || [];
       const nestedTokens = await Promise.all(tokensData.map(async (token) => {
         if (token.nested) {
           const bundleData = await fetchBundle({
@@ -27,11 +28,12 @@ export const useGetAllOwnedTokensByCollection = (
             tokenId: token.tokenId
           });
 
-          const getTokensFromBundle = (nestedToken: NestedTokenItem): TokenItem[] => {
+          const getTokensFromBundle = (nestedToken: NestedTokenItem): GQLToken[] => {
             if (collectionId !== nestedToken.collectionId) return [];
-            const tokenData: TokenItem = {
+            const tokenData: GQLToken = {
               ...nestedToken,
-              nested: true
+              nested: true,
+              attributes: []
             };
             if (!nestedToken.nestingChildren) {
               return [tokenData];
@@ -49,7 +51,7 @@ export const useGetAllOwnedTokensByCollection = (
 
       setTokens(
         [...(nestedTokens?.flat() || [])]
-          .reduce<TokenItem[]>(
+          .reduce<GQLToken[]>(
             (acc, _token) =>
               acc.find(({ collectionId, tokenId }) => collectionId === _token.collectionId && tokenId === _token.tokenId)
                 ? acc

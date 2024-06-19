@@ -1,8 +1,7 @@
 import React from 'react';
-import { Text } from '@unique-nft/ui-kit';
-import { Primary500 } from 'styles/colors';
 import styled from 'styled-components';
-import { Icon } from 'components/UI/Icon/Icon';
+import { Primary500 } from 'styles/colors';
+import { Icon, Text } from 'components/UI';
 
 function BuyBundleInformation({ testid }: { testid?: string }) {
   return (
@@ -14,7 +13,7 @@ function BuyBundleInformation({ testid }: { testid?: string }) {
 }
 
 const Wrapper = styled.div`
-  margin-top: calc(var(--gap) * 1.5);
+  margin-top: calc(var(--prop-gap) * 1.5);
 `;
 
 export default BuyBundleInformation;

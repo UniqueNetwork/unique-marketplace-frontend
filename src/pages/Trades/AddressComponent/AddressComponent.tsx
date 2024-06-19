@@ -39,7 +39,7 @@ const LinkWrapper = styled.span`
   && {
     display: flex;
     align-items: center;
-    column-gap: calc(var(--gap) / 2);
+    column-gap: calc(var(--prop-gap) / 2);
     
     & > div {
       padding: 0;
@@ -50,7 +50,7 @@ const LinkWrapper = styled.span`
     }
 
     @media (max-width: 768px) {
-      column-gap: calc(var(--gap) / 4);
+      column-gap: calc(var(--prop-gap) / 4);
     }
   }
 `;

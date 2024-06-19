@@ -1,7 +1,6 @@
 /* eslint-disable react/jsx-no-bind */
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Heading, Link, Suggest, SuggestProps } from '@unique-nft/ui-kit';
-import { Text, useNotifications, Button } from 'components/UI';
+import { Heading, Link, Text, useNotifications, Button, Suggest } from 'components/UI';
 import { BN } from '@polkadot/util';
 import styled from 'styled-components';
 
@@ -14,16 +13,18 @@ import { CollectionCover } from 'components/CollectionCover/CollectionCover';
 import { FeeMessage } from 'components';
 import { useTransferToBundleStages } from 'hooks/marketplaceStages/useTransferToBundleStages';
 import { INestingToken } from 'components/BundleTree/types';
-import { CollectionInfoWithSchemaResponse, TokenByIdResponse, TokenIdQuery } from '@unique-nft/sdk';
+import { CollectionWithInfoV2Dto, TokenWithInfoV2Dto, TokenIdQuery } from '@unique-nft/sdk';
 import { debounce } from 'utils/helpers';
 import { fromStringToBnString } from 'utils/bigNum';
 import { Coral700 } from 'styles/colors';
-import { useGetCollectionsForNesting } from '../hooks/useGetCollectionsForNesting';
-import { CollectionItem, TokenItem } from '../types';
+import { TokenItem } from '../types';
 import { getIpfsUriByImagePath } from 'utils/urlUtils';
 import { useGetAllOwnedTokensByCollection } from '../hooks/useGetAllOwnedTokensByCollection';
 import { FractionalAmountInput } from '../Modals/FractionalAmountInput';
 import { CollectionMode } from 'api/chainApi/types';
+import { useQueryCollectionsForNesting } from 'api/scanApi/useQueryCollectionsForNesting';
+import { GQLToken } from 'api/scanApi/types';
+import { SuggestProps } from 'components/UI/Suggest';
 
 export const TransferToBundleModal: FC<TBundleTransferModalBodyProps> = ({ token, setIsClosable, onFinish, testid }) => {
   const { selectedAccount } = useAccounts();
@@ -31,7 +32,7 @@ export const TransferToBundleModal: FC<TBundleTransferModalBodyProps> = ({ token
   const [status, setStatus] = useState<'ask' | 'transfer-stage'>('ask'); // TODO: naming
   const [newParent, setNewParent] = useState<{ collectionId: number, tokenId: number }>();
   const [isFetching, setIsFetching] = useState(false);
-  const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse | null>(null);
+  const [collection, setCollection] = useState<CollectionWithInfoV2Dto | null>(null);
   const [amount, setAmount] = useState(1);
 
   useEffect(() => {
@@ -81,14 +82,14 @@ export const TransferToBundleModal: FC<TBundleTransferModalBodyProps> = ({ token
 };
 
 type AskTransferToBundleModalProps = {
-  token: INestingToken | TokenByIdResponse,
-  collection: CollectionInfoWithSchemaResponse | null
+  token: INestingToken | TokenWithInfoV2Dto,
+  collection: CollectionWithInfoV2Dto | null
   onTransferToBundle(newParent: TokenIdQuery, amount: number): void
   testid: string
 };
 
 const AskTransferToBundleModal: FC<AskTransferToBundleModalProps> = ({ token, collection: collectionProp, onTransferToBundle, testid }) => {
-  const [collection, setCollection] = useState<CollectionItem | null>(null);
+  const [collection, setCollection] = useState<GQLToken | null>(null);
   const [selectedToken, setSelectedToken] = useState<TokenItem | null>(null);
   const [isFeeLoading, setIsFeeLoading] = useState(false);
   const [fee, setFee] = useState<string>('0');
@@ -99,13 +100,13 @@ const AskTransferToBundleModal: FC<AskTransferToBundleModalProps> = ({ token, co
   const { api } = useApi();
   const [isSponsored, setIsSponsored] = useState(false);
 
-  const { collections: collectionItems, fetchCollections, isFetching: isFetchingCollections } = useGetCollectionsForNesting();
+  const { collections: collectionItems, fetchCollections, isFetching: isFetchingCollections } = useQueryCollectionsForNesting();
   const { tokens, isFetchingTokens } = useGetAllOwnedTokensByCollection(collection?.collectionId, useMemo(() => ({
     excludeTokenId: {
       collectionId: token.collectionId,
       tokenId: token.tokenId
     }
-  }), [token]));
+  }), [collection, token]));
 
   useEffect(() => {
     if (!selectedAccount) return;
@@ -146,7 +147,7 @@ const AskTransferToBundleModal: FC<AskTransferToBundleModalProps> = ({ token, co
     [onTransferToBundle, selectedToken, amount]
   );
 
-  const onChangeSelectedCollection = useCallback((collection: CollectionItem | null) => {
+  const onChangeSelectedCollection = useCallback((collection: GQLToken | null) => {
     setCollection(collection);
     setSelectedToken(null);
     setFee('0');
@@ -186,12 +187,13 @@ const AskTransferToBundleModal: FC<AskTransferToBundleModalProps> = ({ token, co
         <CollectionsSuggestStyled
           isLoading={isFetchingCollections}
           suggestions={collectionItems}
-          getSuggestionValue={(suggestion) => `${suggestion.collectionName} ${suggestion.collectionId}`}
+          getSuggestionValue={(suggestion) => `${suggestion.collectionName} [ID ${suggestion?.collectionId}]}`}
           getActiveSuggestOption={(suggest, activeValue) => suggest.collectionId === activeValue.collectionId}
           components={{
             SuggestItem: ({ suggestion }) => <ItemOption>
               <CollectionCover src={getIpfsUriByImagePath(suggestion.collectionCover || '')} size={24} type={'circle'} />
-              <Text>{`${suggestion?.collectionName} [ID ${suggestion?.collectionId}]`}</Text>
+              <Text>
+                {`${suggestion?.collectionName} [ID ${suggestion?.collectionId}]`}</Text>
             </ItemOption>
           }}
           onChange={onChangeSelectedCollection}
@@ -210,7 +212,9 @@ const AskTransferToBundleModal: FC<AskTransferToBundleModalProps> = ({ token, co
           getActiveSuggestOption={(suggest, activeValue) => suggest?.tokenId === activeValue?.tokenId}
           components={{
             SuggestItem: ({ suggestion }) => <ItemOption>
-              <CollectionCover src={suggestion?.image?.fullUrl || ''} size={24} type={'square'} />
+              {/*/ TO DO remove after types updates */}
+              {/*/ @ts-ignore */}
+              <CollectionCover src={suggestion?.image || ''} size={24} type={'square'} />
               <Text>{`${suggestion?.tokenPrefix || ''} #${suggestion?.tokenId}`}</Text>
             </ItemOption>
           }}
@@ -286,14 +290,14 @@ const TransferToBundleStagesModal: FC<TransferToBundleStagesModalProps> = ({ tok
 const RowLabel = styled.div`
   display: flex;
   flex-direction: column;
-  row-gap: calc(var(--gap) / 4);
+  row-gap: calc(var(--prop-gap) / 4);
 `;
 
 const Row = styled.div`
-  margin-bottom: calc(var(--gap) * 1.5); 
+  margin-bottom: calc(var(--prop-gap) * 1.5); 
   display: flex;
   flex-direction: column;
-  row-gap: var(--gap);
+  row-gap: var(--prop-gap);
 `;
 
 const ButtonWrapper = styled.div`
@@ -315,12 +319,12 @@ const Content = styled.div`
 
 const ItemOption = styled.div`
   display: flex;
-  column-gap: calc(var(--gap) / 2);
+  column-gap: calc(var(--prop-gap) / 2);
   cursor: pointer;
-  padding: calc(var(--gap) / 2) calc(var(--gap) / 4);
+  padding: calc(var(--prop-gap) / 2) calc(var(--prop-gap) / 4);
 `;
 
-const CollectionsSuggest = (props: SuggestProps<CollectionItem>) => <Suggest<CollectionItem> {...props} />;
+const CollectionsSuggest = (props: SuggestProps<GQLToken>) => <Suggest<GQLToken> {...props} />;
 const CollectionsSuggestStyled = styled(CollectionsSuggest)`
   width: 100%;
   & .unique-input-text {
@@ -340,7 +344,7 @@ const LowBalanceWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
   position: absolute;
-  right: calc(var(--gap) * 1.5);
+  right: calc(var(--prop-gap) * 1.5);
   span {
     color: ${Coral700} !important;
   }

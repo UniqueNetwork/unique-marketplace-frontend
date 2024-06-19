@@ -25,7 +25,7 @@ interface PictureProps {
   alt: string
   testid?: string
   size?: number
-  video?: DecodedVideoUri
+  video?: string
   videoProps?: VideoProps
   isPlaying?: boolean
   badges?: BadgeEnum[]
@@ -50,7 +50,7 @@ export const Picture: FC<PictureProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [hasError, setHasError] = useState<boolean>(false);
-  const { autoplay = true, controls = true, loop = true, muted = true } = useMemo(() => videoProps || {}, [videoProps]);
+  const { autoplay = false, controls = true, loop = true, muted = false } = useMemo(() => videoProps || {}, [videoProps]);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -68,12 +68,18 @@ export const Picture: FC<PictureProps> = ({
 
   const videoUrl = useMemo(() => {
     if (!video) return undefined;
-    const url = video.fullUrl;
+    const url = video;
     // if video doesn't have poster, we rewind video to 0.001 sec
     // because iphone doesn't render first frame as a poster https://developer.apple.com/forums/thread/129377
     if (!imageSrc) return `${url}#t=0.001`;
     else return url;
   }, [video, imageSrc]);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.volume = 0.1;
+    }
+  }, []);
 
   return (<div className={'picture'}>
     {isLoading && <Skeleton width={'100%'} height={'100%'} />}
@@ -82,7 +88,7 @@ export const Picture: FC<PictureProps> = ({
         <Icon name={badge} size={24} />
       </Badge>)}
     </BadgesWrapper>}
-    {!isLoading && video?.fullUrl &&
+    {!isLoading && video &&
       <VideoStyled
         ref={videoRef}
         src={videoUrl || ''}
@@ -95,7 +101,7 @@ export const Picture: FC<PictureProps> = ({
         data-testid={`${testid}-video`}
       />
     }
-    {!isLoading && !hasError && imageSrc && !video?.fullUrl &&
+    {!isLoading && !hasError && imageSrc && !video &&
       <ImgStyled
         alt={alt}
         src={imageSrc}
@@ -106,12 +112,13 @@ export const Picture: FC<PictureProps> = ({
         onLoad={() => setIsLoading(false)}
         onError={() => setHasError(true)}
       />}
-    {!isLoading && (hasError || !imageSrc) && <Placeholder size={size} />}
+    {!isLoading && (hasError || (!imageSrc && !video)) && <Placeholder size={size} />}
   </div>);
 };
 
 const ImgStyled = styled.img`
   box-sizing: border-box;
+  margin: auto;
 `;
 
 const VideoStyled = styled.video`
@@ -131,7 +138,7 @@ const BadgesWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: var(--gap);
+  gap: var(--prop-gap);
   z-index: 2;
 `;
 
@@ -155,5 +162,4 @@ const BadgeWrapper = styled.div`
   line-height: 24px;
   color: ${AdditionalDark};
   box-shadow: 0px 2.767256498336792px 2.2138051986694336px 0px #68686812, 0px 6.650102138519287px 5.32008171081543px 0px #6868680D, 0px 12.521552085876465px 10.017241477966309px 0px #6868680B, 0px 22.3363094329834px 17.869047164916992px 0px #68686809, 0px 41.777610778808594px 33.422088623046875px 0px #68686807, 0px 100px 80px 0px #68686805;
-
 `;

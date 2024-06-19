@@ -16,8 +16,8 @@ const AccountSkeleton: FC = () => {
 const AccountSkeletonWrapper = styled.div`
   display: flex;
   align-items: center;
-  column-gap: calc(var(--gap) / 2);
-  padding: calc(var(--gap) / 2) var(--gap);
+  column-gap: calc(var(--prop-gap) / 2);
+  padding: calc(var(--prop-gap) / 2) var(--prop-gap);
   div {
     padding: 0;
   }

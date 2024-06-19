@@ -1,7 +1,6 @@
 import { FC } from 'react';
 import styled from 'styled-components';
-import { Text } from '@unique-nft/ui-kit';
-import { BlueGrey100 } from '../../../styles/colors';
+import { Text } from 'components/UI';
 
 export interface ITraitProps {
   trait: string;

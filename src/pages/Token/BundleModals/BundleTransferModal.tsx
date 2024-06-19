@@ -1,17 +1,16 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-
+import React, { FC, useEffect, useMemo, useState } from 'react';
+import { TokenWithInfoV2Dto } from '@unique-nft/sdk';
 import { UnnestModal } from './UnnestModal';
 import { TransferToBundleModal } from './TransferToBundleModal';
 import { CustomizeModal } from './CustomizeModal';
 import { INestingToken } from 'components/BundleTree/types';
 import { Modal } from 'components/UI';
-import { TokenByIdResponse } from '@unique-nft/sdk';
 import { EquipModal } from './EquipModal';
 import { MarketType } from 'types/MarketTypes';
 import { UnequipModal } from './UnequipModal';
 
 export type TBundleTransferModalProps = {
-  token?: INestingToken | TokenByIdResponse
+  token?: INestingToken | TokenWithInfoV2Dto
   bundleModalType: MarketType
   setModalType(type: MarketType): void
   onClose(): void
@@ -20,7 +19,7 @@ export type TBundleTransferModalProps = {
 }
 
 export type TBundleTransferModalBodyProps = {
-  token: INestingToken | TokenByIdResponse
+  token: INestingToken | TokenWithInfoV2Dto
   onFinish(): void
   setIsClosable(value: boolean): void
   testid: string

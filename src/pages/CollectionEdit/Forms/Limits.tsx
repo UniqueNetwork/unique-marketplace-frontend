@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { Alert, TooltipWrapper, Button, InputText, Text, useNotifications, ButtonGroup } from 'components/UI';
+import { Heading, Alert, TooltipWrapper, Button, InputText, Text, useNotifications, ButtonGroup, Toggle } from 'components/UI';
 
 import { SettingsSavingProps } from './types';
 import { Form, FormBody, SettingsRow } from 'pages/CreateCollection/components/FormComponents';
 import { FormRow } from './FormComponents';
-import { Heading } from '@unique-nft/ui-kit';
 import { maxTokenLimit } from 'pages/CreateNFT/constants';
 import { FeeMessage } from 'components';
 import { StatusTransactionModal } from './StatusTransactionModal';
@@ -26,10 +25,19 @@ export const Limits = ({ collectionInfo, onComplete }: SettingsSavingProps) => {
   } = useCollectionSetLimits();
   const { info } = useNotifications();
 
-  const { limits, id: collectionId } = collectionInfo || {};
+  const { limits, collectionId } = collectionInfo || {};
 
   const [tokenLimit, setTokenLimit] = useState<string | undefined>(
     limits?.tokenLimit?.toString()
+  );
+  const [ownerCanTransfer, setOwnerCanTransfer] = useState<boolean>(
+    limits?.ownerCanTransfer || false
+  );
+  const [transfersEnabled, setTransfersEnabled] = useState<boolean>(
+    limits?.transfersEnabled || false
+  );
+  const [accountTokenOwnershipLimit, setAccountTokenOwnershipLimit] = useState<string | undefined>(
+    limits?.accountTokenOwnershipLimit?.toString()
   );
 
   const isChanged = useMemo(() => {
@@ -56,7 +64,10 @@ export const Limits = ({ collectionInfo, onComplete }: SettingsSavingProps) => {
         collectionId,
         address: selectedAccount?.address,
         limits: {
-          tokenLimit: Number(tokenLimit)
+          tokenLimit: Number(tokenLimit),
+          ownerCanTransfer,
+          transfersEnabled,
+          accountTokenOwnershipLimit: Number(accountTokenOwnershipLimit)
         }
       }
     });
@@ -76,7 +87,8 @@ export const Limits = ({ collectionInfo, onComplete }: SettingsSavingProps) => {
             collectionId,
             address: selectedAccount.address,
             limits: {
-              tokenLimit: Number(tokenLimit)
+              tokenLimit: Number(tokenLimit),
+
             }
           }
         }
@@ -130,7 +142,53 @@ export const Limits = ({ collectionInfo, onComplete }: SettingsSavingProps) => {
               }}
             />
           </SettingsRow>
-
+          <SettingsRow>
+            <Toggle
+              on={transfersEnabled}
+              label={
+                <>
+                  Trasfers enabled
+                </>
+              }
+              onChange={setTransfersEnabled}
+            />
+          </SettingsRow>
+          <SettingsRow>
+            <Toggle
+              on={ownerCanTransfer}
+              label={
+                <>
+                  Owner can transfer
+                </>
+              }
+              onChange={setOwnerCanTransfer}
+            />
+          </SettingsRow>
+          <SettingsRow>
+            <InputText
+              label='Ownership limit per account'
+              placeholder='Unlimited'
+              id='limit'
+              role='number'
+              value={accountTokenOwnershipLimit}
+              error={!isValid}
+              statusText={
+                !isValid
+                  ? `The number of tokens must between 0 and ${
+                      limits?.accountTokenOwnershipLimit || maxTokenLimit
+                    }`
+                  : ''
+              }
+              onChange={(value) => {
+                const parsed = Number(value);
+                if (!parsed) {
+                  !value && setAccountTokenOwnershipLimit(value);
+                } else {
+                  setAccountTokenOwnershipLimit(parsed > maxTokenLimit ? tokenLimit : parsed.toString());
+                }
+              }}
+            />
+          </SettingsRow>
           <SettingsRow>
             {isValid && isChanged
 ? (

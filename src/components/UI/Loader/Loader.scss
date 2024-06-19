@@ -108,6 +108,25 @@ $loader-size: 24px;
                 margin: -8px -4px;
             }
         }
+
+        &.failed {
+            border: none;
+            animation: none;
+            border: 2px solid var(--color-primary-400);
+            border-top-color: var(--color-primary-400);
+            border-left-color: var(--color-primary-400);
+            position: relative;
+            &::after {
+                content: '×';
+                color: var(--color-primary-400);
+                font-size: 16px;
+                font-weight: bold;
+                position: absolute;
+                top: 45%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+        }
     }
 }
 

@@ -15,7 +15,7 @@ const CardSkeleton: FC = () => {
 const CardSkeletonWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  row-gap: calc(var(--gap) / 4);
+  row-gap: calc(var(--prop-gap) / 4);
   
   & > div {
     &::before {

@@ -1,6 +1,5 @@
 import React, { FC, useEffect } from 'react';
-import { Link } from '@unique-nft/ui-kit';
-import { useNotifications } from 'components/UI';
+import { Link, useNotifications } from 'components/UI';
 
 import { usePurchaseFixStages } from '../../../hooks/marketplaceStages';
 import DefaultMarketStages from './StagesModal';
@@ -12,6 +11,7 @@ import { useGetFee } from 'hooks/useGetFee';
 import MarketController from 'api/chainApi/MarketController';
 import { useApi } from 'hooks/useApi';
 import { debounce } from 'utils/helpers';
+import { NavLink } from 'react-router-dom';
 
 const PurchaseModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, setIsClosable, testid }) => {
   const { api } = useApi();
@@ -45,7 +45,12 @@ const PurchaseModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, setIsClo
   useEffect(() => {
     if (status === StageStatus.success) {
       info(
-        <div data-testid={`${testid}-success-notification`}>You are the new owner of <Link href={`/token/${collectionId || ''}/${tokenId || ''}`} title={`${tokenPrefix || ''} #${tokenId || ''}`}/></div>,
+        <div data-testid={`${testid}-success-notification`}>
+          You are the new owner of{' '}
+          <NavLink to={`/token/${collectionId}/${tokenId}`}>
+            {tokenPrefix} #{tokenId}
+          </NavLink>{' '}
+        </div>,
         { name: 'success', size: 32, color: 'var(--color-additional-light)' }
       );
     }

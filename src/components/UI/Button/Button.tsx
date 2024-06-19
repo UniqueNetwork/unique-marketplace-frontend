@@ -1,8 +1,9 @@
 import classNames from 'classnames';
-import { ComponentProps, DimentionType, IconProps } from '@unique-nft/ui-kit';
 import { Icon } from '..';
 import styled from 'styled-components';
 import React, { ForwardedRef, forwardRef, ReactNode } from 'react';
+import { ComponentProps, DimentionType } from '../types';
+import { IconProps } from '../Icon/Icon';
 
 export interface ButtonBaseProps {
   title: ReactNode;

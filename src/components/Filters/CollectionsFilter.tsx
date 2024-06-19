@@ -1,7 +1,8 @@
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useContext, useState } from 'react';
+import InfiniteScroll from 'react-infinite-scroller';
 import styled from 'styled-components';
-import { Text } from '@unique-nft/ui-kit';
-import { Checkbox } from 'components/UI';
+import { useDebouncedCallback } from 'use-debounce';
+import { Checkbox, Text } from 'components/UI';
 import { useCollections } from '../../hooks/useCollections';
 import { Accordion } from '../Accordion/Accordion';
 import CheckboxSkeleton from '../Skeleton/CheckboxSkeleton';
@@ -12,6 +13,8 @@ import { Attribute, AttributeCount } from '../../api/restApi/offers/types';
 import { CollectionCover } from '../CollectionCover/CollectionCover';
 import { useCuratedCollections } from 'hooks/useCuratedCollections';
 import SearchField from 'components/SearchField/SearchField';
+import CollectionsContext from 'collections/CollectionsContext';
+import { useTextSearchCollections } from 'hooks/useTextSearchCollections';
 
 interface CollectionsFilterProps {
   value?: { collections?: number[], attributes?: { key: string, attribute: string }[], attributeCounts?: number[] } | null
@@ -28,6 +31,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attr
   const { curatedCollections, isFetchingCurated } = useCuratedCollections();
   const { collections: selectedCollections = [], attributes: selectedAttributes = [], attributeCounts: selectedAttributeCounts = [] } = value || {};
   const [searchString, setSearchString] = useState<string>();
+  const { offset, totalCount, fetchCollections } = useContext(CollectionsContext);
 
   const onCollectionSelect = useCallback((collectionId: number) => (value: boolean) => {
     let _selectedCollections;
@@ -43,10 +47,17 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attr
     onChange([]);
   }, [onChange]);
 
-  const filteredCollections = useMemo(() => {
-    if (!searchString) return featuredCollections;
-    return featuredCollections.filter(({ name }) => name.toLowerCase().includes(searchString.toLowerCase()));
-  }, [featuredCollections, searchString]);
+  const {
+    textSearchCollections,
+    isFetching: isFetchingTextSearch,
+    fetchCollectionsTextLike,
+    error: errorTextSearch
+  } = useTextSearchCollections();
+
+  const toggleTextSearch = useDebouncedCallback(async (searchText: string) => {
+    setSearchString(searchText);
+    await fetchCollectionsTextLike(searchText);
+  }, 500);
 
   return (<>
     {curatedCollections.length > 0 && <Accordion title={'Curated collections'}
@@ -83,31 +94,88 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attr
     >
       <SearchFieldWrapper>
         <SearchField searchValue={searchString}
-          onSearchStringChange={setSearchString}
+          onSearchStringChange={toggleTextSearch}
           hideButton
           placeholder='Search by collections'
         />
       </SearchFieldWrapper>
       <CollectionFilterWrapper>
-        {isFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
-        {filteredCollections.map((collection) => (
-          <CheckboxWrapper
-            key={`collection-${collection.id}`}
+        {searchString ? (
+          <>
+            {isFetchingTextSearch &&
+              Array.from({ length: 3 }).map((_, index) => (
+                <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />
+              ))}
+            {textSearchCollections.map((collection) => (
+              <CheckboxWrapper key={`collection-${collection.id}`}>
+                <Checkbox
+                  checked={selectedCollections.indexOf(collection.id) !== -1}
+                  label={
+                    <CheckboxLabelWrapper>
+                      <CollectionCover
+                        src={collection?.cover || ''}
+                        size={22}
+                        type={'circle'}
+                      />
+                      <Text testid={`${testid}-name-${collection.id}`}>
+                        {collection.name || ''}
+                      </Text>
+                    </CheckboxLabelWrapper>
+                  }
+                  size={'m'}
+                  onChange={onCollectionSelect(collection.id)}
+                  testid={`${testid}-checkbox-${collection.id}`}
+                />
+              </CheckboxWrapper>
+            ))}
+            {!isFetchingTextSearch && textSearchCollections.length === 0 && (
+              <Text size='s' color='grey-600'>
+                Not found
+              </Text>
+            )}
+            {errorTextSearch && (
+              <Text size='s' color='grey-600'>
+                {errorTextSearch}
+              </Text>
+            )}
+          </>
+        ) : (
+          <InfiniteScroll
+            hasMore={offset < totalCount}
+            initialLoad={false}
+            loadMore={fetchCollections}
+            pageStart={1}
+            threshold={20}
+            useWindow={false}
           >
-            <Checkbox
-              checked={selectedCollections.indexOf(collection.id) !== -1}
-              label={<CheckboxLabelWrapper>
-                <CollectionCover src={collection.schema?.coverPicture.fullUrl || ''} size={22} type={'circle'}/>
-                <Text
-                  testid={`${testid}-name-${collection.id}`}
-                >{collection.name || ''}</Text>
-              </CheckboxLabelWrapper>}
-              size={'m'}
-              onChange={onCollectionSelect(collection.id)}
-              testid={`${testid}-checkbox-${collection.id}`}
-            />
-          </CheckboxWrapper>
-          ))}
+            {isFetching &&
+              Array.from({ length: 3 }).map((_, index) => (
+                <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />
+              ))}
+            {featuredCollections.map((collection) => (
+              <CheckboxWrapper key={`collection-${collection.id}`}>
+                <Checkbox
+                  checked={selectedCollections.indexOf(collection.id) !== -1}
+                  label={
+                    <CheckboxLabelWrapper>
+                      <CollectionCover
+                        src={collection?.cover || ''}
+                        size={22}
+                        type={'circle'}
+                      />
+                      <Text testid={`${testid}-name-${collection.id}`}>
+                        {collection.name || ''}
+                      </Text>
+                    </CheckboxLabelWrapper>
+                  }
+                  size={'m'}
+                  onChange={onCollectionSelect(collection.id)}
+                  testid={`${testid}-checkbox-${collection.id}`}
+                />
+              </CheckboxWrapper>
+            ))}
+          </InfiniteScroll>
+        )}
       </CollectionFilterWrapper>
     </Accordion>
     {onAttributeCountsChange && !!attributeCounts?.length && <AttributeCountsFilter
@@ -127,15 +195,15 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attr
 
 const CollectionFilterWrapper = styled.div`
   position: relative;
-  margin-top: var(--gap);
+  margin-top: var(--prop-gap);
   padding-top: 2px;
   display: flex;
   flex-direction: column;
-  row-gap: var(--gap);
+  row-gap: var(--prop-gap);
   min-height: 50px;
   max-height: 400px;
   overflow-y: auto;
-  padding-right: var(--gap);
+  padding-right: var(--prop-gap);
   .unique-checkbox-wrapper label {
     max-width: 230px;
     text-overflow: ellipsis;
@@ -145,15 +213,15 @@ const CollectionFilterWrapper = styled.div`
 
 const CuratedCollectionFilterWrapper = styled.div`
   position: relative;
-  margin-top: var(--gap);
+  margin-top: var(--prop-gap);
   padding-top: 2px;
   display: flex;
   flex-direction: column;
-  row-gap: var(--gap);
+  row-gap: var(--prop-gap);
   min-height: 50px;
   max-height: 400px;
   overflow-y: auto;
-  padding-right: var(--gap);
+  padding-right: var(--prop-gap);
   .unique-checkbox-wrapper {
     align-items: center;
   }
@@ -170,7 +238,7 @@ const CheckboxWrapper = styled.div`
 
 const CheckboxLabelWrapper = styled.div`
   display: flex;
-  column-gap: calc(var(--gap) / 4);
+  column-gap: calc(var(--prop-gap) / 4);
   align-items: flex-start;
   cursor: pointer;
   .unique-text {
@@ -182,7 +250,7 @@ const CheckboxLabelWrapper = styled.div`
 
 const CuratedCheckboxLabelWrapper = styled.div`
   display: flex;
-  column-gap: calc(var(--gap) / 4);
+  column-gap: calc(var(--prop-gap) / 4);
   align-items: center;
   cursor: pointer;
   .unique-text {
@@ -202,7 +270,7 @@ const CuratedCheckboxLabelWrapper = styled.div`
 `;
 
 const SearchFieldWrapper = styled.div`
-  margin-top: calc(var(--gap) / 2);
+  margin-top: calc(var(--prop-gap) / 2);
 `;
 
 export default CollectionsFilter;

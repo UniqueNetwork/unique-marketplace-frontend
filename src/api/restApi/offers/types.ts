@@ -1,13 +1,13 @@
 import { PaginatedResponse, Pagination, Sortable } from '../base/types';
 import { INestingToken } from 'components/BundleTree/types';
 import { TokenByIdResponse, CollectionInfoWithSchemaResponse } from '@unique-nft/sdk/full';
+import { AnyString } from '@polkadot/types/types';
 
 export type GetOffersRequestPayload = {
   collectionId?: number | number[]
   minPrice?: string
   maxPrice?: string
-  seller?: string
-  isAuction?: boolean
+  seller?: AnyString
   bidderAddress?: string
   attributes?: string[]
   numberOfAttributes?: number[]
@@ -22,14 +22,6 @@ export type Bid = {
   createdAt: string
   pendingAmount: string
   updatedAt: string
-}
-
-export type Auction = {
-  bids: Bid[]
-  priceStep: string
-  startPrice: string
-  status: 'created' | 'active' | 'withdrawing' | 'stopped' // ???
-  stopAt: string
 }
 
 export type OfferTokenAttribute = {
@@ -53,7 +45,6 @@ export type Offer = {
   quoteId: number
   seller: string
   creationDate: string
-  auction: Auction | null
   tokenDescription: TokenDescription,
   collectionDescription: CollectionDescription
   contractAddress: string

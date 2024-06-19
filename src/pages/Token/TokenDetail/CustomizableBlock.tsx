@@ -1,23 +1,25 @@
-import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
-import { Offer } from 'api/restApi/offers/types';
-import React, { FC, ReactChild, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { Heading, Loader, Text } from '@unique-nft/ui-kit';
+import React, { useEffect, useMemo, useState } from 'react';
+import { CollectionWithInfoV2Dto, TokenWithInfoV2Dto } from '@unique-nft/sdk';
 import styled from 'styled-components';
-import { mockWearables } from '../constants';
+
+import { Offer } from 'api/restApi/offers/types';
+import { GQLCollection } from 'api/scanApi/types';
+import { Loader, Text } from 'components/UI';
 import { useApi } from 'hooks/useApi';
 import { useCollections } from 'hooks/useCollections';
 import { Link } from 'react-router-dom';
+import { mockWearables } from '../constants';
 
 type CustomizableBlockProps = {
-  token?: TokenByIdResponse
-  collection?: CollectionInfoWithSchemaResponse
-  offer?: Offer
+  token?: TokenWithInfoV2Dto;
+  collection?: CollectionWithInfoV2Dto;
+  offer?: Offer;
 }
 
 export const CustomizableBlock = ({ token, offer, collection }: CustomizableBlockProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [baseCollection, setBaseCollection] = useState<CollectionInfoWithSchemaResponse>();
-  const [wearableCollections, setWearableCollections] = useState<CollectionInfoWithSchemaResponse[]>([]);
+  const [baseCollection, setBaseCollection] = useState<GQLCollection>();
+  const [wearableCollections, setWearableCollections] = useState<GQLCollection[]>([]);
   const { getCollection } = useCollections();
   const { currentChainId } = useApi();
   const { collectionId } = useMemo(() => {
@@ -43,7 +45,7 @@ export const CustomizableBlock = ({ token, offer, collection }: CustomizableBloc
       if (isCustomizable) {
         const ids = collection?.permissions?.nesting?.restricted;
         if (!ids?.length) return;
-        const collections = await Promise.all(ids.map(getCollection));
+        const collections = (await Promise.all(ids.map(getCollection))).filter((collection) => !!collection) as GQLCollection[];
         setWearableCollections(collections);
       }
       if (wearable) {

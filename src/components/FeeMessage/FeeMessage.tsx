@@ -1,8 +1,7 @@
 import { FC } from 'react';
 import styled from 'styled-components';
-import { Loader } from '@unique-nft/ui-kit';
 
-import { Text } from 'components/UI';
+import { Text, Loader } from 'components/UI';
 import { useApi } from 'hooks/useApi';
 import { AdditionalWarning100 } from 'styles/colors';
 
@@ -40,7 +39,7 @@ const FeeMessageWrapper = styled.div`
   box-sizing: border-box;
   display: flex;
   padding: 8px 16px;
-  margin: calc(var(--gap) * 1.5) 0;
+  margin: calc(var(--prop-gap) * 1.5) 0;
   border-radius: 4px;
   background-color: var(--color-primary-100);
   width: 100%;

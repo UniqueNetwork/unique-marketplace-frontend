@@ -101,7 +101,7 @@ const Row = styled.div`
     display: flex;
     padding: 0;
     align-items: center;
-    gap: calc(var(--gap) / 2);
+    gap: calc(var(--prop-gap) / 2);
   }
 `;
 

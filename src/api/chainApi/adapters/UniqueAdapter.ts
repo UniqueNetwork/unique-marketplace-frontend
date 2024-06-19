@@ -5,8 +5,8 @@ import IMarketContractAdapter, { IMarketContractProperties } from './IMarketCont
 import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
 import { ChainValue } from '../controllers/BaseController';
-import { CollectionMode, TransferTokenParams } from '../types';
-import { BatchCallArgumentsBody, CollectionProperty, CreateCollectionBody, CreateCollectionParsed, CreateTokenPayload, PropertyKeyPermission, SetCollectionLimitsBody, SetSponsorshipBody, TokenId } from '@unique-nft/sdk';
+import { CollectionMode, CollectionNestingAndPermissionStruct$1, TransferTokenParams } from '../types';
+import { BatchCallArgumentsBody, CollectionProperty, CreateCollectionParsed, CreateCollectionV2ArgsDto, TokenV2ItemForMultipleDto, PropertyKeyPermission, SetCollectionLimitsBody, SetSponsorshipBody, TokenId, CreateTokenPayload } from '@unique-nft/sdk';
 
 const buyGasLimit = 1_000_000;
 const sellGasLimit = 200_000;
@@ -226,6 +226,7 @@ class UniqueAdapter implements IMarketContractAdapter {
         collectionId,
         tokenId,
         price,
+        // currency: 0,
         amount,
         seller: from
       }
@@ -244,6 +245,7 @@ class UniqueAdapter implements IMarketContractAdapter {
         collectionId,
         tokenId,
         price,
+        // currency: 0,
         amount,
         seller: from
       }
@@ -340,16 +342,20 @@ class UniqueAdapter implements IMarketContractAdapter {
     }, { signer });
   }
 
-  async createCollection(payload: CreateCollectionBody, signer: Signer): Promise<CreateCollectionParsed | undefined> {
-    return (await this.uniqueSdk.collection.create.submitWaitResult(payload, { signer })).parsed;
+  async createCollection(payload: CreateCollectionV2ArgsDto, signer: Signer): Promise<CreateCollectionParsed | undefined> {
+    return (await this.uniqueSdk.collection.createV2.submitWaitResult(payload, { signer })).parsed;
   }
 
-  async getCreateCollectionFee(payload: CreateCollectionBody): Promise<string> {
-    return (await this.uniqueSdk.collection.create.getFee(payload)).fee.formatted;
+  async getCreateCollectionFee(payload: CreateCollectionV2ArgsDto): Promise<string> {
+    return (await this.uniqueSdk.collection.createV2.getFee(payload)).fee.formatted;
   }
 
-  async createTokens({ tokens, collectionId }: { tokens: CreateTokenPayload[], collectionId: number }, signer: Signer): Promise<TokenId[] | undefined> {
+  async createTokensV1({ tokens, collectionId }: { tokens: CreateTokenPayload[], collectionId: number }, signer: Signer): Promise<TokenId[] | undefined> {
     return (await this.uniqueSdk.token.createMultiple({ collectionId, tokens, address: signer.address }, { signer })).parsed;
+  }
+
+  async createTokens({ tokens, collectionId }: { tokens: TokenV2ItemForMultipleDto[], collectionId: number }, signer: Signer): Promise<TokenId[] | undefined> {
+    return (await this.uniqueSdk.token.createMultipleV2({ collectionId, tokens, address: signer.address }, { signer })).parsed;
   }
 
   async getSetSponsorshipFee(payload: SetSponsorshipBody, signer: Signer): Promise<string> {
@@ -370,6 +376,18 @@ class UniqueAdapter implements IMarketContractAdapter {
 
   async burn(payload: { collectionId: number, tokenId: number }, signer: Signer): Promise<void> {
     await this.uniqueSdk.token.burn({ ...payload, address: signer.address }, { signer });
+  }
+
+  async burnCollection(collectionId: number, signer: Signer): Promise<void> {
+    await this.uniqueSdk.collection.destroy.submitWaitResult({ collectionId, address: signer.address }, { signer });
+  }
+
+  async getBurnCollectionFee(collectionId: number, signer: Signer): Promise<string> {
+    return (await this.uniqueSdk.collection.destroy.getFee({ collectionId, address: signer.address })).fee.amount;
+  }
+
+  async setCollectionNesting(collectionId: number, value: CollectionNestingAndPermissionStruct$1): Promise<void> {
+    throw new Error('not implemented');
   }
 }
 

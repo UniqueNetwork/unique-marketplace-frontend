@@ -1,19 +1,17 @@
 import { TokenByIdResponse } from '@unique-nft/sdk';
-import { Heading, Loader } from '@unique-nft/ui-kit';
 import { INestingToken } from 'components/BundleTree/types';
 import { useApi } from 'hooks/useApi';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { TBundleTransferModalBodyProps } from './BundleTransferModal';
 import { Address } from '@unique-nft/utils';
 import { StatusTransactionModal } from './components/StatusTransactionModal';
-import { useNotifications } from 'components/UI';
+import { useNotifications, Heading, Loader } from 'components/UI';
 import { useAccounts } from 'hooks/useAccounts';
 
 export const UnequipModal = ({
   token,
   onFinish,
-  setIsClosable
 }: TBundleTransferModalBodyProps) => {
   const { currentChainId, api } = useApi();
   const { selectedAccount } = useAccounts();
@@ -52,14 +50,20 @@ export const UnequipModal = ({
         setFee(feeResponse);
 
         await api?.nft?.unnest(token.collectionId, token.tokenId, token.owner, 'NFT', 1, { account: selectedAccount });
-      } catch (e: any) {
-        error(e.message);
+      } catch (e) {
+        error((e as { message: string }).message);
         setStagesModalIsVisible(false);
       }
       setProgress(1);
       setTransferStage('done');
     })();
   }, [token, currentChainId, api?.nft, selectedAccount, error]);
+
+  const onComplete = useCallback(() => {
+    setStagesModalIsVisible(false);
+    onFinish();
+
+  }, [onFinish]);
 
   if (baseToken) {
     return <StatusTransactionModal
@@ -69,14 +73,8 @@ export const UnequipModal = ({
       progress={progress}
       stage={transferStage}
       fee={fee}
-      onComplete={() => {
-        setStagesModalIsVisible(false);
-        onFinish();
-      }}
-      onContinue={() => {
-        setStagesModalIsVisible(false);
-        onFinish();
-      } }
+      onComplete={onComplete}
+      onContinue={onComplete}
     />;
   }
   return <>
@@ -97,69 +95,7 @@ const Content = styled.div`
 const CreateBundleModalWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--gap);
-`;
-
-const ActionsWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  gap: var(--gap);
-  justify-content: flex-end;
-  align-items: center;
-  &>div {
-    margin: 0;
-  } 
-  button {
-    min-width: 140px;
-  }
-`;
-
-const TokenWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: calc(var(--gap) / 2);
-`;
-
-const TokenMediaWrapper = styled.div`
-  display: flex;
-
-  width: 400px;
-  height: 450px;
-  position: relative;
-  &>div {
-    position: absolute;
-    top: 0;
-  }
-`;
-
-const EquipsSection = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: var(--gap);
-`;
-
-const EquipsListWrapper = styled.div`
-  display: grid;
-  gap: 16px;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  width: 700px;
-  max-height: 500px;
-  overflow-y: auto;
-  padding-right: 8px;
-  height: 100%;
-  @media (max-width: 1280px) {
-    grid-template-columns: 1fr 1fr 1fr;
-    min-width: auto;
-    width: 550px;
-  }
-  @media (max-width: 1024px) {
-    grid-template-columns: 1fr 1fr 1fr;
-    width: auto;
-  }
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr 1fr;
-    width: auto;
-  }
+  gap: var(--prop-gap);
 `;
 
 const LoaderWrapper = styled.div`

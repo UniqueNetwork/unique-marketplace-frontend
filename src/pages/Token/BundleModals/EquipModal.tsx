@@ -1,5 +1,5 @@
-import { TokenByIdResponse } from '@unique-nft/sdk';
-import { Button, Heading, Loader } from '@unique-nft/ui-kit';
+import { TokenWithInfoV2Dto } from '@unique-nft/sdk';
+import { Button, Heading, Loader } from 'components/UI';
 import { INestingToken } from 'components/BundleTree/types';
 import { useApi } from 'hooks/useApi';
 import { useCallback, useEffect, useState } from 'react';
@@ -11,6 +11,7 @@ import { TBundleTransferModalBodyProps } from './BundleTransferModal';
 import { TokensCard } from './components/TokenCard';
 import { CustomizeModal } from './CustomizeModal';
 import { useGetBaseTokens } from './hooks/useGetBaseTokens';
+import { GQLToken } from 'api/scanApi/types';
 
 export const EquipModal = ({
   token,
@@ -20,7 +21,7 @@ export const EquipModal = ({
   const { currentChainId } = useApi();
   const [tokens, setTokens] = useState<TokenItem[]>([]);
   const { fetchBaseTokens, isFetching } = useGetBaseTokens();
-  const [baseToken, setBaseToken] = useState<INestingToken | TokenByIdResponse | undefined>();
+  const [baseToken, setBaseToken] = useState<INestingToken | TokenWithInfoV2Dto | undefined>();
 
   useEffect(() => {
     void (async () => {
@@ -46,7 +47,7 @@ export const EquipModal = ({
       token={baseToken}
       onFinish={onFinish}
       setIsClosable={setIsClosable}
-      selectedWearable={token as unknown as TokenItem}
+      selectedWearable={token as unknown as GQLToken}
       testid={'customize-modal'}
     />;
   }
@@ -95,13 +96,13 @@ const Content = styled.div`
 const CreateBundleModalWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--gap);
+  gap: var(--prop-gap);
 `;
 
 const ActionsWrapper = styled.div`
   display: flex;
   flex-direction: row;
-  gap: var(--gap);
+  gap: var(--prop-gap);
   justify-content: flex-end;
   align-items: center;
   &>div {
@@ -115,7 +116,7 @@ const ActionsWrapper = styled.div`
 const EquipsSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--gap);
+  gap: var(--prop-gap);
 `;
 
 const EquipsListWrapper = styled.div`

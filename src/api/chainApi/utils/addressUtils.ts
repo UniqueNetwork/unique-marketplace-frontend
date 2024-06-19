@@ -1,6 +1,5 @@
 import { addressToEvm, checkAddress, encodeAddress, isEthereumAddress } from '@polkadot/util-crypto';
 import { Address } from '@unique-nft/utils';
-import { keyring } from '@polkadot/ui-keyring';
 
 export const subToEthLowercase = (address: string): string => {
   const bytes = addressToEvm(address);
@@ -33,7 +32,7 @@ export const isTokenOwner = (account: string, tokenOwner: string): boolean => {
 
 export function toChainFormatAddress (address: string, ss58Format: number) {
   if (isEthereumAddress(address)) return address;
-  return keyring.encodeAddress(address, ss58Format);
+  return Address.normalize.substrateAddress(address, ss58Format);
 }
 
 export function validateAddress(address: string, prefixes: number[]) {

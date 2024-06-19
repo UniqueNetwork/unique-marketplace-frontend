@@ -1,7 +1,7 @@
 import { ReactNode, VFC } from 'react';
 import { Button, ButtonProps } from '../Button/Button';
 import { Modal } from '../Modal';
-import { Heading } from '@unique-nft/ui-kit';
+import { Heading } from '../Heading/Heading';
 import styled from 'styled-components';
 
 interface IConfirmProps {

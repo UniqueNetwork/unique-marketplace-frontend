@@ -1,10 +1,10 @@
-import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
+import { CollectionWithInfoV2Dto } from '@unique-nft/sdk';
 import { useApi } from 'hooks/useApi';
 import { useCallback, useEffect, useState } from 'react';
 
 export const useCollectionGetById = (collectionId?: number) => {
   const { api } = useApi();
-  const [collectionInfo, setCollectionInfo] = useState<CollectionInfoWithSchemaResponse | null>(null);
+  const [collectionInfo, setCollectionInfo] = useState<CollectionWithInfoV2Dto | null>(null);
   const [isFetching, setIsFetching] = useState(false);
 
   const fetch = useCallback(async () => {

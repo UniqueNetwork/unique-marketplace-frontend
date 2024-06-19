@@ -1,6 +1,7 @@
 import React, { VFC } from 'react';
 import styled from 'styled-components';
 import { Picture } from '../TokenMedia/Picture';
+import { getIpfsUriByImagePath } from 'utils/urlUtils';
 
 interface collectionCoverProps {
   src: string | undefined
@@ -11,7 +12,7 @@ interface collectionCoverProps {
 export const CollectionCover: VFC<collectionCoverProps> = ({ src, size = 24, type = 'circle' }) => {
   return (
     <CollectionCoverWrapper type={type} size={size}>
-      <Picture src={src} alt={'collection-cover'} size={size}/>
+      <Picture src={getIpfsUriByImagePath(src)} alt={'collection-cover'} size={size}/>
     </CollectionCoverWrapper>
   );
 };

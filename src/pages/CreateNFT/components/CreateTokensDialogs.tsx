@@ -1,18 +1,18 @@
-import { AttributeSchema } from '@unique-nft/schemas';
 import { CreateTokenDialog, NewToken } from '../types';
 import { AttributesModal } from './AttributesModal';
 import { ChangeCollectionModal } from './ChangeCollectionModel';
 import { ExceededModal } from './ExceededModal';
 import { RemovingModal } from './RemovingModal';
-import { TokenTypeEnum } from 'pages/MyTokens/types';
+import { PotentialAttribute } from '@unique-nft/sdk';
 
 interface CreateTokensDialogsProps {
   dialog?: CreateTokenDialog;
   tokens: NewToken[];
   tokenPrefix: string;
   leftTokens: number | string;
-  attributesSchema: Record<number, AttributeSchema> | undefined;
-  mode?: TokenTypeEnum;
+  attributesSchema: PotentialAttribute[] | undefined;
+  mode?: 'NFT' | 'ReFungible' | 'Fungible';
+  schemaVersion: string;
   onChange(tokens: NewToken[]): void;
   onConfirm(): void;
   onClose(): void;
@@ -25,6 +25,7 @@ export const CreateTokensDialogs = ({
   leftTokens,
   attributesSchema,
   mode,
+  schemaVersion,
   onChange,
   onConfirm,
   onClose
@@ -39,6 +40,7 @@ export const CreateTokensDialogs = ({
           tokenPrefix={tokenPrefix}
           attributesSchema={attributesSchema || []}
           mode={mode}
+          schemaVersion={schemaVersion}
           onChange={onChange}
           onClose={onClose}
         />

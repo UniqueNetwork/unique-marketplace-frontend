@@ -1,9 +1,9 @@
 import { forwardRef, LegacyRef } from 'react';
 import classNames from 'classnames';
 import styled from 'styled-components';
-import { ComponentProps } from '@unique-nft/ui-kit';
 
 import { InputBaseProps } from '../InputText/InputText';
+import { ComponentProps } from '../types';
 
 interface BaseTextareaProps extends InputBaseProps {
   // number of rows to display in textarea

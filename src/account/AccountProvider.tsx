@@ -1,18 +1,13 @@
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import keyring from '@polkadot/ui-keyring';
+import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Address } from '@unique-nft/utils';
 
 import { Account, BaseWalletType, WalletsType } from './types';
 import { CONNECTED_WALLET_TYPE, ConnectedWalletsName, useWalletCenter } from './useWalletCenter';
 
 import { DefaultAccountKey } from './constants';
-import { SignModal } from '../components/SignModal/SignModal';
 import { AccountProvider } from './AccountContext';
 import { useApi } from 'hooks/useApi';
 import { useBalanceSubscriptions } from './useBalanceSubscriptions';
-import { KeyringPair } from '@polkadot/keyring/types';
-import { getSuri, PairType } from 'utils/seedUtils';
-import { KeypairType } from '@polkadot/util-crypto/types';
 
 export const AccountWrapper: FC = ({ children }) => {
   const { chainProperties, api } = useApi();
@@ -22,7 +17,6 @@ export const AccountWrapper: FC = ({ children }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [fetchAccountsError, setFetchAccountsError] = useState<string | undefined>();
   const [selectedAccount, setSelectedAccount] = useState<Account>();
-  const [signer, setSigner] = useState<KeyringPair>();
 
   const walletsCenter = useWalletCenter(chainProperties);
   const { subscribeBalancesChanges, isBalancesFetching } = useBalanceSubscriptions();
@@ -67,35 +61,6 @@ export const AccountWrapper: FC = ({ children }) => {
     [selectedAccount?.address]
   );
 
-  const [isSignModalVisible, setIsSignModalVisible] = useState<boolean>(false);
-
-  const onSignCallback = useRef<(password?: string) => void | undefined>();
-
-  const showSignDialog = useCallback((pair: KeyringPair) => {
-    setSigner(pair);
-    setIsSignModalVisible(true);
-
-    return new Promise<string>((resolve, reject) => {
-      onSignCallback.current = (password?: string) => {
-        if (password) {
-          resolve(password);
-        } else {
-          reject(new Error('Signing failed'));
-        }
-      };
-    });
-  }, []);
-
-  const onClose = useCallback(() => {
-    setIsSignModalVisible(false);
-    onSignCallback.current && onSignCallback.current(undefined);
-  }, []);
-
-  const onSignFinish = useCallback((password: string) => {
-    setIsSignModalVisible(false);
-    onSignCallback.current && onSignCallback.current(password);
-  }, []);
-
   useEffect(() => {
     if (!accounts?.size || isLoading) {
       return;
@@ -130,10 +95,7 @@ export const AccountWrapper: FC = ({ children }) => {
     const wallets = getConnectedWallets.split(';') as ConnectedWalletsName[];
     const connectedWallets = wallets.map((typeWallet) =>
       walletsCenter.connectWallet(
-        typeWallet,
-        {
-          requestPasswordCallback: showSignDialog
-        }
+        typeWallet
       )
     );
     if (!connectedWallets.length) {
@@ -160,54 +122,25 @@ export const AccountWrapper: FC = ({ children }) => {
 
   useEffect(fetchAccounts, [fetchAccounts]);
 
-  const addLocalAccount = useCallback((seed: string, derivePath: string, name: string, password: string, pairType: PairType) => {
-    const options = { genesisHash: chainProperties?.genesisHash as `0x${string}`, isHardware: false, name: name.trim(), tags: [] };
-    keyring.addUri(getSuri(seed, derivePath, pairType), password, options, pairType as KeypairType);
-    fetchAccounts();
-  }, [chainProperties, fetchAccounts]);
-
-  const forgetLocalAccount = useCallback(
-    (forgetAddress: string) => {
-      keyring.forgetAccount(forgetAddress);
-      setIsLoading(true);
-
-      setAccounts((accounts) => {
-        const copyAccounts = new Map(accounts);
-        copyAccounts.delete(forgetAddress);
-        return copyAccounts;
-      });
-      setIsLoading(false);
-    },
-    [walletsCenter]
-  );
-
   const value = useMemo(
     () => ({
       isLoading: isLoading || isBalancesFetching,
-      signer,
       accounts,
       selectedAccount,
-      addLocalAccount,
-      forgetLocalAccount,
       fetchAccountsError,
       changeAccount,
       setFetchAccountsError,
       setIsLoading,
-      showSignDialog,
       walletsCenter,
       fetchAccounts
     }),
     [
       isLoading,
       isBalancesFetching,
-      signer,
       accounts,
       selectedAccount,
-      addLocalAccount,
-      forgetLocalAccount,
       fetchAccountsError,
       changeAccount,
-      showSignDialog,
       walletsCenter,
       fetchAccounts
     ]
@@ -216,12 +149,6 @@ export const AccountWrapper: FC = ({ children }) => {
   return (
     <AccountProvider value={value}>
       {children}
-      <SignModal
-        isVisible={isSignModalVisible}
-        keyringPair={signer}
-        onClose={onClose}
-        onFinish={onSignFinish}
-      />
     </AccountProvider>
   );
 };

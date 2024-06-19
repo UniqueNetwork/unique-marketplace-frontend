@@ -1,11 +1,12 @@
 import { NumberInput } from 'components/NumberInput/NumberInput';
+import Skeleton from 'components/Skeleton/Skeleton';
 import { useAccounts } from 'hooks/useAccounts';
 import { useApi } from 'hooks/useApi';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { Coral700 } from 'styles/colors';
 import { formatBlockNumber } from 'utils/textUtils';
-import { Skeleton, Text } from '@unique-nft/ui-kit';
+import { Text } from 'components/UI';
 
 type FractionalAmountInputProps = {
   tokenId: number
@@ -17,7 +18,15 @@ type FractionalAmountInputProps = {
   onChangeIsAmountValid(valid: boolean): void
 };
 
-export const FractionalAmountInput = ({ tokenId, collectionId, ownerAddress, amount, className, onChangeAmount, onChangeIsAmountValid }: FractionalAmountInputProps) => {
+export const FractionalAmountInput = ({ 
+  tokenId, 
+  collectionId, 
+  ownerAddress, 
+  amount, 
+  className, 
+  onChangeAmount, 
+  onChangeIsAmountValid 
+}: FractionalAmountInputProps) => {
   const { api } = useApi();
   const { selectedAccount } = useAccounts();
   const [amountString, setAmountString] = useState('1');
@@ -75,7 +84,7 @@ export const FractionalAmountInput = ({ tokenId, collectionId, ownerAddress, amo
 
 const AmountInputWrapper = styled.div`
   width: 100%;
-  margin-bottom: calc(var(--gap) * 2);
+  margin-bottom: calc(var(--prop-gap) * 2);
 `;
 
 const AmountInputStyled = styled(NumberInput)`
@@ -85,7 +94,7 @@ const AmountInputStyled = styled(NumberInput)`
 const InvalidAmountWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
-  right: calc(var(--gap) * 1.5);
+  right: calc(var(--prop-gap) * 1.5);
   height: 0;
   span {
     color: ${Coral700} !important;

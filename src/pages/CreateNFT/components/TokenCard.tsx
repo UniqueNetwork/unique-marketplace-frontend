@@ -7,17 +7,16 @@ import { Button, Checkbox, InputText, Text } from 'components/UI';
 
 import { Attribute, NewToken, ViewMode } from '../types';
 import { AttributesForm, LabelText } from './AttributesForm';
-import { TokenTypeEnum } from 'pages/MyTokens/types';
 import { Image } from './TokenBasicCard';
-import { AttributeSchemaDto } from '@unique-nft/sdk';
+import { PotentialAttribute } from '@unique-nft/sdk';
 
 export type TokenCardCommonProps = {
   onChange(token: NewToken): void;
   onRemove(id: number): void;
   onOpenModifyModal?(token: NewToken): void;
   tokenPrefix: string;
-  attributesSchema: Record<number, AttributeSchemaDto>;
-  mode: TokenTypeEnum | undefined;
+  attributesSchema: PotentialAttribute[];
+  mode: 'NFT' | 'Fungible' | 'ReFungible' | undefined;
   viewMode: ViewMode;
 };
 
@@ -29,7 +28,7 @@ export const TokenCard = ({
   dragHandleProps,
   commonProps
 }: TokenCardProps) => {
-  const { id, tokenId, image, attributes, isValid, isSelected, totalFractions } = item;
+  const { id, tokenId, image, attributes, isValid, isSelected, totalFractions, royalties } = item;
   const {
     onChange,
     onRemove,
@@ -47,11 +46,11 @@ export const TokenCard = ({
   };
 
   const onSelect = () => {
-    onChange({ id, tokenId, image, attributes, isValid, isSelected: !isSelected });
+    onChange({ id, tokenId, image, attributes, isValid, isSelected: !isSelected, royalties });
   };
 
   const onAttributesChange = (attributes: Attribute[]) => {
-    onChange({ id, tokenId, image, attributes, isValid, isSelected });
+    onChange({ id, tokenId, image, attributes, isValid, isSelected, royalties });
   };
 
   const onStartRemove = () => {
@@ -118,7 +117,7 @@ export const TokenCard = ({
       </TokenBasicWrapper>
       {viewMode === ViewMode.list && (
         <FormGrid>
-          {mode === TokenTypeEnum.RFT && (
+          {mode === 'ReFungible' && (
             <>
               <LabelText>Total fractions</LabelText>
               <InputText
@@ -250,7 +249,7 @@ const TokenCardActions = styled.div`
 
 const ButtonsWrapper = styled.div`
   display: flex;
-  gap: calc(var(--gap) / 2);
+  gap: calc(var(--prop-gap) / 2);
 `;
 
 const TokenLinkTitle = styled(Text).attrs({ appearance: 'block', size: 'l' })`

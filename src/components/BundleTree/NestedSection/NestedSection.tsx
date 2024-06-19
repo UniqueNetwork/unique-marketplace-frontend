@@ -1,12 +1,10 @@
 import React, { FC } from 'react';
-import { Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { INestingToken } from '../types';
-import TokenCard from './TokenCard';
 import { INestedSectionView } from '../../TreeView/types';
 import { useCollection } from '../useCollection';
 import Skeleton from '../../Skeleton/Skeleton';
-import { Icon } from 'components/UI';
+import { Icon, Text } from 'components/UI';
 import NoTrades from 'static/icons/no-trades.svg';
 
 export const NestedSection: FC<INestedSectionView<INestingToken>> = ({ selectedToken, onViewNodeDetails, onUnnestClick, onTransferClick }) => {
@@ -49,10 +47,10 @@ const NestedDetails = styled.div`
 `;
 
 const NestedTokens = styled.div`
-  margin-top: var(--gap);
+  margin-top: var(--prop-gap);
   display: flex;
   flex-wrap: wrap;
-  gap: var(--gap);
+  gap: var(--prop-gap);
 `;
 
 const TitleWrapper = styled.div`
@@ -72,7 +70,7 @@ const NoNestedWrapper = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  row-gap: var(--gap);
+  row-gap: var(--prop-gap);
   width: 100%;
   height: 100%;
   min-height: 140px;

@@ -1,17 +1,18 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
-import { Heading, Skeleton, Text } from '@unique-nft/ui-kit';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { Heading, Text } from 'components/UI';
+import { ProgressBar } from 'components';
 import { useApi } from '../../../hooks/useApi';
 import { formatLongNumber, percentText } from 'utils/textUtils';
-import { useParams } from 'react-router-dom';
-import { ProgressBar } from 'components';
+import Skeleton from 'components/Skeleton/Skeleton';
 
 interface FractionalDetailProps {
   testid?: string
 }
 
-export const FractionalDetail: FC<FractionalDetailProps> = ({ testid = '' }) => {
+export const FractionalDetail: FC<FractionalDetailProps> = () => {
   const { address, id, collectionId } = useParams<{ address: string, id: string, collectionId: string}>();
   const { api } = useApi();
   const [isFetching, setIsFetching] = useState(false);
@@ -39,7 +40,7 @@ export const FractionalDetail: FC<FractionalDetailProps> = ({ testid = '' }) => 
   if (isFetching) {
     return <FractionalDetailWrapper>
       <Heading className='header' size='4'>
-        Сharacteristics
+        Characteristics
       </Heading>
       <Skeleton height={'24px'} width={'100%'} />
       <Skeleton height={'24px'} width={'60%'} />
@@ -51,7 +52,7 @@ export const FractionalDetail: FC<FractionalDetailProps> = ({ testid = '' }) => 
   return (
     <FractionalDetailWrapper>
       <Heading className='header' size='4'>
-        Сharacteristics
+        Characteristics
       </Heading>
       <Row>
         <Text size='m' weight='light' color='grey-500'>
@@ -81,14 +82,14 @@ export const FractionalDetail: FC<FractionalDetailProps> = ({ testid = '' }) => 
 const FractionalDetailWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  margin-bottom: calc(var(--gap) / 2);
-  gap: calc(var(--gap) / 4);
+  margin-bottom: calc(var(--prop-gap) / 2);
+  gap: calc(var(--prop-gap) / 4);
 `;
 
 const Row = styled.div`
   display: flex;
   align-items: center;
-  column-gap: calc(var(--gap) / 2);
+  column-gap: calc(var(--prop-gap) / 2);
   && h1 {
     margin-bottom: 0;
   }

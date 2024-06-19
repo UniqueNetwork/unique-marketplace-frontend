@@ -1,21 +1,23 @@
-import { Offer } from 'api/restApi/offers/types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { mockWearables } from './constants';
-import { useApi } from 'hooks/useApi';
 import { Slide } from 'react-slideshow-image';
 import 'react-slideshow-image/dist/styles.css';
+import styled from 'styled-components';
+
+import { Offer } from 'api/restApi/offers/types';
+import { useOffers } from 'api/restApi/offers/offers';
+import { useApi } from 'hooks/useApi';
+import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
+
 import { TokensCard } from 'components';
 import { MyToken } from 'pages/MyTokens/types';
-import { useOffers } from 'api/restApi/offers/offers';
-import styled from 'styled-components';
-import { Button, Heading } from '@unique-nft/ui-kit';
-import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
+import { CollectionWithInfoV2Dto } from '@unique-nft/sdk';
 import { useNavigate } from 'react-router-dom';
-import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
+import { mockWearables } from './constants';
+import { Button, Heading } from 'components/UI';
 
 interface IProps {
   offer?: Offer | undefined
-  collection?: CollectionInfoWithSchemaResponse
+  collection?: CollectionWithInfoV2Dto
 }
 
 export const RecommendationSection = ({ offer, collection }: IProps) => {
@@ -54,7 +56,7 @@ export const RecommendationSection = ({ offer, collection }: IProps) => {
         setTokens(items);
       } else if (collection) {
         const { items } = await fetch({
-          collectionId: collection?.id,
+          collectionId: collection?.collectionId,
           page: 1,
           pageSize: 40
         });
@@ -62,7 +64,7 @@ export const RecommendationSection = ({ offer, collection }: IProps) => {
         setTokens(items);
       }
     })();
-  }, [baseCollection, wearableCollections, fetch, collection?.id]);
+  }, [baseCollection, wearableCollections, fetch, collection?.collectionId]);
 
   const onExploreCollectionClick = useCallback(() => {
     if (baseCollection) {
@@ -77,7 +79,7 @@ export const RecommendationSection = ({ offer, collection }: IProps) => {
       navigate(`/${currentChainId}/market?filterState={"attributeCounts":[],"collections":[${wearableCollections.join(',')}],"attributes":[]}`);
       return;
     }
-    navigate(`/${currentChainId}/collection/${collection?.id}/`);
+    navigate(`/${currentChainId}/collection/${collection?.collectionId}/`);
   }, [baseCollection, wearableCollections, navigate, currentChainId, collection]);
 
   const deviceSize = useDeviceSize();

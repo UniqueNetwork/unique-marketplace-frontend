@@ -26,12 +26,11 @@ export const useSetRoyaltiesStages = (collectionId: number) => {
     status: StageStatus.default,
     action: async ({ txParams, options }) => {
       const collection = await collectionApi?.getCollection(collectionId);
-      if (!collection?.schema) throw new Error('Collection not found');
+      if (!collection?.info) throw new Error('Collection not found');
       const encodedSchema = SchemaTools.tools.unique.collection.encodeCollectionSchemaToProperties({
-        schemaName: collection.schema.schemaName,
-        schemaVersion: collection.schema.schemaVersion,
-        // @ts-ignore
-        coverPicture: collection.schema.coverPicture,
+        schemaName: collection.info.schemaName || '',
+        schemaVersion: collection.info.originalSchemaVersion || '1.0.0',
+        coverPicture: collection.info.cover_image || {url: ''},
         image: {
           urlTemplate: '{infix}'
         },
@@ -48,10 +47,7 @@ export const useSetRoyaltiesStages = (collectionId: number) => {
       });
       const royalties = encodedSchema.find(({ key }) => key === 'royalties');
       if (!royalties) throw new Error('Schema encoding error');
-      const properties: CollectionProperty[] = [
-        ...collection?.properties || [],
-        royalties
-      ];
+      const properties: CollectionProperty[] = [royalties];
       return await collectionApi?.setProperties(collectionId, properties, options);
     }
   }], [chainProperties?.decimals, collectionApi, collectionId]);

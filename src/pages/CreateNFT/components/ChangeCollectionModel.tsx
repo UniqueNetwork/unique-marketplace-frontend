@@ -1,7 +1,6 @@
 import styled from 'styled-components';
 
-import { Button, Modal, Text } from 'components/UI';
-import { Heading } from '@unique-nft/ui-kit';
+import { Button, Modal, Text, Heading } from 'components/UI';
 import { ModalFooter } from './ModalFooter';
 
 type RemovingModalProps = {

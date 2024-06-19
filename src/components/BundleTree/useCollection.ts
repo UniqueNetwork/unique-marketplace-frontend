@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useApi } from 'hooks/useApi';
 import { useCollections } from 'hooks/useCollections';
-import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
+import { GQLCollection } from 'api/scanApi/types';
 
 export const useCollection = (collectionId: number | undefined) => {
   const [isCollectionLoading, setIsCollectionLoading] = useState(false);
-  const [collection, setCollection] = useState<CollectionInfoWithSchemaResponse>();
+  const [collection, setCollection] = useState<GQLCollection>();
   const { getCollection } = useCollections();
   const { api } = useApi();
 

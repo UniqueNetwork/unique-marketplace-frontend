@@ -50,10 +50,10 @@ const BelongingFilter: FC<BelongingFilterProps> = ({ value, onChange, disabled }
 };
 
 const BelongingFilterWrapper = styled.div`
-  padding-top: var(--gap);
+  padding-top: var(--prop-gap);
   display: flex;
   flex-direction: column;
-  row-gap: var(--gap);
+  row-gap: var(--prop-gap);
   .label {
     font-size: 16px;
     font-weight: 400;

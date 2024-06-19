@@ -106,10 +106,10 @@ const PricesFilter: FC<PricesFilterProps> = ({ value, onChange, testid, disabled
 };
 
 const PriceFilterWrapper = styled.div`
-  padding-top: var(--gap);
+  padding-top: var(--prop-gap);
   display: flex;
   flex-direction: column;
-  row-gap: var(--gap);
+  row-gap: var(--prop-gap);
   button {
     width: 71px;
   }
@@ -117,7 +117,7 @@ const PriceFilterWrapper = styled.div`
 
 const PricesRangeWrapper = styled.div`
   display: flex;
-  column-gap: calc(var(--gap) / 2);
+  column-gap: calc(var(--prop-gap) / 2);
   align-items: center;
 `;
 

@@ -1,4 +1,4 @@
-import { CreateCollectionBody } from '@unique-nft/sdk';
+import { CreateCollectionV2ArgsDto } from '@unique-nft/sdk';
 import { useAccounts } from 'hooks/useAccounts';
 import { useApi } from 'hooks/useApi';
 import { useCallback, useState } from 'react';
@@ -13,7 +13,7 @@ export const useCollectionCreate = () => {
   const [feeLoading, setFeeLoading] = useState(false);
   const [isLoadingSubmitResult, setIsLoadingSubmitResult] = useState(false);
 
-  const submitWaitResult = useCallback(async ({ payload }: { payload: CreateCollectionBody }) => {
+  const submitWaitResult = useCallback(async ({ payload }: { payload: CreateCollectionV2ArgsDto }) => {
     if (!api || !selectedAccount) return;
     setIsLoadingSubmitResult(true);
     const response = await api?.collection?.createCollection(payload, { account: selectedAccount });
@@ -21,7 +21,7 @@ export const useCollectionCreate = () => {
     return response;
   }, [api, selectedAccount]);
 
-  const getFee = useCallback(async ({ payload }: { payload: CreateCollectionBody }) => {
+  const getFee = useCallback(async ({ payload }: { payload: CreateCollectionV2ArgsDto }) => {
     if (!api || !selectedAccount) return;
     setFeeLoading(true);
     const fee = await api?.collection?.getCreateCollectionFee(payload, { account: selectedAccount });

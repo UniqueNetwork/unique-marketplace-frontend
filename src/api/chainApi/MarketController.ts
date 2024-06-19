@@ -207,7 +207,7 @@ class MarketController extends BaseController implements IMarketController {
 
   async getTransferBalanceFee(sender: string, recipient: string, value: number, { account }: TransactionOptions): Promise<string> {
     const adapter = this.getAdapter(account);
-    const rawFee = await adapter.getTransferBalanceFee(sender, recipient, this.getChainValue(value, this.decimals), account);
+    const rawFee = await adapter.getTransferBalanceFee(sender, recipient, this.getChainValue(value, this.decimals), account?.signer);
     return this.getChainValue(rawFee, this.decimals).parsed.toString();
   }
 

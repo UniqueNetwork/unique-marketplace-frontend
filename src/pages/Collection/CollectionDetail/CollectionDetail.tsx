@@ -1,9 +1,10 @@
 import React, { FC, useMemo, useState } from 'react';
-import { Heading } from '@unique-nft/ui-kit';
+import { Link } from 'react-router-dom';
+import { Address } from '@unique-nft/utils';
 import styled from 'styled-components';
 
 import { Picture, Avatar } from 'components';
-import { CollapsableText, Icon, Text, Link as UILink } from 'components/UI';
+import { CollapsableText, Icon, Text, Link as UILink, Heading } from 'components/UI';
 import { isTokenOwner, toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import { CollectionStatisticsBlock } from './CollectionStaticticsBlock';
 import { CollectionDetailSkeleton } from './CollectionDetailSkeleton';
@@ -12,15 +13,15 @@ import { useAccounts } from 'hooks/useAccounts';
 import { shortcutText } from 'utils/textUtils';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import { Primary500, Primary600 } from 'styles/colors';
-import config from 'config';
 import { PagePaper } from 'components/PagePaper/PagePaper';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
-import { Link } from 'react-router-dom';
 import { MarketableCollection } from 'api/restApi/collections/types';
 import ShareTokenModal from 'pages/Token/TokenDetail/ShareTokenModal';
 import { RoyaltiesFormData } from 'pages/CollectionEdit/types';
 import { dateFormat } from 'utils/timestampUtils';
-import { Address } from '@unique-nft/utils';
+import config from 'config';
+import { getIpfsUriByImagePath } from 'utils/urlUtils';
+
 interface IProps {
   collection?: MarketableCollection
   royalties?: RoyaltiesFormData
@@ -32,8 +33,7 @@ export const CollectionDetail: FC<IProps> = ({ collection, royalties }) => {
 
   const { currentChainId, chainProperties } = useApi();
 
-  const { name, description, data, owner, collectionId, metadata } = collection || {};
-  const { schema } = data || {};
+  const { name, description, data, owner, collectionId, metadata, cover } = collection || {};
 
   const [isShareModalVisible, setIsShareModalVisible] = useState(false);
 
@@ -87,7 +87,7 @@ export const CollectionDetail: FC<IProps> = ({ collection, royalties }) => {
     <CollectionDetailWrapper>
       <CollectionCardWrapper >
         <PictureWrapper>
-          <Picture alt={name || ''} src={collection.metadata?.cover || schema?.coverPicture.fullUrl || ''} size={160} />
+          <Picture alt={name || ''} src={getIpfsUriByImagePath(cover)} size={160} />
         </PictureWrapper>
         <CollectionInfoWrapper>
           <div>
@@ -133,7 +133,7 @@ export const CollectionDetail: FC<IProps> = ({ collection, royalties }) => {
             <LinkStyled
               target={'_blank'}
               rel={'noreferrer'}
-              href={`${scanUrl}unique_collection/${collectionId}`}
+              href={`${scanUrl}${currentChainId}/collections/${collectionId}`}
             >
               <TextStyled>View on SubScan</TextStyled>
               <IconWrapper>
@@ -191,24 +191,24 @@ const BannerWrapper = styled.div`
     min-width: 100%;
   }
   @media (max-width: 1024px) {
-    margin-left: calc(var(--gap) * -2);
-    margin-right: calc(var(--gap) * -2);
+    margin-left: calc(var(--prop-gap) * -2);
+    margin-right: calc(var(--prop-gap) * -2);
   }
 `;
 
 const CollectionDetailWrapper = styled.div`
   display: flex;
   justify-content: space-between;
-  padding: calc(var(--gap) * 1.5) calc(var(--gap) * 2) calc(var(--gap) * 2);
+  padding: calc(var(--prop-gap) * 1.5) calc(var(--prop-gap) * 2) calc(var(--prop-gap) * 2);
   position: relative;
   @media (max-width: 768px) {
-    padding: calc(var(--gap) * 1.5) 0 calc(var(--gap) * 2);
+    padding: calc(var(--prop-gap) * 1.5) 0 calc(var(--prop-gap) * 2);
   }
 `;
 
 const CollectionCardWrapper = styled.div`
   display: flex;
-  gap: calc(var(--gap) * 2);
+  gap: calc(var(--prop-gap) * 2);
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -233,16 +233,16 @@ const PictureWrapper = styled.div`
     height: 100%;
   }
   @media (max-width: 768px) {
-    margin-left: calc(var(--gap) * 2);
+    margin-left: calc(var(--prop-gap) * 2);
   }
 `;
 
 const CollectionInfoWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--gap);
+  gap: var(--prop-gap);
   h1.unique-font-heading.size-1 {
-    margin-bottom: var(--gap);
+    margin-bottom: var(--prop-gap);
   }
   @media (min-width: 1920px){
     max-width: 900px;
@@ -252,31 +252,31 @@ const CollectionInfoWrapper = styled.div`
 const OwnerWrapper = styled.div`
   display: flex;
   align-items: center;
-  margin-left: calc(var(--gap) / 2);
+  margin-left: calc(var(--prop-gap) / 2);
 `;
 
 const RightSidebar = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: calc(var(--gap) / 2);
+  gap: calc(var(--prop-gap) / 2);
 `;
 
 const EditCollectionLink = styled(Link)`
   display: flex;
-  gap: var(--gap);
+  gap: var(--prop-gap);
   align-items: center;
   text-align: center;
-  margin-bottom: calc(var(--gap) * 1.5);
+  margin-bottom: calc(var(--prop-gap) * 1.5);
   color: ${Primary500};
   font-size: 16px;
 `;
 
 const LinksWrapper = styled.div`
   display: flex;
-  gap: var(--gap);
+  gap: var(--prop-gap);
   justify-content: flex-end;
-  margin-bottom: calc(var(--gap) * 1.5);
+  margin-bottom: calc(var(--prop-gap) * 1.5);
   flex-wrap: wrap;
 `;
 
@@ -287,7 +287,7 @@ const CreationInfoWrapper = styled.div`
 const Row = styled.div`
   display: flex;
   align-items: center;
-  gap: calc(var(--gap) / 2);
+  gap: calc(var(--prop-gap) / 2);
 `;
 
 const AccountLink = styled.a`
@@ -308,9 +308,9 @@ const AccountLink = styled.a`
 const LinkStyled = styled(UILink)`
   display: flex;
   align-items: center;
-  column-gap: calc(var(--gap) / 4);
+  column-gap: calc(var(--prop-gap) / 4);
   width: fit-content;
-  margin-top: calc(var(--gap) / 2);
+  margin-top: calc(var(--prop-gap) / 2);
 `;
 
 const TextStyled = styled(Text)`

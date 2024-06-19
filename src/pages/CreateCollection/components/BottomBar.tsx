@@ -2,8 +2,7 @@ import { ReactNode, useEffect, useRef, useState, VFC } from 'react';
 import { createPortal } from 'react-dom';
 import styled from 'styled-components';
 
-import { Icon, Text, ButtonGroup, Link } from 'components/UI';
-import { Heading } from '@unique-nft/ui-kit';
+import { Icon, Text, ButtonGroup, Link, Heading } from 'components/UI';
 
 export interface BottomBarProps {
   buttons: ReactNode[];

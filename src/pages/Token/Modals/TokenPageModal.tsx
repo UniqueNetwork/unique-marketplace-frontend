@@ -6,18 +6,15 @@ import { SellModal } from './SellModal';
 import { CancelSellFixStagesModal } from './CancelSellModal';
 import PurchaseModal from './PurchaseModal';
 import { TransferModal } from './TransferModal';
-import { AuctionModal } from './AuctionModal';
-import { WithdrawBidStagesModal } from './WithdrawBidModal';
-import { CancelAuctionStagesModal } from './CancelAuctionModal';
 import { Modal } from 'components/UI';
-import { TokenByIdResponse, CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
+import { TokenWithInfoV2Dto, CollectionWithInfoV2Dto } from '@unique-nft/sdk';
 import { ChangePriceModal } from './ChangePriceModal';
 import { BurnStagesModal } from './BurnModal';
 
 export type TTokenPageModalProps = {
   offer?: Offer
-  token?: TokenByIdResponse
-  collection?: CollectionInfoWithSchemaResponse | null
+  token?: TokenWithInfoV2Dto
+  collection?: CollectionWithInfoV2Dto | null
   // once button is clicked (sell/bid/etc) -> we will change marketType for modal and therefore this component decides what to show and how
   marketType: MarketType
   onClose(): void
@@ -26,8 +23,8 @@ export type TTokenPageModalProps = {
 }
 
 export type TTokenPageModalBodyProps = {
-  token?: TokenByIdResponse
-  collection?: CollectionInfoWithSchemaResponse | null
+  token?: TokenWithInfoV2Dto
+  collection?: CollectionWithInfoV2Dto | null
   offer?: Offer
   onFinish(): void // TODO: make a type, in future we would definitly wan't to pass smth like success/error/error.message
   setIsClosable(value: boolean): void
@@ -45,17 +42,10 @@ const TokenPageModal = ({ onClose, onFinish, marketType, offer, token, collectio
 
   const ModalBodyComponent = useMemo<FC<TTokenPageModalBodyProps> | null>(() => {
     switch (marketType) {
-      case MarketType.sellFix: // TODO: consider merdgin into one "sell" type?
-      case MarketType.sellAuction:
+      case MarketType.sellFix:
         return SellModal;
-      case MarketType.bid:
-        return AuctionModal;
-      case MarketType.withdrawBid:
-        return WithdrawBidStagesModal;
       case MarketType.delist:
         return CancelSellFixStagesModal;
-      case MarketType.delistAuction:
-        return CancelAuctionStagesModal;
       case MarketType.purchase:
         return PurchaseModal;
       case MarketType.transfer:

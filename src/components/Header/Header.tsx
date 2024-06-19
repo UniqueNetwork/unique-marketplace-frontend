@@ -12,6 +12,7 @@ import { WalletManager } from './WalletManager/WalletManager';
 import { DesktopMenuItem, DesktopMenuLink, MobileMenuItem, MobileMenuLink } from './MenuLink';
 import config from 'config';
 import { GetButton } from './GetButton';
+import { f } from '@unique-nft/utils/index-406151a5';
 
 interface HeaderProps {
   activeItem: TMenuItems;
@@ -105,6 +106,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
             optionValue='title'
             optionKey='title'
             onChange={({ url }) => {
+              mobileMenuToggler();
               navigate(url as string);
             }}
           >
@@ -178,7 +180,7 @@ const LogoIcon = styled.img`
 const RightSide = styled.div`
   display: flex;
   align-items: center;
-  gap: var(--gap);
+  gap: var(--prop-gap);
 `;
 
 const MobileMenu = styled.div`

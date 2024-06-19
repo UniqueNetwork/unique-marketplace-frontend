@@ -99,19 +99,19 @@ export const SellToken: FC<SellTokenProps> = ({
 
 const ActionsWrapper = styled.div`
   display: flex;
-  column-gap: var(--gap);
-  margin-top: calc(var(--gap) / 2);
-  margin-bottom: calc(var(--gap) / 2);
+  column-gap: var(--prop-gap);
+  margin-top: calc(var(--prop-gap) / 2);
+  margin-bottom: calc(var(--prop-gap) / 2);
 `;
 
 const ButtonWrapper = styled.div`
   width: 200px;
-  margin-top: calc(var(--gap) / 2);
+  margin-top: calc(var(--prop-gap) / 2);
   display: flex;
-  gap: var(--gap);
+  gap: var(--prop-gap);
 `;
 
 const Divider = styled.div`
-  margin: calc(var(--gap) * 1.5) 0;
+  margin: calc(var(--prop-gap) * 1.5) 0;
   border-top: 1px dashed ${Grey300};
 `;

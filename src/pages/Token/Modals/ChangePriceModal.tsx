@@ -1,7 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-
-import { Heading, Link, Loader } from '@unique-nft/ui-kit';
-import { useNotifications, Button, Text } from 'components/UI';
+import { NavLink } from 'react-router-dom';
+import { useNotifications, Button, Text, Heading, Link, Loader } from 'components/UI';
 import { NumberInput } from 'components/NumberInput/NumberInput';
 import styled from 'styled-components';
 
@@ -191,7 +190,13 @@ export const ChangePriceStagesModal: FC<TChangePriceStagesModal> = ({ collection
   useEffect(() => {
     if (status === StageStatus.success) {
       info(
-        <div data-testid={`${testid}-success-notification`}> The price of <Link href={`/token/${collectionId}/${tokenId}`} title={`${tokenPrefix} #${tokenId}`}/> changed</div>,
+        <div data-testid={`${testid}-success-notification`}>
+          The price of{' '}
+          <NavLink to={`/token/${collectionId}/${tokenId}`}>
+            {tokenPrefix} #{tokenId}
+          </NavLink>{' '}
+          changed
+        </div>,
         { name: 'success', size: 32, color: 'var(--color-additional-light)' }
       );
     }

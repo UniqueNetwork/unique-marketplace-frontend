@@ -2,10 +2,9 @@ import React, { VFC, useCallback, useState } from 'react';
 import { Controller } from 'react-hook-form';
 import styled from 'styled-components';
 
-import { InputText, Text, Textarea, Loader, useNotifications, UploadImage } from 'components/UI';
+import { InputText, Text, Textarea, Loader, useNotifications, UploadImage, Heading } from 'components/UI';
 import { useApi } from 'hooks/useApi';
 import { AdditionalText, Form, FormBody, FormHeader, FormRow, LabelText, UploadWidget } from '../components/FormComponents';
-import { Heading } from '@unique-nft/ui-kit';
 import { getTokenIpfsUriByImagePath } from '../helpers';
 import { FILE_FORMAT_ERROR, FILE_SIZE_LIMIT_ERROR, MAX_DESCRIPTION_SIZE, MAX_NAME_SIZE, MAX_SYMBOL_BYTES_SIZE, MAX_SYMBOL_SIZE, _10MB } from 'pages/CreateNFT/constants';
 import { FORM_ERRORS } from '../constants';

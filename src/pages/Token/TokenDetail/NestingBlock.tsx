@@ -1,10 +1,9 @@
 import React, { FC } from 'react';
 import styled from 'styled-components';
-import { Button } from 'components/UI';
+import { Button, Heading } from 'components/UI';
 
 import { Grey300 } from 'styles/colors';
-import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
-import { Heading } from '@unique-nft/ui-kit';
+import { CollectionWithInfoV2Dto, TokenWithInfoV2Dto } from '@unique-nft/sdk';
 import { blockedNestingCollections } from '../SellToken/constants';
 import { useApi } from 'hooks/useApi';
 import { mockWearables } from '../constants';
@@ -12,8 +11,8 @@ import { CustomizableBlock } from './CustomizableBlock';
 import { Offer } from 'api/restApi/offers/types';
 
 interface NestingTokenBlockProps {
-  token?: TokenByIdResponse
-  collection?: CollectionInfoWithSchemaResponse | undefined
+  token?: TokenWithInfoV2Dto
+  collection?: CollectionWithInfoV2Dto | undefined
   offer?: Offer | undefined
   isOwner?: boolean
   isNested?: boolean
@@ -36,12 +35,12 @@ export const NestingTokenBlock: FC<NestingTokenBlockProps> = ({
   onEquipClick,
   onUnequipClick
 }) => {
-  const { tokenOwner } = token?.collection?.permissions?.nesting || offer?.collectionDescription.permissions?.nesting || {};
+  const { tokenOwner } = collection?.permissions?.nesting || offer?.collectionDescription.permissions?.nesting || {};
   const { currentChainId } = useApi();
   const _collectionId = token?.collectionId || offer?.collectionId || 0;
-  const canTransfer = token?.collection.limits?.transfersEnabled !== false;
+  const canTransfer = collection?.limits?.transfersEnabled !== false;
 
-  const canCustomize = token?.collection.properties.find(({ key }) => key === 'is_customizable')?.value;
+  const canCustomize = collection?.properties.find(({ key }) => key === 'is_customizable')?.value;
   const canEquip = !!mockWearables[currentChainId || '']?.find(({ collectionId }) => collectionId === _collectionId);
 
   if (blockedNestingCollections[currentChainId || '']?.includes(_collectionId || 0)) return null;
@@ -105,7 +104,7 @@ export const NestingTokenBlock: FC<NestingTokenBlockProps> = ({
 
 const ActionsWrapper = styled.div`
   display: flex;
-  row-gap: var(--gap);
+  row-gap: var(--prop-gap);
   flex-direction: column;
   justify-content: flex-start;
   align-items: flex-start;
@@ -115,13 +114,13 @@ const ActionsWrapper = styled.div`
 `;
 
 const Divider = styled.div`
-  margin: calc(var(--gap) * 1.5) 0;
+  margin: calc(var(--prop-gap) * 1.5) 0;
   border-top: 1px dashed ${Grey300};
 `;
 
 const ButtonsWrapper = styled.div`
   display: flex;
-  gap: var(--gap);
+  gap: var(--prop-gap);
   button.primary.equip-button {
     padding: 8px 128px;
   }

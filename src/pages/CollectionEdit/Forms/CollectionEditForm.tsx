@@ -1,6 +1,4 @@
-import { Heading } from '@unique-nft/ui-kit';
-
-import { Button, Textarea } from 'components/UI';
+import { Heading, Button, Textarea } from 'components/UI';
 import { TextInput } from 'components/TextInput/TextInput';
 import { Reducer, useCallback, useMemo, useReducer, useState } from 'react';
 import { ButtonsRow, FormRow, FormWrapper } from './FormComponents';

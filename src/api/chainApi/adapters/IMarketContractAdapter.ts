@@ -1,5 +1,6 @@
 import { CollectionProperty } from '@unique-nft/sdk';
 import { EthCrossAccountId } from '@unique-nft/utils';
+import { CollectionNestingAndPermissionStruct$1 } from '../types';
 import IBaseAdapter, { Signer } from './IBaseAdapter';
 
 export interface IMarketContractProperties {
@@ -16,7 +17,7 @@ interface IMarketContractAdapter extends IBaseAdapter {
 
   changePrice(collectionId: number, tokenId: number, price: string, signer: Signer, contract: IMarketContractProperties): Promise<void>
   getChangePriceFee(collectionId: number, tokenId: number, price: string, signer: Signer, contract: IMarketContractProperties): Promise<string>
-
+  setCollectionNesting(collectionId: number, value: CollectionNestingAndPermissionStruct$1): Promise<void>
 }
 
 export default IMarketContractAdapter;

@@ -1,4 +1,5 @@
 import { IpfsUploadResponse } from '@unique-nft/sdk';
+import { Royalty } from '../CollectionEdit/types';
 
 export interface Option {
   id: number;
@@ -49,6 +50,7 @@ export type NewToken = {
   ipfsCid?: IpfsUploadResponse;
   totalFractions?: string;
   isValid?: boolean;
+  royalties?: Royalty[];
 };
 
 export enum CreateTokenDialog {

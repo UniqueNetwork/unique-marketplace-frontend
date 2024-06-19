@@ -21,6 +21,7 @@ interface OwnerCardProps {
   prefixOwned?: string
   prefixNested?: string
   testid?: string
+  notOwned?: boolean
 }
 
 export const OwnerCard: FC<OwnerCardProps> = ({
@@ -30,7 +31,8 @@ export const OwnerCard: FC<OwnerCardProps> = ({
   canCopy = true,
   prefixOwned,
   prefixNested,
-  testid
+  testid,
+  notOwned,
 }) => {
   const { chainProperties, api, currentChainId } = useApi();
   const { selectedAccount } = useAccounts();
@@ -43,7 +45,7 @@ export const OwnerCard: FC<OwnerCardProps> = ({
   }, [chainProperties?.SS58Prefix]);
 
   const isParentToken = Address.is.nestingAddress(address);
-  const isOwned = !isParentToken && selectedAccount && (Address.is.ethereumAddressInAnyForm(selectedAccount.address)
+  const isOwned = !notOwned && !isParentToken && selectedAccount && (Address.is.ethereumAddressInAnyForm(selectedAccount.address)
     ? Address.compare.ethereumAddresses(selectedAccount.address, address)
     : Address.compare.substrateAddresses(selectedAccount.address, address));
 
@@ -127,7 +129,7 @@ const StyledLink = styled(Link)`
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
-  gap: calc(var(--gap) / 2);
+  gap: calc(var(--prop-gap) / 2);
   &>div>div>span {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -142,7 +144,7 @@ const StyledExternalLink = styled(UILink)`
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
-  gap: calc(var(--gap) / 2);
+  gap: calc(var(--prop-gap) / 2);
   &>span:hover {
     text-decoration: none;
   }
@@ -160,7 +162,7 @@ const StyledContainer = styled.div`
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
-  gap: calc(var(--gap) / 2);
+  gap: calc(var(--prop-gap) / 2);
   &>span:hover {
     text-decoration: none;
   }
@@ -185,7 +187,7 @@ const Row = styled.div`
     display: flex;
     padding: 0;
     align-items: center;
-    gap: calc(var(--gap) / 2);
+    gap: calc(var(--prop-gap) / 2);
 
   }
 `;

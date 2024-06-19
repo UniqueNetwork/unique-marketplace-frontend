@@ -1,9 +1,9 @@
 import { ReactNode, useState } from 'react';
 import classNames from 'classnames';
-import { IconProps } from '@unique-nft/ui-kit';
 import { getDeepValue, sortData } from 'utils/uiUtils';
 import { Icon, Text } from '..';
 import styled from 'styled-components';
+import { IconProps } from '../Icon/Icon';
 
 const SORT_MODES = ['initial', 'desc', 'asc'];
 
@@ -185,7 +185,7 @@ const TableStyled = styled.div`
   flex-direction: column;
   font-style: normal;
 
-  &-header {
+  .unique-table-header {
     font-weight: 500;
     display: flex;
     align-items: center;
@@ -214,8 +214,8 @@ const TableStyled = styled.div`
     }
   }
 
-  &-data {
-    &-row {
+  .unique-table-data {
+    .unique-table-data-row {
       display: flex;
       align-items: center;
       min-height: 40px;

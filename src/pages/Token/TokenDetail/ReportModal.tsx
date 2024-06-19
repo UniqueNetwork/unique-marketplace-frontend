@@ -1,10 +1,8 @@
-import { TokenByIdResponse } from '@unique-nft/sdk';
-import { Heading, Loader, Text } from '@unique-nft/ui-kit';
-import { Offer } from 'api/restApi/offers/types';
-import { TextInput } from 'components/TextInput/TextInput';
-import { Button, Modal, useNotifications } from 'components/UI';
-import { useZendeskRequest } from 'hooks/useZendeskRequest';
 import { useCallback, useMemo, useState } from 'react';
+
+import { TextInput } from 'components/TextInput/TextInput';
+import { Heading, Loader, Text, Button, Modal, useNotifications } from 'components/UI';
+import { useZendeskRequest } from 'hooks/useZendeskRequest';
 import styled from 'styled-components';
 
 interface IReportModalProps {

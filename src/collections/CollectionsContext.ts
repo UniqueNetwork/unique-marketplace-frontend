@@ -1,10 +1,13 @@
 import { Consumer, Context, createContext, Provider } from 'react';
 import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
+import { GQLCollection } from 'api/scanApi/types';
 
 export type CollectionsContextProps = {
   isFetching: boolean
-  collections: CollectionInfoWithSchemaResponse[]
+  collections: GQLCollection[]
   curatedCollections: CollectionInfoWithSchemaResponse[]
+  offset: number
+  totalCount: number,
   fetchCollections(): void
 }
 

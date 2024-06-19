@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Address } from '@unique-nft/utils';
 
-import { Alert, TooltipWrapper, Button, InputText, Text, useNotifications, ButtonGroup } from 'components/UI';
+import { Heading, Alert, TooltipWrapper, Button, InputText, Text, useNotifications, ButtonGroup } from 'components/UI';
 
 import { ConfirmSponsorship } from './ConfirmSponsorship';
 import { SettingsSavingProps } from './types';
@@ -9,7 +9,6 @@ import { RemoveSponsorship } from './RemoveSponsorship';
 import { useAccounts } from 'hooks/useAccounts';
 import { useCollectionSetSponsor } from './hooks/useCollectionSetSponsor';
 import { Form, FormBody, FormRow, SettingsRow } from 'pages/CreateCollection/components/FormComponents';
-import { Heading } from '@unique-nft/ui-kit';
 import { StatusTransactionModal } from './StatusTransactionModal';
 import { ConfirmUpdateCollectionModal } from './ConfirmUpdateCollectionModal';
 import { FeeMessage } from 'components';
@@ -27,7 +26,7 @@ export const Sponsorship = ({ collectionInfo, onComplete }: SettingsSavingProps)
   } = useCollectionSetSponsor();
   const { error, info } = useNotifications();
 
-  const { sponsorship, id: collectionId } = collectionInfo || {};
+  const { sponsorship, collectionId } = collectionInfo || {};
 
   const [sponsor, setSponsor] = useState<string | undefined>(sponsorship?.address);
 

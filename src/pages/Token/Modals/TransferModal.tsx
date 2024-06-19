@@ -1,8 +1,7 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Heading, Link } from '@unique-nft/ui-kit';
-import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
+import { CollectionWithInfoV2Dto, TokenWithInfoV2Dto } from '@unique-nft/sdk';
 import { Address } from '@unique-nft/utils';
-import { useNotifications, Button, Text } from 'components/UI';
+import { Heading, Link, useNotifications, Button, Text } from 'components/UI';
 import { BN } from '@polkadot/util';
 import styled from 'styled-components';
 
@@ -61,8 +60,8 @@ export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosab
 };
 
 type AskTransferModalProps = {
-  token?: TokenByIdResponse
-  collection?: CollectionInfoWithSchemaResponse | null
+  token?: TokenWithInfoV2Dto
+  collection?: CollectionWithInfoV2Dto | null
   onTransfer(receiver: string, amount: number): void
   testid: string
 }
@@ -193,7 +192,7 @@ const AskTransferModal: FC<AskTransferModalProps> = ({ token, collection, onTran
         isFeeLoading={isFeeLoading}
         fee={fee || '0'}
         testid={`${testid}-fee-message`}
-        placeholder={isSponsored ? `Collection ID ${collection?.id} sponsored` : undefined}
+        placeholder={isSponsored ? `Collection ID ${collection?.collectionId} sponsored` : undefined}
       />
       <ButtonWrapper>
         <Button
@@ -250,7 +249,7 @@ const InputStyled = styled(TextInput)`
 
 const AmountInputWrapper = styled.div`
   width: 100%;
-  margin-bottom: calc(var(--gap) * 2);
+  margin-bottom: calc(var(--prop-gap) * 2);
 `;
 
 const AmountInputStyled = styled(NumberInput)`
@@ -272,7 +271,7 @@ const Content = styled.div`
 const InvalidAddressWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
-  right: calc(var(--gap) * 1.5);
+  right: calc(var(--prop-gap) * 1.5);
   height: 0;
   span {
     color: ${Coral700} !important;
@@ -282,7 +281,7 @@ const InvalidAddressWrapper = styled.div`
 const LowBalanceWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
-  right: calc(var(--gap) * 1.5);
+  right: calc(var(--prop-gap) * 1.5);
   span {
     color: ${Coral700} !important;
   }

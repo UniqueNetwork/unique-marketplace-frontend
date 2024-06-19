@@ -1,7 +1,7 @@
 import React, { VFC } from 'react';
 import styled from 'styled-components';
-import { IconProps, Text } from '@unique-nft/ui-kit';
-import { Icon } from 'components/UI/Icon/Icon';
+import { Text } from 'components/UI';
+import { Icon, IconProps } from 'components/UI/Icon/Icon';
 
 interface EmptyTableProps {
   iconProps?: Omit<IconProps, 'size'>
@@ -19,7 +19,7 @@ const EmptyTable: VFC<EmptyTableProps> = ({ iconProps }) => {
 const NoItemsWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  row-gap: calc(var(--gap) * 1.5);
+  row-gap: calc(var(--prop-gap) * 1.5);
   width: 100%;
   height: 640px;
   align-items: center;

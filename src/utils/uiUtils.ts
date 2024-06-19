@@ -1,5 +1,5 @@
+import { SortQuery, TableRowProps } from 'components/UI/Table/Table';
 import { useEffect, useRef } from 'react';
-import { SortQuery, TableRowProps } from '@unique-nft/ui-kit';
 
 export const usePrevious = <T>(value: T): T => {
   const ref: any = useRef<T>();

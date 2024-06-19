@@ -1,21 +1,18 @@
 import React, { FC, useContext, useMemo } from 'react';
-
+import { CollectionWithInfoV2Dto, TokenWithInfoV2Dto } from '@unique-nft/sdk';
 import { Offer } from '../../../api/restApi/offers/types';
 import accountContext from '../../../account/AccountContext';
 import { SellToken } from '../SellToken/SellToken';
 import { BuyToken } from '../BuyToken/BuyToken';
-import Auction from '../Auction/Auction';
 import { isTokenOwner } from 'api/chainApi/utils/addressUtils';
 import { useApi } from '../../../hooks/useApi';
 import { checkAllowedTokenInSettings } from 'api/chainApi/utils/checkTokenIsAllowed';
-import { CollectionInfoWithSchemaResponse, TokenByIdResponse } from '@unique-nft/sdk';
-import { ethers } from 'ethers';
 import { useParams } from 'react-router-dom';
 import { disallowSellingAttributeName, disallowSellingAttributeValue } from '../constants';
 
 interface TokenTradingProps {
-  token?: TokenByIdResponse
-  collection?: CollectionInfoWithSchemaResponse | null
+  token?: TokenWithInfoV2Dto
+  collection?: CollectionWithInfoV2Dto | null
   offer?: Offer
   onSellClick(): void
   onBuyClick(): void
@@ -51,12 +48,12 @@ export const TokenTrading: FC<TokenTradingProps> = ({
   const isAllowed = useMemo(() => {
     const { tokenId, collectionId } = offer || token || {};
     if (!tokenId || !collectionId) return false;
-    if (!(token?.collection.limits?.transfersEnabled !== false)) return false;
+    if (!(collection?.limits?.transfersEnabled !== false)) return false;
 
     // for FHF
-    if (Object.values(token?.attributes || {}).some(({ name, value }) =>
-      name?._ === disallowSellingAttributeName &&
-      (value as { _: string })?._ === disallowSellingAttributeValue)) {
+    if (Object.values(token?.attributes || {}).some(({ trait_type, value }) =>
+      trait_type === disallowSellingAttributeName &&
+      (value as string ) === disallowSellingAttributeValue)) {
       return false;
     }
 
@@ -76,26 +73,19 @@ export const TokenTrading: FC<TokenTradingProps> = ({
   }, [selectedAccount, token, offer, address]);
 
   const royalty = useMemo(() => {
-    const tokenRoyalties = token?.royalties?.reduce((acc, { value, decimals }) => {
-      acc += Number(ethers.utils.formatUnits(value.toString(), decimals));
-      return acc;
-    }, 0) || 0;
-    return tokenRoyalties + (token?.collection?.schema?.royalties?.reduce((acc, { value, decimals }) => {
-      acc += Number(ethers.utils.formatUnits(value.toString(), decimals));
-      return acc;
-    }, 0) || 0);
+   //TO DO update after implement royalties into V2
+
+    // const tokenRoyalties = token?.royalties?.reduce((acc, { value, decimals }) => {
+    //   acc += Number(ethers.utils.formatUnits(value.toString(), decimals));
+    //   return acc;
+    // }, 0) || 0;
+    // return tokenRoyalties + (collection?.schema?.royalties?.reduce((acc, { value, decimals }) => {
+    //   acc += Number(ethers.utils.formatUnits(value.toString(), decimals));
+    //   return acc;
+    // }, 0) || 0);
+    return 0;
   }, [token]);
 
-  if (offer?.auction) {
-    return (<Auction
-      offer={offer}
-      onPlaceABidClick={onPlaceABidClick}
-      onWithdrawClick={onWithdrawClick}
-      onDelistAuctionClick={onDelistAuctionClick}
-      onClose={onAuctionClose}
-      testid={`${testid}-auction`}
-    />);
-  }
   if (isOwner) {
     return (<SellToken
       collectionId={token?.collectionId}

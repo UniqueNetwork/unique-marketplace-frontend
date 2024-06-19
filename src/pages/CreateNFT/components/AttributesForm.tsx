@@ -2,15 +2,15 @@ import styled from 'styled-components';
 import { useMemo } from 'react';
 
 import { Attribute, AttributeOption } from '../types';
-import { Heading, SelectOptionProps } from '@unique-nft/ui-kit';
-import { Icon, InputText, Select, Text, TooltipWrapper } from 'components/UI';
-import { AttributeSchemaDto } from '@unique-nft/sdk';
+import { Icon, InputText, Select, Text, TooltipWrapper, Heading } from 'components/UI';
+import { PotentialAttribute } from '@unique-nft/sdk';
+import { SelectOptionProps } from 'components/UI/types';
 
 type AttributesFormProps = {
   isValid?: boolean;
   initialAttributes: Attribute[];
   attributes: Attribute[];
-  attributesSchema: Record<number, AttributeSchemaDto>;
+  attributesSchema: PotentialAttribute[];
   onChange(attributes: Attribute[]): void;
 };
 
@@ -28,27 +28,24 @@ export const AttributesForm = ({
     onChange([...attributes.slice(0, index), value, ...attributes.slice(index + 1)]);
   };
 
-  const schema = Object.values(attributesSchema);
-
   return (
     <>
       <Heading size='4'>Attributes</Heading>
-      {schema.length === 0 && (
+      {attributesSchema.length === 0 && (
         <Text size='s' color='grey-500'>
           There are no attributes
         </Text>
       )}
-      {schema.length > 0 && (
+      {attributesSchema.length > 0 && (
         <>
-          {schema.map(({ name, optional, isArray, enumValues, type }, index) => {
+          {attributesSchema.map(({ trait_type, values }, index) => {
             return (
               <AttributeRow
-                key={`${name}_${index}`}
-                label={name._}
-                required={!optional}
-                isArray={isArray}
-                enumValues={enumValues}
-                type={type}
+                key={`${trait_type}_${index}`}
+                label={trait_type}
+                required={false}
+                isArray={!!values}
+                enumValues={values}
                 initialValue={initialAttributes[index]}
                 value={attributes[index]}
                 isValid={isValid}
@@ -77,13 +74,7 @@ interface AttributeRowProps {
   label?: string;
   required?: boolean;
   isArray?: boolean;
-  type: AttributeSchemaDto['type'];
-  enumValues?: Record<
-    number,
-    {
-      _: string | number;
-    }
-  >;
+  enumValues?: (string | number)[] | undefined;
   initialValue: Attribute;
   value: Attribute;
   isValid?: boolean;
@@ -102,9 +93,9 @@ const AttributeRow = ({
 }: AttributeRowProps) => {
   const options = useMemo(
     () =>
-      Object.values(enumValues || {}).map((val, index) => ({
+    (enumValues || []).map((val, index) => ({
         id: index.toString(),
-        title: val._
+        title: val.toString()
       })) || [],
     [enumValues]
   );

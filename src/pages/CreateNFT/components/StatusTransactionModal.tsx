@@ -1,15 +1,21 @@
-import { Heading } from '@unique-nft/ui-kit';
-import { Alert, Button, Loader, Text } from 'components/UI';
+import { Alert, Button, Loader, Text, Heading } from 'components/UI';
 import { Modal, ModalProps } from 'components/UI/Modal';
 import { ReactNode } from 'react';
 import styled from 'styled-components';
+
+export enum TRANSACTION_STAGE_ENUM {
+  UPLOADING = 'uploading',
+  MINTING = 'minting',
+  DONE = 'done',
+  FAILED = 'failed'
+}
 
 type Props = Pick<ModalProps, 'isVisible'> & {
   uploadingProgress?: number;
   mintingProgress?: number;
   totalTokens: number;
   batchSize: number;
-  stage: 'uploading' | 'minting' | 'done';
+  stage: TRANSACTION_STAGE_ENUM;
   isVisible: boolean;
   title?: string;
   warning?: ReactNode;
@@ -43,7 +49,13 @@ export const StatusTransactionModal = ({
         </StageDescription>
         <Loader
           state={
-            stage === 'uploading' ? 'idle' : stage === 'minting' ? 'process' : 'done'
+            stage === TRANSACTION_STAGE_ENUM.UPLOADING
+              ? 'idle'
+              : stage === TRANSACTION_STAGE_ENUM.MINTING
+              ? 'process'
+              : stage === TRANSACTION_STAGE_ENUM.FAILED
+              ? 'failed'
+              : 'done'
           }
         />
         <StageDescription>
@@ -58,12 +70,22 @@ export const StatusTransactionModal = ({
           </Text>
         </StageDescription>
       </StagesWrapper>
-      {stage !== 'done' && (
+      {(stage === TRANSACTION_STAGE_ENUM.MINTING ||
+        stage === TRANSACTION_STAGE_ENUM.UPLOADING) && (
         <AlertStyled type='warning'>
-          Please do not close or refresh this page until the token minting is completed.
+          Please do not close or refresh this page until the token minting is
+          completed.
         </AlertStyled>
       )}
-      {stage === 'done' && (
+      {stage === TRANSACTION_STAGE_ENUM.FAILED && (
+        <>
+          <AlertStyled type='warning'>Minting failed.</AlertStyled>
+          <ButtonsWrapper>
+            <Button title='Close' role='primary' onClick={onContinue} />
+          </ButtonsWrapper>
+        </>
+      )}
+      {stage === TRANSACTION_STAGE_ENUM.DONE && (
         <ButtonsWrapper>
           <Button title='Create more' role='primary' onClick={onContinue} />
           <Button title='Go to my tokens' onClick={onComplete} />
@@ -77,8 +99,8 @@ const StagesWrapper = styled.div`
   display: grid;
   grid-template-columns: 24px 1fr;
   align-items: flex-start;
-  grid-column-gap: var(--gap);
-  grid-row-gap: var(--gap);
+  grid-column-gap: var(--prop-gap);
+  grid-row-gap: var(--prop-gap);
   align-items: center;
 `;
 
@@ -90,8 +112,8 @@ const StageDescription = styled.div`
 const ButtonsWrapper = styled.div`
   display: flex;
   justify-content: space-between;
-  margin-top: calc(var(--gap) * 2);
-  gap: calc(var(--gap) * 2);
+  margin-top: calc(var(--prop-gap) * 2);
+  gap: calc(var(--prop-gap) * 2);
 `;
 
 const AlertStyled = styled(Alert)`

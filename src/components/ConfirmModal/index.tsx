@@ -1,6 +1,5 @@
-import { Heading } from '@unique-nft/ui-kit';
-import { Button, Modal } from 'components/UI';
 import React, { FC, useCallback } from 'react';
+import { Button, Modal, Heading } from 'components/UI';
 import styled from 'styled-components';
 import { AdditionalDark } from 'styles/colors';
 

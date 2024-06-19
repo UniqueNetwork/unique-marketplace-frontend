@@ -1,6 +1,6 @@
+import { IconProps } from 'components/UI/Icon/Icon';
 import { NotificationsContext } from '../Notifications';
 import { ReactNode, useContext, useMemo } from 'react';
-import { IconProps } from '@unique-nft/ui-kit';
 
 export const useNotifications = () => {
   const { push, clearAll } = useContext(NotificationsContext);

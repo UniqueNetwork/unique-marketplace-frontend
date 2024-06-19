@@ -4,7 +4,6 @@ import styled from 'styled-components';
 
 import { PagePaper } from 'components/PagePaper/PagePaper';
 import { CollectionBannerComponent } from './CollectionBanner';
-import { Heading } from '@unique-nft/ui-kit';
 import { CollectionEditForm } from './Forms/CollectionEditForm';
 import { Error404 } from 'pages/Errors/404';
 import { CollectionEditSkeleton } from './CollectionEditSkeleton';
@@ -13,7 +12,7 @@ import { RoyaltiesForm } from './Forms/RoyaltiesForm';
 import { CollectionCover } from './CollectionCover';
 import { useMarketableCollection } from 'api/restApi/collections/collection';
 import { MarketableCollection, MarketableCollectionMetadata } from 'api/restApi/collections/types';
-import { Icon, Modal } from 'components/UI';
+import { Heading, Icon, Modal } from 'components/UI';
 import { SaveCollectionStagesModal } from './Modals/SaveCollectionModal';
 import { BlueGrey500 } from 'styles/colors';
 import { SetRoyaltiesStagesModal } from './Modals/SetRoyaltiesModal';
@@ -21,12 +20,12 @@ import { RoyaltiesFormData } from './types';
 import { Sponsorship } from './Forms/Sponsorship';
 import { Limits } from './Forms/Limits';
 import { BurningPermission } from './Forms/BurningPermission';
-import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
+import { CollectionWithInfoV2Dto } from '@unique-nft/sdk';
 
 export const CollectionEditPage = () => {
   const { collectionId } = useParams<{ collectionId: string }>();
   const [collection, setCollection] = useState<MarketableCollection | null>(null);
-  const [collectionInfo, setCollectionInfo] = useState<CollectionInfoWithSchemaResponse | null>(null);
+  const [collectionInfo, setCollectionInfo] = useState<CollectionWithInfoV2Dto | null>(null);
   const [isFetchingCollection, setIsFetchingCollection] = useState<boolean>(true);
   const { fetchCollection } = useMarketableCollection();
   const { api, currentChainId } = useApi();
@@ -45,7 +44,7 @@ export const CollectionEditPage = () => {
       const collection = await fetchCollection(Number(collectionId));
       setCollection(collection || null);
       collection?.metadata?.banner && setBanner({ src: collection?.metadata?.banner });
-      setCover({ src: collection?.metadata?.cover || collection?.data?.schema?.coverPicture.fullUrl || '' });
+      setCover({ src: collection?.metadata?.cover || collection?.data?.info?.cover_image?.url || '' });
 
       setMetadata({
         ...(collection?.metadata || {}),
@@ -54,13 +53,15 @@ export const CollectionEditPage = () => {
 
       const collectionOnChain = await api?.collection?.getCollection(Number(collectionId));
       setCollectionInfo(collectionOnChain || null);
-      if (collectionOnChain?.schema?.royalties?.length) {
+      //TO DO remove after @unique-nft/sdk update
+      //@ts-ignore
+      if (collectionOnChain?.royalties?.length) {
         setRoyalty({
-          royalties: collectionOnChain?.schema?.royalties.map((royalty) => {
-            const value = royalty.value
-              ? (Number(royalty.value) / 100).toFixed(2)
+          //@ts-ignore
+          royalties: collectionOnChain?.royalties?.map(({ address, percent }) => {
+            const value = percent
+              ? percent.toFixed(2)
               : '0';
-            const address = royalty.address;
             return ({ value, address });
           })
         });
@@ -103,7 +104,7 @@ export const CollectionEditPage = () => {
     const collection = await fetchCollection(Number(collectionId));
       setCollection(collection || null);
       collection?.metadata?.banner && setBanner({ src: collection?.metadata?.banner });
-      setCover({ src: collection?.metadata?.cover || collection?.data?.schema?.coverPicture.fullUrl || '' });
+      setCover({ src: collection?.metadata?.cover || collection?.data?.info?.cover_image?.url || '' });
 
       setMetadata({
         ...(collection?.metadata || {}),
@@ -112,7 +113,7 @@ export const CollectionEditPage = () => {
   }, [collectionId, fetchCollection]);
 
   const isCollectionChanged = useMemo(() => {
-    const coverNotChanged = (cover?.src === collection?.data?.schema?.coverPicture.fullUrl && !collection?.metadata?.cover) || collection?.metadata?.cover === cover?.src;
+    const coverNotChanged = (cover?.src === collection?.data?.info?.cover_image?.url && !collection?.metadata?.cover) || collection?.metadata?.cover === cover?.src;
     return collection?.metadata?.banner !== banner?.src || !coverNotChanged;
   }, [collection, banner, cover]);
 
@@ -144,58 +145,75 @@ export const CollectionEditPage = () => {
 
   if (!collection || !collectionInfo) return <Error404 />;
 
-  return (<>
-    <BackLink onClick={backClickHandler}>
-      <Icon name='arrow-left' color={BlueGrey500} size={16}/>
-      <p>back</p>
-    </BackLink>
-    <CollectionEditPaper>
-      <CollectionBannerComponent
-        src={banner?.src}
-        onChange={onUploadBanner}
-        onRemove={onRemoveBanner}
-      />
-      <CollectionEditContentWrapper>
-        <CollectionCover
-          name={name || ''}
-          src={cover?.src}
-          onChange={onUploadCover}
-          onRemove={onRemoveCover}
+  return (
+    <>
+      <BackLink onClick={backClickHandler}>
+        <Icon name='arrow-left' color={BlueGrey500} size={16} />
+        <p>back</p>
+      </BackLink>
+      <CollectionEditPaper>
+        <CollectionBannerComponent
+          src={banner?.src}
+          onChange={onUploadBanner}
+          onRemove={onRemoveBanner}
         />
-        <CollectionEditFormWrapper>
-          <Heading size='1' >{name}</Heading>
-          <CollectionEditForm
-            initialFormData={metadata}
-            onSubmit={onCollectionEditFormSubmit}
-            isCoverChanged={isCollectionChanged}
+        <CollectionEditContentWrapper>
+          <CollectionCover
+            name={name || ''}
+            src={cover?.src}
+            onChange={onUploadCover}
+            onRemove={onRemoveCover}
           />
-          <RoyaltiesForm
-            initialFormData={royalty}
-            onSubmit={onRoyaltiesFormSubmit}
+          <CollectionEditFormWrapper>
+            <Heading size='1'>{name}</Heading>
+            <CollectionEditForm
+              initialFormData={metadata}
+              onSubmit={onCollectionEditFormSubmit}
+              isCoverChanged={isCollectionChanged}
+            />
+            {collectionInfo?.info?.originalSchemaVersion === '1.0.0' && (
+              <RoyaltiesForm
+                initialFormData={royalty.royalties}
+                onSubmit={onRoyaltiesFormSubmit}
+                withSaveButton={true}
+              />
+            )}
+            <Sponsorship
+              collection={collection}
+              collectionInfo={collectionInfo}
+              onComplete={onComplete}
+            />
+            <Limits
+              collection={collection}
+              collectionInfo={collectionInfo}
+              onComplete={onComplete}
+            />
+            <BurningPermission
+              collection={collection}
+              collectionInfo={collectionInfo}
+              onComplete={onComplete}
+            />
+          </CollectionEditFormWrapper>
+        </CollectionEditContentWrapper>
+        <Modal isVisible={modalType === 'metadata'}>
+          <SaveCollectionStagesModal
+            metadata={metadata}
+            bannerFile={banner?.file}
+            coverFile={cover?.file}
+            onFinish={onUpdateFinish}
+            collectionId={collection.collectionId}
           />
-          <Sponsorship collection={collection} collectionInfo={collectionInfo} onComplete={onComplete} />
-          <Limits collection={collection} collectionInfo={collectionInfo} onComplete={onComplete} />
-          <BurningPermission collection={collection} collectionInfo={collectionInfo} onComplete={onComplete} />
-        </CollectionEditFormWrapper>
-      </CollectionEditContentWrapper>
-      <Modal isVisible={modalType === 'metadata'}>
-        <SaveCollectionStagesModal
-          metadata={metadata}
-          bannerFile={banner?.file}
-          coverFile={cover?.file}
-          onFinish={onUpdateFinish}
-          collectionId={collection.collectionId}
-        />
-      </Modal>
-      <Modal isVisible={modalType === 'royalty'}>
-        <SetRoyaltiesStagesModal
-          formData={royalty}
-          onFinish={onUpdateFinish}
-          collectionId={collection.collectionId}
-        />
-      </Modal>
-    </CollectionEditPaper>
-  </>);
+        </Modal>
+        <Modal isVisible={modalType === 'royalty'}>
+          <SetRoyaltiesStagesModal
+            formData={royalty}
+            onFinish={onUpdateFinish}
+            collectionId={collection.collectionId}
+          />
+        </Modal>
+      </CollectionEditPaper>
+    </>
+  );
 };
 
 const CollectionEditPaper = styled(PagePaper)`
@@ -205,8 +223,8 @@ const CollectionEditPaper = styled(PagePaper)`
 
 const CollectionEditContentWrapper = styled.div`
   display: flex;
-  gap: calc(var(--gap) * 2);
-  padding: 0 calc(var(--gap) * 2);
+  gap: calc(var(--prop-gap) * 2);
+  padding: 0 calc(var(--prop-gap) * 2);
   @media (max-width: 768px) {
     padding: 0;
     flex-direction: column;
@@ -214,7 +232,7 @@ const CollectionEditContentWrapper = styled.div`
 `;
 
 const CollectionEditFormWrapper = styled.div`
-  padding: calc(var(--gap) * 1.5) 0;
+  padding: calc(var(--prop-gap) * 1.5) 0;
   flex: 1;
   @media (max-width: 1024px) {
     flex: 1;

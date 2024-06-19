@@ -1,7 +1,5 @@
 import { BN, BN_MAX_INTEGER } from '@polkadot/util';
 import { DecodedAttributeDto } from '@unique-nft/sdk';
-import { SelectOptionProps } from '@unique-nft/ui-kit';
-import { MyCollection } from 'api/restApi/collections/types';
 
 import { Offer } from 'api/restApi/offers/types';
 import { TypeOfAssets, TypeOfCustomizableNFTs } from 'components/Filters/types';
@@ -16,6 +14,8 @@ import { defaultSortingValue, sortingOptions } from '../constants';
 import { MyTokensFilterState } from '../Filters/types';
 import { countTokenAttributes } from '../Filters/utils/attributes';
 import { MixedMyTokenAndOffer, MyToken, TOption } from '../types';
+import { GQLCollection } from 'api/scanApi/types';
+import { SelectOptionProps } from 'components/UI/types';
 
 export type UseMyTokensFilterProps = {
   isFetchingTokens: boolean
@@ -71,8 +71,8 @@ export const useMyTokensFilter = ({ tokens, offers, isFetchingTokens }: UseMyTok
       const { onSell, fixedPrice, timedAuction, notOnSale } = statuses || {};
       if (!onSell && !fixedPrice && !timedAuction && !notOnSale) return true;
       return (onSell && !fixedPrice && !timedAuction && !!token.seller) ||
-        (fixedPrice && !!token.seller && !token.auction) ||
-        (timedAuction && !!token.seller && !!token.auction) ||
+        (fixedPrice && !!token.seller) ||
+        (timedAuction && !!token.seller) ||
         (notOnSale && !token.seller);
     };
 
@@ -156,7 +156,11 @@ export const useMyTokensFilter = ({ tokens, offers, isFetchingTokens }: UseMyTok
           return {
             ...offer,
             owner: offer.seller,
-            attributes: Object.values(offer.tokenDescription?.attributes) as DecodedAttributeDto[]
+            attributes: offer?.tokenDescription
+              ? (Object.values(
+                  offer?.tokenDescription?.attributes
+                ) as DecodedAttributeDto[])
+              : []
           };
         }
         return token;
@@ -190,10 +194,10 @@ export const useMyTokensFilter = ({ tokens, offers, isFetchingTokens }: UseMyTok
     return statusesCount + collectionsCount + attributesCount + numberOfAttributesCount + (prices ? 1 : 0);
   }, [filterState]);
 
-  const myCollections: MyCollection[] = useMemo(() => {
-    const collections: Map<number, MyCollection> = new Map();
+  const myCollections: GQLCollection[] = useMemo(() => {
+    const collections: Map<number, GQLCollection> = new Map();
 
-    offers.forEach(({ collectionId, collectionDescription: { owner, schema, name, tokenPrefix } }) => {
+    offers.forEach(({ collectionId, collectionDescription: { owner, schema, name, mode, tokenPrefix } }) => {
       if (collections.has(collectionId)) return;
       collections.set(collectionId, {
         id: collectionId,
@@ -203,7 +207,11 @@ export const useMyTokensFilter = ({ tokens, offers, isFetchingTokens }: UseMyTok
         tokenPrefix,
         isMarketable: true,
         allowedTokens: '',
+        tokenLimit: 0,
+        tokensCount: 0,
         properties: [],
+        attributesSchema: {},
+        mode: mode || 'NFT',
         permissions: {
           access: 'Normal',
           nesting: {
@@ -214,7 +222,7 @@ export const useMyTokensFilter = ({ tokens, offers, isFetchingTokens }: UseMyTok
         }
       });
     });
-    tokens.forEach(({ collectionId, collectionCover, collectionName, collectionOwner, tokenPrefix }) => {
+    tokens.forEach(({ collectionId, collectionCover, collectionName, collectionOwner, tokenPrefix, type }) => {
       if (collections.has(collectionId)) return;
       collections.set(collectionId, {
         id: collectionId,
@@ -224,7 +232,11 @@ export const useMyTokensFilter = ({ tokens, offers, isFetchingTokens }: UseMyTok
         tokenPrefix: tokenPrefix || '',
         isMarketable: featuredCollections.findIndex(({ id }) => id === collectionId) !== -1,
         allowedTokens: '',
+        tokenLimit: 0,
+        tokensCount: 0,
         properties: [],
+        attributesSchema: {},
+        mode: type === 'RFT' ? 'ReFungible' : 'NFT',
         permissions: {
           access: 'Normal',
           nesting: {

@@ -5,6 +5,8 @@ import { Settings } from '../restApi/settings/types';
 import { UniqueSDKNFTController } from '../chainApi/NFTController';
 import { UniqueSDKCollectionController } from '../chainApi/collectionController';
 import { UniqueSDKRFTController } from 'api/chainApi/RFTController';
+import { changeMetamaskChain } from 'utils/metamask';
+import { EthereumChainParams } from 'account/constants';
 
 export interface NetworkOptions { networkId: string, settings: Settings }
 
@@ -25,13 +27,13 @@ export class SdkClient {
     this.isReady = true;
   }
 
-  setNetwork(options: NetworkOptions): void {
+  async setNetwork(options: NetworkOptions): Promise<void> {
     this.isReady = false;
     this.sdk = new Sdk({ baseUrl: options.settings.blockchain.unique.restUrl });
     this.nftController.setNetwork(options);
     this.collectionController.setNetwork(options);
-    // TODO: when metamask updated we must ask in extension to change network too (see wallet implementation for more)
     this.marketController.setNetwork(options);
+    changeMetamaskChain(EthereumChainParams[options.networkId]);
     this.isReady = true;
   }
 }
