@@ -212,7 +212,9 @@ const AskTransferToBundleModal: FC<AskTransferToBundleModalProps> = ({ token, co
           getActiveSuggestOption={(suggest, activeValue) => suggest?.tokenId === activeValue?.tokenId}
           components={{
             SuggestItem: ({ suggestion }) => <ItemOption>
-              <CollectionCover src={suggestion?.image?.fullUrl || ''} size={24} type={'square'} />
+              {/*/ TO DO remove after types updates */}
+              {/*/ @ts-ignore */}
+              <CollectionCover src={suggestion?.image || ''} size={24} type={'square'} />
               <Text>{`${suggestion?.tokenPrefix || ''} #${suggestion?.tokenId}`}</Text>
             </ItemOption>
           }}

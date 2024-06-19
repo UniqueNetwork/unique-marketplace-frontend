@@ -196,7 +196,7 @@ export const CommonTokenDetail: FC<IProps> = ({
       if (!baseCollectionId) return;
       const token = await api?.nft?.getToken(baseCollectionId, 1);
 
-      setBaseTokenImg(token?.file?.fullUrl || token?.image.fullUrl || undefined);
+      setBaseTokenImg(token?.file?.fullUrl || token?.image || undefined);
 
       const _token = await api?.nft?.getToken(collectionId, tokenId);
 
@@ -218,7 +218,7 @@ export const CommonTokenDetail: FC<IProps> = ({
                 baseSrc={baseTokenImg}
                 badges={badges}
               />
-              <EquippedWearables />
+              <EquippedWearableWrap><EquippedWearables /></EquippedWearableWrap>
             </SliderContainer>
           ) : (
             <PictureWrapper>
@@ -662,4 +662,25 @@ const IconWrapper = styled.div`
 const SliderContainer = styled.div`
   display: flex;
   flex-direction: column;
+`;
+
+const EquippedWearableWrap = styled.div`
+  width: 536px;
+  margin-right: calc(var(--prop-gap)* 2);
+
+  @media (max-width: ${BREAKPOINTS.desktop}px) {
+    width: 536px;
+  }
+  
+  @media (max-width: ${BREAKPOINTS.mediumDesktop}px) {
+    width: 326px;
+  }
+
+  @media (max-width: ${BREAKPOINTS.tablet}px) {
+    width: calc(100vw - var(--prop-gap) * 3);
+  }
+
+  @media (max-width: ${BREAKPOINTS.mobile}px) {
+    width: calc(100vw - var(--prop-gap) * 2);
+  }
 `;

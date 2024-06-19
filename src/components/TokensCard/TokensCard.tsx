@@ -11,7 +11,7 @@ import { Primary600 } from 'styles/colors';
 import { TokensMedia } from './TokensMedia';
 import { countNestedChildren, stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
 import { useCollections } from 'hooks/useCollections';
-import { TokenByIdResponse } from '@unique-nft/sdk';
+import { TokenByIdResponse, TokenWithInfoV2Dto } from '@unique-nft/sdk';
 import { MyToken, TokenTypeEnum } from 'pages/MyTokens/types';
 import { BadgeEnum } from 'components/TokenMedia/Picture';
 import { CollectionTitle } from 'components/OfferCard/CollectionTitle';
@@ -37,7 +37,7 @@ export const TokensCard: FC<TTokensCard> = ({
   showCollectionLink = true,
   ...props
 }) => {
-  const [token, setToken] = useState<Omit<TokenByIdResponse | MyToken, 'collection' | 'nestingParentToken' | 'properties'> | undefined>(props.token);
+  const [token, setToken] = useState<Omit<TokenByIdResponse | MyToken | TokenWithInfoV2Dto, 'collection' | 'nestingParentToken' | 'properties'> | undefined>(props.token);
   const [collection, setCollection] = useState<(GQLCollection) | undefined>();
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isBundleState, setIsBundleState] = useState<boolean>();
@@ -52,27 +52,21 @@ export const TokensCard: FC<TTokensCard> = ({
     collectionTitle,
     imageUrl,
     price,
-    video,
     owner,
     type,
-    amount,
-    totalPieces
   } = useMemo(() => {
-    if (offer || (token && collection) || ((token as MyToken)?.collectionName && (token as MyToken).tokenPrefix)) {
-      const { image, video, owner } = offer?.tokenDescription || token || {};
-      const collectionName = offer?.collectionDescription?.name || collection?.name || (token as MyToken)?.collectionName || '';
-      const tokenPrefix = offer?.collectionDescription?.tokenPrefix || collection?.tokenPrefix || (token as MyToken)?.tokenPrefix || '';
+    if (offer || (token && collection) || (collection?.name && collection?.tokenPrefix)) {
+      const { image, owner } = offer?.tokenDescription || token || {};
+      const collectionName = offer?.collectionDescription?.name || collection?.name;
+      const tokenPrefix = offer?.collectionDescription?.tokenPrefix || collection?.tokenPrefix;
       const { price, seller } = offer || {};
       return {
         tokenPrefix,
         collectionTitle: collectionName,
         imageUrl: image,
-        video: stringToDecodedInfixOrUrlOrCidAndHash(video),
         price,
         owner: seller || owner,
-        type: (token as MyToken)?.type || TokenTypeEnum.NFT,
-        amount: (token as MyToken)?.tokens_amount,
-        totalPieces: (token as MyToken)?.total_pieces
+        type: TokenTypeEnum.NFT,
       };
     }
 
@@ -80,7 +74,7 @@ export const TokensCard: FC<TTokensCard> = ({
       setIsFetching(true);
       void (async () => {
         if (!token) {
-          const token = await api?.nft?.getToken(collectionId, tokenId);
+          const token = await api?.nft?.getTokenV2(collectionId, tokenId);
           if (token) setToken(token);
         }
         if (!collection) {
@@ -148,7 +142,7 @@ export const TokensCard: FC<TTokensCard> = ({
         to={tokenPath}
         tokenId={tokenId}
         imageUrl={imageUrl}
-        video={video?.fullUrl || undefined}
+        video={undefined}
         testid={`${testid}-token-media`}
         badges={isCustomizable ? [BadgeEnum.Customizable] : []}
       />
@@ -187,9 +181,6 @@ export const TokensCard: FC<TTokensCard> = ({
             <IconStyled name={`chain-${currentChainId?.toLowerCase()}`} size={16} />
           </PriceWrapper>
         </TradingInfoWrapper>}
-        {type === TokenTypeEnum.RFT && !!amount && !!totalPieces && <Text size={'xs'} color={'grey-500'} >
-          Owned fractions: {amount}/{totalPieces}
-        </Text>}
       </Description>
 
       {!!isFetching && <Loader isFullPage />}
