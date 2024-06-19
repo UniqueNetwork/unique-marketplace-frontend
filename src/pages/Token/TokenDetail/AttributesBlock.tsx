@@ -46,7 +46,13 @@ export const AttributesBlock: FC<IProps> = ({ attributes, collectionId }: IProps
             enumeration={attribute.value.toString()}
             isFetching={isFetching}
             tokensCount={tokensCount}
-            percents={statistics[`${attribute.trait_type}_${attribute.value.toString()}`]?.count * 100 / tokensCount}
+            percents={
+              ((statistics[
+                `${attribute.trait_type}_${attribute.value.toString()}`
+              ]?.count || 1) *
+                100) /
+              tokensCount
+            }
           />;
         })}
       </AttributesWrapper>
