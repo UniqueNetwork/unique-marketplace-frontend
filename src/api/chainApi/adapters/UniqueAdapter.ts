@@ -226,6 +226,7 @@ class UniqueAdapter implements IMarketContractAdapter {
         collectionId,
         tokenId,
         price,
+        // currency: 0,
         amount,
         seller: from
       }
@@ -233,7 +234,7 @@ class UniqueAdapter implements IMarketContractAdapter {
     return res.fee.raw;
   }
 
-  async sell(from: EthCrossAccountId, collectionId: number, tokenId: number, price: string, currency: number, amount: number, signer: Signer, contract: IMarketContractProperties): Promise<void> {
+  async sell(from: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer, contract: IMarketContractProperties): Promise<void> {
     await this.uniqueSdk.evm.send.submitWaitResult({
       abi: contract.abi || marketplaceAbi as any,
       address: signer.address || '',
@@ -244,7 +245,7 @@ class UniqueAdapter implements IMarketContractAdapter {
         collectionId,
         tokenId,
         price,
-        currency,
+        // currency: 0,
         amount,
         seller: from
       }

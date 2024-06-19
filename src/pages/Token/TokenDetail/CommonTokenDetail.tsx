@@ -196,7 +196,7 @@ export const CommonTokenDetail: FC<IProps> = ({
       if (!baseCollectionId) return;
       const token = await api?.nft?.getToken(baseCollectionId, 1);
 
-      setBaseTokenImg(token?.file?.fullUrl || token?.image.fullUrl || undefined);
+      setBaseTokenImg(token?.file?.fullUrl || token?.image || undefined);
 
       const _token = await api?.nft?.getToken(collectionId, tokenId);
 
