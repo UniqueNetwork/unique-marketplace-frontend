@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import { EquippedWearables } from '../EquippedWearables';
 import { Picture } from 'components';
 import { WearablePicture } from 'components/TokenMedia/WearablePicture';
 import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/schemas';
@@ -190,7 +189,6 @@ const MainSliderItem = ({
                 video={src || ''}
                 testid={`${`testid`}-token-picture`}
               />
-              <EquippedWearables />
             </PictureWrapper>
           )}
         </>

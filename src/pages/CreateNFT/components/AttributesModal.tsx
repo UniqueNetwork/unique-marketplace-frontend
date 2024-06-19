@@ -43,7 +43,7 @@ export const AttributesModal = ({
     return addresses.length !== uniqueAddresses.size;
   }, [royalties]);
 
-  const totalRoyaltyLessThen99 = useMemo(() => Number(royalties && royalties.reduce((acc, { value }) => Number(acc) + Number(value), 0)) < 99, [royalties]);
+  const totalRoyaltyLessThen100 = useMemo(() => Number(royalties && royalties.reduce((acc, { value }) => Number(acc) + Number(value), 0)) < 100, [royalties]);
 
   const onChangeAttributes = (attributes: Attribute[]) => {
     setAttributes(attributes);
@@ -186,7 +186,7 @@ export const AttributesModal = ({
           role='primary'
           title='Submit'
           onClick={onSubmit}
-          disabled={hasDuplicateAddresses || !totalRoyaltyLessThen99}
+          disabled={hasDuplicateAddresses || (royalties && royalties.length > 0 && !totalRoyaltyLessThen100)}
         />
       </ModalFooter>
     </ModalStyled>
