@@ -80,7 +80,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
   }, [tokens]);
 
   const handleSubmit = async () => {
-    if (!collection || !selectedAccount) {
+    if (!collection || !collection?.id || !selectedAccount) {
       return;
     }
 
@@ -129,6 +129,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
     let currentPos = 0;
     let reentryCounter = 0;
     while (currentPos < createTokensPayload.length && reentryCounter <= (MAX_MINT_TOKENS / batchSize)) {
+      reentryCounter++;
       try {
         setMintingProgress(currentPos);
         const result = await submitBatch(createTokensPayload.slice(currentPos, currentPos + batchSize));
@@ -145,7 +146,6 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
           setBatchSize(SMALL_BATCH_SIZE);
         }
       }
-      reentryCounter++;
     }
 
     if (tokensCreated.length > 0) {

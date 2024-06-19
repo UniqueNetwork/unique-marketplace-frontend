@@ -101,7 +101,7 @@ export const TokenTrading: FC<TokenTradingProps> = ({
     />);
   }
 
-  if (!isAllowed) return null;
+  if (!isAllowed || offer?.collectionId === 611) return null;
 
   return (
     <BuyToken
