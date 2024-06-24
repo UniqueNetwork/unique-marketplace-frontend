@@ -56,8 +56,8 @@ const CustomNextArrowVertical: React.FC<ArrowProps> = (props) => {
         height: '50px',
         transition: 'background-color 0.3s ease',
         boxShadow: isHovered
-          ? '0px 6px 6px 0px #00000080'
-          : '0px 4px 4px 0px #00000040',
+          ? '0px 3px 3px 0px #00000040'
+          : '0px 2px 2px 0px #00000020',
 
         top: calculateTop,
         position: 'absolute',
@@ -117,12 +117,10 @@ const CustomPrevArrowVertical: React.FC<ArrowProps> = (props) => {
         height: '50px',
         transition: 'background-color 0.3s ease',
         boxShadow: isHovered
-          ? '0px 6px 6px 0px #00000080'
-          : '0px 4px 4px 0px #00000040',
+          ? '0px -3px 3px 0px #00000040'
+          : '0px -2px 2px 0px #00000020',
         zIndex: 222,
-
         top: '0',
-        // transform: 'rotate(270deg)',
         position: 'absolute',
         left: 'calc(50% - 25px)'
       }}

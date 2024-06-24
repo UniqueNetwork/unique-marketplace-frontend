@@ -492,8 +492,9 @@ const PictureWrapper = styled.div`
     top: 0;
     left: 2px;
     right: 2px;
+    height: 100%;
     display: flex;
-    align-items: center;
+    align-items: start;
     color: white;
     text-align: center;
     max-height: 100%;
