@@ -112,7 +112,7 @@ export const TokenSlider: FC<ITokenSliderProps> = ({
 
       <SliderContainer>
         <Slider ref={horizontalSliderRef} {...settings}>
-          {sliderItems.map(({ type, src }, index) => (
+          {sliderItems.map(({ type, src, thumbnail }, index) => (
             <MainSliderItem
               key={index}
               src={src || ''}
@@ -123,6 +123,7 @@ export const TokenSlider: FC<ITokenSliderProps> = ({
               index={index}
               activeIndex={activeIndex}
               badges={badges}
+              thumbnail={thumbnail}
             />
           ))}
         </Slider>
