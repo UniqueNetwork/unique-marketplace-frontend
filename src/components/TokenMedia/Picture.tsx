@@ -118,7 +118,6 @@ export const Picture: FC<PictureProps> = ({
 
 const ImgStyled = styled.img`
   box-sizing: border-box;
-  margin: auto;
 `;
 
 const VideoStyled = styled.video`
