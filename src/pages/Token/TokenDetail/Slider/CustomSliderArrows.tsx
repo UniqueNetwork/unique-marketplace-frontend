@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Grey200, Grey300 } from 'styles/colors';
 
 interface ArrowProps {
   className?: string;
@@ -38,7 +37,9 @@ const CustomNextArrow: React.FC<ArrowProps> = (props) => {
         width: '50px',
         height: '50px',
         transition: 'background-color 0.3s ease',
-        boxShadow: isHovered ? '0px 6px 6px 0px #00000080' : '0px 4px 4px 0px #00000040',
+        boxShadow: isHovered
+          ? '0px 3px 3px 0px #00000040'
+          : '0px 2px 2px 0px #00000020',
       }}
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
@@ -79,8 +80,10 @@ const CustomPrevArrow: React.FC<ArrowProps> = (props) => {
         width: '50px',
         height: '50px',
         transition: 'background-color 0.3s ease',
-        boxShadow: isHovered ? '0px 6px 6px 0px #00000080' : '0px 4px 4px 0px #00000040',
-        zIndex: 222,
+        boxShadow: isHovered
+          ? '0px 3px 3px 0px #00000040'
+          : '0px 2px 2px 0px #00000020',
+        zIndex: 222
       }}
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
