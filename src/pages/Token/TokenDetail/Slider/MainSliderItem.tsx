@@ -19,6 +19,7 @@ interface SliderItem {
   index: number;
   activeIndex: number;
   badges?: BadgeEnum[];
+  thumbnail?: string,
 }
 
 const SliderItem = styled.div`
@@ -81,7 +82,6 @@ const PictureWrapper = styled.div`
     max-height: 100%;
     border-radius: 8px;
     overflow: hidden;
-    width: 100%;
 
     img {
       max-width: 100%;
@@ -105,6 +105,7 @@ const MainSliderItem = ({
   tokenId,
   activeIndex,
   index,
+  thumbnail,
   badges
 }: SliderItem) => {
   const isActive = activeIndex === index;
@@ -196,7 +197,7 @@ const MainSliderItem = ({
     case 'audio':
       return (
         <SliderItem>
-          <Picture alt={tokenId?.toString() || ''} src={''} video={src || ''} />
+          <Picture alt={tokenId?.toString() || ''} src={thumbnail} video={src || ''} />
         </SliderItem>
       );
     default:
