@@ -34,7 +34,7 @@ export const SellToken: FC<SellTokenProps> = ({
   onChangePriceClick,
   testid
 }) => {
-  const { currentChainId, api } = useApi();
+  const { currentChainId, api, lastContract } = useApi();
 
   const [hideSellBtn, hideTransferBtn] = useMemo(() => {
     if (!currentChainId || !collectionId) return [false, false];
@@ -47,13 +47,16 @@ export const SellToken: FC<SellTokenProps> = ({
 
   const canChangePrice = useMemo(() => {
     if (!offer?.contractAddress) return false;
-    return api?.market?.hasContractMethod(offer.contractAddress, 'changePrice');
-  }, [offer, api]);
+    return (
+      api?.market?.hasContractMethod(offer.contractAddress, 'changePrice') &&
+      offer?.contractAddress === lastContract?.address
+    );
+  }, [offer, api?.market, lastContract?.address]);
 
   if (offer) {
     return (<>
       <Text size={'l'}>{'Price'}</Text>
-      <Price testid={testid} price={offer.price.parsed.toString()} />
+      <Price testid={testid} price={offer.price} />
       <RoyaltyValue value={royalty} />
       <ButtonWrapper>
         <Button

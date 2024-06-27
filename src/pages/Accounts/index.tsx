@@ -14,7 +14,7 @@ import config from 'config';
 import { AccountInfo } from './types';
 import NoAccountsIcon from 'static/icons/no-accounts.svg';
 import { getAccountsColumns } from './columns';
-import { Account, AccountSigner } from 'account/types';
+import { Account } from 'account/types';
 import { useNavigate } from 'react-router-dom';
 import { ConnectWalletModalContext } from 'account/ConnectWalletModalContext';
 
@@ -96,13 +96,6 @@ export const AccountsPage = () => {
 
   return (<PagePaper>
     <AccountPageWrapper>
-      <Row>
-        <CreateAccountButton
-          testid={`${testid}-create-substrate-button`}
-          title={'Сonnect or create wallet'}
-          onClick={() => setIsOpenConnectWalletModal(true)}
-        />
-      </Row>
       <TableWrapper>
         <Table<AccountInfo>
           columns={getAccountsColumns({

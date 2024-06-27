@@ -1,6 +1,6 @@
 import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
 import { BN } from '@polkadot/util';
-import { Signer as SdkSigner, UnsignedTxPayloadResponse } from '@unique-nft/sdk';
+import { BalanceResponse, Signer as SdkSigner, UnsignedTxPayloadResponse } from '@unique-nft/sdk';
 import { IEthereumExtensionResultSafe } from '@unique-nft/utils/extension';
 import { useWalletCenter } from './useWalletCenter';
 import { Signer as EthSigner } from 'ethers';
@@ -50,6 +50,7 @@ export type AccountBalances = {
 
 export type Account<T extends WalletsType = WalletsType> = BaseWalletType<T> & {
   balances?: AccountBalances;
+  fungibleBalances?: Map<string, BalanceResponse>
   unitBalance?: string;
 };
 

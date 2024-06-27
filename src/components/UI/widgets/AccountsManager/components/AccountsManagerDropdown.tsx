@@ -1,13 +1,18 @@
-import React from 'react';
+import React, { useContext, useMemo } from 'react';
 import { Icon, Dropdown, Button, Text, Toggle } from 'components/UI';
 import { AccountsManagerProps } from '../AccountsManager';
 import { AccountCard } from './AccountCard';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
+import { useAccounts } from 'hooks/useAccounts';
+import { ConnectWalletModalContext } from 'account/ConnectWalletModalContext';
+import { BalanceLine } from 'components/UI/Table/BalanceDisplay';
+
+const testid = 'header';
 
 export const AccountsManagerDropdown = ({
   accounts,
-  selectedAccount,
+  // selectedAccount,
   networks,
   activeNetwork,
   deposit,
@@ -23,6 +28,22 @@ export const AccountsManagerDropdown = ({
   onCopyAddressClick,
   onStakeClick
 }: AccountsManagerProps) => {
+  const { setIsOpenConnectWalletModal } = useContext(
+    ConnectWalletModalContext
+  );
+  const { selectedAccount } = useAccounts();
+
+  const fungibleBalancesArray = useMemo(() => {
+    if (!selectedAccount) return [];
+    const accountFungibleBalances = selectedAccount.fungibleBalances;
+    if (!accountFungibleBalances) return [];
+    
+    return Array.from(accountFungibleBalances.entries()).map(([tokenName, balance]) => ({
+      tokenName,
+      ...balance
+    }));
+  }, [selectedAccount]);
+
     return (
       <AccountsManagerDropdownWrapper>
         <div className='accounts-manager-accounts'>
@@ -39,11 +60,11 @@ export const AccountsManagerDropdown = ({
                 avatarRender={avatarRender}
                 onCopyAddressClick={onCopyAddressClick}
               />
-                    )}
+            )}
             iconRight={{
-                        name: 'triangle',
-                        size: 8
-                    }}
+              name: 'triangle',
+              size: 8
+            }}
             onChange={onAccountChange}
           >
             <div
@@ -57,6 +78,11 @@ export const AccountsManagerDropdown = ({
               />
             </div>
           </Dropdown>
+          <CreateAccountButton
+            testid={`${testid}-create-substrate-button`}
+            title={'Сonnect or create wallet'}
+            onClick={() => setIsOpenConnectWalletModal(true)}
+          />
           <div
             className='wallet-link'
             data-testid={'wallet-link'}
@@ -77,15 +103,28 @@ export const AccountsManagerDropdown = ({
             {deposit && <DepositText size='s' weight={'light'}>{`${deposit} ${symbol}`}</DepositText>}
             {depositDescription}
           </div>
+          <CaptionText color='grey-500' size='xs'>
+            Token balances:
+          </CaptionText>
+          {fungibleBalancesArray.map(
+            ({ tokenName, unit, amount }) => (
+              <BalanceLine
+                token={unit}
+                amount={amount}
+                unit={unit}
+                key={`balance_line_header_${tokenName}`}
+              />
+            )
+          )}
         </div>
         {stakeVisibility && (
-        <Button
-          title='Stake'
-          role='primary'
-          disabled={isStakeDisabled}
-          onClick={onStakeClick}
-        />
-            )}
+          <Button
+            title='Stake'
+            role='primary'
+            disabled={isStakeDisabled}
+            onClick={onStakeClick}
+          />
+        )}
         <div className='accounts-manager-networks'>
           <CaptionText color='grey-500' size='s'>
             Active network
@@ -95,7 +134,7 @@ export const AccountsManagerDropdown = ({
               <Icon {...activeNetwork.icon} size={16} />
               <Text>{activeNetwork.name}</Text>
             </div>
-                )}
+          )}
           {networks?.length > 0 && (
             <div className='networks-list'>
               {networks.map((network) => (
@@ -112,9 +151,9 @@ export const AccountsManagerDropdown = ({
                     on={activeNetwork?.id === network.id}
                   />
                 </div>
-                        ))}
+              ))}
             </div>
-                )}
+          )}
         </div>
       </AccountsManagerDropdownWrapper>
     );
@@ -248,3 +287,11 @@ const AccountsManagerDropdownWrapper = styled.div`
     }
   }
 `;
+
+const CreateAccountButton = styled(Button)`
+  width: 243px;
+  @media (max-width: 1024px) {
+    width: 100%;
+  }
+`;
+

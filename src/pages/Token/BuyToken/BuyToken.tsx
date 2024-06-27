@@ -26,7 +26,7 @@ interface BuyTokenProps {
 export const BuyToken: FC<BuyTokenProps> = ({ offer, royalty, onBuy, testid }) => {
   const { api, chainProperties } = useApi();
 
-  const { fee, fetchingFee, getFee } = useGetFee<Parameters<MarketController['getBuyFixFee']>>(api?.market?.getBuyFixFee.bind(api?.market));
+  const { fee, getFee } = useGetFee<Parameters<MarketController['getBuyFixFee']>>(api?.market?.getBuyFixFee.bind(api?.market));
   const { selectedAccount } = useAccounts();
   const { setIsOpenConnectWalletModal } = useContext(ConnectWalletModalContext);
 
@@ -41,13 +41,13 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, royalty, onBuy, testid }) =
       return selectedAccount.balances?.proper?.raw.lte(new BN(offer?.price?.raw).add(rawFee));
     }
     return false;
-  }, [offer?.price?.raw, selectedAccount, rawFee]);
+  }, [offer?.price?.raw, offer?.price?.currency, selectedAccount, rawFee]);
 
   const isEnoughBalance = useMemo(() => {
     const extra = new BN(10).pow(new BN(chainProperties?.decimals || 18));
     if (!selectedAccount?.balances?.proper?.raw || selectedAccount.balances?.proper?.raw.isZero() || !offer?.price?.raw) return false;
     return selectedAccount.balances?.proper?.raw.gte(new BN(offer?.price?.raw).add(rawFee).add(extra));
-  }, [offer?.price?.raw, selectedAccount?.balances?.proper?.raw, rawFee, chainProperties]);
+  }, [offer?.price?.raw, offer?.price?.currency, selectedAccount?.balances?.proper?.raw, rawFee, chainProperties]);
 
   const onBuyClick = useCallback(() => {
     if (!isEnoughBalance) return;
@@ -77,7 +77,7 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, royalty, onBuy, testid }) =
 
   return (<>
     <Text size={'l'}>Price</Text>
-    <Price price={offer?.price?.parsed.toString()} />
+    <Price price={offer?.price} />
     <RoyaltyValue value={royalty} />
     <ButtonWrapper>
       <Button

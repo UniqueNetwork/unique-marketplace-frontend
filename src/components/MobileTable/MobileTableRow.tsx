@@ -19,3 +19,11 @@ export const MobileTableRow = styled.div`
     grid-template-columns: 1fr;
   }
 `;
+
+export const BalancesWrap = styled.div`
+  grid-column: span 2;
+  > div {
+    width: 100%;
+  }
+`;
+

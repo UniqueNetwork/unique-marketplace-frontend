@@ -38,6 +38,8 @@ export type TTransferFunds = {
   sender: string
   recipient: string
   amount: BN | number | string
+  currency: number,
+  decimals: number,
 }
 
 export type TWithdrawFunds = {

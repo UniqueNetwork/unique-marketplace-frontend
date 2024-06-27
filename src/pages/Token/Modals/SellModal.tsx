@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Heading, Link, Loader, useNotifications, Button, Text } from 'components/UI';
+import { Heading, Link, Loader, useNotifications, Button, Text, Select } from 'components/UI';
 import { NumberInput } from 'components/NumberInput/NumberInput';
 import styled from 'styled-components';
 
@@ -21,6 +21,7 @@ import { fromStringToBnString } from 'utils/bigNum';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 import { fixPriceSellingCollectionIds } from '../constants';
 import { useCoinGeckoApi } from 'api/coinGeckoApi/useCoinGeckoApi';
+import { SelectOptionProps } from 'components/UI/types';
 
 export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, collection, onFinish, setIsClosable, testid }) => {
   const { collectionId, tokenId } = token || {};
@@ -66,7 +67,7 @@ type TAskSellModalProps = {
 }
 
 export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, onSellFixPrice, testid }) => {
-  const { chainProperties, api, currentChainId } = useApi();
+  const { api, currentChainId, currencies, currencyMap } = useApi();
   const { selectedAccount } = useAccounts();
   const [priceInputValue, setPriceInputValue] = useState<string>();
 
@@ -86,6 +87,8 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
     })();
   }, []);
 
+  const [selectedCurrencyOption, setSelectedCurrencyOption] = useState(currencyMap.get('0'));
+
   const [isSponsored, setIsSponsored] = useState(false);
 
   useEffect(() => {
@@ -104,10 +107,8 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
   const onConfirmFixPriceClick = useCallback(() => {
     if (!selectedAccount || !priceInputValue || !Number(priceInputValue)) return;
 
-    onSellFixPrice({ price: priceInputValue, accountAddress: selectedAccount.address } as TFixPriceProps); // TODO: proper typing, proper calculated object
-  }, [priceInputValue, selectedAccount, onSellFixPrice]);
-
-  const tokenSymbol = useMemo(() => chainProperties?.token || '', [chainProperties]);
+    onSellFixPrice({ price: priceInputValue, accountAddress: selectedAccount.address, currency: Number(selectedCurrencyOption?.collectionId) } as TFixPriceProps); // TODO: proper typing, proper calculated object
+  }, [priceInputValue, selectedAccount, selectedCurrencyOption, onSellFixPrice]);
 
   const { fee, fetchingFee, getFee } = useGetFee<Parameters<MarketController['getSellFixFee']>>(api?.market?.getSellFixFee.bind(api?.market));
 
@@ -129,36 +130,65 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
         collectionId,
         tokenId,
         Number(priceInputValue),
+        Number(selectedCurrencyOption?.collectionId),
         1,
         { account: selectedAccount }
       );
     }, 300)();
   }, [collectionId, tokenId, priceInputValue, api?.market, selectedAccount?.address]);
 
+  const onSelectChange = useCallback((value: SelectOptionProps) => {
+    const currencySelected = currencyMap.get(value.id as string);
+    setSelectedCurrencyOption(currencySelected);
+  }, [currencyMap]);
+
   if (isFetching) return <Loader />;
 
   const FixedPriceTab = (
     <>
+      <SelectWrapper
+        onChange={onSelectChange}
+        options={currencies.map((option) => ({
+          id: option.id,
+          title: option.title,
+          iconLeft: { size: 20, file: option.iconUrl }
+        }))}
+        value={selectedCurrencyOption?.id || ''}
+        testid={`${testid}-sorting-select`}
+        label={'Select currency'}
+      />
       <InputWrapper
-        label={`Price (${tokenSymbol})*`}
+        label={`Price*`}
         onChange={onPriceInputChange}
         value={priceInputValue?.toString()}
         testid={`${testid}-price-input`}
       />
-      {minPrice > 0 && <WarningBlock>
-        <Text color='grey-500' size='s'>Min price: {minPrice.toFixed(4)} UNQ equivalent $10 (current rate: 1 UNQ = ${currency})</Text>
-      </WarningBlock>}
-      {!isSponsored && <FeeMessage
-        isFeeLoading={fetchingFee}
-        fee={fee || '0'}
-        testid={`${testid}-fee-message`}
-      />}
-      {isSponsored && <WarningBlock>
-        Collection ID {collectionId} sponsored
-      </WarningBlock>}
+
+      {minPrice > 0 && (
+        <WarningBlock>
+          <Text color='grey-500' size='s'>
+            Min price: {minPrice.toFixed(4)} UNQ equivalent $10 (current rate: 1
+            UNQ = ${currency})
+          </Text>
+        </WarningBlock>
+      )}
+      {!isSponsored && (
+        <FeeMessage
+          isFeeLoading={fetchingFee}
+          fee={fee || '0'}
+          testid={`${testid}-fee-message`}
+        />
+      )}
+      {isSponsored && (
+        <WarningBlock>Collection ID {collectionId} sponsored</WarningBlock>
+      )}
       <ButtonWrapper>
         <Button
-          disabled={(!isSponsored && (fetchingFee || !priceInputValue || !Number(priceInputValue))) || !isPriceAvailable}
+          disabled={
+            (!isSponsored &&
+              (fetchingFee || !priceInputValue || !Number(priceInputValue))) ||
+            !isPriceAvailable
+          }
           onClick={onConfirmFixPriceClick}
           role='primary'
           title='Confirm'
@@ -218,6 +248,11 @@ const InputWrapper = styled(NumberInput)`
   width: 100%;
 `;
 
+const SelectWrapper = styled(Select)`
+  width: 100%;
+  margin: 8px 0 0 0 !important;
+`;
+
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
@@ -262,3 +297,4 @@ const SellModalStyled = styled.div`
     margin-top: 16px;
   }
 `;
+
