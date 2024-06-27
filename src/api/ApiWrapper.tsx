@@ -57,7 +57,9 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
 
       setSettings(currentNetworkOption.settings);
       const currencies =
-        currentNetworkOption.settings.blockchain.unique.currencies.map(
+      //@ts-ignore
+        currentNetworkOption.settings.blockchain?.unique?.currencies.map(
+          //@ts-ignore
           (currency) => ({
             ...currency,
             id: String(currency.collectionId),

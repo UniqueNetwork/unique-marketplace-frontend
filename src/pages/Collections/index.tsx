@@ -277,11 +277,11 @@ const CollectionListStyled = styled.div`
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
   }
 
-  @media (max-width: 1439px) {
+  @media (max-width: 1600px) {
     grid-template-columns: 1fr 1fr 1fr 1fr;
   }
 
-  @media (max-width: 1023px) {
+  @media (max-width: 1250px) {
     grid-template-columns: 1fr 1fr 1fr;
   }
 

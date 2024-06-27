@@ -62,7 +62,7 @@ const StatusWrapper = styled.div`
 `;
 
 const ModalWrapper = styled.div`
-  
+  min-width: 50vw;
 `;
 
 const HeadingWrapper = styled.div`
