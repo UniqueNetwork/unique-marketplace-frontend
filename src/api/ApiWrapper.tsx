@@ -56,17 +56,18 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
       const currentNetworkOption = networkOptions.find((no) => no.networkId === currentChainId) || networkOptions[0];
 
       setSettings(currentNetworkOption.settings);
-      const currencies =
-      //@ts-ignore
-        currentNetworkOption.settings.blockchain?.unique?.currencies.map(
-          //@ts-ignore
-          (currency) => ({
-            ...currency,
-            id: String(currency.collectionId),
-            title: String(currency.collectionId)
-          })
-        );
-      setCurrencies(currencies);
+      if (currentNetworkOption.settings.blockchain?.unique?.currencies) {
+        const currencies =
+          currentNetworkOption.settings.blockchain?.unique?.currencies.map(
+            (currency) => ({
+              ...currency,
+              id: String(currency.collectionId),
+              title: String(currency.collectionId)
+            })
+          );
+        setCurrencies(currencies);
+      }
+
       setLastContract(filterTheLastContract(currentNetworkOption.settings.blockchain.unique.contracts));
 
       const sdkClient = new SdkClient(currentNetworkOption);

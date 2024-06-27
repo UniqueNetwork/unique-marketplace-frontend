@@ -204,17 +204,6 @@ export const CommonTokenDetail: FC<IProps> = ({
     })();
   }, [currentChainId, collectionId, tokenId, isWearable, api?.nft]);
   
-  const settings = {
-    dots: true,
-    infinite: true,
-    speed: 500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    
-    nextArrow: <CustomNextArrow />,
-    prevArrow: <CustomPrevArrow />,
-  };
-
   return (
     <CommonTokenDetailStyled>
       <>
