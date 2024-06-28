@@ -38,7 +38,7 @@ export const TableRow: React.FC<TableRowItem> = ({
           </div>
         ))}
       </div>
-      {row['fungibleBalances'] && (
+      {row['fungibleBalances'] && row['fungibleBalances'].size > 0 && (
         <BalanceDisplay balances={row['fungibleBalances']} />
       )}
     </TableRowWrapper>

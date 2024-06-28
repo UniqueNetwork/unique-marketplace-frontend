@@ -103,9 +103,11 @@ export const AccountsManagerDropdown = ({
             {deposit && <DepositText size='s' weight={'light'}>{`${deposit} ${symbol}`}</DepositText>}
             {depositDescription}
           </div>
-          <CaptionText color='grey-500' size='xs'>
-            Token balances:
-          </CaptionText>
+          {fungibleBalancesArray.length > 0 && (
+            <CaptionText color='grey-500' size='xs'>
+              Token balances:
+            </CaptionText>
+          )}
           {fungibleBalancesArray.map(
             ({ tokenName, unit, amount }) => (
               <BalanceLine
