@@ -12,12 +12,14 @@ export type TEnableAllowanceProps = {
 export type TFixPriceProps = {
   accountAddress: string
   price: string // float number
+  currency: number
 }
 
 export type TPurchaseProps = {
   accountAddress: string
   price: number
   amount: number
+  currency: number
 }
 
 export type TDelistProps = {

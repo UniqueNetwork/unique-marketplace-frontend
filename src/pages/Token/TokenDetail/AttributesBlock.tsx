@@ -34,13 +34,20 @@ export const AttributesBlock: FC<IProps> = ({ attributes, collectionId }: IProps
     <div>
       <HeadingWrapper>
         <HeadingStyled size={'4'}>Attributes</HeadingStyled>
-        <IconWithHint align={{ appearance: 'horizontal', horizontal: 'right', vertical: 'middle' }}>
-          Special features of the token that the collection creator specifies when minting
+        <IconWithHint
+          align={{
+            appearance: 'horizontal',
+            horizontal: 'right',
+            vertical: 'middle'
+          }}
+        >
+          Special features of the token that the collection creator specifies
+          when minting
         </IconWithHint>
       </HeadingWrapper>
       <AttributesWrapper>
-        {Object.values(attributes).map((attribute, index) => {
-          return <AttributesRow
+        {Object.values(attributes).map((attribute, index) => (
+          <AttributesRow
             key={index}
             attribute={attribute.trait_type}
             enumeration={attribute.value.toString()}
@@ -53,8 +60,8 @@ export const AttributesBlock: FC<IProps> = ({ attributes, collectionId }: IProps
                 100) /
               tokensCount
             }
-          />;
-        })}
+          />
+        ))}
       </AttributesWrapper>
     </div>
   );

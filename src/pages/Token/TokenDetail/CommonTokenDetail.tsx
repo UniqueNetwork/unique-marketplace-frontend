@@ -203,7 +203,7 @@ export const CommonTokenDetail: FC<IProps> = ({
       setWearableTokenImg(_token?.file?.fullUrl || undefined);
     })();
   }, [currentChainId, collectionId, tokenId, isWearable, api?.nft]);
-
+  
   return (
     <CommonTokenDetailStyled>
       <>
@@ -513,6 +513,34 @@ const PictureWrapper = styled.div`
       border-radius: 8px;
       height: auto;
     }
+  }
+`;
+
+const SliderItem = styled.div`
+  width: 100%;
+  height: 100%;
+`;
+
+const Iframe = styled.iframe`
+  width: calc(100% - 4px);
+  margin: auto;
+  border: none;
+  height: 536px;
+
+  @media (max-width: 1919px) {
+    height: 536px;
+  }
+  
+  @media (max-width: 1023px) {
+    height: 326px;
+  }
+
+  @media (max-width: 767px) {
+    height: calc(100vw - var(--prop-gap) * 3);
+  }
+
+  @media (max-width: 567px) {
+    height: calc(100vw - var(--prop-gap) * 2);
   }
 `;
 

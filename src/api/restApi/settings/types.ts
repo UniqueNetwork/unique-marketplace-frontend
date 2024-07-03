@@ -13,12 +13,22 @@ export type AllowedCollections = {
 export type MarketContract = {
   address: string
   version: string
+  commission: number
+  createdAt: number
+  processedAt: number
 }
 
 export type MarketContractAbiItem = {
   name: string
   stateMutability: 'payable'
   type: 'function'
+}
+
+export type ICurrencySettings = {
+  collectionId: number
+  decimals: number
+  fee: number
+  iconUrl: string
 }
 
 export type Settings = {
@@ -30,6 +40,7 @@ export type Settings = {
       collections: AllowedCollections,
       contracts: MarketContract[],
       contractsAbi?: Record<string, MarketContractAbiItem[]>
+      currencies: ICurrencySettings[],
     }
   },
   auction: {

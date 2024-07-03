@@ -16,7 +16,7 @@ import { NavLink } from 'react-router-dom';
 const PurchaseModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, setIsClosable, testid }) => {
   const { api } = useApi();
   const { selectedAccount } = useAccounts();
-  const { stages, status, initiate } = usePurchaseFixStages(offer?.collectionId || 0, offer?.tokenId || 0, offer?.contractAddress);
+  const { stages, status, initiate } = usePurchaseFixStages(offer?.collectionId || 0, offer?.tokenId || 0, offer?.price.currency || 0, offer?.contractAddress);
   const { info } = useNotifications();
 
   const { fee, fetchingFee, getFee } = useGetFee<Parameters<MarketController['getBuyFixFee']>>(api?.market?.getBuyFixFee.bind(api?.market));
@@ -36,7 +36,7 @@ const PurchaseModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, setIsClo
   useEffect(() => {
     if (!selectedAccount) throw new Error('Account not selected');
     setIsClosable(false);
-    void initiate({ accountAddress: selectedAccount.address, amount: 1, price: offer?.price.parsed || 0 });
+    void initiate({ accountAddress: selectedAccount.address, amount: 1, price: Number(offer?.price.raw) || 0, currency: offer?.price.currency || 0 });
   }, [selectedAccount, offer]);
 
   const { tokenId, collectionId } = offer || {};

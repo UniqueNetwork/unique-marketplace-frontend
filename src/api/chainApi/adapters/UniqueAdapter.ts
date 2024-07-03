@@ -1,6 +1,6 @@
 import { ExtrinsicResultResponse, Sdk, Signer } from '@unique-nft/sdk/full';
 import { Address, EthCrossAccountId } from '@unique-nft/utils';
-import IMarketContractAdapter, { IMarketContractProperties } from './IMarketContractAdapter';
+import IMarketContractAdapter, { IMarketContractProperties, IPurchaseTokenData, IRemoveFromSell, ITransferFungible } from './IMarketContractAdapter';
 
 import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
@@ -212,10 +212,19 @@ class UniqueAdapter implements IMarketContractAdapter {
   }
 
   async changeAllowance(from: string, to: string, collectionId: number, tokenId: number, targetAllowance: boolean, signer: Signer): Promise<void> {
-    await this.uniqueSdk.token.approve.submitWaitResult({ collectionId, tokenId, spender: to, address: from, isApprove: targetAllowance }, { signer });
+    await this.uniqueSdk.token.approve.submitWaitResult(
+      {
+        collectionId,
+        tokenId,
+        spender: to,
+        address: from,
+        isApprove: targetAllowance
+      },
+      { signer }
+    );
   }
 
-  async getSellFee(from: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer, contract: IMarketContractProperties): Promise<string> {
+  async getSellFee(from: EthCrossAccountId, collectionId: number, tokenId: number, price: string, currency: number, amount: number, signer: Signer, contract: IMarketContractProperties): Promise<string> {
     const res = await this.uniqueSdk.evm.send.getFee({
       abi: contract.abi || marketplaceAbi as any,
       address: signer.address || '',
@@ -226,7 +235,7 @@ class UniqueAdapter implements IMarketContractAdapter {
         collectionId,
         tokenId,
         price,
-        // currency: 0,
+        currency,
         amount,
         seller: from
       }
@@ -234,7 +243,7 @@ class UniqueAdapter implements IMarketContractAdapter {
     return res.fee.raw;
   }
 
-  async sell(from: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer, contract: IMarketContractProperties): Promise<void> {
+  async sell(from: EthCrossAccountId, collectionId: number, tokenId: number, price: string, currency: number, amount: number, signer: Signer, contract: IMarketContractProperties): Promise<void> {
     await this.uniqueSdk.evm.send.submitWaitResult({
       abi: contract.abi || marketplaceAbi as any,
       address: signer.address || '',
@@ -245,7 +254,7 @@ class UniqueAdapter implements IMarketContractAdapter {
         collectionId,
         tokenId,
         price,
-        // currency: 0,
+        currency,
         amount,
         seller: from
       }
@@ -270,10 +279,12 @@ class UniqueAdapter implements IMarketContractAdapter {
     return res.fee.raw;
   }
 
-  async buy(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer, contract: IMarketContractProperties): Promise<void> {
+  async buy({to, collectionId, tokenId, price, amount, signer, contract}:  IPurchaseTokenData): Promise<void> {
+    const typedSigner = signer as Signer;
+    
     await this.uniqueSdk.evm.send.submitWaitResult({
       abi: contract.abi || marketplaceAbi as any,
-      address: signer.address || '',
+      address: typedSigner.address || '',
       contractAddress: contract.address,
       value: price,
       funcName: 'buy',
@@ -284,10 +295,10 @@ class UniqueAdapter implements IMarketContractAdapter {
         amount,
         buyer: to
       }
-    }, { signer });
+    }, { signer: typedSigner });
   }
 
-  async changePrice(collectionId: number, tokenId: number, price: string, signer: Signer, contract: IMarketContractProperties): Promise<void> {
+  async changePrice(collectionId: number, tokenId: number, price: string, currency: number, signer: Signer, contract: IMarketContractProperties): Promise<void> {
     await this.uniqueSdk.evm.send.submitWaitResult({
       abi: contract.abi || marketplaceAbi as any,
       address: signer.address || '',
@@ -297,12 +308,13 @@ class UniqueAdapter implements IMarketContractAdapter {
       args: {
         collectionId,
         tokenId,
-        price
+        price,
+        currency,
       }
     }, { signer });
   }
 
-  async getChangePriceFee(collectionId: number, tokenId: number, price: string, signer: Signer, contract: IMarketContractProperties): Promise<string> {
+  async getChangePriceFee(collectionId: number, tokenId: number, price: string, currency: number, signer: Signer, contract: IMarketContractProperties): Promise<string> {
     const res = await this.uniqueSdk.evm.send.getFee({
       abi: contract.abi || marketplaceAbi as any,
       address: signer.address || '',
@@ -312,7 +324,8 @@ class UniqueAdapter implements IMarketContractAdapter {
       args: {
         collectionId,
         tokenId,
-        price
+        price,
+        currency
       }
     });
     return res.fee.raw;
@@ -388,6 +401,70 @@ class UniqueAdapter implements IMarketContractAdapter {
 
   async setCollectionNesting(collectionId: number, value: CollectionNestingAndPermissionStruct$1): Promise<void> {
     throw new Error('not implemented');
+  }
+
+  async transferBalanceFungible({collectionId, address, recipient, amount, signer}: ITransferFungible): Promise<any> {
+    if (!signer) throw Error('No signer provided');
+
+    const typedSigner = signer as Signer;
+    
+    return await this.uniqueSdk.fungible.transferTokens.submitWaitResult(
+      { collectionId, amount, address, from: address, recipient },
+      { signer: typedSigner }
+    );
+  }
+
+  async allowanceFungible({collectionId, address, recipient, amount, signer}: ITransferFungible): Promise<any> {
+    if (!signer) throw Error('No signer provided');
+    const typedSigner = signer as Signer;
+
+    return await this.uniqueSdk.fungible.approveTokens.submitWaitResult(
+      { collectionId, amount, address, spender: recipient },
+      { signer: typedSigner }
+    );
+  }
+
+  async getTransferBalanceFungibleFee({
+    collectionId,
+    address,
+    recipient,
+    amount,
+  }: ITransferFungible): Promise<string> {
+    const res = await this.uniqueSdk.fungible.transferTokens.getFee(
+      {
+        collectionId,
+        amount,
+        address,
+        from: address,
+        recipient
+      }
+    );
+    return res.fee.amount;
+  }
+
+  async revokeTokenSell({
+    collectionId,
+    tokenId,
+    contract,
+    signer
+  }: IRemoveFromSell): Promise<void> {
+    const typedSigner = signer as Signer;
+
+    await this.uniqueSdk.evm.send.submitWaitResult(
+      {
+        abi: contract.abi || (marketplaceAbi as any),
+        address: typedSigner.address || '',
+        contractAddress: contract.address,
+        funcName: 'revoke',
+        gasLimit: sellGasLimit,
+        args: {
+          collectionId,
+          tokenId,
+          amount: 1
+        }
+      },
+      { signer: typedSigner }
+    );
   }
 }
 

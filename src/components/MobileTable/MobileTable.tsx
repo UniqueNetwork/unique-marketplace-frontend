@@ -1,12 +1,13 @@
 import React from 'react';
 
-import { MobileTableRow } from './MobileTableRow';
+import { BalancesWrap, MobileTableRow } from './MobileTableRow';
 import MobileTableSkeleton from '../Skeleton/MobileTableSkeleton';
 import EmptyTable from '../EmptyTable';
 import { getDeepValue } from 'utils/uiUtils';
 import { TableColumnProps, TableRowProps } from 'components/UI/Table/Table';
 import { IconProps } from 'components/UI/Icon/Icon';
 import { Text } from 'components/UI';
+import BalanceDisplay from 'components/UI/Table/BalanceDisplay';
 
 interface MobileTableProps<T> {
   className?: string
@@ -38,6 +39,9 @@ function MobileTable<T>({
             {!column.render && <Text>{getDeepValue(item, column.field)?.toString() || ''}</Text>}
           </div>
         ))}
+        <BalancesWrap>
+          <BalanceDisplay balances={item['fungibleBalances'] || new Map()} />
+        </BalancesWrap>
       </MobileTableRow>
     ))}</>;
   }

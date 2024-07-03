@@ -1,11 +1,10 @@
 import { Contract, ethers, Signer } from 'ethers';
-import { UniqueCollectionSchemaDecoded, UniqueTokenToCreate, SchemaTools } from '@unique-nft/schemas';
 import { IV2Token, SchemaTools as SchemaToolsV2 } from '@unique-nft/schemas-v2';
 import { CollectionProperty, CreateCollectionParsed, CreateCollectionV2ArgsDto, TokenV2ItemForMultipleDto, PropertyKeyPermission, SetCollectionLimitsBody, SetSponsorshipBody, TokenId, CreateTokenPayload } from '@unique-nft/sdk';
-import { UniqueNFTFactory, UniqueFungibleFactory, UniqueRefungibleTokenFactory, CollectionHelpersFactory, parseEthersV5TxReceipt } from '@unique-nft/solidity-interfaces';
+import { UniqueNFTFactory, UniqueFungibleFactory, UniqueRefungibleTokenFactory, CollectionHelpersFactory, parseEthersV5TxReceipt, UniqueRefungibleFactory } from '@unique-nft/solidity-interfaces';
 import { EthCrossAccountId, Address } from '@unique-nft/utils';
 import { Utf8 } from 'utf-helpers';
-import IMarketContractAdapter, { IMarketContractProperties } from './IMarketContractAdapter';
+import IMarketContractAdapter, { IMarketContractProperties, IPurchaseTokenData, IRemoveFromSell, ITransferFungible } from './IMarketContractAdapter';
 
 import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
@@ -156,7 +155,7 @@ class MetamaskAdapter implements IMarketContractAdapter {
     await (await nftFactory.approve(targetTo, tokenId)).wait();
   }
 
-  async getSellFee(from: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer, contractProps: IMarketContractProperties): Promise<string> {
+  async getSellFee(from: EthCrossAccountId, collectionId: number, tokenId: number, price: string, currency: number, amount: number, signer: Signer, contractProps: IMarketContractProperties): Promise<string> {
     const contract = this.getContract(contractProps);
     const gasPrice = await contract.provider.getGasPrice();
     const estimateGas = await contract.provider.estimateGas({
@@ -167,9 +166,9 @@ class MetamaskAdapter implements IMarketContractAdapter {
     return estimateGas.mul(gasPrice).toString();
   }
 
-  async sell(from: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer, contractProps: IMarketContractProperties): Promise<void> {
+  async sell(from: EthCrossAccountId, collectionId: number, tokenId: number, price: string, currency: number, amount: number, signer: Signer, contractProps: IMarketContractProperties): Promise<void> {
     const contract = this.getContract(contractProps);
-    await this.callContract(contract, 'put', collectionId, tokenId, price, amount, from, { gasLimit: sellGasLimit });
+    await this.callContract(contract, 'put', collectionId, tokenId, price, currency, amount, from, { gasLimit: sellGasLimit });
   }
 
   async getBuyFee(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer, contractProps: IMarketContractProperties): Promise<string> {
@@ -179,24 +178,24 @@ class MetamaskAdapter implements IMarketContractAdapter {
     return estimateGas.mul(gasPrice).toString();
   }
 
-  async buy(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer, contractProps: IMarketContractProperties): Promise<void> {
+  async buy({to, collectionId, tokenId, price, amount, contract: contractProps}: IPurchaseTokenData): Promise<void> {
     const contract = this.getContract(contractProps);
 
     const estimateGas = await contract.estimateGas.buy(collectionId, tokenId, amount, to, { value: price, gasLimit: buyGasLimit });
     await this.callContract(contract, 'buy', collectionId, tokenId, amount, to, { value: price, gasLimit: estimateGas.add(1000) });
   }
 
-  async changePrice(collectionId: number, tokenId: number, price: string, signer: Signer, contractProps: IMarketContractProperties): Promise<void> {
+  async changePrice(collectionId: number, tokenId: number, price: string, currency: number, signer: Signer, contractProps: IMarketContractProperties): Promise<void> {
     const contract = this.getContract(contractProps);
 
-    const estimateGas = await contract.estimateGas.changePrice(collectionId, tokenId, price, { gasLimit: buyGasLimit });
-    await this.callContract(contract, 'changePrice', collectionId, tokenId, price, { gasLimit: estimateGas.add(1000) });
+    const estimateGas = await contract.estimateGas.changePrice(collectionId, tokenId, price, currency, { gasLimit: buyGasLimit });
+    await this.callContract(contract, 'changePrice', collectionId, tokenId, price, currency, { gasLimit: estimateGas.add(1000) });
   }
 
-  async getChangePriceFee(collectionId: number, tokenId: number, price: string, signer: Signer, contractProps: IMarketContractProperties): Promise<string> {
+  async getChangePriceFee(collectionId: number, tokenId: number, price: string, currency: number, signer: Signer, contractProps: IMarketContractProperties): Promise<string> {
     const contract = this.getContract(contractProps);
 
-    const estimateGas = await contract.estimateGas.changePrice(collectionId, tokenId, price, { value: price, gasLimit: buyGasLimit });
+    const estimateGas = await contract.estimateGas.changePrice(collectionId, tokenId, price, currency, { value: price, gasLimit: buyGasLimit });
     const gasPrice = await contract.provider.getGasPrice();
 
     return estimateGas.mul(gasPrice).toString();
@@ -417,6 +416,57 @@ class MetamaskAdapter implements IMarketContractAdapter {
 
     // todo - not sure where to format wei to coin, there this.getChainValue in MarketController for instance, but nothing like that in CollectionController
     return ethers.utils.formatEther(collectionBurnFee.mul(gasPrice));
+  }
+
+  async transferBalanceFungible({collectionId, address, recipient, amount, decimals}: ITransferFungible): Promise<any> {
+    const amountWithDecimals = ethers.utils.parseUnits(
+      amount.toString(),
+      decimals
+    );
+    const fromCross = Address.extract.ethCrossAccountId(address);
+    const toCross = Address.extract.ethCrossAccountId(recipient);
+    const uniqueFungible = await UniqueFungibleFactory(collectionId, getEthereumSigner());
+    return await uniqueFungible.transferFromCross(fromCross, toCross, amountWithDecimals);
+  }
+
+  async getTransferBalanceFungibleFee({collectionId, address, recipient, amount}: ITransferFungible): Promise<string> {
+    const fromCross = Address.extract.ethCrossAccountId(address);
+    const toCross = Address.extract.ethCrossAccountId(recipient);
+    const uniqueFungible = await UniqueFungibleFactory(
+      collectionId,
+      getEthereumSigner()
+    );
+
+    const uniqueFungibleTransferFee =
+      await uniqueFungible.estimateGas.transferFromCross(
+        fromCross,
+        toCross,
+        amount
+      );
+    const gasPrice = await uniqueFungible.provider.getGasPrice();
+
+    return ethers.utils.formatEther(uniqueFungibleTransferFee.mul(gasPrice));
+  }
+
+  async allowanceFungible({collectionId, recipient, amount}: ITransferFungible): Promise<any> {
+    const toCross = Address.extract.ethCrossAccountId(recipient);
+    const uniqueFungible = await UniqueFungibleFactory(
+      collectionId,
+      getEthereumSigner()
+    );
+
+    return await uniqueFungible.approveCross(toCross, amount);
+  }
+
+  async revokeTokenSell({
+    collectionId,
+    tokenId,
+    contract: contractOption,
+  }: IRemoveFromSell) {
+    const contract = this.getContract(contractOption);
+    await this.callContract(contract, 'revoke', collectionId, tokenId, {
+      gasLimit: sellGasLimit
+    });
   }
 }
 

@@ -1,0 +1,93 @@
+import { useState } from 'react';
+import styled from 'styled-components';
+import { BalanceResponse } from '@unique-nft/sdk';
+import { formatBalance } from 'utils/textUtils';
+import { useApi } from 'hooks/useApi';
+
+interface BalanceDisplayProps {
+  balances: Map<string, BalanceResponse>;
+}
+
+const BalanceDisplay: React.FC<BalanceDisplayProps> = ({ balances }) => {
+  const [showBalance, setShowBalance] = useState(false);
+  const toggleShowBalance = () => {
+    setShowBalance((prevState) => !prevState);
+  };
+
+  return (
+    <div>
+      <ShowMoreButton onClick={toggleShowBalance}>
+        {showBalance ? 'hide' : 'show other balances'}
+      </ShowMoreButton>
+      {showBalance && (
+        <>
+          {Array.from(balances.entries()).map(
+            ([token, balance]: [string, BalanceResponse]) => (
+              <BalanceLine
+                token={balance.unit}
+                amount={balance?.amount}
+                unit={balance?.unit}
+                key={`balance_line_${token}`}
+              />
+            )
+          )}
+        </>
+      )}
+    </div>
+  );
+};
+
+export const BalanceLine = ({
+  token,
+  amount,
+  unit,
+}: {
+  token: string;
+  amount: number | string;
+  unit: string;
+}) => {
+  const { currencies } = useApi();
+  const currentCurrency = currencies.find((i) => i.title === token);
+
+  return (
+    <BalanceItem>
+      <TokenName><img width={20} src={currentCurrency?.iconUrl} />{unit}</TokenName>
+      <span>
+        {formatBalance(amount)}
+      </span>
+    </BalanceItem>
+  );
+};
+
+const BalanceItem = styled.div`
+  margin-bottom: 5px;
+  padding: 5px 0;
+  display: flex;
+  justify-content: space-between;
+	color: var(--color-grey-500);
+	border-bottom: 1px dotted var(--color-grey-300);
+
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+const TokenName = styled.span`
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  gap: 4px;
+`;
+
+const ShowMoreButton = styled.div`
+  margin-bottom: 4px;
+  color: var(--color-grey-500);
+  text-decoration: underline;
+  cursor: pointer;
+
+  :hover {
+    color: var(--color-grey-700);
+  }
+`;
+
+export default BalanceDisplay;
