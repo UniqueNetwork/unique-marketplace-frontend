@@ -23,6 +23,7 @@ import { Offer } from 'api/restApi/offers/types';
 import { useCoinGeckoApi } from 'api/coinGeckoApi/useCoinGeckoApi';
 import { fixPriceSellingCollectionIds } from '../constants';
 import { SelectOptionProps } from 'components/UI/types';
+import ComingSoon from '../TokenDetail/CurrencesCommingSoon';
 
 
 export const ChangePriceModal: FC<TTokenPageModalBodyProps> = ({ token, offer, collection, onFinish, setIsClosable, testid }) => {
@@ -162,7 +163,11 @@ export const AskPriceModal: FC<TChangePriceModalProps> = ({ collectionId, tokenI
         value={selectedCurrencyOption?.id || ''}
         testid={`${testid}-sorting-select`}
         label={'Select currency'}
-      />
+      >
+        {currencies.length <= 1 && (
+          <ComingSoon />
+        )}
+      </SelectWrapper>
       <InputWrapper
         label={`Price*`}
         onChange={onPriceInputChange}

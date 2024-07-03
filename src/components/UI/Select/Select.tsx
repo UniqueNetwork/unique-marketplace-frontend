@@ -16,6 +16,7 @@ export interface SelectProps extends Omit<ComponentProps, 'onChange'> {
   multi?: boolean;
   values?: string[] | undefined;
   onChange(option: SelectOptionProps | SelectOptionProps[]): void;
+  children?: ReactNode;
 }
 
 export const Select = ({
@@ -40,7 +41,8 @@ export const Select = ({
   onBlur,
   multi = false,
   values,
-  testid
+  testid,
+  children,
 }: SelectProps) => {
   useEffect(() => {
     const defaultOption =
@@ -162,7 +164,7 @@ export const Select = ({
           {multi &&
             selectedMulti.length > 0 &&
             selectedMulti.map((selectedOption, index) => (
-              <div className={'select-tag'} key={index} data-testid={`${testid}-${index}`}>
+              <div className={`select-tag`} key={index} data-testid={`${testid}-${index}`}>
                 {
                   selectedOption?.[
                     optionValue as keyof SelectOptionProps
@@ -172,7 +174,7 @@ export const Select = ({
                   onClick={() =>
                     handleOptionUnselect(selectedOption)
                   }
-                >
+                >123
                   <Icon
                     size={10}
                     name={'close'}
@@ -190,6 +192,7 @@ export const Select = ({
           {!(multi && selectedMulti.length) &&
             !(!multi && selected) &&
             placeholder && (
+
               <span className='select-placeholder'>{placeholder}</span>
             )}
         </div>
@@ -224,6 +227,7 @@ export const Select = ({
                 </div>
               );
             })}
+            <>{children}</>
           </div>
         )}
       </div>
@@ -347,6 +351,11 @@ const SelectStyled = styled.div`
         border-radius: var(--prop-border-radius);
         color: var(--color-additional-light);
         column-gap: 8px;
+        white-space: pre;
+      }
+
+      .disabled {
+        cursor: not-allowed;
       }
     }
 

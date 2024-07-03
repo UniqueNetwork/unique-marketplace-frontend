@@ -22,6 +22,7 @@ import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 import { fixPriceSellingCollectionIds } from '../constants';
 import { useCoinGeckoApi } from 'api/coinGeckoApi/useCoinGeckoApi';
 import { SelectOptionProps } from 'components/UI/types';
+import ComingSoon from '../TokenDetail/CurrencesCommingSoon';
 
 export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, collection, onFinish, setIsClosable, testid }) => {
   const { collectionId, tokenId } = token || {};
@@ -156,7 +157,11 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
         value={selectedCurrencyOption?.id || ''}
         testid={`${testid}-sorting-select`}
         label={'Select currency'}
-      />
+      >
+        {currencies.length <= 1 && (
+          <ComingSoon />
+        )}
+      </SelectWrapper>
       <InputWrapper
         label={`Price*`}
         onChange={onPriceInputChange}
@@ -297,4 +302,3 @@ const SellModalStyled = styled.div`
     margin-top: 16px;
   }
 `;
-

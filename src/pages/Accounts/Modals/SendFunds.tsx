@@ -22,6 +22,7 @@ import { Account } from 'account/types';
 import { FeeMessage } from 'components';
 import { useAccountsFilter } from 'hooks/useAccountsFilter';
 import { SelectOptionProps } from 'components/UI/types';
+import ComingSoon from 'pages/Token/TokenDetail/CurrencesCommingSoon';
 
 export type TransferFundsModalProps = {
   isVisible: boolean
@@ -362,7 +363,11 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
         value={selectedCurrencyOption?.id || '0'}
         testid={`${testid}-sorting-select`}
         label={'Select currency'}
-      />
+      >
+        {currencies.length <= 1 && (
+          <ComingSoon />
+        )}
+      </SelectWrapper>
       <AmountInputWrapper>
         <NumberInput
           disabled={!recipientAddress || !sender}
