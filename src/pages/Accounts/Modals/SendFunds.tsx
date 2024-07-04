@@ -22,7 +22,7 @@ import { Account } from 'account/types';
 import { FeeMessage } from 'components';
 import { useAccountsFilter } from 'hooks/useAccountsFilter';
 import { SelectOptionProps } from 'components/UI/types';
-import ComingSoon from 'pages/Token/TokenDetail/CurrencesCommingSoon';
+import ComingSoon from 'pages/Token/TokenDetail/CurrencesComingSoon';
 
 export type TransferFundsModalProps = {
   isVisible: boolean

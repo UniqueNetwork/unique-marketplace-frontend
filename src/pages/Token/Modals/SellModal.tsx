@@ -3,9 +3,7 @@ import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Heading, Link, Loader, useNotifications, Button, Text, Select } from 'components/UI';
 import { NumberInput } from 'components/NumberInput/NumberInput';
 import styled from 'styled-components';
-
 import { useApi } from 'hooks/useApi';
-
 import DefaultMarketStages from './StagesModal';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 import { TFixPriceProps } from './types';
@@ -22,7 +20,7 @@ import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 import { fixPriceSellingCollectionIds } from '../constants';
 import { useCoinGeckoApi } from 'api/coinGeckoApi/useCoinGeckoApi';
 import { SelectOptionProps } from 'components/UI/types';
-import ComingSoon from '../TokenDetail/CurrencesCommingSoon';
+import ComingSoon from '../TokenDetail/CurrencesComingSoon';
 
 export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, collection, onFinish, setIsClosable, testid }) => {
   const { collectionId, tokenId } = token || {};
@@ -251,6 +249,7 @@ export const SellFixStagesModal: FC<TSellFixStagesModal> = ({ collectionId, toke
 
 const InputWrapper = styled(NumberInput)`
   width: 100%;
+  margin-top: 8px;
 `;
 
 const SelectWrapper = styled(Select)`
