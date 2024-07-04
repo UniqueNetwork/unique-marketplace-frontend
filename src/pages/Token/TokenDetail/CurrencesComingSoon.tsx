@@ -38,7 +38,7 @@ const ComingSoonMessage = styled.div`
   border-radius: 20px 8px;
 `;
 
-const ComingSoonText = styled(Text)`
+const ComingSoonText = styled.div`
   position: absolute;
   top: 50%;
   left: 50%;
