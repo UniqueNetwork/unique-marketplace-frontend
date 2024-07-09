@@ -76,3 +76,8 @@ export const percentText = (percent: number) => {
   }
   return `${percent.toFixed(2)} %`;
 };
+
+export const validateLink = (link: string) => {
+  const urlRegex = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
+  return !!urlRegex.test(link);
+};

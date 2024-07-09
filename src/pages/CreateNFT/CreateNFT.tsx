@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { TokenId, TokenV2ItemForMultipleDto } from '@unique-nft/sdk';
@@ -8,9 +8,8 @@ import { ConfirmBtn } from 'components';
 
 import { CollectionSuggest } from './components/CollectionSuggest';
 import { TokenList } from './components/TokenList';
-import { CreateTokenDialog, NewToken, ViewMode } from './types';
-import { CreateTokensDialogs } from './components/CreateTokensDialogs';
-import { mapTokensToPayload, mapTokensToPayloadV1, parseInvalidAttributes } from './helpers';
+import { CreateTokenDialog, NewToken2, ViewMode } from './types';
+import { mapTokensToPayload } from './helpers';
 import { UploadFAB } from './components/UploadFAB';
 import { CollectionStats } from './components/CollectionStats';
 import { StatusTransactionModal, TRANSACTION_STAGE_ENUM } from './components/StatusTransactionModal';
@@ -25,9 +24,19 @@ import { useCollectionGetById } from './hooks/useCollectionGetById';
 import { useCollectionGetLastTokenId } from './hooks/useCollectionGetLastTokenId';
 import { WrapperContent } from 'pages/CreateCollection/CreateCollection';
 import { GQLCollection } from 'api/scanApi/types';
-import { WarningBlock } from 'components/WarningBlock/WarningBlock';
+import { RoyaltiesForm } from 'pages/CollectionEdit/Forms/RoyaltiesForm';
+import { RoyaltiesFormData } from 'pages/CollectionEdit/types';
+import { CreateNFT_V1 } from './CreateNFT_V1';
 
-export const MAX_MINT_TOKENS = 300;
+export enum CreateTokensSteps {
+  UPLOAD_IMAGES = 'UPLOAD_IMAGES',
+  UPLOAD_MEDIA = 'UPLOAD_MEDIA',
+  SET_DATA = 'SET_DATA',
+  SET_ROYALTIES = 'SET_ROYALTIES',
+  PREVIEW_WITH_FILTERS = 'PREVIEW_WITH_FILTERS',
+}
+
+export const MAX_MINT_TOKENS = 50;
 
 export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) => {
   const [collection, setCollection] = useState<GQLCollection>();
@@ -35,7 +44,26 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
   const collectionBlockRef = useRef<HTMLDivElement>(null);
   const deviceSize = useDeviceSize();
 
-  const [tokens, setTokens] = useState<NewToken[]>([]);
+  const [tokens, setTokens] = useState<NewToken2[]>([]);
+  //disable cache in Local storage
+  // useEffect(() => {
+  //   if (tokens.length === 0) return;
+  //   localStorage.setItem('cachedTokens', JSON.stringify(tokens));
+  //   localStorage.setItem('cachedCollection', JSON.stringify(collection));
+  // }, [tokens, collection]);
+  
+  // useEffect(() => {
+  //   const cachedTokens = localStorage.getItem('cachedTokens');
+  //   const cachedCollection = localStorage.getItem('cachedCollection');
+  //   if (cachedTokens) {
+  //     setTokens(JSON.parse(cachedTokens));
+  //     cachedCollection && (setCollection(JSON.parse(cachedCollection)));
+  //     setStep(CreateTokensSteps.UPLOAD_MEDIA);
+  //   }
+  // }, []);
+  const deleteCachedTokens = () => {
+    localStorage.removeItem('cachedTokens');
+  };
   const [dialog, setDialog] = useState<CreateTokenDialog>();
   const [isLoadingSubmitResult, setIsLoadingSubmitResult] = useState<boolean>(false);
 
@@ -45,7 +73,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
   const BIG_BATCH_SIZE = 30;
   const SMALL_BATCH_SIZE = 10;
   const [batchSize, setBatchSize] = useState<number>(BIG_BATCH_SIZE);
-  const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.grid);
+  const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.list);
   const [isFilterVisible, setIsFilterVisible] = useState(false);
 
   const { currentChainId, api } = useApi();
@@ -86,15 +114,34 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
 
     setIsLoadingSubmitResult(true);
     setStage(TRANSACTION_STAGE_ENUM.UPLOADING);
-    const uploadedTokens: NewToken[] = [];
+    const uploadedTokens: NewToken2[] = [];
     try {
       for (let index = 0; index < tokens.length; index++) {
         setUploadProgress(index);
         await sleep(100);
         const ipfsCid = await api?.collection?.uploadFile(tokens[index].image.file);
+
+        let animationURLIpfsCid;
+
+        if (tokens[index].animation_url && tokens[index].animation_url?.file) {
+          //@ts-ignore
+          animationURLIpfsCid = await api?.collection?.uploadFile(tokens[index].animation_url.file);
+        }
+
+        if (tokens[index]?.media && tokens[index].media.length > 0) {
+          for (const media of tokens[index].media) {
+            if (media?.file) {
+              media.ipfsCid = await api?.collection?.uploadFile(media.file);
+            }
+          }
+        }
+
         uploadedTokens.push({
           ...tokens[index],
-          ipfsCid
+          ipfsCid,
+          animationURLIpfsCid,
+          media: tokens[index].media,
+          royalties: royalty.royalties.length > 0 ? royalty.royalties : undefined,
         });
       }
     } catch (e: any) {
@@ -107,12 +154,9 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
 
     if (schemaVersion === '1.0.0') {
       if (!collection.properties) return;
-      createTokensPayload = mapTokensToPayloadV1(uploadedTokens, collection.properties);
+      throw new Error('Schema not support');
     } else {
-      createTokensPayload = mapTokensToPayload(
-        uploadedTokens,
-        collectionInfo?.info?.potential_attributes
-      );
+      createTokensPayload = mapTokensToPayload(uploadedTokens);
     }
 
     const submitBatch = async (_tokens: TokenV2ItemForMultipleDto[]) => {
@@ -153,6 +197,8 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
       await refetchCollectionInfo();
       setStage(TRANSACTION_STAGE_ENUM.DONE);
       info(`${tokensCreated.length} tokens created successfully`);
+      //TO DO - remove to sell stage after it implemention
+      deleteCachedTokens();
     } else {
       error('Create tokens error');
       setStage(TRANSACTION_STAGE_ENUM.FAILED);
@@ -184,10 +230,12 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
         },
         attributes: [],
         isValid: true,
-        isSelected: false
+        isSelected: false,
+        media: [],
       }))
     ]);
     info(`${files.length} files added`);
+    setStep(CreateTokensSteps.UPLOAD_MEDIA);
   };
 
   const onChangeCollection = (_collection: GQLCollection) => {
@@ -214,13 +262,14 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
     setTokens(tokens.map((token) => ({ ...token, isSelected: false })));
   };
 
-  const changeSelected = (selectedTokens: NewToken[]) => {
+  const changeSelected = (selectedTokens: NewToken2[]) => {
     setTokens(
       tokens.map((token) => {
         const selectedToken = selectedTokens.find(({ id }) => id === token.id);
         return selectedToken || token;
       })
     );
+    setStep(CreateTokensSteps.UPLOAD_MEDIA);
   };
 
   const removeSelected = () => {
@@ -271,217 +320,314 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({ className }) =>
     setViewMode(viewMode);
   };
 
-  const invalidTokenList = useMemo(() => {
-    if (!collection?.properties) return [];
+  const [step, setStep] = useState(CreateTokensSteps.UPLOAD_IMAGES);
+  const [nextStepIsBlocked, setNextStepIsBlocked] = useState(false);
 
-    const invalidTokens = parseInvalidAttributes(
-      tokens,
-      collection?.properties
+  const changeStep = (direction: 'next' | 'prev') => {
+    setStep((currentStep) => {
+      switch (currentStep) {
+        case CreateTokensSteps.UPLOAD_IMAGES:
+          return direction === 'next' ? CreateTokensSteps.UPLOAD_MEDIA : CreateTokensSteps.UPLOAD_MEDIA ;
+        case CreateTokensSteps.UPLOAD_MEDIA:
+          return direction === 'next' ? CreateTokensSteps.SET_DATA : CreateTokensSteps.PREVIEW_WITH_FILTERS;
+        case CreateTokensSteps.SET_DATA:
+          return direction === 'next' ? CreateTokensSteps.SET_ROYALTIES : CreateTokensSteps.UPLOAD_MEDIA;
+        case CreateTokensSteps.SET_ROYALTIES:
+          return direction === 'next' ? CreateTokensSteps.PREVIEW_WITH_FILTERS : CreateTokensSteps.SET_DATA;
+        case CreateTokensSteps.PREVIEW_WITH_FILTERS:
+          return direction === 'next' ? CreateTokensSteps.SET_ROYALTIES : CreateTokensSteps.SET_ROYALTIES;
+        default:
+          throw new Error("Invalid step");
+      }
+    });
+  };
+
+  const [royalty, setRoyalty] = useState<RoyaltiesFormData>({ royalties: [] });
+
+  useEffect(() => {
+    if (royalty.royalties.length === 0) return;
+    //TO DO check percent <=> value
+    //@ts-ignore
+    setTokens((tokens) =>
+      tokens.map((token) => ({
+        ...token,
+        royalties: royalty.royalties.map(({value, address}) => ({percent: value, address }))
+      }))
     );
-    return invalidTokens;
-  }, [tokens, collection]);
+  }, [royalty]);
+  const onRoyaltiesFormSubmit = useCallback((royalty: RoyaltiesFormData) => {
+    setRoyalty(royalty);
+  }, []);
 
   return (
-    <AttributeFilterProvider>
-      <MainWrapper className='create-nft-page' ref={mainWrapperRef}>
-        <WrapperCollectionContentStyled expanded={!!collection}>
-          <Heading size='3'>Choose a collection</Heading>
-          <CollectionBlock ref={collectionBlockRef}>
-            <CollectionSuggest
+    <MainWrapper className='create-nft-page' ref={mainWrapperRef}>
+      <WrapperCollectionContentStyled expanded={!!collection}>
+        <Heading size='3'>Choose a collection</Heading>
+        <CollectionBlock ref={collectionBlockRef}>
+          <CollectionSuggest
+            collection={collection}
+            onChange={onChangeCollection}
+          />
+          {collection && (
+            <CollectionStats
               collection={collection}
-              onChange={onChangeCollection}
+              isFetching={isFetchingInfo || isFetchingLastTokenId}
+              nestingPermissions={collectionInfo?.permissions?.nesting}
+              sponsorship={collectionInfo?.sponsorship}
+              tokensLeft={leftTokens}
+              tokensLimit={collection.tokenLimit || 0}
+              lastTokenId={lastTokenId || 0}
             />
-            {collection && (
-              <CollectionStats
-                collection={collection}
-                isFetching={isFetchingInfo || isFetchingLastTokenId}
-                nestingPermissions={collectionInfo?.permissions?.nesting}
-                sponsorship={collectionInfo?.sponsorship}
-                tokensLeft={leftTokens}
-                tokensLimit={collection.tokenLimit || 0}
-                lastTokenId={lastTokenId || 0}
+          )}
+        </CollectionBlock>
+      </WrapperCollectionContentStyled>
+      {collectionInfo?.info?.originalSchemaVersion === '1.0.0' ?
+        <CreateNFT_V1 collection={collection} />
+        : 
+        <>
+          <WrapperTokenListContentStyled disabled={!collection}>
+            {step === CreateTokensSteps.UPLOAD_IMAGES && (
+              <>
+                <Heading size='3'>NFT images</Heading>
+                <Text size='m' color='grey-500'>
+                  These are images people will see when browsing NFTs in wallets and marketplaces.
+                </Text>
+              </>
+            )}
+            {step === CreateTokensSteps.UPLOAD_MEDIA && (
+              <>
+                <Heading size='3'>NFT Media</Heading>
+                <Text size='m' color='grey-500'>
+                  Only the main image is mandatory. You can add more media
+                  files—they will be displayed on our marketplace. Check
+                  compatibility with other platforms where you plan to showcase
+                  your NFTs.
+                </Text>
+              </>
+            )}
+            {step === CreateTokensSteps.SET_DATA && (
+              <>
+                <Heading size='3'>NFT Attributes</Heading>
+                <Text size='m' color='grey-500'>
+                  NFT attributes are unique characteristics that define and
+                  differentiate an NFT within a collection. These attributes can
+                  include visual aspects like color or traits, as well as
+                  non-visual details such as rarity levels, artists’ info, utility
+                  description, and links to external content.
+                </Text>
+              </>
+            )}
+            {step === CreateTokensSteps.SET_ROYALTIES && (
+              <>
+                <Heading size='3'>Set Royalty</Heading>
+                <Text size='m' color='grey-500'>
+                  Royalties are payments made to the collection&apos;s creator whenever
+                  an NFT is resold. Enter the Royalty % to apply royalties to all
+                  the NFTs you are minting. Keep in mind that setting a high
+                  royalty percentage might discourage buyers from purchasing your
+                  NFTs on the secondary market.
+                </Text>
+              </>
+            )}
+            {step === CreateTokensSteps.PREVIEW_WITH_FILTERS && (
+              <>
+                <Heading size='3'>Check final NFTs before minting</Heading>
+                <Text size='m' color='grey-500'>
+                  Review your NFTs before minting. Check the names and values of
+                  attributes, the list of media files, and ensure they match the
+                  main NFT image.
+                </Text>
+              </>
+            )}
+
+
+            {tokens.length > 0 && (
+              <TokensCounterWrapper>
+                <Text color='grey-500' weight='bold' size='m'>
+                  {tokens.length} / {MAX_MINT_TOKENS}
+                </Text>
+                <Button
+                  title=''
+                  role='ghost'
+                  iconLeft={{
+                    color:
+                      viewMode === ViewMode.grid
+                        ? 'var(--color-primary-500)'
+                        : 'currentColor',
+                    name: 'grid',
+                    size: 32
+                  }}
+                  onClick={onChangeView(ViewMode.grid)}
+                />
+                <Button
+                  title=''
+                  role='ghost'
+                  iconLeft={{
+                    color:
+                      viewMode === ViewMode.list
+                        ? 'var(--color-primary-500)'
+                        : 'currentColor',
+                    name: 'list',
+                    size: 32
+                  }}
+                  onClick={onChangeView(ViewMode.list)}
+                />
+              </TokensCounterWrapper>
+            )}
+            {(step === CreateTokensSteps.UPLOAD_IMAGES ||
+              step === CreateTokensSteps.UPLOAD_MEDIA ||
+              step === CreateTokensSteps.SET_DATA ||
+              step === CreateTokensSteps.PREVIEW_WITH_FILTERS) && (
+              <TokenList
+                viewMode={
+                  step === CreateTokensSteps.PREVIEW_WITH_FILTERS
+                    ? ViewMode.grid
+                    : ViewMode.list
+                }
+                tokenPrefix={collection?.tokenPrefix || ''}
+                attributesSchema={
+                  collectionInfo?.info?.potential_attributes || []
+                }
+                mode={collection?.mode}
+                tokensLimit={collection?.tokenLimit}
+                tokensStartId={lastTokenId}
+                tokens={tokens}
+                disabled={!collection}
+                step={step}
+                collection={collectionInfo || undefined}
+                schemaVersion={
+                  collectionInfo?.info?.originalSchemaVersion || '2.0.0'
+                }
+                onChange={setTokens}
+                onAddTokens={onAddTokens}
               />
             )}
-          </CollectionBlock>
-        </WrapperCollectionContentStyled>
-        <WrapperTokenListContentStyled disabled={!collection}>
-          <Heading size='3'>Create NFTs</Heading>
-          <Text size='m' color='grey-500'>
-            You can mass-mint {MAX_MINT_TOKENS} tokens using JPEG, PNG, and GIF
-            files, with a maximum size of 10MB each
-          </Text>
-          {tokens.length > 0 && (
-            <TokensCounterWrapper>
-              <Text color='grey-500' weight='bold' size='m'>
-                {tokens.length} / {MAX_MINT_TOKENS}
-              </Text>
-              <Button
-                title=''
-                role='ghost'
-                iconLeft={{
-                  color:
-                    viewMode === ViewMode.grid
-                      ? 'var(--color-primary-500)'
-                      : 'currentColor',
-                  name: 'grid',
-                  size: 32
-                }}
-                onClick={onChangeView(ViewMode.grid)}
-              />
-              <Button
-                title=''
-                role='ghost'
-                iconLeft={{
-                  color:
-                    viewMode === ViewMode.list
-                      ? 'var(--color-primary-500)'
-                      : 'currentColor',
-                  name: 'list',
-                  size: 32
-                }}
-                onClick={onChangeView(ViewMode.list)}
-              />
-            </TokensCounterWrapper>
-          )}
-          <TokenList
-            viewMode={viewMode}
-            tokenPrefix={collection?.tokenPrefix || ''}
-            attributesSchema={collectionInfo?.info?.potential_attributes || []}
-            mode={collection?.mode}
-            tokensLimit={collection?.tokenLimit}
-            tokensStartId={lastTokenId}
-            tokens={tokens}
-            disabled={!collection}
-            schemaVersion={collectionInfo?.info?.originalSchemaVersion || '2.0.0'}
-            onChange={setTokens}
-            onAddTokens={onAddTokens}
-          />
-          {tokens.length > 0 && !isFilterVisible && (
-            <ButtonGroup ref={actionBoxRef}>
-              {invalidTokenList.length > 0 && (
-                <WarningBlock>
-                  {invalidTokenList.map(({ token, invalidAttributes }) => (
-                    <div key={'token_validation_item_' + token.image.url}>
-                      Set properties{' '}
-                      {invalidAttributes.map((property, index) => (
-                        <span key={'token_validation_property_' + token.image.url + '_' + index}>
-                          {index ? ', ' : ''}
-                          {collectionInfo?.info?.potential_attributes &&
-                            collectionInfo?.info?.potential_attributes[property]
-                              .trait_type}
-                        </span>
-                      ))}{' '}
-                      to token {collectionInfo?.tokenPrefix}#{token.id}
-                    </div>
-                  ))}
-                </WarningBlock>
-              )}
-              <ButtonConatiner>
-                <Button
-                  title={
-                    <StyledCheckbox
-                      label={
-                        <Text color='grey-500'>
-                          {selected.length
-                            ? `${selected.length} selected`
-                            : 'Select all'}
-                        </Text>
-                      }
-                      checked={selected.length > 0}
-                      onChange={(value: boolean) => {
-                        if (value) {
-                          selectedAll();
-                          return;
-                        }
-                        deselectedAll();
-                      }}
-                      testid='select-all'
-                    />
-                  }
-                  onClick={() => {
-                    if (selected.length > 0) {
-                      deselectedAll();
-                      return;
-                    }
-                    selectedAll();
-                  }}
+            {step === CreateTokensSteps.SET_ROYALTIES && (
+              <RoyaltiesFormWrapper>
+                {' '}
+                <RoyaltiesForm
+                  initialFormData={royalty.royalties}
+                  onSubmit={onRoyaltiesFormSubmit}
+                  withSaveButton={false}
                 />
-                {deviceSize <= DeviceSize.sm && (
-                  <ConfirmBtn
-                    role='outlined'
-                    title='Filter'
-                    onClick={() => setIsFilterVisible(true)}
-                  />
-                )}
+              </RoyaltiesFormWrapper>
+            )}
+            {tokens.length > 0 && !isFilterVisible && (
+              <ButtonGroup ref={actionBoxRef}>
                 <ConfirmBtn
-                  className={selected.length > 1 ? 'visible' : 'hidden'}
                   role='outlined'
-                  disabled={selected.length === 0}
-                  title='Modify selected'
-                  onClick={() => setDialog(CreateTokenDialog.editAttributes)}
+                  title='Back'
+                  disabled={step === CreateTokensSteps.UPLOAD_MEDIA}
+                  onClick={() => changeStep('prev')}
                 />
                 <ConfirmBtn
-                  className={selected.length > 1 ? 'visible' : 'hidden'}
-                  role='danger'
-                  disabled={selected.length === 0}
-                  title='Remove selected'
-                  onClick={() => setDialog(CreateTokenDialog.removeToken)}
-                />
-                <SelectedCountWrapper />
-                <ConfirmBtn
-                  disabled={
-                    !collection ||
-                    tokens.length === 0 ||
-                    invalidTokenList.length > 0
-                  }
                   role='primary'
-                  title='Confirm and create all'
-                  onClick={handleSubmit}
+                  title='Next Step'
+                  disabled={
+                    step === CreateTokensSteps.PREVIEW_WITH_FILTERS ||
+                    nextStepIsBlocked
+                  }
+                  onClick={() => changeStep('next')}
                 />
-                {tokens.length > 0 && Number(leftTokens) > 0 && (
-                  <UploadFAB onUpload={onAddTokens} />
-                )}
-              </ButtonConatiner>
-            </ButtonGroup>
-          )}
-        </WrapperTokenListContentStyled>
+                <ButtonConatiner>
+                  <Button
+                    title={
+                      <StyledCheckbox
+                        label={
+                          <Text color='grey-500'>
+                            {selected.length
+                              ? `${selected.length} selected`
+                              : 'Select all'}
+                          </Text>
+                        }
+                        checked={selected.length > 0}
+                        onChange={(value: boolean) => {
+                          if (value) {
+                            selectedAll();
+                            return;
+                          }
+                          deselectedAll();
+                        }}
+                        testid='select-all'
+                      />
+                    }
+                    onClick={() => {
+                      if (selected.length > 0) {
+                        deselectedAll();
+                        return;
+                      }
+                      selectedAll();
+                    }}
+                  />
+                  {deviceSize <= DeviceSize.sm && (
+                    <ConfirmBtn
+                      role='outlined'
+                      title='Filter'
+                      onClick={() => setIsFilterVisible(true)}
+                    />
+                  )}
+                  {/* <ConfirmBtn
+                    className={selected.length > 1 ? 'visible' : 'hidden'}
+                    role='outlined'
+                    disabled={selected.length === 0}
+                    title='Modify selected'
+                    onClick={() => setDialog(CreateTokenDialog.editAttributes)}
+                  />
+                  <ConfirmBtn
+                    className={selected.length > 1 ? 'visible' : 'hidden'}
+                    role='danger'
+                    disabled={selected.length === 0}
+                    title='Remove selected'
+                    onClick={() => setDialog(CreateTokenDialog.removeToken)}
+                  /> */}
+                  <SelectedCountWrapper />
+                  {step === CreateTokensSteps.PREVIEW_WITH_FILTERS && (
+                    <ConfirmBtn
+                      disabled={
+                        !collection ||
+                        tokens.length === 0
+                      }
+                      role='primary'
+                      title='Confirm and create all'
+                      onClick={handleSubmit}
+                    />
+                  )}
+                  {tokens.length > 0 &&
+                    Number(leftTokens) > 0 &&
+                    (step === CreateTokensSteps.SET_DATA ||
+                      step === CreateTokensSteps.UPLOAD_MEDIA) && (
+                      <UploadFAB onUpload={onAddTokens} />
+                    )}
+                </ButtonConatiner>
+              </ButtonGroup>
+            )}
+          </WrapperTokenListContentStyled>
 
-        <CreateTokensDialogs
-          dialog={dialog}
-          tokens={selected}
-          tokenPrefix={collection?.tokenPrefix || ''}
-          leftTokens={leftTokens}
-          attributesSchema={collectionInfo?.info?.potential_attributes || []}
-          mode={collection?.mode}
-          schemaVersion={collectionInfo?.info?.originalSchemaVersion || '2.0.0'}
-          onClose={() => setDialog(undefined)}
-          onChange={changeSelected}
-          onConfirm={onConfirmDialog}
-        />
-        <StatusTransactionModal
-          isVisible={isLoadingSubmitResult}
-          stage={stage}
-          uploadingProgress={uploadProgress}
-          mintingProgress={mintingProgress}
-          totalTokens={tokens.length}
-          batchSize={batchSize}
-          onComplete={() => {
-            navigate(`/${currentChainId}/sellTokens`);
-          }}
-          onContinue={() => {
-            setTokens([]);
-            setUploadProgress(0);
-            setMintingProgress(0);
-            setIsLoadingSubmitResult(false);
-            setStage(TRANSACTION_STAGE_ENUM.UPLOADING);
-          }}
-        />
-        <MobileFilters
-          isVisible={isFilterVisible}
-          setIsVisible={setIsFilterVisible}
-        />
-      </MainWrapper>
-    </AttributeFilterProvider>
+          <StatusTransactionModal
+            isVisible={isLoadingSubmitResult}
+            stage={stage}
+            uploadingProgress={uploadProgress}
+            mintingProgress={mintingProgress}
+            totalTokens={tokens.length}
+            batchSize={batchSize}
+            onComplete={() => {
+              navigate(`/${currentChainId}/sellTokens`);
+            }}
+            onContinue={() => {
+              setTokens([]);
+              setUploadProgress(0);
+              setMintingProgress(0);
+              setIsLoadingSubmitResult(false);
+              setStage(TRANSACTION_STAGE_ENUM.UPLOADING);
+            }}
+          />
+          <MobileFilters
+            isVisible={isFilterVisible}
+            setIsVisible={setIsFilterVisible}
+          />
+        </>
+      }
+    </MainWrapper>
   );
 };
 
@@ -632,6 +778,10 @@ const ButtonConatiner = styled.div`
       padding: 8px 16px;
     }
   }
+`;
+
+const RoyaltiesFormWrapper = styled.div`
+  width: 800px;
 `;
 
 export const CreateNFT = CreateNFTComponent;

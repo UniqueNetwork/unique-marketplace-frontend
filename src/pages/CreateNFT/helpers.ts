@@ -1,6 +1,7 @@
-import { PotentialAttribute, AttributeSchemaDto, CreateTokenBody, Attribute as UniqueAttribute, TokenV2ItemForMultipleDto, CreateTokenPayload, TokenProperty } from '@unique-nft/sdk';
+import { PotentialAttribute, AttributeSchemaDto, CreateTokenBody, Attribute as UniqueAttribute, TokenV2ItemForMultipleDto, CreateTokenPayload, TokenProperty, Media } from '@unique-nft/sdk';
 
-import { Attribute, AttributeOption, AttributesForFilter, NewToken } from './types';
+import { Attribute, AttributeOption, AttributesForFilter, CreateMediaData, NewToken, NewToken2 } from './types';
+import { SpecialFilters } from './components/useFilteredTokens';
 
 const attributeMapper = (attribute?: Attribute) => {
   if (
@@ -29,24 +30,36 @@ const attributeMapper = (attribute?: Attribute) => {
 };
 
 export const mapTokensToPayload = (
-  tokens: NewToken[],
-  schema?: PotentialAttribute[]
+  tokens: NewToken2[],
 ): TokenV2ItemForMultipleDto[] => {
-  return tokens.map((token) => mapNewToken(token, schema));
+  return tokens.map((token) => mapNewToken(token));
 };
 
 export const mapNewToken = (
-  token: NewToken,
-  schema?: PotentialAttribute[]
+  token: NewToken2,
 ): TokenV2ItemForMultipleDto => {
   const mappedTokenDto: TokenV2ItemForMultipleDto = {
-    image: token.ipfsCid?.fullUrl, 
-    attributes: [],
-    royalties: token.royalties?.map(({value, ...rest}) => ({...rest, percent: +value}))
+    image: token.ipfsCid?.fullUrl,
+    attributes: token.attributes,
+    royalties: token.royalties?.map(({value, ...rest}) => ({...rest, percent: +value})),
+    animation_url: token.animationURLIpfsCid?.fullUrl,
+    //TO DO update after Media types fix [] => {}
+    //@ts-ignore
+    media: token.media && getCreateMediaData(token.media),
   };
 
-  if (schema && token.attributes?.length) {
-    mappedTokenDto.attributes = token.attributes.reduce<UniqueAttribute[]>(
+  console.log(mappedTokenDto, 'mappedTokenDto');
+
+  return mappedTokenDto;
+};
+
+export const mapAttributes = (
+  attributes: Attribute[],
+  schema?: PotentialAttribute[]
+) => {
+  let attr: UniqueAttribute[] = [];
+  if (schema && attributes?.length) {
+    attr = attributes.reduce<UniqueAttribute[]>(
       (acc, attr, index) => {
         if (!schema[index]?.trait_type) return acc;
         if (Array.isArray(attr)) {
@@ -66,8 +79,7 @@ export const mapNewToken = (
       []
     );
   }
-
-  return mappedTokenDto;
+  return attr;
 };
 
 export const mapTokensToPayloadV1 = (
@@ -97,6 +109,18 @@ export const mapTokensToPayloadV1 = (
 
   return tokens.map((token) => mapNewTokenV1(token));
 };
+
+// export parseAttr = (token) => {
+//   tokens.forEach((token) => {
+//     const tokenAttributes = token.attributes;
+//     tokenAttributes.forEach((el, key) => {
+//       const isArray = propertiesIsArrayMap.get(key);
+//       if (!isArray && Array.isArray(el)) {
+//         token.attributes[key] = el[0];
+//       }
+//     });
+//   });
+// }
 
 export const mapNewTokenV1 = (token: NewToken): CreateTokenPayload => {
   const mappedTokenDto: CreateTokenPayload = {
@@ -186,6 +210,7 @@ export const scrollToTokenCard = (id: number) => {
   }
 };
 
+
 export const getAttributesFromTokens = (
   attributesSchema: PotentialAttribute[],
   tokens: NewToken[]
@@ -220,6 +245,7 @@ export const getAttributesFromTokens = (
 
     // Calculate filters to show
     attributes.forEach((attribute, index) => {
+      if( !attributesSchema[index]?.trait_type || !attributesSchema[index]?.values)  return;
       const { trait_type, values } = attributesSchema[index];
       const attributeName = (trait_type || '').toLocaleLowerCase();
 
@@ -308,4 +334,109 @@ export const parseInvalidAttributes = (
   }
   const invalidTokensArray: { token: NewToken; invalidAttributes: number[] }[] = Array.from(invalidTokensMap.values());
   return invalidTokensArray;
+};
+
+interface TransformedMedia {
+  [key: string]: Media;
+}
+
+const getCreateMediaData = (mediaArray: CreateMediaData[]): TransformedMedia => {
+  const transformedMedia: TransformedMedia = {};
+
+  mediaArray.forEach((mediaItem) => {
+    const { name, type, ipfsCid } = mediaItem;
+    const url = ipfsCid && ipfsCid.fullUrl;
+    transformedMedia[name] = {
+      type: type as 'image' | 'animation' | 'video' | 'audio' | 'spatial' | 'pdf' | 'document' | 'other', 
+      url: url as string,
+      name
+    };
+  });
+
+  return transformedMedia;
+};
+
+
+export const getUniqueTraitTypes = (tokens: NewToken2[]): string[] => {
+  const traitTypesSet = new Set<string>();
+
+  tokens.forEach((token) => {
+    token.attributes.forEach((attribute) => {
+      traitTypesSet.add(attribute.trait_type);
+    });
+  });
+
+  return Array.from(traitTypesSet);
+};
+
+export type TraitCount = { trait_type: string; value: string; count: number };
+
+export const getTraitCounts = (tokens: NewToken2[]): TraitCount[] => {
+  const traitMap: { [key: string]: { [key: string]: number } } = {};
+
+  tokens.forEach((token) => {
+    token.attributes.forEach((attribute) => {
+      if (!traitMap[attribute.trait_type]) {
+        traitMap[attribute.trait_type] = {};
+      }
+      if (!traitMap[attribute.trait_type][attribute.value]) {
+        traitMap[attribute.trait_type][attribute.value] = 0;
+      }
+      traitMap[attribute.trait_type][attribute.value]++;
+    });
+  });
+
+  const traitCounts: TraitCount[] = [];
+
+  Object.keys(traitMap).forEach((trait_type) => {
+    Object.keys(traitMap[trait_type]).forEach((value) => {
+      traitCounts.push({
+        trait_type,
+        value,
+        count: traitMap[trait_type][value],
+      });
+    });
+  });
+
+  return traitCounts;
+};
+
+export type ItemCount = {name: string, count: number};
+
+export const getNameCounts = (tokens: NewToken2[]): ItemCount[] => {
+  const nameMap: { [key: string]: number } = {};
+
+  tokens.forEach((token) => {
+    const name = token.name || SpecialFilters.NoName;
+    if (!nameMap[name]) {
+      nameMap[name] = 0;
+    }
+    nameMap[name]++;
+  });
+
+  const nameCounts: ItemCount[] = Object.keys(nameMap).map((name) => ({
+    name,
+    count: nameMap[name],
+  }));
+
+  return nameCounts;
+};
+
+export const getDescriptionCounts = (tokens: NewToken2[]): ItemCount[] => {
+  const descriptionMap: { [key: string]: number } = {};
+
+  tokens.forEach((token) => {
+    const description = token.description || SpecialFilters.NoDescription;
+    if (!descriptionMap[description]) {
+      descriptionMap[description] = 0;
+    }
+    descriptionMap[description]++;
+  });
+
+  const descriptionCounts: ItemCount[] = Object.keys(descriptionMap).map((description) => ({
+    name: description,
+    count: descriptionMap[description],
+  }));
+
+  return descriptionCounts;
 };

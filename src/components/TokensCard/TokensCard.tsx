@@ -56,7 +56,7 @@ export const TokensCard: FC<TTokensCard> = ({
     type,
   } = useMemo(() => {
     if (offer || (token && collection) || (collection?.name && collection?.tokenPrefix)) {
-      const { image, owner } = offer?.tokenDescription || token || {};
+      const { image, owner } =  token || offer?.tokenDescription || {};
       const collectionName = offer?.collectionDescription?.name || collection?.name;
       const tokenPrefix = offer?.collectionDescription?.tokenPrefix || collection?.tokenPrefix;
       const { price, seller } = offer || {};
