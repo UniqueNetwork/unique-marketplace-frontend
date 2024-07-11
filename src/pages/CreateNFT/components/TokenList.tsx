@@ -17,6 +17,7 @@ import TokenInputForm from './TokenInputForm';
 import { NewAttributePayload, TokenLine } from './TokenLine';
 import FilterComponent from './TokenFilter';
 import useFilteredTokens from './useFilteredTokens';
+import Create from 'static/images/create.png';
 
 export type TokenListProps = {
   disabled: boolean;
@@ -474,7 +475,7 @@ export const TokenList = ({
 
 const TokenListWrapper = styled.div<{columnsCount: number, stepUploadImages: boolean}>`
   display: flex;
-  margin-top: calc(var(--prop-gap) * 2);
+  margin-top: calc(var(--prop-gap) * 2.5);
   margin-bottom: calc(var(--prop-gap) * 2);
   min-height: calc(120vh - 444px);
   position: relative;
@@ -486,15 +487,16 @@ const DraggableContainer = styled.div<{ hasOffset: boolean }>`
   margin: ${({ hasOffset }) => (hasOffset ? '0 -32px' : '0')};
   & > div {
     width: 100%;
+    padding-bottom: 10px !important;
   }
 
-  & > div > div > div {
-    margin-bottom: 0 !important;
-  }
+  // & > div > div > div {
+  //   margin-bottom: 0 !important;
+  // }
 
-  & > div {
-    margin-bottom: 0 !important;
-  }
+  // & > div {
+  //   margin-bottom: 0 !important;
+  // }
   .unique-list {
     gap: 0;
   }
@@ -520,14 +522,27 @@ export const ImageUploadArea = ({
 }: ImageUploadAreaProps) => {
   const inputFile = useRef<HTMLInputElement>(null);
   const [isDragEnter, setIsDragEnter] = useState(false);
+
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const MAX_FILE_SIZE_MB = 20;
+    const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+  
     setIsDragEnter(false);
+  
     if (!inputFile.current) {
       return;
     }
-    onUpload?.(Array.from(inputFile.current.files || []));
+  
+    const files = Array.from(inputFile.current.files || []);
+    const validFiles = files.filter((file) => file.size <= MAX_FILE_SIZE_BYTES);
+  
+    if (validFiles.length < files.length) {
+      alert(`Some files exceed the maximum size of ${MAX_FILE_SIZE_MB} MB and will not be uploaded.`);
+    }
+  
+    onUpload?.(validFiles);
     onDragExit();
-
+  
     inputFile.current.value = '';
   };
 
@@ -544,13 +559,20 @@ export const ImageUploadArea = ({
   };
 
   return (
-    <UploadWrapper
+    <WrapperCollectionContentStyled
       className={classNames({
         hidden,
         'drag-enter': isDragEnter,
         'full-area': !hasTokens
       })}
     >
+      <ContentRelative>
+        <Content>
+          <ImageCreate src={Create} />
+          <ContentHeader>Upload NFT images </ContentHeader>
+          <Text size='s'>You can bulk-mint 50 NFTs. Optimal image size 500x500 px, 500 KB</Text>
+        </Content>
+      </ContentRelative>
       <input
         disabled={disabled}
         ref={inputFile}
@@ -564,7 +586,7 @@ export const ImageUploadArea = ({
         onDragEnd={onDragLeave}
         onDragExit={onDragLeave}
       />
-    </UploadWrapper>
+    </WrapperCollectionContentStyled>
   );
 };
 
@@ -574,7 +596,17 @@ const TokenPreviewWrapper = styled.div`
   gap: 32px;
 `;
 
-const UploadWrapper = styled.div`
+const WrapperCollectionContentStyled = styled.div`
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #F5FCFF;
+  border: 1px dashed var(--color-primary-500);
+  // padding: 92px 0 48px;
+  
+  border-radius: 16px;
   position: absolute;
   top: 0;
   bottom: 0;
@@ -582,6 +614,8 @@ const UploadWrapper = styled.div`
   right: 0;
   border: 1px dashed var(--color-primary-500);
   z-index: 1000;
+  left: 0;
+  
   &.full-area {
     left: 0;
   }
@@ -593,6 +627,8 @@ const UploadWrapper = styled.div`
     opacity: 0;
     width: 100%;
     height: 100%;
+    z-index: 1000;
+    cursor: pointer;
   }
   &:before {
     position: absolute;
@@ -713,4 +749,43 @@ const CloseButton = styled.div`
 const FiltersWrapper = styled.div`
   width: 260px;
   margin-right: 32px;
+`;
+
+const ImageCreate = styled.img`
+  width: 132px;
+  height: 132px;
+  margin-bottom: 26px;
+  z-index: 1;
+`;
+
+const ContentRelative = styled.div`
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 0;
+`;
+
+const Content = styled.div`
+  position: absolute;
+  top: 297px;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+`;
+
+const ContentHeader = styled.div`
+  margin-bottom: 8px;
+  font-size: 24px;
+  line-heignt: 36px;
+  font-weight: 700;
+`;
+
+const ContentSubtitle = styled.div`
+
+  font-size: 14px;
+  line-heignt: 22px;
+
 `;

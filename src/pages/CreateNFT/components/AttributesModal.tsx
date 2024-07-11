@@ -1,9 +1,10 @@
+//@ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { Slide } from 'react-slideshow-image';
 import 'react-slideshow-image/dist/styles.css';
 
-import { Attribute, AttributeOption, NewToken } from '../types';
+import { Attribute, AttributeOption, NewToken, NewToken2 } from '../types';
 import { AttributesForm, LabelText } from './AttributesForm';
 import { TokenBasicCard } from './TokenBasicCard';
 import { FormGrid } from './TokenCard';
@@ -14,10 +15,10 @@ import { RoyaltiesForm } from 'pages/CollectionEdit/Forms/RoyaltiesForm';
 import { Royalty } from '../../CollectionEdit/types';
 
 interface AttribytesModalProps {
-  tokens: NewToken[];
+  tokens: NewToken[] | NewToken2[];
   tokenPrefix: string;
   attributesSchema: PotentialAttribute[] | undefined;
-  onChange(tokens: NewToken[]): void;
+  onChange(tokens: NewToken[] | NewToken2[]): void;
   onClose(): void;
   mode?: 'NFT' | 'ReFungible' | 'Fungible';
   schemaVersion: string;

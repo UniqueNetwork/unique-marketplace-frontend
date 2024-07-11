@@ -6,7 +6,8 @@ import { FormBody, FormHeader } from '../components/FormComponents';
 export const NFTAttributes = () => {
   return (
     <>
-      <FormHeader>
+      <Heading size='2'>Submit collection create</Heading>
+      {/* <FormHeader>
         <Heading size='2'>Token attributes</Heading>
         <Text>
           Customize your token — define your NFTs traits: name, accessory, gender,
@@ -15,7 +16,7 @@ export const NFTAttributes = () => {
       </FormHeader>
       <FormBody>
         <AttributesTable />
-      </FormBody>
+      </FormBody> */}
     </>
   );
 };

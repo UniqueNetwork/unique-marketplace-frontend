@@ -284,7 +284,7 @@ export const CreateNFTComponent: FC<{ collection?: GQLCollection }> = ({ collect
     <AttributeFilterProvider>
       <MainWrapper className='create-nft-page' ref={mainWrapperRef}>
         <WrapperTokenListContentStyled disabled={!collection}>
-          <Heading size='3'>Create NFTs</Heading>
+          <Heading size='3'>Select images</Heading>
           <Text size='m' color='grey-500'>
             You can mass-mint {MAX_MINT_TOKENS} tokens using JPEG, PNG, and GIF
             files, with a maximum size of 10MB each

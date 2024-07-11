@@ -122,7 +122,11 @@ export const TokenLine = ({
         tokenId,
         image,
         attributes,
-        animation_url: { file: file, url: URL.createObjectURL(file), name: file.name },
+        animation_url: {
+          file: file,
+          url: URL.createObjectURL(file),
+          name: file.name
+        },
         media,
         isValid,
         isSelected,
@@ -139,7 +143,8 @@ export const TokenLine = ({
   ) => {
     if (event.target.files) {
       const files = event.target.files;
-      const media: { name: string; type: string; file: File, url: string }[] = [];
+      const media: { name: string; type: string; file: File; url: string }[] =
+        [];
       const typeCounters: { [key: string]: number } = {
         image: 0,
         animation: 0,
@@ -205,7 +210,6 @@ export const TokenLine = ({
   const [externalLink, setExternalLink] = useState('');
   const [isValidLink, setIsValidLink] = useState(true);
 
-
   const handleExternalLinkChange = (
     event: React.ChangeEvent<HTMLTextAreaElement>
   ): void => {
@@ -259,51 +263,8 @@ export const TokenLine = ({
           grid: viewMode === ViewMode.grid
         })}
       >
-        <TokenLineCell
-          onMouseEnter={(e) => {
-            e.preventDefault();
-            setHovered(true);
-          }}
-          onMouseLeave={(e) => {
-            e.preventDefault();
-            setHovered(false);
-          }}
-          onTouchStart={(e) => {
-            e.preventDefault();
-            onTouchStart?.(e);
-          }}
-          onMouseDown={(e) => {
-            onMouseDown?.(e);
-          }}
-        >
-          <SelectCheckbox
-            label=''
-            checked={isSelected}
-            onChange={onSelect}
-            testid='select'
-          />
-        </TokenLineCell>
-        <TokenLineCell
-          onMouseEnter={(e) => {
-            e.preventDefault();
-            setHovered(true);
-          }}
-          onMouseLeave={(e) => {
-            e.preventDefault();
-            setHovered(false);
-          }}
-          onTouchStart={(e) => {
-            e.preventDefault();
-            onTouchStart?.(e);
-          }}
-          onMouseDown={(e) => {
-            onMouseDown?.(e);
-          }}
-        >
-          <TokenLinkTitle>{`${tokenPrefix} #${tokenId}`}</TokenLinkTitle>
-        </TokenLineCell>
-        <TokenLineCell>
-          <TokenLinkImageWrapper
+        <LineContent>
+          <TokenLineCell
             onMouseEnter={(e) => {
               e.preventDefault();
               setHovered(true);
@@ -320,93 +281,145 @@ export const TokenLine = ({
               onMouseDown?.(e);
             }}
           >
-            <TokenImage alt={`${tokenPrefix}_${id}`} image={image.url} />
-          </TokenLinkImageWrapper>
-        </TokenLineCell>
-        {step === CreateTokensSteps.UPLOAD_MEDIA && (
+            <SelectCheckbox
+              label=''
+              checked={isSelected}
+              onChange={onSelect}
+              testid='select'
+            />
+          </TokenLineCell>
+          <TokenLineCell
+            onMouseEnter={(e) => {
+              e.preventDefault();
+              setHovered(true);
+            }}
+            onMouseLeave={(e) => {
+              e.preventDefault();
+              setHovered(false);
+            }}
+            onTouchStart={(e) => {
+              e.preventDefault();
+              onTouchStart?.(e);
+            }}
+            onMouseDown={(e) => {
+              onMouseDown?.(e);
+            }}
+          >
+            <TokenLinkTitle>{`${tokenPrefix} #${tokenId}`}</TokenLinkTitle>
+          </TokenLineCell>
           <TokenLineCell>
-            <UploadWrapper>
-              <FileInputLabel htmlFor={`single-upload-${id}`}>
-                Upload
-              </FileInputLabel>
-              <FileInput
-                id={`single-upload-${id}`}
-                type='file'
-                accept='image/*'
-                onChange={handleSingleFileChange}
+            <TokenLinkImageWrapper
+              onMouseEnter={(e) => {
+                e.preventDefault();
+                setHovered(true);
+              }}
+              onMouseLeave={(e) => {
+                e.preventDefault();
+                setHovered(false);
+              }}
+              onTouchStart={(e) => {
+                e.preventDefault();
+                onTouchStart?.(e);
+              }}
+              onMouseDown={(e) => {
+                onMouseDown?.(e);
+              }}
+            >
+              <TokenImage alt={`${tokenPrefix}_${id}`} image={image.url} />
+            </TokenLinkImageWrapper>
+          </TokenLineCell>
+          {step === CreateTokensSteps.UPLOAD_MEDIA && (
+            <TokenLineCell>
+              <UploadWrapper>
+                <FileInputLabel htmlFor={`single-upload-${id}`}>
+                  Upload
+                </FileInputLabel>
+                <FileInput
+                  id={`single-upload-${id}`}
+                  type='file'
+                  accept='image/*'
+                  onChange={handleSingleFileChange}
+                />
+                {animation_url?.name && (
+                  <TextFileUploaded>
+                    {shortcutText(animation_url?.name)}
+                  </TextFileUploaded>
+                )}
+              </UploadWrapper>
+            </TokenLineCell>
+          )}
+          {step === CreateTokensSteps.UPLOAD_MEDIA && (
+            <TokenLineCell>
+              <UploadWrapper>
+                <FileInputLabel htmlFor={`multiple-upload-${id}`}>
+                  Upload multiple items
+                </FileInputLabel>
+                <MultipleFileInput
+                  id={`multiple-upload-${id}`}
+                  type='file'
+                  accept='.jpeg,.png,.gif,.svg,.webp,.mp4,.webm,.mp3,.wav,.gltf,.glb,.usdz,.pdf'
+                  multiple
+                  onChange={handleMultipleFilesChange}
+                />
+                {media?.length > 0 && (
+                  <TextFileUploaded>
+                    {media?.length} files uploaded
+                  </TextFileUploaded>
+                )}
+              </UploadWrapper>
+            </TokenLineCell>
+          )}
+          {step === CreateTokensSteps.UPLOAD_MEDIA && (
+            <TokenLineCell isHovered={hovered} isValid={isValidLink}>
+              <ExternalLinkInput
+                value={externalLink || external_url}
+                onChange={handleExternalLinkChange}
+                placeholder='Enter external link'
               />
-              {animation_url?.name && (
-                <TextFileUploaded>
-                  {shortcutText(animation_url?.name)}
-                </TextFileUploaded>
-              )}
-            </UploadWrapper>
-          </TokenLineCell>
-        )}
-        {step === CreateTokensSteps.UPLOAD_MEDIA && (
-          <TokenLineCell>
-            <UploadWrapper>
-              <FileInputLabel htmlFor={`multiple-upload-${id}`}>
-                Upload multiple items
-              </FileInputLabel>
-              <MultipleFileInput
-                id={`multiple-upload-${id}`}
-                type='file'
-                accept='.jpeg,.png,.gif,.svg,.webp,.mp4,.webm,.mp3,.wav,.gltf,.glb,.usdz,.pdf'
-                multiple
-                onChange={handleMultipleFilesChange}
+            </TokenLineCell>
+          )}
+          {step === CreateTokensSteps.SET_DATA && (
+            <TokenLineCell isHovered={hovered}>
+              <ExternalLinkInput
+                value={nameField || name}
+                onChange={handleNameChange}
+                placeholder='Enter name'
               />
-              {media?.length > 0 && (
-                <TextFileUploaded>
-                  {media?.length} files uploaded
-                </TextFileUploaded>
-              )}
-            </UploadWrapper>
-          </TokenLineCell>
-        )}
-        {step === CreateTokensSteps.UPLOAD_MEDIA && (
-          <TokenLineCell isHovered={hovered} isValid={isValidLink}>
-            <ExternalLinkInput
-              value={externalLink || external_url}
-              onChange={handleExternalLinkChange}
-              placeholder='Enter external link'
-            />
-          </TokenLineCell>
-        )}
-        {step === CreateTokensSteps.SET_DATA && (
-          <TokenLineCell isHovered={hovered}>
-            <ExternalLinkInput
-              value={nameField || name}
-              onChange={handleNameChange}
-              placeholder='Enter name'
-            />
-          </TokenLineCell>
-        )}
-        {step === CreateTokensSteps.SET_DATA && (
-          <TokenLineCell isHovered={hovered}>
-            <ExternalLinkInput
-              value={descriptionField || description}
-              onChange={handleDescriptionChange}
-              placeholder='Enter description'
-            />
-          </TokenLineCell>
-        )}
-        {step === CreateTokensSteps.SET_DATA && newAttributes.length > 0 && newAttributes.map((attribute, index) => (
-          <TokenLineCell key={attribute + '_' + index}>
-            <ExternalLinkInput
-              value={attributes.find((attr) => attr.trait_type === attribute)?.value}
-              onChange={(event) => setNewAttributeValue({
-                trait_type: attribute,
-                value: event.target.value,
-                tokenId,
-              })}
-              placeholder={`Enter ${attribute}`}
-            />
-          </TokenLineCell>))}
-        {step === CreateTokensSteps.SET_DATA && (
-          <TokenLineCell isHovered={hovered}>
-          </TokenLineCell>
-        )}
+            </TokenLineCell>
+          )}
+          {step === CreateTokensSteps.SET_DATA && (
+            <TokenLineCell isHovered={hovered}>
+              <ExternalLinkInput
+                value={descriptionField || description}
+                onChange={handleDescriptionChange}
+                placeholder='Enter description'
+              />
+            </TokenLineCell>
+          )}
+          {step === CreateTokensSteps.SET_DATA &&
+            newAttributes.length > 0 &&
+            newAttributes.map((attribute, index) => (
+              <TokenLineCell key={attribute + '_' + index}>
+                <ExternalLinkInput
+                  value={
+                    attributes.find((attr) => attr.trait_type === attribute)
+                      ?.value
+                  }
+                  onChange={(event) =>
+                    setNewAttributeValue({
+                      trait_type: attribute,
+                      value: event.target.value,
+                      tokenId
+                    })
+                  }
+                  placeholder={`Enter ${attribute}`}
+                />
+              </TokenLineCell>
+            ))}
+          {step === CreateTokensSteps.SET_DATA && (
+            <TokenLineCell isHovered={hovered}></TokenLineCell>
+          )}
+        </LineContent>
       </TokenLineWrap>
       <Modal
         isVisible={attributesModalVisible}
@@ -517,10 +530,19 @@ export const TokenLineWrap = styled.div`
   position: relative;
   display: flex;
   width: 100%;
+  height: 230px;
+`;
+
+export const LineContent = styled.div`
+  position: absolute;
+  width: 100%;
+  top: 0;
+  left: 0;
+  display: flex;
   height: 240px;
   border-top: 1px solid #b9b9b9;
   background: #fff;
-  margin: 0 !important;
+  // margin: 0 !important;
 
   &:last-child {
     border-bottom: 1px solid #b9b9b9;

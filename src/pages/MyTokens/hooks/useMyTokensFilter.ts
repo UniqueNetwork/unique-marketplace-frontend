@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { BN, BN_MAX_INTEGER } from '@polkadot/util';
 import { DecodedAttributeDto } from '@unique-nft/sdk';
 

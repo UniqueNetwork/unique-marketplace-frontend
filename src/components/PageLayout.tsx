@@ -30,7 +30,7 @@ export const PageLayout: FC = () => {
       return { heading: 'Create collection' };
     }
     if (pathname.includes('/create-token')) {
-      return { heading: 'Create NFTs' };
+      return { heading: '' };
     }
     if (pathname.includes('/collections')) {
       return { heading: 'My collections' };
@@ -142,7 +142,7 @@ const LayoutStyled = styled.div<{hasFooterSpacing: boolean}>`
   header {
     top: 0;
     position: sticky !important;
-    z-index: 990;
+    z-index: 1001;
     justify-content: center;
     @media (max-width: 620px) {
       height: 80px !important;
