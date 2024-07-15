@@ -866,8 +866,8 @@ export const TextStyledWithHint = styled(Text)`
 
   > div {
     position: absolute;
-    right: -26px;
-    margin-top: 2px;
+    right: -28px;
+    top: 0px;
   }
 
   > img {
