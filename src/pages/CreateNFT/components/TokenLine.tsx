@@ -10,6 +10,7 @@ import { Image } from './TokenBasicCard';
 import { PotentialAttribute } from '@unique-nft/sdk';
 import { shortcutText, validateLink } from 'utils/textUtils';
 import { CreateTokensSteps } from '../CreateNFT';
+import { filesSizeValidate } from 'utils/filesSizeValidate';
 
 export type NewAttributePayload = {
   trait_type: string;
@@ -88,23 +89,6 @@ export const TokenLine = ({
     });
   };
 
-  // const onAttributesChange = (attributes: Attribute[]) => {
-  //   onChange({
-  //     id,
-  //     tokenId,
-  //     image,
-  //     attributes,
-  //     isValid,
-  //     animation_url,
-  //     media,
-  //     isSelected,
-  //     royalties,
-  //     external_url,
-  //     name,
-  //     description
-  //   });
-  // };
-
   const onStartRemove = () => {
     setWillBeRemoved(true);
     setTimeout(() => {
@@ -116,7 +100,11 @@ export const TokenLine = ({
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     if (event.target.files && event.target.files[0]) {
-      const file = event.target.files[0];
+      const files = filesSizeValidate(event.target.files);
+
+      if (!files) return;
+
+      const file = files[0];
       onChange({
         id,
         tokenId,
@@ -141,100 +129,87 @@ export const TokenLine = ({
   const handleMultipleFilesChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    if (event.target.files) {
-      const files = event.target.files;
-      const media: { name: string; type: string; file: File; url: string }[] =
-        [];
-      const typeCounters: { [key: string]: number } = {
-        image: 0,
-        animation: 0,
-        video: 0,
-        audio: 0,
-        spatial: 0,
-        pdf: 0,
-        document: 0,
-        other: 0
-      };
+    if (!event.target.files) return;
 
-      Array.from(files).forEach((file) => {
-        let type: string;
-        switch (file.type) {
-          case 'image/jpeg':
-          case 'image/png':
-          case 'image/gif':
-            type = 'image';
-            break;
-          case 'video/mp4':
-          case 'video/webm':
-          case 'video/ogg':
-            type = 'video';
-            break;
-          case 'audio/mpeg':
-          case 'audio/ogg':
-          case 'audio/wav':
-            type = 'audio';
-            break;
-          case 'application/pdf':
-            type = 'pdf';
-            break;
-          case 'text/plain':
-          case 'application/msword':
-          case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-            type = 'document';
-            break;
-          default:
-            type = 'other';
-        }
+    const files = filesSizeValidate(event.target.files);
 
-        const name = `${type}_${++typeCounters[type]}`;
-        media.push({ name, type, file, url: URL.createObjectURL(file) });
-      });
+    if (!files) return;
 
-      onChange({
-        id,
-        tokenId,
-        image,
-        attributes,
-        isValid,
-        isSelected,
-        royalties,
-        animation_url,
-        media,
-        external_url,
-        name,
-        description
-      });
-    }
+    const media: { name: string; type: string; file: File; url: string }[] =
+      [];
+    const typeCounters: { [key: string]: number } = {
+      image: 0,
+      animation: 0,
+      video: 0,
+      audio: 0,
+      spatial: 0,
+      pdf: 0,
+      document: 0,
+      other: 0
+    };
+
+    Array.from(files).forEach((file) => {
+      let type: string;
+      switch (file.type) {
+        case 'image/jpeg':
+        case 'image/png':
+        case 'image/gif':
+          type = 'image';
+          break;
+        case 'video/mp4':
+        case 'video/webm':
+        case 'video/ogg':
+          type = 'video';
+          break;
+        case 'audio/mpeg':
+        case 'audio/ogg':
+        case 'audio/wav':
+          type = 'audio';
+          break;
+        case 'application/pdf':
+          type = 'pdf';
+          break;
+        case 'text/plain':
+        case 'application/msword':
+        case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+          type = 'document';
+          break;
+        default:
+          type = 'other';
+      }
+
+      const name = `${type}_${++typeCounters[type]}`;
+      media.push({ name, type, file, url: URL.createObjectURL(file) });
+    });
+
+    onChange({
+      id,
+      tokenId,
+      image,
+      attributes,
+      isValid,
+      isSelected,
+      royalties,
+      animation_url,
+      media,
+      external_url,
+      name,
+      description
+    });
+
   };
 
-  const [externalLink, setExternalLink] = useState('');
   const [isValidLink, setIsValidLink] = useState(true);
 
   const handleExternalLinkChange = (
     event: React.ChangeEvent<HTMLTextAreaElement>
   ): void => {
-    const link = event.target.value;
-    setExternalLink(link);
-    setIsValidLink(validateLink(link));
-  };
+    const externalLinkUpdate = event.target.value;
+    const isLinkValid = validateLink(externalLinkUpdate);
+    setIsValidLink(isLinkValid);
 
-  const [nameField, setNameField] = useState('');
-  const handleNameChange = (
-    event: React.ChangeEvent<HTMLTextAreaElement>
-  ): void => {
-    const name = event.target.value;
-    setNameField(name);
-  };
+    if (!isLinkValid) return;
 
-  const [descriptionField, setDescriptionField] = useState('');
-  const handleDescriptionChange = (
-    event: React.ChangeEvent<HTMLTextAreaElement>
-  ): void => {
-    const description = event.target.value;
-    setDescriptionField(description);
-  };
-
-  useEffect(() => {
     onChange({
       id,
       tokenId,
@@ -245,12 +220,52 @@ export const TokenLine = ({
       isValid,
       isSelected,
       royalties,
-      external_url: externalLink,
-      name: nameField,
-      description: descriptionField
+      external_url: externalLinkUpdate,
+      name,
+      description,
     });
-  }, [externalLink, nameField, descriptionField]);
+  };
 
+  const handleNameChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement>
+  ): void => {
+    const nameUpdate = event.target.value;
+
+    onChange({
+      id,
+      tokenId,
+      image,
+      attributes,
+      animation_url,
+      media,
+      isValid,
+      isSelected,
+      royalties,
+      external_url,
+      name: nameUpdate,
+      description,
+    });
+  };
+
+  const handleDescriptionChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement>
+  ): void => {
+    const descriptionUpdate = event.target.value;
+    onChange({
+      id,
+      tokenId,
+      image,
+      attributes,
+      animation_url,
+      media,
+      isValid,
+      isSelected,
+      royalties,
+      external_url,
+      name,
+      description: descriptionUpdate,
+    });
+  };
   const [attributesModalVisible, setAttributesModalVisible] = useState(false);
 
   return (
@@ -372,7 +387,7 @@ export const TokenLine = ({
           {step === CreateTokensSteps.UPLOAD_MEDIA && (
             <TokenLineCell isHovered={hovered} isValid={isValidLink}>
               <ExternalLinkInput
-                value={externalLink || external_url}
+                value={external_url}
                 onChange={handleExternalLinkChange}
                 placeholder='Enter external link'
               />
@@ -381,7 +396,7 @@ export const TokenLine = ({
           {step === CreateTokensSteps.SET_DATA && (
             <TokenLineCell isHovered={hovered}>
               <ExternalLinkInput
-                value={nameField || name}
+                value={name}
                 onChange={handleNameChange}
                 placeholder='Enter name'
               />
@@ -390,7 +405,7 @@ export const TokenLine = ({
           {step === CreateTokensSteps.SET_DATA && (
             <TokenLineCell isHovered={hovered}>
               <ExternalLinkInput
-                value={descriptionField || description}
+                value={description}
                 onChange={handleDescriptionChange}
                 placeholder='Enter description'
               />
@@ -417,7 +432,7 @@ export const TokenLine = ({
               </TokenLineCell>
             ))}
           {step === CreateTokensSteps.SET_DATA && (
-            <TokenLineCell isHovered={hovered}></TokenLineCell>
+            <TokenLineCellAttrAdd></TokenLineCellAttrAdd>
           )}
         </LineContent>
       </TokenLineWrap>
@@ -590,6 +605,23 @@ export const TokenLineCell = styled.div<{
     border-color: red;
   `}
 `;
+
+export const TokenLineCellAttrAdd =styled.div`
+  flex: 0.5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  text-align: left;
+  font-size: 12px;
+  line-height: 15px;
+  font-weight: 600;
+  border-right: 1px solid #b9b9b9;
+  height: 100%;
+  box-sizing: border-box;
+  background-color: var(--color-blue-grey-100);
+`;
+
 const FileInput = styled.input`
   display: none;
 `;

@@ -9,19 +9,21 @@ interface TokenInputFormProps {
   modalType: SetForAllModalType | null;
   onSubmit: (inputValue: string, modalType: SetForAllModalType | null) => void;
   buttonText?: string;
+  onClose: () => void;
 }
 
 const TokenInputForm: React.FC<TokenInputFormProps> = ({
   modalType,
   buttonText,
-  onSubmit
+  onSubmit,
+  onClose,
 }) => {
   const [inputValue, setInputValue] = useState<string>('');
   const [error, setError] = useState<string>('');
 
   const validateInput = (value: string): string => {
-    if (value.length < 3 || value.length > 300) {
-      return 'Input must be between 3 and 300 characters.';
+    if (value.length < 1 || value.length > 2000) {
+      return 'Input must be between 1 and 2000 characters.';
     }
 
     if (modalType === SetForAllModalType.EXTERNAL_LINK) {
@@ -45,20 +47,26 @@ const TokenInputForm: React.FC<TokenInputFormProps> = ({
 
   return (
     <FormWrap>
-      <TextInput
-        label={
-          (modalType === SetForAllModalType.NAME && 'Name') ||
-          (modalType === SetForAllModalType.DESCRIPTION && 'Description') ||
-          (modalType === SetForAllModalType.EXTERNAL_LINK && 'External link') ||
+      <InputLabel>
+        {
+          (modalType === SetForAllModalType.NAME && 'Set all') ||
+          (modalType === SetForAllModalType.DESCRIPTION && 'Set all') ||
+          (modalType === SetForAllModalType.EXTERNAL_LINK && 'Set all') ||
           (modalType === SetForAllModalType.NEW_ATTRIBUTE && 'New attribute') ||
           ''
         }
+      </InputLabel>
+      <TextInput
+
         value={inputValue}
         onChange={setInputValue}
         errorText={error}
         allowSpaces={true}
       />
-      <ConfirmBtn role='outlined' title={buttonText || 'Set for All'} onClick={handleSubmit} />
+      <ButtonWrap>
+        <ConfirmBtn role='outlined' title={'Cancel'} onClick={onClose} />
+        <ConfirmBtn role='primary' title={buttonText || 'Set'} onClick={handleSubmit} />
+      </ButtonWrap>
     </FormWrap>
   );
 };
@@ -66,8 +74,25 @@ const TokenInputForm: React.FC<TokenInputFormProps> = ({
 export default TokenInputForm;
 
 export const FormWrap = styled.div`
-  min-width: 560px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+`;
+
+export const ButtonWrap = styled.div`
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+
+  button {
+    flex: 1;
+  }
+`;
+
+export const InputLabel = styled.div`
+  margin-bottom: 16px;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  text-align: center;
+  widht: 100%;
 `;

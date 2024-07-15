@@ -18,6 +18,9 @@ import { NewAttributePayload, TokenLine } from './TokenLine';
 import FilterComponent from './TokenFilter';
 import useFilteredTokens from './useFilteredTokens';
 import Create from 'static/images/create.png';
+import IconWithHint from 'components/IconWithHint/IconWithHint';
+import { IconButton } from 'components/IconButton/IconButton';
+import ConfirmDeleteForm from './ConfirmDeleteForm';
 
 export type TokenListProps = {
   disabled: boolean;
@@ -40,7 +43,7 @@ export enum SetForAllModalType {
   DESCRIPTION = 'DESCRIPTION',
   EXTERNAL_LINK = 'EXTERNAL_LINK',
   ATTRIBUTES = 'ATTRIBUTES',
-  NEW_ATTRIBUTE = 'NEW_ATTRIBUTE',
+  NEW_ATTRIBUTE = 'NEW_ATTRIBUTE'
 }
 
 export const TokenList = ({
@@ -137,52 +140,71 @@ export const TokenList = ({
     }
   }, [tokens]);
 
-  const [openAddAttributeModal, setOpenAddAttributeModal] =useState(false);
-  const setNewAttributeValue = ({ trait_type, value, tokenId }: NewAttributePayload) => {
+  const [openAddAttributeModal, setOpenAddAttributeModal] = useState(false);
+  const setNewAttributeValue = ({
+    trait_type,
+    value,
+    tokenId
+  }: NewAttributePayload) => {
     const updatedTokens = tokens.map((token) => {
       if (token.tokenId === tokenId) {
         //@ts-ignore
-        const attributeExists = token.attributes.some((attribute) => attribute.trait_type === trait_type);
-        
+        const attributeExists = token.attributes.some(
+          (attribute) => attribute.trait_type === trait_type
+        );
+
         let updatedAttributes;
         if (attributeExists) {
           updatedAttributes = token.attributes.map((attribute) =>
-            attribute.trait_type === trait_type ? { ...attribute, value } : attribute
+            attribute.trait_type === trait_type
+              ? { ...attribute, value }
+              : attribute
           );
         } else {
           updatedAttributes = [...token.attributes, { trait_type, value }];
         }
-        
+
         return { ...token, attributes: updatedAttributes };
       }
       return token;
     });
-  
+
     onChange(updatedTokens);
   };
 
-  //open modal for set all 
-  const [attributeForSetAll, toggleAttributeForSetAll] = useState<string | null>(null);
+  //open modal for set all
+  const [attributeForSetAll, toggleAttributeForSetAll] = useState<
+    string | null
+  >(null);
   const deleteNewAttribute = (trait_type: string) => {
-    const updatedNewAttributes = newAttributes.filter((attr) => attr !== trait_type);
-    setNewAttributes( updatedNewAttributes);
+    const updatedNewAttributes = newAttributes.filter(
+      (attr) => attr !== trait_type
+    );
+    setNewAttributes(updatedNewAttributes);
 
     const updatedTokens = tokens.map((token) => {
-      const updatedAttributes = token.attributes.filter((attribute) => attribute.trait_type !== trait_type);
+      const updatedAttributes = token.attributes.filter(
+        (attribute) => attribute.trait_type !== trait_type
+      );
       return { ...token, attributes: updatedAttributes };
     });
-  
+
     onChange(updatedTokens);
   };
 
   const columnsCount = useMemo(() => {
-    const res = 5 + (step === CreateTokensSteps.SET_DATA ? newAttributes.length : 0);
+    const res =
+      5 + (step === CreateTokensSteps.SET_DATA ? newAttributes.length : 0);
     return res;
   }, [step, newAttributes]);
-  
-  const [filters, setFilters] = useState<{ attributes: { [key: string]: string[] }; name: string[]; description: string[] }>({ attributes: {}, name: [], description: [] });
+
+  const [filters, setFilters] = useState<{
+    attributes: { [key: string]: string[] };
+    name: string[];
+    description: string[];
+  }>({ attributes: {}, name: [], description: [] });
   const filteredTokens = useFilteredTokens(tokens, filters);
-  
+  const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState<string | null>(null);
 
   return (
     <ScrollWrap>
@@ -228,7 +250,7 @@ export const TokenList = ({
                         attributesSchema,
                         collection,
                         onChange: onTokenChange,
-                        onRemove: onTokenRemove,
+                        onRemove: onTokenRemove
                         // onOpenModifyModal: setEditingToken
                       }}
                       dragHandleProps={{}}
@@ -237,7 +259,6 @@ export const TokenList = ({
                 </TokenPreviewWrapper>
               )}
               {viewMode === ViewMode.list && (
-
                 <TableWrap>
                   <TableHeader columnsCount={columnsCount}>
                     <TableHeaderCell>
@@ -251,99 +272,114 @@ export const TokenList = ({
                     </TableHeaderCell>
                     {step === CreateTokensSteps.UPLOAD_MEDIA && (
                       <TableHeaderCell>
-                        <TextStyled>
-                          Main media file (Full size image/ GIF/ Video/ Audio)
-                          Recommended max. 3Mb
-                        </TextStyled>
+                        <TextStyledWithHint>
+                          Main media file
+                          <IconWithHint
+                            align={{
+                              appearance: 'horizontal',
+                              horizontal: 'right',
+                              vertical: 'top'
+                            }}
+                          >
+                            Full size image/ GIF/ Video/ Audio
+                          </IconWithHint>
+                        </TextStyledWithHint>
+
+                        <TextStyledSmall>Max 3Mb</TextStyledSmall>
                       </TableHeaderCell>
                     )}
                     {step === CreateTokensSteps.UPLOAD_MEDIA && (
                       <TableHeaderCell>
-                        <TextStyled>
-                          Additional media files (Full size image/ GIF/ Video/
-                          Audio) Recommended max. 3Mb
-                        </TextStyled>
+                        <TextStyledWithHint>
+                          Additional media files
+                          <IconWithHint
+                            align={{
+                              appearance: 'horizontal',
+                              horizontal: 'right',
+                              vertical: 'top'
+                            }}
+                          >
+                            (Full size image/ GIF/ Video/ Audio) Recommended
+                            max. 3Mb
+                          </IconWithHint>
+                        </TextStyledWithHint>
+
+                        <TextStyledSmall>Max 3Mb</TextStyledSmall>
                       </TableHeaderCell>
                     )}
                     {step === CreateTokensSteps.UPLOAD_MEDIA && (
                       <TableHeaderCell>
                         <TextStyled>External link</TextStyled>
-                        <HeaderCellButtonWrap>
-                          <ConfirmBtn
-                            role='outlined'
-                            title='Set for All'
-                            onClick={() => {
-                              toggleSetForAllModal(
-                                SetForAllModalType.EXTERNAL_LINK
-                              );
-                            }}
-                          />
-                        </HeaderCellButtonWrap>
+                        <SetAllButton
+                          onClick={() => {
+                            toggleSetForAllModal(
+                              SetForAllModalType.EXTERNAL_LINK
+                            );
+                          }}
+                        >
+                          Set for selected
+                        </SetAllButton>
                       </TableHeaderCell>
                     )}
                     {step === CreateTokensSteps.SET_DATA && (
                       <TableHeaderCell>
                         <TextStyled>Name</TextStyled>
-                        <HeaderCellButtonWrap>
-                          <ConfirmBtn
-                            role='outlined'
-                            title='Set for All'
-                            onClick={() => {
-                              toggleSetForAllModal(SetForAllModalType.NAME);
-                            }}
-                          />
-                        </HeaderCellButtonWrap>
+                        <SetAllButton
+                          onClick={() => {
+                            toggleSetForAllModal(SetForAllModalType.NAME);
+                          }}
+                        >
+                          Set for selected
+                        </SetAllButton>
                       </TableHeaderCell>
                     )}
                     {step === CreateTokensSteps.SET_DATA && (
                       <TableHeaderCell>
                         <TextStyled>Description</TextStyled>
-                        <HeaderCellButtonWrap>
-                          <ConfirmBtn
-                            role='outlined'
-                            title='Set for All'
-                            onClick={() => {
-                              toggleSetForAllModal(
-                                SetForAllModalType.DESCRIPTION
-                              );
-                            }}
-                          />
-                        </HeaderCellButtonWrap>
+                        <SetAllButton
+                          onClick={() => {
+                            toggleSetForAllModal(
+                              SetForAllModalType.DESCRIPTION
+                            );
+                          }}
+                        >
+                          Set for selected
+                        </SetAllButton>
                       </TableHeaderCell>
                     )}
                     {step === CreateTokensSteps.SET_DATA &&
                       newAttributes.map((item, index) => (
-                        <TableHeaderCell key={index}>
-                          <CloseButton onClick={() => deleteNewAttribute(item)}>
-                            <Icon name={'close'} size={16} />
+                        <TableHeaderCellAttribute key={index}>
+                          <CloseButton>
+                            <IconButton
+                              name='trash'
+                              color={'var(--color-grey-500)'}
+                              size={24}
+                              onClick={() => setShowConfirmDeleteModal(item)}
+                            />
                           </CloseButton>
                           <TextStyled>{item}</TextStyled>
-                          <HeaderCellButtonWrap>
-                            <ConfirmBtn
-                              role='outlined'
-                              title='Set for All'
-                              onClick={() => {
-                                toggleAttributeForSetAll(item);
-                              }}
-                            />
-                          </HeaderCellButtonWrap>
-                        </TableHeaderCell>
-                      ))
-                    }
+                          <SetAllButton
+                            onClick={() => {
+                              toggleAttributeForSetAll(item);
+                            }}
+                          >
+                            Set for selected
+                          </SetAllButton>
+                        </TableHeaderCellAttribute>
+                      ))}
                     {/* not show this column in case no attributes */}
                     {step === CreateTokensSteps.SET_DATA && (
-                      <TableHeaderCell>
+                      <TableHeaderCellAttrAdd>
                         {/* <TextStyled>Add attribute</TextStyled> */}
-                        <HeaderAddAttributeWrap>
-                          <ConfirmBtn
-                            role='outlined'
-                            title='Add Attribute'
-                            onClick={() => {
-                              setOpenAddAttributeModal(true);
-                            }}
-                          />
+                        <HeaderAddAttributeWrap
+                          onClick={() => {
+                            setOpenAddAttributeModal(true);
+                          }}
+                        >
+                          +
                         </HeaderAddAttributeWrap>
-                      </TableHeaderCell>
+                      </TableHeaderCellAttrAdd>
                     )}
                   </TableHeader>
 
@@ -385,85 +421,117 @@ export const TokenList = ({
         {
           <Modal
             isVisible={!!setForAllModal}
-            isFlexible={true}
-            onClose={() => toggleSetForAllModal(null)}
-            isClosable
           >
-            {setForAllModal === SetForAllModalType.ATTRIBUTES ? (
-              // <AttributesForm
-              //   initialAttributes={[]}
-              //   attributes={tokens[0]?.attributes || []}
-              //   attributesSchema={attributesSchema}
-              //   isValid={true}
-              //   onChange={(attributes) => {
-              //     onChange(
-              //       tokens.map((_token) => {
-              //         return {
-              //           ..._token,
-              //           attributes: attributes
-              //         };
-              //       })
-              //     );
-              //   }}
-              // />
-              <></>
-            ) : (
-              <TokenInputForm
-                modalType={setForAllModal}
-                onSubmit={handleForAllSubmit}
-              />
-            )}
+            <TokenInputForm
+              modalType={setForAllModal}
+              onSubmit={handleForAllSubmit}
+              onClose={() => toggleSetForAllModal(null)}
+            />
           </Modal>
         }
         {
-          <Modal
-            isVisible={openAddAttributeModal}
-            onClose={() => setOpenAddAttributeModal(false)}
-            isFlexible={true}
-            isClosable
-          >
+          <Modal isVisible={openAddAttributeModal} isFlexible={true}>
             <TokenInputForm
+              onClose={() => setOpenAddAttributeModal(false)}
               modalType={SetForAllModalType.NEW_ATTRIBUTE}
               buttonText={'Add Attribute'}
               onSubmit={(newAttr) => {
-                const attributeExists = newAttributes.some((attr) => attr === newAttr);
-    
+                const attributeExists = newAttributes.some(
+                  (attr) => attr === newAttr
+                );
+
                 if (!attributeExists) {
                   setNewAttributes([...newAttributes, newAttr]);
                 }
-                
+
                 setOpenAddAttributeModal(false);
               }}
             />
           </Modal>
         }
         {
-          <Modal
-            isVisible={!!attributeForSetAll}
-            onClose={() => toggleAttributeForSetAll(null)}
-            isFlexible={true}
-            isClosable
-          >
+          <Modal isVisible={!!attributeForSetAll} isFlexible={true}>
             <TokenInputForm
+              onClose={() => toggleAttributeForSetAll(null)}
               modalType={SetForAllModalType.NEW_ATTRIBUTE}
-              buttonText={`Set ${attributeForSetAll}`}
+              buttonText={`Add attribute`}
               onSubmit={(value) => {
                 const updatedTokens = tokens.map((token) => {
-                  const attributeExists = token.attributes.some((attr) => attr.trait_type === attributeForSetAll);
-            
+                  const attributeExists = token.attributes.some(
+                    (attr) => attr.trait_type === attributeForSetAll
+                  );
+
                   let updatedAttributes;
                   if (attributeExists) {
-                    updatedAttributes = token.attributes.map((attr) => 
-                      attr.trait_type === attributeForSetAll ? { ...attr, value } : attr
+                    updatedAttributes = token.attributes.map((attr) =>
+                      attr.trait_type === attributeForSetAll
+                        ? { ...attr, value }
+                        : attr
                     );
                   } else {
-                    updatedAttributes = [...token.attributes, { trait_type: attributeForSetAll || '', value: value || '' }];
+                    updatedAttributes = [
+                      ...token.attributes,
+                      {
+                        trait_type: attributeForSetAll || '',
+                        value: value || ''
+                      }
+                    ];
                   }
-            
+
                   return { ...token, attributes: updatedAttributes };
                 });
                 onChange(updatedTokens);
                 toggleAttributeForSetAll(null);
+              }}
+            />
+          </Modal>
+        }
+
+        {
+          <Modal isVisible={!!attributeForSetAll} isFlexible={true}>
+            <TokenInputForm
+              onClose={() => toggleAttributeForSetAll(null)}
+              modalType={SetForAllModalType.NEW_ATTRIBUTE}
+              buttonText={`Set ${attributeForSetAll}`}
+              onSubmit={(value) => {
+                const updatedTokens = tokens.map((token) => {
+                  const attributeExists = token.attributes.some(
+                    (attr) => attr.trait_type === attributeForSetAll
+                  );
+
+                  let updatedAttributes;
+                  if (attributeExists) {
+                    updatedAttributes = token.attributes.map((attr) =>
+                      attr.trait_type === attributeForSetAll
+                        ? { ...attr, value }
+                        : attr
+                    );
+                  } else {
+                    updatedAttributes = [
+                      ...token.attributes,
+                      {
+                        trait_type: attributeForSetAll || '',
+                        value: value || ''
+                      }
+                    ];
+                  }
+
+                  return { ...token, attributes: updatedAttributes };
+                });
+                onChange(updatedTokens);
+                toggleAttributeForSetAll(null);
+              }}
+            />
+          </Modal>
+        }
+
+        {
+          <Modal isVisible={!!showConfirmDeleteModal} isFlexible={true}>
+            <ConfirmDeleteForm
+              onClose={() => setShowConfirmDeleteModal(null)}
+              onSubmit={() => {
+                showConfirmDeleteModal && (deleteNewAttribute(showConfirmDeleteModal));
+                setShowConfirmDeleteModal(null);
               }}
             />
           </Modal>
@@ -473,14 +541,23 @@ export const TokenList = ({
   );
 };
 
-const TokenListWrapper = styled.div<{columnsCount: number, stepUploadImages: boolean}>`
+const TokenListWrapper = styled.div<{
+  columnsCount: number;
+  stepUploadImages: boolean;
+}>`
   display: flex;
   margin-top: calc(var(--prop-gap) * 2.5);
   margin-bottom: calc(var(--prop-gap) * 2);
   min-height: calc(120vh - 444px);
   position: relative;
-  width: ${({columnsCount, stepUploadImages}) => stepUploadImages ? 'auto' :`${columnsCount * 240}px`};
+  width: ${({ columnsCount, stepUploadImages }) =>
+    stepUploadImages ? 'auto' : `${columnsCount * 240}px`};
   background: #fff;
+
+  .unique-modal {
+    padding: 50px 120px;
+    width: 320px;
+  }
 `;
 
 const DraggableContainer = styled.div<{ hasOffset: boolean }>`
@@ -526,23 +603,25 @@ export const ImageUploadArea = ({
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     const MAX_FILE_SIZE_MB = 20;
     const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
-  
+
     setIsDragEnter(false);
-  
+
     if (!inputFile.current) {
       return;
     }
-  
+
     const files = Array.from(inputFile.current.files || []);
     const validFiles = files.filter((file) => file.size <= MAX_FILE_SIZE_BYTES);
-  
+
     if (validFiles.length < files.length) {
-      alert(`Some files exceed the maximum size of ${MAX_FILE_SIZE_MB} MB and will not be uploaded.`);
+      alert(
+        `Some files exceed the maximum size of ${MAX_FILE_SIZE_MB} MB and will not be uploaded.`
+      );
     }
-  
+
     onUpload?.(validFiles);
     onDragExit();
-  
+
     inputFile.current.value = '';
   };
 
@@ -570,7 +649,9 @@ export const ImageUploadArea = ({
         <Content>
           <ImageCreate src={Create} />
           <ContentHeader>Upload NFT images </ContentHeader>
-          <Text size='s'>You can bulk-mint 50 NFTs. Optimal image size 500x500 px, 500 KB</Text>
+          <Text size='s'>
+            You can bulk-mint 50 NFTs. Optimal image size 500x500 px, 500 KB
+          </Text>
         </Content>
       </ContentRelative>
       <input
@@ -597,15 +678,14 @@ const TokenPreviewWrapper = styled.div`
 `;
 
 const WrapperCollectionContentStyled = styled.div`
-
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: #F5FCFF;
+  background-color: #f5fcff;
   border: 1px dashed var(--color-primary-500);
   // padding: 92px 0 48px;
-  
+
   border-radius: 16px;
   position: absolute;
   top: 0;
@@ -615,7 +695,7 @@ const WrapperCollectionContentStyled = styled.div`
   border: 1px dashed var(--color-primary-500);
   z-index: 1000;
   left: 0;
-  
+
   &.full-area {
     left: 0;
   }
@@ -678,22 +758,25 @@ const TableWrap = styled.div`
   background: #fff;
 `;
 
-
-export const TableHeader = styled.div<{columnsCount: number}>`
+export const TableHeader = styled.div<{ columnsCount: number }>`
   display: flex;
-  width: ${({columnsCount}) => `${columnsCount * 240}px`};
+  width: ${({ columnsCount }) => `${columnsCount * 240}px`};
   height: 100px;
   background-color: #0000000f;
-  border-top: 1px solid #b9b9b9;
+  
 `;
 
 export const TableHeaderCell = styled.div`
   position: relative;
   flex: 1;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: start;
+  justify-content: start;
   border-right: 1px solid #b9b9b9;
+  border-top: 1px solid #b9b9b9;
   height: 100%;
+  padding: 18px 0;
   box-sizing: border-box;
   &:first-child {
     flex: 0.5;
@@ -705,10 +788,43 @@ export const TableHeaderCell = styled.div`
   }
 `;
 
-const HeaderCellButtonWrap = styled.div`
+const CloseButton = styled.div`
   position: absolute;
-  left: 8px;
-  bottom: 0;
+  cursor: pointer;
+  padding: 10px;
+  top: 0;
+  right: 0;
+
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+
+  svg {
+    fill: var(--color-grey-500);
+  }
+`;
+
+
+export const TableHeaderCellAttribute = styled(TableHeaderCell)`
+  &:hover ${CloseButton} {
+    opacity: 1;
+    visibility: visible;
+  }
+`;
+
+export const TableHeaderCellAttrAdd = styled.div`
+  position: relative;
+  flex: 0.5;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  justify-content: start;
+  border-right: 1px solid #b9b9b9;
+  border-top: 1px solid #b9b9b9;
+  height: 100%;
+  padding: 18px 0;
+  box-sizing: border-box;
+  background-color: var(--color-blue-grey-100);
+  border-top-right-radius: 4px;
 `;
 
 const HeaderAddAttributeWrap = styled.div`
@@ -716,14 +832,55 @@ const HeaderAddAttributeWrap = styled.div`
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--color-primary-500);
+  border-radius: 16px;
+  color: var(--color-primary-500);
+  background-color: #FFF;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 `;
 
 export const TextStyled = styled(Text)`
-  padding-left: 10px;
   text-align: left;
-  font-size: 12px;
-  line-height: 15px;
+  font-size: 16px;
+  line-height: 19px;
   font-weight: 600;
+  padding-left: 10px;
+`;
+
+export const TextStyledWithHint = styled(Text)`
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  text-align: left;
+  font-size: 16px;
+  line-height: 19px;
+  font-weight: 600;
+  padding-left: 10px;
+
+  > div {
+    position: absolute;
+    right: -26px;
+    margin-top: 2px;
+  }
+
+  > img {
+    height: 18px;
+    width: 18px;
+  }
+`;
+
+export const TextStyledSmall = styled.div`
+  margin-top: 2px;
+  font-size: 8px;
+  color: var(--color-grey-600);
+  padding-left: 10px;
 `;
 
 const ScrollWrap = styled.div`
@@ -731,20 +888,6 @@ const ScrollWrap = styled.div`
   overflow-y: scroll;
 `;
 
-const CloseButton = styled.div`
-  position: absolute;
-  cursor: pointer;
-  padding: 10px;
-  top: 0;
-  right: 0;
-  
-  svg {
-    fill: var(--color-additional-dark);
-  }
-  &:hover svg{
-    fill: var(--color-primary-500);
-  }
-`;
 
 const FiltersWrapper = styled.div`
   width: 260px;
@@ -784,8 +927,19 @@ const ContentHeader = styled.div`
 `;
 
 const ContentSubtitle = styled.div`
-
   font-size: 14px;
   line-heignt: 22px;
-
 `;
+
+const SetAllButton = styled.div`
+  line-height: 22px;
+  font-size: 14px;
+  color: var(--color-primary-500);
+  cursor: pointer;
+  margin-top: 8px;
+  padding-left: 10px;
+`;
+
+// const ModalWrapper = styled.div`
+
+// `;

@@ -154,7 +154,7 @@ const FilterComponent: React.FC<FilterProps> = ({ onFilterChange, tokens }) => {
 
   return (
     <FilterContainer>
-      {attributes.length > 0 && <AccordionStyled
+      {attributes && <AccordionStyled
         title={'Attribute count'}
         isOpen={true}
       >
@@ -171,7 +171,7 @@ const FilterComponent: React.FC<FilterProps> = ({ onFilterChange, tokens }) => {
           </CheckboxLabel>
         ))}
       </AccordionStyled>}
-      {filteredNames.length > 0 && <AccordionStyled
+      {filteredNames && <AccordionStyled
         title={'Name'}
         isOpen={true}
       >
@@ -200,7 +200,7 @@ const FilterComponent: React.FC<FilterProps> = ({ onFilterChange, tokens }) => {
         ))}
       </AccordionStyled>}
 
-      {filteredDescriptions.length > 0 && <AccordionStyled
+      {filteredDescriptions && <AccordionStyled
         title={'Description'}
         isOpen={true}
       >
