@@ -1,21 +1,26 @@
 import styled from 'styled-components';
 import { TemplateProps } from 'react-draggable-list';
-import { MouseEventHandler, TouchEventHandler, useState } from 'react';
+import { MouseEventHandler, TouchEventHandler, useRef, useState } from 'react';
 import classNames from 'classnames';
 
 import { Modal, Text } from 'components/UI';
 
-import { NewToken2, ViewMode } from '../types';
-import { Image } from './TokenBasicCard';
+import { NewToken2, ViewMode } from '../../types';
+import { Image } from '../TokenBasicCard';
 import { CollectionWithInfoV2Dto, PotentialAttribute } from '@unique-nft/sdk';
 import { CommonTokenDetail } from 'pages/Token/TokenDetail/CommonTokenDetail';
 import { useAccounts } from 'hooks/useAccounts';
+import Slider from 'react-slick';
+import { CustomNextArrow, CustomPrevArrow } from 'pages/Token/TokenDetail/Slider/CustomSliderArrows';
+import { CustomTokenPreviewArrowsNext, CustomTokenPreviewArrowsPrev } from './CustomTokenPreviewArrows';
 
 export type TokenCardCommonProps = {
   onChange(token: NewToken2): void;
   onRemove(id: number): void;
   onOpenModifyModal?(token: NewToken2): void;
   tokenPrefix: string;
+  list?: NewToken2[];
+  index: number;
   attributesSchema: PotentialAttribute[];
   mode: 'NFT' | 'Fungible' | 'ReFungible' | undefined;
   viewMode: ViewMode;
@@ -34,10 +39,13 @@ export const TokenPreview = ({
     id,
     tokenId,
     image,
+    
   } = item;
   const {
     tokenPrefix,
-    collection
+    collection,
+    list,
+    index,
   } = commonProps;
   const [willBeRemoved, setWillBeRemoved] = useState(false);
   const [hovered, setHovered] = useState(false);
@@ -49,8 +57,21 @@ export const TokenPreview = ({
   const { selectedAccount } = useAccounts();
   const [showTokendetails, setShowTokendetails] = useState<boolean>(false);
 
+  const horizontalSliderRef = useRef<Slider>(null);
+  const settings = {
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    nextArrow: <CustomTokenPreviewArrowsNext />,
+    prevArrow: <CustomTokenPreviewArrowsPrev />,
+    beforeChange: (oldIndex: number, newIndex: number) =>
+      setActiveIndex(newIndex)
+  };
+  const [activeIndex, setActiveIndex] = useState(0);
+
   return (
-    <>
+    <TokenPreviewWrapper>
       <TokenWrapper
         id={`token-${id}`}
         className={classNames({
@@ -85,35 +106,40 @@ export const TokenPreview = ({
         </TokenBasicWrapper>
       </TokenWrapper>
 
+
       <Modal
         isVisible={!!showTokendetails}
         onClose={() => {
-          console.log('ON_CLOSE');
           setShowTokendetails(false);
         }}
         isClosable
         isFlexible={true}
       >
-        <CommonTokenDetailWrapper>
-          <CommonTokenDetail
-          //@ts-ignore
-            token={{
-              ...item,
-              image: item.image.url,
-              collectionId: collection?.collectionId || 0,
-              owner: selectedAccount?.address || '',
-              animation_url: item?.animation_url?.url,
-            }}
-            collection={collection}
-            isLoading={false}
-            testid={`${'create-token-preview'}`}
-            isOwner={true}
-            isNested={false}
-            previewMode={true}
-          ></CommonTokenDetail>
-        </CommonTokenDetailWrapper>
+        <Slider ref={horizontalSliderRef} {...settings} initialSlide={index}>
+          {
+            list?.map((token) => (        <CommonTokenDetailWrapper>
+              <CommonTokenDetail
+              //@ts-ignore
+                token={{
+                  ...token,
+                  image: token.image.url,
+                  collectionId: collection?.collectionId || 0,
+                  owner: selectedAccount?.address || '',
+                  animation_url: token?.animation_url?.url,
+                }}
+                collection={collection}
+                isLoading={false}
+                testid={`${'create-token-preview'}`}
+                isOwner={true}
+                isNested={false}
+                previewMode={true}
+              ></CommonTokenDetail>
+            </CommonTokenDetailWrapper>))
+
+          }
+        </Slider>
       </Modal>
-    </>
+    </TokenPreviewWrapper>
   );
 };
 
@@ -254,4 +280,14 @@ const CommonTokenDetailWrapper = styled.div`
   margin-top: 35px;
   width: 960px;
   max-width: 80vw;
+  height: 650px;
+`;
+
+const TokenPreviewWrapper = styled.div`
+  .unique-modal {
+    width: 1060px !important;
+    height: 720px !important;
+    padding: 0 30px !important;
+    box-sizing: border-box !important; 
+  }
 `;

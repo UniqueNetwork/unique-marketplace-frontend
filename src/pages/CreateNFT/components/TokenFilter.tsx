@@ -17,10 +17,6 @@ const FilterContainer = styled.div`
   .input-wrapper.with-icon:last-of-type svg {
     margin-bottom: -4px;
   }
-
-  // .input-wrapper.with-icon:first-of-type svg {
-  //   margin-bottom: 0;
-  // }
 `;
 
 const CheckboxLabel = styled.label`

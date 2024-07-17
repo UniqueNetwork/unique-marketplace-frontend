@@ -36,6 +36,7 @@ import { CollectionDetail } from 'pages/Collection/CollectionDetail/CollectionDe
 import { CollectionDetailLight } from 'pages/Collection/CollectionDetail/CollectionDetailLight';
 import Skeleton from 'components/Skeleton/Skeleton';
 import { CreateTokensDialogs } from './components/CreateTokensDialogs';
+import { RoyaltiesFormNew } from 'pages/CollectionEdit/Forms/RoyaltiesFormNew';
 
 export enum CreateTokensSteps {
   SELECT_COLLECTION = 'SELECT_COLLECTION',
@@ -427,7 +428,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
           <WrapperCollectionContentStyled expanded={!!collection}>
             <ImageCreate src={Box} />
             <Heading size='3'>
-              Create new collection or select an existing one
+              {!isFetching && (collections.length > 0 ? 'Create new collection or select an existing one' : 'You don`t own any collections yet, but you can create one right now!')}
             </Heading>
             <CreateCollectionLink
               onClick={() => {
@@ -501,14 +502,9 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
                 )}
                 {step === CreateTokensSteps.SET_ROYALTIES && (
                   <ContentWrap>
-                    <Heading size='3'>Set Royalty</Heading>
-                    <Text size='m' color='grey-500'>
-                      Royalties are payments made to the collection&apos;s
-                      creator whenever an NFT is resold. Enter the Royalty % to
-                      apply royalties to all the NFTs you are minting. Keep in
-                      mind that setting a high royalty percentage might
-                      discourage buyers from purchasing your NFTs on the
-                      secondary market.
+                    <Heading size='3'>Royalty</Heading>
+                    <Text size='s' color='grey-500'>
+                      Royalties are payments made to the collection's creator ot team whenever an NFT is resold on the secondary market. 
                     </Text>
                   </ContentWrap>
                 )}
@@ -588,7 +584,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
                 {step === CreateTokensSteps.SET_ROYALTIES && (
                   <RoyaltiesFormWrapper>
                     {' '}
-                    <RoyaltiesForm
+                    <RoyaltiesFormNew
                       initialFormData={royalty.royalties}
                       onSubmit={onRoyaltiesFormSubmit}
                       withSaveButton={false}
@@ -598,12 +594,22 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
                 {tokens.length > 0 && !isFilterVisible && (
                   <ButtonGroup ref={actionBoxRef}>
                     <ConfirmBtn
+                      iconLeft={{
+                        color: 'var(--color-primary-400)',
+                        name: 'arrow-left',
+                        size: 12
+                      }}
                       role='outlined'
                       title='Back'
                       disabled={step === CreateTokensSteps.UPLOAD_MEDIA}
                       onClick={() => changeStep('prev')}
                     />
                     <ConfirmBtn
+                      iconRight={{
+                        color: 'currentColor',
+                        name: 'arrow-right',
+                        size: 12
+                      }}
                       role='primary'
                       title='Next Step'
                       disabled={
@@ -810,6 +816,7 @@ const TokensCounterWrapper = styled.div`
 `;
 
 const ButtonGroup = styled.div`
+
   display: flex;
   flex-wrap: wrap;
   gap: var(--prop-gap);
@@ -821,6 +828,11 @@ const ButtonGroup = styled.div`
   background: white;
   position: sticky;
   border-radius: 4px;
+
+  @media screen and (min-width: 1025px) {
+    padding-left: calc(220px + var(--prop-gap)* 2);
+  }
+
   &.active {
     box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
   }
@@ -835,6 +847,8 @@ const ButtonGroup = styled.div`
       opacity: 0;
     }
   }
+
+
 `;
 
 const SelectedCountWrapper = styled.div`

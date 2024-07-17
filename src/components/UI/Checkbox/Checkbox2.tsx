@@ -10,6 +10,7 @@ export interface CheckboxProps extends Omit<ComponentProps, 'onChange'> {
   size?: 's' | 'm';
   disabled?: boolean;
   className?: string;
+  isRadio?: boolean;
   onChange?: (value: boolean) => void;
   iconRight?: IconProps;
   iconLeft?: IconProps;
@@ -29,6 +30,7 @@ export const Checkbox = forwardRef(
       iconRight,
       iconLeft,
       testid,
+      isRadio,
       className
     }: CheckboxProps,
     ref: LegacyRef<HTMLInputElement>
@@ -42,6 +44,7 @@ export const Checkbox = forwardRef(
           `checkbox-size-${size}`,
           { disabled }
         )}
+        onClick={() => !disabled && onChange?.(!checked)}
       >
         <input
           type='checkbox'
@@ -53,15 +56,19 @@ export const Checkbox = forwardRef(
           onChange={(e) => onChange?.(e.target.checked)}
           data-testid={`${testid}-${name || label}`}
         />
-        <span className={classNames('checkmark', { checked })}>
-          {checked && (
-            <Icon
-              name='checked'
-              color='#fff'
-              size={size === 's' ? 16 : 18}
-            />
-          )}
-        </span>
+        {isRadio ? (
+          <span className={classNames('radio', { checked })}>
+            {checked && (
+              <RadioChecked />
+            )}
+          </span>
+        ) : (
+          <span className={classNames('checkmark', { checked })}>
+            {checked && (
+              <Icon name='checked' color='#fff' size={size === 's' ? 16 : 18} />
+            )}
+          </span>
+        )}
 
         <label
           className={classNames('checkbox-label', {
@@ -69,7 +76,6 @@ export const Checkbox = forwardRef(
             'icon-right': iconRight
           })}
           data-testid={`${testid}-label`}
-          onClick={() => !disabled && onChange?.(!checked)}
         >
           {icon && <Icon {...icon} />}
           <span>{label}</span>
@@ -111,6 +117,23 @@ const CheckboxStyled = styled.div`
     border: 1px solid var(--color-primary-500);
   }
 
+  .radio {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    box-sizing: border-box;
+    border: 1px solid var(--color-grey-300);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .radio.checked {
+    border: 2px solid var(--color-primary-500);
+  }
+
+
   label {
     display: flex;
     font-size: var(--prop-font-size);
@@ -120,6 +143,8 @@ const CheckboxStyled = styled.div`
     line-height: 22px;
     word-break: break-word;
   }
+
+  
 
   &.disabled {
     .checkmark {
@@ -181,4 +206,12 @@ const CheckboxStyled = styled.div`
       margin-left: 4px;
     }
   }
+`;
+
+
+const RadioChecked = styled.div`
+  width: 11px;
+  height: 11px;
+  border-radius: 11px;
+  background: var(--color-primary-500);
 `;

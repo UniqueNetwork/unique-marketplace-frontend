@@ -233,7 +233,7 @@ const TotalWrapper = styled.div`
 const RecipientSelectWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  row-gap: calc(var(--prop-gap) / 2);
+  row-gap: calc(var(--prop-gap));
   .unique-input-text {
     width: 100%;
   }

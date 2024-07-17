@@ -3,7 +3,7 @@ import { TemplateProps } from 'react-draggable-list';
 import { MouseEventHandler, TouchEventHandler, useEffect, useState } from 'react';
 import classNames from 'classnames';
 
-import { Checkbox, Modal, Text } from 'components/UI';
+import { Modal, Text } from 'components/UI';
 
 import { NewToken2, ViewMode } from '../types';
 import { Image } from './TokenBasicCard';
@@ -11,6 +11,7 @@ import { PotentialAttribute } from '@unique-nft/sdk';
 import { shortcutText, validateLink } from 'utils/textUtils';
 import { CreateTokensSteps } from '../CreateNFT';
 import { filesSizeValidate } from 'utils/filesSizeValidate';
+import { Checkbox } from 'components/UI/Checkbox/Checkbox2';
 
 export type NewAttributePayload = {
   trait_type: string;
@@ -296,11 +297,18 @@ export const TokenLine = ({
               onMouseDown?.(e);
             }}
           >
-            <SelectCheckbox
+            {/* <SelectCheckbox
               label=''
               checked={isSelected}
               onChange={onSelect}
               testid='select'
+            /> */}
+            <Checkbox
+              label=''
+              checked={isSelected}
+              onChange={onSelect}
+              size={'m'}
+              testid={''}
             />
           </TokenLineCell>
           <TokenLineCell

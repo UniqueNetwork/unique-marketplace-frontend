@@ -11,7 +11,7 @@ import { getUniqueTraitTypes } from '../helpers';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { CollectionWithInfoV2Dto, PotentialAttribute } from '@unique-nft/sdk';
 import { CreateTokensSteps } from '../CreateNFT';
-import { TokenPreview } from './TokenPreview';
+import { TokenPreview } from './TokenPreview/TokenPreview';
 import { ConfirmBtn } from 'components';
 import TokenInputForm from './TokenInputForm';
 import { NewAttributePayload, TokenLine } from './TokenLine';
@@ -21,6 +21,7 @@ import Create from 'static/images/create.png';
 import IconWithHint from 'components/IconWithHint/IconWithHint';
 import { IconButton } from 'components/IconButton/IconButton';
 import ConfirmDeleteForm from './ConfirmDeleteForm';
+import Slider from 'react-slick';
 
 export type TokenListProps = {
   disabled: boolean;
@@ -249,8 +250,10 @@ export const TokenList = ({
                         tokenPrefix,
                         attributesSchema,
                         collection,
+                        list: filteredTokens,
                         onChange: onTokenChange,
-                        onRemove: onTokenRemove
+                        onRemove: onTokenRemove,
+                        index,
                         // onOpenModifyModal: setEditingToken
                       }}
                       dragHandleProps={{}}
@@ -548,7 +551,7 @@ const TokenListWrapper = styled.div<{
   display: flex;
   margin-top: calc(var(--prop-gap) * 2.5);
   margin-bottom: calc(var(--prop-gap) * 2);
-  min-height: calc(120vh - 444px);
+  min-height: 755px;
   position: relative;
   width: ${({ columnsCount, stepUploadImages }) =>
     stepUploadImages ? 'auto' : `${columnsCount * 240}px`};
@@ -684,8 +687,6 @@ const WrapperCollectionContentStyled = styled.div`
   align-items: center;
   background-color: #f5fcff;
   border: 1px dashed var(--color-primary-500);
-  // padding: 92px 0 48px;
-
   border-radius: 16px;
   position: absolute;
   top: 0;
@@ -838,7 +839,6 @@ const HeaderAddAttributeWrap = styled.div`
   border-radius: 16px;
   color: var(--color-primary-500);
   background-color: #FFF;
-
   display: flex;
   align-items: center;
   justify-content: center;
@@ -910,7 +910,7 @@ const ContentRelative = styled.div`
 
 const Content = styled.div`
   position: absolute;
-  top: 297px;
+  top: 360px;
   height: 100%;
   width: 100%;
   display: flex;
