@@ -41,14 +41,26 @@ const CustomTokenPreviewArrowsNext: React.FC<ArrowProps> = (props) => {
           ? '0px 3px 3px 0px #00000040'
           : '0px 2px 2px 0px #00000020',
         right: '-155px',
-        ...style,
+        ...style
       }}
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <svg xmlns="http://www.w3.org/2000/svg" style={{ margin: '23px 28px' }} width="26" height="33" viewBox="0 0 31 46" fill="none">
-        <path d="M4.25008 4.25L23 22.9999L4.25008 41.75" stroke="#009CF0" stroke-width="2" stroke-linecap="round"/>
+      <svg
+        xmlns='http://www.w3.org/2000/svg'
+        style={{ margin: '23px 28px' }}
+        width='26'
+        height='33'
+        viewBox='0 0 31 46'
+        fill='none'
+      >
+        <path
+          d='M4.25008 4.25L23 22.9999L4.25008 41.75'
+          stroke='#009CF0'
+          strokeWidth='2'
+          strokeLinecap='round'
+        />
       </svg>
     </div>
   );
@@ -87,14 +99,26 @@ const CustomTokenPreviewArrowsPrev: React.FC<ArrowProps> = (props) => {
           : '0px 2px 2px 0px #00000020',
         zIndex: 222,
         left: '-155px',
-        ...style,
+        ...style
       }}
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <svg xmlns="http://www.w3.org/2000/svg" style={{ margin: '23px 25px' }} width="26" height="33" viewBox="0 0 31 46" fill="none">
-        <path d="M26.7499 4.25L8 22.9999L26.7499 41.75" stroke="#009CF0" stroke-width="2" stroke-linecap="round"/>
+      <svg
+        xmlns='http://www.w3.org/2000/svg'
+        style={{ margin: '23px 25px' }}
+        width='26'
+        height='33'
+        viewBox='0 0 31 46'
+        fill='none'
+      >
+        <path
+          d='M26.7499 4.25L8 22.9999L26.7499 41.75'
+          stroke='#009CF0'
+          strokeWidth='2'
+          strokeLinecap='round'
+        />
       </svg>
     </div>
   );

@@ -504,7 +504,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
                   <ContentWrap>
                     <Heading size='3'>Royalty</Heading>
                     <Text size='s' color='grey-500'>
-                      Royalties are payments made to the collection's creator ot team whenever an NFT is resold on the secondary market. 
+                      Royalties are payments made to the collection&apos;s creator ot team whenever an NFT is resold on the secondary market. 
                     </Text>
                   </ContentWrap>
                 )}
