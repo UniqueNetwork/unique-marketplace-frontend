@@ -150,7 +150,14 @@ export const RoyaltiesFormNew = ({
           checked={isWithoutRoyalties}
           label={'No royalty (default) '}
           size={'m'}
-          onChange={() => setIsWithoutRoyalties(!isWithoutRoyalties)}
+          onChange={() => {
+            setRoyalties([]);
+            setValidMap([].map(() => true));
+            onSubmit({
+              royalties: [],
+            });
+            setIsWithoutRoyalties(!isWithoutRoyalties);
+          }}
           testid={''}
           isRadio={true}
         />

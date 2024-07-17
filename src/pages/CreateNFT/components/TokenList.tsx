@@ -22,6 +22,7 @@ import IconWithHint from 'components/IconWithHint/IconWithHint';
 import { IconButton } from 'components/IconButton/IconButton';
 import ConfirmDeleteForm from './ConfirmDeleteForm';
 import Slider from 'react-slick';
+import { Checkbox } from 'components/UI/Checkbox/Checkbox2';
 
 export type TokenListProps = {
   disabled: boolean;
@@ -34,6 +35,9 @@ export type TokenListProps = {
   mode: 'NFT' | 'Fungible' | 'ReFungible' | undefined;
   schemaVersion: string;
   collection?: CollectionWithInfoV2Dto;
+  selectedAll(): void;
+  deselectedAll(): void;
+  selected: NewToken2[];
   onChange(tokens: NewToken2[]): void;
   onAddTokens(files: File[]): void;
   step: CreateTokensSteps;
@@ -59,6 +63,9 @@ export const TokenList = ({
   schemaVersion,
   step,
   collection,
+  selectedAll,
+  deselectedAll,
+  selected,
   onChange,
   onAddTokens
 }: TokenListProps) => {
@@ -253,7 +260,7 @@ export const TokenList = ({
                         list: filteredTokens,
                         onChange: onTokenChange,
                         onRemove: onTokenRemove,
-                        index,
+                        index
                         // onOpenModifyModal: setEditingToken
                       }}
                       dragHandleProps={{}}
@@ -265,7 +272,18 @@ export const TokenList = ({
                 <TableWrap>
                   <TableHeader columnsCount={columnsCount}>
                     <TableHeaderCell>
-                      <TextStyled>Select</TextStyled>
+                      <StyledCheckbox
+                        label={''}
+                        checked={selected.length === tokens.length}
+                        onChange={(value: boolean) => {
+                          if (value) {
+                            selectedAll();
+                            return;
+                          }
+                          deselectedAll();
+                        }}
+                        testid='select-all'
+                      />
                     </TableHeaderCell>
                     <TableHeaderCell>
                       <TextStyled>NFT ID</TextStyled>
@@ -422,9 +440,7 @@ export const TokenList = ({
           </>
         )}
         {
-          <Modal
-            isVisible={!!setForAllModal}
-          >
+          <Modal isVisible={!!setForAllModal}>
             <TokenInputForm
               modalType={setForAllModal}
               onSubmit={handleForAllSubmit}
@@ -533,7 +549,8 @@ export const TokenList = ({
             <ConfirmDeleteForm
               onClose={() => setShowConfirmDeleteModal(null)}
               onSubmit={() => {
-                showConfirmDeleteModal && (deleteNewAttribute(showConfirmDeleteModal));
+                showConfirmDeleteModal &&
+                  deleteNewAttribute(showConfirmDeleteModal);
                 setShowConfirmDeleteModal(null);
               }}
             />
@@ -940,6 +957,11 @@ const SetAllButton = styled.div`
   padding-left: 10px;
 `;
 
-// const ModalWrapper = styled.div`
-
-// `;
+const StyledCheckbox = styled(Checkbox)`
+  margin: auto;
+  margin-top: 22px;
+  .checkmark {
+    background-color: #FFF;
+    border: 1px solid #000;
+  }
+`;

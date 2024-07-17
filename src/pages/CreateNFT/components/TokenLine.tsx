@@ -303,7 +303,7 @@ export const TokenLine = ({
               onChange={onSelect}
               testid='select'
             /> */}
-            <Checkbox
+            <StyledCheckbox
               label=''
               checked={isSelected}
               onChange={onSelect}
@@ -670,12 +670,11 @@ const TextFileUploaded = styled.div`
   text-overflow: ellipsis;
 `;
 
-const AttributesModalOpen = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
+const StyledCheckbox = styled(Checkbox)`
+  margin: auto;
+  margin-top: 110px;
+  .checkmark {
+    background-color: #FFF;
+    border: 1px solid #000;
+  }
 `;

@@ -389,9 +389,6 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
   const [royalty, setRoyalty] = useState<RoyaltiesFormData>({ royalties: [] });
 
   useEffect(() => {
-    if (royalty.royalties.length === 0) return;
-    //TO DO check percent <=> value
-    //@ts-ignore
     setTokens((tokens) =>
       tokens.map((token) => ({
         ...token,
@@ -409,10 +406,6 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
   useEffect(() => {
     void fetchCollections(selectedAccount);
   }, [fetchCollections, selectedAccount]);
-
-  useEffect(() => {
-    console.log(collections, 'ollections');
-  }, [collections]);
 
   return (
     <MainWrapper className='create-nft-page' ref={mainWrapperRef}>
@@ -578,6 +571,9 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
                       }
                       onChange={setTokens}
                       onAddTokens={onAddTokens}
+                      selected={selected}
+                      selectedAll={selectedAll}
+                      deselectedAll={deselectedAll}
                     />
                   </ContentWrap>
                 )}
@@ -619,7 +615,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
                       onClick={() => changeStep('next')}
                     />
                     <ButtonConatiner>
-                      <Button
+                      {/* <Button
                         title={
                           <StyledCheckbox
                             label={
@@ -647,7 +643,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
                           }
                           selectedAll();
                         }}
-                      />
+                      /> */}
                       {deviceSize <= DeviceSize.sm && (
                         <ConfirmBtn
                           role='outlined'
