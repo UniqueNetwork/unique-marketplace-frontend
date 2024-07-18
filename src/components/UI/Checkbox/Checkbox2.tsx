@@ -44,7 +44,9 @@ export const Checkbox = forwardRef(
           `checkbox-size-${size}`,
           { disabled }
         )}
-        onClick={() => !disabled && onChange?.(!checked)}
+        {...(!disabled && {
+          onClick: () => onChange?.(!checked)
+        })}
       >
         <input
           type='checkbox'
@@ -53,7 +55,7 @@ export const Checkbox = forwardRef(
           className='checkbox'
           checked={checked}
           ref={ref}
-          onChange={(e) => onChange?.(e.target.checked)}
+          onChange={(e) => e.preventDefault()}
           data-testid={`${testid}-${name || label}`}
         />
         {isRadio ? (
@@ -143,8 +145,6 @@ const CheckboxStyled = styled.div`
     line-height: 22px;
     word-break: break-word;
   }
-
-  
 
   &.disabled {
     .checkmark {

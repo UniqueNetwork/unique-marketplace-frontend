@@ -60,9 +60,7 @@ const FilterComponent: React.FC<FilterProps> = ({ onFilterChange, tokens }) => {
   const [names, setNames] = useState<ItemCount[]>([]);
   const [descriptions, setDescriptions] = useState<ItemCount[]>([]);
   const [filteredNames, setFilteredNames] = useState<ItemCount[]>([]);
-  const [filteredDescriptions, setFilteredDescriptions] = useState<ItemCount[]>(
-    []
-  );
+  const [filteredDescriptions, setFilteredDescriptions] = useState<ItemCount[]>([]);
 
   useEffect(() => {
     const attributeCounts = getTraitCounts(tokens);
@@ -150,80 +148,93 @@ const FilterComponent: React.FC<FilterProps> = ({ onFilterChange, tokens }) => {
 
   return (
     <FilterContainer>
-      {attributes && <AccordionStyled
-        title={'Attribute count'}
-        isOpen={true}
-      >
-        {attributes.map((attribute, index) => (
-          <CheckboxLabel key={index}>
-            <Checkbox
-              checked={selectedAttributes[attribute.trait_type]?.some((value) => value === attribute.value)}
-              label={attribute.trait_type + ':' + attribute.value}
-              size={'m'}
-              onChange={() => handleAttributeChange(attribute.trait_type, attribute.value)}
-              testid={''}
-            />
-            <AttributeCount>{attribute.count}</AttributeCount>
-          </CheckboxLabel>
-        ))}
-      </AccordionStyled>}
-      {filteredNames && <AccordionStyled
-        title={'Name'}
-        isOpen={true}
-      >
-        <TextInputStyled
-          placeholder=''
-          allowSpaces={true}
-          iconLeft={{
-            size: 15,
-            name: 'magnify',
-            color: 'var(--color-grey-200)'
-          }}
-          value={name}
-          onChange={handleNameChange}
-        />
-        {filteredNames.map((name, index) => (
-          <CheckboxLabel key={'name' + name + '_' + index}>
-            <Checkbox
-              checked={nameFilter.some((item) => item === name.name)}
-              label={name.name}
-              size={'m'}
-              onChange={() => handleNameSelect(name.name)}
-              testid={''}
-            />
-            <AttributeCount>{name.count}</AttributeCount>
-          </CheckboxLabel>
-        ))}
-      </AccordionStyled>}
+      {filteredNames && (
+        <AccordionStyled title={'Name'} isOpen={true}>
+          <TextInputStyled
+            placeholder=''
+            allowSpaces={true}
+            iconLeft={{
+              size: 15,
+              name: 'magnify',
+              color: 'var(--color-grey-200)'
+            }}
+            value={name}
+            onChange={handleNameChange}
+          />
+          {filteredNames.map((name, index) => (
+            <CheckboxLabel key={'name' + name + '_' + index}>
+              <Checkbox
+                checked={nameFilter.some((item) => item === name.name)}
+                label={name.name}
+                size={'m'}
+                onChange={() => handleNameSelect(name.name)}
+                testid={''}
+              />
+              <AttributeCount>{name.count}</AttributeCount>
+            </CheckboxLabel>
+          ))}
+        </AccordionStyled>
+      )}
 
-      {filteredDescriptions && <AccordionStyled
-        title={'Description'}
-        isOpen={true}
-      >
-        <TextInputStyled
-          placeholder=''
-          allowSpaces={true}
-          iconLeft={{
-            size: 15,
-            name: 'magnify',
-            color: 'var(--color-grey-200)'
-          }}
-          value={description}
-          onChange={handleDescriptionChange}
-        />
-        {filteredDescriptions.map((description, index) => (
-          <CheckboxLabel key={'description' + description + '_' + index}>
-            <Checkbox
-              checked={descriptionFilter.some((item) => item === description.name)}
-              label={description.name}
-              size={'m'}
-              onChange={() => handleDescriptionSelect(description.name)}
-              testid={''}
-            />
-            <AttributeCount>{description.count}</AttributeCount>
-          </CheckboxLabel>
-        ))}
-      </AccordionStyled>}
+      {filteredDescriptions && (
+        <AccordionStyled title={'Description'} isOpen={true}>
+          <TextInputStyled
+            placeholder=''
+            allowSpaces={true}
+            iconLeft={{
+              size: 15,
+              name: 'magnify',
+              color: 'var(--color-grey-200)'
+            }}
+            value={description}
+            onChange={handleDescriptionChange}
+          />
+          {filteredDescriptions.map((description, index) => (
+            <CheckboxLabel key={'description' + description + '_' + index}>
+              <Checkbox
+                checked={descriptionFilter.some(
+                  (item) => item === description.name
+                )}
+                label={description.name}
+                size={'m'}
+                onChange={() => handleDescriptionSelect(description.name)}
+                testid={''}
+              />
+              <AttributeCount>{description.count}</AttributeCount>
+            </CheckboxLabel>
+          ))}
+        </AccordionStyled>
+      )}
+      {attributes && (
+        <>
+          {attributes.map((attribute, index) => (
+            <AccordionStyled
+              key={`attr_${attribute.trait_type}_${index}`}
+              title={attribute.trait_type}
+              isOpen={true}
+            >
+              {attribute.items.map((item, itemIndex) => (
+                <CheckboxLabel
+                  key={`attr_checkbox_${attribute.trait_type}_${itemIndex}`}
+                >
+                  <Checkbox
+                    checked={selectedAttributes[attribute.trait_type]?.includes(
+                      item.value
+                    )}
+                    label={item.value}
+                    size={'m'}
+                    onChange={() =>
+                      handleAttributeChange(attribute.trait_type, item.value)
+                    }
+                    testid={''}
+                  />
+                  <AttributeCount>{item.count}</AttributeCount>
+                </CheckboxLabel>
+              ))}
+            </AccordionStyled>
+          ))}
+        </>
+      )}
     </FilterContainer>
   );
 };

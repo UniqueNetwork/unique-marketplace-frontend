@@ -369,7 +369,10 @@ export const getUniqueTraitTypes = (tokens: NewToken2[]): string[] => {
   return Array.from(traitTypesSet);
 };
 
-export type TraitCount = { trait_type: string; value: string; count: number };
+export type TraitCount = {
+  trait_type: string;
+  items: {value: string; count: number}[]
+};
 
 export const getTraitCounts = (tokens: NewToken2[]): TraitCount[] => {
   const traitMap: { [key: string]: { [key: string]: number } } = {};
@@ -389,18 +392,18 @@ export const getTraitCounts = (tokens: NewToken2[]): TraitCount[] => {
   const traitCounts: TraitCount[] = [];
 
   Object.keys(traitMap).forEach((trait_type) => {
-    Object.keys(traitMap[trait_type]).forEach((value) => {
-      traitCounts.push({
-        trait_type,
-        value,
-        count: traitMap[trait_type][value],
-      });
+    const items = Object.keys(traitMap[trait_type]).map((value) => ({
+      value,
+      count: traitMap[trait_type][value],
+    }));
+    traitCounts.push({
+      trait_type,
+      items,
     });
   });
 
   return traitCounts;
 };
-
 export type ItemCount = {name: string, count: number};
 
 export const getNameCounts = (tokens: NewToken2[]): ItemCount[] => {

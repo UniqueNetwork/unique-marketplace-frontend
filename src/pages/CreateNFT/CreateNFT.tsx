@@ -674,12 +674,12 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
                           onClick={handleSubmit}
                         />
                       )}
-                      {tokens.length > 0 &&
+                      {/* {tokens.length > 0 &&
                         Number(leftTokens) > 0 &&
                         (step === CreateTokensSteps.SET_DATA ||
                           step === CreateTokensSteps.UPLOAD_MEDIA) && (
                           <UploadFAB onUpload={onAddTokens} />
-                        )}
+                        )} */}
                     </ButtonConatiner>
                   </ButtonGroup>
                 )}

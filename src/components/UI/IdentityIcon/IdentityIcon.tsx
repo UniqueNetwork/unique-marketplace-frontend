@@ -1,6 +1,6 @@
 import { VFC } from 'react';
 import styled from 'styled-components/macro';
-// import Jdenticon from 'react-jdenticon';
+import Jdenticon from './Jdenticon';
 
 interface IdentityIconProps {
   address: string;
@@ -25,7 +25,7 @@ export const IdentityIcon: VFC<IdentityIconProps> = ({
 
   return (
     <Wrapper copyable={copyable} className={className} onClick={handleAddressCopy}>
-      {/* <Jdenticon size={size} value={address} /> */}
+      <Jdenticon size={size} value={address} />
     </Wrapper>
   );
 };

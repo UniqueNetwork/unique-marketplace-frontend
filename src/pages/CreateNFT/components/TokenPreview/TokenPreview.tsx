@@ -1,3 +1,4 @@
+//@ts-nocheck
 import styled from 'styled-components';
 import { TemplateProps } from 'react-draggable-list';
 import { MouseEventHandler, TouchEventHandler, useRef, useState } from 'react';
@@ -119,7 +120,6 @@ export const TokenPreview = ({
           {
             list?.map((token) => (        <CommonTokenDetailWrapper>
               <CommonTokenDetail
-              //@ts-ignore
                 token={{
                   ...token,
                   image: token.image.url,
@@ -159,6 +159,7 @@ const TokenWrapper = styled.div`
   transition: opacity 0.2s, transform 0.2s;
   position: relative;
   border: 1px solid #c9d0d7;
+	border-radius: 6px;
   box-sizing: border-box;
 
   &.hovered {
@@ -193,9 +194,14 @@ const TokenLinkImageWrapper = styled.div`
     width: 100%;
     height: auto;
   }
+
+	div {
+		border-radius: 6px 6px 0 0;
+	}
 `;
 
 const TokenImage = styled(Image)`
+	border-radius: 0;
   margin-bottom: calc(var(--prop-gap) / 2);
   img {
     user-drag: none;

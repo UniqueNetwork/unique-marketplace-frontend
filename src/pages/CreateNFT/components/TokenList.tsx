@@ -224,13 +224,17 @@ export const TokenList = ({
         stepUploadImages={step === CreateTokensSteps.UPLOAD_IMAGES}
       >
         {tokens.length === 0 && <Stub />}
-        <ImageUploadArea
-          disabled={disabled}
-          hasTokens={tokens.length > 0}
-          hidden={!dragEnter && tokens.length > 0}
-          onUpload={onAddTokens}
-          onDragExit={onDragEnd}
-        />
+        {
+          step === CreateTokensSteps.UPLOAD_IMAGES && (
+            <ImageUploadArea
+              disabled={disabled}
+              hasTokens={tokens.length > 0}
+              hidden={!dragEnter && tokens.length > 0}
+              onUpload={onAddTokens}
+              onDragExit={onDragEnd}
+            />
+          )
+        }
         {tokens.length !== 0 && (
           <>
             {viewMode === ViewMode.grid && deviceSize > DeviceSize.sm && (
