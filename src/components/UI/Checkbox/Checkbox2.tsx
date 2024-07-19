@@ -36,6 +36,14 @@ export const Checkbox = forwardRef(
     ref: LegacyRef<HTMLInputElement>
   ) => {
     const icon = iconLeft || iconRight;
+
+    const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      if (!disabled) {
+        onChange?.(!checked);
+      }
+    };
+
     return (
       <CheckboxStyled
         className={classNames(
@@ -44,9 +52,7 @@ export const Checkbox = forwardRef(
           `checkbox-size-${size}`,
           { disabled }
         )}
-        {...(!disabled && {
-          onClick: () => onChange?.(!checked)
-        })}
+        onClick={handleClick}
       >
         <input
           type='checkbox'
@@ -78,6 +84,7 @@ export const Checkbox = forwardRef(
             'icon-right': iconRight
           })}
           data-testid={`${testid}-label`}
+          onClick={() => !disabled && onChange?.(!checked)}
         >
           {icon && <Icon {...icon} />}
           <span>{label}</span>
@@ -134,7 +141,6 @@ const CheckboxStyled = styled.div`
   .radio.checked {
     border: 2px solid var(--color-primary-500);
   }
-
 
   label {
     display: flex;
@@ -207,7 +213,6 @@ const CheckboxStyled = styled.div`
     }
   }
 `;
-
 
 const RadioChecked = styled.div`
   width: 11px;

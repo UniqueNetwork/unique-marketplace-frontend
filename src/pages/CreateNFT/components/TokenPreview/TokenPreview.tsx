@@ -1,7 +1,6 @@
-//@ts-nocheck
 import styled from 'styled-components';
 import { TemplateProps } from 'react-draggable-list';
-import { MouseEventHandler, TouchEventHandler, useRef, useState } from 'react';
+import { MouseEventHandler, TouchEventHandler, useEffect, useRef, useState } from 'react';
 import classNames from 'classnames';
 
 import { Modal, Text } from 'components/UI';
@@ -14,10 +13,12 @@ import { useAccounts } from 'hooks/useAccounts';
 import Slider from 'react-slick';
 import { CustomNextArrow, CustomPrevArrow } from 'pages/Token/TokenDetail/Slider/CustomSliderArrows';
 import { CustomTokenPreviewArrowsNext, CustomTokenPreviewArrowsPrev } from './CustomTokenPreviewArrows';
+import { Checkbox } from 'components/UI/Checkbox/Checkbox2';
 
 export type TokenCardCommonProps = {
   onChange(token: NewToken2): void;
   onRemove(id: number): void;
+	onSelect(id: number): void;
   onOpenModifyModal?(token: NewToken2): void;
   tokenPrefix: string;
   list?: NewToken2[];
@@ -32,7 +33,6 @@ export type TokenCardProps = TemplateProps<NewToken2, TokenCardCommonProps>;
 
 export const TokenPreview = ({
   item,
-  itemSelected,
   dragHandleProps,
   commonProps
 }: TokenCardProps) => {
@@ -40,13 +40,13 @@ export const TokenPreview = ({
     id,
     tokenId,
     image,
-    
   } = item;
   const {
     tokenPrefix,
     collection,
     list,
     index,
+		onSelect
   } = commonProps;
   const [willBeRemoved, setWillBeRemoved] = useState(false);
   const [hovered, setHovered] = useState(false);
@@ -72,42 +72,31 @@ export const TokenPreview = ({
   const [activeIndex, setActiveIndex] = useState(0);
 
   return (
-    <TokenPreviewWrapper>
+    <TokenPreviewWrapper id={`token-${id}`}>
       <TokenWrapper
-        id={`token-${id}`}
         className={classNames({
           removing: willBeRemoved,
           hovered
         })}
-        onClick={() => setShowTokendetails(true)}
       >
+				<CheckboxWrapper>
+					<Checkbox
+						label=''
+						checked={item.isSelected}
+						onChange={() => onSelect(item.id)}
+						size={'m'}
+						testid={''}
+					/>
+				</CheckboxWrapper>
         <TokenBasicWrapper>
-          <TokenLinkImageWrapper
-            onMouseEnter={(e) => {
-              e.preventDefault();
-              setHovered(true);
-            }}
-            onMouseLeave={(e) => {
-              e.preventDefault();
-              setHovered(false);
-            }}
-            onTouchStart={(e) => {
-              e.preventDefault();
-              onTouchStart?.(e);
-            }}
-            onMouseDown={(e) => {
-              onMouseDown?.(e);
-            }}
-          >
+          <TokenLinkImageWrapper>
             <TokenImage alt={`${tokenPrefix}_${id}`} image={image.url} />
           </TokenLinkImageWrapper>
-          <TokenCardActions>
+          <TokenCardActions onClick={() => setShowTokendetails(true)}>
             <TokenLinkTitle>{`${tokenPrefix} #${tokenId}`}</TokenLinkTitle>
           </TokenCardActions>
         </TokenBasicWrapper>
       </TokenWrapper>
-
-
       <Modal
         isVisible={!!showTokendetails}
         onClose={() => {
@@ -133,6 +122,8 @@ export const TokenPreview = ({
                 isOwner={true}
                 isNested={false}
                 previewMode={true}
+                isBundle={false}
+                onBurn={() => {}}
               ></CommonTokenDetail>
             </CommonTokenDetailWrapper>))
 
@@ -144,13 +135,13 @@ export const TokenPreview = ({
 };
 
 const TokenWrapper = styled.div`
+	position: relative;
   font-family: var(--prop-font-family);
   font-size: var(--prop-font-size);
   font-weight: var(--prop-font-weight);
   word-break: break-all;
   width: 268px;
   height: 328px;
-  cursor: pointer;
   display: flex;
   background: white;
   border-style: none none dashed none;
@@ -246,6 +237,14 @@ const TokenCardActions = styled.div`
 const TokenLinkTitle = styled(Text).attrs({ appearance: 'block', size: 'l' })`
   word-break: break-all;
   margin-left: 8px;
+	color: var(--color-primary-500);
+	cursor: pointer;
+
+	&:hover {
+		text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.3em;
+  }
 `;
 
 export const FormGrid = styled.div`
@@ -296,4 +295,15 @@ const TokenPreviewWrapper = styled.div`
     padding: 0 30px !important;
     box-sizing: border-box !important; 
   }
+`;
+
+const CheckboxWrapper = styled.div`
+	position: absolute;
+	top: 16px;
+	right: 16px;
+	width: 22px;
+	height: 22px;
+	border-radius: 4px;
+	background-color: #FFF;
+	z-index: 1;
 `;

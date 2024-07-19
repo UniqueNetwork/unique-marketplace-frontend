@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { CollectionWithInfoV2Dto, TokenWithInfoV2Dto } from '@unique-nft/sdk';
+import { CollectionWithInfoV2Dto, NestingParentId, PropertyWithHexValue, TokenWithInfoV2Dto } from '@unique-nft/sdk';
 import { Heading, Dropdown, Icon, Text } from 'components/UI';
 import { Picture } from 'components';
 import TokensBandleCard from 'components/BundleTree/NestedSection/TokenCard';
@@ -30,9 +30,17 @@ import { mockWearables } from '../constants';
 import { RoyaltiesBlock } from './RoyaltiesBlock';
 import { TokenSlider } from './Slider/TokenSlider';
 import { BREAKPOINTS } from 'hooks/useBreakpointObserver';
+import { CreateMediaData } from 'pages/CreateNFT/types';
+
+interface TokenWithOptionalFieldsV2Dto extends Omit<TokenWithInfoV2Dto, 'parsingError' | 'properties' | 'nestingParentToken' | 'media'> {
+  parsingError?: string | null;
+  properties?: PropertyWithHexValue[];
+  nestingParentToken?: NestingParentId;
+  media: CreateMediaData[];
+}
 
 interface IProps {
-  token?: TokenWithInfoV2Dto
+  token?: TokenWithOptionalFieldsV2Dto | TokenWithInfoV2Dto
   collection?: CollectionWithInfoV2Dto
   offer?: Offer
   isLoading?: boolean
@@ -85,8 +93,8 @@ export const CommonTokenDetail: FC<IProps> = ({
     let video;
     if (token?.media) {
       const images = Object.values(token?.media || {}).filter((media) => media.type === 'image');    
-      if (images.length > 0 ) {
-        for(const image of images) {
+      if (images.length > 0) {
+        for (const image of images) {
           sliderItems.push({src: image.url, type: 'image'});
         }
       }
@@ -94,14 +102,14 @@ export const CommonTokenDetail: FC<IProps> = ({
       const videos = Object.values(token?.media || {}).filter((media) => media.type === 'video');
       if (videos.length > 0 ) {
         video = videos[0];
-        for(const video of videos) {
+        for (const video of videos) {
           sliderItems.push({src: video.url, type: 'video'});
         }
       }
 
       const audios = Object.values(token?.media || {}).filter((media) => media.type === 'audio');    
       if (audios.length > 0 ) {
-        for(const audio of audios) {
+        for (const audio of audios) {
           sliderItems.push({src: audio.url, type: 'audio', thumbnail: image});
         }
       }

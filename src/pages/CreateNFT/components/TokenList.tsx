@@ -213,6 +213,12 @@ export const TokenList = ({
   }>({ attributes: {}, name: [], description: [] });
   const filteredTokens = useFilteredTokens(tokens, filters);
   const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState<string | null>(null);
+  const onSelect = (tokenId: number) => {
+    const updatedTokens = tokens.map(token =>
+      token.id === tokenId ? { ...token, isSelected: !token.isSelected } : token
+    );
+    onChange(updatedTokens);
+  };
 
   return (
     <ScrollWrap>
@@ -264,8 +270,8 @@ export const TokenList = ({
                         list: filteredTokens,
                         onChange: onTokenChange,
                         onRemove: onTokenRemove,
-                        index
-                        // onOpenModifyModal: setEditingToken
+                        index,
+                        onSelect,
                       }}
                       dragHandleProps={{}}
                     />
@@ -393,10 +399,8 @@ export const TokenList = ({
                           </SetAllButton>
                         </TableHeaderCellAttribute>
                       ))}
-                    {/* not show this column in case no attributes */}
                     {step === CreateTokensSteps.SET_DATA && (
                       <TableHeaderCellAttrAdd>
-                        {/* <TextStyled>Add attribute</TextStyled> */}
                         <HeaderAddAttributeWrap
                           onClick={() => {
                             setOpenAddAttributeModal(true);
@@ -405,6 +409,9 @@ export const TokenList = ({
                           +
                         </HeaderAddAttributeWrap>
                       </TableHeaderCellAttrAdd>
+                    )}
+                    {step === CreateTokensSteps.SET_DATA && (
+                      <FakeCell />
                     )}
                   </TableHeader>
 
@@ -784,8 +791,6 @@ export const TableHeader = styled.div<{ columnsCount: number }>`
   display: flex;
   width: ${({ columnsCount }) => `${columnsCount * 240}px`};
   height: 100px;
-  background-color: #0000000f;
-  
 `;
 
 export const TableHeaderCell = styled.div`
@@ -795,8 +800,9 @@ export const TableHeaderCell = styled.div`
   flex-direction: column;
   align-items: start;
   justify-content: start;
-  border-right: 1px solid #b9b9b9;
-  border-top: 1px solid #b9b9b9;
+  background-color: #0000000f;
+  border-right: 1px solid var(--color-table-grey);
+  border-top: 1px solid var(--color-table-grey);
   height: 100%;
   padding: 18px 0;
   box-sizing: border-box;
@@ -847,6 +853,12 @@ export const TableHeaderCellAttrAdd = styled.div`
   box-sizing: border-box;
   background-color: var(--color-blue-grey-100);
   border-top-right-radius: 4px;
+`;
+
+export const FakeCell = styled.div`
+  flex: 0.5;
+  background: #FFF;
+  border: 1px solid #FFF;
 `;
 
 const HeaderAddAttributeWrap = styled.div`

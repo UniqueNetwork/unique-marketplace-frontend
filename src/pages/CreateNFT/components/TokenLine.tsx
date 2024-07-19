@@ -442,6 +442,9 @@ export const TokenLine = ({
           {step === CreateTokensSteps.SET_DATA && (
             <TokenLineCellAttrAdd></TokenLineCellAttrAdd>
           )}
+          {step === CreateTokensSteps.SET_DATA && (
+            <FakeCell />
+          )}
         </LineContent>
       </TokenLineWrap>
       <Modal
@@ -564,7 +567,7 @@ export const LineContent = styled.div`
   display: flex;
   height: 240px;
   border-top: 1px solid #b9b9b9;
-  background: #fff;
+  background: var(--color-additional-light);
   // margin: 0 !important;
 
   &:last-child {
@@ -630,6 +633,13 @@ export const TokenLineCellAttrAdd =styled.div`
   background-color: var(--color-blue-grey-100);
 `;
 
+export const FakeCell = styled.div`
+  flex: 0.5;
+  background: var(--color-additional-light);
+  border: 1px solid var(--color-additional-light);
+  margin: -1px 0;
+`;
+
 const FileInput = styled.input`
   display: none;
 `;
@@ -674,7 +684,7 @@ const StyledCheckbox = styled(Checkbox)`
   margin: auto;
   margin-top: 110px;
   .checkmark {
-    background-color: #FFF;
+    background-color: var(--color-additional-light);
     border: 1px solid #000;
   }
 `;

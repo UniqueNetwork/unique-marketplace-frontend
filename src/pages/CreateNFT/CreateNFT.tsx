@@ -421,7 +421,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
           <WrapperCollectionContentStyled expanded={!!collection}>
             <ImageCreate src={Box} />
             <Heading size='3'>
-              {!isFetching && (collections.length > 0 ? 'Create new collection or select an existing one' : 'You don`t own any collections yet, but you can create one right now!')}
+              {!isFetching ? (collections.length > 0 ? 'Create new collection or select an existing one' : 'You don`t own any collections yet, but you can create one right now!') : 'Loading collection list'}
             </Heading>
             <CreateCollectionLink
               onClick={() => {
@@ -444,7 +444,11 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
                   setStep(CreateTokensSteps.UPLOAD_IMAGES);
                 }}
               ></CollectionsComponent>
-              {isFetching && <Skeleton />}
+            </PagePaperStyled>
+          )}
+          {isFetching && (
+            <PagePaperStyled>
+              <Skeleton width={'100%'} height={'calc(400px - var(--prop-gap)* 2)'} />
             </PagePaperStyled>
           )}
         </>
@@ -932,6 +936,7 @@ const CreateCollectionLink = styled.div`
 
 const PagePaperStyled = styled(PagePaper)`
   width: 100%;
+  min-height: 400px;
   box-sizing: border-box;
   border-radius: 0;
   margin-top: 34px;
