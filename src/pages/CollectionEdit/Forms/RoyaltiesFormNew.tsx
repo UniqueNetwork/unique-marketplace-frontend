@@ -83,7 +83,13 @@ export const RoyaltiesFormNew = ({
   const onRemoveRoyalty = useCallback(
     (index: number) => () => {
       royalties.splice(index, 1);
+      if (royalties.length === 0) {
+        setIsWithoutRoyalties(true);
+      }
       setRoyalties([...royalties]);
+      onSubmit({
+        royalties: [...royalties],
+      });
     },
     [royalties]
   );
