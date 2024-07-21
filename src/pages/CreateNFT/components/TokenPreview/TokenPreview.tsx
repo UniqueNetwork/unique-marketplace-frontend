@@ -11,14 +11,13 @@ import { CollectionWithInfoV2Dto, PotentialAttribute } from '@unique-nft/sdk';
 import { CommonTokenDetail } from 'pages/Token/TokenDetail/CommonTokenDetail';
 import { useAccounts } from 'hooks/useAccounts';
 import Slider from 'react-slick';
-import { CustomNextArrow, CustomPrevArrow } from 'pages/Token/TokenDetail/Slider/CustomSliderArrows';
 import { CustomTokenPreviewArrowsNext, CustomTokenPreviewArrowsPrev } from './CustomTokenPreviewArrows';
 import { Checkbox } from 'components/UI/Checkbox/Checkbox2';
 
 export type TokenCardCommonProps = {
   onChange(token: NewToken2): void;
   onRemove(id: number): void;
-	onSelect(id: number): void;
+  onSelect(id: number): void;
   onOpenModifyModal?(token: NewToken2): void;
   tokenPrefix: string;
   list?: NewToken2[];
@@ -36,18 +35,8 @@ export const TokenPreview = ({
   dragHandleProps,
   commonProps
 }: TokenCardProps) => {
-  const {
-    id,
-    tokenId,
-    image,
-  } = item;
-  const {
-    tokenPrefix,
-    collection,
-    list,
-    index,
-		onSelect
-  } = commonProps;
+  const { id, tokenId, image } = item;
+  const { tokenPrefix, collection, list, index, onSelect } = commonProps;
   const [willBeRemoved, setWillBeRemoved] = useState(false);
   const [hovered, setHovered] = useState(false);
   const { onMouseDown, onTouchStart } = dragHandleProps as {
@@ -79,15 +68,15 @@ export const TokenPreview = ({
           hovered
         })}
       >
-				<CheckboxWrapper>
-					<Checkbox
-						label=''
-						checked={item.isSelected}
-						onChange={() => onSelect(item.id)}
-						size={'m'}
-						testid={''}
-					/>
-				</CheckboxWrapper>
+        <CheckboxWrapper>
+          <Checkbox
+            label=''
+            checked={item.isSelected}
+            onChange={() => onSelect(item.id)}
+            size={'m'}
+            testid={''}
+          />
+        </CheckboxWrapper>
         <TokenBasicWrapper>
           <TokenLinkImageWrapper>
             <TokenImage alt={`${tokenPrefix}_${id}`} image={image.url} />
@@ -106,15 +95,15 @@ export const TokenPreview = ({
         isFlexible={true}
       >
         <Slider ref={horizontalSliderRef} {...settings} initialSlide={index}>
-          {
-            list?.map((token) => (        <CommonTokenDetailWrapper>
+          {list?.map((token) => (
+            <CommonTokenDetailWrapper>
               <CommonTokenDetail
                 token={{
                   ...token,
                   image: token.image.url,
                   collectionId: collection?.collectionId || 0,
                   owner: selectedAccount?.address || '',
-                  animation_url: token?.animation_url?.url,
+                  animation_url: token?.animation_url?.url
                 }}
                 collection={collection}
                 isLoading={false}
@@ -125,9 +114,8 @@ export const TokenPreview = ({
                 isBundle={false}
                 onBurn={() => {}}
               ></CommonTokenDetail>
-            </CommonTokenDetailWrapper>))
-
-          }
+            </CommonTokenDetailWrapper>
+          ))}
         </Slider>
       </Modal>
     </TokenPreviewWrapper>
@@ -135,7 +123,7 @@ export const TokenPreview = ({
 };
 
 const TokenWrapper = styled.div`
-	position: relative;
+  position: relative;
   font-family: var(--prop-font-family);
   font-size: var(--prop-font-size);
   font-weight: var(--prop-font-weight);
@@ -150,7 +138,7 @@ const TokenWrapper = styled.div`
   transition: opacity 0.2s, transform 0.2s;
   position: relative;
   border: 1px solid #c9d0d7;
-	border-radius: 6px;
+  border-radius: 6px;
   box-sizing: border-box;
 
   &.hovered {
@@ -186,13 +174,13 @@ const TokenLinkImageWrapper = styled.div`
     height: auto;
   }
 
-	div {
-		border-radius: 6px 6px 0 0;
-	}
+  div {
+    border-radius: 6px 6px 0 0;
+  }
 `;
 
 const TokenImage = styled(Image)`
-	border-radius: 0;
+  border-radius: 0;
   margin-bottom: calc(var(--prop-gap) / 2);
   img {
     user-drag: none;
@@ -237,11 +225,11 @@ const TokenCardActions = styled.div`
 const TokenLinkTitle = styled(Text).attrs({ appearance: 'block', size: 'l' })`
   word-break: break-all;
   margin-left: 8px;
-	color: var(--color-primary-500);
-	cursor: pointer;
+  color: var(--color-primary-500);
+  cursor: pointer;
 
-	&:hover {
-		text-decoration: underline;
+  &:hover {
+    text-decoration: underline;
     text-decoration-thickness: 1px;
     text-underline-offset: 0.3em;
   }
@@ -293,17 +281,17 @@ const TokenPreviewWrapper = styled.div`
     width: 1060px !important;
     height: 720px !important;
     padding: 0 30px !important;
-    box-sizing: border-box !important; 
+    box-sizing: border-box !important;
   }
 `;
 
 const CheckboxWrapper = styled.div`
-	position: absolute;
-	top: 16px;
-	right: 16px;
-	width: 22px;
-	height: 22px;
-	border-radius: 4px;
-	background-color: #FFF;
-	z-index: 1;
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  background-color: #fff;
+  z-index: 1;
 `;

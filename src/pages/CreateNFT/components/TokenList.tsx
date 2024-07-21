@@ -214,7 +214,7 @@ export const TokenList = ({
   const filteredTokens = useFilteredTokens(tokens, filters);
   const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState<string | null>(null);
   const onSelect = (tokenId: number) => {
-    const updatedTokens = tokens.map(token =>
+    const updatedTokens = tokens.map((token) =>
       token.id === tokenId ? { ...token, isSelected: !token.isSelected } : token
     );
     onChange(updatedTokens);
