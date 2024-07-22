@@ -397,7 +397,7 @@ export const TokenLine = ({
               <ExternalLinkInput
                 value={external_url}
                 onChange={handleExternalLinkChange}
-                placeholder='Enter external link'
+                placeholder='https://example.com'
               />
             </TokenLineCell>
           )}

@@ -299,14 +299,19 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
   };
 
   const removeSelected = () => {
+    const newTokens = tokens.filter(({ isSelected }) => !isSelected);
+  
     setTokens(
-      tokens
-        .filter(({ isSelected }) => !isSelected)
-        .map((token, index) => ({
-          ...token,
-          tokenId: (lastTokenId || 0) + index + 1
-        }))
+      newTokens.map((token, index) => ({
+        ...token,
+        tokenId: (lastTokenId || 0) + index + 1
+      }))
     );
+  
+    if (newTokens.length === 0) {
+      setStep(CreateTokensSteps.UPLOAD_IMAGES);
+    }
+  
     info(`${selected.length} files removed`);
   };
 
@@ -353,6 +358,20 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
   const [nextStepIsBlocked, setNextStepIsBlocked] = useState(false);
 
   const changeStep = (direction: 'next' | 'prev') => {
+    if (
+      !(
+        (step === CreateTokensSteps.UPLOAD_MEDIA && direction == 'next')
+        || (step === CreateTokensSteps.SET_DATA && direction == 'prev')
+      )
+    ) {
+      setTokens((tokens) =>
+        tokens.map((token) => ({
+          ...token,
+          isSelected: false,
+        }))
+      );
+    }
+
     setStep((currentStep) => {
       switch (currentStep) {
         case CreateTokensSteps.UPLOAD_IMAGES:
@@ -419,7 +438,9 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
             <Heading size='3'>
               {!isFetching ? (collections.length > 0 ? 'Create new collection or select an existing one' : 'You don`t own any collections yet, but you can create one right now!') : 'Loading collection list'}
             </Heading>
-            <CreateCollectionLink
+            <Button
+              role='primary'
+              title={'Create collection'}
               onClick={() => {
                 navigate(`/${currentChainId}/create-collection/`, {
                   state: {
@@ -427,9 +448,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
                   }
                 });
               }}
-            >
-              Create collection
-            </CreateCollectionLink>
+            />
           </WrapperCollectionContentStyled>
           {collections.length > 0 && (
             <PagePaperStyled>
@@ -497,7 +516,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
                   <ContentWrap>
                     <Heading size='3'>Royalty</Heading>
                     <Text size='s' color='grey-500'>
-                      Royalties are payments made to the collection&apos;s creator ot team whenever an NFT is resold on the secondary market. 
+                      Royalties are payments made to the collection&apos;s creator of team whenever an NFT is resold on the secondary market. 
                     </Text>
                   </ContentWrap>
                 )}
@@ -589,7 +608,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
                 )}
                 {tokens.length > 0 && !isFilterVisible && (
                   <ButtonGroup ref={actionBoxRef}>
-                    <ConfirmBtn
+                    {step !== CreateTokensSteps.UPLOAD_MEDIA && <ConfirmBtn
                       iconLeft={{
                         color: 'var(--color-primary-400)',
                         name: 'arrow-left',
@@ -597,10 +616,17 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
                       }}
                       role='outlined'
                       title='Back'
-                      disabled={step === CreateTokensSteps.UPLOAD_MEDIA}
+                      disabled={false}
                       onClick={() => changeStep('prev')}
-                    />
-                    <ConfirmBtn
+                    />}
+                    {step === CreateTokensSteps.PREVIEW_WITH_FILTERS ? (
+                      <ConfirmBtn
+                        disabled={!collection || tokens.length === 0}
+                        role='primary'
+                        title='Confirm and create all'
+                        onClick={handleSubmit}
+                      />
+                    ) : (<ConfirmBtn
                       iconRight={{
                         color: 'currentColor',
                         name: 'arrow-right',
@@ -608,12 +634,9 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
                       }}
                       role='primary'
                       title='Next Step'
-                      disabled={
-                        step === CreateTokensSteps.PREVIEW_WITH_FILTERS ||
-                        nextStepIsBlocked
-                      }
+                      disabled={nextStepIsBlocked}
                       onClick={() => changeStep('next')}
-                    />
+                    />)}
                     <ButtonConatiner>
                       {/* <Button
                         title={
@@ -666,14 +689,6 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
                         onClick={() => setDialog(CreateTokenDialog.removeToken)}
                       />
                       <SelectedCountWrapper />
-                      {step === CreateTokensSteps.PREVIEW_WITH_FILTERS && (
-                        <ConfirmBtn
-                          disabled={!collection || tokens.length === 0}
-                          role='primary'
-                          title='Confirm and create all'
-                          onClick={handleSubmit}
-                        />
-                      )}
                       {/* {tokens.length > 0 &&
                         Number(leftTokens) > 0 &&
                         (step === CreateTokensSteps.SET_DATA ||
@@ -760,12 +775,11 @@ const WrapperCollectionContentStyled = styled(WrapperContent)<{
 }>`
   margin-bottom: calc(var(--prop-gap) * 2.5);
   width: 100%;
-  height: 480px;
+  height: 236px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 138px;
   transition: 0.5s;
 
   @media screen and (min-width: 1025px) {
@@ -812,7 +826,6 @@ const TokensCounterWrapper = styled.div`
 `;
 
 const ButtonGroup = styled.div`
-
   display: flex;
   flex-wrap: wrap;
   gap: var(--prop-gap);
@@ -843,8 +856,6 @@ const ButtonGroup = styled.div`
       opacity: 0;
     }
   }
-
-
 `;
 
 const SelectedCountWrapper = styled.div`

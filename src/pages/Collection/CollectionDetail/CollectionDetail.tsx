@@ -118,7 +118,7 @@ export const CollectionDetail: FC<IProps> = ({ collection, royalties }) => {
                 <Text color='grey-500' size='m'>
                   Owner:
                 </Text>
-                <AccountLink href={`${config.blockchains[currentChainId || '']?.scanUrl}account/${formatedAddressOwner || '404'}`}>
+                <AccountLink target='_blank' href={`${config.blockchains[currentChainId || '']?.scanUrl}account/${formatedAddressOwner || '404'}`}>
                   <Avatar size={24} src={DefaultAvatar} address={formatedAddressOwner}/>
                   <Text color='primary-600' size='m' >
                     {shortcutText(formatedAddressOwner || '')}

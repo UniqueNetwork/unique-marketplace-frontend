@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import DraggableList from 'react-draggable-list';
 import classNames from 'classnames';
 
-import { Icon, Modal, Text } from 'components/UI';
+import { Icon, Modal, Text, TooltipWrapper } from 'components/UI';
 
 import { NewToken2, ViewMode } from '../types';
 import { TokenCardCommonProps, TokenCardProps } from './TokenCard';
@@ -221,6 +221,7 @@ export const TokenList = ({
     );
     onChange(updatedTokens);
   };
+  const addNewAttribute = useRef(null);
 
   return (
     <ScrollWrap>
@@ -405,13 +406,18 @@ export const TokenList = ({
                       ))}
                     {step === CreateTokensSteps.SET_DATA && (
                       <TableHeaderCellAttrAdd>
-                        <HeaderAddAttributeWrap
-                          onClick={() => {
-                            setOpenAddAttributeModal(true);
-                          }}
+                        <TooltipWrapper
+                          align={{ vertical: 'top', horizontal: 'right', appearance: 'vertical' }}
+                          message={'Add New Attribute'}
                         >
-                          +
-                        </HeaderAddAttributeWrap>
+                          <HeaderAddAttributeWrap
+                            onClick={() => {
+                              setOpenAddAttributeModal(true);
+                            }}
+                          >
+                            +
+                          </HeaderAddAttributeWrap>
+                        </TooltipWrapper>
                       </TableHeaderCellAttrAdd>
                     )}
                     {step === CreateTokensSteps.SET_DATA && <FakeCell />}
@@ -859,6 +865,10 @@ export const TableHeaderCellAttrAdd = styled.div`
   box-sizing: border-box;
   background-color: var(--color-blue-grey-100);
   border-top-right-radius: 4px;
+
+  span {
+    margin: 15px 0 0 67px;
+  }
 `;
 
 export const FakeCell = styled.div`
@@ -917,7 +927,7 @@ export const TextStyledWithHint = styled(Text)`
 
 export const TextStyledSmall = styled.div`
   margin-top: 2px;
-  font-size: 8px;
+  font-size: 12px;
   color: var(--color-grey-600);
   padding-left: 10px;
 `;

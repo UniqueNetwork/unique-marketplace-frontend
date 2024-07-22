@@ -77,11 +77,11 @@ export const TokenPreview = ({
             testid={''}
           />
         </CheckboxWrapper>
-        <TokenBasicWrapper>
+        <TokenBasicWrapper onClick={() => setShowTokendetails(true)}>
           <TokenLinkImageWrapper>
             <TokenImage alt={`${tokenPrefix}_${id}`} image={image.url} />
           </TokenLinkImageWrapper>
-          <TokenCardActions onClick={() => setShowTokendetails(true)}>
+          <TokenCardActions>
             <TokenLinkTitle>{`${tokenPrefix} #${tokenId}`}</TokenLinkTitle>
           </TokenCardActions>
         </TokenBasicWrapper>
@@ -94,29 +94,51 @@ export const TokenPreview = ({
         isClosable
         isFlexible={true}
       >
-        <Slider ref={horizontalSliderRef} {...settings} initialSlide={index}>
-          {list?.map((token) => (
-            <CommonTokenDetailWrapper>
-              <CommonTokenDetail
-                token={{
-                  ...token,
-                  image: token.image.url,
-                  collectionId: collection?.collectionId || 0,
-                  owner: selectedAccount?.address || '',
-                  animation_url: token?.animation_url?.url
-                }}
-                collection={collection}
-                isLoading={false}
-                testid={`${'create-token-preview'}`}
-                isOwner={true}
-                isNested={false}
-                previewMode={true}
-                isBundle={false}
-                onBurn={() => {}}
-              ></CommonTokenDetail>
-            </CommonTokenDetailWrapper>
-          ))}
-        </Slider>
+        {list?.length === 1 ? (
+          <CommonTokenDetailWrapper>
+            <CommonTokenDetail
+              token={{
+                ...list[0],
+                image: list[0].image.url,
+                collectionId: collection?.collectionId || 0,
+                owner: selectedAccount?.address || '',
+                animation_url: list[0]?.animation_url?.url
+              }}
+              collection={collection}
+              isLoading={false}
+              testid={`${'create-token-preview'}`}
+              isOwner={true}
+              isNested={false}
+              previewMode={true}
+              isBundle={false}
+              onBurn={() => {}}
+            ></CommonTokenDetail>
+          </CommonTokenDetailWrapper>
+        ) : (
+          <Slider ref={horizontalSliderRef} {...settings} initialSlide={index}>
+            {list?.map((token) => (
+              <CommonTokenDetailWrapper>
+                <CommonTokenDetail
+                  token={{
+                    ...token,
+                    image: token.image.url,
+                    collectionId: collection?.collectionId || 0,
+                    owner: selectedAccount?.address || '',
+                    animation_url: token?.animation_url?.url
+                  }}
+                  collection={collection}
+                  isLoading={false}
+                  testid={`${'create-token-preview'}`}
+                  isOwner={true}
+                  isNested={false}
+                  previewMode={true}
+                  isBundle={false}
+                  onBurn={() => {}}
+                ></CommonTokenDetail>
+              </CommonTokenDetailWrapper>
+            ))}
+          </Slider>
+        )}
       </Modal>
     </TokenPreviewWrapper>
   );
@@ -159,6 +181,7 @@ const TokenWrapper = styled.div`
 
 const TokenBasicWrapper = styled.div`
   display: block;
+  cursor: pointer;
 `;
 
 const TokenLinkImageWrapper = styled.div`
