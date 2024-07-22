@@ -12,7 +12,6 @@ import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { CollectionWithInfoV2Dto, PotentialAttribute } from '@unique-nft/sdk';
 import { CreateTokensSteps } from '../CreateNFT';
 import { TokenPreview } from './TokenPreview/TokenPreview';
-import { ConfirmBtn } from 'components';
 import TokenInputForm from './TokenInputForm';
 import { NewAttributePayload, TokenLine } from './TokenLine';
 import FilterComponent from './TokenFilter';
@@ -21,7 +20,6 @@ import Create from 'static/images/create.png';
 import IconWithHint from 'components/IconWithHint/IconWithHint';
 import { IconButton } from 'components/IconButton/IconButton';
 import ConfirmDeleteForm from './ConfirmDeleteForm';
-import Slider from 'react-slick';
 import { Checkbox } from 'components/UI/Checkbox/Checkbox2';
 
 export type TokenListProps = {
@@ -123,16 +121,19 @@ export const TokenList = ({
     type: SetForAllModalType | null
   ) => {
     const updatedTokens = tokens.map((token) => {
-      switch (type) {
-        case SetForAllModalType.NAME:
-          return { ...token, name: inputValue };
-        case SetForAllModalType.DESCRIPTION:
-          return { ...token, description: inputValue };
-        case SetForAllModalType.EXTERNAL_LINK:
-          return { ...token, external_url: inputValue };
-        default:
-          return token;
+      if (token.isSelected) {
+        switch (type) {
+          case SetForAllModalType.NAME:
+            return { ...token, name: inputValue };
+          case SetForAllModalType.DESCRIPTION:
+            return { ...token, description: inputValue };
+          case SetForAllModalType.EXTERNAL_LINK:
+            return { ...token, external_url: inputValue };
+          default:
+            return token;
+        }
       }
+      return token;
     });
 
     onChange(updatedTokens);
@@ -211,7 +212,9 @@ export const TokenList = ({
     description: string[];
   }>({ attributes: {}, name: [], description: [] });
   const filteredTokens = useFilteredTokens(tokens, filters);
-  const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState<string | null>(null);
+  const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState<
+    string | null
+  >(null);
   const onSelect = (tokenId: number) => {
     const updatedTokens = tokens.map((token) =>
       token.id === tokenId ? { ...token, isSelected: !token.isSelected } : token
@@ -229,17 +232,15 @@ export const TokenList = ({
         stepUploadImages={step === CreateTokensSteps.UPLOAD_IMAGES}
       >
         {tokens.length === 0 && <Stub />}
-        {
-          step === CreateTokensSteps.UPLOAD_IMAGES && (
-            <ImageUploadArea
-              disabled={disabled}
-              hasTokens={tokens.length > 0}
-              hidden={!dragEnter && tokens.length > 0}
-              onUpload={onAddTokens}
-              onDragExit={onDragEnd}
-            />
-          )
-        }
+        {step === CreateTokensSteps.UPLOAD_IMAGES && (
+          <ImageUploadArea
+            disabled={disabled}
+            hasTokens={tokens.length > 0}
+            hidden={!dragEnter && tokens.length > 0}
+            onUpload={onAddTokens}
+            onDragExit={onDragEnd}
+          />
+        )}
         {tokens.length !== 0 && (
           <>
             {viewMode === ViewMode.grid && deviceSize > DeviceSize.sm && (
@@ -270,7 +271,7 @@ export const TokenList = ({
                         onChange: onTokenChange,
                         onRemove: onTokenRemove,
                         index,
-                        onSelect,
+                        onSelect
                       }}
                       dragHandleProps={{}}
                     />
@@ -346,6 +347,7 @@ export const TokenList = ({
                               SetForAllModalType.EXTERNAL_LINK
                             );
                           }}
+                          disabled={!selected.length}
                         >
                           Set for selected
                         </SetAllButton>
@@ -358,6 +360,7 @@ export const TokenList = ({
                           onClick={() => {
                             toggleSetForAllModal(SetForAllModalType.NAME);
                           }}
+                          disabled={!selected.length}
                         >
                           Set for selected
                         </SetAllButton>
@@ -372,6 +375,7 @@ export const TokenList = ({
                               SetForAllModalType.DESCRIPTION
                             );
                           }}
+                          disabled={!selected.length}
                         >
                           Set for selected
                         </SetAllButton>
@@ -393,6 +397,7 @@ export const TokenList = ({
                             onClick={() => {
                               toggleAttributeForSetAll(item);
                             }}
+                            disabled={!selected.length}
                           >
                             Set for selected
                           </SetAllButton>
@@ -409,9 +414,7 @@ export const TokenList = ({
                         </HeaderAddAttributeWrap>
                       </TableHeaderCellAttrAdd>
                     )}
-                    {step === CreateTokensSteps.SET_DATA && (
-                      <FakeCell />
-                    )}
+                    {step === CreateTokensSteps.SET_DATA && <FakeCell />}
                   </TableHeader>
 
                   {/* @ts-ignore */}
@@ -509,6 +512,7 @@ export const TokenList = ({
 
                   return { ...token, attributes: updatedAttributes };
                 });
+
                 onChange(updatedTokens);
                 toggleAttributeForSetAll(null);
               }}
@@ -524,29 +528,33 @@ export const TokenList = ({
               buttonText={`Set ${attributeForSetAll}`}
               onSubmit={(value) => {
                 const updatedTokens = tokens.map((token) => {
-                  const attributeExists = token.attributes.some(
-                    (attr) => attr.trait_type === attributeForSetAll
-                  );
-
-                  let updatedAttributes;
-                  if (attributeExists) {
-                    updatedAttributes = token.attributes.map((attr) =>
-                      attr.trait_type === attributeForSetAll
-                        ? { ...attr, value }
-                        : attr
+                  if (token.isSelected) {
+                    const attributeExists = token.attributes.some(
+                      (attr) => attr.trait_type === attributeForSetAll
                     );
-                  } else {
-                    updatedAttributes = [
-                      ...token.attributes,
-                      {
-                        trait_type: attributeForSetAll || '',
-                        value: value || ''
-                      }
-                    ];
-                  }
 
-                  return { ...token, attributes: updatedAttributes };
+                    let updatedAttributes;
+                    if (attributeExists) {
+                      updatedAttributes = token.attributes.map((attr) =>
+                        attr.trait_type === attributeForSetAll
+                          ? { ...attr, value }
+                          : attr
+                      );
+                    } else {
+                      updatedAttributes = [
+                        ...token.attributes,
+                        {
+                          trait_type: attributeForSetAll || '',
+                          value: value || ''
+                        }
+                      ];
+                    }
+
+                    return { ...token, attributes: updatedAttributes };
+                  }
+                  return token;
                 });
+
                 onChange(updatedTokens);
                 toggleAttributeForSetAll(null);
               }}
@@ -830,7 +838,6 @@ const CloseButton = styled.div`
   }
 `;
 
-
 export const TableHeaderCellAttribute = styled(TableHeaderCell)`
   &:hover ${CloseButton} {
     opacity: 1;
@@ -856,8 +863,8 @@ export const TableHeaderCellAttrAdd = styled.div`
 
 export const FakeCell = styled.div`
   flex: 0.5;
-  background: #FFF;
-  border: 1px solid #FFF;
+  background: #fff;
+  border: 1px solid #fff;
 `;
 
 const HeaderAddAttributeWrap = styled.div`
@@ -870,7 +877,7 @@ const HeaderAddAttributeWrap = styled.div`
   border: 1px solid var(--color-primary-500);
   border-radius: 16px;
   color: var(--color-primary-500);
-  background-color: #FFF;
+  background-color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -920,7 +927,6 @@ const ScrollWrap = styled.div`
   overflow-y: scroll;
 `;
 
-
 const FiltersWrapper = styled.div`
   width: 260px;
   margin-right: 32px;
@@ -963,20 +969,22 @@ const ContentSubtitle = styled.div`
   line-heignt: 22px;
 `;
 
-const SetAllButton = styled.div`
+const SetAllButton = styled.div<{ disabled?: boolean }>`
   line-height: 22px;
   font-size: 14px;
-  color: var(--color-primary-500);
-  cursor: pointer;
+  color: ${({ disabled }) =>
+    disabled ? 'var(--color-grey-400)' : 'var(--color-primary-500)'};
+  cursor: ${({ disabled }) => (disabled ? 'auto' : 'pointer')};
   margin-top: 8px;
   padding-left: 10px;
+  pointer-events: ${({ disabled }) => (disabled ? 'none' : 'auto')};
 `;
 
 const StyledCheckbox = styled(Checkbox)`
   margin: auto;
   margin-top: 22px;
   .checkmark {
-    background-color: #FFF;
+    background-color: #fff;
     border: 1px solid #000;
   }
 `;
