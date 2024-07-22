@@ -278,7 +278,7 @@ const CommonTokenDetailWrapper = styled.div`
 
 const TokenPreviewWrapper = styled.div`
   .unique-modal {
-    width: 1060px !important;
+    width: 1160px !important;
     height: 720px !important;
     padding: 0 30px !important;
     box-sizing: border-box !important;
