@@ -156,7 +156,6 @@ export const TokenList = ({
   }: NewAttributePayload) => {
     const updatedTokens = tokens.map((token) => {
       if (token.tokenId === tokenId) {
-        //@ts-ignore
         const attributeExists = token.attributes.some(
           (attribute) => attribute.trait_type === trait_type
         );

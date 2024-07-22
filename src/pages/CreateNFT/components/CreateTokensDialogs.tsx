@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { CreateTokenDialog, NewToken, NewToken2 } from '../types';
 import { AttributesModal } from './AttributesModal';
 import { ChangeCollectionModal } from './ChangeCollectionModel';
@@ -34,18 +33,18 @@ export const CreateTokensDialogs = ({
   switch (dialog) {
     case CreateTokenDialog.changeCollection:
       return <ChangeCollectionModal onSubmit={onConfirm} onClose={onClose} />;
-    case CreateTokenDialog.editAttributes:
-      return (
-        <AttributesModal
-          tokens={tokens}
-          tokenPrefix={tokenPrefix}
-          attributesSchema={attributesSchema || []}
-          mode={mode}
-          schemaVersion={schemaVersion}
-          onChange={onChange}
-          onClose={onClose}
-        />
-      );
+    // case CreateTokenDialog.editAttributes:
+    //   return (
+    //     <AttributesModal
+    //       tokens={tokens}
+    //       tokenPrefix={tokenPrefix}
+    //       attributesSchema={attributesSchema || []}
+    //       mode={mode}
+    //       schemaVersion={schemaVersion}
+    //       onChange={onChange}
+    //       onClose={onClose}
+    //     />
+    //   );
     case CreateTokenDialog.removeToken:
       return <RemovingModal tokens={tokens} onSubmit={onConfirm} onClose={onClose} />;
     case CreateTokenDialog.exceededTokens:

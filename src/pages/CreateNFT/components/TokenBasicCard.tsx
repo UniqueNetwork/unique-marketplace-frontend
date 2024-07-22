@@ -1,17 +1,16 @@
-//@ts-nocheck
 import { id } from 'date-fns/locale';
 import styled from 'styled-components';
 
 import { Button, Checkbox, Text } from 'components/UI';
 
 import trash from '../../../static/icons/trash.svg';
-import { NewToken, NewToken2 } from '../types';
+import { NewToken } from '../types';
 import emptyImage from 'static/icons/empty-image.svg';
 import { useState } from 'react';
 import classNames from 'classnames';
 
 type TokenBasicCardProps = {
-  onChange?(token: NewToken[] | NewToken2[]): void;
+  onChange?(token: NewToken): void;
   onRemove?(): void;
   token: NewToken;
   tokenPrefix: string;

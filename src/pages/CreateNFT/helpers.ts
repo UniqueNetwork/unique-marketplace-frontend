@@ -43,8 +43,6 @@ export const mapNewToken = (
     attributes: token.attributes,
     royalties: token.royalties?.map(({value, ...rest}) => ({...rest, percent: +value})),
     animation_url: token.animationURLIpfsCid?.fullUrl,
-    //TO DO update after Media types fix [] => {}
-    //@ts-ignore
     media: token.media && getCreateMediaData(token.media),
   };
 

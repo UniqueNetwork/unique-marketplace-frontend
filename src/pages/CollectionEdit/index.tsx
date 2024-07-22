@@ -53,11 +53,8 @@ export const CollectionEditPage = () => {
 
       const collectionOnChain = await api?.collection?.getCollection(Number(collectionId));
       setCollectionInfo(collectionOnChain || null);
-      //TO DO remove after @unique-nft/sdk update
-      //@ts-ignore
       if (collectionOnChain?.royalties?.length) {
         setRoyalty({
-          //@ts-ignore
           royalties: collectionOnChain?.royalties?.map(({ address, percent }) => {
             const value = percent
               ? percent.toFixed(2)

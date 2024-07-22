@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
@@ -10,10 +9,7 @@ import { ConfirmBtn } from 'components';
 import { TokenList } from './components/TokenList';
 import { CreateTokenDialog, NewToken2, ViewMode } from './types';
 import { mapTokensToPayload } from './helpers';
-import { UploadFAB } from './components/UploadFAB';
-import { CollectionStats } from './components/CollectionStats';
 import { StatusTransactionModal, TRANSACTION_STAGE_ENUM } from './components/StatusTransactionModal';
-import { AttributeFilterProvider } from './contexts/AttributesFilterContext';
 import { MobileFilters } from './components/MobileFilter';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { useApi } from 'hooks/useApi';
@@ -140,12 +136,11 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
 
         let animationURLIpfsCid;
 
-        if (tokens[index].animation_url && tokens[index].animation_url?.file) {
-          //@ts-ignore
-          animationURLIpfsCid = await api?.collection?.uploadFile(tokens[index].animation_url.file
-          );
+        const animationFile = tokens[index]?.animation_url?.file;
+        if (animationFile) {
+          animationURLIpfsCid = await api?.collection?.uploadFile(animationFile);
         }
-
+        
         if (tokens[index]?.media && tokens[index].media.length > 0) {
           for (const media of tokens[index].media) {
             if (media?.file) {
@@ -389,6 +384,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
   const [royalty, setRoyalty] = useState<RoyaltiesFormData>({ royalties: [] });
 
   useEffect(() => {
+    //@ts-ignore
     setTokens((tokens) =>
       tokens.map((token) => ({
         ...token,
