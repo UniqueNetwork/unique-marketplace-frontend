@@ -1,4 +1,4 @@
-import { IpfsUploadResponse } from '@unique-nft/sdk';
+import { IpfsUploadResponse, Media } from '@unique-nft/sdk';
 import { Royalty } from '../CollectionEdit/types';
 
 export interface Option {
@@ -38,6 +38,14 @@ export type FilledTokenForm = Required<{
   [P in keyof TokenForm]: NonNullable<TokenForm[P]>;
 }>;
 
+export type CreateMediaData = {
+  file: Blob;
+  // 'image' | 'animation' | 'video' | 'audio' | 'spatial' | 'pdf' | 'document' | 'other';
+  type: string;
+  name: string;
+  ipfsCid?: IpfsUploadResponse; 
+}
+
 export type NewToken = {
   id: number;
   tokenId: number;
@@ -51,6 +59,31 @@ export type NewToken = {
   totalFractions?: string;
   isValid?: boolean;
   royalties?: Royalty[];
+};
+
+export type NewToken2 = {
+  id: number;
+  tokenId: number;
+  image: {
+    file: Blob;
+    url: string;
+  };
+  attributes: {trait_type: string, value: string}[];
+  isSelected: boolean;
+  ipfsCid?: IpfsUploadResponse;
+  animationURLIpfsCid?: IpfsUploadResponse;
+  totalFractions?: string;
+  isValid?: boolean;
+  royalties?: Royalty[];
+  media: CreateMediaData[];
+  external_url?: string;
+  name?: string;
+  description?: string;
+  animation_url?: {
+    file: Blob;
+    url?: string;
+    name?: string;
+  };
 };
 
 export enum CreateTokenDialog {

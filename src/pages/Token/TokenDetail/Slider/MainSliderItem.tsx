@@ -156,6 +156,7 @@ const MainSliderItem = ({
         </PictureWrapper>
       );
     case 'image':
+    case 'animation_url':
       return (
         <PictureWrapper>
           <Picture alt={tokenId?.toString() || ''} src={src} badges={badges} />

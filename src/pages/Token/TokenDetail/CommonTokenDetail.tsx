@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { CollectionWithInfoV2Dto, TokenWithInfoV2Dto } from '@unique-nft/sdk';
-import { Heading, Dropdown, Icon } from 'components/UI';
+import { CollectionWithInfoV2Dto, NestingParentId, PropertyWithHexValue, TokenWithInfoV2Dto } from '@unique-nft/sdk';
+import { Heading, Dropdown, Icon, Text } from 'components/UI';
 import { Picture } from 'components';
 import TokensBandleCard from 'components/BundleTree/NestedSection/TokenCard';
 import { AttributesBlock } from './AttributesBlock';
@@ -30,9 +30,17 @@ import { mockWearables } from '../constants';
 import { RoyaltiesBlock } from './RoyaltiesBlock';
 import { TokenSlider } from './Slider/TokenSlider';
 import { BREAKPOINTS } from 'hooks/useBreakpointObserver';
+import { CreateMediaData } from 'pages/CreateNFT/types';
+
+interface TokenWithOptionalFieldsV2Dto extends Omit<TokenWithInfoV2Dto, 'parsingError' | 'properties' | 'nestingParentToken' | 'media'> {
+  parsingError?: string | null;
+  properties?: PropertyWithHexValue[];
+  nestingParentToken?: NestingParentId;
+  media: CreateMediaData[];
+}
 
 interface IProps {
-  token?: TokenWithInfoV2Dto
+  token?: TokenWithOptionalFieldsV2Dto | TokenWithInfoV2Dto
   collection?: CollectionWithInfoV2Dto
   offer?: Offer
   isLoading?: boolean
@@ -41,6 +49,7 @@ interface IProps {
   isNested: boolean
   isOwner: boolean
   topmostOwner?: string
+  previewMode?: boolean
   onBurn(): void
 }
 
@@ -53,6 +62,7 @@ export const CommonTokenDetail: FC<IProps> = ({
   testid,
   isNested,
   topmostOwner,
+  previewMode,
   onBurn
 }) => {
   const navigate = useNavigate();
@@ -83,8 +93,8 @@ export const CommonTokenDetail: FC<IProps> = ({
     let video;
     if (token?.media) {
       const images = Object.values(token?.media || {}).filter((media) => media.type === 'image');    
-      if (images.length > 0 ) {
-        for(const image of images) {
+      if (images.length > 0) {
+        for (const image of images) {
           sliderItems.push({src: image.url, type: 'image'});
         }
       }
@@ -92,14 +102,14 @@ export const CommonTokenDetail: FC<IProps> = ({
       const videos = Object.values(token?.media || {}).filter((media) => media.type === 'video');
       if (videos.length > 0 ) {
         video = videos[0];
-        for(const video of videos) {
+        for (const video of videos) {
           sliderItems.push({src: video.url, type: 'video'});
         }
       }
 
       const audios = Object.values(token?.media || {}).filter((media) => media.type === 'audio');    
       if (audios.length > 0 ) {
-        for(const audio of audios) {
+        for (const audio of audios) {
           sliderItems.push({src: audio.url, type: 'audio', thumbnail: image});
         }
       }
@@ -211,14 +221,14 @@ export const CommonTokenDetail: FC<IProps> = ({
         {!isLoading && 
           (hasSlider ? (
             <SliderContainer>
-              <TokenSlider 
+              <TokenSlider
                 items={sliderItems}
                 isWearable={isWearable}
                 wearableSrc={wearableTokenImg || image}
                 baseSrc={baseTokenImg}
                 badges={badges}
               />
-              <EquippedWearableWrap><EquippedWearables /></EquippedWearableWrap>
+              {!previewMode && <EquippedWearableWrap><EquippedWearables /></EquippedWearableWrap>}
             </SliderContainer>
           ) : (
             <PictureWrapper>
@@ -245,7 +255,7 @@ export const CommonTokenDetail: FC<IProps> = ({
                   )}
                 </>
               )}
-              <EquippedWearables />
+              {!previewMode && <EquippedWearables />}
             </PictureWrapper>
           ))}
       </>
@@ -279,6 +289,10 @@ export const CommonTokenDetail: FC<IProps> = ({
               )}
             </OwnerBlock>
             <Divider />
+            <TokenData>
+              {token?.name && <Text color='grey-500' size='l'>{token?.name}</Text>}
+              {token?.description && <Text color='grey-500' size='s'>{token?.description}</Text>}
+            </TokenData>
             {isNested &&
               token?.nestingParentToken?.tokenId &&
               token?.nestingParentToken?.collectionId && (
@@ -322,7 +336,7 @@ export const CommonTokenDetail: FC<IProps> = ({
           </>
         )}
       </Description>
-      <DropdownStyled
+      {!previewMode &&<DropdownStyled
         placement={'right'}
         open={dropdownOpen}
         onOpenChange={setDropdownOpen}
@@ -376,7 +390,7 @@ export const CommonTokenDetail: FC<IProps> = ({
         <DropdownWrapper>
           <Icon size={32} name={'meatball-menu'} color={'transparent'} />
         </DropdownWrapper>
-      </DropdownStyled>
+      </DropdownStyled>}
       <ShareTokenModal
         isVisible={shareModalVisible}
         onClose={closeShareModal}
@@ -712,4 +726,11 @@ const EquippedWearableWrap = styled.div`
   @media (max-width: ${BREAKPOINTS.mobile}px) {
     width: calc(100vw - var(--prop-gap) * 2);
   }
+`;
+
+const TokenData = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
 `;

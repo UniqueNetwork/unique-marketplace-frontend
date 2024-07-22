@@ -33,7 +33,7 @@ export const NestedSection: FC<INestedSectionView<INestingToken>> = ({ selectedT
 const NestedDetails = styled.div`
   display: block;
   padding: 16px 32px;
-  background-color: #EDEDEE50;
+  background-color: var(--color-grey-100);
   width: calc(100vw - 777px);
   @media (max-width: 1440px) {
     width: calc(100vw - 729px);

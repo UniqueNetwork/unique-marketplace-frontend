@@ -12,7 +12,6 @@ import { WalletManager } from './WalletManager/WalletManager';
 import { DesktopMenuItem, DesktopMenuLink, MobileMenuItem, MobileMenuLink } from './MenuLink';
 import config from 'config';
 import { GetButton } from './GetButton';
-import { f } from '@unique-nft/utils/index-406151a5';
 
 interface HeaderProps {
   activeItem: TMenuItems;

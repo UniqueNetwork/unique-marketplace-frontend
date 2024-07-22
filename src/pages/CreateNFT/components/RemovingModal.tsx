@@ -2,12 +2,12 @@ import styled from 'styled-components';
 
 import { Button, Modal, Text, Heading } from 'components/UI';
 
-import { NewToken } from '../types';
+import { NewToken, NewToken2 } from '../types';
 import { ModalFooter } from './ModalFooter';
 
 type RemovingModalProps = {
   isVisible?: boolean;
-  tokens: NewToken[];
+  tokens: NewToken2[] | NewToken[];
   onSubmit(): void;
   onClose(): void;
 };
