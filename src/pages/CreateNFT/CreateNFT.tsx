@@ -34,6 +34,7 @@ import Skeleton from 'components/Skeleton/Skeleton';
 import { CreateTokensDialogs } from './components/CreateTokensDialogs';
 import { RoyaltiesFormNew } from 'pages/CollectionEdit/Forms/RoyaltiesFormNew';
 import { validateLink } from 'utils/textUtils';
+import { UploadFAB } from './components/UploadFAB';
 
 export enum CreateTokensSteps {
   SELECT_COLLECTION = 'SELECT_COLLECTION',
@@ -691,12 +692,12 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
                         onClick={() => setDialog(CreateTokenDialog.removeToken)}
                       />
                       <SelectedCountWrapper />
-                      {/* {tokens.length > 0 &&
+                      {tokens.length > 0 &&
                         Number(leftTokens) > 0 &&
                         (step === CreateTokensSteps.SET_DATA ||
                           step === CreateTokensSteps.UPLOAD_MEDIA) && (
                           <UploadFAB onUpload={onAddTokens} />
-                        )} */}
+                        )}
                     </ButtonConatiner>
                   </ButtonGroup>
                 )}
