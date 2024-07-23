@@ -33,6 +33,7 @@ import { CollectionDetailLight } from 'pages/Collection/CollectionDetail/Collect
 import Skeleton from 'components/Skeleton/Skeleton';
 import { CreateTokensDialogs } from './components/CreateTokensDialogs';
 import { RoyaltiesFormNew } from 'pages/CollectionEdit/Forms/RoyaltiesFormNew';
+import { validateLink } from 'utils/textUtils';
 
 export enum CreateTokensSteps {
   SELECT_COLLECTION = 'SELECT_COLLECTION',
@@ -151,6 +152,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
 
         uploadedTokens.push({
           ...tokens[index],
+          external_url: validateLink(tokens[index].external_url || '') ? tokens[index].external_url : '',
           ipfsCid,
           animationURLIpfsCid,
           media: tokens[index].media,
@@ -837,6 +839,7 @@ const ButtonGroup = styled.div`
   background: white;
   position: sticky;
   border-radius: 4px;
+  padding-bottom: 64px;
 
   @media screen and (min-width: 1025px) {
     padding-left: calc(220px + var(--prop-gap)* 2);
@@ -880,17 +883,10 @@ const SelectCheckbox = styled(Checkbox)`
   }
 `;
 
-const StyledCheckbox = styled(Checkbox)`
-  align-items: center;
-  margin-left: -14px;
-  label.checkbox-label {
-    margin-left: 42px;
-  }
-`;
-
 const ButtonConatiner = styled.div`
   display: flex;
-  width: 100%;
+  // width: 100%;
+  margin-left: auto;
   justify-content: start;
   gap: 16px;
 

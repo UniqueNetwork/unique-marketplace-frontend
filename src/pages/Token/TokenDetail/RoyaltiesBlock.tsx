@@ -20,7 +20,7 @@ export const RoyaltiesBlock: FC<IProps> = ({ royalties }: IProps) => {
           <RoyltyLine>
             <OwnerCard
               address={address}
-              isShort={deviceSize < DeviceSize.xl}
+              isShort={true}
               canCopy={false}
               prefixOwned=''
               prefixNested=''

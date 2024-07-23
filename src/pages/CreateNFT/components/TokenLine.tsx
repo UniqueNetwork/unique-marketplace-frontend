@@ -209,7 +209,6 @@ export const TokenLine = ({
     const isLinkValid = validateLink(externalLinkUpdate);
     setIsValidLink(isLinkValid);
 
-    if (!isLinkValid) return;
 
     onChange({
       id,
@@ -566,12 +565,12 @@ export const LineContent = styled.div`
   left: 0;
   display: flex;
   height: 240px;
-  border-top: 1px solid #b9b9b9;
+  border-top: 1px solid var(--color-table-grey);
   background: var(--color-additional-light);
   // margin: 0 !important;
 
   &:last-child {
-    border-bottom: 1px solid #b9b9b9;
+    border-bottom: 1px solid var(--color-table-grey);
   }
 `;
 
@@ -588,33 +587,28 @@ export const TokenLineCell = styled.div<{
   font-size: 12px;
   line-height: 15px;
   font-weight: 600;
-  border-right: 1px solid #b9b9b9;
+
+  border-right: 1px solid var(--color-table-grey);
   height: 100%;
   box-sizing: border-box;
+  border: ${({isValid}) => isValid === false && '1px solid var(--color-additional-warning-500) !important'};
+
   &:first-child {
     flex: 0.5;
-    border-left: 1px solid #b9b9b9;
+    border-left: 1px solid var(--color-table-grey);
   }
 
   &:last-child {
     padding: 0;
+    border-bottom: ${({isValid}) => isValid === true && '1px solid var(--color-table-grey) !important'};
   }
 
   &:nth-child(2) {
     flex: 0.5;
   }
 
-  ${(props) =>
-    props.isHovered &&
-    `
-    border-color: #007BFF;
-  `}
 
-  ${(props) =>
-    props.isValid === false &&
-    `
-    border-color: red;
-  `}
+  z-index: 1;
 `;
 
 export const TokenLineCellAttrAdd =styled.div`
@@ -627,7 +621,7 @@ export const TokenLineCellAttrAdd =styled.div`
   font-size: 12px;
   line-height: 15px;
   font-weight: 600;
-  border-right: 1px solid #b9b9b9;
+  border-right: 1px solid var(--color-table-grey);
   height: 100%;
   box-sizing: border-box;
   background-color: var(--color-blue-grey-100);

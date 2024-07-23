@@ -227,6 +227,7 @@ export const CommonTokenDetail: FC<IProps> = ({
                 wearableSrc={wearableTokenImg || image}
                 baseSrc={baseTokenImg}
                 badges={badges}
+                previewMode={previewMode}
               />
               {!previewMode && <EquippedWearableWrap><EquippedWearables /></EquippedWearableWrap>}
             </SliderContainer>

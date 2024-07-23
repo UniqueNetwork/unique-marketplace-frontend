@@ -935,6 +935,7 @@ export const TextStyledSmall = styled.div`
 const ScrollWrap = styled.div`
   width: 100%;
   overflow-y: scroll;
+  overflow-x: unset;
 `;
 
 const FiltersWrapper = styled.div`
