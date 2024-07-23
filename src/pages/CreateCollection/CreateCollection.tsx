@@ -358,10 +358,10 @@ const CreateCollectionComponent = ({ className }: CreateCollectionProps) => {
     <Wrapper className={classNames('create-collection-page', className)}>
       <WrapperContentStyled>
         <FormWrapper>
-          <CollectionStepper
+          {/* <CollectionStepper
             activeStep={currentStep}
             onClickStep={goToPreviousStep}
-          />
+          /> */}
           {isolatedCollectionForm}
           {isBalanceInsufficient || (!isBalanceInsufficient && isValid) ? (
             <FeeMessage
@@ -388,7 +388,7 @@ const CreateCollectionComponent = ({ className }: CreateCollectionProps) => {
                 onClick={handleSubmit(onNextStep)}
               />
             )}
-            {!isFirstStep && (
+            {/* {!isFirstStep && (
               <Button
                 iconLeft={{
                   color: 'var(--color-primary-400)',
@@ -398,16 +398,16 @@ const CreateCollectionComponent = ({ className }: CreateCollectionProps) => {
                 title='Previous step'
                 onClick={() => goToPreviousStep(currentStep - 1)}
               />
-            )}
-            {isLastStep && (
-              <ConfirmBtn
-                role='primary'
-                title='Create collection'
-                tooltip={errorTooltip}
-                disabled={!isValid || feeLoading || isBalanceInsufficient}
-                onClick={handleSubmit(onCreateCollectionHandle)}
-              />
-            )}
+            )} */}
+
+            <ConfirmBtn
+              role='primary'
+              title='Create collection'
+              tooltip={errorTooltip}
+              disabled={!isValid || feeLoading || isBalanceInsufficient}
+              onClick={handleSubmit(onCreateCollectionHandle)}
+            />
+
           </ButtonGroup>
           <Confirm
             buttons={[
