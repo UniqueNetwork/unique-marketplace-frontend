@@ -662,6 +662,7 @@ const ExternalLinkInput = styled.textarea`
   resize: none;
   padding: 10px;
   font-family: var(--font-inter);
+  background: transparent;
 `;
 
 const UploadWrapper = styled.div`
