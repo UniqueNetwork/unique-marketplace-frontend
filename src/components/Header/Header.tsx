@@ -91,7 +91,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
           <MobileMenuLink to={`/${currentChainId || ''}/market`} active={activeItem === undefined} onClick={mobileMenuToggler}>
             Explore
           </MobileMenuLink>
-          <MobileMenuDropdown
+          {/* <MobileMenuDropdown
             options={[
                 {
                   title: 'NFT',
@@ -110,7 +110,15 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
             }}
           >
             <Text color = 'additional-dark'>Create</Text>
-          </MobileMenuDropdown>
+          </MobileMenuDropdown> */}
+          <MobileMenuLink
+            to={`/${currentChainId || ''}/create-token`}
+            active={activeItem === 'Create tokens'}
+            onClick={mobileMenuToggler}
+            disabled={!selectedAccount && !isLoading}
+          >
+            Create
+          </MobileMenuLink>
           <MobileMenuLink
             to={`/${currentChainId || ''}/sellTokens`}
             active={activeItem === 'My NFTs'}
