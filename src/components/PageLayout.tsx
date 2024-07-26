@@ -30,7 +30,7 @@ export const PageLayout: FC = () => {
       return { heading: 'Create collection' };
     }
     if (pathname.includes('/create-token')) {
-      return { heading: '' };
+      return { heading: 'Create tokens' };
     }
     if (pathname.includes('/collections')) {
       return { heading: 'My collections' };

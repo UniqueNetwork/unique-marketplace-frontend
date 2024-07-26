@@ -24,7 +24,7 @@ export const Layout = ({
       {header}
     </header>
     <main>
-      {heading && <Heading>{heading}</Heading>}
+      {heading && <Heading>{heading !== "Create tokens" && heading}</Heading>}
       {breadcrumbs && <Breadcrumbs {...breadcrumbs} />}
 
       <div className={'unique-layout__content'}>{children}</div>

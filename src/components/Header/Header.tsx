@@ -1,4 +1,4 @@
-import { FC, useCallback, useState } from 'react';
+import { FC, useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { Dropdown, Icon, Text } from '../UI';
@@ -9,8 +9,7 @@ import { useAccounts } from 'hooks/useAccounts';
 import { useApi } from 'hooks/useApi';
 import { TMenuItems } from '../PageLayout';
 import { WalletManager } from './WalletManager/WalletManager';
-import { DesktopMenuItem, DesktopMenuLink, MobileMenuItem, MobileMenuLink } from './MenuLink';
-import config from 'config';
+import { DesktopMenuItem, DesktopMenuLink, MobileMenuLink } from './MenuLink';
 import { GetButton } from './GetButton';
 
 interface HeaderProps {
@@ -48,7 +47,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
             <DesktopMenuLink to={`/${currentChainId || ''}/market`} active={activeItem === undefined}>
               Explore
             </DesktopMenuLink>
-            <MenuDropdown
+            {/* <MenuDropdown
               options={[
                 {
                   title: 'NFT',
@@ -69,7 +68,10 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
               }}
             >
               <DesktopMenuItem $active={activeItem === 'Create collection' || activeItem === 'Create tokens'}>Create</DesktopMenuItem>
-            </MenuDropdown>
+            </MenuDropdown> */}
+            <DesktopMenuLink to={`/${currentChainId || ''}/create-token`} active={activeItem === 'Create tokens' || activeItem === 'Create collection'}>
+              Create
+            </DesktopMenuLink>
             <DesktopMenuLink to={`/${currentChainId || ''}/sellTokens`} active={activeItem === 'My NFTs'} disabled={!selectedAccount || isLoading}>
               My NFTs
             </DesktopMenuLink>
@@ -113,9 +115,8 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
           </MobileMenuDropdown> */}
           <MobileMenuLink
             to={`/${currentChainId || ''}/create-token`}
-            active={activeItem === 'Create tokens'}
+            active={activeItem === 'Create tokens' || activeItem === 'Create collection'}
             onClick={mobileMenuToggler}
-            disabled={!selectedAccount && !isLoading}
           >
             Create
           </MobileMenuLink>
