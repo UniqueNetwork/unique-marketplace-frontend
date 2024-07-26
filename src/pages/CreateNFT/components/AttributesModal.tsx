@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { Slide } from 'react-slideshow-image';
 import 'react-slideshow-image/dist/styles.css';
 
-import { Attribute, AttributeOption, NewToken } from '../types';
+import { Attribute, AttributeOption, NewToken, NewToken2 } from '../types';
 import { AttributesForm, LabelText } from './AttributesForm';
 import { TokenBasicCard } from './TokenBasicCard';
 import { FormGrid } from './TokenCard';

@@ -91,8 +91,8 @@ const ModalWrapper = styled.div<{ isFlexible?: boolean, isGlobalBackdrop?: boole
       position: absolute;
       cursor: pointer;
       padding: 10px;
-      top: 28px;
-      right: 19px;
+      top: 0;
+      right: 0;
       
       svg {
         fill: var(--color-additional-dark);

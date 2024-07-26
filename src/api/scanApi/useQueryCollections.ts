@@ -25,6 +25,7 @@ const gqlQuery = {
         owner: owner_normalized
         cover: collection_cover
         id: collection_id
+        creationDate: date_of_creation
         name: name
         tokenPrefix: token_prefix
         tokensCount: tokens_count

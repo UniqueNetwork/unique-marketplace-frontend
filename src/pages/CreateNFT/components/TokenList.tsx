@@ -1,34 +1,53 @@
-import { ChangeEvent, DragEvent, FC, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { ChangeEvent, DragEvent, FC, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import DraggableList from 'react-draggable-list';
 import classNames from 'classnames';
 
-import { Icon, Text } from 'components/UI';
+import { Icon, Modal, Text, TooltipWrapper } from 'components/UI';
 
-import { AttributeOption, NewToken, ViewMode } from '../types';
-import { TokenCard, TokenCardCommonProps, TokenCardProps } from './TokenCard';
-import { Filter } from './Filter';
-import { getAttributesFromTokens } from '../helpers';
-import { AttributesModal } from './AttributesModal';
-import { AttributeFilterContext } from '../contexts/AttributesFilterContext';
+import { NewToken2, ViewMode } from '../types';
+import { TokenCardCommonProps, TokenCardProps } from './TokenCard';
+import { getUniqueTraitTypes } from '../helpers';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
-import { swap } from 'components/UI/DraggableGrid/helpers';
-import { DraggableGrid, DraggableGridContextProvider, DraggableGridItem } from 'components/UI/DraggableGrid';
-import { PotentialAttribute } from '@unique-nft/sdk';
+import { CollectionWithInfoV2Dto, PotentialAttribute } from '@unique-nft/sdk';
+import { CreateTokensSteps } from '../CreateNFT';
+import { TokenPreview } from './TokenPreview/TokenPreview';
+import TokenInputForm from './TokenInputForm';
+import { NewAttributePayload, TokenLine } from './TokenLine';
+import FilterComponent from './TokenFilter';
+import useFilteredTokens from './useFilteredTokens';
+import Create from 'static/images/create.png';
+import IconWithHint from 'components/IconWithHint/IconWithHint';
+import { IconButton } from 'components/IconButton/IconButton';
+import ConfirmDeleteForm from './ConfirmDeleteForm';
+import { Checkbox } from 'components/UI/Checkbox/Checkbox2';
 
 export type TokenListProps = {
   disabled: boolean;
   viewMode: ViewMode;
-  tokens: NewToken[];
+  tokens: NewToken2[];
   tokenPrefix: string;
   tokensLimit?: number;
   tokensStartId?: number;
   attributesSchema: PotentialAttribute[];
   mode: 'NFT' | 'Fungible' | 'ReFungible' | undefined;
   schemaVersion: string;
-  onChange(tokens: NewToken[]): void;
+  collection?: CollectionWithInfoV2Dto;
+  selectedAll(): void;
+  deselectedAll(): void;
+  selected: NewToken2[];
+  onChange(tokens: NewToken2[]): void;
   onAddTokens(files: File[]): void;
+  step: CreateTokensSteps;
 };
+
+export enum SetForAllModalType {
+  NAME = 'NAME',
+  DESCRIPTION = 'DESCRIPTION',
+  EXTERNAL_LINK = 'EXTERNAL_LINK',
+  ATTRIBUTES = 'ATTRIBUTES',
+  NEW_ATTRIBUTE = 'NEW_ATTRIBUTE'
+}
 
 export const TokenList = ({
   mode,
@@ -40,18 +59,18 @@ export const TokenList = ({
   attributesSchema,
   viewMode,
   schemaVersion,
+  step,
+  collection,
+  selectedAll,
+  deselectedAll,
+  selected,
   onChange,
   onAddTokens
 }: TokenListProps) => {
   const deviceSize = useDeviceSize();
   const containerRef = useRef<HTMLDivElement>(null);
   const [dragEnter, setDragEnter] = useState(false);
-  const [editingToken, setEditingToken] = useState<NewToken>();
-
-  const { attributes, setAttributes, selectedAttributes, setSelectedAttributes } =
-    useContext(AttributeFilterContext);
-
-  const onTokenChange = (token: NewToken) => {
+  const onTokenChange = (token: NewToken2) => {
     const index = tokens.findIndex(({ id }) => id === token.id);
 
     onChange([...tokens.slice(0, index), token, ...tokens.slice(index + 1)]);
@@ -74,204 +93,531 @@ export const TokenList = ({
     setDragEnter(false);
   };
 
-  const onDragItemStart = () => {
-    setDragEnter(false);
-  };
+  // useEffect(() => {
+  //   if (attributesSchema && tokens) {
+  //     const attributes = getAttributesFromTokens(attributesSchema, tokens);
+  //     setAttributes(attributes);
+  //     setSelectedAttributes(
+  //       selectedAttributes.filter(
+  //         ({ key, value }) =>
+  //           !!attributes[key] &&
+  //           attributes[key].some((attr) => attr.value === value)
+  //       )
+  //     );
+  //   }
+  // }, [tokens, attributesSchema]);
 
-  const onGridItemSwapped = (
-    sourceId: string,
-    sourceIndex: number,
-    targetIndex: number
+  // const hasAttributesFilter =
+  //   !!Object.keys(attributes).length &&
+  //   Object.values(attributes).some((attribute) => {
+  //     return !!attribute?.length;
+  //   });
+
+  const [setForAllModal, toggleSetForAllModal] =
+    useState<SetForAllModalType | null>(null);
+
+  const handleForAllSubmit = (
+    inputValue: string,
+    type: SetForAllModalType | null
   ) => {
-    const lastId = (tokensStartId || 0) + 1;
-    onChange(
-      swap(tokens, sourceIndex, targetIndex).map((token, index) => ({
-        ...token,
-        tokenId: lastId + index
-      }))
-    );
+    const updatedTokens = tokens.map((token) => {
+      if (token.isSelected) {
+        switch (type) {
+          case SetForAllModalType.NAME:
+            return { ...token, name: inputValue };
+          case SetForAllModalType.DESCRIPTION:
+            return { ...token, description: inputValue };
+          case SetForAllModalType.EXTERNAL_LINK:
+            return { ...token, external_url: inputValue };
+          default:
+            return token;
+        }
+      }
+      return token;
+    });
+
+    onChange(updatedTokens);
+    toggleSetForAllModal(null);
   };
 
+  const [newAttributes, setNewAttributes] = useState<string[]>([]);
   useEffect(() => {
-    const attributes = getAttributesFromTokens(attributesSchema, tokens);
-    setAttributes(attributes);
-    setSelectedAttributes(
-      selectedAttributes.filter(
-        ({ key, value }) =>
-          !!attributes[key] && attributes[key].some((attr) => attr.value === value)
-      )
-    );
-  }, [tokens, attributesSchema]);
-
-  const filteredTokens = useMemo(() => {
-    if (selectedAttributes.length === 0) {
-      return tokens;
+    //this should work only on init
+    const attributes = getUniqueTraitTypes(tokens);
+    if (attributes.length > 0 && newAttributes.length === 0) {
+      setNewAttributes(attributes);
     }
-    return tokens.filter(({ attributes }) => {
-      return attributes.some((attribute, index) => {
-        if (!attribute) {
-          return false;
-        }
-        return selectedAttributes.some((selectedAttribute) => {
-          if (selectedAttribute.index !== index) {
-            return false;
-          }
-          if (Array.isArray(attribute)) {
-            return (attribute as AttributeOption[]).some(
-              ({ id }) => selectedAttribute.id === +id
-            );
-          }
-          if (typeof attribute === 'string') {
-            return selectedAttribute.value === attribute;
-          }
-          return selectedAttribute.id === (attribute as AttributeOption).id;
-        });
-      });
-    });
-  }, [tokens, selectedAttributes]);
+  }, [tokens]);
 
-  const hasAttributesFilter =
-    !!Object.keys(attributes).length &&
-    Object.values(attributes).some((attribute) => {
-      return !!attribute?.length;
+  const [openAddAttributeModal, setOpenAddAttributeModal] = useState(false);
+  const setNewAttributeValue = ({
+    trait_type,
+    value,
+    tokenId
+  }: NewAttributePayload) => {
+    const updatedTokens = tokens.map((token) => {
+      if (token.tokenId === tokenId) {
+        const attributeExists = token.attributes.some(
+          (attribute) => attribute.trait_type === trait_type
+        );
+
+        let updatedAttributes;
+        if (attributeExists) {
+          updatedAttributes = token.attributes.map((attribute) =>
+            attribute.trait_type === trait_type
+              ? { ...attribute, value }
+              : attribute
+          );
+        } else {
+          updatedAttributes = [...token.attributes, { trait_type, value }];
+        }
+
+        return { ...token, attributes: updatedAttributes };
+      }
+      return token;
     });
+
+    onChange(updatedTokens);
+  };
+
+  //open modal for set all
+  const [attributeForSetAll, toggleAttributeForSetAll] = useState<
+    string | null
+  >(null);
+  const deleteNewAttribute = (trait_type: string) => {
+    const updatedNewAttributes = newAttributes.filter(
+      (attr) => attr !== trait_type
+    );
+    setNewAttributes(updatedNewAttributes);
+
+    const updatedTokens = tokens.map((token) => {
+      const updatedAttributes = token.attributes.filter(
+        (attribute) => attribute.trait_type !== trait_type
+      );
+      return { ...token, attributes: updatedAttributes };
+    });
+
+    onChange(updatedTokens);
+  };
+
+  const columnsCount = useMemo(() => {
+    const res =
+      5 + (step === CreateTokensSteps.SET_DATA ? newAttributes.length : 0);
+    return res;
+  }, [step, newAttributes]);
+
+  const [filters, setFilters] = useState<{
+    attributes: { [key: string]: string[] };
+    name: string[];
+    description: string[];
+  }>({ attributes: {}, name: [], description: [] });
+  const filteredTokens = useFilteredTokens(tokens, filters);
+  const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState<
+    string | null
+  >(null);
+  const onSelect = (tokenId: number) => {
+    const updatedTokens = tokens.map((token) =>
+      token.id === tokenId ? { ...token, isSelected: !token.isSelected } : token
+    );
+    onChange(updatedTokens);
+  };
+  const addNewAttribute = useRef(null);
 
   return (
-    <TokenListWrapper
-      onDragEnter={onDragStart}
-      onDragEnd={onDragEnd}
-      onDragExit={onDragEnd}
-    >
-      {tokens.length === 0 && <Stub />}
-      <ImageUploadArea
-        disabled={disabled}
-        hasTokens={tokens.length > 0}
-        hidden={!dragEnter && tokens.length > 0}
-        onUpload={onAddTokens}
+    <ScrollWrap>
+      <TokenListWrapper
+        onDragEnter={onDragStart}
+        onDragEnd={onDragEnd}
         onDragExit={onDragEnd}
-      />
-      {tokens.length !== 0 && (
-        <>
-          {deviceSize > DeviceSize.sm && hasAttributesFilter && (
-            <Filter
-              attributes={attributes}
-              selectedAttributes={selectedAttributes}
-              onChange={setSelectedAttributes}
-            />
-          )}
-          <DraggableContainer ref={containerRef} hasOffset={hasAttributesFilter}>
-            {viewMode === ViewMode.grid && (
-              <DraggableGridContextProvider onChange={onGridItemSwapped}>
-                <DraggableGrid
-                  itemsPerRow={{ xs: 1, sm: 2, md: 3, lg: 3, xl: 4, xxl: 5 }}
-                  id='tokens-grid'
-                >
-                  {filteredTokens.map((token, index) => (
-                    <DraggableGridItem
-                      key={token.id}
-                      id={token.id.toString()}
-                      onDragStart={onDragItemStart}
-                    >
-                      <TokenCard
-                        key={token.id}
-                        itemSelected={0}
-                        anySelected={0}
-                        item={token}
-                        commonProps={{
-                          mode,
-                          viewMode,
-                          tokenPrefix,
-                          attributesSchema,
-                          onChange: onTokenChange,
-                          onRemove: onTokenRemove,
-                          onOpenModifyModal: setEditingToken
-                        }}
-                        dragHandleProps={{}}
-                      />
-                    </DraggableGridItem>
-                  ))}
-                </DraggableGrid>
-              </DraggableGridContextProvider>
-            )}
-            {viewMode === ViewMode.list && (
-              <>
-                {/* @ts-ignore */}
-                <DraggableList<NewToken, TokenCardCommonProps, FC<TokenCardProps>>
-                  constrainDrag
-                  unsetZIndex
-                  className='draggable-container'
-                  itemKey='id'
-                  template={TokenCard}
-                  list={filteredTokens}
-                  container={() => containerRef.current}
-                  commonProps={{
-                    viewMode,
-                    mode,
-                    tokenPrefix,
-                    attributesSchema,
-                    onChange: onTokenChange,
-                    onRemove: onTokenRemove
-                  }}
-                  onMoveEnd={(newList) => {
-                    const lastId = (tokensStartId || 0) + 1;
-                    return onChange([
-                      ...newList.map((token, index) => ({
-                        ...token,
-                        tokenId: Number(lastId) + Number(index)
-                      }))
-                    ]);
-                  }}
+        columnsCount={columnsCount}
+        stepUploadImages={step === CreateTokensSteps.UPLOAD_IMAGES}
+      >
+        {tokens.length === 0 && <Stub />}
+        {step === CreateTokensSteps.UPLOAD_IMAGES && (
+          <ImageUploadArea
+            disabled={disabled}
+            hasTokens={tokens.length > 0}
+            hidden={!dragEnter && tokens.length > 0}
+            onUpload={onAddTokens}
+            onDragExit={onDragEnd}
+          />
+        )}
+        {tokens.length !== 0 && (
+          <>
+            {viewMode === ViewMode.grid && deviceSize > DeviceSize.sm && (
+              <FiltersWrapper>
+                <FilterComponent
+                  tokens={tokens}
+                  onFilterChange={(newFilters) => setFilters(newFilters)}
                 />
-              </>
+              </FiltersWrapper>
             )}
-          </DraggableContainer>
-        </>
-      )}
-      {!!editingToken && (
-        <AttributesModal
-          tokens={[editingToken]}
-          tokenPrefix={tokenPrefix}
-          attributesSchema={attributesSchema}
-          schemaVersion={schemaVersion}
-          onClose={() => setEditingToken(undefined)}
-          onChange={(_tokens: NewToken[]) => {
-            const token = _tokens[0];
-            if (!token) {
-              return;
-            }
-            onChange(
-              tokens.map((_token) => {
-                if (_token.tokenId !== token.tokenId) {
-                  return _token;
+            <DraggableContainer ref={containerRef} hasOffset={false}>
+              {' '}
+              {viewMode === ViewMode.grid && (
+                <TokenPreviewWrapper>
+                  {filteredTokens.map((token, index) => (
+                    <TokenPreview
+                      key={token.id}
+                      itemSelected={0}
+                      anySelected={0}
+                      item={token}
+                      commonProps={{
+                        mode,
+                        viewMode,
+                        tokenPrefix,
+                        attributesSchema,
+                        collection,
+                        list: filteredTokens,
+                        onChange: onTokenChange,
+                        onRemove: onTokenRemove,
+                        index,
+                        onSelect
+                      }}
+                      dragHandleProps={{}}
+                    />
+                  ))}
+                </TokenPreviewWrapper>
+              )}
+              {viewMode === ViewMode.list && (
+                <TableWrap>
+                  <TableHeader columnsCount={columnsCount}>
+                    <TableHeaderCell>
+                      <StyledCheckbox
+                        label={''}
+                        checked={selected.length === tokens.length}
+                        onChange={(value: boolean) => {
+                          if (value) {
+                            selectedAll();
+                            return;
+                          }
+                          deselectedAll();
+                        }}
+                        testid='select-all'
+                      />
+                    </TableHeaderCell>
+                    <TableHeaderCell>
+                      <TextStyled>NFT ID</TextStyled>
+                    </TableHeaderCell>
+                    <TableHeaderCell>
+                      <TextStyled>NFT main image *</TextStyled>
+                    </TableHeaderCell>
+                    {step === CreateTokensSteps.UPLOAD_MEDIA && (
+                      <TableHeaderCell>
+                        <TextStyledWithHint>
+                          Main media file
+                          <IconWithHint
+                            align={{
+                              appearance: 'horizontal',
+                              horizontal: 'right',
+                              vertical: 'top'
+                            }}
+                          >
+                            Full size image/ GIF/ Video/ Audio
+                          </IconWithHint>
+                        </TextStyledWithHint>
+
+                        <TextStyledSmall>Max 3Mb</TextStyledSmall>
+                      </TableHeaderCell>
+                    )}
+                    {step === CreateTokensSteps.UPLOAD_MEDIA && (
+                      <TableHeaderCell>
+                        <TextStyledWithHint>
+                          Additional media files
+                          <IconWithHint
+                            align={{
+                              appearance: 'horizontal',
+                              horizontal: 'right',
+                              vertical: 'top'
+                            }}
+                          >
+                            (Full size image/ GIF/ Video/ Audio) Recommended
+                            max. 3Mb
+                          </IconWithHint>
+                        </TextStyledWithHint>
+
+                        <TextStyledSmall>Max 3Mb</TextStyledSmall>
+                      </TableHeaderCell>
+                    )}
+                    {step === CreateTokensSteps.UPLOAD_MEDIA && (
+                      <TableHeaderCell>
+                        <TextStyled>External link</TextStyled>
+                        <SetAllButton
+                          onClick={() => {
+                            toggleSetForAllModal(
+                              SetForAllModalType.EXTERNAL_LINK
+                            );
+                          }}
+                          disabled={!selected.length}
+                        >
+                          Set for selected
+                        </SetAllButton>
+                      </TableHeaderCell>
+                    )}
+                    {step === CreateTokensSteps.SET_DATA && (
+                      <TableHeaderCell>
+                        <TextStyled>Name</TextStyled>
+                        <SetAllButton
+                          onClick={() => {
+                            toggleSetForAllModal(SetForAllModalType.NAME);
+                          }}
+                          disabled={!selected.length}
+                        >
+                          Set for selected
+                        </SetAllButton>
+                      </TableHeaderCell>
+                    )}
+                    {step === CreateTokensSteps.SET_DATA && (
+                      <TableHeaderCell>
+                        <TextStyled>Description</TextStyled>
+                        <SetAllButton
+                          onClick={() => {
+                            toggleSetForAllModal(
+                              SetForAllModalType.DESCRIPTION
+                            );
+                          }}
+                          disabled={!selected.length}
+                        >
+                          Set for selected
+                        </SetAllButton>
+                      </TableHeaderCell>
+                    )}
+                    {step === CreateTokensSteps.SET_DATA &&
+                      newAttributes.map((item, index) => (
+                        <TableHeaderCellAttribute key={index}>
+                          <CloseButton>
+                            <IconButton
+                              name='trash'
+                              color={'var(--color-grey-500)'}
+                              size={24}
+                              onClick={() => setShowConfirmDeleteModal(item)}
+                            />
+                          </CloseButton>
+                          <TextStyled>{item}</TextStyled>
+                          <SetAllButton
+                            onClick={() => {
+                              toggleAttributeForSetAll(item);
+                            }}
+                            disabled={!selected.length}
+                          >
+                            Set for selected
+                          </SetAllButton>
+                        </TableHeaderCellAttribute>
+                      ))}
+                    {step === CreateTokensSteps.SET_DATA && (
+                      <TableHeaderCellAttrAdd>
+                        <TooltipWrapper
+                          align={{ vertical: 'top', horizontal: 'right', appearance: 'vertical' }}
+                          message={'Add New Attribute'}
+                        >
+                          <HeaderAddAttributeWrap
+                            onClick={() => {
+                              setOpenAddAttributeModal(true);
+                            }}
+                          >
+                            +
+                          </HeaderAddAttributeWrap>
+                        </TooltipWrapper>
+                      </TableHeaderCellAttrAdd>
+                    )}
+                    {step === CreateTokensSteps.SET_DATA && <FakeCell />}
+                  </TableHeader>
+
+                  {/* @ts-ignore */}
+                  <DraggableList<NewToken2, TokenCardCommonProps, FC<TokenCardProps>>
+                    constrainDrag
+                    unsetZIndex
+                    className='draggable-container'
+                    itemKey='id'
+                    template={TokenLine}
+                    list={filteredTokens}
+                    container={() => containerRef.current}
+                    commonProps={{
+                      viewMode,
+                      mode,
+                      tokenPrefix,
+                      attributesSchema,
+                      step,
+                      newAttributes,
+                      setNewAttributeValue,
+                      onChange: onTokenChange,
+                      onRemove: onTokenRemove
+                    }}
+                    onMoveEnd={(newList) => {
+                      const lastId = (tokensStartId || 0) + 1;
+                      return onChange([
+                        ...newList.map((token, index) => ({
+                          ...token,
+                          tokenId: Number(lastId) + Number(index)
+                        }))
+                      ]);
+                    }}
+                  />
+                </TableWrap>
+              )}
+            </DraggableContainer>
+          </>
+        )}
+        {
+          <Modal isVisible={!!setForAllModal}>
+            <TokenInputForm
+              modalType={setForAllModal}
+              onSubmit={handleForAllSubmit}
+              onClose={() => toggleSetForAllModal(null)}
+            />
+          </Modal>
+        }
+        {
+          <Modal isVisible={openAddAttributeModal} isFlexible={true}>
+            <TokenInputForm
+              onClose={() => setOpenAddAttributeModal(false)}
+              modalType={SetForAllModalType.NEW_ATTRIBUTE}
+              buttonText={'Add Attribute'}
+              onSubmit={(newAttr) => {
+                const attributeExists = newAttributes.some(
+                  (attr) => attr === newAttr
+                );
+
+                if (!attributeExists) {
+                  setNewAttributes([...newAttributes, newAttr]);
                 }
-                return {
-                  ..._token,
-                  attributes: token.attributes,
-                  royalties: token.royalties
-                };
-              })
-            );
-          }}
-        />
-      )}
-    </TokenListWrapper>
+
+                setOpenAddAttributeModal(false);
+              }}
+            />
+          </Modal>
+        }
+        {
+          <Modal isVisible={!!attributeForSetAll} isFlexible={true}>
+            <TokenInputForm
+              onClose={() => toggleAttributeForSetAll(null)}
+              modalType={SetForAllModalType.NEW_ATTRIBUTE}
+              buttonText={`Add attribute`}
+              onSubmit={(value) => {
+                const updatedTokens = tokens.map((token) => {
+                  const attributeExists = token.attributes.some(
+                    (attr) => attr.trait_type === attributeForSetAll
+                  );
+
+                  let updatedAttributes;
+                  if (attributeExists) {
+                    updatedAttributes = token.attributes.map((attr) =>
+                      attr.trait_type === attributeForSetAll
+                        ? { ...attr, value }
+                        : attr
+                    );
+                  } else {
+                    updatedAttributes = [
+                      ...token.attributes,
+                      {
+                        trait_type: attributeForSetAll || '',
+                        value: value || ''
+                      }
+                    ];
+                  }
+
+                  return { ...token, attributes: updatedAttributes };
+                });
+
+                onChange(updatedTokens);
+                toggleAttributeForSetAll(null);
+              }}
+            />
+          </Modal>
+        }
+
+        {
+          <Modal isVisible={!!attributeForSetAll} isFlexible={true}>
+            <TokenInputForm
+              onClose={() => toggleAttributeForSetAll(null)}
+              modalType={SetForAllModalType.NEW_ATTRIBUTE}
+              buttonText={`Set ${attributeForSetAll}`}
+              onSubmit={(value) => {
+                const updatedTokens = tokens.map((token) => {
+                  if (token.isSelected) {
+                    const attributeExists = token.attributes.some(
+                      (attr) => attr.trait_type === attributeForSetAll
+                    );
+
+                    let updatedAttributes;
+                    if (attributeExists) {
+                      updatedAttributes = token.attributes.map((attr) =>
+                        attr.trait_type === attributeForSetAll
+                          ? { ...attr, value }
+                          : attr
+                      );
+                    } else {
+                      updatedAttributes = [
+                        ...token.attributes,
+                        {
+                          trait_type: attributeForSetAll || '',
+                          value: value || ''
+                        }
+                      ];
+                    }
+
+                    return { ...token, attributes: updatedAttributes };
+                  }
+                  return token;
+                });
+
+                onChange(updatedTokens);
+                toggleAttributeForSetAll(null);
+              }}
+            />
+          </Modal>
+        }
+
+        {
+          <Modal isVisible={!!showConfirmDeleteModal} isFlexible={true}>
+            <ConfirmDeleteForm
+              onClose={() => setShowConfirmDeleteModal(null)}
+              onSubmit={() => {
+                showConfirmDeleteModal &&
+                  deleteNewAttribute(showConfirmDeleteModal);
+                setShowConfirmDeleteModal(null);
+              }}
+            />
+          </Modal>
+        }
+      </TokenListWrapper>
+    </ScrollWrap>
   );
 };
 
-const TokenListWrapper = styled.div`
+const TokenListWrapper = styled.div<{
+  columnsCount: number;
+  stepUploadImages: boolean;
+}>`
   display: flex;
-  margin-top: calc(var(--prop-gap) * 2);
+  margin-top: calc(var(--prop-gap) * 2.5);
   margin-bottom: calc(var(--prop-gap) * 2);
-  min-height: calc(120vh - 444px);
+  min-height: 755px;
   position: relative;
+  width: ${({ columnsCount, stepUploadImages }) =>
+    stepUploadImages ? 'auto' : `${columnsCount * 240}px`};
+  background: #fff;
+
+  .unique-modal {
+    padding: 50px 120px;
+    width: 320px;
+  }
 `;
 
 const DraggableContainer = styled.div<{ hasOffset: boolean }>`
-  width: 100%;
   margin: ${({ hasOffset }) => (hasOffset ? '0 -32px' : '0')};
   & > div {
     width: 100%;
+    padding-bottom: 10px !important;
   }
+
+  // & > div > div > div {
+  //   margin-bottom: 0 !important;
+  // }
+
+  // & > div {
+  //   margin-bottom: 0 !important;
+  // }
   .unique-list {
     gap: 0;
   }
@@ -288,7 +634,7 @@ type ImageUploadAreaProps = {
   onDragExit(): void;
 };
 
-const ImageUploadArea = ({
+export const ImageUploadArea = ({
   disabled,
   hasTokens,
   hidden,
@@ -297,12 +643,27 @@ const ImageUploadArea = ({
 }: ImageUploadAreaProps) => {
   const inputFile = useRef<HTMLInputElement>(null);
   const [isDragEnter, setIsDragEnter] = useState(false);
+
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const MAX_FILE_SIZE_MB = 20;
+    const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
     setIsDragEnter(false);
+
     if (!inputFile.current) {
       return;
     }
-    onUpload?.(Array.from(inputFile.current.files || []));
+
+    const files = Array.from(inputFile.current.files || []);
+    const validFiles = files.filter((file) => file.size <= MAX_FILE_SIZE_BYTES);
+
+    if (validFiles.length < files.length) {
+      alert(
+        `Some files exceed the maximum size of ${MAX_FILE_SIZE_MB} MB and will not be uploaded.`
+      );
+    }
+
+    onUpload?.(validFiles);
     onDragExit();
 
     inputFile.current.value = '';
@@ -321,13 +682,22 @@ const ImageUploadArea = ({
   };
 
   return (
-    <UploadWrapper
+    <WrapperCollectionContentStyled
       className={classNames({
         hidden,
         'drag-enter': isDragEnter,
         'full-area': !hasTokens
       })}
     >
+      <ContentRelative>
+        <Content>
+          <ImageCreate src={Create} />
+          <ContentHeader>Upload NFT images </ContentHeader>
+          <Text size='s'>
+            You can bulk-mint 50 NFTs. Optimal image size 500x500 px, 500 KB
+          </Text>
+        </Content>
+      </ContentRelative>
       <input
         disabled={disabled}
         ref={inputFile}
@@ -341,11 +711,24 @@ const ImageUploadArea = ({
         onDragEnd={onDragLeave}
         onDragExit={onDragLeave}
       />
-    </UploadWrapper>
+    </WrapperCollectionContentStyled>
   );
 };
 
-const UploadWrapper = styled.div`
+const TokenPreviewWrapper = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 32px;
+`;
+
+const WrapperCollectionContentStyled = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #f5fcff;
+  border: 1px dashed var(--color-primary-500);
+  border-radius: 16px;
   position: absolute;
   top: 0;
   bottom: 0;
@@ -353,6 +736,8 @@ const UploadWrapper = styled.div`
   right: 0;
   border: 1px dashed var(--color-primary-500);
   z-index: 1000;
+  left: 0;
+
   &.full-area {
     left: 0;
   }
@@ -364,6 +749,8 @@ const UploadWrapper = styled.div`
     opacity: 0;
     width: 100%;
     height: 100%;
+    z-index: 1000;
+    cursor: pointer;
   }
   &:before {
     position: absolute;
@@ -406,5 +793,209 @@ const StubWrapper = styled.div`
   width: 100%;
   svg {
     margin-bottom: var(--prop-gap);
+  }
+`;
+
+const TableWrap = styled.div`
+  background: #fff;
+`;
+
+export const TableHeader = styled.div<{ columnsCount: number }>`
+  display: flex;
+  width: ${({ columnsCount }) => `${columnsCount * 240}px`};
+  height: 100px;
+`;
+
+export const TableHeaderCell = styled.div`
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  justify-content: start;
+  background-color: #0000000f;
+  border-right: 1px solid var(--color-table-grey);
+  border-top: 1px solid var(--color-table-grey);
+  height: 100%;
+  padding: 18px 0;
+  box-sizing: border-box;
+  &:first-child {
+    flex: 0.5;
+    border-left: 1px solid #b9b9b9;
+  }
+
+  &:nth-child(2) {
+    flex: 0.5;
+  }
+`;
+
+const CloseButton = styled.div`
+  position: absolute;
+  cursor: pointer;
+  padding: 10px;
+  top: 0;
+  right: 0;
+
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+
+  svg {
+    fill: var(--color-grey-500);
+  }
+`;
+
+export const TableHeaderCellAttribute = styled(TableHeaderCell)`
+  &:hover ${CloseButton} {
+    opacity: 1;
+    visibility: visible;
+  }
+`;
+
+export const TableHeaderCellAttrAdd = styled.div`
+  position: relative;
+  flex: 0.5;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  justify-content: start;
+  border-right: 1px solid #b9b9b9;
+  border-top: 1px solid #b9b9b9;
+  height: 100%;
+  padding: 18px 0;
+  box-sizing: border-box;
+  background-color: var(--color-blue-grey-100);
+  border-top-right-radius: 4px;
+
+  span {
+    margin: 15px 0 0 67px;
+  }
+`;
+
+export const FakeCell = styled.div`
+  flex: 0.5;
+  background: #fff;
+  border: 1px solid #fff;
+`;
+
+const HeaderAddAttributeWrap = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--color-primary-500);
+  border-radius: 16px;
+  color: var(--color-primary-500);
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+`;
+
+export const TextStyled = styled(Text)`
+  text-align: left;
+  font-size: 16px;
+  line-height: 19px;
+  font-weight: 600;
+  padding-left: 10px;
+`;
+
+export const TextStyledWithHint = styled(Text)`
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  text-align: left;
+  font-size: 16px;
+  line-height: 19px;
+  font-weight: 600;
+  padding-left: 10px;
+
+  > div {
+    position: absolute;
+    right: -28px;
+    top: 0px;
+  }
+
+  > img {
+    height: 18px;
+    width: 18px;
+  }
+`;
+
+export const TextStyledSmall = styled.div`
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--color-grey-600);
+  padding-left: 10px;
+`;
+
+const ScrollWrap = styled.div`
+  width: 100%;
+  overflow-x: scroll;
+  margin-bottom: 30px;
+`;
+
+const FiltersWrapper = styled.div`
+  width: 260px;
+  margin-right: 32px;
+`;
+
+const ImageCreate = styled.img`
+  width: 132px;
+  height: 132px;
+  margin-bottom: 26px;
+  z-index: 1;
+`;
+
+const ContentRelative = styled.div`
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 0;
+`;
+
+const Content = styled.div`
+  position: absolute;
+  top: 360px;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+`;
+
+const ContentHeader = styled.div`
+  margin-bottom: 8px;
+  font-size: 24px;
+  line-heignt: 36px;
+  font-weight: 700;
+`;
+
+const ContentSubtitle = styled.div`
+  font-size: 14px;
+  line-heignt: 22px;
+`;
+
+const SetAllButton = styled.div<{ disabled?: boolean }>`
+  line-height: 22px;
+  font-size: 14px;
+  color: ${({ disabled }) =>
+    disabled ? 'var(--color-grey-400)' : 'var(--color-primary-500)'};
+  cursor: ${({ disabled }) => (disabled ? 'auto' : 'pointer')};
+  margin-top: 8px;
+  padding-left: 10px;
+  pointer-events: ${({ disabled }) => (disabled ? 'none' : 'auto')};
+`;
+
+const StyledCheckbox = styled(Checkbox)`
+  margin: auto;
+  margin-top: 22px;
+  .checkmark {
+    background-color: #fff;
+    border: 1px solid #000;
   }
 `;

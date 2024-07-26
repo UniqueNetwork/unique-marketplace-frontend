@@ -45,6 +45,7 @@ export const GlobalStyle = createGlobalStyle`
     --color-grey-300: #D2D3D6;
     --color-grey-200: #DFE0E2;
     --color-grey-100: #EDEDEE;
+    --color-table-grey: #b9b9b9;
 
     --color-coral-700: #F73800;
     --color-coral-600: #FF430C;

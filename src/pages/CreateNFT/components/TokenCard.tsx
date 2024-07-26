@@ -69,6 +69,11 @@ export const TokenCard = ({
         grid: viewMode === ViewMode.grid
       })}
     >
+      <SelectCheckbox label=''
+        checked={isSelected}
+        onChange={onSelect}
+        testid='select'
+      />
       <TokenBasicWrapper>
         <TokenLinkImageWrapper
           onMouseEnter={(e) => {
@@ -88,11 +93,6 @@ export const TokenCard = ({
           }}
         >
           <TokenImage alt={`${tokenPrefix}_${id}`} image={image.url} />
-          <SelectCheckbox label=''
-            checked={isSelected}
-            onChange={onSelect}
-            testid='select'
-          />
         </TokenLinkImageWrapper>
         <TokenCardActions>
           <TokenLinkTitle>{`${tokenPrefix} #${tokenId}`}</TokenLinkTitle>

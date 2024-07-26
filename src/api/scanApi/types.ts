@@ -9,6 +9,7 @@ export type GQLCollection = {
   name: string
   tokenPrefix: string
   tokensCount: number
+  creationDate: number
   tokenLimit: number
   properties: TokenProperty[]
   permissions: CollectionPermissionsDto

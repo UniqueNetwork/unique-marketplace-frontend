@@ -195,6 +195,6 @@ const Row = styled.div`
 const LinkComponent: FC<{ linkTo: string, isOwned: boolean }> = ({ children, linkTo, isOwned }) => {
   if (isOwned) return <StyledContainer>{children}</StyledContainer>;
   return linkTo.startsWith('https://')
-    ? <StyledExternalLink href={linkTo}>{children}</StyledExternalLink>
+    ? <StyledExternalLink target='_blank' href={linkTo}>{children}</StyledExternalLink>
     : <StyledLink to={linkTo}>{children}</StyledLink>;
 };

@@ -212,6 +212,7 @@ export const useMyTokensFilter = ({ tokens, offers, isFetchingTokens }: UseMyTok
         properties: [],
         attributesSchema: {},
         mode: mode || 'NFT',
+        creationDate: 0,
         permissions: {
           access: 'Normal',
           nesting: {
@@ -236,6 +237,7 @@ export const useMyTokensFilter = ({ tokens, offers, isFetchingTokens }: UseMyTok
         tokensCount: 0,
         properties: [],
         attributesSchema: {},
+        creationDate: 0,
         mode: type === 'RFT' ? 'ReFungible' : 'NFT',
         permissions: {
           access: 'Normal',

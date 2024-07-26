@@ -22,6 +22,7 @@ interface ITokenSliderProps {
   wearableSrc?: string | DecodedInfixOrUrlOrCidAndHash;
   isWearable?: boolean;
   badges?: BadgeEnum[];
+  previewMode?: boolean
 }
 export const TokenSlider: FC<ITokenSliderProps> = ({
   items: sliderItems,
@@ -29,6 +30,7 @@ export const TokenSlider: FC<ITokenSliderProps> = ({
   wearableSrc,
   isWearable,
   badges,
+  previewMode,
 }) => {
   const width = useBreakpointObserver();
 
@@ -52,6 +54,7 @@ export const TokenSlider: FC<ITokenSliderProps> = ({
     speed: 500,
     slidesToShow: 1,
     slidesToScroll: 1,
+    arrows: !previewMode,
     nextArrow: <CustomNextArrow />,
     prevArrow: <CustomPrevArrow />,
     beforeChange: (oldIndex: number, newIndex: number) =>
@@ -110,7 +113,7 @@ export const TokenSlider: FC<ITokenSliderProps> = ({
         </PreviewCarouseWrap>
       )}
 
-      <SliderContainer>
+      <SliderContainer previewMode={!!previewMode}>
         <Slider ref={horizontalSliderRef} {...settings}>
           {sliderItems.map(({ type, src, thumbnail }, index) => (
             <MainSliderItem
@@ -137,9 +140,9 @@ const SliderItem = styled.div`
   height: 100%;
 `;
 
-const SliderContainer = styled.div`
+const SliderContainer = styled.div<{previewMode: boolean}>`
   display: relative;
-  width: 536px;
+  width: ${({previewMode}) => previewMode ? '440px !important' : '536px'};
   margin-right: calc(var(--prop-gap) * 2);
   margin-left: calc(var(--prop-gap) * 2);
 

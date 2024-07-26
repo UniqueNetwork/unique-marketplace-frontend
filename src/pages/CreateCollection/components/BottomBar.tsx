@@ -97,7 +97,7 @@ const BottomPanelWrapper = styled.div<{ height: number }>`
 `;
 
 const BottomPanel = styled.div`
-  z-index: 8;
+  z-index: 1001;
   box-shadow: 0 -8px 12px rgba(0, 0, 0, 0.06);
   position: fixed;
   bottom: 0;

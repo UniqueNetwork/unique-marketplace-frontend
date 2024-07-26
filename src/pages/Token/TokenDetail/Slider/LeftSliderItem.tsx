@@ -20,7 +20,8 @@ const Container = styled.div<{
   isMedia: boolean;
   active: boolean;
   backgroundImage?: string;
-  type: 'token_image' | 'image' | 'youtube_url' | 'video' | 'audio';
+  // 'token_image' | 'image' | 'youtube_url' | 'video' | 'audio';
+  type: string;
 }>`
   display: flex;
   justify-content: center;
@@ -101,6 +102,7 @@ const LeftSliderItem: React.FC<SliderItem> = ({
 
   switch (type) {
     case 'token_image':
+    case 'animation_url':
     case 'image':
       return (
         <Container

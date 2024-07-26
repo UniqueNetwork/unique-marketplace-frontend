@@ -28,10 +28,6 @@ const CustomNextArrow: React.FC<ArrowProps> = (props) => {
     <div
       className={className}
       style={{
-        ...style,
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
         backgroundColor: '#FFF',
         borderRadius: '25px',
         width: '50px',
@@ -40,12 +36,14 @@ const CustomNextArrow: React.FC<ArrowProps> = (props) => {
         boxShadow: isHovered
           ? '0px 3px 3px 0px #00000040'
           : '0px 2px 2px 0px #00000020',
+        ...style,
       }}
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <svg
+        style={{margin: '20px 22px'}}
         width='9'
         height='12'
         viewBox='0 0 9 12'
@@ -66,6 +64,20 @@ const CustomNextArrow: React.FC<ArrowProps> = (props) => {
 const CustomPrevArrow: React.FC<ArrowProps> = (props) => {
   const { className, style, onClick } = props;
   const [isHovered, setIsHovered] = useState(false);
+
+  //react-slick not remove default arrow
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.innerHTML = `
+      .slick-prev:before {
+        display: none !important;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
 
   return (
     <div
