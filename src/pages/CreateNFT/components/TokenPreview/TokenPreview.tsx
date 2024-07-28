@@ -295,7 +295,6 @@ export const FormGrid = styled.div`
 const CommonTokenDetailWrapper = styled.div`
   margin-top: 35px;
   width: 960px;
-  max-width: 80vw;
   height: 650px;
 `;
 

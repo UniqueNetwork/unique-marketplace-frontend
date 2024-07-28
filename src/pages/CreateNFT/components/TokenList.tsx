@@ -973,12 +973,9 @@ const ContentHeader = styled.div`
   font-size: 24px;
   line-heignt: 36px;
   font-weight: 700;
+  text-align: center;
 `;
 
-const ContentSubtitle = styled.div`
-  font-size: 14px;
-  line-heignt: 22px;
-`;
 
 const SetAllButton = styled.div<{ disabled?: boolean }>`
   line-height: 22px;
