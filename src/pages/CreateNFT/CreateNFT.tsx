@@ -614,7 +614,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
                 )}
                 {tokens.length > 0 && !isFilterVisible && (
                   <ButtonGroup ref={actionBoxRef}>
-                    {!isValidTotalRoyalty && <WarningBlock>Max total royalty: 99%</WarningBlock>}
+                    {!isValidTotalRoyalty && <WarningBlock margin={0.5}>Max total royalty: 99%</WarningBlock>}
                     <ButtonConatiner>
                       {step !== CreateTokensSteps.UPLOAD_MEDIA && <ConfirmBtn
                         iconLeft={{
