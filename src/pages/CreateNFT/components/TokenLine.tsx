@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { TemplateProps } from 'react-draggable-list';
-import { MouseEventHandler, TouchEventHandler, useEffect, useState } from 'react';
+import { MouseEventHandler, TouchEventHandler, useState, useRef } from 'react';
 import classNames from 'classnames';
 
 import { Modal, Text } from 'components/UI';
@@ -36,9 +36,39 @@ export type TokenCardCommonProps = {
 
 export type TokenCardProps = TemplateProps<NewToken2, TokenCardCommonProps>;
 
+const TokenLineCellWrapper = ({
+  children,
+  onMouseDown,
+  onTouchStart,
+  setHovered,
+  dragHandleProps,
+}: {
+  children: React.ReactNode;
+  onMouseDown?: MouseEventHandler<HTMLDivElement>;
+  onTouchStart?: TouchEventHandler<HTMLDivElement>;
+  setHovered: (value: boolean) => void;
+  dragHandleProps?: any;
+}) => {
+  const handleInteraction = (e: React.SyntheticEvent, callback?: () => void) => {
+    e.preventDefault();
+    callback?.();
+  };
+
+  return (
+    <TokenLineCell
+      onMouseEnter={(e) => handleInteraction(e, () => setHovered(true))}
+      onMouseLeave={(e) => handleInteraction(e, () => setHovered(false))}
+      onTouchStart={(e) => handleInteraction(e, () => onTouchStart?.(e))}
+      onMouseDown={(e) => handleInteraction(e, () => onMouseDown?.(e))}
+      {...dragHandleProps}
+    >
+      {children}
+    </TokenLineCell>
+  );
+};
+
 export const TokenLine = ({
   item,
-  itemSelected,
   dragHandleProps,
   commonProps
 }: TokenCardProps) => {
@@ -49,7 +79,6 @@ export const TokenLine = ({
     attributes,
     isValid,
     isSelected,
-    animation_url,
     external_url,
     media,
     royalties,
@@ -58,9 +87,7 @@ export const TokenLine = ({
   } = item;
   const {
     onChange,
-    onRemove,
     tokenPrefix,
-    attributesSchema,
     viewMode,
     step,
     newAttributes,
@@ -68,10 +95,12 @@ export const TokenLine = ({
   } = commonProps;
   const [willBeRemoved, setWillBeRemoved] = useState(false);
   const [hovered, setHovered] = useState(false);
+  const [hoveredImage, setHoveredImage] = useState(false);
   const { onMouseDown, onTouchStart } = dragHandleProps as {
     onMouseDown: MouseEventHandler<HTMLDivElement> | undefined;
     onTouchStart: TouchEventHandler<HTMLDivElement> | undefined;
   };
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const onSelect = () => {
     onChange({
@@ -82,7 +111,6 @@ export const TokenLine = ({
       isValid,
       isSelected: !isSelected,
       royalties,
-      animation_url,
       media,
       external_url,
       name,
@@ -90,14 +118,7 @@ export const TokenLine = ({
     });
   };
 
-  const onStartRemove = () => {
-    setWillBeRemoved(true);
-    setTimeout(() => {
-      onRemove(id);
-    }, 250);
-  };
-
-  const handleSingleFileChange = (
+  const handleImageFileChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     if (event.target.files && event.target.files[0]) {
@@ -109,13 +130,8 @@ export const TokenLine = ({
       onChange({
         id,
         tokenId,
-        image,
+        image: { url: URL.createObjectURL(file), file },
         attributes,
-        animation_url: {
-          file: file,
-          url: URL.createObjectURL(file),
-          name: file.name
-        },
         media,
         isValid,
         isSelected,
@@ -191,13 +207,27 @@ export const TokenLine = ({
       isValid,
       isSelected,
       royalties,
-      animation_url,
       media,
       external_url,
       name,
       description
     });
+  };
 
+  const handleRemoveMedia = () => {
+    onChange({
+      id,
+      tokenId,
+      image,
+      attributes,
+      media: [],
+      isValid,
+      isSelected,
+      royalties,
+      external_url,
+      name,
+      description
+    });
   };
 
   const [isValidLink, setIsValidLink] = useState(true);
@@ -209,13 +239,11 @@ export const TokenLine = ({
     const isLinkValid = validateLink(externalLinkUpdate);
     setIsValidLink(isLinkValid);
 
-
     onChange({
       id,
       tokenId,
       image,
       attributes,
-      animation_url,
       media,
       isValid,
       isSelected,
@@ -236,7 +264,6 @@ export const TokenLine = ({
       tokenId,
       image,
       attributes,
-      animation_url,
       media,
       isValid,
       isSelected,
@@ -256,7 +283,6 @@ export const TokenLine = ({
       tokenId,
       image,
       attributes,
-      animation_url,
       media,
       isValid,
       isSelected,
@@ -279,29 +305,11 @@ export const TokenLine = ({
         })}
       >
         <LineContent>
-          <TokenLineCell
-            onMouseEnter={(e) => {
-              e.preventDefault();
-              setHovered(true);
-            }}
-            onMouseLeave={(e) => {
-              e.preventDefault();
-              setHovered(false);
-            }}
-            onTouchStart={(e) => {
-              e.preventDefault();
-              onTouchStart?.(e);
-            }}
-            onMouseDown={(e) => {
-              onMouseDown?.(e);
-            }}
+          <TokenLineCellWrapper
+            onMouseDown={onMouseDown}
+            onTouchStart={onTouchStart}
+            setHovered={setHovered}
           >
-            {/* <SelectCheckbox
-              label=''
-              checked={isSelected}
-              onChange={onSelect}
-              testid='select'
-            /> */}
             <StyledCheckbox
               label=''
               checked={isSelected}
@@ -309,59 +317,52 @@ export const TokenLine = ({
               size={'m'}
               testid={''}
             />
-          </TokenLineCell>
-          <TokenLineCell
-            onMouseEnter={(e) => {
-              e.preventDefault();
-              setHovered(true);
-            }}
-            onMouseLeave={(e) => {
-              e.preventDefault();
-              setHovered(false);
-            }}
-            onTouchStart={(e) => {
-              e.preventDefault();
-              onTouchStart?.(e);
-            }}
-            onMouseDown={(e) => {
-              onMouseDown?.(e);
-            }}
+          </TokenLineCellWrapper>
+          <TokenLineCellWrapper
+            onMouseDown={onMouseDown}
+            onTouchStart={onTouchStart}
+            setHovered={setHovered}
           >
             <TokenLinkTitle>{`${tokenPrefix} #${tokenId}`}</TokenLinkTitle>
-          </TokenLineCell>
+          </TokenLineCellWrapper>
           <TokenLineCell>
             <TokenLinkImageWrapper
-              onMouseEnter={(e) => {
-                e.preventDefault();
-                setHovered(true);
-              }}
-              onMouseLeave={(e) => {
-                e.preventDefault();
-                setHovered(false);
-              }}
-              onTouchStart={(e) => {
-                e.preventDefault();
-                onTouchStart?.(e);
-              }}
-              onMouseDown={(e) => {
-                onMouseDown?.(e);
-              }}
+              onMouseEnter={() => setHoveredImage(true)}
+              onMouseLeave={() => setHoveredImage(false)}
+              onClick={() => fileInputRef.current?.click()}
             >
+              {hoveredImage && (
+                <Overlay>
+                  <OverlayText>Change image</OverlayText>
+                </Overlay>
+              )}
               <TokenImage alt={`${tokenPrefix}_${id}`} image={image.url} />
             </TokenLinkImageWrapper>
+            <FileInput
+              ref={fileInputRef}
+              type='file'
+              accept='image/*'
+              onChange={handleImageFileChange}
+            />
           </TokenLineCell>
-          {step === CreateTokensSteps.UPLOAD_MEDIA && (
+          {/* {step === CreateTokensSteps.UPLOAD_MEDIA && (
             <TokenLineCell>
               <UploadWrapper>
-                <FileInputLabel htmlFor={`single-upload-${id}`}>
-                  Upload
-                </FileInputLabel>
-                <FileInput
-                  id={`single-upload-${id}`}
-                  type='file'
-                  accept='image/*'
-                  onChange={handleSingleFileChange}
-                />
+                {animation_url ? (
+                  <FileInputLabel onClick={handleRemoveSingleFile}>Remove</FileInputLabel>
+                ) : (
+                  <>
+                    <FileInputLabel htmlFor={`single-upload-${id}`}>
+                      Upload
+                    </FileInputLabel>
+                    <FileInput
+                      id={`single-upload-${id}`}
+                      type='file'
+                      accept='image/*'
+                      onChange={handleSingleFileChange}
+                    />
+                  </>
+                )}
                 {animation_url?.name && (
                   <TextFileUploaded>
                     {shortcutText(animation_url?.name)}
@@ -369,23 +370,29 @@ export const TokenLine = ({
                 )}
               </UploadWrapper>
             </TokenLineCell>
-          )}
+          )} */}
           {step === CreateTokensSteps.UPLOAD_MEDIA && (
             <TokenLineCell>
               <UploadWrapper>
-                <FileInputLabel htmlFor={`multiple-upload-${id}`}>
-                  Upload multiple items
-                </FileInputLabel>
-                <MultipleFileInput
-                  id={`multiple-upload-${id}`}
-                  type='file'
-                  accept='.jpeg,.png,.gif,.svg,.webp,.mp4,.webm,.mp3,.wav,.gltf,.glb,.usdz,.pdf'
-                  multiple
-                  onChange={handleMultipleFilesChange}
-                />
-                {media?.length > 0 && (
+                {media.length > 0 ? (
+                  <FileInputLabel onClick={handleRemoveMedia}>Remove files</FileInputLabel>
+                ) : (
+                  <>
+                    <FileInputLabel htmlFor={`multiple-upload-${id}`}>
+                      Upload multiple items
+                    </FileInputLabel>
+                    <MultipleFileInput
+                      id={`multiple-upload-${id}`}
+                      type='file'
+                      accept='.jpeg,.png,.gif,.svg,.webp,.mp4,.webm,.mp3,.wav,.gltf,.glb,.usdz,.pdf'
+                      multiple
+                      onChange={handleMultipleFilesChange}
+                    />
+                  </>
+                )}
+                {media.length > 0 && (
                   <TextFileUploaded>
-                    {media?.length} files uploaded
+                    {media.length} files uploaded
                   </TextFileUploaded>
                 )}
               </UploadWrapper>
@@ -453,13 +460,6 @@ export const TokenLine = ({
         }}
         isClosable
       >
-        {/* <AttributesForm
-          initialAttributes={attributes}
-          attributes={attributes}
-          attributesSchema={attributesSchema}
-          isValid={isValid}
-          onChange={onAttributesChange}
-        /> */}
       </Modal>
     </>
   );
@@ -472,6 +472,32 @@ const TokenLinkImageWrapper = styled.div`
   justify-content: center;
   width: 100%;
   height: 100%;
+
+  &:hover > div {
+    display: flex;
+  }
+`;
+
+const Overlay = styled.div`
+  display: flex;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  
+  background: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+`;
+
+const OverlayText = styled.div`
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
 `;
 
 const TokenImage = styled(Image)`
@@ -487,35 +513,17 @@ const TokenImage = styled(Image)`
     max-width: 100%;
     max-height: 100%;
     opacity: 1;
-    -webkit-transform: translate3d(-50%, -50%, 0);
-    -ms-transform: translate3d(-50%, -50%, 0);
     transform: translate3d(-50%, -50%, 0);
     user-drag: none;
-    -webkit-user-drag: none;
     user-select: none;
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
   }
 `;
 
 const TokenLinkTitle = styled(Text).attrs({ appearance: 'block', size: 'l' })`
   word-break: break-all;
+  margin: auto;
 `;
 
-const SelectCheckbox = styled(Checkbox)`
-  margin: auto;
-  &.unique-checkbox-wrapper.checkbox-size-s span.checkmark {
-    height: 24px;
-    width: 24px;
-    border-radius: 4px;
-    background-color: var(--color-primary-500);
-    opacity: 0.4;
-    &.checked {
-      opacity: 1;
-    }
-  }
-`;
 
 export const FormGrid = styled.div`
   display: grid;
@@ -525,11 +533,7 @@ export const FormGrid = styled.div`
   flex: 1;
   width: 100%;
   align-self: flex-start;
-  & > .unique-text {
-    margin: 0;
-    white-space: break-spaces;
-    word-break: normal;
-  }
+
   h4.unique-font-heading.size-4 {
     grid-column: 1 / span 2;
 
@@ -543,7 +547,7 @@ export const FormGrid = styled.div`
   }
   div.unique-select {
     width: 100%;
-    margin: auto 0;
+    margin: auto 0.
   }
   @media screen and (max-width: 568px) {
     grid-template-columns: 1fr;
@@ -567,7 +571,6 @@ export const LineContent = styled.div`
   height: 240px;
   border-top: 1px solid var(--color-table-grey);
   background: var(--color-additional-light);
-  // margin: 0 !important;
 
   &:last-child {
     border-bottom: 1px solid var(--color-table-grey);
@@ -580,7 +583,7 @@ export const TokenLineCell = styled.div<{
 }>`
   flex: 1;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   padding: 0;
   text-align: left;
@@ -607,11 +610,10 @@ export const TokenLineCell = styled.div<{
     flex: 0.5;
   }
 
-
   z-index: 1;
 `;
 
-export const TokenLineCellAttrAdd =styled.div`
+export const TokenLineCellAttrAdd = styled.div`
   flex: 0.5;
   display: flex;
   justify-content: center;
@@ -652,7 +654,6 @@ const MultipleFileInput = styled(FileInput)``;
 
 const ExternalLinkInput = styled.textarea`
   flex: 1;
-  height: 100%;
   border: none;
   width: 100%;
   cursor: pointer;
@@ -661,6 +662,7 @@ const ExternalLinkInput = styled.textarea`
   outline: none;
   resize: none;
   padding: 10px;
+  padding-top: 24px;
   font-family: var(--font-inter);
   background: transparent;
 `;
@@ -673,6 +675,7 @@ const UploadWrapper = styled.div`
 const TextFileUploaded = styled.div`
   margin: auto;
   text-overflow: ellipsis;
+  padding: 0 10px;
 `;
 
 const StyledCheckbox = styled(Checkbox)`

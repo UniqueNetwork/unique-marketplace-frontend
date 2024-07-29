@@ -35,6 +35,8 @@ import { CreateTokensDialogs } from './components/CreateTokensDialogs';
 import { RoyaltiesFormNew } from 'pages/CollectionEdit/Forms/RoyaltiesFormNew';
 import { validateLink } from 'utils/textUtils';
 import { UploadFAB } from './components/UploadFAB';
+import { WarningBlock } from 'components/WarningBlock/WarningBlock';
+import { filesSizeValidate } from 'utils/filesSizeValidate';
 
 export enum CreateTokensSteps {
   SELECT_COLLECTION = 'SELECT_COLLECTION',
@@ -137,11 +139,6 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
         );
 
         let animationURLIpfsCid;
-
-        const animationFile = tokens[index]?.animation_url?.file;
-        if (animationFile) {
-          animationURLIpfsCid = await api?.collection?.uploadFile(animationFile);
-        }
         
         if (tokens[index]?.media && tokens[index].media.length > 0) {
           for (const media of tokens[index].media) {
@@ -239,6 +236,10 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
       setDialog(CreateTokenDialog.exceededTokens);
       return;
     }
+
+    const validFiles = filesSizeValidate(files, true);
+    if (!validFiles) return;
+
     const lastId =
       (tokens
         .sort(({ tokenId: idA }, { tokenId: idB }) => (idA > idB ? 1 : -1))
@@ -247,7 +248,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
         0) + 1;
     setTokens([
       ...tokens,
-      ...files.map((file, index) => ({
+      ...validFiles.map((file, index) => ({
         id: index + lastId,
         tokenId: index + lastId,
         image: {
@@ -260,27 +261,8 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
         media: []
       }))
     ]);
-    info(`${files.length} files added`);
+    info(`${validFiles.length} files added`);
     setStep(CreateTokensSteps.UPLOAD_MEDIA);
-  };
-
-  const onChangeCollection = (_collection: GQLCollection) => {
-    console.log(_collection, 'COLLECTION_SeLECteD');
-
-    if (_collection === collection) {
-      return;
-    }
-    if (!collection || tokens.length === 0) {
-      setCollection(_collection);
-
-      const rect = collectionBlockRef.current?.getBoundingClientRect();
-      const top = rect?.top;
-      window.scrollTo({ top, behavior: 'smooth' });
-      return;
-    }
-
-    setCollectionToSubmit(_collection);
-    setDialog(CreateTokenDialog.changeCollection);
   };
 
   const selectedAll = () => {
@@ -425,6 +407,11 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
     void fetchCollections(selectedAccount);
   }, [fetchCollections, selectedAccount]);
 
+  const isValidTotalRoyalty = useMemo(() => {
+    const totalRoyalty = royalty.royalties.reduce((acc, { value }) => Number(acc) + Number(value), 0);
+    return totalRoyalty <= 99;
+  }, [royalty]);
+
   return (
     <MainWrapper className='create-nft-page' ref={mainWrapperRef}>
       {
@@ -535,9 +522,6 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
                 )}
                 {tokens.length > 0 && (
                   <TokensCounterWrapper>
-                    {/* <Text color='grey-500' weight='bold' size='m'>
-                      {tokens.length} / {MAX_MINT_TOKENS}
-                    </Text> */}
                     <Button
                       title=''
                       role='ghost'
@@ -611,94 +595,53 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
                 )}
                 {tokens.length > 0 && !isFilterVisible && (
                   <ButtonGroup ref={actionBoxRef}>
-                    {step !== CreateTokensSteps.UPLOAD_MEDIA && <ConfirmBtn
-                      iconLeft={{
-                        color: 'var(--color-primary-400)',
-                        name: 'arrow-left',
-                        size: 12
-                      }}
-                      role='outlined'
-                      title='Back'
-                      disabled={false}
-                      onClick={() => changeStep('prev')}
-                    />}
-                    {step === CreateTokensSteps.PREVIEW_WITH_FILTERS ? (
-                      <ConfirmBtn
-                        disabled={!collection || tokens.length === 0}
-                        role='primary'
-                        title='Confirm and create all'
-                        onClick={handleSubmit}
-                      />
-                    ) : (<ConfirmBtn
-                      iconRight={{
-                        color: 'currentColor',
-                        name: 'arrow-right',
-                        size: 12
-                      }}
-                      role='primary'
-                      title='Next Step'
-                      disabled={nextStepIsBlocked}
-                      onClick={() => changeStep('next')}
-                    />)}
+                    {!isValidTotalRoyalty && <WarningBlock margin={0.5}>Max total royalty: 99%</WarningBlock>}
                     <ButtonConatiner>
-                      {/* <Button
-                        title={
-                          <StyledCheckbox
-                            label={
-                              <Text color='grey-500'>
-                                {selected.length
-                                  ? `${selected.length} selected`
-                                  : 'Select all'}
-                              </Text>
-                            }
-                            checked={selected.length > 0}
-                            onChange={(value: boolean) => {
-                              if (value) {
-                                selectedAll();
-                                return;
-                              }
-                              deselectedAll();
-                            }}
-                            testid='select-all'
-                          />
-                        }
-                        onClick={() => {
-                          if (selected.length > 0) {
-                            deselectedAll();
-                            return;
-                          }
-                          selectedAll();
+                      {step !== CreateTokensSteps.UPLOAD_MEDIA && <ConfirmBtn
+                        iconLeft={{
+                          color: 'var(--color-primary-400)',
+                          name: 'arrow-left',
+                          size: 12
                         }}
-                      /> */}
-                      {deviceSize <= DeviceSize.sm && (
+                        role='outlined'
+                        title='Back'
+                        disabled={!isValidTotalRoyalty}
+                        onClick={() => changeStep('prev')}
+                      />}
+                      {step === CreateTokensSteps.PREVIEW_WITH_FILTERS ? (
                         <ConfirmBtn
-                          role='outlined'
-                          title='Filter'
-                          onClick={() => setIsFilterVisible(true)}
+                          disabled={!collection || tokens.length === 0 || !isValidTotalRoyalty}
+                          role='primary'
+                          title='Confirm and create all'
+                          onClick={handleSubmit}
                         />
-                      )}
-                      {/* <ConfirmBtn
-                    className={selected.length > 1 ? 'visible' : 'hidden'}
-                    role='outlined'
-                    disabled={selected.length === 0}
-                    title='Modify selected'
-                    onClick={() => setDialog(CreateTokenDialog.editAttributes)}
-                  /> */}
-                      <ConfirmBtn
-                        className={selected.length >= 1 ? 'visible' : 'hidden'}
-                        role='danger'
-                        disabled={selected.length === 0}
-                        title='Remove selected'
-                        onClick={() => setDialog(CreateTokenDialog.removeToken)}
-                      />
-                      <SelectedCountWrapper />
-                      {tokens.length > 0 &&
-                        Number(leftTokens) > 0 &&
-                        (step === CreateTokensSteps.SET_DATA ||
-                          step === CreateTokensSteps.UPLOAD_MEDIA) && (
-                          <UploadFAB onUpload={onAddTokens} />
-                        )}
+                      ) : (<ConfirmBtn
+                        iconRight={{
+                          color: 'currentColor',
+                          name: 'arrow-right',
+                          size: 12
+                        }}
+                        role='primary'
+                        title='Next Step'
+                        disabled={nextStepIsBlocked || !isValidTotalRoyalty}
+                        onClick={() => changeStep('next')}
+                      />)}
+                      <RemoveButtonWrap>
+                        <ConfirmBtn
+                          className={selected.length >= 1 ? 'visible' : 'hidden'}
+                          role='danger'
+                          disabled={selected.length === 0}
+                          title='Remove selected'
+                          onClick={() => setDialog(CreateTokenDialog.removeToken)}
+                        />
+                      </RemoveButtonWrap>
                     </ButtonConatiner>
+                    {tokens.length > 0 &&
+                      Number(leftTokens) > 0 &&
+                      (step === CreateTokensSteps.SET_DATA ||
+                        step === CreateTokensSteps.UPLOAD_MEDIA) && (
+                        <UploadFAB onUpload={onAddTokens} />
+                      )}
                   </ButtonGroup>
                 )}
               </WrapperTokenListContentStyled>
@@ -718,6 +661,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
                   setMintingProgress(0);
                   setIsLoadingSubmitResult(false);
                   setStage(TRANSACTION_STAGE_ENUM.UPLOADING);
+                  setStep(CreateTokensSteps.UPLOAD_IMAGES);
                 }}
               />
               <MobileFilters
@@ -830,6 +774,7 @@ const TokensCounterWrapper = styled.div`
 
 const ButtonGroup = styled.div`
   display: flex;
+  flex-direction: column;
   flex-wrap: wrap;
   gap: var(--prop-gap);
   box-sizing: border-box;
@@ -862,49 +807,13 @@ const ButtonGroup = styled.div`
   }
 `;
 
-const SelectedCountWrapper = styled.div`
-  flex: 0.8;
-  display: flex;
-  align-items: center;
-`;
 
-const SelectCheckbox = styled(Checkbox)`
-  align-items: center;
-  &.unique-checkbox-wrapper.checkbox-size-s span.checkmark {
-    height: 32px;
-    width: 32px;
-    border-radius: var(--prop-gap);
-    background-color: var(--color-primary-300);
-    &.checked {
-      background-color: var(--color-primary-500);
-    }
-  }
-  label.checkbox-label {
-    margin-left: 42px;
-  }
-`;
+
 
 const ButtonConatiner = styled.div`
   display: flex;
-  // width: 100%;
-  margin-left: auto;
   justify-content: start;
   gap: 16px;
-
-  @media screen and (max-width: 768px) {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-gap: 10px;
-    & > button:last-of-type {
-      grid-column: 1 / span 2;
-    }
-  }
-  @media screen and (max-width: 568px) {
-    gap: calc(var(--prop-gap) / 2);
-    & > button.unique-button.size-middle {
-      padding: 8px 16px;
-    }
-  }
 `;
 
 const RoyaltiesFormWrapper = styled.div`
@@ -921,23 +830,6 @@ const ImageCreate = styled.img`
   margin-bottom: 24px;
 `;
 
-const CreateCollectionLink = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 192px;
-  height: 40px;
-  background-color: var(--color-primary-500);
-  font-size: 20px;
-  line-height: 24px;
-  color: #fff;
-  cursor: pointer;
-
-  &:hover {
-    opacity: 0.8;
-  }
-`;
-
 const PagePaperStyled = styled(PagePaper)`
   width: 100%;
   min-height: 400px;
@@ -950,6 +842,7 @@ const HeaderStyled = styled.h1`
   font-family: var(--prop-font-family-heading);
   font-weight: 700;
   font-size: 36px;
+  text-align: center;
   line-height: 48px;
   margin: 0 0 24px;
 `;
@@ -958,6 +851,10 @@ const ContentWrap = styled.div`
   @media screen and (min-width: 1025px) {
     padding-left: calc(198px + var(--prop-gap) * 2);
   }
+`;
+
+const RemoveButtonWrap = styled.div`
+  margin-left: auto;
 `;
 
 export const CreateNFT = CreateNFTComponent;

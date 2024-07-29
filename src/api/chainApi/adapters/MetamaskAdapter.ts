@@ -345,7 +345,7 @@ class MetamaskAdapter implements IMarketContractAdapter {
     const toCross = Address.extract.ethCrossAccountId(await signer.getAddress());
 
     const ids = await Promise.all(
-      tokens.map(async ({image, name, description, attributes, background_color, royalties}) => {
+      tokens.map(async ({image, name, description, attributes, background_color, royalties, media, external_url }) => {
         const tokenInfo: IV2Token = {
           schemaName: 'unique',
           schemaVersion: '2.0.0',
@@ -353,6 +353,8 @@ class MetamaskAdapter implements IMarketContractAdapter {
           name,
           description,
           attributes,
+          media,
+          external_url,
           royalties: royalties?.map(({address, percent}) => ({
             address, percent: percent || 0
           })),

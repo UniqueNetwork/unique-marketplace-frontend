@@ -102,7 +102,6 @@ export const TokenPreview = ({
                 image: list[0].image.url,
                 collectionId: collection?.collectionId || 0,
                 owner: selectedAccount?.address || '',
-                animation_url: list[0]?.animation_url?.url
               }}
               collection={collection}
               isLoading={false}
@@ -124,7 +123,6 @@ export const TokenPreview = ({
                     image: token.image.url,
                     collectionId: collection?.collectionId || 0,
                     owner: selectedAccount?.address || '',
-                    animation_url: token?.animation_url?.url
                   }}
                   collection={collection}
                   isLoading={false}
@@ -295,7 +293,6 @@ export const FormGrid = styled.div`
 const CommonTokenDetailWrapper = styled.div`
   margin-top: 35px;
   width: 960px;
-  max-width: 80vw;
   height: 650px;
 `;
 

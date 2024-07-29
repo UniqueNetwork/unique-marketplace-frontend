@@ -79,11 +79,6 @@ export type NewToken2 = {
   external_url?: string;
   name?: string;
   description?: string;
-  animation_url?: {
-    file: Blob;
-    url?: string;
-    name?: string;
-  };
 };
 
 export enum CreateTokenDialog {

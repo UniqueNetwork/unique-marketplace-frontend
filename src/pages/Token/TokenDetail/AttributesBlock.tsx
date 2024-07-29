@@ -18,17 +18,19 @@ interface IProps {
   collectionId: number;
 }
 
-export const AttributesBlock: FC<IProps> = ({ attributes, collectionId }: IProps) => {
+export const AttributesBlock: FC<IProps> = ({ attributes, collectionId }) => {
   const { tokensCount } = useQueryCollectionTokensCount(collectionId);
   const { attributes: attributeStatistics, isFetching } = useQueryAttributes(collectionId);
 
   const statistics = useMemo(() => {
     return attributeStatistics.reduce<Record<string, StatItem>>((acc, { trait_type, value_string }) => {
-        const key = `${trait_type}_${value_string}`;
-        acc[key] = acc[key] ? {...acc[key], count: acc[key].count + 1} : {count: 1, value: value_string, trait_type};
-        return acc;
+      const key = `${trait_type}_${value_string}`;
+      acc[key] = acc[key]
+        ? { ...acc[key], count: acc[key].count + 1 }
+        : { count: 1, value: value_string, trait_type };
+      return acc;
     }, {});
-}, [attributeStatistics]);
+  }, [attributeStatistics]);
 
   return (
     <div>
@@ -38,7 +40,7 @@ export const AttributesBlock: FC<IProps> = ({ attributes, collectionId }: IProps
           align={{
             appearance: 'horizontal',
             horizontal: 'right',
-            vertical: 'middle'
+            vertical: 'middle',
           }}
         >
           Special features of the token that the collection creator specifies
@@ -46,7 +48,7 @@ export const AttributesBlock: FC<IProps> = ({ attributes, collectionId }: IProps
         </IconWithHint>
       </HeadingWrapper>
       <AttributesWrapper>
-        {Object.values(attributes).map((attribute, index) => (
+        {attributes.map((attribute, index) => (
           <AttributesRow
             key={index}
             attribute={attribute.trait_type}
@@ -54,10 +56,7 @@ export const AttributesBlock: FC<IProps> = ({ attributes, collectionId }: IProps
             isFetching={isFetching}
             tokensCount={tokensCount}
             percents={
-              ((statistics[
-                `${attribute.trait_type}_${attribute.value.toString()}`
-              ]?.count || 1) *
-                100) /
+              ((statistics[`${attribute.trait_type}_${attribute.value.toString()}`]?.count || 1) * 100) /
               tokensCount
             }
           />
@@ -71,7 +70,7 @@ const AttributesRow = ({
   attribute,
   enumeration,
   isFetching,
-  percents
+  percents,
 }: {
   attribute: string;
   enumeration: string;
@@ -79,12 +78,20 @@ const AttributesRow = ({
   tokensCount: number;
   percents: number;
 }) => (
-  <AttributeCard key={attribute}>
+  <AttributeCard>
     <Text color='grey-500' size='s' weight='bold'>
-      {attribute.toString().toUpperCase()}
+      {attribute.toUpperCase()}
     </Text>
-    <Row><Trait trait={enumeration} /></Row>
-    {!isFetching && typeof percents === 'number' && <Row><Text size='s' color='grey-500'>{percents.toFixed(0)}%</Text></Row>}
+    <Row>
+      <Trait trait={enumeration} />
+    </Row>
+    {!isFetching && typeof percents === 'number' && isFinite(percents) && (
+      <Row>
+        <Text size='s' color='grey-500'>
+          {percents.toFixed(0)}%
+        </Text>
+      </Row>
+    )}
   </AttributeCard>
 );
 
@@ -93,9 +100,11 @@ const HeadingWrapper = styled.div`
   align-items: self-end;
   margin-bottom: 16px;
   column-gap: calc(var(--prop-gap) / 2);
+
   & > h4.unique-font-heading {
     margin-bottom: 0px;
   }
+
   & > div {
     height: 24px;
   }
@@ -105,10 +114,12 @@ const AttributesWrapper = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 8px;
-  @media (max-width:1280px) {
+
+  @media (max-width: 1280px) {
     grid-template-columns: 1fr 1fr 1fr;
   }
-  @media (max-width:768px) {
+
+  @media (max-width: 768px) {
     grid-template-columns: 1fr 1fr;
   }
 `;

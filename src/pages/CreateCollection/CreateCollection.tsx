@@ -189,12 +189,6 @@ const CreateCollectionComponent = ({ className }: CreateCollectionProps) => {
   };
 
   const onCreateCollectionHandle = (form: CollectionForm) => {
-    if (!form.attributes?.length) {
-      setWarning(warnings.attributesAreNotDefine);
-
-      return;
-    }
-
     onSubmit(form);
   };
 
