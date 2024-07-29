@@ -138,11 +138,6 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
         );
 
         let animationURLIpfsCid;
-
-        const animationFile = tokens[index]?.animation_url?.file;
-        if (animationFile) {
-          animationURLIpfsCid = await api?.collection?.uploadFile(animationFile);
-        }
         
         if (tokens[index]?.media && tokens[index].media.length > 0) {
           for (const media of tokens[index].media) {

@@ -79,7 +79,6 @@ export const TokenLine = ({
     attributes,
     isValid,
     isSelected,
-    animation_url,
     external_url,
     media,
     royalties,
@@ -112,7 +111,6 @@ export const TokenLine = ({
       isValid,
       isSelected: !isSelected,
       royalties,
-      animation_url,
       media,
       external_url,
       name,
@@ -134,37 +132,6 @@ export const TokenLine = ({
         tokenId,
         image: { url: URL.createObjectURL(file), file },
         attributes,
-        animation_url,
-        media,
-        isValid,
-        isSelected,
-        royalties,
-        external_url,
-        name,
-        description
-      });
-    }
-  };
-
-  const handleSingleFileChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    if (event.target.files && event.target.files[0]) {
-      const files = filesSizeValidate(event.target.files);
-
-      if (!files) return;
-
-      const file = files[0];
-      onChange({
-        id,
-        tokenId,
-        image,
-        attributes,
-        animation_url: {
-          file: file,
-          url: URL.createObjectURL(file),
-          name: file.name
-        },
         media,
         isValid,
         isSelected,
@@ -240,25 +207,7 @@ export const TokenLine = ({
       isValid,
       isSelected,
       royalties,
-      animation_url,
       media,
-      external_url,
-      name,
-      description
-    });
-  };
-
-  const handleRemoveSingleFile = () => {
-    onChange({
-      id,
-      tokenId,
-      image,
-      attributes,
-      animation_url: undefined,
-      media,
-      isValid,
-      isSelected,
-      royalties,
       external_url,
       name,
       description
@@ -271,7 +220,6 @@ export const TokenLine = ({
       tokenId,
       image,
       attributes,
-      animation_url,
       media: [],
       isValid,
       isSelected,
@@ -296,7 +244,6 @@ export const TokenLine = ({
       tokenId,
       image,
       attributes,
-      animation_url,
       media,
       isValid,
       isSelected,
@@ -317,7 +264,6 @@ export const TokenLine = ({
       tokenId,
       image,
       attributes,
-      animation_url,
       media,
       isValid,
       isSelected,
@@ -337,7 +283,6 @@ export const TokenLine = ({
       tokenId,
       image,
       attributes,
-      animation_url,
       media,
       isValid,
       isSelected,
@@ -400,7 +345,7 @@ export const TokenLine = ({
               onChange={handleImageFileChange}
             />
           </TokenLineCell>
-          {step === CreateTokensSteps.UPLOAD_MEDIA && (
+          {/* {step === CreateTokensSteps.UPLOAD_MEDIA && (
             <TokenLineCell>
               <UploadWrapper>
                 {animation_url ? (
@@ -425,7 +370,7 @@ export const TokenLine = ({
                 )}
               </UploadWrapper>
             </TokenLineCell>
-          )}
+          )} */}
           {step === CreateTokensSteps.UPLOAD_MEDIA && (
             <TokenLineCell>
               <UploadWrapper>

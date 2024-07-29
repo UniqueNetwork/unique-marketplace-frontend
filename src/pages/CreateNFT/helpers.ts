@@ -42,7 +42,6 @@ export const mapNewToken = (
     image: token.ipfsCid?.fullUrl,
     attributes: token.attributes,
     royalties: token.royalties?.map(({value, ...rest}) => ({...rest, percent: +value})),
-    animation_url: token.animationURLIpfsCid?.fullUrl,
     media: token.media && getCreateMediaData(token.media),
   };
 

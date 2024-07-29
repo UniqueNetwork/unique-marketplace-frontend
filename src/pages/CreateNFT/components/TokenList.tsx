@@ -305,24 +305,6 @@ export const TokenList = ({
                     {step === CreateTokensSteps.UPLOAD_MEDIA && (
                       <TableHeaderCell>
                         <TextStyledWithHint>
-                          Main media file
-                          <IconWithHint
-                            align={{
-                              appearance: 'horizontal',
-                              horizontal: 'right',
-                              vertical: 'top'
-                            }}
-                          >
-                            Full size image/ GIF/ Video/ Audio
-                          </IconWithHint>
-                        </TextStyledWithHint>
-
-                        <TextStyledSmall>Max 3Mb</TextStyledSmall>
-                      </TableHeaderCell>
-                    )}
-                    {step === CreateTokensSteps.UPLOAD_MEDIA && (
-                      <TableHeaderCell>
-                        <TextStyledWithHint>
                           Additional media files
                           <IconWithHint
                             align={{
