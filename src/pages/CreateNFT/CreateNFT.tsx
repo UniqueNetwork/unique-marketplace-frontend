@@ -645,7 +645,22 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
                         disabled={nextStepIsBlocked || !isValidTotalRoyalty}
                         onClick={() => changeStep('next')}
                       />)}
+                      <RemoveButtonWrap>
+                        <ConfirmBtn
+                          className={selected.length >= 1 ? 'visible' : 'hidden'}
+                          role='danger'
+                          disabled={selected.length === 0}
+                          title='Remove selected'
+                          onClick={() => setDialog(CreateTokenDialog.removeToken)}
+                        />
+                      </RemoveButtonWrap>
                     </ButtonConatiner>
+                    {tokens.length > 0 &&
+                      Number(leftTokens) > 0 &&
+                      (step === CreateTokensSteps.SET_DATA ||
+                        step === CreateTokensSteps.UPLOAD_MEDIA) && (
+                        <UploadFAB onUpload={onAddTokens} />
+                      )}
                   </ButtonGroup>
                 )}
               </WrapperTokenListContentStyled>
@@ -811,27 +826,8 @@ const ButtonGroup = styled.div`
   }
 `;
 
-const SelectedCountWrapper = styled.div`
-  flex: 0.8;
-  display: flex;
-  align-items: center;
-`;
 
-const SelectCheckbox = styled(Checkbox)`
-  align-items: center;
-  &.unique-checkbox-wrapper.checkbox-size-s span.checkmark {
-    height: 32px;
-    width: 32px;
-    border-radius: var(--prop-gap);
-    background-color: var(--color-primary-300);
-    &.checked {
-      background-color: var(--color-primary-500);
-    }
-  }
-  label.checkbox-label {
-    margin-left: 42px;
-  }
-`;
+
 
 const ButtonConatiner = styled.div`
   display: flex;
@@ -874,6 +870,10 @@ const ContentWrap = styled.div`
   @media screen and (min-width: 1025px) {
     padding-left: calc(198px + var(--prop-gap) * 2);
   }
+`;
+
+const RemoveButtonWrap = styled.div`
+  margin-left: auto;
 `;
 
 export const CreateNFT = CreateNFTComponent;
