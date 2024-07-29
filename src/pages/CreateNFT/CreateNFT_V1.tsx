@@ -2,17 +2,12 @@ import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { TokenId, TokenV2ItemForMultipleDto } from '@unique-nft/sdk';
-
 import { Button, Checkbox, Text, useNotifications, Heading } from 'components/UI';
 import { ConfirmBtn } from 'components';
-
-import { CollectionSuggest } from './components/CollectionSuggest';
-
 import { CreateTokenDialog, NewToken, ViewMode } from './types';
 import { CreateTokensDialogs } from './components/CreateTokensDialogs';
-import { mapTokensToPayload, mapTokensToPayloadV1, parseInvalidAttributes } from './helpers';
+import { mapTokensToPayloadV1, parseInvalidAttributes } from './helpers';
 import { UploadFAB } from './components/UploadFAB';
-import { CollectionStats } from './components/CollectionStats';
 import { StatusTransactionModal, TRANSACTION_STAGE_ENUM } from './components/StatusTransactionModal';
 import { AttributeFilterProvider } from './contexts/AttributesFilterContext';
 import { MobileFilters } from './components/MobileFilter';
@@ -27,6 +22,7 @@ import { WrapperContent } from 'pages/CreateCollection/CreateCollection';
 import { GQLCollection } from 'api/scanApi/types';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 import { TokenList_V1 } from './components/TokenList_V1';
+import { filesSizeValidate } from 'utils/filesSizeValidate';
 
 export const MAX_MINT_TOKENS = 300;
 
@@ -167,6 +163,10 @@ export const CreateNFTComponent: FC<{ collection?: GQLCollection }> = ({ collect
       setDialog(CreateTokenDialog.exceededTokens);
       return;
     }
+
+    const validFiles = filesSizeValidate(files, true);
+    if (!validFiles) return;
+
     const lastId =
       (tokens.sort(({ tokenId: idA }, { tokenId: idB }) => (idA > idB ? 1 : -1)).at(-1)
         ?.tokenId ||
@@ -174,7 +174,7 @@ export const CreateNFTComponent: FC<{ collection?: GQLCollection }> = ({ collect
         0) + 1;
     setTokens([
       ...tokens,
-      ...files.map((file, index) => ({
+      ...validFiles.map((file, index) => ({
         id: index + lastId,
         tokenId: index + lastId,
         image: {
@@ -186,7 +186,7 @@ export const CreateNFTComponent: FC<{ collection?: GQLCollection }> = ({ collect
         isSelected: false
       }))
     ]);
-    info(`${files.length} files added`);
+    info(`${validFiles.length} files added`);
   };
 
   // const onChangeCollection = (_collection: GQLCollection) => {

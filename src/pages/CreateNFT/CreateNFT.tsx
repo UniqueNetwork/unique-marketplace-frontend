@@ -36,6 +36,7 @@ import { RoyaltiesFormNew } from 'pages/CollectionEdit/Forms/RoyaltiesFormNew';
 import { validateLink } from 'utils/textUtils';
 import { UploadFAB } from './components/UploadFAB';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
+import { filesSizeValidate } from 'utils/filesSizeValidate';
 
 export enum CreateTokensSteps {
   SELECT_COLLECTION = 'SELECT_COLLECTION',
@@ -235,6 +236,10 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
       setDialog(CreateTokenDialog.exceededTokens);
       return;
     }
+
+    const validFiles = filesSizeValidate(files, true);
+    if (!validFiles) return;
+
     const lastId =
       (tokens
         .sort(({ tokenId: idA }, { tokenId: idB }) => (idA > idB ? 1 : -1))
@@ -243,7 +248,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
         0) + 1;
     setTokens([
       ...tokens,
-      ...files.map((file, index) => ({
+      ...validFiles.map((file, index) => ({
         id: index + lastId,
         tokenId: index + lastId,
         image: {
@@ -256,27 +261,8 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
         media: []
       }))
     ]);
-    info(`${files.length} files added`);
+    info(`${validFiles.length} files added`);
     setStep(CreateTokensSteps.UPLOAD_MEDIA);
-  };
-
-  const onChangeCollection = (_collection: GQLCollection) => {
-    console.log(_collection, 'COLLECTION_SeLECteD');
-
-    if (_collection === collection) {
-      return;
-    }
-    if (!collection || tokens.length === 0) {
-      setCollection(_collection);
-
-      const rect = collectionBlockRef.current?.getBoundingClientRect();
-      const top = rect?.top;
-      window.scrollTo({ top, behavior: 'smooth' });
-      return;
-    }
-
-    setCollectionToSubmit(_collection);
-    setDialog(CreateTokenDialog.changeCollection);
   };
 
   const selectedAll = () => {

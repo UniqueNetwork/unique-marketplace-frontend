@@ -21,6 +21,7 @@ import IconWithHint from 'components/IconWithHint/IconWithHint';
 import { IconButton } from 'components/IconButton/IconButton';
 import ConfirmDeleteForm from './ConfirmDeleteForm';
 import { Checkbox } from 'components/UI/Checkbox/Checkbox2';
+import { filesSizeValidate } from 'utils/filesSizeValidate';
 
 export type TokenListProps = {
   disabled: boolean;
@@ -627,23 +628,11 @@ export const ImageUploadArea = ({
   const [isDragEnter, setIsDragEnter] = useState(false);
 
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const MAX_FILE_SIZE_MB = 20;
-    const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
-
+    if (!inputFile.current) return;
     setIsDragEnter(false);
 
-    if (!inputFile.current) {
-      return;
-    }
-
-    const files = Array.from(inputFile.current.files || []);
-    const validFiles = files.filter((file) => file.size <= MAX_FILE_SIZE_BYTES);
-
-    if (validFiles.length < files.length) {
-      alert(
-        `Some files exceed the maximum size of ${MAX_FILE_SIZE_MB} MB and will not be uploaded.`
-      );
-    }
+    const validFiles = filesSizeValidate(inputFile.current.files || [], true);
+    if (!validFiles) return;
 
     onUpload?.(validFiles);
     onDragExit();
