@@ -315,11 +315,11 @@ export const TokenList = ({
                             }}
                           >
                             (Full size image/ GIF/ Video/ Audio) Recommended
-                            max. 3Mb
+                            max. 3Mb. Tolal 10Mb.
                           </IconWithHint>
                         </TextStyledWithHint>
 
-                        <TextStyledSmall>Max 3Mb</TextStyledSmall>
+                        <TextStyledSmall>Tolal 10Mb.</TextStyledSmall>
                       </TableHeaderCell>
                     )}
                     {step === CreateTokensSteps.UPLOAD_MEDIA && (
@@ -631,8 +631,8 @@ export const ImageUploadArea = ({
     if (!inputFile.current) return;
     setIsDragEnter(false);
 
-    const validFiles = filesSizeValidate(inputFile.current.files || [], true);
-    if (!validFiles) return;
+    const validFiles = filesSizeValidate({ fileArray: inputFile.current.files || [], withoutTotalMax: true });
+    if (!validFiles?.length) return;
 
     onUpload?.(validFiles);
     onDragExit();

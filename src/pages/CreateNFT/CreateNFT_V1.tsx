@@ -164,8 +164,8 @@ export const CreateNFTComponent: FC<{ collection?: GQLCollection }> = ({ collect
       return;
     }
 
-    const validFiles = filesSizeValidate(files, true);
-    if (!validFiles) return;
+    const validFiles = filesSizeValidate({ fileArray: files, withoutTotalMax: true });
+    if (!validFiles?.length) return;
 
     const lastId =
       (tokens.sort(({ tokenId: idA }, { tokenId: idB }) => (idA > idB ? 1 : -1)).at(-1)
@@ -188,22 +188,6 @@ export const CreateNFTComponent: FC<{ collection?: GQLCollection }> = ({ collect
     ]);
     info(`${validFiles.length} files added`);
   };
-
-  // const onChangeCollection = (_collection: GQLCollection) => {
-  //   if (_collection === collection) {
-  //     return;
-  //   }
-  //   if (!collection || tokens.length === 0) {
-  //     setCollection(_collection);
-
-  //     const rect = collectionBlockRef.current?.getBoundingClientRect();
-  //     const top = rect?.top;
-  //     window.scrollTo({ top, behavior: 'smooth' });
-  //     return;
-  //   }
-  //   setCollectionToSubmit(_collection);
-  //   setDialog(CreateTokenDialog.changeCollection);
-  // };
 
   const selectedAll = () => {
     setTokens(tokens.map((token) => ({ ...token, isSelected: true })));

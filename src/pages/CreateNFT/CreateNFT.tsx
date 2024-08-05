@@ -237,7 +237,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
       return;
     }
 
-    const validFiles = filesSizeValidate(files, true);
+    const validFiles = filesSizeValidate({ fileArray: files, withoutTotalMax: true });
     if (!validFiles) return;
 
     const lastId =
