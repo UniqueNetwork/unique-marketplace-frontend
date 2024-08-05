@@ -122,9 +122,9 @@ export const TokenLine = ({
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     if (event.target.files && event.target.files[0]) {
-      const files = filesSizeValidate(event.target.files);
+      const files = filesSizeValidate({ fileArray: event.target.files });
 
-      if (!files) return;
+      if (!files?.length) return;
 
       const file = files[0];
       onChange({
@@ -148,7 +148,7 @@ export const TokenLine = ({
   ) => {
     if (!event.target.files) return;
 
-    const files = filesSizeValidate(event.target.files);
+    const files = filesSizeValidate({ fileArray: event.target.files, withoutMaxFileSize: true });
 
     if (!files) return;
 
@@ -384,7 +384,7 @@ export const TokenLine = ({
                     <MultipleFileInput
                       id={`multiple-upload-${id}`}
                       type='file'
-                      accept='.jpeg,.png,.gif,.svg,.webp,.mp4,.webm,.mp3,.wav,.gltf,.glb,.usdz,.pdf'
+                      accept='.jpg,.jpeg,.png,.gif,.svg,.webp,.mp4,.webm,.mp3,.wav,.gltf,.glb,.usdz,.pdf,.txt,.doc,.docx,.rtf,.odt'
                       multiple
                       onChange={handleMultipleFilesChange}
                     />
