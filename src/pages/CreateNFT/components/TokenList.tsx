@@ -315,8 +315,8 @@ export const TokenList = ({
                             }}
                           >
                             Images: .jpg, .jpeg, .png, .gif, .svg, .webp<br/>
-                            Audio: .mp3, .wav<br/>
-                            Video: .mp4, .webm<br/>
+                            Audio: .mp3, .wav, .ogg, .mpeg<br/>
+                            Video: .mp4, .webm, .ogg<br/>
                             Documents: .pdf, .docx, .rtf, .odt<br/>
                             Recommended max. 3Mb per file.<br/>Total 10Mb.
                           </IconWithHint>

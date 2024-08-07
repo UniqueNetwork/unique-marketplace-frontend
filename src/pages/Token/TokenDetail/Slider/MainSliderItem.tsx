@@ -7,11 +7,14 @@ import { BREAKPOINTS } from 'hooks/useBreakpointObserver';
 import { BadgeEnum } from 'components/TokenMedia/Picture';
 import YouTube, { YouTubeEvent, YouTubeProps } from 'react-youtube';
 import { extractVideoId, isYouTubeLink } from 'utils/urlUtils';
+import { Button } from 'components/UI';
+import { shortcutText } from 'utils/textUtils';
 
 interface SliderItem {
   src: string;
   // 'token_image' | 'image' | 'youtube_url' | 'video' | 'audio'
   type: string;
+  name?: string;
   isWearable?: boolean;
   baseSrc?: string | DecodedInfixOrUrlOrCidAndHash;
   wearableSrc?: string | DecodedInfixOrUrlOrCidAndHash;
@@ -19,7 +22,7 @@ interface SliderItem {
   index: number;
   activeIndex: number;
   badges?: BadgeEnum[];
-  thumbnail?: string,
+  thumbnail?: string;
 }
 
 const SliderItem = styled.div`
@@ -96,9 +99,35 @@ const PictureWrapper = styled.div`
   }
 `;
 
+const FileLink = styled.div`
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+`;
+
+const PreviewDocument = styled.div`
+  filter: blur(5px);
+`;
+
+const DocumentSlideWrapper = styled.div`
+  position: relative;
+`;
+
+const TextFileUploaded = styled.div`
+  margin: auto;
+  text-overflow: ellipsis;
+  padding: 10px;
+  font-size: 18px;
+  font-weight: 700;
+`;
+
 const MainSliderItem = ({
   src,
   type,
+  name,
   isWearable,
   wearableSrc,
   baseSrc,
@@ -198,8 +227,36 @@ const MainSliderItem = ({
     case 'audio':
       return (
         <SliderItem>
-          <Picture alt={tokenId?.toString() || ''} src={thumbnail} video={src || ''} />
+          <Picture
+            alt={tokenId?.toString() || ''}
+            src={thumbnail}
+            video={src || ''}
+          />
         </SliderItem>
+      );
+    case 'document':
+      return (
+        <DocumentSlideWrapper>
+          <SliderItem>
+            <PreviewDocument>
+              <PictureWrapper>
+                <Picture alt={tokenId?.toString() || ''} src={thumbnail} />
+              </PictureWrapper>
+            </PreviewDocument>
+            <FileLink>
+              {/* {name && <TextFileUploaded>
+                {shortcutText(name)}
+              </TextFileUploaded>} */}
+              <Button
+                role='primary'
+                title={`See ${shortcutText(name || '')}`}
+                onClick={() => {
+                  window.open(src, '_blank');
+                }}
+              />
+            </FileLink>
+          </SliderItem>
+        </DocumentSlideWrapper>
       );
     default:
       return null;

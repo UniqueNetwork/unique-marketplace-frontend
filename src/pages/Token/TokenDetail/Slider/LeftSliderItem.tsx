@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import styled, { css } from 'styled-components';
 import VideoIcon from 'static/icons/video.svg';
 import AudioIcon from 'static/icons/audio.svg';
+import DocumentIcon from 'static/icons/document.svg';
 import { Icon } from 'components/UI';
 
 export const LEFT_SLIDER_ITEM_SIZE = 92;
@@ -157,6 +158,20 @@ const LeftSliderItem: React.FC<SliderItem> = ({
           </BlurredMedia>
           <IconContainer>
             <Icon file={VideoIcon} size={32} />
+          </IconContainer>
+        </Container>
+      );
+    case 'document':
+      return (
+        <Container
+          type={'audio'}
+          isMedia={true}
+          active={isActive}
+          backgroundImage={thumbnail || 'rgba(0, 0, 0, 1)'}
+          onClick={onItemClick}
+        >
+          <IconContainer>
+            <Icon file={DocumentIcon} size={32} />
           </IconContainer>
         </Container>
       );

@@ -147,13 +147,12 @@ export const TokenLine = ({
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     if (!event.target.files) return;
-
+  
     const files = filesSizeValidate({ fileArray: event.target.files, withoutMaxFileSize: true });
-
+  
     if (!files) return;
-
-    const media: { name: string; type: string; file: File; url: string }[] =
-      [];
+  
+    const media: { name: string; key: string, type: string; file: File; url: string }[] = [];
     const typeCounters: { [key: string]: number } = {
       image: 0,
       animation: 0,
@@ -164,13 +163,16 @@ export const TokenLine = ({
       document: 0,
       other: 0
     };
-
+  
     Array.from(files).forEach((file) => {
       let type: string;
       switch (file.type) {
         case 'image/jpeg':
+        case 'image/jpg':
         case 'image/png':
         case 'image/gif':
+        case 'image/svg+xml':
+        case 'image/webp':
           type = 'image';
           break;
         case 'video/mp4':
@@ -181,24 +183,25 @@ export const TokenLine = ({
         case 'audio/mpeg':
         case 'audio/ogg':
         case 'audio/wav':
+        case 'audio/mp3':
           type = 'audio';
           break;
         case 'application/pdf':
-          type = 'pdf';
-          break;
         case 'text/plain':
         case 'application/msword':
         case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+        case 'application/rtf':
+        case 'application/vnd.oasis.opendocument.text':
           type = 'document';
           break;
         default:
           type = 'other';
       }
-
-      const name = `${type}_${++typeCounters[type]}`;
-      media.push({ name, type, file, url: URL.createObjectURL(file) });
+  
+      const key = `${type}_${++typeCounters[type]}`;
+      media.push({ key, name: file.name, type, file, url: URL.createObjectURL(file) });
     });
-
+  
     onChange({
       id,
       tokenId,

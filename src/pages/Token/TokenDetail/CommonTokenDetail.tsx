@@ -95,27 +95,34 @@ export const CommonTokenDetail: FC<IProps> = ({
       const images = Object.values(token?.media || {}).filter((media) => media.type === 'image');    
       if (images.length > 0) {
         for (const image of images) {
-          sliderItems.push({src: image.url, type: 'image'});
+          sliderItems.push({src: image.url, type: 'image', name: image.name || ''});
         }
       }
-
+  
       const videos = Object.values(token?.media || {}).filter((media) => media.type === 'video');
       if (videos.length > 0 ) {
         video = videos[0];
         for (const video of videos) {
-          sliderItems.push({src: video.url, type: 'video'});
+          sliderItems.push({src: video.url, type: 'video', name: video.name || ''});
         }
       }
-
+  
       const audios = Object.values(token?.media || {}).filter((media) => media.type === 'audio');    
       if (audios.length > 0 ) {
         for (const audio of audios) {
-          sliderItems.push({src: audio.url, type: 'audio', thumbnail: image});
+          sliderItems.push({src: audio.url, type: 'audio', thumbnail: image, name: audio.name || ''});
+        }
+      }
+  
+      const documents = Object.values(token?.media || {}).filter((media) => media.type === 'document');    
+      if (documents.length > 0 ) {
+        for (const document of documents) {
+          sliderItems.push({src: document.url, type: 'document', name: document.name || '', thumbnail: image});
         }
       }
     }
     const attributesList = attributes ? Object.values(attributes) : [];
-
+  
     return {
       tokenId,
       collectionId,
@@ -131,7 +138,7 @@ export const CommonTokenDetail: FC<IProps> = ({
       video
     };
   }, [token, collection, offer]);
-
+  
   const hasSlider = useMemo(() => {
     return sliderItems?.length > 1;
   }, [sliderItems]);

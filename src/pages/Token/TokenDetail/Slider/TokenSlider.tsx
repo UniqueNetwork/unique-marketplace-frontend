@@ -13,6 +13,7 @@ interface SliderItem {
   src?: string;
   //'token_image' | 'image' | 'youtube_url' | 'video' | 'audio'
   type: string;
+  name?: string;
   thumbnail?: string;
 }
 
@@ -115,11 +116,12 @@ export const TokenSlider: FC<ITokenSliderProps> = ({
 
       <SliderContainer previewMode={!!previewMode}>
         <Slider ref={horizontalSliderRef} {...settings}>
-          {sliderItems.map(({ type, src, thumbnail }, index) => (
+          {sliderItems.map(({ type, src, name, thumbnail }, index) => (
             <MainSliderItem
               key={index}
               src={src || ''}
               type={type || ''}
+              name={name || ''}
               isWearable={isWearable}
               baseSrc={baseSrc}
               wearableSrc={wearableSrc}
