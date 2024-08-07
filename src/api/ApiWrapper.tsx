@@ -25,12 +25,12 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
   const [chainProperties, setChainProperties] = useState<ChainPropertiesResponse>();
   const [currentChainId, setCurrentChainId] = useState<string>(initialChainId);
   const [settings, setSettings] = useState<Settings>();
-  //TO DO apdate after settings change
+
   const [currencies, setCurrencies] = useState<ICurrency[]>([
     {
       id: '0',
       collectionId: 0,
-      title: 'OPL',
+      title: 'UNQ',
       iconUrl: '',
       decimals: 18,
       fee: 0

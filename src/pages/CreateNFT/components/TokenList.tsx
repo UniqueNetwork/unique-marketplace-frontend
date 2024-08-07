@@ -314,8 +314,11 @@ export const TokenList = ({
                               vertical: 'top'
                             }}
                           >
-                            (Full size image/ GIF/ Video/ Audio) Recommended
-                            max. 3Mb. Tolal 10Mb.
+                            Images: .jpg, .jpeg, .png, .gif, .svg, .webp<br/>
+                            Audio: .mp3, .wav<br/>
+                            Video: .mp4, .webm<br/>
+                            Documents: .pdf, .docx, .rtf, .odt<br/>
+                            Recommended max. 3Mb per file.<br/>Total 10Mb.
                           </IconWithHint>
                         </TextStyledWithHint>
 
