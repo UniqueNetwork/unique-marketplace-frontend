@@ -98,6 +98,9 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   const deviceSize = useDeviceSize();
   const { currencies, currencyMap } = useApi();
   const [selectedCurrencyOption, setSelectedCurrencyOption] = useState(currencyMap.get('0'));
+  useEffect(() => {
+    setSelectedCurrencyOption(currencyMap.get('0'));
+  }, [currencyMap]);
   const isSelectFungibleToken = useMemo(() => selectedCurrencyOption?.id !== currencyMap.get('0')?.id, [currencyMap, selectedCurrencyOption?.id]);
 
   const { filteredAccounts, onFilter, onReset } = useAccountsFilter({
@@ -120,7 +123,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
         return;
       }
       const recipient = typeof newRecipientAddress === 'string' ? newRecipientAddress : newRecipientAddress?.address;
-      console.log(selectedCurrencyOption);
+
       try {
         const fee = isSelectFungibleToken 
           ? await api?.market?.getTransferBalanceFungibleFee({ 
@@ -172,7 +175,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     if (isConfirmDisabled || !selectedCurrencyOption) return;
     const recipient = typeof recipientAddress === 'string' ? recipientAddress : recipientAddress?.address;
     const decimals = selectedCurrencyOption?.decimals;
-    console.log(selectedCurrencyOption?.collectionId, 'selectedCurrencyOption?.collectionId');
+
     onFinish(
       sender?.address || '',
       recipient || '',

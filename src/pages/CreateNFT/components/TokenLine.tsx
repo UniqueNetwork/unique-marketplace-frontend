@@ -384,7 +384,7 @@ export const TokenLine = ({
                     <MultipleFileInput
                       id={`multiple-upload-${id}`}
                       type='file'
-                      accept='.jpg,.jpeg,.png,.gif,.svg,.webp,.mp4,.webm,.mp3,.wav,.gltf,.glb,.usdz,.pdf,.txt,.doc,.docx,.rtf,.odt'
+                      accept='.jpg,.jpeg,.png,.gif,.svg,.webp,.mp4,.webm,.mp3,.wav,.gltf,.glb,.usdz,.pdf,.docx,.rtf,.odt'
                       multiple
                       onChange={handleMultipleFilesChange}
                     />
