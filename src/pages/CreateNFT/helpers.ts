@@ -43,9 +43,10 @@ export const mapNewToken = (
     attributes: token.attributes,
     royalties: token.royalties?.map(({value, ...rest}) => ({...rest, percent: +value})),
     media: token.media && getCreateMediaData(token.media),
+    name: token.name,
+    description: token.description,
+    external_url: token.external_url,
   };
-
-  console.log(mappedTokenDto, 'mappedTokenDto');
 
   return mappedTokenDto;
 };
