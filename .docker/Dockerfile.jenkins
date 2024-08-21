@@ -33,7 +33,7 @@ ENV DNS_RESOLVER=127.0.0.1
 ENV PORT=80
 ENV ENV_FILE=/usr/share/nginx/html/env.js
 ENV INDEX_FILE=/usr/share/nginx/html/index.html
-
+RUN ls
 EXPOSE ${PORT}
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["nginx"]
