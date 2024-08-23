@@ -15,6 +15,7 @@ import DefaultAvatar from 'static/icons/default-avatar.svg';
 import BalanceSkeleton from '../../Skeleton/BalanceSkeleton';
 import { ChainSwitcher } from './ChainSwitcher/ChainSwithcher';
 import { ConnectWalletModalContext } from 'account/ConnectWalletModalContext';
+import { useWeb3Modal } from '@web3modal/wagmi/react';
 
 const fractionDigits = 4;
 
@@ -83,6 +84,7 @@ export const WalletManager: FC = () => {
     setIsGetKsmOpened(true);
     setIsOpen(false);
   }, [setIsGetKsmOpened]);
+  const { open } = useWeb3Modal()
 
   const balance = useMemo(() => {
     if (!selectedAccount) return '0';
@@ -104,6 +106,7 @@ export const WalletManager: FC = () => {
 
   return (
     <WalletManagerWrapper>
+      <div onClick={open}>Toggle wallet connect</div>
       <AccountsManager
         open={isOpen}
         accounts={[...accounts.values()]}

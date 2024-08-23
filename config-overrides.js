@@ -5,27 +5,30 @@ const webpack = require('webpack');
 module.exports = function override(config) {
     const fallback = config.resolve.fallback || {};
     Object.assign(fallback, {
-        "crypto": require.resolve("crypto-browserify"),
-        "stream": require.resolve("stream-browserify"),
-        "assert": require.resolve("assert"),
-        "http": require.resolve("stream-http"),
-        "https": require.resolve("https-browserify"),
-        "os": require.resolve("os-browserify"),
-        "url": require.resolve("url-parse")
-    })
+        crypto: require.resolve("crypto-browserify"),
+        stream: require.resolve("stream-browserify"),
+        assert: require.resolve("assert"),
+        http: require.resolve("stream-http"),
+        https: require.resolve("https-browserify"),
+        os: require.resolve("os-browserify"),
+        url: require.resolve("url-parse"),
+    });
+
     config.resolve.fallback = fallback;
+
     config.resolve.alias = {
         ...config.resolve.alias,
         process: 'process/',
-        "react/jsx-dev-runtime": "react/jsx-dev-runtime.js",
-        "react/jsx-runtime": "react/jsx-runtime.js",
         "@unique-nft/utils/string": "@unique-nft/utils/string.mjs",
+        "@unique-nft/utils/royalties": "@unique-nft/utils/royalties.mjs",
     };
     config.ignoreWarnings = [/Failed to parse source map/];
     config.plugins = (config.plugins || []).concat([
         new webpack.ProvidePlugin({
-            Buffer: ['buffer', 'Buffer']
+            Buffer: ['buffer', 'Buffer'],
+            process: 'process/browser',
         })
-    ])
+    ]);
+
     return config;
-}
+};

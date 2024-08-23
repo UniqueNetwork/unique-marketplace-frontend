@@ -1,6 +1,7 @@
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { Ethereum, Polkadot } from '@unique-nft/utils/extension';
+import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { ConnectWalletModalContext } from './ConnectWalletModalContext';
 import { useAccounts } from 'hooks/useAccounts';
 import { Heading, Icon, Loader, Modal } from 'components/UI';
@@ -10,6 +11,7 @@ import EnkriptIcon from 'static/icons/enkrypt.svg';
 import NovaWalletIcon from 'static/icons/nova_icon_radial.svg';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { ConnectedWalletsName } from 'account/useWalletCenter';
+import { useAccount } from "wagmi";
 
 enum AccountModal {
   CREATE = 'create',
@@ -26,18 +28,34 @@ export const ConnectWallets = () => {
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
   const [missingExtension, setMissingExtension] = useState<ConnectedWalletsName>();
   const { walletsCenter, fetchAccounts } = useAccounts();
+  const { open } = useWeb3Modal()
+  const { address } = useAccount();
+  useEffect(() => {
+    console.log(address, 'ADDRESS');
+  }, [address]);
+  useEffect(() => {
+    console.log(open, 'OPEN');
+  }, [open]);
 
-  const handleConnectToMetamask = async () => {
+  const handleConnectToMetamask = useCallback(async () => {
+    console.log('trigger MM open!');
     try {
-      await Ethereum.requestAccounts();
-      await walletsCenter.connectWallet('metamask');
-      fetchAccounts();
-      setIsOpenConnectWalletModal(false);
-    } catch (e: any) {
-      setMissingExtension('metamask');
-      setCurrentModal(AccountModal.EXTENSION_MISSING);
+      console.log('block with open works')
+      open();
+    } catch (err) {
+      console.log(err);
     }
-  };
+
+    // try {
+    //   await Ethereum.requestAccounts();
+    //   await walletsCenter.connectWallet('metamask');
+    //   fetchAccounts();
+    //   setIsOpenConnectWalletModal(false);
+    // } catch (e: any) {
+    //   setMissingExtension('metamask');
+    //   setCurrentModal(AccountModal.EXTENSION_MISSING);
+    // }
+  }, [open]);
 
   const handleConnectToPolkadotExtension = (walletName: ConnectedWalletsName = 'polkadot-js') => async () => {
     try {
@@ -82,7 +100,7 @@ export const ConnectWallets = () => {
             {availableWallets.includes('polkadot-js') && <WalletItem onClick={handleConnectToPolkadotExtension()}>
               <Icon size={40} name='polkadot-wallet' /> <span>Polkadot.js</span>
             </WalletItem>}
-            {(window.ethereum?.isMetaMask || noAvailableWallets) && <WalletItem onClick={handleConnectToMetamask}>
+            {(window.ethereum?.isMetaMask || noAvailableWallets) && <WalletItem onClick={open}>
               <Icon size={40} name='metamask-wallet' /> <span>Metamask</span>
             </WalletItem>}
             {availableWallets.includes('talisman') && <WalletItem onClick={handleConnectToPolkadotExtension('talisman')}>
@@ -132,8 +150,8 @@ export const ConnectWallets = () => {
         <WalletItem onClick={handleConnectToPolkadotExtension()}>
           <Icon size={40} name='polkadot-wallet' /> <span>Polkadot.js</span>
         </WalletItem>
-        <WalletItem onClick={handleConnectToMetamask}>
-          <Icon size={40} name='metamask-wallet' /> <span>Metamask</span>
+        <WalletItem onClick={open}>
+          <Icon size={40} name='metamask-wallet' /> <span>Wallet connect</span>
         </WalletItem>
         <WalletItem onClick={handleConnectToPolkadotExtension('talisman')}>
           <Icon size={40} name='talisman-wallet' /> <span>Talisman</span>
