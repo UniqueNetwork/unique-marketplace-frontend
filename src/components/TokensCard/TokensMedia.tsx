@@ -44,7 +44,7 @@ export const TokensMedia: FCC<ITokensMedia> = ({ to, imageUrl, tokenId, video, t
   );
 };
 
-const PictureWrapper = styled(Link)<{ isPlaying: boolean }>`
+const PictureWrapper = styled(({ isPlaying, ...props }) => <Link {...props} />)<{ isPlaying: boolean }>`
   position: relative;
   width: 100%;
   display: flex;
