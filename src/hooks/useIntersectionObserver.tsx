@@ -15,10 +15,8 @@ export function useIntersectionObserver({
   const observer = useRef<IntersectionObserver | null>(null);
 
   const callback = useCallback(
-    (entries) => {
-      if (entries.length === 0) {
-        return;
-      }
+    (entries: IntersectionObserverEntry[]) => {
+      if (entries.length === 0) return;
 
       if (entries[0].isIntersecting && isActive) {
         setVisibleIntersectionObserver(true);
@@ -29,10 +27,8 @@ export function useIntersectionObserver({
   );
 
   const intersectionObserverRef = useCallback(
-    (node) => {
-      if (!node) {
-        return;
-      }
+    (node?: Element) => {
+      if (!node) return;
 
       observer.current?.disconnect();
 

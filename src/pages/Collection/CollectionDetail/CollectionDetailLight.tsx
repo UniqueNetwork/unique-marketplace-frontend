@@ -1,4 +1,4 @@
-import React, { FC, useMemo, useState } from 'react';
+import React, { FCC, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Address } from '@unique-nft/utils';
 import styled from 'styled-components';
@@ -27,7 +27,7 @@ interface IProps {
   collection?: GQLCollection
 }
 
-export const CollectionDetailLight: FC<IProps> = ({ collection }) => {
+export const CollectionDetailLight: FCC<IProps> = ({ collection }) => {
   const { selectedAccount } = useAccounts();
   const deviceSize = useDeviceSize();
 

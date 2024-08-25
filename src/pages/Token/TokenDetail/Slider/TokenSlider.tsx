@@ -1,4 +1,4 @@
-import React, { FC, useMemo, useRef, useState } from 'react';
+import React, { FCC, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { CustomNextArrow, CustomPrevArrow } from './CustomSliderArrows';
 import { CustomNextArrowVertical, CustomPrevArrowVertical } from './CustomSliderArrowsVertical';
@@ -25,7 +25,7 @@ interface ITokenSliderProps {
   badges?: BadgeEnum[];
   previewMode?: boolean
 }
-export const TokenSlider: FC<ITokenSliderProps> = ({
+export const TokenSlider: FCC<ITokenSliderProps> = ({
   items: sliderItems,
   baseSrc,
   wearableSrc,

@@ -1,4 +1,4 @@
-import React, { FC, KeyboardEvent, useCallback, useEffect, useState } from 'react';
+import React, { FCC, KeyboardEvent, useCallback, useEffect, useState } from 'react';
 import { Button } from 'components/UI';
 import styled from 'styled-components';
 import { IconButton } from '../IconButton/IconButton';
@@ -14,7 +14,7 @@ interface SearchFieldProps {
   testid?: string
 }
 
-const SearchField: FC<SearchFieldProps> = ({ className, searchValue, placeholder, onSearch, onSearchStringChange, hideButton, testid }) => {
+const SearchField: FCC<SearchFieldProps> = ({ className, searchValue, placeholder, onSearch, onSearchStringChange, hideButton, testid }) => {
   const [value, setValue] = useState<string | number | undefined>(searchValue);
 
   const onValueChange = useCallback((value: string | undefined) => {

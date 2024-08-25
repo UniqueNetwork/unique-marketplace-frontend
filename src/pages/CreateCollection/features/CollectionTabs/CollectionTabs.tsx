@@ -1,7 +1,7 @@
 import { ConfirmBtn } from 'components';
 import { Button, ButtonGroup } from 'components/UI';
 import { Stepper, StepperProps } from 'components/UI/Stepper';
-import { FC, memo, ReactNode, useEffect, useRef } from 'react';
+import { FCC, memo, ReactNode, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
 const CollectionStepperWrapper = styled.div`
@@ -22,7 +22,7 @@ interface CollectionTabsProps extends Pick<StepperProps, 'onClickStep'> {
 
 const steps: StepperProps['steps'] = ['Main information', 'Token attributes'];
 
-const CollectionTabsComponent: FC<CollectionTabsProps> = ({
+const CollectionTabsComponent: FCC<CollectionTabsProps> = ({
   children,
   step,
   creationTooltip,

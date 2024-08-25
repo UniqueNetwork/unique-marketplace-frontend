@@ -51,7 +51,7 @@ export const Notifications = ({
   const timerId = useRef<NodeJS.Timer>();
 
   const clearingLoop = () => {
-    timerId.current && clearInterval(timerId.current);
+    timerId.current && clearInterval(timerId.current as NodeJS.Timeout);
     timerId.current = setInterval(() => {
       setAlerts((alerts) => {
         if (!alerts.length) return alerts;
@@ -108,7 +108,7 @@ export const Notifications = ({
       : { name: 'warning', size: 32, color: '#fff' };
 
   useEffect(() => {
-    return () => timerId.current && clearInterval(timerId.current);
+    return () => timerId.current && clearInterval(timerId.current as NodeJS.Timeout);
   }, [closingDelay]);
 
   const value = useMemo(

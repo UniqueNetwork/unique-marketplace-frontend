@@ -55,7 +55,7 @@ type FilterProps = {
   }) => void;
 };
 
-const FilterComponent: React.FC<FilterProps> = ({ onFilterChange, tokens }) => {
+const FilterComponent: React.FCC<FilterProps> = ({ onFilterChange, tokens }) => {
   const [attributes, setAttributes] = useState<TraitCount[]>([]);
   const [names, setNames] = useState<ItemCount[]>([]);
   const [descriptions, setDescriptions] = useState<ItemCount[]>([]);

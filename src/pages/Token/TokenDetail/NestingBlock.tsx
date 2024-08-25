@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FCC } from 'react';
 import styled from 'styled-components';
 import { Button, Heading } from 'components/UI';
 
@@ -23,7 +23,7 @@ interface NestingTokenBlockProps {
   onUnequipClick(): void
 }
 
-export const NestingTokenBlock: FC<NestingTokenBlockProps> = ({
+export const NestingTokenBlock: FCC<NestingTokenBlockProps> = ({
   token,
   offer,
   collection,

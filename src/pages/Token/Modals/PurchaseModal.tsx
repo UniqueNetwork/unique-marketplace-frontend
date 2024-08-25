@@ -1,4 +1,4 @@
-import React, { FC, useEffect } from 'react';
+import React, { FCC, useEffect } from 'react';
 import { Link, useNotifications } from 'components/UI';
 
 import { usePurchaseFixStages } from '../../../hooks/marketplaceStages';
@@ -13,7 +13,7 @@ import { useApi } from 'hooks/useApi';
 import { debounce } from 'utils/helpers';
 import { NavLink } from 'react-router-dom';
 
-const PurchaseModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, setIsClosable, testid }) => {
+const PurchaseModal: FCC<TTokenPageModalBodyProps> = ({ offer, onFinish, setIsClosable, testid }) => {
   const { api } = useApi();
   const { selectedAccount } = useAccounts();
   const { stages, status, initiate } = usePurchaseFixStages(offer?.collectionId || 0, offer?.tokenId || 0, offer?.price.currency || 0, offer?.contractAddress);

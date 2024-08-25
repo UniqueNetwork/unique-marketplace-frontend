@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FCC } from 'react';
 import { Royalty } from '@unique-nft/sdk';
 import styled from 'styled-components';
 import { Heading, Text } from 'components/UI';
@@ -9,7 +9,7 @@ interface IProps {
   royalties: Royalty[];
 }
 
-export const RoyaltiesBlock: FC<IProps> = ({ royalties }: IProps) => {
+export const RoyaltiesBlock: FCC<IProps> = ({ royalties }: IProps) => {
   const deviceSize = useDeviceSize();
 
   return (

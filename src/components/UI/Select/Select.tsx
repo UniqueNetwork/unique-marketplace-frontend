@@ -165,22 +165,24 @@ export const Select = ({
             selectedMulti.length > 0 &&
             selectedMulti.map((selectedOption, index) => (
               <div className={`select-tag`} key={index} data-testid={`${testid}-${index}`}>
-                {
-                  selectedOption?.[
-                    optionValue as keyof SelectOptionProps
-                    ]
-                }
-                <div
-                  onClick={() =>
-                    handleOptionUnselect(selectedOption)
+                <>
+                  {
+                    selectedOption?.[
+                        optionValue as keyof SelectOptionProps
+                        ]
                   }
-                >123
-                  <Icon
-                    size={10}
-                    name={'close'}
-                    color={'white'}
-                  />
-                </div>
+                  <div
+                    onClick={() =>
+                        handleOptionUnselect(selectedOption)
+                    }
+                  >123
+                    <Icon
+                        size={10}
+                        name={'close'}
+                        color={'white'}
+                    />
+                  </div>
+                </>
               </div>
             ))}
           {!multi && (
@@ -217,13 +219,14 @@ export const Select = ({
                       : handleOptionSelect(option)
                   }
                   data-testid={`${testid}-${(option)[optionKey]}`}
-                >
+                ><>
                   {
                     option[
-                      optionValue as keyof SelectOptionProps
-                      ]
+                        optionValue as keyof SelectOptionProps
+                        ]
                   }
                   {icon && <Icon {...icon} />}
+                </>
                 </div>
               );
             })}

@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FCC, useEffect, useMemo, useRef, useState } from 'react';
 import { AdditionalDark, AdditionalLight, BlueGrey100, BlueGrey200 } from '../../styles/colors';
 import Skeleton from '../Skeleton/Skeleton';
 import { DecodedInfixOrUrlOrCidAndHash } from 'api/chainApi/types';
@@ -38,7 +38,7 @@ const badgesTooltips = {
   customizable: 'This token is customizable'
 };
 
-export const Picture: FC<PictureProps> = ({
+export const Picture: FCC<PictureProps> = ({
   alt,
   src,
   size,
@@ -141,7 +141,7 @@ const BadgesWrapper = styled.div`
   z-index: 2;
 `;
 
-const Badge: FC<{ tooltip: string, className?: string }> = ({ tooltip, children, className }) => {
+const Badge: FCC<{ tooltip: string, className?: string }> = ({ tooltip, children, className }) => {
   const badgeRef = useRef<HTMLDivElement>(null);
   return <>
     <Tooltip targetRef={badgeRef} >{tooltip}</Tooltip>

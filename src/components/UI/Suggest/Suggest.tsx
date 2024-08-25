@@ -275,7 +275,7 @@ export const Suggest = <T, >({
           <suggestComponents.SuggestList suggestions={_suggestions}>
             {(_suggestion, isLast) => (
               <div
-                ref={isLast ? intersectionObserverRef : undefined}
+                ref={isLast ? (intersectionObserverRef as any /* got no idea how this works*/) : undefined}
                 onClick={() => handleSelectedSuggestion(_suggestion)}
               >
                 <suggestComponents.SuggestItem

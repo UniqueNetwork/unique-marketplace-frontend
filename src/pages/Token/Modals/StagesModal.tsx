@@ -1,4 +1,4 @@
-import React, { FC, useEffect } from 'react';
+import React, { FCC, useEffect } from 'react';
 import styled from 'styled-components';
 import { Text, Heading, Loader, Icon } from 'components/UI';
 import { Stage, StageStatus } from '../../../types/StagesTypes';
@@ -10,7 +10,7 @@ type TStagesModalProps = {
   testid?: string
 }
 
-const DefaultMarketStages: FC<TStagesModalProps> = ({ stages, status, onFinish, testid = '' }) => {
+const DefaultMarketStages: FCC<TStagesModalProps> = ({ stages, status, onFinish, testid = '' }) => {
   useEffect(() => {
     if (status === StageStatus.success || status === StageStatus.error) {
       setTimeout(() => onFinish(), 500);

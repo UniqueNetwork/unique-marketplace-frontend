@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FCC } from 'react';
 import styled from 'styled-components';
 
 import { MobileTableRow } from '../MobileTable/MobileTableRow';
@@ -9,7 +9,7 @@ interface MobileTableSkeletonProps {
   columns: TableColumnProps[]
 }
 
-const MobileTableSkeleton: FC<MobileTableSkeletonProps> = ({ columns }) => {
+const MobileTableSkeleton: FCC<MobileTableSkeletonProps> = ({ columns }) => {
   return (
     <>
       {Array.from({ length: 10 }).map((_, indexRow) => <MobileTableRow key={`skeleton-row-${indexRow}`} >

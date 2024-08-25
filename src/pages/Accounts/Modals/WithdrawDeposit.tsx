@@ -1,4 +1,4 @@
-import React, { FC, useEffect } from 'react';
+import React, { FCC, useEffect } from 'react';
 import { Modal, useNotifications } from 'components/UI';
 
 import DefaultMarketStages from '../../Token/Modals/StagesModal';
@@ -13,7 +13,7 @@ export type WithdrawDepositModalProps = {
   testid: string
 }
 
-export const WithdrawDepositModal: FC<WithdrawDepositModalProps> = ({ isVisible, address, onFinish, testid }) => {
+export const WithdrawDepositModal: FCC<WithdrawDepositModalProps> = ({ isVisible, address, onFinish, testid }) => {
   if (isVisible && address) {
     return <WithdrawDepositStagesModal address={address}
       onFinish={onFinish}
@@ -24,7 +24,7 @@ export const WithdrawDepositModal: FC<WithdrawDepositModalProps> = ({ isVisible,
   return <></>;
 };
 
-export const WithdrawDepositStagesModal: FC<WithdrawDepositModalProps> = ({ address, onFinish, testid }) => {
+export const WithdrawDepositStagesModal: FCC<WithdrawDepositModalProps> = ({ address, onFinish, testid }) => {
   const { stages, status, initiate } = useWithdrawStages(address || '');
   const { info } = useNotifications();
   useEffect(() => {

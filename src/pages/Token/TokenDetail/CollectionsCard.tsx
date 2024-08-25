@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FCC } from 'react';
 import styled from 'styled-components';
 import { Heading, Text } from 'components/UI';
 import noCollections from '../../../static/icons/no-collections.svg';
@@ -14,7 +14,7 @@ interface ICollectionsCardProps {
   testid?: string;
 }
 
-export const CollectionsCard: FC<ICollectionsCardProps> = ({
+export const CollectionsCard: FCC<ICollectionsCardProps> = ({
   avatarSrc,
   description,
   id,

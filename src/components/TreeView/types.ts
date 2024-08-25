@@ -25,7 +25,7 @@ export type TTreeNodeClickHandler<T> = (data: T) => void
 
 export interface INodeContainer<T> {
   data: T
-  nodeView: React.FC<INodeView<T>>
+  nodeView: React.FCC<INodeView<T>>
   onNodeClicked: TTreeNodeClickHandler<T>
   getKey: (a: T) => string
   childrenProperty: keyof T
@@ -39,7 +39,7 @@ export interface INodeContainer<T> {
 
 export interface ITree<T> {
   dataSource: T[]
-  nodeView: React.FC<INodeView<T>>
+  nodeView: React.FCC<INodeView<T>>
   onNodeClicked: TTreeNodeClickHandler<T>
   className?: string
   compareNodes: (a: T, b: T) => boolean
@@ -51,7 +51,7 @@ export interface ITree<T> {
 }
 
 export interface IBundleTree<T> extends ITree<T>{
-  nestedSectionView?: React.FC<INestedSectionView<T>>
+  nestedSectionView?: React.FCC<INestedSectionView<T>>
   showTree?: boolean
 }
 

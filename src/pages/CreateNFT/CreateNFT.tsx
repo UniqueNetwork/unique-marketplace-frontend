@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FCC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { TokenId, TokenV2ItemForMultipleDto } from '@unique-nft/sdk';
@@ -49,7 +49,7 @@ export enum CreateTokensSteps {
 
 export const MAX_MINT_TOKENS = 50;
 
-export const CreateNFTComponent: FC<{ className?: string }> = ({
+export const CreateNFTComponent: FCC<{ className?: string }> = ({
   className
 }) => {
   const [collection, setCollection] = useState<GQLCollection>();

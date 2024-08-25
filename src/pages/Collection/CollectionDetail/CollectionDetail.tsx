@@ -1,4 +1,4 @@
-import React, { FC, useMemo, useState } from 'react';
+import React, { FCC, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Address } from '@unique-nft/utils';
 import styled from 'styled-components';
@@ -27,7 +27,7 @@ interface IProps {
   royalties?: RoyaltiesFormData
 }
 
-export const CollectionDetail: FC<IProps> = ({ collection, royalties }) => {
+export const CollectionDetail: FCC<IProps> = ({ collection, royalties }) => {
   const { selectedAccount } = useAccounts();
   const deviceSize = useDeviceSize();
 

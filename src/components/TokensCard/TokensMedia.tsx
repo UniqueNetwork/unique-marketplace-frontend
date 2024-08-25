@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useState } from 'react';
+import React, { FCC, useCallback, useState } from 'react';
 import { BlueGrey200, BlueGrey500, BlueGrey100, BlueGrey300 } from 'styles/colors';
 import { DecodedInfixOrUrlOrCidAndHash } from 'api/chainApi/types';
 import styled from 'styled-components';
@@ -16,7 +16,7 @@ interface ITokensMedia {
   badges?: BadgeEnum[]
 }
 
-export const TokensMedia: FC<ITokensMedia> = ({ to, imageUrl, tokenId, video, testid, badges }) => {
+export const TokensMedia: FCC<ITokensMedia> = ({ to, imageUrl, tokenId, video, testid, badges }) => {
   const [isPlaying, setIsPlaying] = useState(false);
 
   const togglePlay = useCallback((e: React.MouseEvent<HTMLDivElement>) => {

@@ -1,11 +1,11 @@
-import React, { FC } from 'react';
+import React, { FCC } from 'react';
 import styled from 'styled-components';
 
 import Skeleton from './Skeleton';
 import AccountSkeleton from './AccountSkeleton';
 import { Grey300 } from '../../styles/colors';
 
-export const TokenSkeleton: FC = () => {
+export const TokenSkeleton: FCC = () => {
   return <TokenSkeletonWrapper>
     <Skeleton height={48} />
     <Skeleton height={24} width={100} />

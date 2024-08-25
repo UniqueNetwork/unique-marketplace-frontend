@@ -1,4 +1,4 @@
-import { FC, PropsWithChildren } from 'react';
+import { FCC, PropsWithChildren } from 'react';
 import classNames from 'classnames';
 import './Heading.scss';
 
@@ -8,7 +8,7 @@ type IHeadingProps = PropsWithChildren<{
     testid?: string;
 }>;
 
-export const Heading: FC<IHeadingProps> = ({
+export const Heading: FCC<IHeadingProps> = ({
     children,
     size = '1',
     className,

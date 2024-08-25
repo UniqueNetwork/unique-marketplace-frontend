@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FCC } from 'react';
 import styled from 'styled-components';
 import { Text } from 'components/UI';
 
@@ -6,7 +6,7 @@ export interface ITraitProps {
   trait: string;
 }
 
-export const Trait: FC<ITraitProps> = ({ trait }: ITraitProps) => (
+export const Trait: FCC<ITraitProps> = ({ trait }: ITraitProps) => (
   <TraitStyled>
     <Text
       size='s'

@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FCC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Address } from '@unique-nft/utils';
 import styled from 'styled-components';
 
@@ -25,7 +25,7 @@ type TokensTradesPage = {
   testid: string
 }
 
-export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) => {
+export const TokensTradesPage: FCC<TokensTradesPage> = ({ currentTab, testid }) => {
   const { selectedAccount, isLoading: isLoadingAccounts } = useAccounts();
   const { currentChainId, chainProperties } = useApi();
   const [page, setPage] = useState<number>(0);

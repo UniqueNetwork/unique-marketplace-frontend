@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
+import React, { FCC, useCallback, useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import config from 'config';
@@ -23,7 +23,7 @@ function widgetAvatarRender(accountAddress: string) {
   return (<Avatar size={24} src={DefaultAvatar} address={accountAddress} />);
 }
 
-export const WalletManager: FC = () => {
+export const WalletManager: FCC = () => {
   const { setIsOpenConnectWalletModal } = useContext(ConnectWalletModalContext);
   const { selectedAccount, accounts, isLoading, changeAccount } = useAccounts();
   const [isOpen, setIsOpen] = useState(false);

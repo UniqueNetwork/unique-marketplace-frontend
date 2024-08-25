@@ -1,4 +1,4 @@
-import React, { FC, useMemo } from 'react';
+import React, { FCC, useMemo } from 'react';
 import styled from 'styled-components';
 import { Button, Text } from 'components/UI';
 
@@ -22,7 +22,7 @@ interface SellTokenProps {
   testid: string
 }
 
-export const SellToken: FC<SellTokenProps> = ({
+export const SellToken: FCC<SellTokenProps> = ({
   offer,
   collectionId,
   royalty,

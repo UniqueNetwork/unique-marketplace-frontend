@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FCC, useCallback, useEffect, useMemo, useState } from 'react';
 import { CollectionWithInfoV2Dto, TokenWithInfoV2Dto } from '@unique-nft/sdk';
 import { Address } from '@unique-nft/utils';
 import { Heading, Link, useNotifications, Button, Text } from 'components/UI';
@@ -21,7 +21,7 @@ import { fromStringToBnString } from 'utils/bigNum';
 import { NumberInput } from 'components/NumberInput/NumberInput';
 import { formatBlockNumber } from 'utils/textUtils';
 
-export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosable, onFinish, testid, collection }) => {
+export const TransferModal: FCC<TTokenPageModalBodyProps> = ({ token, setIsClosable, onFinish, testid, collection }) => {
   const { selectedAccount } = useAccounts();
   const [status, setStatus] = useState<'ask' | 'transfer-stage'>('ask'); // TODO: naming
   const [recipient, setRecipient] = useState<string>('');
@@ -66,7 +66,7 @@ type AskTransferModalProps = {
   testid: string
 }
 
-const AskTransferModal: FC<AskTransferModalProps> = ({ token, collection, onTransfer, testid }) => {
+const AskTransferModal: FCC<AskTransferModalProps> = ({ token, collection, onTransfer, testid }) => {
   const { api, chainProperties } = useApi();
   const { selectedAccount } = useAccounts();
   const [address, setAddress] = useState<string>('');
@@ -207,7 +207,7 @@ const AskTransferModal: FC<AskTransferModalProps> = ({ token, collection, onTran
   );
 };
 
-const TransferStagesModal: FC<TTokenPageModalBodyProps & TTransfer> = ({ token, collection, onFinish, sender, amount, recipient, testid }) => {
+const TransferStagesModal: FCC<TTokenPageModalBodyProps & TTransfer> = ({ token, collection, onFinish, sender, amount, recipient, testid }) => {
   const { stages, status, initiate } = useTransferStages(token?.collectionId || 0, token?.tokenId || 0, collection?.mode || 'NFT');
   const { info } = useNotifications();
 

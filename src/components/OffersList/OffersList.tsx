@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FCC } from 'react';
 import styled from 'styled-components';
 import { Offer } from '../../api/restApi/offers/types';
 import { OfferCard } from '../OfferCard/OfferCard';
@@ -10,7 +10,7 @@ type TTokensList = {
   testid: string
 };
 
-export const OffersList: FC<TTokensList> = ({ offers, isLoading, testid }) => {
+export const OffersList: FCC<TTokensList> = ({ offers, isLoading, testid }) => {
   return (
     <OffersListStyled>
       {offers?.map &&

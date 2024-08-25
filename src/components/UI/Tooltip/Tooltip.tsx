@@ -26,7 +26,7 @@ export interface TooltipProps {
   align?: TooltipAlign;
 }
 
-export const Tooltip: React.FC<TooltipProps> = (props) => {
+export const Tooltip: React.FCC<TooltipProps> = (props) => {
   const { className, targetRef, children, align } = props;
 
   const {

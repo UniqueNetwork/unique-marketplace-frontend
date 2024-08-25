@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FCC, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { Heading, Text, Icon } from 'components/UI';
 import { TokenComponent } from './TokenComponent/TokenComponent';
@@ -43,7 +43,7 @@ const getColumns = (testid: string) => [
   }
 ];
 
-const TokenTradesDetailsModal: FC<IConfirmModalProps> = ({ trade, onCancel, testid }) => {
+const TokenTradesDetailsModal: FCC<IConfirmModalProps> = ({ trade, onCancel, testid }) => {
   const [filteredBids, setFilteredBids] = useState<(Bid & TableRowProps)[]>();
   const { tradeDetails, fetch, isFetching } = useTradeDetails();
   useEffect(() => {

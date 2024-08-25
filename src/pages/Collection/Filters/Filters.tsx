@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react';
+import React, { FCC, useCallback } from 'react';
 import styled from 'styled-components';
 
 import AttributeCountsFilter from 'components/Filters/AttributeCountsFilter';
@@ -10,7 +10,7 @@ import { BelongingValue, TokensFilter } from './types';
 import BelongingFilter from './BelongingFilter';
 import StatusFilter from './StatusFilter';
 
-export const Filters: FC<FiltersProps<TokensFilter>> = ({ value, attributes, attributeCounts, onFilterChange, testid, disabled }) => {
+export const Filters: FCC<FiltersProps<TokensFilter>> = ({ value, attributes, attributeCounts, onFilterChange, testid, disabled }) => {
   const { selectedAccount } = useAccounts();
 
   const onBelongingFilterChange = useCallback((belongingValue: BelongingValue) => {

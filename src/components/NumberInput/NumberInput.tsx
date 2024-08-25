@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react';
+import React, { FCC, useCallback } from 'react';
 import { Button, InputText, Loader } from 'components/UI';
 import styled from 'styled-components';
 import { IconButton } from '../IconButton/IconButton';
@@ -18,7 +18,7 @@ interface AmountInputProps {
   onSetMax?(): void
 }
 
-export const NumberInput: FC<AmountInputProps> = ({
+export const NumberInput: FCC<AmountInputProps> = ({
   disabled,
   value,
   onChange,

@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, useCallback, useState } from 'react';
+import React, { ChangeEvent, FCC, useCallback, useState } from 'react';
 import styled from 'styled-components';
 
 import { Grey300, Grey500 } from '../../styles/colors';
@@ -12,7 +12,7 @@ interface PasswordInputProps {
   testid: string
 }
 
-export const PasswordInput: FC<PasswordInputProps> = ({ placeholder, value, onChange, maxLength = 40, testid }) => {
+export const PasswordInput: FCC<PasswordInputProps> = ({ placeholder, value, onChange, maxLength = 40, testid }) => {
   const [isVisibleValue, setIsVisibleValue] = useState<boolean>(false);
 
   const onPasswordChange = useCallback(({ target }: ChangeEvent<HTMLInputElement>) => {

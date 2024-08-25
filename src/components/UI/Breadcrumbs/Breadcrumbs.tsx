@@ -1,4 +1,4 @@
-import React, { FC, Fragment } from 'react';
+import React, { FCC, Fragment } from 'react';
 import { Icon } from '../Icon/Icon';
 import './Breadcrumbs.scss';
 
@@ -6,7 +6,7 @@ export interface BreadcrumbsProps {
     options: { title: string; link?: string }[];
 }
 
-const Breadcrumbs: FC<BreadcrumbsProps> = ({ options }: BreadcrumbsProps) => (
+const Breadcrumbs: FCC<BreadcrumbsProps> = ({ options }: BreadcrumbsProps) => (
   <div className='unique-breadcrumbs-wrapper'>
     {options.map((option, index) => {
             const last = index === options.length - 1;

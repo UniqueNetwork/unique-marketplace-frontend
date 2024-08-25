@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FCC } from 'react';
 import styled from 'styled-components';
 
 import { Text, Loader } from 'components/UI';
@@ -12,7 +12,7 @@ type FeeMessageProps = {
   placeholder?: string
 }
 
-export const FeeMessage: FC<FeeMessageProps> = ({
+export const FeeMessage: FCC<FeeMessageProps> = ({
   isFeeLoading,
   fee,
   testid,

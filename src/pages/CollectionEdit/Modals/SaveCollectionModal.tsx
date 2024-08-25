@@ -1,4 +1,4 @@
-import React, { FC, useEffect } from 'react';
+import React, { FCC, useEffect } from 'react';
 import { useNotifications } from 'components/UI';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { StageStatus } from '../../../types/StagesTypes';
@@ -14,7 +14,7 @@ type SaveCollectionStagesModalProps = {
   onFinish(): void
 }
 
-export const SaveCollectionStagesModal: FC<SaveCollectionStagesModalProps> = ({
+export const SaveCollectionStagesModal: FCC<SaveCollectionStagesModalProps> = ({
   metadata,
   coverFile,
   bannerFile,

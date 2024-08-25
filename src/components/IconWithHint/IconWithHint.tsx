@@ -1,5 +1,5 @@
 import { Tooltip, TooltipAlign } from 'components/UI/Tooltip/Tooltip';
-import React, { FC, useCallback, useRef, useState } from 'react';
+import React, { FCC, useCallback, useRef, useState } from 'react';
 import questionFilledIcon from 'static/icons/question-fill.svg';
 import questionIcon from 'static/icons/question.svg';
 import styled from 'styled-components';
@@ -9,7 +9,7 @@ interface IProps {
   testid?: string
 }
 
-const IconWithHint: FC<IProps> = ({ align, children, testid }) => {
+const IconWithHint: FCC<IProps> = ({ align, children, testid }) => {
   const [isHovered, setIsHovered] = useState(false);
   const targetRef = useRef<HTMLDivElement>(null);
   const onHover = useCallback(

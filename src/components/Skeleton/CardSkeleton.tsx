@@ -1,8 +1,8 @@
-import React, { FC } from 'react';
+import React, { FCC } from 'react';
 import styled from 'styled-components';
 import Skeleton from './Skeleton';
 
-const CardSkeleton: FC = () => {
+const CardSkeleton: FCC = () => {
   return (
     <CardSkeletonWrapper>
       <Skeleton />

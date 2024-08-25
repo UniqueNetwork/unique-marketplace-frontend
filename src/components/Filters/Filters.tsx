@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react';
+import React, { FCC, useCallback } from 'react';
 import styled from 'styled-components';
 
 import StatusFilter from './StatusFilter';
@@ -9,7 +9,7 @@ import { useAccounts } from '../../hooks/useAccounts';
 import TypeOfAssetsFilter from './TypeOfAssets';
 import TypeOfCustomizablesFilter from './TypeOfCustomizables';
 
-export const Filters: FC<FiltersProps> = ({ value, attributes, attributeCounts, onFilterChange, testid }) => {
+export const Filters: FCC<FiltersProps> = ({ value, attributes, attributeCounts, onFilterChange, testid }) => {
   const { selectedAccount } = useAccounts();
 
   const onStatusFilterChange = useCallback((statuses: Statuses) => {

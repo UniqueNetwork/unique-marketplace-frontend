@@ -1,4 +1,4 @@
-import React, { FC, useEffect } from 'react';
+import React, { FCC, useEffect } from 'react';
 import { useNotifications } from 'components/UI';
 
 import DefaultMarketStages from './StagesModal';
@@ -9,7 +9,7 @@ import { useBurnStages } from 'hooks/marketplaceStages/useBurnStages';
 import { useNavigate } from 'react-router-dom';
 import { useApi } from 'hooks/useApi';
 
-export const BurnStagesModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosable, testid }) => {
+export const BurnStagesModal: FCC<TTokenPageModalBodyProps> = ({ token, setIsClosable, testid }) => {
   const { selectedAccount } = useAccounts();
   const { currentChainId } = useApi();
   const { collectionId, tokenId } = token!;

@@ -12,7 +12,7 @@ interface TokenInputFormProps {
   onClose: () => void;
 }
 
-const TokenInputForm: React.FC<TokenInputFormProps> = ({
+const TokenInputForm: React.FCC<TokenInputFormProps> = ({
   modalType,
   buttonText,
   onSubmit,

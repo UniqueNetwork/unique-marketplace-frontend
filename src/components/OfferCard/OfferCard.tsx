@@ -1,4 +1,4 @@
-import React, { FC, useMemo, useRef } from 'react';
+import React, { FCC, useMemo, useRef } from 'react';
 import { generatePath, Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Icon, Text } from 'components/UI';
@@ -17,7 +17,7 @@ export type TTokensCard = {
   testid: string
 };
 
-export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
+export const OfferCard: FCC<TTokensCard> = ({ offer, testid }) => {
   const { currentChainId, currencyMap: erc20Tokens, currencyMap } = useApi();
   const { collectionIsCustomizable, collectionIsWearable } = useCollections();
 

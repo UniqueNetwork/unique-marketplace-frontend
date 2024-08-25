@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useState } from 'react';
+import React, { FCC, useCallback, useState } from 'react';
 import { Button, Text, Heading } from 'components/UI';
 import styled from 'styled-components/macro';
 
@@ -6,7 +6,7 @@ import { TAdminPanelModalBodyProps } from './AdminPanelModal';
 import StagesModal from '../../Token/Modals/StagesModal';
 import { useRejectSponsorshipStages } from '../../../hooks/adminStages/useRejectSponsorshipStages';
 
-export const RejectSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collection, onFinish, setIsClosable }) => {
+export const RejectSponsorshipModal: FCC<TAdminPanelModalBodyProps> = ({ collection, onFinish, setIsClosable }) => {
   const [step, setStep] = useState<'ask' | 'stages'>('ask');
   const { initiate, status, stages } = useRejectSponsorshipStages(collection?.id || 0);
 

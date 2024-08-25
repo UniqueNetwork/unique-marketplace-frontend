@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FCC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Text, useNotifications, Dropdown, Button, Modal, Heading, Select } from 'components/UI';
 import { BN } from '@polkadot/util';
 import styled from 'styled-components';
@@ -18,7 +18,7 @@ import { Coral700 } from 'styles/colors';
 import DefaultMarketStages from '../../Token/Modals/StagesModal';
 import { TTransferFunds } from './types';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
-import { Account } from 'account/types';
+import {Account, WalletsType} from 'account/types';
 import { FeeMessage } from 'components';
 import { useAccountsFilter } from 'hooks/useAccountsFilter';
 import { SelectOptionProps } from 'components/UI/types';
@@ -31,7 +31,7 @@ export type TransferFundsModalProps = {
   testid: string
 }
 
-export const TransferFundsModal: FC<TransferFundsModalProps> = ({ isVisible, senderAddress, onFinish, testid }) => {
+export const TransferFundsModal: FCC<TransferFundsModalProps> = ({ isVisible, senderAddress, onFinish, testid }) => {
   const [status, setStatus] = useState<'ask' | 'transfer-stage'>('ask');
   const [sender, setSender] = useState<string>('');
   const [recipient, setRecipient] = useState<string>('');
@@ -39,7 +39,7 @@ export const TransferFundsModal: FC<TransferFundsModalProps> = ({ isVisible, sen
   const [currency, setCurrency] = useState(0);
   const [decimals, setDecimals] = useState(0);
 
-  const onTransfer = useCallback((_sender: string, _recipient: string, _amount: string, _currency: number, _decimals) => {
+  const onTransfer = useCallback((_sender: string, _recipient: string, _amount: string, _currency: number, _decimals: number) => {
     setRecipient(_recipient);
     setSender(_sender);
     setAmount(Number(_amount));
@@ -85,7 +85,7 @@ type AskSendFundsModalProps = {
   testid: string
 }
 
-export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, onFinish, senderAddress, onClose, testid }) => {
+export const AskTransferFundsModal: FCC<AskSendFundsModalProps> = ({ isVisible, onFinish, senderAddress, onClose, testid }) => {
   const { api, prefixes } = useApi();
   const { accounts } = useAccounts();
   const [sender, setSender] = useState<Account>();
@@ -113,7 +113,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     setSender(account);
   }, [senderAddress, accounts]);
 
-  const getFee = useCallback((newRecipientAddress, amount: number) => {
+  const getFee = useCallback((newRecipientAddress: string | Account<WalletsType>, amount: number) => {
     setIsFeeLoading(true);
     return debounce(async() => {
       if (!sender || !api?.market || !newRecipientAddress) return setIsFeeLoading(false);
@@ -125,8 +125,8 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
       const recipient = typeof newRecipientAddress === 'string' ? newRecipientAddress : newRecipientAddress?.address;
 
       try {
-        const fee = isSelectFungibleToken 
-          ? await api?.market?.getTransferBalanceFungibleFee({ 
+        const fee = isSelectFungibleToken
+          ? await api?.market?.getTransferBalanceFungibleFee({
               collectionId: selectedCurrencyOption?.collectionId || 0,
               address: sender.address,
               recipient,
@@ -145,7 +145,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
 
   const onAmountChange = useCallback((value: string) => {
     setAmount(value);
-    getFee(recipientAddress, Number(value))();
+    if (recipientAddress) getFee(recipientAddress, Number(value))();
   }, [setAmount, getFee, recipientAddress]);
 
   const isAmountGreaterThanBalance = useMemo(() => {
@@ -216,7 +216,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   const onChangeSender = useCallback((value: SelectOptionProps) => {
     const newSender = value as unknown as Account;
     setSender(newSender);
-    getFee(recipientAddress, Number(amount))();
+    if (recipientAddress) getFee(recipientAddress, Number(amount))();
   }, [getFee, recipientAddress, amount]);
 
   const tokenSymbol = useMemo(() => selectedCurrencyOption?.title || '', [selectedCurrencyOption]);
@@ -428,7 +428,7 @@ type TransferFundsStagesModalProps = {
   testid: string
 };
 
-const TransferFundsStagesModal: FC<TransferFundsStagesModalProps & TTransferFunds> = ({ isVisible, onFinish, sender, amount, recipient, currency, decimals, testid }) => {
+const TransferFundsStagesModal: FCC<TransferFundsStagesModalProps & TTransferFunds> = ({ isVisible, onFinish, sender, amount, recipient, currency, decimals, testid }) => {
   const { stages, status, initiate } = useTransferFundsStages(sender);
   const { info } = useNotifications();
   useEffect(() => { void initiate({ sender, recipient, amount, currency, decimals }); }, [sender, recipient, amount, currency, decimals]);

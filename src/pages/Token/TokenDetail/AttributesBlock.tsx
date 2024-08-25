@@ -1,4 +1,4 @@
-import React, { FC, useMemo } from 'react';
+import React, { FCC, useMemo } from 'react';
 import { Attribute } from '@unique-nft/sdk';
 import styled from 'styled-components';
 import { Heading, Text } from 'components/UI';
@@ -18,7 +18,7 @@ interface IProps {
   collectionId: number;
 }
 
-export const AttributesBlock: FC<IProps> = ({ attributes, collectionId }) => {
+export const AttributesBlock: FCC<IProps> = ({ attributes, collectionId }) => {
   const { tokensCount } = useQueryCollectionTokensCount(collectionId);
   const { attributes: attributeStatistics, isFetching } = useQueryAttributes(collectionId);
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import {createRoot} from 'react-dom/client';
 import App from './App';
 import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 import { Market, MyTokens, Collection, Accounts, Trades, Faq, TokenPage, Collections, CollectionEdit } from './pages';
@@ -82,7 +83,11 @@ const commonRoutes = (<>
   />
 </>);
 
-ReactDOM.render(
+const container = document.getElementById('root');
+if (!container) throw new Error('Root element not found');
+const root = createRoot(container);
+
+root.render(
   <React.StrictMode>
     <GlobalStyle />
     <Router>
@@ -111,5 +116,4 @@ ReactDOM.render(
       </Routes>
     </Router>
   </React.StrictMode>,
-  document.getElementById('root')
 );

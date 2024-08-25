@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FCC } from 'react';
 import styled from 'styled-components/macro';
 
 import { GQLCollection } from 'api/scanApi/types';
@@ -9,7 +9,7 @@ interface CollectionsComponentProps {
   emitSelectCollection: (_collection: GQLCollection) => void
 }
 
-const CollectionsComponent: FC<CollectionsComponentProps> = ({ collections, emitSelectCollection }) => {
+const CollectionsComponent: FCC<CollectionsComponentProps> = ({ collections, emitSelectCollection }) => {
   return (
     <Wrapper>
       <ItemsCountWrapper>{collections.length || 0} {collections.length === 1 ? 'Collection' : 'Collections'}</ItemsCountWrapper>

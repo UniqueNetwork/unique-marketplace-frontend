@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react';
+import React, { FCC, useCallback } from 'react';
 import { Checkbox } from 'components/UI';
 import styled from 'styled-components';
 
@@ -13,7 +13,7 @@ interface TypeOfAssetsFilterProps {
   isFetchingTokens: boolean
 }
 
-const TypeOfAssetsFilter: FC<TypeOfAssetsFilterProps> = ({
+const TypeOfAssetsFilter: FCC<TypeOfAssetsFilterProps> = ({
   value,
   onChange,
   testid,

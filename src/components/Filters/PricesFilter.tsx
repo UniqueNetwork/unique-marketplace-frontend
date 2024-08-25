@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FCC, useCallback, useEffect, useState } from 'react';
 import { Button, Text } from 'components/UI';
 import styled from 'styled-components';
 import { PriceRange } from './types';
@@ -12,7 +12,7 @@ interface PricesFilterProps {
   disabled?: boolean
 }
 
-const PricesFilter: FC<PricesFilterProps> = ({ value, onChange, testid, disabled }) => {
+const PricesFilter: FCC<PricesFilterProps> = ({ value, onChange, testid, disabled }) => {
   const { minPrice, maxPrice } = value || {};
   const [minPriceValue, setMinPriceValue] = useState<string>();
   const [maxPriceValue, setMaxPriceValue] = useState<string>();

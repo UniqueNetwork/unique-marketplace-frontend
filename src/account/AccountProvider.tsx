@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { FCC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Address } from '@unique-nft/utils';
 
 import { Account, BaseWalletType, WalletsType } from './types';
@@ -9,7 +9,7 @@ import { AccountProvider } from './AccountContext';
 import { useApi } from 'hooks/useApi';
 import { useBalanceSubscriptions } from './useBalanceSubscriptions';
 
-export const AccountWrapper: FC = ({ children }) => {
+export const AccountWrapper: FCC = ({ children }) => {
   const { chainProperties, api } = useApi();
   const [accounts, setAccounts] = useState<Map<string, BaseWalletType<WalletsType>>>(
     new Map()

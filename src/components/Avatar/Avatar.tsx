@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FCC } from 'react';
 import Identicon from '@polkadot/react-identicon';
 import styled from 'styled-components';
 import { DecodedInfixOrUrlOrCidAndHash } from 'api/chainApi/types';
@@ -13,7 +13,7 @@ export interface IAvatarProps {
   video?: string | DecodedInfixOrUrlOrCidAndHash;
 }
 
-export const Avatar: FC<IAvatarProps> = ({
+export const Avatar: FCC<IAvatarProps> = ({
   src,
   address,
   type = 'square',

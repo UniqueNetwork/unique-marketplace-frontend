@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import React, { FCC, useEffect, useMemo, useState } from 'react';
 
 import { Offer } from 'api/restApi/offers/types';
 import { MarketType } from '../../../types/MarketTypes';
@@ -40,7 +40,7 @@ const TokenPageModal = ({ onClose, onFinish, marketType, offer, token, collectio
     else setIsVisible(true);
   }, [marketType]);
 
-  const ModalBodyComponent = useMemo<FC<TTokenPageModalBodyProps> | null>(() => {
+  const ModalBodyComponent = useMemo<FCC<TTokenPageModalBodyProps> | null>(() => {
     switch (marketType) {
       case MarketType.sellFix:
         return SellModal;

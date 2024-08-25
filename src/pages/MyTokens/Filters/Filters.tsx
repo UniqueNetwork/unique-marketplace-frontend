@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react';
+import React, { FCC, useCallback } from 'react';
 import styled from 'styled-components';
 
 import PricesFilter from 'components/Filters/PricesFilter';
@@ -22,7 +22,7 @@ type FilterProps = {
   featuredTokensForAttributeCounts: MixedMyTokenAndOffer[]
 }
 
-export const Filters: FC<FilterProps> = ({ value, onFilterChange, featuredTokens, collections, isFetchingTokens, testid, tokens, featuredTokensForAttributeCounts }) => {
+export const Filters: FCC<FilterProps> = ({ value, onFilterChange, featuredTokens, collections, isFetchingTokens, testid, tokens, featuredTokensForAttributeCounts }) => {
   const onStatusFilterChange = useCallback((statuses: MyTokensStatuses) => {
     onFilterChange({ ...(value || {}), statuses });
   }, [value, onFilterChange]);

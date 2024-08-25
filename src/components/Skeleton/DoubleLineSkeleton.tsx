@@ -1,9 +1,9 @@
-import React, { FC } from 'react';
+import React, { FCC } from 'react';
 import styled from 'styled-components';
 
 import Skeleton from './Skeleton';
 
-const DoubleLineSkeleton: FC = () => {
+const DoubleLineSkeleton: FCC = () => {
   return (
     <DoubleLineSkeletonWrapper>
       <Skeleton height={22} width={60} />

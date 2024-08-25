@@ -5,7 +5,7 @@ import { useOffer } from 'api/restApi/offers/offer';
 import { INestingToken } from 'components/BundleTree/types';
 import { useAccounts } from 'hooks/useAccounts';
 import { useApi } from 'hooks/useApi';
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FCC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Fraction, TokenContextValue } from './types';
 import { mockWearables } from '../constants';
@@ -23,7 +23,7 @@ export const TokenContext = React.createContext<TokenContextValue>({
   fetchOffer: () => Promise.resolve()
 });
 
-export const TokenContextProvider: FC = ({ children }) => {
+export const TokenContextProvider: FCC = ({ children }) => {
   const { api, currentChainId } = useApi();
   const { selectedAccount } = useAccounts();
   const navigate = useNavigate();

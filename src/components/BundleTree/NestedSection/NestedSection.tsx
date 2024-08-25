@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FCC } from 'react';
 import styled from 'styled-components';
 import { INestingToken } from '../types';
 import { INestedSectionView } from '../../TreeView/types';
@@ -7,7 +7,7 @@ import Skeleton from '../../Skeleton/Skeleton';
 import { Icon, Text } from 'components/UI';
 import NoTrades from 'static/icons/no-trades.svg';
 
-export const NestedSection: FC<INestedSectionView<INestingToken>> = ({ selectedToken, onViewNodeDetails, onUnnestClick, onTransferClick }) => {
+export const NestedSection: FCC<INestedSectionView<INestingToken>> = ({ selectedToken, onViewNodeDetails, onUnnestClick, onTransferClick }) => {
   const { isCollectionLoading, collection } = useCollection(selectedToken?.collectionId);
   return (
     <NestedDetails>
@@ -58,7 +58,7 @@ const TitleWrapper = styled.div`
   flex-direction: column;
 `;
 
-const Title: FC<{isCollectionLoading: boolean, prefix: string, token: INestingToken }> = ({ isCollectionLoading, prefix, token }) => {
+const Title: FCC<{isCollectionLoading: boolean, prefix: string, token: INestingToken }> = ({ isCollectionLoading, prefix, token }) => {
   if (isCollectionLoading) return <Skeleton height={28} width={156} />;
   return (
     <Text color='additional-dark' size='l'>Nested in {prefix} #{token.tokenId}</Text>

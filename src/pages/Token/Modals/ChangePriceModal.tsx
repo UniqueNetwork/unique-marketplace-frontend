@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FCC, useCallback, useEffect, useMemo, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useNotifications, Button, Text, Heading, Loader, Select } from 'components/UI';
 import { NumberInput } from 'components/NumberInput/NumberInput';
@@ -25,7 +25,7 @@ import { fixPriceSellingCollectionIds } from '../constants';
 import { SelectOptionProps } from 'components/UI/types';
 import ComingSoon from '../TokenDetail/CurrencesComingSoon';
 
-export const ChangePriceModal: FC<TTokenPageModalBodyProps> = ({ token, offer, collection, onFinish, setIsClosable, testid }) => {
+export const ChangePriceModal: FCC<TTokenPageModalBodyProps> = ({ token, offer, collection, onFinish, setIsClosable, testid }) => {
   const { collectionId, tokenId } = token || {};
   const [status, setStatus] = useState<'ask' | 'stage'>('ask'); // TODO: naming
   const [fixPrice, setFixPrice] = useState<TFixPriceProps>();
@@ -68,7 +68,7 @@ type TChangePriceModalProps = {
   oldCurrency: number
 }
 
-export const AskPriceModal: FC<TChangePriceModalProps> = ({ collectionId, tokenId, onChangePrice, testid, oldPrice, oldCurrency }) => {
+export const AskPriceModal: FCC<TChangePriceModalProps> = ({ collectionId, tokenId, onChangePrice, testid, oldPrice, oldCurrency }) => {
   const { api, currentChainId, currencies, currencyMap } = useApi();
   const { selectedAccount } = useAccounts();
   const [priceInputValue, setPriceInputValue] = useState<string>();
@@ -208,7 +208,7 @@ type TChangePriceStagesModal = {
   testid: string
 }
 
-export const ChangePriceStagesModal: FC<TChangePriceStagesModal> = ({ collectionId, offer, tokenId, tokenPrefix, sellFix, onFinish, testid }) => {
+export const ChangePriceStagesModal: FCC<TChangePriceStagesModal> = ({ collectionId, offer, tokenId, tokenPrefix, sellFix, onFinish, testid }) => {
   const { contractAddress } = offer || {};
   const { stages, status, initiate } = useChangePriceStages(collectionId, tokenId, contractAddress);
   const { info } = useNotifications();

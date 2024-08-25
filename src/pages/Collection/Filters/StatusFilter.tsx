@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FCC, useCallback, useMemo } from 'react';
 import { Accordion, Checkbox } from 'components/UI';
 import styled from 'styled-components';
 import { useAccounts } from 'hooks/useAccounts';
@@ -11,7 +11,7 @@ interface StatusFilterProps {
   disabled?: boolean
 }
 
-const StatusFilter: FC<StatusFilterProps> = ({ value, onChange, testid, disabled }) => {
+const StatusFilter: FCC<StatusFilterProps> = ({ value, onChange, testid, disabled }) => {
   const { fixedPrice } = value || {};
   const { selectedAccount } = useAccounts();
 

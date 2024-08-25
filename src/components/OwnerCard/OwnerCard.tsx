@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useMemo, MouseEvent, useEffect, useState } from 'react';
+import React, { FCC, useCallback, useMemo, MouseEvent, useEffect, useState } from 'react';
 import { CopyButton, Text, useNotifications, Link as UILink } from 'components/UI';
 import styled from 'styled-components';
 import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
@@ -24,7 +24,7 @@ interface OwnerCardProps {
   notOwned?: boolean
 }
 
-export const OwnerCard: FC<OwnerCardProps> = ({
+export const OwnerCard: FCC<OwnerCardProps> = ({
   address,
   to,
   isShort = false,
@@ -112,7 +112,7 @@ interface IAddressProps {
   testid?: string
 }
 
-const FormattedAddress: FC<IAddressProps> = ({ isShort = false, formatAddress, accountAddress, hideName, testid }) => {
+const FormattedAddress: FCC<IAddressProps> = ({ isShort = false, formatAddress, accountAddress, hideName, testid }) => {
   const address = useMemo(() => {
     return isShort ? shortcutText(formatAddress(accountAddress) || '') : formatAddress(accountAddress) || '';
   }, [isShort, formatAddress, accountAddress]);
@@ -192,7 +192,7 @@ const Row = styled.div`
   }
 `;
 
-const LinkComponent: FC<{ linkTo: string, isOwned: boolean }> = ({ children, linkTo, isOwned }) => {
+const LinkComponent: FCC<{ linkTo: string, isOwned: boolean }> = ({ children, linkTo, isOwned }) => {
   if (isOwned) return <StyledContainer>{children}</StyledContainer>;
   return linkTo.startsWith('https://')
     ? <StyledExternalLink target='_blank' href={linkTo}>{children}</StyledExternalLink>

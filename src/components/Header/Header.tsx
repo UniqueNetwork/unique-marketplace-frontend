@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useState } from 'react';
+import { FCC, useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { Dropdown, Icon, Text } from '../UI';
@@ -16,7 +16,7 @@ interface HeaderProps {
   activeItem: TMenuItems;
 }
 
-export const Header: FC<HeaderProps> = ({ activeItem }) => {
+export const Header: FCC<HeaderProps> = ({ activeItem }) => {
   const { lessThanThreshold: showMobileMenu } =
     useScreenWidthFromThreshold(1279);
   const [mobileMenuIsOpen, toggleMobileMenu] = useState(false);

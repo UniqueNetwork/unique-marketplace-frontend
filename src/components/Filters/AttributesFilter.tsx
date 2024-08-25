@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react';
+import React, { FCC, useCallback } from 'react';
 import styled from 'styled-components';
 import { Checkbox, Text } from 'components/UI';
 import { Accordion } from '../Accordion/Accordion';
@@ -17,7 +17,7 @@ interface AttributesFilterProps {
   disabled?: boolean
 }
 
-const AttributesFilter: FC<AttributesFilterProps> = ({ selectedAttributes = [], attributes, isAttributesFetching, onAttributesChange, testid, disabled }) => {
+const AttributesFilter: FCC<AttributesFilterProps> = ({ selectedAttributes = [], attributes, isAttributesFetching, onAttributesChange, testid, disabled }) => {
   const onAttributeSelect = useCallback((attributeItem: AttributeItem) => (value: boolean) => {
     let _selectedAttributes;
     if (value) {

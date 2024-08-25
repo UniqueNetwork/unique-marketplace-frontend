@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FCC, useCallback, useMemo } from 'react';
 import { Checkbox } from 'components/UI';
 import styled from 'styled-components';
 import { Statuses } from './types';
@@ -12,7 +12,7 @@ interface StatusFilterProps {
   disabled?: boolean
 }
 
-const StatusFilter: FC<StatusFilterProps> = ({ value, onChange, testid, disabled }) => {
+const StatusFilter: FCC<StatusFilterProps> = ({ value, onChange, testid, disabled }) => {
   const { myNFTs, myBets, fixedPrice, timedAuction } = value || {};
   const { selectedAccount } = useAccounts();
 

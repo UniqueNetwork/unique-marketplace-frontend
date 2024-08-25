@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FCC, useCallback, useEffect, useState } from 'react';
 import { Button, Text } from 'components/UI';
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
 import styled from 'styled-components/macro';
@@ -12,7 +12,7 @@ import StagesModal from '../../Token/Modals/StagesModal';
 import { CollectionWithInfoV2Dto } from '@unique-nft/sdk';
 import { Heading } from 'components/UI';
 
-export const AcceptSponsorshipModal: FC<TAdminPanelModalBodyProps> = ({ collection, setIsClosable, onFinish }) => {
+export const AcceptSponsorshipModal: FCC<TAdminPanelModalBodyProps> = ({ collection, setIsClosable, onFinish }) => {
   // TODO: calculate contract call fee
   // const { transferBalanceFee } = useFee();
   const [step, setStep] = useState<'ask' | 'accept-stages' | 'reject-stages'>('ask');

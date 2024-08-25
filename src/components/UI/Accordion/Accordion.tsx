@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, useCallback, useState } from 'react';
+import React, { FCC, ReactNode, useCallback, useState } from 'react';
 import styled from 'styled-components/macro';
 import { Button } from '../Button/Button';
 import { Text } from '../Text/Text';
@@ -31,7 +31,7 @@ const AccordionChevronIcon = () => {
   );
 };
 
-export const Accordion: FC<AccordionProps> = ({
+export const Accordion: FCC<AccordionProps> = ({
   title,
   isOpen: isOpenProps,
   children,

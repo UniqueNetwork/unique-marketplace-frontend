@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FCC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Text, useNotifications, Button, Heading, Link } from 'components/UI';
 import { BN } from '@polkadot/util';
 import styled from 'styled-components';
@@ -19,7 +19,7 @@ import { CollectionMode } from 'api/chainApi/types';
 import { Address } from '@unique-nft/utils';
 import Skeleton from 'components/Skeleton/Skeleton';
 
-export const UnnestModal: FC<TBundleTransferModalBodyProps> = ({ token, setIsClosable, onFinish, testid }) => {
+export const UnnestModal: FCC<TBundleTransferModalBodyProps> = ({ token, setIsClosable, onFinish, testid }) => {
   const { selectedAccount } = useAccounts();
   const { api } = useApi();
   const [status, setStatus] = useState<'ask' | 'unnest-stage'>('ask'); // TODO: naming
@@ -79,15 +79,15 @@ export const UnnestModal: FC<TBundleTransferModalBodyProps> = ({ token, setIsClo
   return null;
 };
 
-type AskUnnestModalProps = { 
-  token: INestingToken | TokenWithInfoV2Dto, 
-  parentAddress: string, 
-  collection: CollectionWithInfoV2Dto | null, 
-  onUnnest(amount: number): void, 
-  testid: string 
+type AskUnnestModalProps = {
+  token: INestingToken | TokenWithInfoV2Dto,
+  parentAddress: string,
+  collection: CollectionWithInfoV2Dto | null,
+  onUnnest(amount: number): void,
+  testid: string
 };
 
-const AskUnnestModal: FC<AskUnnestModalProps> = ({ token, parentAddress, collection, onUnnest, testid }) => {
+const AskUnnestModal: FCC<AskUnnestModalProps> = ({ token, parentAddress, collection, onUnnest, testid }) => {
   const { api } = useApi();
   const { selectedAccount } = useAccounts();
   const [isFeeLoading, setIsFeeLoading] = useState(false);
@@ -179,7 +179,7 @@ type UnnestStagesModalProps = Omit<TBundleTransferModalBodyProps, 'token'> & Tok
   tokenPrefix: string
 };
 
-const UnnestStagesModal: FC<UnnestStagesModalProps> = ({ tokenId, collectionId, parentAddress, mode, amount, tokenPrefix, onFinish, testid }) => {
+const UnnestStagesModal: FCC<UnnestStagesModalProps> = ({ tokenId, collectionId, parentAddress, mode, amount, tokenPrefix, onFinish, testid }) => {
   const { stages, status, initiate } = useUnnestStages({ tokenId, collectionId }, parentAddress, mode);
   const { info } = useNotifications();
   const { selectedAccount } = useAccounts();

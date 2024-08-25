@@ -1,5 +1,5 @@
 import { Address } from '@unique-nft/utils/address';
-import { FC, Fragment, useEffect, useMemo } from 'react';
+import { FCC, FC, Fragment, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import classNames from 'classnames';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
@@ -31,7 +31,7 @@ type CollectionSuggestProps = {
   onChange(collection: GQLCollection | undefined): void;
 };
 
-export const CollectionSuggest: FC<CollectionSuggestProps> = ({
+export const CollectionSuggest: FCC<CollectionSuggestProps> = ({
   collection,
   onChange
 }) => {
@@ -200,7 +200,7 @@ const defaultOptions = {
   }
 };
 
-const CollectionSuggestion: FC<{
+const CollectionSuggestion: FCC<{
   suggestion: CollectionItem;
   isActive?: boolean;
 }> = ({ suggestion, isActive }) => {

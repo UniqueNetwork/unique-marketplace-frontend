@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import React, { FCC, useEffect, useMemo, useState } from 'react';
 import { generatePath, Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Icon, Loader, Text } from 'components/UI';
@@ -28,7 +28,7 @@ export type TTokensCard = {
   showCollectionLink?: boolean
 };
 
-export const TokensCard: FC<TTokensCard> = ({
+export const TokensCard: FCC<TTokensCard> = ({
   collectionId,
   tokenId,
   offer,

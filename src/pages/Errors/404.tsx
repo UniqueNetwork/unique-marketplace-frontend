@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FCC } from 'react';
 import styled from 'styled-components';
 import { PagePaper } from 'components/PagePaper/PagePaper';
 import { Icon, Heading } from 'components/UI';
@@ -6,7 +6,7 @@ import Icon404 from 'static/icons/404icon.svg';
 import Text404 from 'static/icons/404.svg';
 import { BlueGrey400 } from '../../styles/colors';
 
-export const Error404: FC = () => {
+export const Error404: FCC = () => {
   return (
     <PagePaperStyled>
       <Content>

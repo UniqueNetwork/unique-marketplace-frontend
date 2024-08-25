@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import React, { FCC, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { useApi } from 'hooks/useApi';
@@ -16,7 +16,7 @@ export type TCollectionCard = {
   onViewOnScanClick(): void
 };
 
-export const CollectionCard: FC<TCollectionCard> = ({
+export const CollectionCard: FCC<TCollectionCard> = ({
   collection,
   onViewOnScanClick
 }) => {

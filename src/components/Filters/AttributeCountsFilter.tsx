@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react';
+import React, { FCC, useCallback } from 'react';
 import styled from 'styled-components';
 import { Checkbox, Text } from 'components/UI';
 import { Accordion } from '../Accordion/Accordion';
@@ -15,7 +15,7 @@ interface AttributeCountsFilterProps {
   disabled?: boolean
 }
 
-const AttributeCountsFilter: FC<AttributeCountsFilterProps> = ({ attributeCounts = [], selectedAttributeCounts = [], isAttributeCountsFetching, onAttributeCountsChange, testid, disabled }) => {
+const AttributeCountsFilter: FCC<AttributeCountsFilterProps> = ({ attributeCounts = [], selectedAttributeCounts = [], isAttributeCountsFetching, onAttributeCountsChange, testid, disabled }) => {
   const onAttributeCountSelect = useCallback((attributeCount: number) => (value: boolean) => {
     let _selectedAttributeCounts;
     if (value) {

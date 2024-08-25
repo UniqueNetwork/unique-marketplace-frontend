@@ -1,4 +1,4 @@
-import { ChangeEvent, DragEvent, FC, useEffect, useMemo, useRef, useState } from 'react';
+import { ChangeEvent, DragEvent, FCC, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import DraggableList from 'react-draggable-list';
 import classNames from 'classnames';
@@ -410,7 +410,7 @@ export const TokenList = ({
                   </TableHeader>
 
                   {/* @ts-ignore */}
-                  <DraggableList<NewToken2, TokenCardCommonProps, FC<TokenCardProps>>
+                  <DraggableList<NewToken2, TokenCardCommonProps, FCC<TokenCardProps>>
                     constrainDrag
                     unsetZIndex
                     className='draggable-container'

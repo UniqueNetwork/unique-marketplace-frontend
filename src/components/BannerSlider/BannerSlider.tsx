@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FCC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { AdditionalLight, Grey400, Primary500 } from 'styles/colors';
 import { Direction, Animation } from './types';
@@ -38,7 +38,7 @@ interface SliderProps {
 }
 const classNames = { ...DEFAULT_CLASSNAMES };
 
-export const BannerSlider: FC<SliderProps> = ({
+export const BannerSlider: FCC<SliderProps> = ({
   slideIndex = 0,
   direction = Direction.Horizontal,
   autoplay = DEFAULT_AUTOPLAY,
@@ -112,7 +112,7 @@ export const BannerSlider: FC<SliderProps> = ({
 
     return () => {
       if (autoplayTimerId.current) {
-        clearInterval(autoplayTimerId.current);
+        clearInterval(autoplayTimerId.current as NodeJS.Timeout);
       }
     };
   }, [autoplay, isMouseOver, next]);

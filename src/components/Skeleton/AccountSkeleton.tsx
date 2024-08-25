@@ -1,10 +1,10 @@
-import React, { FC } from 'react';
+import React, { FCC } from 'react';
 import styled from 'styled-components';
 
 import Skeleton from './Skeleton';
 import DoubleLineSkeleton from './DoubleLineSkeleton';
 
-const AccountSkeleton: FC = () => {
+const AccountSkeleton: FCC = () => {
   return (
     <AccountSkeletonWrapper>
       <Skeleton width={32} height={32} type={'circle'} />

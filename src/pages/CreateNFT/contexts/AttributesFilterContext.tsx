@@ -1,4 +1,4 @@
-import { createContext, Dispatch, FC, SetStateAction, useState } from 'react';
+import { createContext, Dispatch, FCC, SetStateAction, useState } from 'react';
 
 import { AttributesForFilter, AttributeForFilter } from '../types';
 
@@ -16,7 +16,7 @@ export const AttributeFilterContext = createContext<AttributeFilterContextValue>
   setSelectedAttributes: () => {}
 });
 
-export const AttributeFilterProvider: FC = ({ children }) => {
+export const AttributeFilterProvider: FCC = ({ children }) => {
   const [attributes, setAttributes] = useState<AttributesForFilter>({});
   const [selectedAttributes, setSelectedAttributes] = useState<AttributeForFilter[]>([]);
 

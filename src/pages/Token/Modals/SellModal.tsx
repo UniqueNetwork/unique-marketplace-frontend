@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FCC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Heading, Link, Loader, useNotifications, Button, Text, Select } from 'components/UI';
 import { NumberInput } from 'components/NumberInput/NumberInput';
@@ -22,7 +22,7 @@ import { useCoinGeckoApi } from 'api/coinGeckoApi/useCoinGeckoApi';
 import { SelectOptionProps } from 'components/UI/types';
 import ComingSoon from '../TokenDetail/CurrencesComingSoon';
 
-export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, collection, onFinish, setIsClosable, testid }) => {
+export const SellModal: FCC<TTokenPageModalBodyProps> = ({ token, collection, onFinish, setIsClosable, testid }) => {
   const { collectionId, tokenId } = token || {};
   const [status, setStatus] = useState<'ask' | 'auction-stage' | 'fix-price-stage'>('ask'); // TODO: naming
   const [fixPrice, setFixPrice] = useState<TFixPriceProps>();
@@ -65,7 +65,7 @@ type TAskSellModalProps = {
   testid: string
 }
 
-export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, onSellFixPrice, testid }) => {
+export const AskSellModal: FCC<TAskSellModalProps> = ({ collectionId, tokenId, onSellFixPrice, testid }) => {
   const { api, currentChainId, currencies, currencyMap } = useApi();
   const { selectedAccount } = useAccounts();
   const [priceInputValue, setPriceInputValue] = useState<string>();
@@ -220,7 +220,7 @@ type TSellFixStagesModal = {
   testid: string
 }
 
-export const SellFixStagesModal: FC<TSellFixStagesModal> = ({ collectionId, tokenId, tokenPrefix, sellFix, onFinish, testid }) => {
+export const SellFixStagesModal: FCC<TSellFixStagesModal> = ({ collectionId, tokenId, tokenPrefix, sellFix, onFinish, testid }) => {
   const { stages, status, initiate } = useSellFixStages(collectionId, tokenId);
   const { info } = useNotifications();
 

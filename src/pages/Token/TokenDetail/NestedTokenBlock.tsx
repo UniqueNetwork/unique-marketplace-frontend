@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FCC } from 'react';
 import styled from 'styled-components';
 import { Button } from 'components/UI';
 
@@ -14,7 +14,7 @@ interface NestedTokenBlockProps {
   onUnnestClick(): void
 }
 
-export const NestedTokenBlock: FC<NestedTokenBlockProps> = ({ collection, testid, onTransferClick, onUnnestClick }) => {
+export const NestedTokenBlock: FCC<NestedTokenBlockProps> = ({ collection, testid, onTransferClick, onUnnestClick }) => {
   const { tokenOwner } = collection?.permissions?.nesting || {};
   const { currentChainId } = useApi();
 

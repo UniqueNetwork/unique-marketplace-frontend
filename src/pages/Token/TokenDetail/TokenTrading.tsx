@@ -1,4 +1,4 @@
-import React, { FC, useContext, useMemo } from 'react';
+import React, { FCC, useContext, useMemo } from 'react';
 import { CollectionWithInfoV2Dto, TokenWithInfoV2Dto } from '@unique-nft/sdk';
 import { Offer } from '../../../api/restApi/offers/types';
 import accountContext from '../../../account/AccountContext';
@@ -26,7 +26,7 @@ interface TokenTradingProps {
   testid: string
 }
 
-export const TokenTrading: FC<TokenTradingProps> = ({
+export const TokenTrading: FCC<TokenTradingProps> = ({
   token,
   offer,
   collection,

@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-no-bind */
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FCC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Heading, Link, Text, useNotifications, Button, Suggest } from 'components/UI';
 import { BN } from '@polkadot/util';
 import styled from 'styled-components';
@@ -26,7 +26,7 @@ import { useQueryCollectionsForNesting } from 'api/scanApi/useQueryCollectionsFo
 import { GQLToken } from 'api/scanApi/types';
 import { SuggestProps } from 'components/UI/Suggest';
 
-export const TransferToBundleModal: FC<TBundleTransferModalBodyProps> = ({ token, setIsClosable, onFinish, testid }) => {
+export const TransferToBundleModal: FCC<TBundleTransferModalBodyProps> = ({ token, setIsClosable, onFinish, testid }) => {
   const { selectedAccount } = useAccounts();
   const { api } = useApi();
   const [status, setStatus] = useState<'ask' | 'transfer-stage'>('ask'); // TODO: naming
@@ -88,7 +88,7 @@ type AskTransferToBundleModalProps = {
   testid: string
 };
 
-const AskTransferToBundleModal: FC<AskTransferToBundleModalProps> = ({ token, collection: collectionProp, onTransferToBundle, testid }) => {
+const AskTransferToBundleModal: FCC<AskTransferToBundleModalProps> = ({ token, collection: collectionProp, onTransferToBundle, testid }) => {
   const [collection, setCollection] = useState<GQLToken | null>(null);
   const [selectedToken, setSelectedToken] = useState<TokenItem | null>(null);
   const [isFeeLoading, setIsFeeLoading] = useState(false);
@@ -256,7 +256,7 @@ type TransferToBundleStagesModalProps = TBundleTransferModalBodyProps & { newPar
   tokenPrefix: string
 }
 
-const TransferToBundleStagesModal: FC<TransferToBundleStagesModalProps> = ({ token, owner, newParent, mode, amount, tokenPrefix, onFinish, testid }) => {
+const TransferToBundleStagesModal: FCC<TransferToBundleStagesModalProps> = ({ token, owner, newParent, mode, amount, tokenPrefix, onFinish, testid }) => {
   const { info } = useNotifications();
   const { selectedAccount } = useAccounts();
   const { stages, status, initiate } = useTransferToBundleStages(owner, token, newParent, mode);

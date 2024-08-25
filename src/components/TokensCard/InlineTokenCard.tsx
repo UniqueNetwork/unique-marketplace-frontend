@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FCC, useEffect, useState } from 'react';
 import { Loader, Text } from 'components/UI';
 import styled from 'styled-components';
 
@@ -13,7 +13,7 @@ interface InlineTokenCardProps {
   testid?: string
 }
 
-export const InlineTokenCard: FC<InlineTokenCardProps> = ({ tokenId, collectionId, children, testid }) => {
+export const InlineTokenCard: FCC<InlineTokenCardProps> = ({ tokenId, collectionId, children, testid }) => {
   const { api } = useApi();
   const { getCollection } = useCollections();
   const [token, setToken] = useState<TokenByIdResponse>();

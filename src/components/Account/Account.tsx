@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useMemo, MouseEvent } from 'react';
+import React, { FCC, useCallback, useMemo, MouseEvent } from 'react';
 import { CopyButton, Text, useNotifications } from 'components/UI';
 import styled from 'styled-components';
 import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
@@ -17,7 +17,7 @@ interface AccountProps {
   testid?: string
 }
 
-const AccountCard: FC<AccountProps> = ({
+const AccountCard: FCC<AccountProps> = ({
   accountName,
   accountAddress,
   isShort = false,
@@ -72,7 +72,7 @@ interface IAddressProps {
   testid?: string
 }
 
-const FormattedAddress: FC<IAddressProps> = ({ isShort = false, formatAddress, accountAddress, hideName, testid }) => {
+const FormattedAddress: FCC<IAddressProps> = ({ isShort = false, formatAddress, accountAddress, hideName, testid }) => {
   const address = useMemo(() => {
     return isShort ? shortcutText(formatAddress(accountAddress) || '') : formatAddress(accountAddress) || '';
   }, [isShort, formatAddress, accountAddress]);

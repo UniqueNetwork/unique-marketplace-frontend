@@ -1,4 +1,4 @@
-import React, { FC, useEffect } from 'react';
+import React, { FCC, useEffect } from 'react';
 import { useNotifications } from 'components/UI';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { StageStatus } from '../../../types/StagesTypes';
@@ -12,7 +12,7 @@ type SetRoyaltiesStagesModalProps = {
   onFinish(): void
 }
 
-export const SetRoyaltiesStagesModal: FC<SetRoyaltiesStagesModalProps> = ({
+export const SetRoyaltiesStagesModal: FCC<SetRoyaltiesStagesModalProps> = ({
   formData,
   collectionId,
   onFinish

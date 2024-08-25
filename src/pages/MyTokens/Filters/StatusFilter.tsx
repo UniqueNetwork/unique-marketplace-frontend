@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FCC, useCallback, useMemo } from 'react';
 import { Checkbox } from 'components/UI';
 import styled from 'styled-components';
 import { MyTokensStatuses } from './types';
@@ -11,7 +11,7 @@ interface StatusFilterProps {
   testid: string
 }
 
-const StatusFilter: FC<StatusFilterProps> = ({ value, onChange, testid }) => {
+const StatusFilter: FCC<StatusFilterProps> = ({ value, onChange, testid }) => {
   const { onSell, fixedPrice, timedAuction, notOnSale } = value || {};
   const { selectedAccount } = useAccounts();
 

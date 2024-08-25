@@ -87,7 +87,7 @@ const BlurredMedia = styled.div`
   pointer-events: none;
 `;
 
-const LeftSliderItem: React.FC<SliderItem> = ({
+const LeftSliderItem: React.FCC<SliderItem> = ({
   src,
   type,
   index,

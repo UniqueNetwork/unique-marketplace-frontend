@@ -1,9 +1,9 @@
-import React, { FC } from 'react';
+import React, { FCC } from 'react';
 import styled from 'styled-components';
 
 import Skeleton from './Skeleton';
 
-const BalanceSkeleton: FC = () => {
+const BalanceSkeleton: FCC = () => {
   return (
     <AccountSkeletonWrapper>
       <BalanceSkeletonWrapper>

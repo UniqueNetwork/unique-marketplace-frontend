@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FCC, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { IconButton } from '../IconButton/IconButton';
 import { InputText } from 'components/UI';
@@ -16,7 +16,7 @@ interface TextInputProps {
   testid?: string
 }
 
-export const TextInput: FC<TextInputProps> = ({ value, onChange, placeholder, label, className, iconLeft, errorText, allowSpaces, testid }) => {
+export const TextInput: FCC<TextInputProps> = ({ value, onChange, placeholder, label, className, iconLeft, errorText, allowSpaces, testid }) => {
   const onChangeInput = useCallback((_value: string) => {
     if (!allowSpaces) onChange(_value.trim());
     else onChange(_value);

@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FCC, useCallback, useMemo, useState } from 'react';
 import Skeleton from '../Skeleton/Skeleton';
 import { DecodedInfixOrUrlOrCidAndHash } from 'api/chainApi/types';
 import styled from 'styled-components';
@@ -14,7 +14,7 @@ interface PictureProps {
   size?: number;
 }
 
-export const WearablePicture: FC<PictureProps> = ({
+export const WearablePicture: FCC<PictureProps> = ({
   alt,
   src,
   wearableSrc,

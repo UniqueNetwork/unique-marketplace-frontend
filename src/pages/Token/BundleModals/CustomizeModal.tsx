@@ -80,7 +80,7 @@ export const CustomizeModal = ({
     void fetch();
   }, [api?.collection, api?.nft]);
 
-  const onSelectTokens = useCallback((token) => (value: boolean) => {
+  const onSelectTokens = useCallback((token: GQLToken) => (value: boolean) => {
     if (!value) {
       setSelectedTokens((tokens) => {
         return { ...tokens,

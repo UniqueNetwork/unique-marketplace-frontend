@@ -1,4 +1,4 @@
-import { FC, useMemo } from 'react';
+import { FCC, useMemo } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { Header } from '.';
@@ -8,7 +8,7 @@ import { Layout } from './UI';
 
 export type TMenuItems = 'Explore' | 'My NFTs' | 'Trades' | 'Create collection' | 'Create tokens' | 'FAQ' | 'Manage accounts' | 'My collections';
 
-export const PageLayout: FC = () => {
+export const PageLayout: FCC = () => {
   const { pathname } = useLocation();
   const footer = useFooter();
   const backgroundImage = useBackground();

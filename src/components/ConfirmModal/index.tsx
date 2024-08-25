@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react';
+import React, { FCC, useCallback } from 'react';
 import { Button, Modal, Heading } from 'components/UI';
 import styled from 'styled-components';
 import { AdditionalDark } from 'styles/colors';
@@ -14,7 +14,7 @@ export interface IConfirmModalProps {
   testid?: string
 }
 
-const ConfirmModal: FC<IConfirmModalProps> = ({
+const ConfirmModal: FCC<IConfirmModalProps> = ({
   isVisible,
   children,
   headerText = '',

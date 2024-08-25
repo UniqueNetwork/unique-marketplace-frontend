@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useContext, useEffect, useMemo, useRef } from 'react';
+import React, { FCC, useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import { Button, Text, Tooltip } from 'components/UI';
 import styled from 'styled-components';
 import { useApi } from 'hooks/useApi';
@@ -23,7 +23,7 @@ interface BuyTokenProps {
   testid?: string
 }
 
-export const BuyToken: FC<BuyTokenProps> = ({ offer, royalty, onBuy, testid }) => {
+export const BuyToken: FCC<BuyTokenProps> = ({ offer, royalty, onBuy, testid }) => {
   const { api, chainProperties } = useApi();
 
   const { fee, getFee } = useGetFee<Parameters<MarketController['getBuyFixFee']>>(api?.market?.getBuyFixFee.bind(api?.market));

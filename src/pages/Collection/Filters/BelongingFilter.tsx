@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react';
+import React, { FCC, useCallback } from 'react';
 import { RadioGroup } from 'components/UI';
 import styled from 'styled-components';
 import { useAccounts } from 'hooks/useAccounts';
@@ -11,7 +11,7 @@ interface BelongingFilterProps {
   disabled?: boolean
 }
 
-const BelongingFilter: FC<BelongingFilterProps> = ({ value, onChange, disabled }) => {
+const BelongingFilter: FCC<BelongingFilterProps> = ({ value, onChange, disabled }) => {
   const { selectedAccount } = useAccounts();
 
   const onChangeFilter = useCallback((value: RadioOptionValueType) => {

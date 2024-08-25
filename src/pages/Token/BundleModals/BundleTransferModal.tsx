@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import React, { FCC, useEffect, useMemo, useState } from 'react';
 import { TokenWithInfoV2Dto } from '@unique-nft/sdk';
 import { UnnestModal } from './UnnestModal';
 import { TransferToBundleModal } from './TransferToBundleModal';
@@ -36,7 +36,7 @@ const BundleTransferModal = ({ token, onClose, onFinish, bundleModalType, setMod
     } else setIsVisible(true);
   }, [bundleModalType]);
 
-  const ModalBodyComponent = useMemo<FC<TBundleTransferModalBodyProps> | null>(() => {
+  const ModalBodyComponent = useMemo<FCC<TBundleTransferModalBodyProps> | null>(() => {
     switch (bundleModalType) {
       case MarketType.unnest:
         return UnnestModal;

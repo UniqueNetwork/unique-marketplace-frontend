@@ -8,7 +8,7 @@ interface BalanceDisplayProps {
   balances: Map<string, BalanceResponse>;
 }
 
-const BalanceDisplay: React.FC<BalanceDisplayProps> = ({ balances }) => {
+const BalanceDisplay: React.FCC<BalanceDisplayProps> = ({ balances }) => {
   const [showBalance, setShowBalance] = useState(false);
   const toggleShowBalance = () => {
     setShowBalance((prevState) => !prevState);

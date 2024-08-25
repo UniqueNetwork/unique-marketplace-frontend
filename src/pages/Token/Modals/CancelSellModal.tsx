@@ -1,4 +1,4 @@
-import React, { FC, useEffect } from 'react';
+import React, { FCC, useEffect } from 'react';
 import { useNotifications } from 'components/UI';
 
 import { useCancelSellFixStages } from '../../../hooks/marketplaceStages';
@@ -7,7 +7,7 @@ import { TTokenPageModalBodyProps } from './TokenPageModal';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { StageStatus } from '../../../types/StagesTypes';
 
-export const CancelSellFixStagesModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, setIsClosable, testid }) => {
+export const CancelSellFixStagesModal: FCC<TTokenPageModalBodyProps> = ({ offer, onFinish, setIsClosable, testid }) => {
   const { selectedAccount } = useAccounts();
 
   const { collectionId, tokenId, contractAddress } = offer!;

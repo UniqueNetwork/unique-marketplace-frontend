@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FCC, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { CollectionWithInfoV2Dto, NestingParentId, PropertyWithHexValue, TokenWithInfoV2Dto } from '@unique-nft/sdk';
 import { Heading, Dropdown, Icon, Text } from 'components/UI';
@@ -53,7 +53,7 @@ interface IProps {
   onBurn(): void
 }
 
-export const CommonTokenDetail: FC<IProps> = ({
+export const CommonTokenDetail: FCC<IProps> = ({
   children,
   token,
   collection,

@@ -7,7 +7,7 @@ interface ConfirmDeleteFormProps {
   onClose: () => void;
 }
 
-const ConfirmDeleteForm: React.FC<ConfirmDeleteFormProps> = ({
+const ConfirmDeleteForm: React.FCC<ConfirmDeleteFormProps> = ({
   onSubmit,
   onClose,
 }) => {

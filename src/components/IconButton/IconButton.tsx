@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FCC } from 'react';
 import styled from 'styled-components';
 import { Icon, IconProps } from 'components/UI/Icon/Icon';
 
@@ -8,7 +8,7 @@ interface IconButtonProps extends IconProps {
   testid?: string
 }
 
-export const IconButton: FC<IconButtonProps> = ({ onClick, className, testid = '', ...iconProps }) => {
+export const IconButton: FCC<IconButtonProps> = ({ onClick, className, testid = '', ...iconProps }) => {
   return (
     <StyledButton onClick={onClick} className={className} data-testid={`${testid}`}>
       <Icon {...iconProps} />

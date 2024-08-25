@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FCC } from 'react';
 import styled from 'styled-components';
 
 import { TokenByIdResponse } from '@unique-nft/sdk';
@@ -15,7 +15,7 @@ type TTokensList = {
   testid: string
 };
 
-export const TokensList: FC<TTokensList> = ({ tokens, isLoading, showOwner, testid }) => {
+export const TokensList: FCC<TTokensList> = ({ tokens, isLoading, showOwner, testid }) => {
   return (
     <TokensListStyled>
       {!isLoading &&

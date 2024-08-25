@@ -1,9 +1,9 @@
-import React, { FC } from 'react';
+import React, { FCC } from 'react';
 import styled from 'styled-components';
 
 import Skeleton from './Skeleton';
 
-const CheckboxSkeleton: FC = () => {
+const CheckboxSkeleton: FCC = () => {
   return (
     <CheckboxSkeletonWrapper>
       <Skeleton width={22} height={22}/>

@@ -1,4 +1,4 @@
-import React, { FC, useMemo, useState } from 'react';
+import React, { FCC, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useApi } from 'hooks/useApi';
 import { Primary600 } from 'styles/colors';
@@ -19,7 +19,7 @@ export type TTokensCard = {
   onClick?: () => void
 };
 
-export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, showOwner, isChecked, onClick, onCheck, ...props }) => {
+export const TokensCard: FCC<TTokensCard> = ({ collectionId, tokenId, testid, showOwner, isChecked, onClick, onCheck, ...props }) => {
   const [token] = useState<TokenItem | undefined>(props.token);
 
   const { api } = useApi();

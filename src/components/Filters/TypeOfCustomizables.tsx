@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react';
+import React, { FCC, useCallback } from 'react';
 import { Checkbox } from 'components/UI';
 import styled from 'styled-components';
 
@@ -13,7 +13,7 @@ interface TypeOfCustomizablesFilterProps {
   isFetchingTokens: boolean
 }
 
-const TypeOfCustomizablesFilter: FC<TypeOfCustomizablesFilterProps> = ({
+const TypeOfCustomizablesFilter: FCC<TypeOfCustomizablesFilterProps> = ({
   value,
   onChange,
   testid,

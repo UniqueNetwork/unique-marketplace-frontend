@@ -28,7 +28,7 @@ const Image = styled.img`
   height: 50px;
 `;
 
-const NFTTableRow: React.FC<NFTTableRowProps> = ({ item }) => {
+const NFTTableRow: React.FCC<NFTTableRowProps> = ({ item }) => {
   const { nft } = item;
 
   return (

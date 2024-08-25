@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FCC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Checkbox, Text } from 'components/UI';
 import styled from 'styled-components';
 
@@ -28,7 +28,7 @@ interface CollectionsFilterProps {
   featuredTokensForAttributeCounts: MixedMyTokenAndOffer[]
 }
 
-const CollectionsFilter: FC<CollectionsFilterProps> = ({
+const CollectionsFilter: FCC<CollectionsFilterProps> = ({
   value,
   onChange,
   onAttributesChange,

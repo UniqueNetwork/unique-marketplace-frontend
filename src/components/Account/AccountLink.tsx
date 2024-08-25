@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react';
+import React, { FCC, useCallback } from 'react';
 
 import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import { Link } from 'components/UI';
@@ -12,7 +12,7 @@ interface AccountLinkProps {
   testid?: string
 }
 
-const AccountLink: FC<AccountLinkProps> = ({ accountAddress, to, testid }) => {
+const AccountLink: FCC<AccountLinkProps> = ({ accountAddress, to, testid }) => {
   const { chainProperties, currentChainId } = useApi();
 
   const formatAddress = useCallback((address: string) => {

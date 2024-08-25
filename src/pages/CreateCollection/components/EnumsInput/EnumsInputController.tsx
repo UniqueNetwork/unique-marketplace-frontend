@@ -5,7 +5,7 @@ import { EnumsInput, EnumsInputProps } from './EnumsInput';
 export type BaseControllerProps<T> = Omit<T, 'name'> &
   Pick<ControllerProps, 'name' | 'control' | 'rules' | 'defaultValue'>;
 
-export const EnumsInputController: React.FC<
+export const EnumsInputController: React.FCC<
   BaseControllerProps<EnumsInputProps<string>>
 > = ({ name, control: userControl, rules, defaultValue, ...enumsProps }) => {
   const { control, register } = useFormContext();

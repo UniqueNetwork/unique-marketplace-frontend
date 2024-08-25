@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FCC, useCallback, useEffect, useState } from 'react';
 import { Text, useNotifications, Button, Heading } from 'components/UI';
 import styled from 'styled-components/macro';
 
@@ -11,7 +11,7 @@ import { useAccounts } from 'hooks/useAccounts';
 import { useCollections } from 'hooks/useCollections';
 import { GQLCollection } from 'api/scanApi/types';
 
-export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish, collection }) => {
+export const AddCollectionModal: FCC<TAdminPanelModalBodyProps> = ({ onFinish, collection }) => {
   const { selectedAccount } = useAccounts();
   const [selectedCollection, setSelectedCollection] = useState<GQLCollection | string | undefined>(collection);
   const { appendCollection, collections, fetchCollections } = useCollections();

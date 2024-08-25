@@ -1,9 +1,9 @@
-import React, { FC } from 'react';
+import React, { FCC } from 'react';
 import styled from 'styled-components';
 import { Primary100 } from '../../styles/colors';
 import { Text } from 'components/UI';
 
-export const WarningBlock: FC<{ margin?: number, testid?: string }> = ({ margin = 1.5, children, testid }) => {
+export const WarningBlock: FCC<{ margin?: number, testid?: string }> = ({ margin = 1.5, children, testid }) => {
   return (
     <WarningBlockWrapper margin={margin}>
       <Text

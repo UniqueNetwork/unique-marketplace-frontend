@@ -1,5 +1,5 @@
 import { ITextBaseProps, Text } from 'components/UI/Text/Text';
-import { FC } from 'react';
+import { FCC } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -13,7 +13,7 @@ interface IMobileMenuLink extends IMenuLink {
   onClick(): void
 }
 
-export const DesktopMenuLink: FC<IMenuLink> = ({
+export const DesktopMenuLink: FCC<IMenuLink> = ({
   to,
   active = false,
   disabled = false,
@@ -64,7 +64,7 @@ export const DesktopMenuItem = styled(Text) <{ $active?: boolean, $disabled?: bo
   }
 `;
 
-export const MobileMenuLink: FC<IMobileMenuLink> = ({
+export const MobileMenuLink: FCC<IMobileMenuLink> = ({
   to,
   active = false,
   disabled = false,

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, createContext, useContext, FC } from 'react';
+import { useEffect, useMemo, createContext, useContext, FCC } from 'react';
 import { useWatch, useFormContext } from 'react-hook-form';
 import { useDebouncedCallback } from 'use-debounce';
 
@@ -15,7 +15,7 @@ export interface FeeContextProps {
 
 export const FeeContext = createContext<FeeContextProps | null>(null);
 
-export const FeeProvider: FC = ({ children }) => {
+export const FeeProvider: FCC = ({ children }) => {
   const { getFee, fee, feeError, feeLoading, feeFormatted } = useCollectionCreate();
   const { control } = useFormContext<CollectionForm>();
   const mapCollectionForm = useCollectionFormMapper();

@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { FCC, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { TokenId, TokenV2ItemForMultipleDto } from '@unique-nft/sdk';
@@ -26,7 +26,7 @@ import { filesSizeValidate } from 'utils/filesSizeValidate';
 
 export const MAX_MINT_TOKENS = 300;
 
-export const CreateNFTComponent: FC<{ collection?: GQLCollection }> = ({ collection }) => {
+export const CreateNFTComponent: FCC<{ collection?: GQLCollection }> = ({ collection }) => {
   // const [collection, setCollection] = useState<GQLCollection>();
   const [collectionToSubmit, setCollectionToSubmit] = useState<GQLCollection>();
   const collectionBlockRef = useRef<HTMLDivElement>(null);
@@ -130,7 +130,7 @@ export const CreateNFTComponent: FC<{ collection?: GQLCollection }> = ({ collect
         const result = await submitBatch(createTokensPayload.slice(currentPos, currentPos + batchSize));
         if (!result) return;
         tokensCreated = tokensCreated.length > 0 ? [...tokensCreated, ...result] : [...result];
-        
+
         currentPos += batchSize;
       } catch (e: any) {
         if (e.message === "Cancelled") {

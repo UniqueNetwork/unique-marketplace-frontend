@@ -7,7 +7,7 @@ interface ArrowProps {
   onClick?: () => void;
 }
 
-const CustomNextArrow: React.FC<ArrowProps> = (props) => {
+const CustomNextArrow: React.FCC<ArrowProps> = (props) => {
   const { className, style, onClick } = props;
   const [isHovered, setIsHovered] = useState(false);
 
@@ -62,7 +62,7 @@ const CustomNextArrow: React.FC<ArrowProps> = (props) => {
   );
 };
 
-const CustomPrevArrow: React.FC<ArrowProps> = (props) => {
+const CustomPrevArrow: React.FCC<ArrowProps> = (props) => {
   const { className, style, onClick } = props;
   const [isHovered, setIsHovered] = useState(false);
 

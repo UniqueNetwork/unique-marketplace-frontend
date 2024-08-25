@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import React, { FCC, useEffect, useMemo, useState } from 'react';
 import { AdminPanelModalType } from './types';
 import { RejectSponsorshipModal } from './RejectSposorshipModal';
 import { RemoveCollectionModal } from './RemoveCollectionModal';
@@ -33,7 +33,7 @@ export const AdminPanelModal = ({ onClose, onFinish, collection, modalType }: TA
     } else setIsVisible(true);
   }, [modalType]);
 
-  const ModalBodyComponent = useMemo<FC<TAdminPanelModalBodyProps> | null>(() => {
+  const ModalBodyComponent = useMemo<FCC<TAdminPanelModalBodyProps> | null>(() => {
     switch (modalType) {
       case AdminPanelModalType.addCollection:
         return AddCollectionModal;

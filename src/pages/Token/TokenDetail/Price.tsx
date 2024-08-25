@@ -1,4 +1,4 @@
-import React, { FC, useMemo } from 'react';
+import React, { FCC, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { Icon, Heading } from 'components/UI';
@@ -11,7 +11,7 @@ interface PriceProps {
   testid?: string
 }
 
-export const Price: FC<PriceProps> = ({ price, testid = '' }) => {
+export const Price: FCC<PriceProps> = ({ price, testid = '' }) => {
   const { currentChainId, currencyMap } = useApi();
   const currentCurrency = useMemo(
     () => currencyMap.get(String(price.currency)),

@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useContext, useState } from 'react';
+import React, { FCC, useCallback, useContext, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
 import styled from 'styled-components';
 import { useDebouncedCallback } from 'use-debounce';
@@ -26,7 +26,7 @@ interface CollectionsFilterProps {
   testid: string
 }
 
-const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attributeCounts, onChange, onAttributesChange, onAttributeCountsChange, testid }) => {
+const CollectionsFilter: FCC<CollectionsFilterProps> = ({ value, attributes, attributeCounts, onChange, onAttributesChange, onAttributeCountsChange, testid }) => {
   const { featuredCollections, isFetching } = useCollections();
   const { curatedCollections, isFetchingCurated } = useCuratedCollections();
   const { collections: selectedCollections = [], attributes: selectedAttributes = [], attributeCounts: selectedAttributeCounts = [] } = value || {};

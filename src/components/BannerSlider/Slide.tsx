@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useRef } from 'react';
+import { FCC, useEffect, useMemo, useRef } from 'react';
 import { Banner } from 'api/restApi/banners/types';
 import { get } from 'api/restApi/base';
 import { Text, Heading } from 'components/UI';
@@ -323,7 +323,7 @@ const ButtonWrapper = styled.div`
   gap: 32px;
 `;
 
-const LinkComponent: FC<{ linkTo: string, role: 'primary' | 'ghost', bgColor?: string }> = ({ children, linkTo, role, bgColor }) => {
+const LinkComponent: FCC<{ linkTo: string, role: 'primary' | 'ghost', bgColor?: string }> = ({ children, linkTo, role, bgColor }) => {
   return !linkTo.startsWith(location.origin)
     ? <ExternalLink href={linkTo} role={role} bgColor={bgColor}>{children}</ExternalLink>
     : <LocalLink role={role} bgColor={bgColor} to={linkTo.replace(location.origin, '')}>{children}</LocalLink>;

@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
+import React, { FCC, useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { TokenWithInfoV2Dto } from '@unique-nft/sdk';
 import { AdditionalLight, Coral100, Coral500, Grey300, Primary500, Primary600, Secondary400, Secondary500 } from 'styles/colors';
@@ -212,7 +212,7 @@ const IconWrapper = styled.div`
 
 export default TokenCard;
 
-const TokenTitle: FC<{isCollectionLoading: boolean, prefix: string, token: INestingToken | TokenWithInfoV2Dto, collectionName: string }> = ({ isCollectionLoading, prefix, token, collectionName }) => {
+const TokenTitle: FCC<{isCollectionLoading: boolean, prefix: string, token: INestingToken | TokenWithInfoV2Dto, collectionName: string }> = ({ isCollectionLoading, prefix, token, collectionName }) => {
   if (isCollectionLoading) return <Skeleton height={52} width={62} />;
   return (
     <TokenTitleWrapper>

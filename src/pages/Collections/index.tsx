@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FCC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Select, Button } from 'components/UI';
 import styled from 'styled-components/macro';
 import NoItems from 'components/NoItems';
@@ -46,7 +46,7 @@ const sortingOptions: TOption[] = [
   }
 ];
 
-export const CollectionsPage: FC = () => {
+export const CollectionsPage: FCC = () => {
   const { currentChainId, settings, refetchSettings } = useApi();
   const { selectedAccount } = useAccounts();
   const [sortingValue, setSortingValue] = useState<TOption>(sortingOptions[0]);

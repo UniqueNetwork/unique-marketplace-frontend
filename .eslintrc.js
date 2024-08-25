@@ -75,8 +75,8 @@ module.exports = {
         "default-param-last": [0], // conflicts with TS version (this one doesn't allow TS ?)
         "import-newlines/enforce": ["error", 2048],
         "jsx-quotes": ["error", "prefer-single"],
-        "react/jsx-indent": ["error", 2],
-        "react/jsx-indent-props": [2, 2],
+        "react/jsx-indent": ["warn", 2],
+        "react/jsx-indent-props": ["warn", 2],
         "react/prop-types": [0], // this is a completely broken rule
         "react/jsx-key": "warn",
         "object-curly-newline": [
@@ -112,5 +112,6 @@ module.exports = {
             "named": "never",
             "asyncArrow": "always"
         }],
+        "semi": "off",
     }
 }

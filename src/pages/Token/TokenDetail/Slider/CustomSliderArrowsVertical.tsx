@@ -8,7 +8,7 @@ interface ArrowProps {
   onClick?: () => void;
 }
 
-const CustomNextArrowVertical: React.FC<ArrowProps> = (props) => {
+const CustomNextArrowVertical: React.FCC<ArrowProps> = (props) => {
   const { className, style, onClick } = props;
   const [isHovered, setIsHovered] = useState(false);
   //react-slick not remove default arrow
@@ -85,7 +85,7 @@ const CustomNextArrowVertical: React.FC<ArrowProps> = (props) => {
   );
 };
 
-const CustomPrevArrowVertical: React.FC<ArrowProps> = (props) => {
+const CustomPrevArrowVertical: React.FCC<ArrowProps> = (props) => {
   const { className, style, onClick } = props;
   const [isHovered, setIsHovered] = useState(false);
 

@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FCC } from 'react';
 import styled from 'styled-components';
 
 import { TokensCard } from '..';
@@ -14,7 +14,7 @@ type TTokensList = {
   testid: string
 };
 
-export const TokensList: FC<TTokensList> = ({ tokens, isLoading, testid }) => {
+export const TokensList: FCC<TTokensList> = ({ tokens, isLoading, testid }) => {
   return (
     <TokensListStyled>
       {(!isLoading && tokens) &&

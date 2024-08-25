@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import React, { FCC, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -12,7 +12,7 @@ interface FractionalDetailProps {
   testid?: string
 }
 
-export const FractionalDetail: FC<FractionalDetailProps> = () => {
+export const FractionalDetail: FCC<FractionalDetailProps> = () => {
   const { address, id, collectionId } = useParams<{ address: string, id: string, collectionId: string}>();
   const { api } = useApi();
   const [isFetching, setIsFetching] = useState(false);

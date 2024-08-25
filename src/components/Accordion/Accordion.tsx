@@ -1,6 +1,6 @@
 import { IconButton } from 'components/IconButton/IconButton';
 import { Button, Text } from 'components/UI';
-import React, { FC, ReactNode, useCallback, useState } from 'react';
+import React, { FCC, ReactNode, useCallback, useState } from 'react';
 import styled from 'styled-components/macro';
 import { Coral500 } from 'styles/colors';
 
@@ -32,7 +32,7 @@ const AccordionChevronIcon = () => {
   );
 };
 
-export const Accordion: FC<AccordionProps> = ({
+export const Accordion: FCC<AccordionProps> = ({
   title,
   isOpen: isOpenProps,
   children,

@@ -5,7 +5,7 @@ import { sortData } from 'utils/uiUtils';
 import { Icon, Text } from '..';
 import styled from 'styled-components';
 import { IconProps } from '../Icon/Icon';
-import { TableRow } from './TebleRow';
+import { TableRow } from './TableRow';
 
 const SORT_MODES = ['initial', 'desc', 'asc'];
 

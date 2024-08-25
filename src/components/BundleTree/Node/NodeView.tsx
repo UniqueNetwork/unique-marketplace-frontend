@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useMemo, useRef, useState } from 'react';
+import React, { FCC, useCallback, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { AdditionalDark, AdditionalLight, BlueGrey500, Coral100, Coral500, Grey300, Primary100, Primary200, Primary400, Primary500, Primary600, Secondary400, Secondary200 } from 'styles/colors';
 import Pin from 'static/icons/pin.svg';
@@ -12,7 +12,7 @@ import Skeleton from '../../Skeleton/Skeleton';
 import { useCollection } from '../useCollection';
 import { Icon, Dropdown, Tooltip } from 'components/UI';
 
-const NodeView: FC<INodeView<INestingToken>> = ({
+const NodeView: FCC<INodeView<INestingToken>> = ({
   arrowClicked,
   isOpened,
   data,
@@ -341,7 +341,7 @@ const IconWrapper = styled.div`
 
 export default NodeView;
 
-const TokenTitle: FC<{isCollectionLoading: boolean, prefix: string, token: INestingToken}> = ({ isCollectionLoading, prefix, token }) => {
+const TokenTitle: FCC<{isCollectionLoading: boolean, prefix: string, token: INestingToken}> = ({ isCollectionLoading, prefix, token }) => {
   if (isCollectionLoading) return <Skeleton height={24} width={60} />;
   return (
     <TitleContainer>

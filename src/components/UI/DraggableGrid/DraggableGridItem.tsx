@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/restrict-plus-operands */
-import React, { HTMLAttributes, ReactNode, useContext, useEffect, useRef } from 'react';
+import React, {FCC, HTMLAttributes, ReactNode, useContext, useEffect, useRef} from 'react';
 import { animated, to, useSpring } from 'react-spring';
 
 import { StateType, useGestureResponder, ResponderEvent } from './hooks/useGestureResponder';
@@ -9,12 +9,12 @@ interface DraggableGridItemProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
 }
 
-export const DraggableGridItem = ({
+export const DraggableGridItem: FCC<DraggableGridItemProps> = ({
   children,
   style,
   className,
   ...other
-}: DraggableGridItemProps) => {
+}) => {
   const context = useContext(DraggableGridItemContext);
 
   if (!context) {
@@ -166,18 +166,16 @@ export const DraggableGridItem = ({
     ...other
   };
 
-  return typeof children === 'function'
-    // eslint-disable-next-line multiline-ternary
-    ? (children(animated.div, props, {
+
+  if (typeof children === 'function') {
+    return (children as any)(animated.div, props, {
       dragging: isDragging,
       disabled: !!disableDrag,
       index,
       grid
-    })
-  ) : (
-    // @ts-ignore
-    <animated.div ref={elementRef} {...props}>
-      {children}
-    </animated.div>
-  );
+    });
+  }
+
+  // @ts-ignore
+  return (<animated.div ref={elementRef} {...props}>{children}</animated.div>);
 };
