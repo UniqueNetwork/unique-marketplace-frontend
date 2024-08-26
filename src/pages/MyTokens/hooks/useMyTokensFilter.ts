@@ -156,7 +156,7 @@ export const useMyTokensFilter = ({ tokens, offers, isFetchingTokens }: UseMyTok
           return {
             ...offer,
             owner: offer.seller,
-            attributes: offer?.tokenDescription
+            attributes: (offer?.tokenDescription && offer?.tokenDescription?.attributes)
               ? (Object.values(
                   offer?.tokenDescription?.attributes
                 ) as DecodedAttributeDto[])
