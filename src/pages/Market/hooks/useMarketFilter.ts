@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { GetOffersRequestPayload, OffersResponse } from 'api/restApi/offers/types';
+import { GetOffersRequestPayload, OfferFilters, OffersAttributesResponse, OffersResponse } from 'api/restApi/offers/types';
 import { FilterState, TypeOfAssets, TypeOfCustomizableNFTs } from 'components/Filters/types';
 import { useAccounts } from 'hooks/useAccounts';
 import { parseFilterState, setUrlParameter } from 'utils/helpers';
@@ -14,7 +14,17 @@ import { useCollections } from 'hooks/useCollections';
 import { mockWearables } from 'pages/Token/constants';
 import { SelectOptionProps } from 'components/UI/types';
 
-export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fetch(payload: GetOffersRequestPayload): Promise<OffersResponse | TokensResponse> }) => {
+export const useMarketFilter = ({
+  isFetching,
+  fetch,
+  fetchAttributes
+}: {
+  isFetching: boolean;
+  fetch(
+    payload: GetOffersRequestPayload
+  ): Promise<OffersResponse | TokensResponse>;
+  fetchAttributes: (payload: OfferFilters) => Promise<OffersAttributesResponse>;
+}) => {
   const { currentChainId, api } = useApi();
   const { customizableCollections, featuredCollections } = useCollections();
   const { selectedAccount, isLoading: isAccountsLoading } = useAccounts();
@@ -89,6 +99,13 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
       sort: [value.id]
     });
   }, [fetch, filterState, getFilterByState, searchValue]);
+
+  useEffect(() => {
+    fetchAttributes({
+      ...(getFilterByState(filterState)),
+      searchText: searchValue || undefined,
+    });
+  }, [fetchAttributes, filterState, getFilterByState, searchValue]);
 
   const onSearch = useCallback((value?: string) => {
     setSearchValue(value);

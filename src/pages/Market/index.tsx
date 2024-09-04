@@ -18,9 +18,11 @@ import { BannerSlider } from 'components/BannerSlider/BannerSlider';
 import { Slide } from 'components/BannerSlider/Slide';
 import { useGetBanners } from 'api/restApi/banners/banners';
 import Skeleton from 'components/Skeleton/Skeleton';
+import { useOffersAttributes } from 'api/restApi/offers/offersAttributes';
 
 export const MarketPage = () => {
-  const { offers, offersCount, isFetching, fetchMore, fetch, attributes, attributeCounts } = useOffers();
+  const { offers, offersCount, isFetching, fetchMore, fetch } = useOffers();
+  const { attributes, attributeCounts, isFetchingAttributes, fetchAttributes } = useOffersAttributes();
   const { isFetching: isFetchingCollections } = useCollections();
   const { isLoading: isAccountsLoading } = useAccounts();
   const { banners, isFetching: isFetchingBanners } = useGetBanners();
@@ -36,7 +38,7 @@ export const MarketPage = () => {
     onFilterChange,
     getFilterByState,
     onMobileFilterApply
-  } = useMarketFilter({ isFetching, fetch });
+  } = useMarketFilter({ isFetching, fetch, fetchAttributes });
 
   const hasMore = offers && offers.length < offersCount;
 
@@ -98,17 +100,23 @@ export const MarketPage = () => {
               size='m'
             >{isLoading ? 'Loading items' : `${offersCount} items`}</Text>
           </div>}
-          <InfiniteScroll
-            hasMore={hasMore}
-            initialLoad={false}
-            loadMore={onClickSeeMore}
-            pageStart={1}
-            threshold={200}
-            useWindow={true}
-          >
-            {!isLoading && !offers?.length && <NoItems isSearchResult={!!searchValue || !!filterCount} />}
-            <OffersList offers={offers || []} isLoading={isLoading} testid={`${testid}-offers`} />
-          </InfiniteScroll>
+          {
+            isFetchingAttributes ? (
+              <OffersList offers={[]} isLoading={true} testid={`${testid}-offers-attr-load`} />
+            ) : (
+              <InfiniteScroll
+                hasMore={hasMore}
+                initialLoad={false}
+                loadMore={onClickSeeMore}
+                pageStart={1}
+                threshold={200}
+                useWindow={true}
+              >
+                {!isLoading && !offers?.length && <NoItems isSearchResult={!!searchValue || !!filterCount} />}
+                <OffersList offers={offers || []} isLoading={isLoading} testid={`${testid}-offers`} />
+              </InfiniteScroll>
+            )
+          }
         </MainContent>
       </MarketMainPageStyled>
       {deviceSize <= DeviceSize.md && <MobileFilters
