@@ -110,7 +110,7 @@ const MobileFilterActionsWrapper = styled.div`
   padding: 10px calc(var(--prop-gap) * 1.5);
   background-color: ${AdditionalLight};
   box-shadow: 0px -8px 12px rgba(0, 0, 0, 0.06);
-  z-index: 8;
+  z-index: 10;
   column-gap: calc(var(--prop-gap) / 2);
   
   @media (max-width: 1024px) {
