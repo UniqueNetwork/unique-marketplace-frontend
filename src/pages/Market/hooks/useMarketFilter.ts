@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { GetOffersRequestPayload, OfferFilters, OffersAttributesResponse, OffersResponse } from 'api/restApi/offers/types';
 import { FilterState, TypeOfAssets, TypeOfCustomizableNFTs } from 'components/Filters/types';
 import { useAccounts } from 'hooks/useAccounts';
@@ -33,6 +32,7 @@ export const useMarketFilter = ({
   const [filterState, setFilterState] = useState<FilterState | null>(parseFilterState(searchParams.get('filterState')));
   const [sortingValue, setSortingValue] = useState<string>(searchParams.get('sortingValue') || defaultSortingValue.id);
   const [searchValue, setSearchValue] = useState<string | undefined>(searchParams.get('searchValue') || '');
+  const lastFetchAttributesParams = useRef<OfferFilters | null>(null);
 
   const getFilterByState = useCallback((filterState: FilterState | null) => {
     if (!filterState) return {};
@@ -88,6 +88,18 @@ export const useMarketFilter = ({
     };
   }, [selectedAccount]);
 
+  const fetchFilterAttributes = useCallback(async (currentFilterState: FilterState | null) => {
+    const params = {
+      ...(getFilterByState(currentFilterState)),
+      searchText: searchValue || undefined,
+    };
+  
+    if (JSON.stringify(params) !== JSON.stringify(lastFetchAttributesParams.current)) {
+      lastFetchAttributesParams.current = params;
+      await fetchAttributes(params);
+    }
+  }, [fetchAttributes, getFilterByState, searchValue]);
+
   const onSortingChange = useCallback((value: TOption) => {
     setSortingValue(value.id);
     setUrlParameter('sortingValue', value.id);
@@ -99,13 +111,6 @@ export const useMarketFilter = ({
       sort: [value.id]
     });
   }, [fetch, filterState, getFilterByState, searchValue]);
-
-  useEffect(() => {
-    fetchAttributes({
-      ...(getFilterByState(filterState)),
-      searchText: searchValue || undefined,
-    });
-  }, [fetchAttributes, filterState, getFilterByState, searchValue]);
 
   const onSearch = useCallback((value?: string) => {
     setSearchValue(value);
@@ -121,15 +126,19 @@ export const useMarketFilter = ({
 
   const onFilterChange = useCallback(async (filterState: FilterState | null) => {
     setUrlParameter('filterState', filterState ? JSON.stringify(filterState) : '');
-    await fetch({
-      page: 1,
-      pageSize: 20,
-      ...(getFilterByState(filterState)),
-      searchText: searchValue || undefined,
-      sort: [sortingValue]
-    });
     setFilterState(filterState);
-  }, [fetch, sortingValue, getFilterByState, searchValue]);
+
+    await Promise.all([
+      fetchFilterAttributes(filterState),
+      fetch({
+        page: 1,
+        pageSize: 20,
+        ...(getFilterByState(filterState)),
+        searchText: searchValue || undefined,
+        sort: [sortingValue]
+      })
+    ]);
+  }, [fetch, sortingValue, getFilterByState, searchValue, fetchFilterAttributes]);
 
   const onMobileFilterApply = useCallback(async (filterState: FilterState | null, sorting: SelectOptionProps) => {
     setUrlParameter('filterState', filterState ? JSON.stringify(filterState) : '');
