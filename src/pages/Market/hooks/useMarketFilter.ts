@@ -112,16 +112,18 @@ export const useMarketFilter = ({
     });
   }, [fetch, filterState, getFilterByState, searchValue]);
 
-  const onSearch = useCallback((value?: string) => {
+  const onSearch = useCallback(async(value?: string) => {
     setSearchValue(value);
     setUrlParameter('searchValue', value || '');
-    void fetch({
-      page: 1,
-      pageSize: 20,
-      ...(getFilterByState(filterState)),
-      searchText: value || undefined,
-      sort: [sortingValue]
-    });
+    await Promise.all([
+      fetchFilterAttributes(filterState),
+      void fetch({
+        page: 1,
+        pageSize: 20,
+        ...(getFilterByState(filterState)),
+        searchText: value || undefined,
+        sort: [sortingValue]
+      })]);
   }, [fetch, sortingValue, searchValue, filterState, getFilterByState]);
 
   const onFilterChange = useCallback(async (filterState: FilterState | null) => {
