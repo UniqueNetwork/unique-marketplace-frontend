@@ -19,6 +19,7 @@ export const TokenContext = React.createContext<TokenContextValue>({
   isRftFracton: false,
   isWearable: false,
   isCustomizable: false,
+  fetchTokenError: '',
   fetchToken: () => Promise.resolve(),
   fetchOffer: () => Promise.resolve()
 });
@@ -39,11 +40,20 @@ export const TokenContextProvider: FC = ({ children }) => {
   const [isNested, setIsNested] = useState(false);
   const [fraction, setFraction] = useState<Fraction>();
   const [topmostOwner, setTopmostOwner] = useState<string>();
+  const [fetchTokenError, setFetchTokenError] = useState<string>();
 
   const fetchToken = useCallback(async () => {
+    setFetchTokenError('');
     if (!api?.nft || !api?.rft) return;
     setIsFetchingToken(true);
-    const token = await api.nft?.getTokenV2(collectionId, tokenId);
+    let token;
+    try {
+      token = await api.nft?.getTokenV2(collectionId, tokenId);
+    } catch(err) {
+      const errorMessage = (err instanceof Error) ? err.message : 'Unknown error';
+      setFetchTokenError(errorMessage);
+    }
+
     setToken(token || undefined);
     const collection = await api.collection?.getCollection(collectionId);
     setCollection(collection || undefined);
@@ -135,12 +145,13 @@ export const TokenContextProvider: FC = ({ children }) => {
       isOwner,
       ownerAddress: token?.owner,
       fraction,
+      fetchTokenError,
       fetchToken,
       fetchOffer: async () => { await fetchOffer(collectionId, tokenId); },
       isWearable: !!mockWearables[currentChainId || '']?.find(({ collectionId }) => collectionId === collection?.collectionId),
       isCustomizable: !!collection?.properties.find(({ key }) => key === 'is_customizable')?.value
     };
-  }, [token, collection, offer, bundle, topmostOwner, isNested, address, isFetchingToken, isFetchingOffer, isFetchingBundle, isOwner, fraction, fetchToken, currentChainId, fetchOffer, collectionId, tokenId]);
+  }, [token, collection, offer, bundle, topmostOwner, isNested, address, isFetchingToken, isFetchingOffer, isFetchingBundle, isOwner, fraction, fetchToken, currentChainId, fetchOffer, collectionId, tokenId, fetchTokenError]);
 
   return <TokenContext.Provider value={value} >
     {children}

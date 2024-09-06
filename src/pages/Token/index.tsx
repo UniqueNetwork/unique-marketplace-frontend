@@ -37,6 +37,7 @@ const TokenPage = () => {
     isBundle,
     isNested,
     isFetching,
+    fetchTokenError,
     isOwner,
     topmostOwner
   } = useContext(TokenContext);
@@ -108,6 +109,7 @@ const TokenPage = () => {
           isBundle={isBundle}
           isNested={isNested}
           isOwner={isOwner}
+          notFound={!!fetchTokenError}
           topmostOwner={topmostOwner}
           onBurn={onActionClick(MarketType.burn)}
         >
