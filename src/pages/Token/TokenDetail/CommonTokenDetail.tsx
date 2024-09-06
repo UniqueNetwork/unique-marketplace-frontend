@@ -31,6 +31,7 @@ import { RoyaltiesBlock } from './RoyaltiesBlock';
 import { TokenSlider } from './Slider/TokenSlider';
 import { BREAKPOINTS } from 'hooks/useBreakpointObserver';
 import { CreateMediaData } from 'pages/CreateNFT/types';
+import NoItems from 'components/NoItems';
 
 interface TokenWithOptionalFieldsV2Dto extends Omit<TokenWithInfoV2Dto, 'parsingError' | 'properties' | 'nestingParentToken' | 'media'> {
   parsingError?: string | null;
@@ -50,6 +51,7 @@ interface IProps {
   isOwner: boolean
   topmostOwner?: string
   previewMode?: boolean
+  notFound?: boolean
   onBurn(): void
 }
 
@@ -63,6 +65,7 @@ export const CommonTokenDetail: FC<IProps> = ({
   isNested,
   topmostOwner,
   previewMode,
+  notFound,
   onBurn
 }) => {
   const navigate = useNavigate();
@@ -222,201 +225,205 @@ export const CommonTokenDetail: FC<IProps> = ({
   }, [currentChainId, collectionId, tokenId, isWearable, api?.nft]);
   
   return (
-    <CommonTokenDetailStyled>
-      <>
-        {isLoading && <PictureSkeleton />}
-        {!isLoading && 
-          (hasSlider ? (
-            <SliderContainer>
-              <TokenSlider
-                items={sliderItems}
-                isWearable={isWearable}
-                wearableSrc={wearableTokenImg || image}
-                baseSrc={baseTokenImg}
-                badges={badges}
-                previewMode={previewMode}
-              />
-              {!previewMode && <EquippedWearableWrap><EquippedWearables /></EquippedWearableWrap>}
-            </SliderContainer>
-          ) : (
-            <PictureWrapper>
-              {isLoading && <Skeleton />}
-              {!isLoading && (
-                <>
-                  {!isWearable && (
-                    <Picture
-                      alt={tokenId?.toString() || ''}
-                      src={image}
-                      video={video?.url || ''}
-                      testid={`${testid}-token-picture`}
-                      badges={badges}
-                    />
-                  )}
-                  {isWearable && (
-                    <WearablePicture
-                      alt={tokenId?.toString() || ''}
-                      src={image}
-                      wearableSrc={wearableTokenImg || image}
-                      baseSrc={baseTokenImg}
-                      testid={`${testid}-token-picture`}
-                    />
-                  )}
-                </>
-              )}
-              {!previewMode && <EquippedWearables />}
-            </PictureWrapper>
-          ))}
-      </>
-      <Description>
-        {isLoading && <TokenSkeleton />}
-        {!isLoading && (
+    <>
+      {notFound ? <NoItems /> :
+        <CommonTokenDetailStyled>
           <>
-            <Link to={`/collection/${collectionId}`}>
-              {collectionName} [id {collectionId}]
-            </Link>
-            <HeadingWrapper>
-              <Heading size={'1'} testid={`${testid}-token-name`}>
-                {`${prefix || ''} #${tokenId}`}
-              </Heading>
-              <ShareLink
-                onClick={openShareModal}
-                data-testid={`${testid}-share-button`}
-              >
-                <IconWrapper></IconWrapper>
-              </ShareLink>
-            </HeadingWrapper>
-            <OwnerBlock data-testid={`${testid}-owner-section`}>
-              {!(isRft && !isRftFracton) && (
-                <OwnerCard
-                  address={owner || ''}
-                  isShort={deviceSize < DeviceSize.xl}
-                  canCopy={false}
-                  prefixOwned='Owned by'
-                  prefixNested='Nested in bundle'
-                />
-              )}
-            </OwnerBlock>
-            <Divider />
-            <TokenData>
-              {token?.name && <Text color='grey-500' size='l'>{token?.name}</Text>}
-              {token?.description && <Text color='grey-500' size='s'>{token?.description}</Text>}
-            </TokenData>
-            {isNested &&
-              token?.nestingParentToken?.tokenId &&
-              token?.nestingParentToken?.collectionId && (
-                <>
-                  <Heading size='4'>NFT Wearable for</Heading>
-                  <ParentTokenWrapper>
-                    <TokensBandleCard
-                      tokenId={token.nestingParentToken.tokenId}
-                      collectionId={token.nestingParentToken.collectionId}
-                      onViewNodeDetails={onViewTokenDetails}
-                    />
-                  </ParentTokenWrapper>
-                  <Divider />
-                </>
-              )}
-            {isRft && !isRftFracton && (
-              <>
-                <FractionalOwnersList />
-                <Divider />
-              </>
-            )}
-            {children}
-            {collection?.mode === 'ReFungible' && !!address && (
-              <>
-                <FractionalDetail testid={`${testid}-fractional`} />
-                <Divider />
-              </>
-            )}
-            {attributes && collectionId && (
-              <AttributesBlock
-                attributes={attributesList}
-                collectionId={collectionId}
-              />
-            )}
-            {royalties && Array.isArray(royalties) && (
-              <>
-                <Divider />
-                <RoyaltiesBlock royalties={royalties} />
-              </>
-            )}
-          </>
-        )}
-      </Description>
-      {!previewMode &&<DropdownStyled
-        placement={'right'}
-        open={dropdownOpen}
-        onOpenChange={setDropdownOpen}
-        dropdownRender={() => (
-          <DropdownMenu>
-            <ShareMenuItem onClick={openShareModal}>
-              Share
-              <MenuIconWrapper>
-                <Icon
-                  name={'shared'}
-                  size={16}
-                  color={'var(--color-primary-500)'}
-                />
-              </MenuIconWrapper>
-            </ShareMenuItem>
-            <ScanMenuItem onClick={onScanLinkClick}>
-              View on Subscan
-              <MenuIconWrapper>
-                <Icon
-                  name={'arrow-up-right'}
-                  size={16}
-                  color={'var(--color-primary-500)'}
-                />
-              </MenuIconWrapper>
-            </ScanMenuItem>
-            {!offer && (
-              <BurnMenuItem onClick={onBurn}>
-                Burn
-                <MenuIconWrapper>
-                  <Icon
-                    name={'burn'}
-                    size={16}
-                    color={'var(--color-coral-500)'}
+            {(isLoading && !notFound) && <PictureSkeleton />}
+            {!isLoading &&
+              (hasSlider ? (
+                <SliderContainer>
+                  <TokenSlider
+                    items={sliderItems}
+                    isWearable={isWearable}
+                    wearableSrc={wearableTokenImg || image}
+                    baseSrc={baseTokenImg}
+                    badges={badges}
+                    previewMode={previewMode}
                   />
-                </MenuIconWrapper>
-              </BurnMenuItem>
+                  {!previewMode && <EquippedWearableWrap><EquippedWearables /></EquippedWearableWrap>}
+                </SliderContainer>
+              ) : (
+                <PictureWrapper>
+                  {isLoading && <Skeleton />}
+                  {!isLoading && (
+                    <>
+                      {!isWearable && (
+                        <Picture
+                          alt={tokenId?.toString() || ''}
+                          src={image}
+                          video={video?.url || ''}
+                          testid={`${testid}-token-picture`}
+                          badges={badges}
+                        />
+                      )}
+                      {isWearable && (
+                        <WearablePicture
+                          alt={tokenId?.toString() || ''}
+                          src={image}
+                          wearableSrc={wearableTokenImg || image}
+                          baseSrc={baseTokenImg}
+                          testid={`${testid}-token-picture`}
+                        />
+                      )}
+                    </>
+                  )}
+                  {!previewMode && <EquippedWearables />}
+                </PictureWrapper>
+              ))}
+          </>
+          <Description>
+            {isLoading && <TokenSkeleton />}
+            {!isLoading && (
+              <>
+                <Link to={`/collection/${collectionId}`}>
+                  {collectionName} [id {collectionId}]
+                </Link>
+                <HeadingWrapper>
+                  <Heading size={'1'} testid={`${testid}-token-name`}>
+                    {`${prefix || ''} #${tokenId}`}
+                  </Heading>
+                  <ShareLink
+                    onClick={openShareModal}
+                    data-testid={`${testid}-share-button`}
+                  >
+                    <IconWrapper></IconWrapper>
+                  </ShareLink>
+                </HeadingWrapper>
+                <OwnerBlock data-testid={`${testid}-owner-section`}>
+                  {!(isRft && !isRftFracton) && (
+                    <OwnerCard
+                      address={owner || ''}
+                      isShort={deviceSize < DeviceSize.xl}
+                      canCopy={false}
+                      prefixOwned='Owned by'
+                      prefixNested='Nested in bundle'
+                    />
+                  )}
+                </OwnerBlock>
+                <Divider />
+                <TokenData>
+                  {token?.name && <Text color='grey-500' size='l'>{token?.name}</Text>}
+                  {token?.description && <Text color='grey-500' size='s'>{token?.description}</Text>}
+                </TokenData>
+                {isNested &&
+                  token?.nestingParentToken?.tokenId &&
+                  token?.nestingParentToken?.collectionId && (
+                    <>
+                      <Heading size='4'>NFT Wearable for</Heading>
+                      <ParentTokenWrapper>
+                        <TokensBandleCard
+                          tokenId={token.nestingParentToken.tokenId}
+                          collectionId={token.nestingParentToken.collectionId}
+                          onViewNodeDetails={onViewTokenDetails}
+                        />
+                      </ParentTokenWrapper>
+                      <Divider />
+                    </>
+                  )}
+                {isRft && !isRftFracton && (
+                  <>
+                    <FractionalOwnersList />
+                    <Divider />
+                  </>
+                )}
+                {children}
+                {collection?.mode === 'ReFungible' && !!address && (
+                  <>
+                    <FractionalDetail testid={`${testid}-fractional`} />
+                    <Divider />
+                  </>
+                )}
+                {attributes && collectionId && (
+                  <AttributesBlock
+                    attributes={attributesList}
+                    collectionId={collectionId}
+                  />
+                )}
+                {royalties && Array.isArray(royalties) && (
+                  <>
+                    <Divider />
+                    <RoyaltiesBlock royalties={royalties} />
+                  </>
+                )}
+              </>
             )}
-            <ReportMenuItem onClick={onReportClick}>
-              Report
-              <MenuIconWrapper>
-                <Icon
-                  name={'warning'}
-                  size={16}
-                  color={'var(--color-coral-500)'}
-                />
-              </MenuIconWrapper>
-            </ReportMenuItem>
-          </DropdownMenu>
-        )}
-      >
-        <DropdownWrapper>
-          <Icon size={32} name={'meatball-menu'} color={'transparent'} />
-        </DropdownWrapper>
-      </DropdownStyled>}
-      <ShareTokenModal
-        isVisible={shareModalVisible}
-        onClose={closeShareModal}
-        testid={`${testid}-share-modal`}
-      />
-      <ReportModal
-        collectionId={collectionId || 0}
-        tokenId={tokenId || 0}
-        tokenPrefix={
-          offer?.collectionDescription.tokenPrefix ||
-          collection?.tokenPrefix ||
-          ''
-        }
-        isVisible={reportModalVisible}
-        onClose={closeReportModal}
-        testid={`${testid}-report-modal`}
-      />
-    </CommonTokenDetailStyled>
+          </Description>
+          {!previewMode && <DropdownStyled
+            placement={'right'}
+            open={dropdownOpen}
+            onOpenChange={setDropdownOpen}
+            dropdownRender={() => (
+              <DropdownMenu>
+                <ShareMenuItem onClick={openShareModal}>
+                  Share
+                  <MenuIconWrapper>
+                    <Icon
+                      name={'shared'}
+                      size={16}
+                      color={'var(--color-primary-500)'}
+                    />
+                  </MenuIconWrapper>
+                </ShareMenuItem>
+                <ScanMenuItem onClick={onScanLinkClick}>
+                  View on Subscan
+                  <MenuIconWrapper>
+                    <Icon
+                      name={'arrow-up-right'}
+                      size={16}
+                      color={'var(--color-primary-500)'}
+                    />
+                  </MenuIconWrapper>
+                </ScanMenuItem>
+                {!offer && (
+                  <BurnMenuItem onClick={onBurn}>
+                    Burn
+                    <MenuIconWrapper>
+                      <Icon
+                        name={'burn'}
+                        size={16}
+                        color={'var(--color-coral-500)'}
+                      />
+                    </MenuIconWrapper>
+                  </BurnMenuItem>
+                )}
+                <ReportMenuItem onClick={onReportClick}>
+                  Report
+                  <MenuIconWrapper>
+                    <Icon
+                      name={'warning'}
+                      size={16}
+                      color={'var(--color-coral-500)'}
+                    />
+                  </MenuIconWrapper>
+                </ReportMenuItem>
+              </DropdownMenu>
+            )}
+          >
+            <DropdownWrapper>
+              <Icon size={32} name={'meatball-menu'} color={'transparent'} />
+            </DropdownWrapper>
+          </DropdownStyled>}
+          <ShareTokenModal
+            isVisible={shareModalVisible}
+            onClose={closeShareModal}
+            testid={`${testid}-share-modal`}
+          />
+          <ReportModal
+            collectionId={collectionId || 0}
+            tokenId={tokenId || 0}
+            tokenPrefix={
+              offer?.collectionDescription.tokenPrefix ||
+              collection?.tokenPrefix ||
+              ''
+            }
+            isVisible={reportModalVisible}
+            onClose={closeReportModal}
+            testid={`${testid}-report-modal`}
+          />
+        </CommonTokenDetailStyled>
+      }
+    </>
   );
 };
 

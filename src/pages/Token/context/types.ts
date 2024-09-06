@@ -19,6 +19,7 @@ export type TokenContextValue = {
   bundle?: TokenChildrenResponse
   fraction?: Fraction
   isFetching: boolean
+  fetchTokenError?: string
   fetchToken(): Promise<void>
   fetchOffer(): Promise<void>
 }
