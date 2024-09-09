@@ -3,17 +3,19 @@ import { INestingToken } from 'components/BundleTree/types';
 import { TokenByIdResponse, CollectionInfoWithSchemaResponse } from '@unique-nft/sdk/full';
 import { AnyString } from '@polkadot/types/types';
 
-export type GetOffersRequestPayload = {
-  collectionId?: number | number[]
-  minPrice?: string
-  maxPrice?: string
-  seller?: AnyString
-  bidderAddress?: string
-  attributes?: string[]
-  numberOfAttributes?: number[]
-  searchText?: string
-  searchLocale?: string
-} & Pagination & Sortable;
+export type OfferFilters = {
+  collectionId?: number | number[];
+  minPrice?: string;
+  maxPrice?: string;
+  seller?: AnyString;
+  bidderAddress?: string;
+  attributes?: string[];
+  numberOfAttributes?: number[];
+  searchText?: string;
+  searchLocale?: string;
+};
+
+export type GetOffersRequestPayload = OfferFilters & Pagination & Sortable;
 
 export type Bid = {
   amount: string
@@ -55,7 +57,9 @@ export type Offer = {
 
 export type OfferResponse = Offer
 
-export type OffersResponse = PaginatedResponse<Offer> & {
+export type OffersResponse = PaginatedResponse<Offer> 
+
+export type OffersAttributesResponse = {
   attributes: Record<string, Attribute[]>;
   attributesCount: AttributeCount[]
 }

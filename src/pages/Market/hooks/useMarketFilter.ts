@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-
-import { GetOffersRequestPayload, OffersResponse } from 'api/restApi/offers/types';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { GetOffersRequestPayload, OfferFilters, OffersAttributesResponse, OffersResponse } from 'api/restApi/offers/types';
 import { FilterState, TypeOfAssets, TypeOfCustomizableNFTs } from 'components/Filters/types';
 import { useAccounts } from 'hooks/useAccounts';
 import { parseFilterState, setUrlParameter } from 'utils/helpers';
@@ -14,7 +13,17 @@ import { useCollections } from 'hooks/useCollections';
 import { mockWearables } from 'pages/Token/constants';
 import { SelectOptionProps } from 'components/UI/types';
 
-export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fetch(payload: GetOffersRequestPayload): Promise<OffersResponse | TokensResponse> }) => {
+export const useMarketFilter = ({
+  isFetching,
+  fetch,
+  fetchAttributes
+}: {
+  isFetching: boolean;
+  fetch(
+    payload: GetOffersRequestPayload
+  ): Promise<OffersResponse | TokensResponse>;
+  fetchAttributes: (payload: OfferFilters) => Promise<OffersAttributesResponse>;
+}) => {
   const { currentChainId, api } = useApi();
   const { customizableCollections, featuredCollections } = useCollections();
   const { selectedAccount, isLoading: isAccountsLoading } = useAccounts();
@@ -23,6 +32,7 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
   const [filterState, setFilterState] = useState<FilterState | null>(parseFilterState(searchParams.get('filterState')));
   const [sortingValue, setSortingValue] = useState<string>(searchParams.get('sortingValue') || defaultSortingValue.id);
   const [searchValue, setSearchValue] = useState<string | undefined>(searchParams.get('searchValue') || '');
+  const lastFetchAttributesParams = useRef<OfferFilters | null>(null);
 
   const getFilterByState = useCallback((filterState: FilterState | null) => {
     if (!filterState) return {};
@@ -78,6 +88,18 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
     };
   }, [selectedAccount]);
 
+  const fetchFilterAttributes = useCallback(async (currentFilterState: FilterState | null) => {
+    const params = {
+      ...(getFilterByState(currentFilterState)),
+      searchText: searchValue || undefined,
+    };
+  
+    if (JSON.stringify(params) !== JSON.stringify(lastFetchAttributesParams.current)) {
+      lastFetchAttributesParams.current = params;
+      await fetchAttributes(params);
+    }
+  }, [fetchAttributes, getFilterByState, searchValue]);
+
   const onSortingChange = useCallback((value: TOption) => {
     setSortingValue(value.id);
     setUrlParameter('sortingValue', value.id);
@@ -90,29 +112,35 @@ export const useMarketFilter = ({ isFetching, fetch }: { isFetching: boolean, fe
     });
   }, [fetch, filterState, getFilterByState, searchValue]);
 
-  const onSearch = useCallback((value?: string) => {
+  const onSearch = useCallback(async(value?: string) => {
     setSearchValue(value);
     setUrlParameter('searchValue', value || '');
-    void fetch({
-      page: 1,
-      pageSize: 20,
-      ...(getFilterByState(filterState)),
-      searchText: value || undefined,
-      sort: [sortingValue]
-    });
+    await Promise.all([
+      fetchFilterAttributes(filterState),
+      void fetch({
+        page: 1,
+        pageSize: 20,
+        ...(getFilterByState(filterState)),
+        searchText: value || undefined,
+        sort: [sortingValue]
+      })]);
   }, [fetch, sortingValue, searchValue, filterState, getFilterByState]);
 
   const onFilterChange = useCallback(async (filterState: FilterState | null) => {
     setUrlParameter('filterState', filterState ? JSON.stringify(filterState) : '');
-    await fetch({
-      page: 1,
-      pageSize: 20,
-      ...(getFilterByState(filterState)),
-      searchText: searchValue || undefined,
-      sort: [sortingValue]
-    });
     setFilterState(filterState);
-  }, [fetch, sortingValue, getFilterByState, searchValue]);
+
+    await Promise.all([
+      fetchFilterAttributes(filterState),
+      fetch({
+        page: 1,
+        pageSize: 20,
+        ...(getFilterByState(filterState)),
+        searchText: searchValue || undefined,
+        sort: [sortingValue]
+      })
+    ]);
+  }, [fetch, sortingValue, getFilterByState, searchValue, fetchFilterAttributes]);
 
   const onMobileFilterApply = useCallback(async (filterState: FilterState | null, sorting: SelectOptionProps) => {
     setUrlParameter('filterState', filterState ? JSON.stringify(filterState) : '');
