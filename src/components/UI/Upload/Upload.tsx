@@ -54,7 +54,7 @@ export const Upload: VFC<UploadProps> = ({ className, disabled, accept, onChange
         accept={accept}
         onChange={onFileChange}
         data-testid={testid}
-        style={{ display: 'none' }} // Hide the file input
+        style={{ display: 'none' }}
       />
     </UploadWrapper>
   );

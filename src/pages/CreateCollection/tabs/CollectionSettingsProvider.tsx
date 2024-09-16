@@ -24,7 +24,7 @@ interface CollectionSettingsContextType {
   setCollectionSponsoring: (sponsor: SPONSOR_PERMISSIONS) => void;
 }
 
-export const UNLIMETED_CONST = '99999999';
+export const UNLIMETED_CONST = '99999999999999901';
 
 const CollectionSettingsContext = createContext<CollectionSettingsContextType | undefined>(undefined);
 

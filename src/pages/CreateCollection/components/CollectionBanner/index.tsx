@@ -47,6 +47,7 @@ export const CollectionBannerComponent = ({ src, onChange, onRemove }: Collectio
             </UploadBannerLabelWrapper>
           }
           onChange={onChange}
+          accept={'image/*'}
         />
       )}
       {src && (

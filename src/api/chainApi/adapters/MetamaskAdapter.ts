@@ -1,4 +1,4 @@
-import { Contract, ethers, Signer } from 'ethers';
+import { BigNumber, Contract, ethers, Signer } from 'ethers';
 import { IV2Token, SchemaTools as SchemaToolsV2 } from '@unique-nft/schemas-v2';
 import { CollectionProperty, CreateCollectionParsed, CreateCollectionV2ArgsDto, TokenV2ItemForMultipleDto, PropertyKeyPermission, SetCollectionLimitsBody, SetSponsorshipBody, TokenId, CreateTokenPayload } from '@unique-nft/sdk';
 import { UniqueNFTFactory, UniqueFungibleFactory, UniqueRefungibleTokenFactory, CollectionHelpersFactory, parseEthersV5TxReceipt, UniqueRefungibleFactory } from '@unique-nft/solidity-interfaces';
@@ -11,6 +11,14 @@ import { NestTokenParam } from './IBaseAdapter';
 import { ChainValue } from '../controllers/BaseController';
 import { CollectionMode, CollectionNestingAndPermissionStruct$1, TPP_TO_TPP, TransferTokenParams } from '../types';
 import { getEthereumSigner, sleep } from 'utils/helpers';
+
+const collectionLimitFields = {
+  accountTokenOwnershipLimit: 0,
+  tokenLimit: 3,
+  transfersEnabled: 8
+};
+
+type CollectionLimitFieldKey = keyof typeof collectionLimitFields;
 
 const buyGasLimit = 1_000_000;
 const sellGasLimit = 200_000;
@@ -387,34 +395,90 @@ class MetamaskAdapter implements IMarketContractAdapter {
     await (await nftHelper.burn(payload.tokenId)).wait();
   }
 
-  getSetSponsorshipFee(payload: SetSponsorshipBody, signer: Signer): Promise<string> {
-    throw new Error('not implemented');
+  async getSetSponsorshipFee(payload: SetSponsorshipBody, signer: Signer): Promise<string> {
+    const collection = await UniqueNFTFactory(payload.collectionId, signer);
+    const estimateGas = await collection.estimateGas.setCollectionSponsorCross({
+      sub: '0x0',
+      eth: payload.address,
+    });
+
+    if (!signer.provider) return '';
+  
+    const gasPrice = await signer.provider.getGasPrice();
+    const totalFeeBigNumber = estimateGas.mul(gasPrice);
+    const totalFeeFormatted = parseFloat(ethers.utils.formatEther(totalFeeBigNumber));
+  
+    return String(totalFeeFormatted);
   }
 
   async setSponsorship(payload: SetSponsorshipBody, signer: Signer): Promise<void> {
     const collection = await UniqueNFTFactory(payload.collectionId, signer);
-    await collection.setCollectionSponsorCross({ sub: payload.address, eth: '' });
+    const tx = await collection.setCollectionSponsorCross({
+      sub: '0x0',
+      eth: payload.address
+    });
+    await tx.wait();
   }
 
-  getSetCollectionLimitsFee(payload: SetCollectionLimitsBody, signer: Signer): Promise<string> {
-    throw new Error('not implemented');
-  }
+  async getSetCollectionLimitsFee(payload: SetCollectionLimitsBody, signer: Signer): Promise<string> {
+    const collection = await UniqueNFTFactory(payload.collectionId, signer);
+    let totalGasEstimate = BigNumber.from(0);
+    
+    for (const [fieldKey, value] of Object.entries(payload.limits)) {
+      const typedFieldKey = fieldKey as CollectionLimitFieldKey;
+      const field = collectionLimitFields[typedFieldKey];
+      
+      if (field === undefined) {
+        console.log(`Invalid field: ${fieldKey}`);
+        continue;
+      }
+  
+      const limitStruct = {
+        field,
+        value: {
+          status: value !== null,
+          value: value !== null ? BigNumber.from(value) : BigNumber.from(0),
+        },
+      };
+  
+      const estimateGas = await collection.estimateGas.setCollectionLimit(limitStruct);
+      totalGasEstimate = totalGasEstimate.add(estimateGas);
+    }
+  
+    if (!signer.provider) return '';
 
+    const gasPrice = await signer.provider.getGasPrice();
+  
+    const totalFeeBigNumber = totalGasEstimate.mul(gasPrice);
+    const totalFeeFormatted = parseFloat(ethers.utils.formatEther(totalFeeBigNumber));
+  
+    return String(totalFeeFormatted);
+  }
+  
+  
   async setCollectionLimits(payload: SetCollectionLimitsBody, signer: Signer): Promise<void> {
     const collection = await UniqueNFTFactory(payload.collectionId, signer);
-
-    for (const [field, value] of Object.entries(payload.limits)) {
-        const limitStruct = {
-            field: field,
-            value,
-        };
-
-        await collection.setCollectionLimit(limitStruct, {
-            from: await signer.getAddress(),
-            gasLimit: 200000
-        });
+  
+    for (const [fieldKey, value] of Object.entries(payload.limits)) {
+      const typedFieldKey = fieldKey as CollectionLimitFieldKey;
+      const field = collectionLimitFields[typedFieldKey];
+  
+      if (field === undefined) {
+        console.log(`Invalid field: ${fieldKey}`);
+        continue;
+      }
+      const limitStruct = {
+        field,
+        value: {
+          status: value !== null,
+          value: value !== null ? BigNumber.from(value) : BigNumber.from(0),
+        },
+      };
+  
+      await (await collection.setCollectionLimit(limitStruct)).wait();
     }
   }
+  
 
 
   async burnCollection(collectionId: number): Promise<void> {

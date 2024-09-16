@@ -35,7 +35,10 @@ export const CollectionCover = ({ name, src, onChange, onRemove }: CollectionCov
           {src ? (
             <Picture alt={name || ''} src={src} size={160} />
           ) : (
-            <UploadCover onChange={(url, file: Blob) => onChange(URL.createObjectURL(file), file)} />
+            <UploadCover
+              onChange={(url, file: Blob) => onChange(URL.createObjectURL(file), file)}
+              accept={'image/*'}
+            />
           )}
         </PictureWrapperDotted>
       </PictureWrapper>

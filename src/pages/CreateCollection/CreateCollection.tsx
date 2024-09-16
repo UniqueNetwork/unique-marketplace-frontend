@@ -11,7 +11,6 @@ import { CollectionForm, Warning } from './types';
 import { FORM_ERRORS, tabsUrls, warnings } from './constants';
 import { useCollectionFormMapper } from './hooks/useCollectionFormMapper';
 import { StatusCreateTransactionsModal } from './components/StatusCreateTransactionsModal/StatusCreateTransactionsModal';
-import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
 import { useCollectionCreate } from './hooks/useCollectionCreate';
@@ -20,17 +19,16 @@ import { useCollectionSetProperties } from './hooks/useCollectionSetProperties';
 import { useBalanceInsufficient } from './hooks/useBalanceInsufficient';
 import { MetamaskAccountName } from 'account/MetamaskWallet';
 import { ConfirmBtn } from 'components';
-import { getIpfsUriByImagePath } from 'utils/urlUtils';
 import { CollectionBannerComponent } from './components/CollectionBanner';
 import { CollectionCover } from './components/CollectionCover';
-import { FILE_FORMAT_ERROR, FILE_SIZE_LIMIT_ERROR, _10MB } from 'pages/CreateNFT/constants';
+import { _10MB } from 'pages/CreateNFT/constants';
 import { BUNDLE_PERMISSIONS, SPONSOR_PERMISSIONS, UNLIMETED_CONST, useCollectionSettings } from './tabs/CollectionSettingsProvider';
 import { useCollectionSetLimits } from 'pages/CollectionEdit/Forms/hooks/useCollectionSetLimits';
-import { useCollectionSetSponsor } from 'pages/CollectionEdit/Forms/hooks/useCollectionSetSponsor';
 import { useMarketableCollection } from 'api/restApi/collections/collection';
 import { getSignature } from 'hooks/marketplaceStages/utils/getSignature';
 import { MarketableCollectionMetadata } from 'api/restApi/collections/types';
 import { useCollections } from 'hooks/useCollections';
+import { sleep } from 'utils/helpers';
 
 export const WrapperContent = styled.div`
   box-sizing: border-box;
@@ -72,6 +70,16 @@ const CreateCollectionComponent = () => {
     accounts: { size: accountsLength }
   } = useAccounts();
   const formMapper = useCollectionFormMapper();
+
+  const {
+    // feeFormatted,
+    // getFee,
+    // feeError,
+    // feeLoading,
+    submitWaitResult: submitLimitsWaitResult,
+    // isLoadingSubmitResult
+  } = useCollectionSetLimits();
+
   const {
     getFee,
     fee,
@@ -216,7 +224,7 @@ const CreateCollectionComponent = () => {
   };
 
   const { updateCollection } = useMarketableCollection();
-  const { isFetching, appendCollection } = useCollections();
+  const { appendCollection } = useCollections();
 
   const onSubmit = async (form: CollectionForm) => {
     if (!selectedAccount) {
@@ -237,12 +245,26 @@ const CreateCollectionComponent = () => {
     let bannerSrc;
   
     if (banner && banner.file) {
-      bannerSrc = await api?.collection?.uploadFile(banner.file);
+      try {
+        bannerSrc = await api?.collection?.uploadFile(banner.file);
+      } catch (err) {
+        setIsCreating(false);
+        error(
+          `Upload banner failed`
+        );
+      }
     }
 
     if (cover && cover.file) {
-      const coverSrc = await api?.collection?.uploadFile(cover.file);
-      payload.cover_image.url= coverSrc?.fullUrl || '';
+      try {
+        const coverSrc = await api?.collection?.uploadFile(cover.file);
+        payload.cover_image.url= coverSrc?.fullUrl || '';
+    } catch (err) {
+      setIsCreating(false);
+      error(
+        `Upload cover failed`
+      );
+    }
     }
 
     let createdCollection: CreateCollectionParsed | undefined;
@@ -300,18 +322,12 @@ const CreateCollectionComponent = () => {
     const collectionId = createdCollection?.collectionId;
     if (selectedAccount.name === MetamaskAccountName) {
       setCurrentSubmitStage(2);
-      const { attributes } = form;
-      const coverPictureUrl = getIpfsUriByImagePath(form.coverPictureIpfsCid);
       const { collectionProperties, tokenPropertyPermissions } =
         SchemaTools.encode.collection(
           {
             schemaName: 'unique',
             schemaVersion: '2.0.0',
-            cover_image: coverPictureUrl ? { url: coverPictureUrl } : undefined,
-            potential_attributes: attributes ? attributes.map(({ name, values }) => ({
-              trait_type: name || "",
-              values
-            })) : undefined,
+            cover_image: payload.cover_image.url ? { url: payload.cover_image.url } : undefined,
           },
           {
             defaultPermission: {
@@ -327,32 +343,87 @@ const CreateCollectionComponent = () => {
       });
 
       setCurrentSubmitStage(3);
-      await setProperties.submitWaitResult({
-        collectionId,
-        properties: collectionProperties.map(({ key, valueHex }) => ({ key, value: valueHex }))
-      });
+
+      try {
+        await setProperties.submitWaitResult({
+          collectionId,
+          properties: collectionProperties.map(({ key, valueHex }) => ({ key, value: valueHex }))
+        });
+      } catch (err) {
+        setIsCreating(false);
+        error(
+          `Setting Properties failed`
+        );
+      }
 
       setCurrentSubmitStage(4);
-      await api?.collection?.setCollectionNesting(
-        collectionId,
-        { token_owner: true, collection_admin: false, restricted: [] },
-        { account: selectedAccount }
-      );
 
+      let nestingPermissions = { tokenOwner: false, collectionAdmin: false };
+      
+      if (bundlePermission) {
+        if (bundlePermission === BUNDLE_PERMISSIONS.UNLIMETED) {
+          nestingPermissions = {
+            tokenOwner: true,
+            collectionAdmin: true
+          };
+        } else if (bundlePermission === BUNDLE_PERMISSIONS.COLLECTION_OWNER_OR_ADMIN) {
+          nestingPermissions = {
+            tokenOwner: false,
+            collectionAdmin: true,
+          };
+        } else if (bundlePermission === BUNDLE_PERMISSIONS.RESTRICTED) {
+          nestingPermissions = {
+            tokenOwner: false,
+            collectionAdmin: false,
+          };
+        }
+      }
+      
+      try {
+        await api?.collection?.setCollectionNesting(
+          collectionId,
+          {
+            token_owner: nestingPermissions.tokenOwner,
+            collection_admin: nestingPermissions.collectionAdmin,
+            restricted: []
+          },
+          { account: selectedAccount }
+        );
+
+      } catch (err) {
+        setIsCreating(false);
+        error(
+          `Setting Nesting failed`
+        );
+      }
 
       setCurrentSubmitStage(5);
-      await api?.collection?.setCollectionLimits(
-        {
-          collectionId: createdCollection?.collectionId || 0,
-          address: selectedAccount.address || '',
-          limits: {
-            tokenLimit: +collectionSize,
-            accountTokenOwnershipLimit: +accountTokenOwnershipLimit, 
-            transfersEnabled: tokenTransferPermission,
-          },
-        },
-        { account: selectedAccount }
-      );
+      try {
+        const limits: any = {};
+
+        if (collectionSize !== UNLIMETED_CONST) {
+          limits.tokenLimit = +collectionSize;
+        }
+
+        if (accountTokenOwnershipLimit !== UNLIMETED_CONST) {
+          limits.accountTokenOwnershipLimit = +accountTokenOwnershipLimit;
+        }
+
+        limits.transfersEnabled = Number(tokenTransferPermission);
+
+        await submitLimitsWaitResult({ 
+          payload: {
+            address: selectedAccount.address,
+            collectionId: createdCollection.collectionId,
+            limits: limits,
+          }
+        });
+      } catch (err) {
+        setIsCreating(false);
+        error(
+          `Setting limits failed`
+        );
+      }
 
       if (collectionSponsoring == SPONSOR_PERMISSIONS.OWNER || selectedAccount?.address || createdCollection?.collectionId) {
         setCurrentSubmitStage(6);
@@ -376,6 +447,7 @@ const CreateCollectionComponent = () => {
     //upload banner & socials
     if (bannerSrc || form.telegram || form.twitter || form.website || form.discord || form.instagram || form.reddit) {
       await appendCollection(collectionId);
+      await sleep(1000);
       const { signature, message, type } = await getSignature(selectedAccount);
       if (!type && !signature) return;
       const updateData: MarketableCollectionMetadata = {};
