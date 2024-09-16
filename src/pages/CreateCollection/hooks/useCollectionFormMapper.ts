@@ -12,12 +12,7 @@ export const useCollectionFormMapper = () => {
       name,
       description,
       symbol,
-      // tokenLimit,
-      // ownerCanDestroy,
-      // sponsorAddress,
-      attributes,
       coverPictureIpfsCid,
-      // nesting
     } = form;
 
     const coverPictureUrl = coverPictureIpfsCid ? `${IPFSGateway}${coverPictureIpfsCid}` : '';
@@ -49,13 +44,6 @@ export const useCollectionFormMapper = () => {
         ? {
             url: coverPictureUrl
           }
-        : undefined,
-      potential_attributes: attributes
-        ? attributes.map(({ name, values }) => ({
-            trait_type: name || '',
-            display_type: 'string',
-            values
-          }))
         : undefined,
       permissions: {
         nesting: {

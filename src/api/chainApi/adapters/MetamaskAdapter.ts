@@ -58,6 +58,7 @@ class MetamaskAdapter implements IMarketContractAdapter {
     const tokenHelper = await (mode === 'ReFungible'
       ? UniqueRefungibleTokenFactory({ collectionId, tokenId }, signer)
       : UniqueNFTFactory(collectionId, signer));
+
     await (await tokenHelper.transferFromCross(
       fromCross,
       toCross,
@@ -390,17 +391,31 @@ class MetamaskAdapter implements IMarketContractAdapter {
     throw new Error('not implemented');
   }
 
-  setSponsorship(payload: SetSponsorshipBody, signer: Signer): Promise<void> {
-    throw new Error('not implemented');
+  async setSponsorship(payload: SetSponsorshipBody, signer: Signer): Promise<void> {
+    const collection = await UniqueNFTFactory(payload.collectionId, signer);
+    await collection.setCollectionSponsorCross({ sub: payload.address, eth: '' });
   }
 
   getSetCollectionLimitsFee(payload: SetCollectionLimitsBody, signer: Signer): Promise<string> {
     throw new Error('not implemented');
   }
 
-  setCollectionLimits(payload: SetCollectionLimitsBody, signer: Signer): Promise<void> {
-    throw new Error('not implemented');
+  async setCollectionLimits(payload: SetCollectionLimitsBody, signer: Signer): Promise<void> {
+    const collection = await UniqueNFTFactory(payload.collectionId, signer);
+
+    for (const [field, value] of Object.entries(payload.limits)) {
+        const limitStruct = {
+            field: field,
+            value,
+        };
+
+        await collection.setCollectionLimit(limitStruct, {
+            from: await signer.getAddress(),
+            gasLimit: 200000
+        });
+    }
   }
+
 
   async burnCollection(collectionId: number): Promise<void> {
     const collectionHelper = await CollectionHelpersFactory(getEthereumSigner());

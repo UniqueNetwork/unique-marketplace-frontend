@@ -2,12 +2,14 @@ import { AttributeFieldOptional, AttributeFieldType, Warning } from './types';
 
 export const enum CREATE_COLLECTION_TABS_ROUTE {
   MAIN_INFORMATION = 'main-information',
-  NFT_ATTRIBUTES = 'nft-attributes',
+  COLLECTIONS_SETTINGS = 'collection-settings',
+  LINKS = 'collection-links',
 }
 
 export const tabsUrls = [
   `${CREATE_COLLECTION_TABS_ROUTE.MAIN_INFORMATION}`,
-  `${CREATE_COLLECTION_TABS_ROUTE.NFT_ATTRIBUTES}`
+  `${CREATE_COLLECTION_TABS_ROUTE.COLLECTIONS_SETTINGS}`,
+  `${CREATE_COLLECTION_TABS_ROUTE.LINKS}`
 ];
 
 export const warnings: Record<string, Warning> = {
@@ -16,11 +18,6 @@ export const warnings: Record<string, Warning> = {
     description:
       "Are you sure that you want to create the collection without it? You can't return to editing the cover in this product version."
   },
-  attributesAreNotDefine: {
-    title: "Warning! You haven't entered attributes. ",
-    description:
-      "Are you sure that you want to create the collection without them? You can't return to editing the attributes in this product version."
-  }
 };
 
 export const types: AttributeFieldType[] = [

@@ -1,12 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { FieldError, FormProvider, useForm, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
-import classNames from 'classnames';
 import { useDebounce } from 'use-debounce';
 import { SchemaTools } from '@unique-nft/schemas-v2';
 import { CreateCollectionParsed } from '@unique-nft/sdk';
-import { Button, ButtonGroup, Confirm, Text, useNotifications, Alert } from 'components/UI';
+import { Button, ButtonGroup, Confirm, Text, useNotifications, Alert, UploadImage } from 'components/UI';
 
 import { CollectionForm, Warning } from './types';
 import { FORM_ERRORS, tabsUrls, warnings } from './constants';
@@ -20,16 +19,18 @@ import { useCollectionSetTokenPropertyPermissions } from './hooks/useCollectionS
 import { useCollectionSetProperties } from './hooks/useCollectionSetProperties';
 import { useBalanceInsufficient } from './hooks/useBalanceInsufficient';
 import { MetamaskAccountName } from 'account/MetamaskWallet';
-import { FormWrapper } from 'pages/CollectionEdit/Forms/FormComponents';
-import { CollectionStepper } from './components/CollectionStepper';
-import { ConfirmBtn, FeeMessage } from 'components';
-import { BottomBar } from './components/BottomBar';
-import { CollectionSidebar } from './components/CollectionSidebar';
+import { ConfirmBtn } from 'components';
 import { getIpfsUriByImagePath } from 'utils/urlUtils';
-
-interface CreateCollectionProps {
-  className?: string;
-}
+import { CollectionBannerComponent } from './components/CollectionBanner';
+import { CollectionCover } from './components/CollectionCover';
+import { FILE_FORMAT_ERROR, FILE_SIZE_LIMIT_ERROR, _10MB } from 'pages/CreateNFT/constants';
+import { BUNDLE_PERMISSIONS, SPONSOR_PERMISSIONS, UNLIMETED_CONST, useCollectionSettings } from './tabs/CollectionSettingsProvider';
+import { useCollectionSetLimits } from 'pages/CollectionEdit/Forms/hooks/useCollectionSetLimits';
+import { useCollectionSetSponsor } from 'pages/CollectionEdit/Forms/hooks/useCollectionSetSponsor';
+import { useMarketableCollection } from 'api/restApi/collections/collection';
+import { getSignature } from 'hooks/marketplaceStages/utils/getSignature';
+import { MarketableCollectionMetadata } from 'api/restApi/collections/types';
+import { useCollections } from 'hooks/useCollections';
 
 export const WrapperContent = styled.div`
   box-sizing: border-box;
@@ -44,25 +45,21 @@ export const WrapperContent = styled.div`
 `;
 
 const WrapperContentStyled = styled(WrapperContent)`
+  position: relative;
   margin-bottom: calc(var(--prop-gap) * 2.5);
+  border-radius: 8px;
+  padding: 0px;
 
   @media screen and (min-width: 1025px) {
     margin-bottom: 0;
+    padding-bottom: 20px;
   }
 `;
 
-const ButtonsGroup = styled.div`
-  position: absolute;
-  bottom: 0;
-  padding: calc(var(--prop-gap) / 1.6) calc(var(--prop-gap) / 2);
-`;
-
-const CreateCollectionComponent = ({ className }: CreateCollectionProps) => {
-  const deviceSize = useDeviceSize();
+const CreateCollectionComponent = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [warning, setWarning] = useState<Warning | null>();
-  const [isDrawerOpen, setDrawerOpen] = useState(false);
-  const [currentStage, setCurrentStage] = useState(0);
+  const [currentSubmitStage, setCurrentSubmitStage] = useState(0);
   const [isCreating, setIsCreating] = useState(false);
 
   const navigate = useNavigate();
@@ -93,6 +90,34 @@ const CreateCollectionComponent = ({ className }: CreateCollectionProps) => {
   const { isBalanceInsufficient } = useBalanceInsufficient(
     fee || '0'
   );
+  const [banner, setBanner] = useState<{ src: string, file?: Blob }>();
+  const [cover, setCover] = useState<{ src: string, file?: Blob }>();
+
+  const onUploadBanner = useCallback((src: string, file: Blob) => {
+    setBanner({ src, file });
+  }, []);
+
+  const onRemoveBanner = useCallback(() => {
+    setBanner(undefined);
+  }, []);
+
+  const onUploadCover = useCallback((src: string, file: Blob) => {
+    setCover({ src, file });
+
+    //coverPictureIpfsCid
+  }, []);
+
+  const onRemoveCover = useCallback(() => {
+    setCover(undefined);
+  }, []);
+
+  const {
+    collectionSize,
+    accountTokenOwnershipLimit,
+    tokenTransferPermission,
+    bundlePermission,
+    collectionSponsoring,
+  } = useCollectionSettings();
 
   const collectionForm = useForm<CollectionForm>({
     mode: 'onChange',
@@ -101,11 +126,14 @@ const CreateCollectionComponent = ({ className }: CreateCollectionProps) => {
       name: '',
       symbol: '',
       description: '',
+      //social media
+      discord: '',
+      website: '',
+      twitter: '',
+      instagram: '',
+      telegram: '',
+      reddit: '',
       address: selectedAccount?.address,
-      nesting: {
-        tokenOwner: true,
-        collectionAdmin: true
-      }
     }
   });
   const {
@@ -156,8 +184,8 @@ const CreateCollectionComponent = ({ className }: CreateCollectionProps) => {
     setIsCreating(false);
     error(
       submitWaitResultError ||
-        setTokenPropertyPermissions.submitWaitResultError ||
-        setProperties.submitWaitResultError
+      setTokenPropertyPermissions.submitWaitResultError ||
+      setProperties.submitWaitResultError
     );
   }, [
     submitWaitResultError,
@@ -178,98 +206,192 @@ const CreateCollectionComponent = ({ className }: CreateCollectionProps) => {
       setCurrentStep(step);
     }
   };
-  const onNextStep = ({ coverPictureIpfsCid }: CollectionForm) => {
-    if (!coverPictureIpfsCid) {
-      setWarning(warnings.coverIsNotDefine);
-
-      return;
-    }
+  const onNextStep = useCallback(() => {
 
     goToNextStep(currentStep + 1);
-  };
+  }, [cover, warnings, setWarning, goToNextStep, currentStep]);
 
   const onCreateCollectionHandle = (form: CollectionForm) => {
     onSubmit(form);
   };
 
-  // TO DO create method for Reject TX case
-  // const createCollection = async(payload: CreateCollectionV2ArgsDto): Promise<CreateCollectionParsed | undefined> => {
-  //   try {
-  //     const createdCollection = await submitWaitResult({ payload });
-  //     if (!createdCollection) {
-  //       throw new Error('Failed to create collection');
-  //     }
-  //     return createdCollection;
-  //   } catch (err) {
-  //     console.log('You need to sign TX');
-  //     createCollection(payload);
-  //   }
-  // };
+  const { updateCollection } = useMarketableCollection();
+  const { isFetching, appendCollection } = useCollections();
 
   const onSubmit = async (form: CollectionForm) => {
     if (!selectedAccount) {
-      error('Account is not found');
       return;
     }
 
-    const payload = formMapper(form);
-    setCurrentStage(0);
+    if (!cover) {
+      setWarning(warnings.coverIsNotDefine);
+      return;
+    }
+
+    setCurrentSubmitStage(0);
     setIsCreating(true);
+    const payload = formMapper(form);
+    payload.cover_image = {url: ''};
+    payload.permissions = {};
+    payload.limits = {};
+    let bannerSrc;
+  
+    if (banner && banner.file) {
+      bannerSrc = await api?.collection?.uploadFile(banner.file);
+    }
+
+    if (cover && cover.file) {
+      const coverSrc = await api?.collection?.uploadFile(cover.file);
+      payload.cover_image.url= coverSrc?.fullUrl || '';
+    }
 
     let createdCollection: CreateCollectionParsed | undefined;
     try {
+      if (bundlePermission) {
+        if (bundlePermission === BUNDLE_PERMISSIONS.UNLIMETED) {
+          payload.permissions.nesting = {
+            tokenOwner: true,
+            collectionAdmin: true
+          };
+        } else if (bundlePermission === BUNDLE_PERMISSIONS.COLLECTION_OWNER_OR_ADMIN) {
+          payload.permissions.nesting = {
+            tokenOwner: false,
+            collectionAdmin: true,
+          };
+        } else if (bundlePermission === BUNDLE_PERMISSIONS.RESTRICTED) {
+          payload.permissions.nesting = {
+            tokenOwner: false,
+            collectionAdmin: false,
+          };
+        }
+      }
+
+      if (collectionSponsoring == SPONSOR_PERMISSIONS.OWNER || selectedAccount?.address || createdCollection?.collectionId) {
+        payload.sponsorship = {
+          address: selectedAccount?.address || '',
+          isConfirmed: true,
+        };
+      }
+
+      if (collectionSize !== UNLIMETED_CONST) {
+        payload.limits.tokenLimit = +collectionSize;
+      }
+
+      if (accountTokenOwnershipLimit !== UNLIMETED_CONST) {
+        payload.limits.accountTokenOwnershipLimit = +accountTokenOwnershipLimit;
+      }
+
+      if (tokenTransferPermission) {
+        payload.limits.transfersEnabled = tokenTransferPermission;
+      }
+      setCurrentSubmitStage(1);
       createdCollection = await submitWaitResult({ payload });
     } catch (err) {
       setIsCreating(false);
       error('You need to sign the transaction');
       return;
     }
+
+    if (!createdCollection?.collectionId) {
+      setIsCreating(false);
+      error('Something went wrong');
+      return;
+    }
     const collectionId = createdCollection?.collectionId;
     if (selectedAccount.name === MetamaskAccountName) {
-      if (!collectionId) {
-        setIsCreating(false);
-        error('Something went wrong');
-        return;
-      }
-      setCurrentStage(1);
+      setCurrentSubmitStage(2);
       const { attributes } = form;
       const coverPictureUrl = getIpfsUriByImagePath(form.coverPictureIpfsCid);
       const { collectionProperties, tokenPropertyPermissions } =
-      SchemaTools.encode.collection(
-        {
-          schemaName: 'unique',
-          schemaVersion: '2.0.0',
-          cover_image: coverPictureUrl ? { url: coverPictureUrl } : undefined,
-          potential_attributes: attributes ? attributes.map(({ name, values }) => ({ 
-            trait_type: name || "",
-            values
-          })) : undefined,
-        },
-        {
-          defaultPermission: {
-            mutable: true,
-            collectionAdmin: true,
-            tokenOwner: false
+        SchemaTools.encode.collection(
+          {
+            schemaName: 'unique',
+            schemaVersion: '2.0.0',
+            cover_image: coverPictureUrl ? { url: coverPictureUrl } : undefined,
+            potential_attributes: attributes ? attributes.map(({ name, values }) => ({
+              trait_type: name || "",
+              values
+            })) : undefined,
+          },
+          {
+            defaultPermission: {
+              mutable: true,
+              collectionAdmin: true,
+              tokenOwner: false
+            }
           }
-        }
-      );
+        );
       await setTokenPropertyPermissions.submitWaitResult({
         collectionId,
         propertyPermissions: tokenPropertyPermissions
       });
-      
-      setCurrentStage(2);
+
+      setCurrentSubmitStage(3);
       await setProperties.submitWaitResult({
         collectionId,
-        properties: collectionProperties.map(({key, valueHex}) => ({key, value: valueHex}))
+        properties: collectionProperties.map(({ key, valueHex }) => ({ key, value: valueHex }))
       });
 
-      setCurrentStage(3);
+      setCurrentSubmitStage(4);
       await api?.collection?.setCollectionNesting(
         collectionId,
         { token_owner: true, collection_admin: false, restricted: [] },
         { account: selectedAccount }
       );
+
+
+      setCurrentSubmitStage(5);
+      await api?.collection?.setCollectionLimits(
+        {
+          collectionId: createdCollection?.collectionId || 0,
+          address: selectedAccount.address || '',
+          limits: {
+            tokenLimit: +collectionSize,
+            accountTokenOwnershipLimit: +accountTokenOwnershipLimit, 
+            transfersEnabled: tokenTransferPermission,
+          },
+        },
+        { account: selectedAccount }
+      );
+
+      if (collectionSponsoring == SPONSOR_PERMISSIONS.OWNER || selectedAccount?.address || createdCollection?.collectionId) {
+        setCurrentSubmitStage(6);
+        await api?.collection?.setSponsorship(
+          {
+            address: selectedAccount?.address,
+            collectionId,
+            newSponsor: 'Sponsor',
+          },
+          { account: selectedAccount }
+        );
+      }
+    }
+
+    if (selectedAccount.name === MetamaskAccountName) {
+      setCurrentSubmitStage(7);
+    } else {
+      setCurrentSubmitStage(2);
+    }
+
+    //upload banner & socials
+    if (bannerSrc || form.telegram || form.twitter || form.website || form.discord || form.instagram || form.reddit) {
+      await appendCollection(collectionId);
+      const { signature, message, type } = await getSignature(selectedAccount);
+      if (!type && !signature) return;
+      const updateData: MarketableCollectionMetadata = {};
+      
+      if (bannerSrc) updateData.banner = bannerSrc.fullUrl;
+      if (form.website) updateData.website = form.website;
+      if (form.discord) updateData.discord = form.discord;
+      if (form.twitter) updateData.twitter = form.twitter;
+      if (form.instagram) updateData.instagram = form.instagram;
+      if (form.telegram) updateData.telegram = form.telegram;
+      if (form.reddit) updateData.reddit = form.reddit;
+    
+
+      if (!type || !signature) return;
+
+      updateCollection(collectionId, updateData, type, { message, signature });
     }
 
     setIsCreating(false);
@@ -293,14 +415,11 @@ const CreateCollectionComponent = ({ className }: CreateCollectionProps) => {
   const isFirstStep = currentStep - 1 === 0;
   const isLastStep = currentStep === tabsUrls.length;
 
-  const isolatedCollectionForm = useMemo(
-    () => (
-      <FormProvider {...collectionForm}>
-        <Outlet />
-      </FormProvider>
-    ),
-    [collectionForm]
-  );
+  const isolatedCollectionForm = useMemo(() => (
+    <FormProvider {...collectionForm}>
+      <Outlet />
+    </FormProvider>
+  ), [collectionForm]);
 
   const errorTooltip = useMemo(() => {
     if (!isValid) {
@@ -338,26 +457,45 @@ const CreateCollectionComponent = ({ className }: CreateCollectionProps) => {
   ]);
 
   const isValidFirstStep = useMemo(() => {
+    return !errors.name || !errors.symbol;
+  }, [errors, isBalanceInsufficient]);
+
+  const isValidSecondStep = useMemo(() => {
     return !errors.name || !errors.symbol || !errors.coverPictureIpfsCid;
   }, [errors, isBalanceInsufficient]);
 
+
   const creatingStages = useMemo(() => {
     if (selectedAccount?.name === MetamaskAccountName) {
-      return ['Creating collection', 'Setting permissions', 'Setting properties', 'Setting nesting'];
+      return ['Upload images', 'Creating collection', 'Setting permissions', 'Setting properties', 'Setting nesting', 'Setting Limits', 'Set Sponsorship', 'Upload banner & socials'];
     }
-    return ['Creating collection'];
+
+    return ['Upload images', 'Creating collection', 'Upload banner & socials'];
   }, [selectedAccount?.name]);
 
+  if (!selectedAccount) {
+    return <>Account is not found</>;
+  }
+
   return (
-    <Wrapper className={classNames('create-collection-page', className)}>
+    <Wrapper>
       <WrapperContentStyled>
+        <CollectionBannerComponent
+          src={banner?.src}
+          onChange={onUploadBanner}
+          onRemove={onRemoveBanner}
+        />
+        <CoverWrapper>
+          <CollectionCover
+            name={''}
+            src={cover?.src}
+            onChange={onUploadCover}
+            onRemove={onRemoveCover}
+          />
+        </CoverWrapper>
         <FormWrapper>
-          {/* <CollectionStepper
-            activeStep={currentStep}
-            onClickStep={goToPreviousStep}
-          /> */}
           {isolatedCollectionForm}
-          {isBalanceInsufficient || (!isBalanceInsufficient && isValid) ? (
+          {/* {isBalanceInsufficient || (!isBalanceInsufficient && isValid) ? (
             <FeeMessage
               fee={feeFormatted}
               isFeeLoading={feeLoading}
@@ -367,8 +505,19 @@ const CreateCollectionComponent = ({ className }: CreateCollectionProps) => {
             <Alert type='warning'>
               A fee will be calculated after corrected filling required fields
             </Alert>
-          )}
+          )} */}
           <ButtonGroup $fill>
+            {!isFirstStep && (
+              <Button
+                iconLeft={{
+                  color: 'var(--color-primary-400)',
+                  name: 'arrow-left',
+                  size: 12
+                }}
+                title='Back'
+                onClick={() => goToPreviousStep(currentStep - 1)}
+              />
+            )}
             {!isLastStep && (
               <ConfirmBtn
                 iconRight={{
@@ -377,30 +526,19 @@ const CreateCollectionComponent = ({ className }: CreateCollectionProps) => {
                   size: 12
                 }}
                 title='Next step'
-                disabled={!isValidFirstStep}
+                disabled={!isValidFirstStep || !isValidSecondStep}
                 tooltip={errorTooltip}
                 onClick={handleSubmit(onNextStep)}
               />
             )}
-            {/* {!isFirstStep && (
-              <Button
-                iconLeft={{
-                  color: 'var(--color-primary-400)',
-                  name: 'arrow-left',
-                  size: 12
-                }}
-                title='Previous step'
-                onClick={() => goToPreviousStep(currentStep - 1)}
-              />
-            )} */}
 
-            <ConfirmBtn
+            {isLastStep && <ConfirmBtn
               role='primary'
-              title='Create collection'
+              title='Create collection disabled'
               tooltip={errorTooltip}
-              disabled={!isValid || feeLoading || isBalanceInsufficient}
+              // disabled={!isValid || feeLoading || isBalanceInsufficient}
               onClick={handleSubmit(onCreateCollectionHandle)}
-            />
+            />}
 
           </ButtonGroup>
           <Confirm
@@ -431,47 +569,24 @@ const CreateCollectionComponent = ({ className }: CreateCollectionProps) => {
             isVisible={isCreating}
             descriptions={creatingStages}
             warning='Advanced settings will be available on the collection page after creating the collection'
-            step={currentStage}
+            step={currentSubmitStage}
           />
         </FormWrapper>
       </WrapperContentStyled>
-      {deviceSize >= DeviceSize.lg ? (
-        <CollectionSidebar
-          collectionForm={collectionFormValues as CollectionForm}
-        />
-      ) : (
-        <BottomBar
-          buttons={[
-            <Button
-              title='Preview'
-              key='toggleDrawer'
-              onClick={() => setDrawerOpen(true)}
-            />
-          ]}
-          isOpen={isDrawerOpen}
-          parent={document.body}
-        >
-          <CollectionSidebar
-            collectionForm={collectionFormValues as CollectionForm}
-          />
-          <ButtonsGroup>
-            <Button
-              title='Back'
-              key='toggleDrawer'
-              onClick={() => setDrawerOpen(false)}
-            />
-          </ButtonsGroup>
-        </BottomBar>
-      )}
     </Wrapper>
   );
 };
 
-const Wrapper = styled.div`
-  @media screen and (min-width: 1025px) {
-    display: flex;
-    align-items: flex-start;
-  }
+const Wrapper = styled.div``;
+
+const FormWrapper = styled.div`
+  margin: calc(var(--prop-gap) * 2.5) 0;
+  padding-left: calc(32px + 160px + 10px + 24px);
+  max-width: 766px;
+`;
+
+const CoverWrapper = styled.div`
+  margin-left: 28px;
 `;
 
 export const CreateCollection = CreateCollectionComponent;

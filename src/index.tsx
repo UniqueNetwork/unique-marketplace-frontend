@@ -9,6 +9,10 @@ import { TokenContextProvider } from 'pages/Token/context/TokenContext';
 import { CreateNFT } from 'pages/CreateNFT';
 import { CreateCollectionPage } from 'pages/CreateCollection';
 import { MainInformation, NFTAttributes } from 'pages/CreateCollection/tabs';
+import { CollectionSettings } from 'pages/CreateCollection/tabs/CollectionSettings';
+import { CollectionLinks } from 'pages/CreateCollection/tabs/CollectionLinks';
+import { CREATE_COLLECTION_TABS_ROUTE } from 'pages/CreateCollection/constants';
+import { CollectionSettingsProvider } from 'pages/CreateCollection/tabs/CollectionSettingsProvider';
 
 const commonRoutes = (<>
   <Route
@@ -52,16 +56,22 @@ const commonRoutes = (<>
     path={'create-token'}
   />
   <Route
-    element={<CreateCollectionPage />}
+    element={<CollectionSettingsProvider>
+      <CreateCollectionPage />
+    </CollectionSettingsProvider>}
     path={'create-collection'}
   >
     <Route
       element={<MainInformation />}
-      path={'main-information'}
+      path={CREATE_COLLECTION_TABS_ROUTE.MAIN_INFORMATION}
     />
     <Route
-      element={<NFTAttributes />}
-      path={'nft-attributes'}
+      element={<CollectionSettings />}
+      path={CREATE_COLLECTION_TABS_ROUTE.COLLECTIONS_SETTINGS}
+    />
+    <Route
+      element={<CollectionLinks />}
+      path={CREATE_COLLECTION_TABS_ROUTE.LINKS}
     />
   </Route>
   <Route
