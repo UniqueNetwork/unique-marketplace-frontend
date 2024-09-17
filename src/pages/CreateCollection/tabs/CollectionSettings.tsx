@@ -39,7 +39,7 @@ export const CollectionSettings = () => {
       </Text>
       <OptionsWrapper>
         <Checkbox
-          checked={collectionSize === UNLIMETED_CONST}
+          checked={(collectionSize === UNLIMETED_CONST || collectionSize === '')}
           label={'Unlimited (default)'}
           size={'m'}
           onChange={() => setCollectionSize(UNLIMETED_CONST)}
@@ -48,7 +48,7 @@ export const CollectionSettings = () => {
         />
         <CheckboxTextInput>
           <Checkbox
-            checked={collectionSize !== UNLIMETED_CONST}
+            checked={collectionSize !== UNLIMETED_CONST && collectionSize !== ''}
             label={''}
             size={'m'}
             onChange={() => setCollectionSize('100')}
@@ -75,7 +75,7 @@ export const CollectionSettings = () => {
       </Text>
       <OptionsWrapper>
         <Checkbox
-          checked={accountTokenOwnershipLimit === UNLIMETED_CONST}
+          checked={accountTokenOwnershipLimit === UNLIMETED_CONST || accountTokenOwnershipLimit === ''}
           label={'Unlimited (default)'}
           size={'m'}
           onChange={() => setaccountTokenOwnershipLimit(UNLIMETED_CONST)}
@@ -84,7 +84,7 @@ export const CollectionSettings = () => {
         />
         <CheckboxTextInput>
           <Checkbox
-            checked={accountTokenOwnershipLimit !== UNLIMETED_CONST}
+            checked={accountTokenOwnershipLimit !== UNLIMETED_CONST && accountTokenOwnershipLimit !== ''}
             label={''}
             size={'m'}
             onChange={() => setaccountTokenOwnershipLimit('100')}

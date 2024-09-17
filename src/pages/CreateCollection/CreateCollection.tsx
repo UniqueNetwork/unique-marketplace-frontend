@@ -18,7 +18,7 @@ import { useCollectionSetTokenPropertyPermissions } from './hooks/useCollectionS
 import { useCollectionSetProperties } from './hooks/useCollectionSetProperties';
 import { useBalanceInsufficient } from './hooks/useBalanceInsufficient';
 import { MetamaskAccountName } from 'account/MetamaskWallet';
-import { ConfirmBtn } from 'components';
+import { ConfirmBtn, FeeMessage } from 'components';
 import { CollectionBannerComponent } from './components/CollectionBanner';
 import { CollectionCover } from './components/CollectionCover';
 import { _10MB } from 'pages/CreateNFT/constants';
@@ -401,11 +401,11 @@ const CreateCollectionComponent = () => {
       try {
         const limits: any = {};
 
-        if (collectionSize !== UNLIMETED_CONST) {
+        if (collectionSize !== UNLIMETED_CONST && collectionSize !== '') {
           limits.tokenLimit = +collectionSize;
         }
 
-        if (accountTokenOwnershipLimit !== UNLIMETED_CONST) {
+        if (accountTokenOwnershipLimit !== UNLIMETED_CONST && accountTokenOwnershipLimit !== '') {
           limits.accountTokenOwnershipLimit = +accountTokenOwnershipLimit;
         }
 
@@ -444,7 +444,7 @@ const CreateCollectionComponent = () => {
       setCurrentSubmitStage(2);
     }
 
-    //upload banner & socials
+    // Set banner & links
     if (bannerSrc || form.telegram || form.twitter || form.website || form.discord || form.instagram || form.reddit) {
       await appendCollection(collectionId);
       await sleep(1000);
@@ -498,11 +498,7 @@ const CreateCollectionComponent = () => {
       if (!errors || !Object.values(errors).length) {
         return FORM_ERRORS.REQUIRED_FIELDS;
       }
-      const { attributes, ...fieldErrors } = errors;
-
-      if (attributes?.filter?.((item) => !!item).length) {
-        return FORM_ERRORS.REQUIRED_FIELDS;
-      }
+      const { ...fieldErrors } = errors;
 
       return Object.values(fieldErrors)
         .reduce<FieldError[]>((arr, item) => {
@@ -539,14 +535,14 @@ const CreateCollectionComponent = () => {
 
   const creatingStages = useMemo(() => {
     if (selectedAccount?.name === MetamaskAccountName) {
-      return ['Upload images', 'Creating collection', 'Setting permissions', 'Setting properties', 'Setting nesting', 'Setting Limits', 'Set Sponsorship', 'Upload banner & socials'];
+      return ['Upload images', 'Creating collection', 'Setting permissions', 'Setting properties', 'Setting nesting', 'Setting Limits', 'Set Sponsorship', 'Set banner & links'];
     }
 
-    return ['Upload images', 'Creating collection', 'Upload banner & socials'];
+    return ['Upload images', 'Creating collection', 'Set banner & links'];
   }, [selectedAccount?.name]);
 
   if (!selectedAccount) {
-    return <>Account is not found</>;
+    return <>Account is not connected</>;
   }
 
   return (
@@ -567,7 +563,7 @@ const CreateCollectionComponent = () => {
         </CoverWrapper>
         <FormWrapper>
           {isolatedCollectionForm}
-          {/* {isBalanceInsufficient || (!isBalanceInsufficient && isValid) ? (
+          {isBalanceInsufficient || (!isBalanceInsufficient && isValid) ? (
             <FeeMessage
               fee={feeFormatted}
               isFeeLoading={feeLoading}
@@ -577,7 +573,7 @@ const CreateCollectionComponent = () => {
             <Alert type='warning'>
               A fee will be calculated after corrected filling required fields
             </Alert>
-          )} */}
+          )}
           <ButtonGroup $fill>
             {!isFirstStep && (
               <Button
@@ -606,9 +602,9 @@ const CreateCollectionComponent = () => {
 
             {isLastStep && <ConfirmBtn
               role='primary'
-              title='Create collection disabled'
+              title='Create collection'
               tooltip={errorTooltip}
-              // disabled={!isValid || feeLoading || isBalanceInsufficient}
+              disabled={!isValid || feeLoading || isBalanceInsufficient}
               onClick={handleSubmit(onCreateCollectionHandle)}
             />}
 
