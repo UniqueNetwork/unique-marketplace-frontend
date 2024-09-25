@@ -14,10 +14,11 @@ export const CollectionLinks = () => {
     <>
       <CollectionHeader name={name} description={description} />
       <Heading size='2'>Links</Heading>
-      <Text size='m' color='grey-500' weight='light'>
-        Will be visible in the collection page on the marketplace. Can be set or changed later.
-      </Text>
-      
+      <SubHeaderWrap>
+        <Text size='m' color='grey-500' weight='light'>
+          Will be visible in the collection page on the marketplace. Can be set or changed later.
+        </Text>
+      </SubHeaderWrap>
       <FormRow>
         <Controller
           name='discord'
@@ -158,4 +159,8 @@ const SymbolInputText = styled(InputText)`
     font-weight: 500;
     margin-bottom: 16px;
   }
+`;
+
+const SubHeaderWrap = styled.div`
+  margin-bottom: 40px;
 `;
