@@ -132,7 +132,11 @@ export const CollectionSettings = () => {
       </TitleWrap>
       <Text size='m' color='grey-500' weight='light'>
         The setting determines whether NFT bundles can be created within this collection. Can be limited later, but can never be reset back to ‘unlimited‘.
-        <a target='_blank' href=''><Blue>Learn More</Blue></a>
+        <a
+          target='_blank'
+          rel='noreferrer'
+          href='https://docs.unique.network/about/nft-features/nested.html'
+        ><Blue>Learn More</Blue></a>
       </Text>
       <OptionsWrapper>
         <Checkbox
@@ -164,12 +168,16 @@ export const CollectionSettings = () => {
 
       <TitleWrap>
         <Text size='l' color='--color-secondary-500'>
-          Collection sponsorin
+          Collection sponsoring
         </Text>
       </TitleWrap>
       <Text size='m' color='grey-500' weight='light'>
         If collection sponsoring is enabled, the sponsor pays for all transfers of this collection NFTs made by any NFT owner. Can be set or changed later.
-        <a target='_blank' href=''><Blue>Learn More</Blue></a>
+        <a
+          target='_blank'
+          rel='noreferrer'
+          href='https://docs.unique.network/about/network-features/sponsoring.html'
+        ><Blue>Learn More</Blue></a>
       </Text>
       <OptionsWrapper>
         <Checkbox

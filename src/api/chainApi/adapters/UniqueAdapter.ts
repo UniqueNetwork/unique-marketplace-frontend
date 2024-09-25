@@ -379,6 +379,14 @@ class UniqueAdapter implements IMarketContractAdapter {
     await this.uniqueSdk.collection.setSponsorship(payload, { signer });
   }
 
+  async confirmCollectionSponsorship(payload: SetSponsorshipBody, signer: Signer): Promise<void> {
+    await this.uniqueSdk.collection.confirmSponsorship({ collectionId: payload.collectionId, address: signer.address }, { signer });
+  }
+
+  async getConfirmSponsorshipFee(payload: SetSponsorshipBody, signer: Signer): Promise<string> {
+    return (await this.uniqueSdk.collection.confirmSponsorship.getFee({ collectionId: payload.collectionId, address: signer.address })).fee.formatted;
+  }
+
   async getSetCollectionLimitsFee(payload: SetCollectionLimitsBody, signer: Signer): Promise<string> {
     return (await this.uniqueSdk.collection.setLimits.getFee(payload)).fee.formatted;
   }

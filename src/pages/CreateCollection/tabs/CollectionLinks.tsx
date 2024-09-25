@@ -1,4 +1,4 @@
-import { Heading, InputText } from 'components/UI';
+import { Heading, InputText, Text } from 'components/UI';
 import styled from 'styled-components';
 import { FormRow } from '../components/FormComponents';
 import { Controller, useFormContext } from 'react-hook-form';
@@ -14,6 +14,10 @@ export const CollectionLinks = () => {
     <>
       <CollectionHeader name={name} description={description} />
       <Heading size='2'>Links</Heading>
+      <Text size='m' color='grey-500' weight='light'>
+        Will be visible in the collection page on the marketplace. Can be set or changed later.
+      </Text>
+      
       <FormRow>
         <Controller
           name='discord'
@@ -26,7 +30,7 @@ export const CollectionLinks = () => {
           render={({ field: { onChange, value }, fieldState: { error } }) => (
             <SymbolInputText
               label='Discord'
-              placeholder='http://'
+              placeholder='https://'
               value={value}
               error={!!error}
               statusText={error?.message}
@@ -48,7 +52,7 @@ export const CollectionLinks = () => {
           render={({ field: { onChange, value }, fieldState: { error } }) => (
             <SymbolInputText
               label='Website'
-              placeholder='http://'
+              placeholder='https://'
               value={value}
               error={!!error}
               statusText={error?.message}
@@ -70,7 +74,7 @@ export const CollectionLinks = () => {
           render={({ field: { onChange, value }, fieldState: { error } }) => (
             <SymbolInputText
               label='Twitter'
-              placeholder='http://'
+              placeholder='https://'
               value={value}
               error={!!error}
               statusText={error?.message}
@@ -92,7 +96,7 @@ export const CollectionLinks = () => {
           render={({ field: { onChange, value }, fieldState: { error } }) => (
             <SymbolInputText
               label='Instagram'
-              placeholder='http://'
+              placeholder='https://'
               value={value}
               error={!!error}
               statusText={error?.message}
@@ -114,7 +118,7 @@ export const CollectionLinks = () => {
           render={({ field: { onChange, value }, fieldState: { error } }) => (
             <SymbolInputText
               label='Telegram'
-              placeholder='http://'
+              placeholder='https://'
               value={value}
               error={!!error}
               statusText={error?.message}
@@ -136,7 +140,7 @@ export const CollectionLinks = () => {
           render={({ field: { onChange, value }, fieldState: { error } }) => (
             <SymbolInputText
               label='Reddit'
-              placeholder='http://'
+              placeholder='https://'
               value={value}
               error={!!error}
               statusText={error?.message}

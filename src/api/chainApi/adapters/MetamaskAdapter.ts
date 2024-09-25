@@ -11,6 +11,7 @@ import { NestTokenParam } from './IBaseAdapter';
 import { ChainValue } from '../controllers/BaseController';
 import { CollectionMode, CollectionNestingAndPermissionStruct$1, TPP_TO_TPP, TransferTokenParams } from '../types';
 import { getEthereumSigner, sleep } from 'utils/helpers';
+import { CollectionSponsorship } from '@unique-nft/sdk';
 
 const collectionLimitFields = {
   accountTokenOwnershipLimit: 0,
@@ -420,6 +421,32 @@ class MetamaskAdapter implements IMarketContractAdapter {
     await tx.wait();
   }
 
+  async confirmCollectionSponsorship(payload: SetSponsorshipBody, signer: Signer): Promise<void> {
+    const collection = await UniqueNFTFactory(payload.collectionId, signer);
+    
+    const tx = await collection.confirmCollectionSponsorship({
+      from: await signer.getAddress(),
+    });
+    
+    await tx.wait();
+  }
+
+  async getConfirmSponsorshipFee(payload: SetSponsorshipBody, signer: Signer): Promise<string> {
+    const collection = await UniqueNFTFactory(payload.collectionId, signer);
+    
+    const estimateGas = await collection.estimateGas.confirmCollectionSponsorship({
+      from: await signer.getAddress(),
+    });
+  
+    if (!signer.provider) return '';
+    
+    const gasPrice = await signer.provider.getGasPrice();
+    const totalFeeBigNumber = estimateGas.mul(gasPrice);
+    const totalFeeFormatted = parseFloat(ethers.utils.formatEther(totalFeeBigNumber));
+  
+    return String(totalFeeFormatted);
+  }
+  
   async getSetCollectionLimitsFee(payload: SetCollectionLimitsBody, signer: Signer): Promise<string> {
     const collection = await UniqueNFTFactory(payload.collectionId, signer);
     let totalGasEstimate = BigNumber.from(0);
@@ -478,8 +505,6 @@ class MetamaskAdapter implements IMarketContractAdapter {
       await (await collection.setCollectionLimit(limitStruct)).wait();
     }
   }
-  
-
 
   async burnCollection(collectionId: number): Promise<void> {
     const collectionHelper = await CollectionHelpersFactory(getEthereumSigner());

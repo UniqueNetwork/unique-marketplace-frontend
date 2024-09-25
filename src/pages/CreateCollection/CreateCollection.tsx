@@ -29,6 +29,7 @@ import { getSignature } from 'hooks/marketplaceStages/utils/getSignature';
 import { MarketableCollectionMetadata } from 'api/restApi/collections/types';
 import { useCollections } from 'hooks/useCollections';
 import { sleep } from 'utils/helpers';
+import { useCollectionConfirmSponsorship } from 'pages/CollectionEdit/Forms/hooks/useCollectionConfirmSponsorship';
 
 export const WrapperContent = styled.div`
   box-sizing: border-box;
@@ -153,6 +154,20 @@ const CreateCollectionComponent = () => {
     control
   });
 
+  const needConfirmSponsoring = useMemo(() => (
+    collectionSponsoring == SPONSOR_PERMISSIONS.OWNER
+  ), [collectionSponsoring]);
+
+  const {
+    getFee: getConfirmSponsorshipFee,
+    feeFormatted: feeConfirmSponsorship,
+    submitWaitResult: submitConfirmSponsorshipResult
+  } = useCollectionConfirmSponsorship();
+
+  const sumFee = useMemo(() => {
+    return (String(Number(feeFormatted) + (feeConfirmSponsorship ? Number(feeConfirmSponsorship) / 10**12 : 0) ));
+  }, [feeConfirmSponsorship, fee]);
+
   const [collectionDebounceValue] = useDebounce(collectionFormValues as any, 500);
 
   const returnToCreateToken = useMemo(() => {
@@ -205,8 +220,12 @@ const CreateCollectionComponent = () => {
     if (collectionDebounceValue && isValid) {
       const collection = formMapper(collectionDebounceValue);
       getFee({ payload: collection });
+
+      if (needConfirmSponsoring && selectedAccount && selectedAccount.name !== MetamaskAccountName) {
+        getConfirmSponsorshipFee({ payload: 1 });
+      }
     }
-  }, [collectionDebounceValue, getFee]);
+  }, [collectionDebounceValue, needConfirmSponsoring, getFee, getConfirmSponsorshipFee]);
 
   const goToNextStep = (step: number) => setCurrentStep(step);
   const goToPreviousStep = (step: number) => {
@@ -215,7 +234,7 @@ const CreateCollectionComponent = () => {
     }
   };
   const onNextStep = useCallback(() => {
-
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     goToNextStep(currentStep + 1);
   }, [cover, warnings, setWarning, goToNextStep, currentStep]);
 
@@ -425,7 +444,7 @@ const CreateCollectionComponent = () => {
         );
       }
 
-      if (collectionSponsoring == SPONSOR_PERMISSIONS.OWNER || selectedAccount?.address || createdCollection?.collectionId) {
+      if (needConfirmSponsoring || selectedAccount?.address || createdCollection?.collectionId) {
         setCurrentSubmitStage(6);
         await api?.collection?.setSponsorship(
           {
@@ -438,10 +457,23 @@ const CreateCollectionComponent = () => {
       }
     }
 
+    if (needConfirmSponsoring) {
+      setCurrentSubmitStage(selectedAccount.name === MetamaskAccountName ? 7 : 2);
+      try {
+        await submitConfirmSponsorshipResult(({ payload: collectionId }));
+        
+      } catch (err) {
+        setIsCreating(false);
+        error(
+          `Confirm sponsorship failed`
+        );
+      }
+    }
+
     if (selectedAccount.name === MetamaskAccountName) {
-      setCurrentSubmitStage(7);
+      setCurrentSubmitStage(needConfirmSponsoring ? 8 : 7);
     } else {
-      setCurrentSubmitStage(2);
+      setCurrentSubmitStage(needConfirmSponsoring ? 3 : 2);
     }
 
     // Set banner & links
@@ -459,7 +491,6 @@ const CreateCollectionComponent = () => {
       if (form.instagram) updateData.instagram = form.instagram;
       if (form.telegram) updateData.telegram = form.telegram;
       if (form.reddit) updateData.reddit = form.reddit;
-    
 
       if (!type || !signature) return;
 
@@ -534,12 +565,29 @@ const CreateCollectionComponent = () => {
 
 
   const creatingStages = useMemo(() => {
+    const baseStages = ['Upload images', 'Creating collection'];
+    const metamaskStages = [
+      'Setting permissions',
+      'Setting properties',
+      'Setting nesting',
+      'Setting Limits',
+      'Setting Sponsorship',
+      'Confirm Sponsorship',
+      'Setting banner & links'
+    ];
+    
+    const defaultStages = ['Confirm Sponsorship', 'Setting banner & links'];
+  
     if (selectedAccount?.name === MetamaskAccountName) {
-      return ['Upload images', 'Creating collection', 'Setting permissions', 'Setting properties', 'Setting nesting', 'Setting Limits', 'Set Sponsorship', 'Set banner & links'];
+      return needConfirmSponsoring
+        ? [...baseStages, ...metamaskStages]
+        : [...baseStages, ...metamaskStages.slice(0, -2)];
     }
-
-    return ['Upload images', 'Creating collection', 'Set banner & links'];
-  }, [selectedAccount?.name]);
+  
+    return needConfirmSponsoring
+      ? [...baseStages, ...defaultStages]
+      : [...baseStages, 'Setting banner & links'];
+  }, [selectedAccount?.name, needConfirmSponsoring]);
 
   if (!selectedAccount) {
     return <>Account is not connected</>;
@@ -565,7 +613,7 @@ const CreateCollectionComponent = () => {
           {isolatedCollectionForm}
           {isBalanceInsufficient || (!isBalanceInsufficient && isValid) ? (
             <FeeMessage
-              fee={feeFormatted}
+              fee={sumFee}
               isFeeLoading={feeLoading}
               testid='fee'
             />
@@ -611,21 +659,7 @@ const CreateCollectionComponent = () => {
           </ButtonGroup>
           <Confirm
             buttons={[
-              { title: 'No, return', onClick: () => setWarning(null) },
-              {
-                title: 'Yes, I am sure',
-                role: 'primary',
-                type: 'submit',
-                onClick: handleSubmit((form: CollectionForm) => {
-                  if (isLastStep) {
-                    onSubmit(form);
-                  } else {
-                    goToNextStep(2);
-                  }
-
-                  setWarning(null);
-                })
-              }
+              { title: 'Return', role: 'primary', onClick: () => setWarning(null) },
             ]}
             isVisible={!!warning}
             title={warning?.title}
@@ -636,7 +670,6 @@ const CreateCollectionComponent = () => {
           <StatusCreateTransactionsModal
             isVisible={isCreating}
             descriptions={creatingStages}
-            warning='Advanced settings will be available on the collection page after creating the collection'
             step={currentSubmitStage}
           />
         </FormWrapper>
