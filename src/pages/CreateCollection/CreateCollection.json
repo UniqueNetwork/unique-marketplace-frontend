@@ -1,0 +1,94 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_collectionCreationFee",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "payable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [],
+    "name": "IncorrectFee",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "collectionId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "collectionAddress",
+        "type": "address"
+      }
+    ],
+    "name": "CollectionCreated",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "_name",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_description",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_symbol",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_collectionCover",
+        "type": "string"
+      },
+      {
+        "internalType": "bool",
+        "name": "_transferEnabled",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_tokenLimit",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_accountTokenOwnership",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "_nestingPermissionsTokenOwner",
+        "type": "bool"
+      },
+      {
+        "internalType": "bool",
+        "name": "_nestingPermissionsCollectionAdmin",
+        "type": "bool"
+      }
+    ],
+    "name": "createCollection",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "stateMutability": "payable",
+    "type": "receive"
+  }
+]

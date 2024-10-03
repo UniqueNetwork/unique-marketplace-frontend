@@ -23,13 +23,13 @@ import { CollectionBannerComponent } from './components/CollectionBanner';
 import { CollectionCover } from './components/CollectionCover';
 import { _10MB } from 'pages/CreateNFT/constants';
 import { BUNDLE_PERMISSIONS, SPONSOR_PERMISSIONS, UNLIMETED_CONST, useCollectionSettings } from './tabs/CollectionSettingsProvider';
-import { useCollectionSetLimits } from 'pages/CollectionEdit/Forms/hooks/useCollectionSetLimits';
 import { useMarketableCollection } from 'api/restApi/collections/collection';
 import { getSignature } from 'hooks/marketplaceStages/utils/getSignature';
 import { MarketableCollectionMetadata } from 'api/restApi/collections/types';
 import { useCollections } from 'hooks/useCollections';
-import { sleep } from 'utils/helpers';
+import { getEthereumSigner, sleep } from 'utils/helpers';
 import { useCollectionConfirmSponsorship } from 'pages/CollectionEdit/Forms/hooks/useCollectionConfirmSponsorship';
+import { ethers } from 'ethers';
 
 export const WrapperContent = styled.div`
   box-sizing: border-box;
@@ -73,21 +73,11 @@ const CreateCollectionComponent = () => {
   const formMapper = useCollectionFormMapper();
 
   const {
-    // feeFormatted,
-    // getFee,
-    // feeError,
-    // feeLoading,
-    submitWaitResult: submitLimitsWaitResult,
-    // isLoadingSubmitResult
-  } = useCollectionSetLimits();
-
-  const {
     getFee,
     fee,
     feeFormatted,
-    feeLoading,
+    feeLoading: feeCollectionLoading,
     submitWaitResult,
-    isLoadingSubmitResult,
     feeError,
     submitWaitResultError
   } = useCollectionCreate();
@@ -112,8 +102,6 @@ const CreateCollectionComponent = () => {
 
   const onUploadCover = useCallback((src: string, file: Blob) => {
     setCover({ src, file });
-
-    //coverPictureIpfsCid
   }, []);
 
   const onRemoveCover = useCallback(() => {
@@ -164,9 +152,50 @@ const CreateCollectionComponent = () => {
     submitWaitResult: submitConfirmSponsorshipResult
   } = useCollectionConfirmSponsorship();
 
-  const sumFee = useMemo(() => {
-    return (String(Number(feeFormatted) + (feeConfirmSponsorship ? Number(feeConfirmSponsorship) / 10**12 : 0) ));
-  }, [feeConfirmSponsorship, fee]);
+  const [sumFee, setSumFee] = useState(feeFormatted);
+  const [feeLoading, setFeeLoading] = useState(false);
+  
+  useEffect(() => {
+    const calculateFee = async () => {
+      setFeeLoading(true);
+      const signer = getEthereumSigner();
+      const gasPrice = await signer.provider.getGasPrice();
+      let feeToUse = feeFormatted;
+  
+      if (selectedAccount?.name !== MetamaskAccountName) {
+        try {
+          const CREATE_CONTRACT_ADDRESS = '0x82B366d04f5620201e688045436fA5bAb2Edf51a';
+          const CollectionManager = new ethers.Contract(CREATE_CONTRACT_ADDRESS, (await import('./CreateCollection.json')).default, getEthereumSigner());
+          
+          const gasEstimate = await CollectionManager.estimateGas.createCollection(
+            collectionFormValues.name,
+            collectionFormValues.description,
+            collectionFormValues.symbol,
+            cover?.src || '',
+            !!collectionFormValues.transfersEnabled,
+            collectionFormValues.tokenLimit || 0,
+            collectionFormValues.accountTokenOwnershipLimit || 0,
+            collectionFormValues.nesting?.tokenOwner,
+            collectionFormValues.nesting?.collectionAdmin
+          );
+  
+          const totalFee = gasEstimate.mul(gasPrice);
+  
+          feeToUse = ethers.utils.formatEther(totalFee);
+        } catch (err) {
+          console.error("Error estimating gas: ", err);
+        }
+      }
+  
+      const finalFee = String(Number(feeToUse) + (feeConfirmSponsorship ? (Number(feeConfirmSponsorship) / 10**12)*gasPrice.toNumber() : 0));
+      setSumFee(finalFee);
+      setFeeLoading(false);
+    };
+  
+    calculateFee();
+  }, [feeConfirmSponsorship, feeFormatted, selectedAccount?.name, collectionFormValues, cover?.src, api]);
+  
+  
 
   const [collectionDebounceValue] = useDebounce(collectionFormValues as any, 500);
 
@@ -238,10 +267,6 @@ const CreateCollectionComponent = () => {
     goToNextStep(currentStep + 1);
   }, [cover, warnings, setWarning, goToNextStep, currentStep]);
 
-  const onCreateCollectionHandle = (form: CollectionForm) => {
-    onSubmit(form);
-  };
-
   const { updateCollection } = useMarketableCollection();
   const { appendCollection } = useCollections();
 
@@ -285,7 +310,7 @@ const CreateCollectionComponent = () => {
       );
     }
     }
-
+    let collectionId;
     let createdCollection: CreateCollectionParsed | undefined;
     try {
       if (bundlePermission) {
@@ -326,155 +351,55 @@ const CreateCollectionComponent = () => {
         payload.limits.transfersEnabled = tokenTransferPermission;
       }
       setCurrentSubmitStage(1);
-      createdCollection = await submitWaitResult({ payload });
+      
+      if (selectedAccount.name !== MetamaskAccountName) {
+        createdCollection = await submitWaitResult({ payload });
+
+        collectionId = createdCollection?.collectionId || 0;
+      } else {
+        //@ts-ignore
+        const COLECTION_CREATION_FEE = 2n * 10n ** 18n;
+        const CREATE_CONTRACT_ADDRESS = '0x9b540Bb357317353aF8929eFff25b659f6677E4A';
+          const CollectionManager = new ethers.Contract(CREATE_CONTRACT_ADDRESS, (await import('./CreateCollection.json')).default, getEthereumSigner());
+
+          const mintCollectionTx = await CollectionManager.createCollection(
+            payload.name,
+            payload.description,
+            payload.symbol,
+            payload.cover_image.url,
+            !!payload.limits.transfersEnabled,
+            payload.limits.tokenLimit || 0,
+            payload.limits.accountTokenOwnershipLimit || 0,
+            payload.permissions.nesting?.tokenOwner,
+            payload.permissions.nesting?.collectionAdmin,
+            { gasLimit: 500_000, value: COLECTION_CREATION_FEE }
+          );
+
+          const receipt = await mintCollectionTx.wait();
+
+          console.log(receipt, 'receipt');
+          const collectionCreateEvent = receipt.events.find((event: any) => event.event === "CollectionCreated");
+          collectionId = collectionCreateEvent?.args[0]?.toNumber();
+      }
     } catch (err) {
+      console.error(err);
       setIsCreating(false);
       error('You need to sign the transaction');
       return;
     }
 
-    if (!createdCollection?.collectionId) {
+    setCurrentSubmitStage(2);
+
+    try {
+      await submitConfirmSponsorshipResult(({ payload: collectionId }));
+    } catch (err) {
       setIsCreating(false);
-      error('Something went wrong');
-      return;
-    }
-    const collectionId = createdCollection?.collectionId;
-    if (selectedAccount.name === MetamaskAccountName) {
-      setCurrentSubmitStage(2);
-      const { collectionProperties, tokenPropertyPermissions } =
-        SchemaTools.encode.collection(
-          {
-            schemaName: 'unique',
-            schemaVersion: '2.0.0',
-            cover_image: payload.cover_image.url ? { url: payload.cover_image.url } : undefined,
-          },
-          {
-            defaultPermission: {
-              mutable: true,
-              collectionAdmin: true,
-              tokenOwner: false
-            }
-          }
-        );
-      await setTokenPropertyPermissions.submitWaitResult({
-        collectionId,
-        propertyPermissions: tokenPropertyPermissions
-      });
-
-      setCurrentSubmitStage(3);
-
-      try {
-        await setProperties.submitWaitResult({
-          collectionId,
-          properties: collectionProperties.map(({ key, valueHex }) => ({ key, value: valueHex }))
-        });
-      } catch (err) {
-        setIsCreating(false);
-        error(
-          `Setting Properties failed`
-        );
-      }
-
-      setCurrentSubmitStage(4);
-
-      let nestingPermissions = { tokenOwner: false, collectionAdmin: false };
-      
-      if (bundlePermission) {
-        if (bundlePermission === BUNDLE_PERMISSIONS.UNLIMETED) {
-          nestingPermissions = {
-            tokenOwner: true,
-            collectionAdmin: true
-          };
-        } else if (bundlePermission === BUNDLE_PERMISSIONS.COLLECTION_OWNER_OR_ADMIN) {
-          nestingPermissions = {
-            tokenOwner: false,
-            collectionAdmin: true,
-          };
-        } else if (bundlePermission === BUNDLE_PERMISSIONS.RESTRICTED) {
-          nestingPermissions = {
-            tokenOwner: false,
-            collectionAdmin: false,
-          };
-        }
-      }
-      
-      try {
-        await api?.collection?.setCollectionNesting(
-          collectionId,
-          {
-            token_owner: nestingPermissions.tokenOwner,
-            collection_admin: nestingPermissions.collectionAdmin,
-            restricted: []
-          },
-          { account: selectedAccount }
-        );
-
-      } catch (err) {
-        setIsCreating(false);
-        error(
-          `Setting Nesting failed`
-        );
-      }
-
-      setCurrentSubmitStage(5);
-      try {
-        const limits: any = {};
-
-        if (collectionSize !== UNLIMETED_CONST && collectionSize !== '') {
-          limits.tokenLimit = +collectionSize;
-        }
-
-        if (accountTokenOwnershipLimit !== UNLIMETED_CONST && accountTokenOwnershipLimit !== '') {
-          limits.accountTokenOwnershipLimit = +accountTokenOwnershipLimit;
-        }
-
-        limits.transfersEnabled = Number(tokenTransferPermission);
-
-        await submitLimitsWaitResult({ 
-          payload: {
-            address: selectedAccount.address,
-            collectionId: createdCollection.collectionId,
-            limits: limits,
-          }
-        });
-      } catch (err) {
-        setIsCreating(false);
-        error(
-          `Setting limits failed`
-        );
-      }
-
-      if (needConfirmSponsoring || selectedAccount?.address || createdCollection?.collectionId) {
-        setCurrentSubmitStage(6);
-        await api?.collection?.setSponsorship(
-          {
-            address: selectedAccount?.address,
-            collectionId,
-            newSponsor: 'Sponsor',
-          },
-          { account: selectedAccount }
-        );
-      }
+      error(
+        `Confirm sponsorship failed`
+      );
     }
 
-    if (needConfirmSponsoring) {
-      setCurrentSubmitStage(selectedAccount.name === MetamaskAccountName ? 7 : 2);
-      try {
-        await submitConfirmSponsorshipResult(({ payload: collectionId }));
-        
-      } catch (err) {
-        setIsCreating(false);
-        error(
-          `Confirm sponsorship failed`
-        );
-      }
-    }
-
-    if (selectedAccount.name === MetamaskAccountName) {
-      setCurrentSubmitStage(needConfirmSponsoring ? 8 : 7);
-    } else {
-      setCurrentSubmitStage(needConfirmSponsoring ? 3 : 2);
-    }
+    setCurrentSubmitStage(needConfirmSponsoring ? 3 : 2);
 
     // Set banner & links
     if (bannerSrc || form.telegram || form.twitter || form.website || form.discord || form.instagram || form.reddit) {
@@ -566,33 +491,27 @@ const CreateCollectionComponent = () => {
 
   const creatingStages = useMemo(() => {
     const baseStages = ['Upload images', 'Creating collection'];
-    const metamaskStages = [
-      'Setting permissions',
-      'Setting properties',
-      'Setting nesting',
-      'Setting Limits',
-      'Setting Sponsorship',
-      'Confirm Sponsorship',
-      'Setting banner & links'
-    ];
-    
-    const defaultStages = ['Confirm Sponsorship', 'Setting banner & links'];
   
-    if (selectedAccount?.name === MetamaskAccountName) {
-      return needConfirmSponsoring
-        ? [...baseStages, ...metamaskStages]
-        : [...baseStages, ...metamaskStages.slice(0, -2)];
-    }
+    const confirmSponsorshipStages = ['Confirm Sponsorship'];
+  
+    const shouldAddBannerStage = banner?.src || collectionFormValues.telegram || 
+      collectionFormValues.twitter || collectionFormValues.website || 
+      collectionFormValues.discord || collectionFormValues.instagram || collectionFormValues.reddit;
   
     return needConfirmSponsoring
-      ? [...baseStages, ...defaultStages]
-      : [...baseStages, 'Setting banner & links'];
-  }, [selectedAccount?.name, needConfirmSponsoring]);
-
-  if (!selectedAccount) {
-    return <>Account is not connected</>;
-  }
-
+      ? [...baseStages, ...confirmSponsorshipStages, ...(shouldAddBannerStage ? ['Setting banner & links'] : [])]
+      : [...baseStages, ...(shouldAddBannerStage ? ['Setting banner & links'] : [])];
+  }, [
+    needConfirmSponsoring,
+    banner?.src,
+    collectionFormValues.telegram, 
+    collectionFormValues.twitter, 
+    collectionFormValues.website, 
+    collectionFormValues.discord, 
+    collectionFormValues.instagram, 
+    collectionFormValues.reddit
+  ]);
+  
   return (
     <Wrapper>
       <WrapperContentStyled>
@@ -653,7 +572,7 @@ const CreateCollectionComponent = () => {
               title='Create collection'
               tooltip={errorTooltip}
               disabled={!isValid || feeLoading || isBalanceInsufficient}
-              onClick={handleSubmit(onCreateCollectionHandle)}
+              onClick={handleSubmit(onSubmit)}
             />}
 
           </ButtonGroup>
