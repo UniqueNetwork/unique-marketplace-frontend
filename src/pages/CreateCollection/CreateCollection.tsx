@@ -3,7 +3,6 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { FieldError, FormProvider, useForm, useWatch } from 'react-hook-form';
 import styled from 'styled-components';
 import { useDebounce } from 'use-debounce';
-import { SchemaTools } from '@unique-nft/schemas-v2';
 import { CreateCollectionParsed } from '@unique-nft/sdk';
 import { Button, ButtonGroup, Confirm, Text, useNotifications, Alert, UploadImage } from 'components/UI';
 
@@ -17,7 +16,6 @@ import { useCollectionCreate } from './hooks/useCollectionCreate';
 import { useCollectionSetTokenPropertyPermissions } from './hooks/useCollectionSetTokenPropertyPermissions';
 import { useCollectionSetProperties } from './hooks/useCollectionSetProperties';
 import { useBalanceInsufficient } from './hooks/useBalanceInsufficient';
-import { MetamaskAccountName } from 'account/MetamaskWallet';
 import { ConfirmBtn, FeeMessage } from 'components';
 import { CollectionBannerComponent } from './components/CollectionBanner';
 import { CollectionCover } from './components/CollectionCover';
@@ -30,6 +28,11 @@ import { useCollections } from 'hooks/useCollections';
 import { getEthereumSigner, sleep } from 'utils/helpers';
 import { useCollectionConfirmSponsorship } from 'pages/CollectionEdit/Forms/hooks/useCollectionConfirmSponsorship';
 import { ethers } from 'ethers';
+import { isEthereumAddress } from '@polkadot/util-crypto';
+
+//@ts-ignore
+const COLECTION_CREATION_FEE = 2n * 10n ** 18n;
+const CREATE_CONTRACT_ADDRESS = '0x5b1445236C7269aB4dac15e57aA5a0656043aE8a';
 
 export const WrapperContent = styled.div`
   box-sizing: border-box;
@@ -155,47 +158,6 @@ const CreateCollectionComponent = () => {
   const [sumFee, setSumFee] = useState(feeFormatted);
   const [feeLoading, setFeeLoading] = useState(false);
   
-  // useEffect(() => {
-  //   const calculateFee = async () => {
-  //     setFeeLoading(true);
-  //     const signer = getEthereumSigner();
-  //     const gasPrice = await signer.provider.getGasPrice();
-  //     let feeToUse = feeFormatted;
-  
-  //     if (selectedAccount?.name !== MetamaskAccountName) {
-  //       try {
-  //         const CREATE_CONTRACT_ADDRESS = '0x82B366d04f5620201e688045436fA5bAb2Edf51a';
-  //         const CollectionManager = new ethers.Contract(CREATE_CONTRACT_ADDRESS, (await import('./CreateCollection.json')).default, getEthereumSigner());
-          
-  //         const gasEstimate = await CollectionManager.estimateGas.createCollection(
-  //           collectionFormValues.name,
-  //           collectionFormValues.description,
-  //           collectionFormValues.symbol,
-  //           cover?.src || '',
-  //           !!collectionFormValues.transfersEnabled,
-  //           collectionFormValues.tokenLimit || 0,
-  //           collectionFormValues.accountTokenOwnershipLimit || 0,
-  //           collectionFormValues.nesting?.tokenOwner,
-  //           collectionFormValues.nesting?.collectionAdmin
-  //         );
-  
-  //         const totalFee = gasEstimate.mul(gasPrice);
-  
-  //         feeToUse = ethers.utils.formatEther(totalFee);
-  //       } catch (err) {
-  //         console.error("Error estimating gas: ", err);
-  //       }
-  //     }
-  
-  //     const finalFee = String(Number(feeToUse) + (feeConfirmSponsorship ? (Number(feeConfirmSponsorship) / 10**12)*gasPrice.toNumber() : 0));
-  //     setSumFee(finalFee);
-  //     setFeeLoading(false);
-  //   };
-  
-  //   calculateFee();
-  // }, [feeConfirmSponsorship, feeFormatted, selectedAccount?.name, collectionFormValues, cover?.src, api]);
-  
-  
 
   const [collectionDebounceValue] = useDebounce(collectionFormValues as any, 500);
 
@@ -244,17 +206,6 @@ const CreateCollectionComponent = () => {
     setTokenPropertyPermissions.submitWaitResultError,
     setProperties.submitWaitResultError
   ]);
-
-  useEffect(() => {
-    if (collectionDebounceValue && isValid) {
-      const collection = formMapper(collectionDebounceValue);
-      getFee({ payload: collection });
-
-      if (needConfirmSponsoring && selectedAccount && selectedAccount.name !== MetamaskAccountName) {
-        getConfirmSponsorshipFee({ payload: 1 });
-      }
-    }
-  }, [collectionDebounceValue, needConfirmSponsoring, getFee, getConfirmSponsorshipFee]);
 
   const goToNextStep = (step: number) => setCurrentStep(step);
   const goToPreviousStep = (step: number) => {
@@ -352,14 +303,11 @@ const CreateCollectionComponent = () => {
       }
       setCurrentSubmitStage(1);
       
-      if (selectedAccount.name !== MetamaskAccountName) {
+      if (!isEthereumAddress(selectedAccount.address)) {
         createdCollection = await submitWaitResult({ payload });
 
         collectionId = createdCollection?.collectionId || 0;
       } else {
-        //@ts-ignore
-        const COLECTION_CREATION_FEE = 2n * 10n ** 18n;
-        const CREATE_CONTRACT_ADDRESS = '0x4797E10Bf551DcD9a208434D2A944dE8734bDCF0';
           const CollectionManager = new ethers.Contract(CREATE_CONTRACT_ADDRESS, (await import('./CreateCollection.json')).default, getEthereumSigner());
 
           const mintCollectionTx = await CollectionManager.createCollection(
@@ -440,6 +388,80 @@ const CreateCollectionComponent = () => {
     }
     navigate(`/${currentChainId}/collections`);
   };
+
+  useEffect(() => {
+    const calculateFees = async () => {
+      if (collectionDebounceValue && isValid) {
+        const collection = formMapper(collectionDebounceValue);
+
+        await getFee({ payload: collection });
+
+        if (needConfirmSponsoring && selectedAccount) {
+          await getConfirmSponsorshipFee({ payload: 1 });
+        }
+  
+        if (!(collectionFormValues.name && collectionFormValues.symbol)) return;
+  
+        setFeeLoading(true);
+  
+        const signer = getEthereumSigner();
+        const gasPrice = await signer.provider.getGasPrice();
+  
+        let feeToUse = feeFormatted;
+        if (
+          isEthereumAddress(selectedAccount?.address)
+
+        ) {
+          try {
+            const CollectionManager = new ethers.Contract(
+              CREATE_CONTRACT_ADDRESS,
+              (await import('./CreateCollection.json')).default,
+              signer
+            );
+  
+            const gasEstimate = await CollectionManager.estimateGas.createCollection(
+              collectionFormValues.name,
+              collectionFormValues.description,
+              collectionFormValues.symbol,
+              cover?.src || '',
+              !!collectionFormValues.transfersEnabled,
+              collectionFormValues.tokenLimit || 0,
+              collectionFormValues.accountTokenOwnershipLimit || 0,
+              collectionFormValues.nesting?.tokenOwner,
+              collectionFormValues.nesting?.collectionAdmin,
+              { gasLimit: 500_000, value: COLECTION_CREATION_FEE }
+            );
+            const totalFee = gasEstimate.mul(gasPrice);
+
+            feeToUse = ethers.utils.formatEther(totalFee.add(COLECTION_CREATION_FEE));
+          } catch (err) {
+            console.error("Error estimating gas: ", err);
+          }
+        } else {
+          feeToUse = feeFormatted;
+        }
+        console.log(feeConfirmSponsorship, gasPrice, 'feeConfirmSponsorship');
+        const finalFee = String(Number(feeToUse));
+  
+        setSumFee(finalFee);
+        setFeeLoading(false);
+      }
+    };
+  
+    calculateFees();
+  }, [
+    collectionDebounceValue,
+    isValid,
+    needConfirmSponsoring,
+    selectedAccount?.name,
+    getFee,
+    getConfirmSponsorshipFee,
+    collectionFormValues,
+    cover?.src,
+    feeFormatted,
+    feeConfirmSponsorship,
+  ]);
+  
 
   const isFirstStep = currentStep - 1 === 0;
   const isLastStep = currentStep === tabsUrls.length;
