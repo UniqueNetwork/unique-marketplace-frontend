@@ -89,9 +89,6 @@ const CreateCollectionComponent = () => {
   const setTokenPropertyPermissions = useCollectionSetTokenPropertyPermissions();
   const setProperties = useCollectionSetProperties();
 
-  const { isBalanceInsufficient } = useBalanceInsufficient(
-    fee || '0'
-  );
   const [banner, setBanner] = useState<{ src: string, file?: Blob }>();
   const [cover, setCover] = useState<{ src: string, file?: Blob }>();
 
@@ -469,6 +466,8 @@ const CreateCollectionComponent = () => {
       <Outlet />
     </FormProvider>
   ), [collectionForm]);
+
+  const { isBalanceInsufficient } = useBalanceInsufficient(sumFee || '0');
 
   const errorTooltip = useMemo(() => {
     if (!isValid) {
