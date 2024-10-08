@@ -1,12 +1,10 @@
-import React, { VFC, useCallback, useState } from 'react';
+import React, { VFC } from 'react';
 import { Controller } from 'react-hook-form';
 import styled from 'styled-components';
 
-import { InputText, Text, Textarea, Loader, useNotifications, UploadImage, Heading } from 'components/UI';
-import { useApi } from 'hooks/useApi';
-import { AdditionalText, Form, FormBody, FormHeader, FormRow, LabelText, UploadWidget } from '../components/FormComponents';
-import { getTokenIpfsUriByImagePath } from '../helpers';
-import { FILE_FORMAT_ERROR, FILE_SIZE_LIMIT_ERROR, MAX_DESCRIPTION_SIZE, MAX_NAME_SIZE, MAX_SYMBOL_BYTES_SIZE, MAX_SYMBOL_SIZE, _10MB } from 'pages/CreateNFT/constants';
+import { InputText, Textarea, Heading } from 'components/UI';
+import { Form, FormBody, FormHeader, FormRow } from '../components/FormComponents';
+import { MAX_DESCRIPTION_SIZE, MAX_NAME_SIZE, MAX_SYMBOL_BYTES_SIZE, MAX_SYMBOL_SIZE, _10MB } from 'pages/CreateNFT/constants';
 import { FORM_ERRORS } from '../constants';
 
 interface MainInformationProps {
@@ -14,53 +12,10 @@ interface MainInformationProps {
 }
 
 const MainInformationComponent: VFC<MainInformationProps> = ({ className }) => {
-  const { error } = useNotifications();
-  const { api } = useApi();
-  const [isFileUploading, setIsFileUploading] = useState(false);
-
-  const beforeUploadHandler = useCallback((data: { url: string; file: Blob | File }) => {
-    if (data.file.size > _10MB) {
-      error(FILE_SIZE_LIMIT_ERROR);
-
-      return false;
-    }
-    if (!/.*\.(jpeg|jpg|gif|png)$/.test((data.file as File).name.toLowerCase())) {
-      error(FILE_FORMAT_ERROR);
-
-      return false;
-    }
-
-    return true;
-  }, []);
-
-  const onFileChangeHandler = useCallback(
-    async (
-      data: { url: string; file: Blob } | null,
-      callbackFn: (cid: string) => void
-    ) => {
-      if (!data?.url) {
-        callbackFn('');
-        return;
-      }
-      if (!beforeUploadHandler(data)) {
-        return;
-      }
-      setIsFileUploading(true);
-      const response = await api?.collection?.uploadFile(data.file);
-      setIsFileUploading(false);
-      response && callbackFn(response.cid);
-    },
-    [api?.collection]
-  );
-
   return (
     <>
       <FormHeader>
-        <Heading size='2'>Main information</Heading>
-        <Text>
-          The core collection information cannot be modified once approved/signed. For any
-          changes the collection will need to be burned and re-created
-        </Text>
+        <Heading size='2'>Immutable collection information</Heading>
       </FormHeader>
       <FormBody>
         <Form className={className}>
@@ -79,7 +34,7 @@ const MainInformationComponent: VFC<MainInformationProps> = ({ className }) => {
               }}
               render={({ field: { onChange, value }, fieldState: { error } }) => (
                 <InputText
-                  label='Name*'
+                  label='Collection name *'
                   value={value}
                   maxLength={MAX_NAME_SIZE}
                   additionalText={`Max ${MAX_NAME_SIZE} symbols (${
@@ -87,23 +42,6 @@ const MainInformationComponent: VFC<MainInformationProps> = ({ className }) => {
                   } left)`}
                   error={!!error}
                   statusText={error?.message}
-                  onChange={onChange}
-                />
-              )}
-            />
-          </FormRow>
-          <FormRow>
-            <Controller
-              name='description'
-              render={({ field: { onChange, value } }) => (
-                <Textarea
-                  label='Description'
-                  value={value}
-                  rows={4}
-                  maxLength={MAX_DESCRIPTION_SIZE}
-                  additionalText={`Max ${MAX_DESCRIPTION_SIZE} symbols (${
-                    MAX_DESCRIPTION_SIZE - value.length
-                  } left)`}
                   onChange={onChange}
                 />
               )}
@@ -129,7 +67,7 @@ const MainInformationComponent: VFC<MainInformationProps> = ({ className }) => {
                   maxLength={MAX_SYMBOL_SIZE}
                   additionalText={
                     <>
-                      Token name as displayed in Wallet <br />
+                      Can be used as an NFT name by some wallets. 
                       Max symbols {MAX_SYMBOL_SIZE} ({MAX_SYMBOL_SIZE - value.length}{' '}
                       left)
                     </>
@@ -147,39 +85,29 @@ const MainInformationComponent: VFC<MainInformationProps> = ({ className }) => {
               )}
             />
           </FormRow>
-          <FormRow className='has_uploader'>
-            <DownloadCover>
-              <UploadWidget>
-                <LabelText>Upload image</LabelText>
-                <AdditionalText>Choose JPG, PNG, GIF (max 10 Mb)</AdditionalText>
-                <Controller
-                  name='coverPictureIpfsCid'
-                  render={({ field: { onChange, value } }) => (
-                    <div className='upload-container'>
-                      <UploadImage
-                        type='circle'
-                        upload={getTokenIpfsUriByImagePath(value)}
-                        beforeUpload={beforeUploadHandler}
-                        onChange={(data) => onFileChangeHandler(data, onChange)}
-                      />
-                      {isFileUploading && <Loader isFullPage size='middle' />}
-                    </div>
-                  )}
+
+          <FormRow>
+            <Controller
+              name='description'
+              render={({ field: { onChange, value } }) => (
+                <Textarea
+                  label='Description'
+                  value={value}
+                  rows={4}
+                  maxLength={MAX_DESCRIPTION_SIZE}
+                  additionalText={`Max ${MAX_DESCRIPTION_SIZE} symbols (${
+                    MAX_DESCRIPTION_SIZE - value.length
+                  } left)`}
+                  onChange={onChange}
                 />
-              </UploadWidget>
-            </DownloadCover>
+              )}
+            />
           </FormRow>
         </Form>
       </FormBody>
     </>
   );
 };
-
-const DownloadCover = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 30px;
-`;
 
 const SymbolInputText = styled(InputText)`
   div.additional-text {

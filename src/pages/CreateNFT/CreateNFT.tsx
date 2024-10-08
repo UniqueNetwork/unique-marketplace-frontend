@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { TokenId, TokenV2ItemForMultipleDto } from '@unique-nft/sdk';
 
-import { Button, Checkbox, Text, useNotifications, Heading } from 'components/UI';
+import { Button, Text, useNotifications, Heading } from 'components/UI';
 import { ConfirmBtn } from 'components';
 
 import { TokenList } from './components/TokenList';
@@ -11,7 +11,7 @@ import { CreateTokenDialog, NewToken2, ViewMode } from './types';
 import { mapTokensToPayload } from './helpers';
 import { StatusTransactionModal, TRANSACTION_STAGE_ENUM } from './components/StatusTransactionModal';
 import { MobileFilters } from './components/MobileFilter';
-import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
+import useDeviceSize from 'hooks/useDeviceSize';
 import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
 import { sleep } from 'utils/helpers';

@@ -109,3 +109,8 @@ export const getEthereumSigner = () => {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   return provider.getSigner();
 };
+
+export const getEthereumProvider = () => {
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  return provider;
+};

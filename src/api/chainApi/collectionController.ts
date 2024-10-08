@@ -18,19 +18,8 @@ export class UniqueSDKCollectionController extends BaseController {
   }
 
   async confirmSponsorship(collectionId: number, { account }: TransactionOptions): Promise<void> {
-    if (!this.uniqueSdk) throw new Error('Controller isn\'t ready');
-    if (!account) throw new Error('Account not provided');
-    const unsignedTxPayload = await this.uniqueSdk.collection.confirmSponsorship.build({
-      collectionId,
-      address: account.address
-    });
-    if (!unsignedTxPayload) throw new Error('Transaction build error');
-    const { signature } = await this.uniqueSdk.collection.confirmSponsorship.sign(unsignedTxPayload, { signer: account });
-    if (!signature) throw new Error('Signing failed');
-    await this.uniqueSdk.extrinsics.submit({
-      signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
-      signature
-    });
+    const adapter = this.getAdapter(account);
+    return await adapter.confirmCollectionSponsorship({collectionId, address: account.address, newSponsor: account.address}, account.signer);
   }
 
   async getCollection(collectionId: number): Promise<CollectionWithInfoV2Dto | null> {

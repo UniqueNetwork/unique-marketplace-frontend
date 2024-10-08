@@ -28,7 +28,17 @@ export type CollectionForm = {
   description: string;
   symbol: string;
   coverPictureIpfsCid?: string;
+  transfersEnabled: boolean;
+  accountTokenOwnershipLimit: number;
+  discord: string;
+  website: string;
+  twitter: string;
+  instagram: string;
+  telegram: string;
+  reddit: string;
   sponsorAddress: string;
+
+
   tokenLimit?: number;
   ownerCanDestroy?: boolean;
   attributes?: AttributeField[];

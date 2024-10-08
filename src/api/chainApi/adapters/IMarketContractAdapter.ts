@@ -1,6 +1,7 @@
 import { EthCrossAccountId } from '@unique-nft/utils';
 import { CollectionNestingAndPermissionStruct$1 } from '../types';
 import IBaseAdapter, { Signer } from './IBaseAdapter';
+import { SetSponsorshipBody } from '@unique-nft/sdk';
 
 export interface IMarketContractProperties {
     address: string
@@ -50,6 +51,9 @@ interface IMarketContractAdapter extends IBaseAdapter {
 
   allowanceFungible({collectionId, address, recipient, amount, signer}: ITransferFungible): Promise<void>
   revokeTokenSell({collectionId, tokenId, contract, signer}: IRemoveFromSell): Promise<void>
+
+  confirmCollectionSponsorship(payload: SetSponsorshipBody, signer: Signer): Promise<void>
+  getConfirmSponsorshipFee(payload: SetSponsorshipBody, signer: Signer): Promise<string>
 }
 
 export default IMarketContractAdapter;
