@@ -309,7 +309,6 @@ const CreateCollectionComponent = () => {
         collectionId = createdCollection?.collectionId || 0;
       } else {
           const CollectionManager = new ethers.Contract(CREATE_CONTRACT_ADDRESS, (await import('./CreateCollection.json')).default, getEthereumSigner());
-
           const mintCollectionTx = await CollectionManager.createCollection(
             payload.name,
             payload.description,
@@ -396,9 +395,9 @@ const CreateCollectionComponent = () => {
 
         await getFee({ payload: collection });
 
-        if (needConfirmSponsoring && selectedAccount) {
-          await getConfirmSponsorshipFee({ payload: 1 });
-        }
+        // if (needConfirmSponsoring && selectedAccount) {
+        //   await getConfirmSponsorshipFee({ payload: 1 });
+        // }
   
         if (!(collectionFormValues.name && collectionFormValues.symbol)) return;
   
@@ -440,7 +439,6 @@ const CreateCollectionComponent = () => {
         } else {
           feeToUse = feeFormatted;
         }
-        console.log(feeConfirmSponsorship, gasPrice, 'feeConfirmSponsorship');
         const finalFee = String(Number(feeToUse));
   
         setSumFee(finalFee);
