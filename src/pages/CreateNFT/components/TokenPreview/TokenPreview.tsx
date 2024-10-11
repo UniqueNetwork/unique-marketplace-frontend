@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { TemplateProps } from 'react-draggable-list';
+// import { TemplateProps } from 'react-draggable-list';
 import { MouseEventHandler, TouchEventHandler, useEffect, useRef, useState } from 'react';
 import classNames from 'classnames';
 
@@ -28,7 +28,7 @@ export type TokenCardCommonProps = {
   collection?: CollectionWithInfoV2Dto;
 };
 
-export type TokenCardProps = TemplateProps<NewToken2, TokenCardCommonProps>;
+export type TokenCardProps = any;
 
 export const TokenPreview = ({
   item,

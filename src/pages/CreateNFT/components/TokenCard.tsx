@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { TemplateProps } from 'react-draggable-list';
+// import { TemplateProps } from 'react-draggable-list';
 import { MouseEventHandler, TouchEventHandler, useState } from 'react';
 import classNames from 'classnames';
 
@@ -20,7 +20,7 @@ export type TokenCardCommonProps = {
   viewMode: ViewMode;
 };
 
-export type TokenCardProps = TemplateProps<NewToken, TokenCardCommonProps>;
+export type TokenCardProps = any;
 
 export const TokenCard = ({
   item,

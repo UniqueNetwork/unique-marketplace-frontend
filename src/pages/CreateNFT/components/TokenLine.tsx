@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { TemplateProps } from 'react-draggable-list';
+// import { TemplateProps } from 'react-draggable-list';
 import { MouseEventHandler, TouchEventHandler, useState, useRef } from 'react';
 import classNames from 'classnames';
 
@@ -34,7 +34,7 @@ export type TokenCardCommonProps = {
   setNewAttributeValue: (attribute: NewAttributePayload) => void;
 };
 
-export type TokenCardProps = TemplateProps<NewToken2, TokenCardCommonProps>;
+export type TokenCardProps = any;
 
 const TokenLineCellWrapper = ({
   children,

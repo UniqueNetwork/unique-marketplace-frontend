@@ -29,6 +29,7 @@ import { getEthereumSigner, sleep } from 'utils/helpers';
 import { useCollectionConfirmSponsorship } from 'pages/CollectionEdit/Forms/hooks/useCollectionConfirmSponsorship';
 import { ethers } from 'ethers';
 import { isEthereumAddress } from '@polkadot/util-crypto';
+import { useAppKitProvider } from '@reown/appkit/react';
 
 //@ts-ignore
 const COLECTION_CREATION_FEE = 2n * 10n ** 18n;
@@ -74,6 +75,7 @@ const CreateCollectionComponent = () => {
     accounts: { size: accountsLength }
   } = useAccounts();
   const formMapper = useCollectionFormMapper();
+  const { walletProvider } = useAppKitProvider('eip155');
 
   const {
     getFee,
@@ -299,13 +301,16 @@ const CreateCollectionComponent = () => {
         payload.limits.transfersEnabled = tokenTransferPermission;
       }
       setCurrentSubmitStage(1);
-      
+      console.log('create collection',selectedAccount.address, isEthereumAddress(selectedAccount.address))
       if (!isEthereumAddress(selectedAccount.address)) {
         createdCollection = await submitWaitResult({ payload });
 
         collectionId = createdCollection?.collectionId || 0;
       } else {
-          const CollectionManager = new ethers.Contract(CREATE_CONTRACT_ADDRESS, (await import('./CreateCollection.json')).default, getEthereumSigner());
+        if (!walletProvider) throw new Error('No Reown wallet provider found');
+        const provider = new ethers.providers.Web3Provider(walletProvider);
+        const signer = await provider.getSigner();
+          const CollectionManager = new ethers.Contract(CREATE_CONTRACT_ADDRESS, (await import('./CreateCollection.json')).default, signer);
           const mintCollectionTx = await CollectionManager.createCollection(
             payload.name,
             payload.description,
@@ -400,7 +405,8 @@ const CreateCollectionComponent = () => {
   
         setFeeLoading(true);
   
-        const signer = getEthereumSigner();
+        const provider = new ethers.providers.Web3Provider(walletProvider);
+        const signer = await provider.getSigner();
         const gasPrice = await signer.provider.getGasPrice();
   
         let feeToUse = feeFormatted;

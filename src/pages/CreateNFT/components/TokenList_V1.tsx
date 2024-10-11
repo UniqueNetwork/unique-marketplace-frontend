@@ -1,19 +1,19 @@
 import { ChangeEvent, DragEvent, FC, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
-import DraggableList from 'react-draggable-list';
 import classNames from 'classnames';
+import { DndContext, closestCenter } from '@dnd-kit/core';
+import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 import { Icon, Text } from 'components/UI';
-
 import { AttributeOption, NewToken, ViewMode } from '../types';
-import { TokenCard, TokenCardCommonProps, TokenCardProps } from './TokenCard';
+import { TokenCard } from './TokenCard';
 import { Filter } from './Filter';
 import { getAttributesFromTokens } from '../helpers';
 import { AttributesModal } from './AttributesModal';
 import { AttributeFilterContext } from '../contexts/AttributesFilterContext';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
-import { swap } from 'components/UI/DraggableGrid/helpers';
-import { DraggableGrid, DraggableGridContextProvider, DraggableGridItem } from 'components/UI/DraggableGrid';
 import { PotentialAttribute } from '@unique-nft/sdk';
 
 export type TokenListProps = {
@@ -30,7 +30,21 @@ export type TokenListProps = {
   onAddTokens(files: File[]): void;
 };
 
-export const TokenList_V1 = ({
+const SortableItem = ({ id, token }: { id: number; token: NewToken }) => {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      <TokenCard token={token} />
+    </div>
+  );
+};
+
+export const TokenList_V1: FC<TokenListProps> = ({
   mode,
   tokens,
   tokenPrefix,
@@ -42,54 +56,33 @@ export const TokenList_V1 = ({
   schemaVersion,
   onChange,
   onAddTokens
-}: TokenListProps) => {
+}) => {
   const deviceSize = useDeviceSize();
-  const containerRef = useRef<HTMLDivElement>(null);
   const [dragEnter, setDragEnter] = useState(false);
   const [editingToken, setEditingToken] = useState<NewToken>();
-
   const { attributes, setAttributes, selectedAttributes, setSelectedAttributes } =
     useContext(AttributeFilterContext);
 
   const onTokenChange = (token: NewToken) => {
     const index = tokens.findIndex(({ id }) => id === token.id);
-
     onChange([...tokens.slice(0, index), token, ...tokens.slice(index + 1)]);
   };
 
   const onTokenRemove = (id: number) => {
     const lastId = (tokensStartId || 0) + 1;
-    const _tokens = [
-      ...tokens
-        .filter((token) => id !== token.id)
-        .map((token, index) => ({ ...token, tokenId: lastId + index }))
-    ];
+    const _tokens = tokens
+      .filter((token) => id !== token.id)
+      .map((token, index) => ({ ...token, tokenId: lastId + index }));
     onChange(_tokens);
   };
 
-  const onDragStart = () => {
-    setDragEnter(true);
-  };
-  const onDragEnd = () => {
-    setDragEnter(false);
-  };
-
-  const onDragItemStart = () => {
-    setDragEnter(false);
-  };
-
-  const onGridItemSwapped = (
-    sourceId: string,
-    sourceIndex: number,
-    targetIndex: number
-  ) => {
-    const lastId = (tokensStartId || 0) + 1;
-    onChange(
-      swap(tokens, sourceIndex, targetIndex).map((token, index) => ({
-        ...token,
-        tokenId: lastId + index
-      }))
-    );
+  const handleDragEnd = ({ active, over }: { active: any; over: any }) => {
+    if (active.id !== over.id) {
+      const oldIndex = tokens.findIndex((token) => token.id === active.id);
+      const newIndex = tokens.findIndex((token) => token.id === over.id);
+      const reorderedTokens = arrayMove(tokens, oldIndex, newIndex);
+      onChange(reorderedTokens);
+    }
   };
 
   useEffect(() => {
@@ -109,13 +102,9 @@ export const TokenList_V1 = ({
     }
     return tokens.filter(({ attributes }) => {
       return attributes.some((attribute, index) => {
-        if (!attribute) {
-          return false;
-        }
+        if (!attribute) return false;
         return selectedAttributes.some((selectedAttribute) => {
-          if (selectedAttribute.index !== index) {
-            return false;
-          }
+          if (selectedAttribute.index !== index) return false;
           if (Array.isArray(attribute)) {
             return (attribute as AttributeOption[]).some(
               ({ id }) => selectedAttribute.id === +id
@@ -130,25 +119,18 @@ export const TokenList_V1 = ({
     });
   }, [tokens, selectedAttributes]);
 
-  const hasAttributesFilter =
-    !!Object.keys(attributes).length &&
-    Object.values(attributes).some((attribute) => {
-      return !!attribute?.length;
-    });
+  const hasAttributesFilter = Object.keys(attributes).length > 0 &&
+    Object.values(attributes).some((attribute) => !!attribute?.length);
 
   return (
-    <TokenListWrapper
-      onDragEnter={onDragStart}
-      onDragEnd={onDragEnd}
-      onDragExit={onDragEnd}
-    >
+    <TokenListWrapper onDragEnter={() => setDragEnter(true)} onDragEnd={() => setDragEnter(false)}>
       {tokens.length === 0 && <Stub />}
       <ImageUploadArea
         disabled={disabled}
         hasTokens={tokens.length > 0}
         hidden={!dragEnter && tokens.length > 0}
         onUpload={onAddTokens}
-        onDragExit={onDragEnd}
+        onDragExit={() => setDragEnter(false)}
       />
       {tokens.length !== 0 && (
         <>
@@ -159,72 +141,15 @@ export const TokenList_V1 = ({
               onChange={setSelectedAttributes}
             />
           )}
-          <DraggableContainer ref={containerRef} hasOffset={hasAttributesFilter}>
-            {viewMode === ViewMode.grid && (
-              <DraggableGridContextProvider onChange={onGridItemSwapped}>
-                <DraggableGrid
-                  itemsPerRow={{ xs: 1, sm: 2, md: 3, lg: 3, xl: 4, xxl: 5 }}
-                  id='tokens-grid'
-                >
-                  {filteredTokens.map((token, index) => (
-                    <DraggableGridItem
-                      key={token.id}
-                      id={token.id.toString()}
-                      onDragStart={onDragItemStart}
-                    >
-                      <TokenCard
-                        key={token.id}
-                        itemSelected={0}
-                        anySelected={0}
-                        item={token}
-                        commonProps={{
-                          mode,
-                          viewMode,
-                          tokenPrefix,
-                          attributesSchema,
-                          onChange: onTokenChange,
-                          onRemove: onTokenRemove,
-                          onOpenModifyModal: setEditingToken
-                        }}
-                        dragHandleProps={{}}
-                      />
-                    </DraggableGridItem>
-                  ))}
-                </DraggableGrid>
-              </DraggableGridContextProvider>
-            )}
-            {viewMode === ViewMode.list && (
-              <>
-                {/* @ts-ignore */}
-                <DraggableList<NewToken, TokenCardCommonProps, FC<TokenCardProps>>
-                  constrainDrag
-                  unsetZIndex
-                  className='draggable-container'
-                  itemKey='id'
-                  template={TokenCard}
-                  list={filteredTokens}
-                  container={() => containerRef.current}
-                  commonProps={{
-                    viewMode,
-                    mode,
-                    tokenPrefix,
-                    attributesSchema,
-                    onChange: onTokenChange,
-                    onRemove: onTokenRemove
-                  }}
-                  onMoveEnd={(newList) => {
-                    const lastId = (tokensStartId || 0) + 1;
-                    return onChange([
-                      ...newList.map((token, index) => ({
-                        ...token,
-                        tokenId: Number(lastId) + Number(index)
-                      }))
-                    ]);
-                  }}
-                />
-              </>
-            )}
-          </DraggableContainer>
+          <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={tokens.map((token) => token.id)} strategy={verticalListSortingStrategy}>
+              <DraggableContainer hasOffset={hasAttributesFilter}>
+                {filteredTokens.map((token) => (
+                  <SortableItem key={token.id} id={token.id} token={token} />
+                ))}
+              </DraggableContainer>
+            </SortableContext>
+          </DndContext>
         </>
       )}
       {!!editingToken && (
@@ -236,20 +161,11 @@ export const TokenList_V1 = ({
           onClose={() => setEditingToken(undefined)}
           onChange={(_tokens: NewToken[]) => {
             const token = _tokens[0];
-            if (!token) {
-              return;
-            }
+            if (!token) return;
             onChange(
-              tokens.map((_token) => {
-                if (_token.tokenId !== token.tokenId) {
-                  return _token;
-                }
-                return {
-                  ..._token,
-                  attributes: token.attributes,
-                  royalties: token.royalties
-                };
-              })
+              tokens.map((_token) =>
+                _token.tokenId !== token.tokenId ? _token : { ..._token, ...token }
+              )
             );
           }}
         />
@@ -272,12 +188,6 @@ const DraggableContainer = styled.div<{ hasOffset: boolean }>`
   & > div {
     width: 100%;
   }
-  .unique-list {
-    gap: 0;
-  }
-  @media screen and (max-width: 768px) {
-    margin: 0;
-  }
 `;
 
 type ImageUploadAreaProps = {
@@ -297,44 +207,35 @@ const ImageUploadArea = ({
 }: ImageUploadAreaProps) => {
   const inputFile = useRef<HTMLInputElement>(null);
   const [isDragEnter, setIsDragEnter] = useState(false);
+
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     setIsDragEnter(false);
-    if (!inputFile.current) {
-      return;
-    }
+    if (!inputFile.current) return;
     onUpload?.(Array.from(inputFile.current.files || []));
     onDragExit();
-
     inputFile.current.value = '';
   };
 
-  const onDragEnter = (event: DragEvent<HTMLInputElement>) => {
-    if (disabled) {
-      return;
-    }
-    setIsDragEnter(true);
+  const onDragEnter = () => {
+    if (!disabled) setIsDragEnter(true);
   };
 
-  const onDragLeave = (event: DragEvent<HTMLInputElement>) => {
+  const onDragLeave = () => {
     setIsDragEnter(false);
     onDragExit();
   };
 
   return (
     <UploadWrapper
-      className={classNames({
-        hidden,
-        'drag-enter': isDragEnter,
-        'full-area': !hasTokens
-      })}
+      className={classNames({ hidden, 'drag-enter': isDragEnter, 'full-area': !hasTokens })}
     >
       <input
         disabled={disabled}
         ref={inputFile}
-        type='file'
-        multiple={true}
-        title='Click to select or drop files here'
-        accept='image/*'
+        type="file"
+        multiple
+        title="Click to select or drop files here"
+        accept="image/*"
         onChange={onChange}
         onDragEnter={onDragEnter}
         onDragLeave={onDragLeave}
@@ -389,8 +290,8 @@ const UploadWrapper = styled.div`
 const Stub = () => {
   return (
     <StubWrapper>
-      <Icon name='empty-image' size={80} />
-      <Text color='blue-grey-500' size='m' weight='light'>
+      <Icon name="empty-image" size={80} />
+      <Text color="blue-grey-500" size="m" weight="light">
         Click to select or drop files here
       </Text>
     </StubWrapper>

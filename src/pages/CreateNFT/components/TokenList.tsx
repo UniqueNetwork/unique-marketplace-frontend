@@ -1,6 +1,6 @@
 import { ChangeEvent, DragEvent, FC, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
-import DraggableList from 'react-draggable-list';
+// import DraggableList from 'react-draggable-list';
 import classNames from 'classnames';
 
 import { Icon, Modal, Text, TooltipWrapper } from 'components/UI';
@@ -410,7 +410,7 @@ export const TokenList = ({
                   </TableHeader>
 
                   {/* @ts-ignore */}
-                  <DraggableList<NewToken2, TokenCardCommonProps, FC<TokenCardProps>>
+                  {/* <DraggableList<NewToken2, TokenCardCommonProps, FC<TokenCardProps>>
                     constrainDrag
                     unsetZIndex
                     className='draggable-container'
@@ -438,7 +438,7 @@ export const TokenList = ({
                         }))
                       ]);
                     }}
-                  />
+                  /> */}
                 </TableWrap>
               )}
             </DraggableContainer>

@@ -65,7 +65,7 @@ export class MetamaskWallet
           walletMetaInformation: res.result,
           signerType: AccountSigner.extension,
           sign: this.getSignature,
-          signer: provider.getSigner() as Signer,
+          signer: provider.getSigner() as Signer,// Signer from hook
           changeChain: this.changeChain.bind(this),
           isMintingEnabled: this.isMintingEnabled
         }
