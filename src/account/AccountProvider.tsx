@@ -89,17 +89,18 @@ export const AccountWrapper: FC = ({ children }) => {
   
       const accountExists = accounts.has(ethereumAddress);
       if (!accountExists) {
-        setTimeout(handleReownWallet, 2000);
+
+        setTimeout(handleReownWallet, 500);
       }
     };
   
     handleWalletConnection();
-  }, [ethereumAddress, isConnected, walletProvider, accounts]);
+  }, [ethereumAddress]);
   
   const [previousEthereumAddress, setPreviousEthereumAddress] = useState<string | undefined>();
 
   useEffect(() => {
-    if (!isConnected && previousEthereumAddress) {
+    if (!isConnected && !ethereumAddress && previousEthereumAddress) {
       setAccounts((prevAccounts) => {
         const updatedAccounts = new Map(prevAccounts);
   
@@ -107,17 +108,19 @@ export const AccountWrapper: FC = ({ children }) => {
           updatedAccounts.delete(previousEthereumAddress);
         }
   
-        return updatedAccounts; // Возвращаем обновленную карту
+        return updatedAccounts;
       });
     }
   
-    // Обновляем старый Ethereum-адрес
-    setPreviousEthereumAddress(ethereumAddress);
-  }, [isConnected, ethereumAddress]);
+    if (ethereumAddress) {
+      setPreviousEthereumAddress(ethereumAddress);
+    }
+  }, [isConnected, ethereumAddress, previousEthereumAddress]);
   
 
 
   const handleReownWallet = async () => {
+    console.log('HANDLE_REOWN');
     await walletsCenter.connectReownWallet(walletProvider);
     fetchAccounts();
   };
