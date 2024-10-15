@@ -1,6 +1,5 @@
 import styled from 'styled-components';
-// import { TemplateProps } from 'react-draggable-list';
-import { MouseEventHandler, TouchEventHandler, useState } from 'react';
+import { useState } from 'react';
 import classNames from 'classnames';
 
 import { Button, Checkbox, InputText, Text } from 'components/UI';

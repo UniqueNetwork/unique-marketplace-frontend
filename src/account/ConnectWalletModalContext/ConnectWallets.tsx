@@ -92,9 +92,9 @@ export const ConnectWallets = () => {
             {availableWallets.includes('polkadot-js') && <WalletItem onClick={handleConnectToPolkadotExtension()}>
               <Icon size={40} name='polkadot-wallet' /> <span>Polkadot.js</span>
             </WalletItem>}
-            {(window.ethereum?.isMetaMask || noAvailableWallets) && <WalletItem onClick={() => open()}>
-              <Icon size={40} name='wallet-connect' /> <span>Metamask</span>
-            </WalletItem>}
+            <WalletItem onClick={() => open()}>
+              <ImgWalletConnect src={WalletConnect}/> <span>WalletConnect</span>
+            </WalletItem>
             {availableWallets.includes('talisman') && <WalletItem onClick={handleConnectToPolkadotExtension('talisman')}>
               <Icon size={40} name='talisman-wallet' /> <span>Talisman</span>
             </WalletItem>}
