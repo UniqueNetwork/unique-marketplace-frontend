@@ -79,7 +79,7 @@ class BaseController implements IBaseController {
       return this.getDefaultAdapter();
     }
     if (this.isMetamaskSigner(account)) {
-      changeMetamaskChain(EthereumChainParams[this.networkId]);
+      // changeMetamaskChain(EthereumChainParams[this.networkId]);
       return this.metamaskAdapter;
     }
     return this.uniqueAdapter;
