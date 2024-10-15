@@ -42,6 +42,7 @@ module.exports = {
     ],
     ignorePatterns: [
         ".eslintrc.js",
+        "babel.config.js",
         ".github/**",
         ".stylelintrc.json",
         ".vscode/**",
@@ -49,7 +50,7 @@ module.exports = {
         "**/build/*",
         "**/coverage/*",
         "**/node_modules/*",
-      ],
+      ],      
     "rules": {
         // required as 'off' since typescript-eslint has own versions
         indent: "off",

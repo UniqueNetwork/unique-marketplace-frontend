@@ -8,16 +8,16 @@ import { DefaultAccountKey } from './constants';
 import { AccountProvider } from './AccountContext';
 import { useApi } from 'hooks/useApi';
 import { useBalanceSubscriptions } from './useBalanceSubscriptions';
+import { useAppKitAccount, useAppKitProvider } from '@reown/appkit/react';
 
 export const AccountWrapper: FC = ({ children }) => {
   const { chainProperties, api } = useApi();
-  const [accounts, setAccounts] = useState<Map<string, BaseWalletType<WalletsType>>>(
-    new Map()
-  );
+  const [accounts, setAccounts] = useState<Map<string, BaseWalletType<WalletsType>>>(new Map());
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [fetchAccountsError, setFetchAccountsError] = useState<string | undefined>();
   const [selectedAccount, setSelectedAccount] = useState<Account>();
-
+  const { address: ethereumAddress, status: appKitStatus, isConnected } = useAppKitAccount();
+  const { walletProvider } = useAppKitProvider('eip155');
   const walletsCenter = useWalletCenter(chainProperties);
   const { subscribeBalancesChanges, isBalancesFetching } = useBalanceSubscriptions();
 
@@ -55,7 +55,6 @@ export const AccountWrapper: FC = ({ children }) => {
         return;
       }
       localStorage.setItem(DefaultAccountKey, account.normalizedAddress);
-
       setSelectedAccount(account);
     },
     [selectedAccount?.address]
@@ -72,7 +71,7 @@ export const AccountWrapper: FC = ({ children }) => {
       ? Address.is.ethereumAddressInAnyForm(defaultAccountNormalizedAddress)
         ? defaultAccountNormalizedAddress
         : Address.normalize.substrateAddress(defaultAccountNormalizedAddress, chainProperties?.SS58Prefix)
-          : '';
+      : '';
 
     const defaultAccount = accounts.get(defaultAccountAddress);
 
@@ -84,6 +83,48 @@ export const AccountWrapper: FC = ({ children }) => {
     }
   }, [accounts, changeAccount, isLoading]);
 
+  useEffect(() => {
+    const handleWalletConnection = () => {
+      if (!ethereumAddress || !isConnected || !walletProvider) return;
+  
+      const accountExists = accounts.has(ethereumAddress);
+      if (!accountExists) {
+
+        setTimeout(handleReownWallet, 500);
+      }
+    };
+  
+    handleWalletConnection();
+  }, [ethereumAddress]);
+  
+  const [previousEthereumAddress, setPreviousEthereumAddress] = useState<string | undefined>();
+
+  useEffect(() => {
+    if (!isConnected && !ethereumAddress && previousEthereumAddress) {
+      setAccounts((prevAccounts) => {
+        const updatedAccounts = new Map(prevAccounts);
+  
+        if (previousEthereumAddress) {
+          updatedAccounts.delete(previousEthereumAddress);
+        }
+  
+        return updatedAccounts;
+      });
+    }
+  
+    if (ethereumAddress) {
+      setPreviousEthereumAddress(ethereumAddress);
+    }
+  }, [isConnected, ethereumAddress, previousEthereumAddress]);
+  
+
+
+  const handleReownWallet = async () => {
+    console.log('HANDLE_REOWN');
+    await walletsCenter.connectReownWallet(walletProvider);
+    fetchAccounts();
+  };
+
   const fetchAccounts = useCallback(() => {
     if (!chainProperties || !api?.market?.uniqueSdk) return;
     const getConnectedWallets = localStorage.getItem(CONNECTED_WALLET_TYPE);
@@ -93,11 +134,12 @@ export const AccountWrapper: FC = ({ children }) => {
     }
     setIsLoading(true);
     const wallets = getConnectedWallets.split(';') as ConnectedWalletsName[];
+    console.log(wallets, '!Wallets');
     const connectedWallets = wallets.map((typeWallet) =>
-      walletsCenter.connectWallet(
-        typeWallet
-      )
+      typeWallet === 'reown' ? walletsCenter.connectReownWallet(walletProvider) : walletsCenter.connectWallet(typeWallet)
     );
+
+    console.log(connectedWallets, '!connectedWallets');
     if (!connectedWallets.length) {
       setIsLoading(false);
       return;
@@ -114,13 +156,15 @@ export const AccountWrapper: FC = ({ children }) => {
         });
 
         void (async () => {
+          console.log('SET_ACCOUNT', map);
           setAccounts(await subscribeBalancesChanges(map, setAccounts));
           setIsLoading(false);
         })();
       });
-  }, [chainProperties, api?.market?.uniqueSdk]);
+  }, [chainProperties, api?.market?.uniqueSdk, walletProvider]);
 
   useEffect(fetchAccounts, [fetchAccounts]);
+
 
   const value = useMemo(
     () => ({

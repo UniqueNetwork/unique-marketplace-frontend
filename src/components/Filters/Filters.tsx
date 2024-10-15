@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 
 import StatusFilter from './StatusFilter';
@@ -40,7 +40,12 @@ export const Filters: FC<FiltersProps> = ({ value, attributes, attributeCounts, 
     onFilterChange({ ...(value || {}), typeOfCustomizableNFTs });
   }, [value, onFilterChange]);
 
+  useEffect(() => {
+    console.log('FILTERS WRAP');
+  }, []);
+
   return <FiltersStyled>
+    FILTERS WRAP
     <StatusFilter value={value?.statuses} onChange={onStatusFilterChange} testid={`${testid}-status`} />
     <TypeOfAssetsFilter
       isFetchingTokens={false}
