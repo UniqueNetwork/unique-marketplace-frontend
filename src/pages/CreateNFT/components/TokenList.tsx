@@ -1,12 +1,10 @@
 import { ChangeEvent, DragEvent, FC, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
-// import DraggableList from 'react-draggable-list';
 import classNames from 'classnames';
 
 import { Icon, Modal, Text, TooltipWrapper } from 'components/UI';
 
 import { NewToken2, ViewMode } from '../types';
-import { TokenCardCommonProps, TokenCardProps } from './TokenCard';
 import { getUniqueTraitTypes } from '../helpers';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { CollectionWithInfoV2Dto, PotentialAttribute } from '@unique-nft/sdk';
@@ -22,6 +20,7 @@ import { IconButton } from 'components/IconButton/IconButton';
 import ConfirmDeleteForm from './ConfirmDeleteForm';
 import { Checkbox } from 'components/UI/Checkbox/Checkbox2';
 import { filesSizeValidate } from 'utils/filesSizeValidate';
+import { SortableTokenList } from './SortableTokenList';
 
 export type TokenListProps = {
   disabled: boolean;
@@ -275,7 +274,6 @@ export const TokenList = ({
                         index,
                         onSelect
                       }}
-                      dragHandleProps={{}}
                     />
                   ))}
                 </TokenPreviewWrapper>
@@ -408,37 +406,20 @@ export const TokenList = ({
                     )}
                     {step === CreateTokensSteps.SET_DATA && <FakeCell />}
                   </TableHeader>
-
-                  {/* @ts-ignore */}
-                  {/* <DraggableList<NewToken2, TokenCardCommonProps, FC<TokenCardProps>>
-                    constrainDrag
-                    unsetZIndex
-                    className='draggable-container'
-                    itemKey='id'
-                    template={TokenLine}
-                    list={filteredTokens}
-                    container={() => containerRef.current}
-                    commonProps={{
-                      viewMode,
-                      mode,
-                      tokenPrefix,
-                      attributesSchema,
-                      step,
-                      newAttributes,
-                      setNewAttributeValue,
-                      onChange: onTokenChange,
-                      onRemove: onTokenRemove
-                    }}
-                    onMoveEnd={(newList) => {
-                      const lastId = (tokensStartId || 0) + 1;
-                      return onChange([
-                        ...newList.map((token, index) => ({
-                          ...token,
-                          tokenId: Number(lastId) + Number(index)
-                        }))
-                      ]);
-                    }}
-                  /> */}
+                  <SortableTokenList
+                    tokens={filteredTokens}
+                    viewMode={viewMode}
+                    mode={mode}
+                    tokenPrefix={tokenPrefix}
+                    attributesSchema={attributesSchema}
+                    step={step}
+                    newAttributes={newAttributes}
+                    setNewAttributeValue={setNewAttributeValue}
+                    onChange={onChange}
+                    onRemove={onTokenRemove}
+                    containerRef={containerRef}
+                    tokensStartId={tokensStartId}
+                  />
                 </TableWrap>
               )}
             </DraggableContainer>

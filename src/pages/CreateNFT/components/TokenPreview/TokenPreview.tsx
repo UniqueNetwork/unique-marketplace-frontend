@@ -1,6 +1,5 @@
 import styled from 'styled-components';
-// import { TemplateProps } from 'react-draggable-list';
-import { MouseEventHandler, TouchEventHandler, useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import classNames from 'classnames';
 
 import { Modal, Text } from 'components/UI';
@@ -32,17 +31,11 @@ export type TokenCardProps = any;
 
 export const TokenPreview = ({
   item,
-  dragHandleProps,
   commonProps
 }: TokenCardProps) => {
   const { id, tokenId, image } = item;
   const { tokenPrefix, collection, list, index, onSelect } = commonProps;
   const [willBeRemoved, setWillBeRemoved] = useState(false);
-  const [hovered, setHovered] = useState(false);
-  const { onMouseDown, onTouchStart } = dragHandleProps as {
-    onMouseDown: MouseEventHandler<HTMLDivElement> | undefined;
-    onTouchStart: TouchEventHandler<HTMLDivElement> | undefined;
-  };
 
   const { selectedAccount } = useAccounts();
   const [showTokendetails, setShowTokendetails] = useState<boolean>(false);
@@ -65,7 +58,6 @@ export const TokenPreview = ({
       <TokenWrapper
         className={classNames({
           removing: willBeRemoved,
-          hovered
         })}
       >
         <CheckboxWrapper>

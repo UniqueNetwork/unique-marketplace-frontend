@@ -40,10 +40,6 @@ export const TokenCard = ({
   } = commonProps;
   const [willBeRemoved, setWillBeRemoved] = useState(false);
   const [hovered, setHovered] = useState(false);
-  const { onMouseDown, onTouchStart } = dragHandleProps as {
-    onMouseDown: MouseEventHandler<HTMLDivElement> | undefined;
-    onTouchStart: TouchEventHandler<HTMLDivElement> | undefined;
-  };
 
   const onSelect = () => {
     onChange({ id, tokenId, image, attributes, isValid, isSelected: !isSelected, royalties });
@@ -86,10 +82,10 @@ export const TokenCard = ({
           }}
           onTouchStart={(e) => {
             e.preventDefault();
-            onTouchStart?.(e);
+            // onTouchStart?.(e);
           }}
           onMouseDown={(e) => {
-            onMouseDown?.(e);
+            // onMouseDown?.(e);
           }}
         >
           <TokenImage alt={`${tokenPrefix}_${id}`} image={image.url} />

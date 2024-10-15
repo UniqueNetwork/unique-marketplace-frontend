@@ -11,6 +11,7 @@ import { ethers } from 'ethers';
 import { changeMetamaskChain } from 'utils/metamask';
 import { EthereumChainParams } from 'account/constants';
 import { MetamaskAccountName } from 'account/MetamaskWallet';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 export type ChainValue = {
   raw: string;
@@ -64,8 +65,12 @@ class BaseController implements IBaseController {
     this.networkId = options.networkId;
   }
 
-  private isMetamaskSigner(account: Account): boolean {
+  private isMetamaskSignerOld(account: Account): boolean {
     return account.name === MetamaskAccountName;
+  }
+
+  private isMetamaskSigner(account: Account): boolean {
+    return isEthereumAddress(account.address);
   }
 
   protected getAdapter(account: Account): IMarketContractAdapter {
