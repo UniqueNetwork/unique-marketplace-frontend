@@ -25,11 +25,14 @@ import { useMarketableCollection } from 'api/restApi/collections/collection';
 import { getSignature } from 'hooks/marketplaceStages/utils/getSignature';
 import { MarketableCollectionMetadata } from 'api/restApi/collections/types';
 import { useCollections } from 'hooks/useCollections';
-import { getEthereumSigner, sleep } from 'utils/helpers';
+import { sleep } from 'utils/helpers';
 import { useCollectionConfirmSponsorship } from 'pages/CollectionEdit/Forms/hooks/useCollectionConfirmSponsorship';
 import { ethers } from 'ethers';
 import { isEthereumAddress } from '@polkadot/util-crypto';
-import { useAppKitProvider } from '@reown/appkit/react';
+import { useEthersSigner, getNumericChainId } from 'account/WalletConnectContext/useSigner';
+import { switchNetwork } from 'utils/swithChain';
+import { parseEthersV6TxReceipt } from '@unique-nft/solidity-interfaces';
+import { Address } from '@unique-nft/utils';
 
 //@ts-ignore
 const COLECTION_CREATION_FEE = 2n * 10n ** 18n;
@@ -75,8 +78,9 @@ const CreateCollectionComponent = () => {
     accounts: { size: accountsLength }
   } = useAccounts();
   const formMapper = useCollectionFormMapper();
-  const { walletProvider } = useAppKitProvider('eip155');
+  // const { walletProvider } = useAppKitProvider('eip155');
 
+  const signer = useEthersSigner();
   const {
     getFee,
     fee,
@@ -109,6 +113,7 @@ const CreateCollectionComponent = () => {
   const onRemoveCover = useCallback(() => {
     setCover(undefined);
   }, []);
+  
 
   const {
     collectionSize,
@@ -307,11 +312,14 @@ const CreateCollectionComponent = () => {
 
         collectionId = createdCollection?.collectionId || 0;
       } else {
-        if (!walletProvider) throw new Error('No Reown wallet provider found');
-        const provider = new ethers.providers.Web3Provider(walletProvider);
-        const signer = await provider.getSigner();
+        if (!signer) throw new Error('No Reown wallet provider found');
+        // const provider = new ethers.providers.Web3Provider(walletProvider);
+        // const signer = await provider.getSigner();
+        const numericChainId = getNumericChainId(currentChainId);
+          switchNetwork(numericChainId);
           const CollectionManager = new ethers.Contract(CREATE_CONTRACT_ADDRESS, (await import('./CreateCollection.json')).default, signer);
-          const mintCollectionTx = await CollectionManager.createCollection(
+          console.log(CollectionManager, 'CollectionManager')
+          const txCreateCollection = await (await CollectionManager.createCollection(
             payload.name,
             payload.description,
             payload.symbol,
@@ -321,14 +329,12 @@ const CreateCollectionComponent = () => {
             payload.limits.accountTokenOwnershipLimit || 0,
             payload.permissions.nesting?.tokenOwner,
             payload.permissions.nesting?.collectionAdmin,
-            { gasLimit: 500_000, value: COLECTION_CREATION_FEE }
-          );
+            { gasLimit: 500_000,value: COLECTION_CREATION_FEE }
+          )).wait();
 
-          const receipt = await mintCollectionTx.wait();
+          collectionId = Number(parseEthersV6TxReceipt(txCreateCollection).events?.CollectionCreated?.collectionId as string)
 
-          console.log(receipt, 'receipt');
-          const collectionCreateEvent = receipt.events.find((event: any) => event.event === "CollectionCreated");
-          collectionId = collectionCreateEvent?.args[0]?.toNumber();
+          console.log(collectionId, 'ccollectionId');
       }
     } catch (err) {
       console.error(err);
@@ -405,41 +411,42 @@ const CreateCollectionComponent = () => {
   
         setFeeLoading(true);
   
-        const provider = new ethers.providers.Web3Provider(walletProvider);
-        const signer = await provider.getSigner();
-        const gasPrice = await signer.provider.getGasPrice();
+        // const provider = new ethers.providers.Web3Provider(walletProvider);
+        // const signer = await provider.getSigner();
   
         let feeToUse = feeFormatted;
         if (
           isEthereumAddress(selectedAccount?.address)
-
         ) {
-          try {
-            const CollectionManager = new ethers.Contract(
-              CREATE_CONTRACT_ADDRESS,
-              (await import('./CreateCollection.json')).default,
-              signer
-            );
-  
-            const gasEstimate = await CollectionManager.estimateGas.createCollection(
-              collectionFormValues.name,
-              collectionFormValues.description,
-              collectionFormValues.symbol,
-              cover?.src || '',
-              !!collectionFormValues.transfersEnabled,
-              collectionFormValues.tokenLimit || 0,
-              collectionFormValues.accountTokenOwnershipLimit || 0,
-              collectionFormValues.nesting?.tokenOwner,
-              collectionFormValues.nesting?.collectionAdmin,
-              { gasLimit: 500_000, value: COLECTION_CREATION_FEE }
-            );
-            const totalFee = gasEstimate.mul(gasPrice);
-
-            feeToUse = ethers.utils.formatEther(totalFee.add(COLECTION_CREATION_FEE));
-          } catch (err) {
-            console.error("Error estimating gas: ", err);
-          }
-        } else {
+            try {
+              const gasPrice = await signer.provider.getGasPrice();
+              console.log(gasPrice, 'GAS_PRICE')
+    
+              const CollectionManager = new ethers.Contract(
+                CREATE_CONTRACT_ADDRESS,
+                (await import('./CreateCollection.json')).default,
+                signer
+              );
+    
+              const gasEstimate = await CollectionManager.estimateGas.createCollection(
+                collectionFormValues.name,
+                collectionFormValues.description,
+                collectionFormValues.symbol,
+                cover?.src || '',
+                !!collectionFormValues.transfersEnabled,
+                collectionFormValues.tokenLimit || 0,
+                collectionFormValues.accountTokenOwnershipLimit || 0,
+                collectionFormValues.nesting?.tokenOwner,
+                collectionFormValues.nesting?.collectionAdmin,
+                { gasLimit: 500_000, value: COLECTION_CREATION_FEE }
+              );
+    
+              const totalFee = gasEstimate.mul(gasPrice);
+              feeToUse = ethers.formatEther(totalFee.add(COLECTION_CREATION_FEE));
+            } catch (err) {
+              console.error("Error estimating gas: ", err);
+            }
+          } else {
           feeToUse = feeFormatted;
         }
         const finalFee = String(Number(feeToUse));

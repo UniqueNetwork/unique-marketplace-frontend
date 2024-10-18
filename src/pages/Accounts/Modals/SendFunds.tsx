@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Text, useNotifications, Dropdown, Button, Modal, Heading, Select } from 'components/UI';
 import { BN } from '@polkadot/util';
 import styled from 'styled-components';
@@ -431,8 +431,20 @@ type TransferFundsStagesModalProps = {
 const TransferFundsStagesModal: FC<TransferFundsStagesModalProps & TTransferFunds> = ({ isVisible, onFinish, sender, amount, recipient, currency, decimals, testid }) => {
   const { stages, status, initiate } = useTransferFundsStages(sender);
   const { info } = useNotifications();
-  useEffect(() => { void initiate({ sender, recipient, amount, currency, decimals }); }, [sender, recipient, amount, currency, decimals]);
+  const memoizedInitiate = useMemo(() => {
+    return { sender, recipient, amount, currency, decimals };
+  }, [sender, recipient, amount, currency, decimals]);
+  
+  const hasInitiatedRef = useRef(false);
 
+  useEffect(() => {
+    console.log(hasInitiatedRef.current, sender, recipient, amount, currency, decimals)
+    if (hasInitiatedRef.current && sender && recipient && amount && currency !== undefined && decimals) {
+      void initiate({ sender, recipient, amount, currency, decimals });
+    }
+    hasInitiatedRef.current = true;
+  }, [sender, recipient, amount, currency, decimals]);
+  
   useEffect(() => {
     if (status === StageStatus.success) {
       info(

@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useState, ReactNode } from 'react';
 import { Address } from '@unique-nft/utils';
 
 import { Account, BaseWalletType, WalletsType } from './types';
@@ -8,16 +8,24 @@ import { DefaultAccountKey } from './constants';
 import { AccountProvider } from './AccountContext';
 import { useApi } from 'hooks/useApi';
 import { useBalanceSubscriptions } from './useBalanceSubscriptions';
-import { useAppKitAccount, useAppKitProvider } from '@reown/appkit/react';
+import { useAccount } from 'wagmi';
+import { useEthersSigner } from './WalletConnectContext/useSigner';
 
-export const AccountWrapper: FC = ({ children }) => {
+interface AccountWrapperProps {
+  children: ReactNode;
+}
+
+export const AccountWrapper: FC<AccountWrapperProps> = ({ children }) => {
   const { chainProperties, api } = useApi();
   const [accounts, setAccounts] = useState<Map<string, BaseWalletType<WalletsType>>>(new Map());
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [fetchAccountsError, setFetchAccountsError] = useState<string | undefined>();
   const [selectedAccount, setSelectedAccount] = useState<Account>();
-  const { address: ethereumAddress, status: appKitStatus, isConnected } = useAppKitAccount();
-  const { walletProvider } = useAppKitProvider('eip155');
+
+  const { address: ethereumAddress } = useAccount();
+  // const { address: ethereumAddress, status: appKitStatus, isConnected } = useAppKitAccount();
+  // const { walletProvider } = useAppKitProvider('eip155');
+  
   const walletsCenter = useWalletCenter(chainProperties);
   const { subscribeBalancesChanges, isBalancesFetching } = useBalanceSubscriptions();
 
@@ -85,7 +93,7 @@ export const AccountWrapper: FC = ({ children }) => {
 
   useEffect(() => {
     const handleWalletConnection = () => {
-      if (!ethereumAddress || !isConnected || !walletProvider) return;
+      if (!ethereumAddress) return;
   
       const accountExists = accounts.has(ethereumAddress);
       if (!accountExists) {
@@ -95,12 +103,12 @@ export const AccountWrapper: FC = ({ children }) => {
     };
   
     handleWalletConnection();
-  }, [ethereumAddress]);
+  }, [ethereumAddress, ]);
   
   const [previousEthereumAddress, setPreviousEthereumAddress] = useState<string | undefined>();
 
   useEffect(() => {
-    if (!isConnected && !ethereumAddress && previousEthereumAddress) {
+    if (!ethereumAddress && previousEthereumAddress) {
       setAccounts((prevAccounts) => {
         const updatedAccounts = new Map(prevAccounts);
   
@@ -115,37 +123,54 @@ export const AccountWrapper: FC = ({ children }) => {
     if (ethereumAddress) {
       setPreviousEthereumAddress(ethereumAddress);
     }
-  }, [isConnected, ethereumAddress, previousEthereumAddress]);
+  }, [ethereumAddress, previousEthereumAddress]);
   
+  const signer = useEthersSigner();
 
-
-  const handleReownWallet = async () => {
-    console.log('HANDLE_REOWN');
-    await walletsCenter.connectReownWallet(walletProvider);
-    fetchAccounts();
-  };
+  const handleReownWallet = useCallback(async () => {
+    if (!signer) return;
+    const newWallets = await walletsCenter.connectReownWallet(signer);
+  
+    setAccounts((prevAccounts) => {
+      const updatedAccounts = new Map(prevAccounts);
+      newWallets.forEach((account, address) => {
+        updatedAccounts.set(address, account);
+      });
+      return updatedAccounts;
+    });
+  }, [signer]);
+  
 
   const fetchAccounts = useCallback(() => {
     if (!chainProperties || !api?.market?.uniqueSdk) return;
-    const getConnectedWallets = localStorage.getItem(CONNECTED_WALLET_TYPE);
-    if (!getConnectedWallets) {
-      setIsLoading(false);
-      return;
-    }
+  
     setIsLoading(true);
-    const wallets = getConnectedWallets.split(';') as ConnectedWalletsName[];
-    console.log(wallets, '!Wallets');
-    const connectedWallets = wallets.map((typeWallet) =>
-      typeWallet === 'reown' ? walletsCenter.connectReownWallet(walletProvider) : walletsCenter.connectWallet(typeWallet)
-    );
-
-    console.log(connectedWallets, '!connectedWallets');
-    if (!connectedWallets.length) {
+    const walletsFromStorage = localStorage.getItem(CONNECTED_WALLET_TYPE)?.split(';') as ConnectedWalletsName[] || [];
+    const walletsSet = new Set(walletsFromStorage);
+    if (signer) {
+      walletsSet.add('reown');
+    }
+  
+    const wallets = Array.from(walletsSet);
+  
+    const connectedWalletPromises = wallets.map((typeWallet) => {
+      if (typeWallet === 'reown') {
+        if (signer) {
+          return walletsCenter.connectReownWallet(signer);
+        } else {
+          return Promise.resolve(new Map());
+        }
+      } else {
+        return walletsCenter.connectWallet(typeWallet);
+      }
+    });
+  
+    if (!connectedWalletPromises.length) {
       setIsLoading(false);
       return;
     }
-
-    void Promise.allSettled(connectedWallets)
+  
+    void Promise.allSettled(connectedWalletPromises)
       .then((results) => {
         const map = new Map();
         results.forEach((result) => {
@@ -154,15 +179,15 @@ export const AccountWrapper: FC = ({ children }) => {
             map.set(address, acc);
           });
         });
-
+  
         void (async () => {
           console.log('SET_ACCOUNT', map);
           setAccounts(await subscribeBalancesChanges(map, setAccounts));
           setIsLoading(false);
         })();
       });
-  }, [chainProperties, api?.market?.uniqueSdk, walletProvider]);
-
+  }, [chainProperties, api?.market?.uniqueSdk, signer]);
+  
   useEffect(fetchAccounts, [fetchAccounts]);
 
 
