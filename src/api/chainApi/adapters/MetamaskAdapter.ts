@@ -1,4 +1,5 @@
 import { Contract, ethers, JsonRpcSigner, Signer } from 'ethers';
+
 import { IV2Token, SchemaTools as SchemaToolsV2 } from '@unique-nft/schemas-v2';
 import { CollectionProperty, CreateCollectionParsed, CreateCollectionV2ArgsDto, TokenV2ItemForMultipleDto, PropertyKeyPermission, SetCollectionLimitsBody, SetSponsorshipBody, TokenId, CreateTokenPayload } from '@unique-nft/sdk';
 import { UniqueNFTFactory, UniqueFungibleFactory, UniqueRefungibleTokenFactory, CollectionHelpersFactory, parseEthersV6TxReceipt } from '@unique-nft/solidity-interfaces';
@@ -202,8 +203,9 @@ class MetamaskAdapter implements IMarketContractAdapter {
   async getChangePriceFee(collectionId: number, tokenId: number, price: string, currency: number, signer: Signer, contractProps: IMarketContractProperties): Promise<string> {
     const contract = this.getContract(contractProps, signer);
 
-    const estimateGas = await contract.estimateGas.changePrice(collectionId, tokenId, price, currency, { value: price, gasLimit: buyGasLimit });
-    const gasPrice = await contract.provider.getGasPrice();
+    const estimateGas = await contract.changePrice.estimateGas(collectionId, tokenId, price, currency, { value: price, gasLimit: buyGasLimit });
+    const feeData = await contract.provider.getFeeData();  // In Ethers v6, getFeeData() is used
+    const gasPrice = feeData.gasPrice;
 
     return estimateGas.mul(gasPrice).toString();
   }
@@ -226,29 +228,36 @@ class MetamaskAdapter implements IMarketContractAdapter {
     }));
   }
 
-  async getCreateCollectionFee({ address, tokenPrefix, description, name }: CreateCollectionV2ArgsDto, signer: Signer): Promise<string> {
+  async getCreateCollectionFee(
+    { address, tokenPrefix, description, name }: CreateCollectionV2ArgsDto,
+    signer: Signer
+  ): Promise<string> {
+
+    if (!signer || !signer.provider) return '0';
+
     const collectionHelper = await CollectionHelpersFactory(signer);
-
     const collectionCreationFee = await collectionHelper.collectionCreationFee();
-
-    const collectionCreationEstimateGas = await collectionHelper.estimateGas.createNFTCollection(
+  
+    const collectionCreationEstimateGas = await collectionHelper.createNFTCollection.estimateGas(
       name,
       description,
       tokenPrefix || name.slice(0, 4),
       {
-        from: address,
         value: collectionCreationFee
       }
     );
+  
+    const feeData = await signer.provider.getFeeData();
+    const gasPrice = feeData.gasPrice;
 
-    const gasPrice = await collectionHelper.provider.getGasPrice();
+    if (!gasPrice) return '0';
 
-    const totalFeeBigNumber = collectionCreationEstimateGas.mul(gasPrice).add(collectionCreationFee);
+    const totalFeeBigNumber = collectionCreationEstimateGas * gasPrice + collectionCreationFee;
     const totalFeeFormatted = parseFloat(ethers.formatEther(totalFeeBigNumber));
-
+  
     return String(totalFeeFormatted);
   }
-
+  
   async createCollection({ name, description, tokenPrefix, address }: CreateCollectionV2ArgsDto, signer: Signer): Promise<CreateCollectionParsed | undefined> {
     const collectionHelpers = await CollectionHelpersFactory(signer);
     const createCollectionResult = 
@@ -430,7 +439,7 @@ class MetamaskAdapter implements IMarketContractAdapter {
   async getSetSponsorshipFee(payload: SetSponsorshipBody, signer: Signer): Promise<string> {
     const rpcSigner = signer as JsonRpcSigner;
     const collection = await UniqueNFTFactory(payload.collectionId, rpcSigner);
-    const estimateGas: bigint = await collection.estimateGas.setCollectionSponsorCross({
+    const estimateGas: bigint = await collection.setCollectionSponsorCross.estimateGas({
       sub: '0x0',
       eth: payload.address,
     });
