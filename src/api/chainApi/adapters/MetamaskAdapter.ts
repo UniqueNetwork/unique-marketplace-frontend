@@ -617,8 +617,8 @@ class MetamaskAdapter implements IMarketContractAdapter {
     if (!tx) return;
 
     const tokenMintingResult = parseEthersV6TxReceipt(tx);
-
-    return tokenMintingResult;
+    const tokenId = Number(tokenMintingResult.events.Transfer.tokenId) || 1;
+    return [{ collectionId, tokenId }];
   }
 
   async burn(payload: { collectionId: number; tokenId: number }, signer: Signer): Promise<void> {
