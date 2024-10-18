@@ -10,8 +10,8 @@ import EnkriptIcon from 'static/icons/enkrypt.svg';
 import NovaWalletIcon from 'static/icons/nova_icon_radial.svg';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { ConnectedWalletsName } from 'account/useWalletCenter';
-import { useAppKit, useAppKitAccount } from '@reown/appkit/react';
 import WalletConnect from 'static/images/walletconnect.png';
+import { useWeb3Modal } from '@web3modal/wagmi/react';
 
 enum AccountModal {
   CREATE = 'create',
@@ -28,9 +28,6 @@ export const ConnectWallets = () => {
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
   const [missingExtension, setMissingExtension] = useState<ConnectedWalletsName>();
   const { walletsCenter, fetchAccounts } = useAccounts();
-  const { address, isConnected } = useAppKitAccount();
-
-
 
   const handleConnectToMetamask = async () => {
     try {
@@ -59,7 +56,7 @@ export const ConnectWallets = () => {
     }
   };
 
-  const { open } = useAppKit()
+  const { open } = useWeb3Modal();
 
   const isMobile = DeviceSize.sm >= useDeviceSize();
   const [isFetching, setIsFetching] = useState<boolean>(false);

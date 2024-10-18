@@ -104,13 +104,3 @@ export const truncateDecimalsBalanceSheet = (balance: string | undefined) => {
   arrBalance[lastElem] = arrBalance[lastElem].slice(0, 4);
   return arrBalance.join('.');
 };
-
-export const getEthereumSigner = () => {
-  const provider = new ethers.providers.Web3Provider(window.ethereum);
-  return provider.getSigner();
-};
-
-export const getEthereumProvider = () => {
-  const provider = new ethers.providers.Web3Provider(window.ethereum);
-  return provider;
-};

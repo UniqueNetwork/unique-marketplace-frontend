@@ -107,8 +107,8 @@ export const TokenPreview = ({
           </CommonTokenDetailWrapper>
         ) : (
           <Slider ref={horizontalSliderRef} {...settings} initialSlide={index}>
-            {list?.map((token) => (
-              <CommonTokenDetailWrapper>
+            {list?.map((token, id) => (
+              <CommonTokenDetailWrapper key={'token_preview' + token.id + '-' + id}>
                 <CommonTokenDetail
                   token={{
                     ...token,

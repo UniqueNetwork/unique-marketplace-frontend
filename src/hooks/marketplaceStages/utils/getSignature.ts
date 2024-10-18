@@ -1,7 +1,6 @@
 import { Account } from 'account/types';
-import { Signer as EthersSigner } from 'ethers';
+import { AbstractSigner as EthersSigner } from 'ethers';
 import { Signer as UniqueSigner } from '@unique-nft/sdk';
-import { SignerPayloadRaw } from '@unique-nft/utils/extension';
 
 export const isEthersSigner = (signer: any): signer is EthersSigner =>
   (signer instanceof EthersSigner);

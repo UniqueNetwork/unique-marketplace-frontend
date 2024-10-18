@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-// import { TemplateProps } from 'react-draggable-list';
 import { MouseEventHandler, TouchEventHandler, useState, useRef } from 'react';
 import classNames from 'classnames';
 

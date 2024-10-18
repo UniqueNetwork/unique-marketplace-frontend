@@ -40,12 +40,7 @@ export const Filters: FC<FiltersProps> = ({ value, attributes, attributeCounts, 
     onFilterChange({ ...(value || {}), typeOfCustomizableNFTs });
   }, [value, onFilterChange]);
 
-  useEffect(() => {
-    console.log('FILTERS WRAP');
-  }, []);
-
   return <FiltersStyled>
-    FILTERS WRAP
     <StatusFilter value={value?.statuses} onChange={onStatusFilterChange} testid={`${testid}-status`} />
     <TypeOfAssetsFilter
       isFetchingTokens={false}

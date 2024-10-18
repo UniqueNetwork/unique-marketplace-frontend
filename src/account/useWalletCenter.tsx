@@ -1,10 +1,10 @@
-import { useAppKitProvider, useAppKitAccount, useAppKitState } from '@reown/appkit/react';
-import { ethers } from 'ethers';
+import { Signer } from 'ethers';
 import { useState, useCallback, useEffect } from 'react';
 import { ChainPropertiesResponse } from '@unique-nft/sdk';
 import { PolkadotWallet, PolkadotWalletName } from './PolkadotWallet';
 import { MetamaskWallet } from './MetamaskWallet';
 import { BaseWalletType } from './types';
+import { useAccount } from 'wagmi';
 
 export type ConnectedWalletsName = 'polkadot-js' | 'keyring' | 'metamask' | 'talisman' | 'subwallet-js' | 'enkrypt' | 'novawallet' | 'reown';
 
@@ -28,8 +28,9 @@ export const useWalletCenter = (chainProperties?: ChainPropertiesResponse) => {
   );
 
 
-  const { address, isConnected } = useAppKitAccount();
-  const { selectedNetworkId } = useAppKitState();
+  const { address } = useAccount();
+  // const { address, isConnected } = useAppKitAccount();
+  // const { selectedNetworkId } = useAppKitState();
 
   const connectWallet = useCallback(
     async (typeWallet: ConnectedWalletsName) => {
@@ -64,13 +65,9 @@ export const useWalletCenter = (chainProperties?: ChainPropertiesResponse) => {
   );
 
   const connectReownWallet = useCallback(
-    async (walletProvider) => {
-      console.log(walletProvider, 'walletProvider')
-      if (!walletProvider) throw new Error('No Reown wallet provider found');
+    async (signer: Signer) => {
+      if (!signer) throw new Error('No Reown wallet provider found');
       try {
-        console.log('Logic for Reown (AppKit) wallet connection')
-        const provider = new ethers.providers.Web3Provider(walletProvider);
-        const signer = provider.getSigner();
         const address = await signer.getAddress();
 
         const newWallets = new Map([
@@ -80,7 +77,7 @@ export const useWalletCenter = (chainProperties?: ChainPropertiesResponse) => {
               name: 'reown',
               normalizedAddress: address,
               address,
-              walletMetaInformation: walletProvider,
+              walletMetaInformation: '',
               signerType: 'reown',
               sign: async (message: string) => await signer.signMessage(message),
               signer,
@@ -108,8 +105,8 @@ export const useWalletCenter = (chainProperties?: ChainPropertiesResponse) => {
     connectWallet,
     connectReownWallet,
     connectedWallets,
-    isConnected,
+    // isConnected,
     address,
-    selectedNetworkId,
+    // selectedNetworkId,
   } as const;
 };

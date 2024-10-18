@@ -1,12 +1,16 @@
 // TODO: this provider is OBSOLETE, consider removing it entirely
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState, ReactNode } from 'react';
 import { useApi } from '../hooks/useApi';
 import { CollectionsProvider } from './CollectionsContext';
 import { CollectionInfoWithSchemaResponse } from '@unique-nft/sdk';
 import { useQueryCollections } from 'api/scanApi/useQueryCollections';
 import { GQLCollection } from 'api/scanApi/types';
 
-const CollectionsWrapper: FC = ({ children }) => {
+interface CollectionsWrapperProps {
+  children: ReactNode;
+}
+
+const CollectionsWrapper: FC<CollectionsWrapperProps> = ({ children }) => {
   const [collections, setCollections] = useState<GQLCollection[]>([]);
   const [curatedCollections, setCuratedCollections] = useState<CollectionInfoWithSchemaResponse[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(true);
