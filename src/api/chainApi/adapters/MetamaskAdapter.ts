@@ -716,7 +716,6 @@ class MetamaskAdapter implements IMarketContractAdapter {
 
     return String(totalFeeBigInt);
   }
-
   async setCollectionLimits(payload: SetCollectionLimitsBody, signer: Signer): Promise<void> {
     const collection = await UniqueNFTFactory(payload.collectionId, signer);
 
