@@ -288,9 +288,10 @@ class MetamaskAdapter implements IMarketContractAdapter {
     contractProps: IMarketContractProperties
   ): Promise<void> {
     const contract = this.getContract(contractProps, signer);
-    await this.callContract(
-      contract,
-      'put',
+    
+    const putMethod = contract.getFunction('put');
+    
+    const rest = await (await putMethod(
       collectionId,
       tokenId,
       price,
@@ -298,9 +299,11 @@ class MetamaskAdapter implements IMarketContractAdapter {
       amount,
       from,
       { gasLimit: sellGasLimit }
-    );
-  }
+    )).wait();
 
+    console.log(rest, 'RESULT');
+  }
+  
   async getBuyFee(
     to: EthCrossAccountId,
     collectionId: number,
@@ -340,14 +343,17 @@ class MetamaskAdapter implements IMarketContractAdapter {
     signer,
   }: IPurchaseTokenData): Promise<void> {
     const contract = this.getContract(contractProps, signer);
-    const estimateGas = await contract.buy.estimateGas(collectionId, tokenId, amount, to, {
+    const buyMethod = contract.getFunction('buy');
+    
+    const estimateGas = await buyMethod.estimateGas(collectionId, tokenId, amount, to, {
       value: price,
       gasLimit: buyGasLimit,
     });
-    await this.callContract(contract, 'buy', collectionId, tokenId, amount, to, {
+    
+    await (await buyMethod(collectionId, tokenId, amount, to, {
       value: price,
       gasLimit: estimateGas + 1000n,
-    });
+    })).wait();
   }
 
   async changePrice(
@@ -359,13 +365,15 @@ class MetamaskAdapter implements IMarketContractAdapter {
     contractProps: IMarketContractProperties
   ): Promise<void> {
     const contract = this.getContract(contractProps, signer);
-
-    const estimateGas = await contract.changePrice.estimateGas(collectionId, tokenId, price, currency, {
+    const changePriceMethod = contract.getFunction('changePrice');
+    
+    const estimateGas = await changePriceMethod.estimateGas(collectionId, tokenId, price, currency, {
       gasLimit: buyGasLimit,
     });
-    await this.callContract(contract, 'changePrice', collectionId, tokenId, price, currency, {
+  
+    await (await changePriceMethod(collectionId, tokenId, price, currency, {
       gasLimit: estimateGas + 1000n,
-    });
+    })).wait();
   }
 
   async getChangePriceFee(
@@ -823,13 +831,12 @@ class MetamaskAdapter implements IMarketContractAdapter {
     contract: contractOption,
     signer,
   }: IRemoveFromSell): Promise<void> {
-    if (!signer) {
-      throw new Error('Signer is required');
-    }
     const contract = this.getContract(contractOption, signer);
-    await this.callContract(contract, 'revoke', collectionId, tokenId, {
+    const revokeMethod = contract.getFunction('revoke');
+    
+    await (await revokeMethod(collectionId, tokenId, {
       gasLimit: sellGasLimit,
-    });
+    })).wait();
   }
 }
 
