@@ -313,6 +313,7 @@ class MetamaskAdapter implements IMarketContractAdapter {
     signer: Signer,
     contractProps: IMarketContractProperties
   ): Promise<string> {
+    if (!signer || !signer.provider) return '';
     const contract = this.getContract(contractProps, signer);
 
     const estimateGas = await contract.buy.estimateGas(
@@ -323,7 +324,7 @@ class MetamaskAdapter implements IMarketContractAdapter {
       { value: price, gasLimit: buyGasLimit }
     );
 
-    const feeData = await contract.provider.getFeeData();
+    const feeData = await signer.provider.getFeeData();
     const gasPrice = feeData.gasPrice;
 
     if (!gasPrice) return '0';
@@ -384,6 +385,7 @@ class MetamaskAdapter implements IMarketContractAdapter {
     signer: Signer,
     contractProps: IMarketContractProperties
   ): Promise<string> {
+    if (!signer || !signer.provider) return '';
     const contract = this.getContract(contractProps, signer);
 
     const estimateGas = await contract.changePrice.estimateGas(
@@ -394,7 +396,7 @@ class MetamaskAdapter implements IMarketContractAdapter {
       { gasLimit: buyGasLimit }
     );
 
-    const feeData = await contract.provider.getFeeData();
+    const feeData = await signer.provider.getFeeData();
     const gasPrice = feeData.gasPrice;
 
     if (!gasPrice) return '0';

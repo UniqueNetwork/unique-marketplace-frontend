@@ -11,14 +11,16 @@ import WalletConnect from 'static/images/walletconnect.png';
 
 interface AccountCardProps extends IAccount {
   avatarRender?(address: string): ReactNode;
-  onCopyAddressClick?(address: string): void
+  onCopyAddressClick?(address: string): void,
+  onOpenChange?(status: boolean): void
 }
 
 export const AccountCard = ({
   name,
   address,
   avatarRender,
-  onCopyAddressClick
+  onCopyAddressClick,
+  onOpenChange
 }: AccountCardProps) => {
   const shortAddress =
     address && address?.length > 13
@@ -34,7 +36,10 @@ export const AccountCard = ({
 
   return (
     <AccountCardWrapper>
-      {address === ethereumAddress ? <button onClick={() => open()} style={{ border: 'none', background: 'transparent', padding: 0 }}>
+      {address === ethereumAddress ? <button onClick={() => {
+        onOpenChange && onOpenChange(false);
+        open();
+      }} style={{ border: 'none', background: 'transparent', padding: 0 }}>
         <ImgWalletConnect src={WalletConnect} alt="Wallet Connect" />
       </button> : (avatarRender && address
         ? (

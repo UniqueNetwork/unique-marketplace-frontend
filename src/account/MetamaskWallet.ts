@@ -52,8 +52,7 @@ export class MetamaskWallet
       return new Map();
     }
 
-    // @ts-ignore
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const provider = new ethers.BrowserProvider(window.ethereum);
 
     this._accounts = new Map([
       [
@@ -65,7 +64,7 @@ export class MetamaskWallet
           walletMetaInformation: res.result,
           signerType: AccountSigner.extension,
           sign: this.getSignature,
-          signer: provider.getSigner() as Signer,// Signer from hook
+          signer: await provider.getSigner() as Signer,// Signer from hook
           changeChain: this.changeChain.bind(this),
           isMintingEnabled: this.isMintingEnabled
         }
@@ -74,9 +73,8 @@ export class MetamaskWallet
     return this._accounts;
   }
 
-  getSignature(unsignedTxPayload?: UnsignedTxPayloadResponse, selectedAccount?: Account) {
-    // @ts-ignore
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    return provider.getSigner();
+  async getSignature(unsignedTxPayload?: UnsignedTxPayloadResponse, selectedAccount?: Account) {
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    return await provider.getSigner();
   }
 }

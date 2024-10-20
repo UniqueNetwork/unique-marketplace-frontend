@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from 'react';
+import React, { useContext, useEffect, useMemo } from 'react';
 import { Icon, Dropdown, Button, Text, Toggle } from 'components/UI';
 import { AccountsManagerProps } from '../AccountsManager';
 import { AccountCard } from './AccountCard';
@@ -26,7 +26,8 @@ export const AccountsManagerDropdown = ({
   onNetworkChange,
   onManageBalanceClick,
   onCopyAddressClick,
-  onStakeClick
+  onStakeClick,
+  onOpenChange,
 }: AccountsManagerProps) => {
   const { setIsOpenConnectWalletModal } = useContext(
     ConnectWalletModalContext
@@ -59,6 +60,7 @@ export const AccountsManagerDropdown = ({
                 {...option}
                 avatarRender={avatarRender}
                 onCopyAddressClick={onCopyAddressClick}
+                onOpenChange={onOpenChange}
               />
             )}
             iconRight={{
@@ -75,6 +77,7 @@ export const AccountsManagerDropdown = ({
                 {...selectedAccount}
                 avatarRender={avatarRender}
                 onCopyAddressClick={onCopyAddressClick}
+                onOpenChange={onOpenChange}
               />
             </div>
           </Dropdown>

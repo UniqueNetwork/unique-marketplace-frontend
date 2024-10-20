@@ -434,15 +434,11 @@ const TransferFundsStagesModal: FC<TransferFundsStagesModalProps & TTransferFund
   const memoizedInitiate = useMemo(() => {
     return { sender, recipient, amount, currency, decimals };
   }, [sender, recipient, amount, currency, decimals]);
-  
-  const hasInitiatedRef = useRef(false);
 
   useEffect(() => {
-    console.log(hasInitiatedRef.current, sender, recipient, amount, currency, decimals)
-    if (hasInitiatedRef.current && sender && recipient && amount && currency !== undefined && decimals) {
+    if (sender && recipient && amount && currency !== undefined && decimals) {
       void initiate({ sender, recipient, amount, currency, decimals });
     }
-    hasInitiatedRef.current = true;
   }, [sender, recipient, amount, currency, decimals]);
   
   useEffect(() => {

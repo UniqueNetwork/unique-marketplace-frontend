@@ -74,7 +74,8 @@ const container = document.getElementById('root');
 const root = createRoot(container!);
 
 root.render(
-  <React.StrictMode>
+  // <React.StrictMode>
+  <>
     <GlobalStyle />
     <Router>
       <Routes>
@@ -92,5 +93,6 @@ root.render(
         </Route>
       </Routes>
     </Router>
-  </React.StrictMode>
+  </>
+  // </React.StrictMode>
 );
