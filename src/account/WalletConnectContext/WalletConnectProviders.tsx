@@ -21,17 +21,18 @@ export const config = defaultWagmiConfig({
   metadata,
 });
 
-const METAMASK_ID = process.env.REACT_APP_METAMASK_ID as string;
-const ZERION_ID = process.env.REACT_APP_ZERION_ID as string;
-const TRUST_ID = process.env.REACT_APP_TRUST_ID as string;
+const METAMASK_ID = 'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96' as string;
+const ZERION_ID = 'ecc4036f814562b41a5268adc86270fba1365471402006302e70169465b7ac18' as string;
+const TRUST_ID = '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0' as string;
 
 
 createWeb3Modal({
   wagmiConfig: config,
   projectId,
-  // includeWalletIds: [
-  //   METAMASK_ID, ZERION_ID, TRUST_ID
-  // ],
+  includeWalletIds: [
+    METAMASK_ID, ZERION_ID, TRUST_ID,
+    'fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa'
+  ],
   enableSwaps: false,
   enableOnramp: false,
   enableAnalytics: false,

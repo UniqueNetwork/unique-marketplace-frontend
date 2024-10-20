@@ -6,7 +6,7 @@ import { useApi } from '../../hooks/useApi';
 import { switchNetwork } from 'utils/swithChain';
 
 export function clientToSigner(client: Client<Transport, Chain, Account>) {
-  const { account, chain, transport } = client
+  const { account, chain, transport } = client;
   const network = {
     chainId: chain.id,
     name: chain.name,
@@ -22,7 +22,7 @@ export function useEthersSigner() {
   const { currentChainId: chainId } = useApi();
 
   const numericChainId = getNumericChainId(chainId);
-  switchNetwork(numericChainId);
+  // switchNetwork(numericChainId);
   const { data: client } = useConnectorClient<Config>({ chainId: numericChainId });
   return useMemo(() => (client ? clientToSigner(client) : undefined), [client]);
 }
