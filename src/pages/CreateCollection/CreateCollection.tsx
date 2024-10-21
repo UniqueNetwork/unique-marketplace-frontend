@@ -321,7 +321,7 @@ const CreateCollectionComponent = () => {
           payload.cover_image.url,
           !!payload.limits.transfersEnabled,
           payload.limits.tokenLimit || 0,
-          payload.limits.accountTokenOwnershipLimit || 0,
+          payload.limits.accountTokenOwnershipLimit || (payload.limits.tokenLimit ? payload.limits.tokenLimit : 100000000),
           payload.permissions.nesting?.tokenOwner,
           payload.permissions.nesting?.collectionAdmin,
           { gasLimit: 500_000, value: COLECTION_CREATION_FEE }
