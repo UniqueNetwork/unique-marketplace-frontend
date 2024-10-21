@@ -49,20 +49,20 @@ export const AccountCard = ({
           <Avatar src={DefaultAvatar} type='circle' />
         ))}
       <div className='account-card-content'>
-        <TooltipStyled
+        {/* <TooltipStyled
           align={{ vertical: 'top', horizontal: 'middle', appearance: 'vertical' }}
           targetRef={nameTextRef}
         >
           {name}
-        </TooltipStyled>
+        </TooltipStyled> */}
         <Text size='m' ref={nameTextRef} >{name}</Text>
         <div className='account-card-address'>
-          <TooltipStyled
+          {/* <TooltipStyled
             align={{ vertical: 'top', horizontal: 'middle', appearance: 'vertical' }}
             targetRef={addressTextRef}
           >
             {address}
-          </TooltipStyled>
+          </TooltipStyled> */}
           <Text size='s' color='grey-500' ref={addressTextRef}>
             {shortAddress}
           </Text>
@@ -86,6 +86,7 @@ const AccountCardWrapper = styled.div`
   align-items: center;
   column-gap: calc(var(--prop-gap) / 2);
   .account-card-content {
+    position: relative;
     display: flex;
     flex-direction: column;
     &>.unique-text {

@@ -321,13 +321,16 @@ const CreateCollectionComponent = () => {
           payload.cover_image.url,
           !!payload.limits.transfersEnabled,
           payload.limits.tokenLimit || 0,
-          payload.limits.accountTokenOwnershipLimit || 100000000,
+          payload.limits.accountTokenOwnershipLimit || 0,
           payload.permissions.nesting?.tokenOwner,
           payload.permissions.nesting?.collectionAdmin,
           { gasLimit: 500_000, value: COLECTION_CREATION_FEE }
         )).wait();
+        
 
         collectionId = Number(parseEthersV6TxReceipt(txCreateCollection).events?.CollectionCreated?.collectionId as string)
+
+        console.log(collectionId, 'COLLECTION_ID');
       }
     } catch (err) {
       console.error(err);
