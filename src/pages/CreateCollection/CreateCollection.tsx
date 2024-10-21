@@ -314,7 +314,6 @@ const CreateCollectionComponent = () => {
         const numericChainId = getNumericChainId(currentChainId);
         switchNetwork(numericChainId);
         const CollectionManager = new ethers.Contract(CREATE_CONTRACT_ADDRESS, (await import('./CreateCollection.json')).default, signer);
-        console.log(CollectionManager, 'CollectionManager')
         const txCreateCollection = await (await CollectionManager.createCollection(
           payload.name,
           payload.description,
@@ -322,15 +321,13 @@ const CreateCollectionComponent = () => {
           payload.cover_image.url,
           !!payload.limits.transfersEnabled,
           payload.limits.tokenLimit || 0,
-          payload.limits.accountTokenOwnershipLimit || 0,
+          payload.limits.accountTokenOwnershipLimit || 100000000,
           payload.permissions.nesting?.tokenOwner,
           payload.permissions.nesting?.collectionAdmin,
           { gasLimit: 500_000, value: COLECTION_CREATION_FEE }
         )).wait();
 
         collectionId = Number(parseEthersV6TxReceipt(txCreateCollection).events?.CollectionCreated?.collectionId as string)
-
-        console.log(collectionId, 'ccollectionId');
       }
     } catch (err) {
       console.error(err);
@@ -414,7 +411,7 @@ const CreateCollectionComponent = () => {
         if (
           isEthereumAddress(selectedAccount?.address)
         ) {
-
+          if (!signer) throw new Error('No Reown wallet provider found');
           const feeData = await signer.provider!.getFeeData();
           const gasPrice = feeData.gasPrice;
           console.log(gasPrice, 'GAS_PRICE')
