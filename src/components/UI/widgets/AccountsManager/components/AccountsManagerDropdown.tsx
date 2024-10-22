@@ -84,7 +84,10 @@ export const AccountsManagerDropdown = ({
           <CreateAccountButton
             testid={`${testid}-create-substrate-button`}
             title={'Сonnect or create wallet'}
-            onClick={() => setIsOpenConnectWalletModal(true)}
+            onClick={() => {
+              setIsOpenConnectWalletModal(true);
+              onOpenChange && onOpenChange(false);
+            }}
           />
           <div
             className='wallet-link'
