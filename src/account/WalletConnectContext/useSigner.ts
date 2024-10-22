@@ -22,7 +22,7 @@ export function useEthersSigner() {
   const { currentChainId: chainId } = useApi();
 
   const numericChainId = getNumericChainId(chainId);
-  // switchNetwork(numericChainId);
+  switchNetwork(numericChainId);
   const { data: client } = useConnectorClient<Config>({ chainId: numericChainId });
   return useMemo(() => (client ? clientToSigner(client) : undefined), [client]);
 }
