@@ -41,8 +41,10 @@ export const ConnectWallets = () => {
     }
   };
 
-
-
+  const openWalletConnect = () => {
+    open();
+    setIsOpenConnectWalletModal(false);
+  };
 
   const handleConnectToPolkadotExtension = (walletName: ConnectedWalletsName = 'polkadot-js') => async () => {
     try {
@@ -89,7 +91,7 @@ export const ConnectWallets = () => {
             {availableWallets.includes('polkadot-js') && <WalletItem onClick={handleConnectToPolkadotExtension()}>
               <Icon size={40} name='polkadot-wallet' /> <span>Polkadot.js</span>
             </WalletItem>}
-            <WalletItem onClick={() => open()}>
+            <WalletItem onClick={openWalletConnect}>
               <ImgWalletConnect src={WalletConnect}/> <span>WalletConnect</span>
             </WalletItem>
             {availableWallets.includes('talisman') && <WalletItem onClick={handleConnectToPolkadotExtension('talisman')}>
@@ -139,7 +141,7 @@ export const ConnectWallets = () => {
         <WalletItem onClick={handleConnectToPolkadotExtension()}>
           <Icon size={40} name='polkadot-wallet' /> <span>Polkadot.js</span>
         </WalletItem>
-        <WalletItem onClick={() => open()}>
+        <WalletItem onClick={openWalletConnect}>
           <ImgWalletConnect src={WalletConnect}/> <span>WalletConnect</span>
         </WalletItem>
         <WalletItem onClick={handleConnectToPolkadotExtension('talisman')}>
