@@ -59,12 +59,7 @@ export const StatusTransactionModal = ({
           }
         />
         <StageDescription>
-          <Text size='m' weight='regular'>{`Minting ${
-            mintingProgress + 1
-          }-${Math.min(
-            mintingProgress + batchSize,
-            totalTokens
-          )} of ${totalTokens} tokens`}</Text>
+          <Text size='m' weight='regular'>{`Minting ${totalTokens} tokens`}</Text>
           <Text size='s' color='grey-500'>
             Step 2
           </Text>

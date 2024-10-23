@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useState, ReactNode } from 'react';
 import { Address } from '@unique-nft/utils';
 
 import { Account, BaseWalletType, WalletsType } from './types';
@@ -8,16 +8,26 @@ import { DefaultAccountKey } from './constants';
 import { AccountProvider } from './AccountContext';
 import { useApi } from 'hooks/useApi';
 import { useBalanceSubscriptions } from './useBalanceSubscriptions';
+import { useAccount } from 'wagmi';
+import { getNumericChainId, useEthersSigner } from './WalletConnectContext/useSigner';
+import { switchNetwork } from 'utils/swithChain';
 
-export const AccountWrapper: FC = ({ children }) => {
+interface AccountWrapperProps {
+  children: ReactNode;
+}
+
+export const AccountWrapper: FC<AccountWrapperProps> = ({ children }) => {
   const { chainProperties, api } = useApi();
-  const [accounts, setAccounts] = useState<Map<string, BaseWalletType<WalletsType>>>(
-    new Map()
-  );
+  const [accounts, setAccounts] = useState<Map<string, BaseWalletType<WalletsType>>>(new Map());
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [fetchAccountsError, setFetchAccountsError] = useState<string | undefined>();
   const [selectedAccount, setSelectedAccount] = useState<Account>();
+  const { currentChainId: chainId } = useApi();
+  const { address: ethereumAddress, isConnected, isConnecting, status } = useAccount();
 
+  // const { address: ethereumAddress, status: appKitStatus, isConnected } = useAppKitAccount();
+  // const { walletProvider } = useAppKitProvider('eip155');
+  
   const walletsCenter = useWalletCenter(chainProperties);
   const { subscribeBalancesChanges, isBalancesFetching } = useBalanceSubscriptions();
 
@@ -55,7 +65,6 @@ export const AccountWrapper: FC = ({ children }) => {
         return;
       }
       localStorage.setItem(DefaultAccountKey, account.normalizedAddress);
-
       setSelectedAccount(account);
     },
     [selectedAccount?.address]
@@ -72,7 +81,7 @@ export const AccountWrapper: FC = ({ children }) => {
       ? Address.is.ethereumAddressInAnyForm(defaultAccountNormalizedAddress)
         ? defaultAccountNormalizedAddress
         : Address.normalize.substrateAddress(defaultAccountNormalizedAddress, chainProperties?.SS58Prefix)
-          : '';
+      : '';
 
     const defaultAccount = accounts.get(defaultAccountAddress);
 
@@ -84,26 +93,89 @@ export const AccountWrapper: FC = ({ children }) => {
     }
   }, [accounts, changeAccount, isLoading]);
 
+  useEffect(() => {
+    const handleWalletConnection = () => {
+      if (!ethereumAddress) return;
+  
+      const accountExists = accounts.has(ethereumAddress);
+      if (!accountExists) {
+
+        setTimeout(handleReownWallet, 500);
+      }
+    };
+  
+    handleWalletConnection();
+  }, [ethereumAddress]);
+  
+  const [previousEthereumAddress, setPreviousEthereumAddress] = useState<string | undefined>();
+
+  useEffect(() => {
+    if (!ethereumAddress && previousEthereumAddress) {
+      setAccounts((prevAccounts) => {
+        const updatedAccounts = new Map(prevAccounts);
+  
+        if (previousEthereumAddress) {
+          updatedAccounts.delete(previousEthereumAddress);
+        }
+  
+        return updatedAccounts;
+      });
+    }
+  
+    if (ethereumAddress) {
+      setPreviousEthereumAddress(ethereumAddress);
+
+      const numericChainId = getNumericChainId(chainId);
+      switchNetwork(numericChainId);
+    }
+  }, [ethereumAddress, previousEthereumAddress]);
+  
+  const signer = useEthersSigner();
+
+  const handleReownWallet = useCallback(async () => {
+    if (!signer) return;
+    const newWallets = await walletsCenter.connectReownWallet(signer);
+  
+    setAccounts((prevAccounts) => {
+      const updatedAccounts = new Map(prevAccounts);
+      newWallets.forEach((account, address) => {
+        updatedAccounts.set(address, account);
+      });
+      return updatedAccounts;
+    });
+  }, [signer]);
+  
+
   const fetchAccounts = useCallback(() => {
     if (!chainProperties || !api?.market?.uniqueSdk) return;
-    const getConnectedWallets = localStorage.getItem(CONNECTED_WALLET_TYPE);
-    if (!getConnectedWallets) {
-      setIsLoading(false);
-      return;
-    }
+  
     setIsLoading(true);
-    const wallets = getConnectedWallets.split(';') as ConnectedWalletsName[];
-    const connectedWallets = wallets.map((typeWallet) =>
-      walletsCenter.connectWallet(
-        typeWallet
-      )
-    );
-    if (!connectedWallets.length) {
+    const walletsFromStorage = localStorage.getItem(CONNECTED_WALLET_TYPE)?.split(';') as ConnectedWalletsName[] || [];
+    const walletsSet = new Set(walletsFromStorage);
+    if (signer) {
+      walletsSet.add('reown');
+    }
+  
+    const wallets = Array.from(walletsSet);
+  
+    const connectedWalletPromises = wallets.map((typeWallet) => {
+      if (typeWallet === 'reown') {
+        if (signer) {
+          return walletsCenter.connectReownWallet(signer);
+        } else {
+          return Promise.resolve(new Map());
+        }
+      } else {
+        return walletsCenter.connectWallet(typeWallet);
+      }
+    });
+  
+    if (!connectedWalletPromises.length) {
       setIsLoading(false);
       return;
     }
-
-    void Promise.allSettled(connectedWallets)
+  
+    void Promise.allSettled(connectedWalletPromises)
       .then((results) => {
         const map = new Map();
         results.forEach((result) => {
@@ -112,15 +184,17 @@ export const AccountWrapper: FC = ({ children }) => {
             map.set(address, acc);
           });
         });
-
+  
         void (async () => {
+          console.log('SET_ACCOUNT', map);
           setAccounts(await subscribeBalancesChanges(map, setAccounts));
           setIsLoading(false);
         })();
       });
-  }, [chainProperties, api?.market?.uniqueSdk]);
-
+  }, [chainProperties, api?.market?.uniqueSdk, signer]);
+  
   useEffect(fetchAccounts, [fetchAccounts]);
+
 
   const value = useMemo(
     () => ({

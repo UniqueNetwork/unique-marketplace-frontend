@@ -1,26 +1,34 @@
 import React, { ReactNode, useRef } from 'react';
+import { useAccount } from 'wagmi';
+import { useWeb3Modal } from '@web3modal/wagmi/react';
 import { IAccount } from '../AccountsManager';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import useCopyToClipboard from '../hooks/useCopyToClipboard';
 import styled from 'styled-components';
 import { CopyButton, Text, Tooltip } from 'components/UI';
 import { Avatar } from 'components';
+import WalletConnect from 'static/images/walletconnect.png';
 
 interface AccountCardProps extends IAccount {
   avatarRender?(address: string): ReactNode;
-  onCopyAddressClick?(address: string): void
+  onCopyAddressClick?(address: string): void,
+  onOpenChange?(status: boolean): void
 }
 
 export const AccountCard = ({
-    name,
-    address,
-    avatarRender,
-    onCopyAddressClick
-  }: AccountCardProps) => {
+  name,
+  address,
+  avatarRender,
+  onCopyAddressClick,
+  onOpenChange
+}: AccountCardProps) => {
   const shortAddress =
     address && address?.length > 13
       ? `${address.slice(0, 5)}...${address.slice(-5)}`
       : address;
+
+  const { address: ethereumAddress } = useAccount();
+  const { open } = useWeb3Modal();
 
   const [_, copy] = useCopyToClipboard();
   const nameTextRef = useRef<HTMLDivElement>(null);
@@ -28,28 +36,33 @@ export const AccountCard = ({
 
   return (
     <AccountCardWrapper>
-      {avatarRender && address
+      {address === ethereumAddress ? <button onClick={() => {
+        onOpenChange && onOpenChange(false);
+        open();
+      }} style={{ border: 'none', background: 'transparent', padding: 0 }}>
+        <ImgWalletConnect src={WalletConnect} alt="Wallet Connect" />
+      </button> : (avatarRender && address
         ? (
           avatarRender(address)
         )
         : (
           <Avatar src={DefaultAvatar} type='circle' />
-        )}
+        ))}
       <div className='account-card-content'>
-        <TooltipStyled
+        {/* <TooltipStyled
           align={{ vertical: 'top', horizontal: 'middle', appearance: 'vertical' }}
           targetRef={nameTextRef}
         >
           {name}
-        </TooltipStyled>
+        </TooltipStyled> */}
         <Text size='m' ref={nameTextRef} >{name}</Text>
         <div className='account-card-address'>
-          <TooltipStyled
+          {/* <TooltipStyled
             align={{ vertical: 'top', horizontal: 'middle', appearance: 'vertical' }}
             targetRef={addressTextRef}
           >
             {address}
-          </TooltipStyled>
+          </TooltipStyled> */}
           <Text size='s' color='grey-500' ref={addressTextRef}>
             {shortAddress}
           </Text>
@@ -73,6 +86,7 @@ const AccountCardWrapper = styled.div`
   align-items: center;
   column-gap: calc(var(--prop-gap) / 2);
   .account-card-content {
+    position: relative;
     display: flex;
     flex-direction: column;
     &>.unique-text {
@@ -93,4 +107,11 @@ const AccountCardWrapper = styled.div`
 const TooltipStyled = styled(Tooltip)`
   z-index: 9999;
   max-width: unset;
+`;
+
+const ImgWalletConnect = styled.img`
+  border-radius: 6px;
+  widht: 30px;
+  height: 30px;
+  cursor: pointer;
 `;

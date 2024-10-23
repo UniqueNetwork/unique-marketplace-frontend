@@ -25,10 +25,14 @@ import { useMarketableCollection } from 'api/restApi/collections/collection';
 import { getSignature } from 'hooks/marketplaceStages/utils/getSignature';
 import { MarketableCollectionMetadata } from 'api/restApi/collections/types';
 import { useCollections } from 'hooks/useCollections';
-import { getEthereumSigner, sleep } from 'utils/helpers';
+import { sleep } from 'utils/helpers';
 import { useCollectionConfirmSponsorship } from 'pages/CollectionEdit/Forms/hooks/useCollectionConfirmSponsorship';
 import { ethers } from 'ethers';
 import { isEthereumAddress } from '@polkadot/util-crypto';
+import { useEthersSigner, getNumericChainId } from 'account/WalletConnectContext/useSigner';
+import { switchNetwork } from 'utils/swithChain';
+import { parseEthersV6TxReceipt } from '@unique-nft/solidity-interfaces';
+import { Address } from '@unique-nft/utils';
 
 //@ts-ignore
 const COLECTION_CREATION_FEE = 2n * 10n ** 18n;
@@ -74,7 +78,9 @@ const CreateCollectionComponent = () => {
     accounts: { size: accountsLength }
   } = useAccounts();
   const formMapper = useCollectionFormMapper();
+  // const { walletProvider } = useAppKitProvider('eip155');
 
+  const signer = useEthersSigner();
   const {
     getFee,
     fee,
@@ -154,7 +160,6 @@ const CreateCollectionComponent = () => {
 
   const [sumFee, setSumFee] = useState(feeFormatted);
   const [feeLoading, setFeeLoading] = useState(false);
-  
 
   const [collectionDebounceValue] = useDebounce(collectionFormValues as any, 500);
 
@@ -231,11 +236,11 @@ const CreateCollectionComponent = () => {
     setCurrentSubmitStage(0);
     setIsCreating(true);
     const payload = formMapper(form);
-    payload.cover_image = {url: ''};
+    payload.cover_image = { url: '' };
     payload.permissions = {};
     payload.limits = {};
     let bannerSrc;
-  
+
     if (banner && banner.file) {
       try {
         bannerSrc = await api?.collection?.uploadFile(banner.file);
@@ -250,13 +255,13 @@ const CreateCollectionComponent = () => {
     if (cover && cover.file) {
       try {
         const coverSrc = await api?.collection?.uploadFile(cover.file);
-        payload.cover_image.url= coverSrc?.fullUrl || '';
-    } catch (err) {
-      setIsCreating(false);
-      error(
-        `Upload cover failed`
-      );
-    }
+        payload.cover_image.url = coverSrc?.fullUrl || '';
+      } catch (err) {
+        setIsCreating(false);
+        error(
+          `Upload cover failed`
+        );
+      }
     }
     let collectionId;
     let createdCollection: CreateCollectionParsed | undefined;
@@ -299,31 +304,33 @@ const CreateCollectionComponent = () => {
         payload.limits.transfersEnabled = tokenTransferPermission;
       }
       setCurrentSubmitStage(1);
-      
+      console.log('create collection', selectedAccount.address, isEthereumAddress(selectedAccount.address))
       if (!isEthereumAddress(selectedAccount.address)) {
         createdCollection = await submitWaitResult({ payload });
 
         collectionId = createdCollection?.collectionId || 0;
       } else {
-          const CollectionManager = new ethers.Contract(CREATE_CONTRACT_ADDRESS, (await import('./CreateCollection.json')).default, getEthereumSigner());
-          const mintCollectionTx = await CollectionManager.createCollection(
-            payload.name,
-            payload.description,
-            payload.symbol,
-            payload.cover_image.url,
-            !!payload.limits.transfersEnabled,
-            payload.limits.tokenLimit || 0,
-            payload.limits.accountTokenOwnershipLimit || 0,
-            payload.permissions.nesting?.tokenOwner,
-            payload.permissions.nesting?.collectionAdmin,
-            { gasLimit: 500_000, value: COLECTION_CREATION_FEE }
-          );
+        if (!signer) throw new Error('No Reown wallet provider found');
+        const numericChainId = getNumericChainId(currentChainId);
+        switchNetwork(numericChainId);
+        const CollectionManager = new ethers.Contract(CREATE_CONTRACT_ADDRESS, (await import('./CreateCollection.json')).default, signer);
+        const txCreateCollection = await (await CollectionManager.createCollection(
+          payload.name,
+          payload.description,
+          payload.symbol,
+          payload.cover_image.url,
+          !!payload.limits.transfersEnabled,
+          payload.limits.tokenLimit || 0,
+          payload.limits.accountTokenOwnershipLimit || (payload.limits.tokenLimit ? payload.limits.tokenLimit : 100000000),
+          payload.permissions.nesting?.tokenOwner,
+          payload.permissions.nesting?.collectionAdmin,
+          { gasLimit: 500_000, value: COLECTION_CREATION_FEE }
+        )).wait();
+        
 
-          const receipt = await mintCollectionTx.wait();
+        collectionId = Number(parseEthersV6TxReceipt(txCreateCollection).events?.CollectionCreated?.collectionId as string)
 
-          console.log(receipt, 'receipt');
-          const collectionCreateEvent = receipt.events.find((event: any) => event.event === "CollectionCreated");
-          collectionId = collectionCreateEvent?.args[0]?.toNumber();
+        console.log(collectionId, 'COLLECTION_ID');
       }
     } catch (err) {
       console.error(err);
@@ -353,7 +360,7 @@ const CreateCollectionComponent = () => {
       const { signature, message, type } = await getSignature(selectedAccount);
       if (!type && !signature) return;
       const updateData: MarketableCollectionMetadata = {};
-      
+
       if (bannerSrc) updateData.banner = bannerSrc.fullUrl;
       if (form.website) updateData.website = form.website;
       if (form.discord) updateData.discord = form.discord;
@@ -395,54 +402,53 @@ const CreateCollectionComponent = () => {
         // if (needConfirmSponsoring && selectedAccount) {
         //   await getConfirmSponsorshipFee({ payload: 1 });
         // }
-  
+
         if (!(collectionFormValues.name && collectionFormValues.symbol)) return;
-  
+
         setFeeLoading(true);
-  
-        const signer = getEthereumSigner();
-        const gasPrice = await signer.provider.getGasPrice();
-  
+
+        // const provider = new ethers.providers.Web3Provider(walletProvider);
+        // const signer = await provider.getSigner();
+
         let feeToUse = feeFormatted;
         if (
           isEthereumAddress(selectedAccount?.address)
-
         ) {
-          try {
-            const CollectionManager = new ethers.Contract(
-              CREATE_CONTRACT_ADDRESS,
-              (await import('./CreateCollection.json')).default,
-              signer
-            );
-  
-            const gasEstimate = await CollectionManager.estimateGas.createCollection(
-              collectionFormValues.name,
-              collectionFormValues.description,
-              collectionFormValues.symbol,
-              cover?.src || '',
-              !!collectionFormValues.transfersEnabled,
-              collectionFormValues.tokenLimit || 0,
-              collectionFormValues.accountTokenOwnershipLimit || 0,
-              collectionFormValues.nesting?.tokenOwner,
-              collectionFormValues.nesting?.collectionAdmin,
-              { gasLimit: 500_000, value: COLECTION_CREATION_FEE }
-            );
-            const totalFee = gasEstimate.mul(gasPrice);
+          if (!signer) throw new Error('No Reown wallet provider found');
+          const feeData = await signer.provider!.getFeeData();
+          const gasPrice = feeData.gasPrice;
+          console.log(gasPrice, 'GAS_PRICE')
 
-            feeToUse = ethers.utils.formatEther(totalFee.add(COLECTION_CREATION_FEE));
-          } catch (err) {
-            console.error("Error estimating gas: ", err);
-          }
+          const CollectionManager = new ethers.Contract(
+            CREATE_CONTRACT_ADDRESS,
+            (await import('./CreateCollection.json')).default,
+            signer
+          );
+
+          const gasEstimate = await CollectionManager.createCollection.estimateGas(
+            collectionFormValues.name || '',
+            collectionFormValues.description || '',
+            collectionFormValues.symbol || 'XXX',
+            cover?.src || '',
+            !!collectionFormValues.transfersEnabled || true,
+            collectionFormValues.tokenLimit || 0,
+            collectionFormValues.accountTokenOwnershipLimit || 0,
+            collectionFormValues.nesting?.tokenOwner || '',
+            collectionFormValues.nesting?.collectionAdmin || '',
+            { gasLimit: 500_000, value: COLECTION_CREATION_FEE }
+          );
+          const totalFee = gasEstimate * gasPrice + COLECTION_CREATION_FEE;
+          feeToUse = ethers.formatUnits(totalFee, 18)
         } else {
           feeToUse = feeFormatted;
         }
         const finalFee = String(Number(feeToUse));
-  
+
         setSumFee(finalFee);
         setFeeLoading(false);
       }
     };
-  
+
     calculateFees();
   }, [
     collectionDebounceValue,
@@ -456,7 +462,7 @@ const CreateCollectionComponent = () => {
     feeFormatted,
     feeConfirmSponsorship,
   ]);
-  
+
 
   const isFirstStep = currentStep - 1 === 0;
   const isLastStep = currentStep === tabsUrls.length;
@@ -511,27 +517,27 @@ const CreateCollectionComponent = () => {
 
   const creatingStages = useMemo(() => {
     const baseStages = ['Upload images', 'Creating collection'];
-  
+
     const confirmSponsorshipStages = ['Confirm Sponsorship'];
-  
-    const shouldAddBannerStage = banner?.src || collectionFormValues.telegram || 
-      collectionFormValues.twitter || collectionFormValues.website || 
+
+    const shouldAddBannerStage = banner?.src || collectionFormValues.telegram ||
+      collectionFormValues.twitter || collectionFormValues.website ||
       collectionFormValues.discord || collectionFormValues.instagram || collectionFormValues.reddit;
-  
+
     return needConfirmSponsoring
       ? [...baseStages, ...confirmSponsorshipStages, ...(shouldAddBannerStage ? ['Setting banner & links'] : [])]
       : [...baseStages, ...(shouldAddBannerStage ? ['Setting banner & links'] : [])];
   }, [
     needConfirmSponsoring,
     banner?.src,
-    collectionFormValues.telegram, 
-    collectionFormValues.twitter, 
-    collectionFormValues.website, 
-    collectionFormValues.discord, 
-    collectionFormValues.instagram, 
+    collectionFormValues.telegram,
+    collectionFormValues.twitter,
+    collectionFormValues.website,
+    collectionFormValues.discord,
+    collectionFormValues.instagram,
     collectionFormValues.reddit
   ]);
-  
+
   return (
     <Wrapper>
       <WrapperContentStyled>

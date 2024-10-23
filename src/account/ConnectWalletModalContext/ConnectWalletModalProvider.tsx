@@ -1,9 +1,13 @@
-import { FC, useMemo, useState } from 'react';
+import { FC, useMemo, useState, ReactNode } from 'react';
 
 import { ConnectWalletModalContext } from './ConnectWalletModalContext';
 import { ConnectWallets } from './ConnectWallets';
 
-export const ConnectWalletModalProvider: FC = ({ children }) => {
+interface ConnectWalletModalProviderProps {
+  children: ReactNode;
+}
+
+export const ConnectWalletModalProvider: FC<ConnectWalletModalProviderProps> = ({ children }) => {
   const [isOpenConnectWalletModal, setIsOpenConnectWalletModal] = useState<boolean>(
     false
   );

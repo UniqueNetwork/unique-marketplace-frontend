@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
+import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import config from 'config';
@@ -89,7 +89,7 @@ export const WalletManager: FC = () => {
     return formatBalance(accounts.get(selectedAccount?.address)?.balances?.proper.parsed || '0', fractionDigits);
   }, [selectedAccount, accounts]);
 
-  if (!isLoading && !selectedAccount) {
+  if ((!isLoading && !selectedAccount) || (!isLoading && !accounts.size)) {
     return (<>
       <Button title={'Connect'} onClick={onCreateAccountClick} />
       <ChainSwitcher

@@ -1,6 +1,5 @@
 import styled from 'styled-components';
-import { TemplateProps } from 'react-draggable-list';
-import { MouseEventHandler, TouchEventHandler, useState } from 'react';
+import { useState } from 'react';
 import classNames from 'classnames';
 
 import { Button, Checkbox, InputText, Text } from 'components/UI';
@@ -20,7 +19,7 @@ export type TokenCardCommonProps = {
   viewMode: ViewMode;
 };
 
-export type TokenCardProps = TemplateProps<NewToken, TokenCardCommonProps>;
+export type TokenCardProps = any;
 
 export const TokenCard = ({
   item,
@@ -40,10 +39,6 @@ export const TokenCard = ({
   } = commonProps;
   const [willBeRemoved, setWillBeRemoved] = useState(false);
   const [hovered, setHovered] = useState(false);
-  const { onMouseDown, onTouchStart } = dragHandleProps as {
-    onMouseDown: MouseEventHandler<HTMLDivElement> | undefined;
-    onTouchStart: TouchEventHandler<HTMLDivElement> | undefined;
-  };
 
   const onSelect = () => {
     onChange({ id, tokenId, image, attributes, isValid, isSelected: !isSelected, royalties });
@@ -86,10 +81,10 @@ export const TokenCard = ({
           }}
           onTouchStart={(e) => {
             e.preventDefault();
-            onTouchStart?.(e);
+            // onTouchStart?.(e);
           }}
           onMouseDown={(e) => {
-            onMouseDown?.(e);
+            // onMouseDown?.(e);
           }}
         >
           <TokenImage alt={`${tokenPrefix}_${id}`} image={image.url} />

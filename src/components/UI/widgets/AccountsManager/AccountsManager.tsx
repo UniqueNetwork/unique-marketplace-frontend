@@ -61,7 +61,7 @@ export const AccountsManager = (props: AccountsManagerProps) => {
   return (
     <DropdownStyled
       dropdownRender={() => (
-        <AccountsManagerDropdown {...props} isTouch={touchDevice} />
+        <AccountsManagerDropdown {...props} isTouch={touchDevice} onOpenChange={onOpenChange} />
       )}
       iconRight={{
         name: 'triangle',

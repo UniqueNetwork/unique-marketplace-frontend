@@ -33,7 +33,9 @@ export class SdkClient {
     this.nftController.setNetwork(options);
     this.collectionController.setNetwork(options);
     this.marketController.setNetwork(options);
-    changeMetamaskChain(EthereumChainParams[options.networkId]);
+
+    
+    // changeMetamaskChain(EthereumChainParams[options.networkId]);
     this.isReady = true;
   }
 }

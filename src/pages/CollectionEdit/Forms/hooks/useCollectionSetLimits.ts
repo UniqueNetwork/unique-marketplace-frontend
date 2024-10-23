@@ -5,6 +5,7 @@ import { useMemo } from 'react';
 
 export const useCollectionSetLimits = () => {
   const { api } = useApi();
+  
   return useMutation<SetCollectionLimitsBody, void>(useMemo(() => ({
     mutation: api?.collection?.setCollectionLimits.bind(api?.collection),
     getFee: api?.collection?.getSetCollectionLimitsFee.bind(api?.collection)

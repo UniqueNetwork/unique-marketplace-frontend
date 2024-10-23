@@ -8,9 +8,10 @@ import UniqueAdapter from '../adapters/UniqueAdapter';
 import IBaseController from '../controllers/base/IBaseController';
 import { BN } from '@polkadot/util';
 import { ethers } from 'ethers';
-import { changeMetamaskChain } from 'utils/metamask';
-import { EthereumChainParams } from 'account/constants';
+import { getNumericChainId } from 'account/WalletConnectContext/useSigner';
 import { MetamaskAccountName } from 'account/MetamaskWallet';
+import { isEthereumAddress } from '@polkadot/util-crypto';
+import { switchNetwork } from 'utils/swithChain';
 
 export type ChainValue = {
   raw: string;
@@ -37,7 +38,7 @@ class BaseController implements IBaseController {
       case BN:
         return {
           raw: value.toString(),
-          parsed: Number(ethers.utils.formatUnits(value.toString(), decimals).toString())
+          parsed: Number(ethers.formatUnits(value.toString(), decimals).toString())
         };
       case Number:
         return {
@@ -47,7 +48,7 @@ class BaseController implements IBaseController {
       case String:
         return {
           raw: value as string,
-          parsed: Number(ethers.utils.formatUnits(value.toString(), decimals).toString())
+          parsed: Number(ethers.formatUnits(value.toString(), decimals).toString())
         };
       default:
         throw new Error('Invalid amount format for transfer balance');
@@ -64,8 +65,12 @@ class BaseController implements IBaseController {
     this.networkId = options.networkId;
   }
 
-  private isMetamaskSigner(account: Account): boolean {
+  private isMetamaskSignerOld(account: Account): boolean {
     return account.name === MetamaskAccountName;
+  }
+
+  private isMetamaskSigner(account: Account): boolean {
+    return isEthereumAddress(account.address);
   }
 
   protected getAdapter(account: Account): IMarketContractAdapter {
@@ -74,7 +79,9 @@ class BaseController implements IBaseController {
       return this.getDefaultAdapter();
     }
     if (this.isMetamaskSigner(account)) {
-      changeMetamaskChain(EthereumChainParams[this.networkId]);
+      // changeMetamaskChain(EthereumChainParams[this.networkId]);
+
+      // switchNetwork(getNumericChainId(this.networkId));
       return this.metamaskAdapter;
     }
     return this.uniqueAdapter;

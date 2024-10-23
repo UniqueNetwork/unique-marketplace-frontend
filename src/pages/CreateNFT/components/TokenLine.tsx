@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import { TemplateProps } from 'react-draggable-list';
 import { MouseEventHandler, TouchEventHandler, useState, useRef } from 'react';
 import classNames from 'classnames';
 
@@ -8,10 +7,11 @@ import { Modal, Text } from 'components/UI';
 import { NewToken2, ViewMode } from '../types';
 import { Image } from './TokenBasicCard';
 import { PotentialAttribute } from '@unique-nft/sdk';
-import { shortcutText, validateLink } from 'utils/textUtils';
+import { validateLink } from 'utils/textUtils';
 import { CreateTokensSteps } from '../CreateNFT';
 import { filesSizeValidate } from 'utils/filesSizeValidate';
 import { Checkbox } from 'components/UI/Checkbox/Checkbox2';
+import { useSortable } from '@dnd-kit/sortable';
 
 export type NewAttributePayload = {
   trait_type: string;
@@ -34,33 +34,22 @@ export type TokenCardCommonProps = {
   setNewAttributeValue: (attribute: NewAttributePayload) => void;
 };
 
-export type TokenCardProps = TemplateProps<NewToken2, TokenCardCommonProps>;
+export type TokenCardProps = any;
 
 const TokenLineCellWrapper = ({
   children,
-  onMouseDown,
-  onTouchStart,
-  setHovered,
-  dragHandleProps,
+  id,
 }: {
   children: React.ReactNode;
-  onMouseDown?: MouseEventHandler<HTMLDivElement>;
-  onTouchStart?: TouchEventHandler<HTMLDivElement>;
-  setHovered: (value: boolean) => void;
-  dragHandleProps?: any;
+  id: string;
 }) => {
-  const handleInteraction = (e: React.SyntheticEvent, callback?: () => void) => {
-    e.preventDefault();
-    callback?.();
-  };
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
 
   return (
     <TokenLineCell
-      onMouseEnter={(e) => handleInteraction(e, () => setHovered(true))}
-      onMouseLeave={(e) => handleInteraction(e, () => setHovered(false))}
-      onTouchStart={(e) => handleInteraction(e, () => onTouchStart?.(e))}
-      onMouseDown={(e) => handleInteraction(e, () => onMouseDown?.(e))}
-      {...dragHandleProps}
+      {...attributes}
+      {...listeners}
+      style={{ cursor: 'grab'}}
     >
       {children}
     </TokenLineCell>
@@ -69,9 +58,9 @@ const TokenLineCellWrapper = ({
 
 export const TokenLine = ({
   item,
-  dragHandleProps,
   commonProps
 }: TokenCardProps) => {
+
   const {
     id,
     tokenId,
@@ -94,12 +83,7 @@ export const TokenLine = ({
     setNewAttributeValue
   } = commonProps;
   const [willBeRemoved, setWillBeRemoved] = useState(false);
-  const [hovered, setHovered] = useState(false);
   const [hoveredImage, setHoveredImage] = useState(false);
-  const { onMouseDown, onTouchStart } = dragHandleProps as {
-    onMouseDown: MouseEventHandler<HTMLDivElement> | undefined;
-    onTouchStart: TouchEventHandler<HTMLDivElement> | undefined;
-  };
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const onSelect = () => {
@@ -303,29 +287,24 @@ export const TokenLine = ({
         id={`token-${id}`}
         className={classNames({
           removing: willBeRemoved,
-          hovered,
           grid: viewMode === ViewMode.grid
         })}
       >
         <LineContent>
-          <TokenLineCellWrapper
-            onMouseDown={onMouseDown}
-            onTouchStart={onTouchStart}
-            setHovered={setHovered}
-          >
-            <StyledCheckbox
+          <ItemWrap>
+            <TokenLineCellWrapper id={id}>
+              <></>
+            </TokenLineCellWrapper>
+            <StyledCheckboxAbs
               label=''
               checked={isSelected}
               onChange={onSelect}
               size={'m'}
               testid={''}
             />
-          </TokenLineCellWrapper>
-          <TokenLineCellWrapper
-            onMouseDown={onMouseDown}
-            onTouchStart={onTouchStart}
-            setHovered={setHovered}
-          >
+          </ItemWrap>
+
+          <TokenLineCellWrapper id={id}>
             <TokenLinkTitle>{`${tokenPrefix} #${tokenId}`}</TokenLinkTitle>
           </TokenLineCellWrapper>
           <TokenLineCell>
@@ -348,32 +327,6 @@ export const TokenLine = ({
               onChange={handleImageFileChange}
             />
           </TokenLineCell>
-          {/* {step === CreateTokensSteps.UPLOAD_MEDIA && (
-            <TokenLineCell>
-              <UploadWrapper>
-                {animation_url ? (
-                  <FileInputLabel onClick={handleRemoveSingleFile}>Remove</FileInputLabel>
-                ) : (
-                  <>
-                    <FileInputLabel htmlFor={`single-upload-${id}`}>
-                      Upload
-                    </FileInputLabel>
-                    <FileInput
-                      id={`single-upload-${id}`}
-                      type='file'
-                      accept='image/*'
-                      onChange={handleSingleFileChange}
-                    />
-                  </>
-                )}
-                {animation_url?.name && (
-                  <TextFileUploaded>
-                    {shortcutText(animation_url?.name)}
-                  </TextFileUploaded>
-                )}
-              </UploadWrapper>
-            </TokenLineCell>
-          )} */}
           {step === CreateTokensSteps.UPLOAD_MEDIA && (
             <TokenLineCell>
               <UploadWrapper>
@@ -402,7 +355,7 @@ export const TokenLine = ({
             </TokenLineCell>
           )}
           {step === CreateTokensSteps.UPLOAD_MEDIA && (
-            <TokenLineCell isHovered={hovered} isValid={isValidLink}>
+            <TokenLineCell isValid={isValidLink}>
               <ExternalLinkInput
                 value={external_url}
                 onChange={handleExternalLinkChange}
@@ -411,7 +364,7 @@ export const TokenLine = ({
             </TokenLineCell>
           )}
           {step === CreateTokensSteps.SET_DATA && (
-            <TokenLineCell isHovered={hovered}>
+            <TokenLineCell>
               <ExternalLinkInput
                 value={name}
                 onChange={handleNameChange}
@@ -420,7 +373,7 @@ export const TokenLine = ({
             </TokenLineCell>
           )}
           {step === CreateTokensSteps.SET_DATA && (
-            <TokenLineCell isHovered={hovered}>
+            <TokenLineCell>
               <ExternalLinkInput
                 value={description}
                 onChange={handleDescriptionChange}
@@ -580,6 +533,16 @@ export const LineContent = styled.div`
   }
 `;
 
+const ItemWrap = styled.div`
+  flex: 0.5;
+  display: flex;
+  position: relative;
+
+  div {
+    flex: 1 !important;
+  }
+`;
+
 export const TokenLineCell = styled.div<{
   isHovered?: boolean;
   isValid?: boolean;
@@ -688,4 +651,10 @@ const StyledCheckbox = styled(Checkbox)`
     background-color: var(--color-additional-light);
     border: 1px solid #000;
   }
+`;
+
+const StyledCheckboxAbs = styled(StyledCheckbox)`
+  position: absolute;
+  margin-left: calc(50% - 10px);
+  z-index: 45;
 `;

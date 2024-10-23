@@ -10,6 +10,8 @@ import EnkriptIcon from 'static/icons/enkrypt.svg';
 import NovaWalletIcon from 'static/icons/nova_icon_radial.svg';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { ConnectedWalletsName } from 'account/useWalletCenter';
+import WalletConnect from 'static/images/walletconnect.png';
+import { useWeb3Modal } from '@web3modal/wagmi/react';
 
 enum AccountModal {
   CREATE = 'create',
@@ -39,6 +41,11 @@ export const ConnectWallets = () => {
     }
   };
 
+  const openWalletConnect = () => {
+    open();
+    setIsOpenConnectWalletModal(false);
+  };
+
   const handleConnectToPolkadotExtension = (walletName: ConnectedWalletsName = 'polkadot-js') => async () => {
     try {
       await walletsCenter.connectWallet(walletName);
@@ -50,6 +57,8 @@ export const ConnectWallets = () => {
       setCurrentModal(AccountModal.EXTENSION_MISSING);
     }
   };
+
+  const { open } = useWeb3Modal();
 
   const isMobile = DeviceSize.sm >= useDeviceSize();
   const [isFetching, setIsFetching] = useState<boolean>(false);
@@ -82,9 +91,9 @@ export const ConnectWallets = () => {
             {availableWallets.includes('polkadot-js') && <WalletItem onClick={handleConnectToPolkadotExtension()}>
               <Icon size={40} name='polkadot-wallet' /> <span>Polkadot.js</span>
             </WalletItem>}
-            {(window.ethereum?.isMetaMask || noAvailableWallets) && <WalletItem onClick={handleConnectToMetamask}>
-              <Icon size={40} name='metamask-wallet' /> <span>Metamask</span>
-            </WalletItem>}
+            <WalletItem onClick={openWalletConnect}>
+              <ImgWalletConnect src={WalletConnect}/> <span>WalletConnect</span>
+            </WalletItem>
             {availableWallets.includes('talisman') && <WalletItem onClick={handleConnectToPolkadotExtension('talisman')}>
               <Icon size={40} name='talisman-wallet' /> <span>Talisman</span>
             </WalletItem>}
@@ -132,8 +141,8 @@ export const ConnectWallets = () => {
         <WalletItem onClick={handleConnectToPolkadotExtension()}>
           <Icon size={40} name='polkadot-wallet' /> <span>Polkadot.js</span>
         </WalletItem>
-        <WalletItem onClick={handleConnectToMetamask}>
-          <Icon size={40} name='metamask-wallet' /> <span>Metamask</span>
+        <WalletItem onClick={openWalletConnect}>
+          <ImgWalletConnect src={WalletConnect}/> <span>WalletConnect</span>
         </WalletItem>
         <WalletItem onClick={handleConnectToPolkadotExtension('talisman')}>
           <Icon size={40} name='talisman-wallet' /> <span>Talisman</span>
@@ -203,4 +212,10 @@ const WalletItem = styled.a`
   svg {
     min-width: 40px;
   }
+`;
+
+const ImgWalletConnect = styled.img`
+  border-radius: 8px;
+  widht: 40px;
+  height: 40px;
 `;
