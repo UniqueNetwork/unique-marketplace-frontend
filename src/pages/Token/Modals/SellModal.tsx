@@ -187,11 +187,11 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
       )}
       <ButtonWrapper>
         <Button
-          disabled={
-            (!isSponsored &&
-              (fetchingFee || !priceInputValue || !Number(priceInputValue))) ||
-            !isPriceAvailable
-          }
+          // disabled={
+          //   (!isSponsored &&
+          //     (fetchingFee || !priceInputValue || !Number(priceInputValue))) ||
+          //   !isPriceAvailable
+          // }
           onClick={onConfirmFixPriceClick}
           role='primary'
           title='Confirm'

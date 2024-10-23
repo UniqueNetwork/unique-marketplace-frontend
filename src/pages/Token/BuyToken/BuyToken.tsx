@@ -86,7 +86,7 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, royalty, onBuy, testid }) =
         title='Buy'
         ref={buyButtonRef}
         wide={true}
-        disabled={(!!selectedAccount && !isEnoughBalance) || (royalty || 0) >= 1 || isNotEnoughBalanceOnPolkadot}
+        // disabled={(!!selectedAccount && !isEnoughBalance) || (royalty || 0) >= 1 || isNotEnoughBalanceOnPolkadot}
       />
     </ButtonWrapper>
     {!!selectedAccount && !isEnoughBalance && <Tooltip targetRef={buyButtonRef} >

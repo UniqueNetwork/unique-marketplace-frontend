@@ -187,7 +187,7 @@ export const AskPriceModal: FC<TChangePriceModalProps> = ({ collectionId, tokenI
       {!isEnoughBalance && <Text color={'coral-500'} testid={`${testid}-low-balance-warning`}>Your balance is too low to sell</Text>}
       <ButtonWrapper>
         <Button
-          disabled={(!isSponsored && (fetchingFee || !isEnoughBalance || !priceInputValue || !Number(priceInputValue))) || !isPriceAvailable}
+          // disabled={(!isSponsored && (!isEnoughBalance || !priceInputValue || !Number(priceInputValue))) || !isPriceAvailable}
           onClick={onConfirmFixPriceClick}
           role='primary'
           title='Confirm'
