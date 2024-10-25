@@ -11,7 +11,7 @@ const projectId = 'f7355c4a8483073af9629880e7887524' as string;
 const metadata = {
   name: "Unique NFT Marketplace",
   description: "",
-  url: "https://market.uniquenetwork.dev/",
+  url: "https://unqnft.io/",
   icons: [""],
 };
 
