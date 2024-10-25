@@ -67,42 +67,15 @@ class MarketController extends BaseController implements IMarketController {
     if (newAllowance.isAllowed !== targetAllowance) throw new Error('Allowance change failed');
   }
 
-  public async getSellFixFee(collectionId: number, tokenId: number, price: number, currency: number, amount: number, { account }: TransactionOptions): Promise<string> {
-    const from = Address.extract.ethCrossAccountId(account.address);
+  public async estimateGasChangeAllowance(collectionId: number, tokenId: number, { account }: TransactionOptions): Promise<string> {
     const adapter = this.getAdapter(account);
-    const priceWithDecimals = (price * (10 ** this.decimals)).toLocaleString('fullwide', { useGrouping: false });
-    const rawFee = await adapter.getSellFee(
-      from,
+    const rawFee = await adapter.estimateGasChangeAllowance(
+      account.address,
+      this.actualContract.address,
       collectionId,
       tokenId,
-      priceWithDecimals,
-      currency,
-      amount,
+      true,
       account.signer,
-      this.actualContract
-    );
-    return this.getChainValue(rawFee, this.decimals).parsed.toString();
-  }
-
-  public async getBuyFixFee(collectionId: number, tokenId: number, amount: number, { account, contractAddress }: TransactionOptions): Promise<string> {
-    const to = Address.extract.ethCrossAccountId(account.address);
-    const order = (await this.getOrder(collectionId, tokenId, contractAddress));
-    const value = order.price as { type: string, hex: string };
-    const adapter = this.getAdapter(account);
-    const parsedPrice = BigInt(value.hex).toString();
-    const rawFee = await adapter.getBuyFee(
-      to,
-      collectionId,
-      tokenId,
-      parsedPrice,
-      amount,
-      account.signer,
-      contractAddress
-      ? {
-        address: contractAddress,
-        abi: this.contractsAbi[contractAddress]
-      }
-      : this.actualContract
     );
     return this.getChainValue(rawFee, this.decimals).parsed.toString();
   }
@@ -319,20 +292,6 @@ class MarketController extends BaseController implements IMarketController {
     : this.actualContract;
     const priceWithDecimals = (collectionId ? (price * (10 ** decimals)) : (price * (10 ** this.decimals))).toLocaleString('fullwide', { useGrouping: false });
     await adapter.changePrice(collectionId, tokenId, priceWithDecimals, currency, account.signer, contract);
-  }
-
-  async getChangePriceFee(collectionId: number, tokenId: number, price: number, currency: number, { account, contractAddress }: TransactionOptions): Promise<string> {
-    const adapter = this.getAdapter(account);
-    const contract = contractAddress
-    ? {
-        address: contractAddress,
-        abi: this.contractsAbi[contractAddress]
-      }
-    : this.actualContract;
-    const priceWithDecimals = (price * (10 ** this.decimals)).toLocaleString('fullwide', { useGrouping: false });
-    const rawFee = await adapter.getChangePriceFee(collectionId, tokenId, priceWithDecimals, currency, account.signer, contract);
-
-    return this.getChainValue(rawFee, this.decimals).parsed.toString();
   }
 
   async revokeTokenSell({

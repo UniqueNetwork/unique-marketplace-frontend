@@ -6,9 +6,6 @@ import DefaultMarketStages from './StagesModal';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { StageStatus } from '../../../types/StagesTypes';
-import { FeeMessage } from 'components';
-import { useGetFee } from 'hooks/useGetFee';
-import MarketController from 'api/chainApi/MarketController';
 import { useApi } from 'hooks/useApi';
 import { debounce } from 'utils/helpers';
 import { NavLink } from 'react-router-dom';
@@ -18,20 +15,6 @@ const PurchaseModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, setIsClo
   const { selectedAccount } = useAccounts();
   const { stages, status, initiate } = usePurchaseFixStages(offer?.collectionId || 0, offer?.tokenId || 0, offer?.price.currency || 0, offer?.contractAddress);
   const { info } = useNotifications();
-
-  const { fee, fetchingFee, getFee } = useGetFee<Parameters<MarketController['getBuyFixFee']>>(api?.market?.getBuyFixFee.bind(api?.market));
-
-  useEffect(() => {
-    if (!offer || !selectedAccount) return;
-    debounce(async () => {
-      await getFee(
-        offer.collectionId,
-        offer.tokenId,
-        1,
-        { account: selectedAccount, contractAddress: offer.contractAddress }
-      );
-    }, 300)();
-  }, [offer, selectedAccount]);
 
   useEffect(() => {
     if (!selectedAccount) throw new Error('Account not selected');
@@ -63,11 +46,6 @@ const PurchaseModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, setIsClo
         status={status}
         onFinish={onFinish}
         testid={testid}
-      />
-      <FeeMessage
-        isFeeLoading={fetchingFee}
-        fee={fee || '0'}
-        testid={`${testid}-fee-message`}
       />
     </div>
   );

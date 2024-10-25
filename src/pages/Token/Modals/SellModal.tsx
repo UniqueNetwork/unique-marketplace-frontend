@@ -10,8 +10,6 @@ import { TFixPriceProps } from './types';
 import { useSellFixStages } from '../../../hooks/marketplaceStages';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { StageStatus } from '../../../types/StagesTypes';
-import MarketController from 'api/chainApi/MarketController';
-import { useGetFee } from 'hooks/useGetFee';
 import { debounce } from 'utils/helpers';
 import { FeeMessage } from 'components';
 import { BN } from '@polkadot/util';
@@ -21,6 +19,7 @@ import { fixPriceSellingCollectionIds } from '../constants';
 import { useCoinGeckoApi } from 'api/coinGeckoApi/useCoinGeckoApi';
 import { SelectOptionProps } from 'components/UI/types';
 import ComingSoon from '../TokenDetail/CurrencesComingSoon';
+import useEstimateGasChangeAllowance from 'hooks/marketplaceStages/useChangeAllowanceFee';
 
 export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, collection, onFinish, setIsClosable, testid }) => {
   const { collectionId, tokenId } = token || {};
@@ -109,7 +108,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
     onSellFixPrice({ price: priceInputValue, accountAddress: selectedAccount.address, currency: Number(selectedCurrencyOption?.collectionId) } as TFixPriceProps); // TODO: proper typing, proper calculated object
   }, [priceInputValue, selectedAccount, selectedCurrencyOption, onSellFixPrice]);
 
-  const { fee, fetchingFee, getFee } = useGetFee<Parameters<MarketController['getSellFixFee']>>(api?.market?.getSellFixFee.bind(api?.market));
+  const { fee, fetchingFee, getFee } = useEstimateGasChangeAllowance();
 
   const isEnoughBalance = useMemo(() => {
     if (isSponsored) return true;
@@ -128,10 +127,6 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ collectionId, tokenId, on
       await getFee(
         collectionId,
         tokenId,
-        Number(priceInputValue),
-        Number(selectedCurrencyOption?.collectionId),
-        1,
-        { account: selectedAccount }
       );
     }, 300)();
   }, [collectionId, tokenId, priceInputValue, api?.market, selectedAccount?.address]);

@@ -304,7 +304,6 @@ const CreateCollectionComponent = () => {
         payload.limits.transfersEnabled = tokenTransferPermission;
       }
       setCurrentSubmitStage(1);
-      console.log('create collection', selectedAccount.address, isEthereumAddress(selectedAccount.address))
       if (!isEthereumAddress(selectedAccount.address)) {
         createdCollection = await submitWaitResult({ payload });
 
@@ -329,8 +328,6 @@ const CreateCollectionComponent = () => {
         
 
         collectionId = Number(parseEthersV6TxReceipt(txCreateCollection).events?.CollectionCreated?.collectionId as string)
-
-        console.log(collectionId, 'COLLECTION_ID');
       }
     } catch (err) {
       console.error(err);
@@ -399,17 +396,9 @@ const CreateCollectionComponent = () => {
 
         await getFee({ payload: collection });
 
-        // if (needConfirmSponsoring && selectedAccount) {
-        //   await getConfirmSponsorshipFee({ payload: 1 });
-        // }
-
         if (!(collectionFormValues.name && collectionFormValues.symbol)) return;
 
         setFeeLoading(true);
-
-        // const provider = new ethers.providers.Web3Provider(walletProvider);
-        // const signer = await provider.getSigner();
-
         let feeToUse = feeFormatted;
         if (
           isEthereumAddress(selectedAccount?.address)
@@ -417,8 +406,6 @@ const CreateCollectionComponent = () => {
           if (!signer) throw new Error('No Reown wallet provider found');
           const feeData = await signer.provider!.getFeeData();
           const gasPrice = feeData.gasPrice;
-          console.log(gasPrice, 'GAS_PRICE')
-
           const CollectionManager = new ethers.Contract(
             CREATE_CONTRACT_ADDRESS,
             (await import('./CreateCollection.json')).default,

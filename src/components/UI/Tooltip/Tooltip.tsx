@@ -2,7 +2,7 @@
  * @author Pavel Kalachev <pkalachev@usetech.com>
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { ReactNode, useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import classNames from 'classnames';
 
@@ -24,6 +24,7 @@ export interface TooltipProps {
   targetRef: React.MutableRefObject<HTMLDivElement | HTMLButtonElement | null>;
   className?: string;
   align?: TooltipAlign;
+  children: ReactNode;
 }
 
 export const Tooltip: React.FC<TooltipProps> = (props) => {
