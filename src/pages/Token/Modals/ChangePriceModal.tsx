@@ -12,12 +12,6 @@ import { TFixPriceProps } from './types';
 import { useChangePriceStages } from '../../../hooks/marketplaceStages';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { StageStatus } from '../../../types/StagesTypes';
-import MarketController from 'api/chainApi/MarketController';
-import { useGetFee } from 'hooks/useGetFee';
-import { debounce } from 'utils/helpers';
-import { FeeMessage } from 'components';
-import { BN } from '@polkadot/util';
-import { fromStringToBnString } from 'utils/bigNum';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 import { Offer } from 'api/restApi/offers/types';
 import { useCoinGeckoApi } from 'api/coinGeckoApi/useCoinGeckoApi';
@@ -111,29 +105,6 @@ export const AskPriceModal: FC<TChangePriceModalProps> = ({ collectionId, tokenI
     onChangePrice({ price: priceInputValue, accountAddress: selectedAccount.address, currency: Number(selectedCurrencyOption?.collectionId) } as TFixPriceProps); // TODO: proper typing, proper calculated object
   }, [priceInputValue, selectedAccount, selectedCurrencyOption, onChangePrice]);
 
-  const { fee, fetchingFee, getFee } = useGetFee<Parameters<MarketController['getSellFixFee']>>(api?.market?.getSellFixFee.bind(api?.market));
-
-  const isEnoughBalance = useMemo(() => {
-    if (isSponsored) return true;
-    if (!selectedAccount?.balances?.proper.raw || selectedAccount.balances?.proper.raw.isZero() || !fee) return false;
-
-    return selectedAccount.balances?.proper.raw.gte(new BN(fromStringToBnString(fee)));
-  }, [fee, selectedAccount?.balances?.proper.raw, isSponsored]);
-
-  useEffect(() => {
-    if (!api || !selectedAccount || !priceInputValue) return;
-    debounce(async () => {
-      await getFee(
-        collectionId,
-        tokenId,
-        Number(priceInputValue),
-        Number(selectedCurrencyOption?.collectionId),
-        1,
-        { account: selectedAccount }
-      );
-    }, 300)();
-  }, [collectionId, tokenId, priceInputValue, api?.market, selectedAccount?.address, selectedCurrencyOption]);
-
   const isPriceAvailable = useMemo(() => {
     return Number(priceInputValue) >= minPrice;
   }, [priceInputValue, minPrice]);
@@ -176,18 +147,12 @@ export const AskPriceModal: FC<TChangePriceModalProps> = ({ collectionId, tokenI
       {minPrice > 0 && <WarningBlock>
         <Text color='grey-500' size='s'>Min price: {minPrice.toFixed(4)} UNQ equivalent $10 (current rate: 1 UNQ = ${currency})</Text>
       </WarningBlock>}
-      {!isSponsored && <FeeMessage
-        isFeeLoading={fetchingFee}
-        fee={fee || '0'}
-        testid={`${testid}-fee-message`}
-      />}
       {isSponsored && <WarningBlock>
         Collection ID {collectionId} sponsored
       </WarningBlock>}
-      {!isEnoughBalance && <Text color={'coral-500'} testid={`${testid}-low-balance-warning`}>Your balance is too low to sell</Text>}
       <ButtonWrapper>
         <Button
-          // disabled={(!isSponsored && (!isEnoughBalance || !priceInputValue || !Number(priceInputValue))) || !isPriceAvailable}
+          disabled={(!isSponsored && (!priceInputValue || !Number(priceInputValue))) || !isPriceAvailable}
           onClick={onConfirmFixPriceClick}
           role='primary'
           title='Confirm'
@@ -255,6 +220,7 @@ const SelectWrapper = styled(Select)`
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
+  margin-top: 32px;
 
   @media (max-width: 568px) {
     button {

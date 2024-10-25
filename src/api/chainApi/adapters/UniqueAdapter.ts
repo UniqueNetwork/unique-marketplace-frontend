@@ -224,22 +224,17 @@ class UniqueAdapter implements IMarketContractAdapter {
     );
   }
 
-  async getSellFee(from: EthCrossAccountId, collectionId: number, tokenId: number, price: string, currency: number, amount: number, signer: Signer, contract: IMarketContractProperties): Promise<string> {
-    const res = await this.uniqueSdk.evm.send.getFee({
-      abi: contract.abi || marketplaceAbi as any,
-      address: signer.address || '',
-      contractAddress: contract.address,
-      funcName: 'put',
-      gasLimit: sellGasLimit,
-      args: {
+  async estimateGasChangeAllowance(from: string, to: string, collectionId: number, tokenId: number, targetAllowance: boolean, signer: Signer): Promise<string> {
+    const res = await this.uniqueSdk.token.approve.getFee(
+      {
         collectionId,
         tokenId,
-        price,
-        currency,
-        amount,
-        seller: from
+        spender: to,
+        address: from,
+        isApprove: targetAllowance
       }
-    });
+    );
+
     return res.fee.raw;
   }
 
@@ -312,23 +307,6 @@ class UniqueAdapter implements IMarketContractAdapter {
         currency,
       }
     }, { signer });
-  }
-
-  async getChangePriceFee(collectionId: number, tokenId: number, price: string, currency: number, signer: Signer, contract: IMarketContractProperties): Promise<string> {
-    const res = await this.uniqueSdk.evm.send.getFee({
-      abi: contract.abi || marketplaceAbi as any,
-      address: signer.address || '',
-      contractAddress: contract.address,
-      funcName: 'changePrice',
-      gasLimit: buyGasLimit,
-      args: {
-        collectionId,
-        tokenId,
-        price,
-        currency
-      }
-    });
-    return res.fee.raw;
   }
 
   async transferTokensBatch(transfers: TransferTokenParams[], signer: Signer, onSubmittedOne?: (token: TokenId, index: number) => void): Promise<void> {

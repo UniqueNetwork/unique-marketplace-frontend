@@ -245,36 +245,26 @@ class MetamaskAdapter implements IMarketContractAdapter {
     await (await nftFactory.approve(targetTo, tokenId)).wait();
   }
 
-  async getSellFee(
-    from: EthCrossAccountId,
+  async estimateGasChangeAllowance(
+    from: string,
+    to: string,
     collectionId: number,
     tokenId: number,
-    price: string,
-    currency: number,
-    amount: number,
-    signer: Signer,
-    contractProps: IMarketContractProperties
+    targetAllowance: boolean,
+    signer: Signer
   ): Promise<string> {
-    const contract = this.getContract(contractProps, signer);
-
-    const estimateGas = await contract.put.estimateGas(
-      collectionId,
-      tokenId,
-      price,
-      currency,
-      amount,
-      from,
-      { gasLimit: sellGasLimit }
-    );
-
+    if (!signer || !signer.provider) throw Error('No signer provided');
+    const targetTo = targetAllowance ? to : from;
+    const nftFactory = await UniqueNFTFactory(collectionId, signer);
+    const estimateGas = await nftFactory.approve.estimateGas(targetTo, tokenId);
     const feeData = await signer.provider.getFeeData();
-    const gasPrice = feeData.gasPrice;
+    const gasPrice = feeData.gasPrice ? BigInt(feeData.gasPrice.toString()) : BigInt(0);
 
-    if (!gasPrice) return '0';
+    if (!gasPrice) throw Error('Gas price not calculated');
 
-    const totalFeeBigInt = String(estimateGas * gasPrice);
+    const totalFeeBigInt = estimateGas * gasPrice;
 
-    return totalFeeBigInt;
+    return String(totalFeeBigInt);
   }
 
   async sell(
@@ -300,8 +290,6 @@ class MetamaskAdapter implements IMarketContractAdapter {
       from,
       { gasLimit: sellGasLimit }
     )).wait();
-
-    console.log(rest, 'RESULT');
   }
   
   async getBuyFee(
@@ -313,7 +301,7 @@ class MetamaskAdapter implements IMarketContractAdapter {
     signer: Signer,
     contractProps: IMarketContractProperties
   ): Promise<string> {
-    if (!signer || !signer.provider) return '';
+    if (!signer || !signer.provider) throw Error('No signer provided');
     const contract = this.getContract(contractProps, signer);
 
     const estimateGas = await contract.buy.estimateGas(
@@ -377,35 +365,6 @@ class MetamaskAdapter implements IMarketContractAdapter {
     })).wait();
   }
 
-  async getChangePriceFee(
-    collectionId: number,
-    tokenId: number,
-    price: string,
-    currency: number,
-    signer: Signer,
-    contractProps: IMarketContractProperties
-  ): Promise<string> {
-    if (!signer || !signer.provider) return '';
-    const contract = this.getContract(contractProps, signer);
-
-    const estimateGas = await contract.changePrice.estimateGas(
-      collectionId,
-      tokenId,
-      price,
-      currency,
-      { gasLimit: buyGasLimit }
-    );
-
-    const feeData = await signer.provider.getFeeData();
-    const gasPrice = feeData.gasPrice;
-
-    if (!gasPrice) return '0';
-
-    const totalFeeBigInt = estimateGas * gasPrice;
-
-    return String(totalFeeBigInt);
-  }
-
   async transferTokensBatch(
     transfers: TransferTokenParams[],
     signer: Signer,
@@ -432,7 +391,7 @@ class MetamaskAdapter implements IMarketContractAdapter {
     { address, tokenPrefix, description, name }: CreateCollectionV2ArgsDto,
     signer: Signer
   ): Promise<string> {
-    if (!signer || !signer.provider) return '0';
+    if (!signer || !signer.provider) throw Error('No signer provided');
 
     const collectionHelper = await CollectionHelpersFactory(signer);
     const collectionCreationFee = await collectionHelper.collectionCreationFee();

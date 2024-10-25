@@ -36,14 +36,13 @@ export interface IRemoveFromSell {
 
 interface IMarketContractAdapter extends IBaseAdapter {
   changeAllowance(from: string, to: string, collectionId: number, tokenId: number, targetAllowance: boolean, signer: Signer): Promise<void>
+  estimateGasChangeAllowance(from: string, to: string, collectionId: number, tokenId: number, targetAllowance: boolean, signer: Signer): Promise<string>
 
   sell(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, currency: number, amount: number, signer: Signer, contract: IMarketContractProperties): Promise<void>
   buy({to, collectionId, tokenId, price, amount, signer, contract}:  IPurchaseTokenData): Promise<void>
-  getSellFee(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, currency: number, amount: number, signer: Signer, contract: IMarketContractProperties): Promise<string>
   getBuyFee(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer, contract: IMarketContractProperties): Promise<string>
 
   changePrice(collectionId: number, tokenId: number, price: string, currency: number, signer: Signer, contract: IMarketContractProperties): Promise<void>
-  getChangePriceFee(collectionId: number, tokenId: number, price: string, currency: number, signer: Signer, contract: IMarketContractProperties): Promise<string>
   setCollectionNesting(collectionId: number, value: CollectionNestingAndPermissionStruct$1): Promise<void>
 
   transferBalanceFungible({collectionId, address, recipient, amount, decimals, signer}: ITransferFungible): Promise<void>
