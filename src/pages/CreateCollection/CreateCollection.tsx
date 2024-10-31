@@ -19,7 +19,7 @@ import { useBalanceInsufficient } from './hooks/useBalanceInsufficient';
 import { ConfirmBtn, FeeMessage } from 'components';
 import { CollectionBannerComponent } from './components/CollectionBanner';
 import { CollectionCover } from './components/CollectionCover';
-import { _10MB } from 'pages/CreateNFT/constants';
+import { _10MB, maxAccountTokenOwnershipLimit, maxTokenLimit } from 'pages/CreateNFT/constants';
 import { BUNDLE_PERMISSIONS, SPONSOR_PERMISSIONS, UNLIMETED_CONST, useCollectionSettings } from './tabs/CollectionSettingsProvider';
 import { useMarketableCollection } from 'api/restApi/collections/collection';
 import { getSignature } from 'hooks/marketplaceStages/utils/getSignature';
@@ -313,14 +313,15 @@ const CreateCollectionComponent = () => {
         const numericChainId = getNumericChainId(currentChainId);
         switchNetwork(numericChainId);
         const CollectionManager = new ethers.Contract(CREATE_CONTRACT_ADDRESS, (await import('./CreateCollection.json')).default, signer);
+
         const txCreateCollection = await (await CollectionManager.createCollection(
           payload.name,
           payload.description,
           payload.symbol,
           payload.cover_image.url,
           !!payload.limits.transfersEnabled,
-          payload.limits.tokenLimit || 0,
-          payload.limits.accountTokenOwnershipLimit || (payload.limits.tokenLimit ? payload.limits.tokenLimit : 100000000),
+          payload.limits.tokenLimit || (payload.limits.accountTokenOwnershipLimit ? payload.limits.accountTokenOwnershipLimit : maxTokenLimit),
+          payload.limits.accountTokenOwnershipLimit || (payload.limits.tokenLimit ? payload.limits.tokenLimit : maxAccountTokenOwnershipLimit),
           payload.permissions.nesting?.tokenOwner,
           payload.permissions.nesting?.collectionAdmin,
           { gasLimit: 500_000, value: COLECTION_CREATION_FEE }

@@ -54,52 +54,54 @@ export const Limits = ({ collectionInfo, onComplete }: SettingsSavingProps) => {
       ? Number(tokenLimit) <= limits.tokenLimit
       : Number(tokenLimit) <= maxTokenLimit;
   }, [tokenLimit, limits?.tokenLimit]);
-
-  useEffect(() => {
-    if (!isValid || !isChanged || !collectionId || !selectedAccount?.address) {
-      return;
-    }
-    void getFee({
-      payload: {
-        collectionId,
-        address: selectedAccount?.address,
-        limits: {
-          tokenLimit: Number(tokenLimit),
-          ownerCanTransfer,
-          transfersEnabled,
-          accountTokenOwnershipLimit: Number(accountTokenOwnershipLimit)
-        }
-      }
-    });
-  }, [collectionId, tokenLimit, getFee, isValid, isChanged, selectedAccount?.address]);
-
   const handleSubmit = async () => {
     if (!collectionId || !selectedAccount) {
       return;
     }
-
+  
     setVisibleConfirmModal(false);
-
+  
     try {
-      await submitWaitResult(
-        {
-          payload: {
-            collectionId,
-            address: selectedAccount.address,
-            limits: {
-              tokenLimit: Number(tokenLimit),
-
-            }
-          }
-        }
-      );
-      await onComplete?.();
+      const updatedLimits: Partial<typeof limits> = {};
+  
+      // Compare tokenLimit
+      const initialTokenLimit = limits?.tokenLimit;
+      const currentTokenLimit = tokenLimit !== undefined ? Number(tokenLimit) : undefined;
+      if (currentTokenLimit !== initialTokenLimit) {
+        updatedLimits.tokenLimit = currentTokenLimit;
+      }
+  
+      // Compare accountTokenOwnershipLimit
+      const initialAccountTokenOwnershipLimit = limits?.accountTokenOwnershipLimit;
+      const currentAccountTokenOwnershipLimit = accountTokenOwnershipLimit !== undefined ? Number(accountTokenOwnershipLimit) : undefined;
+      if (currentAccountTokenOwnershipLimit !== initialAccountTokenOwnershipLimit) {
+        updatedLimits.accountTokenOwnershipLimit = currentAccountTokenOwnershipLimit;
+      }
+  
+      // Compare ownerCanTransfer
+      if (ownerCanTransfer !== limits?.ownerCanTransfer) {
+        updatedLimits.ownerCanTransfer = ownerCanTransfer;
+      }
+  
+      // Compare transfersEnabled
+      if (transfersEnabled !== limits?.transfersEnabled) {
+        updatedLimits.transfersEnabled = transfersEnabled;
+      }
+  
+      await submitWaitResult({
+        payload: {
+          collectionId,
+          address: selectedAccount.address,
+          limits: updatedLimits,
+        },
+      });
+      // await onComplete?.();
       info('Limits set successfully');
     } catch (e: any) {
       setVisibleConfirmModal(false);
     }
   };
-
+  
   return (
     <>
       <FormBody>
@@ -212,7 +214,7 @@ export const Limits = ({ collectionInfo, onComplete }: SettingsSavingProps) => {
             >
               <Button
                 title='Save changes'
-                disabled={!isChanged || !isValid}
+                disabled={false}
                 onClick={() => {
                   setVisibleConfirmModal(true);
                 }}

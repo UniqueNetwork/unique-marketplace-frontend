@@ -21,6 +21,7 @@ const collectionLimitFields = {
   accountTokenOwnershipLimit: 0,
   tokenLimit: 3,
   transfersEnabled: 8,
+  ownerCanTransfer: 6,
 };
 
 type CollectionLimitFieldKey = keyof typeof collectionLimitFields;
@@ -685,28 +686,42 @@ class MetamaskAdapter implements IMarketContractAdapter {
 
     return String(totalFeeBigInt);
   }
+
   async setCollectionLimits(payload: SetCollectionLimitsBody, signer: Signer): Promise<void> {
     const collection = await UniqueNFTFactory(payload.collectionId, signer);
-
+  
     for (const [fieldKey, value] of Object.entries(payload.limits)) {
       const typedFieldKey = fieldKey as CollectionLimitFieldKey;
       const field = collectionLimitFields[typedFieldKey];
-
+  
       if (field === undefined) {
         console.log(`Invalid field: ${fieldKey}`);
         continue;
       }
-      const limitStruct = {
-        field,
-        value: {
+  
+      let limitValue: { status: boolean; value: any };
+  
+      if (fieldKey === 'ownerCanTransfer' || fieldKey === 'transfersEnabled') {
+        limitValue = {
+          status: value !== null,
+          value: Number(value),
+        };
+      } else {
+        limitValue = {
           status: value !== null,
           value: value !== null ? ethers.toBigInt(value) : 0n,
-        },
+        };
+      }
+  
+      const limitStruct = {
+        field,
+        value: limitValue,
       };
 
       await (await collection.setCollectionLimit(limitStruct)).wait();
     }
   }
+  
 
   async burnCollection(collectionId: number, signer: Signer): Promise<void> {
     const collectionHelper = await CollectionHelpersFactory(signer);
