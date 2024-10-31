@@ -1,4 +1,5 @@
 export const maxTokenLimit = 4294967295;
+export const maxAccountTokenOwnershipLimit = 100000000;
 export const _10MB = 10000000;
 export const MAX_NAME_SIZE = 64;
 export const MAX_DESCRIPTION_SIZE = 256;
