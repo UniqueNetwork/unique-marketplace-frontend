@@ -653,7 +653,9 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
                 totalTokens={tokens.length}
                 batchSize={batchSize}
                 onComplete={() => {
-                  navigate(`/${currentChainId}/sellTokens`);
+                  localStorage.setItem('tokensForSell', JSON.stringify(tokens.map(token => ({ ...token, collectionId: collection?.id || 0 }))));
+
+                  navigate(`/${currentChainId}/mass-listing`);
                 }}
                 onContinue={() => {
                   setTokens([]);
