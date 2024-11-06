@@ -1,0 +1,42 @@
+[
+    {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "marketContractAddress",
+            "type": "address"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "collectionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "tokenId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "price",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct BatchTokenSaleWithApproval.TokenSale[]",
+            "name": "sales",
+            "type": "tuple[]"
+          },
+          {
+            "internalType": "address",
+            "name": "from",
+            "type": "address"
+          }
+        ],
+        "name": "batchSell",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+      }
+]
