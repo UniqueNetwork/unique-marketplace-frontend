@@ -4,15 +4,19 @@ import styled from 'styled-components';
 
 import { PagePaper } from 'components/PagePaper/PagePaper';
 import { CollectionBannerComponent } from './CollectionBanner';
-import { CollectionEditForm } from './Forms/CollectionEditForm';
+import { MainInformationForm } from './Forms/MainInformationForm';
+import { SocialMediaLinksForm } from './Forms/SocialMediaLinksForm';
 import { Error404 } from 'pages/Errors/404';
 import { CollectionEditSkeleton } from './CollectionEditSkeleton';
 import { useApi } from 'hooks/useApi';
 import { RoyaltiesForm } from './Forms/RoyaltiesForm';
 import { CollectionCover } from './CollectionCover';
 import { useMarketableCollection } from 'api/restApi/collections/collection';
-import { MarketableCollection, MarketableCollectionMetadata } from 'api/restApi/collections/types';
-import { Heading, Icon, Modal } from 'components/UI';
+import {
+  MarketableCollection,
+  MarketableCollectionMetadata,
+} from 'api/restApi/collections/types';
+import { Heading, Icon, Modal, Tabs } from 'components/UI';
 import { SaveCollectionStagesModal } from './Modals/SaveCollectionModal';
 import { BlueGrey500 } from 'styles/colors';
 import { SetRoyaltiesStagesModal } from './Modals/SetRoyaltiesModal';
@@ -27,14 +31,23 @@ export const CollectionEditPage = () => {
   const [collection, setCollection] = useState<MarketableCollection | null>(null);
   const [collectionInfo, setCollectionInfo] = useState<CollectionWithInfoV2Dto | null>(null);
   const [isFetchingCollection, setIsFetchingCollection] = useState<boolean>(true);
+  const [activeTabIndex, setActiveTabIndex] = useState<number>(0);
   const { fetchCollection } = useMarketableCollection();
   const { api, currentChainId } = useApi();
-  const [banner, setBanner] = useState<{src: string, file?: Blob}>();
-  const [cover, setCover] = useState<{src: string, file?: Blob}>();
+  const [banner, setBanner] = useState<{ src: string; file?: Blob }>();
+  const [cover, setCover] = useState<{ src: string; file?: Blob }>();
   const [metadata, setMetadata] = useState<MarketableCollectionMetadata>({});
   const [royalty, setRoyalty] = useState<RoyaltiesFormData>({ royalties: [] });
   const [modalType, setModalType] = useState<'metadata' | 'royalty'>();
   const navigate = useNavigate();
+
+  const tabLabels = [
+    'Main information',
+    'Social media links',
+    'Collection sponsor',
+    'Token limits',
+    'Burn collection',
+  ];
 
   useEffect(() => {
     if (!api?.collection) return;
@@ -44,11 +57,19 @@ export const CollectionEditPage = () => {
       const collection = await fetchCollection(Number(collectionId));
       setCollection(collection || null);
       collection?.metadata?.banner && setBanner({ src: collection?.metadata?.banner });
-      setCover({ src: collection?.metadata?.cover || collection?.data?.info?.cover_image?.url || '' });
+      setCover({
+        src: collection?.metadata?.cover || collection?.data?.info?.cover_image?.url || '',
+      });
 
       setMetadata({
         ...(collection?.metadata || {}),
-        description: collection?.metadata?.description || collection?.description
+        description: collection?.metadata?.description || collection?.description,
+        website: collection?.metadata?.website,
+        discord: collection?.metadata?.discord,
+        twitter: collection?.metadata?.twitter,
+        instagram: collection?.metadata?.instagram,
+        telegram: collection?.metadata?.telegram,
+        reddit: collection?.metadata?.reddit,
       });
 
       const collectionOnChain = await api?.collection?.getCollection(Number(collectionId));
@@ -56,17 +77,15 @@ export const CollectionEditPage = () => {
       if (collectionOnChain?.royalties?.length) {
         setRoyalty({
           royalties: collectionOnChain?.royalties?.map(({ address, percent }) => {
-            const value = percent
-              ? percent.toFixed(2)
-              : '0';
-            return ({ value, address });
-          })
+            const value = percent ? percent.toFixed(2) : '0';
+            return { value, address };
+          }),
         });
       }
 
       setIsFetchingCollection(false);
     })();
-  }, [api, collectionId, setIsFetchingCollection, fetchCollection]);
+  }, [api, collectionId, fetchCollection]);
 
   const { name } = collection || {};
 
@@ -86,10 +105,34 @@ export const CollectionEditPage = () => {
     setCover(undefined);
   }, []);
 
-  const onCollectionEditFormSubmit = useCallback((metadata: MarketableCollectionMetadata) => {
-    setMetadata({ ...metadata, banner: banner?.src, cover: cover?.src });
-    setModalType('metadata');
-  }, [banner, cover]);
+  const onMainInfoSubmit = useCallback(
+    (mainMetadata: Pick<MarketableCollectionMetadata, 'description'>) => {
+      setMetadata((prevMetadata) => ({
+        ...prevMetadata,
+        ...mainMetadata,
+        banner: banner?.src,
+        cover: cover?.src,
+      }));
+      setModalType('metadata');
+    },
+    [banner, cover]
+  );
+
+  const onSocialMediaSubmit = useCallback(
+    (
+      socialMediaMetadata: Pick<
+        MarketableCollectionMetadata,
+        'website' | 'discord' | 'twitter' | 'instagram' | 'telegram' | 'reddit'
+      >
+    ) => {
+      setMetadata((prevMetadata) => ({
+        ...prevMetadata,
+        ...socialMediaMetadata,
+      }));
+      setModalType('metadata');
+    },
+    []
+  );
 
   const onRoyaltiesFormSubmit = useCallback((royalty: RoyaltiesFormData) => {
     setRoyalty(royalty);
@@ -99,18 +142,28 @@ export const CollectionEditPage = () => {
   const onUpdateFinish = useCallback(async () => {
     setModalType(undefined);
     const collection = await fetchCollection(Number(collectionId));
-      setCollection(collection || null);
-      collection?.metadata?.banner && setBanner({ src: collection?.metadata?.banner });
-      setCover({ src: collection?.metadata?.cover || collection?.data?.info?.cover_image?.url || '' });
+    setCollection(collection || null);
+    collection?.metadata?.banner && setBanner({ src: collection?.metadata?.banner });
+    setCover({
+      src: collection?.metadata?.cover || collection?.data?.info?.cover_image?.url || '',
+    });
 
-      setMetadata({
-        ...(collection?.metadata || {}),
-        description: collection?.metadata?.description || collection?.description
-      });
+    setMetadata({
+      ...(collection?.metadata || {}),
+      description: collection?.metadata?.description || collection?.description,
+      website: collection?.metadata?.website,
+      discord: collection?.metadata?.discord,
+      twitter: collection?.metadata?.twitter,
+      instagram: collection?.metadata?.instagram,
+      telegram: collection?.metadata?.telegram,
+      reddit: collection?.metadata?.reddit,
+    });
   }, [collectionId, fetchCollection]);
 
   const isCollectionChanged = useMemo(() => {
-    const coverNotChanged = (cover?.src === collection?.data?.info?.cover_image?.url && !collection?.metadata?.cover) || collection?.metadata?.cover === cover?.src;
+    const coverNotChanged =
+      (cover?.src === collection?.data?.info?.cover_image?.url && !collection?.metadata?.cover) ||
+      collection?.metadata?.cover === cover?.src;
     return collection?.metadata?.banner !== banner?.src || !coverNotChanged;
   }, [collection, banner, cover]);
 
@@ -135,9 +188,11 @@ export const CollectionEditPage = () => {
   }, [fetchCollection]);
 
   if (isFetchingCollection) {
-    return <CollectionEditPaper>
-      <CollectionEditSkeleton />
-    </CollectionEditPaper>;
+    return (
+      <CollectionEditPaper>
+        <CollectionEditSkeleton />
+      </CollectionEditPaper>
+    );
   }
 
   if (!collection || !collectionInfo) return <Error404 />;
@@ -145,15 +200,18 @@ export const CollectionEditPage = () => {
   return (
     <>
       <BackLink onClick={backClickHandler}>
-        <Icon name='arrow-left' color={BlueGrey500} size={16} />
+        <Icon name="arrow-left" color={BlueGrey500} size={16} />
         <p>back</p>
       </BackLink>
       <CollectionEditPaper>
-        <CollectionBannerComponent
-          src={banner?.src}
-          onChange={onUploadBanner}
-          onRemove={onRemoveBanner}
-        />
+        <CollectionBannerWrapper disabled={activeTabIndex !== 0}>
+          <CollectionBannerComponent
+            src={banner?.src}
+            onChange={onUploadBanner}
+            onRemove={onRemoveBanner}
+          />
+          {activeTabIndex !== 0 && <BannerOverlay />}
+        </CollectionBannerWrapper>
         <CollectionEditContentWrapper>
           <CollectionCover
             name={name || ''}
@@ -162,36 +220,66 @@ export const CollectionEditPage = () => {
             onRemove={onRemoveCover}
           />
           <CollectionEditFormWrapper>
-            <Heading size='1'>{name}</Heading>
-            <CollectionEditForm
-              initialFormData={metadata}
-              onSubmit={onCollectionEditFormSubmit}
-              isCoverChanged={isCollectionChanged}
+            <Heading size="1">{name}</Heading>
+            <Tabs
+              activeIndex={activeTabIndex}
+              labels={tabLabels}
+              onClick={setActiveTabIndex}
+              type="default"
             />
-            {collectionInfo?.info?.originalSchemaVersion === '1.0.0' && (
-              <RoyaltiesForm
-                initialFormData={royalty.royalties}
-                onSubmit={onRoyaltiesFormSubmit}
-                withSaveButton={true}
+            {activeTabIndex === 0 && (
+              <>
+                <MainInformationForm
+                  initialFormData={{ description: metadata.description }}
+                  onSubmit={onMainInfoSubmit}
+                  isCoverChanged={isCollectionChanged}
+                />
+                {collectionInfo?.info?.originalSchemaVersion === '1.0.0' && (
+                  <RoyaltiesForm
+                    initialFormData={royalty.royalties}
+                    onSubmit={onRoyaltiesFormSubmit}
+                    withSaveButton={true}
+                  />
+                )}
+              </>
+            )}
+            {activeTabIndex === 1 && (
+              <SocialMediaLinksForm
+                initialFormData={{
+                  website: metadata.website,
+                  discord: metadata.discord,
+                  twitter: metadata.twitter,
+                  instagram: metadata.instagram,
+                  telegram: metadata.telegram,
+                  reddit: metadata.reddit,
+                }}
+                onSubmit={onSocialMediaSubmit}
               />
             )}
-            <Sponsorship
-              collection={collection}
-              collectionInfo={collectionInfo}
-              onComplete={onComplete}
-            />
-            <Limits
-              collection={collection}
-              collectionInfo={collectionInfo}
-              onComplete={onComplete}
-            />
-            <BurningPermission
-              collection={collection}
-              collectionInfo={collectionInfo}
-              onComplete={onComplete}
-            />
+            {activeTabIndex === 2 && (
+              <Sponsorship
+                collection={collection}
+                collectionInfo={collectionInfo}
+                onComplete={onComplete}
+              />
+            )}
+            {activeTabIndex === 3 && (
+              <Limits
+                collection={collection}
+                collectionInfo={collectionInfo}
+                onComplete={onComplete}
+              />
+            )}
+            {activeTabIndex === 4 && (
+              <BurningPermission
+                collection={collection}
+                collectionInfo={collectionInfo}
+                onComplete={onComplete}
+              />
+            )}
           </CollectionEditFormWrapper>
         </CollectionEditContentWrapper>
+
         <Modal isVisible={modalType === 'metadata'}>
           <SaveCollectionStagesModal
             metadata={metadata}
@@ -257,3 +345,22 @@ const BackLink = styled.button`
     width: 14px;
   }
 `;
+
+const CollectionBannerWrapper = styled.div<{ disabled: boolean }>`
+  position: relative;
+  ${(props) =>
+    props.disabled &&
+    `
+    pointer-events: none;
+  `}
+`;
+const BannerOverlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px 8px 0 0;
+  background-color: rgba(128, 128, 128, 0.5);
+`;
+

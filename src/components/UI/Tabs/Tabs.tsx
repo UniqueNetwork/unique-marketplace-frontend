@@ -20,121 +20,117 @@ export const Tabs = ({
   disabledIndexes,
   type = 'default',
   onClick,
-  testid
-}: TabsProps) => (
-  <TabsStyled
-    className={classNames(type, {
-      'unique-tabs-labels': labels,
-      'unique-tabs-contents': children
-    })}
-    data-testid={testid}
-  >
-    {labels
-      ? labels.map((label, index) => {
-        const disabled = disabledIndexes?.includes(index);
-        return (
-          <div
-            key={`tab-label-${index}`}
-            {...(!disabled && {
-              onClick: () => {
-                onClick?.(index);
-              }
-            })}
-            className={classNames('tab-label', {
-              active: activeIndex === index,
-              disabled
-            })}
-            data-testid={`${testid}-${label}`}
-          >
-            {label}
-          </div>
-        );
-      })
-      : children?.[activeIndex]}
-  </TabsStyled>
-);
+  testid,
+}: TabsProps) => {
+  const numberOfTabs = labels ? labels.length : children ? children.length : 0;
 
-const TabsStyled = styled.div`
-  .unique-tabs-labels {
-    font-family: var(--prop-font-family);
-    font-size: var(--prop-font-size);
-    display: flex;
-    flex-wrap: wrap;
-    font-style: normal;
-    font-weight: 500;
+  return (
+    <TabsContainer data-testid={testid} type={type}>
+      {labels && (
+        <TabLabels numberOfTabs={numberOfTabs}>
+          {labels.map((label, index) => {
+            const disabled = disabledIndexes?.includes(index);
+            return (
+              <TabLabel
+                key={`tab-label-${index}`}
+                onClick={() => {
+                  if (!disabled) {
+                    onClick?.(index);
+                  }
+                }}
+                active={activeIndex === index}
+                disabled={disabled}
+                data-testid={`${testid}-${label}`}
+                numberOfTabs={numberOfTabs}
+              >
+                {label}
+              </TabLabel>
+            );
+          })}
+        </TabLabels>
+      )}
+      {children && <TabContent>{children[activeIndex]}</TabContent>}
+    </TabsContainer>
+  );
+};
 
-    &.slim {
-      .tab-label {
-        color: var(--color-additional-dark);
-        display: flex;
-        align-items: center;
-        height: 80px;
-        padding: 0 20px;
-        cursor: pointer;
+const TabsContainer = styled.div<{ type: 'default' | 'slim' }>`
+  /* Container styles if needed */
+`;
 
-        &.active {
-          border-bottom: 2px solid var(--color-primary-500);
-        }
-      }
-    }
+const TabLabels = styled.div<{ numberOfTabs: number }>`
+  display: flex;
+  flex-wrap: wrap;
+  font-family: var(--prop-font-family);
+  font-size: var(--prop-font-size);
+  font-weight: 500;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--color-grey-300);
 
-    &.default {
-      .tab-label {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        position: relative;
-        width: 198px;
-        height: 38px;
-        border: 1px solid var(--color-primary-400);
-        line-height: 24px;
-        color: var(--color-primary-400);
-        cursor: pointer;
-        border-left: none;
+  @media (max-width: 768px) {
+    ${(props) =>
+      props.numberOfTabs > 2 &&
+      `
+      flex-direction: column;
+      overflow-y: auto;
+      max-height: 200px; /* Adjust as needed */
+    `}
+  }
+`;
 
-        &:first-of-type {
-          border-top-left-radius: var(--prop-border-radius);
-          border-bottom-left-radius: var(--prop-border-radius);
-          border-left: 1px solid var(--color-primary-400);
-        }
+const TabLabel = styled.div<{
+  active: boolean;
+  disabled?: boolean;
+  numberOfTabs: number;
+}>`
+  position: relative;
+  padding: 12px 24px;
+  margin-right: 32px;
+  cursor: pointer;
+  color: ${(props) =>
+    props.disabled
+      ? 'var(--color-grey-400)'
+      : props.active
+      ? 'var(--color-primary-500)'
+      : 'var(--color-blue-grey-500)'};
+  transition: color 0.3s;
+  pointer-events: ${(props) => (props.disabled ? 'none' : 'auto')};
+  white-space: nowrap; /* Prevent text from wrapping */
 
-        &:last-of-type {
-          border-top-right-radius: var(--prop-border-radius);
-          border-bottom-right-radius: var(--prop-border-radius);
-        }
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: ${(props) => (props.active ? '100%' : '0%')};
+    height: 2px;
+    background-color: var(--color-primary-500);
+    transition: width 0.3s;
+  }
 
-        &.disabled {
-          background-color: var(--color-grey-100);
-          color: var(--color-blue-grey-400);
-          border-color: var(--color-blue-grey-300);
-          cursor: default;
-        }
+  &:hover {
+    color: ${(props) =>
+      props.disabled ? 'var(--color-grey-400)' : 'var(--color-primary-500)'};
 
-        &.active {
-          color: var(--color-additional-light);
-          background-color: var(--color-primary-400);
-          border-color: var(--color-primary-400);
-        }
-      }
+    &::after {
+      width: ${(props) => (props.disabled ? '0%' : '100%')};
     }
   }
 
-  .unique-tab-intermediate {
-    font-family: var(--prop-font-family);
-    font-size: var(--prop-font-size);
-    font-weight: var(--prop-font-weight);
-    position: relative;
-    padding: 15px;
-    margin-top: 15px;
-    border-radius: var(--prop-border-radius);
-    background-color: var(--color-primary-200);
+  &:last-child {
+    margin-right: 0;
   }
 
-  .unique-tabs-contents {
-    font-family: var(--prop-font-family);
-    font-size: var(--prop-font-size);
-    font-weight: var(--prop-font-weight);
-    position: relative;
-    padding: 15px 0;
+  @media (max-width: 768px) {
+    ${(props) =>
+      props.numberOfTabs > 2 &&
+      `
+      width: 100%;
+      margin-right: 0;
+    `}
   }
+`;
+
+const TabContent = styled.div`
+  padding: 24px 0;
 `;
