@@ -315,7 +315,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
     setTokens((tokens) =>
       tokens.map((token, index) => ({
         ...token,
-        tokenId: (lastTokenId || 0) + index + 1
+        tokenId: token.tokenId || (lastTokenId || 0) + index + 1
       }))
     );
   }, [lastTokenId]);

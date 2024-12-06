@@ -10,7 +10,7 @@ import IMarketController from './controllers/base/IMarketController';
 import { CollectionMode, TransactionOptions } from './types';
 import BaseController from './controllers/BaseController';
 import { MarketContract, MarketContractAbiItem } from 'api/restApi/settings/types';
-import { IMarketContractProperties } from './adapters/IMarketContractAdapter';
+import { IMarketContractProperties, TokenForOrder } from './adapters/IMarketContractAdapter';
 import { Account } from 'account/types';
 
 class MarketController extends BaseController implements IMarketController {
@@ -98,6 +98,23 @@ class MarketController extends BaseController implements IMarketController {
     const priceWithDecimals = (collectionId ? (price * (10 ** decimals)) : (price * (10 ** this.decimals))).toLocaleString('fullwide', { useGrouping: false });
     await adapter.sell(from, collectionId, tokenId, priceWithDecimals, currency, amount, account.signer, this.actualContract);
     await sleep(1000); // little lag to make sure offer is added to db
+  }
+
+  async sellBatchFix(tokens: TokenForOrder[], account: Account): Promise<void> {
+    const from = Address.extract.ethCrossAccountId(account.address);
+    const adapter = this.getAdapter(account);
+    tokens =tokens.map(token => ({
+      tokenId: token.tokenId,
+      collectionId: token.collectionId,
+      currency: token.currency,
+      amount: 1,
+      seller: from,
+      //@ts-ignore
+      price: (token.price * (10 ** this.decimals)).toLocaleString('fullwide', { useGrouping: false })
+      // price: BigInt((token.price as number) * (10 ** this.decimals))
+    }));
+
+    await adapter.sellBatch(tokens, account.signer, this.actualContract);
   }
 
   async buyFix(collectionId: number, tokenId: number, amount: number, { account, contractAddress }: TransactionOptions): Promise<void> {

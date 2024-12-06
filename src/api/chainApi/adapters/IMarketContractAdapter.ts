@@ -34,11 +34,22 @@ export interface IRemoveFromSell {
   contract: IMarketContractProperties;
 }
 
+export interface TokenForOrder {
+  collectionId: number;
+  tokenId: number;
+  amount: number;
+  currency: number;
+  price: bigint | number;
+  seller?: EthCrossAccountId;
+}
+
 interface IMarketContractAdapter extends IBaseAdapter {
   changeAllowance(from: string, to: string, collectionId: number, tokenId: number, targetAllowance: boolean, signer: Signer): Promise<void>
   estimateGasChangeAllowance(from: string, to: string, collectionId: number, tokenId: number, targetAllowance: boolean, signer: Signer): Promise<string>
 
   sell(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, currency: number, amount: number, signer: Signer, contract: IMarketContractProperties): Promise<void>
+  sellBatch(tokens: TokenForOrder[],signer: Signer, contract: IMarketContractProperties): Promise<void>
+
   buy({to, collectionId, tokenId, price, amount, signer, contract}:  IPurchaseTokenData): Promise<void>
   getBuyFee(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer, contract: IMarketContractProperties): Promise<string>
 

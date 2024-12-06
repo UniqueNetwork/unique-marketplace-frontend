@@ -1,9 +1,10 @@
-import React, { FC, useEffect, useState } from 'react';
-import { Modal, useNotifications } from 'components/UI';
+import React, { FC, useEffect, useMemo, useState } from 'react';
+import { Alert, Button, Modal, useNotifications } from 'components/UI';
 import { StageStatus } from 'types/StagesTypes';
 import { TokenWithPrice } from './NFTLine';
 import { useSellBulkStages } from './hooks/useSellBulkStages';
 import DefaultMarketStages from 'pages/Token/Modals/StagesModal';
+import styled from 'styled-components';
 
 export type SellTokensModalProps = {
   isVisible: boolean;
@@ -13,7 +14,15 @@ export type SellTokensModalProps = {
 };
 
 export const SellTokensModal: FC<SellTokensModalProps> = ({ isVisible, tokensForListing, onFinish, testid }) => {
-  const { stages, status, initiate } = useSellBulkStages(tokensForListing);
+  const tokensForOrders = useMemo(() => {
+    return tokensForListing.filter(token => token.isSelected).map(token => ({
+      ...token,
+      amount: 1,
+      currency: 0,
+    }));
+  }, [tokensForListing]);
+  
+  const { stages, status, initiate } = useSellBulkStages(tokensForOrders);
   const { info } = useNotifications();
   const [isInitiated, setIsInitiated] = useState(false);
 
@@ -31,6 +40,7 @@ export const SellTokensModal: FC<SellTokensModalProps> = ({ isVisible, tokensFor
         size: 32,
         color: 'var(--color-additional-light)',
       });
+      //TO DO redirect
       onFinish();
     }
   }, [status]);
@@ -45,6 +55,34 @@ export const SellTokensModal: FC<SellTokensModalProps> = ({ isVisible, tokensFor
           testid={`${testid}`}
         />
       </div>
+
+      {status === StageStatus.error && (
+        <>
+          <AlertStyled type='warning'>Sell stage failed.</AlertStyled>
+          <ButtonsWrapper>
+            <Button title='Close' role='primary' onClick={() => {}} />
+          </ButtonsWrapper>
+        </>
+      )}
+      {status === StageStatus.success && (
+        <ButtonsWrapper>
+          <Button title='Create more' role='primary' onClick={() => {}} />
+          <Button title='Sell Tokens' onClick={() => {}} />
+        </ButtonsWrapper>
+      )}
     </Modal>
   );
 };
+
+
+const ButtonsWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-top: calc(var(--prop-gap) * 2);
+  gap: calc(var(--prop-gap) * 2);
+`;
+
+const AlertStyled = styled(Alert)`
+  margin-top: calc(var(--prop-gap) * 1.5);
+  margin-bottom: 8px !important;
+`;

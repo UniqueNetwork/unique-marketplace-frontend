@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import styled from 'styled-components';
 import { Button, Modal } from 'components/UI';
 import { TokenLineSimple, TokenWithPrice } from './NFTLine';
@@ -8,26 +8,23 @@ import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 import TokenInputForm from 'pages/CreateNFT/components/TokenInputForm';
 import { SetForAllModalType } from 'pages/CreateNFT/components/TokenList';
 import { SellTokensModal } from './SellTokensModal';
+import { useAccounts } from 'hooks/useAccounts';
 
 export const MassListing = () => {
   const [tokensForListing, setTokensForListing] = useState<TokenWithPrice[]>([]);
   const [selectedTokens, setSelectedTokens] = useState<number[]>([]);
   const { api } = useApi();
-  const marketApi = api?.market;
   const [missingPriceIds, setMissingPriceIds] = useState<number[]>([]);
   const [isSetForAllModalVisible, setSetForAllModalVisible] = useState(false);
-  //const [setForAllPrice, setSetForAllPrice] = useState<number | undefined>();
+
   const [isSellModalVisible, setSellModalVisible] = useState(false);
 
   const openSellModal = () => setSellModalVisible(true);
   const closeSellModal = () => setSellModalVisible(false);
 
-
   const openSetForAllModal = () => setSetForAllModalVisible(true);
   const closeSetForAllModal = () => setSetForAllModalVisible(false);
   const handleSetForAllPrice = (setForAllPrice: string) => {
-    console.log('SET_FOR_ALL', setForAllPrice)
-
     setTokensForListing((prevTokens) =>
       prevTokens.map((token) =>
         selectedTokens.includes(token.id) ? { ...token, price: +setForAllPrice } : token
@@ -44,15 +41,38 @@ export const MassListing = () => {
   }, [tokensForListing, selectedTokens]);
 
   useEffect(() => {
-    const savedTokens = localStorage.getItem('tokensForSell');
-    if (savedTokens) {
-      const parsedTokens: TokenWithPrice[] = JSON.parse(savedTokens);
-      setTokensForListing(parsedTokens);
-
-      const allTokenIds = parsedTokens.map((token) => token.id);
-      setSelectedTokens(allTokenIds);
+    try {
+      const savedTokens = localStorage.getItem('tokensForSell');
+      if (savedTokens) {
+        const parsedTokens: TokenWithPrice[] = JSON.parse(savedTokens);
+  
+        if (Array.isArray(parsedTokens) && parsedTokens.every((token) => token.id)) {
+          setTokensForListing(parsedTokens);
+          const allTokenIds = parsedTokens.map((token) => token.id);
+          setSelectedTokens(allTokenIds);
+        } else {
+          console.warn('Invalid tokens found in localStorage. Clearing storage.');
+          localStorage.removeItem('tokensForSell');
+        }
+      }
+    } catch (error) {
+      console.error('Failed to parse tokens from localStorage:', error);
+      localStorage.removeItem('tokensForSell');
     }
   }, []);
+  
+
+  const [isScrolledToTop, setIsScrolledToTop] = useState(true);
+  const [isScrolledToBottom, setIsScrolledToBottom] = useState(false);
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const element = e.currentTarget;
+    const isTop = element.scrollTop === 0;
+    const isBottom = element.scrollHeight - element.scrollTop === element.clientHeight;
+
+    setIsScrolledToTop(isTop);
+    setIsScrolledToBottom(isBottom);
+  };
 
   const selectAll = () => {
     const allTokenIds = tokensForListing.map((token) => token.id);
@@ -83,8 +103,30 @@ export const MassListing = () => {
     );
   }, []);
 
+  const { selectedAccount } = useAccounts();
+  const [shouldShowSellModal, setShouldShowSellModal] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (selectedAccount) {
+        setShouldShowSellModal(true);
+        clearInterval(interval);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [selectedAccount]);
+
   return (
-    <DraggableContainer hasOffset={false}>
+    <PageWrapper>
+        <HeaderStyled>
+          {'NFTs Mass Listing'}
+        </HeaderStyled>
+      <TableContainer
+        onScroll={handleScroll}
+        isScrolledToTop={isScrolledToTop}
+        isScrolledToBottom={isScrolledToBottom}
+      >
       <TableWrap>
         <TableHeader columnsCount={5}>
           <TableHeaderCell>
@@ -135,55 +177,56 @@ export const MassListing = () => {
           />
         ))}
       </TableWrap>
-      {selectedTokens.length === 0 && <WarningBlock>No tokens selected</WarningBlock>}
-      {missingPriceIds.length > 0 && (
-        <WarningBlock>{`Items ${missingPriceIds.join(', ')} are missing prices`}</WarningBlock>
-      )}
-
+      </TableContainer>
       <Button
         title='Sell Tokens'
         onClick={openSellModal}
         disabled={selectedTokens.length === 0 || missingPriceIds.length > 0}
       />
-      <SellTokensModal
+      {selectedTokens.length === 0 && <WarningBlock>No tokens selected</WarningBlock>}
+      {missingPriceIds.length > 0 && (
+        <WarningBlock>{`Items ${missingPriceIds.join(', ')} are missing prices`}</WarningBlock>
+      )}
+
+      {shouldShowSellModal && <SellTokensModal
         isVisible={isSellModalVisible}
         tokensForListing={tokensForListing}
         onFinish={closeSellModal}
         testid="sell-tokens-modal"
-      />
+      />}
 
       {
         isSetForAllModalVisible && (
-          <Modal isVisible={isSetForAllModalVisible} onClose={closeSetForAllModal}>
+          <Modal isFlexible={true} isVisible={isSetForAllModalVisible} onClose={closeSetForAllModal}>
             <TokenInputForm
               modalType={SetForAllModalType.PRICE}
               onSubmit={handleSetForAllPrice}
               onClose={closeSetForAllModal}
+              onlyNumber={true}
             />
           </Modal>
         )
       }
-
-    </DraggableContainer>
+    </PageWrapper>
   );
 };
 
 const TableWrap = styled.div`
-  background: #fff;
+
 `;
 
-const DraggableContainer = styled.div<{ hasOffset: boolean }>`
-  margin: ${({ hasOffset }) => (hasOffset ? '0 -32px' : '0')};
-  & > div {
-    width: 100%;
-    padding-bottom: 10px !important;
-  }
+const PageWrapper = styled.div`
+
   .unique-list {
     gap: 0;
   }
   @media screen and (max-width: 768px) {
     margin: 0;
   }
+
+  background: #fff;
+  padding: 32px;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 8%);
 `;
 
 export const TableHeader = styled.div<{ columnsCount: number }>`
@@ -237,4 +280,28 @@ const SetAllButton = styled.div<{ disabled?: boolean }>`
   margin-top: 8px;
   padding-left: 10px;
   pointer-events: ${({ disabled }) => (disabled ? 'none' : 'auto')};
+`;
+
+const TableContainer = styled.div<{
+  isScrolledToTop: boolean;
+  isScrolledToBottom: boolean;
+}>`
+  //max-height: 400px;
+  overflow-y: scroll;
+
+  max-width: 1200px;
+  margin-bottom: 20px;
+  border-top: ${({ isScrolledToTop }) =>
+    isScrolledToTop ? 'none' : '1px solid var(--color-table-grey)'};
+  border-bottom: ${({ isScrolledToBottom }) =>
+    isScrolledToBottom ? 'none' : '1px solid var(--color-table-grey)'};
+`;
+
+const HeaderStyled = styled.h1`
+  font-family: var(--prop-font-family-heading);
+  font-weight: 700;
+  font-size: 36px;
+  text-align: left;
+  line-height: 48px;
+  margin: 0 0 24px;
 `;
