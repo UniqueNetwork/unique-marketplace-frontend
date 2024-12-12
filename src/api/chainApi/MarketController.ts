@@ -60,7 +60,6 @@ class MarketController extends BaseController implements IMarketController {
     const to = contractAddress || this.actualContract.address;
     const isAlreadyAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from, to });
     if (isAlreadyAllowed.isAllowed === targetAllowance) return;
-
     const adapter = this.getAdapter(account);
     await adapter.changeAllowance(from, to, collectionId, tokenId, targetAllowance, account.signer);
     const newAllowance = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from, to });
@@ -122,9 +121,6 @@ class MarketController extends BaseController implements IMarketController {
 
     const order = (await this.getOrder(collectionId, tokenId, contractAddress));
     const value = order.price as { type: string, hex: string };
-    // console.log('seller', seller); // TODO: recheck allowance? If so - which out of two accounts
-    // const isAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from: seller.eth, to });
-    // if (!isAllowed.isAllowed) throw new Error('Token not approved for sale');
     if (!value || !value.hex) throw new Error('Order price incorrect');
     const adapter = this.getAdapter(account);
 

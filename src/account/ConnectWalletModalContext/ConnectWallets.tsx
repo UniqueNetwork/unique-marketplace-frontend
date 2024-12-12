@@ -79,6 +79,7 @@ export const ConnectWallets = () => {
     return (
       <>
         <Modal
+          isGlobalBackdrop={true}
           isVisible={isOpenConnectWalletModal}
           onClose={() => {
             setIsOpenConnectWalletModal(false);
@@ -129,6 +130,7 @@ export const ConnectWallets = () => {
 
   return <>
     <Modal
+      isGlobalBackdrop={true}
       isVisible={isOpenConnectWalletModal}
       onClose={() => {
       setIsOpenConnectWalletModal(false);

@@ -9,18 +9,22 @@ import TokenInputForm from 'pages/CreateNFT/components/TokenInputForm';
 import { SetForAllModalType } from 'pages/CreateNFT/components/TokenList';
 import { SellTokensModal } from './SellTokensModal';
 import { useAccounts } from 'hooks/useAccounts';
+import { useNavigate } from 'react-router-dom';
 
 export const MassListing = () => {
   const [tokensForListing, setTokensForListing] = useState<TokenWithPrice[]>([]);
   const [selectedTokens, setSelectedTokens] = useState<number[]>([]);
-  const { api } = useApi();
+  const { currentChainId } = useApi();
   const [missingPriceIds, setMissingPriceIds] = useState<number[]>([]);
+  const navigate = useNavigate();
   const [isSetForAllModalVisible, setSetForAllModalVisible] = useState(false);
 
   const [isSellModalVisible, setSellModalVisible] = useState(false);
 
   const openSellModal = () => setSellModalVisible(true);
   const closeSellModal = () => setSellModalVisible(false);
+
+  const onFinish = () => {};
 
   const openSetForAllModal = () => setSetForAllModalVisible(true);
   const closeSetForAllModal = () => setSetForAllModalVisible(false);
@@ -144,7 +148,7 @@ export const MassListing = () => {
             />
           </TableHeaderCell>
           <TableHeaderCell>
-            <TextStyled>NFT ID</TextStyled>
+            <TextStyled>NFT ID - collection ID</TextStyled>
           </TableHeaderCell>
           <TableHeaderCell>
             <TextStyled>NFT main image</TextStyled>
@@ -191,7 +195,7 @@ export const MassListing = () => {
       {shouldShowSellModal && <SellTokensModal
         isVisible={isSellModalVisible}
         tokensForListing={tokensForListing}
-        onFinish={closeSellModal}
+        onFinish={onFinish}
         testid="sell-tokens-modal"
       />}
 

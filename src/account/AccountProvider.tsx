@@ -186,7 +186,6 @@ export const AccountWrapper: FC<AccountWrapperProps> = ({ children }) => {
         });
   
         void (async () => {
-          console.log('SET_ACCOUNT', map);
           setAccounts(await subscribeBalancesChanges(map, setAccounts));
           setIsLoading(false);
         })();

@@ -39,7 +39,7 @@ export const TokenLineSimple = React.memo(({ token, isSelected, onSelect, onPric
         <Checkbox checked={isSelected} onChange={() => onSelect(token.id)} label={''} testid={''} />
       </TokenLineCell>
       <TokenLineCell>
-        <Text>{`NFT #${token.tokenId}`}</Text>
+        <Text>{`NFT #${token.tokenId} - ${token.collectionId}`}</Text>
       </TokenLineCell>
       <TokenLineCell>
         <TokenImage src={token.image?.url} alt={`NFT #${token.tokenId}`} />

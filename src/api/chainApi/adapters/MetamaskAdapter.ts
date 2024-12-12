@@ -27,7 +27,8 @@ const collectionLimitFields = {
 type CollectionLimitFieldKey = keyof typeof collectionLimitFields;
 
 const buyGasLimit = 1_000_000n;
-const sellGasLimit = 5_000_000n;
+const sellGasLimit = 200_000n;
+const sellBatchGasLimit = 5_000_000n;
 
 class MetamaskAdapter implements IMarketContractAdapter {
   private getContract(contract: IMarketContractProperties, signer: Signer) {
@@ -279,7 +280,6 @@ class MetamaskAdapter implements IMarketContractAdapter {
     contractProps: IMarketContractProperties
   ): Promise<void> {
     const contract = this.getContract(contractProps, signer);
-
     const putMethod = contract.getFunction('put');
     
     const rest = await (await putMethod(
@@ -303,7 +303,7 @@ class MetamaskAdapter implements IMarketContractAdapter {
 
     await (await putBatchMethod(
       tokens,
-      { gasLimit: sellGasLimit }
+      { gasLimit: sellBatchGasLimit }
     )).wait();
   }
   

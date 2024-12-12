@@ -1,7 +1,7 @@
-import React, { FC, useEffect, useMemo, useState } from 'react';
-import { generatePath, Link } from 'react-router-dom';
+import React, { FC, useContext, useEffect, useMemo, useState } from 'react';
+import { generatePath, Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import { Icon, Loader, Text } from 'components/UI';
+import { Checkbox, Icon, Loader, Text } from 'components/UI';
 import { isTokenOwner } from 'api/chainApi/utils/addressUtils';
 import { Offer } from 'api/restApi/offers/types';
 import { useApi } from 'hooks/useApi';
@@ -9,13 +9,14 @@ import { useAccounts } from 'hooks/useAccounts';
 import { formatBalance, shortcutText } from 'utils/textUtils';
 import { Primary600 } from 'styles/colors';
 import { TokensMedia } from './TokensMedia';
-import { countNestedChildren, stringToDecodedInfixOrUrlOrCidAndHash } from 'utils/helpers';
+import { countNestedChildren } from 'utils/helpers';
 import { useCollections } from 'hooks/useCollections';
 import { TokenByIdResponse, TokenWithInfoV2Dto } from '@unique-nft/sdk';
 import { MyToken, TokenTypeEnum } from 'pages/MyTokens/types';
 import { BadgeEnum } from 'components/TokenMedia/Picture';
 import { CollectionTitle } from 'components/OfferCard/CollectionTitle';
 import { GQLCollection } from 'api/scanApi/types';
+import { useSelectedTokens } from 'pages/MyTokens/context/SellTokensContext';
 
 export type TTokensCard = {
   token?: Omit<TokenByIdResponse | MyToken, 'collection' | 'nestingParentToken' | 'properties'>
@@ -35,10 +36,11 @@ export const TokensCard: FC<TTokensCard> = ({
   testid,
   showOwner,
   showCollectionLink = true,
+  tokenImageUrl,
   ...props
 }) => {
   const [token, setToken] = useState<Omit<TokenByIdResponse | MyToken | TokenWithInfoV2Dto, 'collection' | 'nestingParentToken' | 'properties'> | undefined>(props.token);
-  const [collection, setCollection] = useState<(GQLCollection) | undefined>();
+  const [collection, setCollection] = useState<GQLCollection | undefined>();
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isBundleState, setIsBundleState] = useState<boolean>();
   const [isNestedState, setIsNestedState] = useState<boolean>();
@@ -47,6 +49,7 @@ export const TokensCard: FC<TTokensCard> = ({
   const { api, currentChainId } = useApi();
   const { selectedAccount } = useAccounts();
   const { getCollection } = useCollections();
+
   const {
     tokenPrefix,
     collectionTitle,
@@ -56,7 +59,7 @@ export const TokensCard: FC<TTokensCard> = ({
     type,
   } = useMemo(() => {
     if (offer || (token && collection) || (collection?.name && collection?.tokenPrefix)) {
-      const { image, owner } =  token || offer?.tokenDescription || {};
+      const { image, owner } = token || offer?.tokenDescription || {};
       const collectionName = offer?.collectionDescription?.name || collection?.name;
       const tokenPrefix = offer?.collectionDescription?.tokenPrefix || collection?.tokenPrefix;
       const { price, seller } = offer || {};
@@ -85,7 +88,7 @@ export const TokensCard: FC<TTokensCard> = ({
       })();
     }
     return {};
-  }, [collectionId, tokenId, collection, token, api]);
+  }, [collectionId, tokenId, collection, token, api, offer]);
 
   useEffect(() => {
     void (async () => {
@@ -136,8 +139,36 @@ export const TokensCard: FC<TTokensCard> = ({
     return !!collection?.properties?.find(({ key }) => key === 'is_customizable')?.value;
   }, [collection, getCollection, token?.collectionId]);
 
+  const { selectedTokens, toggleTokenSelection, selectAll, deselectAll } = useSelectedTokens();
+
+  const isChecked = useMemo(() => {
+    return selectedTokens.some(token => token.tokenId === tokenId && token.collectionId === collectionId);
+  }, [selectedTokens, tokenId]);
+
+  const handleCheckboxChange = (checked: boolean) => {
+    tokenId && toggleTokenSelection({
+      id: tokenId,
+      tokenId,
+      collectionId: Number(collectionId),
+      image: {
+        url: imageUrl
+      }
+    })
+  };
+
   return (
     <TokensCardStyled>
+      {isOwner && (!price?.parsed) && (
+        <SelectCheckboxWrap>
+          <Checkbox
+            checked={isChecked}
+            label=""
+            size="m"
+            onChange={handleCheckboxChange}
+            testid={`${testid}-checkbox`}
+          />
+        </SelectCheckboxWrap>
+      )}
       <TokensMedia
         to={tokenPath}
         tokenId={tokenId}
@@ -160,27 +191,34 @@ export const TokensCard: FC<TTokensCard> = ({
               <span>#{tokenId}</span>
             </Text>
           </Link>
-          {showCollectionLink && <Link
-            data-testid={`${testid}-collection-${collectionId}-link`}
-            to={`/${currentChainId?.toLowerCase()}/collection/${collectionId || ''}`}
-          >
-            <CollectionTitle
-              collectionId={collectionId || 0}
-              collectionName={collectionTitle || ''}
-            />
-          </Link>}
-          {showOwner && <Text size={'s'} color={'grey-500'}>{isOwner ? 'You own it' : `Owned by: ${shortcutText(owner || '')}`}</Text>}
+          {showCollectionLink && (
+            <Link
+              data-testid={`${testid}-collection-${collectionId}-link`}
+              to={`/${currentChainId?.toLowerCase()}/collection/${collectionId || ''}`}
+            >
+              <CollectionTitle
+                collectionId={collectionId || 0}
+                collectionName={collectionTitle || ''}
+              />
+            </Link>
+          )}
+          {showOwner && (
+            <Text size={'s'} color={'grey-500'}>
+              {isOwner ? 'You own it' : `Owned by: ${shortcutText(owner || '')}`}
+            </Text>
+          )}
         </BasicDataWrapper>
-        {!!price?.parsed && <TradingInfoWrapper>
-          <Text size={'xs'} color={'grey-500'} >Price</Text>
-          <PriceWrapper length={price.parsed.toFixed(5).length}>
-            <Text
-              testid={`${testid}-price`}
-              size='l'
-            >{formatBalance(price.parsed, 4, true)}</Text>
-            <IconStyled name={`chain-${currentChainId?.toLowerCase()}`} size={16} />
-          </PriceWrapper>
-        </TradingInfoWrapper>}
+        {!!price?.parsed && (
+          <TradingInfoWrapper>
+            <Text size={'xs'} color={'grey-500'}>Price</Text>
+            <PriceWrapper length={price.parsed.toFixed(5).length}>
+              <Text testid={`${testid}-price`} size='l'>
+                {formatBalance(price.parsed, 4, true)}
+              </Text>
+              <IconStyled name={`chain-${currentChainId?.toLowerCase()}`} size={16} />
+            </PriceWrapper>
+          </TradingInfoWrapper>
+        )}
       </Description>
 
       {!!isFetching && <Loader isFullPage />}
@@ -227,18 +265,18 @@ const Description = styled.div`
   }
 `;
 
-const PriceWrapper = styled.div<{ length: number }>` 
+const PriceWrapper = styled.div<{ length: number }>`
   display: flex;
   align-items: center;
   span:first-child {
-    font-size: ${({ length }) => `${length > 11 ? 18 - (length - 11) : 18}px !important`}
+    font-size: ${({ length }) => `${length > 11 ? 18 - (length - 11) : 18}px !important`};
   }
   span {
     white-space: nowrap;
   }
 `;
 
-const TradingInfoWrapper = styled.div` 
+const TradingInfoWrapper = styled.div`
   display: flex;
   margin-top: calc(var(--prop-gap) / 2);
   column-gap: calc(var(--prop-gap) / 4);
@@ -249,3 +287,24 @@ const TradingInfoWrapper = styled.div`
 const IconStyled = styled(Icon)`
   margin: 0 calc(var(--prop-gap) / 4);
 `;
+
+const SelectCheckboxWrap = styled.div`
+  position: absolute;
+  background: #fff;
+  right: 4px;
+  height: 22px;
+  border-radius: 4px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transform: scale(1.5);
+  transform-origin: center;
+
+  .checkmark {
+    top: -10px;
+  }
+`;
+
+

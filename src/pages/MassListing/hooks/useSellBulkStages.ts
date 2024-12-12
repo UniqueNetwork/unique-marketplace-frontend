@@ -13,12 +13,12 @@ import { TokenForOrder } from 'api/chainApi/adapters/IMarketContractAdapter';
 import { TTransaction } from 'api/chainApi/types';
 
 export const useSellBulkStages = (tokensForListing: TokenForOrder[]) => {
-  const { api, currentChainId } = useApi();
+  const { api, currentChainId, baseURL } = useApi();
+  
   const { accounts, selectedAccount } = useAccounts();
   const marketApi = api?.market;
   const signer = useEthersSigner();
   const accountAddress = selectedAccount?.address;
-  //TO DO update
   const chainUrl = `https://rest.unique.network/v2/${currentChainId}`;
 
   const uniqueChain = useMemo(() => {
@@ -32,7 +32,6 @@ export const useSellBulkStages = (tokensForListing: TokenForOrder[]) => {
 
   const contractAddress = useMemo(() => marketApi?.getActualContract().address, [marketApi]);
 
-  //@ts-ignore
   const transferStages: InternalStage<any>[] = useMemo(() => [
     {
       title: 'Approving Tokens',
@@ -43,15 +42,22 @@ export const useSellBulkStages = (tokensForListing: TokenForOrder[]) => {
 
         if (isEthereumAddress(selectedAccount?.address)) {
           if (!signer) throw Error('No signer provided');
-          const nftFactory = await UniqueNFTFactory(tokensForListing[0].collectionId, signer);
-
-          const checkApprove = nftFactory.isApprovedForAll(signer.address, contractAddress);
-
-          if (!checkApprove) {
-            const result = await (await nftFactory.setApprovalForAll(contractAddress, true, { gasLimit: 500_000 })).wait();
-            return result;
+          const collectionIds = tokensForListing.reduce<number[]>((accum, token) => {
+            if (!accum.includes(token.collectionId)) {
+              accum.push(token.collectionId);
+            }
+            return accum;
+          }, []);
+          
+          for (const collectionId of collectionIds) {
+            const nftFactory = await UniqueNFTFactory(collectionId, signer);
+            const checkApprove = await nftFactory.isApprovedForAll(signer.address, contractAddress);
+          
+            if (!checkApprove) {
+              await (await nftFactory.setApprovalForAll(contractAddress, true, { gasLimit: 500_000 })).wait();
+            }
           }
-          return true;
+          return;
         } else {
           const batchOperations = tokensForListing.map((token) =>
             uniqueChain.token.approve.encode({
@@ -60,8 +66,7 @@ export const useSellBulkStages = (tokensForListing: TokenForOrder[]) => {
               spender: contractAddress,
             })
           );
-          const result = await uniqueChain.utility.batchAll(batchOperations);
-          return result.result.isSuccess ? undefined : Promise.reject('Approval failed');
+          await uniqueChain.utility.batchAll(batchOperations);
         }
       }
     },

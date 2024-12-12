@@ -1,17 +1,9 @@
-/**
- * @author Pavel Kalachev <pkalachev@usetech.com>
- */
-
-import React, { ReactNode, useEffect, useRef, useState } from 'react';
-import ReactDOM from 'react-dom';
+import React, { FC, ReactNode, useEffect, useRef, useState } from 'react';
+import styled from 'styled-components';
 import classNames from 'classnames';
 
-import styled from 'styled-components';
-
 export type VerticalAlign = 'top' | 'middle' | 'bottom';
-
 export type HorizontalAlign = 'left' | 'middle' | 'right';
-
 export type AppearanceAlign = 'vertical' | 'horizontal';
 
 export type TooltipAlign = {
@@ -20,279 +12,215 @@ export type TooltipAlign = {
   appearance: AppearanceAlign;
 };
 
-export interface TooltipProps {
-  targetRef: React.MutableRefObject<HTMLDivElement | HTMLButtonElement | null>;
-  className?: string;
+interface TooltipProps {
   align?: TooltipAlign;
+  targetRef: React.RefObject<HTMLElement>;
   children: ReactNode;
+  className?: string;
 }
 
-export const Tooltip: React.FC<TooltipProps> = (props) => {
-  const { className, targetRef, children, align } = props;
+const TooltipWrapper = styled.div<{ $isVisible: boolean; $appearance: AppearanceAlign }>`
+  font-family: var(--prop-font-family);
+  font-size: var(--prop-font-size);
+  font-weight: var(--prop-font-weight);
+  position: fixed;
+  padding: 8px 15px;
+  max-width: 350px;
+  width: fit-content;
+  background-color: var(--color-secondary-500);
+  color: var(--color-additional-light);
+  border-radius: 2px;
+  z-index: 1000;
+  line-height: 22px;
+  display: inline-flex;
+  opacity: ${props => props.$isVisible ? 1 : 0};
+  visibility: ${props => props.$isVisible ? 'visible' : 'hidden'};
+  transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+  pointer-events: ${props => props.$isVisible ? 'auto' : 'none'};
 
-  const {
-    vertical = 'bottom',
-    horizontal = 'right',
-    appearance = 'vertical'
-  } = align || {};
+  &:before {
+    position: absolute;
+    content: '';
+    left: -15px;
+    top: -15px;
+    width: calc(100% + 30px);
+    height: calc(100% + 30px);
+  }
 
+  .content {
+    z-index: 101;
+  }
+
+  .arrow {
+    position: absolute;
+
+    .icon {
+      width: 8px;
+      height: 8px;
+      transform: rotate(45deg);
+      background-color: var(--color-secondary-500);
+    }
+
+    &.vertical {
+      &.top {
+        top: -4px;
+      }
+
+      &.bottom {
+        bottom: -4px;
+      }
+
+      &.left {
+        left: 10px;
+      }
+
+      &.middle {
+        left: calc(50% - 4px);
+      }
+
+      &.right {
+        right: 10px;
+      }
+    }
+
+    &.horizontal {
+      &.left {
+        left: -4px;
+      }
+
+      &.right {
+        right: -4px;
+      }
+
+      &.middle {
+        top: calc(50% - 4px);
+      }
+
+      &.top {
+        top: 11px;
+      }
+
+      &.bottom {
+        bottom: 11px;
+      }
+    }
+  }
+`;
+
+export const Tooltip: FC<TooltipProps> = ({ align, targetRef, children, className }) => {
   const tooltipRef = useRef<HTMLDivElement>(null);
-
-  const tooltipProps = {
-    isVisible: false,
-    posX: 1,
-    posY: 1
-  };
-
-  const [tooltip, setTooltip] = useState(tooltipProps);
-  const [arrow, setArrow] = useState({
-    x: 'right',
-    y: 'bottom'
+  const [tooltipStyles, setTooltipStyles] = useState<{ top: number; left: number }>({
+    top: 0,
+    left: 0,
   });
 
-  const handleMouseOut = () => setTooltip(tooltipProps);
+  const [isHovered, setIsHovered] = useState(false);
+  const [arrow, setArrow] = useState({ x: 'right', y: 'bottom' });
 
-  const handleMouseEnter = () => {
+  const updateTooltipPosition = () => {
+    if (!tooltipRef.current || !targetRef.current) return;
+
+    const { top, height, left, width } = targetRef.current.getBoundingClientRect();
     let leftPos = 0;
     let topPos = 0;
     const arrowPos = { x: 'right', y: 'bottom' };
-    window.addEventListener('mousewheel', handleMouseOut);
 
-    setTooltip({
-      isVisible: true,
-      posX: leftPos,
-      posY: topPos
-    });
+    const {
+      vertical = 'bottom',
+      horizontal = 'right',
+      appearance = 'vertical'
+    } = align || {};
 
-    if (!tooltipRef.current || !targetRef.current) {
-      return;
-    }
+    if (appearance === 'horizontal') {
+      if (vertical === 'top') {
+        topPos = top - 5;
+        arrowPos.y = 'top';
+      } else if (vertical === 'middle') {
+        topPos = top + (height - tooltipRef.current.clientHeight) / 2;
+        arrowPos.y = 'middle';
+      } else if (vertical === 'bottom') {
+        topPos = top + height - tooltipRef.current.clientHeight + 5;
+        arrowPos.y = 'bottom';
+      }
 
-    const { top, height, left, width } = targetRef.current.getBoundingClientRect();
-
-    if (align) {
-      if (appearance === 'horizontal') {
-        if (vertical === 'top') {
-          topPos = top - 5;
-          arrowPos.y = 'top';
-        }
-        if (vertical === 'middle') {
-          topPos = top + (height - tooltipRef.current.clientHeight) / 2;
-          arrowPos.y = 'middle';
-        }
-        if (vertical === 'bottom') {
-          topPos = top + height - tooltipRef.current.clientHeight + 5;
-          arrowPos.y = 'bottom';
-        }
-
-        if (horizontal === 'left') {
-          leftPos = left - tooltipRef.current.clientWidth - 10;
-          arrowPos.x = 'right';
-        }
-        if (horizontal === 'right') {
-          leftPos = left + width + 10;
-          arrowPos.x = 'left';
-        }
-      } else {
-        if (vertical === 'top') {
-          topPos = top - tooltipRef.current.clientHeight - 5;
-          arrowPos.y = 'bottom';
-        }
-        if (vertical === 'middle') {
-          topPos = top - (height - tooltipRef.current.clientHeight) / 2;
-          arrowPos.y = 'middle';
-        }
-        if (vertical === 'bottom') {
-          topPos = top + height + 5;
-          arrowPos.y = 'top';
-        }
-
-        if (horizontal === 'left') {
-          leftPos = left - 10;
-          arrowPos.x = 'left';
-        }
-        if (horizontal === 'right') {
-          leftPos = left + width - tooltipRef.current.clientWidth + 10;
-
-          if (leftPos < 0) {
-            leftPos = 4;
-          }
-          arrowPos.x = 'right';
-        }
-        if (horizontal === 'middle') {
-          leftPos = left + (width - tooltipRef.current.clientWidth) / 2;
-          arrowPos.x = 'middle';
-        }
+      if (horizontal === 'left') {
+        leftPos = left - tooltipRef.current.clientWidth - 10;
+        arrowPos.x = 'right';
+      } else if (horizontal === 'right') {
+        leftPos = left + width + 10;
+        arrowPos.x = 'left';
       }
     } else {
-      if (left <= tooltipRef.current.clientWidth / 2) {
+      if (vertical === 'top') {
+        topPos = top - tooltipRef.current.clientHeight - 5;
+        arrowPos.y = 'bottom';
+      } else if (vertical === 'middle') {
+        topPos = top + (height - tooltipRef.current.clientHeight) / 2;
+        arrowPos.y = 'middle';
+      } else if (vertical === 'bottom') {
+        topPos = top + height + 5;
+        arrowPos.y = 'top';
+      }
+
+      if (horizontal === 'left') {
+        leftPos = left - 10;
         arrowPos.x = 'left';
-        leftPos = left + width / 2 - 15;
-      } else if (
-        document.documentElement.clientWidth - left <=
-        tooltipRef.current.clientWidth / 2
-      ) {
-        arrowPos.x = 'right';
-        leftPos = left + width / 2 - tooltipRef.current.clientWidth + 10;
+      } else if (horizontal === 'right') {
+        leftPos = left + width - tooltipRef.current.clientWidth + 10;
         if (leftPos < 0) {
           leftPos = 4;
         }
-      } else {
+        arrowPos.x = 'right';
+      } else if (horizontal === 'middle') {
+        leftPos = left + (width - tooltipRef.current.clientWidth) / 2;
         arrowPos.x = 'middle';
-        leftPos = left + width / 2 - tooltipRef.current.clientWidth / 2;
-      }
-
-      if (
-        document.documentElement.clientHeight - top - height >=
-        tooltipRef.current.clientHeight
-      ) {
-        arrowPos.y = 'top';
-        topPos = top + height + 10;
-      } else {
-        arrowPos.y = 'bottom';
-        topPos = top - tooltipRef.current.clientHeight - 10;
       }
     }
 
-    setTooltip({
-      isVisible: true,
-      posX: leftPos,
-      posY: topPos
-    });
+    setTooltipStyles({ top: topPos, left: leftPos });
     setArrow(arrowPos);
   };
 
   useEffect(() => {
-    const element = targetRef.current;
-    const tooltip = tooltipRef.current;
-
-    if (element) {
-      element.addEventListener('mouseenter', handleMouseEnter);
-      element.addEventListener('mouseleave', handleMouseOut);
-
-      if (tooltip) {
-        tooltip.addEventListener('mouseenter', handleMouseEnter);
-        tooltip.addEventListener('mouseleave', handleMouseOut);
-      }
-      return () => {
-        element.removeEventListener('mouseenter', handleMouseEnter);
-        element.removeEventListener('mouseleave', handleMouseOut);
-      };
+    if (isHovered) {
+      updateTooltipPosition();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [targetRef, tooltipRef.current]);
+  }, [isHovered, targetRef, align]);
 
-  const TooltipContent = tooltip.isVisible
-? (
-  <TooltipWrapper
-    className={classNames('unique-tooltip', className)}
-    ref={tooltipRef}
-    style={{ top: tooltip.posY, left: tooltip.posX }}
-  >
-    <div
-      className={classNames('arrow', appearance, {
-          [arrow.x]: !![arrow.x],
-          [arrow.y]: !![arrow.y]
-        })}
+  useEffect(() => {
+    const targetElement = targetRef.current;
+    if (!targetElement) return;
+
+    const handleMouseEnter = () => setIsHovered(true);
+    const handleMouseLeave = () => setIsHovered(false);
+
+    targetElement.addEventListener('mouseenter', handleMouseEnter);
+    targetElement.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      targetElement.removeEventListener('mouseenter', handleMouseEnter);
+      targetElement.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, [targetRef]);
+
+  return (
+    <TooltipWrapper
+      ref={tooltipRef}
+      className={classNames('unique-tooltip', className)}
+      style={tooltipStyles}
+      $isVisible={isHovered}
+      $appearance={align?.appearance || 'vertical'}
     >
-      <div className='icon' />
-    </div>
-    {typeof children === 'string'
-? (
-  <div className='content' dangerouslySetInnerHTML={{ __html: children }}></div>
-      )
-: (
-  <div className='content'>{children}</div>
-      )}
-  </TooltipWrapper>
-  )
-: null;
-
-  const el = useRef(document.querySelector('#root'));
-
-  return ReactDOM.createPortal(TooltipContent, el.current as Element);
+      <div
+        className={classNames('arrow', align?.appearance, {
+          [arrow.x]: !!arrow.x,
+          [arrow.y]: !!arrow.y
+        })}
+      >
+        <div className="icon" />
+      </div>
+      <div className="content">{children}</div>
+    </TooltipWrapper>
+  );
 };
 
-const TooltipWrapper = styled.div`
-  font-family: var(--prop-font-family);
-    font-size: var(--prop-font-size);
-    font-weight: var(--prop-font-weight);
-    position: fixed;
-    padding: 8px 15px;
-    max-width: 350px;
-    width: fit-content;
-    background-color: var(--color-secondary-500);
-    color: var(--color-additional-light);
-    border-radius: 2px;
-    z-index: 100;
-    line-height: 22px;
-    display: inline-flex;
-
-    &:before {
-        position: absolute;
-        content: '';
-        left: -15px;
-        top: -15px;
-        width: calc(100% + 15px);
-        height: calc(100% + 15px);
-    }
-
-    .content {
-        z-index: 101;
-    }
-
-    .arrow {
-        position: absolute;
-
-        .icon {
-            width: 8px;
-            height: 8px;
-            transform: rotate(45deg);
-            background-color: var(--color-secondary-500);
-        }
-    }
-
-    .vertical {
-        &.top {
-            top: -4px;
-        }
-
-        &.bottom {
-            bottom: -4px;
-        }
-
-        &.left {
-            left: 10px;
-        }
-
-        &.middle {
-            left: calc(50% - 4px);
-        }
-
-        &.right {
-            left: calc(100% - 24px);
-        }
-    }
-
-    .horizontal {
-        &.right {
-            right: -4px;
-        }
-
-        &.left {
-            left: -4px;
-        }
-
-        &.middle {
-            top: calc(50% - 4px);
-        }
-
-        &.top {
-            top: 11px;
-        }
-
-        &.bottom {
-            bottom: 11px;
-        }
-    }
-`;

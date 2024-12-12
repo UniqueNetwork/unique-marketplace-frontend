@@ -67,7 +67,7 @@ const ModalWrapper = styled.div<{ isFlexible?: boolean, isGlobalBackdrop?: boole
   left: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.7);
-  z-index: ${({ isGlobalBackdrop }) => isGlobalBackdrop ? 1000 : 50};
+  z-index: ${({ isGlobalBackdrop }) => isGlobalBackdrop ? 1002 : 50};
   display: flex;
   justify-content: center;
   overflow-y: auto;

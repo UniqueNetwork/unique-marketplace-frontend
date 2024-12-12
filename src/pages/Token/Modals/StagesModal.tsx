@@ -25,8 +25,17 @@ const DefaultMarketStages: FC<TStagesModalProps> = ({ stages, status, onFinish, 
       <StageWrapper>
         {stages.map((stage, index) => (<React.Fragment key={`stage-${index}`}>
           <StatusWrapper>
-            {(stage.status === StageStatus.inProgress || stage.status === StageStatus.awaitingSign) && <Loader isFullPage />}
-            {stage.status === StageStatus.success && <Icon name={'check-circle'} size={24} color={'var(--color-additional-dark)'} />}
+          <Loader
+            state={
+              stage.status === StageStatus.inProgress || stage.status === StageStatus.awaitingSign
+                ? 'process'
+                : stage.status === StageStatus.success
+                ? 'done'
+                : stage.status === StageStatus.error
+                ? 'failed'
+                : 'idle'
+            }
+          />
           </StatusWrapper>
           <TitleWrapper>
             <Text

@@ -7,6 +7,7 @@ import { AccountWrapper } from 'account/AccountProvider';
 import CollectionsWrapper from './collections/CollectionsProvider';
 import { ConnectWalletModalProvider } from 'account/ConnectWalletModalContext';
 import { WalletConnectProviders } from 'account/WalletConnectContext/WalletConnectProviders';
+import { SelectedTokensProvider } from 'pages/MyTokens/context/SellTokensContext';
 
 document.title = config.documentTitle || 'Unique Market';
 
@@ -17,12 +18,14 @@ export default function App() {
         <ApiWrapper>
           <AccountWrapper>
             <ConnectWalletModalProvider>
-              <CollectionsWrapper>
-                <IntroSlider />
-                <PageLayout>
-                  <Outlet />
-                </PageLayout>
-              </CollectionsWrapper>
+              <SelectedTokensProvider>
+                <CollectionsWrapper>
+                  <IntroSlider />
+                  <PageLayout>
+                    <Outlet />
+                  </PageLayout>
+                </CollectionsWrapper>
+              </SelectedTokensProvider>
             </ConnectWalletModalProvider>
           </AccountWrapper>
         </ApiWrapper>

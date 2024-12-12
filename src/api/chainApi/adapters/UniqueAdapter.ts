@@ -10,6 +10,7 @@ import { BatchCallArgumentsBody, CollectionProperty, CreateCollectionParsed, Cre
 
 const buyGasLimit = 1_000_000;
 const sellGasLimit = 200_000;
+const sellBatchGasLimit = 5_000_000;
 class UniqueAdapter implements IMarketContractAdapter {
   constructor(uniqueSdk: Sdk) {
     this.uniqueSdk = uniqueSdk;
@@ -266,7 +267,7 @@ class UniqueAdapter implements IMarketContractAdapter {
       address: signer.address || '',
       contractAddress: contract.address,
       funcName: 'putBatch',
-      gasLimit: sellGasLimit,
+      gasLimit: sellBatchGasLimit,
       args: [tokens],
     }, { signer });
   }

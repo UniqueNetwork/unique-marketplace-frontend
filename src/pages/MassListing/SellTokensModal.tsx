@@ -5,6 +5,7 @@ import { TokenWithPrice } from './NFTLine';
 import { useSellBulkStages } from './hooks/useSellBulkStages';
 import DefaultMarketStages from 'pages/Token/Modals/StagesModal';
 import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom';
 
 export type SellTokensModalProps = {
   isVisible: boolean;
@@ -15,7 +16,7 @@ export type SellTokensModalProps = {
 
 export const SellTokensModal: FC<SellTokensModalProps> = ({ isVisible, tokensForListing, onFinish, testid }) => {
   const tokensForOrders = useMemo(() => {
-    return tokensForListing.filter(token => token.isSelected).map(token => ({
+    return tokensForListing.filter(token => !token.isSelected).map(token => ({
       ...token,
       amount: 1,
       currency: 0,
@@ -25,6 +26,7 @@ export const SellTokensModal: FC<SellTokensModalProps> = ({ isVisible, tokensFor
   const { stages, status, initiate } = useSellBulkStages(tokensForOrders);
   const { info } = useNotifications();
   const [isInitiated, setIsInitiated] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (isVisible && !isInitiated) {
@@ -40,7 +42,6 @@ export const SellTokensModal: FC<SellTokensModalProps> = ({ isVisible, tokensFor
         size: 32,
         color: 'var(--color-additional-light)',
       });
-      //TO DO redirect
       onFinish();
     }
   }, [status]);
@@ -66,8 +67,9 @@ export const SellTokensModal: FC<SellTokensModalProps> = ({ isVisible, tokensFor
       )}
       {status === StageStatus.success && (
         <ButtonsWrapper>
-          <Button title='Create more' role='primary' onClick={() => {}} />
-          <Button title='Sell Tokens' onClick={() => {}} />
+          <Button title='To main page' onClick={() => {
+            navigate('/market');
+          }} />
         </ButtonsWrapper>
       )}
     </Modal>
