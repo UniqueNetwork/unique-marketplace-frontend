@@ -24,7 +24,7 @@ const DefaultMarketStages: FC<TStagesModalProps> = ({ stages, status, onFinish, 
       </HeadingWrapper>
       <StageWrapper>
         {stages.map((stage, index) => (<React.Fragment key={`stage-${index}`}>
-          <StatusWrapper>
+          <StatusWrapper stagesLength={stages.length}>
           <Loader
             state={
               stage.status === StageStatus.inProgress || stage.status === StageStatus.awaitingSign
@@ -62,11 +62,12 @@ const StageWrapper = styled.div`
   align-items: flex-start;
 `;
 
-const StatusWrapper = styled.div`
+const StatusWrapper = styled.div<{ stagesLength: number }>`
   position: relative;
   height: 100%;
+  
   > div {
-    top: 12px;
+    top: ${({ stagesLength }) => (stagesLength === 1 ? '0' : '12px')};
   }
 `;
 
