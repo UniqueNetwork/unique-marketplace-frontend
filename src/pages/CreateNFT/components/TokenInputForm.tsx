@@ -10,6 +10,7 @@ interface TokenInputFormProps {
   onSubmit: (inputValue: string, modalType: SetForAllModalType | null) => void;
   buttonText?: string;
   onClose: () => void;
+  onlyNumber?: boolean;
 }
 
 const TokenInputForm: React.FC<TokenInputFormProps> = ({
@@ -17,6 +18,7 @@ const TokenInputForm: React.FC<TokenInputFormProps> = ({
   buttonText,
   onSubmit,
   onClose,
+  onlyNumber = false,
 }) => {
   const [inputValue, setInputValue] = useState<string>('');
   const [error, setError] = useState<string>('');
@@ -24,6 +26,10 @@ const TokenInputForm: React.FC<TokenInputFormProps> = ({
   const validateInput = (value: string): string => {
     if (value.length < 1 || value.length > 2000) {
       return 'Input must be between 1 and 2000 characters.';
+    }
+
+    if (onlyNumber && isNaN(Number(value))) {
+      return 'Input must be a number.';
     }
 
     if (modalType === SetForAllModalType.EXTERNAL_LINK) {
@@ -45,6 +51,15 @@ const TokenInputForm: React.FC<TokenInputFormProps> = ({
     }
   };
 
+  const handleInputChange = (value: string): void => {
+    if (onlyNumber) {
+      const numericValue = value.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+      setInputValue(numericValue);
+    } else {
+      setInputValue(value);
+    }
+  };
+
   return (
     <FormWrap>
       <InputLabel>
@@ -57,15 +72,14 @@ const TokenInputForm: React.FC<TokenInputFormProps> = ({
         }
       </InputLabel>
       <TextInput
-
         value={inputValue}
-        onChange={setInputValue}
+        onChange={handleInputChange}
         errorText={error}
-        allowSpaces={true}
+        allowSpaces={!onlyNumber}
       />
       <ButtonWrap>
-        <ConfirmBtn role='outlined' title={'Cancel'} onClick={onClose} />
-        <ConfirmBtn role='primary' title={buttonText || 'Set'} onClick={handleSubmit} />
+        <ConfirmBtn role="outlined" title="Cancel" onClick={onClose} />
+        <ConfirmBtn role="primary" title={buttonText || 'Set'} onClick={handleSubmit} />
       </ButtonWrap>
     </FormWrap>
   );
@@ -94,5 +108,5 @@ export const InputLabel = styled.div`
   line-height: 24px;
   font-weight: 600;
   text-align: center;
-  widht: 100%;
+  width: 100%;
 `;

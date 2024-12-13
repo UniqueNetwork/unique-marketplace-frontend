@@ -1,8 +1,8 @@
-import React, { FC } from 'react';
+import React, { FC, ReactNode } from 'react';
 import styled from 'styled-components';
 import { AdditionalLight } from '../../styles/colors';
 
-export const PagePaper: FC<{ className?: string }> = ({ children, className = '' }) => {
+export const PagePaper: FC<{ className?: string, children: ReactNode }> = ({ children, className = '' }) => {
   return (
     <PagePaperWrapper className={className}>
       {children}

@@ -5,7 +5,7 @@ import { CollectionProperty, CreateCollectionParsed, CreateCollectionV2ArgsDto, 
 import { UniqueNFTFactory, UniqueFungibleFactory, UniqueRefungibleTokenFactory, CollectionHelpersFactory, parseEthersV6TxReceipt } from '@unique-nft/solidity-interfaces';
 import { EthCrossAccountId, Address } from '@unique-nft/utils';
 import { Utf8 } from 'utf-helpers';
-import IMarketContractAdapter, { IMarketContractProperties, IPurchaseTokenData, IRemoveFromSell, ITransferFungible } from './IMarketContractAdapter';
+import IMarketContractAdapter, { IMarketContractProperties, IPurchaseTokenData, IRemoveFromSell, ITransferFungible, TokenForOrder } from './IMarketContractAdapter';
 import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
 import { ChainValue } from '../controllers/BaseController';
@@ -28,6 +28,7 @@ type CollectionLimitFieldKey = keyof typeof collectionLimitFields;
 
 const buyGasLimit = 1_000_000n;
 const sellGasLimit = 200_000n;
+const sellBatchGasLimit = 5_000_000n;
 
 class MetamaskAdapter implements IMarketContractAdapter {
   private getContract(contract: IMarketContractProperties, signer: Signer) {
@@ -279,7 +280,6 @@ class MetamaskAdapter implements IMarketContractAdapter {
     contractProps: IMarketContractProperties
   ): Promise<void> {
     const contract = this.getContract(contractProps, signer);
-    
     const putMethod = contract.getFunction('put');
     
     const rest = await (await putMethod(
@@ -290,6 +290,20 @@ class MetamaskAdapter implements IMarketContractAdapter {
       amount,
       from,
       { gasLimit: sellGasLimit }
+    )).wait();
+  }
+
+  async sellBatch(
+    tokens: TokenForOrder[],
+    signer: Signer,
+    contractProps: IMarketContractProperties
+  ): Promise<void> {
+    const contract = this.getContract(contractProps, signer);
+    const putBatchMethod = contract.getFunction('putBatch');
+
+    await (await putBatchMethod(
+      tokens,
+      { gasLimit: sellBatchGasLimit }
     )).wait();
   }
   

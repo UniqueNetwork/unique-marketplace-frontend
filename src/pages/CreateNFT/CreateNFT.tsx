@@ -315,7 +315,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
     setTokens((tokens) =>
       tokens.map((token, index) => ({
         ...token,
-        tokenId: (lastTokenId || 0) + index + 1
+        tokenId: token.tokenId || (lastTokenId || 0) + index + 1
       }))
     );
   }, [lastTokenId]);
@@ -653,7 +653,8 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
                 totalTokens={tokens.length}
                 batchSize={batchSize}
                 onComplete={() => {
-                  navigate(`/${currentChainId}/sellTokens`);
+                  localStorage.setItem('tokensForSell', JSON.stringify(tokens.map(token => ({ ...token, collectionId: collection?.id || 0 }))));
+                  navigate(`/${currentChainId}/mass-listing`);
                 }}
                 onContinue={() => {
                   setTokens([]);

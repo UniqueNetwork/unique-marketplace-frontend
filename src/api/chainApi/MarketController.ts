@@ -10,7 +10,7 @@ import IMarketController from './controllers/base/IMarketController';
 import { CollectionMode, TransactionOptions } from './types';
 import BaseController from './controllers/BaseController';
 import { MarketContract, MarketContractAbiItem } from 'api/restApi/settings/types';
-import { IMarketContractProperties } from './adapters/IMarketContractAdapter';
+import { IMarketContractProperties, TokenForOrder } from './adapters/IMarketContractAdapter';
 import { Account } from 'account/types';
 
 class MarketController extends BaseController implements IMarketController {
@@ -60,7 +60,6 @@ class MarketController extends BaseController implements IMarketController {
     const to = contractAddress || this.actualContract.address;
     const isAlreadyAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from, to });
     if (isAlreadyAllowed.isAllowed === targetAllowance) return;
-
     const adapter = this.getAdapter(account);
     await adapter.changeAllowance(from, to, collectionId, tokenId, targetAllowance, account.signer);
     const newAllowance = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from, to });
@@ -100,14 +99,28 @@ class MarketController extends BaseController implements IMarketController {
     await sleep(1000); // little lag to make sure offer is added to db
   }
 
+  async sellBatchFix(tokens: TokenForOrder[], account: Account): Promise<void> {
+    const from = Address.extract.ethCrossAccountId(account.address);
+    const adapter = this.getAdapter(account);
+    tokens =tokens.map(token => ({
+      tokenId: token.tokenId,
+      collectionId: token.collectionId,
+      currency: token.currency,
+      amount: 1,
+      seller: from,
+      //@ts-ignore
+      price: (token.price * (10 ** this.decimals)).toLocaleString('fullwide', { useGrouping: false })
+      // price: BigInt((token.price as number) * (10 ** this.decimals))
+    }));
+
+    await adapter.sellBatch(tokens, account.signer, this.actualContract);
+  }
+
   async buyFix(collectionId: number, tokenId: number, amount: number, { account, contractAddress }: TransactionOptions): Promise<void> {
     const to = Address.extract.ethCrossAccountId(account.address);
 
     const order = (await this.getOrder(collectionId, tokenId, contractAddress));
     const value = order.price as { type: string, hex: string };
-    // console.log('seller', seller); // TODO: recheck allowance? If so - which out of two accounts
-    // const isAllowed = await this.uniqueSdk.token.allowance({ collectionId, tokenId, from: seller.eth, to });
-    // if (!isAllowed.isAllowed) throw new Error('Token not approved for sale');
     if (!value || !value.hex) throw new Error('Order price incorrect');
     const adapter = this.getAdapter(account);
 

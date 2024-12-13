@@ -46,7 +46,8 @@ export enum SetForAllModalType {
   DESCRIPTION = 'DESCRIPTION',
   EXTERNAL_LINK = 'EXTERNAL_LINK',
   ATTRIBUTES = 'ATTRIBUTES',
-  NEW_ATTRIBUTE = 'NEW_ATTRIBUTE'
+  NEW_ATTRIBUTE = 'NEW_ATTRIBUTE',
+  PRICE = 'PRICE',
 }
 
 export const TokenList = ({

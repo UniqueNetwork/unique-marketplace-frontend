@@ -23,6 +23,7 @@ import { CollectionSettings } from 'pages/CreateCollection/tabs/CollectionSettin
 import { CollectionLinks } from 'pages/CreateCollection/tabs/CollectionLinks';
 import { CREATE_COLLECTION_TABS_ROUTE } from 'pages/CreateCollection/constants';
 import { CollectionSettingsProvider } from 'pages/CreateCollection/tabs/CollectionSettingsProvider';
+import { MassListing } from 'pages/MassListing/MassListing';
 
 const commonRoutes = (
   <>
@@ -63,6 +64,10 @@ const commonRoutes = (
       <Route path={CREATE_COLLECTION_TABS_ROUTE.COLLECTIONS_SETTINGS} element={<CollectionSettings />} />
       <Route path={CREATE_COLLECTION_TABS_ROUTE.LINKS} element={<CollectionLinks />} />
     </Route>
+    <Route
+      element={<MassListing />}
+      path={'mass-listing'}
+    />
     <Route path="faq" element={<Faq />} />
     <Route path="collections">
       <Route index element={<Collections />} />

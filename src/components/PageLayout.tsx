@@ -142,7 +142,7 @@ const LayoutStyled = styled.div<{hasFooterSpacing: boolean}>`
   header {
     top: 0;
     position: sticky !important;
-    z-index: 999;
+    z-index: 1001;
     justify-content: center;
     @media (max-width: 620px) {
       height: 80px !important;

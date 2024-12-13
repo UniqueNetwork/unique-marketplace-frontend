@@ -1,12 +1,13 @@
 import { Tooltip, TooltipAlign } from 'components/UI/Tooltip/Tooltip';
-import React, { FC, useCallback, useRef, useState } from 'react';
+import React, { FC, ReactNode, useCallback, useRef, useState } from 'react';
 import questionFilledIcon from 'static/icons/question-fill.svg';
 import questionIcon from 'static/icons/question.svg';
 import styled from 'styled-components';
 
 interface IProps {
   align?: TooltipAlign;
-  testid?: string
+  testid?: string;
+  children: ReactNode;
 }
 
 const IconWithHint: FC<IProps> = ({ align, children, testid }) => {

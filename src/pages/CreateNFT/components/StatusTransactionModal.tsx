@@ -34,6 +34,7 @@ export const StatusTransactionModal = ({
   onComplete,
   onContinue
 }: Props) => {
+
   return (
     <Modal isVisible={isVisible} isClosable={false}>
       <Heading>{title}</Heading>
@@ -83,7 +84,8 @@ export const StatusTransactionModal = ({
       {stage === TRANSACTION_STAGE_ENUM.DONE && (
         <ButtonsWrapper>
           <Button title='Create more' role='primary' onClick={onContinue} />
-          <Button title='Go to my tokens' onClick={onComplete} />
+          {/* <Button title='Go to my tokens' onClick={onComplete} /> */}
+          <Button title='Sell Tokens' onClick={onComplete} />
         </ButtonsWrapper>
       )}
     </Modal>

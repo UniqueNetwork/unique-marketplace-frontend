@@ -1,6 +1,6 @@
 import { ExtrinsicResultResponse, Sdk, Signer } from '@unique-nft/sdk/full';
 import { Address, EthCrossAccountId } from '@unique-nft/utils';
-import IMarketContractAdapter, { IMarketContractProperties, IPurchaseTokenData, IRemoveFromSell, ITransferFungible } from './IMarketContractAdapter';
+import IMarketContractAdapter, { IMarketContractProperties, IPurchaseTokenData, IRemoveFromSell, ITransferFungible, TokenForOrder } from './IMarketContractAdapter';
 
 import marketplaceAbi from '../contracts/marketplace-0.json';
 import { NestTokenParam } from './IBaseAdapter';
@@ -10,6 +10,7 @@ import { BatchCallArgumentsBody, CollectionProperty, CreateCollectionParsed, Cre
 
 const buyGasLimit = 1_000_000;
 const sellGasLimit = 200_000;
+const sellBatchGasLimit = 5_000_000;
 class UniqueAdapter implements IMarketContractAdapter {
   constructor(uniqueSdk: Sdk) {
     this.uniqueSdk = uniqueSdk;
@@ -245,17 +246,32 @@ class UniqueAdapter implements IMarketContractAdapter {
       contractAddress: contract.address,
       funcName: 'put',
       gasLimit: sellGasLimit,
-      args: {
+      args: [{
         collectionId,
         tokenId,
         price,
         currency,
         amount,
         seller: from
-      }
+      }]
     }, { signer });
   }
 
+  async sellBatch(
+    tokens: TokenForOrder[],
+    signer: Signer,
+    contract: IMarketContractProperties
+  ): Promise<void> {
+    await this.uniqueSdk.evm.send.submitWaitResult({
+      abi: contract.abi || marketplaceAbi as any,
+      address: signer.address || '',
+      contractAddress: contract.address,
+      funcName: 'putBatch',
+      gasLimit: sellBatchGasLimit,
+      args: [tokens],
+    }, { signer });
+  }
+  
   async getBuyFee(to: EthCrossAccountId, collectionId: number, tokenId: number, price: string, amount: number, signer: Signer, contract: IMarketContractProperties): Promise<string> {
     const res = await this.uniqueSdk.evm.send.getFee({
       abi: contract.abi || marketplaceAbi as any,

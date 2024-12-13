@@ -64,6 +64,7 @@ export type NewToken = {
 export type NewToken2 = {
   id: number;
   tokenId: number;
+  collectionId?: number;
   image: {
     file: Blob;
     url: string;
@@ -80,6 +81,16 @@ export type NewToken2 = {
   name?: string;
   description?: string;
 };
+
+export type TokenForSale = {
+  id: string | number;
+  tokenId: number;
+  collectionId: number;
+  image: {
+    url: string;
+    file?: Blob,
+  }
+}
 
 export enum CreateTokenDialog {
   editAttributes = 'editAttributes',
