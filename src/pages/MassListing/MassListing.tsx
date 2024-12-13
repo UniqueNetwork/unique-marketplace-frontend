@@ -194,6 +194,9 @@ export const MassListing = () => {
 
       {shouldShowSellModal && <SellTokensModal
         isVisible={isSellModalVisible}
+        closeModal={() => {
+          setSellModalVisible(false);
+        }}
         tokensForListing={tokensForListing}
         onFinish={onFinish}
         testid="sell-tokens-modal"

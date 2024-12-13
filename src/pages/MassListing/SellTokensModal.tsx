@@ -11,10 +11,11 @@ export type SellTokensModalProps = {
   isVisible: boolean;
   tokensForListing: TokenWithPrice[];
   onFinish(): void;
+  closeModal(): void;
   testid: string;
 };
 
-export const SellTokensModal: FC<SellTokensModalProps> = ({ isVisible, tokensForListing, onFinish, testid }) => {
+export const SellTokensModal: FC<SellTokensModalProps> = ({ isVisible, tokensForListing, onFinish, closeModal, testid }) => {
   const tokensForOrders = useMemo(() => {
     return tokensForListing.filter(token => !token.isSelected).map(token => ({
       ...token,
@@ -61,7 +62,7 @@ export const SellTokensModal: FC<SellTokensModalProps> = ({ isVisible, tokensFor
         <>
           <AlertStyled type='warning'>Sell stage failed.</AlertStyled>
           <ButtonsWrapper>
-            <Button title='Close' role='primary' onClick={() => {}} />
+            <Button title='Close' role='primary' onClick={closeModal} />
           </ButtonsWrapper>
         </>
       )}
