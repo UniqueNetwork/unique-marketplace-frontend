@@ -87,7 +87,7 @@ export const useQueryTokens = () => {
           ...(searchText ? getSearchConditions(searchText) : {}),
           ...(owner
             ? { _or: [
-              { owner: { _eq: owner } },
+              { owner: { _eq: Address.is.ethereumAddressInAnyForm(owner) ? owner.toLowerCase() : owner } },
               {
                 owner_normalized: {
                   _eq: Address.is.ethereumAddressInAnyForm(owner)
