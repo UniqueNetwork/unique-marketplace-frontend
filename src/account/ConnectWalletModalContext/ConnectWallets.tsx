@@ -110,12 +110,6 @@ export const ConnectWallets = () => {
               <Icon file={EnkriptIcon} size={40} />
               <span>Enkrypt</span>
             </WalletItem>}
-            {(window.walletExtension?.isNovaWallet || noAvailableWallets) && <WalletItem
-              onClick={handleConnectToPolkadotExtension('novawallet')}
-            >
-              <Icon file={NovaWalletIcon} size={40} />
-              <span>Nova Wallet</span>
-            </WalletItem>}
           </Wallets>
           {isFetching && <Loader />}
         </Modal>
@@ -157,12 +151,6 @@ export const ConnectWallets = () => {
           <Icon file={EnkriptIcon} size={40} />
           <span>Enkrypt</span>
         </WalletItem>
-        {(window.walletExtension?.isNovaWallet || noAvailableWallets) && <WalletItem
-          onClick={handleConnectToPolkadotExtension('novawallet')}
-        >
-          <Icon file={NovaWalletIcon} size={40} />
-          <span>Nova Wallet</span>
-        </WalletItem>}
       </Wallets>
       {isFetching && <Loader />}
     </Modal>
