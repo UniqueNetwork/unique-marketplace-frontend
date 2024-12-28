@@ -1,7 +1,6 @@
 import React, { FC, useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import { Button, Text, Tooltip } from 'components/UI';
 import styled from 'styled-components';
-
 import { Price } from '../TokenDetail/Price';
 import { Grey300 } from '../../../styles/colors';
 import { Offer } from '../../../api/restApi/offers/types';
@@ -19,7 +18,6 @@ interface BuyTokenProps {
 export const BuyToken: FC<BuyTokenProps> = ({ offer, royalty, onBuy, testid }) => {
   const { selectedAccount } = useAccounts();
   const { setIsOpenConnectWalletModal } = useContext(ConnectWalletModalContext);
-
 
   const onBuyClick = useCallback(() => {
     onBuy();
@@ -47,9 +45,6 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, royalty, onBuy, testid }) =
         disabled={(royalty || 0) >= 1}
       />
     </ButtonWrapper>
-    {!!selectedAccount && <Tooltip targetRef={buyButtonRef} >
-      Not enough funds in your wallet
-    </Tooltip>}
     {(royalty || 0) >= 1 && <Text color={'coral-500'} testid={`${testid}-low-balance-warning`}>The royalty is too big. Maximum royalty - 99%</Text>}
     <Divider />
   </>);

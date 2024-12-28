@@ -282,17 +282,17 @@ class MetamaskAdapter implements IMarketContractAdapter {
     const contract = this.getContract(contractProps, signer);
     const putMethod = contract.getFunction('put');
     
-    const rest = await (await putMethod(
-      collectionId,
-      tokenId,
-      price,
-      currency,
-      amount,
-      from,
+    const rest = await (await putMethod({
+        collectionId,
+        tokenId,
+        price,
+        currency,
+        amount,
+        seller: from,
+      },
       { gasLimit: sellGasLimit }
     )).wait();
   }
-
   async sellBatch(
     tokens: TokenForOrder[],
     signer: Signer,
