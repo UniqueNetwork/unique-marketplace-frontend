@@ -1,9 +1,8 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { Button, Modal } from 'components/UI';
 import { TokenLineSimple, TokenWithPrice } from './NFTLine';
 import { Checkbox } from 'components/UI/Checkbox/Checkbox2';
-import { useApi } from 'hooks/useApi';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 import TokenInputForm from 'pages/CreateNFT/components/TokenInputForm';
 import { SetForAllModalType } from 'pages/CreateNFT/components/TokenList';
@@ -14,9 +13,7 @@ import { useNavigate } from 'react-router-dom';
 export const MassListing = () => {
   const [tokensForListing, setTokensForListing] = useState<TokenWithPrice[]>([]);
   const [selectedTokens, setSelectedTokens] = useState<number[]>([]);
-  const { currentChainId } = useApi();
   const [missingPriceIds, setMissingPriceIds] = useState<number[]>([]);
-  const navigate = useNavigate();
   const [isSetForAllModalVisible, setSetForAllModalVisible] = useState(false);
 
   const [isSellModalVisible, setSellModalVisible] = useState(false);
@@ -28,6 +25,7 @@ export const MassListing = () => {
 
   const openSetForAllModal = () => setSetForAllModalVisible(true);
   const closeSetForAllModal = () => setSetForAllModalVisible(false);
+
   const handleSetForAllPrice = (setForAllPrice: string) => {
     setTokensForListing((prevTokens) =>
       prevTokens.map((token) =>
@@ -121,116 +119,122 @@ export const MassListing = () => {
     return () => clearInterval(interval);
   }, [selectedAccount]);
 
+  const selectedTokensObjects = useMemo(() => {
+    return tokensForListing.filter((token) => 
+      selectedTokens.includes(token.id)
+    );
+  }, [tokensForListing, selectedTokens]);
   return (
     <PageWrapper>
-        <HeaderStyled>
-          {'NFTs Mass Listing'}
-        </HeaderStyled>
+      <HeaderStyled>
+        {'NFTs Mass Listing'}
+      </HeaderStyled>
+
       <TableContainer
         onScroll={handleScroll}
         isScrolledToTop={isScrolledToTop}
         isScrolledToBottom={isScrolledToBottom}
       >
-      <TableWrap>
-        <TableHeader columnsCount={5}>
-          <TableHeaderCell>
-            <StyledCheckbox
-              label={''}
-              checked={selectedTokens.length === tokensForListing.length}
-              onChange={(value: boolean) => {
-                if (value) {
-                  selectAll();
-                  return;
-                }
-                deselectAll();
-              }}
-              testid='select-all'
+        <TableWrap>
+          <TableHeader columnsCount={5}>
+            <TableHeaderCell>
+              <StyledCheckbox
+                label={''}
+                checked={selectedTokens.length === tokensForListing.length}
+                onChange={(value: boolean) => {
+                  if (value) {
+                    selectAll();
+                    return;
+                  }
+                  deselectAll();
+                }}
+                testid='select-all'
+              />
+            </TableHeaderCell>
+            <TableHeaderCell>
+              <TextStyled>NFT ID - collection ID</TextStyled>
+            </TableHeaderCell>
+            <TableHeaderCell>
+              <TextStyled>NFT main image</TextStyled>
+            </TableHeaderCell>
+            <TableHeaderCell>
+              <TextStyled>Price</TextStyled>
+
+              <SetAllButton
+                onClick={openSetForAllModal}
+                disabled={!selectedTokens.length}
+              >
+                Set for selected
+              </SetAllButton>
+            </TableHeaderCell>
+            <TableHeaderCell>
+              <TextStyled>Currency</TextStyled>
+            </TableHeaderCell>
+          </TableHeader>
+
+          {tokensForListing.map((token) => (
+            <TokenLineSimple
+              key={token.id}
+              token={token}
+              isSelected={isTokenSelected(token.id)}
+              onSelect={toggleTokenSelection}
+              onPriceChange={handlePriceChange}
             />
-          </TableHeaderCell>
-          <TableHeaderCell>
-            <TextStyled>NFT ID - collection ID</TextStyled>
-          </TableHeaderCell>
-          <TableHeaderCell>
-            <TextStyled>NFT main image</TextStyled>
-          </TableHeaderCell>
-          {/* <TableHeaderCell>
-            <TextStyled>Name</TextStyled>
-          </TableHeaderCell> */}
-          <TableHeaderCell>
-            <TextStyled>Price</TextStyled>
-
-            <SetAllButton
-              onClick={openSetForAllModal}
-              disabled={!selectedTokens.length}
-            >
-              Set for selected
-            </SetAllButton>
-          </TableHeaderCell>
-          <TableHeaderCell>
-            <TextStyled>Currency</TextStyled>
-          </TableHeaderCell>
-        </TableHeader>
-
-        {tokensForListing.map((token) => (
-          <TokenLineSimple
-            key={token.id}
-            token={token}
-            isSelected={isTokenSelected(token.id)}
-            onSelect={toggleTokenSelection}
-            onPriceChange={handlePriceChange}
-          />
-        ))}
-      </TableWrap>
+          ))}
+        </TableWrap>
       </TableContainer>
+
       <Button
         title='Sell Tokens'
         onClick={openSellModal}
         disabled={selectedTokens.length === 0 || missingPriceIds.length > 0}
       />
-      {selectedTokens.length === 0 && <WarningBlock>No tokens selected</WarningBlock>}
+
+      {selectedTokens.length === 0 && (
+        <WarningBlock>No tokens selected</WarningBlock>
+      )}
+
       {missingPriceIds.length > 0 && (
         <WarningBlock>{`Items ${missingPriceIds.join(', ')} are missing prices`}</WarningBlock>
       )}
 
-      {shouldShowSellModal && <SellTokensModal
-        isVisible={isSellModalVisible}
-        closeModal={() => {
-          setSellModalVisible(false);
-        }}
-        tokensForListing={tokensForListing}
-        onFinish={onFinish}
-        testid="sell-tokens-modal"
-      />}
+      {shouldShowSellModal && (
+        <SellTokensModal
+          isVisible={isSellModalVisible}
+          closeModal={closeSellModal}
+          tokensForListing={selectedTokensObjects}
+          onFinish={onFinish}
+          testid="sell-tokens-modal"
+        />
+      )}
 
-      {
-        isSetForAllModalVisible && (
-          <Modal isFlexible={true} isVisible={isSetForAllModalVisible} onClose={closeSetForAllModal}>
-            <TokenInputForm
-              modalType={SetForAllModalType.PRICE}
-              onSubmit={handleSetForAllPrice}
-              onClose={closeSetForAllModal}
-              onlyNumber={true}
-            />
-          </Modal>
-        )
-      }
+      {isSetForAllModalVisible && (
+        <Modal
+          isFlexible={true}
+          isVisible={isSetForAllModalVisible}
+          onClose={closeSetForAllModal}
+        >
+          <TokenInputForm
+            modalType={SetForAllModalType.PRICE}
+            onSubmit={handleSetForAllPrice}
+            onClose={closeSetForAllModal}
+            onlyNumber={true}
+          />
+        </Modal>
+      )}
     </PageWrapper>
   );
 };
 
-const TableWrap = styled.div`
-
-`;
+const TableWrap = styled.div``;
 
 const PageWrapper = styled.div`
-
   .unique-list {
     gap: 0;
   }
   @media screen and (max-width: 768px) {
     margin: 0;
   }
-
   background: #fff;
   padding: 32px;
   box-shadow: 0 4px 12px rgb(0 0 0 / 8%);
@@ -293,9 +297,7 @@ const TableContainer = styled.div<{
   isScrolledToTop: boolean;
   isScrolledToBottom: boolean;
 }>`
-  //max-height: 400px;
   overflow-y: scroll;
-
   max-width: 1200px;
   margin-bottom: 20px;
   border-top: ${({ isScrolledToTop }) =>

@@ -1,11 +1,9 @@
 import { useMemo } from 'react';
 import { UniqueChain } from 'sdk-2';
-import { ethers, parseUnits } from 'ethers';
 import { useAccounts } from 'hooks/useAccounts';
 import { useApi } from 'hooks/useApi';
 import { InternalStage, StageStatus } from 'types/StagesTypes';
 import useStages from 'hooks/useStages';
-import { Address } from '@unique-nft/utils';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 import { UniqueNFTFactory } from '@unique-nft/solidity-interfaces';
 import { useEthersSigner } from 'account/WalletConnectContext/useSigner';
@@ -13,8 +11,7 @@ import { TokenForOrder } from 'api/chainApi/adapters/IMarketContractAdapter';
 import { TTransaction } from 'api/chainApi/types';
 
 export const useSellBulkStages = (tokensForListing: TokenForOrder[]) => {
-  const { api, currentChainId, baseURL } = useApi();
-  
+  const { api, currentChainId } = useApi();
   const { accounts, selectedAccount } = useAccounts();
   const marketApi = api?.market;
   const signer = useEthersSigner();
@@ -25,12 +22,14 @@ export const useSellBulkStages = (tokensForListing: TokenForOrder[]) => {
     if (!accountAddress) return null;
     return UniqueChain({
       baseUrl: chainUrl,
-      //@ts-ignore
-      account: selectedAccount,
+      account: selectedAccount as any
     });
   }, [accountAddress, chainUrl, accounts]);
 
-  const contractAddress = useMemo(() => marketApi?.getActualContract().address, [marketApi]);
+  const contractAddress = useMemo(
+    () => marketApi?.getActualContract().address,
+    [marketApi]
+  );
 
   const transferStages: InternalStage<any>[] = useMemo(() => [
     {
@@ -39,25 +38,26 @@ export const useSellBulkStages = (tokensForListing: TokenForOrder[]) => {
       status: StageStatus.default,
       action: async () => {
         if (!uniqueChain || !contractAddress) return;
-
         if (isEthereumAddress(selectedAccount?.address)) {
           if (!signer) throw Error('No signer provided');
-          const collectionIds = tokensForListing.reduce<number[]>((accum, token) => {
-            if (!accum.includes(token.collectionId)) {
-              accum.push(token.collectionId);
-            }
-            return accum;
+          const collectionIds = tokensForListing.reduce<number[]>((acc, token) => {
+            if (!acc.includes(token.collectionId)) acc.push(token.collectionId);
+            return acc;
           }, []);
-          
           for (const collectionId of collectionIds) {
             const nftFactory = await UniqueNFTFactory(collectionId, signer);
-            const checkApprove = await nftFactory.isApprovedForAll(signer.address, contractAddress);
-          
+            const checkApprove = await nftFactory.isApprovedForAll(
+              signer.address,
+              contractAddress
+            );
             if (!checkApprove) {
-              await (await nftFactory.setApprovalForAll(contractAddress, true, { gasLimit: 500_000 })).wait();
+              await (
+                await nftFactory.setApprovalForAll(contractAddress, true, {
+                  gasLimit: 500_000
+                })
+              ).wait();
             }
           }
-          return;
         } else {
           const batchOperations = tokensForListing.map((token) =>
             uniqueChain.token.approve.encode({
@@ -76,18 +76,20 @@ export const useSellBulkStages = (tokensForListing: TokenForOrder[]) => {
       status: StageStatus.default,
       action: async (): Promise<void | TTransaction> => {
         if (!accountAddress) throw new Error('No account selected');
-        const result = await marketApi?.sellBatchFix(tokensForListing, selectedAccount);
-        return result;
+        return await marketApi?.sellBatchFix(tokensForListing, selectedAccount);
       }
     }
-  ], [uniqueChain, contractAddress, tokensForListing, accountAddress, accounts, marketApi]);
+  ], [
+    tokensForListing,
+    accountAddress,
+    signer,
+    selectedAccount
+  ]);
 
-  const { stages, error, status, initiate } = useStages<any>(transferStages, selectedAccount);
+  const { stages, error, status, initiate } = useStages<any>(
+    transferStages,
+    selectedAccount
+  );
 
-  return {
-    stages,
-    error,
-    status,
-    initiate
-  };
+  return { stages, error, status, initiate };
 };
