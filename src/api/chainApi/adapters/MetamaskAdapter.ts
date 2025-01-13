@@ -269,7 +269,7 @@ class MetamaskAdapter implements IMarketContractAdapter {
     return String(totalFeeBigInt);
   }
 
-  async sell(
+    async sell(
     from: EthCrossAccountId,
     collectionId: number,
     tokenId: number,
@@ -824,7 +824,7 @@ class MetamaskAdapter implements IMarketContractAdapter {
     const contract = this.getContract(contractOption, signer);
     const revokeMethod = contract.getFunction('revoke');
     
-    await (await revokeMethod(collectionId, tokenId, {
+    await (await revokeMethod(collectionId, tokenId, 1, {
       gasLimit: sellGasLimit,
     })).wait();
   }
