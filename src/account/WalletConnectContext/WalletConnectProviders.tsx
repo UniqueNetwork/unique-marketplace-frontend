@@ -16,7 +16,7 @@ const metadata = {
 };
 
 export const config = defaultWagmiConfig({
-  chains: [unique, uniqueOpal, uniqueQuartz],
+  chains: [unique],
   projectId,
   metadata,
   auth: {
