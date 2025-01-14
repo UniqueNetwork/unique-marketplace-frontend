@@ -30,9 +30,7 @@ import { useCollectionConfirmSponsorship } from 'pages/CollectionEdit/Forms/hook
 import { ethers } from 'ethers';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 import { useEthersSigner, getNumericChainId } from 'account/WalletConnectContext/useSigner';
-import { switchNetwork } from 'utils/swithChain';
 import { parseEthersV6TxReceipt } from '@unique-nft/solidity-interfaces';
-import { Address } from '@unique-nft/utils';
 
 //@ts-ignore
 const COLECTION_CREATION_FEE = 2n * 10n ** 18n;
@@ -310,8 +308,6 @@ const CreateCollectionComponent = () => {
         collectionId = createdCollection?.collectionId || 0;
       } else {
         if (!signer) throw new Error('No Reown wallet provider found');
-        const numericChainId = getNumericChainId(currentChainId);
-        switchNetwork(numericChainId);
         const CollectionManager = new ethers.Contract(CREATE_CONTRACT_ADDRESS, (await import('./CreateCollection.json')).default, signer);
 
         const txCreateCollection = await (await CollectionManager.createCollection(
@@ -425,6 +421,8 @@ const CreateCollectionComponent = () => {
             collectionFormValues.nesting?.collectionAdmin || '',
             { gasLimit: 500_000, value: COLECTION_CREATION_FEE }
           );
+
+          if (!gasPrice) return;
           const totalFee = gasEstimate * gasPrice + COLECTION_CREATION_FEE;
           feeToUse = ethers.formatUnits(totalFee, 18)
         } else {

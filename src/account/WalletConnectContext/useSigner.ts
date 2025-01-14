@@ -3,7 +3,6 @@ import { useMemo } from 'react'
 import type { Account, Chain, Client, Transport } from 'viem'
 import { type Config, useConnectorClient } from 'wagmi';
 import { useApi } from '../../hooks/useApi';
-import { switchNetwork } from 'utils/swithChain';
 
 export function clientToSigner(client: Client<Transport, Chain, Account>) {
   const { account, chain, transport } = client;
@@ -22,7 +21,6 @@ export function useEthersSigner() {
   const { currentChainId: chainId } = useApi();
 
   const numericChainId = getNumericChainId(chainId);
-  switchNetwork(numericChainId);
   const { data: client } = useConnectorClient<Config>({ chainId: numericChainId });
   return useMemo(() => (client ? clientToSigner(client) : undefined), [client]);
 }
