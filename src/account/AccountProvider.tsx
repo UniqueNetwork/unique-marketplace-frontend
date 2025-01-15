@@ -10,6 +10,7 @@ import { useApi } from 'hooks/useApi';
 import { useBalanceSubscriptions } from './useBalanceSubscriptions';
 import { useAccount } from 'wagmi';
 import { getNumericChainId, useEthersSigner } from './WalletConnectContext/useSigner';
+import { useWeb3ModalCustom } from './WalletConnectContext/Web3ModalContext';
 
 interface AccountWrapperProps {
   children: ReactNode;
@@ -108,6 +109,8 @@ export const AccountWrapper: FC<AccountWrapperProps> = ({ children }) => {
   
   const [previousEthereumAddress, setPreviousEthereumAddress] = useState<string | undefined>();
 
+  const { reinitializeWithChainName } = useWeb3ModalCustom();
+
   useEffect(() => {
     if (!ethereumAddress && previousEthereumAddress) {
       setAccounts((prevAccounts) => {
@@ -121,8 +124,9 @@ export const AccountWrapper: FC<AccountWrapperProps> = ({ children }) => {
       });
     }
   
-    if (ethereumAddress) {
+    if (ethereumAddress && chainId) {
       setPreviousEthereumAddress(ethereumAddress);
+      reinitializeWithChainName(chainId)
     }
   }, [ethereumAddress, previousEthereumAddress]);
   
