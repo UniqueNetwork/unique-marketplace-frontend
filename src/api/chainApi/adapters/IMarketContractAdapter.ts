@@ -39,7 +39,7 @@ export interface TokenForOrder {
   tokenId: number;
   amount: number;
   currency: number;
-  price: bigint | number;
+  price: bigint | number | string;
   seller?: EthCrossAccountId;
 }
 

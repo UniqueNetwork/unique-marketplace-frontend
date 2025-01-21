@@ -11,7 +11,7 @@ import { TokenForOrder } from 'api/chainApi/adapters/IMarketContractAdapter';
 import { TTransaction } from 'api/chainApi/types';
 
 export const useSellBulkStages = (tokensForListing: TokenForOrder[]) => {
-  const { api, currentChainId } = useApi();
+  const { api, currentChainId, currencyMap } = useApi();
   const { accounts, selectedAccount } = useAccounts();
   const marketApi = api?.market;
   const signer = useEthersSigner();
@@ -76,14 +76,20 @@ export const useSellBulkStages = (tokensForListing: TokenForOrder[]) => {
       status: StageStatus.default,
       action: async (): Promise<void | TTransaction> => {
         if (!accountAddress) throw new Error('No account selected');
-        return await marketApi?.sellBatchFix(tokensForListing, selectedAccount);
+        console.log(tokensForListing, 'TOKENS_FOR_LISTING');
+        
+        return await marketApi?.sellBatchFix(tokensForListing.map((token) => ({
+          ...token, 
+          price: BigInt((token.price as number) * (10 ** (currencyMap.get(String(token.currency))?.decimals || 18)))
+        })), selectedAccount);
       }
     }
   ], [
     tokensForListing,
     accountAddress,
     signer,
-    selectedAccount
+    selectedAccount,
+    currencyMap,
   ]);
 
   const { stages, error, status, initiate } = useStages<any>(
