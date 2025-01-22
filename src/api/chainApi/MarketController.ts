@@ -102,17 +102,16 @@ class MarketController extends BaseController implements IMarketController {
   async sellBatchFix(tokens: TokenForOrder[], account: Account): Promise<void> {
     const from = Address.extract.ethCrossAccountId(account.address);
     const adapter = this.getAdapter(account);
-    tokens =tokens.map(token => ({
+  
+    tokens = tokens.map(token => ({
       tokenId: token.tokenId,
       collectionId: token.collectionId,
       currency: token.currency,
       amount: 1,
       seller: from,
-      //@ts-ignore
-      price: (token.price * (10 ** this.decimals)).toLocaleString('fullwide', { useGrouping: false })
-      // price: BigInt((token.price as number) * (10 ** this.decimals))
+      price: token.price.toString()
     }));
-
+  
     await adapter.sellBatch(tokens, account.signer, this.actualContract);
   }
 
