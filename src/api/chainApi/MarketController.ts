@@ -102,6 +102,7 @@ class MarketController extends BaseController implements IMarketController {
   async sellBatchFix(tokens: TokenForOrder[], account: Account): Promise<void> {
     const from = Address.extract.ethCrossAccountId(account.address);
     const adapter = this.getAdapter(account);
+    console.log(tokens, 'UPDATED_TYPES')
   
     tokens = tokens.map(token => ({
       tokenId: token.tokenId,
