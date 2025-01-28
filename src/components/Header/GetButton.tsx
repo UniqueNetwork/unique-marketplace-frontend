@@ -11,7 +11,7 @@ const onGetClick = (token: string) => () => {
       window.open('https://www.mexc.com/exchange/QTZ_USDT', '_blank', 'noopener');
       break;
     case 'UNQ':
-      window.open('https://www.huobi.com/en-us/exchange/unq_usdt', '_blank', 'noopener');
+      window.open('https://app.hydration.net/trade/swap?assetIn=5&assetOut=25', '_blank', 'noopener');
       break;
     default:
       break;
