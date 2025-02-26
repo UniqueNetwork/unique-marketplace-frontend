@@ -94,7 +94,7 @@ export const ConnectWallets = () => {
           }}
           isClosable
         >
-          <Heading size='2'>Connect wallet</Heading>
+          <Heading size='2'>Connect wallet 123</Heading>
           <p>Choose how you want to connect. If you don&apos;t have a wallet, you can select a provider and create one.</p>
           <Wallets>
             {availableWallets.includes('polkadot-js') && <WalletItem onClick={handleConnectToPolkadotExtension()}>
@@ -151,7 +151,7 @@ export const ConnectWallets = () => {
     }}
       isClosable
     >
-      <Heading size='2'>Connect wallet</Heading>
+      <Heading size='2'>Connect wallet 567</Heading>
       <p>Choose how you want to connect. If you don&apos;t have a wallet, you can select a provider and create one.</p>
       <Wallets>
         <WalletItem onClick={handleConnectToPolkadotExtension()}>
