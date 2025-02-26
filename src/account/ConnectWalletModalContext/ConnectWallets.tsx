@@ -4,7 +4,7 @@ import { Ethereum, Polkadot } from '@unique-nft/utils/extension';
 import { ConnectWalletModalContext } from './ConnectWalletModalContext';
 import { useAccounts } from 'hooks/useAccounts';
 import { Heading, Icon, Loader, Modal } from 'components/UI';
-import { ExtensionMissingModal } from './ExtensionMissing';
+import { ExtensionMissingModal, extensionSourceLinks } from './ExtensionMissing';
 import SubWalletIcon from 'static/icons/subwallet.svg';
 import EnkriptIcon from 'static/icons/enkrypt.svg';
 import NovaWalletIcon from 'static/icons/nova_icon_radial.svg';
@@ -118,12 +118,18 @@ export const ConnectWallets = () => {
               <Icon file={EnkriptIcon} size={40} />
               <span>Enkrypt</span>
             </WalletItem>}
-            {(window.walletExtension?.isNovaWallet || noAvailableWallets) && <WalletItem
-              onClick={handleConnectToPolkadotExtension('novawallet')}
-            >
+            <WalletItem onClick={() => {
+              console.log(window.walletExtension?.isNovaWallet, 'window.walletExtension?.isNovaWallet')
+              if (!window.walletExtension?.isNovaWallet) {
+                window.location.href = 'https://app.novawallet.io/open/dapp?url=https://playx.unique.network/';
+              } else {
+                handleConnectToPolkadotExtension('polkadot-js')();
+              }
+            }}>
               <Icon file={NovaWalletIcon} size={40} />
               <span>Nova Wallet</span>
-            </WalletItem>}
+            </WalletItem>
+
           </Wallets>
           {isFetching && <Loader />}
         </Modal>
@@ -165,12 +171,12 @@ export const ConnectWallets = () => {
           <Icon file={EnkriptIcon} size={40} />
           <span>Enkrypt</span>
         </WalletItem>
-        {(window.walletExtension?.isNovaWallet || noAvailableWallets) && <WalletItem
-          onClick={handleConnectToPolkadotExtension('novawallet')}
-        >
+        <WalletItem onClick={() => {
+          console.log(window.walletExtension, window.walletExtension?.isNovaWallet, '!window.walletExtension?.isNovaWallet')
+          window.open(extensionSourceLinks.novawallet, '_blank')}}>
           <Icon file={NovaWalletIcon} size={40} />
           <span>Nova Wallet</span>
-        </WalletItem>}
+        </WalletItem>
       </Wallets>
       {isFetching && <Loader />}
     </Modal>
