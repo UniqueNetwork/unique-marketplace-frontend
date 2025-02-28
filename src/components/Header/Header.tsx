@@ -41,6 +41,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
         </MenuIcon>}
         <LogoLink to={'/'}>
           <LogoIcon src='/logos/logo.svg'/>
+          debug
         </LogoLink>
         {!showMobileMenu && (
           <nav>
