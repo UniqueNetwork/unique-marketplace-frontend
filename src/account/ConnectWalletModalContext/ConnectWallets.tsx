@@ -121,7 +121,7 @@ export const ConnectWallets = () => {
             <WalletItem onClick={() => {
               console.log(window.walletExtension?.isNovaWallet, 'window.walletExtension?.isNovaWallet')
               if (!window.walletExtension?.isNovaWallet) {
-                window.location.href = 'https://app.novawallet.io/open/dapp?url=https://playx.unique.network/';
+                window.location.href = 'https://app.novawallet.io/open/dapp?url=https://unqnft.io';
               } else {
                 handleConnectToPolkadotExtension('polkadot-js')();
               }
@@ -170,12 +170,6 @@ export const ConnectWallets = () => {
         <WalletItem onClick={handleConnectToPolkadotExtension('enkrypt')}>
           <Icon file={EnkriptIcon} size={40} />
           <span>Enkrypt</span>
-        </WalletItem>
-        <WalletItem onClick={() => {
-          console.log(window.walletExtension, window.walletExtension?.isNovaWallet, '!window.walletExtension?.isNovaWallet')
-          window.open(extensionSourceLinks.novawallet, '_blank')}}>
-          <Icon file={NovaWalletIcon} size={40} />
-          <span>Nova Wallet</span>
         </WalletItem>
       </Wallets>
       {isFetching && <Loader />}
