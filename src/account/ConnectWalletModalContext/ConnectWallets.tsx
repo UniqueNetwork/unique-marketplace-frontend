@@ -110,6 +110,17 @@ export const ConnectWallets = () => {
               <Icon file={EnkriptIcon} size={40} />
               <span>Enkrypt</span>
             </WalletItem>}
+            <WalletItem onClick={() => {
+              if (!window.walletExtension?.isNovaWallet) {
+                window.location.href = 'https://app.novawallet.io/open/dapp?url=https://unqnft.io';
+              } else {
+                handleConnectToPolkadotExtension('polkadot-js')();
+              }
+            }}>
+              <Icon file={NovaWalletIcon} size={40} />
+              <span>Nova Wallet</span>
+            </WalletItem>
+
           </Wallets>
           {isFetching && <Loader />}
         </Modal>
