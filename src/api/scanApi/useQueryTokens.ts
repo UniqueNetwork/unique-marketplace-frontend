@@ -184,11 +184,11 @@ const getSearchConditions = (searchText: string) => {
     return {
       _or: [
         { token_id: { _eq: Number(searchText) } },
-        { collection_name: { _like: `%${searchText}%` } }
+        { collection_name: { _ilike: `%${searchText}%` } }
       ]
     };
   }
   return {
-    collection_name: { _like: `%${searchText}%` }
+    collection_name: { _ilike: `%${searchText}%` }
   };
 };
