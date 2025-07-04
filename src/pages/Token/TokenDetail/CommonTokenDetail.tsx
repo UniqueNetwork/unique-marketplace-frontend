@@ -161,6 +161,7 @@ export const CommonTokenDetail: FC<IProps> = ({
     // if (offer) {
     //   return formatAddress(offer?.seller);
     // }
+    console.log('TEST_NO_OFFER_LOG')
     if (isNested && topmostOwner) return formatAddress(topmostOwner);
     if (!token?.owner) return undefined;
     return (token.owner ? formatAddress(token.owner) : token.owner);
