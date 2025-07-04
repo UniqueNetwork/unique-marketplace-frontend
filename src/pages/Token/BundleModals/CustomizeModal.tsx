@@ -55,7 +55,7 @@ export const CustomizeModal = ({
       page: 0,
       restrictedCollections: collection?.permissions?.nesting?.restricted,
       nestedTokens
-    });
+    }, selectedAccount);
 
     setTokens(tokens);
     setTotal(total);
@@ -157,7 +157,7 @@ export const CustomizeModal = ({
       searchText,
       restrictedCollections: collection?.permissions?.nesting?.restricted,
       nestedTokens
-    });
+    }, selectedAccount);
 
     setTokens(tokens);
     setTotal(total);
