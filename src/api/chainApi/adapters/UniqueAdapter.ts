@@ -331,11 +331,6 @@ class UniqueAdapter implements IMarketContractAdapter {
     const chainType = this.extractChainType(this.uniqueSdk.chain.baseUrl);
     const chainUrl = this.buildChainUrl(chainType);
 
-
-    console.log(`Extracted chain type: ${chainType}`);
-    console.log(`New chain URL: ${chainUrl}`);
-    console.log(signer, 'SIGNER');
-
     const uniqueChain = UniqueChain({ 
       baseUrl: chainUrl, 
       account: {

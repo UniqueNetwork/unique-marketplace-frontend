@@ -15,6 +15,22 @@ import { WearableOffersModal } from './WearableOffersModal';
 import { useQueryTokens } from 'api/scanApi/useQueryTokens';
 import { GQLToken } from 'api/scanApi/types';
 
+interface TokenProperty {
+  key: string;
+  value: string;
+  valueHex?: string;
+}
+
+interface ExtendedToken {
+  tokenId?: number;
+  collectionId?: number;
+  file?: string | { fullUrl?: string; ipfsCid?: string; url?: string };
+  image?: string | { fullUrl?: string; ipfsCid?: string; url?: string };
+  imageUrl?: string;
+  src?: string;
+  properties?: TokenProperty[];
+}
+
 export const CustomizeModal = ({
   token,
   onFinish,
@@ -80,7 +96,7 @@ export const CustomizeModal = ({
     void fetch();
   }, [api?.collection, api?.nft]);
 
-  const onSelectTokens = useCallback((token) => (value: boolean) => {
+  const onSelectTokens = useCallback((token: GQLToken) => (value: boolean) => {
     if (!value) {
       setSelectedTokens((tokens) => {
         return { ...tokens,
@@ -94,8 +110,51 @@ export const CustomizeModal = ({
     }
   }, []);
 
-  const images = useMemo(() => {
-    return Object.values(selectedTokens).filter((token) => !!token).map((token) => token?.file || token?.image);
+  const baseImage = useMemo(() => {
+    const tokenWithProps = token as ExtendedToken;
+    if (tokenWithProps?.properties && Array.isArray(tokenWithProps.properties)) {
+      const baseImageProperty = tokenWithProps.properties.find(prop => prop.key === 'f.u');
+      if (baseImageProperty?.value) {
+        return baseImageProperty.value;
+      }
+    }
+    return token?.image;
+  }, [token]);
+
+  const removePreviewFromUrl = (url: string | null | undefined): string | undefined => {
+    if (!url || typeof url !== 'string') {
+      return undefined;
+    }
+    return url.replace(/_preview\.(png|jpg|jpeg|gif|webp)$/i, '.$1');
+  };
+
+  const wearableImages = useMemo(() => {
+    return Object.values(selectedTokens)
+      .filter((token): token is GQLToken => !!token)
+      .map((token) => {
+        let imageUrl: string | undefined = undefined;
+        
+        if (typeof token?.file === 'string') {
+          imageUrl = token.file;
+        } else if (typeof token?.image === 'string') {
+          imageUrl = token.image;
+        }
+        else if (token?.file && typeof token.file === 'object') {
+          const fileObj = token.file as { fullUrl?: string; ipfsCid?: string; url?: string };
+          imageUrl = fileObj.url || fileObj.fullUrl;
+        } else if (token?.image && typeof token.image === 'object') {
+          const imageObj = token.image as { fullUrl?: string; ipfsCid?: string; url?: string };
+          imageUrl = imageObj.url || imageObj.fullUrl;
+        }
+        else if ('imageUrl' in token && typeof token.imageUrl === 'string') {
+          imageUrl = token.imageUrl;
+        } else if ('src' in token && typeof token.src === 'string') {
+          imageUrl = token.src;
+        }
+        
+        return removePreviewFromUrl(imageUrl);
+      })
+      .filter((url): url is string => !!url);
   }, [selectedTokens]);
 
   const onSubmut = useCallback(async () => {
@@ -234,8 +293,14 @@ export const CustomizeModal = ({
       <NestingWrapper>
         <TokenWrapper>
           <TokenMediaWrapper>
-            <TokensMedia imageUrl={token.image} testid={''} />
-            {images.map((image, index) => <TokensMedia key={`${image?.ipfsCid}_${index}`} imageUrl={image} testid={'bundle-token-image'} />)}
+            <BaseTokenImage>
+              <TokensMedia imageUrl={baseImage} testid='base-token-image' />
+            </BaseTokenImage>
+            {wearableImages.map((image, index) => (
+              <WearableOverlay key={`${image}_${index}`} layerIndex={index + 1}>
+                <TokensMedia imageUrl={image} testid={`wearable-overlay-${index}`} />
+              </WearableOverlay>
+            ))}
           </TokenMediaWrapper>
           <Text
             size='l'
@@ -347,13 +412,34 @@ const TokenWrapper = styled.div`
 
 const TokenMediaWrapper = styled.div`
   display: flex;
-
   width: 400px;
   height: 450px;
   position: relative;
-  &>div {
-    position: absolute;
-    top: 0;
+`;
+
+const BaseTokenImage = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  
+  & > div {
+    width: 100%;
+    height: 100%;
+  }
+`;
+
+const WearableOverlay = styled.div<{ layerIndex: number }>`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  
+  & > div {
+    width: 100%;
+    height: 100%;
   }
 `;
 
