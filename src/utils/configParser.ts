@@ -39,6 +39,8 @@ export const getNetworkParams = (
   config: Record<string, string | undefined>,
   network: string
 ): Chain => {
+
+  console.log(config, network, 'CONFIG+NETWORK')
   const chain: Chain = {
     apiEndpoint: findNetworkParamByName(config, network, 'API'),
     name: findNetworkParamByName(config, network, 'NAME'),

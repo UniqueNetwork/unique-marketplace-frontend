@@ -143,9 +143,9 @@ export const AccountsManagerDropdown = ({
               <Text>{activeNetwork.name}</Text>
             </div>
           )}
-          {networks?.length > 0 && (
+          {activeNetwork && (
             <div className='networks-list'>
-              {networks.map((network) => (
+              {[activeNetwork].map((network) => (
                 <div
                   className='network'
                   key={`network-${network.id}`}
@@ -153,11 +153,6 @@ export const AccountsManagerDropdown = ({
                 >
                   <Icon {...network.icon} size={16} />
                   <Text>{network.name}</Text>
-                  <Toggle
-                    label=''
-                    onChange={() => onNetworkChange?.(network)}
-                    on={activeNetwork?.id === network.id}
-                  />
                 </div>
               ))}
             </div>

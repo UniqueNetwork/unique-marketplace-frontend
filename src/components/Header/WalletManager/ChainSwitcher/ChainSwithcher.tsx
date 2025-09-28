@@ -22,18 +22,13 @@ export const ChainSwitcher = ({ chains, activeChain, onChainChange }: ChainSwitc
           <CaptionText color='grey-500' size='s' weight='light' >
             Active network
           </CaptionText>
-          {chains.map((network) => (
+          {activeChain && [activeChain].map((network) => (
             <ChainToggleWrapper
               key={`network-${network.id}`}
               data-testid={`network-${network.id}`}
             >
               <Icon {...network.icon} size={16} />
               <Text>{network.name}</Text>
-              <Toggle
-                label=''
-                onChange={() => onChainChange?.(network)}
-                on={activeChain?.id === network.id}
-              />
             </ChainToggleWrapper>))}
         </ChainListWrapper>)}
     </>;
