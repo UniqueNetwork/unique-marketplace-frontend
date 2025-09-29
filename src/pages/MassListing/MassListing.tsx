@@ -1,21 +1,21 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { Button, Modal } from 'components/UI';
-import { TokenLineSimple, TokenWithPrice } from './NFTLine';
+import { NFTLine, TokenWithPrice } from './NFTLine';
 import { Checkbox } from 'components/UI/Checkbox/Checkbox2';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 import TokenInputForm from 'pages/CreateNFT/components/TokenInputForm';
 import { SetForAllModalType } from 'pages/CreateNFT/components/TokenList';
 import { SellTokensModal } from './SellTokensModal';
 import { useAccounts } from 'hooks/useAccounts';
-import { useNavigate } from 'react-router-dom';
+import { CurrencySelectModal } from './components/CurrencySelectModal';
 
 export const MassListing = () => {
   const [tokensForListing, setTokensForListing] = useState<TokenWithPrice[]>([]);
   const [selectedTokens, setSelectedTokens] = useState<number[]>([]);
   const [missingPriceIds, setMissingPriceIds] = useState<number[]>([]);
   const [isSetForAllModalVisible, setSetForAllModalVisible] = useState(false);
-
+  const [isSetForAllCurrencyModalVisible, setSetForAllCurrencyModalVisible] = useState(false);
   const [isSellModalVisible, setSellModalVisible] = useState(false);
 
   const openSellModal = () => setSellModalVisible(true);
@@ -26,6 +26,9 @@ export const MassListing = () => {
   const openSetForAllModal = () => setSetForAllModalVisible(true);
   const closeSetForAllModal = () => setSetForAllModalVisible(false);
 
+  const openSetForAllCurrencyModal = () => setSetForAllCurrencyModalVisible(true);
+  const closeSetForAllCurrencyModal = () => setSetForAllCurrencyModalVisible(false);
+
   const handleSetForAllPrice = (setForAllPrice: string) => {
     setTokensForListing((prevTokens) =>
       prevTokens.map((token) =>
@@ -33,6 +36,15 @@ export const MassListing = () => {
       )
     );
     closeSetForAllModal();
+  };
+
+  const handleSetForAllCurrency = (currency: number) => {
+    setTokensForListing((prevTokens) =>
+      prevTokens.map((token) =>
+        selectedTokens.includes(token.id) ? { ...token, currency } : token
+      )
+    );
+    closeSetForAllCurrencyModal();
   };
 
   useEffect(() => {
@@ -47,10 +59,14 @@ export const MassListing = () => {
       const savedTokens = localStorage.getItem('tokensForSell');
       if (savedTokens) {
         const parsedTokens: TokenWithPrice[] = JSON.parse(savedTokens);
-  
+
         if (Array.isArray(parsedTokens) && parsedTokens.every((token) => token.id)) {
-          setTokensForListing(parsedTokens);
-          const allTokenIds = parsedTokens.map((token) => token.id);
+          const tokensWithDefaultCurrency = parsedTokens.map((token) => ({
+            ...token,
+            currency: token.currency || 0,
+          }));
+          setTokensForListing(tokensWithDefaultCurrency);
+          const allTokenIds = tokensWithDefaultCurrency.map((token) => token.id);
           setSelectedTokens(allTokenIds);
         } else {
           console.warn('Invalid tokens found in localStorage. Clearing storage.');
@@ -62,7 +78,12 @@ export const MassListing = () => {
       localStorage.removeItem('tokensForSell');
     }
   }, []);
-  
+
+  // Add useEffect to track updates to tokensForListing
+  useEffect(() => {
+    console.log('tokensForListing updated:', tokensForListing);
+    // You can perform additional actions here when the array updates
+  }, [tokensForListing]);
 
   const [isScrolledToTop, setIsScrolledToTop] = useState(true);
   const [isScrolledToBottom, setIsScrolledToBottom] = useState(false);
@@ -97,10 +118,22 @@ export const MassListing = () => {
     return selectedTokens.includes(tokenId);
   };
 
-  const handlePriceChange = useCallback((tokenId: number, newPrice: number) => {
+  const handlePriceChange = useCallback((tokenId: number, collectionId: number, newPrice: number) => {
     setTokensForListing((prevTokens) =>
       prevTokens.map((token) =>
-        token.id === tokenId && token.price !== newPrice ? { ...token, price: newPrice } : token
+        token.id === tokenId && token.collectionId === collectionId && token.price !== newPrice
+          ? { ...token, price: newPrice }
+          : token
+      )
+    );
+  }, []);
+
+  const handleCurrencyChange = useCallback((tokenId: number, collectionId: number, currency: number) => {
+    setTokensForListing((prevTokens) =>
+      prevTokens.map((token) =>
+        token.id === tokenId && token.collectionId === collectionId && token.currency !== currency
+          ? { ...token, currency }
+          : token
       )
     );
   }, []);
@@ -120,15 +153,12 @@ export const MassListing = () => {
   }, [selectedAccount]);
 
   const selectedTokensObjects = useMemo(() => {
-    return tokensForListing.filter((token) => 
-      selectedTokens.includes(token.id)
-    );
+    return tokensForListing.filter((token) => selectedTokens.includes(token.id));
   }, [tokensForListing, selectedTokens]);
+
   return (
     <PageWrapper>
-      <HeaderStyled>
-        {'NFTs Mass Listing'}
-      </HeaderStyled>
+      <HeaderStyled>{'NFTs Mass Listing'}</HeaderStyled>
 
       <TableContainer
         onScroll={handleScroll}
@@ -148,7 +178,7 @@ export const MassListing = () => {
                   }
                   deselectAll();
                 }}
-                testid='select-all'
+                testid="select-all"
               />
             </TableHeaderCell>
             <TableHeaderCell>
@@ -160,39 +190,39 @@ export const MassListing = () => {
             <TableHeaderCell>
               <TextStyled>Price</TextStyled>
 
-              <SetAllButton
-                onClick={openSetForAllModal}
-                disabled={!selectedTokens.length}
-              >
+              <SetAllButton onClick={openSetForAllModal} disabled={!selectedTokens.length}>
                 Set for selected
               </SetAllButton>
             </TableHeaderCell>
             <TableHeaderCell>
               <TextStyled>Currency</TextStyled>
+
+              <SetAllButton onClick={openSetForAllCurrencyModal} disabled={!selectedTokens.length}>
+                Set for selected
+              </SetAllButton>
             </TableHeaderCell>
           </TableHeader>
 
           {tokensForListing.map((token) => (
-            <TokenLineSimple
+            <NFTLine
               key={token.id}
               token={token}
               isSelected={isTokenSelected(token.id)}
               onSelect={toggleTokenSelection}
               onPriceChange={handlePriceChange}
+              onCurrencyChange={handleCurrencyChange}
             />
           ))}
         </TableWrap>
       </TableContainer>
 
       <Button
-        title='Sell Tokens'
+        title="Sell Tokens"
         onClick={openSellModal}
         disabled={selectedTokens.length === 0 || missingPriceIds.length > 0}
       />
 
-      {selectedTokens.length === 0 && (
-        <WarningBlock>No tokens selected</WarningBlock>
-      )}
+      {selectedTokens.length === 0 && <WarningBlock>No tokens selected</WarningBlock>}
 
       {missingPriceIds.length > 0 && (
         <WarningBlock>{`Items ${missingPriceIds.join(', ')} are missing prices`}</WarningBlock>
@@ -209,11 +239,7 @@ export const MassListing = () => {
       )}
 
       {isSetForAllModalVisible && (
-        <Modal
-          isFlexible={true}
-          isVisible={isSetForAllModalVisible}
-          onClose={closeSetForAllModal}
-        >
+        <Modal isFlexible={true} isVisible={isSetForAllModalVisible} onClose={closeSetForAllModal}>
           <TokenInputForm
             modalType={SetForAllModalType.PRICE}
             onSubmit={handleSetForAllPrice}
@@ -221,6 +247,14 @@ export const MassListing = () => {
             onlyNumber={true}
           />
         </Modal>
+      )}
+
+      {isSetForAllCurrencyModalVisible && (
+        <CurrencySelectModal
+          isVisible={isSetForAllCurrencyModalVisible}
+          onClose={closeSetForAllCurrencyModal}
+          onSubmit={handleSetForAllCurrency}
+        />
       )}
     </PageWrapper>
   );
@@ -285,8 +319,7 @@ const StyledCheckbox = styled(Checkbox)`
 const SetAllButton = styled.div<{ disabled?: boolean }>`
   line-height: 22px;
   font-size: 14px;
-  color: ${({ disabled }) =>
-    disabled ? 'var(--color-grey-400)' : 'var(--color-primary-500)'};
+  color: ${({ disabled }) => (disabled ? 'var(--color-grey-400)' : 'var(--color-primary-500)')};
   cursor: ${({ disabled }) => (disabled ? 'auto' : 'pointer')};
   margin-top: 8px;
   padding-left: 10px;

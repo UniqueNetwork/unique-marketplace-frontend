@@ -8,10 +8,8 @@ import UniqueAdapter from '../adapters/UniqueAdapter';
 import IBaseController from '../controllers/base/IBaseController';
 import { BN } from '@polkadot/util';
 import { ethers } from 'ethers';
-import { getNumericChainId } from 'account/WalletConnectContext/useSigner';
 import { MetamaskAccountName } from 'account/MetamaskWallet';
 import { isEthereumAddress } from '@polkadot/util-crypto';
-import { switchNetwork } from 'utils/swithChain';
 
 export type ChainValue = {
   raw: string;
@@ -79,9 +77,6 @@ class BaseController implements IBaseController {
       return this.getDefaultAdapter();
     }
     if (this.isMetamaskSigner(account)) {
-      // changeMetamaskChain(EthereumChainParams[this.networkId]);
-
-      // switchNetwork(getNumericChainId(this.networkId));
       return this.metamaskAdapter;
     }
     return this.uniqueAdapter;

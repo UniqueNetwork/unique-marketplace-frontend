@@ -20,7 +20,7 @@ export const SellTokensModal: FC<SellTokensModalProps> = ({ isVisible, tokensFor
     return tokensForListing.filter(token => !token.isSelected).map(token => ({
       ...token,
       amount: 1,
-      currency: 0,
+      currency: token.currency,
     }));
   }, [tokensForListing]);
   

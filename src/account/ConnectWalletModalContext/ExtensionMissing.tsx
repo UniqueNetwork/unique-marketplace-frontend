@@ -10,7 +10,7 @@ type Props = {
   missingExtension?: ConnectedWalletsName;
 };
 
-const extensionSourceLinks: Record<ConnectedWalletsName, string> = {
+export const extensionSourceLinks: Record<ConnectedWalletsName, string> = {
   'polkadot-js': 'https://polkadot.js.org/extension/',
   'subwallet-js': 'https://www.subwallet.app/download.html',
   talisman: 'https://www.talisman.xyz/',

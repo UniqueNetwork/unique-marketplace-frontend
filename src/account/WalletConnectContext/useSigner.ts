@@ -1,7 +1,7 @@
 import { BrowserProvider, JsonRpcSigner } from 'ethers'
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import type { Account, Chain, Client, Transport } from 'viem'
-import { type Config, useConnectorClient } from 'wagmi';
+import { type Config, useConfig, useConnectorClient } from 'wagmi';
 import { useApi } from '../../hooks/useApi';
 import { switchNetwork } from 'utils/swithChain';
 
@@ -20,10 +20,14 @@ export function clientToSigner(client: Client<Transport, Chain, Account>) {
 /** Hook to convert a viem Wallet Client to an ethers.js Signer. */
 export function useEthersSigner() {
   const { currentChainId: chainId } = useApi();
+  const config = useConfig()
 
   const numericChainId = getNumericChainId(chainId);
-  switchNetwork(numericChainId);
   const { data: client } = useConnectorClient<Config>({ chainId: numericChainId });
+  // useEffect(() => {
+    switchNetwork(numericChainId, config);
+  // }, [numericChainId, client, config])
+  
   return useMemo(() => (client ? clientToSigner(client) : undefined), [client]);
 }
 

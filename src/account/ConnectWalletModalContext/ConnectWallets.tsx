@@ -4,7 +4,7 @@ import { Ethereum, Polkadot } from '@unique-nft/utils/extension';
 import { ConnectWalletModalContext } from './ConnectWalletModalContext';
 import { useAccounts } from 'hooks/useAccounts';
 import { Heading, Icon, Loader, Modal } from 'components/UI';
-import { ExtensionMissingModal } from './ExtensionMissing';
+import { ExtensionMissingModal, extensionSourceLinks } from './ExtensionMissing';
 import SubWalletIcon from 'static/icons/subwallet.svg';
 import EnkriptIcon from 'static/icons/enkrypt.svg';
 import NovaWalletIcon from 'static/icons/nova_icon_radial.svg';
@@ -12,6 +12,9 @@ import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { ConnectedWalletsName } from 'account/useWalletCenter';
 import WalletConnect from 'static/images/walletconnect.png';
 import { useWeb3Modal } from '@web3modal/wagmi/react';
+import { useWeb3ModalCustom } from 'account/WalletConnectContext/Web3ModalContext';
+import { useApi } from 'hooks/useApi';
+
 
 enum AccountModal {
   CREATE = 'create',
@@ -41,7 +44,12 @@ export const ConnectWallets = () => {
     }
   };
 
+  const { reinitializeWithChainName } = useWeb3ModalCustom();
+  const { currentChainId: chainId } = useApi();
+
   const openWalletConnect = () => {
+    if (!chainId) return;
+    reinitializeWithChainName(chainId)
     open();
     setIsOpenConnectWalletModal(false);
   };

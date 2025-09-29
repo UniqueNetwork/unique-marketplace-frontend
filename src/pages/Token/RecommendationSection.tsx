@@ -101,9 +101,10 @@ export const RecommendationSection = ({ offer, collection }: IProps) => {
     return slides.map((tokens, index) => {
         return <SlideWrapper key={index}>
           {tokens.map((token) => {
+            const randomKey = `${token.collectionId}_${token.tokenId}_${Math.random()}_RecommendationSection`;
             return (
               <TokensCard
-                key={`${token.collectionId}_${token.tokenId}`}
+                key={randomKey}
                 collectionId={token.collectionId}
                 tokenId={token.tokenId}
                 offer={token}

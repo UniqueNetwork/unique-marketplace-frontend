@@ -1,5 +1,5 @@
-import React, { FC, useContext, useEffect, useMemo, useState } from 'react';
-import { generatePath, Link, useLocation } from 'react-router-dom';
+import React, { FC, useEffect, useMemo, useState } from 'react';
+import { generatePath, Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Checkbox, Icon, Loader, Text } from 'components/UI';
 import { isTokenOwner } from 'api/chainApi/utils/addressUtils';
@@ -46,7 +46,7 @@ export const TokensCard: FC<TTokensCard> = ({
   const [isNestedState, setIsNestedState] = useState<boolean>();
   const [tokensCount, setTokensCount] = useState<number>();
 
-  const { api, currentChainId } = useApi();
+  const { api, currentChainId, currencyMap: erc20Tokens, currencyMap } = useApi();
   const { selectedAccount } = useAccounts();
   const { getCollection } = useCollections();
 
@@ -156,6 +156,11 @@ export const TokensCard: FC<TTokensCard> = ({
     })
   };
 
+  const currentCurrency = useMemo(
+    () => price && currencyMap.get(String(price.currency)),
+    [currencyMap, price]
+  );
+
   return (
     <TokensCardStyled>
       {isOwner && (!price?.parsed) && (
@@ -213,9 +218,23 @@ export const TokensCard: FC<TTokensCard> = ({
             <Text size={'xs'} color={'grey-500'}>Price</Text>
             <PriceWrapper length={price.parsed.toFixed(5).length}>
               <Text testid={`${testid}-price`} size='l'>
-                {formatBalance(price.parsed, 4, true)}
+                {formatBalance(Number(price.raw) / 10 ** (currentCurrency?.decimals || 1), 4, true)}
               </Text>
-              <IconStyled name={`chain-${currentChainId?.toLowerCase()}`} size={16} />
+              {price.currency ? (
+                <>
+                  &nbsp;
+                  <img
+                    width={24}
+                    height={24}
+                    src={erc20Tokens.get(String(price.currency))?.iconUrl}
+                  />
+                </>
+              ) : (
+                <IconStyled
+                  name={`chain-${currentChainId?.toLowerCase()}`}
+                  size={16}
+                />
+              )}
             </PriceWrapper>
           </TradingInfoWrapper>
         )}

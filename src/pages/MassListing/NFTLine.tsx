@@ -1,68 +1,71 @@
 import styled from 'styled-components';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Checkbox } from 'components/UI/Checkbox/Checkbox2';
 import { Text } from 'components/UI';
 import { NewToken2 } from 'pages/CreateNFT/types';
-import { useApi } from 'hooks/useApi';
+import { CurrencySelect } from './components/CurrencySelect';
 
-export type TokenWithPrice = NewToken2 & { price: number, collectionId: number };
+export type TokenWithPrice = NewToken2 & { price: number; collectionId: number; currency: number };
 
-type TokenLineSimpleProps = {
+type NFTLineProps = {
   token: TokenWithPrice;
   isSelected: boolean;
   onSelect: (tokenId: number) => void;
-  onPriceChange: (tokenId: number, newPrice: number) => void;
+  onPriceChange: (tokenId: number, collectionId: number, newPrice: number) => void;
+  onCurrencyChange: (tokenId: number, collectionId: number, currency: number) => void;
 };
 
-export const TokenLineSimple = React.memo(({ token, isSelected, onSelect, onPriceChange }: TokenLineSimpleProps) => {
-  const { chainProperties, currentChainId } = useApi();
-  const handlePriceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newPrice = event.target.value.replace(/\D/g, "");
-    onPriceChange(token.id, Number(newPrice));
-  };
+export const NFTLine = React.memo(
+  ({ token, isSelected, onSelect, onPriceChange, onCurrencyChange }: NFTLineProps) => {
+    const handlePriceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      const newPrice = event.target.value.replace(/\D/g, '');
+      onPriceChange(token.id, token.collectionId, Number(newPrice));
+    };
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (
-      !/[0-9]/.test(event.key) &&
-      event.key !== "Backspace" &&
-      event.key !== "Delete" &&
-      event.key !== "ArrowLeft" &&
-      event.key !== "ArrowRight" &&
-      event.key !== "."
-    ) {
-      event.preventDefault();
-    }
-  };
-  return (
-    <TokenLineWrap>
-      <TokenLineCell>
-        <Checkbox checked={isSelected} onChange={() => onSelect(token.id)} label={''} testid={''} />
-      </TokenLineCell>
-      <TokenLineCell>
-        <Text>{`NFT #${token.tokenId} - ${token.collectionId}`}</Text>
-      </TokenLineCell>
-      <TokenLineCell>
-        <TokenImage src={token.image?.url} alt={`NFT #${token.tokenId}`} />
-      </TokenLineCell>
-      {/* <TokenLineCell>
-        <Text>{token.name}</Text>
-      </TokenLineCell> */}
-      <TokenLineCell>
-      <PriceInput
-          type="text"
-          value={token.price?.toString() ?? ""}
-          onChange={handlePriceChange}
-          onKeyDown={handleKeyDown}
-          placeholder="Enter price"
-        />
-      </TokenLineCell>
-      <TokenLineCell>
-        <Text>{chainProperties?.token}</Text>
-      </TokenLineCell>
-    </TokenLineWrap>
-  );
-});
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (
+        !/[0-9]/.test(event.key) &&
+        event.key !== 'Backspace' &&
+        event.key !== 'Delete' &&
+        event.key !== 'ArrowLeft' &&
+        event.key !== 'ArrowRight' &&
+        event.key !== '.'
+      ) {
+        event.preventDefault();
+      }
+    };
 
+    return (
+      <TokenLineWrap>
+        <TokenLineCell>
+          <Checkbox checked={isSelected} onChange={() => onSelect(token.id)} label={''} testid={''} />
+        </TokenLineCell>
+        <TokenLineCell>
+          <Text>{`NFT #${token.tokenId} - ${token.collectionId}`}</Text>
+        </TokenLineCell>
+        <TokenLineCell>
+          <TokenImage src={token.image?.url} alt={`NFT #${token.tokenId}`} />
+        </TokenLineCell>
+        <TokenLineCell>
+          <PriceInput
+            type="text"
+            value={token.price?.toString() ?? ''}
+            onChange={handlePriceChange}
+            onKeyDown={handleKeyDown}
+            placeholder="Enter price"
+          />
+        </TokenLineCell>
+        <TokenLineCell>
+          <CurrencySelect
+            onCurrencyChange={(currency) => onCurrencyChange(token.id, token.collectionId, currency)}
+            tokenId={token.id}
+            selectedCurrency={token.currency}
+          />
+        </TokenLineCell>
+      </TokenLineWrap>
+    );
+  },
+);
 
 const TokenLineWrap = styled.div`
   display: flex;
@@ -90,7 +93,6 @@ export const TokenLineCell = styled.div`
     flex: 0.5;
     border-left: 1px solid #b9b9b9;
   }
-
 `;
 
 const TokenImage = styled.img`
