@@ -59,12 +59,12 @@ export const Filters: FC<FilterProps> = ({ value, onFilterChange, featuredTokens
       onChange={onTypeOfAssetsFilterChange}
       testid={`${testid}-assets`}
     />
-    <TypeOfCustomizablesFilter
+    {/* <TypeOfCustomizablesFilter
       isFetchingTokens={isFetchingTokens}
       value={value?.typeOfCustomizableNFTs}
       onChange={onTypeOfCustomizableChange}
       testid={`${testid}-customizable`}
-    />
+    /> */}
     <PricesFilter value={value?.prices} onChange={onPricesFilterChange} testid={`${testid}-prices`} />
     <CollectionsFilter
       value={value}

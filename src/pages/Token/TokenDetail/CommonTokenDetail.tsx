@@ -41,6 +41,7 @@ interface TokenWithOptionalFieldsV2Dto extends Omit<TokenWithInfoV2Dto, 'parsing
 }
 
 interface IProps {
+  children?: React.ReactNode
   token?: TokenWithOptionalFieldsV2Dto | TokenWithInfoV2Dto
   collection?: CollectionWithInfoV2Dto
   offer?: Offer
@@ -179,9 +180,8 @@ export const CommonTokenDetail: FC<IProps> = ({
   }, []);
 
   const onScanLinkClick = useCallback(() => {
-    if (!currentChainId) return;
     setDropdownOpen(false);
-    window.open(`${config.blockchains[currentChainId].scanUrl}unique_item/${collectionId}-${tokenId}`, '_blank', 'noopener');
+    window.open(`https://unique.subscan.io/unique_item/${collectionId}-${tokenId}`, '_blank', 'noopener');
   }, [tokenId, collectionId]);
 
   const onReportClick = useCallback(() => {

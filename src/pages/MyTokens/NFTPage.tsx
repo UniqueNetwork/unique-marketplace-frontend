@@ -105,7 +105,7 @@ export const NFTPage = () => {
           </SortSelectWrapper>
 
           <ButtonsWrapper>
-            <Button role='primary' title={'Create an NFT'} onClick={onCreateTokenClick}/>
+            <Button role='primary' title={'Create NFT'} onClick={onCreateTokenClick}/>
           </ButtonsWrapper>
         </SearchAndSortingWrapper>
         <PaginationWrapper>

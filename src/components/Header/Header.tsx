@@ -78,9 +78,9 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
             <DesktopMenuLink to={`/${currentChainId || ''}/collections`} active={activeItem === 'My collections'} disabled={!selectedAccount || isLoading}>
               My collections
             </DesktopMenuLink>
-            <DesktopMenuLink to='/faq' active={activeItem === 'FAQ'}>
+            {/* <DesktopMenuLink to='/faq' active={activeItem === 'FAQ'}>
               FAQ
-            </DesktopMenuLink>
+            </DesktopMenuLink> */}
           </nav>
         )}
       </LeftSideColumn>

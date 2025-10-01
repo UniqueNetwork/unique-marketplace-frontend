@@ -6,6 +6,7 @@ import { Coral500 } from 'styles/colors';
 
 export interface AccordionProps {
   title: ReactNode;
+  children?: ReactNode;
   isOpen?: boolean;
   isClearShow?: boolean;
   onClear?(): void;

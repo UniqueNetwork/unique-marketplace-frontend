@@ -112,8 +112,8 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
               <>
                 &nbsp;
                 <img
-                  width={24}
-                  height={24}
+                  width={16}
+                  height={16}
                   src={erc20Tokens.get(String(offer.price.currency))?.iconUrl}
                 />
               </>
