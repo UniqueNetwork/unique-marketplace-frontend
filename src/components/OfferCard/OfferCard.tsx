@@ -111,10 +111,9 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
             {offer.price.currency ? (
               <>
                 &nbsp;
-                <img
-                  width={16}
-                  height={16}
+                <CurrencyIcon
                   src={erc20Tokens.get(String(offer.price.currency))?.iconUrl}
+                  alt="currency"
                 />
               </>
             ) : (
@@ -182,7 +181,7 @@ const Description = styled.div`
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  width: calc(100% - 16px);
+  width: 100%;
   span {
     color: ${Primary600};
   }
@@ -190,4 +189,10 @@ const Description = styled.div`
 
 const IconStyled = styled(Icon)`
   margin: 0 calc(var(--prop-gap) / 4);
+`;
+
+const CurrencyIcon = styled.img`
+  width: 16px !important;
+  height: 16px !important;
+  flex-shrink: 0;
 `;

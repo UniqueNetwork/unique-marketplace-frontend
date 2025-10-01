@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import { MetamaskAccount } from '@unique-nft/accounts/metamask';
 import { useApi } from '../useApi';
 import { TPurchaseProps } from '../../pages/Token/Modals/types';
 import { InternalStage, StageStatus, TInternalStageActionParams } from '../../types/StagesTypes';
@@ -12,7 +11,7 @@ export const usePurchaseFixStages = (
   currency: number,
   contractAddress?: string
 ) => {
-  const { api } = useApi();
+  const { api, currencyMap } = useApi();
   const { selectedAccount } = useAccounts();
   const marketApi = api?.market;
   // move money to mirror for payment on substrate wallet
@@ -27,11 +26,15 @@ export const usePurchaseFixStages = (
         title: 'Approve allowance for spending ERC20 tokens',
         status: StageStatus.default,
         action: ({ txParams }: TInternalStageActionParams<TPurchaseProps>) => {
+          const currencyInfo = currencyMap?.get(currency.toString());
+          const decimals = currencyInfo?.decimals || 0;
+          const amount = txParams.price / Math.pow(10, decimals);
+          
           return marketApi?.allowanceFungible({
             collectionId: currency,
             address: account.address,
             recipient: contractAddress || '',
-            amount: txParams.price,
+            amount: amount,
             account: account,
           });
         },
@@ -47,7 +50,7 @@ export const usePurchaseFixStages = (
     });
 
     return stages;
-  }, [marketApi, collectionId, tokenId, currency, contractAddress, selectedAccount]);
+  }, [marketApi, collectionId, tokenId, currency, contractAddress, selectedAccount, currencyMap]); // ✅ Добавили currencyMap
 
   const { stages, error, status, initiate } = useStages<TPurchaseProps>(purchaseStages, selectedAccount);
 

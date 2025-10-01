@@ -159,9 +159,7 @@ export const CommonTokenDetail: FC<IProps> = ({
     if (collection?.mode === 'ReFungible' && address) {
       return formatAddress(address);
     }
-    if (offer) {
-      return formatAddress(offer?.seller);
-    }
+
     if (isNested && topmostOwner) return formatAddress(topmostOwner);
     if (!token?.owner) return undefined;
     return (token.owner ? formatAddress(token.owner) : token.owner);

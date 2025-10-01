@@ -119,7 +119,6 @@ export const ConnectWallets = () => {
               <span>Enkrypt</span>
             </WalletItem>}
             <WalletItem onClick={() => {
-              console.log(window.walletExtension?.isNovaWallet, 'window.walletExtension?.isNovaWallet')
               if (!window.walletExtension?.isNovaWallet) {
                 window.location.href = 'https://app.novawallet.io/open/dapp?url=https://unqnft.io';
               } else {

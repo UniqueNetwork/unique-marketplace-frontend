@@ -7,6 +7,7 @@ import { NestTokenParam } from './IBaseAdapter';
 import { ChainValue } from '../controllers/BaseController';
 import { CollectionMode, CollectionNestingAndPermissionStruct$1, TransferTokenParams } from '../types';
 import { BatchCallArgumentsBody, CollectionProperty, CreateCollectionParsed, CreateCollectionV2ArgsDto, TokenV2ItemForMultipleDto, PropertyKeyPermission, SetCollectionLimitsBody, SetSponsorshipBody, TokenId, CreateTokenPayload } from '@unique-nft/sdk';
+import { UniqueChain, UniqueChainInstance } from 'sdk-2';
 
 const buyGasLimit = 1_000_000;
 const sellGasLimit = 200_000;
@@ -326,27 +327,29 @@ class UniqueAdapter implements IMarketContractAdapter {
   }
 
   async transferTokensBatch(transfers: TransferTokenParams[], signer: Signer, onSubmittedOne?: (token: TokenId, index: number) => void): Promise<void> {
-    // TODO: extend this method to RFT
-    // const method = mode === 'ReFungible' ? this.uniqueSdk.refungible.transferToken : this.uniqueSdk.token.transfer;
+    if (!signer.address) return;
+    const chainType = this.extractChainType(this.uniqueSdk.chain.baseUrl);
+    const chainUrl = this.buildChainUrl(chainType);
 
-    const calls: BatchCallArgumentsBody[] = transfers.map(({ from, to, token }) => ({
-      method: {
-        section: 'unique',
-        method: 'transferFrom'
-      },
-      rawPayload: {
-        from,
-        to,
+    const uniqueChain = UniqueChain({ 
+      baseUrl: chainUrl, 
+      account: {
+        address: signer.address, 
+        signer: { sign: signer.sign }
+      } 
+    });
+
+    const batchOperations = transfers.map(({ from, to, token }) =>
+      uniqueChain.token.transfer.encode({
         collectionId: token.collectionId,
         tokenId: token.tokenId,
-        value: 1
-      }
-    }));
-
-    await this.uniqueSdk.common.batch.submitWaitResult({
-      address: signer.address,
-      calls
-    }, { signer });
+        to,
+        from,
+        amount: 1
+      })
+    );
+    
+    await uniqueChain.utility.batchAll(batchOperations);
   }
 
   async createCollection(payload: CreateCollectionV2ArgsDto, signer: Signer): Promise<CreateCollectionParsed | undefined> {
@@ -467,6 +470,20 @@ class UniqueAdapter implements IMarketContractAdapter {
       },
       { signer: typedSigner }
     );
+  }
+
+  private extractChainType(baseUrl: string): string {
+    const chainMatch = baseUrl.match(/https:\/\/rest\.unique(?:network\.dev|\.network)\/([^\/]+)\/v1/);
+    
+    if (!chainMatch) {
+      throw new Error(`Could not extract chain type from SDK baseUrl: ${baseUrl}`);
+    }
+    
+    return chainMatch[1];
+  }
+
+  private buildChainUrl(chainType: string): string {
+    return `https://rest.unique.network/v2/${chainType}`;
   }
 }
 
