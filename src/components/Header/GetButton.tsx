@@ -26,7 +26,7 @@ export const GetButton = () => {
   return <StyledButton
     role='primary'
     onClick={onGetClick(chainProperties.token)}
-    title={`Get ${chainProperties.token}`}
+    title={`Buy ${chainProperties.token}`}
   />;
 };
 

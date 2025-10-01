@@ -29,6 +29,7 @@ export type FilterState = {
   collections?: number[]
   attributes?: AttributeItem[]
   attributeCounts?: number[]
+  currencies?: number[]
 };
 
 export type FilterChangeHandler<T> = Dispatch<SetStateAction<T | null>> | ((value: T | null) => void);

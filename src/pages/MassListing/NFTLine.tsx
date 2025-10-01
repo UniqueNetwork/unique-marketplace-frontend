@@ -17,9 +17,25 @@ type NFTLineProps = {
 
 export const NFTLine = React.memo(
   ({ token, isSelected, onSelect, onPriceChange, onCurrencyChange }: NFTLineProps) => {
+    const [priceInput, setPriceInput] = useState(token.price > 0 ? token.price.toString() : '');
+    useEffect(() => {
+      setPriceInput(token.price > 0 ? token.price.toString() : '');
+    }, [token.price]);
+
     const handlePriceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      const newPrice = event.target.value.replace(/\D/g, '');
-      onPriceChange(token.id, token.collectionId, Number(newPrice));
+      const value = event.target.value;
+      
+      const sanitized = value.replace(/[^\d.]/g, '');
+
+      const parts = sanitized.split('.');
+      if (parts.length > 2) {
+        return;
+      }
+      
+      setPriceInput(sanitized);
+
+      const numValue = sanitized === '' || sanitized === '.' ? 0 : parseFloat(sanitized) || 0;
+      onPriceChange(token.id, token.collectionId, numValue);
     };
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -29,8 +45,13 @@ export const NFTLine = React.memo(
         event.key !== 'Delete' &&
         event.key !== 'ArrowLeft' &&
         event.key !== 'ArrowRight' &&
+        event.key !== 'Tab' &&
         event.key !== '.'
       ) {
+        event.preventDefault();
+      }
+      
+      if (event.key === '.' && event.currentTarget.value.includes('.')) {
         event.preventDefault();
       }
     };
@@ -49,7 +70,7 @@ export const NFTLine = React.memo(
         <TokenLineCell>
           <PriceInput
             type="text"
-            value={token.price?.toString() ?? ''}
+            value={priceInput}
             onChange={handlePriceChange}
             onKeyDown={handleKeyDown}
             placeholder="Enter price"

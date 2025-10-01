@@ -78,7 +78,6 @@ export const CollectionDetail: FC<IProps> = ({ collection, royalties }) => {
     </CollectionDetailPaper>;
   }
 
-  const scanUrl = currentChainId ? config.blockchains[currentChainId]?.scanUrl : '';
 
   return <CollectionDetailPaper>
     <BannerWrapper >
@@ -133,7 +132,7 @@ export const CollectionDetail: FC<IProps> = ({ collection, royalties }) => {
             <LinkStyled
               target={'_blank'}
               rel={'noreferrer'}
-              href={`${scanUrl}${currentChainId}/collections/${collectionId}`}
+              href={`https://unique.subscan.io/unique_collection/${collectionId}`}
             >
               <TextStyled>View on SubScan</TextStyled>
               <IconWrapper>
@@ -157,7 +156,7 @@ export const CollectionDetail: FC<IProps> = ({ collection, royalties }) => {
           <LinkStyled
             target={'_blank'}
             rel={'noreferrer'}
-            href={`${scanUrl}unique_collection/${collectionId}`}
+            href={`https://unique.subscan.io/unique_collection/${collectionId}`}
           >
             <TextStyled>View on SubScan</TextStyled>
             <IconWrapper>

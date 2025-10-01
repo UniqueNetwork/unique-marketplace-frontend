@@ -192,7 +192,7 @@ const IconStyled = styled(Icon)`
 `;
 
 const CurrencyIcon = styled.img`
-  width: 24px !important;
-  height: 24px !important;
+  width: 16px !important;
+  height: 16px !important;
   flex-shrink: 0;
 `;

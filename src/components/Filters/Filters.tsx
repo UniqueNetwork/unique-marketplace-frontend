@@ -20,6 +20,10 @@ export const Filters: FC<FiltersProps> = ({ value, attributes, attributeCounts, 
     onFilterChange({ ...value, prices });
   }, [value, onFilterChange]);
 
+  const onCurrenciesFilterChange = useCallback((currencies: number[]) => {
+    onFilterChange({ ...value, currencies });
+  }, [value, onFilterChange]);
+
   const onCollectionsFilterChange = useCallback((collections: number[]) => {
     onFilterChange({ ...value, collections, attributes: [], attributeCounts: [] });
   }, [value, onFilterChange]);
@@ -48,13 +52,13 @@ export const Filters: FC<FiltersProps> = ({ value, attributes, attributeCounts, 
       onChange={onTypeOfAssetsFilterChange}
       testid={`${testid}-assets`}
     />
-    <TypeOfCustomizablesFilter
-      isFetchingTokens={false}
-      value={value?.typeOfCustomizableNFTs}
-      onChange={onTypeOfCustomizableChange}
-      testid={`${testid}-customizable`}
+    <PricesFilter 
+      value={value?.prices} 
+      onChange={onPricesFilterChange}
+      selectedCurrencies={value?.currencies}
+      onCurrenciesChange={onCurrenciesFilterChange}
+      testid={`${testid}-prices`} 
     />
-    <PricesFilter value={value?.prices} onChange={onPricesFilterChange} testid={`${testid}-prices`} />
     <CollectionsFilter
       value={value}
       attributes={attributes}
