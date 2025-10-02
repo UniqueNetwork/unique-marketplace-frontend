@@ -51,14 +51,22 @@ const TokenInputForm: React.FC<TokenInputFormProps> = ({
     }
   };
 
-  const handleInputChange = (value: string): void => {
-    if (onlyNumber) {
-      const numericValue = value.replace(/[^0-9]/g, ''); // Remove non-numeric characters
-      setInputValue(numericValue);
-    } else {
-      setInputValue(value);
+const handleInputChange = (value: string): void => {
+  if (onlyNumber) {
+    let numericValue = value.replace(/[^0-9.]/g, '');
+    
+    const dotCount = (numericValue.match(/\./g) || []).length;
+    if (dotCount > 1) {
+      const firstDotIndex = numericValue.indexOf('.');
+      numericValue = numericValue.slice(0, firstDotIndex + 1) + 
+                     numericValue.slice(firstDotIndex + 1).replace(/\./g, '');
     }
-  };
+    
+    setInputValue(numericValue);
+  } else {
+    setInputValue(value);
+  }
+};
 
   return (
     <FormWrap>

@@ -12,7 +12,6 @@ const testid = 'header';
 
 export const AccountsManagerDropdown = ({
   accounts,
-  // selectedAccount,
   networks,
   activeNetwork,
   deposit,
@@ -34,16 +33,36 @@ export const AccountsManagerDropdown = ({
   );
   const { selectedAccount } = useAccounts();
 
-  const fungibleBalancesArray = useMemo(() => {
-    if (!selectedAccount) return [];
-    const accountFungibleBalances = selectedAccount.fungibleBalances;
-    if (!accountFungibleBalances) return [];
+  const allBalances = useMemo(() => {
+    const balances = [];
+    const symbolUpper = symbol.toUpperCase();
     
-    return Array.from(accountFungibleBalances.entries()).map(([tokenName, balance]) => ({
-      tokenName,
-      ...balance
-    }));
-  }, [selectedAccount]);
+    if (symbol) {
+      const sanitizedBalance = balance ? String(balance).replace(/\s/g, '') : '0';
+      
+      balances.push({
+        tokenName: symbol,
+        unit: symbol,
+        amount: sanitizedBalance
+      });
+    }
+    
+    if (selectedAccount?.fungibleBalances) {
+      for (const [tokenName, balanceData] of selectedAccount.fungibleBalances.entries()) {
+        const unit = balanceData.unit || tokenName;
+        
+        if (unit.toUpperCase() !== symbolUpper) {
+          balances.push({
+            tokenName,
+            unit,
+            amount: balanceData.amount || '0'
+          });
+        }
+      }
+    }
+    
+    return balances;
+  }, [selectedAccount, balance, symbol]);
 
     return (
       <AccountsManagerDropdownWrapper>
@@ -89,48 +108,34 @@ export const AccountsManagerDropdown = ({
               onOpenChange && onOpenChange(false);
             }}
           />
-          {/* <div
-            className='wallet-link'
-            data-testid={'wallet-link'}
-          >
-
-          </div> */}
         </div>
 
         <div className='accounts-manager-networks'>
-        <div className='accounts-manager-wallet'>
-          <CaptionText color='grey-500' size='s'>
-            Balance
-          </CaptionText>
-          <div className='wallet-content' data-testid='wallet-content'>
-            <BalanceText size='l'>{`${balance} ${symbol}`}</BalanceText>
-            {deposit && <DepositText size='s' weight={'light'}>{`${deposit} ${symbol}`}</DepositText>}
-            {depositDescription}
-          </div>
-          {fungibleBalancesArray.length > 0 && (
-            <CaptionText color='grey-500' size='xs'>
-              Token balances:
+          <div className='accounts-manager-wallet'>
+            <CaptionText color='grey-500' size='s'>
+              Balance
             </CaptionText>
-          )}
-          {fungibleBalancesArray.map(
-            ({ tokenName, unit, amount }) => (
+            <div className='wallet-content' data-testid='wallet-content'>
+              {deposit && <DepositText size='s' weight={'light'}>{`Deposit: ${deposit} ${symbol}`}</DepositText>}
+              {depositDescription}
+            </div>
+            {allBalances.map(({ tokenName, unit, amount }) => (
               <BalanceLine
                 token={unit}
                 amount={amount}
                 unit={unit}
                 key={`balance_line_header_${tokenName}`}
               />
-            )
+            ))}
+          </div>
+          {stakeVisibility && (
+            <Button
+              title='Stake'
+              role='primary'
+              disabled={isStakeDisabled}
+              onClick={onStakeClick}
+            />
           )}
-        </div>
-        {stakeVisibility && (
-          <Button
-            title='Stake'
-            role='primary'
-            disabled={isStakeDisabled}
-            onClick={onStakeClick}
-          />
-        )}
         </div>
 
         <Link
@@ -280,4 +285,3 @@ const CreateAccountButton = styled(Button)`
     width: 100%;
   }
 `;
-
