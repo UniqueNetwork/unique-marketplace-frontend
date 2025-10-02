@@ -346,7 +346,7 @@ const Wrapper = styled.div`
   background: #ffffff;
 
   @media (max-width: 768px) {
-    // padding: 16px;
+    padding: 10px;
   }
 `;
 
@@ -366,7 +366,7 @@ const TableContainer = styled.div`
   background: white;
   border: 1px solid #e5e5e5;
   border-radius: 8px;
-  overflow: hidden;
+  overflow: scroll;
 
   table {
     border-collapse: collapse;
