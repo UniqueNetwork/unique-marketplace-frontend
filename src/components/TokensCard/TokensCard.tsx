@@ -223,10 +223,9 @@ export const TokensCard: FC<TTokensCard> = ({
               {price.currency ? (
                 <>
                   &nbsp;
-                  <img
-                    width={24}
-                    height={24}
+                  <CurrencyIcon
                     src={erc20Tokens.get(String(price.currency))?.iconUrl}
+                    alt="currency"
                   />
                 </>
               ) : (
@@ -307,6 +306,12 @@ const IconStyled = styled(Icon)`
   margin: 0 calc(var(--prop-gap) / 4);
 `;
 
+const CurrencyIcon = styled.img`
+  width: 16px !important;
+  height: 16px !important;
+  flex-shrink: 0;
+`;
+
 const SelectCheckboxWrap = styled.div`
   position: absolute;
   background: #fff;
@@ -325,5 +330,3 @@ const SelectCheckboxWrap = styled.div`
     top: -10px;
   }
 `;
-
-
