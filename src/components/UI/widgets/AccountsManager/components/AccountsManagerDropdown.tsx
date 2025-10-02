@@ -136,7 +136,7 @@ export const AccountsManagerDropdown = ({
         <Link
           to={`/${activeNetwork?.id}/accounts`}
           onClick={onManageBalanceClick}
-          title='Manage accounts'
+          title='Manage balances'
         >
           <CreateAccountButton title={'Manage balances'} />
         </Link>

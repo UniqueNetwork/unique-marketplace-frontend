@@ -49,7 +49,7 @@ export const PageLayout: FC = () => {
     }
 
     if (pathname.includes('/accounts')) {
-      return { heading: 'Manage accounts' };
+      return { heading: 'Manage balances' };
     }
   }, [pathname]);
 
