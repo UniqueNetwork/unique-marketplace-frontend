@@ -89,17 +89,15 @@ export const AccountsManagerDropdown = ({
               onOpenChange && onOpenChange(false);
             }}
           />
-          <div
+          {/* <div
             className='wallet-link'
             data-testid={'wallet-link'}
           >
-            <Link
-              to={`/${activeNetwork?.id}/accounts`}
-              onClick={onManageBalanceClick}
-              title='Manage accounts'
-            >Manage accounts</Link>
-          </div>
+
+          </div> */}
         </div>
+
+        <div className='accounts-manager-networks'>
         <div className='accounts-manager-wallet'>
           <CaptionText color='grey-500' size='s'>
             Balance
@@ -133,31 +131,15 @@ export const AccountsManagerDropdown = ({
             onClick={onStakeClick}
           />
         )}
-        <div className='accounts-manager-networks'>
-          <CaptionText color='grey-500' size='s'>
-            Active network
-          </CaptionText>
-          {(!networks || networks.length === 0) && activeNetwork && (
-            <div className='network'>
-              <Icon {...activeNetwork.icon} size={16} />
-              <Text>{activeNetwork.name}</Text>
-            </div>
-          )}
-          {activeNetwork && (
-            <div className='networks-list'>
-              {[activeNetwork].map((network) => (
-                <div
-                  className='network'
-                  key={`network-${network.id}`}
-                  data-testid={`network-${network.id}`}
-                >
-                  <Icon {...network.icon} size={16} />
-                  <Text>{network.name}</Text>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
+
+        <Link
+          to={`/${activeNetwork?.id}/accounts`}
+          onClick={onManageBalanceClick}
+          title='Manage accounts'
+        >
+          <CreateAccountButton title={'Manage balances'} />
+        </Link>
       </AccountsManagerDropdownWrapper>
     );
 };
@@ -178,7 +160,8 @@ const AccountsManagerDropdownWrapper = styled.div`
     display: flex;
     flex-direction: column;
     row-gap: calc(var(--prop-gap) * 1.5);
-    padding: calc(var(--prop-gap) * 1.5);
+    padding: 8px;
+    padding-bottom: 16px;
     min-width: 236px;
     .unique-dropdown {
         width: 100%;

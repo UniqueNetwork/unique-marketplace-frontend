@@ -13,6 +13,7 @@ export interface ICurrency {
   iconUrl: string
   decimals: number
   fee: number
+  name: string
 } 
 
 export type Api = {
