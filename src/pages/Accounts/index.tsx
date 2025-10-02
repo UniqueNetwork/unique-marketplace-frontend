@@ -344,10 +344,9 @@ export const AccountsPage = () => {
 const Wrapper = styled.div`
   min-height: 100vh;
   background: #ffffff;
-  padding: 32px;
 
   @media (max-width: 768px) {
-    padding: 16px;
+    // padding: 16px;
   }
 `;
 
