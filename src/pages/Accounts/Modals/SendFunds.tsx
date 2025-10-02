@@ -27,11 +27,18 @@ import ComingSoon from 'pages/Token/TokenDetail/CurrencesComingSoon';
 export type TransferFundsModalProps = {
   isVisible: boolean
   senderAddress?: string
+  preselectedCurrency?: string
   onFinish(): void
   testid: string
 }
 
-export const TransferFundsModal: FC<TransferFundsModalProps> = ({ isVisible, senderAddress, onFinish, testid }) => {
+export const TransferFundsModal: FC<TransferFundsModalProps> = ({ 
+  isVisible, 
+  senderAddress, 
+  preselectedCurrency,
+  onFinish, 
+  testid 
+}) => {
   const [status, setStatus] = useState<'ask' | 'transfer-stage'>('ask');
   const [sender, setSender] = useState<string>('');
   const [recipient, setRecipient] = useState<string>('');
@@ -58,6 +65,7 @@ export const TransferFundsModal: FC<TransferFundsModalProps> = ({ isVisible, sen
      isVisible={isVisible}
      onFinish={onTransfer}
      senderAddress={senderAddress || ''}
+     preselectedCurrency={preselectedCurrency}
      onClose={onFinish}
      testid={`${testid}-ask`}
    />);
@@ -80,12 +88,20 @@ export const TransferFundsModal: FC<TransferFundsModalProps> = ({ isVisible, sen
 type AskSendFundsModalProps = {
   isVisible: boolean
   senderAddress: string
+  preselectedCurrency?: string
   onFinish(sender: string, recipient: string, amount: string, currency: number, decimals: number): void
   onClose(): void
   testid: string
 }
 
-export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, onFinish, senderAddress, onClose, testid }) => {
+export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ 
+  isVisible, 
+  onFinish, 
+  senderAddress, 
+  preselectedCurrency,
+  onClose, 
+  testid 
+}) => {
   const { api, prefixes } = useApi();
   const { accounts } = useAccounts();
   const [sender, setSender] = useState<Account>();
@@ -98,9 +114,28 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   const deviceSize = useDeviceSize();
   const { currencies, currencyMap } = useApi();
   const [selectedCurrencyOption, setSelectedCurrencyOption] = useState(currencyMap.get('0'));
+
+  // Set preselected currency
   useEffect(() => {
-    setSelectedCurrencyOption(currencyMap.get('0'));
-  }, [currencyMap]);
+    if (preselectedCurrency) {
+      if (preselectedCurrency === '0') {
+        setSelectedCurrencyOption(currencyMap.get('0'));
+      } else {
+        // Find by unit or title (e.g., 'DOT')
+        const currency = Array.from(currencyMap.values()).find(
+          c => c.title === preselectedCurrency || c.unit === preselectedCurrency
+        );
+        if (currency) {
+          setSelectedCurrencyOption(currency);
+        } else {
+          setSelectedCurrencyOption(currencyMap.get('0'));
+        }
+      }
+    } else {
+      setSelectedCurrencyOption(currencyMap.get('0'));
+    }
+  }, [currencyMap, preselectedCurrency]);
+
   const isSelectFungibleToken = useMemo(() => selectedCurrencyOption?.id !== currencyMap.get('0')?.id, [currencyMap, selectedCurrencyOption?.id]);
 
   const { filteredAccounts, onFilter, onReset } = useAccountsFilter({
@@ -185,11 +220,6 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     );
   }, [sender, recipientAddress, amount, onFinish, isConfirmDisabled, selectedCurrencyOption]);
 
-  const senders = useMemo(
-    () => [...accounts.values()].filter(({ address }) => recipientAddress !== address),
-    [recipientAddress]
-  );
-
   const onChangeAddress = useCallback((value: string | Account) => {
     setRecipientAddress(value);
     getFee(value, Number(amount))();
@@ -211,13 +241,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     setIsValidRecipientAddress(true);
     setFee('0');
     onClose();
-  }, [accounts, onClose]);
-
-  const onChangeSender = useCallback((value: SelectOptionProps) => {
-    const newSender = value as unknown as Account;
-    setSender(newSender);
-    getFee(recipientAddress, Number(amount))();
-  }, [getFee, recipientAddress, amount]);
+  }, [onClose, onReset]);
 
   const tokenSymbol = useMemo(() => selectedCurrencyOption?.title || '', [selectedCurrencyOption]);
   const selectedBalance = useMemo(() => {
@@ -264,7 +288,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     } finally {
       setIsSetMaxLoading(false);
     }
-  }, [api, sender, recipientAddress, tokenSymbol, isSelectFungibleToken]);
+  }, [api, sender, recipientAddress, tokenSymbol, isSelectFungibleToken, selectedCurrencyOption]);
 
   const total = useMemo(() => {
     if (!amount || !fee || fee === '0') return null;
@@ -287,33 +311,14 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
       <Text size={'s'} color={'grey-500'}>
         {'From'}
       </Text>
-      <SenderSelectWrapper>
-        <Dropdown
-          optionKey={'address'}
-          options={senders as unknown as SelectOptionProps[]}
-          onChange={onChangeSender}
-          optionRender={(option) => (
-            <AddressOptionWrapper>
-              <AccountCard
-                accountName={(option as unknown as Account)?.name || ''}
-                accountAddress={(option as unknown as Account)?.address || ''}
-                canCopy
-                isShort={deviceSize < DeviceSize.md}
-              />
-            </AddressOptionWrapper>
-          )}
-          iconRight={{ name: 'triangle', size: 8 }}
-        >
-          <AddressWrapper>
-            <AccountCard
-              accountName={sender?.name || ''}
-              accountAddress={sender?.address || ''}
-              canCopy
-              isShort={deviceSize < DeviceSize.md}
-            />
-          </AddressWrapper>
-        </Dropdown>
-      </SenderSelectWrapper>
+      <AddressWrapper>
+        <AccountCard
+          accountName={sender?.name || ''}
+          accountAddress={sender?.address || ''}
+          canCopy
+          isShort={deviceSize < DeviceSize.md}
+        />
+      </AddressWrapper>
       <AmountWrapper>
         <Text
           testid={`${testid}-balance`}
@@ -468,26 +473,6 @@ const Content = styled.div`
   }
 `;
 
-const SenderSelectWrapper = styled.div`
-  position: relative;
-  
-  & .unique-dropdown {
-    width: 100%;
-    cursor: pointer;
-    min-height: 64px;
-    .dropdown-options {
-      max-height: 229px;
-      overflow-y: auto;
-      row-gap: calc(var(--prop-gap) / 4);
-    }
-  }
-  & .icon-triangle{
-    position: absolute;
-    top: calc(50% - 4px);
-    right: calc(var(--prop-gap) / 2);
-  }
-`;
-
 const AddressWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--prop-gap) / 2);
@@ -495,13 +480,12 @@ const AddressWrapper = styled.div`
   border-radius: 4px;
   padding: calc(var(--prop-gap) / 2) var(--prop-gap);
   align-items: center;
-  cursor: pointer;
+  min-height: 64px;
+  background-color: var(--color-grey-100);
+  
   .unique-text {
     text-overflow: ellipsis;
     overflow: hidden;
-  }
-  &:hover {
-    border: 1px solid var(--color-grey-500);
   }
 `;
 
