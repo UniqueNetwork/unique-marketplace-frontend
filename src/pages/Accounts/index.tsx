@@ -15,6 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import { ConnectWalletModalContext } from 'account/ConnectWalletModalContext';
 import { useDotBalance } from 'hooks/getDotBalance';
 import { CrossChainTransferModal } from './CrossChainTransferModal';
+import SubscanLogo from 'static/images/subscan-logo.png';
 
 const testid = 'accounts-page';
 
@@ -35,6 +36,18 @@ interface TokenBalance {
   canSend: boolean;
   canTransferFromRelay?: boolean;
 }
+
+const formatNumberWithCommas = (value: string | number): string => {
+  const cleanValue = typeof value === 'string' ? value.replace(/[,\s]/g, '') : value;
+  const num = typeof cleanValue === 'string' ? parseFloat(cleanValue) : cleanValue;
+  if (isNaN(num)) return '0';
+  
+  const parts = num.toFixed(4).split('.');
+  const integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const decimalPart = parts[1];
+  
+  return `${integerPart}.${decimalPart}`;
+};
 
 export const AccountsPage = () => {
   const { setIsOpenConnectWalletModal } = useContext(ConnectWalletModalContext);
@@ -87,7 +100,6 @@ export const AccountsPage = () => {
         });
       } else {
         // Other tokens (USDT, etc.)
-        // Add logic here to fetch balances for other tokens when available
         balances.push({
           collectionId,
           name: currency.name,
@@ -126,6 +138,11 @@ export const AccountsPage = () => {
     setCurrentModal(undefined);
     refetchDotBalance();
   }, [refetchDotBalance]);
+
+  const truncateAddress = (address: string) => {
+    if (address.length <= 16) return address;
+    return `${address.slice(0, 8)}...${address.slice(-8)}`;
+  };
 
   const copyToClipboard = useCallback(() => {
     if (selectedAccount?.address) {
@@ -201,7 +218,7 @@ export const AccountsPage = () => {
                         </Td>
                         <Td>
                           <ActionsCell>
-                            <Button 
+                            <StyledButton 
                               title="Send" 
                               onClick={onAccountActionClick(AccountModal.sendFunds, token.collectionId)}
                               disabled={!token.canSend}
@@ -213,6 +230,7 @@ export const AccountsPage = () => {
                                 onClick={onAccountActionClick(AccountModal.crossChainTransfer)}
                                 disabled={!token.canSend}
                                 size="small"
+                                role="primary"
                               />
                             )}
                             {isUNQ && (
@@ -221,6 +239,7 @@ export const AccountsPage = () => {
                                 onClick={onAccountActionClick(AccountModal.withdrawDeposit)}
                                 disabled={true}
                                 size="small"
+                                role="primary"
                               />
                             )}
                           </ActionsCell>
@@ -278,11 +297,11 @@ export const AccountsPage = () => {
           <SummaryCard>
             <ProfileHeader>
               <ProfileName>{account.name || 'Alex'}</ProfileName>
-              <Avatar />
+              <AvatarImage src={SubscanLogo} alt="Account" />
             </ProfileHeader>
 
             <AddressBox>
-              <AddressText>{account.address}</AddressText>
+              <AddressText>{truncateAddress(account.address)}</AddressText>
               <CopyButton onClick={copyToClipboard}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
@@ -294,9 +313,9 @@ export const AccountsPage = () => {
             {/* Balance Summary */}
             <BalanceList>
               {tokenBalances.map((token) => {
-                const totalBalance = token.relayBalance 
-                  ? (parseFloat(token.uniqueBalance) + parseFloat(token.relayBalance)).toFixed(token.decimals > 4 ? 4 : token.decimals)
-                  : token.uniqueBalance;
+                const uniqueNum = parseFloat(token.uniqueBalance.replace(/[,\s]/g, '')) || 0;
+                const relayNum = token.relayBalance ? parseFloat(token.relayBalance.replace(/[,\s]/g, '')) || 0 : 0;
+                const totalBalance = uniqueNum + relayNum;
 
                 return (
                   <BalanceItem key={token.collectionId}>
@@ -304,7 +323,7 @@ export const AccountsPage = () => {
                       <TokenIconImage src={token.iconUrl} alt={token.name} style={{ width: '32px', height: '32px' }} />
                       <TokenLabel>{token.name}</TokenLabel>
                     </BalanceHeader>
-                    <BalanceAmount>{totalBalance}</BalanceAmount>
+                    <BalanceAmount>{formatNumberWithCommas(totalBalance)}</BalanceAmount>
                   </BalanceItem>
                 );
               })}
@@ -354,7 +373,7 @@ const GridContainer = styled.div`
   max-width: 100%;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 2fr 1fr;
   gap: 16px;
 
   @media (max-width: 1324px) {
@@ -366,10 +385,15 @@ const TableContainer = styled.div`
   background: white;
   border: 1px solid #e5e5e5;
   border-radius: 8px;
-  overflow: scroll;
+  overflow-x: auto;
+
+  @media (max-width: 1324px) {
+    overflow-x: scroll;
+  }
 
   table {
     border-collapse: collapse;
+    min-width: 100%;
   }
 
   thead {
@@ -489,11 +513,9 @@ const ProfileName = styled.h2`
   margin: 0;
 `;
 
-const Avatar = styled.div`
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #ff00ff 0%, #00ffff 100%);
+const AvatarImage = styled.img`
+  width: 48px;
+  height: 48px;
   flex-shrink: 0;
 `;
 
@@ -507,7 +529,6 @@ const AddressText = styled.span`
   font-size: 12px;
   font-family: monospace;
   color: #000000;
-  word-break: break-all;
   flex: 1;
 `;
 
@@ -548,27 +569,48 @@ const BalanceHeader = styled.div`
 `;
 
 const BalanceAmount = styled.div`
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 600;
   color: #000000;
   line-height: 1;
 `;
 
-const CrossChainButton = styled(Button)`
+const StyledButton = styled(Button)`
   && {
-    background-color: #009CF0;
-    color: white;
-    border-color: #009CF0;
+    transition: filter 0.2s ease;
 
     &:hover:not(:disabled) {
-      background-color: #0088d4;
-      border-color: #0088d4;
+      filter: brightness(1.1);
     }
 
     &:disabled {
-      background-color: #e5e5e5;
-      color: #81858e;
-      border-color: #e5e5e5;
+      background-color: #e5e5e5 !important;
+      color: #81858e !important;
+      border-color: #e5e5e5 !important;
+      cursor: not-allowed;
+    }
+  }
+`;
+
+const CrossChainButton = styled(Button)`
+  &&& {
+    background-color: #009CF0 !important;
+    color: white !important;
+    border-color: #009CF0 !important;
+
+    &:hover:not(:disabled) {
+      background-color: #009CF0 !important;
+      color: white !important;
+      border-color: #009CF0 !important;
+      opacity: 0.8;
+    }
+
+    &:disabled {
+      background-color: #e5e5e5 !important;
+      color: #81858e !important;
+      border-color: #e5e5e5 !important;
+      cursor: not-allowed;
+      opacity: 1 !important;
     }
   }
 `;
