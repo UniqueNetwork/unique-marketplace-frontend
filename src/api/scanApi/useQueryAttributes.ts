@@ -1,6 +1,4 @@
 import { get } from 'api/restApi/base';
-import config from 'config';
-import { useApi } from 'hooks/useApi';
 import { useEffect, useState } from 'react';
 
 export type AttributeStatistic = {
@@ -15,7 +13,6 @@ type TraitsResponse = {
 };
 
 export const useQueryAttributes = (collectionId: number) => {
-  const { currentChainId } = useApi();
   const [isFetching, setIsFetching] = useState(false);
   const [attributes, setAttributes] = useState<AttributeStatistic[]>([]);
 
@@ -24,9 +21,7 @@ export const useQueryAttributes = (collectionId: number) => {
       setIsFetching(true);
 
       try {
-        const scanUrl = config.blockchains[currentChainId || '']?.scanUrl || 'https://api-unique.uniquescan.io/';
-        const apiUrl = `${scanUrl.replace(/\/$/, '')}/v2`;
-        const url = `${apiUrl}/collections/${collectionId}/traits`;
+        const url = `https://api-unique.uniquescan.io/v2/collections/${collectionId}/traits`;
         
         const response = await get(url);
 
@@ -40,7 +35,7 @@ export const useQueryAttributes = (collectionId: number) => {
         setIsFetching(false);
       }
     })();
-  }, [collectionId, currentChainId]);
+  }, [collectionId]);
 
   return {
     isFetching,
