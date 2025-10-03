@@ -23,19 +23,9 @@ export const AttributesBlock: FC<IProps> = ({ attributes, collectionId }) => {
   const statistics = useMemo(() => {
     const result: Record<string, StatItem> = {};
     
-    attributeStatistics.forEach((attr) => {
-      if ('values' in attr) {
-        const traitType = attr.name?._ || attr.key;
-        
-        attr.values.forEach((val) => {
-          const valueString = val.value?._ || val.value;
-          const key = `${traitType}_${valueString}`;
-          result[key] = { count: val.tokens_count };
-        });
-      } else {
-        const key = `${attr.trait_type}_${attr.value_string}`;
-        result[key] = { count: attr.count };
-      }
+    attributeStatistics.forEach((stat) => {
+      const key = `${stat.traitType}_${stat.value}`;
+      result[key] = { count: stat.count };
     });
     
     return result;
