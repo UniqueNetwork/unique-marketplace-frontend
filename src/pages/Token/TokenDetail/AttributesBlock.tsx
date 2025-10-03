@@ -9,8 +9,6 @@ import { useQueryCollectionTokensCount } from 'api/scanApi/useQueryCollectionTok
 
 interface StatItem {
   count: number;
-  value: string;
-  trait_type: string;
 }
 
 interface IProps {
@@ -23,13 +21,24 @@ export const AttributesBlock: FC<IProps> = ({ attributes, collectionId }) => {
   const { attributes: attributeStatistics, isFetching } = useQueryAttributes(collectionId);
 
   const statistics = useMemo(() => {
-    return attributeStatistics.reduce<Record<string, StatItem>>((acc, { trait_type, value_string }) => {
-      const key = `${trait_type}_${value_string}`;
-      acc[key] = acc[key]
-        ? { ...acc[key], count: acc[key].count + 1 }
-        : { count: 1, value: value_string, trait_type };
-      return acc;
-    }, {});
+    const result: Record<string, StatItem> = {};
+    
+    attributeStatistics.forEach((attr) => {
+      if ('values' in attr) {
+        const traitType = attr.name?._ || attr.key;
+        
+        attr.values.forEach((val) => {
+          const valueString = val.value?._ || val.value;
+          const key = `${traitType}_${valueString}`;
+          result[key] = { count: val.tokens_count };
+        });
+      } else {
+        const key = `${attr.trait_type}_${attr.value_string}`;
+        result[key] = { count: attr.count };
+      }
+    });
+    
+    return result;
   }, [attributeStatistics]);
 
   return (
@@ -56,7 +65,7 @@ export const AttributesBlock: FC<IProps> = ({ attributes, collectionId }) => {
             isFetching={isFetching}
             tokensCount={tokensCount}
             percents={
-              ((statistics[`${attribute.trait_type}_${attribute.value.toString()}`]?.count || 1) * 100) /
+              ((statistics[`${attribute.trait_type}_${attribute.value.toString()}`]?.count || 0) * 100) /
               tokensCount
             }
           />
@@ -70,6 +79,7 @@ const AttributesRow = ({
   attribute,
   enumeration,
   isFetching,
+  tokensCount,
   percents,
 }: {
   attribute: string;
@@ -85,7 +95,7 @@ const AttributesRow = ({
     <Row>
       <Trait trait={enumeration} />
     </Row>
-    {!isFetching && typeof percents === 'number' && isFinite(percents) && (
+    {!isFetching && typeof percents === 'number' && isFinite(percents) && percents > 0 && (
       <Row>
         <Text size='s' color='grey-500'>
           {percents.toFixed(0)}%

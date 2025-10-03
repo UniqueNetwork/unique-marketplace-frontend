@@ -183,7 +183,7 @@ const AccountsManagerWrapper = styled.div`
   position: relative;
   padding: 8px 12px;
   cursor: pointer;
-  min-width: 280px;
+  // min-width: 280px;
   max-height: 55px;
   
   &:hover {
@@ -277,7 +277,7 @@ const AccountsManagerWrapper = styled.div`
   }
 
   @media (max-width: 567px) {
-    min-width: 280px;
+    // min-width: 280px;
     padding: 6px 10px;
   }
 
