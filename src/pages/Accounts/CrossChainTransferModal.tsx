@@ -7,16 +7,17 @@ import { web3FromAddress, web3Enable } from '@polkadot/extension-dapp';
 import { u8aToHex } from '@polkadot/util';
 import { decodeAddress } from '@polkadot/util-crypto';
 import BigNumber from 'bignumber.js';
+import { useAccounts } from 'hooks/useAccounts';
 
 const DOT_DECIMALS = 10;
 const UNIQUE_CHAIN_ID = 2037;
 const MIN_DOT_TRANSFER = 0.001;
 const MAX_DOT_TRANSFER = 1000;
+const MIN_BALANCE_AFTER_TRANSFER = 1.1; // Existential Deposit + buffer
 
 interface CrossChainTransferModalProps {
   isVisible: boolean;
   onFinish: () => void;
-  address: string;
   polkadotBalance?: string;
   testid?: string;
 }
@@ -27,10 +28,11 @@ type TransactionStatus = 'idle' | 'pending' | 'success' | 'error';
 export const CrossChainTransferModal: React.FC<CrossChainTransferModalProps> = ({
   isVisible,
   onFinish,
-  address,
   polkadotBalance = '0',
   testid = 'cross-chain-modal',
 }) => {
+  const { selectedAccount } = useAccounts();
+  
   const [transferAmount, setTransferAmount] = useState('');
   const [transferDirection, setTransferDirection] = useState<TransferDirection>('fromPolkadot');
   const [transactionStatus, setTransactionStatus] = useState<TransactionStatus>('idle');
@@ -38,6 +40,8 @@ export const CrossChainTransferModal: React.FC<CrossChainTransferModalProps> = (
   const [txHash, setTxHash] = useState('');
   const [polkadotApi, setPolkadotApi] = useState<ApiPromise | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
+
+  const address = selectedAccount?.address;
 
   // Initialize Polkadot API
   useEffect(() => {
@@ -49,6 +53,9 @@ export const CrossChainTransferModal: React.FC<CrossChainTransferModalProps> = (
   const initializeApi = async () => {
     setIsConnecting(true);
     try {
+      // Initialize extensions ONCE at startup
+      await web3Enable('DOT Exchange');
+      
       const provider = new WsProvider('wss://rpc.polkadot.io');
       const api = await ApiPromise.create({ provider });
       setPolkadotApi(api);
@@ -95,14 +102,9 @@ export const CrossChainTransferModal: React.FC<CrossChainTransferModalProps> = (
         new BigNumber(10).pow(DOT_DECIMALS)
       );
 
-      // Initialize Polkadot extension before using it
-      setStatusMessage('Connecting to wallet extension...');
-      const extensions = await web3Enable('DOT Exchange');
+      setStatusMessage('Connecting to wallet...');
       
-      if (extensions.length === 0) {
-        throw new Error('No Polkadot extension found. Please install Polkadot.js extension.');
-      }
-
+      // Get injector for the address - extensions already initialized
       const injector = await web3FromAddress(address);
 
       if (transferDirection === 'fromPolkadot') {
@@ -114,6 +116,7 @@ export const CrossChainTransferModal: React.FC<CrossChainTransferModalProps> = (
           },
         };
 
+        // Use the address prop - this is the Unique Network address (destination)
         const addressBytes = decodeAddress(address);
         const beneficiary = {
           V4: {
@@ -140,7 +143,7 @@ export const CrossChainTransferModal: React.FC<CrossChainTransferModalProps> = (
           amount: amount.toString(),
         });
 
-        // FIXED: Use limitedReserveTransferAssets instead of transferAssets
+        // Use limitedReserveTransferAssets
         const tx = polkadotApi.tx.xcmPallet.limitedReserveTransferAssets(
           destination,
           beneficiary,
@@ -205,7 +208,7 @@ export const CrossChainTransferModal: React.FC<CrossChainTransferModalProps> = (
   const isAmountValid =
     transferAmountNum >= MIN_DOT_TRANSFER && transferAmountNum <= MAX_DOT_TRANSFER;
   const availableBalance = parseFloat(polkadotBalance);
-  const isBalanceSufficient = transferAmountNum > 0 && availableBalance >= transferAmountNum + 0.01;
+  const isBalanceSufficient = transferAmountNum > 0 && availableBalance >= transferAmountNum + MIN_BALANCE_AFTER_TRANSFER;
 
   return (
     <Modal isVisible={isVisible} isClosable onClose={handleClose}>
@@ -279,7 +282,7 @@ export const CrossChainTransferModal: React.FC<CrossChainTransferModalProps> = (
               {transferAmount && !isBalanceSufficient && (
                 <ErrorText>
                   Insufficient balance. Available: {polkadotBalance} DOT, Required: ~
-                  {(transferAmountNum + 0.01).toFixed(3)} DOT (including fees)
+                  {(transferAmountNum + MIN_BALANCE_AFTER_TRANSFER).toFixed(3)} DOT (including fees + min balance {MIN_BALANCE_AFTER_TRANSFER} DOT)
                 </ErrorText>
               )}
             </FormGroup>

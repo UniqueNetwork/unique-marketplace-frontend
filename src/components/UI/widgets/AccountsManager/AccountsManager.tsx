@@ -67,7 +67,14 @@ export const AccountsManager = (props: AccountsManagerProps) => {
     const sanitizedValue = String(value).replace(/\s/g, '');
     const numericValue = parseFloat(sanitizedValue);
     if (isNaN(numericValue)) return '0';
-    return String(Math.round(numericValue));
+    
+    const rounded = numericValue.toFixed(2);
+
+    if (rounded.endsWith('.00')) {
+      return rounded.slice(0, -3);
+    }
+    
+    return rounded;
   };
 
   const tokenInfoBySymbol = useMemo(() => {

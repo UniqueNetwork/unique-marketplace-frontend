@@ -348,7 +348,6 @@ export const AccountsPage = () => {
         <CrossChainTransferModal
           isVisible={currentModal === AccountModal.crossChainTransfer}
           onFinish={onModalClose}
-          address={account.address}
           polkadotBalance={polkadotRelayBalance}
           testid={`${testid}-cross-chain-modal`}
         />
