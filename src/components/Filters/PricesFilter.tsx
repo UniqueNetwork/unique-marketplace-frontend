@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState, useRef } from 'react';
 import { Button, Text } from 'components/UI';
 import styled from 'styled-components';
 import { PriceRange } from './types';
@@ -29,30 +29,40 @@ const PricesFilter: FC<PricesFilterProps> = ({
   const [minPriceValue, setMinPriceValue] = useState<string>();
   const [maxPriceValue, setMaxPriceValue] = useState<string>();
   const [localSelectedCurrencies, setLocalSelectedCurrencies] = useState<number[]>(selectedCurrencies);
+  
+  // Track if we're updating from internal change (to avoid syncing back from props)
+  const isInternalChangeRef = useRef(false);
 
   const handleCurrencyToggle = useCallback((currencyId: number) => {
-    setLocalSelectedCurrencies((prev) => {
-      const newSelection = prev.includes(currencyId)
-        ? prev.filter((id) => id !== currencyId)
-        : [...prev, currencyId];
-      
-      if (onCurrenciesChange) {
-        onCurrenciesChange(newSelection);
-      }
-      return newSelection;
-    });
-  }, [onCurrenciesChange]);
+    const newSelection = localSelectedCurrencies.includes(currencyId)
+      ? localSelectedCurrencies.filter((id) => id !== currencyId)
+      : [...localSelectedCurrencies, currencyId];
+    
+    isInternalChangeRef.current = true;
+  
+    setLocalSelectedCurrencies(newSelection);
+
+    if (onCurrenciesChange) {
+      onCurrenciesChange(newSelection);
+    }
+    
+    setTimeout(() => {
+      isInternalChangeRef.current = false;
+    }, 0);
+  }, [localSelectedCurrencies, onCurrenciesChange]);
 
   const onApply = useCallback(() => {
     if (minPriceValue || maxPriceValue) {
       let minPrice = minPriceValue;
       let maxPrice = maxPriceValue;
 
+      // If max < min, reset min to 0
       if (minPriceValue && maxPriceValue && Number(maxPriceValue) < Number(minPriceValue)) {
         setMinPriceValue('0');
         minPrice = '0';
       }
 
+      // If max equals 0, clear it
       if (maxPriceValue && Number(maxPriceValue) === 0) {
         setMaxPriceValue('');
         maxPrice = undefined;
@@ -64,20 +74,27 @@ const PricesFilter: FC<PricesFilterProps> = ({
     onChange(undefined);
   }, [minPriceValue, maxPriceValue, onChange]);
 
+  // Sync local state with props for prices
   useEffect(() => {
     setMinPriceValue(minPrice);
     setMaxPriceValue(maxPrice);
   }, [minPrice, maxPrice]);
 
   useEffect(() => {
-    const arraysAreEqual = 
-      selectedCurrencies.length === localSelectedCurrencies.length &&
-      selectedCurrencies.every(id => localSelectedCurrencies.includes(id));
+
+    if (isInternalChangeRef.current) {
+      return;
+    }
     
-    if (!arraysAreEqual) {
+    // Create string representations for deep comparison
+    const propsStr = JSON.stringify([...selectedCurrencies].sort());
+    const localStr = JSON.stringify([...localSelectedCurrencies].sort());
+    
+    // Only update if actually different
+    if (propsStr !== localStr) {
       setLocalSelectedCurrencies(selectedCurrencies);
     }
-  }, [selectedCurrencies, localSelectedCurrencies]);
+  }, [selectedCurrencies]);
 
   const onChangeMinPrice = useCallback((value: string) => {
     setMinPriceValue(value || undefined);
@@ -88,13 +105,22 @@ const PricesFilter: FC<PricesFilterProps> = ({
   }, []);
 
   const onPricesClear = useCallback(() => {
+    isInternalChangeRef.current = true;
+    
     setMinPriceValue(undefined);
     setMaxPriceValue(undefined);
     setLocalSelectedCurrencies([]);
+    
+    // Call callbacks to remove filters from parent state
     onChange(undefined);
     if (onCurrenciesChange) {
       onCurrenciesChange([]);
     }
+    
+    // Reset flag after a tick
+    setTimeout(() => {
+      isInternalChangeRef.current = false;
+    }, 0);
   }, [onChange, onCurrenciesChange]);
 
   const onClearMinPrice = useCallback(() => {
@@ -107,72 +133,74 @@ const PricesFilter: FC<PricesFilterProps> = ({
     onChange(undefined);
   }, [onChange, minPriceValue]);
 
+  const hasActiveFilters = !!minPrice || !!maxPrice || localSelectedCurrencies.length > 0;
+
   return (
     <Accordion 
-      title={'Price'}
+      title="Price"
       isOpen={true}
       onClear={onPricesClear}
-      isClearShow={!!minPrice || !!maxPrice || localSelectedCurrencies.length > 0}
-      children={
-        <PriceFilterWrapper>
-          {/* Currency checkboxes section */}
-          {onCurrenciesChange && currencies.length > 0 && (
-            <CurrenciesSection>
-              <SectionLabel>Currency</SectionLabel>
-              <CurrenciesWrapper>
-                {currencies.map((currency) => (
-                  <CurrencyItemWrapper key={currency.id} style={{ alignItems: 'center' }}>
-                    <CurrencyItem>
-                      <CheckboxWrapper>
-                        <Checkbox
-                          checked={localSelectedCurrencies.includes(Number(currency.id))}
-                          onChange={() => handleCurrencyToggle(Number(currency.id))}
-                          label={''}
-                          testid={`${testid}-currency-${currency.id}`}
-                          disabled={disabled}
-                        />
-                      </CheckboxWrapper>
-                      {currency.iconUrl && (
-                        <CurrencyIcon src={currency.iconUrl} alt={currency.title} />
-                      )}
-                      <CurrencyLabel>{currency.title}</CurrencyLabel>
-                    </CurrencyItem>
-                  </CurrencyItemWrapper>
-                ))}
-              </CurrenciesWrapper>
-            </CurrenciesSection>
-          )}
+      isClearShow={hasActiveFilters}
+    >
+      <PriceFilterWrapper>
+        {/* Currency checkboxes section */}
+        {onCurrenciesChange && currencies.length > 0 && (
+          <CurrenciesSection>
+            <SectionLabel>Currency</SectionLabel>
+            <CurrenciesWrapper>
+              {currencies.map((currency) => (
+                <CurrencyItemWrapper key={currency.id}>
+                  <CurrencyItem onClick={() => !disabled && handleCurrencyToggle(Number(currency.id))}>
+                    <CheckboxWrapper>
+                      <Checkbox
+                        checked={localSelectedCurrencies.includes(Number(currency.id))}
+                        onChange={() => handleCurrencyToggle(Number(currency.id))}
+                        label=""
+                        testid={`${testid}-currency-${currency.id}`}
+                        disabled={disabled}
+                      />
+                    </CheckboxWrapper>
+                    {currency.iconUrl && (
+                      <CurrencyIcon src={currency.iconUrl} alt={currency.title} />
+                    )}
+                    <CurrencyLabel>{currency.title}</CurrencyLabel>
+                  </CurrencyItem>
+                </CurrencyItemWrapper>
+              ))}
+            </CurrenciesWrapper>
+          </CurrenciesSection>
+        )}
 
-          {/* Price range section */}
-          <PricesRangeWrapper>
-            <NumberInput
-              value={minPriceValue?.toString()}
-              onChange={onChangeMinPrice}
-              placeholder={'Min'}
-              testid={`${testid}-minPrice`}
-              disabled={disabled}
-              onClear={onClearMinPrice}
-            />
-            <Text>to</Text>
-            <NumberInput
-              value={maxPriceValue?.toString()}
-              onChange={onChangeMaxPrice}
-              placeholder={'Max'}
-              testid={`${testid}-maxPrice`}
-              disabled={disabled}
-              onClear={onClearMaxPrice}
-            />
-          </PricesRangeWrapper>
-          <Button
-            wide
-            title={'Apply'}
-            onClick={onApply}
-            testid={`${testid}-apply-button`}
-            disabled={disabled || (!minPriceValue && !maxPriceValue)}
+        {/* Price range section */}
+        <PricesRangeWrapper>
+          <NumberInput
+            value={minPriceValue?.toString()}
+            onChange={onChangeMinPrice}
+            placeholder="Min"
+            testid={`${testid}-minPrice`}
+            disabled={disabled}
+            onClear={onClearMinPrice}
           />
-        </PriceFilterWrapper>
-      }
-    />
+          <Text>to</Text>
+          <NumberInput
+            value={maxPriceValue?.toString()}
+            onChange={onChangeMaxPrice}
+            placeholder="Max"
+            testid={`${testid}-maxPrice`}
+            disabled={disabled}
+            onClear={onClearMaxPrice}
+          />
+        </PricesRangeWrapper>
+        
+        <Button
+          wide
+          title="Apply"
+          onClick={onApply}
+          testid={`${testid}-apply-button`}
+          disabled={disabled || (!minPriceValue && !maxPriceValue)}
+        />
+      </PriceFilterWrapper>
+    </Accordion>
   );
 };
 
@@ -211,9 +239,10 @@ const CurrencyItemWrapper = styled.div`
 
 const CurrencyItem = styled.div`
   display: flex;
-  align-items: center !important;
+  align-items: center;
   column-gap: 8px;
   cursor: pointer;
+  user-select: none;
 `;
 
 const CurrencyIcon = styled.img`

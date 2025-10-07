@@ -13,31 +13,75 @@ import { useCollections } from 'hooks/useCollections';
 import { mockWearables } from 'pages/Token/constants';
 import { SelectOptionProps } from 'components/UI/types';
 
+const isEmptyFilterState = (filterState: FilterState | null): boolean => {
+  if (!filterState) return true;
+  
+  const {
+    statuses,
+    prices,
+    currencies,
+    collections,
+    attributes,
+    attributeCounts,
+    typeOfAssets,
+    typeOfCustomizableNFTs
+  } = filterState;
+
+  const hasStatuses = statuses && Object.values(statuses).some(Boolean);
+  const hasPrices = prices && (prices.minPrice || prices.maxPrice);
+  const hasCurrencies = currencies && currencies.length > 0;
+  const hasCollections = collections && collections.length > 0;
+  const hasAttributes = attributes && attributes.length > 0;
+  const hasAttributeCounts = attributeCounts && attributeCounts.length > 0;
+  const hasTypes = typeOfAssets || typeOfCustomizableNFTs;
+
+  return !hasStatuses && !hasPrices && !hasCurrencies && !hasCollections && 
+         !hasAttributes && !hasAttributeCounts && !hasTypes;
+};
+
+interface UseMarketFilterParams {
+  isFetching: boolean;
+  fetch(payload: GetOffersRequestPayload): Promise<OffersResponse | TokensResponse>;
+  fetchAttributes: (payload: OfferFilters) => Promise<OffersAttributesResponse>;
+}
+
 export const useMarketFilter = ({
   isFetching,
   fetch,
   fetchAttributes
-}: {
-  isFetching: boolean;
-  fetch(
-    payload: GetOffersRequestPayload
-  ): Promise<OffersResponse | TokensResponse>;
-  fetchAttributes: (payload: OfferFilters) => Promise<OffersAttributesResponse>;
-}) => {
+}: UseMarketFilterParams) => {
   const { currentChainId, api } = useApi();
-  const { customizableCollections, featuredCollections } = useCollections();
+  const { featuredCollections } = useCollections();
   const { selectedAccount, isLoading: isAccountsLoading } = useAccounts();
   const searchParams = new URLSearchParams(window.location.search);
 
-  const [filterState, setFilterState] = useState<FilterState | null>(parseFilterState(searchParams.get('filterState')));
-  const [sortingValue, setSortingValue] = useState<string>(searchParams.get('sortingValue') || defaultSortingValue.id);
-  const [searchValue, setSearchValue] = useState<string | undefined>(searchParams.get('searchValue') || '');
+  const [filterState, setFilterState] = useState<FilterState | null>(
+    parseFilterState(searchParams.get('filterState'))
+  );
+  const [sortingValue, setSortingValue] = useState<string>(
+    searchParams.get('sortingValue') || defaultSortingValue.id
+  );
+  const [searchValue, setSearchValue] = useState<string | undefined>(
+    searchParams.get('searchValue') || ''
+  );
+  
   const lastFetchAttributesParams = useRef<OfferFilters | null>(null);
+  const prevAccountAddress = useRef<string | undefined>(selectedAccount?.address);
+  const hasInitialLoadRef = useRef(false);
+
+  const mockWearablesData = useMemo(() => {
+    if (!currentChainId) return { wearables: [], customizables: [] };
+    const wearables = mockWearables[currentChainId]?.map(({ collectionId }) => collectionId) || [];
+    const customizables = mockWearables[currentChainId]?.map(({ baseCollections }) => baseCollections).flat() || [];
+    return { wearables, customizables };
+  }, [currentChainId]);
 
   const getFilterByState = useCallback((filterState: FilterState | null) => {
     if (!filterState) return {};
+    
     const { statuses, prices, collections, attributeCounts, attributes, ...otherFilter } = filterState;
     const { myNFTs, myBets, timedAuction, fixedPrice } = statuses || {};
+    
     const seller = myNFTs && selectedAccount?.address
       ? (Address.is.ethereumAddressInAnyForm(selectedAccount?.address)
         ? Address.normalize.ethereumAddress(selectedAccount?.address)
@@ -45,31 +89,26 @@ export const useMarketFilter = ({
       : undefined;
 
     let _collections: number[] = [];
+    const { wearables, customizables } = mockWearablesData;
 
-    // mocked wearables and base collections used to filter
-    const wearables = mockWearables[currentChainId || ''].map(({ collectionId }) => collectionId);
-    const customizables = mockWearables[currentChainId || ''].map(({ baseCollections }) => baseCollections).flat();
     if (otherFilter.typeOfAssets === TypeOfAssets.NFTs) {
-      _collections = featuredCollections.map(({ id }) => id).filter((id) => {
-        return ![...customizables, ...wearables].includes(id);
-      });
-    }
-    if (otherFilter.typeOfAssets === TypeOfAssets.CustomizableNFTs) {
+      _collections = featuredCollections
+        .map(({ id }) => id)
+        .filter((id) => ![...customizables, ...wearables].includes(id));
+    } else if (otherFilter.typeOfAssets === TypeOfAssets.CustomizableNFTs) {
       _collections = [...customizables, ...wearables];
     }
 
     if (otherFilter.typeOfCustomizableNFTs === TypeOfCustomizableNFTs.Base) {
       _collections = customizables;
-    }
-    if (otherFilter.typeOfCustomizableNFTs === TypeOfCustomizableNFTs.Wearables) {
+    } else if (otherFilter.typeOfCustomizableNFTs === TypeOfCustomizableNFTs.Wearables) {
       _collections = wearables;
-    }
-    if (otherFilter.typeOfCustomizableNFTs === TypeOfCustomizableNFTs.All) {
+    } else if (otherFilter.typeOfCustomizableNFTs === TypeOfCustomizableNFTs.All) {
       _collections = [...wearables, ...customizables];
     }
 
     let collectionId = (collections?.length && _collections.length)
-      ? collections.filter((value) => (_collections).includes(value))
+      ? collections.filter((value) => _collections.includes(value))
       : [...(collections || []), ...(_collections || [])];
 
     if (collectionId.length === 0 && collections?.length && _collections.length) {
@@ -79,14 +118,16 @@ export const useMarketFilter = ({
     return {
       seller,
       bidderAddress: myBets ? selectedAccount?.address : undefined,
-      isAuction: (timedAuction && fixedPrice) || (!timedAuction && !fixedPrice) ? undefined : !!timedAuction && !fixedPrice,
+      isAuction: (timedAuction && fixedPrice) || (!timedAuction && !fixedPrice) 
+        ? undefined 
+        : !!timedAuction && !fixedPrice,
       ...prices,
       collectionId,
       numberOfAttributes: attributeCounts,
       attributes: attributes?.map(({ attribute }) => attribute),
       ...otherFilter
     };
-  }, [selectedAccount]);
+  }, [selectedAccount, mockWearablesData, featuredCollections]);
 
   const fetchFilterAttributes = useCallback(async (currentFilterState: FilterState | null) => {
     const params = {
@@ -96,7 +137,11 @@ export const useMarketFilter = ({
   
     if (JSON.stringify(params) !== JSON.stringify(lastFetchAttributesParams.current)) {
       lastFetchAttributesParams.current = params;
-      await fetchAttributes(params);
+      try {
+        await fetchAttributes(params);
+      } catch (error) {
+        console.error('Error fetching attributes:', error);
+      }
     }
   }, [fetchAttributes, getFilterByState, searchValue]);
 
@@ -112,25 +157,126 @@ export const useMarketFilter = ({
     });
   }, [fetch, filterState, getFilterByState, searchValue]);
 
-  const onSearch = useCallback(async(value?: string) => {
+  const onSearch = useCallback(async (value?: string) => {
     setSearchValue(value);
     setUrlParameter('searchValue', value || '');
-    await Promise.all([
-      fetchFilterAttributes(filterState),
-      void fetch({
+    
+    try {
+      await Promise.all([
+        fetchFilterAttributes(filterState),
+        fetch({
+          page: 1,
+          pageSize: 20,
+          ...(getFilterByState(filterState)),
+          searchText: value || undefined,
+          sort: [sortingValue]
+        })
+      ]);
+    } catch (error) {
+      console.error('Error during search:', error);
+    }
+  }, [fetch, sortingValue, filterState, getFilterByState, fetchFilterAttributes]);
+
+  const onFilterChange = useCallback(async (filterState: FilterState | null) => {
+    if (!filterState || isEmptyFilterState(filterState)) {
+      setUrlParameter('filterState', '');
+      setFilterState(null);
+    } else {
+      setUrlParameter('filterState', JSON.stringify(filterState));
+      setFilterState(filterState);
+    }
+
+    try {
+      await Promise.all([
+        fetchFilterAttributes(filterState),
+        fetch({
+          page: 1,
+          pageSize: 20,
+          ...(getFilterByState(filterState)),
+          searchText: searchValue || undefined,
+          sort: [sortingValue]
+        })
+      ]);
+    } catch (error) {
+      console.error('Error applying filters:', error);
+    }
+  }, [fetch, sortingValue, getFilterByState, searchValue, fetchFilterAttributes]);
+
+  const onMobileFilterApply = useCallback(async (
+    filterState: FilterState | null, 
+    sorting: SelectOptionProps
+  ) => {
+    if (!filterState || isEmptyFilterState(filterState)) {
+      setUrlParameter('filterState', '');
+      setFilterState(null);
+    } else {
+      setUrlParameter('filterState', JSON.stringify(filterState));
+      setFilterState(filterState);
+    }
+    
+    setUrlParameter('sortingValue', sorting.id as string);
+    setSortingValue(sorting.id as string);
+    
+    try {
+      await fetch({
         page: 1,
         pageSize: 20,
         ...(getFilterByState(filterState)),
-        searchText: value || undefined,
-        sort: [sortingValue]
-      })]);
-  }, [fetch, sortingValue, searchValue, filterState, getFilterByState]);
+        searchText: searchValue || undefined,
+        sort: [sorting.id as string]
+      });
+    } catch (error) {
+      console.error('Error applying mobile filters:', error);
+    }
+  }, [fetch, getFilterByState, searchValue]);
 
-  const onFilterChange = useCallback(async (filterState: FilterState | null) => {
-    setUrlParameter('filterState', filterState ? JSON.stringify(filterState) : '');
-    setFilterState(filterState);
+  useEffect(() => {
+    if (isAccountsLoading) return;
+    if (prevAccountAddress.current === selectedAccount?.address) return;
+    if (!filterState?.statuses?.myNFTs) return;
+    
+    prevAccountAddress.current = selectedAccount?.address;
+    
+    if (!isFetching) {
+      void onFilterChange(filterState);
+    }
+  }, [selectedAccount?.address, isAccountsLoading, filterState?.statuses?.myNFTs, isFetching, onFilterChange]);
 
-    await Promise.all([
+  const filterCount = useMemo(() => {
+    if (!filterState) return 0;
+    
+    const { 
+      statuses, 
+      prices, 
+      collections = [], 
+      attributes = [], 
+      attributeCounts = [], 
+      typeOfAssets, 
+      typeOfCustomizableNFTs 
+    } = filterState;
+    
+    const statusesCount = statuses 
+      ? Object.values(statuses).filter(Boolean).length 
+      : 0;
+    const collectionsCount = collections.length;
+    const numberOfAttributesCount = attributeCounts.length;
+    const attributesCount = attributes.length;
+    const pricesCount = prices ? 1 : 0;
+    const typesCount = (typeOfAssets ? 1 : 0) + (typeOfCustomizableNFTs ? 1 : 0);
+
+    return statusesCount + collectionsCount + attributesCount + 
+           numberOfAttributesCount + pricesCount + typesCount;
+  }, [filterState]);
+
+  const isFirstRender = useIsFirstRender();
+
+  useEffect(() => {
+    if (hasInitialLoadRef.current) return;
+    if (!currentChainId || !api) return;
+    
+    hasInitialLoadRef.current = true;
+
+    void Promise.all([
       fetchFilterAttributes(filterState),
       fetch({
         page: 1,
@@ -140,56 +286,15 @@ export const useMarketFilter = ({
         sort: [sortingValue]
       })
     ]);
-  }, [fetch, sortingValue, getFilterByState, searchValue, fetchFilterAttributes]);
-
-  const onMobileFilterApply = useCallback(async (filterState: FilterState | null, sorting: SelectOptionProps) => {
-    setUrlParameter('filterState', filterState ? JSON.stringify(filterState) : '');
-    setUrlParameter('sortingValue', sorting.id as string);
-    await fetch({
-      page: 1,
-      pageSize: 20,
-      ...(getFilterByState(filterState)),
-      searchText: searchValue || undefined,
-      sort: [sorting.id as string]
-    });
-    setFilterState(filterState);
-    setSortingValue(sorting.id as string);
-  }, [fetch, getFilterByState, searchValue]);
-
-  const onChangeAccount = useCallback(() => {
-    if (isFetching) return;
-    void onFilterChange(filterState);
-  }, [filterState, isFetching, onFilterChange]);
-
-  useEffect(() => {
-    if (isAccountsLoading) return;
-    onChangeAccount();
-  }, [isAccountsLoading]);
-
-  useEffect(() => {
-    if (selectedAccount?.address && filterState?.statuses?.myNFTs) {
-      onChangeAccount();
-    }
-  }, [selectedAccount?.address]);
-
-  const filterCount = useMemo(() => {
-    const { statuses, prices, collections = [], attributes = [], attributeCounts = [], typeOfAssets, typeOfCustomizableNFTs } = filterState || {};
-    const statusesCount: number = Object.values(statuses || {}).filter((status) => status).length;
-    const collectionsCount: number = collections.length;
-    const numberOfAttributesCount: number = attributeCounts.length;
-    const attributesCount: number = attributes.length;
-    const typesCount = (!typeOfAssets ? 0 : 1) + (!typeOfCustomizableNFTs ? 0 : 1);
-
-    return statusesCount + collectionsCount + attributesCount + numberOfAttributesCount + (prices ? 1 : 0) + typesCount;
-  }, [filterState]);
-
-  const isFirstRender = useIsFirstRender();
+  }, [currentChainId, api]);
 
   useEffect(() => {
     if (!currentChainId || !api || isFirstRender) return;
+    
     setFilterState(null);
     setSearchValue(undefined);
     setSortingValue(defaultSortingValue.id);
+    
     void fetch({
       page: 1,
       pageSize: 20,
