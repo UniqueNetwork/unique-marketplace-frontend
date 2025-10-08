@@ -29,10 +29,15 @@ const CollectionsWrapper: FC<CollectionsWrapperProps> = ({ children }) => {
       return;
     }
 
-    setCuratedCollections(Object.values(featuredCollections)
-      .filter(({ isCurated }) => isCurated)
-      .map(({ description }) => description));
-
+    setCuratedCollections(
+      Object.entries(featuredCollections)
+        .filter(([_, { isCurated }]) => isCurated)
+        .map(([id, { description }]) => ({
+          ...description,
+          id: Number(id)
+        }))
+    );
+    
     const { collections: newCollections, count } = await fetch({ limit: FETCH_COLLECTIONS_LIMIT, offset });
     setTotalCount(count);
     setCollections([...collections, ...newCollections]);
