@@ -23,7 +23,8 @@ enum AccountModal {
   sendFunds,
   withdrawDeposit,
   getKsmModal,
-  crossChainTransfer
+  crossChainTransferFromPolkadot,
+  crossChainTransferToPolkadot,
 }
 
 interface TokenBalance {
@@ -227,7 +228,7 @@ export const AccountsPage = () => {
                             {token.name === 'DOT' && (
                               <CrossChainButton 
                                 title="Cross-chain transfer" 
-                                onClick={onAccountActionClick(AccountModal.crossChainTransfer)}
+                                onClick={onAccountActionClick(AccountModal.crossChainTransferToPolkadot)}
                                 disabled={!token.canSend}
                                 size="small"
                                 role="primary"
@@ -278,7 +279,7 @@ export const AccountsPage = () => {
                             <ActionsCell>
                               <CrossChainButton 
                                 title="Cross-chain transfer" 
-                                onClick={onAccountActionClick(AccountModal.crossChainTransfer)}
+                                onClick={onAccountActionClick(AccountModal.crossChainTransferFromPolkadot)}
                                 disabled={!token.canTransferFromRelay}
                                 size="small"
                               />
@@ -346,9 +347,18 @@ export const AccountsPage = () => {
           testid={`${testid}-withdraw-modal`}
         />
         <CrossChainTransferModal
-          isVisible={currentModal === AccountModal.crossChainTransfer}
+          isVisible={
+            currentModal === AccountModal.crossChainTransferFromPolkadot ||
+            currentModal === AccountModal.crossChainTransferToPolkadot
+          }
+          initialDirection={
+            currentModal === AccountModal.crossChainTransferFromPolkadot 
+              ? 'fromPolkadot' 
+              : 'toPolkadot'
+          }
           onFinish={onModalClose}
           polkadotBalance={polkadotRelayBalance}
+          uniqueDotBalance={uniqueDotBalance}
           testid={`${testid}-cross-chain-modal`}
         />
         {config.rampApiKey && currentModal === AccountModal.getKsmModal && (

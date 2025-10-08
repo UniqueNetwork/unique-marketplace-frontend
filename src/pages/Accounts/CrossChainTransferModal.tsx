@@ -15,10 +15,15 @@ const MIN_DOT_TRANSFER = 0.001;
 const MAX_DOT_TRANSFER = 1000;
 const MIN_BALANCE_AFTER_TRANSFER = 1.1; // Existential Deposit + buffer
 
+const DOT_COLLECTION_ID = 437;
+const WUD_COLLECTION_ID = 3779;
+
 interface CrossChainTransferModalProps {
   isVisible: boolean;
   onFinish: () => void;
   polkadotBalance?: string;
+  uniqueDotBalance?: string;
+  initialDirection?: TransferDirection;
   testid?: string;
 }
 
@@ -29,40 +34,55 @@ export const CrossChainTransferModal: React.FC<CrossChainTransferModalProps> = (
   isVisible,
   onFinish,
   polkadotBalance = '0',
+  uniqueDotBalance = '0',
+  initialDirection = 'fromPolkadot',
   testid = 'cross-chain-modal',
 }) => {
   const { selectedAccount } = useAccounts();
   
   const [transferAmount, setTransferAmount] = useState('');
-  const [transferDirection, setTransferDirection] = useState<TransferDirection>('fromPolkadot');
+  const [transferDirection, setTransferDirection] = useState<TransferDirection>(initialDirection);
   const [transactionStatus, setTransactionStatus] = useState<TransactionStatus>('idle');
   const [statusMessage, setStatusMessage] = useState('');
   const [txHash, setTxHash] = useState('');
   const [polkadotApi, setPolkadotApi] = useState<ApiPromise | null>(null);
+  const [uniqueApi, setUniqueApi] = useState<ApiPromise | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
 
   const address = selectedAccount?.address;
 
-  // Initialize Polkadot API
+  // Initialize APIs and set initial direction
   useEffect(() => {
-    if (isVisible && !polkadotApi) {
-      initializeApi();
+    if (isVisible) {
+      setTransferDirection(initialDirection);
+      initializeApis();
     }
-  }, [isVisible]);
+    return () => {
+      if (polkadotApi) polkadotApi.disconnect();
+      if (uniqueApi) uniqueApi.disconnect();
+    };
+  }, [isVisible, initialDirection]);
 
-  const initializeApi = async () => {
+  const initializeApis = async () => {
     setIsConnecting(true);
     try {
-      // Initialize extensions ONCE at startup
       await web3Enable('DOT Exchange');
       
-      const provider = new WsProvider('wss://rpc.polkadot.io');
-      const api = await ApiPromise.create({ provider });
-      setPolkadotApi(api);
-      console.log('Polkadot API connected');
+      const polkadotProvider = new WsProvider('wss://rpc.polkadot.io');
+      const uniqueProvider = new WsProvider('wss://ws.unique.network');
+      
+      const [polkadotApiInstance, uniqueApiInstance] = await Promise.all([
+        ApiPromise.create({ provider: polkadotProvider }),
+        ApiPromise.create({ provider: uniqueProvider }),
+      ]);
+      
+      setPolkadotApi(polkadotApiInstance);
+      setUniqueApi(uniqueApiInstance);
+      
+      console.log('Both APIs connected');
     } catch (error) {
-      console.error('Failed to connect to Polkadot:', error);
-      setStatusMessage('Failed to connect to Polkadot network');
+      console.error('Failed to connect:', error);
+      setStatusMessage('Failed to connect to blockchain networks');
       setTransactionStatus('error');
     } finally {
       setIsConnecting(false);
@@ -74,15 +94,20 @@ export const CrossChainTransferModal: React.FC<CrossChainTransferModalProps> = (
     setTransactionStatus('idle');
     setStatusMessage('');
     setTxHash('');
+    setTransferDirection(initialDirection);
     if (polkadotApi) {
       polkadotApi.disconnect();
       setPolkadotApi(null);
     }
+    if (uniqueApi) {
+      uniqueApi.disconnect();
+      setUniqueApi(null);
+    }
     onFinish();
-  }, [onFinish, polkadotApi]);
+  }, [onFinish, polkadotApi, uniqueApi, initialDirection]);
 
   const executeTransfer = async () => {
-    if (!polkadotApi || !address || !transferAmount) return;
+    if (!address || !transferAmount) return;
 
     setTransactionStatus('pending');
     setStatusMessage('Validating transfer...');
@@ -103,12 +128,12 @@ export const CrossChainTransferModal: React.FC<CrossChainTransferModalProps> = (
       );
 
       setStatusMessage('Connecting to wallet...');
-      
-      // Get injector for the address - extensions already initialized
       const injector = await web3FromAddress(address);
 
       if (transferDirection === 'fromPolkadot') {
         // Polkadot Relay Chain → Unique Network
+        if (!polkadotApi) throw new Error('Polkadot API not connected');
+
         const destination = {
           V4: {
             parents: 0,
@@ -137,13 +162,12 @@ export const CrossChainTransferModal: React.FC<CrossChainTransferModalProps> = (
           ],
         };
 
-        console.log('XCM transfer configuration (Polkadot → Unique):', {
+        console.log('XCM transfer (Polkadot → Unique):', {
           destination,
           beneficiary: beneficiary.V4.interior.X1[0].AccountId32.id,
           amount: amount.toString(),
         });
 
-        // Use limitedReserveTransferAssets
         const tx = polkadotApi.tx.xcmPallet.limitedReserveTransferAssets(
           destination,
           beneficiary,
@@ -161,7 +185,7 @@ export const CrossChainTransferModal: React.FC<CrossChainTransferModalProps> = (
             console.log('Transaction status:', result.status.type);
 
             if (result.status.isInBlock) {
-              console.log('Transaction included in block:', result.status.asInBlock.toString());
+              console.log('In block:', result.status.asInBlock.toString());
               
               const success = result.events.some(
                 ({ event }) =>
@@ -174,17 +198,14 @@ export const CrossChainTransferModal: React.FC<CrossChainTransferModalProps> = (
                   `Successfully transferred ${transferAmount} DOT to Unique Network`
                 );
                 setTxHash(result.txHash.toString());
-                setTimeout(() => {
-                  handleClose();
-                }, 3000);
+                setTimeout(handleClose, 3000);
               } else {
                 setTransactionStatus('error');
-                setStatusMessage('Transaction failed - check blockchain explorer for details');
+                setStatusMessage('Transaction failed');
               }
 
               unsub();
             } else if (result.isError) {
-              console.error('Transaction error:', result);
               setTransactionStatus('error');
               setStatusMessage('Transaction failed');
               unsub();
@@ -192,8 +213,72 @@ export const CrossChainTransferModal: React.FC<CrossChainTransferModalProps> = (
           }
         );
       } else {
-        // Unique Network → Polkadot Relay Chain (reverse transfer - not yet implemented)
-        throw new Error('Transfer from Unique to Polkadot is not yet implemented');
+        // Unique Network → Polkadot Relay Chain
+        if (!uniqueApi) throw new Error('Unique API not connected');
+
+        const destination = {
+          V4: {
+            parents: 1,
+            interior: {
+              X1: [{ AccountId32: { id: u8aToHex(decodeAddress(address)) } }]
+            },
+          },
+        };
+
+        console.log('XCM transfer (Unique → Polkadot):', {
+          collectionId: DOT_COLLECTION_ID,
+          amount: amount.toString(),
+          destination,
+        });
+
+        const tx = uniqueApi.tx.xTokens.transfer(
+          DOT_COLLECTION_ID,
+          amount.toString(),
+          destination,
+          'Unlimited'
+        );
+
+        setStatusMessage('Signing transaction...');
+
+        const unsub = await tx.signAndSend(
+          address,
+          { signer: injector.signer },
+          (result) => {
+            console.log('Transaction status:', result.status.type);
+
+            if (result.status.isInBlock) {
+              console.log('In block:', result.status.asInBlock.toString());
+              
+              const success = result.events.some(
+                ({ event }) =>
+                  event.section === 'system' && event.method === 'ExtrinsicSuccess'
+              );
+
+              const xcmFailed = result.events.some(
+                ({ event }) =>
+                  event.section === 'xTokens' && event.method === 'XcmExecutionFailed'
+              );
+
+              if (success && !xcmFailed) {
+                setTransactionStatus('success');
+                setStatusMessage(
+                  `Successfully transferred ${transferAmount} DOT to Polkadot Relay Chain`
+                );
+                setTxHash(result.txHash.toString());
+                setTimeout(handleClose, 3000);
+              } else {
+                setTransactionStatus('error');
+                setStatusMessage(xcmFailed ? 'XCM execution failed' : 'Transaction failed');
+              }
+
+              unsub();
+            } else if (result.isError) {
+              setTransactionStatus('error');
+              setStatusMessage('Transaction failed');
+              unsub();
+            }
+          }
+        );
       }
     } catch (error) {
       console.error('Transfer failed:', error);
@@ -207,8 +292,16 @@ export const CrossChainTransferModal: React.FC<CrossChainTransferModalProps> = (
   const transferAmountNum = transferAmount ? parseFloat(transferAmount) : 0;
   const isAmountValid =
     transferAmountNum >= MIN_DOT_TRANSFER && transferAmountNum <= MAX_DOT_TRANSFER;
-  const availableBalance = parseFloat(polkadotBalance);
-  const isBalanceSufficient = transferAmountNum > 0 && availableBalance >= transferAmountNum + MIN_BALANCE_AFTER_TRANSFER;
+  
+  const availableBalance = transferDirection === 'fromPolkadot' 
+    ? parseFloat(polkadotBalance)
+    : parseFloat(uniqueDotBalance);
+  
+  const isBalanceSufficient = 
+    transferAmountNum > 0 && 
+    availableBalance >= transferAmountNum + MIN_BALANCE_AFTER_TRANSFER;
+
+  const currentApi = transferDirection === 'fromPolkadot' ? polkadotApi : uniqueApi;
 
   return (
     <Modal isVisible={isVisible} isClosable onClose={handleClose}>
@@ -220,7 +313,7 @@ export const CrossChainTransferModal: React.FC<CrossChainTransferModalProps> = (
 
         {isConnecting ? (
           <LoadingState>
-            <Text>Connecting to Polkadot network...</Text>
+            <Text>Connecting to blockchain networks...</Text>
           </LoadingState>
         ) : (
           <ModalBody>
@@ -237,8 +330,6 @@ export const CrossChainTransferModal: React.FC<CrossChainTransferModalProps> = (
                 <DirectionButton
                   $active={transferDirection === 'toPolkadot'}
                   onClick={() => setTransferDirection('toPolkadot')}
-                  disabled
-                  title="Coming soon"
                 >
                   Unique → Polkadot
                 </DirectionButton>
@@ -268,7 +359,9 @@ export const CrossChainTransferModal: React.FC<CrossChainTransferModalProps> = (
               />
               <InputFooter>
                 <HelperText>Min: {MIN_DOT_TRANSFER} DOT</HelperText>
-                <HelperText>Available: {polkadotBalance} DOT</HelperText>
+                <HelperText>
+                  Available: {transferDirection === 'fromPolkadot' ? polkadotBalance : uniqueDotBalance} DOT
+                </HelperText>
               </InputFooter>
 
               {transferAmount && transferAmountNum < MIN_DOT_TRANSFER && (
@@ -281,8 +374,8 @@ export const CrossChainTransferModal: React.FC<CrossChainTransferModalProps> = (
 
               {transferAmount && !isBalanceSufficient && (
                 <ErrorText>
-                  Insufficient balance. Available: {polkadotBalance} DOT, Required: ~
-                  {(transferAmountNum + MIN_BALANCE_AFTER_TRANSFER).toFixed(3)} DOT (including fees + min balance {MIN_BALANCE_AFTER_TRANSFER} DOT)
+                  Insufficient balance. Available: {availableBalance.toFixed(3)} DOT, Required: ~
+                  {(transferAmountNum + MIN_BALANCE_AFTER_TRANSFER).toFixed(3)} DOT (including fees)
                 </ErrorText>
               )}
             </FormGroup>
@@ -293,7 +386,11 @@ export const CrossChainTransferModal: React.FC<CrossChainTransferModalProps> = (
                 <StatusMessage>{statusMessage}</StatusMessage>
                 {txHash && (
                   <TxHashLink
-                    href={`https://polkadot.subscan.io/extrinsic/${txHash}`}
+                    href={
+                      transferDirection === 'fromPolkadot'
+                        ? `https://polkadot.subscan.io/extrinsic/${txHash}`
+                        : `https://unique.subscan.io/extrinsic/${txHash}`
+                    }
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -321,7 +418,7 @@ export const CrossChainTransferModal: React.FC<CrossChainTransferModalProps> = (
                   !isAmountValid ||
                   !isBalanceSufficient ||
                   transactionStatus === 'pending' ||
-                  !polkadotApi
+                  !currentApi
                 }
               />
             </ButtonGroup>
