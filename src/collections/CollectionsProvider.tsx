@@ -29,14 +29,30 @@ const CollectionsWrapper: FC<CollectionsWrapperProps> = ({ children }) => {
       return;
     }
 
-    setCuratedCollections(
-      Object.entries(featuredCollections)
-        .filter(([_, { isCurated }]) => isCurated)
-        .map(([id, { description }]) => ({
-          ...description,
-          id: Number(id)
-        }))
+    const curated = Object.entries(featuredCollections)
+      .filter(([_, { isCurated }]) => isCurated)
+      .map(([id, { description }]) => ({
+        ...description,
+        id: Number(id)
+      }));
+
+    console.log('🟢 Curated collections WITH id fix:', 
+      curated.map(c => ({ 
+        name: c.name, 
+        id: c.id,
+        type: typeof c.id
+      }))
     );
+    
+    console.log('🟢 WUD collections check:', 
+      curated.filter(c => c.name?.includes('WUD')).map(c => ({ 
+        name: c.name, 
+        id: c.id,
+        type: typeof c.id
+      }))
+    );
+
+    setCuratedCollections(curated);
     
     const { collections: newCollections, count } = await fetch({ limit: FETCH_COLLECTIONS_LIMIT, offset });
     setTotalCount(count);
