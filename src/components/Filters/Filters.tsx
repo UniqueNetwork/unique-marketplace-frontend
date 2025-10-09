@@ -39,8 +39,15 @@ export const Filters: FC<FiltersProps> = ({ value, attributes, attributeCounts, 
   }, [value, onFilterChange]);
 
   const onPricesFilterChange = useCallback((prices: PriceRange | undefined) => {
-    const newState = updateFilterState(value, 'prices', prices);
-    onFilterChange(newState);
+    // Always replace the entire prices object, don't merge
+    if (!prices || Object.keys(prices).length === 0) {
+      // Remove prices completely
+      const { prices: _, ...rest } = value || {};
+      onFilterChange(Object.keys(rest).length > 0 ? rest as FilterState : null);
+    } else {
+      // Replace with new prices
+      onFilterChange({ ...value, prices });
+    }
   }, [value, onFilterChange]);
 
   const onCurrenciesFilterChange = useCallback((currencies: number[]) => {

@@ -28,7 +28,7 @@ const isEmptyFilterState = (filterState: FilterState | null): boolean => {
   } = filterState;
 
   const hasStatuses = statuses && Object.values(statuses).some(Boolean);
-  const hasPrices = prices && (prices.minPrice || prices.maxPrice);
+  const hasPrices = prices && (prices.minPrice || prices.maxPrice || prices.minUsdtPrice || prices.maxUsdtPrice);
   const hasCurrencies = currencies && currencies.length > 0;
   const hasCollections = collections && collections.length > 0;
   const hasAttributes = attributes && attributes.length > 0;
@@ -68,6 +68,10 @@ export const useMarketFilter = ({
   const lastFetchAttributesParams = useRef<OfferFilters | null>(null);
   const prevAccountAddress = useRef<string | undefined>(selectedAccount?.address);
   const hasInitialLoadRef = useRef(false);
+  
+  // Race condition fix: track request order
+  const requestCounterRef = useRef(0);
+  const lastSuccessfulRequestRef = useRef(0);
 
   const mockWearablesData = useMemo(() => {
     if (!currentChainId) return { wearables: [], customizables: [] };
@@ -79,7 +83,7 @@ export const useMarketFilter = ({
   const getFilterByState = useCallback((filterState: FilterState | null) => {
     if (!filterState) return {};
     
-    const { statuses, prices, collections, attributeCounts, attributes, ...otherFilter } = filterState;
+    const { statuses, prices, collections, attributeCounts, attributes, currencies, ...otherFilter } = filterState;
     const { myNFTs, myBets, timedAuction, fixedPrice } = statuses || {};
     
     const seller = myNFTs && selectedAccount?.address
@@ -115,13 +119,41 @@ export const useMarketFilter = ({
       collectionId = [0];
     }
 
+    // Currency and price logic:
+    // - Always pass currencies parameter when selected (for filtering by currency)
+    // - Single currency with prices: use minPrice/maxPrice
+    // - Zero or multiple currencies with prices: use minUsdtPrice/maxUsdtPrice
+    const shouldUseUsdtPrice = !currencies || currencies.length === 0 || currencies.length > 1;
+    
+    let priceParams = {};
+    let currencyParams = {};
+    
+    // Always add currencies if selected
+    if (currencies && currencies.length > 0) {
+      currencyParams = { currencies };
+    }
+    
+    // Add price parameters if prices are set
+    if (prices) {
+      if (shouldUseUsdtPrice) {
+        // Use USDT prices for multiple or no currencies
+        if (prices.minUsdtPrice) priceParams = { ...priceParams, minUsdtPrice: prices.minUsdtPrice };
+        if (prices.maxUsdtPrice) priceParams = { ...priceParams, maxUsdtPrice: prices.maxUsdtPrice };
+      } else {
+        // Use regular prices for single currency
+        if (prices.minPrice) priceParams = { ...priceParams, minPrice: prices.minPrice };
+        if (prices.maxPrice) priceParams = { ...priceParams, maxPrice: prices.maxPrice };
+      }
+    }
+
     return {
       seller,
       bidderAddress: myBets ? selectedAccount?.address : undefined,
       isAuction: (timedAuction && fixedPrice) || (!timedAuction && !fixedPrice) 
         ? undefined 
         : !!timedAuction && !fixedPrice,
-      ...prices,
+      ...priceParams,
+      ...currencyParams,
       collectionId,
       numberOfAttributes: attributeCounts,
       attributes: attributes?.map(({ attribute }) => attribute),
@@ -148,18 +180,27 @@ export const useMarketFilter = ({
   const onSortingChange = useCallback((value: TOption) => {
     setSortingValue(value.id);
     setUrlParameter('sortingValue', value.id);
+    
+    // Race condition fix
+    const requestId = ++requestCounterRef.current;
+    
     void fetch({
       page: 1,
       pageSize: 20,
       ...(getFilterByState(filterState)),
       searchText: searchValue || undefined,
       sort: [value.id]
+    }).then(() => {
+      lastSuccessfulRequestRef.current = requestId;
     });
   }, [fetch, filterState, getFilterByState, searchValue]);
 
   const onSearch = useCallback(async (value?: string) => {
     setSearchValue(value);
     setUrlParameter('searchValue', value || '');
+    
+    // Race condition fix
+    const requestId = ++requestCounterRef.current;
     
     try {
       await Promise.all([
@@ -170,6 +211,8 @@ export const useMarketFilter = ({
           ...(getFilterByState(filterState)),
           searchText: value || undefined,
           sort: [sortingValue]
+        }).then(() => {
+          lastSuccessfulRequestRef.current = requestId;
         })
       ]);
     } catch (error) {
@@ -186,6 +229,9 @@ export const useMarketFilter = ({
       setFilterState(filterState);
     }
 
+    // Race condition fix
+    const requestId = ++requestCounterRef.current;
+
     try {
       await Promise.all([
         fetchFilterAttributes(filterState),
@@ -195,6 +241,8 @@ export const useMarketFilter = ({
           ...(getFilterByState(filterState)),
           searchText: searchValue || undefined,
           sort: [sortingValue]
+        }).then(() => {
+          lastSuccessfulRequestRef.current = requestId;
         })
       ]);
     } catch (error) {
@@ -217,6 +265,9 @@ export const useMarketFilter = ({
     setUrlParameter('sortingValue', sorting.id as string);
     setSortingValue(sorting.id as string);
     
+    // Race condition fix
+    const requestId = ++requestCounterRef.current;
+    
     try {
       await fetch({
         page: 1,
@@ -224,6 +275,8 @@ export const useMarketFilter = ({
         ...(getFilterByState(filterState)),
         searchText: searchValue || undefined,
         sort: [sorting.id as string]
+      }).then(() => {
+        lastSuccessfulRequestRef.current = requestId;
       });
     } catch (error) {
       console.error('Error applying mobile filters:', error);
@@ -252,7 +305,8 @@ export const useMarketFilter = ({
       attributes = [], 
       attributeCounts = [], 
       typeOfAssets, 
-      typeOfCustomizableNFTs 
+      typeOfCustomizableNFTs,
+      currencies = []
     } = filterState;
     
     const statusesCount = statuses 
@@ -263,9 +317,10 @@ export const useMarketFilter = ({
     const attributesCount = attributes.length;
     const pricesCount = prices ? 1 : 0;
     const typesCount = (typeOfAssets ? 1 : 0) + (typeOfCustomizableNFTs ? 1 : 0);
+    const currenciesCount = currencies.length;
 
     return statusesCount + collectionsCount + attributesCount + 
-           numberOfAttributesCount + pricesCount + typesCount;
+           numberOfAttributesCount + pricesCount + typesCount + currenciesCount;
   }, [filterState]);
 
   const isFirstRender = useIsFirstRender();
@@ -276,6 +331,9 @@ export const useMarketFilter = ({
     
     hasInitialLoadRef.current = true;
 
+    // Race condition fix
+    const requestId = ++requestCounterRef.current;
+
     void Promise.all([
       fetchFilterAttributes(filterState),
       fetch({
@@ -284,6 +342,8 @@ export const useMarketFilter = ({
         ...(getFilterByState(filterState)),
         searchText: searchValue || undefined,
         sort: [sortingValue]
+      }).then(() => {
+        lastSuccessfulRequestRef.current = requestId;
       })
     ]);
   }, [currentChainId, api]);
@@ -295,10 +355,15 @@ export const useMarketFilter = ({
     setSearchValue(undefined);
     setSortingValue(defaultSortingValue.id);
     
+    // Race condition fix
+    const requestId = ++requestCounterRef.current;
+    
     void fetch({
       page: 1,
       pageSize: 20,
       sort: [defaultSortingValue.id]
+    }).then(() => {
+      lastSuccessfulRequestRef.current = requestId;
     });
   }, [currentChainId]);
 

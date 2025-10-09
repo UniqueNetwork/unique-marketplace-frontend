@@ -83,7 +83,11 @@ export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
         setCollection(mapCollectionToMarketable(collectionOnChain, tokensCountOnScan));
         return;
       }
-      setCollection({...collectionData, cover: collectionOnChain?.info?.cover_image?.url});
+      
+      setCollection(prev => ({
+        ...collectionData,
+        cover: collectionOnChain?.info?.cover_image?.url,
+      }));
     })();
   }, [currentChainId, collectionId, selectedAccount?.address]);
 
@@ -97,14 +101,19 @@ export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
         clearInterval(intervalId);
         return;
       }
-  
+
       fetchAttempts++;
       const collectionData = await fetchCollection(collectionId);
       if (!collectionData) return;
-      setCollection(collectionData);
+      
+      setCollection(prev => ({
+        ...prev,
+        ...collectionData,
+        cover: prev?.cover || collectionOnChain?.info?.cover_image?.url,
+      }));
+      
       if (collectionData?.tokensCount === collectionData?.tokensTotal) {
         setScanning(false);
-
         void fetch({
           page: 1,
           pageSize,
@@ -117,7 +126,8 @@ export const NFTCollectionPage = ({ collection: collectionOnChain }: CollectionP
 
     const intervalId = setInterval(refetchCollection, 3000);
     return () => clearInterval(intervalId);
-  }, [scanning, collectionId, tokensCountOnScan, filterState, sortingValue, searchValue]);
+  }, [scanning, collectionId, tokensCountOnScan, filterState, sortingValue, searchValue, collectionOnChain]);
+
   const hasMore = tokens && tokens.length < tokensCount && !isFetching;
 
   const onClickSeeMore = useCallback(() => {

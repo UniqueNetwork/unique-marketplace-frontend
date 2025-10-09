@@ -6,6 +6,8 @@ export type Statuses = Record<'myNFTs' | 'fixedPrice' | 'timedAuction' | 'myBets
 export type PriceRange = {
   minPrice?: string
   maxPrice?: string
+  minUsdtPrice?: string
+  maxUsdtPrice?: string
 };
 
 export enum TypeOfAssets {
