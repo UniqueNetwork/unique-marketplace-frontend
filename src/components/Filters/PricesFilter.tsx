@@ -26,14 +26,67 @@ const PricesFilter: FC<PricesFilterProps> = ({
 }) => {
   const { currencies } = useApi();
   
+  // Determine if we should use USDT prices based on currency selection
   const shouldUseUsdtPrice = selectedCurrencies.length === 0 || selectedCurrencies.length > 1;
   
+  // Get label text for filtering
+  const filterLabel = !shouldUseUsdtPrice && selectedCurrencies.length === 1 
+    ? currencies.find(c => Number(c.id) === selectedCurrencies[0])?.title || 'Currency'
+    : 'USDT';
+  
+  // Store actual price values (independent of USD/USDT mode)
   const [minPriceValue, setMinPriceValue] = useState<string>();
   const [maxPriceValue, setMaxPriceValue] = useState<string>();
   const [localSelectedCurrencies, setLocalSelectedCurrencies] = useState<number[]>(selectedCurrencies);
   
   // Track if we're updating from internal change (to avoid syncing back from props)
   const isInternalChangeRef = useRef(false);
+  const previousShouldUseUsdtPriceRef = useRef(shouldUseUsdtPrice);
+  const throttleTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Simple throttle function using setTimeout
+  const throttledAutoApply = useCallback((minVal: string | undefined, maxVal: string | undefined, useUsdt: boolean) => {
+    // Clear existing timer
+    if (throttleTimerRef.current) {
+      clearTimeout(throttleTimerRef.current);
+    }
+
+    // Set new timer
+    throttleTimerRef.current = setTimeout(() => {
+      if (!minVal && !maxVal) {
+        onChange(undefined);
+        return;
+      }
+
+      isInternalChangeRef.current = true;
+
+      // Send ONLY the appropriate price parameters based on mode
+      const newPrices: PriceRange = {};
+      
+      if (useUsdt) {
+        if (minVal) newPrices.minUsdtPrice = minVal;
+        if (maxVal) newPrices.maxUsdtPrice = maxVal;
+      } else {
+        if (minVal) newPrices.minPrice = minVal;
+        if (maxVal) newPrices.maxPrice = maxVal;
+      }
+      
+      onChange(newPrices);
+
+      setTimeout(() => {
+        isInternalChangeRef.current = false;
+      }, 300);
+    }, 250);
+  }, [onChange]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (throttleTimerRef.current) {
+        clearTimeout(throttleTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleCurrencyToggle = useCallback((currencyId: number) => {
     const newSelection = localSelectedCurrencies.includes(currencyId)
@@ -47,27 +100,11 @@ const PricesFilter: FC<PricesFilterProps> = ({
       onCurrenciesChange(newSelection);
     }
     
-    // Auto-apply filter when currencies change
-    if (minPriceValue || maxPriceValue) {
-      const willUseUsdtPrice = newSelection.length === 0 || newSelection.length > 1;
-      
-      if (willUseUsdtPrice) {
-        onChange({
-          minUsdtPrice: minPriceValue,
-          maxUsdtPrice: maxPriceValue
-        });
-      } else {
-        onChange({
-          minPrice: minPriceValue,
-          maxPrice: maxPriceValue
-        });
-      }
-    }
-    
+    // Reset flag after longer delay to ensure useEffect doesn't override
     setTimeout(() => {
       isInternalChangeRef.current = false;
-    }, 0);
-  }, [localSelectedCurrencies, onCurrenciesChange, minPriceValue, maxPriceValue, onChange]);
+    }, 300);
+  }, [localSelectedCurrencies, onCurrenciesChange]);
 
   const onApply = useCallback(() => {
     if (minPriceValue || maxPriceValue) {
@@ -86,18 +123,27 @@ const PricesFilter: FC<PricesFilterProps> = ({
         maxPrice = undefined;
       }
 
-      // Use USDT prices when multiple currencies or no currencies selected
+      isInternalChangeRef.current = true;
+
+      // Send ONLY the appropriate price parameters based on mode
+      const newPrices: PriceRange = {};
+      
       if (shouldUseUsdtPrice) {
-        onChange({
-          minUsdtPrice: minPrice,
-          maxUsdtPrice: maxPrice
-        });
+        // USDT mode: only set USDT prices
+        if (minPrice) newPrices.minUsdtPrice = minPrice;
+        if (maxPrice) newPrices.maxUsdtPrice = maxPrice;
       } else {
-        onChange({
-          minPrice,
-          maxPrice
-        });
+        // USD mode: only set regular prices
+        if (minPrice) newPrices.minPrice = minPrice;
+        if (maxPrice) newPrices.maxPrice = maxPrice;
       }
+      
+      onChange(newPrices);
+
+      setTimeout(() => {
+        isInternalChangeRef.current = false;
+      }, 300);
+      
       return;
     }
     onChange(undefined);
@@ -105,28 +151,61 @@ const PricesFilter: FC<PricesFilterProps> = ({
 
   // Sync local state with props for prices
   useEffect(() => {
-    if (shouldUseUsdtPrice) {
-      setMinPriceValue(value?.minUsdtPrice);
-      setMaxPriceValue(value?.maxUsdtPrice);
-    } else {
-      setMinPriceValue(value?.minPrice);
-      setMaxPriceValue(value?.maxPrice);
+    // Get the current mode
+    const currentMode = shouldUseUsdtPrice;
+    const previousMode = previousShouldUseUsdtPriceRef.current;
+    
+    // Mode changed (switching between USD and USDT) - ALWAYS clear inputs
+    if (currentMode !== previousMode) {
+      // CLEAR inputs when switching modes
+      setMinPriceValue(undefined);
+      setMaxPriceValue(undefined);
+      
+      // CLEAR old price parameters in parent state
+      isInternalChangeRef.current = true;
+      onChange(undefined);
+      
+      setTimeout(() => {
+        isInternalChangeRef.current = false;
+      }, 300);
+      
+      previousShouldUseUsdtPriceRef.current = currentMode;
+      return;
     }
-  }, [value?.minPrice, value?.maxPrice, value?.minUsdtPrice, value?.maxUsdtPrice, shouldUseUsdtPrice]);
+
+    // For normal sync - check internal flag
+    if (isInternalChangeRef.current) {
+      return;
+    }
+    
+    // Normal sync: update from props if values changed externally
+    if (currentMode) {
+      // USDT mode: use minUsdtPrice/maxUsdtPrice
+      if (value?.minUsdtPrice !== minPriceValue) {
+        setMinPriceValue(value?.minUsdtPrice);
+      }
+      if (value?.maxUsdtPrice !== maxPriceValue) {
+        setMaxPriceValue(value?.maxUsdtPrice);
+      }
+    } else {
+      // USD mode: use minPrice/maxPrice
+      if (value?.minPrice !== minPriceValue) {
+        setMinPriceValue(value?.minPrice);
+      }
+      if (value?.maxPrice !== maxPriceValue) {
+        setMaxPriceValue(value?.maxPrice);
+      }
+    }
+    
+    previousShouldUseUsdtPriceRef.current = currentMode;
+  }, [value?.minPrice, value?.maxPrice, value?.minUsdtPrice, value?.maxUsdtPrice, shouldUseUsdtPrice, onChange]);
 
   useEffect(() => {
     if (isInternalChangeRef.current) {
       return;
     }
     
-    // Create string representations for deep comparison
-    const propsStr = JSON.stringify([...selectedCurrencies].sort());
-    const localStr = JSON.stringify([...localSelectedCurrencies].sort());
-    
-    // Only update if actually different
-    if (propsStr !== localStr) {
-      setLocalSelectedCurrencies(selectedCurrencies);
-    }
+    setLocalSelectedCurrencies(selectedCurrencies);
   }, [selectedCurrencies]);
 
   const onChangeMinPrice = useCallback((value: string) => {
@@ -150,30 +229,37 @@ const PricesFilter: FC<PricesFilterProps> = ({
       onCurrenciesChange([]);
     }
     
-    // Reset flag after a tick
+    // Reset flag after longer delay
     setTimeout(() => {
       isInternalChangeRef.current = false;
-    }, 0);
+    }, 300);
   }, [onChange, onCurrenciesChange]);
 
   const onClearMinPrice = useCallback(() => {
     if (maxPriceValue !== undefined) return;
+    isInternalChangeRef.current = true;
     onChange(undefined);
+    setTimeout(() => {
+      isInternalChangeRef.current = false;
+    }, 300);
   }, [onChange, maxPriceValue]);
 
   const onClearMaxPrice = useCallback(() => {
     if (minPriceValue !== undefined) return;
+    isInternalChangeRef.current = true;
     onChange(undefined);
+    setTimeout(() => {
+      isInternalChangeRef.current = false;
+    }, 300);
   }, [onChange, minPriceValue]);
 
   const hasActiveFilters = 
     !!(value?.minPrice || value?.maxPrice || value?.minUsdtPrice || value?.maxUsdtPrice) || 
     localSelectedCurrencies.length > 0;
 
-  // Determine placeholder text based on currency selection
-  const currencyLabel = shouldUseUsdtPrice ? 'USDT' : 'Selected Currency';
-  const minPlaceholder = `Min (${shouldUseUsdtPrice ? 'USDT' : 'USD'})`;
-  const maxPlaceholder = `Max (${shouldUseUsdtPrice ? 'USDT' : 'USD'})`;
+  // Placeholders are simple since we have label above
+  const minPlaceholder = 'Min';
+  const maxPlaceholder = 'Max';
 
   return (
     <Accordion 
@@ -212,25 +298,30 @@ const PricesFilter: FC<PricesFilterProps> = ({
         )}
 
         {/* Price range section */}
-        <PricesRangeWrapper>
-          <NumberInput
-            value={minPriceValue?.toString()}
-            onChange={onChangeMinPrice}
-            placeholder={minPlaceholder}
-            testid={`${testid}-minPrice`}
-            disabled={disabled}
-            onClear={onClearMinPrice}
-          />
-          <Text>to</Text>
-          <NumberInput
-            value={maxPriceValue?.toString()}
-            onChange={onChangeMaxPrice}
-            placeholder={maxPlaceholder}
-            testid={`${testid}-maxPrice`}
-            disabled={disabled}
-            onClear={onClearMaxPrice}
-          />
-        </PricesRangeWrapper>
+        <CurrencyLabelSection>
+          <CurrencyLabelText>Filter by {filterLabel}:</CurrencyLabelText>
+          
+          
+          <PricesRangeWrapper>
+            <NumberInput
+              value={minPriceValue?.toString()}
+              onChange={onChangeMinPrice}
+              placeholder={minPlaceholder}
+              testid={`${testid}-minPrice`}
+              disabled={disabled}
+              onClear={onClearMinPrice}
+            />
+            <Text>to</Text>
+            <NumberInput
+              value={maxPriceValue?.toString()}
+              onChange={onChangeMaxPrice}
+              placeholder={maxPlaceholder}
+              testid={`${testid}-maxPrice`}
+              disabled={disabled}
+              onClear={onClearMaxPrice}
+            />
+          </PricesRangeWrapper>
+        </CurrencyLabelSection>
         
         <Button
           wide
@@ -293,6 +384,20 @@ const CurrencyIcon = styled.img`
 
 const CurrencyLabel = styled.span`
   font-size: 14px;
+  line-height: 20px;
+`;
+
+const CurrencyLabelSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  column-gap: 8px;
+  padding: 4px 0;
+`;
+
+const CurrencyLabelText = styled.span`
+  font-size: 14px;
+  font-weight: 600;
   line-height: 20px;
 `;
 
