@@ -25,7 +25,9 @@ const PricesFilter: FC<PricesFilterProps> = ({
   disabled 
 }) => {
   const { currencies } = useApi();
-  const { minPrice, maxPrice } = value || {};
+  
+  const shouldUseUsdtPrice = selectedCurrencies.length === 0 || selectedCurrencies.length > 1;
+  
   const [minPriceValue, setMinPriceValue] = useState<string>();
   const [maxPriceValue, setMaxPriceValue] = useState<string>();
   const [localSelectedCurrencies, setLocalSelectedCurrencies] = useState<number[]>(selectedCurrencies);
@@ -39,17 +41,33 @@ const PricesFilter: FC<PricesFilterProps> = ({
       : [...localSelectedCurrencies, currencyId];
     
     isInternalChangeRef.current = true;
-  
     setLocalSelectedCurrencies(newSelection);
 
     if (onCurrenciesChange) {
       onCurrenciesChange(newSelection);
     }
     
+    // Auto-apply filter when currencies change
+    if (minPriceValue || maxPriceValue) {
+      const willUseUsdtPrice = newSelection.length === 0 || newSelection.length > 1;
+      
+      if (willUseUsdtPrice) {
+        onChange({
+          minUsdtPrice: minPriceValue,
+          maxUsdtPrice: maxPriceValue
+        });
+      } else {
+        onChange({
+          minPrice: minPriceValue,
+          maxPrice: maxPriceValue
+        });
+      }
+    }
+    
     setTimeout(() => {
       isInternalChangeRef.current = false;
     }, 0);
-  }, [localSelectedCurrencies, onCurrenciesChange]);
+  }, [localSelectedCurrencies, onCurrenciesChange, minPriceValue, maxPriceValue, onChange]);
 
   const onApply = useCallback(() => {
     if (minPriceValue || maxPriceValue) {
@@ -68,20 +86,35 @@ const PricesFilter: FC<PricesFilterProps> = ({
         maxPrice = undefined;
       }
 
-      onChange({ minPrice, maxPrice });
+      // Use USDT prices when multiple currencies or no currencies selected
+      if (shouldUseUsdtPrice) {
+        onChange({
+          minUsdtPrice: minPrice,
+          maxUsdtPrice: maxPrice
+        });
+      } else {
+        onChange({
+          minPrice,
+          maxPrice
+        });
+      }
       return;
     }
     onChange(undefined);
-  }, [minPriceValue, maxPriceValue, onChange]);
+  }, [minPriceValue, maxPriceValue, onChange, shouldUseUsdtPrice]);
 
   // Sync local state with props for prices
   useEffect(() => {
-    setMinPriceValue(minPrice);
-    setMaxPriceValue(maxPrice);
-  }, [minPrice, maxPrice]);
+    if (shouldUseUsdtPrice) {
+      setMinPriceValue(value?.minUsdtPrice);
+      setMaxPriceValue(value?.maxUsdtPrice);
+    } else {
+      setMinPriceValue(value?.minPrice);
+      setMaxPriceValue(value?.maxPrice);
+    }
+  }, [value?.minPrice, value?.maxPrice, value?.minUsdtPrice, value?.maxUsdtPrice, shouldUseUsdtPrice]);
 
   useEffect(() => {
-
     if (isInternalChangeRef.current) {
       return;
     }
@@ -133,7 +166,14 @@ const PricesFilter: FC<PricesFilterProps> = ({
     onChange(undefined);
   }, [onChange, minPriceValue]);
 
-  const hasActiveFilters = !!minPrice || !!maxPrice || localSelectedCurrencies.length > 0;
+  const hasActiveFilters = 
+    !!(value?.minPrice || value?.maxPrice || value?.minUsdtPrice || value?.maxUsdtPrice) || 
+    localSelectedCurrencies.length > 0;
+
+  // Determine placeholder text based on currency selection
+  const currencyLabel = shouldUseUsdtPrice ? 'USDT' : 'Selected Currency';
+  const minPlaceholder = `Min (${shouldUseUsdtPrice ? 'USDT' : 'USD'})`;
+  const maxPlaceholder = `Max (${shouldUseUsdtPrice ? 'USDT' : 'USD'})`;
 
   return (
     <Accordion 
@@ -176,7 +216,7 @@ const PricesFilter: FC<PricesFilterProps> = ({
           <NumberInput
             value={minPriceValue?.toString()}
             onChange={onChangeMinPrice}
-            placeholder="Min"
+            placeholder={minPlaceholder}
             testid={`${testid}-minPrice`}
             disabled={disabled}
             onClear={onClearMinPrice}
@@ -185,7 +225,7 @@ const PricesFilter: FC<PricesFilterProps> = ({
           <NumberInput
             value={maxPriceValue?.toString()}
             onChange={onChangeMaxPrice}
-            placeholder="Max"
+            placeholder={maxPlaceholder}
             testid={`${testid}-maxPrice`}
             disabled={disabled}
             onClear={onClearMaxPrice}

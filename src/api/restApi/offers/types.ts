@@ -7,6 +7,9 @@ export type OfferFilters = {
   collectionId?: number | number[];
   minPrice?: string;
   maxPrice?: string;
+  minUsdtPrice?: string;
+  maxUsdtPrice?: string;
+  currencies?: number[];
   seller?: AnyString;
   bidderAddress?: string;
   attributes?: string[];
