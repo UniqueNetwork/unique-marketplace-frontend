@@ -4,7 +4,6 @@ import styled from 'styled-components';
 import { Button, Modal, Text } from 'components/UI';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { web3FromAddress, web3Enable } from '@polkadot/extension-dapp';
-import { u8aToHex } from '@polkadot/util';
 import { decodeAddress } from '@polkadot/util-crypto';
 import BigNumber from 'bignumber.js';
 import { useAccounts } from 'hooks/useAccounts';
@@ -66,7 +65,7 @@ export const CrossChainTransferModal: React.FC<CrossChainTransferModalProps> = (
   const initializeApis = async () => {
     setIsConnecting(true);
     try {
-      await web3Enable('DOT Exchange');
+      // await web3Enable('DOT Exchange');
       
       const polkadotProvider = new WsProvider('wss://rpc.polkadot.io');
       const uniqueProvider = new WsProvider('wss://ws.unique.network');
@@ -111,6 +110,7 @@ export const CrossChainTransferModal: React.FC<CrossChainTransferModalProps> = (
 
     setTransactionStatus('pending');
     setStatusMessage('Validating transfer...');
+    await web3Enable('DOT Exchange');
 
     try {
       const transferAmountNum = parseFloat(transferAmount);
@@ -141,12 +141,16 @@ export const CrossChainTransferModal: React.FC<CrossChainTransferModalProps> = (
           },
         };
 
-        // Use the address prop - this is the Unique Network address (destination)
-        const addressBytes = decodeAddress(address);
         const beneficiary = {
           V4: {
             parents: 0,
-            interior: { X1: [{ AccountId32: { id: u8aToHex(addressBytes) } }] },
+            interior: { 
+              X1: [{ 
+                AccountId32: { 
+                  id: decodeAddress(address)
+                } 
+              }] 
+            },
           },
         };
 
@@ -220,7 +224,11 @@ export const CrossChainTransferModal: React.FC<CrossChainTransferModalProps> = (
           V4: {
             parents: 1,
             interior: {
-              X1: [{ AccountId32: { id: u8aToHex(decodeAddress(address)) } }]
+              X1: [{ 
+                AccountId32: { 
+                  id: decodeAddress(address)
+                } 
+              }]
             },
           },
         };
@@ -299,7 +307,11 @@ export const CrossChainTransferModal: React.FC<CrossChainTransferModalProps> = (
   
   const isBalanceSufficient = 
     transferAmountNum > 0 && 
-    availableBalance >= transferAmountNum + MIN_BALANCE_AFTER_TRANSFER;
+    availableBalance >= transferAmountNum + (
+      transferDirection === 'fromPolkadot' 
+        ? MIN_BALANCE_AFTER_TRANSFER
+        : 0
+    );
 
   const currentApi = transferDirection === 'fromPolkadot' ? polkadotApi : uniqueApi;
 
