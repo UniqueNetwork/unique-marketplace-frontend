@@ -39,6 +39,20 @@ const isEmptyFilterState = (filterState: FilterState | null): boolean => {
          !hasAttributes && !hasAttributeCounts && !hasTypes;
 };
 
+const transformSortValue = (sortValue: string, currencies?: number[]): string => {
+  const shouldUseUsdtPrice = !currencies || currencies.length === 0 || currencies.length > 1;
+  
+  if (sortValue.includes('Price')) {
+    if (shouldUseUsdtPrice) {
+      return sortValue.replace(/\bPrice\b/g, 'UsdtPrice');
+    } else {
+      return sortValue.replace(/\bUsdtPrice\b/g, 'Price');
+    }
+  }
+  
+  return sortValue;
+};
+
 interface UseMarketFilterParams {
   isFetching: boolean;
   fetch(payload: GetOffersRequestPayload): Promise<OffersResponse | TokensResponse>;
@@ -69,7 +83,6 @@ export const useMarketFilter = ({
   const prevAccountAddress = useRef<string | undefined>(selectedAccount?.address);
   const hasInitialLoadRef = useRef(false);
   
-  // Race condition fix: track request order
   const requestCounterRef = useRef(0);
   const lastSuccessfulRequestRef = useRef(0);
 
@@ -119,28 +132,20 @@ export const useMarketFilter = ({
       collectionId = [0];
     }
 
-    // Currency and price logic:
-    // - Always pass currencies parameter when selected (for filtering by currency)
-    // - Single currency with prices: use minPrice/maxPrice
-    // - Zero or multiple currencies with prices: use minUsdtPrice/maxUsdtPrice
     const shouldUseUsdtPrice = !currencies || currencies.length === 0 || currencies.length > 1;
     
     let priceParams = {};
     let currencyParams = {};
     
-    // Always add currencies if selected
     if (currencies && currencies.length > 0) {
       currencyParams = { currencies };
     }
     
-    // Add price parameters if prices are set
     if (prices) {
       if (shouldUseUsdtPrice) {
-        // Use USDT prices for multiple or no currencies
         if (prices.minUsdtPrice) priceParams = { ...priceParams, minUsdtPrice: prices.minUsdtPrice };
         if (prices.maxUsdtPrice) priceParams = { ...priceParams, maxUsdtPrice: prices.maxUsdtPrice };
       } else {
-        // Use regular prices for single currency
         if (prices.minPrice) priceParams = { ...priceParams, minPrice: prices.minPrice };
         if (prices.maxPrice) priceParams = { ...priceParams, maxPrice: prices.maxPrice };
       }
@@ -181,15 +186,15 @@ export const useMarketFilter = ({
     setSortingValue(value.id);
     setUrlParameter('sortingValue', value.id);
     
-    // Race condition fix
     const requestId = ++requestCounterRef.current;
+    const transformedSort = transformSortValue(value.id, filterState?.currencies);
     
     void fetch({
       page: 1,
       pageSize: 20,
       ...(getFilterByState(filterState)),
       searchText: searchValue || undefined,
-      sort: [value.id]
+      sort: [transformedSort]
     }).then(() => {
       lastSuccessfulRequestRef.current = requestId;
     });
@@ -199,8 +204,8 @@ export const useMarketFilter = ({
     setSearchValue(value);
     setUrlParameter('searchValue', value || '');
     
-    // Race condition fix
     const requestId = ++requestCounterRef.current;
+    const transformedSort = transformSortValue(sortingValue, filterState?.currencies);
     
     try {
       await Promise.all([
@@ -210,7 +215,7 @@ export const useMarketFilter = ({
           pageSize: 20,
           ...(getFilterByState(filterState)),
           searchText: value || undefined,
-          sort: [sortingValue]
+          sort: [transformedSort]
         }).then(() => {
           lastSuccessfulRequestRef.current = requestId;
         })
@@ -231,6 +236,7 @@ export const useMarketFilter = ({
 
     // Race condition fix
     const requestId = ++requestCounterRef.current;
+    const transformedSort = transformSortValue(sortingValue, filterState?.currencies);
 
     try {
       await Promise.all([
@@ -240,7 +246,7 @@ export const useMarketFilter = ({
           pageSize: 20,
           ...(getFilterByState(filterState)),
           searchText: searchValue || undefined,
-          sort: [sortingValue]
+          sort: [transformedSort]
         }).then(() => {
           lastSuccessfulRequestRef.current = requestId;
         })
@@ -267,6 +273,7 @@ export const useMarketFilter = ({
     
     // Race condition fix
     const requestId = ++requestCounterRef.current;
+    const transformedSort = transformSortValue(sorting.id as string, filterState?.currencies);
     
     try {
       await fetch({
@@ -274,7 +281,7 @@ export const useMarketFilter = ({
         pageSize: 20,
         ...(getFilterByState(filterState)),
         searchText: searchValue || undefined,
-        sort: [sorting.id as string]
+        sort: [transformedSort]
       }).then(() => {
         lastSuccessfulRequestRef.current = requestId;
       });
@@ -331,8 +338,8 @@ export const useMarketFilter = ({
     
     hasInitialLoadRef.current = true;
 
-    // Race condition fix
     const requestId = ++requestCounterRef.current;
+    const transformedSort = transformSortValue(sortingValue, filterState?.currencies);
 
     void Promise.all([
       fetchFilterAttributes(filterState),
@@ -341,7 +348,7 @@ export const useMarketFilter = ({
         pageSize: 20,
         ...(getFilterByState(filterState)),
         searchText: searchValue || undefined,
-        sort: [sortingValue]
+        sort: [transformedSort]
       }).then(() => {
         lastSuccessfulRequestRef.current = requestId;
       })
