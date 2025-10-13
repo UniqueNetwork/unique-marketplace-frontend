@@ -35,6 +35,7 @@ interface SliderProps {
   infinite?: boolean
   className?: string
   minSwipeOffset?: number
+  children: React.ReactNode
 }
 const classNames = { ...DEFAULT_CLASSNAMES };
 
@@ -137,6 +138,31 @@ export const BannerSlider: FC<SliderProps> = ({
       clearTimeout(animationTimerId);
     };
   }, [duration, targetSliderIndex]);
+
+  useEffect(() => {
+    if (!sliderRef.current) return;
+    
+    const handleLinkClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const link = target.closest('a[href]');
+      
+      if (link && link instanceof HTMLAnchorElement) {
+        const linkUrl = new URL(link.href);
+        const currentUrl = new URL(window.location.href);
+        
+        if (linkUrl.hostname !== currentUrl.hostname) {
+          e.preventDefault();
+          window.open(link.href, '_blank', 'noopener,noreferrer');
+        }
+      }
+    };
+    
+    sliderRef.current.addEventListener('click', handleLinkClick);
+    
+    return () => {
+      sliderRef.current?.removeEventListener('click', handleLinkClick);
+    };
+  }, []);
 
   const getSlideClass = useCallback((index: number) => {
     const lastSlideIndex = slideCount - 1;

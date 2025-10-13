@@ -53,12 +53,12 @@ export const Filters: FC<FilterProps> = ({ value, onFilterChange, featuredTokens
 
   return <FiltersStyled>
     <StatusFilter value={value?.statuses} onChange={onStatusFilterChange} testid={`${testid}-status`} />
-    <TypeOfAssetsFilter
+    {/* <TypeOfAssetsFilter
       isFetchingTokens={isFetchingTokens}
       value={value?.typeOfAssets}
       onChange={onTypeOfAssetsFilterChange}
       testid={`${testid}-assets`}
-    />
+    /> */}
     {/* <TypeOfCustomizablesFilter
       isFetchingTokens={isFetchingTokens}
       value={value?.typeOfCustomizableNFTs}

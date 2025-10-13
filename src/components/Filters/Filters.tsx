@@ -86,12 +86,12 @@ export const Filters: FC<FiltersProps> = ({ value, attributes, attributeCounts, 
         onChange={onStatusFilterChange} 
         testid={`${testid}-status`} 
       />
-      <TypeOfAssetsFilter
+      {/* <TypeOfAssetsFilter
         isFetchingTokens={false}
         value={value?.typeOfAssets}
         onChange={onTypeOfAssetsFilterChange}
         testid={`${testid}-assets`}
-      />
+      /> */}
       <PricesFilter 
         value={value?.prices} 
         onChange={onPricesFilterChange}
