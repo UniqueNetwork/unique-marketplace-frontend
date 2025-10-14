@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useContext, useEffect, useState, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 import { Button } from 'components/UI';
 import { useApi } from 'hooks/useApi';
@@ -16,6 +16,10 @@ import { useHydrationBalances } from 'hooks/useHydrationBalances';
 import { useUsdtBalance } from 'hooks/useUsdtBalance';
 
 const testid = 'accounts-page';
+
+const REFETCH_INTERVAL = 30000; 
+const REFETCH_DURATION = 90000; 
+const REFETCH_COUNT = REFETCH_DURATION / REFETCH_INTERVAL; // 8 times
 
 type ChainType = 'unique' | 'relay' | 'assetHub' | 'hydration';
 
@@ -77,6 +81,9 @@ export const AccountsPage = () => {
     balance: '0'
   });
   
+  const refetchIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const refetchCountRef = useRef<number>(0);
+  
   const navigate = useNavigate();
   const { chainProperties, currentChainId, currencyMap } = useApi();
 
@@ -107,6 +114,47 @@ export const AccountsPage = () => {
     refetchUsdtBalance();
     refetchHydrationBalances();
   }, [refetchDotBalance, refetchUsdtBalance, refetchHydrationBalances]);
+
+  const startPeriodicRefetch = useCallback((token: string) => {
+    // Clear any existing interval
+    if (refetchIntervalRef.current) {
+      clearInterval(refetchIntervalRef.current);
+    }
+    
+    // Reset counter
+    refetchCountRef.current = 0;
+    
+    // Initial fetch
+    refetchAllBalances();
+    
+    console.log(`Starting periodic balance refresh for ${token} (every 15s for 2 minutes)`);
+    
+    // Start interval
+    refetchIntervalRef.current = setInterval(() => {
+      refetchCountRef.current += 1;
+      
+      console.log(`Balance refresh ${refetchCountRef.current}/${REFETCH_COUNT} for ${token}`);
+      refetchAllBalances();
+      
+      // Stop after REFETCH_COUNT iterations (2 minutes)
+      if (refetchCountRef.current >= REFETCH_COUNT) {
+        console.log(`Stopping periodic refresh for ${token}`);
+        if (refetchIntervalRef.current) {
+          clearInterval(refetchIntervalRef.current);
+          refetchIntervalRef.current = null;
+        }
+      }
+    }, REFETCH_INTERVAL);
+  }, [refetchAllBalances]);
+
+  // Cleanup interval on unmount
+  useEffect(() => {
+    return () => {
+      if (refetchIntervalRef.current) {
+        clearInterval(refetchIntervalRef.current);
+      }
+    };
+  }, []);
 
   const openTransfer = useCallback((
     token: string,
@@ -272,12 +320,6 @@ export const AccountsPage = () => {
                                   disabled={!token.canSend}
                                   size="small"
                                 />
-                                {/* <CrossChainButton 
-                                  title="To Asset Hub" 
-                                  onClick={() => openTransfer('DOT', 'unique', 'assetHub', token.uniqueBalance)}
-                                  disabled={!token.canSend}
-                                  size="small"
-                                /> */}
                                 <CrossChainButton 
                                   title="To Hydration" 
                                   onClick={() => openTransfer('DOT', 'unique', 'hydration', token.uniqueBalance)}
@@ -418,7 +460,6 @@ export const AccountsPage = () => {
               </CopyButton>
             </AddressBox>
 
-
             <BalanceList>
               {tokenBalances.map((token) => {
                 const uniqueNum = parseFloat(token.uniqueBalance.replace(/[,\s]/g, '')) || 0;
@@ -446,7 +487,7 @@ export const AccountsPage = () => {
           isVisible={sendModalVisible}
           onFinish={() => {
             setSendModalVisible(false);
-            refetchAllBalances();
+            startPeriodicRefetch('UNQ');
           }}
           senderAddress={selectedAccount.address}
           preselectedCurrency={selectedCurrency}
@@ -456,8 +497,9 @@ export const AccountsPage = () => {
         <UniversalCrossChainTransferModal
           isVisible={transferModal.isOpen}
           onFinish={() => {
+            const token = transferModal.token;
             setTransferModal(prev => ({ ...prev, isOpen: false }));
-            refetchAllBalances();
+            startPeriodicRefetch(token);
           }}
           tokenSymbol={transferModal.token}
           sourceChain={transferModal.from}
@@ -515,26 +557,6 @@ const Td = styled.td<{ align?: 'left' | 'right' }>`
   text-align: ${props => props.align || 'left'};
   vertical-align: top;
   border-bottom: 1px solid #f1f3f5;
-`;
-
-
-const SeparatorLine = styled.div`
-  height: 2px;
-  background: linear-gradient(90deg, rgba(0, 156, 240, 0) 0%, rgba(0, 156, 240, 0.15) 20%, rgba(0, 156, 240, 0.3) 50%, rgba(0, 156, 240, 0.15) 80%, rgba(0, 156, 240, 0) 100%);
-  margin: 0 16px;
-  position: relative;
-  &::before, &::after {
-    content: '';
-    position: absolute;
-    top: -4px;
-    width: 8px;
-    height: 8px;
-    background: rgba(0, 156, 240, 0.4);
-    border-radius: 50%;
-    box-shadow: 0 0 8px rgba(0, 156, 240, 0.4);
-  }
-  &::before { left: 0; }
-  &::after { right: 0; }
 `;
 
 const ActionsCell = styled.div`
