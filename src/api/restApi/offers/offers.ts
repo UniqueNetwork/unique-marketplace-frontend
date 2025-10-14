@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useRef } from 'react';
 import { AxiosError } from 'axios';
 
 import { get } from '../base';
@@ -26,51 +26,81 @@ export const useOffers = () => {
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [fetchingError, setFetchingError] = useState<ResponseError | undefined>();
   const { api, baseURL } = useApi();
+  
+  const requestIdRef = useRef(0);
 
   const fetch = useCallback(async ({ minPrice, maxPrice, ...payload }: GetOffersRequestPayload) => {
+    const currentRequestId = ++requestIdRef.current;
+    
+    if (payload.page === 1) {
+      setOffers([]);
+      setOffersCount(0);
+    }
+    
     setIsFetching(true);
+    setFetchingError(undefined);
+    
     try {
       const { status, data } = await getOffers(baseURL, {
         ...payload,
         minPrice: minPrice,
         maxPrice: maxPrice
       });
-      if (status === 200) {
+      
+      if (status === 200 && currentRequestId === requestIdRef.current) {
         setOffers(data.items);
         setOffersCount(data.totalItems);
-        setIsFetching(false);
         return data;
       }
     } catch (err) {
       const { response, message } = err as AxiosError;
-      setFetchingError({
-        status: response?.status,
-        message
-      });
+      if (currentRequestId === requestIdRef.current) {
+        setFetchingError({
+          status: response?.status,
+          message
+        });
+      }
+    } finally {
+      if (currentRequestId === requestIdRef.current) {
+        setIsFetching(false);
+      }
     }
+    
     return emptyResponse;
   }, [baseURL, api?.market?.decimals]);
 
   const fetchMore = useCallback(async ({ minPrice, maxPrice, ...payload }: GetOffersRequestPayload) => {
+    if (isFetching) return;
+    
+    const currentRequestId = ++requestIdRef.current;
+    
     setIsFetching(true);
+    setFetchingError(undefined);
+    
     try {
       const { status, data } = await getOffers(baseURL, {
         ...payload,
         minPrice: minPrice,
         maxPrice: maxPrice
       });
-      if (status === 200) {
-        setOffers([...offers, ...data.items]);
-        setIsFetching(false);
+      
+      if (status === 200 && currentRequestId === requestIdRef.current) {
+        setOffers(prev => [...prev, ...data.items]);
       }
     } catch (err) {
       const { response, message } = err as AxiosError;
-      setFetchingError({
-        status: response?.status,
-        message
-      });
+      if (currentRequestId === requestIdRef.current) {
+        setFetchingError({
+          status: response?.status,
+          message
+        });
+      }
+    } finally {
+      if (currentRequestId === requestIdRef.current) {
+        setIsFetching(false);
+      }
     }
-  }, [baseURL, offers, api?.market?.decimals]);
+  }, [baseURL, isFetching, api?.market?.decimals]);
 
   return {
     offers,
