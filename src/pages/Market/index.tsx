@@ -37,10 +37,9 @@ export const MarketPage = () => {
     onSortingChange,
     onFilterChange,
     getFilterByState,
-    onMobileFilterApply
+    onMobileFilterApply,
+    transformSortValue
   } = useMarketFilter({ isFetching, fetch, fetchAttributes });
-
-  const hasMore = offers && offers.length < offersCount;
 
   const onClickSeeMore = useCallback(() => {
     if (!isFetching) {
@@ -49,10 +48,12 @@ export const MarketPage = () => {
         pageSize,
         ...(getFilterByState(filterState)),
         searchText: searchValue || undefined,
-        sort: [sortingValue]
+        sort: [transformSortValue(sortingValue)]
       });
     }
-  }, [fetchMore, offers, pageSize, isFetching, searchValue, filterState]);
+  }, [fetchMore, offers, pageSize, isFetching, searchValue, filterState, sortingValue, transformSortValue]);
+
+  const hasMore = offers && offers.length < offersCount;
 
   const isLoading = isAccountsLoading || isFetching || isFetchingCollections;
 

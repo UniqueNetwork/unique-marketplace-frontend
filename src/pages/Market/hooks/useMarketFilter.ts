@@ -386,6 +386,7 @@ export const useMarketFilter = ({
     setSortingValue,
     setSearchValue,
     getFilterByState,
-    onMobileFilterApply
+    onMobileFilterApply,
+    transformSortValue: (sortValue: string) => transformSortValue(sortValue, filterState?.currencies)
   };
 };
