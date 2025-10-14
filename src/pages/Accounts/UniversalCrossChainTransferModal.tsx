@@ -315,7 +315,7 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
         } else if (destinationChain === 'unique' && (tokenSymbol === 'USDT' || tokenSymbol === 'WUD')) {
           // Hydration → Unique (USDT/WUD via asset location)
           const assetId = tokenSymbol === 'USDT' ? USDT_ASSET_ID : WUD_ASSET_ID;
-          
+
           // Asset to send - just the user amount
           const assetLocation = {
             V4: {
@@ -802,7 +802,7 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
                 <span>Available: {sourceBalance} {tokenSymbol}</span>
               </Info>
               
-              {(needsDestFee || isRelayDotTransfer) && amount && amountNum > 0 && (
+              {needsDestFee && amount && amountNum > 0 && (
                 <FeeBreakdown>
                   {isMultiHop && (
                     <RouteInfo>
@@ -810,43 +810,22 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
                       <RouteNote>Separate fee asset sent to cover execution costs on all hops</RouteNote>
                     </RouteInfo>
                   )}
-                  {isRelayDotTransfer && (
-                    <RouteInfo>
-                      ⚠️ Polkadot Relay Chain Transfer
-                      <RouteNote>You must keep at least {MIN_BALANCE_AFTER_TRANSFER_DOT_RELAY} DOT in your Relay Chain account (Existential Deposit + buffer)</RouteNote>
-                    </RouteInfo>
-                  )}
                   <FeeRow>
                     <span>Recipient receives:</span>
                     <span>{amountNum.toFixed(tokenSymbol === 'USDT' ? 2 : 4)} {tokenSymbol}</span>
                   </FeeRow>
-                  {destFee > 0 && (
-                    <FeeRow>
-                      <span>Fee for execution costs:</span>
-                      <span>+{destFee.toFixed(tokenSymbol === 'USDT' ? 2 : 4)} {tokenSymbol}</span>
-                    </FeeRow>
-                  )}
-                  {relayMinBalance > 0 && (
-                    <FeeRow>
-                      <span>Must remain on Relay Chain:</span>
-                      <span>+{relayMinBalance.toFixed(4)} {tokenSymbol}</span>
-                    </FeeRow>
-                  )}
+                  <FeeRow>
+                    <span>Fee for execution costs:</span>
+                    <span>+{destFee.toFixed(tokenSymbol === 'USDT' ? 2 : 4)} {tokenSymbol}</span>
+                  </FeeRow>
                   <FeeDivider />
                   <FeeRow $bold>
-                    <span>Total {isRelayDotTransfer ? 'required' : 'deducted from balance'}:</span>
+                    <span>Total deducted from balance:</span>
                     <span>{totalAmount.toFixed(tokenSymbol === 'USDT' ? 2 : 4)} {tokenSymbol}</span>
                   </FeeRow>
-                  {needsDestFee && (
-                    <FeeNote>
-                      The fee is sent as a separate asset for XCM execution costs{isMultiHop && ' across all hops'}.
-                    </FeeNote>
-                  )}
-                  {isRelayDotTransfer && (
-                    <FeeNote>
-                      The minimum balance requirement ensures your Relay Chain account remains active.
-                    </FeeNote>
-                  )}
+                  <FeeNote>
+                    The fee is sent as a separate asset for XCM execution costs{isMultiHop && ' across all hops'}.
+                  </FeeNote>
                 </FeeBreakdown>
               )}
               
