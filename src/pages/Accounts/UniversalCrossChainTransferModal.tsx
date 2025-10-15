@@ -43,6 +43,7 @@ const TOKENS: Record<string, TokenConfig> = {
     decimals: 10, 
     uniqueCollectionId: 3779,
     assetHubAssetId: 31337,
+    hydrationCurrencyId: 25,
     minTransfer: 0.01, 
     maxTransfer: 1000000 
   },
@@ -225,8 +226,21 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
         (sourceChain === 'unique' && destinationChain === 'hydration')
       ) && (tokenSymbol === 'USDT' || tokenSymbol === 'WUD');
       
+      // WUD transfers use USDT from Asset Hub as fee asset
+      const isWudTransfer = tokenSymbol === 'WUD';
+      const isWudMultiHop = isMultiHop && isWudTransfer;
+      
       // Fee is sent as separate asset, NOT added to user amount
-      const destFee = needsDestFee ? (isMultiHop ? 0.12 : 0.05) : 0;
+      let destFee = 0;
+      if (needsDestFee) {
+        if (isWudMultiHop) {
+          destFee = 0.15; // 0.15 USDT fee for WUD multi-hop transfers
+        } else if (isMultiHop) {
+          destFee = 0.05;
+        } else {
+          destFee = 0.05;
+        }
+      }
       const totalNeeded = amountNum + destFee + relayMinBalance;
       
       if (totalNeeded > balanceNum) {
@@ -333,21 +347,35 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
             }
           };
           
-          // Fee for XCM execution (will be deducted from amountRaw)
-          const feeForExecution = new BigNumber(0.12)
-            .multipliedBy(new BigNumber(10).pow(token.decimals))
+          // Fee for XCM execution - use USDT on Asset Hub as fee asset for WUD transfers
+          let feeAssetId, feeDecimals, baseFee;
+          if (tokenSymbol === 'WUD') {
+            // For WUD transfers, use USDT on Asset Hub as fee asset
+            feeAssetId = USDT_ASSET_ID; // USDT on Asset Hub
+            feeDecimals = 6; // USDT has 6 decimals
+            baseFee = 0.15; // 0.15 USDT fee (increased for XCM costs)
+          } else {
+            // For USDT transfers, use USDT as fee asset
+            feeAssetId = USDT_ASSET_ID;
+            feeDecimals = 6;
+            baseFee = 0.05;
+          }
+          
+          const feeForExecution = new BigNumber(baseFee)
+            .multipliedBy(new BigNumber(10).pow(feeDecimals))
             .integerValue(BigNumber.ROUND_DOWN)
             .toString(10);
           
+          // Fee asset - USDT on Asset Hub
           const feeAsset = {
             V4: {
               id: {
-                parents: 1,
+                parents: 1, // USDT from Asset Hub
                 interior: {
                   X3: [
                     { Parachain: ASSETHUB_CHAIN_ID },
                     { PalletInstance: ASSET_HUB_PALLET_ASSETS },
-                    { GeneralIndex: assetId }
+                    { GeneralIndex: feeAssetId }
                   ]
                 }
               },
@@ -368,9 +396,10 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
           };
           
           console.log('Multi-hop transfer:', {
-            sending: amount,
-            feeWillBeDeducted: '0.12',
-            recipientWillReceive: 'approximately ' + (parseFloat(amount) - 0.12)
+            sending: amount + ' ' + tokenSymbol,
+            feeAsset: tokenSymbol === 'WUD' ? 'USDT on Asset Hub' : tokenSymbol,
+            feeAmount: baseFee + ' ' + (tokenSymbol === 'WUD' ? 'USDT' : tokenSymbol),
+            recipientWillReceive: amount + ' ' + tokenSymbol
           });
           
           tx = api.tx.xTokens.transferMultiassetWithFee(assetLocation, feeAsset, destination, 'Unlimited');
@@ -453,8 +482,22 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
             }
           };
           
-          const feeForExecution = new BigNumber(0.12)
-            .multipliedBy(new BigNumber(10).pow(token.decimals))
+          // Fee for XCM execution - use USDT from Asset Hub for WUD transfers
+          let feeAssetId, feeDecimals, baseFee;
+          if (tokenSymbol === 'WUD') {
+            // For WUD transfers, use USDT from Asset Hub as fee asset
+            feeAssetId = USDT_ASSET_ID;
+            feeDecimals = 6; // USDT has 6 decimals
+            baseFee = 0.05; // 0.12 USDT fee
+          } else {
+            // For USDT transfers, use USDT as fee asset
+            feeAssetId = USDT_ASSET_ID;
+            feeDecimals = 6;
+            baseFee = 0.044;
+          }
+          
+          const feeForExecution = new BigNumber(baseFee)
+            .multipliedBy(new BigNumber(10).pow(feeDecimals))
             .integerValue(BigNumber.ROUND_DOWN)
             .toString(10);
           
@@ -466,7 +509,7 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
                   X3: [
                     { Parachain: ASSETHUB_CHAIN_ID },
                     { PalletInstance: ASSET_HUB_PALLET_ASSETS },
-                    { GeneralIndex: assetId }
+                    { GeneralIndex: feeAssetId }
                   ]
                 }
               },
@@ -488,8 +531,8 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
           
           console.log('Multi-hop transfer:', {
             sending: amount,
-            feeWillBeDeducted: '0.12',
-            recipientWillReceive: 'approximately ' + (parseFloat(amount) - 0.12)
+            feeWillBeDeducted: baseFee.toString(),
+            recipientWillReceive: 'approximately ' + (parseFloat(amount) - baseFee)
           });
           
           tx = api.tx.xTokens.transferMultiassetWithFee(assetLocation, feeAsset, destination, 'Unlimited');
@@ -766,7 +809,20 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
   ) && (tokenSymbol === 'USDT' || tokenSymbol === 'WUD');
   
   // Fee sent as separate asset for XCM execution
-  const destFee = needsDestFee ? (isMultiHop ? 0.12 : 0.05) : 0;
+  // WUD transfers use USDT from Asset Hub as fee asset
+  const isWudTransfer = tokenSymbol === 'WUD';
+  const isWudMultiHop = isMultiHop && isWudTransfer;
+  
+  let destFee = 0;
+  if (needsDestFee) {
+    if (isWudMultiHop) {
+      destFee = 0.15; // 0.15 USDT fee for WUD multi-hop transfers
+    } else if (isMultiHop) {
+      destFee = 0.047;
+    } else {
+      destFee = 0.05;
+    }
+  }
   const totalAmount = amountNum + destFee + relayMinBalance;
   
   const isValid = !isNaN(amountNum) && 
@@ -816,12 +872,12 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
                   </FeeRow>
                   <FeeRow>
                     <span>Fee for execution costs:</span>
-                    <span>+{destFee.toFixed(tokenSymbol === 'USDT' ? 2 : 4)} {tokenSymbol}</span>
+                    <span>+{destFee.toFixed(tokenSymbol === 'USDT' ? 2 : 4)} {isWudMultiHop ? 'USDT' : tokenSymbol}</span>
                   </FeeRow>
                   <FeeDivider />
                   <FeeRow $bold>
                     <span>Total deducted from balance:</span>
-                    <span>{totalAmount.toFixed(tokenSymbol === 'USDT' ? 2 : 4)} {tokenSymbol}</span>
+                    <span>{amountNum.toFixed(tokenSymbol === 'USDT' ? 2 : 4)} {tokenSymbol} + {destFee.toFixed(tokenSymbol === 'USDT' ? 2 : 4)} {isWudMultiHop ? 'USDT' : tokenSymbol}</span>
                   </FeeRow>
                   <FeeNote>
                     The fee is sent as a separate asset for XCM execution costs{isMultiHop && ' across all hops'}.
