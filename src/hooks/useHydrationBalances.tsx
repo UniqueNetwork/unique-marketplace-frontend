@@ -9,9 +9,14 @@ const DOT_HYDRATION_ID = 5;
 const UNQ_HYDRATION_ID = 25;
 const USDT_HYDRATION_ID = 10;
 
+// WUD is a foreign asset from Asset Hub
+// Confirmed from on-chain transaction data
+const WUD_HYDRATION_ID = 1000085;
+
 const DOT_DECIMALS = 10;
 const UNQ_DECIMALS = 18;
 const USDT_DECIMALS = 6;
+const WUD_DECIMALS = 10;
 
 interface HydrationBalancesResult {
   dotBalance: string;
@@ -20,6 +25,8 @@ interface HydrationBalancesResult {
   unqBalanceRaw: string;
   usdtBalance: string;
   usdtBalanceRaw: string;
+  wudBalance: string;
+  wudBalanceRaw: string;
   isLoading: boolean;
   error: string | null;
   refetch: () => void;
@@ -33,6 +40,8 @@ export const useHydrationBalances = (account: Account | undefined): HydrationBal
     unqBalanceRaw: '0',
     usdtBalance: '0',
     usdtBalanceRaw: '0',
+    wudBalance: '0',
+    wudBalanceRaw: '0',
     isLoading: false,
     error: null as string | null,
   });
@@ -46,6 +55,8 @@ export const useHydrationBalances = (account: Account | undefined): HydrationBal
         unqBalanceRaw: '0',
         usdtBalance: '0',
         usdtBalanceRaw: '0',
+        wudBalance: '0',
+        wudBalanceRaw: '0',
         isLoading: false,
         error: null,
       });
@@ -60,6 +71,8 @@ export const useHydrationBalances = (account: Account | undefined): HydrationBal
       const hydrationApi = await ApiPromise.create({ provider: hydrationProvider });
 
       console.log('Fetching Hydration balances for:', account.address);
+      
+      const actualWudId = WUD_HYDRATION_ID;
       
       // Fetch DOT balance
       let dotBalance = '0';
@@ -133,6 +146,35 @@ export const useHydrationBalances = (account: Account | undefined): HydrationBal
         console.error('Error getting USDT balance on Hydration:', error);
       }
 
+      // Fetch WUD balance with the correct asset ID
+      let wudBalance = '0';
+      let wudBalanceRaw = '0';
+      try {
+        const wudBalanceQuery = await hydrationApi.query.tokens.accounts(
+          account.address,
+          actualWudId
+        ) as any;
+
+        if (wudBalanceQuery && wudBalanceQuery.free) {
+          wudBalanceRaw = wudBalanceQuery.free.toString();
+          const rawBalance = new BigNumber(wudBalanceRaw);
+          const divisor = new BigNumber(10).pow(WUD_DECIMALS);
+          wudBalance = rawBalance.dividedBy(divisor).toFixed(4);
+
+          console.log('Hydration WUD balance:', {
+            assetId: actualWudId,
+            raw: wudBalanceRaw,
+            formatted: wudBalance,
+          });
+        }
+      } catch (error) {
+        console.error(`Error getting WUD balance on Hydration (tried asset ID ${actualWudId}):`, error);
+        
+        // If the first attempt fails and we haven't tried the dynamic lookup,
+        // it might mean WUD isn't supported on Hydration yet
+        console.log('WUD might not be registered on Hydration yet');
+      }
+
       await hydrationApi.disconnect();
 
       setBalances({
@@ -142,6 +184,8 @@ export const useHydrationBalances = (account: Account | undefined): HydrationBal
         unqBalanceRaw,
         usdtBalance,
         usdtBalanceRaw,
+        wudBalance,
+        wudBalanceRaw,
         isLoading: false,
         error: null,
       });
@@ -154,6 +198,8 @@ export const useHydrationBalances = (account: Account | undefined): HydrationBal
         unqBalanceRaw: '0',
         usdtBalance: '0',
         usdtBalanceRaw: '0',
+        wudBalance: '0',
+        wudBalanceRaw: '0',
         isLoading: false,
         error: error instanceof Error ? error.message : 'Failed to fetch Hydration balances',
       });
@@ -171,6 +217,8 @@ export const useHydrationBalances = (account: Account | undefined): HydrationBal
     unqBalanceRaw: balances.unqBalanceRaw,
     usdtBalance: balances.usdtBalance,
     usdtBalanceRaw: balances.usdtBalanceRaw,
+    wudBalance: balances.wudBalance,
+    wudBalanceRaw: balances.wudBalanceRaw,
     isLoading: balances.isLoading,
     error: balances.error,
     refetch: fetchBalances,
