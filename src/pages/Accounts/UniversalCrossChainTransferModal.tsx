@@ -234,7 +234,7 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
       let destFee = 0;
       if (needsDestFee) {
         if (isWudMultiHop) {
-          destFee = 0.15; // 0.15 USDT fee for WUD multi-hop transfers
+          destFee = 0.35; // 0.35 USDT fee for WUD multi-hop transfers
         } else if (isMultiHop) {
           destFee = 0.05;
         } else {
@@ -353,7 +353,7 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
             // For WUD transfers, use USDT on Asset Hub as fee asset
             feeAssetId = USDT_ASSET_ID; // USDT on Asset Hub
             feeDecimals = 6; // USDT has 6 decimals
-            baseFee = 0.15; // 0.15 USDT fee (increased for XCM costs)
+            baseFee = 0.35; // 0.15 USDT fee (increased for XCM costs)
           } else {
             // For USDT transfers, use USDT as fee asset
             feeAssetId = USDT_ASSET_ID;
@@ -458,7 +458,7 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
                     ]
                   }
                 },
-                fun: { Fungible: new BigNumber(0.15).multipliedBy(new BigNumber(10).pow(6)).integerValue(BigNumber.ROUND_DOWN).toString(10) }
+                fun: { Fungible: new BigNumber(0.20).multipliedBy(new BigNumber(10).pow(6)).integerValue(BigNumber.ROUND_DOWN).toString(10) }
               }
             };
 
@@ -714,7 +714,7 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
                     ]
                   }
                 },
-                fun: { Fungible: new BigNumber(0.15).multipliedBy(new BigNumber(10).pow(6)).integerValue(BigNumber.ROUND_DOWN).toString(10) }
+                fun: { Fungible: new BigNumber(0.35).multipliedBy(new BigNumber(10).pow(6)).integerValue(BigNumber.ROUND_DOWN).toString(10) }
               }
             };
 
@@ -730,12 +730,7 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
               }
             };
 
-            console.log('WUD AssetHub → Unique with USDT fee:', {
-              sending: amount + ' WUD',
-              feeAsset: 'USDT on Asset Hub',
-              feeAmount: '0.15 USDT',
-              recipientWillReceive: amount + ' WUD'
-            });
+
 
             tx = api.tx.xTokens.transferMultiassetWithFee(assetLocation, feeAsset, destination, 'Unlimited');
           } else {
@@ -931,7 +926,7 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
   let destFee = 0;
   if (needsDestFee) {
     if (isWudMultiHop || isWudUniqueToAssetHub) {
-      destFee = 0.15; // 0.15 USDT fee for WUD transfers with separate fee asset
+      destFee = 0.35; // 0.15 USDT fee for WUD transfers with separate fee asset
     } else if (isMultiHop) {
       destFee = 0.047;
     } else {
