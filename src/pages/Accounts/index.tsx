@@ -14,6 +14,7 @@ import SubscanLogo from 'static/images/subscan-logo.png';
 
 import { useHydrationBalances } from 'hooks/useHydrationBalances';
 import { useUsdtBalance } from 'hooks/useUsdtBalance';
+import { useWudBalance } from 'hooks/useWudBalance';
 
 const testid = 'accounts-page';
 
@@ -105,15 +106,25 @@ export const AccountsPage = () => {
     dotBalance: hydrationDotBalance,
     unqBalance: hydrationUnqBalance,
     usdtBalance: hydrationUsdtBalance,
+    wudBalance: hydrationWudBalance,
     isLoading: isHydrationLoading,
     refetch: refetchHydrationBalances
   } = useHydrationBalances(selectedAccount);
+
+  const { 
+    uniqueWudBalance, 
+    assetHubWudBalance, 
+    hydrationWudBalance: hydrationWudBalanceFromHook,
+    isLoading: isWudLoading,
+    refetch: refetchWudBalance
+  } = useWudBalance(selectedAccount);
 
   const refetchAllBalances = useCallback(() => {
     refetchDotBalance();
     refetchUsdtBalance();
     refetchHydrationBalances();
-  }, [refetchDotBalance, refetchUsdtBalance, refetchHydrationBalances]);
+    refetchWudBalance();
+  }, [refetchDotBalance, refetchUsdtBalance, refetchHydrationBalances, refetchWudBalance]);
 
   const startPeriodicRefetch = useCallback((token: string) => {
     // Clear any existing interval
@@ -219,13 +230,31 @@ export const AccountsPage = () => {
           canTransferFromAssetHub: usdtOnAssetHubBalance > 0,
           canTransferFromHydration: usdtOnHydrationBalance > 0
         });
+      } else if (currency.name === 'WUD') {
+        const wudOnUniqueBalance = parseFloat(uniqueWudBalance || '0');
+        const wudOnAssetHubBalance = parseFloat(assetHubWudBalance || '0');
+        const wudOnHydrationBalance = parseFloat(hydrationWudBalance || '0');
+        
+        balances.push({
+          collectionId,
+          name: currency.name,
+          iconUrl: currency.iconUrl,
+          decimals: currency.decimals,
+          uniqueBalance: isWudLoading ? '...' : uniqueWudBalance,
+          assetHubBalance: isWudLoading ? '...' : assetHubWudBalance,
+          hydrationBalance: isHydrationLoading ? '...' : hydrationWudBalance,
+          canSend: wudOnUniqueBalance > 0,
+          canTransferFromAssetHub: wudOnAssetHubBalance > 0,
+          canTransferFromHydration: wudOnHydrationBalance > 0
+        });
       }
     });
 
     return balances;
   }, [currencyMap, selectedAccount, uniqueDotBalance, polkadotRelayBalance, isDotLoading, 
       uniqueUsdtBalance, assetHubUsdtBalance, hydrationUsdtBalance, isUsdtLoading,
-      hydrationDotBalance, hydrationUnqBalance, isHydrationLoading]);
+      hydrationDotBalance, hydrationUnqBalance, isHydrationLoading,
+      uniqueWudBalance, assetHubWudBalance, hydrationWudBalanceFromHook, isWudLoading]);
 
   useEffect(() => {
     if (!isLoading && !accounts.size) {
@@ -355,6 +384,22 @@ export const AccountsPage = () => {
                                 disabled={!token.canSend}
                                 size="small"
                               />
+                            )}
+                            {token.name === 'WUD' && (
+                              <>
+                                <CrossChainButton 
+                                  title="To Asset Hub" 
+                                  onClick={() => openTransfer('WUD', 'unique', 'assetHub', token.uniqueBalance)}
+                                  disabled={!token.canSend}
+                                  size="small"
+                                />
+                                <CrossChainButton 
+                                  title="To Hydration" 
+                                  onClick={() => openTransfer('WUD', 'unique', 'hydration', token.uniqueBalance)}
+                                  disabled={!token.canSend}
+                                  size="small"
+                                />
+                              </>
                             )}
                           </ActionsCell>
                         </Td>
