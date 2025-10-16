@@ -67,6 +67,7 @@ export const CommonTokenDetail: FC<IProps> = ({
   topmostOwner,
   previewMode,
   notFound,
+  isOwner,
   onBurn
 }) => {
   const navigate = useNavigate();
@@ -372,7 +373,7 @@ export const CommonTokenDetail: FC<IProps> = ({
                   />
                 </MenuIconWrapper>
               </ScanMenuItem>
-              {!offer && (
+              {isOwner && (
                 <BurnMenuItem onClick={onBurn}>
                   Burn
                   <MenuIconWrapper>

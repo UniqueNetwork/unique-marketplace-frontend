@@ -37,7 +37,7 @@ const BelongingFilter: FC<BelongingFilterProps> = ({ value, onChange, disabled }
             },
             {
               value: 'Disowned',
-              label: 'Disowned',
+              label: 'Not owned',
               disabled
             }
           ]}
