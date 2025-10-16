@@ -689,52 +689,43 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
           // AssetHub → Unique/Hydration (USDT/WUD - native assets)
           if (destinationChain === 'unique' && tokenSymbol === 'WUD') {
             // WUD AssetHub → Unique with USDT fee
-            const assetLocation = {
-              V4: {
-                id: {
-                  parents: 0,
-                  interior: {
+
+
+
+
+            const dest = { 
+              V4: { 
+                parents: 1, 
+                interior: { X1: [{ Parachain: UNIQUE_CHAIN_ID }] } 
+              } 
+            };
+            
+            const beneficiary = {
+              V4: { 
+                parents: 0, 
+                interior: { X1: [{ AccountId32: { id: accountId } }] } 
+              }
+            };
+            
+            const assets = {
+              V4: [{
+                id: { 
+                  parents: 0, 
+                  interior: { 
                     X2: [
-                      { PalletInstance: ASSET_HUB_PALLET_ASSETS },
+                      { PalletInstance: ASSET_HUB_PALLET_ASSETS }, 
                       { GeneralIndex: token.assetHubAssetId }
-                    ]
-                  }
+                    ] 
+                  } 
                 },
                 fun: { Fungible: amountRaw }
-              }
+              }]
             };
-
-            // Fee asset - USDT on Asset Hub
-            const feeAsset = {
-              V4: {
-                id: {
-                  parents: 0,
-                  interior: {
-                    X2: [
-                      { PalletInstance: ASSET_HUB_PALLET_ASSETS },
-                      { GeneralIndex: USDT_ASSET_ID }
-                    ]
-                  }
-                },
-                fun: { Fungible: new BigNumber(HYDRATION_NON_SOLO_FEE).multipliedBy(new BigNumber(10).pow(6)).integerValue(BigNumber.ROUND_DOWN).toString(10) }
-              }
-            };
-
-            const destination = {
-              V4: {
-                parents: 1,
-                interior: {
-                  X2: [
-                    { Parachain: UNIQUE_CHAIN_ID },
-                    { AccountId32: { network: null, id: accountId } }
-                  ]
-                }
-              }
-            };
-
-
-
-            tx = api.tx.xTokens.transferMultiassetWithFee(assetLocation, feeAsset, destination, 'Unlimited');
+            
+            tx = api.tx.polkadotXcm.limitedReserveTransferAssets(
+              dest, beneficiary, assets, 0, 
+              { Limited: { refTime: "5000000000", proofSize: "200000" } }
+            );
           } else {
             // Regular AssetHub → Unique/Hydration (USDT - native assets)
             const dest = { 
