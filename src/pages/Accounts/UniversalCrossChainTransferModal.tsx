@@ -7,16 +7,17 @@ import { web3Accounts, web3Enable, web3FromSource } from '@polkadot/extension-da
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 import BigNumber from 'bignumber.js';
 
+// Constants
 const UNIQUE_CHAIN_ID = 2037;
 const ASSETHUB_CHAIN_ID = 1000;
 const HYDRATION_CHAIN_ID = 2034;
 const ASSET_HUB_PALLET_ASSETS = 50;
 const USDT_ASSET_ID = 1984;
 const WUD_ASSET_ID = 31337;
-const MIN_BALANCE_AFTER_TRANSFER_DOT_RELAY = 1.1; // Existential Deposit + buffer for Relay Chain
-const HYDRATION_NON_SOLO_FEE = 0.35 // 0.35 USDT fee for non-solo transfers on Hydration
+const MIN_BALANCE_AFTER_TRANSFER_DOT_RELAY = 1.1; // Existential Deposit for Relay Chain
+const HYDRATION_NON_SOLO_FEE = 0.35; // USDT fee for WUD multi-hop transfers
 
-
+// Types
 interface TokenConfig {
   decimals: number;
   uniqueCollectionId?: number;
@@ -26,6 +27,26 @@ interface TokenConfig {
   maxTransfer: number;
 }
 
+type ChainType = keyof typeof CHAINS;
+type Status = 'idle' | 'pending' | 'success' | 'error';
+
+interface Props {
+  isVisible: boolean;
+  onFinish: () => void;
+  tokenSymbol: string;
+  sourceChain: ChainType;
+  destinationChain: ChainType;
+  sourceBalance: string;
+  sourceUSDTBalance?: string; // USDT balance on source chain for fee payment
+  testid?: string;
+}
+
+interface FeeInfo {
+  feeAsset: string;
+  feeAmount: number;
+}
+
+// Token and chain configurations
 const TOKENS: Record<string, TokenConfig> = {
   DOT: { 
     decimals: 10, 
@@ -66,19 +87,473 @@ const CHAINS = {
   hydration: { name: 'Hydration', rpc: 'wss://rpc.hydradx.cloud', explorer: 'https://hydration.subscan.io' }
 };
 
-type ChainType = keyof typeof CHAINS;
-type Status = 'idle' | 'pending' | 'success' | 'error';
+// Determine fee currency and amount for different routes
+const getFeeAssetInfo = (
+  source: ChainType,
+  destination: ChainType,
+  token: string
+): FeeInfo | null => {
+  // WUD transfers always use USDT for fees
+  if (token === 'WUD') {
+    if (source === 'hydration' && destination === 'unique') {
+      return { feeAsset: 'USDT', feeAmount: HYDRATION_NON_SOLO_FEE };
+    }
+    if (source === 'unique' && destination === 'hydration') {
+      return { feeAsset: 'USDT', feeAmount: HYDRATION_NON_SOLO_FEE };
+    }
+    if (source === 'unique' && destination === 'assetHub') {
+      return { feeAsset: 'USDT', feeAmount: 0.20 };
+    }
+    if (source === 'hydration' && destination === 'assetHub') {
+      return { feeAsset: 'USDT', feeAmount: 0.05 };
+    }
+  }
 
-interface Props {
-  isVisible: boolean;
-  onFinish: () => void;
-  tokenSymbol: string;
-  sourceChain: ChainType;
-  destinationChain: ChainType;
-  sourceBalance: string;
-  testid?: string;
+  // USDT transfers use USDT for fees
+  if (token === 'USDT') {
+    if (source === 'hydration' && destination === 'unique') {
+      return { feeAsset: 'USDT', feeAmount: 0.05 };
+    }
+    if (source === 'unique' && destination === 'hydration') {
+      return { feeAsset: 'USDT', feeAmount: 0.12 };
+    }
+    if (source === 'hydration' && destination === 'assetHub') {
+      return { feeAsset: 'USDT', feeAmount: 0.05 };
+    }
+    if (source === 'unique' && destination === 'assetHub') {
+      return { feeAsset: 'USDT', feeAmount: 0.05 };
+    }
+  }
+
+  // Native tokens don't have explicit XCM fees in our setup
+  return null;
+};
+
+// Transaction builder class for cleaner code organization
+class TransactionBuilder {
+  private api: ApiPromise;
+  
+  constructor(api: ApiPromise) {
+    this.api = api;
+  }
+
+  private createAssetLocation(assetId: number, amountRaw: string) {
+    return {
+      V4: {
+        id: {
+          parents: 1,
+          interior: {
+            X3: [
+              { Parachain: ASSETHUB_CHAIN_ID },
+              { PalletInstance: ASSET_HUB_PALLET_ASSETS },
+              { GeneralIndex: assetId }
+            ]
+          }
+        },
+        fun: { Fungible: amountRaw }
+      }
+    };
+  }
+
+  private createDestination(parachainId: number, accountId: Uint8Array) {
+    return {
+      V4: {
+        parents: 1,
+        interior: {
+          X2: [
+            { Parachain: parachainId },
+            { AccountId32: { network: null, id: accountId } }
+          ]
+        }
+      }
+    };
+  }
+
+  private calculateFee(baseFee: number, decimals: number): string {
+    return new BigNumber(baseFee)
+      .multipliedBy(new BigNumber(10).pow(decimals))
+      .integerValue(BigNumber.ROUND_DOWN)
+      .toString(10);
+  }
+
+  // HYDRATION SOURCE ROUTES
+  hydrationToAssetHub(token: string, amountRaw: string, accountId: Uint8Array) {
+    const assetId = token === 'USDT' ? USDT_ASSET_ID : WUD_ASSET_ID;
+    const tokenConfig = TOKENS[token];
+    
+    const assetLocation = this.createAssetLocation(assetId, amountRaw);
+    const feeAsset = this.createAssetLocation(assetId, this.calculateFee(0.05, tokenConfig.decimals));
+    const destination = this.createDestination(ASSETHUB_CHAIN_ID, accountId);
+    
+    return this.api.tx.xTokens.transferMultiassetWithFee(assetLocation, feeAsset, destination, 'Unlimited');
+  }
+
+  hydrationToUnique(token: string, amountRaw: string, accountId: Uint8Array) {
+    const assetId = token === 'USDT' ? USDT_ASSET_ID : WUD_ASSET_ID;
+    const baseFee = token === 'WUD' ? HYDRATION_NON_SOLO_FEE : 0.05;
+    
+    const assetLocation = this.createAssetLocation(assetId, amountRaw);
+    const feeAsset = this.createAssetLocation(USDT_ASSET_ID, this.calculateFee(baseFee, 6));
+    const destination = this.createDestination(UNIQUE_CHAIN_ID, accountId);
+    
+    return this.api.tx.xTokens.transferMultiassetWithFee(assetLocation, feeAsset, destination, 'Unlimited');
+  }
+
+  hydrationToParachainNative(destinationChain: ChainType, currencyId: number, amountRaw: string, accountId: Uint8Array) {
+    const destParachain = destinationChain === 'unique' ? UNIQUE_CHAIN_ID : ASSETHUB_CHAIN_ID;
+    const destination = this.createDestination(destParachain, accountId);
+    
+    return this.api.tx.xTokens.transfer(currencyId, amountRaw, destination, 'Unlimited');
+  }
+
+  // UNIQUE SOURCE ROUTES
+  uniqueToHydration(token: string, amountRaw: string, accountId: Uint8Array) {
+    const assetId = token === 'USDT' ? USDT_ASSET_ID : WUD_ASSET_ID;
+    const baseFee = token === 'WUD' ? HYDRATION_NON_SOLO_FEE : 0.12;
+    
+    const assetLocation = this.createAssetLocation(assetId, amountRaw);
+    const feeAsset = this.createAssetLocation(USDT_ASSET_ID, this.calculateFee(baseFee, 6));
+    const destination = this.createDestination(HYDRATION_CHAIN_ID, accountId);
+    
+    return this.api.tx.xTokens.transferMultiassetWithFee(assetLocation, feeAsset, destination, 'Unlimited');
+  }
+
+  uniqueToAssetHubUSDT(amountRaw: string, accountId: Uint8Array) {
+    const destination = {
+      V4: {
+        parents: 1,
+        interior: { X1: [{ Parachain: ASSETHUB_CHAIN_ID }] }
+      }
+    };
+    
+    const beneficiary = {
+      V4: {
+        parents: 0,
+        interior: { X1: [{ AccountId32: { id: accountId } }] }
+      }
+    };
+    
+    const assets = {
+      V4: [{
+        id: {
+          parents: 1,
+          interior: {
+            X3: [
+              { Parachain: ASSETHUB_CHAIN_ID },
+              { PalletInstance: ASSET_HUB_PALLET_ASSETS },
+              { GeneralIndex: USDT_ASSET_ID }
+            ]
+          }
+        },
+        fun: { Fungible: amountRaw }
+      }]
+    };
+    
+    return this.api.tx.polkadotXcm.transferAssets(destination, beneficiary, assets, 0, 'Unlimited');
+  }
+
+  uniqueToAssetHubWUD(amountRaw: string, accountId: Uint8Array) {
+    const assetLocation = this.createAssetLocation(WUD_ASSET_ID, amountRaw);
+    const feeAsset = this.createAssetLocation(USDT_ASSET_ID, this.calculateFee(0.20, 6));
+    const destination = this.createDestination(ASSETHUB_CHAIN_ID, accountId);
+    
+    return this.api.tx.xTokens.transferMultiassetWithFee(assetLocation, feeAsset, destination, 'Unlimited');
+  }
+
+  uniqueToRelayDOT(collectionId: number, amountRaw: string, accountId: Uint8Array) {
+    const destination = {
+      V4: {
+        parents: 1,
+        interior: { X1: [{ AccountId32: { id: accountId } }] }
+      }
+    };
+    
+    return this.api.tx.xTokens.transfer(collectionId, amountRaw, destination, 'Unlimited');
+  }
+
+  uniqueToParachainNative(destinationChain: ChainType, collectionId: number, amountRaw: string, accountId: Uint8Array) {
+    const destParachain = destinationChain === 'hydration' ? HYDRATION_CHAIN_ID : ASSETHUB_CHAIN_ID;
+    const destination = this.createDestination(destParachain, accountId);
+    
+    return this.api.tx.xTokens.transfer(collectionId, amountRaw, destination, 'Unlimited');
+  }
+
+  // RELAY SOURCE ROUTES
+  relayToUniqueDOT(amountRaw: string, accountId: Uint8Array) {
+    const destination = {
+      V4: {
+        parents: 0,
+        interior: { X1: [{ Parachain: UNIQUE_CHAIN_ID }] }
+      }
+    };
+    
+    const beneficiary = {
+      V4: {
+        parents: 0,
+        interior: { X1: [{ AccountId32: { id: accountId } }] }
+      }
+    };
+    
+    const assets = {
+      V4: [{
+        id: { parents: 0, interior: 'Here' },
+        fun: { Fungible: amountRaw }
+      }]
+    };
+    
+    return this.api.tx.xcmPallet.limitedReserveTransferAssets(
+      destination,
+      beneficiary,
+      assets,
+      0,
+      { Limited: { refTime: "5000000000", proofSize: "200000" } }
+    );
+  }
+
+  // ASSET HUB SOURCE ROUTES
+  assetHubToParachain(
+    destinationChain: ChainType,
+    token: string,
+    assetId: number,
+    amountRaw: string,
+    accountId: Uint8Array
+  ) {
+    const destParachain = destinationChain === 'unique' ? UNIQUE_CHAIN_ID : HYDRATION_CHAIN_ID;
+    
+    const dest = {
+      V4: {
+        parents: 1,
+        interior: { X1: [{ Parachain: destParachain }] }
+      }
+    };
+    
+    const beneficiary = {
+      V4: {
+        parents: 0,
+        interior: { X1: [{ AccountId32: { id: accountId } }] }
+      }
+    };
+    
+    const assets = {
+      V4: [{
+        id: {
+          parents: 0,
+          interior: {
+            X2: [
+              { PalletInstance: ASSET_HUB_PALLET_ASSETS },
+              { GeneralIndex: assetId }
+            ]
+          }
+        },
+        fun: { Fungible: amountRaw }
+      }]
+    };
+    
+    return this.api.tx.polkadotXcm.limitedReserveTransferAssets(
+      dest,
+      beneficiary,
+      assets,
+      0,
+      { Limited: { refTime: "5000000000", proofSize: "200000" } }
+    );
+  }
+
+  assetHubDOTToParachain(destinationChain: ChainType, amountRaw: string, accountId: Uint8Array) {
+    const destParachain = destinationChain === 'unique' ? UNIQUE_CHAIN_ID : HYDRATION_CHAIN_ID;
+    
+    const dest = {
+      V4: {
+        parents: 1,
+        interior: { X1: [{ Parachain: destParachain }] }
+      }
+    };
+    
+    const beneficiary = {
+      V4: {
+        parents: 0,
+        interior: { X1: [{ AccountId32: { id: accountId } }] }
+      }
+    };
+    
+    const assets = {
+      V4: [{
+        id: { parents: 1, interior: 'Here' },
+        fun: { Fungible: amountRaw }
+      }]
+    };
+    
+    return this.api.tx.polkadotXcm.limitedReserveTransferAssets(
+      dest,
+      beneficiary,
+      assets,
+      0,
+      { Limited: { refTime: "5000000000", proofSize: "200000" } }
+    );
+  }
 }
 
+// Main routing function with clear conditions
+function buildTransaction(
+  api: ApiPromise,
+  source: ChainType,
+  destination: ChainType,
+  token: string,
+  amountRaw: string,
+  accountId: Uint8Array,
+  tokenConfig: TokenConfig
+) {
+  const builder = new TransactionBuilder(api);
+
+  // ROUTE: Hydration → AssetHub (USDT/WUD)
+  if (source === 'hydration' && destination === 'assetHub' && (token === 'USDT' || token === 'WUD')) {
+    return builder.hydrationToAssetHub(token, amountRaw, accountId);
+  }
+
+  // ROUTE: Hydration → Unique (USDT/WUD)
+  if (source === 'hydration' && destination === 'unique' && (token === 'USDT' || token === 'WUD')) {
+    return builder.hydrationToUnique(token, amountRaw, accountId);
+  }
+
+  // ROUTE: Hydration → Any (DOT/UNQ native tokens)
+  if (source === 'hydration' && (token === 'DOT' || token === 'UNQ') && tokenConfig.hydrationCurrencyId) {
+    return builder.hydrationToParachainNative(destination, tokenConfig.hydrationCurrencyId, amountRaw, accountId);
+  }
+
+  // ROUTE: Unique → Hydration (USDT/WUD)
+  if (source === 'unique' && destination === 'hydration' && (token === 'USDT' || token === 'WUD')) {
+    return builder.uniqueToHydration(token, amountRaw, accountId);
+  }
+
+  // ROUTE: Unique → AssetHub (USDT)
+  if (source === 'unique' && destination === 'assetHub' && token === 'USDT') {
+    return builder.uniqueToAssetHubUSDT(amountRaw, accountId);
+  }
+
+  // ROUTE: Unique → AssetHub (WUD)
+  if (source === 'unique' && destination === 'assetHub' && token === 'WUD') {
+    return builder.uniqueToAssetHubWUD(amountRaw, accountId);
+  }
+
+  // ROUTE: Unique → Relay (DOT)
+  if (source === 'unique' && destination === 'relay' && token === 'DOT' && tokenConfig.uniqueCollectionId !== undefined) {
+    return builder.uniqueToRelayDOT(tokenConfig.uniqueCollectionId, amountRaw, accountId);
+  }
+
+  // ROUTE: Unique → Any (DOT/UNQ native tokens)
+  if (source === 'unique' && (token === 'DOT' || token === 'UNQ') && tokenConfig.uniqueCollectionId !== undefined) {
+    return builder.uniqueToParachainNative(destination, tokenConfig.uniqueCollectionId, amountRaw, accountId);
+  }
+
+  // ROUTE: Relay → Unique (DOT)
+  if (source === 'relay' && destination === 'unique' && token === 'DOT') {
+    return builder.relayToUniqueDOT(amountRaw, accountId);
+  }
+
+  // ROUTE: AssetHub → Any (USDT/WUD)
+  if (source === 'assetHub' && (token === 'USDT' || token === 'WUD') && tokenConfig.assetHubAssetId) {
+    return builder.assetHubToParachain(destination, token, tokenConfig.assetHubAssetId, amountRaw, accountId);
+  }
+
+  // ROUTE: AssetHub → Any (DOT)
+  if (source === 'assetHub' && token === 'DOT') {
+    return builder.assetHubDOTToParachain(destination, amountRaw, accountId);
+  }
+
+  throw new Error(`Unsupported transfer route: ${source} → ${destination} for ${token}`);
+}
+
+// Validation function with proper fee asset and existential deposit checking
+function validateAmountAndBalances(
+  amountNum: number,
+  sourceBalance: string,
+  sourceUSDTBalance: string | undefined,
+  source: ChainType,
+  destination: ChainType,
+  tokenSymbol: string,
+  token: TokenConfig
+) {
+  const balanceNum = parseFloat(sourceBalance.replace(/[,\s]/g, ''));
+  
+  // Basic validations
+  if (isNaN(amountNum) || amountNum <= 0) {
+    throw new Error('Please enter a valid amount');
+  }
+  
+  if (amountNum < token.minTransfer) {
+    throw new Error(`Minimum transfer: ${token.minTransfer} ${tokenSymbol}`);
+  }
+  
+  if (amountNum > token.maxTransfer) {
+    throw new Error(`Maximum transfer: ${token.maxTransfer} ${tokenSymbol}`);
+  }
+
+  // Check Existential Deposit for DOT on Relay Chain
+  const isRelayDotTransfer = source === 'relay' && tokenSymbol === 'DOT' && destination === 'unique';
+  const relayMinBalance = isRelayDotTransfer ? MIN_BALANCE_AFTER_TRANSFER_DOT_RELAY : 0;
+  
+  // Get fee information
+  const feeInfo = getFeeAssetInfo(source, destination, tokenSymbol);
+  
+  if (feeInfo) {
+    const { feeAsset, feeAmount } = feeInfo;
+    
+    // Check if fee is paid in different asset (WUD transfers use USDT for fees)
+    if (feeAsset === 'USDT' && tokenSymbol !== 'USDT') {
+      // WUD transfer - fee paid in USDT
+      if (!sourceUSDTBalance) {
+        throw new Error(`USDT balance not available. Need ${feeAmount} USDT for transaction fee`);
+      }
+      
+      const usdtBalanceNum = parseFloat(sourceUSDTBalance.replace(/[,\s]/g, ''));
+      if (feeAmount > usdtBalanceNum) {
+        throw new Error(
+          `Insufficient USDT balance for fee. Need ${feeAmount.toFixed(2)} USDT, ` +
+          `available: ${sourceUSDTBalance} USDT on ${CHAINS[source].name}`
+        );
+      }
+      
+      // Check main token balance
+      const totalNeeded = amountNum + relayMinBalance;
+      if (totalNeeded > balanceNum) {
+        throw new Error(
+          `Insufficient ${tokenSymbol} balance. Need ${totalNeeded.toFixed(4)} ${tokenSymbol}, ` +
+          `available: ${sourceBalance} ${tokenSymbol}`
+        );
+      }
+    } else {
+      // Fee paid in same asset (USDT transfers or native tokens)
+      const totalNeeded = amountNum + feeAmount + relayMinBalance;
+      if (totalNeeded > balanceNum) {
+        if (isRelayDotTransfer) {
+          throw new Error(
+            `Insufficient balance. Need to keep at least ${relayMinBalance} DOT on Relay Chain for Existential Deposit. ` +
+            `Maximum transfer: ${(balanceNum - relayMinBalance).toFixed(4)} DOT`
+          );
+        }
+        throw new Error(
+          `Insufficient balance. Need ${totalNeeded.toFixed(tokenSymbol === 'USDT' ? 2 : 4)} ${tokenSymbol} ` +
+          `(${amountNum} transfer + ${feeAmount} fee), available: ${sourceBalance} ${tokenSymbol}`
+        );
+      }
+    }
+  } else {
+    // No XCM fee but check for Existential Deposit
+    const totalNeeded = amountNum + relayMinBalance;
+    if (totalNeeded > balanceNum) {
+      if (isRelayDotTransfer) {
+        throw new Error(
+          `Insufficient balance. Need to keep at least ${relayMinBalance} DOT on Relay Chain for Existential Deposit. ` +
+          `Maximum transfer: ${(balanceNum - relayMinBalance).toFixed(4)} DOT`
+        );
+      }
+      throw new Error(
+        `Insufficient ${tokenSymbol} balance. Available: ${sourceBalance} ${tokenSymbol}`
+      );
+    }
+  }
+}
+
+// Main Component
 export const UniversalCrossChainTransferModal: FC<Props> = ({
   isVisible,
   onFinish,
@@ -86,6 +561,7 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
   sourceChain,
   destinationChain,
   sourceBalance,
+  sourceUSDTBalance,
   testid = 'universal-cross-chain-modal'
 }) => {
   const { selectedAccount } = useAccounts();
@@ -136,7 +612,6 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
     onFinish();
   }, [api, onFinish]);
 
-  // Compare addresses by public key (works across different SS58 formats)
   const isSameAddress = (addr1: string, addr2: string): boolean => {
     try {
       const pub1 = decodeAddress(addr1);
@@ -148,26 +623,19 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
   };
 
   const getInjectorForAccount = async (address: string) => {
-    // Enable extensions
     const extensions = await web3Enable('Cross-chain Transfer');
     if (!extensions.length) {
       throw new Error('No wallet extension found');
     }
 
-    // Wait for extension initialization
     await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Get all accounts from extensions
     const allAccounts = await web3Accounts();
-
-    // Find matching account by public key
     const matchingAccount = allAccounts.find(acc => isSameAddress(acc.address, address));
     
     if (!matchingAccount) {
-      console.error('Account not found!');
       throw new Error('Account not found in wallet. Please make sure the account is imported in your extension.');
     }
-    // Get injector using web3FromSource (this is the KEY!)
+    
     const injector = await web3FromSource(matchingAccount.meta.source);
     if (!injector?.signer) {
       throw new Error(`Extension ${matchingAccount.meta.source} has no signer`);
@@ -189,703 +657,65 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
     try {
       const amountNum = parseFloat(amount);
       
-      console.log('Validating amount:', {
-        amount: amountNum,
-        min: token.minTransfer,
-        max: token.maxTransfer,
-        balance: sourceBalance
-      });
-
-      if (isNaN(amountNum) || amountNum <= 0) {
-        throw new Error('Please enter a valid amount');
-      }
-      
-      if (amountNum < token.minTransfer) {
-        throw new Error(`Minimum transfer: ${token.minTransfer} ${tokenSymbol}`);
-      }
-      
-      if (amountNum > token.maxTransfer) {
-        throw new Error(`Maximum transfer: ${token.maxTransfer} ${tokenSymbol}`);
-      }
-
-      const balanceNum = parseFloat(sourceBalance.replace(/[,\s]/g, ''));
-      
-      // Special requirement for DOT transfers from Relay Chain
-      // Must keep at least 1.1 DOT for Existential Deposit + buffer
-      const isRelayDotTransfer = sourceChain === 'relay' && tokenSymbol === 'DOT' && destinationChain === 'unique';
-      const relayMinBalance = isRelayDotTransfer ? MIN_BALANCE_AFTER_TRANSFER_DOT_RELAY : 0;
-      
-      // Check if this route needs destination fee
-      const needsDestFee = (
-        (sourceChain === 'hydration' || sourceChain === 'unique') &&
-        (tokenSymbol === 'USDT' || tokenSymbol === 'WUD') &&
-        (destinationChain === 'assetHub' || destinationChain === 'unique' || destinationChain === 'hydration')
+      // Validate amount and balances
+      validateAmountAndBalances(
+        amountNum,
+        sourceBalance,
+        sourceUSDTBalance,
+        sourceChain,
+        destinationChain,
+        tokenSymbol,
+        token
       );
-      
-      // Multi-hop transfers have higher execution costs
-      const isMultiHop = (
-        (sourceChain === 'hydration' && destinationChain === 'unique') ||
-        (sourceChain === 'unique' && destinationChain === 'hydration')
-      ) && (tokenSymbol === 'USDT' || tokenSymbol === 'WUD');
-      
-      // WUD transfers use USDT from Asset Hub as fee asset
-      const isWudTransfer = tokenSymbol === 'WUD';
-      const isWudMultiHop = isMultiHop && isWudTransfer;
-      
-      // Fee is sent as separate asset, NOT added to user amount
-      let destFee = 0;
-      if (needsDestFee) {
-        if (isWudMultiHop) {
-          destFee = HYDRATION_NON_SOLO_FEE; // 0.35 USDT fee for WUD multi-hop transfers
-        } else if (isMultiHop) {
-          destFee = 0.05;
-        } else {
-          destFee = 0.05;
-        }
-      }
-      const totalNeeded = amountNum + destFee + relayMinBalance;
-      
-      if (totalNeeded > balanceNum) {
-        if (isRelayDotTransfer) {
-          throw new Error(`Insufficient balance. Need ${totalNeeded.toFixed(4)} DOT (${amountNum} transfer + ${relayMinBalance} must remain for Existential Deposit), available: ${sourceBalance} DOT`);
-        }
-        throw new Error(`Insufficient balance. Need ${totalNeeded.toFixed(tokenSymbol === 'USDT' ? 2 : 4)} ${tokenSymbol} (${amountNum} transfer + ${destFee} fee), available: ${sourceBalance} ${tokenSymbol}`);
-      }
 
-      // Convert to raw amount without any formatting
+      // Convert to raw amount
       const amountRaw = new BigNumber(amount)
         .multipliedBy(new BigNumber(10).pow(token.decimals))
         .integerValue(BigNumber.ROUND_DOWN)
         .toString(10);
       
-      console.log('Amount conversion:', {
-        input: amount,
-        decimals: token.decimals,
-        raw: amountRaw,
-        rawType: typeof amountRaw
-      });
-      
       const accountId = decodeAddress(selectedAccount.address);
       
       setMessage('Creating transaction...');
-      let tx;
       
-      // FROM HYDRATION
-      if (sourceChain === 'hydration' && token.hydrationCurrencyId !== undefined) {
-        if (destinationChain === 'assetHub' && (tokenSymbol === 'USDT' || tokenSymbol === 'WUD')) {
-          // Hydration → AssetHub (USDT/WUD returning home)
-          const assetId = tokenSymbol === 'USDT' ? USDT_ASSET_ID : WUD_ASSET_ID;
-          
-          // Asset for user
-          const assetLocation = {
-            V4: {
-              id: {
-                parents: 1,
-                interior: {
-                  X3: [
-                    { Parachain: ASSETHUB_CHAIN_ID },
-                    { PalletInstance: ASSET_HUB_PALLET_ASSETS },
-                    { GeneralIndex: assetId }
-                  ]
-                }
-              },
-              fun: { Fungible: amountRaw }
-            }
-          };
-          
-          // Fee for destination
-          const feeBuffer = new BigNumber(0.05)
-            .multipliedBy(new BigNumber(10).pow(token.decimals))
-            .integerValue(BigNumber.ROUND_DOWN)
-            .toString(10);
-          
-          const feeAsset = {
-            V4: {
-              id: {
-                parents: 1,
-                interior: {
-                  X3: [
-                    { Parachain: ASSETHUB_CHAIN_ID },
-                    { PalletInstance: ASSET_HUB_PALLET_ASSETS },
-                    { GeneralIndex: assetId }
-                  ]
-                }
-              },
-              fun: { Fungible: feeBuffer }
-            }
-          };
-          
-          const destination = {
-            V4: {
-              parents: 1,
-              interior: {
-                X2: [
-                  { Parachain: ASSETHUB_CHAIN_ID },
-                  { AccountId32: { network: null, id: accountId } }
-                ]
-              }
-            }
-          };
-          
-          tx = api.tx.xTokens.transferMultiassetWithFee(assetLocation, feeAsset, destination, 'Unlimited');
-        } else if (destinationChain === 'unique' && (tokenSymbol === 'USDT' || tokenSymbol === 'WUD')) {
-          // Hydration → Unique (USDT/WUD via asset location)
-          const assetId = tokenSymbol === 'USDT' ? USDT_ASSET_ID : WUD_ASSET_ID;
-
-          // Asset to send - just the user amount
-          const assetLocation = {
-            V4: {
-              id: {
-                parents: 1,
-                interior: {
-                  X3: [
-                    { Parachain: ASSETHUB_CHAIN_ID },
-                    { PalletInstance: ASSET_HUB_PALLET_ASSETS },
-                    { GeneralIndex: assetId }
-                  ]
-                }
-              },
-              fun: { Fungible: amountRaw }
-            }
-          };
-          
-          // Fee for XCM execution - use USDT on Asset Hub as fee asset for WUD transfers
-          let feeAssetId, feeDecimals, baseFee;
-          if (tokenSymbol === 'WUD') {
-            // For WUD transfers, use USDT on Asset Hub as fee asset
-            feeAssetId = USDT_ASSET_ID; // USDT on Asset Hub
-            feeDecimals = 6; // USDT has 6 decimals
-            baseFee = HYDRATION_NON_SOLO_FEE; // 0.15 USDT fee (increased for XCM costs)
-          } else {
-            // For USDT transfers, use USDT as fee asset
-            feeAssetId = USDT_ASSET_ID;
-            feeDecimals = 6;
-            baseFee = 0.05;
-          }
-          
-          const feeForExecution = new BigNumber(baseFee)
-            .multipliedBy(new BigNumber(10).pow(feeDecimals))
-            .integerValue(BigNumber.ROUND_DOWN)
-            .toString(10);
-          
-          // Fee asset - USDT on Asset Hub
-          const feeAsset = {
-            V4: {
-              id: {
-                parents: 1, // USDT from Asset Hub
-                interior: {
-                  X3: [
-                    { Parachain: ASSETHUB_CHAIN_ID },
-                    { PalletInstance: ASSET_HUB_PALLET_ASSETS },
-                    { GeneralIndex: feeAssetId }
-                  ]
-                }
-              },
-              fun: { Fungible: feeForExecution }
-            }
-          };
-          
-          const destination = {
-            V4: {
-              parents: 1,
-              interior: {
-                X2: [
-                  { Parachain: UNIQUE_CHAIN_ID },
-                  { AccountId32: { network: null, id: accountId } }
-                ]
-              }
-            }
-          };
-          
-          console.log('Multi-hop transfer:', {
-            sending: amount + ' ' + tokenSymbol,
-            feeAsset: tokenSymbol === 'WUD' ? 'USDT on Asset Hub' : tokenSymbol,
-            feeAmount: baseFee + ' ' + (tokenSymbol === 'WUD' ? 'USDT' : tokenSymbol),
-            recipientWillReceive: amount + ' ' + tokenSymbol
-          });
-          
-          tx = api.tx.xTokens.transferMultiassetWithFee(assetLocation, feeAsset, destination, 'Unlimited');
-        } else {
-          // Hydration → Unique/AssetHub (native tokens like DOT, UNQ)
-          const destParachain = destinationChain === 'unique' ? UNIQUE_CHAIN_ID : ASSETHUB_CHAIN_ID;
-          const destination = {
-            V4: {
-              parents: 1,
-              interior: {
-                X2: [
-                  { Parachain: destParachain },
-                  { AccountId32: { network: null, id: accountId } }
-                ]
-              }
-            }
-          };
-          
-          tx = api.tx.xTokens.transfer(token.hydrationCurrencyId, amountRaw, destination, 'Unlimited');
-        }
-      }
-      // FROM UNIQUE
-      else if (sourceChain === 'unique' && token.uniqueCollectionId !== undefined) {
-        if (destinationChain === 'assetHub' && (tokenSymbol === 'USDT' || tokenSymbol === 'WUD')) {
-          // Unique → AssetHub (USDT/WUD returning home)
-          const assetId = tokenSymbol === 'USDT' ? USDT_ASSET_ID : WUD_ASSET_ID;
-          
-          if (tokenSymbol === 'WUD') {
-            // WUD Unique → AssetHub with USDT fee
-            const assetLocation = {
-              V4: {
-                id: {
-                  parents: 1,
-                  interior: {
-                    X3: [
-                      { Parachain: ASSETHUB_CHAIN_ID },
-                      { PalletInstance: ASSET_HUB_PALLET_ASSETS },
-                      { GeneralIndex: assetId }
-                    ]
-                  }
-                },
-                fun: { Fungible: amountRaw }
-              }
-            };
-
-            // Fee asset - USDT from Asset Hub
-            const feeAsset = {
-              V4: {
-                id: {
-                  parents: 1,
-                  interior: {
-                    X3: [
-                      { Parachain: ASSETHUB_CHAIN_ID },
-                      { PalletInstance: ASSET_HUB_PALLET_ASSETS },
-                      { GeneralIndex: USDT_ASSET_ID }
-                    ]
-                  }
-                },
-                fun: { Fungible: new BigNumber(0.20).multipliedBy(new BigNumber(10).pow(6)).integerValue(BigNumber.ROUND_DOWN).toString(10) }
-              }
-            };
-
-            const destination = {
-              V4: {
-                parents: 1,
-                interior: {
-                  X2: [
-                    { Parachain: ASSETHUB_CHAIN_ID },
-                    { AccountId32: { network: null, id: accountId } }
-                  ]
-                }
-              }
-            };
-
-            console.log('WUD Unique → AssetHub with USDT fee:', {
-              sending: amount + ' WUD',
-              feeAsset: 'USDT on Asset Hub',
-
-              recipientWillReceive: amount + ' WUD'
-            });
-
-            tx = api.tx.xTokens.transferMultiassetWithFee(assetLocation, feeAsset, destination, 'Unlimited');
-          } else {
-            // USDT Unique → AssetHub (regular transfer)
-            const destination = {
-              V4: {
-                parents: 1,
-                interior: {
-                  X1: [{ Parachain: ASSETHUB_CHAIN_ID }]
-                }
-              }
-            };
-            
-            const beneficiary = {
-              V4: {
-                parents: 0,
-                interior: {
-                  X1: [{ AccountId32: { id: accountId } }]
-                }
-              }
-            };
-            
-            const assets = {
-              V4: [{
-                id: {
-                  parents: 1,
-                  interior: {
-                    X3: [
-                      { Parachain: ASSETHUB_CHAIN_ID },
-                      { PalletInstance: ASSET_HUB_PALLET_ASSETS },
-                      { GeneralIndex: assetId }
-                    ]
-                  }
-                },
-                fun: { Fungible: amountRaw }
-              }]
-            };
-            
-            tx = api.tx.polkadotXcm.transferAssets(destination, beneficiary, assets, 0, 'Unlimited');
-          }
-        } else if (destinationChain === 'hydration' && (tokenSymbol === 'USDT' || tokenSymbol === 'WUD')) {
-      // Unique → Hydration. Logic is separated for USDT and WUD.
-
-        if (tokenSymbol === 'USDT') {
-            // --- BLOCK FOR USDT ---
-            console.log('Preparing Unique -> Hydration transfer for USDT');
-            
-            // 1. Asset to transfer: USDT
-            const assetLocation = {
-                V4: {
-                    id: {
-                        parents: 1,
-                        interior: {
-                            X3: [
-                                { Parachain: ASSETHUB_CHAIN_ID },
-                                { PalletInstance: ASSET_HUB_PALLET_ASSETS },
-                                { GeneralIndex: USDT_ASSET_ID }
-                            ]
-                        }
-                    },
-                    fun: { Fungible: amountRaw }
-                }
-            };
-
-            // 2. Asset for the fee: USDT
-            const baseFee = 0.12; // The correct fee amount
-            const feeForExecution = new BigNumber(baseFee)
-                .multipliedBy(new BigNumber(10).pow(6)) // USDT decimals
-                .integerValue(BigNumber.ROUND_DOWN)
-                .toString(10);
-
-            const feeAsset = {
-                V4: {
-                    id: {
-                        parents: 1,
-                        interior: {
-                            X3: [
-                                { Parachain: ASSETHUB_CHAIN_ID },
-                                { PalletInstance: ASSET_HUB_PALLET_ASSETS },
-                                { GeneralIndex: USDT_ASSET_ID }
-                            ]
-                        }
-                    },
-                    fun: { Fungible: feeForExecution }
-                }
-            };
-
-            // 3. Destination address
-            const destination = {
-                V4: {
-                    parents: 1,
-                    interior: {
-                        X2: [
-                            { Parachain: HYDRATION_CHAIN_ID },
-                            { AccountId32: { network: null, id: accountId } }
-                        ]
-                    }
-                }
-            };
-            
-            tx = api.tx.xTokens.transferMultiassetWithFee(assetLocation, feeAsset, destination, 'Unlimited');
-
-        } else if (tokenSymbol === 'WUD') {
-          // --- BLOCK FOR WUD ---
-          console.log('Preparing Unique -> Hydration transfer for WUD');
-
-          // 1. Asset to transfer: WUD
-          const assetLocation = {
-              V4: {
-                  id: {
-                      parents: 1,
-                      interior: {
-                          X3: [
-                              { Parachain: ASSETHUB_CHAIN_ID },
-                              { PalletInstance: ASSET_HUB_PALLET_ASSETS },
-                              { GeneralIndex: WUD_ASSET_ID }
-                          ]
-                      }
-                  },
-                  fun: { Fungible: amountRaw }
-              }
-          };
-
-          // 2. Asset for the fee: USDT (!!!)
-
-          const feeForExecution = new BigNumber(HYDRATION_NON_SOLO_FEE)
-              .multipliedBy(new BigNumber(10).pow(6)) // USDT decimals
-              .integerValue(BigNumber.ROUND_DOWN)
-              .toString(10);
-              
-          const feeAsset = {
-              V4: {
-                  id: {
-                      parents: 1,
-                      interior: {
-                          X3: [
-                              { Parachain: ASSETHUB_CHAIN_ID },
-                              { PalletInstance: ASSET_HUB_PALLET_ASSETS },
-                              { GeneralIndex: USDT_ASSET_ID } // Fee is in USDT
-                          ]
-                      }
-                  },
-                  fun: { Fungible: feeForExecution }
-              }
-          };
-
-          // 3. Destination address
-          const destination = {
-              V4: {
-                  parents: 1,
-                  interior: {
-                      X2: [
-                          { Parachain: HYDRATION_CHAIN_ID },
-                          { AccountId32: { network: null, id: accountId } }
-                      ]
-                  }
-              }
-          };
-
-          tx = api.tx.xTokens.transferMultiassetWithFee(assetLocation, feeAsset, destination, 'Unlimited');
-      }
-        } else if (destinationChain === 'relay' && tokenSymbol === 'DOT') {
-          // Unique → Relay (DOT returning to Relay Chain)
-          const destination = {
-            V4: {
-              parents: 1,
-              interior: {
-                X1: [{ 
-                  AccountId32: { 
-                    id: accountId
-                  } 
-                }]
-              }
-            }
-          };
-          
-          tx = api.tx.xTokens.transfer(token.uniqueCollectionId, amountRaw, destination, 'Unlimited');
-        } else {
-          // Unique → AssetHub/Hydration (native tokens like DOT, UNQ)
-          const destParachain = destinationChain === 'hydration' ? HYDRATION_CHAIN_ID : ASSETHUB_CHAIN_ID;
-          const destination = {
-            V4: {
-              parents: 1,
-              interior: {
-                X2: [
-                  { Parachain: destParachain },
-                  { AccountId32: { network: null, id: accountId } }
-                ]
-              }
-            }
-          };
-          
-          tx = api.tx.xTokens.transfer(token.uniqueCollectionId, amountRaw, destination, 'Unlimited');
-        }
-      }
-      // FROM RELAY (DOT to Unique)
-      else if (sourceChain === 'relay') {
-        if (!api) throw new Error('Polkadot API not connected');
-
-        const destination = {
-          V4: {
-            parents: 0,
-            interior: { X1: [{ Parachain: UNIQUE_CHAIN_ID }] },
-          },
-        };
-
-        const beneficiary = {
-          V4: {
-            parents: 0,
-            interior: { 
-              X1: [{ 
-                AccountId32: { 
-                  id: accountId
-                } 
-              }] 
-            },
-          },
-        };
-
-        const assets = {
-          V4: [
-            {
-              id: {
-                parents: 0,
-                interior: 'Here',
-              },
-              fun: { Fungible: amountRaw },
-            },
-          ],
-        };
-
-        console.log('XCM transfer (Polkadot → Unique):', {
-          destination,
-          beneficiary: beneficiary.V4.interior.X1[0].AccountId32.id,
-          amount: amountRaw,
-        });
-
-        tx = api.tx.xcmPallet.limitedReserveTransferAssets(
-          destination,
-          beneficiary,
-          assets,
-          0,
-          { Limited: { refTime: "5000000000", proofSize: "200000" } }
-        );
-      }
-      // FROM ASSET HUB
-      else if (sourceChain === 'assetHub') {
-        const destParachain = destinationChain === 'unique' ? UNIQUE_CHAIN_ID : HYDRATION_CHAIN_ID;
-        
-        if (token.assetHubAssetId !== undefined) {
-          // AssetHub → Unique/Hydration (USDT/WUD - native assets)
-          if (destinationChain === 'unique' && tokenSymbol === 'WUD') {
-            // WUD AssetHub → Unique with USDT fee
-
-
-
-
-            const dest = { 
-              V4: { 
-                parents: 1, 
-                interior: { X1: [{ Parachain: UNIQUE_CHAIN_ID }] } 
-              } 
-            };
-            
-            const beneficiary = {
-              V4: { 
-                parents: 0, 
-                interior: { X1: [{ AccountId32: { id: accountId } }] } 
-              }
-            };
-            
-            const assets = {
-              V4: [{
-                id: { 
-                  parents: 0, 
-                  interior: { 
-                    X2: [
-                      { PalletInstance: ASSET_HUB_PALLET_ASSETS }, 
-                      { GeneralIndex: token.assetHubAssetId }
-                    ] 
-                  } 
-                },
-                fun: { Fungible: amountRaw }
-              }]
-            };
-            
-            tx = api.tx.polkadotXcm.limitedReserveTransferAssets(
-              dest, beneficiary, assets, 0, 
-              { Limited: { refTime: "5000000000", proofSize: "200000" } }
-            );
-          } else {
-            // Regular AssetHub → Unique/Hydration (USDT - native assets)
-            const dest = { 
-              V4: { 
-                parents: 1, 
-                interior: { X1: [{ Parachain: destParachain }] } 
-              } 
-            };
-            
-            const beneficiary = {
-              V4: { 
-                parents: 0, 
-                interior: { X1: [{ AccountId32: { id: accountId } }] } 
-              }
-            };
-            
-            const assets = {
-              V4: [{
-                id: { 
-                  parents: 0, 
-                  interior: { 
-                    X2: [
-                      { PalletInstance: ASSET_HUB_PALLET_ASSETS }, 
-                      { GeneralIndex: token.assetHubAssetId }
-                    ] 
-                  } 
-                },
-                fun: { Fungible: amountRaw }
-              }]
-            };
-            
-            tx = api.tx.polkadotXcm.limitedReserveTransferAssets(
-              dest, beneficiary, assets, 0, 
-              { Limited: { refTime: "5000000000", proofSize: "200000" } }
-            );
-          }
-        } else if (tokenSymbol === 'DOT') {
-          // AssetHub → Unique/Hydration (DOT - relay chain native token)
-          const dest = { 
-            V4: { 
-              parents: 1, 
-              interior: { X1: [{ Parachain: destParachain }] } 
-            } 
-          };
-          
-          const beneficiary = {
-            V4: { 
-              parents: 0, 
-              interior: { X1: [{ AccountId32: { id: accountId } }] } 
-            }
-          };
-          
-          const assets = { 
-            V4: [{ 
-              id: { 
-                parents: 1,  // DOT is from parent (Relay)
-                interior: 'Here' 
-              }, 
-              fun: { Fungible: amountRaw } 
-            }] 
-          };
-          
-          tx = api.tx.polkadotXcm.limitedReserveTransferAssets(
-            dest, beneficiary, assets, 0, 
-            { Limited: { refTime: "5000000000", proofSize: "200000" } }
-          );
-        } else {
-          throw new Error('Unsupported token for AssetHub transfer');
-        }
-      } else {
-        throw new Error('Unsupported transfer route');
-      }
+      // Build transaction
+      const tx = buildTransaction(
+        api,
+        sourceChain,
+        destinationChain,
+        tokenSymbol,
+        amountRaw,
+        accountId,
+        token
+      );
 
       if (!tx) {
         throw new Error('Failed to create transaction');
       }
 
-      console.log('Transaction created successfully!');
-      console.log('Section:', tx.method.section);
-      console.log('Method:', tx.method.method);
-      console.log('Args:', JSON.stringify(tx.method.args, null, 2));
-      console.log('Hash:', tx.hash.toHex());
+      console.log('Transaction created:', {
+        section: tx.method.section,
+        method: tx.method.method,
+        hash: tx.hash.toHex()
+      });
 
       setMessage('Connecting to wallet...');
-      
-      // Get injector and account
       const { injector, account } = await getInjectorForAccount(selectedAccount.address);
 
       setMessage('Requesting signature...');
-      console.log('=== Signing transaction ===');
-      console.log('Account:', account.address);
-      console.log('Injector source:', injector.name);
-      
-      // Get account nonce
       const nonce = await api.rpc.system.accountNextIndex(account.address);
-      console.log('Account nonce:', nonce.toString());
       
-      // Sign payload first (this triggers extension popup)
-      console.log('Calling signAsync...');
       const signedPayload = await tx.signAsync(account.address, { 
         signer: injector.signer,
         nonce: nonce
       });
       
-      console.log('Payload signed! Sending transaction...');
       setMessage('Broadcasting transaction...');
       
-      // Now send the signed transaction
       await signedPayload.send((result) => {
         console.log('Transaction status:', result.status.type);
         
         if (result.status.isInBlock) {
-          console.log('In block:', result.status.asInBlock.toString());
-          
           const success = result.events.some(({ event }) => 
             event.section === 'system' && event.method === 'ExtrinsicSuccess'
           );
@@ -906,79 +736,106 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
             setTxHash(result.txHash.toString());
           }
         } else if (result.isError) {
-          console.error('Transaction error:', result);
           setStatus('error');
           setMessage('Transaction error occurred');
         }
       });
 
-      console.log('Transaction submitted');
     } catch (error: any) {
       console.error('Transfer error:', error);
       setStatus('error');
       
-      // User-friendly error messages
       if (error.message?.includes('Cancelled') || error.message?.includes('cancelled')) {
         setMessage('Transaction cancelled by user');
-      } else if (error.message?.includes('extension')) {
-        setMessage(error.message);
       } else if (error.message?.includes('1010')) {
         setMessage('Insufficient balance for transaction fee');
-      } else if (error.message?.includes('Minimum') || error.message?.includes('Maximum')) {
-        setMessage(error.message);
       } else {
         setMessage(error.message || 'Transfer failed. Please try again');
       }
     }
   };
 
-  if (!isVisible) return null;
-
-  const amountNum = parseFloat(amount || '0');
-  const balanceNum = parseFloat(sourceBalance.replace(/[,\s]/g, ''));
-  
-  // Special requirement for DOT transfers from Relay Chain
-  const isRelayDotTransfer = sourceChain === 'relay' && tokenSymbol === 'DOT' && destinationChain === 'unique';
-  const relayMinBalance = isRelayDotTransfer ? MIN_BALANCE_AFTER_TRANSFER_DOT_RELAY : 0;
-  
-  // Calculate destination fee based on route
-  // Fee is sent as separate asset for XCM execution costs, NOT added to user amount
-  const needsDestFee = (
-    (sourceChain === 'hydration' || sourceChain === 'unique') &&
-    (tokenSymbol === 'USDT' || tokenSymbol === 'WUD') &&
-    (destinationChain === 'assetHub' || destinationChain === 'unique' || destinationChain === 'hydration') &&
-    sourceChain !== destinationChain  // Don't add fee for same chain
-  );
-  
-  // Multi-hop transfers have higher execution costs
-  const isMultiHop = (
-    (sourceChain === 'hydration' && destinationChain === 'unique') ||
-    (sourceChain === 'unique' && destinationChain === 'hydration')
-  ) && (tokenSymbol === 'USDT' || tokenSymbol === 'WUD');
-  
-  // Fee sent as separate asset for XCM execution
-  // WUD transfers use USDT from Asset Hub as fee asset
-  const isWudTransfer = tokenSymbol === 'WUD';
-  const isWudMultiHop = isMultiHop && isWudTransfer;
-  const isWudUniqueToAssetHub = sourceChain === 'unique' && destinationChain === 'assetHub' && tokenSymbol === 'WUD';
-  
-  let destFee = 0;
-  if (needsDestFee) {
-    if (isWudMultiHop || isWudUniqueToAssetHub) {
-      destFee = HYDRATION_NON_SOLO_FEE; // 0.15 USDT fee for WUD transfers with separate fee asset
-    } else if (isMultiHop) {
-      destFee = 0.047;
+  // Calculate fee information for UI display
+  const getFeeDisplay = () => {
+    const feeInfo = getFeeAssetInfo(sourceChain, destinationChain, tokenSymbol);
+    const amountNum = parseFloat(amount || '0');
+    const balanceNum = parseFloat(sourceBalance.replace(/[,\s]/g, ''));
+    const usdtBalanceNum = sourceUSDTBalance ? parseFloat(sourceUSDTBalance.replace(/[,\s]/g, '')) : 0;
+    
+    // Check for Relay DOT Existential Deposit
+    const isRelayDotTransfer = sourceChain === 'relay' && tokenSymbol === 'DOT' && destinationChain === 'unique';
+    const relayMinBalance = isRelayDotTransfer ? MIN_BALANCE_AFTER_TRANSFER_DOT_RELAY : 0;
+    
+    let isValid = false;
+    let errorMessage = '';
+    
+    // Basic validation
+    if (amountNum <= 0) {
+      isValid = false;
+      errorMessage = '';
+    } else if (amountNum < token.minTransfer) {
+      isValid = false;
+      errorMessage = `Minimum transfer: ${token.minTransfer} ${tokenSymbol}`;
+    } else if (amountNum > token.maxTransfer) {
+      isValid = false;
+      errorMessage = `Maximum transfer: ${token.maxTransfer} ${tokenSymbol}`;
+    } else if (isRelayDotTransfer && amountNum + relayMinBalance > balanceNum) {
+      // Special check for Relay DOT
+      isValid = false;
+      const maxTransfer = Math.max(0, balanceNum - relayMinBalance);
+      errorMessage = `Must keep ${relayMinBalance} DOT on Relay Chain (Existential Deposit). Maximum transfer: ${maxTransfer.toFixed(4)} DOT`;
+    } else if (feeInfo) {
+      const { feeAsset, feeAmount } = feeInfo;
+      const needsSeparateFeeAsset = feeAsset === 'USDT' && tokenSymbol !== 'USDT';
+      
+      if (needsSeparateFeeAsset) {
+        // WUD transfers - check both balances separately
+        if (amountNum > balanceNum) {
+          isValid = false;
+          errorMessage = `Insufficient ${tokenSymbol} balance. Available: ${sourceBalance} ${tokenSymbol}`;
+        } else if (!sourceUSDTBalance || usdtBalanceNum < feeAmount) {
+          isValid = false;
+          errorMessage = sourceUSDTBalance 
+            ? `Insufficient USDT for fee. Need ${feeAmount.toFixed(2)} USDT, available: ${sourceUSDTBalance} USDT`
+            : `USDT balance required for fee. Need ${feeAmount.toFixed(2)} USDT`;
+        } else {
+          isValid = true;
+        }
+      } else {
+        // Same asset for amount and fee
+        const totalNeeded = amountNum + feeAmount + relayMinBalance;
+        if (totalNeeded > balanceNum) {
+          isValid = false;
+          errorMessage = `Insufficient balance. Need ${totalNeeded.toFixed(tokenSymbol === 'USDT' ? 2 : 4)} ${tokenSymbol}, available: ${sourceBalance} ${tokenSymbol}`;
+        } else {
+          isValid = true;
+        }
+      }
     } else {
-      destFee = 0.05;
+      // No fee but still check balance
+      const totalNeeded = amountNum + relayMinBalance;
+      if (totalNeeded > balanceNum) {
+        isValid = false;
+        errorMessage = `Insufficient balance. Available: ${sourceBalance} ${tokenSymbol}`;
+      } else {
+        isValid = true;
+      }
     }
-  }
-  const totalAmount = amountNum + destFee + relayMinBalance;
-  
-  const isValid = !isNaN(amountNum) && 
-                  amountNum > 0 &&
-                  amountNum >= token.minTransfer && 
-                  amountNum <= token.maxTransfer && 
-                  totalAmount <= balanceNum;
+    
+    return { 
+      feeInfo, 
+      needsSeparateFeeAsset: feeInfo?.feeAsset === 'USDT' && tokenSymbol !== 'USDT', 
+      isValid, 
+      errorMessage, 
+      isRelayDotTransfer, 
+      relayMinBalance 
+    };
+  };
+
+  const { feeInfo, needsSeparateFeeAsset, isValid, errorMessage, isRelayDotTransfer, relayMinBalance } = getFeeDisplay();
+  const amountNum = parseFloat(amount || '0');
+
+  if (!isVisible) return null;
 
   return (
     <Modal isVisible={isVisible} isClosable onClose={handleClose}>
@@ -1007,43 +864,85 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
                 <span>Available: {sourceBalance} {tokenSymbol}</span>
               </Info>
               
-              {needsDestFee && amount && amountNum > 0 && (
+              {/* Existential Deposit display for Relay DOT */}
+              {isRelayDotTransfer && amount && amountNum > 0 && (
                 <FeeBreakdown>
-                  {isMultiHop && (
-                    <RouteInfo>
-                      🔄 Multi-hop route: {fromChain.name} → AssetHub → {toChain.name}
-                      <RouteNote>Separate fee asset sent to cover execution costs on all hops</RouteNote>
-                    </RouteInfo>
-                  )}
                   <FeeRow>
-                    <span>Recipient receives:</span>
-                    <span>{amountNum.toFixed(tokenSymbol === 'USDT' ? 2 : 4)} {tokenSymbol}</span>
+                    <span>Amount to transfer:</span>
+                    <span>{amountNum.toFixed(4)} DOT</span>
                   </FeeRow>
                   <FeeRow>
-                    <span>Fee for execution costs:</span>
-                    <span>+{destFee.toFixed(tokenSymbol === 'USDT' ? 2 : 4)} {(isWudMultiHop || isWudUniqueToAssetHub) ? 'USDT' : tokenSymbol}</span>
+                    <span>Existential Deposit (must remain):</span>
+                    <span>{relayMinBalance} DOT</span>
                   </FeeRow>
                   <FeeDivider />
                   <FeeRow $bold>
-                    <span>Total deducted from balance:</span>
-                    <span>{amountNum.toFixed(tokenSymbol === 'USDT' ? 2 : 4)} {tokenSymbol} + {destFee.toFixed(tokenSymbol === 'USDT' ? 2 : 4)} {(isWudMultiHop || isWudUniqueToAssetHub) ? 'USDT' : tokenSymbol}</span>
+                    <span>Total required on Relay:</span>
+                    <span>{(amountNum + relayMinBalance).toFixed(4)} DOT</span>
+                  </FeeRow>
+                  <FeeRow>
+                    <span>Available on Relay:</span>
+                    <span>{sourceBalance} DOT</span>
                   </FeeRow>
                   <FeeNote>
-                    The fee is sent as a separate asset for XCM execution costs{isMultiHop && ' across all hops'}.
+                    Polkadot Relay Chain requires minimum {relayMinBalance} DOT balance to keep account active
                   </FeeNote>
                 </FeeBreakdown>
               )}
               
-              {amount && !isValid && amountNum > 0 && (
-                <Warning>
-                  {amountNum < token.minTransfer && `Amount must be at least ${token.minTransfer} ${tokenSymbol}`}
-                  {amountNum > token.maxTransfer && `Amount cannot exceed ${token.maxTransfer} ${tokenSymbol}`}
-                  {totalAmount > balanceNum && (
-                    isRelayDotTransfer 
-                      ? `Insufficient balance. Need ${totalAmount.toFixed(4)} ${tokenSymbol} (${amountNum} transfer + ${relayMinBalance} must remain for Existential Deposit)`
-                      : `Insufficient balance. Need ${totalAmount.toFixed(tokenSymbol === 'USDT' ? 2 : 4)} ${tokenSymbol} (including ${destFee} execution fee)`
+              {/* Fee breakdown for transfers with XCM fees */}
+              {feeInfo && amount && amountNum > 0 && !isRelayDotTransfer && (
+                <FeeBreakdown>
+                  <FeeRow>
+                    <span>Amount to send:</span>
+                    <span>{amountNum.toFixed(tokenSymbol === 'USDT' ? 2 : 4)} {tokenSymbol}</span>
+                  </FeeRow>
+                  
+                  {needsSeparateFeeAsset ? (
+                    <>
+                      <FeeRow>
+                        <span>XCM execution fee:</span>
+                        <span>{feeInfo.feeAmount.toFixed(2)} USDT</span>
+                      </FeeRow>
+                      <FeeDivider />
+                      <FeeRow>
+                        <span>Required {tokenSymbol} balance:</span>
+                        <span>{amountNum.toFixed(4)} {tokenSymbol}</span>
+                      </FeeRow>
+                      <FeeRow>
+                        <span>Required USDT balance (for fee):</span>
+                        <span>{feeInfo.feeAmount.toFixed(2)} USDT</span>
+                      </FeeRow>
+                      {sourceUSDTBalance && (
+                        <FeeRow $success={parseFloat(sourceUSDTBalance.replace(/[,\s]/g, '')) >= feeInfo.feeAmount}>
+                          <span>Available USDT on {fromChain.name}:</span>
+                          <span>{sourceUSDTBalance} USDT {parseFloat(sourceUSDTBalance.replace(/[,\s]/g, '')) >= feeInfo.feeAmount ? '✓' : ''}</span>
+                        </FeeRow>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <FeeRow>
+                        <span>XCM execution fee:</span>
+                        <span>{feeInfo.feeAmount.toFixed(tokenSymbol === 'USDT' ? 2 : 4)} {tokenSymbol}</span>
+                      </FeeRow>
+                      <FeeDivider />
+                      <FeeRow $bold>
+                        <span>Total required:</span>
+                        <span>{(amountNum + feeInfo.feeAmount).toFixed(tokenSymbol === 'USDT' ? 2 : 4)} {tokenSymbol}</span>
+                      </FeeRow>
+                    </>
                   )}
-                </Warning>
+                  
+                  <FeeNote>
+                    Fee covers XCM execution costs across chains
+                  </FeeNote>
+                </FeeBreakdown>
+              )}
+              
+              {/* Error display */}
+              {amount && !isValid && amountNum > 0 && errorMessage && (
+                <Warning>{errorMessage}</Warning>
               )}
             </Group>
 
@@ -1082,6 +981,7 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
   );
 };
 
+// Styled components
 const Content = styled.div`
   width: 100%; 
   max-width: 540px;
@@ -1147,7 +1047,10 @@ const Info = styled.div`
 const Warning = styled.div`
   font-size: 12px;
   color: #dc3545;
-  margin-top: -4px;
+  margin-top: 4px;
+  padding: 8px;
+  background: #fef2f2;
+  border-radius: 4px;
 `;
 
 const FeeBreakdown = styled.div`
@@ -1158,13 +1061,13 @@ const FeeBreakdown = styled.div`
   margin-top: 8px;
 `;
 
-const FeeRow = styled.div<{ $bold?: boolean }>`
+const FeeRow = styled.div<{ $bold?: boolean; $success?: boolean }>`
   display: flex;
   justify-content: space-between;
   font-size: 13px;
   margin-bottom: 6px;
   font-weight: ${p => p.$bold ? '600' : '400'};
-  color: ${p => p.$bold ? '#000' : '#495057'};
+  color: ${p => p.$success ? '#28a745' : p.$bold ? '#000' : '#495057'};
   
   &:last-of-type {
     margin-bottom: 0;
@@ -1182,23 +1085,6 @@ const FeeNote = styled.div`
   color: #6c757d;
   margin-top: 8px;
   font-style: italic;
-`;
-
-const RouteInfo = styled.div`
-  font-size: 12px;
-  color: #0066cc;
-  background: #e6f2ff;
-  padding: 8px;
-  border-radius: 4px;
-  margin-bottom: 8px;
-  font-weight: 500;
-`;
-
-const RouteNote = styled.div`
-  font-size: 11px;
-  color: #666;
-  margin-top: 4px;
-  font-weight: 400;
 `;
 
 const StatusBox = styled.div<{ $status: Status }>`
