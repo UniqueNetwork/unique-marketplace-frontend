@@ -14,6 +14,8 @@ const ASSET_HUB_PALLET_ASSETS = 50;
 const USDT_ASSET_ID = 1984;
 const WUD_ASSET_ID = 31337;
 const MIN_BALANCE_AFTER_TRANSFER_DOT_RELAY = 1.1; // Existential Deposit + buffer for Relay Chain
+const HYDRATION_NON_SOLO_FEE = 0.35 // 0.35 USDT fee for non-solo transfers on Hydration
+
 
 interface TokenConfig {
   decimals: number;
@@ -234,7 +236,7 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
       let destFee = 0;
       if (needsDestFee) {
         if (isWudMultiHop) {
-          destFee = 0.35; // 0.35 USDT fee for WUD multi-hop transfers
+          destFee = HYDRATION_NON_SOLO_FEE; // 0.35 USDT fee for WUD multi-hop transfers
         } else if (isMultiHop) {
           destFee = 0.05;
         } else {
@@ -353,7 +355,7 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
             // For WUD transfers, use USDT on Asset Hub as fee asset
             feeAssetId = USDT_ASSET_ID; // USDT on Asset Hub
             feeDecimals = 6; // USDT has 6 decimals
-            baseFee = 0.35; // 0.15 USDT fee (increased for XCM costs)
+            baseFee = HYDRATION_NON_SOLO_FEE; // 0.15 USDT fee (increased for XCM costs)
           } else {
             // For USDT transfers, use USDT as fee asset
             feeAssetId = USDT_ASSET_ID;
@@ -477,7 +479,7 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
             console.log('WUD Unique → AssetHub with USDT fee:', {
               sending: amount + ' WUD',
               feeAsset: 'USDT on Asset Hub',
-              feeAmount: '0.15 USDT',
+
               recipientWillReceive: amount + ' WUD'
             });
 
@@ -546,12 +548,12 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
             // For WUD transfers, use USDT from Asset Hub as fee asset
             feeAssetId = USDT_ASSET_ID;
             feeDecimals = 6; // USDT has 6 decimals
-            baseFee = 0.05; // 0.12 USDT fee
+            baseFee = HYDRATION_NON_SOLO_FEE; // 0.12 USDT fee
           } else {
             // For USDT transfers, use USDT as fee asset
             feeAssetId = USDT_ASSET_ID;
             feeDecimals = 6;
-            baseFee = 0.044;
+            baseFee = 0.2;
           }
           
           const feeForExecution = new BigNumber(baseFee)
@@ -714,7 +716,7 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
                     ]
                   }
                 },
-                fun: { Fungible: new BigNumber(0.35).multipliedBy(new BigNumber(10).pow(6)).integerValue(BigNumber.ROUND_DOWN).toString(10) }
+                fun: { Fungible: new BigNumber(HYDRATION_NON_SOLO_FEE).multipliedBy(new BigNumber(10).pow(6)).integerValue(BigNumber.ROUND_DOWN).toString(10) }
               }
             };
 
@@ -926,7 +928,7 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
   let destFee = 0;
   if (needsDestFee) {
     if (isWudMultiHop || isWudUniqueToAssetHub) {
-      destFee = 0.35; // 0.15 USDT fee for WUD transfers with separate fee asset
+      destFee = HYDRATION_NON_SOLO_FEE; // 0.15 USDT fee for WUD transfers with separate fee asset
     } else if (isMultiHop) {
       destFee = 0.047;
     } else {
