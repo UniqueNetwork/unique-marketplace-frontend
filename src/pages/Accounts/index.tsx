@@ -176,6 +176,19 @@ export const AccountsPage = () => {
     setTransferModal({ isOpen: true, token, from, to, balance });
   }, []);
 
+  const getUSDTBalanceForChain = (chain: ChainType): string => {
+    switch(chain) {
+      case 'unique':
+        return uniqueUsdtBalance || '0';
+      case 'assetHub':
+        return assetHubUsdtBalance || '0';
+      case 'hydration':
+        return hydrationUsdtBalance || '0';
+      default:
+        return '0';
+    }
+  };
+
   const tokenBalances = useMemo<TokenBalance[]>(() => {
     if (!currencyMap || currencyMap.size === 0) return [];
 
@@ -550,6 +563,7 @@ export const AccountsPage = () => {
           sourceChain={transferModal.from}
           destinationChain={transferModal.to}
           sourceBalance={transferModal.balance}
+          sourceUSDTBalance={getUSDTBalanceForChain(transferModal.from)}
           testid={`${testid}-cross-chain-modal`}
         />
       </Wrapper>
