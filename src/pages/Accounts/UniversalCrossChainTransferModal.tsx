@@ -68,7 +68,7 @@ const TOKENS: Record<string, TokenConfig> = {
     assetHubAssetId: 31337,
     hydrationCurrencyId: 25,
     minTransfer: 0.01, 
-    maxTransfer: 1000000 
+    maxTransfer: 100000000000
   },
   USDT: { 
     decimals: 6, 
