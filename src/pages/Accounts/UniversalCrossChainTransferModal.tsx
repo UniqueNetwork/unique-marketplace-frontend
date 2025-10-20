@@ -17,6 +17,14 @@ const WUD_ASSET_ID = 31337;
 const MIN_BALANCE_AFTER_TRANSFER_DOT_RELAY = 1.1; // Existential Deposit for Relay Chain
 const HYDRATION_NON_SOLO_FEE = 0.35; // USDT fee for WUD multi-hop transfers
 
+const formatNumber = (num: number, decimals?: number): string => {
+  // Format number with thousand separators
+  return num.toLocaleString('en-US', {
+    minimumFractionDigits: decimals ?? 0,
+    maximumFractionDigits: decimals ?? (num % 1 === 0 ? 0 : 4)
+  });
+};
+
 // Types
 interface TokenConfig {
   decimals: number;
@@ -68,7 +76,7 @@ const TOKENS: Record<string, TokenConfig> = {
     assetHubAssetId: 31337,
     hydrationCurrencyId: 25,
     minTransfer: 0.01, 
-    maxTransfer: 1000000 
+    maxTransfer: 10000000000
   },
   USDT: { 
     decimals: 6, 
@@ -480,11 +488,11 @@ function validateAmountAndBalances(
   }
   
   if (amountNum < token.minTransfer) {
-    throw new Error(`Minimum transfer: ${token.minTransfer} ${tokenSymbol}`);
+    throw new Error(`Minimum transfer: ${formatNumber(token.minTransfer)} ${tokenSymbol}`);
   }
   
   if (amountNum > token.maxTransfer) {
-    throw new Error(`Maximum transfer: ${token.maxTransfer} ${tokenSymbol}`);
+    throw new Error(`Maximum transfer: ${formatNumber(token.maxTransfer)} ${tokenSymbol}`);
   }
 
   // Check Existential Deposit for DOT on Relay Chain
@@ -501,13 +509,13 @@ function validateAmountAndBalances(
     if (feeAsset === 'USDT' && tokenSymbol !== 'USDT') {
       // WUD transfer - fee paid in USDT
       if (!sourceUSDTBalance) {
-        throw new Error(`USDT balance not available. Need ${feeAmount} USDT for transaction fee`);
+        throw new Error(`USDT balance not available. Need ${formatNumber(feeAmount, 2)} USDT for transaction fee`);
       }
       
       const usdtBalanceNum = parseFloat(sourceUSDTBalance.replace(/[,\s]/g, ''));
       if (feeAmount > usdtBalanceNum) {
         throw new Error(
-          `Insufficient USDT balance for fee. Need ${feeAmount.toFixed(2)} USDT, ` +
+          `Insufficient USDT balance for fee. Need ${formatNumber(feeAmount, 2)} USDT, ` +
           `available: ${sourceUSDTBalance} USDT on ${CHAINS[source].name}`
         );
       }
@@ -516,7 +524,7 @@ function validateAmountAndBalances(
       const totalNeeded = amountNum + relayMinBalance;
       if (totalNeeded > balanceNum) {
         throw new Error(
-          `Insufficient ${tokenSymbol} balance. Need ${totalNeeded.toFixed(4)} ${tokenSymbol}, ` +
+          `Insufficient ${tokenSymbol} balance. Need ${formatNumber(totalNeeded)} ${tokenSymbol}, ` +
           `available: ${sourceBalance} ${tokenSymbol}`
         );
       }
@@ -526,13 +534,13 @@ function validateAmountAndBalances(
       if (totalNeeded > balanceNum) {
         if (isRelayDotTransfer) {
           throw new Error(
-            `Insufficient balance. Need to keep at least ${relayMinBalance} DOT on Relay Chain for Existential Deposit. ` +
-            `Maximum transfer: ${(balanceNum - relayMinBalance).toFixed(4)} DOT`
+            `Insufficient balance. Need to keep at least ${formatNumber(relayMinBalance, 1)} DOT on Relay Chain for Existential Deposit. ` +
+            `Maximum transfer: ${formatNumber(balanceNum - relayMinBalance)} DOT`
           );
         }
         throw new Error(
-          `Insufficient balance. Need ${totalNeeded.toFixed(tokenSymbol === 'USDT' ? 2 : 4)} ${tokenSymbol} ` +
-          `(${amountNum} transfer + ${feeAmount} fee), available: ${sourceBalance} ${tokenSymbol}`
+          `Insufficient balance. Need ${formatNumber(totalNeeded)} ${tokenSymbol} ` +
+          `(${formatNumber(amountNum)} transfer + ${formatNumber(feeAmount)} fee), available: ${sourceBalance} ${tokenSymbol}`
         );
       }
     }
@@ -542,8 +550,8 @@ function validateAmountAndBalances(
     if (totalNeeded > balanceNum) {
       if (isRelayDotTransfer) {
         throw new Error(
-          `Insufficient balance. Need to keep at least ${relayMinBalance} DOT on Relay Chain for Existential Deposit. ` +
-          `Maximum transfer: ${(balanceNum - relayMinBalance).toFixed(4)} DOT`
+          `Insufficient balance. Need to keep at least ${formatNumber(relayMinBalance, 1)} DOT on Relay Chain for Existential Deposit. ` +
+          `Maximum transfer: ${formatNumber(balanceNum - relayMinBalance)} DOT`
         );
       }
       throw new Error(
@@ -727,7 +735,7 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
           
           if (success && !failed) {
             setStatus('success');
-            setMessage(`Successfully transferred ${amount} ${tokenSymbol}`);
+            setMessage(`Successfully transferred ${formatNumber(parseFloat(amount))} ${tokenSymbol}`);
             setTxHash(result.txHash.toString());
             setTimeout(handleClose, 9000);
           } else {
@@ -775,15 +783,15 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
       errorMessage = '';
     } else if (amountNum < token.minTransfer) {
       isValid = false;
-      errorMessage = `Minimum transfer: ${token.minTransfer} ${tokenSymbol}`;
+      errorMessage = `Minimum transfer: ${formatNumber(token.minTransfer)} ${tokenSymbol}`;
     } else if (amountNum > token.maxTransfer) {
       isValid = false;
-      errorMessage = `Maximum transfer: ${token.maxTransfer} ${tokenSymbol}`;
+      errorMessage = `Maximum transfer: ${formatNumber(token.maxTransfer)} ${tokenSymbol}`;
     } else if (isRelayDotTransfer && amountNum + relayMinBalance > balanceNum) {
       // Special check for Relay DOT
       isValid = false;
       const maxTransfer = Math.max(0, balanceNum - relayMinBalance);
-      errorMessage = `Must keep ${relayMinBalance} DOT on Relay Chain (Existential Deposit). Maximum transfer: ${maxTransfer.toFixed(4)} DOT`;
+      errorMessage = `Must keep ${formatNumber(relayMinBalance, 1)} DOT on Relay Chain (Existential Deposit). Maximum transfer: ${formatNumber(maxTransfer)} DOT`;
     } else if (feeInfo) {
       const { feeAsset, feeAmount } = feeInfo;
       const needsSeparateFeeAsset = feeAsset === 'USDT' && tokenSymbol !== 'USDT';
@@ -806,7 +814,7 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
         const totalNeeded = amountNum + feeAmount + relayMinBalance;
         if (totalNeeded > balanceNum) {
           isValid = false;
-          errorMessage = `Insufficient balance. Need ${totalNeeded.toFixed(tokenSymbol === 'USDT' ? 2 : 4)} ${tokenSymbol}, available: ${sourceBalance} ${tokenSymbol}`;
+          errorMessage = `Insufficient balance. Need ${formatNumber(totalNeeded)} ${tokenSymbol}, available: ${sourceBalance} ${tokenSymbol}`;
         } else {
           isValid = true;
         }
@@ -856,11 +864,11 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
                 step="any"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                placeholder={`Min: ${token.minTransfer}`}
+                placeholder={`Min: ${formatNumber(token.minTransfer)}`}
                 disabled={status === 'pending'}
               />
               <Info>
-                <span>Min: {token.minTransfer} {tokenSymbol}</span>
+                <span>Min: {formatNumber(token.minTransfer)} {tokenSymbol}</span>
                 <span>Available: {sourceBalance} {tokenSymbol}</span>
               </Info>
               
@@ -869,23 +877,23 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
                 <FeeBreakdown>
                   <FeeRow>
                     <span>Amount to transfer:</span>
-                    <span>{amountNum.toFixed(4)} DOT</span>
+                    <span>{formatNumber(amountNum, 4)} DOT</span>
                   </FeeRow>
                   <FeeRow>
                     <span>Existential Deposit (must remain):</span>
-                    <span>{relayMinBalance} DOT</span>
+                    <span>{formatNumber(relayMinBalance, 1)} DOT</span>
                   </FeeRow>
                   <FeeDivider />
                   <FeeRow $bold>
                     <span>Total required on Relay:</span>
-                    <span>{(amountNum + relayMinBalance).toFixed(4)} DOT</span>
+                    <span>{formatNumber(amountNum + relayMinBalance, 4)} DOT</span>
                   </FeeRow>
                   <FeeRow>
                     <span>Available on Relay:</span>
                     <span>{sourceBalance} DOT</span>
                   </FeeRow>
                   <FeeNote>
-                    Polkadot Relay Chain requires minimum {relayMinBalance} DOT balance to keep account active
+                    Polkadot Relay Chain requires minimum {formatNumber(relayMinBalance, 1)} DOT balance to keep account active
                   </FeeNote>
                 </FeeBreakdown>
               )}
@@ -895,23 +903,23 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
                 <FeeBreakdown>
                   <FeeRow>
                     <span>Amount to send:</span>
-                    <span>{amountNum.toFixed(tokenSymbol === 'USDT' ? 2 : 4)} {tokenSymbol}</span>
+                    <span>{formatNumber(amountNum, tokenSymbol === 'USDT' ? 2 : 4)} {tokenSymbol}</span>
                   </FeeRow>
                   
                   {needsSeparateFeeAsset ? (
                     <>
                       <FeeRow>
                         <span>XCM execution fee:</span>
-                        <span>{feeInfo.feeAmount.toFixed(2)} USDT</span>
+                        <span>{formatNumber(feeInfo.feeAmount, 2)} USDT</span>
                       </FeeRow>
                       <FeeDivider />
                       <FeeRow>
                         <span>Required {tokenSymbol} balance:</span>
-                        <span>{amountNum.toFixed(4)} {tokenSymbol}</span>
+                        <span>{formatNumber(amountNum, 4)} {tokenSymbol}</span>
                       </FeeRow>
                       <FeeRow>
                         <span>Required USDT balance (for fee):</span>
-                        <span>{feeInfo.feeAmount.toFixed(2)} USDT</span>
+                        <span>{formatNumber(feeInfo.feeAmount, 2)} USDT</span>
                       </FeeRow>
                       {sourceUSDTBalance && (
                         <FeeRow $success={parseFloat(sourceUSDTBalance.replace(/[,\s]/g, '')) >= feeInfo.feeAmount}>
@@ -924,12 +932,12 @@ export const UniversalCrossChainTransferModal: FC<Props> = ({
                     <>
                       <FeeRow>
                         <span>XCM execution fee:</span>
-                        <span>{feeInfo.feeAmount.toFixed(tokenSymbol === 'USDT' ? 2 : 4)} {tokenSymbol}</span>
+                        <span>{formatNumber(feeInfo.feeAmount, tokenSymbol === 'USDT' ? 2 : 4)} {tokenSymbol}</span>
                       </FeeRow>
                       <FeeDivider />
                       <FeeRow $bold>
                         <span>Total required:</span>
-                        <span>{(amountNum + feeInfo.feeAmount).toFixed(tokenSymbol === 'USDT' ? 2 : 4)} {tokenSymbol}</span>
+                        <span>{formatNumber(amountNum + feeInfo.feeAmount, tokenSymbol === 'USDT' ? 2 : 4)} {tokenSymbol}</span>
                       </FeeRow>
                     </>
                   )}
