@@ -26,15 +26,11 @@ export const usePurchaseFixStages = (
         title: 'Approve allowance for spending ERC20 tokens',
         status: StageStatus.default,
         action: ({ txParams }: TInternalStageActionParams<TPurchaseProps>) => {
-          const currencyInfo = currencyMap?.get(currency.toString());
-          const decimals = currencyInfo?.decimals || 0;
-          const amount = txParams.price / Math.pow(10, decimals);
-          
           return marketApi?.allowanceFungible({
             collectionId: currency,
             address: account.address,
             recipient: contractAddress || '',
-            amount: amount,
+            amount: txParams.price,
             account: account,
           });
         },
@@ -50,7 +46,7 @@ export const usePurchaseFixStages = (
     });
 
     return stages;
-  }, [marketApi, collectionId, tokenId, currency, contractAddress, selectedAccount, currencyMap]); // ✅ Добавили currencyMap
+  }, [marketApi, collectionId, tokenId, currency, contractAddress, selectedAccount, currencyMap]);
 
   const { stages, error, status, initiate } = useStages<TPurchaseProps>(purchaseStages, selectedAccount);
 
