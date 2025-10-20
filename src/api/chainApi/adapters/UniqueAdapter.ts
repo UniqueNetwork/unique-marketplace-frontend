@@ -421,11 +421,22 @@ class UniqueAdapter implements IMarketContractAdapter {
 
   async allowanceFungible({collectionId, address, recipient, amount, signer}: ITransferFungible): Promise<any> {
     if (!signer) throw Error('No signer provided');
-    const typedSigner = signer as Signer;
 
-    return await this.uniqueSdk.fungible.approveTokens.submitWaitResult(
-      { collectionId, amount, address, spender: recipient },
-      { signer: typedSigner }
+    const chainType = this.extractChainType(this.uniqueSdk.chain.baseUrl);
+    const chainUrl = this.buildChainUrl(chainType);
+    const uniqueChain = UniqueChain({
+      baseUrl: chainUrl,
+    });
+
+    return await uniqueChain.fungible.approve(
+      {
+        collectionId: collectionId,
+        spender: recipient,
+        amount: amount,
+        sender: address,
+      },
+      { signerAddress: address },
+      { signer },
     );
   }
 
