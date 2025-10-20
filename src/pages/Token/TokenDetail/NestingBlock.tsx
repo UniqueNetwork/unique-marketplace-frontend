@@ -90,7 +90,7 @@ export const NestingTokenBlock: FC<NestingTokenBlockProps> = ({
       <ActionsWrapper>
         <Heading size='4' >Nesting</Heading>
         <ButtonsWrapper>
-          {isOwner && <Button
+          {isOwner && tokenOwner && <Button
             title={'Nest this token'}
             onClick={onNestClick}
             testid={`${testid}-transfer-button`}
