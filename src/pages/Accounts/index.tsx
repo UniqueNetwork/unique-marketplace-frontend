@@ -409,7 +409,7 @@ export const AccountsPage = () => {
                                 <CrossChainButton 
                                   title="To Hydration" 
                                   onClick={() => openTransfer('WUD', 'unique', 'hydration', token.uniqueBalance)}
-                                  disabled={!token.canSend}
+                                  disabled={true}
                                   size="small"
                                 />
                               </>
