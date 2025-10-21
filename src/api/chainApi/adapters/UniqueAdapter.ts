@@ -427,12 +427,14 @@ class UniqueAdapter implements IMarketContractAdapter {
     const uniqueChain = UniqueChain({
       baseUrl: chainUrl,
     });
+    console.log('Approving allowance for fungible token:', {collectionId, address, recipient, amount});
 
+    console.log(String(amount), 'AMOUNT_TO_STRING');
     return await uniqueChain.fungible.approve(
       {
         collectionId: collectionId,
         spender: recipient,
-        amount: amount,
+        amount: String(amount),
         sender: address,
       },
       { signerAddress: address },
