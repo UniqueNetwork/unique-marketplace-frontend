@@ -314,7 +314,8 @@ export const AccountsPage = () => {
                   const isLastToken = tokenIndex === tokenBalances.length - 1;
 
                   let rowSpan = 1;
-                  if (token.relayBalance) rowSpan++;
+                  // Relay balance row is hidden, so don't count it in rowSpan
+                  // if (token.relayBalance) rowSpan++;
                   if (token.assetHubBalance) rowSpan++;
                   if (token.hydrationBalance) rowSpan++;
 
@@ -356,12 +357,6 @@ export const AccountsPage = () => {
                             />
                             {token.name === 'DOT' && (
                               <>
-                                <CrossChainButton 
-                                  title="To Relay Chain" 
-                                  onClick={() => openTransfer('DOT', 'unique', 'relay', token.uniqueBalance)}
-                                  disabled={!token.canSend}
-                                  size="small"
-                                />
                                 <CrossChainButton 
                                   title="To Hydration" 
                                   onClick={() => openTransfer('DOT', 'unique', 'hydration', token.uniqueBalance)}
@@ -418,7 +413,7 @@ export const AccountsPage = () => {
                         </Td>
                       </tr>
 
-                      {token.relayBalance && (
+                      {false && token.relayBalance && (
                         <tr>
                           <Td>
                             <ChainName>Polkadot Relay</ChainName>
