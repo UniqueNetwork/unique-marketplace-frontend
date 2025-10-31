@@ -227,37 +227,11 @@ class TransactionBuilder {
   }
 
   uniqueToAssetHubUSDT(amountRaw: string, accountId: Uint8Array) {
-    const destination = {
-      V4: {
-        parents: 1,
-        interior: { X1: [{ Parachain: ASSETHUB_CHAIN_ID }] }
-      }
-    };
+    const assetLocation = this.createAssetLocation(USDT_ASSET_ID, amountRaw);
+    const feeAsset = this.createAssetLocation(USDT_ASSET_ID, this.calculateFee(0.05, 6));
+    const destination = this.createDestination(ASSETHUB_CHAIN_ID, accountId);
     
-    const beneficiary = {
-      V4: {
-        parents: 0,
-        interior: { X1: [{ AccountId32: { id: accountId } }] }
-      }
-    };
-    
-    const assets = {
-      V4: [{
-        id: {
-          parents: 1,
-          interior: {
-            X3: [
-              { Parachain: ASSETHUB_CHAIN_ID },
-              { PalletInstance: ASSET_HUB_PALLET_ASSETS },
-              { GeneralIndex: USDT_ASSET_ID }
-            ]
-          }
-        },
-        fun: { Fungible: amountRaw }
-      }]
-    };
-    
-    return this.api.tx.polkadotXcm.transferAssets(destination, beneficiary, assets, 0, 'Unlimited');
+    return this.api.tx.xTokens.transferMultiassetWithFee(assetLocation, feeAsset, destination, 'Unlimited');
   }
 
   uniqueToAssetHubWUD(amountRaw: string, accountId: Uint8Array) {
@@ -318,7 +292,6 @@ class TransactionBuilder {
     );
   }
 
-  // ASSET HUB SOURCE ROUTES
   assetHubToParachain(
     destinationChain: ChainType,
     token: string,
@@ -327,74 +300,58 @@ class TransactionBuilder {
     accountId: Uint8Array
   ) {
     const destParachain = destinationChain === 'unique' ? UNIQUE_CHAIN_ID : HYDRATION_CHAIN_ID;
-    
-    const dest = {
-      V4: {
-        parents: 1,
-        interior: { X1: [{ Parachain: destParachain }] }
-      }
-    };
-    
-    const beneficiary = {
-      V4: {
-        parents: 0,
-        interior: { X1: [{ AccountId32: { id: accountId } }] }
-      }
-    };
-    
-    const assets = {
-      V4: [{
-        id: {
-          parents: 0,
-          interior: {
-            X2: [
-              { PalletInstance: ASSET_HUB_PALLET_ASSETS },
-              { GeneralIndex: assetId }
-            ]
-          }
-        },
-        fun: { Fungible: amountRaw }
-      }]
-    };
-    
-    return this.api.tx.polkadotXcm.limitedReserveTransferAssets(
-      dest,
-      beneficiary,
-      assets,
-      0,
-      { Limited: { refTime: "5000000000", proofSize: "200000" } }
-    );
-  }
 
-  assetHubDOTToParachain(destinationChain: ChainType, amountRaw: string, accountId: Uint8Array) {
-    const destParachain = destinationChain === 'unique' ? UNIQUE_CHAIN_ID : HYDRATION_CHAIN_ID;
-    
     const dest = {
       V4: {
         parents: 1,
         interior: { X1: [{ Parachain: destParachain }] }
       }
     };
-    
-    const beneficiary = {
+
+    const feeAssetId = {
       V4: {
         parents: 0,
-        interior: { X1: [{ AccountId32: { id: accountId } }] }
+        interior: {
+          X2: [
+            { PalletInstance: ASSET_HUB_PALLET_ASSETS },
+            { GeneralIndex: assetId }
+          ]
+        }
       }
     };
     
     const assets = {
-      V4: [{
-        id: { parents: 1, interior: 'Here' },
-        fun: { Fungible: amountRaw }
-      }]
+      V4: [
+        {
+          id: { ...feeAssetId.V4 },
+          fun: { Fungible: amountRaw }
+        }
+      ]
     };
-    
-    return this.api.tx.polkadotXcm.limitedReserveTransferAssets(
+
+    const customXcmOnDest = {
+      V4: [
+        {
+          DepositAsset: {
+            assets: { Wild: 'All' },
+            beneficiary: {
+              parents: 0,
+              interior: {
+                X1: [{ AccountId32: { id: accountId } }]
+              }
+            }
+          }
+        }
+      ]
+    };
+
+    return this.api.tx.polkadotXcm.transferAssetsUsingTypeAndThen(
       dest,
-      beneficiary,
       assets,
-      0,
+      'LocalReserve',
+      feeAssetId,
+      'LocalReserve',
+      customXcmOnDest,
       { Limited: { refTime: "5000000000", proofSize: "200000" } }
     );
   }
@@ -442,30 +399,20 @@ function buildTransaction(
     return builder.uniqueToAssetHubWUD(amountRaw, accountId);
   }
 
-  // ROUTE: Unique → Relay (DOT)
-  if (source === 'unique' && destination === 'relay' && token === 'DOT' && tokenConfig.uniqueCollectionId !== undefined) {
-    return builder.uniqueToRelayDOT(tokenConfig.uniqueCollectionId, amountRaw, accountId);
-  }
+  // BLOCKED: Unique ↔ Relay routes are not supported
 
   // ROUTE: Unique → Any (DOT/UNQ native tokens)
   if (source === 'unique' && (token === 'DOT' || token === 'UNQ') && tokenConfig.uniqueCollectionId !== undefined) {
     return builder.uniqueToParachainNative(destination, tokenConfig.uniqueCollectionId, amountRaw, accountId);
   }
 
-  // ROUTE: Relay → Unique (DOT)
-  if (source === 'relay' && destination === 'unique' && token === 'DOT') {
-    return builder.relayToUniqueDOT(amountRaw, accountId);
-  }
+  // BLOCKED: Unique ↔ Relay routes are not supported
 
   // ROUTE: AssetHub → Any (USDT/WUD)
   if (source === 'assetHub' && (token === 'USDT' || token === 'WUD') && tokenConfig.assetHubAssetId) {
     return builder.assetHubToParachain(destination, token, tokenConfig.assetHubAssetId, amountRaw, accountId);
   }
 
-  // ROUTE: AssetHub → Any (DOT)
-  if (source === 'assetHub' && token === 'DOT') {
-    return builder.assetHubDOTToParachain(destination, amountRaw, accountId);
-  }
 
   throw new Error(`Unsupported transfer route: ${source} → ${destination} for ${token}`);
 }
@@ -480,6 +427,10 @@ function validateAmountAndBalances(
   tokenSymbol: string,
   token: TokenConfig
 ) {
+  // Block deprecated Unique ↔ Relay transfers
+  if ((source === 'unique' && destination === 'relay') || (source === 'relay' && destination === 'unique')) {
+    throw new Error('Transfers between Unique and Polkadot Relay are not supported');
+  }
   const balanceNum = parseFloat(sourceBalance.replace(/[,\s]/g, ''));
   
   // Basic validations
