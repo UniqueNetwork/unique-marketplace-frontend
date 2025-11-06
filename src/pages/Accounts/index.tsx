@@ -1,6 +1,7 @@
 import React, { useCallback, useContext, useEffect, useState, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 import { Button } from 'components/UI';
+import { Alert } from 'components/UI/Alert/Alert';
 import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
 import { PagePaper } from 'components/PagePaper/PagePaper';
@@ -297,6 +298,11 @@ export const AccountsPage = () => {
   return (
     <PagePaper>
       <Wrapper>
+        <AlertWrapper>
+          <Alert type="warning">
+            ⚠️ Technical maintenance: DOT transfers are temporarily unavailable (including Hydration, AssetHub, and others). We are working to resolve the issue.
+          </Alert>
+        </AlertWrapper>
         <GridContainer>
           <TableContainer>
             <table style={{ width: '100%' }}>
@@ -355,7 +361,7 @@ export const AccountsPage = () => {
                               disabled={!token.canSend}
                               size="small"
                             />
-                            {token.name === 'DOT' && (
+                            {false && token.name === 'DOT' && (
                               <>
                                 <CrossChainButton 
                                   title="To Hydration" 
@@ -446,12 +452,18 @@ export const AccountsPage = () => {
                           </Td>
                           <Td>
                             <ActionsCell>
-                              <CrossChainButton 
-                                title="To Unique" 
-                                onClick={() => openTransfer(token.name, 'assetHub', 'unique', token.assetHubBalance!)}
-                                disabled={!token.canTransferFromAssetHub}
-                                size="small"
-                              />
+                              {token.name === 'DOT' ? (
+                                <Alert type="warning" style={{ fontSize: '12px', padding: '8px 12px', margin: 0 }}>
+                                  ⚠️ Technical maintenance
+                                </Alert>
+                              ) : (
+                                <CrossChainButton 
+                                  title="To Unique" 
+                                  onClick={() => openTransfer(token.name, 'assetHub', 'unique', token.assetHubBalance!)}
+                                  disabled={!token.canTransferFromAssetHub}
+                                  size="small"
+                                />
+                              )}
                             </ActionsCell>
                           </Td>
                         </tr>
@@ -468,16 +480,22 @@ export const AccountsPage = () => {
                           </Td>
                           <Td>
                             <ActionsCell>
-                              <ButtonWrapper 
-                                title={getDisabledTooltip(token.name, 'hydration', 'unique')}
-                              >
-                                <CrossChainButton 
-                                  title={isTransferAvailable(token.name, 'hydration', 'unique') ? "To Unique" : "Unavailable until November"}
-                                  onClick={() => openTransfer(token.name, 'hydration', 'unique', token.hydrationBalance!)}
-                                  disabled={!token.canTransferFromHydration || !isTransferAvailable(token.name, 'hydration', 'unique')}
-                                  size="small"
-                                />
-                              </ButtonWrapper>
+                              {token.name === 'DOT' ? (
+                                <Alert type="warning" style={{ fontSize: '12px', padding: '8px 12px', margin: 0 }}>
+                                  ⚠️ Technical maintenance
+                                </Alert>
+                              ) : (
+                                <ButtonWrapper 
+                                  title={getDisabledTooltip(token.name, 'hydration', 'unique')}
+                                >
+                                  <CrossChainButton 
+                                    title={isTransferAvailable(token.name, 'hydration', 'unique') ? "To Unique" : "Unavailable until November"}
+                                    onClick={() => openTransfer(token.name, 'hydration', 'unique', token.hydrationBalance!)}
+                                    disabled={!token.canTransferFromHydration || !isTransferAvailable(token.name, 'hydration', 'unique')}
+                                    size="small"
+                                  />
+                                </ButtonWrapper>
+                              )}
                             </ActionsCell>
                           </Td>
                         </tr>
@@ -814,4 +832,8 @@ const CrossChainButton = styled(Button)`
       opacity: 1 !important;
     }
   }
+`;
+
+const AlertWrapper = styled.div`
+  margin-bottom: 16px;
 `;
