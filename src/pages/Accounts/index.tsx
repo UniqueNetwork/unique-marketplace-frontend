@@ -92,6 +92,7 @@ export const AccountsPage = () => {
   const { 
     uniqueDotBalance,
     polkadotRelayBalance,
+    assetHubDotBalance,
     isLoading: isDotLoading,
     refetch: refetchDotBalance 
   } = useDotBalance(selectedAccount);
@@ -214,6 +215,7 @@ export const AccountsPage = () => {
       } else if (currency.name === 'DOT') {
         const dotOnUniqueBalance = parseFloat(uniqueDotBalance || '0');
         const dotOnRelayBalance = parseFloat(polkadotRelayBalance || '0');
+        const dotOnAssetHubBalance = parseFloat(assetHubDotBalance || '0');
         const dotOnHydrationBalance = parseFloat(hydrationDotBalance || '0');
         balances.push({
           collectionId,
@@ -222,9 +224,11 @@ export const AccountsPage = () => {
           decimals: currency.decimals,
           uniqueBalance: isDotLoading ? '...' : (uniqueDotBalance || '0'),
           relayBalance: isDotLoading ? '...' : (polkadotRelayBalance || '0'),
+          assetHubBalance: isDotLoading ? '...' : (assetHubDotBalance || '0'),
           hydrationBalance: isHydrationLoading ? '...' : hydrationDotBalance,
           canSend: dotOnUniqueBalance > 0,
           canTransferFromRelay: dotOnRelayBalance > 0,
+          canTransferFromAssetHub: dotOnAssetHubBalance > 0,
           canTransferFromHydration: dotOnHydrationBalance > 0
         });
       } else if (currency.name === 'USDT') {
@@ -265,7 +269,7 @@ export const AccountsPage = () => {
     });
 
     return balances;
-  }, [currencyMap, selectedAccount, uniqueDotBalance, polkadotRelayBalance, isDotLoading, 
+  }, [currencyMap, selectedAccount, uniqueDotBalance, polkadotRelayBalance, assetHubDotBalance, isDotLoading, 
       uniqueUsdtBalance, assetHubUsdtBalance, hydrationUsdtBalance, isUsdtLoading,
       hydrationDotBalance, hydrationUnqBalance, isHydrationLoading,
       uniqueWudBalance, assetHubWudBalance, hydrationWudBalanceFromHook, isWudLoading]);
@@ -298,11 +302,6 @@ export const AccountsPage = () => {
   return (
     <PagePaper>
       <Wrapper>
-        <AlertWrapper>
-          <Alert type="warning">
-            ⚠️ Technical maintenance: DOT transfers are temporarily unavailable (including Hydration, AssetHub, and others). We are working to resolve the issue.
-          </Alert>
-        </AlertWrapper>
         <GridContainer>
           <TableContainer>
             <table style={{ width: '100%' }}>
@@ -323,7 +322,7 @@ export const AccountsPage = () => {
                   // Relay balance row is hidden, so don't count it in rowSpan
                   // if (token.relayBalance) rowSpan++;
                   if (token.assetHubBalance) rowSpan++;
-                  if (token.hydrationBalance) rowSpan++;
+                  if (token.hydrationBalance && token.name !== 'DOT') rowSpan++;
 
                   return (
                     <React.Fragment key={token.collectionId}>
@@ -361,11 +360,11 @@ export const AccountsPage = () => {
                               disabled={!token.canSend}
                               size="small"
                             />
-                            {false && token.name === 'DOT' && (
+                            {token.name === 'DOT' && (
                               <>
                                 <CrossChainButton 
-                                  title="To Hydration" 
-                                  onClick={() => openTransfer('DOT', 'unique', 'hydration', token.uniqueBalance)}
+                                  title="To Asset Hub" 
+                                  onClick={() => openTransfer('DOT', 'unique', 'assetHub', token.uniqueBalance)}
                                   disabled={!token.canSend}
                                   size="small"
                                 />
@@ -452,24 +451,18 @@ export const AccountsPage = () => {
                           </Td>
                           <Td>
                             <ActionsCell>
-                              {token.name === 'DOT' ? (
-                                <Alert type="warning" style={{ fontSize: '12px', padding: '8px 12px', margin: 0 }}>
-                                  ⚠️ Technical maintenance
-                                </Alert>
-                              ) : (
-                                <CrossChainButton 
-                                  title="To Unique" 
-                                  onClick={() => openTransfer(token.name, 'assetHub', 'unique', token.assetHubBalance!)}
-                                  disabled={!token.canTransferFromAssetHub}
-                                  size="small"
-                                />
-                              )}
+                              <CrossChainButton 
+                                title="To Unique" 
+                                onClick={() => openTransfer(token.name, 'assetHub', 'unique', token.assetHubBalance!)}
+                                disabled={!token.canTransferFromAssetHub}
+                                size="small"
+                              />
                             </ActionsCell>
                           </Td>
                         </tr>
                       )}
 
-                      {token.hydrationBalance && (
+                      {token.hydrationBalance && token.name !== 'DOT' && (
                         <tr>
                           <Td>
                             <ChainName>Hydration</ChainName>
@@ -480,22 +473,16 @@ export const AccountsPage = () => {
                           </Td>
                           <Td>
                             <ActionsCell>
-                              {token.name === 'DOT' ? (
-                                <Alert type="warning" style={{ fontSize: '12px', padding: '8px 12px', margin: 0 }}>
-                                  ⚠️ Technical maintenance
-                                </Alert>
-                              ) : (
-                                <ButtonWrapper 
-                                  title={getDisabledTooltip(token.name, 'hydration', 'unique')}
-                                >
-                                  <CrossChainButton 
-                                    title={isTransferAvailable(token.name, 'hydration', 'unique') ? "To Unique" : "Unavailable until November"}
-                                    onClick={() => openTransfer(token.name, 'hydration', 'unique', token.hydrationBalance!)}
-                                    disabled={!token.canTransferFromHydration || !isTransferAvailable(token.name, 'hydration', 'unique')}
-                                    size="small"
-                                  />
-                                </ButtonWrapper>
-                              )}
+                              <ButtonWrapper 
+                                title={getDisabledTooltip(token.name, 'hydration', 'unique')}
+                              >
+                                <CrossChainButton 
+                                  title={isTransferAvailable(token.name, 'hydration', 'unique') ? "To Unique" : "Unavailable until November"}
+                                  onClick={() => openTransfer(token.name, 'hydration', 'unique', token.hydrationBalance!)}
+                                  disabled={!token.canTransferFromHydration || !isTransferAvailable(token.name, 'hydration', 'unique')}
+                                  size="small"
+                                />
+                              </ButtonWrapper>
                             </ActionsCell>
                           </Td>
                         </tr>

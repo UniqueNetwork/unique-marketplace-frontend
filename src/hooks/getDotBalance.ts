@@ -4,13 +4,17 @@ import BigNumber from 'bignumber.js';
 import { Account } from 'account/types';
 
 const DOT_DECIMALS = 10;
+const DOT_COLLECTION_ID = 437;
 const POLKADOT_WS_URL = 'wss://rpc.polkadot.io';
+const ASSETHUB_WS_URL = 'wss://polkadot-asset-hub-rpc.polkadot.io';
 
 interface DotBalances {
   uniqueBalance: string;
   uniqueBalanceRaw: string;
   polkadotRelayBalance: string;
   polkadotRelayBalanceRaw: string;
+  assetHubBalance: string;
+  assetHubBalanceRaw: string;
   isLoading: boolean;
   error: string | null;
 }
@@ -21,6 +25,8 @@ export const useDotBalance = (account: Account | undefined) => {
     uniqueBalanceRaw: '0',
     polkadotRelayBalance: '0',
     polkadotRelayBalanceRaw: '0',
+    assetHubBalance: '0',
+    assetHubBalanceRaw: '0',
     isLoading: false,
     error: null,
   });
@@ -32,6 +38,8 @@ export const useDotBalance = (account: Account | undefined) => {
         uniqueBalanceRaw: '0',
         polkadotRelayBalance: '0',
         polkadotRelayBalanceRaw: '0',
+        assetHubBalance: '0',
+        assetHubBalanceRaw: '0',
         isLoading: false,
         error: null,
       });
@@ -100,11 +108,42 @@ export const useDotBalance = (account: Account | undefined) => {
         console.error('Error getting DOT balance on Polkadot Relay:', error);
       }
 
+      // Fetch DOT balance on Asset Hub
+      let assetHubBalance = '0';
+      let assetHubBalanceRaw = '0';
+
+      try {
+        console.log('Connecting to Asset Hub...');
+        const assetHubProvider = new WsProvider(ASSETHUB_WS_URL);
+        const assetHubApi = await ApiPromise.create({ provider: assetHubProvider });
+
+        console.log('Fetching Asset Hub DOT balance for:', account.address);
+        const accountInfo: any = await assetHubApi.query.system.account(account.address);
+
+        const free = accountInfo.data.free;
+        assetHubBalanceRaw = free.toString();
+
+        const rawBalance = new BigNumber(assetHubBalanceRaw);
+        const divisor = new BigNumber(10).pow(DOT_DECIMALS);
+        assetHubBalance = rawBalance.dividedBy(divisor).toFixed();
+
+        console.log('Asset Hub DOT balance:', {
+          raw: assetHubBalanceRaw,
+          formatted: assetHubBalance,
+        });
+
+        await assetHubApi.disconnect();
+      } catch (error) {
+        console.error('Error getting DOT balance on Asset Hub:', error);
+      }
+
       setBalances({
         uniqueBalance,
         uniqueBalanceRaw,
         polkadotRelayBalance,
         polkadotRelayBalanceRaw,
+        assetHubBalance,
+        assetHubBalanceRaw,
         isLoading: false,
         error: null,
       });
@@ -115,6 +154,8 @@ export const useDotBalance = (account: Account | undefined) => {
         uniqueBalanceRaw: '0',
         polkadotRelayBalance: '0',
         polkadotRelayBalanceRaw: '0',
+        assetHubBalance: '0',
+        assetHubBalanceRaw: '0',
         isLoading: false,
         error: error instanceof Error ? error.message : 'Failed to fetch DOT balances',
       });
@@ -130,6 +171,8 @@ export const useDotBalance = (account: Account | undefined) => {
     uniqueDotBalanceRaw: balances.uniqueBalanceRaw,
     polkadotRelayBalance: balances.polkadotRelayBalance,
     polkadotRelayBalanceRaw: balances.polkadotRelayBalanceRaw,
+    assetHubDotBalance: balances.assetHubBalance,
+    assetHubDotBalanceRaw: balances.assetHubBalanceRaw,
     isLoading: balances.isLoading,
     error: balances.error,
     refetch: fetchBalances,

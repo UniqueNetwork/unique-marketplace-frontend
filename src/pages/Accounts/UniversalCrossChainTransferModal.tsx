@@ -58,7 +58,7 @@ interface FeeInfo {
 const TOKENS: Record<string, TokenConfig> = {
   DOT: { 
     decimals: 10, 
-    uniqueCollectionId: 437,
+    uniqueCollectionId: 437, // DOT collectionId is always 437
     hydrationCurrencyId: 5,
     minTransfer: 0.01, 
     maxTransfer: 1000 
@@ -355,6 +355,134 @@ class TransactionBuilder {
       { Limited: { refTime: "5000000000", proofSize: "200000" } }
     );
   }
+
+  // DOT: Asset Hub → Unique (V5, LocalReserve)
+  assetHubToUniqueDOT(amountRaw: string, accountId: Uint8Array) {
+    const dest = {
+      V5: {
+        parents: 1,
+        interior: { X1: [{ Parachain: UNIQUE_CHAIN_ID }] }
+      }
+    };
+
+    const assets = {
+      V5: [
+        {
+          id: { parents: 1, interior: 'Here' },
+          fun: { Fungible: amountRaw }
+        }
+      ]
+    };
+
+    const remoteFeesId = {
+      V5: {
+        parents: 1,
+        interior: 'Here'
+      }
+    };
+
+    const customXcmOnDest = {
+      V5: [
+        {
+          DepositAsset: {
+            assets: { Wild: 'All' },
+            beneficiary: {
+              parents: 0,
+              interior: { X1: [{ AccountId32: { id: accountId } }] }
+            }
+          }
+        }
+      ]
+    };
+
+    return this.api.tx.polkadotXcm.transferAssetsUsingTypeAndThen(
+      dest,
+      assets,
+      'LocalReserve',
+      remoteFeesId,
+      'LocalReserve',
+      customXcmOnDest,
+      'Unlimited'
+    );
+  }
+
+  // DOT: Unique → Asset Hub
+  uniqueToAssetHubDOT(collectionId: number, amountRaw: string, accountId: Uint8Array) {
+    const destination = {
+      V4: {
+        parents: 1,
+        interior: {
+          X2: [
+            { Parachain: ASSETHUB_CHAIN_ID },
+            { AccountId32: { network: null, id: accountId } }
+          ]
+        }
+      }
+    };
+    
+    return this.api.tx.xTokens.transfer(collectionId, amountRaw, destination, 'Unlimited');
+  }
+
+  // DOT: Hydration → Unique (RemoteReserve)
+  hydrationToUniqueDOT(currencyId: number, amountRaw: string, accountId: Uint8Array) {
+    const dest = {
+      V5: {
+        parents: 1,
+        interior: { X1: [{ Parachain: UNIQUE_CHAIN_ID }] }
+      }
+    };
+
+    const assets = {
+      V5: [
+        {
+          id: { parents: 1, interior: 'Here' },
+          fun: { Fungible: amountRaw }
+        }
+      ]
+    };
+
+    const remoteReserveLocation = {
+      V5: {
+        parents: 1,
+        interior: { X1: [{ Parachain: ASSETHUB_CHAIN_ID }] }
+      }
+    };
+
+    const remoteFeesId = {
+      V5: {
+        parents: 1,
+        interior: 'Here'
+      }
+    };
+
+    const customXcmOnDest = {
+      V5: [
+        {
+          DepositAsset: {
+            assets: { Wild: 'All' },
+            beneficiary: {
+              parents: 0,
+              interior: { X1: [{ AccountId32: { id: accountId } }] }
+            }
+          }
+        }
+      ]
+    };
+
+    return this.api.tx.polkadotXcm.transferAssetsUsingTypeAndThen(
+      dest,
+      assets,
+      {
+        RemoteReserve: remoteReserveLocation
+      },
+      remoteFeesId,
+      {
+        RemoteReserve: remoteReserveLocation
+      },
+      customXcmOnDest,
+      'Unlimited'
+    );
+  }
 }
 
 // Main routing function with clear conditions
@@ -379,8 +507,23 @@ function buildTransaction(
     return builder.hydrationToUnique(token, amountRaw, accountId);
   }
 
-  // ROUTE: Hydration → Any (DOT/UNQ native tokens)
-  if (source === 'hydration' && (token === 'DOT' || token === 'UNQ') && tokenConfig.hydrationCurrencyId) {
+  // ROUTE: AssetHub → Unique (DOT)
+  if (source === 'assetHub' && destination === 'unique' && token === 'DOT') {
+    return builder.assetHubToUniqueDOT(amountRaw, accountId);
+  }
+
+  // ROUTE: Unique → AssetHub (DOT)
+  if (source === 'unique' && destination === 'assetHub' && token === 'DOT' && tokenConfig.uniqueCollectionId !== undefined) {
+    return builder.uniqueToAssetHubDOT(tokenConfig.uniqueCollectionId, amountRaw, accountId);
+  }
+
+  // ROUTE: Hydration → Unique (DOT)
+  if (source === 'hydration' && destination === 'unique' && token === 'DOT' && tokenConfig.hydrationCurrencyId) {
+    return builder.hydrationToUniqueDOT(tokenConfig.hydrationCurrencyId, amountRaw, accountId);
+  }
+
+  // ROUTE: Hydration → Any (UNQ native tokens)
+  if (source === 'hydration' && token === 'UNQ' && tokenConfig.hydrationCurrencyId) {
     return builder.hydrationToParachainNative(destination, tokenConfig.hydrationCurrencyId, amountRaw, accountId);
   }
 
@@ -401,8 +544,8 @@ function buildTransaction(
 
   // BLOCKED: Unique ↔ Relay routes are not supported
 
-  // ROUTE: Unique → Any (DOT/UNQ native tokens)
-  if (source === 'unique' && (token === 'DOT' || token === 'UNQ') && tokenConfig.uniqueCollectionId !== undefined) {
+  // ROUTE: Unique → Any (UNQ native tokens)
+  if (source === 'unique' && token === 'UNQ' && tokenConfig.uniqueCollectionId !== undefined) {
     return builder.uniqueToParachainNative(destination, tokenConfig.uniqueCollectionId, amountRaw, accountId);
   }
 
