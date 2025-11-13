@@ -243,10 +243,7 @@ function resolveExtensionsPlugin(): Plugin {
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    react({
-      // Enable React Fast Refresh
-      fastRefresh: true,
-    }),
+    react(),
     // Fix babel-plugin-macros resolve issues (must be first)
     babelMacrosFixPlugin(),
     // Resolve imports without extensions (must be before other plugins)
@@ -338,11 +335,6 @@ export default defineConfig({
       resolveExtensions: ['.jsx', '.js', '.ts', '.tsx'],
       // Fix for styled-components and babel-plugin-macros
       plugins: [],
-    },
-    // CommonJS options for better compatibility
-    commonjsOptions: {
-      include: [/node_modules/],
-      transformMixedEsModules: true,
     },
   },
   build: {
