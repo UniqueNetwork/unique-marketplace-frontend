@@ -337,10 +337,12 @@ export default defineConfig({
       plugins: [],
     },
   },
+  root: '.',
   build: {
     // Increase chunk size warning limit
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
+      input: resolve(__dirname, 'public/index.html'),
       output: {
         manualChunks: {
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
