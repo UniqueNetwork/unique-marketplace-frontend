@@ -29,6 +29,8 @@ export type ICurrencySettings = {
   decimals: number
   fee: number
   iconUrl: string
+  symbol?: string
+  name?: string
 }
 
 export type Settings = {

@@ -1,7 +1,7 @@
 import React, { FC, useCallback } from 'react';
 import { Text, useNotifications, Button, Heading } from 'components/UI';
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { useCollections } from 'hooks/useCollections';
 
 export const RemoveCollectionModal: FC<TAdminPanelModalBodyProps> = ({ collection, onFinish }) => {

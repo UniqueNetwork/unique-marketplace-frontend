@@ -42,7 +42,6 @@ module.exports = {
     ],
     ignorePatterns: [
         ".eslintrc.js",
-        "babel.config.js",
         ".github/**",
         ".stylelintrc.json",
         ".vscode/**",

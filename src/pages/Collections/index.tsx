@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Select, Button } from 'components/UI';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import NoItems from 'components/NoItems';
 import { Secondary400 } from 'styles/colors';
 import { CollectionCard } from 'components/CollectionCard/CollectionCard';

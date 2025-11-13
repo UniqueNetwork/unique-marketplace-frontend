@@ -9,8 +9,6 @@ const DOT_HYDRATION_ID = 5;
 const UNQ_HYDRATION_ID = 25;
 const USDT_HYDRATION_ID = 10;
 
-// WUD is a foreign asset from Asset Hub
-// Confirmed from on-chain transaction data
 const WUD_HYDRATION_ID = 1000085;
 
 const DOT_DECIMALS = 10;

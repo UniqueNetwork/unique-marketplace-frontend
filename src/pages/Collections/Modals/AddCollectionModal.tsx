@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import { Text, useNotifications, Button, Heading } from 'components/UI';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
 import { useApi } from 'hooks/useApi';
 import { CollectionCover } from 'components/CollectionCover/CollectionCover';

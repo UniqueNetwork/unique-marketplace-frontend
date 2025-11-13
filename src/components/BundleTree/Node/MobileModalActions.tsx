@@ -1,6 +1,6 @@
 import React from 'react';
 import { Modal, Heading } from 'components/UI';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
 interface IMobileModalActionsProps {
   isVisible: boolean;

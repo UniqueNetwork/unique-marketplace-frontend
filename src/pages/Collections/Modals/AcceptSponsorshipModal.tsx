@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import { Button, Text } from 'components/UI';
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
 import { useApi } from 'hooks/useApi';
 import { useAcceptSponsorshipStages } from 'hooks/adminStages/useAcceptSponsorshipStages';

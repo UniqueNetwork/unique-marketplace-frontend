@@ -34,14 +34,54 @@ export const NumberInput: FC<AmountInputProps> = ({
 }) => {
   const onChangeInput = useCallback((_value: string) => {
     if (disabled) return;
-    if (_value === '') onChange(_value);
-    // regExp to check value according to valid number format
-    const regExp = new RegExp(`^([1-9]\\d{0,9}|0)(\\.\\d{0,${decimals}})?$`);
-    // check value is correct
-    if (_value.length > 1 && _value.startsWith('0') && !_value.startsWith('0.')) _value = _value.replace('0', '');
-    if (regExp.test(_value.trim())) {
-      onChange(_value.trim());
+    
+    // Allow empty string - always pass it through
+    if (!_value || _value === '') {
+      onChange('');
+      return;
     }
+    
+    // Remove any non-numeric characters except decimal point
+    let cleanedValue = _value.replace(/[^\d.]/g, '');
+    
+    // If after cleaning we have nothing, allow empty
+    if (!cleanedValue) {
+      onChange('');
+      return;
+    }
+    
+    // Remove multiple decimal points, keep only the first one
+    const dotIndex = cleanedValue.indexOf('.');
+    if (dotIndex !== -1) {
+      const beforeDot = cleanedValue.substring(0, dotIndex + 1);
+      const afterDot = cleanedValue.substring(dotIndex + 1).replace(/\./g, '');
+      cleanedValue = beforeDot + afterDot;
+    }
+    
+    // Limit decimal places
+    if (cleanedValue.includes('.')) {
+      const parts = cleanedValue.split('.');
+      if (parts[1] && parts[1].length > decimals) {
+        cleanedValue = parts[0] + '.' + parts[1].substring(0, decimals);
+      }
+    }
+    
+    // Remove leading zeros (except for "0" or "0.")
+    if (cleanedValue.length > 1 && cleanedValue.startsWith('0') && !cleanedValue.startsWith('0.')) {
+      cleanedValue = cleanedValue.replace(/^0+/, '') || '0';
+    }
+    
+    // Limit integer part to 10 digits
+    const dotPos = cleanedValue.indexOf('.');
+    const integerPart = dotPos !== -1 ? cleanedValue.substring(0, dotPos) : cleanedValue;
+    if (integerPart.length > 10) {
+      const limitedInteger = integerPart.substring(0, 10);
+      cleanedValue = dotPos !== -1 ? limitedInteger + cleanedValue.substring(dotPos) : limitedInteger;
+    }
+    
+    // Always pass through the cleaned value - let the parent component validate if needed
+    // This allows any valid numeric input like "1", "12", "12.", "12.3", "0", "0.5", etc.
+    onChange(cleanedValue);
   }, [onChange, decimals, disabled]);
 
   const onClearClick = useCallback(() => {
@@ -56,7 +96,7 @@ export const NumberInput: FC<AmountInputProps> = ({
       additionalText={additionalText}
       placeholder={placeholder}
       onChange={onChangeInput}
-      value={value}
+      value={value || ''}
       label={label}
       testid={`${testid}`}
     />

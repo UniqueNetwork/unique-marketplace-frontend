@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
 import { GQLCollection } from 'api/scanApi/types';
 import { CollectionCard } from './CollectionCard';

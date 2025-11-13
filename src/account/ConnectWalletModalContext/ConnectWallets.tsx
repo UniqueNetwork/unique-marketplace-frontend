@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
+import { web3Enable } from '@polkadot/extension-dapp';
 import { Ethereum, Polkadot } from '@unique-nft/utils/extension';
 import { ConnectWalletModalContext } from './ConnectWalletModalContext';
 import { useAccounts } from 'hooks/useAccounts';
@@ -56,11 +57,13 @@ export const ConnectWallets = () => {
 
   const handleConnectToPolkadotExtension = (walletName: ConnectedWalletsName = 'polkadot-js') => async () => {
     try {
+      console.log(`Attempting to connect ${walletName} wallet...`);
       await walletsCenter.connectWallet(walletName);
+      console.log(`Successfully connected ${walletName} wallet`);
       fetchAccounts();
       setIsOpenConnectWalletModal(false);
     } catch (e: any) {
-      console.log(e);
+      console.error(`Failed to connect ${walletName} wallet:`, e);
       setMissingExtension(walletName);
       setCurrentModal(AccountModal.EXTENSION_MISSING);
     }
@@ -75,9 +78,24 @@ export const ConnectWallets = () => {
   useEffect(() => {
     void (async () => {
       setIsFetching(true);
-      const wallets = await Polkadot.listWallets();
-      setAvailableWallets(wallets.wallets.map(({ name }) => name));
-      setIsFetching(false);
+      try {
+        const extensions = await web3Enable('Unique Marketplace');
+        console.log('Available Polkadot extensions:', extensions);
+        
+        if (extensions && extensions.length > 0) {
+          const wallets = await Polkadot.listWallets();
+          console.log('Available wallets:', wallets);
+          setAvailableWallets(wallets.wallets.map(({ name }) => name));
+        } else {
+          console.warn('No Polkadot extensions found');
+          setAvailableWallets([]);
+        }
+      } catch (e) {
+        console.error('Failed to enable Polkadot extension:', e);
+        setAvailableWallets([]);
+      } finally {
+        setIsFetching(false);
+      }
     })();
   }, []);
 

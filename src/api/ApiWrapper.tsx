@@ -56,23 +56,52 @@ const ApiWrapper = ({ children }: ChainProviderProps) => {
       const currentNetworkOption = networkOptions.find((no) => no.networkId === currentChainId) || networkOptions[0];
 
       setSettings(currentNetworkOption.settings);
-      if (currentNetworkOption.settings.blockchain?.unique?.currencies) {
-        const currencies =
-          currentNetworkOption.settings.blockchain?.unique?.currencies.map(
-            (currency) => ({
-              ...currency,
-              id: String(currency.collectionId),
-              title: String(currency.collectionId)
-            })
-          );
-        setCurrencies(currencies);
-      }
-
-      setLastContract(filterTheLastContract(currentNetworkOption.settings.blockchain.unique.contracts));
-
+      
       const sdkClient = new SdkClient(currentNetworkOption);
       setSdkClient(sdkClient);
       setChainProperties(await sdkClient.sdk.common.chainProperties());
+      
+      if (currentNetworkOption.settings.blockchain?.unique?.currencies) {
+        // Fetch collection info for each currency to get the symbol
+        const currenciesWithSymbols = await Promise.all(
+          currentNetworkOption.settings.blockchain.unique.currencies.map(async (currency) => {
+            // For native currency (collectionId: 0), use symbol from settings, chainProperties, or default
+            if (currency.collectionId === 0) {
+              const symbol = (currency as any).symbol || chainProperties?.token || 'UNQ';
+              return {
+                ...currency,
+                id: String(currency.collectionId),
+                title: symbol,
+                name: symbol
+              };
+            }
+            
+            // For other currencies, try to fetch collection info
+            try {
+              const collectionInfo = await sdkClient.sdk.collection.getV2({ collectionId: currency.collectionId });
+              const symbol = collectionInfo?.tokenPrefix || collectionInfo?.name || String(currency.collectionId);
+              return {
+                ...currency,
+                id: String(currency.collectionId),
+                title: symbol,
+                name: symbol
+              };
+            } catch (error) {
+              console.error(`Error fetching collection ${currency.collectionId}:`, error);
+              // Fallback to collectionId if we can't fetch the collection
+              return {
+                ...currency,
+                id: String(currency.collectionId),
+                title: String(currency.collectionId),
+                name: String(currency.collectionId)
+              };
+            }
+          })
+        );
+        setCurrencies(currenciesWithSymbols);
+      }
+
+      setLastContract(filterTheLastContract(currentNetworkOption.settings.blockchain.unique.contracts));
 
       setRpcClientInitialized(true);
     })().then(() => {

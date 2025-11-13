@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useState } from 'react';
 import { Button, Text, Heading } from 'components/UI';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
 import StagesModal from '../../Token/Modals/StagesModal';

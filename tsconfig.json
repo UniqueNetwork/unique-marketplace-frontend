@@ -23,7 +23,8 @@
     "jsx": "react-jsx"
   },
   "include": [
-    "src"
+    "src",
+    "vite.config.ts"
   ],
-  "exclude": ["babel.config.js", "node_modules"]
+  "exclude": ["node_modules"]
 }

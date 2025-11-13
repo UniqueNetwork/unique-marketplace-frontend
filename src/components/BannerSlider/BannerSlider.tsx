@@ -362,7 +362,7 @@ export const BannerSlider: FC<SliderProps> = ({
     <Bullets>
       {Array.from({ length: slideCount }).map((_, index) => <Bullet
         key={index}
-        isCurrent={index === targetSliderIndex}
+        $isCurrent={index === targetSliderIndex}
       />)}
     </Bullets>
   </SliderWrapper>);
@@ -381,11 +381,11 @@ const Bullets = styled.div`
   align-self: center;
 `;
 
-const Bullet = styled.div<{ isCurrent: boolean }>` 
-  width: ${({ isCurrent }) => isCurrent ? '32px' : '8px'};
+const Bullet = styled.div<{ $isCurrent: boolean }>` 
+  width: ${({ $isCurrent }) => $isCurrent ? '32px' : '8px'};
   height: 8px;
   border-radius: 4px;
-  background-color: ${({ isCurrent }) => isCurrent ? Primary500 : Grey400};
+  background-color: ${({ $isCurrent }) => $isCurrent ? Primary500 : Grey400};
   transition: all .3s linear;
 `;
 

@@ -54,7 +54,7 @@ export const PageLayout: FC = () => {
   }, [pathname]);
 
   return (
-    <BgLayoutStyled backgroundImage={backgroundImage} hasFooterSpacing={pathname === '/market' || pathname === '/sellTokens' || pathname.includes('/token')}>
+    <BgLayoutStyled $backgroundImage={backgroundImage} $hasFooterSpacing={pathname === '/market' || pathname === '/sellTokens' || pathname.includes('/token')}>
       <Layout
         {...layoutProps}
         footer={<div dangerouslySetInnerHTML={{ __html: footer }} />}
@@ -70,7 +70,7 @@ export const PageLayout: FC = () => {
   );
 };
 
-const LayoutStyled = styled.div<{hasFooterSpacing: boolean}>`
+const LayoutStyled = styled.div<{$hasFooterSpacing: boolean}>`
 
   /* specific for dafc */
   .unique-layout {
@@ -97,7 +97,7 @@ const LayoutStyled = styled.div<{hasFooterSpacing: boolean}>`
         line-height: 24px;
       }
       @media (max-width: 568px) {
-        padding-bottom: ${({ hasFooterSpacing }) => hasFooterSpacing ? 'calc(var(--prop-gap) * 5)' : 'var(--prop-gap)'};
+        padding-bottom: ${({ $hasFooterSpacing }) => $hasFooterSpacing ? 'calc(var(--prop-gap) * 5)' : 'var(--prop-gap)'};
       }
     }
   }
@@ -179,10 +179,10 @@ const LayoutStyled = styled.div<{hasFooterSpacing: boolean}>`
   }
 `;
 
-const BgLayoutStyled = styled(LayoutStyled)<{ backgroundImage: string | null }>`
+const BgLayoutStyled = styled(LayoutStyled)<{ $backgroundImage: string | null }>`
   .unique-layout {
     min-height: 100vh;
-    background-image: url(${(props) => props.backgroundImage});
+    background-image: url(${(props) => props.$backgroundImage});
     background-position: inherit;
     background-position-x: inherit;
     background-position-y: inherit;

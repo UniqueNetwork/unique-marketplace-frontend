@@ -74,7 +74,7 @@ export function MobileFilters<T = FilterState>({ filterCount, filterComponent, d
       </>
       }
     </MobileFilterActionsWrapper>
-    <MobileFilterModal isVisible={isVisible}>
+    <MobileFilterModal $isVisible={isVisible}>
       <Tabs
         activeIndex={activeTabIndex}
         labels={tabs}
@@ -124,7 +124,7 @@ const MobileFilterActionsWrapper = styled.div`
   }
 `;
 
-const MobileFilterModal = styled.div<{ isVisible: boolean }>`
+const MobileFilterModal = styled.div<{ $isVisible: boolean }>`
   display: none;
   position: fixed;
   background-color: ${AdditionalLight};
@@ -149,7 +149,7 @@ const MobileFilterModal = styled.div<{ isVisible: boolean }>`
   }
   
   @media (max-width: 1024px) {
-    display: ${({ isVisible }) => isVisible ? 'block' : 'none'};
+    display: ${({ $isVisible }) => $isVisible ? 'block' : 'none'};
   }
 `;
 

@@ -27,7 +27,7 @@ export const Tabs = ({
   return (
     <TabsContainer data-testid={testid} type={type}>
       {labels && (
-        <TabLabels numberOfTabs={numberOfTabs}>
+        <TabLabels $numberOfTabs={numberOfTabs}>
           {labels.map((label, index) => {
             const disabled = disabledIndexes?.includes(index);
             return (
@@ -38,10 +38,10 @@ export const Tabs = ({
                     onClick?.(index);
                   }
                 }}
-                active={activeIndex === index}
+                $active={activeIndex === index}
                 disabled={disabled}
                 data-testid={`${testid}-${label}`}
-                numberOfTabs={numberOfTabs}
+                $numberOfTabs={numberOfTabs}
               >
                 {label}
               </TabLabel>
@@ -58,7 +58,7 @@ const TabsContainer = styled.div<{ type: 'default' | 'slim' }>`
   /* Container styles if needed */
 `;
 
-const TabLabels = styled.div<{ numberOfTabs: number }>`
+const TabLabels = styled.div<{ $numberOfTabs: number }>`
   display: flex;
   flex-wrap: wrap;
   font-family: var(--prop-font-family);
@@ -69,7 +69,7 @@ const TabLabels = styled.div<{ numberOfTabs: number }>`
 
   @media (max-width: 768px) {
     ${(props) =>
-      props.numberOfTabs > 2 &&
+      props.$numberOfTabs > 2 &&
       `
       flex-direction: column;
       overflow-y: auto;
@@ -79,9 +79,9 @@ const TabLabels = styled.div<{ numberOfTabs: number }>`
 `;
 
 const TabLabel = styled.div<{
-  active: boolean;
+  $active: boolean;
   disabled?: boolean;
-  numberOfTabs: number;
+  $numberOfTabs: number;
 }>`
   position: relative;
   padding: 12px 24px;
@@ -90,7 +90,7 @@ const TabLabel = styled.div<{
   color: ${(props) =>
     props.disabled
       ? 'var(--color-grey-400)'
-      : props.active
+      : props.$active
       ? 'var(--color-primary-500)'
       : 'var(--color-blue-grey-500)'};
   transition: color 0.3s;
@@ -102,7 +102,7 @@ const TabLabel = styled.div<{
     position: absolute;
     bottom: -1px;
     left: 0;
-    width: ${(props) => (props.active ? '100%' : '0%')};
+    width: ${(props) => (props.$active ? '100%' : '0%')};
     height: 2px;
     background-color: var(--color-primary-500);
     transition: width 0.3s;
@@ -123,7 +123,7 @@ const TabLabel = styled.div<{
 
   @media (max-width: 768px) {
     ${(props) =>
-      props.numberOfTabs > 2 &&
+      props.$numberOfTabs > 2 &&
       `
       width: 100%;
       margin-right: 0;

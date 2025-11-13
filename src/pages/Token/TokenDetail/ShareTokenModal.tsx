@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
 import { Heading, Modal, useNotifications } from 'components/UI';
 import { TelegramShareButton, TwitterShareButton, FacebookShareButton, RedditShareButton } from 'components/ShareButton';

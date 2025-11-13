@@ -1,7 +1,7 @@
 import { IconButton } from 'components/IconButton/IconButton';
 import { Button, Text } from 'components/UI';
 import React, { FC, ReactNode, useCallback, useState } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { Coral500 } from 'styles/colors';
 
 export interface AccordionProps {
@@ -56,7 +56,7 @@ export const Accordion: FC<AccordionProps> = ({
   return (
     <AccordionWrapper className={className}>
       <AccordionHeaderWrapper>
-        <AccordionTitle isOpen={isOpen} onClick={onTitleClick}>
+        <AccordionTitle $isOpen={isOpen} onClick={onTitleClick}>
           <Text>{title}</Text>
           <AccordionChevronIcon />
         </AccordionTitle>
@@ -69,7 +69,7 @@ export const Accordion: FC<AccordionProps> = ({
           />
         )}
       </AccordionHeaderWrapper>
-      <AccordionBodyWrapper isOpen={isOpen}>{children}</AccordionBodyWrapper>
+      <AccordionBodyWrapper $isOpen={isOpen}>{children}</AccordionBodyWrapper>
     </AccordionWrapper>
   );
 };
@@ -83,7 +83,7 @@ const AccordionHeaderWrapper = styled.div`
   min-height: 30px;
 `;
 
-const AccordionTitle = styled.div<{ isOpen?: boolean }>`
+const AccordionTitle = styled.div<{ $isOpen?: boolean }>`
   display: flex;
   cursor: pointer;
   align-items: center;
@@ -91,13 +91,13 @@ const AccordionTitle = styled.div<{ isOpen?: boolean }>`
   svg {
     min-width: 24px;
     transform-origin: center;
-    transform: ${({ isOpen }) => (isOpen ? 'rotate(0deg);' : 'rotate(-90deg);')};
+    transform: ${({ $isOpen }) => ($isOpen ? 'rotate(0deg);' : 'rotate(-90deg);')};
     transition: all 0.3s;
   }
 `;
 
-const AccordionBodyWrapper = styled.div<{ isOpen?: boolean }>`
-  animation: ${({ isOpen }) => (isOpen ? 'show 0.3s forwards' : 'hide 0.3s forwards')};
+const AccordionBodyWrapper = styled.div<{ $isOpen?: boolean }>`
+  animation: ${({ $isOpen }) => ($isOpen ? 'show 0.3s forwards' : 'hide 0.3s forwards')};
 
   @keyframes hide {
     from {

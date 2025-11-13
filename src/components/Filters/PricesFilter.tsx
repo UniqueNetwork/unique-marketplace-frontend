@@ -43,6 +43,11 @@ const PricesFilter: FC<PricesFilterProps> = ({
   const isInternalChangeRef = useRef(false);
   const previousShouldUseUsdtPriceRef = useRef(shouldUseUsdtPrice);
   const throttleTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+  
+  const onCurrenciesChangeRef = useRef(onCurrenciesChange);
+  onCurrenciesChangeRef.current = onCurrenciesChange;
 
   // Simple throttle function using setTimeout
   const throttledAutoApply = useCallback((minVal: string | undefined, maxVal: string | undefined, useUsdt: boolean) => {
@@ -54,7 +59,7 @@ const PricesFilter: FC<PricesFilterProps> = ({
     // Set new timer
     throttleTimerRef.current = setTimeout(() => {
       if (!minVal && !maxVal) {
-        onChange(undefined);
+        onChangeRef.current(undefined);
         return;
       }
 
@@ -71,13 +76,13 @@ const PricesFilter: FC<PricesFilterProps> = ({
         if (maxVal) newPrices.maxPrice = maxVal;
       }
       
-      onChange(newPrices);
+      onChangeRef.current(newPrices);
 
       setTimeout(() => {
         isInternalChangeRef.current = false;
       }, 300);
     }, 250);
-  }, [onChange]);
+  }, []);
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -96,15 +101,15 @@ const PricesFilter: FC<PricesFilterProps> = ({
     isInternalChangeRef.current = true;
     setLocalSelectedCurrencies(newSelection);
 
-    if (onCurrenciesChange) {
-      onCurrenciesChange(newSelection);
+    if (onCurrenciesChangeRef.current) {
+      onCurrenciesChangeRef.current(newSelection);
     }
     
     // Reset flag after longer delay to ensure useEffect doesn't override
     setTimeout(() => {
       isInternalChangeRef.current = false;
     }, 300);
-  }, [localSelectedCurrencies, onCurrenciesChange]);
+  }, [localSelectedCurrencies]);
 
   const onApply = useCallback(() => {
     if (minPriceValue || maxPriceValue) {
@@ -138,7 +143,7 @@ const PricesFilter: FC<PricesFilterProps> = ({
         if (maxPrice) newPrices.maxPrice = maxPrice;
       }
       
-      onChange(newPrices);
+      onChangeRef.current(newPrices);
 
       setTimeout(() => {
         isInternalChangeRef.current = false;
@@ -146,10 +151,9 @@ const PricesFilter: FC<PricesFilterProps> = ({
       
       return;
     }
-    onChange(undefined);
-  }, [minPriceValue, maxPriceValue, onChange, shouldUseUsdtPrice]);
+    onChangeRef.current(undefined);
+  }, [minPriceValue, maxPriceValue, shouldUseUsdtPrice]);
 
-  // Sync local state with props for prices
   useEffect(() => {
     // Get the current mode
     const currentMode = shouldUseUsdtPrice;
@@ -163,57 +167,64 @@ const PricesFilter: FC<PricesFilterProps> = ({
       
       // CLEAR old price parameters in parent state
       isInternalChangeRef.current = true;
-      onChange(undefined);
       
       setTimeout(() => {
+        onChangeRef.current(undefined);
         isInternalChangeRef.current = false;
-      }, 300);
+      }, 0);
       
       previousShouldUseUsdtPriceRef.current = currentMode;
       return;
     }
 
-    // For normal sync - check internal flag
+    // For normal sync - check internal flag (don't sync if change came from user input)
     if (isInternalChangeRef.current) {
       return;
     }
     
     // Normal sync: update from props if values changed externally
-    if (currentMode) {
-      // USDT mode: use minUsdtPrice/maxUsdtPrice
-      if (value?.minUsdtPrice !== minPriceValue) {
-        setMinPriceValue(value?.minUsdtPrice);
-      }
-      if (value?.maxUsdtPrice !== maxPriceValue) {
-        setMaxPriceValue(value?.maxUsdtPrice);
-      }
-    } else {
-      // USD mode: use minPrice/maxPrice
-      if (value?.minPrice !== minPriceValue) {
-        setMinPriceValue(value?.minPrice);
-      }
-      if (value?.maxPrice !== maxPriceValue) {
-        setMaxPriceValue(value?.maxPrice);
-      }
+    // Use refs to compare without triggering re-renders
+    const currentMinPrice = currentMode ? value?.minUsdtPrice : value?.minPrice;
+    const currentMaxPrice = currentMode ? value?.maxUsdtPrice : value?.maxPrice;
+    
+    // Only update if props actually changed (not from our own state changes)
+    if (currentMinPrice !== minPriceValue) {
+      setMinPriceValue(currentMinPrice);
+    }
+    if (currentMaxPrice !== maxPriceValue) {
+      setMaxPriceValue(currentMaxPrice);
     }
     
     previousShouldUseUsdtPriceRef.current = currentMode;
-  }, [value?.minPrice, value?.maxPrice, value?.minUsdtPrice, value?.maxUsdtPrice, shouldUseUsdtPrice, onChange]);
+  }, [value?.minPrice, value?.maxPrice, value?.minUsdtPrice, value?.maxUsdtPrice, shouldUseUsdtPrice]);
 
+  // Track previous selectedCurrencies to avoid unnecessary updates
+  const prevSelectedCurrenciesRef = useRef<number[]>(selectedCurrencies);
+  
   useEffect(() => {
     if (isInternalChangeRef.current) {
+      prevSelectedCurrenciesRef.current = selectedCurrencies;
       return;
     }
     
-    setLocalSelectedCurrencies(selectedCurrencies);
+    // Only update if the arrays are actually different
+    const arraysEqual = (a: number[], b: number[]) => {
+      if (a.length !== b.length) return false;
+      return a.every((val, index) => val === b[index]);
+    };
+    
+    if (!arraysEqual(prevSelectedCurrenciesRef.current, selectedCurrencies)) {
+      setLocalSelectedCurrencies(selectedCurrencies);
+      prevSelectedCurrenciesRef.current = selectedCurrencies;
+    }
   }, [selectedCurrencies]);
 
   const onChangeMinPrice = useCallback((value: string) => {
-    setMinPriceValue(value || undefined);
+    setMinPriceValue(value === '' ? undefined : value);
   }, []);
 
   const onChangeMaxPrice = useCallback((value: string) => {
-    setMaxPriceValue(value || undefined);
+    setMaxPriceValue(value === '' ? undefined : value);
   }, []);
 
   const onPricesClear = useCallback(() => {
@@ -224,34 +235,34 @@ const PricesFilter: FC<PricesFilterProps> = ({
     setLocalSelectedCurrencies([]);
     
     // Call callbacks to remove filters from parent state
-    onChange(undefined);
-    if (onCurrenciesChange) {
-      onCurrenciesChange([]);
+    onChangeRef.current(undefined);
+    if (onCurrenciesChangeRef.current) {
+      onCurrenciesChangeRef.current([]);
     }
     
     // Reset flag after longer delay
     setTimeout(() => {
       isInternalChangeRef.current = false;
     }, 300);
-  }, [onChange, onCurrenciesChange]);
+  }, []);
 
   const onClearMinPrice = useCallback(() => {
     if (maxPriceValue !== undefined) return;
     isInternalChangeRef.current = true;
-    onChange(undefined);
+    onChangeRef.current(undefined);
     setTimeout(() => {
       isInternalChangeRef.current = false;
     }, 300);
-  }, [onChange, maxPriceValue]);
+  }, [maxPriceValue]);
 
   const onClearMaxPrice = useCallback(() => {
     if (minPriceValue !== undefined) return;
     isInternalChangeRef.current = true;
-    onChange(undefined);
+    onChangeRef.current(undefined);
     setTimeout(() => {
       isInternalChangeRef.current = false;
     }, 300);
-  }, [onChange, minPriceValue]);
+  }, [minPriceValue]);
 
   const hasActiveFilters = 
     !!(value?.minPrice || value?.maxPrice || value?.minUsdtPrice || value?.maxUsdtPrice) || 
@@ -301,10 +312,9 @@ const PricesFilter: FC<PricesFilterProps> = ({
         <CurrencyLabelSection>
           <CurrencyLabelText>Filter by {filterLabel}:</CurrencyLabelText>
           
-          
           <PricesRangeWrapper>
             <NumberInput
-              value={minPriceValue?.toString()}
+              value={minPriceValue || ''}
               onChange={onChangeMinPrice}
               placeholder={minPlaceholder}
               testid={`${testid}-minPrice`}
@@ -313,7 +323,7 @@ const PricesFilter: FC<PricesFilterProps> = ({
             />
             <Text>to</Text>
             <NumberInput
-              value={maxPriceValue?.toString()}
+              value={maxPriceValue || ''}
               onChange={onChangeMaxPrice}
               placeholder={maxPlaceholder}
               testid={`${testid}-maxPrice`}

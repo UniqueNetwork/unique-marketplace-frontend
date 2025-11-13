@@ -1,5 +1,5 @@
 import { VFC } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { BlurredCover } from './BlurredCover';
 import { RoundedCover } from './RoundedCover';
 import { useCheckImageExists } from 'pages/CreateNFT/hooks/useCheckImageExists';

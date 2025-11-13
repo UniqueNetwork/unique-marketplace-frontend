@@ -1,5 +1,5 @@
 import { VFC, useCallback } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import clockGrayLight from 'static/icons/clock-gray-light.svg';
 import { CollectionCover } from './components/CollectionCover';

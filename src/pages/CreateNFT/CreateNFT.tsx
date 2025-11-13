@@ -423,7 +423,7 @@ export const CreateNFTComponent: FC<{ className?: string }> = ({
       }
       {step === CreateTokensSteps.SELECT_COLLECTION && (
         <>
-          <WrapperCollectionContentStyled expanded={!!collection}>
+          <WrapperCollectionContentStyled $expanded={!!collection}>
             <ImageCreate src={Box} />
             <Heading size='3'>
               {!isFetching ? (collections.length > 0 ? 'Create new collection or select an existing one' : 'You don`t own any collections yet, but you can create one right now!') : 'Loading collection list'}
@@ -719,7 +719,7 @@ const CollectionBlock = styled.div`
 `;
 
 const WrapperCollectionContentStyled = styled(WrapperContent)<{
-  expanded: boolean;
+  $expanded: boolean;
 }>`
   margin-bottom: calc(var(--prop-gap) * 2.5);
   width: 100%;

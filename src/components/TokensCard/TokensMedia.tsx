@@ -25,7 +25,7 @@ export const TokensMedia: FC<ITokensMedia> = ({ to, imageUrl, tokenId, video, te
   }, [isPlaying]);
 
   return (
-    <PictureWrapper to={to} isPlaying={isPlaying}>
+    <PictureWrapper to={to} $isPlaying={isPlaying}>
       <Picture
         alt={tokenId?.toString() || ''}
         src={imageUrl}
@@ -44,7 +44,7 @@ export const TokensMedia: FC<ITokensMedia> = ({ to, imageUrl, tokenId, video, te
   );
 };
 
-const PictureWrapper = styled(Link)<{ isPlaying: boolean }>`
+const PictureWrapper = styled(Link)<{ $isPlaying: boolean }>`
   position: relative;
   width: 100%;
   display: flex;
@@ -106,7 +106,7 @@ const PictureWrapper = styled(Link)<{ isPlaying: boolean }>`
     img {
       width: 24px;
       height: 24px;
-      margin-left: ${({ isPlaying }) => (isPlaying ? '0' : '4px')};
+      margin-left: ${({ $isPlaying }) => ($isPlaying ? '0' : '4px')};
     }
   }
   

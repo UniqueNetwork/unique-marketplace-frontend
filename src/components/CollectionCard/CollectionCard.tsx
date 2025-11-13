@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { useApi } from 'hooks/useApi';
 import { shortcutText } from 'utils/textUtils';
 import { Text } from 'components/UI';

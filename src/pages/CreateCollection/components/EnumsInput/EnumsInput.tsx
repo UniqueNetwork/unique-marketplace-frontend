@@ -39,7 +39,6 @@ export const EnumsInput = <T, >({
       onAdd?.(currentEnum);
       setCurrentEnum('');
     } else {
-      alert('Warning. You are trying to add already existed item');
       setCurrentEnum('');
     }
   };

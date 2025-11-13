@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 
 import StatusFilter from './StatusFilter';
@@ -33,51 +33,59 @@ const updateFilterState = <K extends keyof FilterState>(
 
 export const Filters: FC<FiltersProps> = ({ value, attributes, attributeCounts, onFilterChange, testid }) => {
   const { selectedAccount } = useAccounts();
+  
+  // Используем ref для хранения последнего value, чтобы callbacks могли его использовать
+  const valueRef = useRef(value);
+  useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
 
   const onStatusFilterChange = useCallback((statuses: Statuses) => {
-    onFilterChange({ ...value, statuses });
-  }, [value, onFilterChange]);
+    onFilterChange({ ...valueRef.current, statuses });
+  }, [onFilterChange]);
 
+  // ИСПРАВЛЕНО: Используем valueRef.current вместо value в зависимостях
   const onPricesFilterChange = useCallback((prices: PriceRange | undefined) => {
+    const currentValue = valueRef.current;
     // Always replace the entire prices object, don't merge
     if (!prices || Object.keys(prices).length === 0) {
       // Remove prices completely
-      const { prices: _, ...rest } = value || {};
+      const { prices: _, ...rest } = currentValue || {};
       onFilterChange(Object.keys(rest).length > 0 ? rest as FilterState : null);
     } else {
       // Replace with new prices
-      onFilterChange({ ...value, prices });
+      onFilterChange({ ...currentValue, prices });
     }
-  }, [value, onFilterChange]);
+  }, [onFilterChange]);
 
   const onCurrenciesFilterChange = useCallback((currencies: number[]) => {
-    const newState = updateFilterState(value, 'currencies', currencies);
+    const newState = updateFilterState(valueRef.current, 'currencies', currencies);
     onFilterChange(newState);
-  }, [value, onFilterChange]);
+  }, [onFilterChange]);
 
   const onCollectionsFilterChange = useCallback((collections: number[]) => {
-    onFilterChange({ ...value, collections, attributes: [], attributeCounts: [] });
-  }, [value, onFilterChange]);
+    onFilterChange({ ...valueRef.current, collections, attributes: [], attributeCounts: [] });
+  }, [onFilterChange]);
 
   const onCollectionAttributesFilterChange = useCallback((attributes: AttributeItem[]) => {
-    const newState = updateFilterState(value, 'attributes', attributes);
+    const newState = updateFilterState(valueRef.current, 'attributes', attributes);
     onFilterChange(newState);
-  }, [value, onFilterChange]);
+  }, [onFilterChange]);
 
   const onCollectionAttributeCountsFilterChange = useCallback((attributeCounts: number[]) => {
-    const newState = updateFilterState(value, 'attributeCounts', attributeCounts);
+    const newState = updateFilterState(valueRef.current, 'attributeCounts', attributeCounts);
     onFilterChange(newState);
-  }, [value, onFilterChange]);
+  }, [onFilterChange]);
 
   const onTypeOfAssetsFilterChange = useCallback((typeOfAssets: TypeOfAssets) => {
-    const newState = updateFilterState(value, 'typeOfAssets', typeOfAssets);
+    const newState = updateFilterState(valueRef.current, 'typeOfAssets', typeOfAssets);
     onFilterChange(newState);
-  }, [value, onFilterChange]);
+  }, [onFilterChange]);
 
   const onTypeOfCustomizableChange = useCallback((typeOfCustomizableNFTs: TypeOfCustomizableNFTs) => {
-    const newState = updateFilterState(value, 'typeOfCustomizableNFTs', typeOfCustomizableNFTs);
+    const newState = updateFilterState(valueRef.current, 'typeOfCustomizableNFTs', typeOfCustomizableNFTs);
     onFilterChange(newState);
-  }, [value, onFilterChange]);
+  }, [onFilterChange]);
 
   return (
     <FiltersStyled>

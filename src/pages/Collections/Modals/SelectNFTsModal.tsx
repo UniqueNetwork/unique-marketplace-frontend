@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import { Text, useNotifications, Button, Heading } from 'components/UI';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
 import { TextInput } from 'components/TextInput/TextInput';

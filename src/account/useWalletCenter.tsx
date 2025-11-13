@@ -8,7 +8,7 @@ import { useAccount } from 'wagmi';
 
 export type ConnectedWalletsName = 'polkadot-js' | 'keyring' | 'metamask' | 'talisman' | 'subwallet-js' | 'enkrypt' | 'novawallet' | 'reown';
 
-const wallets = new Map<
+const walletClasses = new Map<
   ConnectedWalletsName,
   typeof PolkadotWallet | typeof MetamaskWallet
 >([
@@ -34,9 +34,22 @@ export const useWalletCenter = (chainProperties?: ChainPropertiesResponse) => {
 
   const connectWallet = useCallback(
     async (typeWallet: ConnectedWalletsName) => {
-      if (!chainProperties) return;
+      if (!chainProperties) {
+        console.error('chainProperties is not available');
+        return;
+      }
       try {
-        const wallet = new (wallets.get(typeWallet)!)(chainProperties, typeWallet as PolkadotWalletName);
+        console.log('Connecting wallet:', typeWallet);
+        console.log('Available wallet types:', Array.from(walletClasses.keys()));
+        const WalletClass = walletClasses.get(typeWallet);
+        console.log('WalletClass for', typeWallet, ':', WalletClass);
+        if (!WalletClass) {
+          throw new Error(`Wallet type "${typeWallet}" is not supported`);
+        }
+        if (typeof WalletClass !== 'function') {
+          throw new Error(`Wallet type "${typeWallet}" is not a constructor`);
+        }
+        const wallet = new WalletClass(chainProperties, typeWallet as PolkadotWalletName);
         const currentWallets = await wallet.getAccounts();
 
         const connectedWallets =

@@ -44,7 +44,7 @@ const SearchField: FC<SearchFieldProps> = ({ className, searchValue, placeholder
 
   return (
     <SearchWrapper className={className}>
-      <InputWrapper hideButton={!!hideButton}>
+      <InputWrapper $hideButton={!!hideButton}>
         <InputTextStyled
           iconLeft={hideButton ? undefined : { name: 'magnify', size: 16 }}
           onChange={onValueChange}
@@ -112,7 +112,7 @@ const InputTextStyled = styled(InputText)`
   width: 100%;
 `;
 
-const InputWrapper = styled.div<{ hideButton: boolean }>`
+const InputWrapper = styled.div<{ $hideButton: boolean }>`
   position: relative;
   display: inline-block;
   flex-grow: 1;
@@ -123,7 +123,7 @@ const InputWrapper = styled.div<{ hideButton: boolean }>`
     }
   }
   .clear-button {
-    right: ${({ hideButton }) => hideButton ? 'calc(var(--prop-gap) / 2 + 24px)' : 'calc(var(--prop-gap) / 2 + 2px)'};
+    right: ${({ $hideButton }) => $hideButton ? 'calc(var(--prop-gap) / 2 + 24px)' : 'calc(var(--prop-gap) / 2 + 2px)'};
   }
 
 `;

@@ -1,5 +1,5 @@
 import React, { ReactElement, useCallback, useState } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { Tabs, Select, Button } from 'components/UI';
 
 import { AdditionalLight } from 'styles/colors';
